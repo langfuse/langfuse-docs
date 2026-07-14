@@ -13,7 +13,7 @@ import { Details, Summary } from "@/components/Details";
 
 Use this page if your application, framework, or collector already emits OpenTelemetry (OTEL) traces and you want to send them to Langfuse.
 
-Langfuse can operate as an OpenTelemetry Backend to receive traces on the `/api/public/otel` (OTLP) endpoint. In addition to the [Langfuse SDKs](/docs/sdk/overview) and [native integrations](/integrations), this OpenTelemetry endpoint is designed to increase compatibility with frameworks, libraries, and languages beyond the SDKs and native integrations. Popular OpenTelemetry libraries include OpenLLMetry and OpenLIT which extend Language support of Langfuse tracing to Java and Go and cover frameworks such as AutoGen, Semantic Kernel, and more.
+Langfuse can operate as an OpenTelemetry Backend to receive traces on the `/api/public/otel` (OTLP) endpoint. In addition to the [Langfuse SDKs](/docs/observability/sdk/overview) and [native integrations](/integrations), this OpenTelemetry endpoint is designed to increase compatibility with frameworks, libraries, and languages beyond the SDKs and native integrations. Popular OpenTelemetry libraries include OpenLLMetry and OpenLIT which extend Language support of Langfuse tracing to Java and Go and cover frameworks such as AutoGen, Semantic Kernel, and more.
 
 As the [Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/attributes-registry/gen-ai/) for GenAI attributes on traces are still evolving, Langfuse maps the received OTel traces to the [Langfuse data model](/docs/observability/data-model) and supports additional attributes that are popular in the OTel GenAI ecosystem ([attribute mapping](#property-mapping)). Please contribute to the discussion on [GitHub](https://github.com/orgs/langfuse/discussions/2509) if an integration does not work as expected or does not parse the correct attributes.
 
@@ -21,17 +21,19 @@ As the [Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/attrib
 
 <Callout type="info">
   **Using Python or JS/TS?** Prefer the Langfuse SDKs instead of wiring raw
-  OpenTelemetry exporters directly. Start with the
-  [Python SDK v3](/docs/sdk/python/sdk-v3) or the
-  [JS/TS SDK](/docs/sdk/typescript/guide). This OpenTelemetry page is most
-  useful for existing OTEL setups, collector-based ingestion, and unsupported
-  languages.
+  OpenTelemetry exporters directly. Start with the OTEL-native
+  [Langfuse SDKs](/docs/observability/sdk/overview) (Python SDK v4, JS/TS SDK
+  v5). This OpenTelemetry page is most useful for existing OTEL setups,
+  collector-based ingestion, and unsupported languages.
 </Callout>
 
 <Callout type="warning">
   **Important:** If you want to filter and aggregate by `userId`, `sessionId`,
   `metadata`, `version`, `release`, or `tags`, you need to propagate these
-  trace-level attributes to every span in the trace. Start with
+  trace-level attributes to every span in the trace. On the
+  [Langfuse v4 data model](/docs/v4), each observation stores its own copy of
+  these attributes — spans that do not carry them are missed by filters and
+  aggregations. Start with
   [Propagating Trace Attributes to All Spans](#propagating-attributes) before
   wiring this up in production.
 </Callout>
@@ -70,10 +72,24 @@ attributes include:
 - `tags` (via `langfuse.trace.tags`)
 - `trace_name` (via `langfuse.trace.name`)
 
-Langfuse filters and aggregations increasingly operate across individual
-observations rather than only at the trace level. If you want to reliably
-filter or aggregate by these attributes, they need to be present on each span
-in the trace, not only on the root span.
+On the [Langfuse v4 data model](/docs/v4), filters and aggregations operate
+across individual observations, and every observation row stores its own copy
+of these attributes. A span that does not carry them is not matched when you
+filter or group by user, session, tags, and so on — setting them only on the
+root span means only the root observation is found. To reliably filter and
+aggregate, the attributes need to be present on each span in the trace.
+
+<Callout type="info">
+  **Transition behavior:** Spans ingested **without** the
+  `x-langfuse-ingestion-version: 4` header ([see
+  below](#opentelemetry-endpoint)) flow through a transitional pipeline that
+  retains the previous server-side behavior — trace-level attributes set on
+  any span are applied to all observations of the trace — at the cost of a
+  **~10 minute ingestion delay**. Self-hosted Langfuse v4 deployments ingest
+  all OpenTelemetry spans directly by default
+  (`LANGFUSE_MIGRATION_V4_NATIVE_OTEL_BEHAVIOUR=direct`), so client-side
+  propagation is always required there, with or without the header.
+</Callout>
 
 ### Recommended: Use OpenTelemetry Baggage for Propagation
 
@@ -109,18 +125,20 @@ OpenTelemetry integration, you can use the convenience methods
 `propagate_attributes()` (Python) or `propagateAttributes()` (TypeScript),
 which handle attribute propagation automatically. These methods provide a
 simpler interface and are the recommended approach when using Langfuse SDKs.
+See [Add attributes to observations](/docs/observability/sdk/instrumentation#add-attributes)
+for implementation details.
 
 ## Ingestion Options
 
-### OpenTelemetry native Langfuse SDK v4
+### OpenTelemetry-native Langfuse SDKs
 
-The quickest path to start tracing with Langfuse is the new **OTEL-native Langfuse SDK v4**. The SDK is a thin layer on top of the official OpenTelemetry client that automatically converts emitted spans into rich Langfuse observations (spans, generations, events, and [other observation types](/docs/observability/features/observation-types)) and adds first-class helpers for LLM-specific features such as token usage, cost tracking, prompt linking, and scoring.
+The quickest path to start tracing with Langfuse are the **OTEL-native Langfuse SDKs** (Python SDK v4, JS/TS SDK v5). The SDKs are a thin layer on top of the official OpenTelemetry client that automatically converts emitted spans into rich Langfuse observations (spans, generations, events, and [other observation types](/docs/observability/features/observation-types)), adds first-class helpers for LLM-specific features such as token usage, cost tracking, prompt linking, and scoring, and handles [trace attribute propagation](#propagating-attributes) via `propagate_attributes()` / `propagateAttributes()`.
 
-Because it lives in the shared OpenTelemetry context, spans from other OTEL-instrumented libraries can be exported to Langfuse too. By default, Langfuse focuses on LLM-relevant spans (Langfuse SDK spans, spans with `gen_ai.*` attributes, and known LLM instrumentors). To export everything, use a permissive custom filter as described in the [advanced SDK docs](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope).
+Because they live in the shared OpenTelemetry context, spans from other OTEL-instrumented libraries can be exported to Langfuse too. By default, Langfuse focuses on LLM-relevant spans (Langfuse SDK spans, spans with `gen_ai.*` attributes, and known LLM instrumentors). To export everything, use a permissive custom filter as described in the [advanced SDK docs](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope).
 
-Get started by following the dedicated guide for the Python implementation here: [/docs/observability/sdk/overview](/docs/observability/sdk/overview).
+Get started with the dedicated guide: [/docs/observability/sdk/overview](/docs/observability/sdk/overview).
 
-### OpenTelemetry endpoint
+### OpenTelemetry endpoint [#opentelemetry-endpoint]
 
 Langfuse can receive traces on the `/api/public/otel` (OTLP) endpoint.
 
@@ -145,7 +163,7 @@ For long API Keys on GNU systems, you may have to add `-w 0` at the end since `b
 
 <Callout type="info">
 
-If you want spans ingested directly via OpenTelemetry to appear in real time in Langfuse Cloud Fast Preview, include the `x-langfuse-ingestion-version: 4` header. If your setup uses signal-specific header settings, add the same value to `OTEL_EXPORTER_OTLP_TRACES_HEADERS`.
+The `x-langfuse-ingestion-version: 4` header opts your exporter into direct ingestion on the [Langfuse v4](/docs/v4) data model: spans appear in real time, and Langfuse expects trace-level attributes to be [propagated to every span](#propagating-attributes) client-side. Without the header, spans flow through a transitional pipeline that applies trace-level attributes server-side but delays data by ~10 minutes. Self-hosted v4 deployments with the default `LANGFUSE_MIGRATION_V4_NATIVE_OTEL_BEHAVIOUR=direct` ingest all spans directly, regardless of the header. If your setup uses signal-specific header settings, add the same value to `OTEL_EXPORTER_OTLP_TRACES_HEADERS`.
 
 </Callout>
 
@@ -164,7 +182,7 @@ Please note that Langfuse currently supports OTLP over HTTP with both `HTTP/JSON
 
 ### Custom via OpenTelemetry SDKs
 
-You can use the OpenTelemetry SDKs to directly export traces to Langfuse with the configuration mentioned above. Thereby, Language support of Langfuse is extended to other languages than the ones supported by the [Langfuse SDKs](/docs/sdk/overview) (Python and JS/TS).
+You can use the OpenTelemetry SDKs to directly export traces to Langfuse with the configuration mentioned above. Thereby, Language support of Langfuse is extended to other languages than the ones supported by the [Langfuse SDKs](/docs/observability/sdk/overview) (Python and JS/TS).
 
 ### Use OpenTelemetry GenAI Instrumentation Libraries
 
@@ -312,7 +330,7 @@ service:
 In case you want to selectively send OTel Spans to Langfuse, you can use the OTel Collector [filterprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/filterprocessor/README.md).
 It enables you to filter spans based on attributes, span names, and more.
 As this applies on a Span level, you may risk incomplete traces and should be careful when applying complex filter rules.
-Langfuse also requires that a root span is sent to our backend to ensure that a trace is created correctly.
+Langfuse also expects the root span of each trace to be sent: it becomes the root observation that represents the trace (trace name, timestamps, time bucketing in charts). Traces whose root span is filtered out can render incompletely or be missing from time-series charts.
 
 With the configuration below, you would only forward Spans which have a `gen_ai.system` attribute set to `openai`:
 
@@ -365,7 +383,7 @@ Furthermore, Langfuse uses attributes within the `langfuse.*` namespace to map O
 
 Langfuse distinguishes between trace-level attributes and observation-level attributes.
 
-- [Trace-level attributes](#trace-level-attributes) represent shared context for an entire interaction. If Langfuse detects these attributes on a specific span, it will treat them as properties of the whole trace.
+- [Trace-level attributes](#trace-level-attributes) represent shared context for an entire interaction — user, session, tags, release, version. On the [Langfuse v4 data model](/docs/v4), every observation stores its own copy of these attributes, so they must be [propagated to all spans](#propagating-attributes) of a trace.
 - [Observation-level attributes](#observation-level-attributes) describe individual steps within a trace. Langfuse keeps them on the observation level.
 
 ### How Metadata Mapping Works [#metadata-mapping]
@@ -386,23 +404,23 @@ OpenTelemetry spans can carry arbitrary attributes. Langfuse handles these attri
 
 </Callout>
 
-### Trace-Level Attributes
+### Trace-Level Attributes [#trace-level-attributes]
 
-These attributes are applied to the trace record in Langfuse. They may be set on any span in the trace.
+These attributes carry the shared context of a trace and are used to group, filter, and aggregate related observations. Set them on **every span** of a trace ([propagation](#propagating-attributes)): with direct v4 ingestion, each observation only carries the attributes set on its own span, so a span without them is missed by filters and aggregations. Spans ingested through the transitional non-v4 pipeline (no `x-langfuse-ingestion-version: 4` header) retain the previous behavior — attributes set on any span are applied to the whole trace — at the cost of a ~10 minute delay.
 
-| Langfuse Field                        | Description                                                                                                                              | Mapped from OTel Attribute                                                     |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| <a id="name"></a>`name`               | The name of the trace.                                                                                                                   | • `langfuse.trace.name`: `string`<br/>• Span name of the root span             |
-| <a id="userId"></a>`userId`           | The unique identifier for the end-user.                                                                                                  | • `langfuse.user.id`: `string`<br/>• `user.id`: `string`                       |
-| <a id="sessionId"></a>`sessionId`     | The unique identifier for the user session.                                                                                              | • `langfuse.session.id`: `string`<br/>• `session.id`: `string`                 |
-| <a id="release"></a>`release`         | The release version of your application.                                                                                                 | • `langfuse.release`: `string`                                                 |
-| <a id="public"></a>`public`           | A boolean flag to mark a trace as public, allowing it to be shared via a URL.                                                            | • `langfuse.trace.public`: `boolean`                                           |
-| <a id="tags"></a>`tags`               | An array of strings to categorize or label the trace.                                                                                    | • `langfuse.trace.tags`: `string[]`                                            |
-| <a id="metadata"></a>`metadata`       | A flexible object for storing any additional, unstructured data on the trace. See note below.                                            | • `langfuse.trace.metadata.*`: `string`<br/>• Root span's observation metadata |
-| <a id="input"></a>`input`             | The initial input for the entire trace.                                                                                                  | • `langfuse.trace.input`: `string`<br/>• Root span's observation input         |
-| <a id="output"></a>`output`           | The final output for the entire trace.                                                                                                   | • `langfuse.trace.output`: `string`<br/>• Root span's observation output       |
-| <a id="version"></a>`version`         | The [version](/docs/observability/features/releases-and-versioning) of the trace, useful for tracking changes to your application logic. | • Root span's attributes mapped to `version`                                   |
-| <a id="environment"></a>`environment` | The deployment [environment](/docs/observability/features/environments) where the trace was generated.                                   | • Root span's attributes mapped to `environment`                               |
+| Langfuse Field                        | Description                                                                                                                              | Mapped from OTel Attribute                                                                                                                                       |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <a id="name"></a>`name`               | The name of the trace.                                                                                                                   | • `langfuse.trace.name`: `string`<br/>• Span name of the root span                                                                                               |
+| <a id="userId"></a>`userId`           | The unique identifier for the end-user.                                                                                                  | • `langfuse.user.id`: `string`<br/>• `user.id`: `string`                                                                                                         |
+| <a id="sessionId"></a>`sessionId`     | The unique identifier for the user session.                                                                                              | • `langfuse.session.id`: `string`<br/>• `session.id`: `string`                                                                                                   |
+| <a id="release"></a>`release`         | The release version of your application.                                                                                                 | • `langfuse.release`: `string`                                                                                                                                   |
+| <a id="public"></a>`public`           | A boolean flag to mark a trace as public, allowing it to be shared via a URL.                                                            | • `langfuse.trace.public`: `boolean`                                                                                                                             |
+| <a id="tags"></a>`tags`               | An array of strings to categorize or label the trace.                                                                                    | • `langfuse.trace.tags`: `string[]`                                                                                                                              |
+| <a id="metadata"></a>`metadata`       | A flexible object for storing any additional, unstructured data on the trace. See note below.                                            | • `langfuse.trace.metadata.*`: `string`<br/>• Root span's observation metadata                                                                                   |
+| <a id="input"></a>`input`             | The initial input for the entire trace, derived from the root observation. Set the input on the root span.                               | • Root span's observation input ([`langfuse.observation.input`](#obs-input))<br/>• `langfuse.trace.input`: `string` — legacy, ignored by direct v4 ingestion     |
+| <a id="output"></a>`output`           | The final output for the entire trace, derived from the root observation. Set the output on the root span.                               | • Root span's observation output ([`langfuse.observation.output`](#obs-output))<br/>• `langfuse.trace.output`: `string` — legacy, ignored by direct v4 ingestion |
+| <a id="version"></a>`version`         | The [version](/docs/observability/features/releases-and-versioning) of the trace, useful for tracking changes to your application logic. | • `langfuse.version`: `string` (per span)<br/>• `service.version` resource attribute                                                                             |
+| <a id="environment"></a>`environment` | The deployment [environment](/docs/observability/features/environments) where the trace was generated.                                   | • `langfuse.environment`: `string` (per span)<br/>• `deployment.environment.name` / `deployment.environment` resource attribute                                  |
 
 <Callout type="info">
 **Filtering by metadata key in Langfuse**
@@ -411,8 +429,8 @@ Langfuse only supports filtering on top-level keys within the `metadata` of an e
 
 By default, all OpenTelemetry attributes and resource attributes are mapped into an `attributes` and `resourceAttributes` key within `metadata` and are thus not queryable.
 
-If you want to query on specific attributes, you can use the `langfuse.trace.metadata` prefix to map them to the top-level `metadata` object of the trace.
-The following snippet will produce a filterable `user_name` property in the `metadata` object of the trace:
+If you want to query on specific attributes, you can use the `langfuse.trace.metadata` prefix to map them to the top-level `metadata` object.
+The following snippet will produce a filterable `user_name` property in the `metadata` object of the observation the attribute is set on — combine it with [attribute propagation](#propagating-attributes) to make it filterable across the whole trace:
 
 ```python
 with tracer.start_as_current_span("Langfuse Attributes") as span:
@@ -421,7 +439,7 @@ with tracer.start_as_current_span("Langfuse Attributes") as span:
 
 </Callout>
 
-### Observation-Level Attributes
+### Observation-Level Attributes [#observation-level-attributes]
 
 These attributes are applied to individual observations (spans) within a trace ([data model](/docs/observability/data-model)).
 
@@ -461,5 +479,7 @@ with tracer.start_as_current_span("Langfuse Attributes") as span:
 
 ## Troubleshooting
 
+- **Filtering by `userId`, `sessionId`, or `tags` only matches the root observation:** these trace-level attributes are stored per observation on the Langfuse v4 data model. Propagate them to all spans of the trace — see [Propagating Trace Attributes to All Spans](#propagating-attributes).
+- **Spans appear with a ~10 minute delay:** OTel exporters without the `x-langfuse-ingestion-version: 4` header flow through the transitional ingestion pipeline. Add the header to your exporter to ingest in real time ([configuration](#opentelemetry-endpoint)).
 - If you encounter `4xx` errors while self-hosting Langfuse, please upgrade your deployment to the latest version. The OpenTelemetry endpoint was first introduced in Langfuse [v3.22.0](https://github.com/langfuse/langfuse/releases/tag/v3.22.0) and has seen significant improvements since then.
 - Langfuse supports OTLP over HTTP with both `HTTP/JSON` and `HTTP/protobuf`. `gRPC` is not supported yet.
