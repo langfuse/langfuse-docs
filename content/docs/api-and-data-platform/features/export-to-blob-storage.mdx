@@ -154,7 +154,7 @@ A single export run writes one file per exported table — up to four, depending
 {prefix}{project-id}/manifests/{max-timestamp}.json
 ```
 
-The manifest is uploaded strictly after all table files of the run. Once it appears, every file it lists is fully available in your bucket; if any upload fails, no manifest is written and the whole run is retried (table files are overwritten under the same keys on retry). The timestamp in the manifest key is the run's `maxTimestamp` in UTC, truncated to whole seconds, with colons replaced by dashes and the milliseconds and trailing `Z` dropped (`2026-07-13T09:00:00.000Z` → `2026-07-13T09-00-00`). This is the same stem used by the run's table files (`{prefix}{project-id}/{table}/{timestamp}.{extension}`), so a run's files and its manifest sort together.
+The manifest is uploaded strictly after all table files of the run. Once it appears, every file it lists is fully available in your bucket; if any upload fails, no manifest is written and the whole run is retried (table files are overwritten under the same keys on retry). The timestamp in the manifest key is the run's `maxTimestamp` in UTC, truncated to whole seconds, with colons replaced by dashes and the milliseconds and trailing `Z` dropped (`2026-07-13T09:00:00.000Z` → `2026-07-13T09-00-00`). This is the same stem used by the run's table files (`{prefix}{project-id}/{table}/{timestamp}.{extension}`), so a run's table files and its manifest share the same timestamp stem.
 
 Example manifest:
 
