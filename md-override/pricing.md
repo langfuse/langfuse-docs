@@ -120,11 +120,15 @@ Optional **Yearly Commitment**:
 | [LLM-as-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge)                       | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Human annotation](/docs/scores/annotation)                                                         | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Human annotation queues](/docs/evaluation/evaluation-methods/annotation#annotation-queues)         | 1 queue             | 3 queues            | Yes                 | Yes                          |
+| **Metrics**                                                                                         |                     |                     |                     |                              |
+| [Custom dashboards](/docs/metrics/features/custom-dashboards)                                       | Yes                 | Yes                 | Yes                 | Yes                          |
+| [Monitors and alerts](/docs/metrics/features/monitors)                                              | 20 monitors         | 20 monitors         | 20 monitors         | 20 monitors                  |
 | **Collaboration**                                                                                   |                     |                     |                     |                              |
 | Projects                                                                                            | Unlimited           | Unlimited           | Unlimited           | Unlimited                    |
 | Users                                                                                               | 2                   | Unlimited           | Unlimited           | Unlimited                    |
 | **API**                                                                                             |                     |                     |                     |                              |
 | [Extensive public API](/docs/api-and-data-platform/features/public-api)                             | Yes                 | Yes                 | Yes                 | Yes                          |
+| [Metrics & Observations APIs (v2)](/docs/metrics/features/metrics-api#v2)                           | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Rate limit (general API)](/faq/all/api-limits)                                                     | 30 req/min          | 100 req/min         | 1,000 req/min       | Custom                       |
 | [Rate limit (datasets API)](/faq/all/api-limits)                                                    | 100 req/min         | 200 req/min         | 1,000 req/min       | Custom                       |
 | [Rate limit (Metrics API v2)](/faq/all/api-limits)                                                  | 100 req/day         | 100 req/hour        | 500 req/hour        | Custom                       |
@@ -137,6 +141,7 @@ Optional **Yearly Commitment**:
 | [Scheduled export to blob storage](/docs/api-and-data-platform/features/query-via-sdk#blob-storage) | --                  | --                  | Teams add-on        | Yes                          |
 | **Support**                                                                                         |                     |                     |                     |                              |
 | [Ask AI](/docs/ask-ai)                                                                              | Yes                 | Yes                 | Yes                 | Yes                          |
+| [Langfuse Assistant (in-app agent)](/docs/langfuse-assistant)                                       | Public beta         | Public beta         | Public beta         | Public beta                  |
 | [Community (GitHub)](/support#community)                                                            | Yes                 | Yes                 | Yes                 | Yes                          |
 | [In-app support](/support#in-app)                                                                   | --                  | Yes                 | Yes                 | Yes                          |
 | [Private Slack channel](/support#slack)                                                             | --                  | --                  | Teams add-on        | Yes                          |

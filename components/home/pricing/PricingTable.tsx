@@ -652,6 +652,38 @@ const sections: Section[] = [
     ],
   },
   {
+    name: "Metrics",
+    href: "/docs/metrics/overview",
+    features: [
+      {
+        name: "Custom Dashboards",
+        href: "/docs/metrics/features/custom-dashboards",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
+        },
+      },
+      {
+        name: "Monitors and Alerts",
+        description:
+          "Threshold-based alerts on your LLM application metrics with notifications via Slack, webhooks, and GitHub Actions. Up to 20 monitors per organization on all plans. Self-hosted deployments require Langfuse v4 and an Enterprise license.",
+        href: "/docs/metrics/features/monitors",
+        tiers: {
+          cloud: {
+            Hobby: "20 monitors",
+            Core: "20 monitors",
+            Pro: "20 monitors",
+            Enterprise: "20 monitors",
+          },
+          selfHosted: {
+            "Open Source": false,
+            Enterprise: "20 monitors (Langfuse v4+)",
+          },
+        },
+      },
+    ],
+  },
+  {
     name: "Collaboration",
     features: [
       {
@@ -695,6 +727,19 @@ const sections: Section[] = [
             Enterprise: true,
           },
           selfHosted: { "Open Source": true, Enterprise: true },
+        },
+      },
+      {
+        name: "Metrics & Observations APIs (v2)",
+        description:
+          "High-performance v2 endpoints for aggregate metrics and row-level observation data. On self-hosted deployments, these APIs require Langfuse v4.",
+        href: "/docs/metrics/features/metrics-api#v2",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: {
+            "Open Source": "Langfuse v4+",
+            Enterprise: "Langfuse v4+",
+          },
         },
       },
       {
@@ -890,6 +935,21 @@ const sections: Section[] = [
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
+        },
+      },
+      {
+        name: "Langfuse Assistant (in-app agent)",
+        description:
+          "In-product AI assistant to explore your Langfuse project data and take selected actions with your approval. Available on Langfuse Cloud only.",
+        href: "/docs/langfuse-assistant",
+        tiers: {
+          cloud: {
+            Hobby: "Public beta",
+            Core: "Public beta",
+            Pro: "Public beta",
+            Enterprise: "Public beta",
+          },
+          selfHosted: { "Open Source": false, Enterprise: false },
         },
       },
       {
