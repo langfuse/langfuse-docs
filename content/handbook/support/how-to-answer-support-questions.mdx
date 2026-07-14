@@ -974,26 +974,26 @@ Best,
 
 <summary>Bug bounty / vulnerability disclosure</summary>
 
-**We do not run a formal bug bounty program.** Almost all inbound is one of:
+**Langfuse is included in the [ClickHouse Bugcrowd program](https://bugcrowd.com/engagements/clickhouse).** Almost all inbound is one of:
 
-1. Legitimate disclosure of a real security issue, escalate immediately to engineering.
+1. Legitimate disclosure of a real security issue, direct the reporter to Bugcrowd. If the report suggests active exploitation or customer data exposure, also escalate immediately to engineering.
 2. Outreach from agencies/freelancers offering paid security services, polite decline.
 3. Auto-generated reports of "vulnerabilities" that turn out to be expected behavior (subdomain redirects, password length DoS, etc.), polite explanation that the behavior is intended.
 
 **Triage steps:**
 
-1. Skim the report. Does it describe a _real, reproducible_ vulnerability? If yes → escalate.
-2. If it's an agency pitch or a generic templated report → use the standard reply.
-3. For ambiguous cases, ask for proof-of-concept before escalating.
+1. Direct vulnerability reports to the [ClickHouse Bugcrowd program](https://bugcrowd.com/engagements/clickhouse), where the reporter can review eligibility, scope, and reward details before submitting. Do not ask the reporter to send sensitive proof-of-concept details through support channels.
+2. If the report suggests active exploitation or customer data exposure, page engineering on Slack `#security` in parallel.
+3. If it's an agency pitch or a generic templated report → use the standard reply.
 
-**Reply template (no formal program):**
+**Reply template (vulnerability report or bug bounty inquiry):**
 
 ```text
 Hi {name},
 
-Thank you for reaching out. At the current time, Langfuse doesn't offer a formal bug bounty program. Please review our responsible disclosure page, which has the channel for reporting real security issues:
+Thank you for reaching out. Langfuse participates in the ClickHouse Bugcrowd program. Please review the program's eligibility, scope, and reward details and submit your report through Bugcrowd:
 
-https://langfuse.com/security/responsible-disclosure#bug-bounty-program
+https://bugcrowd.com/engagements/clickhouse
 
 Best,
 {you}
