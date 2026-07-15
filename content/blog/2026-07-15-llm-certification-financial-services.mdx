@@ -1,7 +1,7 @@
 ---
 title: Certifying LLMs and AI Agents for Financial Services
 date: 2026/07/15
-description: How to use Langfuse datasets and experiments to certify LLMs and AI agents before they reach production in regulated financial environments.
+description: How to use Langfuse datasets and experiments to build internal release gates and audit evidence for LLMs and AI agents in financial services.
 tag: guide
 author: Doneyli
 ogImage: /images/blog/2026-07-15-llm-certification-financial-services/og.png
@@ -11,40 +11,32 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
   title="Certifying LLMs and AI Agents for Financial Services"
-  description="How to use Langfuse datasets and experiments to certify LLMs and AI agents before they reach production in regulated financial environments."
+  description="How to use Langfuse datasets and experiments to build internal release gates and audit evidence for LLMs and AI agents in financial services."
   date="July 15, 2026"
-  authors={["doneylidej", "lotteverheyden"]}
+  authors={["doneylidej"]}
 />
 
 import { Frame } from "@/components/Frame";
 
-I have spent the past decade-plus helping financial services organizations build data systems. If you have ever shipped software next to a model risk management team, you know the rhythm: nothing reaches production until someone produces evidence, and producing that evidence by hand takes weeks.
+One number turned the run red: 81.3%.
 
-That process was designed for credit models that changed twice a year. LLMs break it in two ways. First, risk teams are no longer approving a raw model; they are approving the system built on it: a 10-K analysis assistant, a sentiment triage pipeline, a client advisory drafting tool. Second, the thing under review never stops changing. Prompts get promoted, models get swapped, production traffic drifts. A certification that takes two weeks of manual testing cannot govern a system that changes twice a week.
-
-This post walks through a certification pipeline that turns that evidence into a repeatable, one-command process: it runs a model against financial benchmarks derived from real SEC filings, scores the output with domain-specific evaluators, and produces a PASS/FAIL verdict with a full audit trail in Langfuse. Here's what the output looks like after running Claude Sonnet against [FinanceBench](https://huggingface.co/datasets/PatronusAI/financebench):
+I had just finished a 150-item FinanceBench run with Claude Sonnet. The pipeline's default numerical-accuracy gate was 85%, so the model did not certify.
 
 <Frame fullWidth>
   ![Certification results: Claude Sonnet on FinanceBench](/images/blog/2026-07-15-llm-certification-financial-services/benchmark-results.png)
 </Frame>
 
-Notice that 81.3% numerical accuracy sits below the 85% gate this pipeline defaults to: that run, as it stands, would not certify. Catching that on a dashboard before deployment, rather than in production after, is the whole argument of this post.
+Catching that failure on a dashboard before deployment, rather than in production after, is the argument of this post.
 
-The pipeline is built with [Langfuse datasets and experiments](/docs/evaluation/experiments/datasets). The full code is available in the [langfuse-llm-certification-finance](https://github.com/doneyli/langfuse-llm-certification-finance) repository. We will start with model certification, then go where the real risk conversations happen: [certifying the whole agent](#certifying-the-whole-agent), not just the model inside it.
+I have spent the past decade-plus helping financial services organizations build data systems. If you have ever shipped software next to a model risk management team, you know the rhythm: nothing reaches production until someone produces evidence, and producing that evidence by hand takes weeks.
 
-## What regulators actually expect [#what-regulators-actually-expect]
+That process was designed for credit models that changed twice a year. LLM systems change much faster. Prompts get promoted, models get swapped, tools and retrieval logic evolve, and production traffic drifts. Risk teams are not approving a raw model. They are approving the system built around it: a 10-K analysis assistant, a sentiment triage pipeline, or a client advisory drafting tool.
 
-The two-week approval cycle is not bureaucratic theater. It is how institutions respond to real supervisory expectations, and it is worth naming the ones that shape this space, because each maps to something concrete an evaluation pipeline can produce:
+Here, **certification** means an internal, repeatable release gate and evidence package. It does not replace regulatory approval, independent validation, legal review, or accountable human sign-off.
 
-| Framework                                                                                                                                                                               | What it expects                                                                                                                                                                          | Where this pipeline helps                                                                                                                  |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| [Fed SR 26-2](https://www.federalreserve.gov/supervisionreg/srletters/sr2602.htm) / [OCC 2026-13](https://www.occ.gov/news-issuances/bulletins/2026/bulletin-2026-13.html) (US banking) | Model risk management: validation before use, documentation, ongoing monitoring, effective challenge. Revised April 2026, replacing the SR 11-7 framework banks ran on for fifteen years | Certification runs are repeatable validation evidence; the export script produces the documentation; run history is the ongoing monitoring |
-| [PRA SS1/23](https://www.bankofengland.co.uk/prudential-regulation/publication/2023/may/model-risk-management-principles-for-banks-ss) (UK banking)                                     | Model risk management principles that explicitly extend to AI and ML: model inventories, tiering, periodic revalidation                                                                  | Every model, variant, and agent is a tracked row with full run history; revalidation is one command or one CI trigger                      |
-| [EU AI Act](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689)                                                                                                       | Credit scoring is a high-risk use (Annex III), which brings automatic logging (Art. 12), human oversight (Art. 14), post-market monitoring (Art. 72)                                     | Traces are the logs; annotation queues are the documented human oversight; the production monitor is post-market monitoring                |
-| [DORA](https://eur-lex.europa.eu/eli/reg/2022/2554/oj) (EU financial entities)                                                                                                          | Operational resilience for ICT services, including the third-party services you depend on, and model APIs are now exactly that                                                           | Live tracing catches a degrading third-party model before your clients do                                                                  |
-| [NIST AI RMF](https://www.nist.gov/itl/ai-risk-management-framework) (US, voluntary but widely referenced)                                                                              | Measure: test, evaluate, verify. Manage: respond to identified risks on an ongoing basis                                                                                                 | The evaluator suite and gates are the measurement; the feedback loop at the end of this post is the management                             |
+The pipeline turns that evidence into a scripted process: it runs a model or agent against financial datasets, scores the output with domain-specific evaluators, and produces a PASS/FAIL verdict with a full audit trail in Langfuse. The code is available in the [langfuse-llm-certification-finance](https://github.com/doneyli/langfuse-llm-certification-finance) repository, pinned here to the [source state used for this post](https://github.com/doneyli/langfuse-llm-certification-finance/commit/86e14811c7647bbdf40f298d4ea0aca352e3e298).
 
-None of these frameworks prescribes tooling, and running this pipeline does not make anyone compliant by itself. But the common denominator across all five is evidence: versioned artifacts, complete logs, documented human review, and monitoring that keeps running after deployment. The expectations themselves do not sit still either; the US agencies replaced their fifteen-year-old model risk guidance this April. Durable evidence infrastructure outlasts any single rulebook, and that is exactly the job of an LLM observability platform. It is why this pipeline records everything (datasets, prompts, traces, scores, human reviews) in Langfuse instead of a spreadsheet that goes stale the day it is exported.
+That is the distinction I care about: evaluation scores alone do not certify an AI system. A certifiable system produces repeatable evidence across the model, prompt, agent trajectory, and human review. We will start with model evaluation, then go where the real risk conversations happen: [certifying the whole agent](#certifying-the-whole-agent), not just the model inside it.
 
 ## Golden datasets [#golden-datasets]
 
@@ -86,7 +78,7 @@ for item in ds:
 
 The `question_reasoning` field matters later: it is free ground truth for checking whether an agent took the right path, not just whether it produced the right answer.
 
-One practical detail I lean on constantly: every dataset loads in two sizes. The setup script's `--sample` flag loads 10-item versions (`certification/financebench-sample`) that run end to end in a couple of minutes; that is what I use in live demos and as the fast inner loop while iterating on evaluators and prompts. The full sets (`certification/financebench-v1`, all 150 items) are what a formal certification run gets scored against. Same pipeline, same evaluators, same gates; the only thing that changes is the dataset name, so nothing you validated on the sample drifts when you run the real thing.
+One practical detail I lean on constantly: every dataset loads in two sizes. The setup script's `--sample` flag loads 10-item versions (`certification/financebench-sample`) that run end to end in a couple of minutes; that is what I use in live demos and as the fast inner loop while iterating on evaluators and prompts. The full set (`certification/financebench-v1`, all 150 items) is what a formal certification run gets scored against. The task, evaluators, and gates stay the same between the two sizes, which reduces configuration drift. The results can still change materially as coverage expands, so a sample run is a directional check, not certification evidence.
 
 ## Running the experiment [#running-the-experiment]
 
@@ -163,7 +155,7 @@ The pipeline deliberately mixes two kinds of evaluators, because they catch diff
 
 **An LLM-as-a-judge evaluator** for the dimension the deterministic checks cannot see: [groundedness](/docs/evaluation/evaluation-methods/llm-as-a-judge). A judge model (configurable via an environment variable) receives the output, the source evidence, and the question, and scores faithfulness and completeness against a financial auditor rubric, weighted 70/30.
 
-The run that convinced me you need both: certifying Claude Haiku on FinanceBench, numerical accuracy came back at 60% while groundedness came back at 97%. Without the judge, the report says "60%, FAILED" and everyone concludes the model is unreliable. With it, you can tell the risk team something far more useful: the model faithfully uses the evidence it is given, and its failure is specifically numerical reasoning. Those are two very different remediation paths, and the distinction is exactly what a model risk assessment needs.
+The run that convinced me you need both came from the seeded 10-item FinanceBench sample: Claude Haiku's numerical accuracy was 60% while groundedness was 97%. Without the judge, the report says "60%, FAILED" and everyone concludes the model is unreliable. With it, you can tell the risk team something far more useful: the model faithfully uses the evidence it is given, and its failure is specifically numerical reasoning. Those are two very different remediation paths, and the distinction is exactly what a model risk assessment needs.
 
 All evaluators follow the same Langfuse signature. Here is numerical accuracy, condensed from the repository:
 
@@ -211,7 +203,7 @@ def certification_gate(score_name, threshold=0.85):
     return evaluator
 ```
 
-The results can be exported as compliance-ready reports in Markdown, JSON, or CSV using the export script:
+The results can be exported as review-ready evidence packages in Markdown, JSON, or CSV using the export script:
 
 ```bash
 python setup_datasets.py --dataset financebench --sample
@@ -273,7 +265,7 @@ And because certification repeats, each dataset keeps a run history. This is the
   ![Run history for the adversarial dataset: the deliberately tempted runs fail certification between clean passes](/images/blog/2026-07-15-llm-certification-financial-services/portal-run-history.png)
 </Frame>
 
-This works because Langfuse is API-first by design. The docs put it plainly: "All Langfuse data and features are available via the API." There is a published [OpenAPI spec](https://api.reference.langfuse.com) with typed [Python and JS/TS SDKs](/docs/api-and-data-platform/features/query-via-sdk) wrapping it, an official [CLI](/docs/api-and-data-platform/features/cli) that exposes every endpoint for scripting and coding agents, a [Metrics API](/docs/metrics/features/metrics-api) for aggregates, and [scheduled exports to blob storage](/docs/api-and-data-platform/features/export-to-blob-storage) for warehouse pipelines. In practice you can treat Langfuse as a headless engineering platform: engineers work in the Langfuse UI, and everyone else meets the same data inside the portals and systems your organization already has. Compliance wants certification evidence inside the existing GRC tool? It is one API integration away, and this portal is a few hundred lines of proof.
+This works because Langfuse is API-first by design. The docs put it plainly: "All Langfuse data and features are available via the API." The portal uses that [public API](/docs/api-and-data-platform/features/public-api) through the typed [Python SDK](/docs/api-and-data-platform/features/query-via-sdk), while the [Metrics API](/docs/metrics/features/metrics-api) and [scheduled exports](/docs/api-and-data-platform/features/export-to-blob-storage) support aggregate and warehouse workflows. Langfuse stays the source of truth; the portal is a domain-specific view for the people making the approval decision. Connecting the same evidence to a GRC system still requires authentication, data mapping, access controls, and the institution's review process.
 
 ## Keeping the evidence current [#keeping-the-evidence-current]
 
@@ -287,7 +279,21 @@ Certification in financial services is not one-and-done, so the pipeline closes 
 
 A reviewed failure can then be promoted into the golden dataset as a new item (the reviewer supplies the correct answer; the pipeline never copies the suspect output as ground truth), so the next certification run regression-tests exactly the failure production found.
 
-**Shipping a prompt re-certifies it.** The pipeline ships CI workflows for GitHub Actions: promoting a prompt to `production` in Langfuse fires a webhook that re-runs the affected certification with a strict exit code. A prompt promotion that regresses the gate fails the build instead of quietly shipping to clients.
+**Shipping a prompt re-certifies it.** The pipeline ships a GitHub Actions workflow for this loop. Once the one-time Langfuse GitHub Repository Dispatch integration and repository secrets are configured, promoting a prompt to `production` triggers the affected certification with a strict exit code. A prompt promotion that regresses the gate fails the workflow, creating a visible release block for the accountable reviewer instead of quietly shipping to clients.
+
+## What the governance frameworks actually require [#what-regulators-actually-expect]
+
+This pipeline is engineering infrastructure, not regulatory approval. Applicability depends on the institution, jurisdiction, model classification, and use case. The useful question is narrower: which parts of a governance process can this pipeline support with repeatable evidence?
+
+| Framework                                                                                                                                                                  | Scope and expectation                                                                                                                                                                                                                                                            | Evidence this pipeline can support                                                                                                                                                                                          |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Fed SR 26-2](https://www.federalreserve.gov/supervisionreg/srletters/SR2602.htm) / [OCC 2026-13](https://www.occ.gov/news-issuances/bulletins/2026/bulletin-2026-13.html) | The revised US model risk guidance covers traditional quantitative models and non-generative, non-agentic AI. It explicitly excludes generative and agentic AI from scope, while telling banks to determine appropriate governance and controls for systems outside the guidance | The validation, documentation, monitoring, and effective-challenge patterns are useful design references for an internal LLM governance process. They are not direct compliance requirements for the agents in this post    |
+| [PRA SS1/23](https://www.bankofengland.co.uk/prudential-regulation/publication/2023/may/model-risk-management-principles-for-banks-ss)                                     | Applies to in-scope UK firms with internal model approval and includes AI and ML modelling techniques where the broader model-risk principles apply: identification, tiering, governance, validation, and mitigants                                                              | Versioned certification runs can contribute validation and revalidation evidence, subject to the firm's model inventory, materiality assessment, and independent review                                                     |
+| [EU AI Act](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689)                                                                                          | Classifies specific uses as high risk, including systems used to evaluate the creditworthiness of natural persons. Applicable high-risk systems carry logging, human-oversight, and post-market-monitoring obligations                                                           | Traces can contribute logging evidence, annotation queues can support documented human review, and production monitoring can feed a post-market process. None of those controls satisfies the relevant obligation by itself |
+| [DORA](https://eur-lex.europa.eu/eli/reg/2022/2554/oj)                                                                                                                     | Requires in-scope EU financial entities to manage ICT risk and third-party ICT dependencies. Whether and how a model API falls into that program depends on the service and the institution's use of it                                                                          | Tracing and monitoring can provide operational evidence about availability, degradation, incidents, and third-party model behavior                                                                                          |
+| [NIST AI RMF](https://www.nist.gov/itl/ai-risk-management-framework)                                                                                                       | A voluntary framework organized around Govern, Map, Measure, and Manage, including documented testing before deployment and monitoring while systems are in use                                                                                                                  | Datasets, evaluators, gates, review queues, and run history provide technical evidence for Measure and inputs to Manage                                                                                                     |
+
+Across the applicable rules and voluntary guidance, the recurring engineering requirement is evidence: versioned artifacts, complete logs, documented human review, and monitoring that continues after deployment. Langfuse can hold that evidence and make it reproducible. The institution still owns applicability decisions, policy, independent challenge, approvals, and legal compliance.
 
 ## Adapting for your use case [#adapting-for-your-use-case]
 
