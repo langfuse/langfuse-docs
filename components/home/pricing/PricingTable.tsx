@@ -89,7 +89,7 @@ type Tier = {
 };
 
 const TEAMS_ADDON = "Teams add-on";
-const YEARLY_COMMITMENT = "Yearly Commitment";
+const COMMITTED_SPEND = "Committed spend";
 
 const tiers: Record<DeploymentOption, Tier[]> = {
   cloud: [
@@ -199,16 +199,6 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Support SLA",
         "Dedicated support engineer",
       ],
-      addOn: {
-        name: "Yearly Commitment",
-        mainFeatures: [
-          "Custom Volume Pricing",
-          "Architecture reviews",
-          "Billing via AWS Marketplace",
-          "Billing via Invoice",
-          "Vendor Onboarding",
-        ],
-      },
       cta: "Talk to sales",
     },
   ],
@@ -238,11 +228,12 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       featured: false,
       description:
         "Dedicated Langfuse deployment with enterprise capabilities and support.",
-      price: "Custom Pricing",
+      price: "Custom pricing",
       mainFeatures: [
         "All Open Source features plus management APIs, project-level RBAC, data retention policies, and audit logs",
-        "Bundled with ClickHouse Cloud, ClickHouse BYOC, or ClickHouse Private",
-        "Langfuse pricing is additive to your ClickHouse commercial plan",
+        "Runs on your ClickHouse deployment — we help you pick the right ClickHouse setup",
+        "Activated via license key; one key covers all of your environments",
+        "Annual agreement sized on your billable units",
         "Dedicated support engineer for deployment and hosting guidance",
         "Solutions architect support during evaluation and rollout",
         "Direct access to the product team for feedback",
@@ -265,7 +256,7 @@ type Section = {
   href?: string;
   features: {
     name: string;
-    description?: string;
+    description?: React.ReactNode;
     href?: string;
     tiers: Partial<
       Record<
@@ -407,14 +398,15 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Custom Usage Pricing",
-        description: "Custom volume based pricing for large-scale projects.",
+        name: "Volume discounts",
+        description:
+          "Volume discounts for large-scale projects, available with an annual committed-spend agreement.",
         tiers: {
           cloud: {
             Hobby: false,
-            Core: false,
-            Pro: false,
-            Enterprise: "Available with " + YEARLY_COMMITMENT,
+            Core: COMMITTED_SPEND,
+            Pro: COMMITTED_SPEND,
+            Enterprise: COMMITTED_SPEND,
           },
         },
       },
@@ -808,11 +800,13 @@ const sections: Section[] = [
       {
         name: "ClickHouse deployment model",
         description:
-          "Open Source assumes you operate ClickHouse yourself. Enterprise is bundled with ClickHouse Cloud, ClickHouse BYOC, or ClickHouse Private.",
+          "Langfuse runs on ClickHouse OSS, ClickHouse Cloud, or ClickHouse BYOC in every edition. For Enterprise, we recommend ClickHouse BYOC or ClickHouse Cloud for the best performance and support.",
+        href: "/self-hosting/deployment/infrastructure/clickhouse",
         tiers: {
           selfHosted: {
-            "Open Source": "Self-managed ClickHouse OSS",
-            Enterprise: "Bundled: ClickHouse Cloud / BYOC / Private",
+            "Open Source": "ClickHouse OSS, Cloud, or BYOC",
+            Enterprise:
+              "ClickHouse OSS, Cloud, or BYOC (BYOC or Cloud recommended)",
           },
         },
       },
@@ -976,13 +970,18 @@ const sections: Section[] = [
       {
         name: "Response time SLO",
         description:
-          "Target response time for support requests via supported channels",
+          "First-response targets depend on request severity. Severity levels are defined in the ClickHouse support services policy.",
+        href: "https://clickhouse.com/legal/support-services-policy",
         tiers: {
           cloud: {
             Hobby: "n/a",
-            Core: "48h",
-            Pro: "48h, Teams add-on: 24h",
-            Enterprise: "Custom",
+            Core: "Best effort",
+            Pro: "Best effort; 1 business day with " + COMMITTED_SPEND,
+            Enterprise: "1 business day; 1h (24/7) with " + COMMITTED_SPEND,
+          },
+          selfHosted: {
+            "Open Source": "Best effort (community)",
+            Enterprise: "1h (24/7)",
           },
         },
       },
@@ -1175,70 +1174,39 @@ const sections: Section[] = [
     ],
   },
   {
-    name: "Billing",
-    features: [
-      {
-        name: "Subscription management",
-        tiers: {
-          cloud: {
-            Hobby: false,
-            Core: "Self-serve",
-            Pro: "Self-serve",
-            Enterprise: "Self-serve, Contact sales for " + YEARLY_COMMITMENT,
-          },
-          selfHosted: { "Open Source": false, Enterprise: true },
-        },
-      },
-      {
-        name: "Payment methods",
-        tiers: {
-          cloud: {
-            Hobby: false,
-            Core: "Credit card",
-            Pro: "Credit card",
-            Enterprise: "Credit card, Invoice",
-          },
-          selfHosted: { "Open Source": false, Enterprise: true },
-        },
-      },
-      {
-        name: "Contract duration",
-        tiers: {
-          cloud: {
-            Hobby: false,
-            Core: "Monthly",
-            Pro: "Monthly",
-            Enterprise: YEARLY_COMMITMENT,
-          },
-          selfHosted: { "Open Source": false, Enterprise: true },
-        },
-      },
-      {
-        name: "Billing via AWS Marketplace",
-        tiers: {
-          cloud: {
-            Hobby: false,
-            Core: false,
-            Pro: false,
-            Enterprise: YEARLY_COMMITMENT,
-          },
-          selfHosted: { "Open Source": false, Enterprise: true },
-        },
-      },
-    ],
-  },
-  {
     name: "Compliance",
     href: "/security",
     features: [
       {
         name: "Contracts",
+        description: (
+          <>
+            Standard terms are the{" "}
+            <Link
+              href="https://clickhouse.com/legal/clickhouse-general-terms-and-conditions"
+              className="underline"
+              target="_blank"
+            >
+              ClickHouse General Terms &amp; Conditions
+            </Link>{" "}
+            and the{" "}
+            <Link
+              href="https://clickhouse.com/legal/clickhouse-self-managed-addendum"
+              className="underline"
+              target="_blank"
+            >
+              Self-Managed Addendum
+            </Link>
+            . Redlined contracts are available for larger committed-spend
+            agreements.
+          </>
+        ),
         tiers: {
           cloud: {
             Hobby: "Standard T&Cs & DPA",
             Core: "Standard T&Cs & DPA",
             Pro: "Standard T&Cs & DPA",
-            Enterprise: "Talk to Sales",
+            Enterprise: "Standard T&Cs & DPA",
           },
           selfHosted: { "Open Source": false, Enterprise: true },
         },
@@ -1279,12 +1247,55 @@ const sections: Section[] = [
         name: "InfoSec/legal reviews",
         href: "/security",
         tiers: {
+          selfHosted: { "Open Source": false, Enterprise: true },
+        },
+      },
+    ],
+  },
+  {
+    name: "Billing",
+    description:
+      "All paid plans are self-serve with monthly billing via credit card. With the optional Committed spend agreement, you can switch to billing via AWS Marketplace or invoice.",
+    features: [
+      {
+        name: "Subscription management",
+        tiers: {
           cloud: {
             Hobby: false,
-            Core: false,
-            Pro: false,
-            Enterprise: YEARLY_COMMITMENT,
+            Core: "Self-serve",
+            Pro: "Self-serve",
+            Enterprise: "Self-serve",
           },
+          selfHosted: { "Open Source": false, Enterprise: true },
+        },
+      },
+      {
+        name: "Payment methods",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: "Credit card",
+            Pro: "Credit card",
+            Enterprise: "Credit card",
+          },
+          selfHosted: { "Open Source": false, Enterprise: true },
+        },
+      },
+      {
+        name: "Contract duration",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: "Monthly",
+            Pro: "Monthly",
+            Enterprise: "Monthly",
+          },
+          selfHosted: { "Open Source": false, Enterprise: true },
+        },
+      },
+      {
+        name: "Billing via AWS Marketplace or invoice",
+        tiers: {
           selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
@@ -1297,7 +1308,7 @@ const FeatureDetails = ({
   description,
   href,
 }: {
-  description?: string;
+  description?: React.ReactNode;
   href?: string;
 }) => {
   if (!description && !href) {
@@ -1354,14 +1365,15 @@ const FeatureCell = ({
             </HoverCardContent>
           </HoverCard>
         )}
-        {value.includes(YEARLY_COMMITMENT) && (
+        {value.includes(COMMITTED_SPEND) && (
           <HoverCard>
             <HoverCardTrigger>
               <InfoIcon className="inline-block ml-1 size-3" />
             </HoverCardTrigger>
             <HoverCardContent className="w-60">
-              Available when committing to a yearly contract on the Enterprise
-              plan.
+              Available with an annual committed-spend agreement, on any cloud
+              plan from a minimum annual contract size. You purchase Langfuse
+              Cloud Credits that draw down against list pricing.
             </HoverCardContent>
           </HoverCard>
         )}
@@ -1384,78 +1396,164 @@ const FeatureCell = ({
   }
 };
 
+const committedSpendFeatures = [
+  "Volume discounts",
+  "Procurement support (vendor onboarding, security reviews, contract)",
+  "Upgraded support",
+  "Billing via AWS Marketplace or invoice",
+];
+
+// Committed spend box - optional annual agreement, available on every cloud plan
+export function CommittedSpendBox({ className }: { className?: string }) {
+  return (
+    <div className={cn("relative w-full", className)}>
+      <div className="absolute top-0 left-1/2 z-10 px-2 text-xs -translate-x-1/2 -translate-y-1/2 bg-surface-bg text-muted-foreground">
+        + optional
+      </div>
+      <CornerBox className="p-4 pt-5 w-full lg:p-6 lg:pt-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-8">
+          <div className="lg:max-w-[16rem] lg:shrink-0">
+            <span className="text-sm font-bold text-primary">
+              Committed spend
+            </span>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Available on any cloud plan from a minimum annual contract size.
+              Langfuse Cloud Credits draw down against list pricing and unlock:
+            </p>
+          </div>
+          <div className="flex flex-col gap-3 items-start lg:flex-1">
+            <ul className="grid gap-x-6 gap-y-1.5 text-sm sm:grid-cols-[repeat(2,max-content)]">
+              {committedSpendFeatures.map((feature) => (
+                <li key={feature} className="flex space-x-2">
+                  <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
+                  <span className="text-muted-foreground">{feature}</span>
+                </li>
+              ))}
+            </ul>
+            <Button
+              variant="secondary"
+              size="small"
+              href="/talk-to-us"
+              className="justify-center! group-hover:border-line-structure hover:border-line-cta"
+            >
+              Talk to sales
+            </Button>
+          </div>
+        </div>
+      </CornerBox>
+    </div>
+  );
+}
+
 // Pricing Plans component - renders the card grid
 export function PricingPlans({ variant }: { variant: DeploymentOption }) {
   const selectedTiers = tiers[variant];
 
   return (
-    <div
-      className={cn(
-        "mt-12",
-        selectedTiers.length === 1
-          ? "flex justify-center"
-          : "grid grid-cols-1 gap-y-6 gap-x-6 md:grid-cols-2 md:gap-x-2 lg:gap-x-6 lg:items-stretch",
-        selectedTiers.length === 4 && "lg:grid-cols-4",
-        selectedTiers.length === 3 && "lg:grid-cols-3",
-        selectedTiers.length === 2 && "lg:grid-cols-2",
-      )}
-    >
-      {selectedTiers.map((tier) => {
-        return (
-          <Card
-            key={tier.id}
-            hoverStripes
-            className={cn(
-              "relative h-full flex flex-col",
-              selectedTiers.length === 1 && "w-full max-w-lg",
-            )}
-          >
-            {tier.pill && (
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <div
-                  className={cn(
-                    "inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-center whitespace-nowrap rounded-full",
-                    tier.pillClassName ?? "bg-primary text-primary-foreground",
-                  )}
-                >
-                  {tier.pill}
+    <>
+      <div
+        className={cn(
+          "mt-12",
+          selectedTiers.length === 1
+            ? "flex justify-center"
+            : "grid grid-cols-1 gap-y-6 gap-x-6 md:grid-cols-2 md:gap-x-2 md:gap-y-0 lg:gap-x-6 lg:items-stretch",
+          selectedTiers.length === 4 && "lg:grid-cols-4",
+          selectedTiers.length === 3 && "lg:grid-cols-3",
+          selectedTiers.length === 2 && "lg:grid-cols-2",
+        )}
+      >
+        {selectedTiers.map((tier, tierIdx) => {
+          return (
+            <Card
+              key={tier.id}
+              hoverStripes
+              className={cn(
+                "relative h-full flex flex-col",
+                // Subgrid keeps header/price/CTA/feature rows vertically
+                // aligned across cards regardless of text wrapping.
+                selectedTiers.length > 1 && "md:grid md:grid-rows-subgrid",
+                selectedTiers.length > 1 &&
+                  (variant === "cloud" ? "md:row-span-8" : "md:row-span-6"),
+                tierIdx >= 2 && "md:mt-6 lg:mt-0",
+                selectedTiers.length === 1 && "w-full max-w-lg",
+              )}
+            >
+              {tier.pill && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <div
+                    className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-center whitespace-nowrap rounded-full",
+                      tier.pillClassName ??
+                        "bg-primary text-primary-foreground",
+                    )}
+                  >
+                    {tier.pill}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            <CardHeader className="p-4 text-left lg:p-6">
-              <CardTitle className="text-lg font-semibold text-foreground">
-                {tier.name}
-              </CardTitle>
-              <CardDescription className="text-left max-w-[24ch]">
-                {tier.description}
-                {tier.learnMore && (
-                  <>
-                    {" "}
-                    <Link href={tier.learnMore} className="underline">
-                      Learn more
-                    </Link>
-                    .
-                  </>
-                )}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-0 px-4 lg:px-6">
+              <CardHeader className="p-4 text-left lg:p-6">
+                <CardTitle className="text-lg font-semibold text-foreground">
+                  {tier.name}
+                </CardTitle>
+                <CardDescription className="text-left max-w-[24ch]">
+                  {tier.description}
+                  {tier.learnMore && (
+                    <>
+                      {" "}
+                      <Link href={tier.learnMore} className="underline">
+                        Learn more
+                      </Link>
+                      .
+                    </>
+                  )}
+                </CardDescription>
+              </CardHeader>
               {/* Price information */}
-              <div className="h-[60px] flex items-baseline">
-                <span className="text-3xl font-bold">{tier.price}</span>
-                <span className="ml-1 text-sm leading-4">
-                  {tier.price.includes("$")
-                    ? tier.priceUnit
-                      ? `/ ${tier.priceUnit}`
-                      : "/ month"
-                    : ""}
-                </span>
-              </div>
+              <CardContent className="p-0 px-4 lg:px-6">
+                <div className="h-[60px] flex items-baseline">
+                  <span className="text-3xl font-bold">{tier.price}</span>
+                  <span className="ml-1 text-sm leading-4 whitespace-nowrap">
+                    {tier.price.includes("$")
+                      ? tier.priceUnit
+                        ? `/ ${tier.priceUnit}`
+                        : "/ month"
+                      : ""}
+                  </span>
+                </div>
+              </CardContent>
 
-              <div>
-                {tier.ctaCallout ? (
-                  <div className="flex gap-2">
+              <CardContent className="p-0 px-4 lg:px-6">
+                <div>
+                  {tier.ctaCallout ? (
+                    <div className="flex gap-2">
+                      <Button
+                        variant={tier.featured ? "primary" : "secondary"}
+                        size="default"
+                        href={tier.href}
+                        {...(isCloudAppHref(tier.href)
+                          ? { "data-launch-app-cta": "" }
+                          : {})}
+                        wrapperClassName="flex-1"
+                        className={cn(
+                          "justify-center!",
+                          !tier.featured &&
+                            "group-hover:border-line-structure hover:border-line-cta",
+                        )}
+                      >
+                        {tier.cta}
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="default"
+                        href={tier.ctaCallout.href}
+                        wrapperClassName="flex-1"
+                        className="justify-center! group-hover:border-line-structure hover:border-line-cta"
+                      >
+                        {tier.ctaCallout.text}
+                      </Button>
+                    </div>
+                  ) : (
                     <Button
                       variant={tier.featured ? "primary" : "secondary"}
                       size="default"
@@ -1463,7 +1561,6 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                       {...(isCloudAppHref(tier.href)
                         ? { "data-launch-app-cta": "" }
                         : {})}
-                      wrapperClassName="flex-1"
                       className={cn(
                         "justify-center!",
                         !tier.featured &&
@@ -1472,122 +1569,100 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                     >
                       {tier.cta}
                     </Button>
-                    <Button
-                      variant="secondary"
-                      size="default"
-                      href={tier.ctaCallout.href}
-                      wrapperClassName="flex-1"
-                      className="justify-center! group-hover:border-line-structure hover:border-line-cta"
-                    >
-                      {tier.ctaCallout.text}
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    variant={tier.featured ? "primary" : "secondary"}
-                    size="default"
-                    href={tier.href}
-                    {...(isCloudAppHref(tier.href)
-                      ? { "data-launch-app-cta": "" }
-                      : {})}
-                    className={cn(
-                      "justify-center!",
-                      !tier.featured &&
-                        "group-hover:border-line-structure hover:border-line-cta",
-                    )}
-                  >
-                    {tier.cta}
-                  </Button>
-                )}
-              </div>
+                  )}
+                </div>
+              </CardContent>
 
               {/* Callouts for different tiers - always render container for alignment */}
-              <div className="px-0 py-6 h-[30px] flex items-center justify-center">
-                {tier.calloutLink ? (
-                  <div className="text-xs text-center text-muted-foreground whitespace-nowrap">
-                    <Link
-                      href={tier.calloutLink.href}
-                      className="underline underline-offset-2 decoration-auto text-muted-foreground hover:text-primary"
-                    >
-                      {tier.calloutLink.text}
-                    </Link>
-                  </div>
-                ) : null}
-              </div>
-            </CardContent>
-
-            {/* Trusted by section for cloud tiers */}
-            {variant === "cloud" && (
-              <>
-                <div className="border-t border-line-structure"></div>
-                <TrustedBy customers={trustedByData.cloud[tier.name]} />
-              </>
-            )}
-            <div className="border-t border-line-structure"></div>
-            <CardFooter className="flex-col gap-2 items-start p-4 lg:p-6">
-              <ul className="space-y-2.5 text-sm">
-                {tier.mainFeatures.map((feature, index) => (
-                  <li key={index} className="flex space-x-2">
-                    <Check className="shrink-0 mt-0.5 h-4 w-4 text-primary" />
-                    <span className="text-muted-foreground">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-              {tier.addOn && (
-                <div className="relative mt-3 w-full">
-                  <div className="absolute top-0 left-1/2 z-10 px-2 text-xs -translate-x-1/2 -translate-y-1/2 bg-surface-bg text-muted-foreground">
-                    + optional
-                  </div>
-                  <CornerBox className="p-3 pt-4 w-full">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-bold text-primary">
-                        {tier.addOn.name}
-                      </span>
-                      {tier.addOn.price && (
-                        <span className="text-sm font-bold text-primary">
-                          {tier.addOn.price}
-                        </span>
-                      )}
-                    </div>
-                    <ul className="mt-1 space-y-1 text-sm">
-                      {tier.addOn.mainFeatures.map((feature) => (
-                        <li key={feature} className="flex space-x-2">
-                          <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
-                          <span className="text-muted-foreground">
-                            {feature}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                    {tier.addOn.cta && (
-                      <Button
-                        variant="secondary"
-                        size="small"
-                        href={tier.addOn.cta.href}
-                        wrapperClassName="mt-3"
-                        className="justify-center! group-hover:border-line-structure hover:border-line-cta"
+              <CardContent className="p-0 px-4 lg:px-6">
+                <div className="px-0 py-6 h-[30px] flex items-center justify-center">
+                  {tier.calloutLink ? (
+                    <div className="text-xs text-center text-muted-foreground whitespace-nowrap">
+                      <Link
+                        href={tier.calloutLink.href}
+                        className="underline underline-offset-2 decoration-auto text-muted-foreground hover:text-primary"
                       >
-                        {tier.addOn.cta.text}
-                      </Button>
-                    )}
-                    {tier.addOn.calloutLink && (
-                      <div className="mt-2 text-xs text-center text-muted-foreground">
-                        <Link
-                          href={tier.addOn.calloutLink.href}
-                          className="underline hover:text-primary"
-                        >
-                          {tier.addOn.calloutLink.text}
-                        </Link>
-                      </div>
-                    )}
-                  </CornerBox>
+                        {tier.calloutLink.text}
+                      </Link>
+                    </div>
+                  ) : null}
                 </div>
+              </CardContent>
+
+              {/* Trusted by section for cloud tiers */}
+              {variant === "cloud" && (
+                <>
+                  <div className="border-t border-line-structure"></div>
+                  <TrustedBy customers={trustedByData.cloud[tier.name]} />
+                </>
               )}
-            </CardFooter>
-          </Card>
-        );
-      })}
-    </div>
+              <div className="border-t border-line-structure"></div>
+              <CardFooter className="flex-col gap-2 items-start p-4 lg:p-6">
+                <ul className="space-y-2.5 text-sm">
+                  {tier.mainFeatures.map((feature, index) => (
+                    <li key={index} className="flex space-x-2">
+                      <Check className="shrink-0 mt-0.5 h-4 w-4 text-primary" />
+                      <span className="text-muted-foreground">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                {tier.addOn && (
+                  <div className="relative mt-3 w-full">
+                    <div className="absolute top-0 left-1/2 z-10 px-2 text-xs -translate-x-1/2 -translate-y-1/2 bg-surface-bg text-muted-foreground">
+                      + optional
+                    </div>
+                    <CornerBox className="p-3 pt-4 w-full">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-bold text-primary">
+                          {tier.addOn.name}
+                        </span>
+                        {tier.addOn.price && (
+                          <span className="text-sm font-bold text-primary">
+                            {tier.addOn.price}
+                          </span>
+                        )}
+                      </div>
+                      <ul className="mt-1 space-y-1 text-sm">
+                        {tier.addOn.mainFeatures.map((feature) => (
+                          <li key={feature} className="flex space-x-2">
+                            <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
+                            <span className="text-muted-foreground">
+                              {feature}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                      {tier.addOn.cta && (
+                        <Button
+                          variant="secondary"
+                          size="small"
+                          href={tier.addOn.cta.href}
+                          wrapperClassName="mt-3"
+                          className="justify-center! group-hover:border-line-structure hover:border-line-cta"
+                        >
+                          {tier.addOn.cta.text}
+                        </Button>
+                      )}
+                      {tier.addOn.calloutLink && (
+                        <div className="mt-2 text-xs text-center text-muted-foreground">
+                          <Link
+                            href={tier.addOn.calloutLink.href}
+                            className="underline hover:text-primary"
+                          >
+                            {tier.addOn.calloutLink.text}
+                          </Link>
+                        </div>
+                      )}
+                    </CornerBox>
+                  </div>
+                )}
+              </CardFooter>
+            </Card>
+          );
+        })}
+      </div>
+      {variant === "cloud" && <CommittedSpendBox className="mt-10" />}
+    </>
   );
 }
 
@@ -1893,6 +1968,7 @@ export function PricingTable({
           </Table>
         </div>
       </section>
+      {variant === "cloud" && <CommittedSpendBox className="mt-12" />}
     </>
   );
 }

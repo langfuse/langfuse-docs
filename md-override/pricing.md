@@ -70,102 +70,105 @@ For large-scale teams. Enterprise-grade support and security.
 - Support SLA
 - Dedicated support engineer
 
-Optional **Yearly Commitment**:
-
-- Custom volume pricing
-- Architecture reviews
-- Billing via AWS Marketplace
-- Billing via invoice
-- Vendor onboarding
-
 [Contact sales](/talk-to-us?deployment=cloud) | [Enterprise FAQ](/enterprise)
+
+### Committed spend (optional, all cloud plans)
+
+Available on any cloud plan from a minimum annual contract size. Langfuse Cloud Credits draw down against list pricing and unlock:
+
+- Volume discounts
+- Procurement support (vendor onboarding, security reviews, contract)
+- Upgraded support
+- Billing via AWS Marketplace or invoice
+
+[Talk to sales](/talk-to-us)
 
 ## Feature Comparison (Cloud)
 
-| Feature                                                                                             | Hobby               | Core                | Pro                 | Enterprise                   |
-| --------------------------------------------------------------------------------------------------- | ------------------- | ------------------- | ------------------- | ---------------------------- |
-| **LLM Application & Agent Tracing**                                                                 |                     |                     |                     |                              |
-| [Traces and graphs (agents)](/docs/observability/overview)                                          | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Session tracking (chats/threads)](/docs/observability/features/sessions)                           | Yes                 | Yes                 | Yes                 | Yes                          |
-| [User tracking](/docs/observability/features/users)                                                 | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Token and cost tracking](/docs/observability/features/token-and-cost-tracking)                     | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Native framework integrations](/integrations)                                                      | Yes                 | Yes                 | Yes                 | Yes                          |
-| [SDKs (Python, JavaScript)](/docs/observability/sdk/overview)                                       | Yes                 | Yes                 | Yes                 | Yes                          |
-| [OpenTelemetry (Java, Go, custom)](/docs/opentelemetry/get-started)                                 | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Proxy-based logging (via LiteLLM)](/integrations/gateways/litellm)                                 | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Custom via API](/api-and-data-platform/features/public-api)                                        | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Included usage](/docs/administration/billable-units)                                               | 50k units           | 100k units          | 100k units          | 100k units                   |
-| [Additional usage](/docs/administration/billable-units)                                             | --                  | $8/100k units       | $8/100k units       | $8/100k units                |
-| Custom usage pricing                                                                                | --                  | --                  | --                  | Yearly Commitment            |
-| [Multi-modal](/docs/observability/features/multi-modality)                                          | Free while in beta  | Free while in beta  | Free while in beta  | Free while in beta           |
-| Access to historical data                                                                           | 30 days             | 90 days             | 3 years             | 3 years                      |
-| [Ingestion throughput](/faq/all/api-limits)                                                         | 1,000 req/min       | 4,000 req/min       | 20,000 req/min      | Custom                       |
-| **Prompt Management**                                                                               |                     |                     |                     |                              |
-| [Prompt versioning](/docs/prompt-management/get-started)                                            | Yes                 | Yes                 | Yes                 | Yes                          |
-| Prompt fetching                                                                                     | Unlimited           | Unlimited           | Unlimited           | Unlimited                    |
-| [Prompt release management](/docs/prompt-management/features/prompt-version-control)                | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Prompt composability](/docs/prompt-management/features/composability)                              | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Prompt caching (server and client)](/docs/prompt-management/features/caching)                      | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Playground](/docs/prompt-management/features/playground)                                           | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Prompt experiments](/docs/evaluation/dataset-runs/native-run)                                      | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Webhooks & Slack](/docs/prompt-management/features/webhooks-slack-integrations)                    | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Protected deployment labels](/docs/prompt-management/get-started#protected-prompt-labels)          | --                  | --                  | Teams add-on        | Yes                          |
-| **Evaluation (online and offline)**                                                                 |                     |                     |                     |                              |
-| [Datasets](/docs/evaluation/dataset-runs/datasets)                                                  | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)                             | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui)                               | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Evaluation scores (custom)](/docs/evaluation/evaluation-methods/custom-scores)                     | Yes                 | Yes                 | Yes                 | Yes                          |
-| [User feedback tracking](/faq/all/user-feedback)                                                    | Yes                 | Yes                 | Yes                 | Yes                          |
-| [External evaluation pipelines](/guides/cookbook/example_external_evaluation_pipelines)             | Yes                 | Yes                 | Yes                 | Yes                          |
-| [LLM-as-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge)                       | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Human annotation](/docs/scores/annotation)                                                         | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Human annotation queues](/docs/evaluation/evaluation-methods/annotation#annotation-queues)         | 1 queue             | 3 queues            | Yes                 | Yes                          |
-| **Collaboration**                                                                                   |                     |                     |                     |                              |
-| Projects                                                                                            | Unlimited           | Unlimited           | Unlimited           | Unlimited                    |
-| Users                                                                                               | 2                   | Unlimited           | Unlimited           | Unlimited                    |
-| **API**                                                                                             |                     |                     |                     |                              |
-| [Extensive public API](/docs/api-and-data-platform/features/public-api)                             | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Rate limit (general API)](/faq/all/api-limits)                                                     | 30 req/min          | 100 req/min         | 1,000 req/min       | Custom                       |
-| [Rate limit (datasets API)](/faq/all/api-limits)                                                    | 100 req/min         | 200 req/min         | 1,000 req/min       | Custom                       |
-| [Rate limit (Metrics API v2)](/faq/all/api-limits)                                                  | 100 req/day         | 100 req/hour        | 500 req/hour        | Custom                       |
-| [Rate limit (legacy Metrics API)](/faq/all/api-limits)                                              | 100 req/day         | 2,000 req/day       | 2,000 req/day       | Custom                       |
-| [SLA](/enterprise#faq)                                                                              | --                  | --                  | --                  | Yes                          |
-| **Exports**                                                                                         |                     |                     |                     |                              |
-| [Batch export via UI](/docs/api-and-data-platform/features/query-via-sdk#ui)                        | Yes                 | Yes                 | Yes                 | Yes                          |
-| [PostHog integration](/integrations/analytics/posthog)                                              | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Mixpanel integration](/integrations/analytics/mixpanel)                                            | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Scheduled export to blob storage](/docs/api-and-data-platform/features/query-via-sdk#blob-storage) | --                  | --                  | Teams add-on        | Yes                          |
-| **Support**                                                                                         |                     |                     |                     |                              |
-| [Ask AI](/docs/ask-ai)                                                                              | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Community (GitHub)](/support#community)                                                            | Yes                 | Yes                 | Yes                 | Yes                          |
-| [In-app support](/support#in-app)                                                                   | --                  | Yes                 | Yes                 | Yes                          |
-| [Private Slack channel](/support#slack)                                                             | --                  | --                  | Teams add-on        | Yes                          |
-| [Dedicated support engineer](/support#onboarding)                                                   | --                  | --                  | --                  | Yes                          |
-| [Onboarding & architectural guidance](/support#onboarding)                                          | --                  | --                  | --                  | Yes                          |
-| Response time SLO                                                                                   | n/a                 | 48h                 | 48h (Teams: 24h)    | Custom                       |
-| [Support SLA](/enterprise#faq)                                                                      | --                  | --                  | --                  | Yes                          |
-| **Security**                                                                                        |                     |                     |                     |                              |
-| [Data region](/security/data-regions)                                                               | US, EU, or Japan    | US, EU, or Japan    | US, EU, or Japan    | US, EU, Japan, or HIPAA      |
-| Sign in with Google, AzureAD, GitHub                                                                | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Organization-level RBAC](/docs/administration/rbac)                                                | Yes                 | Yes                 | Yes                 | Yes                          |
-| Enterprise SSO (e.g. Okta, EntraID)                                                                 | --                  | --                  | Teams add-on        | Yes                          |
-| SSO enforcement                                                                                     | --                  | --                  | Teams add-on        | Yes                          |
-| [Client-side data masking](/docs/observability/features/masking)                                    | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Project-level RBAC](/docs/administration/rbac#project-level-roles)                                 | --                  | --                  | Teams add-on        | Yes                          |
-| [Data retention management](/docs/administration/data-retention)                                    | --                  | --                  | Yes                 | Yes                          |
-| [SCIM API (automated user provisioning)](/docs/administration/scim-and-org-api)                     | --                  | --                  | --                  | Yes                          |
-| [Audit logs](/docs/administration/audit-logs)                                                       | --                  | --                  | --                  | Yes                          |
-| **Billing**                                                                                         |                     |                     |                     |                              |
-| Subscription management                                                                             | --                  | Self-serve          | Self-serve          | Self-serve, or contact sales |
-| Payment methods                                                                                     | --                  | Credit card         | Credit card         | Credit card, Invoice         |
-| Contract duration                                                                                   | --                  | Monthly             | Monthly             | Yearly Commitment            |
-| Billing via AWS Marketplace                                                                         | --                  | --                  | --                  | Yearly Commitment            |
-| **Compliance**                                                                                      |                     |                     |                     |                              |
-| Contracts                                                                                           | Standard T&Cs & DPA | Standard T&Cs & DPA | Standard T&Cs & DPA | Talk to sales                |
-| [Data processing agreement (GDPR)](/security/dpa)                                                   | Yes                 | Yes                 | Yes                 | Yes                          |
-| [SOC2 Type II & ISO27001 reports](/security)                                                        | --                  | --                  | Yes                 | Yes                          |
-| [HIPAA compliance](/security/hipaa)                                                                 | --                  | --                  | Yes                 | Yes                          |
-| InfoSec/legal reviews                                                                               | --                  | --                  | --                  | Yearly Commitment            |
+| Feature                                                                                             | Hobby               | Core                | Pro                                              | Enterprise                                     |
+| --------------------------------------------------------------------------------------------------- | ------------------- | ------------------- | ------------------------------------------------ | ---------------------------------------------- |
+| **LLM Application & Agent Tracing**                                                                 |                     |                     |                                                  |                                                |
+| [Traces and graphs (agents)](/docs/observability/overview)                                          | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Session tracking (chats/threads)](/docs/observability/features/sessions)                           | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [User tracking](/docs/observability/features/users)                                                 | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Token and cost tracking](/docs/observability/features/token-and-cost-tracking)                     | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Native framework integrations](/integrations)                                                      | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [SDKs (Python, JavaScript)](/docs/observability/sdk/overview)                                       | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [OpenTelemetry (Java, Go, custom)](/docs/opentelemetry/get-started)                                 | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Proxy-based logging (via LiteLLM)](/integrations/gateways/litellm)                                 | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Custom via API](/api-and-data-platform/features/public-api)                                        | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Included usage](/docs/administration/billable-units)                                               | 50k units           | 100k units          | 100k units                                       | 100k units                                     |
+| [Additional usage](/docs/administration/billable-units)                                             | --                  | $8/100k units       | $8/100k units                                    | $8/100k units                                  |
+| Volume discounts                                                                                    | --                  | Committed spend     | Committed spend                                  | Committed spend                                |
+| [Multi-modal](/docs/observability/features/multi-modality)                                          | Free while in beta  | Free while in beta  | Free while in beta                               | Free while in beta                             |
+| Access to historical data                                                                           | 30 days             | 90 days             | 3 years                                          | 3 years                                        |
+| [Ingestion throughput](/faq/all/api-limits)                                                         | 1,000 req/min       | 4,000 req/min       | 20,000 req/min                                   | Custom                                         |
+| **Prompt Management**                                                                               |                     |                     |                                                  |                                                |
+| [Prompt versioning](/docs/prompt-management/get-started)                                            | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| Prompt fetching                                                                                     | Unlimited           | Unlimited           | Unlimited                                        | Unlimited                                      |
+| [Prompt release management](/docs/prompt-management/features/prompt-version-control)                | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Prompt composability](/docs/prompt-management/features/composability)                              | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Prompt caching (server and client)](/docs/prompt-management/features/caching)                      | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Playground](/docs/prompt-management/features/playground)                                           | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Prompt experiments](/docs/evaluation/dataset-runs/native-run)                                      | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Webhooks & Slack](/docs/prompt-management/features/webhooks-slack-integrations)                    | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Protected deployment labels](/docs/prompt-management/get-started#protected-prompt-labels)          | --                  | --                  | Teams add-on                                     | Yes                                            |
+| **Evaluation (online and offline)**                                                                 |                     |                     |                                                  |                                                |
+| [Datasets](/docs/evaluation/dataset-runs/datasets)                                                  | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)                             | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui)                               | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Evaluation scores (custom)](/docs/evaluation/evaluation-methods/custom-scores)                     | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [User feedback tracking](/faq/all/user-feedback)                                                    | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [External evaluation pipelines](/guides/cookbook/example_external_evaluation_pipelines)             | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [LLM-as-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge)                       | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Human annotation](/docs/scores/annotation)                                                         | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Human annotation queues](/docs/evaluation/evaluation-methods/annotation#annotation-queues)         | 1 queue             | 3 queues            | Yes                                              | Yes                                            |
+| **Collaboration**                                                                                   |                     |                     |                                                  |                                                |
+| Projects                                                                                            | Unlimited           | Unlimited           | Unlimited                                        | Unlimited                                      |
+| Users                                                                                               | 2                   | Unlimited           | Unlimited                                        | Unlimited                                      |
+| **API**                                                                                             |                     |                     |                                                  |                                                |
+| [Extensive public API](/docs/api-and-data-platform/features/public-api)                             | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Rate limit (general API)](/faq/all/api-limits)                                                     | 30 req/min          | 100 req/min         | 1,000 req/min                                    | Custom                                         |
+| [Rate limit (datasets API)](/faq/all/api-limits)                                                    | 100 req/min         | 200 req/min         | 1,000 req/min                                    | Custom                                         |
+| [Rate limit (Metrics API v2)](/faq/all/api-limits)                                                  | 100 req/day         | 100 req/hour        | 500 req/hour                                     | Custom                                         |
+| [Rate limit (legacy Metrics API)](/faq/all/api-limits)                                              | 100 req/day         | 2,000 req/day       | 2,000 req/day                                    | Custom                                         |
+| [SLA](/enterprise#faq)                                                                              | --                  | --                  | --                                               | Yes                                            |
+| **Exports**                                                                                         |                     |                     |                                                  |                                                |
+| [Batch export via UI](/docs/api-and-data-platform/features/query-via-sdk#ui)                        | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [PostHog integration](/integrations/analytics/posthog)                                              | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Mixpanel integration](/integrations/analytics/mixpanel)                                            | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Scheduled export to blob storage](/docs/api-and-data-platform/features/query-via-sdk#blob-storage) | --                  | --                  | Teams add-on                                     | Yes                                            |
+| **Support**                                                                                         |                     |                     |                                                  |                                                |
+| [Ask AI](/docs/ask-ai)                                                                              | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Community (GitHub)](/support#community)                                                            | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [In-app support](/support#in-app)                                                                   | --                  | Yes                 | Yes                                              | Yes                                            |
+| [Private Slack channel](/support#slack)                                                             | --                  | --                  | Teams add-on                                     | Yes                                            |
+| [Dedicated support engineer](/support#onboarding)                                                   | --                  | --                  | --                                               | Yes                                            |
+| [Onboarding & architectural guidance](/support#onboarding)                                          | --                  | --                  | --                                               | Yes                                            |
+| [Response time SLO](https://clickhouse.com/legal/support-services-policy)                           | n/a                 | Best effort         | Best effort; 1 business day with Committed spend | 1 business day; 1h (24/7) with Committed spend |
+| [Support SLA](/enterprise#faq)                                                                      | --                  | --                  | --                                               | Yes                                            |
+| **Security**                                                                                        |                     |                     |                                                  |                                                |
+| [Data region](/security/data-regions)                                                               | US, EU, or Japan    | US, EU, or Japan    | US, EU, or Japan                                 | US, EU, Japan, or HIPAA                        |
+| Sign in with Google, AzureAD, GitHub                                                                | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Organization-level RBAC](/docs/administration/rbac)                                                | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| Enterprise SSO (e.g. Okta, EntraID)                                                                 | --                  | --                  | Teams add-on                                     | Yes                                            |
+| SSO enforcement                                                                                     | --                  | --                  | Teams add-on                                     | Yes                                            |
+| [Client-side data masking](/docs/observability/features/masking)                                    | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [Project-level RBAC](/docs/administration/rbac#project-level-roles)                                 | --                  | --                  | Teams add-on                                     | Yes                                            |
+| [Data retention management](/docs/administration/data-retention)                                    | --                  | --                  | Yes                                              | Yes                                            |
+| [SCIM API (automated user provisioning)](/docs/administration/scim-and-org-api)                     | --                  | --                  | --                                               | Yes                                            |
+| [Audit logs](/docs/administration/audit-logs)                                                       | --                  | --                  | --                                               | Yes                                            |
+| **Compliance**                                                                                      |                     |                     |                                                  |                                                |
+| Contracts                                                                                           | Standard T&Cs & DPA | Standard T&Cs & DPA | Standard T&Cs & DPA                              | Standard T&Cs & DPA                            |
+| [Data processing agreement (GDPR)](/security/dpa)                                                   | Yes                 | Yes                 | Yes                                              | Yes                                            |
+| [SOC2 Type II & ISO27001 reports](/security)                                                        | --                  | --                  | Yes                                              | Yes                                            |
+| [HIPAA compliance](/security/hipaa)                                                                 | --                  | --                  | Yes                                              | Yes                                            |
+| **Billing**                                                                                         |                     |                     |                                                  |                                                |
+| Subscription management                                                                             | --                  | Self-serve          | Self-serve                                       | Self-serve                                     |
+| Payment methods                                                                                     | --                  | Credit card         | Credit card                                      | Credit card                                    |
+| Contract duration                                                                                   | --                  | Monthly             | Monthly                                          | Monthly                                        |
+
+_Standard contracts: [ClickHouse General Terms & Conditions](https://clickhouse.com/legal/clickhouse-general-terms-and-conditions) and the [Self-Managed Addendum](https://clickhouse.com/legal/clickhouse-self-managed-addendum). Redlined contracts are available for larger committed-spend agreements._
 
 ## Graduated Usage Pricing
 
@@ -220,7 +223,7 @@ Additional usage beyond the included units is billed at graduated rates. Higher 
 - Next 9M units at $7.00/100k: $630.00
 - Next 40M units at $6.50/100k: $2,600.00
 - Next 50M units at $6.00/100k: $3,000.00
-- **Total: $8,801.00/month** (custom volume pricing available with yearly commitment)
+- **Total: $8,801.00/month** (volume discounts available with an annual committed-spend agreement)
 
 ### Billable Units
 
@@ -258,9 +261,15 @@ You get one bill each month. The plan fee is charged at the start of the month, 
 **What are Langfuse Cloud Credits, and how do they affect me?**
 A Langfuse Cloud Credit is a prepaid unit of credit, equal to one (1) US dollar, to be applied to a customer's use of Langfuse Cloud. Credits are drawn down according to the then-current pricing at [langfuse.com/pricing](/pricing).
 
-Langfuse Cloud Credits only apply to customers with a committed spend contract for Langfuse Cloud. If you have questions about your credit balance, drawdown schedule, or committed spend contract, please contact your account team.
+Langfuse Cloud Credits only apply to customers with a committed-spend agreement for Langfuse Cloud. If you have questions about your credit balance, drawdown schedule, or committed-spend agreement, please contact your account team.
 
 If you use Langfuse Cloud on a Pay-as-you-Go basis, Langfuse Cloud Credits do not apply to you.
+
+**What is the Committed spend option?**
+Committed spend is an annual agreement for Langfuse Cloud, available on every cloud plan from a minimum annual contract size. You purchase Langfuse Cloud Credits that draw down against the public price list at [langfuse.com/pricing](/pricing). In exchange for the commitment, you get volume discounts, procurement support (vendor onboarding, security reviews), upgraded support, and billing via AWS Marketplace or invoice. Redlined contracts are available for larger agreements. [Talk to us](/talk-to-us) to get started.
+
+**How is self-hosted Langfuse Enterprise priced?**
+Langfuse OSS is free (MIT license). Langfuse Enterprise (self-hosted) is an annual agreement with a flat fee sized on your [billable units](/docs/administration/billable-units) across all deployments and environments. It is activated via a license key -- one key covers all of your environments. Langfuse does not actively meter self-hosted usage; usage is reviewed together at renewal. [Talk to us](/talk-to-us?deployment=self-hosted) for a quote.
 
 **Can I set up alerts on usage fees?**
 Yes, you can configure [spend alerts](/docs/administration/spend-alerts) to receive email notifications when spending exceeds predefined thresholds.
@@ -269,7 +278,7 @@ Yes, you can configure [spend alerts](/docs/administration/spend-alerts) to rece
 Through the organization settings in Langfuse Cloud or the [Customer Portal](/billing-portal).
 
 **Can I redline the contracts?**
-Yes, customized contracts are available for Enterprise customers with a yearly commitment. Contact enterprise@langfuse.com. Default plans are self-serve on standard terms.
+Redlined contracts are available for larger committed-spend agreements. Contact enterprise@langfuse.com. Default plans are self-serve on standard terms.
 
 **Where is the data stored?**
 Langfuse Cloud is hosted on AWS. Data is stored in the US, EU, Japan, or the HIPAA-compliant US region depending on your selection. See [security documentation](/security) for details.
