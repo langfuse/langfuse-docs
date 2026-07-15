@@ -1,0 +1,174 @@
+---
+title: How to set up a user feedback loop for your application
+sidebarTitle: User feedback loop
+description: Capture explicit and implicit user feedback as scores on your traces, surface the responses worth reviewing, and turn what you learn into datasets and automated evaluators.
+category: Evaluation
+---
+
+import { LoopDiagram } from "@/components/academy/LoopDiagram";
+import { FeedbackCaptureDiagram } from "@/components/academy/FeedbackCaptureDiagram";
+
+# How to set up a user feedback loop for your application
+
+Once traces are coming in, capturing user feedback is a great next step. Your users judge every response through what they click, edit, retry, or say. Capturing that on your traces gives you a quality signal grounded in real usage, where each score points at a trace you can open and learn from.
+
+<Callout type="info">
+  A lot of teams ask _"I have traces coming in, how do I now get started with evals?"_. Often, these teams are better off starting with user feedback first.
+</Callout>
+
+This feedback gathering step generally has a very high ROI, in the AI Engineering process. We often write about this process in the [Langfuse Academy](/academy), where we walk through the [AI engineering loop](/academy/ai-engineering-loop) in more detail. Gathering user feedback happens in the monitoring stage highlighted below.
+
+<LoopDiagram highlight="monitor" />
+
+## Prerequisites
+
+You already have traces coming into Langfuse. See [tracing](/docs/observability/get-started) if you have not set this up yet.
+
+## Walkthrough
+
+<Steps>
+
+### Choose your feedback signals [#choose-signals]
+
+Feedback comes in two forms. **Explicit feedback** is a rating the user gives on purpose, like a thumbs up or down or a star rating: unambiguous, but rare and skewed toward unhappy users. **Implicit feedback** is derived from what users do, like retrying a query or editing a draft: you have data on every trace, but needs interpretation.
+
+The best signals depend heavily on your use case. Some examples as inspiration:
+
+| Signal                                                | What it tells you                       | Typically captured via |
+| ----------------------------------------------------- | --------------------------------------- | ---------------------- |
+| Thumbs up or down on a response                       | Direct rating of that response          | Browser SDK            |
+| A user rephrasing the same question                   | The previous answer didn't land         | LLM-as-a-Judge         |
+| A user asking to speak to a human                     | The user stopped trusting the assistant | LLM-as-a-Judge         |
+| A response copied by the user                         | The output was good enough to reuse     | Browser SDK            |
+| A drafted reply edited before it is sent              | What was wrong or missing in the draft  | SDK / API              |
+| A copilot suggestion accepted or dismissed            | Whether the suggestion fit the context  | Browser SDK            |
+| An extracted field corrected in a review step         | Which field was extracted incorrectly   | SDK / API              |
+| A search query reformulated without clicking a result | The results missed the intent           | SDK / API              |
+| A recommended item skipped right after it starts      | The pick missed the user's taste        | SDK / API              |
+
+Tips:
+
+- signals combine well, no need to implement only one
+- capture free-form text wherever it fits (can be as a [comment on the score](/docs/evaluation/scores/data-model)), as much of this analysis is now done by agents, and they work better with more context
+- the [academy examples](/academy/examples) show how signals are chosen for a specific application and change over its lifecycle
+
+### Capture the signals as scores [#capture]
+
+Every signal ends up as a [score](/docs/evaluation/scores/data-model) on the trace that produced the output. A score has a name, a value with a data type (boolean, numeric, categorical or free text), and an optional `comment`. Evaluators also store their results as scores, so your user feedback can land in the same filters, dashboards, and analytics.
+
+<FeedbackCaptureDiagram />
+
+The route into that score depends on where the signal originates:
+
+<Tabs items={["Signal from UI", "App event from backend", "Via LLM-as-a-Judge"]}>
+<Tab>
+
+Ratings from your UI go straight from the browser using your public key:
+
+```typescript
+import { LangfuseBrowserClient } from "@langfuse/browser";
+
+const langfuse = new LangfuseBrowserClient({
+  publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY!,
+});
+
+// On a thumbs up / down click
+await langfuse.score({
+  traceId, // returned by your backend with the response
+  name: "response_rating", // one descriptive name per signal
+  value: 1, // 1 for thumbs up, 0 for thumbs down
+  dataType: "BOOLEAN",
+});
+```
+
+The [User Feedback](/docs/observability/features/user-feedback) page has the full setup for a Next.js chatbot, including how the frontend gets the trace ID.
+
+</Tab>
+<Tab>
+
+Events your app observes, like an accepted suggestion, an edited draft, or a closed ticket, are scored the moment they happen:
+
+<LangTabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# The user edited the drafted reply before sending it
+langfuse.create_score(
+    trace_id=trace_id,  # the trace that produced the draft
+    name="draft_edited",
+    value=1,
+    data_type="BOOLEAN",
+    comment=edit_diff,  # the edit itself, as context for later analysis
+)
+```
+
+</Tab>
+<Tab>
+
+```typescript
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+// The user edited the drafted reply before sending it
+await langfuse.score.create({
+  traceId, // the trace that produced the draft
+  name: "draft_edited",
+  value: 1,
+  dataType: "BOOLEAN",
+  comment: editDiff, // the edit itself, as context for later analysis
+});
+
+// Flush the scores in short-lived environments
+await langfuse.flush();
+```
+
+</Tab>
+</LangTabs>
+
+See [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk) for score types, updating scores, and validating them against a score config.
+
+</Tab>
+<Tab>
+
+Signals that live in free text, like a user asking for a human or rephrasing a question, leave no event your code can catch. An [LLM-as-a-Judge evaluator](/docs/evaluation/evaluation-methods/llm-as-a-judge) on your production traces reads the conversation and writes the score, with no change to your application.
+
+</Tab>
+</Tabs>
+
+### Act on the feedback [#act]
+
+#### Monitor how quality is trending [#monitor-trends]
+
+[Score analytics](/docs/evaluation/scores/score-analytics) and [custom dashboards](/docs/metrics/features/custom-dashboards) chart how each signal moves over time. One caveat: not every signal is a clean quality metric, e.g. thumbs feedback skews toward unhappy users.
+
+#### Surface interesting traces [#surface-traces]
+
+Filter traces by score, for example `response_rating = 0`, to get a concrete list of traces to investigate. [Error analysis](/academy/monitoring/error-analysis) is a structured way to read and cluster them, and an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues) brings in more reviewers.
+
+#### Use it as input for structured improvement [#structured-improvement]
+
+Add the failing cases to a [dataset](/docs/evaluation/experiments/datasets), test a fix with an [experiment](/docs/evaluation/experiments/experiments-via-ui) before shipping, and turn a recurring failure mode into an [automated evaluator](/docs/evaluation/core-concepts#evaluation-methods) that scores every production trace from then on.
+
+**Much of this can also be handed to an agent**, see [Let an agent act on the feedback](#agents) below.
+
+</Steps>
+
+## Let an agent act on the feedback [#agents]
+
+Langfuse is built for agent access through the [Langfuse CLI](/docs/api-and-data-platform/features/cli), the [Agent Skill](/docs/api-and-data-platform/features/agent-skill), and the [MCP Server](/docs/api-and-data-platform/features/mcp-server): point one at your project and it can interpret and act on the behavior that gets surfaced via user feedback. An example task:
+
+```text
+Fetch the traces from the last 7 days with a response_rating score of 0.
+Read the comments and outputs, cluster the failures into categories,
+and propose a prompt change for the two biggest ones.
+```
+
+Some reading material as inspiration:
+
+- [Using Agent Skills to Automatically Improve your Prompts](/blog/2026-02-16-prompt-improvement-claude-skills)
+- [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering)
