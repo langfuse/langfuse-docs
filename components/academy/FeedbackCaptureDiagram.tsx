@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useId, useLayoutEffect, useRef } from "react";
 
 const INNER_W = 900;
 const INNER_H = 250;
@@ -53,6 +53,7 @@ export function FeedbackCaptureDiagram() {
   const row2Mid = ROW2_Y + BOX_H / 2;
   const attachX = LF_X + 26;
   const gapMid = (ROW1_Y + BOX_H + ROW2_Y) / 2;
+  const arrowId = `fc-arrow-${useId().replace(/:/g, "")}`;
 
   return (
     <figure
@@ -130,7 +131,7 @@ export function FeedbackCaptureDiagram() {
           >
             <defs>
               <marker
-                id="fc-arrow"
+                id={arrowId}
                 viewBox="0 0 10 10"
                 refX="8"
                 refY="5"
@@ -156,7 +157,7 @@ export function FeedbackCaptureDiagram() {
               y2={row1Mid}
               stroke="var(--line-cta)"
               strokeWidth="1.5"
-              markerEnd="url(#fc-arrow)"
+              markerEnd={`url(#${arrowId})`}
             />
             <line
               x1={BOX_W_APP + 6}
@@ -165,7 +166,7 @@ export function FeedbackCaptureDiagram() {
               y2={row2Mid}
               stroke="var(--line-cta)"
               strokeWidth="1.5"
-              markerEnd="url(#fc-arrow)"
+              markerEnd={`url(#${arrowId})`}
             />
             <line
               x1={attachX}
@@ -175,7 +176,7 @@ export function FeedbackCaptureDiagram() {
               stroke="var(--line-cta)"
               strokeWidth="1.5"
               strokeDasharray="4 4"
-              markerEnd="url(#fc-arrow)"
+              markerEnd={`url(#${arrowId})`}
             />
           </svg>
 

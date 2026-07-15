@@ -75,6 +75,7 @@ const langfuse = new LangfuseBrowserClient({
 // On a thumbs up / down click
 await langfuse.score({
   traceId, // returned by your backend with the response
+  id: `response_rating-${traceId}`, // stable id, so re-rating updates instead of duplicating
   name: "response_rating", // one descriptive name per signal
   value: 1, // 1 for thumbs up, 0 for thumbs down
   dataType: "BOOLEAN",
