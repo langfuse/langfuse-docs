@@ -46,7 +46,7 @@ Install the necessary packages:
 
 ```python
 # Install Langfuse
-%pip install --quiet "langfuse<3.0.0"
+%pip install --quiet langfuse --upgrade
 # Install dependencies for supervised intent classification
 %pip install --quiet pandas scikit-learn sentence-transformers torch transformers
 # Install dependencies for unsupervised intent recognition
@@ -61,10 +61,10 @@ import os
 
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 ```
 
 Select an embedding model from the Sentence Transformers library:
@@ -86,8 +86,8 @@ Initialize the Langfuse client:
 
 
 ```python
-from langfuse import Langfuse
-langfuse = Langfuse()
+from langfuse import get_client
+langfuse = get_client()
 ```
 
 #### Optional: Create dummy trace data
@@ -103,46 +103,21 @@ sample_utterances = [
     "Please revert to the beginning"
 ]
 
-# Create dummy traces
+# Create dummy traces. The input of the root observation becomes the trace input.
 for utterance in sample_utterances:
-    langfuse.trace(input={"message": utterance})
+    langfuse.start_observation(name="user-message", input={"message": utterance}).end()
+
+# Ensure all traces are sent to Langfuse before fetching them below
+langfuse.flush()
 ```
 
 Fetch data from your project
 
 
 ```python
-traces = langfuse.fetch_traces()
+traces = langfuse.api.trace.list()
 traces.data[0].dict()
 ```
-
-
-
-
-    {'id': '7e687860-55eb-47f0-b632-e568d5dfb57b',
-     'timestamp': datetime.datetime(2024, 10, 8, 7, 7, 51, 549000, tzinfo=datetime.timezone.utc),
-     'input': {'message': 'Please revert to the beginning'},
-     'tags': [],
-     'public': False,
-     'htmlPath': '/project/cm200q5d4003v6upt2pnmihyj/traces/7e687860-55eb-47f0-b632-e568d5dfb57b',
-     'latency': 0.0,
-     'totalCost': 0.0,
-     'observations': [],
-     'scores': [],
-     'bookmarked': False,
-     'projectId': 'cm200q5d4003v6upt2pnmihyj',
-     'createdAt': '2024-10-08T07:07:52.917Z',
-     'updatedAt': '2024-10-08T07:07:52.917Z',
-     'name': None,
-     'output': None,
-     'sessionId': None,
-     'release': None,
-     'version': None,
-     'userId': None,
-     'metadata': None,
-     'externalId': None}
-
-
 
 Construct a DataFrame for analysis:
 
@@ -382,14 +357,26 @@ traces_df
 
 ### 4. Tag traces with labels
 
+Observations in Langfuse are immutable, so tags cannot be edited after an observation was created. To tag an existing trace, add a small additional observation with the predicted intent as a tag to that trace. Tags across all observations of a trace are aggregated on the trace level.
+
+> **Note:** `trace_context.trace_id` must be a W3C-format trace ID (32 lowercase hex characters), which is what current Langfuse SDKs generate. Traces created with older SDK versions may use UUID-format IDs (with dashes) — the tagging observation cannot be attached to those. If you work with historical traces, filter for W3C-format IDs, e.g. `traces_df[traces_df["trace_id"].str.fullmatch(r"[0-9a-f]{32}")]`.
+
 
 ```python
+from langfuse import propagate_attributes
+
 # Note: This will add to existing tags, not add duplicate tags.
 for index, row in traces_df.iterrows():
     if row["confidence_score"] > 0.30:
         trace_id = row["trace_id"]
         label = row["label"]
-        langfuse.trace(id=trace_id, tags = [label])
+        with propagate_attributes(tags=[label]):
+            langfuse.start_observation(
+                name="intent-tag",
+                trace_context={"trace_id": trace_id},
+            ).end()
+
+langfuse.flush()
 ```
 
 _Tags in Langfuse_
@@ -408,18 +395,19 @@ import os
 
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your openai key
-os.environ["OPENAI_API_KEY"] = ""
+os.environ.setdefault("OPENAI_API_KEY", "")
 ```
 
 
 ```python
-langfuse = Langfuse()
+from langfuse import get_client
+langfuse = get_client()
 ```
 
 ### 1. Fetch traces from Langfuse
@@ -432,7 +420,7 @@ PAGES_TO_FETCH = 300
 
 traces = []
 for i in range(PAGES_TO_FETCH):
-    traces_page = langfuse.fetch_traces(page=i+1)
+    traces_page = langfuse.api.trace.list(page=i+1)
     traces.extend(traces_page.data)
 ```
 
@@ -628,17 +616,25 @@ cluster_traces_df[cluster_traces_df["cluster_label"]=="trace_in_langfuse"].messa
 
 
 ```python
-# add as labels back to langfuse
+# Add the cluster labels as tags back to the traces in Langfuse
+from langfuse import propagate_attributes
+
 for index, row in cluster_traces_df.iterrows():
     if row["cluster"] != -1:
         trace_id = row["trace_id"]
         label = row["cluster_label"]
-        langfuse.trace(id=trace_id, tags=[label])
+        with propagate_attributes(tags=[label]):
+            langfuse.start_observation(
+                name="intent-tag",
+                trace_context={"trace_id": trace_id},
+            ).end()
+
+langfuse.flush()
 ```
 
 ## Conclusion
 
-Each approach has its pros and cons.  
+Each approach has its pros and cons.\
 
 The supervised approach requires a lot of effort upfront to prepare a labelled dataset of an appropriate size.  During inference, it will only be able to assign labels that it was trained on, so it will not handle new cases well.  However, the inference will be consistent.
 

@@ -1,5 +1,5 @@
 ---
-title: Evaluation of Rag with Ragas
+title: "Evaluation of RAG pipelines with Ragas"
 description: Use RAGAS to evaluate your RAG pipelines traced with Langfuse to measure the quality of your retrieval and sythesis.
 category: Evaluation
 ---
@@ -20,13 +20,13 @@ Ragas is an open-source tool that can help you run [Model-Based Evaluation](http
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your openai key
-os.environ["OPENAI_API_KEY"] = "sk-proj-"
+os.environ.setdefault("OPENAI_API_KEY", "sk-proj-")
 ```
 
 
@@ -65,9 +65,9 @@ fiqa_eval
 ## The Metrics
 For going to measure the following aspects of a RAG system. These metric are from the Ragas library:
 
-1. [faithfulness](https://docs.ragas.io/en/latest/concepts/metrics/faithfulness.html): This measures the factual consistency of the generated answer against the given context.
-2. [answer_relevancy](https://docs.ragas.io/en/latest/concepts/metrics/answer_relevance.html): Answer Relevancy, focuses on assessing how pertinent the generated answer is to the given prompt.
-3. [context precision](https://docs.ragas.io/en/latest/concepts/metrics/context_precision.html): Context Precision is a metric that evaluates whether all of the ground-truth relevant items present in the contexts are ranked high. Ideally all the relevant chunks must appear at the top ranks. This metric is computed using the question and the contexts, with values ranging between 0 and 1, where higher scores indicate better precision.
+1. [faithfulness](https://docs.ragas.io/en/latest/concepts/metrics/available_metrics/faithfulness/): This measures the factual consistency of the generated answer against the given context.
+2. [answer_relevancy](https://docs.ragas.io/en/latest/concepts/metrics/available_metrics/answer_relevance/): Answer Relevancy, focuses on assessing how pertinent the generated answer is to the given prompt.
+3. [context precision](https://docs.ragas.io/en/latest/concepts/metrics/available_metrics/context_precision/): Context Precision is a metric that evaluates whether all of the ground-truth relevant items present in the contexts are ranked high. Ideally all the relevant chunks must appear at the top ranks. This metric is computed using the question and the contexts, with values ranging between 0 and 1, where higher scores indicate better precision.
 
 Checkout the [RAGAS documentation](https://docs.ragas.io/en/latest/concepts/metrics/index.html) to know more about these metrics and how they work.
 

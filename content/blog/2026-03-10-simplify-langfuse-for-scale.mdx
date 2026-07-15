@@ -16,7 +16,7 @@ import { Frame } from "@/components/Frame";
   authors={["steffenschmitz", "valeriy", "maxdeichmann"]}
 />
 
-Langfuse is building the open source LLM engineering platform to help teams build production-grade LLM applications faster.
+Langfuse is building the open source AI engineering platform to help teams build production-grade LLM applications faster.
 In December 2024, we released Langfuse [V3](https://langfuse.com/blog/2024-12-langfuse-v3-infrastructure-evolution) where we moved all tracing data from Postgres to ClickHouse.
 
 Today, we are sharing a major next step in product performance and making the product simpler: our shift to an observations-centric data model.
@@ -24,7 +24,7 @@ For you, this means every LLM call, tool execution, and agent step lives in one 
 
 For the rollout summary and upgrade guidance, see the [changelog post](/changelog/2026-03-10-simplify-for-scale).
 It is live in Beta on Langfuse Cloud across all regions.
-We are still working on the upgrade path for self-hosters and will eventually release it as a V4 major version.
+We are still working on the upgrade path for self-hosters and will eventually release it as a v4 major version.
 
 <Frame className="flex-1">
   ![Langfuse gets Faster](/images/blog/2026-03-10-simplify-langfuse-for-scale/og.jpg)
@@ -161,7 +161,7 @@ No join planner, no cross-table scan, just ClickHouse doing what it does well.
 
 ### Traces: From Entity to Correlation Identifier
 
-The most visible product change in V4 is the shift to an observations-first UI.
+The most visible product change in our next major version (v4) is the shift to an observations-first UI.
 For many users, the traces table was the primary entry point for debugging.
 We think that was a limitation of the old model rather than the right default.
 
@@ -178,13 +178,12 @@ Filters, sorting, and [saved views](/changelog/2025-05-20-save-table-views) repl
 The trace waterfall view isn't going away. It's still one click away from any observation row when you need the full picture of a request.
 But discovery starts with the flat table: filter by observation name, type, model, cost, latency, user, session, or error status to surface the operations that matter, then drill into the trace for context.
 
-
-## Road to V4: Implementation Hurdles
+## Road to v4: Implementation Hurdles
 
 ### Dual Write
 
 Before migrating the historic data, we had to write all incoming records into the old and new format.
-The problem: live ingestion, where trace metadata can arrive *after* the first observation of a trace.
+The problem: live ingestion, where trace metadata can arrive _after_ the first observation of a trace.
 We needed strong write consistency across all observation records, server-side, without breaking existing SDK contracts.
 
 We evaluated per-event delays, shared metadata stores (Cassandra, DynamoDB), and S3-based reprocessing.
@@ -273,9 +272,9 @@ Most customers who switched saw immediate performance improvements.
 
 The V1 APIs aren't going away. But V2 is the path forward.
 
-## V4 Open Source and Self-Hosters
+## Release for Open Source and Self-Hosters
 
 Today's launch is for Langfuse Cloud.
 We know self-hosters are waiting \- some of our largest projects are on self-hosted infrastructure.
 We're working through automated migration tooling and validating the dual-write setup for open-source ClickHouse deployments.
-Migration guides and a V4 release for self-hosters will follow in the coming weeks.
+Migration guides and release for self-hosters will follow in the coming weeks.

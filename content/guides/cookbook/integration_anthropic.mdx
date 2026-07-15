@@ -17,10 +17,10 @@ This notebook demonstrates **two** different ways to use Anthropic models with L
 1. **OpenTelemetry Instrumentation:** Use the [`AnthropicInstrumentor`](https://pypi.org/project/opentelemetry-instrumentation-anthropic/) library to wrap Anthropic SDK calls and send OpenTelemetry spans to Langfuse.
 2. **OpenAI SDK:** Use Anthropic's OpenAI-compatible endpoints via [Langfuse's OpenAI SDK wrapper](https://langfuse.com/integrations/model-providers/openai-py).
 
-> **What is Anthropic?**  
+> **What is Anthropic?**\
 Anthropic is an AI safety company that develops Claude, a family of large language models designed to be helpful, harmless, and honest. Claude models excel at complex reasoning, analysis, and creative tasks.
 
-> **What is Langfuse?**  
+> **What is Langfuse?**\
 [Langfuse](https://langfuse.com) is an open source platform for LLM observability and monitoring. It helps you trace and monitor your AI applications by capturing metadata, prompt details, token usage, latency, and more.
 
 
@@ -46,12 +46,12 @@ Also set your Anthropic API ([Anthropic Console](https://console.anthropic.com/)
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
-os.environ["ANTHROPIC_API_KEY"] = "sk-ant-..."  # Your Anthropic API key
+os.environ.setdefault("ANTHROPIC_API_KEY", "sk-ant-...")  # Your Anthropic API key
 ```
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
@@ -94,7 +94,7 @@ client = Anthropic(
 
 # Make the API call to Anthropic
 message = client.messages.create(
-    model="claude-opus-4-20250514",
+    model="claude-haiku-4-5",
     max_tokens=1000,
     temperature=1,
     system="You are a world-class poet. Respond only with short poems.",
@@ -128,7 +128,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="claude-opus-4-20250514", # Anthropic model name
+    model="claude-haiku-4-5", # Anthropic model name
     messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "Who are you?"}
@@ -148,6 +148,7 @@ You can also view the trace in Langfuse here:
 
 - [Approach 1: OpenTelemetry Instrumentation](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/308aca9bc430ad872d474fc545889ee2?timestamp=2025-07-25T07:35:01.172Z&display=details)
 - [Approach 2: OpenAI SDK](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/8e8da1b2c15036ed9c25b37c604f2d29?timestamp=2025-07-22T16:05:47.602Z&display=details)
+
 </Steps>
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";

@@ -90,7 +90,7 @@ Filtering can break trace trees when intermediate or parent spans are dropped wh
 
 ### `update_current_trace()` decomposed into 3 methods
 
-In the new model, correlating attributes (`user_id`, `session_id`, `metadata`, `tags`) must live on every observation, not just the trace. This is why they move to `propagate_attributes()` — a context manager that automatically applies these attributes to the current and all child observations created within its scope.
+In the new model, correlating attributes (`user_id`, `session_id`, `metadata`, `tags`, and request-scoped `environment`) must live on every observation, not just the trace. This is why they move to `propagate_attributes()` — a context manager that automatically applies these attributes to the current and all child observations created within its scope.
 
 **v3:**
 
@@ -125,6 +125,7 @@ def my_function():
         version="1.0",
         metadata={"key": "value"},
         tags=["tag1"],
+        environment="staging",
     ):
         result = call_llm("hello")
 
@@ -137,15 +138,15 @@ def my_function():
 
 **Key differences:**
 
-| Attribute                                  | v3                                      | v4                                                   |
-| ------------------------------------------ | --------------------------------------- | ---------------------------------------------------- |
-| `name`                                     | `update_current_trace(name=...)`        | `propagate_attributes(trace_name=...)`               |
-| `user_id`, `session_id`, `tags`, `version` | `update_current_trace(...)`             | `propagate_attributes(...)`                          |
-| `metadata`                                 | `update_current_trace(metadata=any)`    | `propagate_attributes(metadata=dict[str,str])`       |
-| `input`, `output`                          | `update_current_trace(...)`             | `set_current_trace_io(...)` (deprecated)             |
-| `public`                                   | `update_current_trace(public=True)`     | `set_current_trace_as_public()`                      |
-| `release`                                  | `update_current_trace(release=...)`     | Removed — use `LANGFUSE_RELEASE` env var             |
-| `environment`                              | `update_current_trace(environment=...)` | Removed — use `LANGFUSE_TRACING_ENVIRONMENT` env var |
+| Attribute                                  | v3                                      | v4                                                                                                                                                                             |
+| ------------------------------------------ | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`                                     | `update_current_trace(name=...)`        | `propagate_attributes(trace_name=...)`                                                                                                                                         |
+| `user_id`, `session_id`, `tags`, `version` | `update_current_trace(...)`             | `propagate_attributes(...)`                                                                                                                                                    |
+| `metadata`                                 | `update_current_trace(metadata=any)`    | `propagate_attributes(metadata=dict[str,str])`                                                                                                                                 |
+| `input`, `output`                          | `update_current_trace(...)`             | `set_current_trace_io(...)` (deprecated)                                                                                                                                       |
+| `public`                                   | `update_current_trace(public=True)`     | `set_current_trace_as_public()`                                                                                                                                                |
+| `release`                                  | `update_current_trace(release=...)`     | Removed — use `LANGFUSE_RELEASE` env var                                                                                                                                       |
+| `environment`                              | `update_current_trace(environment=...)` | Use `LANGFUSE_TRACING_ENVIRONMENT` or `Langfuse(environment=...)` for process-level environments. Use `propagate_attributes(environment=...)` for request-scoped environments. |
 
 <Callout type="warning">
   `set_current_trace_io()` is deprecated and exists only for backward
@@ -198,14 +199,14 @@ with langfuse.start_as_current_observation(as_type="span", name="my-operation") 
 In v4, high-performance Public API resources are now the defaults. The v2
 aliases were removed.
 
-| v3 / transitional name                    | v4 name                               |
-| ----------------------------------------- | ------------------------------------- |
-| `langfuse.api.observations_v_2`           | `langfuse.api.observations`           |
-| `langfuse.api.score_v_2`                  | `langfuse.api.scores`                |
-| `langfuse.api.metrics_v_2`                | `langfuse.api.metrics`                |
-| `langfuse.api.observations` (legacy v1)   | `langfuse.api.legacy.observations_v1` |
-| `langfuse.api.score` (legacy v1)          | `langfuse.api.legacy.score_v1`        |
-| `langfuse.api.metrics` (legacy v1)        | `langfuse.api.legacy.metrics_v1`      |
+| v3 / transitional name                  | v4 name                               |
+| --------------------------------------- | ------------------------------------- |
+| `langfuse.api.observations_v_2`         | `langfuse.api.observations`           |
+| `langfuse.api.score_v_2`                | `langfuse.api.scores`                 |
+| `langfuse.api.metrics_v_2`              | `langfuse.api.metrics`                |
+| `langfuse.api.observations` (legacy v1) | `langfuse.api.legacy.observations_v1` |
+| `langfuse.api.score` (legacy v1)        | `langfuse.api.legacy.score_v1`        |
+| `langfuse.api.metrics` (legacy v1)      | `langfuse.api.legacy.metrics_v1`      |
 
 If you still need legacy v1 behavior, switch to the corresponding
 `langfuse.api.legacy.<resource>_v1` namespace.

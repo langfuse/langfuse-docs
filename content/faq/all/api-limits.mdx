@@ -24,17 +24,21 @@ While the [Langfuse API](/docs/api) is extremely open and flexible, there are so
 
 ### Rate Limits
 
-Rate limits are applied per-organization.
+Rate limits are applied per-organization. Metrics API v2 uses a separate rate-limit bucket from the legacy Metrics API.
 
-| Resource                                                                                                | Hobby              | Core               | Pro/Team/Enterprise |
-| ------------------------------------------------------------------------------------------------------- | ------------------ | ------------------ | ------------------- |
-| **Tracing**. Batched `/ingestion` and `/otel` endpoints used by SDKs and integrations to ingest traces. | 1,000&nbsp;req/min | 4,000&nbsp;req/min | 20,000&nbsp;req/min |
-| **Legacy Tracing**. Legacy ingestion endpoints.                                                         | 100&nbsp;req/min   | 400&nbsp;req/min   | 400&nbsp;req/min    |
-| **Trace Data Deletion**. Public API endpoints used to delete trace data, including traces, observations, and scores. | 50&nbsp;req/day    | 200&nbsp;req/day   | 1,000&nbsp;req/day  |
-| **Prompts**. GET APIs used to fetch prompts for use in applications.                                    | No limit           | No limit           | No limit            |
-| **Metrics**. GET APIs used to fetch analytics data, e.g. [metrics api](/docs/analytics/metrics-api).    | 100&nbsp;req/day   | 200&nbsp;req/day   | 2000&nbsp;req/day   |
-| **Datasets**. APIs used to work with [datasets and experiments](/docs/datasets).                        | 100&nbsp;req/min   | 200&nbsp;req/min   | 1,000&nbsp;req/min  |
-| **API**. All other APIs.                                                                                | 30&nbsp;req/min    | 100&nbsp;req/min   | 1,000&nbsp;req/min  |
+| Resource                                                                                                                | Hobby              | Core               | Pro/Team/Enterprise |
+| ----------------------------------------------------------------------------------------------------------------------- | ------------------ | ------------------ | ------------------- |
+| **Tracing**. Batched `/ingestion` and `/otel` endpoints used by SDKs and integrations to ingest traces.                 | 1,000&nbsp;req/min | 4,000&nbsp;req/min | 20,000&nbsp;req/min |
+| **Legacy Tracing**. Legacy ingestion endpoints.                                                                         | 100&nbsp;req/min   | 400&nbsp;req/min   | 400&nbsp;req/min    |
+| **Trace Data Deletion**. Public API endpoints used to delete trace data, including traces, observations, and scores.    | 50&nbsp;req/day    | 200&nbsp;req/day   | 1,000&nbsp;req/day  |
+| **Prompts**. GET APIs used to fetch prompts for use in applications.                                                    | No limit           | No limit           | No limit            |
+| **[Metrics API v2](/docs/metrics/features/metrics-api#v2)**. `GET /api/public/v2/metrics` for aggregate analytics data. | 100&nbsp;req/day   | 100&nbsp;req/hour  | 500&nbsp;req/hour   |
+| **[Legacy Metrics API](/docs/metrics/features/metrics-api#v1)**. Legacy `GET /api/public/metrics` endpoint.             | 100&nbsp;req/day   | 2,000&nbsp;req/day | 2,000&nbsp;req/day  |
+| **Datasets**. APIs used to work with [datasets and experiments](/docs/datasets).                                        | 100&nbsp;req/min   | 200&nbsp;req/min   | 1,000&nbsp;req/min  |
+| **Legacy read APIs**. Older trace, observation, and session read endpoints, listed below.                               | 15&nbsp;req/min    | 30&nbsp;req/min    | 100&nbsp;req/min    |
+| **API**. All other APIs.                                                                                                | 30&nbsp;req/min    | 100&nbsp;req/min   | 1,000&nbsp;req/min  |
+
+The legacy read APIs are `GET /api/public/traces`, `GET /api/public/traces/{traceId}`, `GET /api/public/observations`, `GET /api/public/observations/{observationId}`, `GET /api/public/sessions`, and `GET /api/public/sessions/{sessionId}`.
 
 On the Enterprise plan, you can request custom rate limits by contacting [support](/support).
 

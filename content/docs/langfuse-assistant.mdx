@@ -1,0 +1,84 @@
+---
+title: Langfuse Assistant
+description: Ask questions about your Langfuse project data in plain language from inside the Langfuse Cloud UI.
+sidebarTitle: Assistant
+---
+
+# Langfuse Assistant
+
+<AvailabilityBanner
+  availability={{
+    hobby: "public-beta",
+    core: "public-beta",
+    pro: "public-beta",
+    enterprise: "public-beta",
+    selfHosted: "not-available",
+  }}
+/>
+
+The Langfuse Assistant is an in-product assistant for exploring your Langfuse project data and taking selected actions in Langfuse with your approval. You can ask questions about traces, observations, sessions, metrics, and Langfuse workflows in plain language.
+
+<Video src="https://static.langfuse.com/docs-videos/in-app-agent.mp4" />
+
+## What you can ask [#what-you-can-ask]
+
+Ask the Assistant questions such as:
+
+- "Which traces had the highest latency yesterday?"
+- "Show me failed generations in the last hour."
+- "What's my token spend this week, broken down by model?"
+- "How do I set up an evaluator?"
+- "Open the traces table filtered to errors from today."
+- "Create a dataset for regression examples."
+- "Set up a numeric score config for friendliness."
+
+## How it works [#how-it-works]
+
+The Assistant uses the Langfuse MCP server and additional tools to answer questions, inspect project data, and help you take actions in Langfuse.
+
+The Assistant can:
+
+- Query traces, observations, sessions, and metrics through Langfuse tools
+- Search Langfuse documentation
+- Propose links to Langfuse pages such as traces, sessions, dashboards, prompts, datasets, experiments, evals, monitors, and project settings
+- Help with selected actions such as creating or updating Langfuse resources
+
+The Assistant is designed to be safe by default:
+
+- If a request would change data or configuration, the Assistant pauses and asks you to explicitly approve that specific action first.
+
+The Assistant can only use actions that your account already has access to in the current project. Approval adds a second safety check, but it does not grant any extra permissions.
+
+The Assistant is also aware of your current context in the Langfuse UI, such as the current trace, observation, session, or dashboard, as well as user metadata such as your name, browser language, and timezone. This context is used to provide more relevant answers and propose actions.
+
+## Data privacy and security [#data-privacy-and-security]
+
+The Assistant follows the same data handling model as other Langfuse AI features. See [AI Features](/security/ai-features) for the canonical security and privacy details.
+
+Key points:
+
+- Model requests are handled in the same AWS region as your [Langfuse data region](/security/data-regions).
+- Assistant access is scoped to the authenticated user and current project.
+- Actions that can change data require explicit approval and remain limited to the permissions of the signed-in user.
+- AI feature tracing for product and service improvement can be enabled or disabled separately by organization admins and owners.
+
+## Conversation history [#conversation-history]
+
+Assistant conversations are saved per user and project so you can return to previous conversations.
+
+## Feedback [#feedback]
+
+You can submit thumbs-up or thumbs-down feedback on Assistant responses. If AI feature tracing is enabled, feedback may be used for product and service improvement.
+
+You can also share your thoughts in our [feedback discussion](https://github.com/orgs/langfuse/discussions/14196).
+
+## Limitations [#limitations]
+
+The Assistant is a beta feature. It may misunderstand a question or return incomplete results. Verify important answers and review action details carefully before acting on them.
+
+## Related resources [#related-resources]
+
+- [AI Feature Security](/security/ai-features)
+- [Langfuse MCP Server](/docs/api-and-data-platform/features/mcp-server)
+- [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill)
+- [Langfuse Assistant announcement](/changelog/2026-06-19-langfuse-assistant-public-beta)

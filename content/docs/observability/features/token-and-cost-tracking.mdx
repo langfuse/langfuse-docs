@@ -18,7 +18,7 @@ Langfuse tracks the usage and costs of your LLM generations and provides breakdo
 
 Usage types can be arbitrary strings and differ by LLM provider. At the highest level, they can be simply `input` and `output`. As LLMs grow more sophisticated, additional usage types are necessary, such as `cached_tokens`, `audio_tokens`, `image_tokens`.
 
-In the UI, Langfuse summarizes all usage types that include the string `input` as input usage types, similarly`output` as output usage types. If no `total` usage type is ingested, Langfuse sums up all usage type units to a total.
+In the UI, Langfuse summarizes all usage types that include the string `input` as input usage types, similarly `output` as output usage types. If no `total` usage type is ingested, Langfuse sums up all usage type units to a total. For this to work, usage types must be [mutually exclusive buckets](#usage-details-contract).
 
 Both usage details and cost details can be either
 
@@ -80,7 +80,7 @@ def anthropic_completion(**kwargs):
           "input": response.usage.input_tokens,
           "output": response.usage.output_tokens,
           "cache_read_input_tokens": response.usage.cache_read_input_tokens
-          # "total": int,  # if not set, it is derived from input + cache_read_input_tokens + output
+          # "total": int,  # if not set, it is derived as the sum of all usage types
         },
       # Optionally, also ingest usd cost. Alternatively, you can infer it via a model definition in Langfuse.
       cost_details={
@@ -88,7 +88,7 @@ def anthropic_completion(**kwargs):
           "input": 1,
           "cache_read_input_tokens": 0.5,
           "output": 1,
-          # "total": float, # if not set, it is derived from input + cache_read_input_tokens + output
+          # "total": float, # if not set, it is derived as the sum of all usage types
       }
   )
 
@@ -135,7 +135,7 @@ with langfuse.start_as_current_observation(
             "input": response.usage.input_tokens,
             "output": response.usage.output_tokens,
             "cache_read_input_tokens": response.usage.cache_read_input_tokens
-            # "total": int,  # if not set, it is derived from input + cache_read_input_tokens + output
+            # "total": int,  # if not set, it is derived as the sum of all usage types
         },
         # Optionally, also ingest usd cost. Alternatively, you can infer it via a model definition in Langfuse.
         cost_details={
@@ -143,7 +143,7 @@ with langfuse.start_as_current_observation(
             "input": 1,
             "cache_read_input_tokens": 0.5,
             "output": 1,
-            # "total": float, # if not set, it is derived from input + cache_read_input_tokens + output
+            # "total": float, # if not set, it is derived as the sum of all usage types
         }
     )
 ```
@@ -183,7 +183,7 @@ await startActiveObservation("context-manager", async (span) => {
       output: 5,
       cache_read_input_tokens: 2,
       some_other_token_count: 10,
-      total: 17, // optional, it is derived from input + cache_read_input_tokens + output
+      total: 27, // optional, it is derived as the sum of all usage types
     },
     costDetails: {
       // If you don't want the costs to be calculated based on model definitions, you can pass the costDetails manually.
@@ -214,7 +214,7 @@ async function fetchData(source: string) {
         output: 5,
         cache_read_input_tokens: 2,
         some_other_token_count: 10,
-        total: 17, // optional, it is derived from input + cache_read_input_tokens + output
+        total: 27, // optional, it is derived as the sum of all usage types
       },
       costDetails: {
         // If you don't want the costs to be calculated based on model definitions, you can pass the costDetails manually.
@@ -264,7 +264,7 @@ generation.update({
     output: 5,
     cache_read_input_tokens: 2,
     some_other_token_count: 10,
-    total: 17, // optional, it is derived from input + cache_read_input_tokens + output
+    total: 27, // optional, it is derived as the sum of all usage types
   },
   costDetails: {
     // If you don't want the costs to be calculated based on model definitions, you can pass the costDetails manually.
@@ -290,9 +290,49 @@ You can also update the usage and cost via `generation.update()`.
 </Tab>
 </LangTabs>
 
-### Compatibility with OpenAI
+### Usage types are mutually exclusive buckets [#usage-details-contract]
 
-For increased compatibility with OpenAI, you can also use the OpenAI Usage schema. `prompt_tokens` will be mapped to `input`, `completion_tokens` will be mapped to `output`, and `total_tokens` will be mapped to `total`. The keys nested in `prompt_tokens_details` will be flattened with an `input_` prefix and `completion_tokens_details` will be flattened with an `output_` prefix.
+Langfuse treats every key in `usage_details` as a separate, non-overlapping bucket: each token must be counted in exactly one key. In particular, `input` must exclude tokens that are already counted in another `input_*` key (such as `input_cached_tokens` or `input_cache_creation`), and `output` must exclude tokens counted in another `output_*` key (such as `output_reasoning_tokens`). The one exception is `total`: it is not a bucket itself but spans all buckets and equals their sum.
+
+Langfuse relies on this contract in three places:
+
+- **Display**: the UI sums all usage types containing `input` to show total input usage, and all usage types containing `output` to show total output usage.
+- **Cost inference**: each usage type is matched exactly against the per-usage-type prices of the model definition, and the resulting costs are summed.
+- **Total**: if no `total` is ingested, Langfuse derives it as the sum of all buckets.
+
+If buckets overlap — for example, if `input` still contains the tokens reported in `input_cached_tokens` — those tokens are displayed twice, and the inferred cost double-counts them: the cost shown in Langfuse overstates what your provider actually charged. Directly ingested `cost_details` are used verbatim and are not affected.
+
+Many LLM providers report **inclusive** counts. For example, OpenAI's `prompt_tokens` (Chat Completions API) and `input_tokens` (Responses API) include cached tokens. Anthropic's `input_tokens`, in contrast, already excludes cache reads and cache writes. Inclusive counts must be converted into exclusive buckets before they are stored, by subtracting the detail counts from the top-level count.
+
+For example, an OpenAI-style response with 17,903 prompt tokens (of which 17,817 were cache hits) and 188 completion tokens:
+
+| Provider reports (inclusive)                      | Stored in Langfuse (exclusive) |
+| ------------------------------------------------- | ------------------------------ |
+| `prompt_tokens: 17903`                            | `input: 86`                    |
+| `prompt_tokens_details: { cached_tokens: 17817 }` | `input_cached_tokens: 17817`   |
+| `completion_tokens: 188`                          | `output: 188`                  |
+| `total_tokens: 18091`                             | `total: 18091`                 |
+
+#### When Langfuse converts for you [#usage-details-normalization]
+
+Whether you need to do this conversion yourself depends on how the usage data reaches Langfuse:
+
+- **Langfuse integrations and SDK wrappers** (e.g., the [OpenAI wrapper](/integrations/model-providers/openai-py)) capture usage from the provider response and convert it for you.
+- **OpenTelemetry usage attributes** (`gen_ai.usage.*` as defined by the OpenTelemetry GenAI semantic conventions, plus the `llm.token_count.*` namespace used by some instrumentation libraries): treated as inclusive. Langfuse normalizes them during ingestion by subtracting cache read and cache creation tokens from `input`.
+- **OpenAI usage schema** passed as usage details (nested `prompt_tokens_details` / `completion_tokens_details`, see [Compatibility with OpenAI](#openai-usage-schema)): recognized and normalized during ingestion. The match is strict: if the object contains any key beyond the OpenAI usage fields, it is treated as flat keys instead.
+- **Langfuse-style flat keys** passed as usage details via the SDKs or the API (`usage_details` / `usageDetails`, OTel attribute `langfuse.observation.usage_details`): stored verbatim, no normalization is applied. **Values must already be exclusive.**
+
+If you write your own instrumentation that sets usage details with flat keys, check how your provider reports usage and subtract cached or detail token counts from the top-level `input`/`output` counts — exactly once — before passing them to Langfuse.
+
+### Compatibility with OpenAI [#openai-usage-schema]
+
+For increased compatibility with OpenAI, you can also use the OpenAI Usage schema. `prompt_tokens` will be mapped to `input`, `completion_tokens` will be mapped to `output`, and `total_tokens` will be mapped to `total`. The keys nested in `prompt_tokens_details` will be flattened with an `input_` prefix and `completion_tokens_details` will be flattened with an `output_` prefix. Since OpenAI reports these detail counts inclusively, Langfuse subtracts them from `input` and `output` respectively, so that the stored buckets are [mutually exclusive](#usage-details-contract).
+
+<Callout type="warning">
+
+Schema recognition is strict: the usage object must contain **only** the OpenAI usage fields shown below. If it includes any additional key (for example, some gateways append a `cost` field), it is not recognized as OpenAI-style usage and is instead stored verbatim as [flat keys](#usage-details-contract) — without the mapping and without the subtraction. This failure mode is silent, so strip extra keys before ingesting.
+
+</Callout>
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
@@ -331,23 +371,29 @@ with langfuse.start_as_current_observation(
 <Tab>
 
 ```ts
-const generation = langfuse.generation({
-  // ...
-  usage: {
-    // usage
-    prompt_tokens: integer,
-    completion_tokens: integer,
-    total_tokens: integer,
-    prompt_tokens_details: {
-      cached_tokens: integer,
-      audio_tokens: integer,
-    },
-    completion_tokens_details: {
-      reasoning_tokens: integer,
+import { startObservation } from "@langfuse/tracing";
+
+const generation = startObservation(
+  "openai-style-generation",
+  {
+    model: "gpt-4o",
+    usageDetails: {
+      // usage (OpenAI-style schema)
+      prompt_tokens: 10,
+      completion_tokens: 25,
+      total_tokens: 35,
+      prompt_tokens_details: {
+        cached_tokens: 5,
+        audio_tokens: 2,
+      },
+      completion_tokens_details: {
+        reasoning_tokens: 15,
+      },
     },
   },
-  // ...
-});
+  { asType: "generation" },
+);
+generation.end();
 ```
 
 </Tab>
@@ -390,6 +436,7 @@ Langfuse supports **pricing tiers** for models, enabling accurate cost calculati
 #### How tier matching works
 
 Each model can have multiple pricing tiers, each with:
+
 - **Name**: A descriptive name (e.g., "Standard", "Large Context")
 - **Priority**: Evaluation order (0 is reserved for default tier)
 - **Conditions**: Rules that determine when the tier applies
@@ -398,13 +445,13 @@ Each model can have multiple pricing tiers, each with:
 When calculating cost, Langfuse evaluates tiers in priority order (excluding the default tier). The first tier whose conditions are satisfied is used. If no conditional tier matches, the default tier is applied.
 
 **Condition format:**
+
 - `usageDetailPattern`: A regex pattern to match usage detail keys (e.g., `input` matches `input_tokens`, `input_cached_tokens`, etc.)
 - `operator`: Comparison operator (`gt`, `gte`, `lt`, `lte`, `eq`, `neq`)
 - `value`: The threshold value to compare against
 - `caseSensitive`: Whether the pattern matching is case-sensitive (default: false)
 
 For example, the "Large Context" tier for Claude Sonnet 4.5 has a condition: `input > 200000`, meaning it applies when the sum of all usage details matching the pattern "input" exceeds 200,000 tokens.
-
 
 ### Custom model definitions [#custom-model-definitions]
 

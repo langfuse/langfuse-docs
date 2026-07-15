@@ -2,17 +2,22 @@ import Link from "next/link";
 import { Banner as FumadocsBanner } from "fumadocs-ui/components/banner";
 
 export function Banner() {
-  return (
-    <FumadocsBanner
-      id="fd-top-banner"
-      className="bg-black text-white [&_a]:text-white [&_button]:text-white"
-    >
-      <Link href="/docs/v4">
-        <span className="sm:hidden">Langfuse just got faster →</span>
-        <span className="hidden sm:inline">
-          Langfuse just got faster – read about Fast Preview (v4) →
-        </span>
-      </Link>
-    </FumadocsBanner>
-  );
+  return null;
+  // return (
+  //   <FumadocsBanner
+  //     id="fd-top-banner-ai-engineer-world-fair-2026"
+  //     height="2rem"
+  //     className="bg-black text-white [&_a]:text-white [&_button]:text-white"
+  //   >
+  //     <Link href="https://www.ai.engineer/worldsfair">
+  //       <span className="sm:hidden">
+  //         Langfuse @ AI Engineer · Booth LG-39 →
+  //       </span>
+  //       <span className="hidden sm:inline">
+  //         Langfuse @ AI Engineer World Fair in San Francisco · Find us at booth
+  //         LG-39 →
+  //       </span>
+  //     </Link>
+  //   </FumadocsBanner>
+  // );
 }

@@ -22,7 +22,7 @@ Thank you to [@tkmamidi](https://github.com/tkmamidi) for the original implement
 
 ### What is Langfuse?
 
-[Langfuse](https://github.com/langfuse/langfuse) is an open-source LLM engineering platform that helps build reliable LLM applications via LLM Application Observability, Evaluation, Experiments, and Prompt Management. See [docs](https://langfuse.com/docs) for more details.
+[Langfuse](https://github.com/langfuse/langfuse) is an open-source AI engineering platform that helps build reliable LLM applications via LLM Application Observability, Evaluation, Experiments, and Prompt Management. See [docs](https://langfuse.com/docs) for more details.
 
 ### Walkthrough
 
@@ -51,42 +51,36 @@ This notebook will show you how to
 
 Install requirements. We use OpenAI for this simple example. We could use any model here.
 
-_**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
-
-
 ```python
-# pinning httpx as the latest version is not compatible with the OpenAI SDK at the time of creating this notebook
-%pip install gradio "langfuse<3.0.0" openai httpx==0.27.2
+%pip install gradio langfuse openai --upgrade
 ```
 
 Set credentials and initialize Langfuse SDK Client used to add user feedback later on.
 
 You can either create a free [Langfuse Cloud](https://cloud.langfuse.com) account or [self-host Langfuse](https://langfuse.com/self-hosting) in a couple of minutes.
 
-
 ```python
 import os
 
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your openai key
 # We use OpenAI for this demo, could easily change to other models
-os.environ["OPENAI_API_KEY"] = ""
+os.environ.setdefault("OPENAI_API_KEY", "")
 ```
-
 
 ```python
 import gradio as gr
 import json
 import uuid
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+langfuse = get_client()
 ```
 
 ## Implementation of Chat functions
@@ -96,7 +90,6 @@ langfuse = Langfuse()
 Each chat message belongs to a thread in the Gradio Chatbot which can be reset using `clear` ([reference](https://www.gradio.app/docs/gradio/chatbot#event-listeners)).
 
 We implement the following method that creates a `session_id` that is used globally and can be reset via the `set_new_session_id` method. This session_id will be used for [Langfuse Sessions](https://langfuse.com/docs/tracing-features/sessions).
-
 
 ```python
 session_id = None
@@ -110,18 +103,16 @@ set_new_session_id()
 
 ### Response handler
 
-When implementing the `respond` method, we use the Langfuse [`@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators) to automatically log each response to [Langfuse Tracing](https://langfuse.com/docs/tracing).
+When implementing the `respond` method, we use the Langfuse [`@observe()` decorator](https://langfuse.com/docs/observability/sdk/instrumentation#observe-wrapper) to automatically log each response to [Langfuse Tracing](https://langfuse.com/docs/tracing). The decorator creates the root observation of the trace; we set the chat input/output on it via `langfuse.update_current_span()` and group all messages of a thread into a [Langfuse Session](https://langfuse.com/docs/tracing-features/sessions) via `propagate_attributes(session_id=...)`.
 
-In addition we use the [openai integration](https://langfuse.com/integrations/model-providers/openai-py) as it simplifies instrumenting the LLM call to capture model parameters, token counts, and other metadata. Alternatively, we could use the integrations with [LangChain](https://langfuse.com/integrations/frameworks/langchain), [LlamaIndex](https://langfuse.com/integrations/frameworks/llamaindex), [other frameworks](https://langfuse.com/integrations), or instrument the call itself with the decorator ([example](https://langfuse.com/docs/sdk/python/decorators#log-any-llm-call)).
-
+In addition we use the [openai integration](https://langfuse.com/integrations/model-providers/openai-py) as it simplifies instrumenting the LLM call to capture model parameters, token counts, and other metadata. Alternatively, we could use the integrations with [LangChain](https://langfuse.com/integrations/frameworks/langchain), [LlamaIndex](https://langfuse.com/integrations/frameworks/llamaindex), [other frameworks](https://langfuse.com/integrations), or instrument the call itself with the SDK ([example](https://langfuse.com/docs/observability/sdk/instrumentation#custom)).
 
 ```python
-# Langfuse decorator
-from langfuse.decorators import observe
+# Langfuse decorator and attribute propagation
+from langfuse import observe, propagate_attributes
 # Optional: automated instrumentation via OpenAI SDK integration
 # See note above regarding alternative implementations
 from langfuse.openai import openai
-from langfuse import propagate_attributes
 
 # Global reference for the current trace_id which is used to later add user feedback
 current_trace_id = None
@@ -136,17 +127,15 @@ async def create_response(
     global current_trace_id
     current_trace_id = langfuse.get_current_trace_id()
 
-    # Add session_id to Langfuse Trace to enable session tracking
+    # Add session_id to all observations of this trace to enable session tracking
     global session_id
     with propagate_attributes(
         trace_name="gradio_demo_chat",
         session_id=session_id,
     ):
 
-        # Set trace input
-        langfuse.set_current_trace_io(
-            input=prompt,
-        )
+        # Set input on the root observation created by the decorator
+        langfuse.update_current_span(input=prompt)
 
         # Add prompt to history
         if not history:
@@ -163,10 +152,8 @@ async def create_response(
         )
         response["content"] = oai_response.choices[0].message.content or ""
 
-        # Customize trace ouput for better readability in Langfuse Sessions
-        langfuse.set_current_trace_io(
-            output=response["content"],
-        )
+        # Set output on the root observation for better readability in Langfuse Sessions
+        langfuse.update_current_span(output=response["content"])
 
         yield history + [response]
 
@@ -179,20 +166,18 @@ async def respond(prompt: str, history):
 
 We implement user [feedback tracking in Langfuse](https://langfuse.com/docs/scores/user-feedback) via the `like` event for the Gradio chatbot ([reference](https://www.gradio.app/docs/gradio/chatbot#event-listeners)). This methdod reuses the current trace id available in the global state of this application.
 
-
 ```python
 def handle_like(data: gr.LikeData):
     global current_trace_id
     if data.liked:
-        langfuse.score(value=1, name="user-feedback", trace_id=current_trace_id)
+        langfuse.create_score(value=1, name="user-feedback", trace_id=current_trace_id)
     else:
-        langfuse.score(value=0, name="user-feedback", trace_id=current_trace_id)
+        langfuse.create_score(value=0, name="user-feedback", trace_id=current_trace_id)
 ```
 
 ### Retries
 
 Allow you to retry a completion via the Gradio Chatbot `retry` event ([docs](https://www.gradio.app/docs/gradio/chatbot#event-listeners)). This is not specific to the integration with Langfuse.
-
 
 ```python
 async def handle_retry(history, retry_data: gr.RetryData):
@@ -205,7 +190,6 @@ async def handle_retry(history, retry_data: gr.RetryData):
 ## Run Gradio Chatbot
 
 After implementing all methods above, we can now put together the [Gradio Chatbot](https://www.gradio.app/docs/gradio/chatbot) and launch it. If run within Colab, you should see an embedded Chatbot interface.
-
 
 ```python
 with gr.Blocks() as demo:
@@ -238,7 +222,4 @@ Example trace, session, and user feedback in Langfuse ([public link](https://clo
 
 ![Gradio Traces, sessions and user feedback in Langfuse](https://static.langfuse.com/cookbooks/gradio/gradio-traces-in-langfuse.gif)
 
-
 If you have any questions or feedback, please join the [Langfuse Discord](https://langfuse.com/discord) or create a new thread on [GitHub Discussions](https://langfuse.com/gh-support).
-
-

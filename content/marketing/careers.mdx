@@ -1,38 +1,42 @@
 ---
 title: Careers at Langfuse
-description: "Join the Langfuse team to build the leading open-source LLM engineering platform"
+description: "Join the Langfuse team to build the leading open-source AI engineering platform"
+contentWidth: docs
 ---
 
 import { CTACard } from "@/components/CTACard";
 import { Button } from "@/components/ui/button";
-import { Header } from "@/components/Header";
-import { ImpactChart } from "@/components/customers/ImpactChart";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselPrevious,
-  CarouselNext,
-} from "@/components/ui/carousel";
-import { CredibilitySentence } from "@/components/credibilitySentence";
+import { Heading } from "@/components/ui/heading";
+import { TextHighlight } from "@/components/ui/text-highlight";
+import { Text } from "@/components/ui/text";
+import { CredibilitySentence } from "@/components/CredibilitySentence";
+import Image from "next/image";
 
-<div className="md:container">
-  <div className="flex flex-col items-center content-center text-center my-10 mb-20">
-    <Header
-      title="Building Langfuse"
-      description="Join the team building the leading open-source LLM engineering platform"
-      h="h1"
-    />
-    <Button asChild variant="default" size="lg">
-      <a
-        href="https://jobs.ashbyhq.com/langfuse"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        View Open Positions →
-      </a>
+<div className="not-prose flex flex-col gap-4 mb-8 items-center text-center">
+  <Heading as="h1" size="large">
+    <TextHighlight>Building Langfuse</TextHighlight>
+  </Heading>
+  <Text>Join the team building the leading open-source AI engineering platform</Text>
+  <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+    <Button href="https://jobs.ashbyhq.com/langfuse" target="_blank" rel="noopener">
+      View Open Positions →
+    </Button>
+    <Button href="/role-finder" variant="secondary">
+      AI Job Matcher
     </Button>
   </div>
+</div>
+
+<div className="not-prose relative mx-auto my-6 w-full max-w-xl overflow-hidden rounded border border-line-structure">
+  <Image
+    src="/images/people/team.jpg"
+    alt="Langfuse Team"
+    width={1106}
+    height={829}
+    quality={90}
+    className="h-auto w-full"
+    sizes="(max-width: 576px) 100vw, 576px"
+  />
 </div>
 
 While LLMs improve a lot, we don't see enough applications in production. Building these applications requires a new workflow of continuous monitoring and evaluation that we enable with Langfuse (learn more about [our mission](/handbook/chapters/mission)).
@@ -49,39 +53,20 @@ If complex technical problems & great developer experiences excite you, we'd lov
 
 ## Team
 
-<Carousel
-  className="w-full"
-  opts={{
-    loop: true,
-  }}
->
-  <CarouselContent>
-    <CarouselItem>
-      <Frame fullWidth>![Langfuse Team](/images/people/team.jpg)</Frame>
-    </CarouselItem>
-    <CarouselItem>
-      <Frame fullWidth>![Langfuse Office](/images/careers/office3.jpg)</Frame>
-    </CarouselItem>
-    <CarouselItem>
-      <Frame fullWidth>![Langfuse Team](/images/careers/team3.jpg)</Frame>
-    </CarouselItem>
-    <CarouselItem>
-      <Frame fullWidth>![Langfuse Team](/images/careers/team4.jpg)</Frame>
-    </CarouselItem>
-    <CarouselItem>
-      <Frame fullWidth>![Langfuse Team](/images/careers/team5.jpg)</Frame>
-    </CarouselItem>
-    <CarouselItem>
-      <Frame fullWidth>![Langfuse Team](/images/careers/team6.jpg)</Frame>
-    </CarouselItem>
-  </CarouselContent>
-  <CarouselPrevious />
-  <CarouselNext />
-</Carousel>
-
+import { PolaroidGallery } from "@/components/careers";
 import TeamMembers from "@/components-mdx/team-members.mdx";
 
 <TeamMembers />
+
+<div className="h-12" />
+
+<div className="text-center">
+
+## Team impressions: from start to now
+
+</div>
+
+<PolaroidGallery />
 
 <CTACard
   title="Curious to build with us?"
@@ -92,7 +77,7 @@ import TeamMembers from "@/components-mdx/team-members.mdx";
     <a
       href="https://jobs.ashbyhq.com/langfuse"
       target="_blank"
-      rel="noopener noreferrer"
+      rel="noopener"
     >
       See open roles
     </a>
@@ -129,7 +114,6 @@ import {
   Joystick,
   ListOrdered,
 } from "lucide-react";
-import Image from "next/image";
 
 <Cards num={3}>
   <Card
@@ -234,8 +218,6 @@ import PublicMetricsDashboard from "@/components-mdx/public-metrics-dashboard.md
 
 <PublicMetricsDashboard />
 
-## Work with us
-
 <CTACard
   title="Curious to build with us?"
   description="If you are excited about delivering exceptional open-source developer experiences alongside an insanely motivated team that ships, reach out!"
@@ -245,7 +227,7 @@ import PublicMetricsDashboard from "@/components-mdx/public-metrics-dashboard.md
     <a
       href="https://jobs.ashbyhq.com/langfuse"
       target="_blank"
-      rel="noopener noreferrer"
+      rel="noopener"
     >
       See open roles
     </a>

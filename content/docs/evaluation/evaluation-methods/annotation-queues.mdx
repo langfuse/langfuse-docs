@@ -5,7 +5,7 @@ description: Manage your annotation tasks with ease using our new workflow tooli
 
 # Annotation Queues [#annotation-queues]
 
-Annotation Queues are a manual [evaluation method](/docs/evaluation/core-concepts#evaluation-methods) which is build for domain experts to add [scores](/docs/evaluation/scores/overview) and comments to traces, observations or sessions.
+Annotation Queues are a manual [evaluation method](/docs/evaluation/core-concepts#evaluation-methods) which is built for domain experts to add [scores](/docs/evaluation/scores/overview) and comments to traces, observations or sessions.
 
 <Video
   src="https://static.langfuse.com/docs-videos/2025-12-19-annotation-queues.mp4"
@@ -43,7 +43,7 @@ Once you have created annotation queues, you can assign traces, observations or 
 <Tab>
 To add multiple traces, sessions or observations to a queue:
 
-1. Select Traces, Observations or Sessions via the checkboxes. 
+1. Select Traces, Observations or Sessions via the checkboxes.
 2. Click on the "Actions" dropdown menu
 3. Click on `Add to queue` to add the selected traces, sessions or observations to the queue.
 4. Select the queue you want to add the traces, sessions or observations to.
@@ -73,6 +73,22 @@ You will see an annotation task for each item in the queue.
 2. Click on `Complete + next` to move to the next annotation task or finish the queue
 
 </Steps>
+
+## Keyboard shortcuts [#keyboard-shortcuts]
+
+Processing a queue is fully keyboard-driven, so you can score items without reaching for the mouse. The shortcuts follow a navigate-then-edit model and are suppressed while you are typing in a text field or while a dialog or dropdown is open. Press `?` in the queue to open the in-app cheatsheet.
+
+| Key                    | Action                                                  |
+| ---------------------- | ------------------------------------------------------- |
+| `→` / `←`              | Next / previous item in the queue                       |
+| `↑` / `↓`              | Move between score fields (wraps at the ends)           |
+| `1`–`9`                | Select the Nth option on a categorical or boolean field |
+| `Enter`                | Commit the current value, or open a dropdown            |
+| `Esc`                  | Leave a text field and return to field navigation       |
+| `Cmd`/`Ctrl` + `Enter` | Complete the item and advance to the next               |
+| `?`                    | Open the keyboard shortcuts cheatsheet                  |
+
+Number badges appear on categorical options when a field is focused, and the `⌘↵` / `Ctrl↵` hint is shown on the **Mark Completed** button. The score-field shortcuts (`↑`/`↓`, `1`–`9`, `Enter`, `Esc`) also work in the inline **Annotate** drawer on trace, observation, and session pages; the queue navigation keys (`→`/`←`, `Cmd`/`Ctrl` + `Enter`) apply when processing a queue.
 
 ## Manage Annotation Queues via API
 

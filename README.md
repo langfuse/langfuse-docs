@@ -1,8 +1,14 @@
-![GitHub Banner](https://github.com/langfuse/langfuse-docs/assets/2834609/e403ad73-73fa-43f0-9925-292b05ce58de)
+<img width="2400" height="600" alt="hero-b" src="https://github.com/user-attachments/assets/382a0209-262d-42b0-8107-e0997c568d13" />
 
 # Langfuse Docs
 
 Repo for [langfuse.com](https://langfuse.com). Built with [Fumadocs](https://fumadocs.vercel.app/) and Next.js App Router.
+
+> ### 🧑‍💻 We're hiring
+>
+> Langfuse is growing fast (we doubled the team in the last 6 months) - since January 2026 we're part of ClickHouse, we're hiring engineering hybrid across the EU.
+> We hire engineers who love open source and great developer experiences.
+> **[See open roles →](https://langfuse.com/careers?utm_source=github&utm_medium=readme&utm_campaign=hiring&utm_content=langfuse-docs)**
 
 ## Local Development
 
@@ -13,6 +19,15 @@ To use Node 22 (e.g. with [nvm](https://github.com/nvm-sh/nvm)): `nvm install 22
 1. Optional: Create env based on [.env.template](./.env.template)
 2. Run `pnpm i` to install the dependencies.
 3. Run `pnpm dev` to start the development server on localhost:3333
+
+## Formatting
+
+This repo uses [Prettier](https://prettier.io/) for formatting supported source and content files, including Markdown and MDX.
+
+- Run `pnpm run format` to format files.
+- Run `pnpm run format:check` to check formatting in CI mode.
+
+Markdown prose wrapping is preserved and embedded-language formatting is disabled in `.prettierrc.json` so formatting does not change linebreak-sensitive Markdown rendering or fenced code snippet contents.
 
 ## Python cookbooks
 
@@ -50,6 +65,13 @@ To embed a "gif", actually embed a video and use `gifMode` (`<Video src="" gifMo
 - [Tailwind CSS](https://tailwindcss.com/)
 
 Interested in stack of Q&A docs chatbot? Checkout the [blog post](https://langfuse.com/blog/qa-chatbot-for-langfuse-docs) for implementation details (all open source)
+
+## Search & AI chat
+
+The docs site uses [Inkeep](https://inkeep.com/) for two separate embeds:
+
+- **Search** — Inkeep's embedded search widget.
+- **Ask AI chat** — Fumadocs' built-in Inkeep chat integration.
 
 ## LLM Features
 

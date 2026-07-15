@@ -3,6 +3,7 @@ source: ⚠️ Jupyter Notebook
 title: Observability & Tracing for Instructor
 sidebarTitle: Instructor
 logo: /images/integrations/instructor_icon.svg
+logoAppearance: dark
 description: Open-source observability for Instructor, a popular library to get structured (JSON, Pydantic) LLM outputs.
 category: Integrations
 ---
@@ -11,12 +12,11 @@ category: Integrations
 
 > **What is Instructor?** [Instructor](https://python.useinstructor.com/) ([GitHub](https://github.com/jxnl/instructor/)) is a popular library to get structured LLM outputs.Instructor makes it easy to reliably get structured data like JSON from Large Language Models (LLMs) like GPT-3.5, GPT-4, GPT-4-Vision, including open source models like Mistral/Mixtral from Together, Anyscale, Ollama, and llama-cpp-python. By leveraging various modes like Function Calling, Tool Calling and even constrained sampling modes like JSON mode, JSON Schema; Instructor stands out for its simplicity, transparency, and user-centric design. Under the hood, Instructor leverages Pydantic to do the heavy lifting, and provides a simple, easy-to-use API on top of it by helping you manage validation context, retries with Tenacity, and streaming Lists and Partial responses.
 
-> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source LLM engineering platform that helps teams trace API calls, monitor performance, and debug issues in their AI applications.
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source AI engineering platform that helps teams trace API calls, monitor performance, and debug issues in their LLM applications.
 
 This is a cookbook with examples of the Langfuse Integration for Python.
 
 ## Setup
-
 
 ```python
 %pip install langfuse openai pydantic instructor --upgrade
@@ -24,18 +24,17 @@ This is a cookbook with examples of the Langfuse Integration for Python.
 
 Initialize the Langfuse client with your API keys from the project settings in the Langfuse UI and add them to your environment.
 
-
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your openai key
-os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...")
 ```
 
 ## Get started
@@ -43,7 +42,6 @@ os.environ["OPENAI_API_KEY"] = "sk-proj-..."
 It is easy to use instructor with Langfuse. We use the [Langfuse OpenAI integration](https://langfuse.com/integrations/model-providers/openai-py) and simply patch the client with instructor. This works with both synchronous and asynchronous clients.
 
 ### Langfuse-Instructor integration with sychnronous OpenAI client
-
 
 ```python
 import instructor
@@ -76,7 +74,6 @@ print(weather_info.model_dump_json(indent=2))
 ```
 
 ### Langfuse-Instructor integration with asychnronous OpenAI client
-
 
 ```python
 import instructor
@@ -112,7 +109,6 @@ print(response.model_dump_json(indent=2))
 ## Example
 
 In this example, we first classify customer feedback into categories like `PRAISE`, `SUGGESTION`, `BUG` and `QUESTION`, and further scores the relevance of each feedback to the business on a scale of 0.0 to 1.0. In this case, we use the asynchronous OpenAI client `AsyncOpenAI` to classify and evaluate the feedback.
-
 
 ```python
 from typing import List, Tuple

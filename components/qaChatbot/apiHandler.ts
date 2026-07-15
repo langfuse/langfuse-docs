@@ -1,11 +1,6 @@
 import { openai, OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
-import {
-  streamText,
-  UIMessage,
-  experimental_createMCPClient as createMCPClient,
-  MCPTransport,
-  stepCountIs,
-} from "ai";
+import { streamText, UIMessage, stepCountIs } from "ai";
+import { createMCPClient } from "@ai-sdk/mcp";
 import {
   observe,
   propagateAttributes,
@@ -58,12 +53,21 @@ export const handler = async (req: Request) => {
         type: "chat",
       });
 
-      const reasoningSummary = prompt.config
-        .reasoningSummary as "low" | "medium" | "high" | undefined;
-      const textVerbosity = prompt.config
-        .textVerbosity as "low" | "medium" | "high" | undefined;
-      const reasoningEffort = prompt.config
-        .reasoningEffort as "low" | "medium" | "high" | undefined;
+      const reasoningSummary = prompt.config.reasoningSummary as
+        | "low"
+        | "medium"
+        | "high"
+        | undefined;
+      const textVerbosity = prompt.config.textVerbosity as
+        | "low"
+        | "medium"
+        | "high"
+        | undefined;
+      const reasoningEffort = prompt.config.reasoningEffort as
+        | "low"
+        | "medium"
+        | "high"
+        | undefined;
 
       const chatHistory = messages.map((msg) => ({
         role: msg.role,
@@ -83,7 +87,7 @@ export const handler = async (req: Request) => {
           return createMCPClient({
             transport: new StreamableHTTPClientTransport(mcpUrl, {
               sessionId: `qa-chatbot-${crypto.randomUUID()}`,
-            }) as MCPTransport,
+            }),
           });
         },
       );
@@ -100,7 +104,7 @@ export const handler = async (req: Request) => {
           } satisfies OpenAIResponsesProviderOptions,
         },
         messages: compiledPrompt,
-        tools,
+        tools: tools as Parameters<typeof streamText>[0]["tools"],
         stopWhen: stepCountIs(10),
         experimental_telemetry: {
           isEnabled: true,

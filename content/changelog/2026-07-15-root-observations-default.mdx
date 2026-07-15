@@ -1,0 +1,41 @@
+---
+date: 2026-07-15
+title: "Start with root observations"
+description: "Projects using app-root-aware Langfuse SDKs now open the observations table with a focused view of outer roots and application entry points."
+author: Nimar
+canonical: https://langfuse.com/faq/all/explore-observations-in-v4
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+The observations table now starts with `Is Root Observation = true` for projects ingesting with Python SDK v4.7.0+ or JS/TS SDK v5.4.0+. The focused view includes both outer roots and SDK-detected app roots, so you see the application entry points in your traces before their child operations.
+
+For example, you can now:
+
+- Scan the top-level requests and agent runs in a project without first filtering out every nested LLM, tool, or retrieval call.
+- Find the application input and output captured on a root observation, then open its trace to inspect the full execution.
+- Remove the visible root filter whenever you want to search or compare individual operations across traces.
+
+## Why app roots matter
+
+The latest major Langfuse SDKs filter some OpenTelemetry instrumentation and infrastructure spans by default. An excluded span can be the outer parent of the application observations you send to Langfuse. Because its exported children retain their parent span IDs, a filter that only checks for observations without a parent can return no application roots even though those observations were ingested.
+
+Python SDK v4.7.0+ and JS/TS SDK v5.4.0+ solve this by marking the highest exported application observation beneath a filtered parent as an **app root**. The `Is Root Observation` filter now matches an observation when it is either a top-level **outer root** or an SDK-marked **app root**.
+
+## A default that respects your view
+
+Langfuse applies the root filter only when you arrive at the observations table without table state of your own. Existing saved/default views and shared links with filters continue to open as configured. If you remove the automatic root filter, Langfuse remembers your choice. If the filter finds no roots while other observations exist, Langfuse removes it automatically so your data does not disappear behind an empty default.
+
+## Learn more
+
+<Cards num={1}>
+  <Card
+    title="Explore observations in Langfuse Fast Preview"
+    href="/faq/all/explore-observations-in-v4"
+    icon={<Book />}
+    arrow
+  />
+</Cards>

@@ -2,7 +2,7 @@ import { createMcpHandler } from "@vercel/mcp-adapter";
 import * as z from "zod/v3";
 import { PostHog } from "posthog-node";
 import { waitUntil } from "@vercel/functions";
-import { searchLangfuseDocsWithInkeep } from "@/lib/inkeep-search";
+import { searchLangfuseDocsWithInkeep } from "@/lib/inkeep-search-backend";
 
 const posthog = process.env.NEXT_PUBLIC_POSTHOG_KEY
   ? new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
@@ -15,7 +15,7 @@ const posthog = process.env.NEXT_PUBLIC_POSTHOG_KEY
 const trackMcpToolUsage = async (
   toolName: string,
   status: "success" | "error",
-  properties: Record<string, unknown> = {}
+  properties: Record<string, unknown> = {},
 ) => {
   return waitUntil(
     (async () => {
@@ -34,7 +34,7 @@ const trackMcpToolUsage = async (
       } catch (error) {
         console.error("Error tracking PostHog event:", error);
       }
-    })()
+    })(),
   );
 };
 
@@ -44,7 +44,11 @@ export const mcpHandler = createMcpHandler(
       "searchLangfuseDocs",
       "Semantic search (RAG) over the Langfuse documentation. Use this whenever the user asks a broader question that cannot be answered by a specific single page. Returns a concise answer synthesized from relevant docs. The raw provider response is included in _meta. Prefer this before guessing. If a specific page is needed call getLangfuseDocsPage first.",
       {
-        query: z.string().describe("The user's question in natural language. Include helpful context like SDK/language (e.g., Python v3, JS v4), self-hosted vs cloud, and short error messages (trim long stack traces). Keep under ~600 characters."),
+        query: z
+          .string()
+          .describe(
+            "The user's question in natural language. Include helpful context like SDK/language (e.g., Python v3, JS v4), self-hosted vs cloud, and short error messages (trim long stack traces). Keep under ~600 characters.",
+          ),
       },
       async ({ query }) => {
         try {
@@ -60,7 +64,8 @@ export const mcpHandler = createMcpHandler(
         } catch (error) {
           trackMcpToolUsage("searchLangfuseDocs", "error", {
             query,
-            error_message: error instanceof Error ? error.message : "Unknown error",
+            error_message:
+              error instanceof Error ? error.message : "Unknown error",
           });
           return {
             content: [
@@ -72,17 +77,17 @@ export const mcpHandler = createMcpHandler(
             isError: true,
           };
         }
-      }
+      },
     );
 
     (server as any).tool(
       "getLangfuseDocsPage",
-      "Fetch the raw Markdown for a single Langfuse docs page. Accepts a docs path (e.g., /docs/observability/overview) or a full https://langfuse.com URL. Returns the exact Markdown (may include front matter). Use when you need a specific page content (Integration, Features, API, etc.) or code samples. Prefer searchLangfuseDocs for broader questions where there is not one specific page about it.",
+      "Fetch the raw Markdown for a single Langfuse docs page. Accepts a docs path (e.g., /docs/observability/overview) or a full https://langfuse.com URL. Returns the exact Markdown (may include front matter). Use when you need a specific page content (Integration, Features, API, etc.) or code samples. Prefer searchLangfuseDocs for broader questions where there is not one specific page about it. Changelog pages (/changelog/...) are historical release notes: use them only to confirm that a feature exists or when it shipped, not as an implementation reference. Their code samples reflect the SDK/API at release time and may be outdated, so for implementation follow the current docs and the API/SDK reference instead.",
       {
         pathOrUrl: z
           .string()
           .describe(
-            "Docs path starting with \"/\" (e.g., /docs/observability/overview) or a full URL on https://langfuse.com. Do not include anchors (#...) or queries (?foo=bar) — they will be ignored."
+            'Docs path starting with "/" (e.g., /docs/observability/overview) or a full URL on https://langfuse.com. Do not include anchors (#...) or queries (?foo=bar) — they will be ignored.',
           ),
       },
       async ({ pathOrUrl }: { pathOrUrl: string }) => {
@@ -122,7 +127,8 @@ export const mcpHandler = createMcpHandler(
         } catch (error) {
           trackMcpToolUsage("getLangfuseDocsPage", "error", {
             input: pathOrUrl,
-            error_message: error instanceof Error ? error.message : "Unknown error",
+            error_message:
+              error instanceof Error ? error.message : "Unknown error",
           });
           return {
             content: [
@@ -134,7 +140,7 @@ export const mcpHandler = createMcpHandler(
             isError: true,
           };
         }
-      }
+      },
     );
 
     (server as any).tool(
@@ -156,7 +162,8 @@ export const mcpHandler = createMcpHandler(
           };
         } catch (error) {
           trackMcpToolUsage("getLangfuseOverview", "error", {
-            error_message: error instanceof Error ? error.message : "Unknown error",
+            error_message:
+              error instanceof Error ? error.message : "Unknown error",
           });
           return {
             content: [
@@ -168,9 +175,9 @@ export const mcpHandler = createMcpHandler(
             isError: true,
           };
         }
-      }
+      },
     );
   },
   {},
-  { basePath: "/api", maxDuration: 60, verboseLogs: true }
+  { basePath: "/api", maxDuration: 60, verboseLogs: true },
 );

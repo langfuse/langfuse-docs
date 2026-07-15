@@ -4,11 +4,12 @@ sidebarTitle: OpenAI Assistants API
 description: Use of Langfuse decorator to trace calls made to openai assistants
 category: Integrations
 logo: /images/integrations/openai_icon.svg
+logoAppearance: dark
 ---
 
 # Cookbook: Observability for OpenAI Assistants API with Langfuse
 
-This cookbook demonstrates how to use the Langfuse [`observe` decorator](https://langfuse.com/docs/sdk/python/decorators) to trace calls made to the [OpenAI Assistants API](https://platform.openai.com/docs/assistants/overview). It covers creating an assistant, running it on a thread, and observing the execution with [Langfuse tracing](https://langfuse.com/docs/tracing).
+This cookbook demonstrates how to use the Langfuse [`observe` decorator](https://langfuse.com/docs/observability/sdk/instrumentation#observe-wrapper) to trace calls made to the [OpenAI Assistants API](https://platform.openai.com/docs/assistants/overview). It covers creating an assistant, running it on a thread, and observing the execution with [Langfuse tracing](https://langfuse.com/docs/tracing).
 
 Note: The native [OpenAI SDK wrapper](https://langfuse.com/integrations/model-providers/openai-py) does not support tracing of the OpenAI assistants API, you need to instrument it via the decorator as shown in this notebook.
 
@@ -24,28 +25,24 @@ The Assistants API from OpenAI allows developers to build AI assistants that can
 
 Install the required packages:
 
-_**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
-
-
 ```python
-%pip install --upgrade openai "langfuse<3.0.0"
+%pip install --upgrade openai langfuse
 ```
 
 Set your environment:
-
 
 ```python
 import os
 
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your openai key
-os.environ["OPENAI_API_KEY"] = ""
+os.environ.setdefault("OPENAI_API_KEY", "")
 ```
 
 ## Step by step
@@ -54,7 +51,6 @@ os.environ["OPENAI_API_KEY"] = ""
 
 Use the `client.beta.assistants.create` method to create a new assistant. Alternatively you can also create the assistant via the OpenAI console:
 
-
 ```python
 from langfuse import observe
 from openai import OpenAI
@@ -62,13 +58,13 @@ from openai import OpenAI
 @observe()
 def create_assistant():
     client = OpenAI()
-    
+
     assistant = client.beta.assistants.create(
         name="Math Tutor",
         instructions="You are a personal math tutor. Answer questions briefly, in a sentence or less.",
         model="gpt-4"
     )
-    
+
     return assistant
 
 assistant = create_assistant()
@@ -81,12 +77,11 @@ print(f"Created assistant: {assistant.id}")
 
 Create a thread and run the assistant on it:
 
-
 ```python
 @observe()
 def run_assistant(assistant_id, user_input):
     client = OpenAI()
-    
+
     thread = client.beta.threads.create()
 
     client.beta.threads.messages.create(
@@ -95,12 +90,12 @@ def run_assistant(assistant_id, user_input):
     client.beta.threads.messages.create(
         thread_id=thread.id, role="user", content=user_input
     )
-    
+
     run = client.beta.threads.runs.create(
         thread_id=thread.id,
         assistant_id=assistant_id,
     )
-    
+
     return run, thread
 
 user_input = "I need to solve the equation `3x + 11 = 14`. Can you help me?"
@@ -114,20 +109,19 @@ print(f"Created run: {run.id}")
 
 Retrieve the assistant's response from the thread:
 
-
 ```python
 import json
-from langfuse import get_client
+from langfuse import observe, get_client
 langfuse = get_client()
 
 @observe()
 def get_response(thread_id, run_id):
     client = OpenAI()
-    
+
     messages = client.beta.threads.messages.list(thread_id=thread_id, order="asc")
     assistant_response = messages.data[-1].content[0].text.value
 
-    # get run for token counts
+    # get run for model and token counts
     run_log = client.beta.threads.runs.retrieve(
         thread_id=thread_id,
         run_id=run_id
@@ -138,20 +132,20 @@ def get_response(thread_id, run_id):
     )
     input_messages = [{"role": message.role, "content": message.content[0].text.value} for message in message_log.data[::-1][:-1]]
 
-    # log internal generation within the openai assistant as a separate child generation to langfuse
-    # get langfuse client used by the decorator, uses the low-level Python SDK
-    langfuse_client = langfuse.client_instance
-    # pass trace_id and current observation ids to the newly created child generation
-    langfuse_client.generation(
-        trace_id=langfuse.get_current_trace_id(),
-        parent_observation_id=langfuse.get_current_observation_id(),
-        model=run.model,
-        usage_details=run.usage,
+    # log the internal generation within the openai assistant as a nested generation
+    # it is automatically attached to the current trace and parent observation created by the decorator
+    with langfuse.start_as_current_observation(
+        as_type="generation",
+        name="assistant-run",
+        model=run_log.model,
         input=input_messages,
-        output=assistant_response
-    )
-    
-    return assistant_response, run
+    ) as generation:
+        generation.update(
+            output=assistant_response,
+            usage_details=run_log.usage.model_dump() if run_log.usage else None,
+        )
+
+    return assistant_response, run_log
 
 response = get_response(thread.id, run.id)
 print(f"Assistant response: {response[0]}")
@@ -160,7 +154,6 @@ print(f"Assistant response: {response[0]}")
 **[Public link of example trace](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/e0933ea5-6806-4eb7-aed8-a42d23c57096?observation=401fb816-22e5-45ac-a4c9-e437b120f2e7) of fetching the response**
 
 ## All in one trace
-
 
 ```python
 import time
@@ -173,7 +166,7 @@ def run_math_tutor(user_input):
     time.sleep(5) # notebook only, wait for the assistant to finish
 
     response = get_response(thread.id, run.id)
-    
+
     return response[0]
 
 user_input = "I need to solve the equation `3x + 11 = 14`. Can you help me?"

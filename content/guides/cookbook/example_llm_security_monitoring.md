@@ -1,5 +1,5 @@
 ---
-title: Example Llm Security Monitoring
+title: "Example: Monitoring LLM Security"
 description: Overview of common security problems facing LLM-based applications and how to use Langfuse to trace, prevent, and evaluate security risks.
 category: Security
 ---
@@ -21,7 +21,7 @@ Want to learn more? Check out our [documentation on LLM Security](https://langfu
 
 
 ```python
-%pip install llm-guard "langfuse<3.0.0" openai
+%pip install llm-guard langfuse openai --upgrade
 ```
 
 
@@ -30,13 +30,13 @@ import os
 
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your openai key
-os.environ["OPENAI_API_KEY"] = ""
+os.environ.setdefault("OPENAI_API_KEY", "")
 ```
 
 ## Examples
@@ -53,7 +53,7 @@ Without security measures, it is possible to generate stories for inappropriate 
 
 
 ```python
-from langfuse.decorators import observe
+from langfuse import observe
 from langfuse.openai import openai # OpenAI integration
 
 @observe()
@@ -82,14 +82,15 @@ The following example implements LLM Guard [Ban Topics](https://llm-guard.com/in
 
 LLM Guard uses the following [models](https://huggingface.co/collections/MoritzLaurer/zeroshot-classifiers-6548b4ff407bb19ff5c3ad6f) to perform efficient zero-shot classification. This allows users to specify any topic they want to detect.
 
-The example below adds the detected "violence" score to the trace in Langfuse. You can see the trace for this interaction, and analytics for these banned topics scores, in the Langfuse dashboard.
+The example below adds the detected "violence" score to the current observation in Langfuse. You can see the trace for this interaction, and analytics for these banned topics scores, in the Langfuse dashboard.
 
 
 ```python
-from langfuse.decorators import observe, langfuse_context
+from langfuse import observe, get_client
 from langfuse.openai import openai # OpenAI integration
 from llm_guard.input_scanners import BanTopics
 
+langfuse = get_client()
 violence_scanner = BanTopics(topics=["violence"], threshold=0.5)
 
 @observe()
@@ -97,7 +98,7 @@ def story(topic: str):
 
     sanitized_prompt, is_valid, risk_score = violence_scanner.scan(topic)
 
-    langfuse_context.score_current_observation(
+    langfuse.score_current_span(
         name="input-violence",
         value=risk_score
     )
@@ -159,7 +160,7 @@ vault = Vault()
 from llm_guard.input_scanners import Anonymize
 from llm_guard.input_scanners.anonymize_helpers import BERT_LARGE_NER_CONF
 from langfuse.openai import openai # OpenAI integration
-from langfuse.decorators import observe, langfuse_context
+from langfuse import observe
 from llm_guard.output_scanners import Deanonymize
 
 prompt = "So, Ms. Hyman, you should feel free to turn your video on and commence your testimony. Ms. Hyman: Thank you, Your Honor. Good morning. Thank you for the opportunity to address this Committee. My name is Kelly Hyman and I am the founder and managing partner of the Hyman Law Firm, P.A. I’ve been licensed to practice law over 19 years, with the last 10 years focusing on representing plaintiffs in mass torts and class actions. I have represented clients in regards to class actions involving data breaches and privacy violations against some of the largest tech companies, including Facebook, Inc., and Google, LLC. Additionally, I have represented clients in mass tort litigation, hundreds of claimants in individual actions filed in federal court involving ransvaginal mesh and bladder slings. I speak to you"
@@ -210,11 +211,13 @@ You can stack multiple scanners if you want to filter for multiple security risk
 
 
 ```python
-from langfuse.decorators import observe, langfuse_context
+from langfuse import observe, get_client
 from langfuse.openai import openai # OpenAI integration
 
 from llm_guard import scan_prompt
 from llm_guard.input_scanners import PromptInjection, TokenLimit, Toxicity
+
+langfuse = get_client()
 vault = Vault()
 input_scanners = [Toxicity(), TokenLimit(), PromptInjection()]
 
@@ -223,10 +226,12 @@ def query(input: str):
 
     sanitized_prompt, results_valid, results_score = scan_prompt(input_scanners, input)
 
-    langfuse_context.score_current_observation(
-        name="input-score",
-        value=results_score
-    )
+    # Add one score per scanner to the current observation
+    for scanner_name, score in results_score.items():
+        langfuse.score_current_span(
+            name=f"input-{scanner_name.lower()}",
+            value=score
+        )
 
     if any(not result for result in results_valid.values()):
       print(f"Prompt \"{input}\" is not valid, scores: {results_score}")
@@ -316,7 +321,7 @@ We use the LLM Guard [Prompt Injection scanner](https://llm-guard.com/input_scan
 ```python
 from llm_guard.input_scanners import PromptInjection
 from llm_guard.input_scanners.prompt_injection import MatchType
-from langfuse.decorators import observe, langfuse_context
+from langfuse import observe
 from langfuse.openai import openai # OpenAI integration
 
 @observe()
@@ -353,7 +358,7 @@ As you can see, LLM Guard fails to catch the injected Grandma Trick prompt. Let'
 
 
 ```python
-os.environ["LAKERA_GUARD_API_KEY"] = ""
+os.environ.setdefault("LAKERA_GUARD_API_KEY", "")
 ```
 
 

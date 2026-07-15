@@ -4,28 +4,10 @@ import { useState, useMemo } from "react";
 import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 import { Loader } from "@/components/ai-elements/loader";
-import {
-  Suggestions,
-  Suggestion,
-} from "@/components/ai-elements/suggestion";
-import { LangfuseWeb } from "langfuse";
+import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId";
+import { scoreDemoFeedback } from "@/components/demoLangfuseBrowserClients";
 import { SendIcon, ThumbsUpIcon, ThumbsDownIcon } from "lucide-react";
-
-const eulangfuseWebClient = new LangfuseWeb({
-  baseUrl: process.env.NEXT_PUBLIC_EU_LANGFUSE_BASE_URL,
-  publicKey: process.env.NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY,
-});
-
-const usLangfuseWebClient = new LangfuseWeb({
-  publicKey: process.env.NEXT_PUBLIC_US_LANGFUSE_PUBLIC_KEY,
-  baseUrl: process.env.NEXT_PUBLIC_US_LANGFUSE_BASE_URL,
-});
-
-const jpLangfuseWebClient = new LangfuseWeb({
-  publicKey: process.env.NEXT_PUBLIC_JP_LANGFUSE_PUBLIC_KEY,
-  baseUrl: process.env.NEXT_PUBLIC_JP_LANGFUSE_BASE_URL,
-});
 
 type SentimentResult = {
   sentiment: "positive" | "negative" | "neutral";
@@ -121,21 +103,19 @@ export const SentimentClassifier = ({
   const handleFeedback = (value: number) => {
     if (!result) return;
     setFeedback(value);
-    for (const client of [eulangfuseWebClient, usLangfuseWebClient, jpLangfuseWebClient]) {
-      client.score({
-        traceId: result.traceId,
-        id: `user-feedback-${result.traceId}`,
-        name: "user-feedback",
-        value,
-      });
-    }
+    scoreDemoFeedback({
+      traceId: result.traceId,
+      id: `user-feedback-${result.traceId}`,
+      name: "user-feedback",
+      value,
+    });
   };
 
   const colors = result ? SENTIMENT_COLORS[result.result.sentiment] : null;
 
   return (
     <div className={cn("h-[62vh]", className)} {...props}>
-      <div className="flex flex-col h-full border border-border/40 rounded-2xl bg-gradient-to-br from-background via-background/95 to-muted/20 backdrop-blur-md shadow-xl shadow-black/10 dark:shadow-black/30 p-5 transition-all duration-300 hover:shadow-2xl hover:shadow-black/15 dark:hover:shadow-black/40 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-br before:from-primary/5 before:via-transparent before:to-transparent before:pointer-events-none">
+      <div className="flex flex-col h-full rounded-[2px] border border-line-structure bg-surface-bg corner-box-corners p-5 relative overflow-hidden">
         <div className="flex-1 overflow-y-auto relative z-10 space-y-4">
           {/* Input area */}
           <div className="space-y-3">
@@ -143,13 +123,13 @@ export const SentimentClassifier = ({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Enter text to analyze sentiment..."
-              className="w-full h-32 p-3 rounded-lg border border-border bg-background text-foreground text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full h-32 p-3 rounded-[2px] border border-line-structure bg-surface-bg text-text-secondary text-sm shadow-sm resize-none focus:outline-none focus:ring-1 focus:ring-line-cta"
             />
             <div className="flex items-center gap-3">
               <button
                 onClick={() => handleSubmit()}
                 disabled={!input.trim() || loading}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-[2px] border border-line-structure bg-text-primary text-surface-bg text-sm font-medium shadow-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
               >
                 {loading ? (
                   <Loader size={14} />
@@ -204,8 +184,10 @@ export const SentimentClassifier = ({
           {result && colors && (
             <div className="space-y-4">
               {/* Analyzed text */}
-              <div className="p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">Analyzed: </span>
+              <div className="p-3 rounded-[2px] border border-line-structure bg-[#403d391a] dark:bg-[#b8b6a01a] text-sm text-text-secondary">
+                <span className="font-medium text-text-primary">
+                  Analyzed:{" "}
+                </span>
                 {result.inputText}
               </div>
 
@@ -213,9 +195,9 @@ export const SentimentClassifier = ({
               <div className="flex items-center gap-4">
                 <span
                   className={cn(
-                    "inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold capitalize",
+                    "inline-flex items-center px-3 py-1 rounded-[2px] text-sm font-semibold capitalize",
                     colors.bg,
-                    colors.text
+                    colors.text,
                   )}
                 >
                   {result.result.sentiment}
@@ -227,7 +209,10 @@ export const SentimentClassifier = ({
                   </div>
                   <div className="h-2 rounded-full bg-muted overflow-hidden">
                     <div
-                      className={cn("h-full rounded-full transition-all duration-500", colors.bar)}
+                      className={cn(
+                        "h-full rounded-full transition-all duration-500",
+                        colors.bar,
+                      )}
                       style={{ width: `${result.result.confidence * 100}%` }}
                     />
                   </div>
@@ -249,7 +234,7 @@ export const SentimentClassifier = ({
                     {result.result.keyPhrases.map((phrase, i) => (
                       <span
                         key={i}
-                        className="inline-flex items-center px-2 py-0.5 rounded-md bg-muted text-xs text-muted-foreground"
+                        className="inline-flex items-center px-2 py-0.5 rounded-[2px] border border-line-structure bg-[#403d391a] dark:bg-[#b8b6a01a] text-xs text-text-secondary"
                       >
                         {phrase}
                       </span>
@@ -266,10 +251,10 @@ export const SentimentClassifier = ({
                 <button
                   onClick={() => handleFeedback(1)}
                   className={cn(
-                    "p-1.5 rounded-md transition-colors",
+                    "p-1.5 rounded-[2px] transition-colors",
                     feedback === 1
-                      ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      ? "text-green-700 dark:text-green-400"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
                   )}
                 >
                   <ThumbsUpIcon className="size-3.5" />
@@ -277,10 +262,10 @@ export const SentimentClassifier = ({
                 <button
                   onClick={() => handleFeedback(0)}
                   className={cn(
-                    "p-1.5 rounded-md transition-colors",
+                    "p-1.5 rounded-[2px] transition-colors",
                     feedback === 0
-                      ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      ? "text-red-700 dark:text-red-400"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
                   )}
                 >
                   <ThumbsDownIcon className="size-3.5" />
@@ -291,7 +276,8 @@ export const SentimentClassifier = ({
         </div>
 
         <p className="mt-4 text-xs text-muted-foreground text-center relative z-10 italic">
-          Powered by GPT-4o-mini. All interactions are traced in the public example project.
+          Powered by GPT-4o-mini. All interactions are traced in the public
+          example project.
         </p>
       </div>
     </div>

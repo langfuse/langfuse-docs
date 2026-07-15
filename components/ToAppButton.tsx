@@ -1,27 +1,54 @@
 "use client";
 
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Plus, Loader2 } from "lucide-react";
 import { Button } from "./ui/button";
-import { useState, useEffect } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { cn } from "@/lib/utils";
 import {
   cloudRegions,
-  continentHostMapping,
+  cloudRegionSelectorOrder,
   type CloudRegionKey,
 } from "@/lib/cloud-regions";
 import { useCloudRegionSignIn } from "@/lib/use-cloud-region-sign-in";
+import { isCloudAppHref } from "@/lib/google-ads";
+import { reportLaunchAppConversion } from "@/lib/ad-conversions";
 
-const DEFAULT_BUTTON_TEXT = {
-  signedIn: "To App",
-  signUp: "Sign Up",
-  dropdown: "App",
-} as const;
+const REGION_SHORTCUTS: Partial<Record<CloudRegionKey, string>> = {
+  us: "U",
+  hipaa: "H",
+  eu: "E",
+  jp: "J",
+};
+
+function isEditableElement(el: Element | null): boolean {
+  if (!el) return false;
+  const tag = el.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return true;
+  if (
+    el instanceof HTMLElement &&
+    (el.isContentEditable || el.closest("[contenteditable='true']"))
+  )
+    return true;
+  return false;
+}
+
+function isEditableTarget(target: EventTarget | null): boolean {
+  if (target instanceof HTMLElement && isEditableElement(target)) return true;
+  let active: Element | null = document.activeElement;
+  while (active?.shadowRoot?.activeElement) {
+    active = active.shadowRoot.activeElement;
+  }
+  if (active && isEditableElement(active)) return true;
+  return false;
+}
 
 interface ToAppButtonProps {
   signedInText?: string;
@@ -30,113 +57,170 @@ interface ToAppButtonProps {
 }
 
 export const ToAppButton = ({
-  signedInText = DEFAULT_BUTTON_TEXT.signedIn,
-  signUpText = DEFAULT_BUTTON_TEXT.signUp,
-  dropdownText = DEFAULT_BUTTON_TEXT.dropdown,
+  signedInText = "Launch App",
+  signUpText = "Launch App",
+  dropdownText = "Launch App",
 }: ToAppButtonProps = {}) => {
   const signedInRegions = useCloudRegionSignIn();
-  const [continentCode, setContinentCode] = useState<string | null>(null);
-  const isUsingDefaultText =
-    signedInText === DEFAULT_BUTTON_TEXT.signedIn &&
-    signUpText === DEFAULT_BUTTON_TEXT.signUp &&
-    dropdownText === DEFAULT_BUTTON_TEXT.dropdown;
-
-  useEffect(() => {
-    if (process.env.NODE_ENV === "production") {
-      const abortController = new AbortController();
-
-      fetch("/api/get-continent-code", {
-        signal: abortController.signal,
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.continentCode && continentHostMapping[data.continentCode]) {
-            setContinentCode(data.continentCode);
-          }
-        })
-        .catch((error) => {
-          // Only update state if the error is not from aborting
-          if (error.name !== "AbortError") {
-            setContinentCode(null);
-          }
-        });
-
-      return () => {
-        abortController.abort();
-      };
-    }
-  }, []);
 
   const signedInCount = Object.values(signedInRegions).filter(Boolean).length;
 
+  const signedInRegion =
+    signedInCount === 1
+      ? Object.entries(cloudRegions).find(
+          ([key]) => signedInRegions[key as CloudRegionKey],
+        )
+      : null;
+
   if (signedInCount > 1) {
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            size="xs"
-            className={cn(
-              "whitespace-nowrap",
-              isUsingDefaultText && "w-[45px] sm:w-[70px]"
-            )}
-          >
-            <span className="sm:hidden">{dropdownText}</span>
-            <span className="hidden sm:inline">{signedInText}</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          {Object.entries(cloudRegions).map(
-            ([key, region]) =>
-              signedInRegions[key as CloudRegionKey] && (
-                <DropdownMenuItem asChild key={key}>
-                  <Link href={region.url}>{region.label}</Link>
-                </DropdownMenuItem>
-              )
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <MultiRegionButton
+        signedInRegions={signedInRegions}
+        dropdownText={dropdownText}
+      />
     );
-  } else if (signedInCount === 1) {
-    const signedInRegion = Object.entries(cloudRegions).find(
-      ([key]) => signedInRegions[key as CloudRegionKey]
-    );
-
+  } else if (signedInCount === 1 && signedInRegion) {
     return (
-      <Button
-        size="xs"
-        asChild
-        className={cn(
-          "whitespace-nowrap",
-          isUsingDefaultText && "w-[45px] sm:w-[70px]"
-        )}
-      >
-        <Link href={signedInRegion![1].url}>
-          <span className="sm:hidden">{dropdownText}</span>
-          <span className="hidden sm:inline">{signedInText}</span>
-        </Link>
-      </Button>
+      <NavigatingButton href={signedInRegion[1].url} label={signedInText} />
     );
   } else {
-    return (
-      <Button
-        size="xs"
-        asChild
-        className={cn(
-          "whitespace-nowrap",
-          isUsingDefaultText && "w-[45px] sm:w-[70px]"
-        )}
-      >
-        <Link
-          href={
-            continentCode
-              ? continentHostMapping[continentCode]
-              : cloudRegions.eu.url
-          }
-        >
-          <span className="sm:hidden">{dropdownText}</span>
-          <span className="hidden sm:inline">{signUpText}</span>
-        </Link>
-      </Button>
-    );
+    return <NavigatingButton href="/cloud" label={signUpText} />;
   }
 };
+
+function NavigatingButton({ href, label }: { href: string; label: string }) {
+  const [navigating, setNavigating] = useState(false);
+  const router = useRouter();
+  const isExternal = href.startsWith("http");
+
+  const navigate = useCallback(() => {
+    setNavigating(true);
+    if (isExternal) {
+      window.location.href = href;
+    } else {
+      router.push(href);
+    }
+  }, [href, isExternal, router]);
+
+  return (
+    <Button
+      variant="primary"
+      size="small"
+      shortcutKey={navigating ? undefined : "L"}
+      icon={
+        navigating ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : undefined
+      }
+      iconPosition="end"
+      href={href}
+      {...(isCloudAppHref(href) ? { "data-launch-app-cta": "" } : {})}
+      onClick={(e) => {
+        e.preventDefault();
+        navigate();
+      }}
+      className="whitespace-nowrap"
+    >
+      {label}
+    </Button>
+  );
+}
+
+function MultiRegionButton({
+  signedInRegions,
+  dropdownText,
+}: {
+  signedInRegions: Record<CloudRegionKey, boolean>;
+  dropdownText: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  const visibleRegions = useMemo(
+    () =>
+      cloudRegionSelectorOrder
+        .filter((key) => signedInRegions[key])
+        .map((key) => ({ key, ...cloudRegions[key] })),
+    [signedInRegions],
+  );
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (isEditableTarget(e.target)) return;
+
+      if (!open) {
+        if (e.key.toLowerCase() === "l") {
+          e.preventDefault();
+          setOpen(true);
+        }
+        return;
+      }
+
+      const match = visibleRegions.find(
+        ({ key }) =>
+          REGION_SHORTCUTS[key]?.toLowerCase() === e.key.toLowerCase(),
+      );
+      if (match) {
+        e.preventDefault();
+        reportLaunchAppConversion();
+        window.location.href = match.url;
+        setOpen(false);
+      }
+    },
+    [open, visibleRegions],
+  );
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
+
+  return (
+    <DropdownMenu open={open} onOpenChange={setOpen} modal>
+      <DropdownMenuTrigger asChild>
+        <Button
+          ref={triggerRef}
+          variant="primary"
+          size="small"
+          shortcutKey="L"
+          className="whitespace-nowrap"
+        >
+          {dropdownText}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        onCloseAutoFocus={(e) => {
+          e.preventDefault();
+          triggerRef.current?.focus();
+        }}
+      >
+        {visibleRegions.map(({ key, label, url }) => (
+          <DropdownMenuItem asChild key={key}>
+            <Link href={url} data-launch-app-cta="">
+              {label}
+              {REGION_SHORTCUTS[key] && (
+                <kbd
+                  className="ml-auto flex justify-center items-center not-italic shrink-0 w-[20px] h-[20px] rounded-px font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] p-0 border border-[rgba(64,61,57,0.20)] dark:border-[rgba(184,182,160,0.30)] bg-[rgba(64,61,57,0.10)] dark:bg-[rgba(184,182,160,0.12)]"
+                  aria-hidden
+                >
+                  {REGION_SHORTCUTS[key]}
+                </kbd>
+              )}
+            </Link>
+          </DropdownMenuItem>
+        ))}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link
+            href="/cloud"
+            className="flex items-center gap-1.5 text-muted-foreground"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Add region
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}

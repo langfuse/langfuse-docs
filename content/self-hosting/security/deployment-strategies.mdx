@@ -17,8 +17,6 @@ In most cases, a single Langfuse deployment is the best approach. It leverages R
 
 A single Langfuse deployment is the standard and recommended setup. It centralizes management, scales efficiently across projects and environments, and takes full advantage of Langfuse's built-in RBAC features.
 
-<div className="border rounded p-4 pt-0 bg-card mt-6">
-
 ```mermaid
 graph TB
     subgraph AppVPC1["App/Env VPC 1"]
@@ -41,8 +39,6 @@ graph TB
     User["User/API/SDK"]
     LF -- Public Hostname and SSO --> User
 ```
-
-</div>
 
 ### When to Use
 
@@ -67,8 +63,6 @@ In this approach, you run a separate Langfuse deployment for each service, proje
 
 Langfuse can be deployed via infrastructure as code (IaC) tools like Terraform or Helm, making this approach more manageable.
 
-<div className="border rounded p-4 pt-0 bg-card mt-6">
-
 ```mermaid
 graph TB
     subgraph AppVPC1["App/Env VPC 1"]
@@ -92,8 +86,6 @@ graph TB
     LF2 -- VPN --> User
     LFn -- VPN --> User
 ```
-
-</div>
 
 ### When to Use
 

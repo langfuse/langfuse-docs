@@ -24,9 +24,7 @@ export function GitHubReadme({ url }: { url: string }) {
 
   if (error) return <p>Error loading README content.</p>;
   if (!content)
-    return (
-      <p className="text-sm text-muted-foreground">Loading README…</p>
-    );
+    return <p className="text-sm text-muted-foreground">Loading README…</p>;
 
   return <RenderedReadmeContent content={content} />;
 }

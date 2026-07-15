@@ -1,5 +1,5 @@
 ---
-title: Otel Integration Openllmetry
+title: "OpenLLMetry Integration via OpenTelemetry"
 description: Example cookbook for the OpenLLMetry Langfuse integration using OpenTelemetry.
 category: Integrations
 ---
@@ -21,7 +21,7 @@ Begin by installing the necessary Python packages. In this example, we need the 
 
 ## Step 2: Configure Environment Variables
 
-Before sending any requests, configure your environment with the necessary credentials and endpoints. Here, we set up Langfuse authentication by combining your public and secret keys into a Base64-encoded token. We also specify the Langfuse endpoint based on your desired geographical region (EU or US) and provide your OpenAI API key.
+Before sending any requests, configure your environment with the necessary credentials and endpoints. Here, we set up Langfuse authentication by combining your public and secret keys into a Base64-encoded token. We also specify the Langfuse endpoint based on your desired [data region](https://langfuse.com/security/data-regions) (EU, US, Japan, or HIPAA) and provide your OpenAI API key.
 
 
 ```python
@@ -29,10 +29,10 @@ import os
 import base64
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Build Basic Auth header.
 LANGFUSE_AUTH = base64.b64encode(
@@ -44,7 +44,7 @@ os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = os.environ.get("LANGFUSE_BASE_URL") 
 os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = f"Authorization=Basic {LANGFUSE_AUTH}"
 
 # Your openai key
-os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...")
 ```
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
