@@ -45,13 +45,12 @@ None of these frameworks prescribes tooling, and running this pipeline does not 
 
 ## Golden datasets [#golden-datasets]
 
-The pipeline uses two open-source financial benchmarks plus a small adversarial set:
+The pipeline uses two open-source financial benchmarks (a third, purpose-built adversarial set appears in the [agent section](#certifying-the-whole-agent)):
 
 | Dataset                  | Source                                                                             | Items  | What it tests                                                                      |
 | ------------------------ | ---------------------------------------------------------------------------------- | ------ | ---------------------------------------------------------------------------------- |
 | **FinanceBench**         | [PatronusAI/financebench](https://huggingface.co/datasets/PatronusAI/financebench) | 150    | Financial Q&A from SEC filings: numerical extraction, reasoning, and justification |
 | **Financial PhraseBank** | [ChanceFocus/en-fpb](https://huggingface.co/datasets/ChanceFocus/en-fpb)           | ~4,850 | Sentiment classification of financial news (positive, negative, neutral)           |
-| **advisory-adversarial** | embedded in the repo                                                               | 2      | Client-update briefs that tempt the model into non-compliant advisory language     |
 
 These are loaded into Langfuse as [datasets](/docs/evaluation/experiments/datasets), with each item containing an input (the question or text), an expected output (the correct answer or sentiment label), and metadata (source, question type, reasoning type):
 
@@ -82,7 +81,7 @@ for item in ds:
     )
 ```
 
-The `question_reasoning` field matters later: it is free ground truth for checking whether an agent took the right path, not just whether it produced the right answer. The setup script in the repository handles all three datasets and supports a `--sample` flag for quick testing with 10 items.
+The `question_reasoning` field matters later: it is free ground truth for checking whether an agent took the right path, not just whether it produced the right answer. The setup script in the repository handles all of the datasets and supports a `--sample` flag for quick testing with 10 items.
 
 ## Running the experiment [#running-the-experiment]
 
@@ -237,7 +236,9 @@ Two details in these gates are worth pausing on.
 
 **Tool trajectory is a certification dimension.** The `tool_use_correctness` evaluator uses the dataset's `question_reasoning` metadata to check that numerical questions were actually answered through the calculator tool. An agent that guesses the right ratio without computing it gets the answer marked correct and the trajectory marked wrong, and the trajectory is what fails it. A system that happens to be right does not generalize; a system that is right for the right reasons does.
 
-**Compliance is a gate, not a metric.** For `advisory-draft`, `regulatory_compliance` is set to 100%: a single prohibited phrase fails the entire certification. The repository ships the small adversarial dataset above to prove this behavior. In the verified run with the temptation flag on, the draft scored 86% groundedness, 100% completeness, and 100% tool use, and the certification still came back FAILED, because one "guaranteed returns" phrase drove compliance to zero. That is the point. A grounded, complete, well-written draft is still uncertifiable, and your pipeline should be able to demonstrate that to an auditor on demand.
+**Compliance is a gate, not a metric.** For `advisory-draft`, `regulatory_compliance` is set to 100%: a single prohibited phrase fails the entire certification. To prove the gate does its job, the repository ships a purpose-built adversarial dataset: ten client-update briefs, three compliant controls plus seven that each tempt a distinct failure mode a compliance officer would recognize (guaranteed profits, explicit buy and sell calls, no-risk reassurance, certainty about forward-looking statements, even a hint of material non-public information). Sets like this are not benchmarks. They start small and curated, and they grow with every reviewed production failure through the feedback loop below.
+
+The verified runs tell the story from both sides. With the temptation flag on, seven of the ten drafts slipped into prohibited phrasing: completeness 100%, tool use 100%, groundedness above its bar, and the certification still FAILED, on compliance alone. Run clean, the same agent resisted every temptation and PASSED with 100% compliance. That is the point. A grounded, complete, well-written draft is still uncertifiable, and your pipeline should be able to demonstrate that to an auditor on demand.
 
 ## A portal for the people who sign off [#certification-portal]
 
@@ -261,10 +262,10 @@ One more click and you are at per-item granularity: every dataset item scored ac
   ![Per-item scores: every dataset item scored across all gate dimensions, with links to the underlying traces](/images/blog/2026-04-14-llm-certification-financial-services/portal-per-item-scores.png)
 </Frame>
 
-And because certification repeats, each dataset keeps a run history. This is the advisory-draft agent on the adversarial dataset: the dip below the threshold line is the deliberately tempted run failing certification between two clean passes.
+And because certification repeats, each dataset keeps a run history. This is the advisory-draft agent on the adversarial dataset: the dips are the deliberately tempted runs failing certification between clean passes.
 
 <Frame fullWidth>
-  ![Run history for the adversarial dataset: the tempted run fails certification between two clean passes](/images/blog/2026-04-14-llm-certification-financial-services/portal-run-history.png)
+  ![Run history for the adversarial dataset: the deliberately tempted runs fail certification between clean passes](/images/blog/2026-04-14-llm-certification-financial-services/portal-run-history.png)
 </Frame>
 
 This works because Langfuse is API-first by design. The docs put it plainly: "All Langfuse data and features are available via the API." There is a published [OpenAPI spec](https://api.reference.langfuse.com) with typed [Python and JS/TS SDKs](/docs/api-and-data-platform/features/query-via-sdk) wrapping it, an official [CLI](/docs/api-and-data-platform/features/cli) that exposes every endpoint for scripting and coding agents, a [Metrics API](/docs/metrics/features/metrics-api) for aggregates, and [scheduled exports to blob storage](/docs/api-and-data-platform/features/export-to-blob-storage) for warehouse pipelines. In practice you can treat Langfuse as a headless engineering platform: engineers work in the Langfuse UI, and everyone else meets the same data inside the portals and systems your organization already has. Compliance wants certification evidence inside the existing GRC tool? It is one API integration away, and this portal is a few hundred lines of proof.
