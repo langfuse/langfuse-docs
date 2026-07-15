@@ -225,6 +225,18 @@ Two details in these gates are worth pausing on.
 
 **Compliance is a gate, not a metric.** For `advisory-draft`, `regulatory_compliance` is set to 100%: a single prohibited phrase fails the entire certification. The repository ships the small adversarial dataset above to prove this behavior. In the verified run with the temptation flag on, the draft scored 86% groundedness, 100% completeness, and 100% tool use, and the certification still came back FAILED, because one "guaranteed returns" phrase drove compliance to zero. That is the point. A grounded, complete, well-written draft is still uncertifiable, and your pipeline should be able to demonstrate that to an auditor on demand.
 
+## A portal for the people who sign off [#certification-portal]
+
+The people who approve models do not read traces. Risk officers and business owners want one screen that answers three questions: what is certified, against which dataset, and when was it last checked. So the repository ships a Certification Portal, a small React dashboard on a FastAPI backend that renders exactly that: the latest certification status for every model, variant, and agent, with per-run evaluator breakdowns, run history, and per-item drill-downs behind each row.
+
+<Frame fullWidth>
+  ![Certification Portal: live certification status for every model and agent, read from Langfuse](/images/blog/2026-04-14-llm-certification-financial-services/certification-portal.png)
+</Frame>
+
+The part I want to highlight is what the portal does not have: a database. Every number on that screen is fetched live from Langfuse's [public REST API](/docs/api-and-data-platform/features/public-api) (datasets, runs, traces, scores), and every row deep-links back to the underlying traces in Langfuse as the source of truth.
+
+This works because Langfuse is API-first by design. The docs put it plainly: "All Langfuse data and features are available via the API." There is a published [OpenAPI spec](https://api.reference.langfuse.com) with typed [Python and JS/TS SDKs](/docs/api-and-data-platform/features/query-via-sdk) wrapping it, an official [CLI](/docs/api-and-data-platform/features/cli) that exposes every endpoint for scripting and coding agents, a [Metrics API](/docs/metrics/features/metrics-api) for aggregates, and [scheduled exports to blob storage](/docs/api-and-data-platform/features/export-to-blob-storage) for warehouse pipelines. In practice you can treat Langfuse as a headless engineering platform: engineers work in the Langfuse UI, and everyone else meets the same data inside the portals and systems your organization already has. Compliance wants certification evidence inside the existing GRC tool? It is one API integration away, and this portal is a few hundred lines of proof.
+
 ## Keeping the evidence current [#keeping-the-evidence-current]
 
 Certification in financial services is not one-and-done, so the pipeline closes the loop in both directions:
