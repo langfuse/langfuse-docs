@@ -1,6 +1,6 @@
 ---
 title: Certifying LLMs and AI Agents for Financial Services
-date: 2026/04/14
+date: 2026/07/15
 description: How to use Langfuse datasets and experiments to certify LLMs and AI agents before they reach production in regulated financial environments.
 tag: guide
 author: Doneyli
@@ -11,7 +11,7 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 <BlogHeader
   title="Certifying LLMs and AI Agents for Financial Services"
   description="How to use Langfuse datasets and experiments to certify LLMs and AI agents before they reach production in regulated financial environments."
-  date="April 14, 2026"
+  date="July 15, 2026"
   authors={["doneylidej", "lotteverheyden"]}
 />
 
@@ -24,7 +24,7 @@ That process was designed for credit models that changed twice a year. LLMs brea
 This post walks through a certification pipeline that turns that evidence into a repeatable, one-command process: it runs a model against financial benchmarks derived from real SEC filings, scores the output with domain-specific evaluators, and produces a PASS/FAIL verdict with a full audit trail in Langfuse. Here's what the output looks like after running Claude Sonnet against [FinanceBench](https://huggingface.co/datasets/PatronusAI/financebench):
 
 <Frame fullWidth>
-  ![Certification results: Claude Sonnet on FinanceBench](/images/blog/2026-04-14-llm-certification-financial-services/benchmark-results.png)
+  ![Certification results: Claude Sonnet on FinanceBench](/images/blog/2026-07-15-llm-certification-financial-services/benchmark-results.png)
 </Frame>
 
 Notice that 81.3% numerical accuracy sits below the 85% gate this pipeline defaults to: that run, as it stands, would not certify. Catching that on a dashboard before deployment, rather than in production after, is the whole argument of this post.
@@ -128,7 +128,7 @@ dataset = langfuse.get_dataset("certification/financebench-v1")
 
 result = dataset.run_experiment(
     name="financebench-v1",
-    run_name="claude-sonnet-4-6-20260414",
+    run_name="claude-sonnet-4-6-20260715",
     task=create_certification_task(model, endpoint, api_key),
     evaluators=[
         numerical_accuracy_evaluator,
@@ -249,7 +249,7 @@ The verified runs tell the story from both sides. With the temptation flag on, s
 The people who approve models do not read traces. Risk officers and business owners want one screen that answers three questions: what is certified, against which dataset, and when was it last checked. So the repository ships a Certification Portal, a small React dashboard on a FastAPI backend that renders exactly that: the latest certification status for every model, variant, and agent, with per-run evaluator breakdowns, run history, and per-item drill-downs behind each row.
 
 <Frame fullWidth>
-  ![Certification Portal: live certification status for every model and agent, read from Langfuse](/images/blog/2026-04-14-llm-certification-financial-services/certification-portal.png)
+  ![Certification Portal: live certification status for every model and agent, read from Langfuse](/images/blog/2026-07-15-llm-certification-financial-services/certification-portal.png)
 </Frame>
 
 The important part is what the portal does not have: a database. Every number on that screen is fetched live from Langfuse's [public REST API](/docs/api-and-data-platform/features/public-api) (datasets, runs, traces, scores), and every row deep-links back to the underlying traces in Langfuse as the source of truth.
@@ -257,19 +257,19 @@ The important part is what the portal does not have: a database. Every number on
 Every row on the matrix drills down. Click into a run and you get the run-level breakdown: each gate dimension against its threshold, plus min, max, and pass rate per evaluator:
 
 <Frame fullWidth>
-  ![Run breakdown: every gate dimension of the 10-K analyst certification against its threshold](/images/blog/2026-04-14-llm-certification-financial-services/portal-run-breakdown.png)
+  ![Run breakdown: every gate dimension of the 10-K analyst certification against its threshold](/images/blog/2026-07-15-llm-certification-financial-services/portal-run-breakdown.png)
 </Frame>
 
 One more click and you are at per-item granularity: every dataset item scored across all dimensions, each with a trace link that lands on the exact nested trace in Langfuse. When item 6 misses the numerical accuracy check, nobody argues about aggregates. You open the trace and read what the agent actually did:
 
 <Frame fullWidth>
-  ![Per-item scores: every dataset item scored across all gate dimensions, with links to the underlying traces](/images/blog/2026-04-14-llm-certification-financial-services/portal-per-item-scores.png)
+  ![Per-item scores: every dataset item scored across all gate dimensions, with links to the underlying traces](/images/blog/2026-07-15-llm-certification-financial-services/portal-per-item-scores.png)
 </Frame>
 
 And because certification repeats, each dataset keeps a run history. This is the advisory-draft agent on the adversarial dataset: the dips are the deliberately tempted runs failing certification between clean passes.
 
 <Frame fullWidth>
-  ![Run history for the adversarial dataset: the deliberately tempted runs fail certification between clean passes](/images/blog/2026-04-14-llm-certification-financial-services/portal-run-history.png)
+  ![Run history for the adversarial dataset: the deliberately tempted runs fail certification between clean passes](/images/blog/2026-07-15-llm-certification-financial-services/portal-run-history.png)
 </Frame>
 
 This works because Langfuse is API-first by design. The docs put it plainly: "All Langfuse data and features are available via the API." There is a published [OpenAPI spec](https://api.reference.langfuse.com) with typed [Python and JS/TS SDKs](/docs/api-and-data-platform/features/query-via-sdk) wrapping it, an official [CLI](/docs/api-and-data-platform/features/cli) that exposes every endpoint for scripting and coding agents, a [Metrics API](/docs/metrics/features/metrics-api) for aggregates, and [scheduled exports to blob storage](/docs/api-and-data-platform/features/export-to-blob-storage) for warehouse pipelines. In practice you can treat Langfuse as a headless engineering platform: engineers work in the Langfuse UI, and everyone else meets the same data inside the portals and systems your organization already has. Compliance wants certification evidence inside the existing GRC tool? It is one API integration away, and this portal is a few hundred lines of proof.
@@ -281,7 +281,7 @@ Certification in financial services is not one-and-done, so the pipeline closes 
 **Production feeds the golden datasets.** A monitoring script scores live traces for compliance and completeness and routes violations to a Langfuse [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues) for human review. The queue itself encodes the routing policy, and reviewers score each item against dedicated human score configs:
 
 <Frame fullWidth>
-  ![The Certification Review annotation queue in Langfuse, with pending and completed human reviews](/images/blog/2026-04-14-llm-certification-financial-services/langfuse-annotation-queue.png)
+  ![The Certification Review annotation queue in Langfuse, with pending and completed human reviews](/images/blog/2026-07-15-llm-certification-financial-services/langfuse-annotation-queue.png)
 </Frame>
 
 A reviewed failure can then be promoted into the golden dataset as a new item (the reviewer supplies the correct answer; the pipeline never copies the suspect output as ground truth), so the next certification run regression-tests exactly the failure production found.
