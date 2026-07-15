@@ -26,15 +26,15 @@ Memory is the one layer of the agent stack that observability usually can't see.
 
 Each EverOS API call becomes one Langfuse trace, with the server-side pipeline stages as typed child observations:
 
-| EverOS operation | Langfuse observation | What becomes visible |
-| --- | --- | --- |
-| `POST /api/v1/memory/add` | span `everos.memory.add` | messages buffered per session |
-| `POST /api/v1/memory/flush` → LLM extraction | generation `everos.extract` | model + tokens, so Langfuse can compute the cost |
-| markdown persistence | span `everos.persist.markdown` | the `.md` files written |
-| `POST /api/v1/memory/search` | retriever `everos.memory.search` | query, top_k → episodes/facts + fused scores |
-| query embedding | embedding `everos.search.embed_query` | embedding model + tokens |
-| hybrid recall + rerank | retriever / span | BM25 + vector candidate funnel, rerank scores |
-| `POST /api/v1/ome/trigger` | agent `everos.ome.<strategy>` | reflection / consolidation / skill evolution |
+| EverOS operation                             | Langfuse observation                  | What becomes visible                             |
+| -------------------------------------------- | ------------------------------------- | ------------------------------------------------ |
+| `POST /api/v1/memory/add`                    | span `everos.memory.add`              | messages buffered per session                    |
+| `POST /api/v1/memory/flush` → LLM extraction | generation `everos.extract`           | model + tokens, so Langfuse can compute the cost |
+| markdown persistence                         | span `everos.persist.markdown`        | the `.md` files written                          |
+| `POST /api/v1/memory/search`                 | retriever `everos.memory.search`      | query, top_k → episodes/facts + fused scores     |
+| query embedding                              | embedding `everos.search.embed_query` | embedding model + tokens                         |
+| hybrid recall + rerank                       | retriever / span                      | BM25 + vector candidate funnel, rerank scores    |
+| `POST /api/v1/ome/trigger`                   | agent `everos.ome.<strategy>`         | reflection / consolidation / skill evolution     |
 
 Index sync (SQLite → LanceDB) runs asynchronously in EverOS, so it surfaces as its own correlated trace rather than a child of `add`. Recall-quality signals are pushed as Langfuse **scores** (they're first-class objects, not span attributes).
 
