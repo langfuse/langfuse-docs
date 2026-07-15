@@ -28,15 +28,6 @@ If you want the short answer before the details:
 - **Strands Agents**, the **OpenAI Agents SDK**, the **Claude Agent SDK**, **Google ADK**, and **Microsoft Agent Framework** are the natural picks if you are committed to the AWS, OpenAI, Anthropic, Google, or Microsoft ecosystems respectively.
 - **CrewAI** is the most approachable way to build role-based multi-agent teams.
 
-## What changed in the agent framework landscape since early 2025
-
-The market consolidated around a smaller set of actively developed frameworks, and a few facts are worth knowing before you commit (all verified July 2026):
-
-- **AutoGen is in maintenance mode.** Microsoft's README states that AutoGen "will not receive new features or enhancements" and directs new users to [Microsoft Agent Framework](https://github.com/microsoft/agent-framework), which it calls the enterprise-ready successor. The last AutoGen release shipped in September 2025.
-- **Microsoft Agent Framework reached 1.x** and consolidates the ideas from AutoGen and Semantic Kernel into one Python and .NET framework with built-in OpenTelemetry support.
-- **The big frameworks stabilized.** LangGraph, CrewAI, Strands Agents, and Mastra all reached 1.x; Pydantic AI and Google ADK are on 2.x. The pre-1.0 churn that defined 2024 and early 2025 is largely over.
-- **Coding-agent SDKs became general-purpose agent frameworks.** The Claude Agent SDK exposes the same harness that powers Claude Code for arbitrary agent applications, and the Vercel AI SDK added first-class agent abstractions.
-
 ## LangGraph
 
 [LangGraph](https://github.com/langchain-ai/langgraph) extends the well-known [LangChain](https://github.com/langchain-ai/langchain) ecosystem with a graph-based architecture that treats agent steps like nodes in a directed graph. Each node handles a prompt or sub-task, and edges control data flow and transitions. This is helpful for complex, multi-step tasks where you need precise control over branching and error handling. Since reaching 1.0, LangGraph has focused on production concerns: durable execution that resumes agents exactly where they left off after a failure, human-in-the-loop interrupts, and short-term plus long-term memory. It is available in Python and JavaScript and is used in production by companies including Klarna, Replit, and Elastic (per the project README, July 2026).
@@ -222,7 +213,7 @@ If you value fast setup and want to watch your agent generate and run Python cod
 
 ## If you would rather not write code
 
-Several low-code and no-code tools now ship agent capabilities and can be a better fit for automation-heavy teams: [n8n](/integrations/no-code/n8n) for workflow automation with AI agent nodes, [Langflow](/integrations/no-code/langflow) and [Flowise](/integrations/no-code/flowise) for visual agent building, and [Dify](/integrations/no-code/dify) for LLM app development. They trade flexibility for speed, and all of them can send traces to Langfuse, so you keep the same observability whether the agent was coded or clicked together.
+Several low-code and no-code tools now ship agent capabilities and can be a better fit for automation-heavy teams: [LibreChat](https://www.librechat.ai/) for workflow automation with AI agent nodes, [Langflow](/integrations/no-code/langflow) and [Flowise](/integrations/no-code/flowise) for visual agent building, and [Dify](/integrations/no-code/dify) for LLM app development. They trade flexibility for speed, and all of them can send traces to Langfuse, so you keep the same observability whether the agent was coded or clicked together.
 
 ## Comparison table
 
