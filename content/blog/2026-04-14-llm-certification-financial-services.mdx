@@ -27,6 +27,8 @@ This post walks through a certification pipeline that turns that evidence into a
   ![Certification results: Claude Sonnet on FinanceBench](/images/blog/2026-04-14-llm-certification-financial-services/benchmark-results.png)
 </Frame>
 
+Notice that 81.3% numerical accuracy sits below the 85% gate this pipeline defaults to: that run, as it stands, would not certify. Catching that on a dashboard before deployment, rather than in production after, is the whole argument of this post.
+
 The pipeline is built with [Langfuse datasets and experiments](/docs/evaluation/experiments/datasets). The full code is available in the [langfuse-llm-certification-finance](https://github.com/doneyli/langfuse-llm-certification-finance) repository. We will start with model certification, then go where the real risk conversations happen: [certifying the whole agent](#certifying-the-whole-agent), not just the model inside it.
 
 ## What regulators actually expect [#what-regulators-actually-expect]
@@ -41,7 +43,7 @@ The two-week approval cycle is not bureaucratic theater. It is how institutions 
 | [DORA](https://eur-lex.europa.eu/eli/reg/2022/2554/oj) (EU financial entities)                                                                                                          | Operational resilience for ICT services, including the third-party services you depend on, and model APIs are now exactly that                                                           | Live tracing catches a degrading third-party model before your clients do                                                                  |
 | [NIST AI RMF](https://www.nist.gov/itl/ai-risk-management-framework) (US, voluntary but widely referenced)                                                                              | Measure: test, evaluate, verify. Manage: respond to identified risks on an ongoing basis                                                                                                 | The evaluator suite and gates are the measurement; the feedback loop at the end of this post is the management                             |
 
-None of these frameworks prescribes tooling, and running this pipeline does not make anyone compliant by itself. But the common denominator across all five is evidence: versioned artifacts, complete logs, documented human review, and monitoring that keeps running after deployment. Note that the expectations themselves do not sit still either; the US agencies replaced their fifteen-year-old model risk guidance this April. Durable evidence infrastructure outlasts any single rulebook, and that is exactly the job of an LLM observability platform. It is why this pipeline records everything (datasets, prompts, traces, scores, human reviews) in Langfuse instead of a spreadsheet that goes stale the day it is exported.
+None of these frameworks prescribes tooling, and running this pipeline does not make anyone compliant by itself. But the common denominator across all five is evidence: versioned artifacts, complete logs, documented human review, and monitoring that keeps running after deployment. The expectations themselves do not sit still either; the US agencies replaced their fifteen-year-old model risk guidance this April. Durable evidence infrastructure outlasts any single rulebook, and that is exactly the job of an LLM observability platform. It is why this pipeline records everything (datasets, prompts, traces, scores, human reviews) in Langfuse instead of a spreadsheet that goes stale the day it is exported.
 
 ## Golden datasets [#golden-datasets]
 
@@ -83,7 +85,7 @@ for item in ds:
 
 The `question_reasoning` field matters later: it is free ground truth for checking whether an agent took the right path, not just whether it produced the right answer.
 
-One practical detail I lean on constantly: every dataset loads in two sizes. The `--sample` flag loads 10-item versions (`certification/financebench-sample`) that run end to end in a couple of minutes; that is what I use in live demos and as the fast inner loop while iterating on evaluators and prompts. The full sets (`certification/financebench-v1`, all 150 items) are what a formal certification run gets scored against. Same pipeline, same evaluators, same gates; the only thing that changes is the dataset name, so nothing you validated on the sample drifts when you run the real thing.
+One practical detail I lean on constantly: every dataset loads in two sizes. The setup script's `--sample` flag loads 10-item versions (`certification/financebench-sample`) that run end to end in a couple of minutes; that is what I use in live demos and as the fast inner loop while iterating on evaluators and prompts. The full sets (`certification/financebench-v1`, all 150 items) are what a formal certification run gets scored against. Same pipeline, same evaluators, same gates; the only thing that changes is the dataset name, so nothing you validated on the sample drifts when you run the real thing.
 
 ## Running the experiment [#running-the-experiment]
 
@@ -238,7 +240,7 @@ Two details in these gates are worth pausing on.
 
 **Tool trajectory is a certification dimension.** The `tool_use_correctness` evaluator uses the dataset's `question_reasoning` metadata to check that numerical questions were actually answered through the calculator tool. An agent that guesses the right ratio without computing it gets the answer marked correct and the trajectory marked wrong, and the trajectory is what fails it. A system that happens to be right does not generalize; a system that is right for the right reasons does.
 
-**Compliance is a gate, not a metric.** For `advisory-draft`, `regulatory_compliance` is set to 100%: a single prohibited phrase fails the entire certification. To prove the gate does its job, the repository ships a purpose-built adversarial dataset: ten client-update briefs, three compliant controls plus seven that each tempt a distinct failure mode a compliance officer would recognize (guaranteed profits, explicit buy and sell calls, no-risk reassurance, certainty about forward-looking statements, even a hint of material non-public information). Sets like this are not benchmarks. They start small and curated, and they grow with every reviewed production failure through the feedback loop below.
+**Compliance is a gate, not a metric.** For `advisory-draft`, `regulatory_compliance` is set to 100%: a single prohibited phrase fails the entire certification. To prove the gate does its job, the repository ships a purpose-built adversarial dataset: ten client-update briefs, three compliant controls plus seven that each tempt a distinct failure mode a compliance officer would recognize (guaranteed profits, explicit buy and sell calls, no-risk reassurance, certainty about forward-looking statements, portfolio concentration advice, even a hint of material non-public information). Sets like this are not benchmarks. They start small and curated, and they grow with every reviewed production failure through the feedback loop below.
 
 The verified runs tell the story from both sides. With the temptation flag on, seven of the ten drafts slipped into prohibited phrasing: completeness 100%, tool use 100%, groundedness above its bar, and the certification still FAILED, on compliance alone. Run clean, the same agent resisted every temptation and PASSED with 100% compliance. That is the point. A grounded, complete, well-written draft is still uncertifiable, and your pipeline should be able to demonstrate that to an auditor on demand.
 
@@ -250,7 +252,7 @@ The people who approve models do not read traces. Risk officers and business own
   ![Certification Portal: live certification status for every model and agent, read from Langfuse](/images/blog/2026-04-14-llm-certification-financial-services/certification-portal.png)
 </Frame>
 
-The part I want to highlight is what the portal does not have: a database. Every number on that screen is fetched live from Langfuse's [public REST API](/docs/api-and-data-platform/features/public-api) (datasets, runs, traces, scores), and every row deep-links back to the underlying traces in Langfuse as the source of truth.
+The important part is what the portal does not have: a database. Every number on that screen is fetched live from Langfuse's [public REST API](/docs/api-and-data-platform/features/public-api) (datasets, runs, traces, scores), and every row deep-links back to the underlying traces in Langfuse as the source of truth.
 
 Every row on the matrix drills down. Click into a run and you get the run-level breakdown: each gate dimension against its threshold, plus min, max, and pass rate per evaluator:
 
