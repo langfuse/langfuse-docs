@@ -11,24 +11,22 @@ This guide outlines the key differences between **[Langfuse](/)** and **[Datadog
 **TL;DR:**
 
 - **Choose Langfuse** if you want an open-source (MIT) platform you can fully self-host, with LLM tracing, evaluations, runtime prompt management, and datasets/experiments in one purpose-built tool, and unit-based pricing that starts at $29/month.
-- **Choose Datadog** if your organization already runs on Datadog APM and you primarily need LLM traces correlated with the rest of your infrastructure, logs, and user sessions inside an existing enterprise agreement.
-- **Many teams run both**: Datadog for application and infrastructure monitoring, Langfuse for LLM engineering workflows, fed from the same OpenTelemetry instrumentation. See [Using Langfuse and Datadog Together](#coexistence).
+- **Choose Datadog** if your organization already runs on Datadog APM and you primarily need LLM logs correlated with the rest of your infrastructure.
+- **Many teams run both**: Datadog for application and infrastructure monitoring, Langfuse for LLM evaluation workflows, fed from the same OpenTelemetry instrumentation. See [Using Langfuse and Datadog Together](#coexistence).
 
 ## Langfuse and Datadog at a Glance
 
-| Dimension                   | Langfuse                                              | Datadog LLM Observability                                                          |
-| --------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| **Source model**            | Open source (MIT)                                     | Proprietary SaaS                                                                   |
-| **Self-hosting**            | Yes, first-class                                      | No                                                                                 |
-| **LLM & agent tracing**     | Yes                                                   | Yes                                                                                |
-| **Evaluations**             | LLM-as-a-judge, code evaluators, human annotation     | LLM-as-a-judge templates, custom judges, external evals via API, annotation queues |
-| **Prompt management**       | Runtime serving with versions, labels, and caching    | Prompt Tracking (observability of prompt versions; no runtime serving)             |
-| **Datasets & experiments**  | Yes                                                   | Yes                                                                                |
-| **Playground**              | Yes                                                   | Yes                                                                                |
-| **OpenTelemetry**           | OTel-native SDKs + OTLP endpoint                      | OTLP ingestion (GenAI semantic conventions 1.37+)                                  |
-| **First-party SDKs**        | Python, JS/TS (OTel-native); other languages via OTel | Python, Node.js, Java                                                              |
-| **APM / infra correlation** | LLM-focused; runs alongside any APM via OTel          | Native correlation with Datadog APM, logs, and RUM                                 |
-| **Entry price**             | Free (50k units/mo); Core $29/mo                      | Free (40k LLM spans/mo); Pro $160/mo billed annually                               |
+| Dimension                  | Langfuse                                              | Datadog LLM Observability                                 |
+| -------------------------- | ----------------------------------------------------- | --------------------------------------------------------- |
+| **Self-hosting**           | Yes, first-class, Open source (MIT)                   | Proprietary SaaS                                          |
+| **LLM & agent tracing**    | Yes                                                   | Yes                                                       |
+| **Evaluations**            | LLM-as-a-judge, code evaluators, human annotation     | LLM-as-a-judge, external evals via API, annotation queues |
+| **Prompt management**      | Runtime serving with versions, labels, and caching    | Prompt tracking only                                      |
+| **Datasets & experiments** | Yes                                                   | Yes                                                       |
+| **Playground**             | Yes                                                   | Yes                                                       |
+| **OpenTelemetry**          | OTel-native SDKs + OTLP endpoint                      | OTLP ingestion (GenAI semantic conventions 1.37+)         |
+| **First-party SDKs**       | Python, JS/TS (OTel-native); other languages via OTel | Python, Node.js, Java                                     |
+| **Entry price**            | Free (50k units/mo); Core $29/mo                      | Free (40k LLM spans/mo); Pro $160/mo billed annually      |
 
 ## Open Source & Distribution
 
@@ -56,15 +54,15 @@ Both platforms capture hierarchical traces of LLM applications and agents, inclu
 
 ## Evaluation
 
-Both platforms ship a working evaluation loop; the implementations differ in where evaluations run and how far they extend. [Langfuse evaluations](/docs/evaluation/overview) include managed LLM-as-a-judge evaluators, code-based evaluators, custom scores via SDK/API, human annotation queues, and dataset experiments, all of which also run in self-hosted deployments. Datadog provides LLM-as-a-judge templates (including Hallucination, Failure to Answer, Toxicity, Prompt Injection, Sentiment, Topic Relevancy, Goal Completeness, Tool Selection, and Tool Argument Correctness), custom LLM-as-a-judge evaluators defined in natural language, external evaluations submitted via API, and annotation queues ([source](https://docs.datadoghq.com/llm_observability/evaluations/), checked 2026-07).
+Both platforms ship a working evaluation loop; the implementations differ in where evaluations run and how far they extend. [Langfuse evaluations](/docs/evaluation/overview) include managed LLM-as-a-judge evaluators, code-based evaluators, custom scores via SDK/API, human annotation queues, and dataset experiments, all of which also run in self-hosted deployments. Datadog provides LLM-as-a-judge templates (including Hallucination, Failure to Answer, Toxicity and Prompt Injection), custom LLM-as-a-judge evaluators defined in natural language, external evaluations submitted via API, and annotation queues ([source](https://docs.datadoghq.com/llm_observability/evaluations/), checked 2026-07).
 
-| Feature                   | Langfuse                                                            | Datadog                                                                  |
-| ------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| **LLM-as-a-judge**        | Managed evaluators on any traced data, incl. tool-call evaluators.  | Template and custom judge evaluators.                                    |
-| **Code-based evaluators** | Deterministic evaluators run natively.                              | External evaluations via API or third-party frameworks (e.g., DeepEval). |
-| **Human review**          | Annotation queues.                                                  | Annotation queues.                                                       |
-| **Datasets/experiments**  | Datasets, experiments, and prompt experiments via UI, SDK, and API. | Datasets and experiments with Playground integration.                    |
-| **Where evals run**       | Cloud or your own infrastructure (self-hosted).                     | Datadog's SaaS platform.                                                 |
+| Feature                   | Langfuse                                                            | Datadog                                                      |
+| ------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------ |
+| **LLM-as-a-judge**        | Managed evaluators on any traced data, incl. tool-call evaluators.  | Template and custom judge evaluators.                        |
+| **Code-based evaluators** | Deterministic evaluators run natively.                              | External via API or third-party frameworks (e.g., DeepEval). |
+| **Human review**          | Annotation queues.                                                  | Annotation queues.                                           |
+| **Datasets/experiments**  | Datasets, experiments, and prompt experiments via UI, SDK, and API. | Datasets and experiments with Playground integration.        |
+| **Where evals run**       | Cloud or your own infrastructure (self-hosted).                     | Datadog's SaaS platform.                                     |
 
 ## Prompt Management
 
@@ -87,17 +85,6 @@ The billing models are structurally different, so read the units carefully befor
 | **Enterprise**       | [$2,499/mo](/pricing), incl. audit logs, SCIM, SLAs.                       | Custom, typically part of a broader Datadog agreement.                               |
 
 Two practical notes. First, Datadog's free and Pro tiers include full feature access, which is a low barrier for teams already inside the Datadog ecosystem. Second, Datadog's 15-day default retention is short for LLM engineering workflows like building evaluation datasets from historical production traces; extended retention is a paid add-on, while Langfuse Core includes 90 days and Pro includes 3 years.
-
-## When Datadog Is the Better Fit
-
-An honest comparison names the cases where the other tool wins:
-
-- **Your organization already standardizes on Datadog.** If APM, logs, and dashboards live in Datadog, adding LLM spans to the same pane means one vendor, one bill, one access-control model, and no new procurement cycle.
-- **Cross-stack correlation is the primary requirement.** Datadog links LLM traces to the services, hosts, and real user sessions underneath them. Langfuse focuses on the LLM application layer and does not aim to replace an APM.
-- **You need a first-party Java SDK.** Datadog ships one; Langfuse covers Java through OpenTelemetry rather than a dedicated SDK.
-- **Ops-led monitoring is the main use case.** If the goal is alerting on latency, error rates, and token spend within an existing on-call workflow, Datadog's monitors and incident tooling are already where your team works.
-
-Conversely, teams that need self-hosting, runtime prompt management, evaluation workflows on their own infrastructure, or an open-source stack will not find those in Datadog (checked 2026-07).
 
 ## Using Langfuse and Datadog Together [#coexistence]
 
@@ -142,10 +129,6 @@ As of July 2026, Datadog offers a free tier with 40k LLM spans per month and 15-
 ### Can I use Langfuse and Datadog at the same time? [#langfuse-and-datadog-together]
 
 Yes, and this is a common setup. Both products consume OpenTelemetry traces, so one instrumentation layer can feed Datadog for APM and Langfuse for LLM engineering, either via two span processors in your application or a collector-based fan-out. See [using Langfuse with an existing OpenTelemetry setup](/faq/all/existing-otel-setup) for working configurations.
-
-### Does Datadog support OpenTelemetry for LLM traces? [#datadog-opentelemetry]
-
-Yes. Datadog ingests OpenTelemetry traces that follow the GenAI semantic conventions version 1.37 or later over OTLP HTTP, and supports OpenLLMetry v0.47+; OpenInference is not supported (checked July 2026). Langfuse SDKs are built natively on OpenTelemetry, and Langfuse additionally accepts OTLP traces from OpenLLMetry, OpenLIT, and other instrumentation libraries on its `/api/public/otel` endpoint.
 
 <Callout type="info">
   This comparison is out of date? Please [raise a pull request](https://github.com/langfuse/langfuse-docs/tree/main/content/resources/engineering) with up-to-date information.
