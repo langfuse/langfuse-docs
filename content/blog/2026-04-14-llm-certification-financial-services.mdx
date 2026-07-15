@@ -81,7 +81,9 @@ for item in ds:
     )
 ```
 
-The `question_reasoning` field matters later: it is free ground truth for checking whether an agent took the right path, not just whether it produced the right answer. The setup script in the repository handles all of the datasets and supports a `--sample` flag for quick testing with 10 items.
+The `question_reasoning` field matters later: it is free ground truth for checking whether an agent took the right path, not just whether it produced the right answer.
+
+One practical detail I lean on constantly: every dataset loads in two sizes. The `--sample` flag loads 10-item versions (`certification/financebench-sample`) that run end to end in a couple of minutes; that is what I use in live demos and as the fast inner loop while iterating on evaluators and prompts. The full sets (`certification/financebench-v1`, all 150 items) are what a formal certification run gets scored against. Same pipeline, same evaluators, same gates; the only thing that changes is the dataset name, so nothing you validated on the sample drifts when you run the real thing.
 
 ## Running the experiment [#running-the-experiment]
 
