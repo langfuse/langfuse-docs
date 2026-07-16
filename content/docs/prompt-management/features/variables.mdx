@@ -225,7 +225,7 @@ const langfuseChatPrompt = await langfuse.prompt.get("movie-critic-chat", {
   type: "chat",
 });
 const langchainChatPrompt = ChatPromptTemplate.fromMessages(
-  langfuseChatPrompt.getLangchainPrompt().map((m) => [m.role, m.content])
+  langfuseChatPrompt.getLangchainPrompt()
 );
 
 // Compile with variables
