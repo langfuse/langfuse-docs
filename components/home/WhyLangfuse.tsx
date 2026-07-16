@@ -26,7 +26,7 @@ const reasons = [
     body: "Standard trace format. Works with existing OpenTelemetry instrumentation.",
   },
   {
-    title: "80+ integrations",
+    title: "100+ integrations",
     body: "Works with any model, any framework, and stack.",
   },
   {
