@@ -1,0 +1,195 @@
+---
+title: Answer relevance evaluation for LLM applications
+description: "Answer relevance evaluation for LLM apps: what the metric measures, judge prompt design, a runnable Langfuse experiment, and how Ragas answer relevancy fits."
+tags: [guide, evaluation]
+---
+
+# Answer relevance evaluation for LLM applications
+
+Answer relevance measures whether a generated answer addresses the question that was asked. It is one of the core quality metrics for question-answering systems, RAG pipelines, and support chatbots, because the most common failure in these applications is not a wrong fact but a non-answer: the model responds fluently to a related question, covers half of a two-part question, or deflects entirely. Relevance is judged from the question and the answer alone, so it can be computed without ground truth labels.
+
+**TL;DR:** Answer relevance evaluation checks question-answer fit, not factual correctness and not groundedness in retrieved context. Because it needs no reference answer, it works both in offline experiments and on live production traffic. The recipe below defines the metric boundary, walks through judge prompt design for the hard cases (partial answers and refusals), and implements it end to end as a Langfuse experiment with a binary LLM-as-a-judge evaluator, plus the online evaluator setup for production traces.
+
+## How answer relevance differs from faithfulness and hallucination detection
+
+Answer relevance answers exactly one question: does the response address what the user asked? A response can be perfectly relevant and factually wrong, and a response can be fully grounded in retrieved documents while ignoring the question. Evaluating these as one blended "quality" score hides which failure you have, so each dimension gets its own evaluator:
+
+| Question about the output                           | Metric                  | Recipe                                                                            |
+| --------------------------------------------------- | ----------------------- | --------------------------------------------------------------------------------- |
+| Does it address the question that was asked?        | Answer relevance        | This page                                                                         |
+| Is it supported by the retrieved context?           | RAG faithfulness        | [RAG faithfulness evaluation](/resources/engineering/rag-faithfulness-evaluation) |
+| Does it assert facts that are false or unsupported? | Hallucination detection | [Hallucination detection](/resources/engineering/hallucination-detection)         |
+
+The three metrics fail independently in practice. A RAG system with a weak retriever produces faithful but irrelevant answers (it accurately summarizes the wrong documents). A strong model with no retrieval produces relevant but unfaithful answers. Scoring relevance separately tells you whether to fix the prompt and question handling, or the retrieval and grounding.
+
+## Answer relevance needs no ground truth
+
+Answer relevance is a reference-free metric. The judge compares the answer against the question, not against an expected output, so an evaluation dataset for it is just a list of questions. This has two practical consequences:
+
+1. You can start evaluating before anyone writes golden answers. A dump of real user questions is a complete relevance dataset.
+2. The same evaluator runs on production traffic, where ground truth never exists. Reference-based metrics like answer correctness are confined to curated test sets; relevance is not.
+
+The trade-off is scope: a reference-free judge cannot tell you the answer is right. Teams typically pair a relevance evaluator with a correctness evaluator on the labeled subset of their data and rely on relevance alone for the unlabeled rest.
+
+## Designing an answer relevance judge prompt
+
+Relevance requires reading comprehension, so the evaluator is an LLM-as-a-judge rather than a code check. Three design decisions determine whether the scores are useful.
+
+**Keep the judge on the question, not the quality.** Judges drift toward rating answers as "good" when they are long, confident, and well-formatted. The prompt must state that style, correctness, and completeness of explanation are out of scope, and that the only test is whether the specific question asked gets addressed. Answering a related but different question fails.
+
+**Decide explicitly how partial answers score.** For a multi-part question ("what is the refund policy, and does it differ for annual plans?"), an answer covering one part is the exact failure mode this metric exists to catch. The rubric below fails partial answers. If you prefer to track partial coverage, make it a separate categorical score rather than softening the relevance definition.
+
+**Score refusals honestly.** "I can't help with that" is not relevant to the question, and the judge should say so, even when refusing was the right behavior. Letting refusals pass as relevant silently inflates your metric as the model gets more cautious. The honest setup scores the refusal as not relevant and tracks refusals as their own score, so a rising refusal rate is visible instead of laundered through the relevance number.
+
+One more recommendation from [Langfuse Academy](/academy/evaluate): prefer binary pass/fail scores over 1-to-5 scales. A binary rubric forces a clear definition of what separates acceptable from unacceptable, while graded scales leave the difference between a 3 and a 4 to the judge's mood, which makes scores drift across evaluators and over time.
+
+## Run an answer relevance experiment with the Langfuse Python SDK
+
+The script below is self-contained: a task that answers questions, a binary relevance judge, a run-level aggregate, and a dataset of plain questions with no expected outputs. It uses the experiment runner in the Langfuse Python SDK (v4), which traces every task execution, runs evaluators concurrently, and records scores automatically. If your application already traces with Langfuse, this adds no new services and no new credentials: the experiment uses the same SDK and the same API keys as your tracing setup, against Langfuse Cloud or a self-hosted instance.
+
+```python
+# pip install langfuse openai
+# env: LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, LANGFUSE_HOST, OPENAI_API_KEY
+
+import json
+
+import openai
+from langfuse import Evaluation, get_client
+from langfuse.openai import OpenAI  # drop-in wrapper, traces the task's model calls
+
+langfuse = get_client()
+task_client = OpenAI()          # application calls, traced into each experiment item
+judge_client = openai.OpenAI()  # judge calls, kept out of the application traces
+
+JUDGE_PROMPT = """You are evaluating whether an answer is relevant to the question asked.
+
+Question:
+{question}
+
+Answer:
+{answer}
+
+The answer is relevant only if it addresses the specific question asked. Apply these rules:
+- Answering a related but different question is not relevant.
+- Addressing only some parts of a multi-part question is not relevant.
+- A refusal, deflection, or "I don't know" is not relevant, even if refusing was appropriate.
+- Style, length, and factual correctness are out of scope; judge only question-answer fit.
+
+Respond in JSON: {{"relevant": true or false, "refusal": true or false, "reasoning": "one sentence"}}"""
+
+
+def answer_question(*, item, **kwargs):
+    """The application under test: answer a user question."""
+    response = task_client.chat.completions.create(
+        model="gpt-4.1",
+        messages=[
+            {"role": "system", "content": "You are a support assistant for a SaaS product."},
+            {"role": "user", "content": item["input"]},
+        ],
+    )
+    return response.choices[0].message.content
+
+
+def answer_relevance(*, input, output, **kwargs):
+    """Binary LLM-as-a-judge for answer relevance. Reference-free: no expected output used."""
+    judgment = judge_client.chat.completions.create(
+        model="gpt-4.1",
+        messages=[
+            {
+                "role": "user",
+                "content": JUDGE_PROMPT.format(question=input, answer=output),
+            }
+        ],
+        response_format={"type": "json_object"},
+        temperature=0,
+    )
+    verdict = json.loads(judgment.choices[0].message.content)
+    return [
+        Evaluation(
+            name="answer_relevance",
+            value=1.0 if verdict["relevant"] else 0.0,
+            comment=verdict["reasoning"],
+        ),
+        Evaluation(name="refusal", value=1.0 if verdict["refusal"] else 0.0),
+    ]
+
+
+def relevance_rate(*, item_results, **kwargs):
+    """Run-level aggregate: share of relevant answers across the dataset."""
+    values = [
+        e.value
+        for r in item_results
+        for e in r.evaluations
+        if e.name == "answer_relevance"
+    ]
+    return Evaluation(
+        name="relevance_rate",
+        value=sum(values) / len(values) if values else None,
+    )
+
+
+# A relevance dataset is just questions; no ground truth required.
+data = [
+    {"input": "How do I rotate an API key without downtime?"},
+    {"input": "What is the refund policy, and does it differ for annual plans?"},
+    {"input": "Can I export my usage data to CSV?"},
+    {"input": "Why was my account charged twice this month?"},
+]
+
+result = langfuse.run_experiment(
+    name="Answer relevance baseline",
+    description="Binary relevance judge over the support question set",
+    data=data,
+    task=answer_question,
+    evaluators=[answer_relevance],
+    run_evaluators=[relevance_rate],
+)
+print(result.format())
+```
+
+Each item produces a trace with the task execution and two scores (`answer_relevance` and `refusal`); the run carries the aggregate `relevance_rate`. The judge's one-sentence reasoning lands in the score comment, which is what you read when auditing why an item failed.
+
+To make runs comparable over time, move the questions into a Langfuse-hosted dataset and run the same task and evaluators against it. Every execution then becomes a dataset run you can diff in the UI against previous prompt or model versions:
+
+```python
+dataset = langfuse.get_dataset("support-questions")
+
+result = dataset.run_experiment(
+    name="Answer relevance, prompt v2",
+    task=answer_question,
+    evaluators=[answer_relevance],
+    run_evaluators=[relevance_rate],
+)
+```
+
+The full runner API, including concurrency control and async tasks, is documented in [experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk).
+
+## Evaluate answer relevance on production traces
+
+Because relevance is reference-free, the same rubric runs on live traffic. In Langfuse, this is an [LLM-as-a-judge evaluator](/docs/evaluation/evaluation-methods/llm-as-a-judge) that the platform executes for you, no SDK code involved: create a custom evaluator with the rubric above as the prompt and `{{question}}` and `{{answer}}` variables, map those variables to the input and output of the observations you want judged (with JSONPath for nested fields, and a live preview against your last 24 hours of data), and target live observations with a sampling percentage. Sampling 5 to 10 percent of traffic is usually enough to see the relevance trend without judging every request.
+
+Scores attach to the matched observations asynchronously, so this is a monitoring signal, not an in-flight guardrail. The payoff is the trend line: a relevance drop after a prompt change, a model swap, or a retriever regression shows up in the score timeline before it shows up in support tickets, and the flagged traces are the exact items to pull into your experiment dataset for the next offline iteration.
+
+## Ragas answer relevancy and Langfuse
+
+[Ragas](https://docs.ragas.io/) popularized this metric under the name `answer_relevancy` (class `ResponseRelevancy`), and its implementation is worth understanding even if you do not use the library. Instead of asking a judge directly, Ragas generates a few candidate questions from the answer (three by default) and scores the mean cosine similarity between their embeddings and the original question's embedding; evasive or noncommittal answers are forced to a score of 0. It is reference-free, like the judge approach above, and requires both an LLM and an embedding model. The embedding formulation yields a graded 0-to-1 signal and comes with prompts the Ragas project maintains; the direct binary judge is simpler to run, cheaper (no embedding calls), and gives you a rubric you can read and edit when scores look wrong.
+
+Both work with Langfuse. Ragas scores computed in your own pipeline can be pushed to Langfuse traces and experiments, and the managed evaluator catalog includes evaluators built with partners like Ragas. See the [Ragas integration](/integrations/frameworks/ragas) for the end-to-end setup.
+
+## FAQ
+
+### What is the difference between answer relevance and answer correctness? [#relevance-vs-correctness]
+
+Answer relevance checks whether the response addresses the question asked; answer correctness checks whether the response is factually right, usually by comparing against a reference answer. An answer can be fully relevant and wrong, or correct on the facts while answering a different question. Relevance is reference-free and runs anywhere, while correctness needs ground truth and is confined to labeled datasets.
+
+### Can you evaluate answer relevance without ground truth? [#no-ground-truth]
+
+Yes. Answer relevance is judged from the question and the answer alone, so no expected output is needed. This is why a plain list of real user questions is a complete relevance dataset, and why the same evaluator can run on production traces, where ground truth never exists.
+
+### How should refusals be scored in answer relevance evaluation? [#handling-refusals]
+
+Score refusals as not relevant, and record a separate refusal score so they stay distinguishable from ordinary failures. A refusal does not address the question, even when refusing is the correct behavior, and counting refusals as relevant hides growing model caution inside a flat metric. Ragas handles this the same way: noncommittal answers are scored 0.
+
+### Is answer relevance the same as Ragas answer relevancy? [#ragas-answer-relevancy]
+
+They measure the same property with different mechanics. Ragas `answer_relevancy` generates questions from the answer and scores embedding similarity to the original question, producing a graded 0-to-1 value; a direct LLM-as-a-judge reads the question-answer pair against a rubric, typically returning a binary verdict with reasoning. Both are reference-free, and both can write scores to Langfuse.

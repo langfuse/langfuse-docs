@@ -1,0 +1,369 @@
+---
+title: Migrate a Promptfoo eval suite to Langfuse
+description: "Step-by-step guide to migrate a Promptfoo eval suite to Langfuse: turn tests into dataset items, port assertions to evaluators, and keep failing CI on regressions."
+tags: [migration, guide]
+---
+
+# Migrate a Promptfoo eval suite to Langfuse
+
+This guide walks through moving an existing [Promptfoo](https://www.promptfoo.dev) eval
+suite to [Langfuse](/) datasets and experiments: test cases first, then assertions, the
+prompt/provider matrix, and the CI gate.
+
+**TL;DR:** A promptfooconfig.yaml maps cleanly onto Langfuse concepts. `tests` and their
+`vars` become dataset items, deterministic assertions become code evaluators, model-graded
+assertions become LLM-as-a-judge evaluators, and `promptfoo eval` in CI becomes an
+experiment script that raises `RegressionError` inside the `langfuse/experiment-action`
+GitHub Action. What changes structurally: Promptfoo evals are declarative YAML runs whose
+results live in local files or a shared viewer, while Langfuse experiments are code that
+runs against datasets on a platform where your production traces, scores, and prompts
+already live. You can migrate incrementally and keep Promptfoo running side-by-side, and
+Promptfoo's red teaming has no Langfuse equivalent, so keep it for that.
+
+## Why teams migrate
+
+Promptfoo is a good CI harness for prompt testing: a declarative config, a broad assertion
+library, and a fast local loop with `promptfoo eval` and `promptfoo view`. Teams typically
+outgrow it in one specific way: eval results live apart from production. Promptfoo runs
+produce output files and a results viewer, with sharing to promptfoo.app or a self-hosted
+sharing server (as of July 2026, per the
+[Promptfoo sharing docs](https://www.promptfoo.dev/docs/usage/sharing/)). Production
+telemetry lives somewhere else entirely.
+
+Moving the suite into Langfuse changes that:
+
+- **Eval results land next to production traces.** Every experiment item execution creates
+  a full [trace](/docs/observability/data-model), so a failing test case is inspectable
+  with the same tooling you use for production incidents, and the same datasets can be
+  built from real production traces.
+- **Non-engineers can see and shape evals.** Datasets, experiment comparisons, and
+  [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) are in the
+  Langfuse UI, so product managers and domain experts review outputs and edit test cases
+  without checking out a repo.
+- **Judges run as managed platform evaluators.** Langfuse ships a catalog of
+  [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge)
+  maintained with partners like Ragas (Hallucination, Context-Relevance, Toxicity,
+  Helpfulness), and the same judges score live production traffic, not only offline runs.
+- **The whole platform is self-hostable.** Both tools are MIT-licensed open source; the
+  difference is what you can run. [Self-hosting Langfuse](/self-hosting) gives you the full
+  platform (UI, API, storage) in your own infrastructure as the persistent system of record
+  for eval history.
+
+Be equally clear about what you give up. Promptfoo's declarative assertion catalog is broad
+(30+ types including `rouge-n`, `bleu`, `perplexity`, `latency`, and `cost`, all negatable
+and weightable); in Langfuse, deterministic checks are code you write as evaluator
+functions or [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators), with
+the [autoevals](https://github.com/braintrustdata/autoevals) library covering many
+model-graded and heuristic checks out of the box. The zero-code YAML workflow becomes a
+Python or TypeScript script. And Promptfoo's provider matrix, which expands
+`providers × prompts × tests` automatically, becomes a loop you write yourself. If the
+declarative harness is all you need and results-in-files is acceptable, Promptfoo remains a
+reasonable choice; this guide is for teams consolidating evals where their traces live.
+
+## Concept mapping
+
+| Promptfoo (promptfooconfig.yaml)                                            | Langfuse                                                                                                                                                                                    | Notes                                                               |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `tests` with `vars`                                                         | [Dataset items](/docs/evaluation/experiments/datasets) (`input`, `expected_output`, `metadata`)                                                                                             | One test case becomes one item                                      |
+| Assertion reference values (`value:` on `contains`, `factuality`, ...)      | `expected_output` on the dataset item                                                                                                                                                       | Per-item ground truth moves into the item                           |
+| Deterministic `assert` types (`contains`, `regex`, `is-json`, `javascript`) | Evaluator functions in the [experiment SDK](/docs/evaluation/experiments/experiments-via-sdk), or [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) authored in the UI | Checks become code instead of YAML types                            |
+| Model-graded `assert` types (`llm-rubric`, `factuality`, `context-*`)       | [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) or autoevals scorers via `create_evaluator_from_autoevals`                                                  | Managed judges also run on production traces                        |
+| `defaultTest`                                                               | `evaluators` passed to `run_experiment`                                                                                                                                                     | Experiment evaluators apply to every item by default                |
+| `prompts` (inline or `file://`)                                             | [Prompt management](/docs/prompt-management) with versions and labels                                                                                                                       | Promptfoo can also fetch these via `langfuse://` references         |
+| `providers` × `prompts` matrix                                              | One experiment run per variant on the same dataset                                                                                                                                          | Runs are compared side-by-side in the Langfuse UI                   |
+| `promptfoo eval` in CI (exit code `100` on failures)                        | Experiment script raising `RegressionError` + [langfuse/experiment-action](/docs/evaluation/experiments/experiments-ci-cd)                                                                  | Both fail the job and comment on the PR                             |
+| `outputPath`, `promptfoo view`, `promptfoo share`                           | Experiment runs persisted in Langfuse                                                                                                                                                       | History and comparisons live in the platform, no artifact shuffling |
+
+## The example suite
+
+The steps below migrate this small but representative config: two test cases, a
+deterministic assertion each, and a model-graded rubric applied to every test via
+`defaultTest`.
+
+```yaml
+# promptfooconfig.yaml (before)
+prompts:
+  - file://prompts/support-agent.txt
+providers:
+  - openai:gpt-4.1
+defaultTest:
+  assert:
+    - type: llm-rubric
+      value: "Is polite and offers a concrete next step"
+tests:
+  - vars:
+      question: "How do I reset my password?"
+    assert:
+      - type: icontains
+        value: "reset link"
+  - vars:
+      question: "What is your refund window?"
+    assert:
+      - type: icontains
+        value: "30 days"
+```
+
+All Langfuse snippets below use the Python SDK v4 (`pip install langfuse`); the JS/TS SDK
+(`@langfuse/client`) has equivalent APIs throughout.
+
+## Step 1: Turn tests into a dataset
+
+Each entry in `tests` becomes a dataset item. The `vars` map to `input`, and per-test
+reference values (here, the `icontains` string) move to `expected_output`:
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()  # reads LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, LANGFUSE_BASE_URL
+
+langfuse.create_dataset(name="support-agent-regression")
+
+test_cases = [
+    {"question": "How do I reset my password?", "must_contain": "reset link"},
+    {"question": "What is your refund window?", "must_contain": "30 days"},
+]
+
+for case in test_cases:
+    langfuse.create_dataset_item(
+        dataset_name="support-agent-regression",
+        input={"question": case["question"]},
+        expected_output=case["must_contain"],
+    )
+```
+
+Unlike YAML tests in a repo, [dataset items](/docs/evaluation/experiments/datasets) are
+editable in the UI, versioned, and can be created directly from interesting production
+traces, which is how regression suites usually grow after the migration.
+
+## Step 2: Port assertions to evaluators
+
+Evaluators are plain functions that receive the item's `input`, `output`, and
+`expected_output` and return an `Evaluation`. The `icontains` assertion becomes a few lines
+of Python, and the `llm-rubric` assertion becomes a judge function that calls a model. Like
+`defaultTest`, evaluators passed to an experiment apply to every item.
+
+```python
+from langfuse import Evaluation
+from langfuse.openai import OpenAI  # traced drop-in replacement
+
+def contains_expected(*, output, expected_output, **kwargs):
+    # replaces: type: icontains
+    passed = (expected_output or "").lower() in (output or "").lower()
+    return Evaluation(name="contains_expected", value=1.0 if passed else 0.0)
+
+RUBRIC = "Is polite and offers a concrete next step"
+
+def rubric_judge(*, input, output, **kwargs):
+    # replaces: type: llm-rubric
+    response = OpenAI().chat.completions.create(
+        model="gpt-4.1",
+        messages=[{
+            "role": "user",
+            "content": (
+                f"Grade this response against the rubric: {RUBRIC}\n\n"
+                f"Question: {input['question']}\n\nResponse: {output}\n\n"
+                'Reply "PASS" or "FAIL", then a one-sentence reason.'
+            ),
+        }],
+    )
+    verdict = response.choices[0].message.content or ""
+    return Evaluation(
+        name="rubric",
+        value=1.0 if verdict.strip().upper().startswith("PASS") else 0.0,
+        comment=verdict,
+    )
+```
+
+For Promptfoo's other model-graded assertions, you rarely need to write the judge yourself:
+
+- The [autoevals](https://github.com/braintrustdata/autoevals) library ships `Factuality`
+  (adapted from OpenAI's evals project, the same lineage as Promptfoo's `factuality`
+  assertion), `ClosedQA`, embedding similarity, and RAG metrics covering context precision,
+  recall, and faithfulness. Langfuse converts any of them into an evaluator with
+  `create_evaluator_from_autoevals` (see the
+  [experiment SDK docs](/docs/evaluation/experiments/experiments-via-sdk)).
+- Langfuse-managed [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge)
+  are configured in the UI and executed by the platform against experiments or live
+  traffic, so judge prompts stop living in application code entirely.
+
+Deterministic checks you want non-engineers to see and reuse can also be authored directly
+in the Langfuse UI as [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators),
+which Langfuse executes on experiment observations.
+
+## Step 3: Run the experiment (and the provider matrix)
+
+The experiment runner loops your application over the dataset, traces every execution, and
+applies the evaluators. Where Promptfoo calls the provider for you, the Langfuse task
+function is your own code, which means the eval exercises your actual retrieval, tools, and
+glue logic rather than a bare model call.
+
+```python
+def support_agent_task(*, item, **kwargs):
+    return answer_question(item.input["question"])  # your application logic
+
+dataset = langfuse.get_dataset("support-agent-regression")
+
+result = dataset.run_experiment(
+    name="post-migration-baseline",
+    task=support_agent_task,
+    evaluators=[contains_expected, rubric_judge],
+)
+print(result.format())
+```
+
+Promptfoo's `providers` and `prompts` lists expand into a grid automatically. In Langfuse,
+you express a variant comparison as one experiment run per variant on the same dataset,
+typically looping over [prompt management](/docs/prompt-management) versions or labels:
+
+```python
+for label in ["production", "candidate"]:
+    prompt = langfuse.get_prompt("support-agent", label=label)
+
+    def task(*, item, prompt=prompt, **kwargs):
+        compiled = prompt.compile(question=item.input["question"])
+        response = OpenAI().chat.completions.create(
+            model=prompt.config.get("model", "gpt-4.1"),
+            messages=[{"role": "user", "content": compiled}],
+        )
+        return response.choices[0].message.content
+
+    dataset.run_experiment(
+        name=f"support-agent ({label})",
+        task=task,
+        evaluators=[contains_expected, rubric_judge],
+    )
+```
+
+The runs appear side-by-side in the dataset's experiment comparison view, which replaces
+`promptfoo view` as the place where variant results are compared, with the difference that
+every result links to a full trace.
+
+## Step 4: Keep failing CI on regressions
+
+`promptfoo eval` exits with code `100` when a test case fails (as of July 2026, per the
+[Promptfoo CLI docs](https://www.promptfoo.dev/docs/usage/command-line/)), and
+`promptfoo/promptfoo-action` posts a results link on pull requests. The Langfuse equivalent
+is the [langfuse/experiment-action](/docs/evaluation/experiments/experiments-ci-cd) GitHub
+Action: your experiment script raises `RegressionError` when a metric violates its
+threshold, the action fails the job, and it posts a PR comment with run-level scores, an
+item-level table, and a link to the experiment in Langfuse.
+
+```python
+# experiments/support-agent-gate.py
+# support_agent_task, contains_expected, and rubric_judge as defined in steps 2 and 3
+from langfuse import Evaluation, RegressionError, RunnerContext
+
+THRESHOLD = 0.9
+
+def pass_rate(*, item_results, **kwargs):
+    scores = [
+        e.value
+        for item in item_results
+        for e in item.evaluations
+        if e.name == "contains_expected"
+    ]
+    return Evaluation(name="pass_rate", value=sum(scores) / len(scores) if scores else 0.0)
+
+def experiment(context: RunnerContext):
+    result = context.run_experiment(
+        name="PR gate: support agent",
+        task=support_agent_task,
+        evaluators=[contains_expected, rubric_judge],
+        run_evaluators=[pass_rate],
+    )
+
+    rate = next(
+        (e.value for e in result.run_evaluations if e.name == "pass_rate"), None
+    )
+
+    if not isinstance(rate, (int, float)) or rate < THRESHOLD:
+        raise RegressionError(
+            result=result,
+            metric="pass_rate",
+            value=float(rate) if isinstance(rate, (int, float)) else 0.0,
+            threshold=THRESHOLD,
+        )
+
+    return result
+```
+
+```yaml
+# .github/workflows/eval-gate.yml (excerpt)
+- uses: langfuse/experiment-action@<release tag>
+  with:
+    langfuse_public_key: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+    langfuse_secret_key: ${{ secrets.LANGFUSE_SECRET_KEY }}
+    experiment_path: experiments/support-agent-gate
+    dataset_name: support-agent-regression
+    github_token: ${{ github.token }}
+```
+
+The action supports pinning a `dataset_version` for reproducible runs and exposes a
+normalized `result_json` output for downstream steps. For a deeper treatment of regression
+gates, thresholds, and flaky-judge handling, see our guide to
+[LLM regression testing](/resources/engineering/llm-regression-testing).
+
+## What you can keep running
+
+Migration does not have to be a cutover, and two Promptfoo workflows remain useful
+alongside Langfuse:
+
+- **Promptfoo evals against Langfuse-managed prompts.** Promptfoo natively resolves
+  `langfuse://prompt-name@production` references in its `prompts` list, so moving prompts
+  into Langfuse first lets both systems test the same source of truth during the
+  transition. The [Promptfoo integration page](/integrations/other/promptfoo) covers the
+  setup; this migration guide is the optional endpoint of that path.
+- **Red teaming.** Promptfoo's `redteam` and model-scanning capabilities target security
+  probing, which Langfuse does not do. Teams that migrate their quality evals commonly keep
+  Promptfoo in the toolchain for adversarial testing.
+
+Historical Promptfoo results are best archived rather than imported: scores are cheap to
+regenerate against the migrated dataset, and re-running your latest suite as a
+`post-migration-baseline` experiment gives future runs a clean anchor.
+
+## Validation checklist
+
+- [ ] Dataset item count matches the number of Promptfoo test cases (including any CSV-loaded tests)
+- [ ] Every assertion in the old config has a corresponding evaluator (code, autoevals, or managed judge)
+- [ ] Reference values (`contains` strings, factuality references) moved into `expected_output`
+- [ ] Baseline experiment run completed with all evaluators producing scores
+- [ ] Judge evaluator spot-checked against a handful of known-good and known-bad outputs
+- [ ] CI gate fails on a deliberately broken prompt (mirror of exit code `100` behavior)
+- [ ] PR comment from `langfuse/experiment-action` renders scores and links to the run
+- [ ] Team members who used `promptfoo view` have Langfuse project access
+- [ ] Decision recorded on what stays in Promptfoo (red teaming, side-by-side window end date)
+
+## FAQ
+
+### Can I keep running Promptfoo alongside Langfuse? [#keep-both-tools]
+
+Yes, and most teams do during the transition. Promptfoo can fetch prompts from Langfuse via
+`langfuse://` references, so both tools can evaluate the same prompt versions while you
+port test cases and assertions incrementally. Many teams also keep Promptfoo permanently
+for red teaming, which Langfuse does not replace.
+
+### Do Langfuse evaluators cover Promptfoo's assertion types? [#assertion-parity]
+
+Mostly, but not as a one-to-one catalog. Deterministic assertions (`contains`, `regex`,
+`is-json`, custom `javascript`/`python`) become short evaluator functions or UI-authored
+code evaluators. Model-graded assertions map to autoevals scorers (factuality, closed QA,
+similarity, RAG context metrics) or Langfuse-managed LLM-as-a-judge evaluators. Promptfoo's
+per-assertion `weight` and `threshold` scoring has no direct equivalent; compute composite
+scores in a run-level evaluator instead. Statistical metrics like `rouge-n` or `perplexity`
+need a library call inside an evaluator function.
+
+### Can Langfuse fail my CI pipeline the way `promptfoo eval` does? [#ci-parity]
+
+Yes. Where `promptfoo eval` exits with code `100` on failing test cases, a Langfuse
+experiment script raises `RegressionError` when a metric drops below your threshold, and
+the `langfuse/experiment-action` GitHub Action fails the job and posts a PR comment with
+scores and a link to the run. Outside GitHub Actions, the same experiment code runs as a
+pytest or Vitest suite with ordinary assertions.
+
+### How do non-engineers access results after migrating? [#team-access]
+
+Through the Langfuse UI, with org- and project-level roles. Experiment runs, score
+comparisons, and individual traces are browsable without touching the repo, and annotation
+queues let reviewers grade outputs in a structured workflow. This replaces the Promptfoo
+pattern of sharing viewer links or result files, and it applies equally on self-hosted
+Langfuse deployments.
