@@ -6,29 +6,14 @@ import { cn } from "@/lib/utils";
 import { Loader } from "@/components/ai-elements/loader";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 import { Image as AiImage } from "@/components/ai-elements/image";
-import { LangfuseWeb } from "langfuse";
 import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId";
+import { scoreDemoFeedback } from "@/components/demoLangfuseBrowserClients";
 import {
   SendIcon,
   DownloadIcon,
   ThumbsUpIcon,
   ThumbsDownIcon,
 } from "lucide-react";
-
-const eulangfuseWebClient = new LangfuseWeb({
-  baseUrl: process.env.NEXT_PUBLIC_EU_LANGFUSE_BASE_URL,
-  publicKey: process.env.NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY,
-});
-
-const usLangfuseWebClient = new LangfuseWeb({
-  publicKey: process.env.NEXT_PUBLIC_US_LANGFUSE_PUBLIC_KEY,
-  baseUrl: process.env.NEXT_PUBLIC_US_LANGFUSE_BASE_URL,
-});
-
-const jpLangfuseWebClient = new LangfuseWeb({
-  publicKey: process.env.NEXT_PUBLIC_JP_LANGFUSE_PUBLIC_KEY,
-  baseUrl: process.env.NEXT_PUBLIC_JP_LANGFUSE_BASE_URL,
-});
 
 type GeneratedImage = {
   base64: string;
@@ -119,18 +104,12 @@ export const ImageGenerator = ({
   const handleFeedback = (value: number) => {
     if (!currentImage) return;
     setFeedback(value);
-    for (const client of [
-      eulangfuseWebClient,
-      usLangfuseWebClient,
-      jpLangfuseWebClient,
-    ]) {
-      client.score({
-        traceId: currentImage.traceId,
-        id: `user-feedback-${currentImage.traceId}`,
-        name: "user-feedback",
-        value,
-      });
-    }
+    scoreDemoFeedback({
+      traceId: currentImage.traceId,
+      id: `user-feedback-${currentImage.traceId}`,
+      name: "user-feedback",
+      value,
+    });
   };
 
   return (

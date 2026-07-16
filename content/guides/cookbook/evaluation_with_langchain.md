@@ -23,7 +23,7 @@ First you need to install Langfuse and Langchain via pip and then set the enviro
 
 
 ```python
-%pip install langfuse langchain langchain-openai --upgrade
+%pip install langfuse langchain langchain-classic langchain-openai --upgrade
 ```
 
 
@@ -31,13 +31,13 @@ First you need to install Langfuse and Langchain via pip and then set the enviro
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your openai key
-os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...")
 ```
 
 
@@ -124,9 +124,9 @@ In this section, we define functions to set up the Langchain eval based on the e
 
 
 ```python
-from langchain.evaluation import load_evaluator
+from langchain_classic.evaluation import load_evaluator
 from langchain_openai import OpenAI
-from langchain.evaluation.criteria import LabeledCriteriaEvalChain
+from langchain_classic.evaluation.criteria import LabeledCriteriaEvalChain
 
 def get_evaluator_for_key(key: str):
   llm = OpenAI(temperature=0, model=os.environ.get('EVAL_MODEL'))

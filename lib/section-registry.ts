@@ -13,6 +13,7 @@ import {
   handbookSource,
   academySource,
   workshopSource,
+  resourcesSource,
   marketingSource,
 } from "@/lib/source";
 
@@ -122,6 +123,13 @@ export const docSections: Record<string, SectionMeta> = {
     source: workshopSource,
     collection: "workshop",
     title: "Workshop",
+    layout: "docs",
+    hasOwnRoute: true,
+  },
+  resources: {
+    source: resourcesSource,
+    collection: "resources",
+    title: "Resources",
     layout: "docs",
     hasOwnRoute: true,
   },

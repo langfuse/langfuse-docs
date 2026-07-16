@@ -1,0 +1,44 @@
+---
+date: 2026-07-10
+title: "Home, now a dashboard you can customize"
+description: "Choose which dashboard shows on Home, reuse Home widgets in your own dashboards, and copy, duplicate, and share widgets as portable JSON."
+author: Nikita Kabardin
+ogVideo: /images/changelog/2026-07-10-home-is-a-dashboard.mp4
+canonical: https://langfuse.com/docs/metrics/features/custom-dashboards
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+Your project **Home** is built from the same widgets and query engine as your custom dashboards: the same familiar overview out of the box, but every tile is a widget you can rearrange, reuse, or replace. For example:
+
+- Preview any dashboard on Home, then set the one your team should see by default.
+- Reuse a Home chart, such as traces over time, model cost, or latency percentiles, on a custom dashboard.
+- Copy a widget from one project into another, or export a whole dashboard as JSON and import it elsewhere.
+
+## Pick what shows on Home
+
+Home renders from a Langfuse-curated default, and each project chooses which dashboard shows there. Open the **dashboard selector** in the Home header to preview any dashboard. The choice lives in the URL, so the view is shareable. When you find the one you want, **Set as default** makes it the project's Home. That changes the page for everyone in the project, so you confirm before it applies.
+
+## Editing does not touch the original
+
+Langfuse-managed dashboards and widgets keep all of their edit controls: drag, resize, delete, add, and edit. The first change you make opens a dialog that duplicates the dashboard into your project and applies your change to the copy. You customize a managed dashboard without touching the original, and without looking for a separate Clone button first.
+
+## Manage and move widgets
+
+Every widget, on a dashboard and in the widget library, now has a **⋯ menu** with **Copy**, **Duplicate**, and **Download JSON**. Copy a widget and paste it onto any dashboard with **⌘/Ctrl+V**; it is added and scrolled into view. Paste only activates when your clipboard actually holds a Langfuse widget.
+
+Widgets and dashboards now use a versioned, portable JSON format. A widget carries `{"$langfuseWidget": true, "version": 1}`, and a dashboard the matching `$langfuseDashboard` envelope with each widget's config inlined, so it travels without database IDs. Export a single widget or a whole dashboard, then import it by dragging the JSON file onto a dashboard. Langfuse checks that it is a Langfuse widget or dashboard and recreates the widgets in your project.
+
+## Learn more
+
+<Cards num={1}>
+  <Card
+    title="Custom Dashboards"
+    href="/docs/metrics/features/custom-dashboards"
+    icon={<Book />}
+    arrow
+  />
+</Cards>

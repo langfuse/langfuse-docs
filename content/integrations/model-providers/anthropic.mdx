@@ -3,6 +3,7 @@ source: ⚠️ Jupyter Notebook
 title: Observability for Anthropic with Langfuse Integration
 sidebarTitle: Anthropic (Python)
 logo: /images/integrations/anthropic_icon.png
+logoAppearance: dark
 description: Learn how to integrate Langfuse with Anthropic for comprehensive tracing and debugging of your AI conversations.
 category: Integrations
 ---
@@ -43,12 +44,12 @@ Also set your Anthropic API ([Anthropic Console](https://console.anthropic.com/)
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
-os.environ["ANTHROPIC_API_KEY"] = "sk-ant-..."  # Your Anthropic API key
+os.environ.setdefault("ANTHROPIC_API_KEY", "sk-ant-...")  # Your Anthropic API key
 ```
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
@@ -87,7 +88,7 @@ client = Anthropic(
 
 # Make the API call to Anthropic
 message = client.messages.create(
-    model="claude-opus-4-20250514",
+    model="claude-haiku-4-5",
     max_tokens=1000,
     temperature=1,
     system="You are a world-class poet. Respond only with short poems.",
@@ -120,7 +121,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="claude-opus-4-20250514", # Anthropic model name
+    model="claude-haiku-4-5", # Anthropic model name
     messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "Who are you?"}

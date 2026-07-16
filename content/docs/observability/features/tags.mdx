@@ -215,7 +215,7 @@ chain.invoke(
 
 ```ts /propagateAttributes/
 import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
-import { CallbackHandler } from "langfuse-langchain";
+import { CallbackHandler } from "@langfuse/langchain";
 
 const langfuseHandler = new CallbackHandler();
 
@@ -249,21 +249,6 @@ const tags = ["tag-1", "tag-2"];
 
 // Pass config to the chain invocation to be parsed as Langfuse trace attributes
 await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler], tags: tags });
-```
-
-When using the integration with the JS SDK (see [interop docs](/integrations/frameworks/langchain#interoperability)), set tags via `langfuse.trace()`:
-
-```ts
-import { CallbackHandler, Langfuse } from "langfuse-langchain";
-const langfuse = new Langfuse();
-
-const trace = langfuse.trace({
-  tags: ["tag-1", "tag-2"],
-});
-const langfuseHandler = new CallbackHandler({ root: trace });
-
-// Add Langfuse handler as callback to your langchain chain/agent
-await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler] });
 ```
 
 </Tab>

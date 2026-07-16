@@ -4,6 +4,7 @@ sidebarTitle: Ollama
 description: Run Open Source LLMs locally on your machine with Ollama and trace outputs with Langfuse for Open Source LLM Observability
 category: Integrations
 logo: /images/integrations/ollama_icon.svg
+logoAppearance: dark
 ---
 
 # Trace your local Ollama model with Langfuse
@@ -67,9 +68,9 @@ import os
 
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 ```
 
@@ -163,13 +164,13 @@ import os
 
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your openai key
-os.environ["OPENAI_API_KEY"] = ""
+os.environ.setdefault("OPENAI_API_KEY", "")
 ```
 
 ### Step 3: Use the OpenAI Python SDK to call the Mistral Model
