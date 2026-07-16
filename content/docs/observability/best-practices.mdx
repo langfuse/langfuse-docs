@@ -58,7 +58,7 @@ Framework integrations typically set these types automatically. If you're instru
 
 ### Is it nested correctly?
 
-A tool call should nest under the `generation` that decided to make it, rather than sitting next to it as a flat sibling, so the tree shows which action came from which decision.
+A tool call should nest under the `agent` or `span` that orchestrates the step, as a sibling of the `generation` that requested it, so the tree shows which step each action belongs to instead of leaving tool calls dangling at the trace root.
 
 Framework integrations usually get this right automatically. If you're instrumenting manually, see [nesting observations](/docs/observability/sdk/instrumentation#nesting-observations).
 
