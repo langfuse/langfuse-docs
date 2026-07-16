@@ -130,9 +130,9 @@ context in this order:
 
 | Level                | Purpose                                                                                                                    | How to apply it                      | Attributes                                                                                                                                                                                                |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Experiment context   | Propagates the experiment's identity to every span in every item trace, so Langfuse can synthesize them as one experiment. | Baggage                              | `langfuse.experiment.id`, `langfuse.experiment.name`, `langfuse.experiment.description`, optional `langfuse.experiment.dataset.id`, `langfuse.experiment.metadata.*`, and optional `langfuse.environment` |
-| Experiment item root | Identifies one item trace root and stores its input, expected output, and actual output.                                   | Attributes directly on the root span | `langfuse.observation.input`, `langfuse.observation.output`, `langfuse.experiment.item.expected_output`, and `langfuse.experiment.item.metadata.*`                                                        |
-| Item context         | Propagates one item's identity to the root and child spans in that item's trace.                                           | Root attributes, then Baggage        | `langfuse.experiment.item.id`, optional `langfuse.experiment.item.version`, and `langfuse.experiment.item.root_observation_id`                                                                            |
+| Experiment context   | Propagates the experiment's identity to every span in every item trace, so Langfuse can synthesize them as one experiment. | Baggage                              | `langfuse.experiment.id`, `langfuse.experiment.name`, `langfuse.experiment.description` (optional), `langfuse.experiment.dataset.id` (optional), `langfuse.experiment.metadata.*` (optional), `langfuse.environment` (optional) |
+| Experiment item root | Identifies one item trace root and stores its input, expected output, and actual output.                                   | Attributes directly on the root span | `langfuse.observation.input`, `langfuse.observation.output`, `langfuse.experiment.item.expected_output` (optional), `langfuse.experiment.item.metadata.*` (optional)                                                        |
+| Item context         | Propagates one item's identity to the root and child spans in that item's trace.                                           | Root attributes, then Baggage        | `langfuse.experiment.item.id`, `langfuse.experiment.item.root_observation_id`, `langfuse.experiment.item.version` (optional)                                                                            |
 
 Configure a `BaggageSpanProcessor` as described in the [Baggage propagation
 pattern](#recommended-use-opentelemetry-baggage-for-propagation).
@@ -155,10 +155,10 @@ create an enclosing "experiment" span.
 experimentBaggage = baggageFromAttributes({
   "langfuse.experiment.id": experiment.id, // unique per experiment
   "langfuse.experiment.name": experiment.name, // unique per experiment
-  "langfuse.experiment.description": experiment.description,
-  "langfuse.experiment.dataset.id": experiment.datasetId, // optional
-  "langfuse.experiment.metadata.prompt_version": "v4",
-  "langfuse.environment": "experiment", // optional: use a separate environment for experiment traffic
+  "langfuse.experiment.description": experiment.description, // optional
+  "langfuse.experiment.dataset.id": experiment.datasetId, // optional: Langfuse-managed datasets only
+  "langfuse.experiment.metadata.prompt_version": "v4", // optional
+  "langfuse.environment": "experiment", // optional: separate environment for experiment traffic
 })
 ```
 
