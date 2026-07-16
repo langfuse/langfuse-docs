@@ -64,10 +64,6 @@ You could review every conversation by hand. We decided to evaluate where we nee
 
 The first three run as [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) in Langfuse and target observations that contain the full message history. You can start from the managed evaluator library in Langfuse or copy the prompts from our related post on [high-signal production monitoring](/blog/2026-04-01-llm-as-a-judge-production-monitoring). User frustration is tracked with a code-based all-caps detector, also running in Langfuse, scoped to observations where the user input comes first.
 
-<Frame fullWidth>
-  ![Evaluator scores on a trace in Langfuse](/images/blog/2026-03-25-llm-as-a-judge-production-monitoring/scores_in_ui.png)
-</Frame>
-
 This is what turns "review everything" into "review the right things."
 
 ### What counts as quality?
@@ -84,7 +80,7 @@ Both relevance and user intent are set up as LLM-as-a-judge evaluators: one nume
 We then set up a production monitoring dashboard that shows average scores, user intent classifications, total score counts, and cost over time. On top of that, we have monitors that notify us in Slack when certain thresholds are reached, such as increased cost, increased time to first token, or a high number of users disagreeing with our chatbot.
 
 <Frame fullWidth>
-  ![Dashboard widget showing user intent distribution](/images/blog/2026-04-14-categorical-llm-as-a-judge-user-intent/dashboard-widget.png)
+  ![Production score monitoring dashboard for the docs chatbot](/images/blog/2026-07-16-steal-our-eval-setup/score-monitoring-dashboard.png)
 </Frame>
 
 ## Annotation queues, and why you still look yourself
@@ -96,7 +92,7 @@ Your coding agent can help you get through volume here. But especially in the ea
 For each conversation you review, attach two things: a pass/fail call and a short freeform note on what actually went wrong. Use open coding, not a fixed category list yet. After a first pass, group failure modes and label all failed conversations with their respective category. For each category, decide what to do about it: ignore it, monitor it further, or fix it. The full guide on how to do this systematically is in our [error analysis guide](/academy/monitoring/error-analysis).
 
 <Frame fullWidth>
-  ![Annotation queue in Langfuse](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/annotation-queue.png)
+  ![Annotation queue item with pass/fail assessment and open coding fields](/images/blog/2026-07-16-steal-our-eval-setup/annotation-queue-item.png)
 </Frame>
 
 That comment is what matters most, more than the score. It is what turns into the expected output when this example becomes a dataset item.
@@ -104,6 +100,10 @@ That comment is what matters most, more than the score. It is what turns into th
 ## From annotations to a dataset
 
 Once we annotated enough real conversations and noted what we think the right output should have been, we built a proper [dataset](/docs/evaluation/experiments/datasets). A dataset item needs an input and can have an expected output, or none, depending on what you are testing.
+
+<Frame fullWidth>
+  ![General QA chatbot dataset with production and synthetic examples](/images/blog/2026-07-16-steal-our-eval-setup/general-qa-chatbot-dataset.png)
+</Frame>
 
 Two things matter most when building it:
 
@@ -116,15 +116,15 @@ For chatbots, three dimensions have held up well as a starting point and are clo
 - **Keyword overlap**, especially useful for making sure product names and specific terms actually show up.
 - **Behavior match**, whether the bot did the right thing given the question: answer directly, ask a follow-up, defer because it is out of scope, or call the right tool.
 
+<Frame fullWidth>
+  ![Expected output on a chatbot dataset item with sample reply, keyword overlap, and behavior label](/images/blog/2026-07-16-steal-our-eval-setup/dataset-expected-output.png)
+</Frame>
+
 Correctness and behavior match are set up as LLM-as-a-judge evaluators in the app. They are scoped to experiment runs on this specific dataset. Keyword overlap runs as part of the experiment runner and is a deterministic match, so a code-based eval.
 
 This dataset with its evaluators can then be used to run [experiments](/docs/evaluation/experiments/experiments-via-sdk) and understand the quality of your system. We frequently run experiments on newly released models, after changes to the docs, and whenever we add new edge cases to the dataset.
 
 That dataset doubles as your regression suite. We run it as part of [CI](/docs/evaluation/experiments/experiments-ci-cd), so a prompt or model change gets checked against real failure cases before it ships, not after.
-
-<Frame fullWidth>
-  ![Failure modes identified during error analysis](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/failure-modes.png)
-</Frame>
 
 ## The failure mode that is actually yours
 
@@ -133,6 +133,10 @@ CI catches the general stuff. But every system has one or two failure modes that
 For us, it is staying grounded in the actual docs instead of training data. LLMs know old versions of SDKs, and multiple versions exist across the ecosystem, so a fluent, confident, wrong answer is an easy failure to produce and an easy one to miss.
 
 We built a separate dataset just for this. It is reference-free: inputs only, no expected output, because the correct answer changes every time the SDK does. What we evaluate instead is whether the answer is actually grounded in the retrieved documentation rather than in what the model already "knows."
+
+<Frame fullWidth>
+  ![SDK integration grounding dataset item with input and metadata](/images/blog/2026-07-16-steal-our-eval-setup/sdk-grounding-dataset-item.png)
+</Frame>
 
 Your version will be different. Maybe it is making sure a specific tool gets called when it should. Maybe it is knowing when to hand off to a human instead of guessing. The mechanism is the same either way: find the failure mode through your own error analysis, then build a dataset around that specific thing. Do not wait for a generic evaluator to catch it, because it will not.
 
