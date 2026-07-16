@@ -9,25 +9,34 @@ import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { TextHighlight } from "@/components/ui/text-highlight";
 import { Text } from "@/components/ui/text";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselPrevious,
-  CarouselNext,
-} from "@/components/ui/carousel";
 import { CredibilitySentence } from "@/components/CredibilitySentence";
+import Image from "next/image";
 
 <div className="not-prose flex flex-col gap-4 mb-8 items-center text-center">
   <Heading as="h1" size="large">
     <TextHighlight>Building Langfuse</TextHighlight>
   </Heading>
   <Text>Join the team building the leading open-source AI engineering platform</Text>
-  <div className="mt-2 inline-flex">
+  <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
     <Button href="https://jobs.ashbyhq.com/langfuse" target="_blank" rel="noopener">
       View Open Positions →
     </Button>
+    <Button href="/role-finder" variant="secondary">
+      AI Job Matcher
+    </Button>
   </div>
+</div>
+
+<div className="not-prose relative mx-auto my-6 w-full max-w-xl overflow-hidden rounded border border-line-structure">
+  <Image
+    src="/images/people/team.jpg"
+    alt="Langfuse Team"
+    width={1106}
+    height={829}
+    quality={90}
+    className="h-auto w-full"
+    sizes="(max-width: 576px) 100vw, 576px"
+  />
 </div>
 
 While LLMs improve a lot, we don't see enough applications in production. Building these applications requires a new workflow of continuous monitoring and evaluation that we enable with Langfuse (learn more about [our mission](/handbook/chapters/mission)).
@@ -44,41 +53,20 @@ If complex technical problems & great developer experiences excite you, we'd lov
 
 ## Team
 
-import { CarouselSlide } from "@/components/CarouselSlide";
-
-<Carousel
-  className="w-full"
-  opts={{
-    loop: true,
-  }}
->
-  <CarouselContent className="items-stretch">
-    <CarouselItem>
-      <CarouselSlide src="/images/people/team.jpg" alt="Langfuse Team" />
-    </CarouselItem>
-    <CarouselItem>
-      <CarouselSlide src="/images/careers/office3.jpg" alt="Langfuse Office" />
-    </CarouselItem>
-    <CarouselItem>
-      <CarouselSlide src="/images/careers/team3.jpg" alt="Langfuse Team" />
-    </CarouselItem>
-    <CarouselItem>
-      <CarouselSlide src="/images/careers/team4.jpg" alt="Langfuse Team" />
-    </CarouselItem>
-    <CarouselItem>
-      <CarouselSlide src="/images/careers/team5.jpg" alt="Langfuse Team" />
-    </CarouselItem>
-    <CarouselItem>
-      <CarouselSlide src="/images/careers/team6.jpg" alt="Langfuse Team" />
-    </CarouselItem>
-  </CarouselContent>
-  <CarouselPrevious />
-  <CarouselNext />
-</Carousel>
-
+import { PolaroidGallery } from "@/components/careers";
 import TeamMembers from "@/components-mdx/team-members.mdx";
 
 <TeamMembers />
+
+<div className="h-12" />
+
+<div className="text-center">
+
+## Team impressions: from start to now
+
+</div>
+
+<PolaroidGallery />
 
 <CTACard
   title="Curious to build with us?"
@@ -126,7 +114,6 @@ import {
   Joystick,
   ListOrdered,
 } from "lucide-react";
-import Image from "next/image";
 
 <Cards num={3}>
   <Card

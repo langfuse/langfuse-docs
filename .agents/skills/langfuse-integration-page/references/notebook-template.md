@@ -47,13 +47,13 @@ Get your Langfuse keys from the project settings in [Langfuse Cloud](https://lan
 import os
 
 # Get keys for your project from the project settings page: https://langfuse.com/cloud
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region (API host)
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region (API host)
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region (API host)
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # <PARTNER> API key
-os.environ["<PARTNER>_API_KEY"] = "..."
+os.environ.setdefault("<PARTNER>_API_KEY", "...")
 ```
 
 **Cell 6 — markdown** _(skip for the OpenAI drop-in pattern)_

@@ -12,7 +12,7 @@ The agent (`agent.py`) is a Python-based LiveKit agent that:
 
 ### OTel tracing
 
-The agent configures an OpenTelemetry `TracerProvider` that exports spans to Langfuse via the OTLP/HTTP exporter. LiveKit's agent SDK automatically instruments LLM calls, STT, TTS, and tool invocations as OTel spans. These are sent to `{LANGFUSE_HOST}/api/public/otel` using Basic auth derived from the Langfuse API keys.
+The agent configures an OpenTelemetry `TracerProvider` that exports spans to Langfuse via the OTLP/HTTP exporter. LiveKit's agent SDK automatically instruments LLM calls, STT, TTS, and tool invocations as OTel spans. These are sent to `{LANGFUSE_BASE_URL}/api/public/otel` using Basic auth derived from the Langfuse API keys.
 
 ## Deployment
 
@@ -22,7 +22,7 @@ The following secrets must be configured on the LiveKit Cloud agent (via `--secr
 
 - `LANGFUSE_PUBLIC_KEY`
 - `LANGFUSE_SECRET_KEY`
-- `LANGFUSE_HOST` (e.g. `https://cloud.langfuse.com`)
+- `LANGFUSE_BASE_URL` (e.g. `https://cloud.langfuse.com`)
 
 `LIVEKIT_URL`, `LIVEKIT_API_KEY`, and `LIVEKIT_API_SECRET` are injected automatically by LiveKit Cloud.
 

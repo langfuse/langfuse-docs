@@ -126,6 +126,12 @@ Evaluate live production traffic to monitor your LLM application performance in 
 
 Run evaluators on individual observations within your traces—such as LLM calls, retrieval operations, embedding generations, or tool calls.
 
+#### Context available to observation-level evaluators [#observation-evaluator-context]
+
+Observation-level evaluators map variables from the matched observation. They can use fields on that observation, such as `input`, `output`, and `metadata`.
+
+They do not load sibling or child observations from the same trace. If your evaluator needs the overall request and response of an application or agent invocation, target a root observation that records that overall input and output. The evaluator still only sees data on that root observation; it will not automatically include data from child observations unless your application writes the required summary or context onto the root observation.
+
 **Why target Observations**
 
 - **Dramatically faster execution**: Evaluations complete in seconds, not minutes. Eliminates evaluation delays and backlogs. Asynchronous architecture processes thousands of evaluations per minute.
@@ -148,6 +154,10 @@ At ingest time, each observation is evaluated against your filter criteria. Matc
 <Tab>
 
 Run evaluators on complete traces, evaluating entire workflow executions from start to finish.
+
+<Callout type="warning">
+Trace-level LLM-as-a-Judge evaluators are legacy. Migrate to observation-level evaluators and put the data the judge needs on the target observation.
+</Callout>
 
 <Callout type="info">
 **Consider targeting Observations instead**: Observation-level evaluators complete in seconds (vs minutes for trace-level), eliminating evaluation delays. They also offer better precision for production monitoring. See [upgrade guide](/faq/all/llm-as-a-judge-migration).
@@ -321,6 +331,8 @@ We recommend migrating to [observation-level evaluators](/faq/all/llm-as-a-judge
 
 You now need to teach Langfuse _which properties_ of your observation, trace, or experiment item represent the actual data to populate these variables for a sensible evaluation. For instance, you might map your system's logged observation input to the prompt's `{{input}}` variable, and the LLM response (observation output) to the prompt's `{{output}}` variable. This mapping is crucial for ensuring the evaluation is sensible and relevant.
 
+For observation and experiment targets, **Tool Calls** maps the calls recorded on the target observation. Each call contains `id`, `name`, `arguments`, `type`, and `index`. Valid JSON arguments are parsed. Map the full array or use a JSONPath selector such as `$[*].name`.
+
 <Tabs items={["Live Production Data", "Offline Experiment Data"]}>
 <Tab>
 
@@ -340,7 +352,7 @@ You now need to teach Langfuse _which properties_ of your observation, trace, or
 
 ### Trigger the evaluation
 
-To see your evaluator in action, you need to either [send traces](/docs/observability/get-started) (fastest) or trigger an experiment run (takes longer to setup) via the [UI](/docs/evaluation/experiments/experiments-via-ui) or [SDK](/docs/evaluation/experiments/experiments-via-sdk). Make sure to set the correct target data in the evaluator settings according to how you want to trigger the evaluation.
+To see your evaluator in action, you need to either [send traces](/docs/observability/get-started) (fastest) or trigger an experiment run (takes longer to set up) via the [UI](/docs/evaluation/experiments/experiments-via-ui) or [SDK](/docs/evaluation/experiments/experiments-via-sdk). Make sure to set the correct target data in the evaluator settings according to how you want to trigger the evaluation.
 
 </Steps>
 
@@ -381,7 +393,7 @@ Beyond the UI, you can set up and manage LLM-as-a-Judge evaluation programmatica
 The setup is split into two resources:
 
 - **Evaluators** define _how_ to score data: the judge prompt, its `{{variables}}`, the structured output definition (numeric, boolean, or categorical), and the optional model configuration. Evaluators are versioned—creating one under an existing name produces the next version, and active rules automatically move to it.
-- **Evaluation rules** define _what_ gets evaluated: the target (live observations or experiments), filters, sampling rate, and the mapping from your data onto the evaluator's variables. Each rule references an evaluator family by `name` and `scope`.
+- **Evaluation rules** define _what_ gets evaluated: the target (live observations or experiments), filters, sampling rate, and the mapping from your data onto the evaluator's variables. Each rule references an evaluator family by `name` and `scope`. The `tool_calls` mapping source is available for both targets.
 
 A typical flow is to create an evaluator, read back its `variables` and `outputDefinition`, then create one or more evaluation rules that reference it.
 

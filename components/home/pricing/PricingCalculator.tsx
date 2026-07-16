@@ -22,8 +22,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Link from "next/link";
-import { InfoIcon } from "lucide-react";
-import { Text } from "@/components/ui";
+import { InfoIcon, MessageCircle } from "lucide-react";
+import { Button, Text } from "@/components/ui";
+
+const SALES_ASSISTED_UNITS_THRESHOLD = 50_000_000;
 
 // Graduated pricing tiers
 const pricingTiers = [
@@ -118,12 +120,16 @@ export function PricingCalculator({
   const [currentBaseFee, setCurrentBaseFee] = useState<number>(
     PLAN_CONFIGS.find((p) => p.name === initialPlan)?.baseFee || 0,
   );
+  const monthlyUnits = useMemo(
+    () => parseInt(monthlyEvents.replace(/,/g, "")) || 0,
+    [monthlyEvents],
+  );
+  const shouldSuggestSales = monthlyUnits >= SALES_ASSISTED_UNITS_THRESHOLD;
 
   // Calculate pricing breakdown (single source of truth)
   const pricingBreakdown = useMemo(() => {
-    const events = parseInt(monthlyEvents.replace(/,/g, "")) || 0;
-    return calculatePricingBreakdown(events);
-  }, [monthlyEvents]);
+    return calculatePricingBreakdown(monthlyUnits);
+  }, [monthlyUnits]);
 
   // Derive total cost from breakdown
   const calculatedPrice = useMemo(() => {
@@ -244,6 +250,30 @@ export function PricingCalculator({
             </CornerBox>
           </div>
 
+          {shouldSuggestSales && (
+            <div className="flex flex-col gap-3 rounded-sm border border-line-structure bg-surface-1 p-4 md:flex-row md:items-center md:justify-between">
+              <div className="space-y-1">
+                <div className="text-sm font-medium text-text-primary">
+                  High-volume workload
+                </div>
+                <Text size="s" className="text-left text-text-secondary">
+                  At {formatNumber(SALES_ASSISTED_UNITS_THRESHOLD)}+ billable
+                  units per month, talk to sales for help sizing the workload
+                  and a custom quote.
+                </Text>
+              </div>
+              <Button
+                href="/talk-to-us?deployment=cloud"
+                variant="secondary"
+                icon={<MessageCircle className="size-3.5" />}
+                wrapperClassName="w-full shrink-0 md:w-auto"
+                aria-label="Talk to sales"
+              >
+                Talk to sales
+              </Button>
+            </div>
+          )}
+
           {/* Breakdown */}
           <div className="space-y-3">
             <div className="font-medium">Pricing tiers breakdown:</div>
@@ -292,10 +322,8 @@ export function PricingCalculator({
                   <TableCell className="font-semibold">Total</TableCell>
                   <TableCell className="font-semibold text-right">
                     {(() => {
-                      const totalUnits =
-                        parseInt(monthlyEvents.replace(/,/g, "")) || 0;
-                      if (totalUnits === 0) return "—";
-                      const avgRate = (calculatedPrice / totalUnits) * 100000;
+                      if (monthlyUnits === 0) return "—";
+                      const avgRate = (calculatedPrice / monthlyUnits) * 100000;
                       return formatCurrency(avgRate) + "/100k";
                     })()}
                   </TableCell>

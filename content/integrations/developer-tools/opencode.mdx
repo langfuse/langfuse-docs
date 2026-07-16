@@ -1,0 +1,163 @@
+---
+title: "Trace OpenCode with Langfuse"
+sidebarTitle: OpenCode
+logo: /images/integrations/opencode_icon.svg
+logoAppearance: multicolor
+description: "Trace OpenCode coding sessions — user turns, assistant generations, tool calls, retries, and reasoning — with Langfuse for comprehensive observability."
+category: Integrations
+---
+
+# OpenCode tracing with Langfuse
+
+> **What is OpenCode?** [OpenCode](https://opencode.ai) is an open-source AI coding agent that runs in your terminal (with desktop and IDE clients too). It understands your codebase, edits code, runs commands, and works across different model providers.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com/) is an open-source AI engineering platform. It helps teams trace agentic applications, debug issues, evaluate quality, and monitor costs in production.
+
+<Callout type="info" title="Install via the OpenCode plugin">
+The easiest way to set this up is the [Langfuse OpenCode Observability Plugin](https://github.com/langfuse/opencode-observability-plugin). Enable OpenCode's OpenTelemetry support and add the plugin in your OpenCode config:
+
+```json
+{
+  "experimental": {
+    "openTelemetry": true
+  },
+  "plugin": ["@langfuse/opencode-observability-plugin@latest"]
+}
+```
+
+Then add your Langfuse keys and restart OpenCode (full steps below).
+
+</Callout>
+
+## What can this integration trace?
+
+The plugin reads OpenCode's session telemetry through OpenCode's OpenTelemetry support and sends it to Langfuse. You can monitor:
+
+- **User turns**: every prompt you send to OpenCode
+- **Assistant generations**: each model response within a turn
+- **Tool calls**: the tools OpenCode invokes, with their inputs and outputs
+- **Retries**: retried generation steps
+- **Reasoning output**: the model's reasoning captured alongside its responses
+- **Compaction**: context compaction output, so you can see when and how the session was summarized
+- **Failed steps**: failed generation steps, surfaced so you can debug them
+
+## How it works
+
+OpenCode has experimental [OpenTelemetry](https://opencode.ai/docs) support. When it's enabled, plugins can receive the telemetry OpenCode emits for a session.
+
+1. You enable `experimental.openTelemetry` and add `@langfuse/opencode-observability-plugin` to the `plugin` array in your OpenCode config.
+2. On startup, OpenCode loads the plugin and streams session telemetry to it.
+3. The plugin converts turns, generations, tool calls, and reasoning into Langfuse traces and sends them to your project using the [Langfuse SDK](/docs/observability/sdk/overview).
+4. Credentials and options (`environment`, `userId`) are resolved from a config file or environment variables.
+
+## Quick start
+
+<Steps>
+
+### Set up Langfuse
+
+1. Sign up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-host Langfuse](/self-hosting).
+2. Create a new project and copy your API keys from the project settings.
+
+### Enable the plugin
+
+Enable OpenTelemetry and add the plugin in your `opencode.json` or `opencode.jsonc`:
+
+```json
+{
+  "experimental": {
+    "openTelemetry": true
+  },
+  "plugin": ["@langfuse/opencode-observability-plugin@latest"]
+}
+```
+
+Restart OpenCode after changing the config.
+
+### Add your Langfuse credentials [#set-credentials]
+
+Create a credentials file at `~/.config/opencode/opencode-langfuse.json`:
+
+```json
+{
+  "publicKey": "pk-lf-...",
+  "secretKey": "sk-lf-...",
+  "baseUrl": "https://cloud.langfuse.com",
+  "environment": "development",
+  "userId": "your-user-id"
+}
+```
+
+Only `publicKey` and `secretKey` are required. If `baseUrl` is omitted, the plugin uses `https://cloud.langfuse.com` (EU region); if `environment` is omitted, it uses `development`.
+
+Alternatively, set your credentials with environment variables:
+
+```bash
+export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+export LANGFUSE_BASEURL="https://cloud.langfuse.com"
+export LANGFUSE_ENVIRONMENT="development"
+export LANGFUSE_USER_ID="your-user-id"
+```
+
+If both `LANGFUSE_PUBLIC_KEY` and `LANGFUSE_SECRET_KEY` are set, the plugin uses the environment variables instead of reading the config file. Optional values can be supplied either way.
+
+### Use OpenCode
+
+Run OpenCode as usual. Sessions are sent to Langfuse as you work:
+
+```bash
+cd your-project
+opencode
+```
+
+### View traces in Langfuse
+
+Open your Langfuse project to see the captured traces. The structure mirrors how OpenCode actually works:
+
+- **Turn trace**: one trace per turn, from your prompt to the final answer.
+- **Generations**: one per model response in the turn, including the model's reasoning, the text response, and the tool calls it requested.
+- **Tool spans**: nested under the generation that triggered them, with input, output, and error status. Failed steps and retries are surfaced so you can spot where a turn went wrong.
+- **Environment and user**: traces are labeled with the configured [`environment`](/docs/observability/features/environments) and [`userId`](/docs/observability/features/users), so you can filter your own sessions or separate development from production.
+
+</Steps>
+
+## Environment variables
+
+| Variable               | Description                                                                                                                                                             | Required                       |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| `LANGFUSE_PUBLIC_KEY`  | Your Langfuse public key (`pk-lf-...`)                                                                                                                                  | Yes                            |
+| `LANGFUSE_SECRET_KEY`  | Your Langfuse secret key (`sk-lf-...`)                                                                                                                                  | Yes                            |
+| `LANGFUSE_BASEURL`     | Langfuse host. EU: `https://cloud.langfuse.com`, US: `https://us.cloud.langfuse.com`, Japan: `https://jp.cloud.langfuse.com`, HIPAA: `https://hipaa.cloud.langfuse.com` | No (defaults to EU)            |
+| `LANGFUSE_ENVIRONMENT` | Environment label for the traces (e.g. `production`)                                                                                                                    | No (defaults to `development`) |
+| `LANGFUSE_USER_ID`     | User ID attached to all traces                                                                                                                                          | No                             |
+
+Setting both `LANGFUSE_PUBLIC_KEY` and `LANGFUSE_SECRET_KEY` makes the plugin use environment variables instead of the `opencode-langfuse.json` config file.
+
+## Troubleshooting
+
+### No traces appearing in Langfuse
+
+1. **OpenTelemetry isn't enabled.** Confirm `experimental.openTelemetry` is `true` and `@langfuse/opencode-observability-plugin` is in the `plugin` array of your `opencode.json`, then restart OpenCode.
+2. **Credentials are missing.** Make sure `publicKey`/`secretKey` are set, either in `~/.config/opencode/opencode-langfuse.json` or via environment variables. Verify the public key starts with `pk-lf-`.
+3. **Region mismatch.** `baseUrl` (or `LANGFUSE_BASEURL`) must match the region your keys belong to.
+
+### Authentication errors
+
+Verify your API keys are correct and that `baseUrl` matches the region your keys belong to:
+
+- **EU region**: `https://cloud.langfuse.com`
+- **US region**: `https://us.cloud.langfuse.com`
+- **Japan region**: `https://jp.cloud.langfuse.com`
+- **HIPAA region**: `https://hipaa.cloud.langfuse.com`
+
+### Data privacy
+
+When enabled, the plugin sends completed OpenCode session telemetry to Langfuse, including prompts, assistant messages, reasoning output, and tool inputs and outputs. Don't enable tracing for sessions containing data you don't want stored in Langfuse.
+
+## Resources
+
+- [Langfuse OpenCode Observability Plugin (GitHub)](https://github.com/langfuse/opencode-observability-plugin)
+- [OpenCode documentation](https://opencode.ai/docs)
+- [OpenCode GitHub repository](https://github.com/anomalyco/opencode)
+- [Langfuse TypeScript SDK](/docs/observability/sdk/overview)

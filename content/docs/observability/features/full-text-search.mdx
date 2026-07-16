@@ -17,9 +17,13 @@ Full-text search lets you find all occurrences of a specific keyword or phrase a
 
 Use the search bar above the traces and observations tables to search across `input` and `output` content. Matching traces and observations are returned so you can quickly locate the run you are looking for and combine search with the existing filters and time range selectors.
 
+On the v4 Observations and Traces tables, full-text search is also available inline in the [Filter Search Bar](/docs/observability/features/filter-search-bar), alongside structured filters like `level:ERROR` and `latency:>2`.
+
 ## Performance [#performance]
 
 Search uses [ClickHouse full-text search](https://clickhouse.com/docs/engines/table-engines/mergetree-family/textindexes). Text indexes let Langfuse skip over data that cannot match a query before reading full observation payloads, which keeps search fast even for large projects with high-volume traces. You can read more in the [ClickHouse GA announcement](https://clickhouse.com/blog/full-text-search-ga-release).
+
+Because these indexes are token-based, a query matches whole words rather than substrings within them — `error` matches `error` but not `errors` — and a multi-word query matches as a contiguous phrase.
 
 ## Search via the API [#api]
 
@@ -58,7 +62,7 @@ Example exact metadata filter:
 ]
 ```
 
-Pass the JSON array as the URL-encoded `filter` query parameter on `GET /api/public/v2/observations`. See the [Observations API v2 docs](/docs/api-and-data-platform/features/observations-api#v2) and the [API reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations) for the full filter schema.
+Pass the JSON array as the URL-encoded `filter` query parameter on `GET /api/public/v2/observations`. See the [Observations API v2 docs](/docs/api-and-data-platform/features/observations-api#v2) and the [API reference](https://api.reference.langfuse.com/#tag/observations/GET/api/public/v2/observations) for the full filter schema.
 
 ## GitHub Discussions
 

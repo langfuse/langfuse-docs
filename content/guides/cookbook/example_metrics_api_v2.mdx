@@ -39,10 +39,10 @@ Get your API keys from your Langfuse project settings in [Langfuse Cloud](https:
 ```python
 import os
 
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"  # EU region
-# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com"  # US region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")  # EU region
+# os.environ.setdefault("LANGFUSE_BASE_URL", "https://us.cloud.langfuse.com")  # US region
 
 ```
 
@@ -192,4 +192,4 @@ score_summary_df
 
 You can adapt the same helper for other v2 views such as `scores-categorical`, add filters on fields like environment or trace name, or export the resulting `DataFrame` for downstream reporting.
 
-To explore the full query schema and supported fields, see the [Metrics API documentation](https://langfuse.com/docs/metrics/features/metrics-api#v2) and the [API reference](https://api.reference.langfuse.com/#tag/metricsv2/GET/api/public/v2/metrics).
+To explore the full query schema and supported fields, see the [Metrics API documentation](https://langfuse.com/docs/metrics/features/metrics-api#v2) and the [API reference](https://api.reference.langfuse.com/#tag/metrics/GET/api/public/v2/metrics).

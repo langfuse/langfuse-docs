@@ -2,10 +2,11 @@
 node_modules
 .pnpm-store
 .vercel
+node-compile-cache
 
-.env.local
-.env
-.env*.local
+.env*
+!.env.template
+!.env.example
 
 # next sitemap
 public/robots.txt
@@ -15,6 +16,9 @@ public/sitemap*.xml
 public/llms*.txt
 public/md-src
 content/workshop/
+
+# Generated from public/design.template.md by scripts/sync-design-tokens.js
+public/design.md
 
 # we use pnpm
 package-lock.json

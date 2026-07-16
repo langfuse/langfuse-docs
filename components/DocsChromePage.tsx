@@ -6,6 +6,7 @@ import type { TOCItemType } from "fumadocs-core/toc";
 import { DocsTocFooter } from "@/components/DocsTocFooter";
 import { DocBodyChrome } from "@/components/DocBodyChrome";
 import { DocsAndPageFooter } from "@/components/DocsAndPageFooter";
+import { DocsBreadcrumb } from "@/components/DocsBreadcrumb";
 import { getMDXComponents } from "@/mdx-components";
 
 type BodyChromeProps = Omit<ComponentProps<typeof DocBodyChrome>, "children">;
@@ -56,7 +57,7 @@ export async function DocsChromePage({
     <DocsPage
       toc={toc}
       lastUpdate={lastModified}
-      breadcrumb={{ includePage: true, includeRoot: true }}
+      breadcrumb={{ component: <DocsBreadcrumb /> }}
       tableOfContent={{
         footer: (
           <DocsTocFooter pageTitle={data.title} lastModified={lastModified} />

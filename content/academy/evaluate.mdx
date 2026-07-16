@@ -26,7 +26,7 @@ Manual evaluation is not a one-and-done step. Good production setups incorporate
 
 <ManualGuideCallout
   href="/guides/cookbook/error-analysis-llm-applications"
-  topic="error analysis"
+  topic="Error analysis"
   lede="Select your sample data, build an annotation queue, cluster failure categories, quantify failure rates, and decide what to do."
 />
 
@@ -64,7 +64,7 @@ This is the right method for qualities that require understanding language: whet
 LLM judges are imperfect and easy to get wrong. This means:
 
 - A model does not automatically grade things as a human expert would as they do not have the context of the expert
-- They need calibration against human preferences to verify they are measuring what you think they are measuring
+- They need [calibration](/guides/llm-as-a-judge-calibration-skill) against human preferences to verify they are measuring what you think they are measuring
 - They can share blind spots with your application's LLM, especially when the same model family is used for both
 
 These limitations aren't reasons to avoid LLM judges. An LLM judge that has been calibrated against human labels and is backed by code evaluator checks is a reliable evaluator.
@@ -160,23 +160,28 @@ If production behavior matches expectations, you can keep scaling with more conf
   title="More guides"
   guides={[
     {
+      href: "/guides/llm-as-a-judge-calibration-skill",
+      topic: "LLM-as-a-judge calibration",
+      lede: "Test whether your judge prompt agrees with how you would label cases, and iterate until it does.",
+    },
+    {
       href: "/guides/cookbook/evaluation_of_rag_with_ragas",
       topic: "RAG evaluation with RAGAS",
       lede: "Score retrieval and generation quality for a RAG application.",
     },
     {
       href: "/guides/cookbook/example_external_evaluation_pipelines",
-      topic: "external evaluation pipelines",
+      topic: "Writing scores to Langfuse from external evaluation pipelines",
       lede: "Fetch production traces, evaluate them outside Langfuse, and post scores back via the API.",
     },
     {
       href: "/guides/cookbook/example_evaluating_multi_turn_conversations",
-      topic: "evaluating multi-turn conversations",
+      topic: "Evaluating multi-turn conversations",
       lede: "Score quality across conversation turns in chat applications.",
     },
     {
       href: "/guides/cookbook/example_simulated_multi_turn_conversations",
-      topic: "simulated multi-turn conversations",
+      topic: "Simulated multi-turn conversations",
       lede: "Generate and evaluate simulated multi-turn scenarios.",
     },
   ]}
