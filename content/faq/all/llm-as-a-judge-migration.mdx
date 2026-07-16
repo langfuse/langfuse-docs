@@ -36,20 +36,20 @@ After upgrading to the [v4 data model](/docs/v4), input, output, and context are
 
 ### 1. Start the upgrade in Langfuse
 
-Open **Evaluation > LLM-as-a-Judge**, select the legacy evaluator, and start the upgrade. Langfuse reviews its filters and variable mappings, then recommends the appropriate assistant.
+Open **Evaluation > LLM-as-a-Judge**. You will be greeted with the upgrade screen, which walks you through all evaluators that need to be upgraded and recommends the appropriate assistant for each one.
 
 ### 2. Follow the recommended assistant path
 
 - **Langfuse Assistant:** Recommended when the evaluator can be upgraded by selecting an existing observation and translating its configuration. This is the fastest path and does not require manual UI setup.
 - **Coding assistant:** Recommended when the SDK or instrumentation must change first. Langfuse provides the relevant context and prompt to use in your coding editor.
 
-Some upgrades use both: update the instrumentation with a coding assistant, then return to Langfuse Assistant to select the correct observation and create the new evaluator.
+The upgrade screen and recommended assistant guide you through the full process. You do not need to recreate evaluator configurations manually in the UI.
 
 ### 3. Review and create the evaluator
 
-Review the proposed target observation, filters, and variable mappings. Create the observation-level evaluator, but keep the legacy evaluator available until you validate the results.
+Review the proposed target observation, filters, and variable mappings. When creating the observation-level evaluator, you can keep the legacy evaluator active to compare results or deactivate it immediately.
 
-## How scores change
+## How resulting evaluation scores might look different
 
 A trace-level evaluator produces one score per matching trace. An observation-level evaluator produces one score per matching observation.
 
@@ -61,26 +61,27 @@ If three observations in one trace match the filters, the upgraded evaluator pro
 
 ## Validate the upgrade
 
-1. Keep the legacy and observation-level evaluators active briefly.
-2. Confirm that the new evaluator receives the expected input, output, and context.
-3. Check that the number of matched observations and scores per trace is intentional.
-4. Deactivate the legacy evaluator once the new results are validated.
+1. Confirm that the new evaluator receives the expected input, output, and context.
+2. Check that the number of matched observations and scores per trace is intentional.
+3. If you kept the legacy evaluator active, compare the results and deactivate it when ready.
 
 If you need to revert, deactivate the new evaluator and reactivate the existing legacy evaluator. Historical evaluation results remain accessible.
 
-## How existing configurations are grouped
+## Optional: How configurations might change
 
-Langfuse uses the current variable mappings to recommend an upgrade path. You do not need to classify the evaluator yourself.
+The upgrade screen and recommended assistant guide you through every change. You do not need to classify or update configurations manually. Expand this section only if you want to understand the technical details.
 
 <details>
-<summary>View configuration cases and a before/after example</summary>
+<summary>View technical configuration cases and a before/after example</summary>
 
-| Current variable mapping                                       | How Langfuse handles it                                                                                                                                                                                    |
-| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`Observation` for every variable, all from one observation** | Configuration-only upgrade. Langfuse Assistant targets the same span or generation and translates the filters and variable mappings.                                                                       |
-| **`Trace` for every variable**                                 | Langfuse Assistant inspects representative traces and helps select the observation holding the equivalent input, output, and metadata. For end-to-end evaluations, this is often a root observation.       |
-| **A mix of `Trace` and one `Observation`**                     | Target that observation and make the trace fields available there via [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes) or an instrumentation update.                     |
-| **More than one `Observation`, with or without `Trace`**       | Update instrumentation first: write the required values to a root or dedicated evaluation observation, then target it directly. Any future multi-span support will also use the observation-centric model. |
+Langfuse groups existing configurations by their variable mappings and recommends an assistant based on the required change:
+
+| Current variable mapping                                       | Typical configuration change                                                                                                                                                           |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`Observation` for every variable, all from one observation** | Target the same span or generation and translate the filters and variable mappings.                                                                                                    |
+| **`Trace` for every variable**                                 | Select the observation holding the equivalent input, output, and metadata. For end-to-end evaluations, this is often a root observation.                                               |
+| **A mix of `Trace` and one `Observation`**                     | Target that observation and make the trace fields available there via [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes) or an instrumentation update. |
+| **More than one `Observation`, with or without `Trace`**       | Write the required values to a root or dedicated evaluation observation, then target it directly. Any future multi-span support will also use the observation-centric model.           |
 
 ### Before and after example
 
