@@ -59,10 +59,6 @@ The v2 Metrics API provides significant performance improvements through an opti
 
 The v2 Metrics API enforces a default `config.row_limit` of 100 rows per query to ensure consistent performance. You can specify a custom `config.row_limit` in your query to override this default, up to a maximum of 1,000 rows.
 
-### Rate Limits
-
-On Langfuse Cloud, the v2 Metrics API uses its own per-organization rate-limit bucket: 100 requests/day (Hobby), 100 requests/hour (Core), and 500 requests/hour (Pro/Enterprise, custom limits available). See the [API limits FAQ](/faq/all/api-limits) for details. Self-hosted instances have no enforced rate limits.
-
 ### High Cardinality Dimensions
 
 Certain dimensions like `id`, `traceId`, `userId`, and `sessionId` cannot be used for grouping in the v2 Metrics API. Grouping by these high cardinality fields is extremely expensive and rarely useful in practice. These dimensions remain available for filtering.
