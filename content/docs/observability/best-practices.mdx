@@ -56,6 +56,12 @@ For example
 
 Framework integrations typically set these types automatically. If you're instrumenting manually, you can set them via the `as_type` parameter (Python) or `asType` (JS/TS). See the [observation types docs](/docs/observability/features/observation-types) for a full list.
 
+### Is it nested correctly?
+
+A tool call should nest under the `generation` that decided to make it, rather than sitting next to it as a flat sibling, so the tree shows which action came from which decision.
+
+Framework integrations usually get this right automatically. If you're instrumenting manually, see [nesting observations](/docs/observability/sdk/instrumentation#nesting-observations).
+
 ### Is there noise you don't need?
 
 Not every observation in the tree is useful for understanding what your application did. HTTP spans, database queries, and framework internals often add clutter without giving you meaningful insight. If you see observations like these polluting your trace tree, you can [filter them out](/faq/all/unwanted-http-database-spans).
@@ -101,6 +107,12 @@ Typical input/output for `GENERATION` observations:
 - For a chatbot: the user message (input) and the assistant response (output).
 - For a RAG pipeline: the user query and the generated answer.
 - For a classification task: the text being classified and the predicted label.
+
+<Callout type="info">
+
+Most inputs/outputs can be rendered as a readable, role-labeled conversation rather than a raw JSON blob. If yours show up as raw JSON, you can take a look at the formatting: it should be a list of messages in the standard OpenAI format (each with a `role` and `content`), and it renders tool calls as cards only when they sit in an assistant message's `tool_calls` array with each call's `arguments` given as a JSON-encoded string (for example `"{\"location\": \"Paris\"}"`).
+
+</Callout>
 
 If your input and output fields are showing up empty unintentionally, see [why are the input and output of my trace empty?](/faq/all/empty-trace-input-and-output)
 
