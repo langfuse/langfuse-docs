@@ -121,11 +121,11 @@ model calls, tool calls, and other work.
 To make experiment data show correctly in Langfuse, model three levels of
 context in this order:
 
-| Level                | Purpose                                                                                                                    | How to apply it                      | Attributes                                                                                                                                                               |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Experiment context   | Propagates the experiment's identity to every span in every item trace, so Langfuse can synthesize them as one experiment. | Baggage                              | `langfuse.experiment.id`, `langfuse.experiment.name`, `langfuse.experiment.description`, optional `langfuse.experiment.dataset.id`, and `langfuse.experiment.metadata.*` |
-| Experiment item root | Identifies one item trace root and stores its input, expected output, and actual output.                                   | Attributes directly on the root span | `langfuse.observation.input`, `langfuse.observation.output`, `langfuse.experiment.item.expected_output`, and `langfuse.experiment.item.metadata.*`                       |
-| Item context         | Propagates one item's identity to the root and child spans in that item's trace.                                           | Root attributes, then Baggage        | `langfuse.experiment.item.id`, optional `langfuse.experiment.item.version`, and `langfuse.experiment.item.root_observation_id`                                           |
+| Level                | Purpose                                                                                                                    | How to apply it                      | Attributes                                                                                                                                                                                                |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Experiment context   | Propagates the experiment's identity to every span in every item trace, so Langfuse can synthesize them as one experiment. | Baggage                              | `langfuse.experiment.id`, `langfuse.experiment.name`, `langfuse.experiment.description`, optional `langfuse.experiment.dataset.id`, `langfuse.experiment.metadata.*`, and optional `langfuse.environment` |
+| Experiment item root | Identifies one item trace root and stores its input, expected output, and actual output.                                   | Attributes directly on the root span | `langfuse.observation.input`, `langfuse.observation.output`, `langfuse.experiment.item.expected_output`, and `langfuse.experiment.item.metadata.*`                                                        |
+| Item context         | Propagates one item's identity to the root and child spans in that item's trace.                                           | Root attributes, then Baggage        | `langfuse.experiment.item.id`, optional `langfuse.experiment.item.version`, and `langfuse.experiment.item.root_observation_id`                                                                            |
 
 Configure a `BaggageSpanProcessor` as described in the [Baggage propagation
 pattern](#recommended-use-opentelemetry-baggage-for-propagation).
@@ -134,17 +134,18 @@ show how each level is represented.
 
 ### 1. Experiment Context: Baggage Shared by All Item Traces
 
-Create experiment Baggage once. Start every item root with this Baggage and no
-active parent span: each item must remain a separate trace. Do not create an
-enclosing "experiment" span.
+Create experiment Baggage once. Start every item execution with this Baggage
+and no active parent span: each execution must remain a separate trace. Do not
+create an enclosing "experiment" span.
 
 ```text
 experimentBaggage = baggageFromAttributes({
-  "langfuse.experiment.id": experiment.id,
-  "langfuse.experiment.name": experiment.name,
+  "langfuse.experiment.id": experiment.id, // unique per experiment
+  "langfuse.experiment.name": experiment.name, // unique per experiment
   "langfuse.experiment.description": experiment.description,
   "langfuse.experiment.dataset.id": experiment.datasetId, // optional
   "langfuse.experiment.metadata.prompt_version": "v4",
+  "langfuse.environment": "experiment", // optional: use a separate environment for experiment traffic
 })
 ```
 
@@ -177,8 +178,8 @@ for each item:
 
   root.setAttributes({
     ...itemAttributes,
-    "langfuse.experiment.item.expected_output": jsonEncode(item.expectedOutput),
-    "langfuse.experiment.item.metadata.country": item.metadata.country,
+    "langfuse.experiment.item.expected_output": jsonEncode(item.expectedOutput), // optional
+    "langfuse.experiment.item.metadata.country": item.metadata.country, // optional
   })
 ```
 
@@ -223,9 +224,10 @@ root.end()
 Experiment runs often deserve a separate environment such as `experiment` so
 they do not mix with production traffic. If the exporter only sends experiment
 runs, set `langfuse.environment=experiment` as a resource attribute. If the
-same exporter also sends production traffic, set and propagate
-`langfuse.environment` on the item root and its child spans instead. See
-[Environments](/docs/observability/features/environments) for details.
+same exporter also sends production traffic, add `langfuse.environment` to the
+experiment Baggage. This applies it to every item trace and span in the
+experiment. See [Environments](/docs/observability/features/environments) for
+details.
 
 ## Ingestion Options
 
