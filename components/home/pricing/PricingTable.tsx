@@ -666,7 +666,7 @@ const sections: Section[] = [
       {
         name: "Monitors and Alerts",
         description:
-          "Threshold-based alerts on your LLM application metrics with notifications via Slack, webhooks, and GitHub Actions. Up to 20 monitors per organization on all plans. Self-hosted availability is planned for Langfuse v4 with an Enterprise license.",
+          "Threshold-based alerts on your LLM application metrics with notifications via Slack, webhooks, and GitHub Actions. Up to 20 monitors per organization on Langfuse Cloud. Self-hosted deployments require Langfuse v4 and have no monitor limit.",
         href: "/docs/metrics/features/monitors",
         tiers: {
           cloud: {
@@ -676,8 +676,8 @@ const sections: Section[] = [
             Enterprise: "20 monitors",
           },
           selfHosted: {
-            "Open Source": false,
-            Enterprise: "20 monitors (Langfuse v4+)",
+            "Open Source": "Langfuse v4+",
+            Enterprise: "Langfuse v4+",
           },
         },
       },
