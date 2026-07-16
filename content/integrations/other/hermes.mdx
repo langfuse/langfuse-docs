@@ -1,13 +1,13 @@
 ---
 source: ⚠️ Jupyter Notebook
-title: Integrate Langfuse with Hermes Agent
+title: Hermes Agent tracing with Langfuse
 sidebarTitle: Hermes Agent
 logo: /images/integrations/hermes_icon.png
 description: Trace and debug Hermes Agent conversations, LLM calls, and tool usage with Langfuse observability.
 category: Integrations
 ---
 
-# Integrate Langfuse with Hermes Agent
+# Hermes Agent tracing with Langfuse
 
 This notebook shows how to integrate **Langfuse** with **Hermes Agent** to trace, debug, and evaluate your agent's conversations, LLM calls, and tool usage.
 
@@ -45,9 +45,9 @@ The cell below sets the same credentials inside this Python kernel so we can qui
 import os
 
 # Get keys for your project from the project settings page: https://langfuse.com/cloud
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Reminder: for the Hermes CLI itself, place the same credentials in ~/.hermes/.env

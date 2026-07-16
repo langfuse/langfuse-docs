@@ -22,10 +22,10 @@ Langfuse is now observations-first. Queries that used to require expensive joins
 
 **How to adopt:**
 
-- **SDK:** Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) / [JS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5). Replace trace update calls with `propagate_attributes()`.
+- **SDK:** Upgrade to [Python SDK v4.7.0+](/docs/observability/sdk/upgrade-path/python-v3-to-v4) / [JS/TS SDK v5.4.0+](/docs/observability/sdk/upgrade-path/js-v4-to-v5). Replace trace update calls with `propagate_attributes()`.
 - **OTEL:** Set the `x-langfuse-ingestion-version: 4` HTTP header on your span exporter. Propagate trace attributes to _all_ observations. [See setup guide](/integrations/native/opentelemetry)
 - **UI:** If your organization was created before April 14, 2026, 14:00 UTC (15:00 CET), enable the **Preview** toggle (bottom-left) to opt in. Organizations created on/after this cutoff are already on "Fast Preview" and do not see the toggle. Filter observations directly in the new unified table and create saved views for productive defaults. [See saved views guide](/faq/all/explore-observations-in-v4)
-- **Evals:** Migrate evals to the observation level. [See evals migration guide](/faq/all/llm-as-a-judge-migration))
+- **Evals:** Migrate LLM-as-a-Judge evals to the observation level. [See evals migration guide](/faq/all/llm-as-a-judge-migration)
 
 ---
 
@@ -85,11 +85,11 @@ Data from SDKs `langfuse-js` < `5.0.0`, `langfuse-python` < `4.0.0`, or direct O
 
 To take advantage of the new data model and explore your data in real time, use one of these ingestion paths:
 
-- **Python SDK:** v4 ([migration guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4))
-- **JS/TS SDK:** v5 ([migration guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5))
+- **Python SDK:** v4.7.0+ ([migration guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4))
+- **JS/TS SDK:** v5.4.0+ ([migration guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5))
 - **Direct OpenTelemetry ingestion:** set `x-langfuse-ingestion-version: 4` on your OTEL span exporter ([OpenTelemetry setup](/integrations/native/opentelemetry))
 
-For SDK users, the key change is that `update_current_trace()` and `updateActiveTrace()` are replaced by `propagate_attributes()`, which automatically pushes attributes like `user_id`, `session_id`, `metadata`, and `tags` to all child observations.
+For SDK users, the key change is that `update_current_trace()` and `updateActiveTrace()` are replaced by `propagate_attributes()`, which automatically pushes attributes like `user_id`, `session_id`, `metadata`, `tags`, and request-scoped `environment` in the Python SDK to all child observations.
 
 ### Optional: Migrate LLM-as-a-judge evaluations
 
@@ -120,6 +120,8 @@ The new [Observations API v2](/docs/api-and-data-platform/features/observations-
 ### Faster evaluation workflows
 
 [Observation-level evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) execute in seconds as we do not need to query ClickHouse for each evaluation anymore.
+
+Observation-level evaluators only use data on the observation they run against. They do not automatically read sibling or child observations from the same trace. If you need to judge an overall application or agent invocation, target a root observation that records the overall input and output, and write any additional context the judge needs onto that same observation.
 
 ## Under the hood [#under-the-hood]
 

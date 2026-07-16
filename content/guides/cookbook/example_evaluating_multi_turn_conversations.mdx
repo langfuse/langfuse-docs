@@ -57,13 +57,13 @@ First you need to install Langfuse via pip and then set the environment variable
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-123"
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-123"
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-123")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-123")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your openai key
-os.environ["OPENAI_API_KEY"] = 'sk-proj-123'
+os.environ.setdefault("OPENAI_API_KEY", 'sk-proj-123')
 ```
 
 Now we'll create a simple cooking assistant chatbot that uses OpenAI as the LLM and trace it with Langfuse.
@@ -141,6 +141,7 @@ We'll now add a few conversation traces to Langfuse.
 
 <Callout type="info">
    Technically, we're creating fake/synthetic conversation examples here, not using real ones from actual users. Creating synthetic conversations is a different evaluation method that we'll explain separately in another post. For now, let's pretend these are real conversations from your chatbot.
+
 </Callout>
 
 

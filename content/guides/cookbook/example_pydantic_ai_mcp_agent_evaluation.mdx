@@ -20,6 +20,7 @@ This cycle of reasoning, action, environment interaction, and feedback continues
 
 <Frame>
 ![LLM Agent](/images/cookbook/example_pydantic_ai_mcp_agent_evaluation/agent-overview.png)
+
 </Frame>
 
 ## Why Agent Evaluation Matters
@@ -36,6 +37,7 @@ The task is frequently underspecified: prompts and examples don't clearly encode
 
 <Frame>
 ![LLM Agent](/images/cookbook/example_pydantic_ai_mcp_agent_evaluation/evaluations.png)
+
 </Frame>
 
 
@@ -43,30 +45,31 @@ The task is frequently underspecified: prompts and examples don't clearly encode
 
 Agent evaluation is not a one-time activity — it evolves as your agent matures. The process has three distinct phases:
 
-**Phase 1: Early Development (Manual Tracing)**  
+**Phase 1: Early Development (Manual Tracing)**\
 When you're first building an agent, the most valuable thing you can do is inspect its [traces](/docs/observability/overview). Manual tracing gives you immediate insight into the agent's reasoning, tool calls, and failure points. Use Langfuse's trace viewer to step through each action the agent took.
 
-**Phase 2: First Users (Online Evaluation)**  
+**Phase 2: First Users (Online Evaluation)**\
 As real users interact with your agent, implement feedback mechanisms — like thumbs-up/thumbs-down buttons — to flag problematic traces for review. You can also set up automated [online evaluators](/docs/evaluation/core-concepts#online-evaluation) that score production traces in real time.
 
-**Phase 3: Scaling (Offline Evaluation)**  
+**Phase 3: Scaling (Offline Evaluation)**\
 The final phase, and the focus of this guide, is creating an automated offline evaluation pipeline. As you scale, you can't manually review every trace. You need a "gold standard" [dataset](/docs/evaluation/experiments/datasets) of inputs and their expected outputs or trajectories. This benchmark allows you to [run experiments](/docs/evaluation/experiments/experiments-via-sdk), prevent regressions, and confidently iterate on prompts, models, and tool configurations.
 
 <Frame>
 ![LLM Agent](/images/cookbook/example_pydantic_ai_mcp_agent_evaluation/issues.png)
+
 </Frame>
 
 ## Three Agent Evaluation Strategies
 
 This guide covers three practical, automated evaluation strategies. Each operates at a different level of granularity and answers a different question about your agent's behavior.
 
-**1) Final Response Evaluation (Black-Box):**  
+**1) Final Response Evaluation (Black-Box):**\
 This method evaluates only the user's input and the agent's final answer, ignoring the internal steps entirely. It's the simplest to set up and works with any agent framework, but it cannot tell you *why* a failure occurred.
 
-**2) Trajectory Evaluation (Glass-Box):**  
+**2) Trajectory Evaluation (Glass-Box):**\
 This method checks whether the agent took the "correct path." It compares the agent's actual sequence of tool calls against the expected sequence from a benchmark dataset. When the final answer is wrong, trajectory evaluation pinpoints exactly where in the reasoning process the failure occurred.
 
-**3) Single Step Evaluation (White-Box):**  
+**3) Single Step Evaluation (White-Box):**\
 This is the most granular evaluation strategy, acting like a unit test for agent reasoning. Instead of running the whole agent, it tests each decision-making step in isolation to see if it produces the expected next action. This is especially useful for validating that search queries, API parameters, or tool selections are correct.
 
 ## Implementation: Evaluate an Agent Step-by-Step
@@ -92,12 +95,12 @@ Get your Langfuse API keys from [project settings](https://cloud.langfuse.com).
 ```python
 import os
 
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com"  # EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")  # EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
-os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...")
 ```
 
 ### Step 2: Enable Langfuse Tracing
@@ -240,6 +243,7 @@ Tests output quality. Works regardless of internal implementation.
 
 <Frame>
 ![Final Response Evaluation](/images/cookbook/example_pydantic_ai_mcp_agent_evaluation/eval-final-response.png)
+
 </Frame>
 
 **Prompt template:**
@@ -265,6 +269,7 @@ You are a teacher grading a student based on the factual correctness of their st
 
 - Response: {{response}}
 - Facts to verify: {{facts_to_verify}}
+
 ```
 
 #### 2. Trajectory Evaluation (Glass Box)
@@ -273,6 +278,7 @@ Verifies the agent used the correct sequence of tools.
 
 <Frame>
 ![Trajectory Evaluation](/images/cookbook/example_pydantic_ai_mcp_agent_evaluation/eval-trajectory.png)
+
 </Frame>
 
 **Prompt template:**
@@ -309,6 +315,7 @@ Validates search query quality when agents search documentation.
 
 <Frame>
 ![Trajectory Evaluation](/images/cookbook/example_pydantic_ai_mcp_agent_evaluation/eval-single-step.png)
+
 </Frame>
 
 **Prompt template:**
@@ -424,7 +431,7 @@ Now that you have a working agent evaluation pipeline, here are ways to extend i
 - **Scale your dataset** with [synthetic data generation](/guides/cookbook/example_synthetic_datasets) to cover more edge cases
 - **Add online evaluation** to score production traces in real time using [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)
 - **Evaluate multi-turn conversations** if your agent handles [multi-turn dialogue](/guides/cookbook/example_evaluating_multi_turn_conversations)
-- **Monitor agent performance** over time with [custom dashboards](/docs/metrics/features/custom-dashboards) and [score analytics](/docs/evaluation/scores/score-analytics)
+- **Monitor agent performance** over time with [custom dashboards](/docs/metrics/features/custom-dashboards) and [score analytics](/docs/evaluation/evaluation-methods/score-analytics)
 - **Explore the full evaluation roadmap** in our [comprehensive evaluation guide](/blog/2025-11-12-evals)
 
 ## Frequently Asked Questions

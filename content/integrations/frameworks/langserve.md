@@ -6,7 +6,7 @@ sidebarTitle: Langserve
 logo: /images/integrations/langchain_icon.png
 ---
 
-# Cookbook: Langserve Integration (SDK v2)
+# Cookbook: Langserve Integration
 
 [Langserve](https://python.langchain.com/docs/langserve/) (Python)
 
@@ -20,10 +20,8 @@ This cookbook demonstrates how to trace applications deployed via Langserve with
 
 ## Setup
 
-_**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
-
 ```python
-!pip install fastapi sse_starlette httpx langserve "langfuse<3.0.0" langchain-openai langchain
+%pip install fastapi sse_starlette httpx langserve langfuse langchain-openai langchain --upgrade
 ```
 
 ```python
@@ -31,31 +29,32 @@ import os
 
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
-os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your openai key
-os.environ["OPENAI_API_KEY"] = ""
+os.environ.setdefault("OPENAI_API_KEY", "")
 ```
 
 ## Simple LLM Call Example
 
-Initialize the Langfuse client and configure the LLM with Langfuse as callback handler. Add to Fastapi via Langserve's `add_routes()`.
+Initialize the Langfuse `CallbackHandler` (authenticated via the environment variables set above) and configure the LLM with it as callback handler. Add to Fastapi via Langserve's `add_routes()`.
 
 ```python
 from langchain_openai import ChatOpenAI
 from langchain_core.runnables.config import RunnableConfig
-from langfuse import Langfuse
-from langfuse.callback import CallbackHandler
+from langfuse import get_client
+from langfuse.langchain import CallbackHandler
 from fastapi import FastAPI
 from langserve import add_routes
 
+# Initialize Langfuse CallbackHandler for Langchain (tracing)
 langfuse_handler = CallbackHandler()
 
 # Tests the SDK connection with the server
-langfuse_handler.auth_check()
+get_client().auth_check()
 
 llm = ChatOpenAI()
 
@@ -93,8 +92,8 @@ Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trac
 ## LCEL example
 
 ```python
-from langchain.prompts import ChatPromptTemplate
-from langchain.schema import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
 from langserve import add_routes
 
 # Create Chain

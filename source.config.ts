@@ -11,6 +11,7 @@ import monokaiProLightRaw from "./lib/themes/monokai-pro-light.json";
 const monokaiProLight = monokaiProLightRaw as unknown as any;
 import remarkGfm from "remark-gfm";
 import { remarkMdxMermaid } from "fumadocs-core/mdx-plugins";
+import { remarkCodeFilename } from "./lib/remark-code-filename.mjs";
 import { mdxJsxToMarkdown } from "mdast-util-mdx-jsx";
 import { z } from "zod";
 
@@ -136,6 +137,7 @@ export const faq = defineDocs({
 
 const integrationsFrontmatterSchema = sidebarFrontmatterSchema.extend({
   logo: z.string().nullish(),
+  logoAppearance: z.enum(["dark", "light", "multicolor"]).optional(),
 });
 
 export const integrations = defineDocs({
@@ -190,6 +192,20 @@ export const workshop = defineDocs({
   docs: { schema: sidebarFrontmatterSchema },
 });
 
+// SEO/GEO resources section (e.g. /resources/engineering). Supports optional
+// tags so the index listing can group articles by category (comparisons,
+// migrations, …).
+const resourcesFrontmatterSchema = sidebarFrontmatterSchema.extend({
+  tags: z.array(z.string()).optional(),
+});
+
+export const resources = defineDocs({
+  dir: "content/resources",
+  docs: {
+    schema: resourcesFrontmatterSchema,
+  },
+});
+
 export const marketing = defineDocs({
   dir: "content/marketing",
   docs: { schema: marketingFrontmatterSchema },
@@ -198,7 +214,7 @@ export const marketing = defineDocs({
 export default defineConfig({
   plugins: [lastModified()],
   mdxOptions: {
-    remarkPlugins: [remarkGfm, remarkMdxMermaid],
+    remarkPlugins: [remarkGfm, remarkMdxMermaid, remarkCodeFilename],
     providerImportSource: "@/mdx-components",
     // Disable remark-image: many content files reference remote images via https://
     // and the plugin tries to fetch dimensions at compile time, causing build failures

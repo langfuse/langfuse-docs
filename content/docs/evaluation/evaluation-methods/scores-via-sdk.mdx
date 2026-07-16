@@ -6,7 +6,7 @@ sidebarTitle: Scores via API/SDK
 
 # Scores via API/SDK
 
-You can use the Langfuse SDKs or API to add [scores](/docs/evaluation/scores/overview) to traces, observations, sessions and dataset runs. This is an evaluation method that allows to set up custom evaluation workflows and extend the scoring capabilities of Langfuse. See the [data model](/docs/evaluation/scores/data-model#scores) for full details on the score object.
+You can use the Langfuse SDKs or API to add [scores](/docs/evaluation/scores/overview) to traces, observations, sessions and dataset runs. This is an evaluation method that allows you to set up custom evaluation workflows and extend the scoring capabilities of Langfuse. See the [data model](/docs/evaluation/scores/data-model#scores) for full details on the score object.
 
 If you want Langfuse to run deterministic Python or TypeScript logic for you, use [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators). Use this page when your application, pipeline, or CI job computes scores and sends them to Langfuse via API or SDK.
 
@@ -138,7 +138,7 @@ with langfuse.start_as_current_observation(as_type="span", name="my-operation"):
 
 </Tab>
 <Tab>
-Boolean scores must be provided as a float. The value's string equivalent will be automatically populated and is accessible on read. See [API reference](/docs/api) for more details on POST/GET scores endpoints.
+Boolean scores must be provided as a float, where `1` is true and `0` is false. When read via the [v3 scores API](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores), the value is returned as a boolean. See [API reference](/docs/api) for more details on POST/GET scores endpoints.
 
 ```python
 from langfuse import get_client
@@ -295,7 +295,7 @@ await langfuse.flush();
 
 </Tab>
 <Tab>
-Boolean scores must be provided as a float. The value's string equivalent will be automatically populated and is accessible on read. See [API reference](/docs/api) for more details on POST/GET scores endpoints.
+Boolean scores must be provided as a float, where `1` is true and `0` is false. When read via the [v3 scores API](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores), the value is returned as a boolean. See [API reference](/docs/api) for more details on POST/GET scores endpoints.
 
 ```ts
 import { LangfuseClient } from "@langfuse/client";
@@ -345,7 +345,7 @@ await langfuse.flush();
 </Tab>
 <Tab>
 
-You can also create scores directly via the [REST API](https://api.reference.langfuse.com/#tag/score/POST/api/public/scores). Authenticate using HTTP Basic Auth with your Langfuse Public Key as username and Secret Key as password.
+You can also create scores directly via the [REST API](https://api.reference.langfuse.com/#tag/legacyscorev1/POST/api/public/scores). Authenticate using HTTP Basic Auth with your Langfuse Public Key as username and Secret Key as password.
 
 <Tabs items={["Numeric", "Categorical", "Boolean", "Text"]}>
 <Tab>
@@ -385,7 +385,7 @@ curl -X POST https://cloud.langfuse.com/api/public/scores \
 
 </Tab>
 <Tab>
-Boolean scores must be provided as a float (`0` or `1`). The value's string equivalent will be automatically populated and is accessible on read.
+Boolean scores must be provided as a float, where `1` is true and `0` is false. When read via the [v3 scores API](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores), the value is returned as a boolean.
 
 ```bash
 curl -X POST https://cloud.langfuse.com/api/public/scores \
@@ -424,6 +424,37 @@ curl -X POST https://cloud.langfuse.com/api/public/scores \
 
 </Tab>
 </LangTabs>
+
+### Browser score ingestion [#browser-score-ingestion]
+
+Use `@langfuse/browser` when the score is created in frontend code, for example thumbs up/down user feedback, star ratings, or client-side quality signals. The browser SDK only needs a Langfuse public key and sends each score immediately via the ingestion API. Do not expose a secret key in browser code.
+
+For backend services, scripts, CI jobs, and evaluation pipelines, use `@langfuse/client` as shown in the JS/TS SDK examples above.
+
+```bash
+npm install @langfuse/browser
+```
+
+```ts
+import { LangfuseBrowserClient } from "@langfuse/browser";
+
+const langfuse = new LangfuseBrowserClient({
+  publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY!,
+  baseUrl: process.env.NEXT_PUBLIC_LANGFUSE_BASE_URL, // optional, defaults to https://cloud.langfuse.com
+});
+
+await langfuse.score({
+  traceId: message.traceId,
+  observationId: message.generationId, // optional
+  id: `user-feedback-${message.traceId}`, // optional, use as an idempotency key
+  name: "user-feedback",
+  value: 1, // 1 for positive, 0 for negative
+  dataType: "BOOLEAN",
+  comment: "Helpful answer", // optional
+});
+```
+
+`score()` returns `{ id }` after ingestion succeeds. No `flush()` call is required.
 
 ### Session-level Scores
 
@@ -485,13 +516,17 @@ curl -X POST https://cloud.langfuse.com/api/public/scores \
 
 ## Advanced
 
-### Preventing Duplicate Scores
+### Preventing Duplicate Scores [#preventing-duplicate-scores]
 
 By default, Langfuse allows for multiple scores of the same `name` on the same trace. This is useful if you'd like to track the evolution of a score over time or if e.g. you've received multiple user feedback scores on the same trace.
 
-In some cases, you want to prevent this behavior or update an existing score. This can be achieved by creating an **idempotency key** on the score and passing this as an `id` (JS/TS) / `score_id` (Python) when creating the score, for example `trace_id-score_name`.
+In some cases, you want to prevent this behavior or overwrite an existing score. A score is identified by three fields — its `id`, its `name`, and its date (`toDate(timestamp)`) — and a new score only replaces an existing one when all three match. To achieve this, create an **idempotency key** and pass it as the `id` (JS/TS) / `score_id` (Python) when creating the score (for example `trace_id-score_name`), and keep the `name` and `timestamp` unchanged across calls. If any of the three differs — for example the same `id` with a different `name` — you get an additional score rather than a replacement.
 
-Note that if you expect API calls for the same score to be 30+ days apart, you should also use the same timestamp. See [How to update traces, observations, and scores](/faq/all/tracing-data-updates#updating-traces-observations-and-scores) for more details.
+<Callout type="warning">
+Do not send partial score updates (only the changed fields) and rely on Langfuse to merge them into the existing record. This merge only happens for a limited window after creation, is deprecated, and will be removed. Always send the complete score.
+</Callout>
+
+See [How to update traces, observations, and scores](/faq/all/tracing-data-updates#updating-scores) for more details on Langfuse's immutable data model.
 
 ### Enforcing a Score Config
 
@@ -745,7 +780,7 @@ await langfuse.flush();
 </Tab>
 <Tab>
 
-You can also enforce score configs via the [REST API](https://api.reference.langfuse.com/#tag/score/POST/api/public/scores) by providing a `configId`.
+You can also enforce score configs via the [REST API](https://api.reference.langfuse.com/#tag/legacyscorev1/POST/api/public/scores) by providing a `configId`.
 
 <Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores", "Text Scores"]}>
 <Tab>
@@ -842,7 +877,7 @@ Certain score properties might be inferred based on your input:
 
 - **If you don't provide a score data type** it will always be inferred. See tables below for details.
 - **For boolean and categorical scores**, we will provide the score value in both numerical and string format where possible. The score value format that is not provided as input, i.e. the translated value is referred to as the inferred value in the tables below.
-- **On read for boolean scores both** numerical and string representations of the score value will be returned, e.g. both 1 and True.
+- **On read via the [v3 scores API](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores)**, boolean scores are returned as a single boolean `value`.
 - **For categorical scores**, the string representation is always provided and a numerical mapping of the category will be produced only if a `ScoreConfig` was provided.
 
 Detailed Examples:
@@ -903,18 +938,18 @@ For example, let's assume you'd like to ingest a text score to capture **reviewe
 
 ## Update Existing Scores via API/SDKs [#update]
 
-When creating a score, you can provide an optional `id` (JS/TS) / `score_id` (Python) parameter. This will update the score if it already exists within your project.
+When creating a score, you can provide an optional `id` (JS/TS) / `score_id` (Python) parameter. A re-ingested score overwrites an existing one only when its `id`, `name`, and `timestamp` (at date granularity, `toDate(timestamp)`) all match — a matching `id` alone is not sufficient, and any difference creates a duplicate instead of an update.
 
-If you want to update a score without needing to fetch the list of existing scores from Langfuse, you can set your own `id` parameter as an idempotency key when initially creating the score.
+To overwrite a score without fetching existing scores first, set a stable `id` as an idempotency key when initially creating the score, and keep the `name` and `timestamp` unchanged on subsequent calls. See [Preventing Duplicate Scores](#preventing-duplicate-scores) for details.
 
 ## Related guides
 
 <ManualGuideList
   guides={[
     {
-      href: "/guides/cookbook/user-feedback",
+      href: "/guides/user-feedback-loop",
       topic: "Collecting user feedback",
-      lede: "Collect in-app feedback from your users on application quality or performance, captured in the frontend via our Browser SDK.",
+      lede: "Capture explicit and implicit user feedback as scores on your traces, including in-app ratings sent via our Browser SDK.",
     },
     {
       href: "/guides/cookbook/example_external_evaluation_pipelines",

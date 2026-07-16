@@ -31,7 +31,6 @@ import {
 } from "@/components/ui/hover-card";
 import { TrustedBy } from "../components/TrustedBy";
 import { trustedByData } from "@/data/trusted-by";
-import Image from "next/image";
 import { isCloudAppHref } from "@/lib/google-ads";
 
 // Reusable graduated pricing text with calculator link
@@ -161,7 +160,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Data retention management",
         "Unlimited annotation queues",
         "High rate limits",
-        "SOC2 & ISO27001 reports, BAA available (HIPAA)",
+        "SOC2 & ISO27001 reports, HIPAA-ready region",
         "Prioritized in-app support",
       ],
       addOn: {
@@ -237,23 +236,8 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       id: "tier-self-hosted-enterprise",
       href: "/talk-to-us?deployment=self-hosted",
       featured: false,
-      pillClassName: "bg-[#FAFF6A] text-[#1A1A1A]",
       description:
         "Dedicated Langfuse deployment with enterprise capabilities and support.",
-      pill: (
-        <>
-          <span className="inline-flex rounded-sm p-0.5">
-            <Image
-              src="/images/logos/clickhouse_icon.svg"
-              alt=""
-              width={14}
-              height={14}
-              className="size-3.5 rounded-[2px]"
-            />
-          </span>
-          ClickHouse Cloud / BYOC / Private
-        </>
-      ),
       price: "Custom Pricing",
       mainFeatures: [
         "All Open Source features plus management APIs, project-level RBAC, data retention policies, and audit logs",
@@ -738,13 +722,25 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Rate limit (metrics api)",
+        name: "Rate limit (Metrics API v2)",
         href: "/faq/all/api-limits",
         tiers: {
           cloud: {
             Hobby: "100 requests / day",
-            Core: "200 requests / day",
-            Pro: "2000 requests / day",
+            Core: "100 requests / hour",
+            Pro: "500 requests / hour",
+            Enterprise: "Custom",
+          },
+        },
+      },
+      {
+        name: "Rate limit (legacy Metrics API)",
+        href: "/faq/all/api-limits",
+        tiers: {
+          cloud: {
+            Hobby: "100 requests / day",
+            Core: "2,000 requests / day",
+            Pro: "2,000 requests / day",
             Enterprise: "Custom",
           },
         },
@@ -1016,7 +1012,7 @@ const sections: Section[] = [
           cloud: {
             Hobby: "US, EU, or JP",
             Core: "US, EU, or JP",
-            Pro: "US, EU, or JP",
+            Pro: "US, EU, JP, or HIPAA",
             Enterprise: "US, EU, JP, or HIPAA",
           },
         },
@@ -1249,7 +1245,7 @@ const sections: Section[] = [
       },
       {
         name: "Data processing agreement (GDPR)",
-        href: "/security/dpa",
+        href: "/dpa",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
         },
@@ -1268,7 +1264,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "HIPAA compliance",
+        name: "HIPAA-ready region",
         href: "/security/hipaa",
         tiers: {
           cloud: {

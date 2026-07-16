@@ -928,6 +928,17 @@ ul[data-gh-discussions-list] {
   background: var(--surface-2);
   color: var(--text-primary);
   font-variant-numeric: ordinal;
+  font-variant-ligatures: none;
+  font-feature-settings:
+    "liga" 0,
+    "calt" 0;
+  padding: 0 0.25rem;
+}
+
+.prose
+  table
+  :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  line-height: 1.5rem;
 }
 
 /* Links whose primary label is inline <code> (e.g. [`api()`](/ref)): underline
@@ -1203,4 +1214,19 @@ inkeep-portal .inkeep-widget-vars {
   --ikp-font-family-heading: var(--font-sans);
   --ikp-font-family-body: var(--font-sans);
   --ikp-font-family-mono: var(--font-mono);
+}
+
+/*
+ * Blockquote callouts: disable the automatic typographic quotation marks.
+ * fumadocs-ui's prose typography (css/dist/style.css) styles `.prose blockquote`
+ * with `quotes: "\201C""\201D""\2018""\2019"` and injects them via
+ * `content: open-quote` / `content: close-quote` on the first/last paragraph.
+ * We use blockquotes as plain callout boxes, so the marks are unwanted.
+ */
+.prose blockquote {
+  quotes: none;
+}
+.prose blockquote p:first-of-type::before,
+.prose blockquote p:last-of-type::after {
+  content: none;
 }

@@ -7,9 +7,10 @@ try {
   // File not yet generated (e.g. first run without prebuild). Silently ignore.
 }
 
-// All valid content page paths — used for additionalPaths so that
-// server-rendered pages (blog, changelog, faq, handbook, etc.) that are NOT
-// statically pre-built are still included in the sitemap.
+// Per-page metadata { loc, lastmod, title, description } for every content
+// page — used for additionalPaths so that server-rendered pages (blog,
+// changelog, faq, handbook, etc.) that are NOT statically pre-built are still
+// included in the sitemap, each with an accurate <lastmod> derived from git.
 let allPages = [];
 try {
   allPages = require("./.sitemap-all-pages.json");
@@ -19,29 +20,50 @@ try {
 
 const BASE_URL = process.env.CF_PAGES_URL ?? "https://langfuse.com";
 
+// Tolerate the legacy string[] shape in case a stale cache is present.
+const pageEntries = allPages.map((p) =>
+  typeof p === "string" ? { loc: p } : p,
+);
+const pageByLoc = new Map(pageEntries.map((p) => [p.loc, p]));
+
+// The homepage is not a content page, so it has no frontmatter date. Use the
+// most recent content change as a sensible freshness signal for "/".
+const latestLastmod = pageEntries.reduce((max, p) => {
+  if (!p.lastmod) return max;
+  return !max || Date.parse(p.lastmod) > Date.parse(max) ? p.lastmod : max;
+}, undefined);
+
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
   siteUrl: BASE_URL,
   generateRobotsTxt: true,
   changefreq: "daily",
+  // Never emit build-time timestamps. With autoLastmod, next-sitemap stamps
+  // every page with `new Date()` on each build, making all <lastmod> values
+  // identical and useless as a freshness signal for search engines and AI
+  // crawlers. The real per-page lastmod is supplied via additionalPaths below.
+  autoLastmod: false,
   // Provide every content page explicitly so server-rendered pages
-  // (not statically built) are included. next-sitemap deduplicates,
-  // so static pages appearing in both discovery and here is fine.
+  // (not statically built) are included. next-sitemap deduplicates: when a page
+  // is also discovered from the build output, the additionalPaths entry below
+  // overwrites its fields, so our accurate lastmod wins.
   additionalPaths: async () => {
+    const rootLastmod = pageByLoc.get("/")?.lastmod || latestLastmod;
     const entries = [
       // Root
       {
         loc: "/",
         priority: 1,
         changefreq: "daily",
-        lastmod: new Date().toISOString(),
+        ...(rootLastmod ? { lastmod: rootLastmod } : {}),
       },
     ];
-    for (const route of allPages) {
+    for (const page of pageEntries) {
+      if (page.loc === "/") continue; // already added above with priority
       entries.push({
-        loc: route,
+        loc: page.loc,
         changefreq: "daily",
-        lastmod: new Date().toISOString(),
+        ...(page.lastmod ? { lastmod: page.lastmod } : {}),
       });
     }
     return entries;

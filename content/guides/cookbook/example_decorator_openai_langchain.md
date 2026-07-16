@@ -1,5 +1,5 @@
 ---
-title: Example Decorator Openai Langchain
+title: "Example: Langfuse Decorator + OpenAI Integration + Langchain Integration"
 description: LLM Rap Battle traced using the Langfuse Decorator, OpenAI & Langchain Integration
 category: Integrations
 ---
@@ -16,13 +16,13 @@ category: Integrations
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your openai key
-os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...")
 ```
 
 ## Imports
@@ -124,25 +124,25 @@ print("\nSummary: " + rap_summary)
 
     Topic: artificial general intelligence
     
-    Rap 0: I'm kickin' it with AGI, the future's in my sights,  
-    Machines getting smarter, like they got new insights,  
-    Beyond narrow AI, it's a brand new domain,  
-    Computers thinkin' freely, sharpenin' their brain.  
+    Rap 0: I'm kickin' it with AGI, the future's in my sights,\
+    Machines getting smarter, like they got new insights,\
+    Beyond narrow AI, it's a brand new domain,\
+    Computers thinkin' freely, sharpenin' their brain.\
     
-    Rap 1: Flippin' through algorithms, a digital symphony,  
-    These code lines are flowin', create new epiphanies,  
-    Boundless like the universe, we're breakin' every mold,  
-    With AGI in the lab, we're changin' stories untold.  
+    Rap 1: Flippin' through algorithms, a digital symphony,\
+    These code lines are flowin', create new epiphanies,\
+    Boundless like the universe, we're breakin' every mold,\
+    With AGI in the lab, we're changin' stories untold.\
     
-    Rap 2: Pixels turn to poetry with intelligence so bold,  
-    Machines learnin' feelings, understanding what’s unsaid,  
-    They sift through data waves, pickin' up the threads,  
-    Craftin' neural pathways where human thoughts are spread.  
+    Rap 2: Pixels turn to poetry with intelligence so bold,\
+    Machines learnin' feelings, understanding what’s unsaid,\
+    They sift through data waves, pickin' up the threads,\
+    Craftin' neural pathways where human thoughts are spread.\
     
-    Rap 3: Mathematics in motion, like a symphony of thought,  
-    Explorin' every crevice, solutions we sought,  
-    From zeroes and ones to infinite potential,  
-    In the realm of AGI, we're only experimental.  
+    Rap 3: Mathematics in motion, like a symphony of thought,\
+    Explorin' every crevice, solutions we sought,\
+    From zeroes and ones to infinite potential,\
+    In the realm of AGI, we're only experimental.\
     
     Summary: The rap is about artificial general intelligence (AGI) and how it is changing the future. The artists discuss the capabilities of machines becoming smarter and thinking freely, breaking boundaries and creating new epiphanies. They describe AGI as creating new possibilities and understanding human thoughts, with infinite potential and still in an experimental stage.
 
