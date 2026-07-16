@@ -23,6 +23,11 @@
     "workshop:sync": "node scripts/sync-workshop.mjs",
     "link-check": "node scripts/check-links.js",
     "sitemap-check": "node scripts/check-sitemap-links.js",
+    "qa-chatbot:seed-general": "npx tsx components/qaChatbot/datasets/seed_general_qa_chatbot_dataset.ts",
+    "qa-chatbot:seed-sdk-grounding": "npx tsx components/qaChatbot/datasets/seed_sdk_integration_grounding_dataset.ts",
+    "qa-chatbot:setup-sdk-grounding-evaluators": "npx tsx components/qaChatbot/evaluators/setup_sdk_integration_grounding_evaluators.ts",
+    "qa-chatbot:general-experiment": "npx tsx components/qaChatbot/experiments/run_general_qa_chatbot_experiment.ts",
+    "qa-chatbot:sdk-grounding-experiment": "npx tsx components/qaChatbot/experiments/run_sdk_integration_grounding_experiment.ts",
     "nuke": "rm -rf .next && rm -rf node_modules && pnpm install"
   },
   "engines": {
