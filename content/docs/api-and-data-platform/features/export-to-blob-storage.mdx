@@ -198,7 +198,7 @@ Example manifest:
 Notes on the schema:
 
 - `version` increments only on breaking changes; new fields may be added without a version bump, so ignore unknown fields when parsing.
-- `window` is the time range of data covered by the run. `maxTimestamp` duplicates `window.maxTimestamp`; the timestamp stem in the manifest file name is derived from it as described above.
+- `window` is the time range of data covered by the run, with both bounds inclusive — a record at exactly `maxTimestamp` also falls into the next run's window. `maxTimestamp` duplicates `window.maxTimestamp`; the timestamp stem in the manifest file name is derived from it as described above.
 - `tables` and `files` reflect the selected export source; `scores` is always included regardless of the source.
 - `files[].key` is the full object key including your configured prefix, so consumers can fetch listed files without reconstructing paths.
 - `files[].fileType` is the configured file type: `JSON`, `CSV`, `JSONL`, or `PARQUET`. `files[].format` additionally encodes compression: one of `parquet`, `json-raw`, `json-gzip`, `jsonl-raw`, `jsonl-gzip`, `csv-raw`, or `csv-gzip`.
