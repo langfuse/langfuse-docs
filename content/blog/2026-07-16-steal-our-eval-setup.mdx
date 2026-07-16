@@ -1,0 +1,143 @@
+---
+title: "Yes, you can steal our eval setup"
+date: 2026/07/16
+description: "A copyable walkthrough of the observability, monitoring, annotation, dataset, and experiment setup behind the Langfuse docs chatbot."
+tag: engineering
+author: Annabell
+highlight: true
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Yes, you can steal our eval setup"
+  description="A copyable walkthrough of the observability, monitoring, annotation, dataset, and experiment setup behind the Langfuse docs chatbot."
+  date="July 16, 2026"
+  authors={["annabellschafer"]}
+/>
+
+Everyone is building some kind of agent or AI system right now. The advice you hear everywhere is that your evals need to be custom, built for your specific use case. That is mostly true. What gets less airtime is that within a given use case type, the approach is often surprisingly comparable and copyable.
+
+One of the most established things people build is a chatbot. It is the original use case, the thing we will tell our grandchildren about, and still what most people have in mind when they hear "AI". So why would everyone building a chatbot reinvent the eval wheel? You can copy from someone else's chatbot.
+
+For example, from ours.
+
+We wanted to share exactly how we built the observability and eval setup, plus the continuous improvement loop, for our own docs chatbot. You do not have to take our word for any of it: you can click through the live setup yourself.
+
+<Callout type="info">
+  Explore the [Langfuse example project](/docs/demo), the [public Langfuse
+  project](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi), and
+  the [open-source chatbot
+  code](https://github.com/langfuse/langfuse-docs/tree/main/components/qaChatbot).
+</Callout>
+
+Quick fact sheet on the chatbot:
+
+- Runs on Vercel AI SDK v7
+- Uses OpenAI models for generation
+- Has access to an Inkeep-powered RAG tool
+- Has access to our docs MCP
+
+## Trace every step
+
+Before anything else, you need to see what the chatbot is actually doing, not just what it says at the end. Every retrieval call, every tool use, the full input and output at each step. Tracing is the foundation for everything else: no traces means no monitoring, no clear issue investigation, and no foundation for good datasets.
+
+What you are looking for is the user's question, the retrieval step showing which docs got pulled in, the tool calls, and the generation step with the final answer. If something is wrong with the answer, the trace tells you whether the problem was bad retrieval or bad generation on top of good retrieval. Those are two very different fixes.
+
+## Monitor what is going on in prod
+
+Once production tracing is in place, we check for two things:
+
+- Which chatbot interactions are interesting enough to review?
+- How do quality and usage behave over time?
+
+### What counts as interesting?
+
+You could review every conversation by hand. We decided to evaluate where we need to look and call that monitoring. A few things reliably mark a chatbot conversation as worth a closer look:
+
+- The user pushes back or disagrees with the answer.
+- The question is out of scope for what the bot can actually help with.
+- The same question comes up again, reworded, because the first answer did not land.
+- The user is clearly frustrated.
+
+The first three run as [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) in Langfuse and target observations that contain the full message history. You can start from the managed evaluator library in Langfuse or copy the prompts from our related post on [high-signal production monitoring](/blog/2026-04-01-llm-as-a-judge-production-monitoring). User frustration is tracked with a code-based all-caps detector, also running in Langfuse, scoped to observations where the user input comes first.
+
+<Frame fullWidth>
+  ![Evaluator scores on a trace in Langfuse](/images/blog/2026-03-25-llm-as-a-judge-production-monitoring/scores_in_ui.png)
+</Frame>
+
+This is what turns "review everything" into "review the right things."
+
+### What counts as quality?
+
+On top of the event detectors, a lightweight always-on quality check helps:
+
+- Is our output relevant to what the user is asking?
+- What are the rough intent categories of our users over time?
+
+This is not a fully fledged quality evaluation system, but it gives us a signal for quality and usage drift over time, which tells us when to take action.
+
+Both relevance and user intent are set up as LLM-as-a-judge evaluators: one numeric, one categorical. The user intent categories are application-specific. For our use case, we use `conceptual-question`, `implementation-question`, `self-hosting`, `pricing-and-comparison`, `ui-feedback`, and `irrelevant-to-langfuse`.
+
+We then set up a production monitoring dashboard that shows average scores, user intent classifications, total score counts, and cost over time. On top of that, we have monitors that notify us in Slack when certain thresholds are reached, such as increased cost, increased time to first token, or a high number of users disagreeing with our chatbot.
+
+<Frame fullWidth>
+  ![Dashboard widget showing user intent distribution](/images/blog/2026-04-14-categorical-llm-as-a-judge-user-intent/dashboard-widget.png)
+</Frame>
+
+## Annotation queues, and why you still look yourself
+
+Our traces end up in two [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) worth working through: one with flagged conversations, and one with general samples of everything, reviewed on a regular cadence regardless of whether anything was flagged.
+
+Your coding agent can help you get through volume here. But especially in the early setup, most of the value, we would put it somewhere around 80%, comes from a human actually looking at the data. Because lightweight monitoring already points you at the relevant stuff, that look is a lot more efficient than it sounds.
+
+For each conversation you review, attach two things: a pass/fail call and a short freeform note on what actually went wrong. Use open coding, not a fixed category list yet. After a first pass, group failure modes and label all failed conversations with their respective category. For each category, decide what to do about it: ignore it, monitor it further, or fix it. The full guide on how to do this systematically is in our [error analysis guide](/academy/monitoring/error-analysis).
+
+<Frame fullWidth>
+  ![Annotation queue in Langfuse](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/annotation-queue.png)
+</Frame>
+
+That comment is what matters most, more than the score. It is what turns into the expected output when this example becomes a dataset item.
+
+## From annotations to a dataset
+
+Once we annotated enough real conversations and noted what we think the right output should have been, we built a proper [dataset](/docs/evaluation/experiments/datasets). A dataset item needs an input and can have an expected output, or none, depending on what you are testing.
+
+Two things matter most when building it:
+
+- The input distribution should reflect what people actually ask, not what you imagine they ask. Mix random sampling with your annotated examples.
+- You need to know what you are evaluating before you build the dataset, not after.
+
+For chatbots, three dimensions have held up well as a starting point and are close to universal across different bots:
+
+- **Correctness against an expected answer**, checked with an LLM judge.
+- **Keyword overlap**, especially useful for making sure product names and specific terms actually show up.
+- **Behavior match**, whether the bot did the right thing given the question: answer directly, ask a follow-up, defer because it is out of scope, or call the right tool.
+
+Correctness and behavior match are set up as LLM-as-a-judge evaluators in the app. They are scoped to experiment runs on this specific dataset. Keyword overlap runs as part of the experiment runner and is a deterministic match, so a code-based eval.
+
+This dataset with its evaluators can then be used to run [experiments](/docs/evaluation/experiments/experiments-via-sdk) and understand the quality of your system. We frequently run experiments on newly released models, after changes to the docs, and whenever we add new edge cases to the dataset.
+
+That dataset doubles as your regression suite. We run it as part of [CI](/docs/evaluation/experiments/experiments-ci-cd), so a prompt or model change gets checked against real failure cases before it ships, not after.
+
+<Frame fullWidth>
+  ![Failure modes identified during error analysis](/images/blog/2025-08-29-error-analysis-to-evaluate-llm-applications/failure-modes.png)
+</Frame>
+
+## The failure mode that is actually yours
+
+CI catches the general stuff. But every system has one or two failure modes that are specific to it, not to chatbots in general.
+
+For us, it is staying grounded in the actual docs instead of training data. LLMs know old versions of SDKs, and multiple versions exist across the ecosystem, so a fluent, confident, wrong answer is an easy failure to produce and an easy one to miss.
+
+We built a separate dataset just for this. It is reference-free: inputs only, no expected output, because the correct answer changes every time the SDK does. What we evaluate instead is whether the answer is actually grounded in the retrieved documentation rather than in what the model already "knows."
+
+Your version will be different. Maybe it is making sure a specific tool gets called when it should. Maybe it is knowing when to hand off to a human instead of guessing. The mechanism is the same either way: find the failure mode through your own error analysis, then build a dataset around that specific thing. Do not wait for a generic evaluator to catch it, because it will not.
+
+## It is a loop, not a milestone
+
+Keep monitoring production, keep doing error analysis, keep pulling interesting traces into your datasets. That is what turns this from a one-time setup into a system that actually gets better over time.
+
+The more mature the setup gets, the more of this you can hand off to a coding agent: triaging queues, drafting dataset items, flagging candidates for review. Early on, though, look yourself. That is where most of the value is.
+
+The full setup is live in our [public Langfuse project](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi), including the traces, scores, dashboards, datasets, and experiment setup described above.
