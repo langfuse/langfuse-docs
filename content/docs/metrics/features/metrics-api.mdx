@@ -33,7 +33,7 @@ The older Metrics API remains available, but is not recommended as the default f
 
 <Callout type="info">
 
-**Self-hosted:** The v2 Metrics API requires [Langfuse v4](/docs/v4). On earlier self-hosted versions, use the [legacy Metrics API v1](#v1).
+**Self-hosted:** The v2 Metrics API requires [Langfuse v4](/docs/v4). Self-hosted v4 support is in progress — until it ships, use the [legacy Metrics API v1](#v1).
 
 **Data availability:** Data from older SDKs (`langfuse-python` < `4.0.0`, `langfuse-js` < `5.0.0`) or direct OpenTelemetry exporters that do not send `x-langfuse-ingestion-version: 4` can be delayed by up to 10 minutes on v2 endpoints. Upgrade to [Python SDK v4.7.0+](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS SDK v5.4.0+](/docs/observability/sdk/upgrade-path/js-v4-to-v5), or set that header on your OTEL span exporter, to see new data in real time.
 
@@ -63,7 +63,7 @@ The v2 Metrics API enforces a default `config.row_limit` of 100 rows per query t
 
 ### Rate Limits
 
-On Langfuse Cloud, the v2 Metrics API uses its own per-organization rate-limit bucket: 100 requests/day (Hobby), 100 requests/hour (Core), and 500 requests/hour (Pro/Team/Enterprise, custom limits available). See the [API limits FAQ](/faq/all/api-limits) for details. Self-hosted instances have no enforced rate limits.
+On Langfuse Cloud, the v2 Metrics API uses its own per-organization rate-limit bucket: 100 requests/day (Hobby), 100 requests/hour (Core), and 500 requests/hour (Pro/Enterprise, custom limits available). See the [API limits FAQ](/faq/all/api-limits) for details. Self-hosted instances have no enforced rate limits.
 
 ### High Cardinality Dimensions
 
