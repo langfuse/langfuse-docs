@@ -75,7 +75,7 @@ observations rather than only at the trace level. If you want to reliably
 filter or aggregate by these attributes, they need to be present on each span
 in the trace, not only on the root span.
 
-### Recommended: Use OpenTelemetry Baggage for Propagation
+### Recommended: Use OpenTelemetry Baggage for Propagation [#recommended-use-opentelemetry-baggage-for-propagation]
 
 The recommended approach for propagating these attributes across all spans is
 to use [OpenTelemetry Baggage](https://opentelemetry.io/docs/concepts/signals/baggage/)
@@ -112,6 +112,13 @@ simpler interface and are the recommended approach when using Langfuse SDKs.
 
 ## Experiments: Ingesting Experiment Spans
 
+<Callout type="info">
+  **Using Python or TypeScript?** Use [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)
+  with the [Langfuse SDKs](/docs/observability/sdk/overview). They handle these
+  attributes automatically. This guide is for direct OpenTelemetry ingestion,
+  primarily when no Langfuse SDK is available for your language.
+</Callout>
+
 An [experiment](/docs/evaluation/core-concepts#experiments) runs your
 application against test data. Each input is an experiment item, optionally
 with an expected output. Each item corresponds to one trace that shows how your
@@ -131,6 +138,12 @@ Configure a `BaggageSpanProcessor` as described in the [Baggage propagation
 pattern](#recommended-use-opentelemetry-baggage-for-propagation).
 It copies Baggage entries to each newly created span. The following sections
 show how each level is represented.
+
+<Callout type="warning">
+  **Baggage is sent to downstream services:** OpenTelemetry injects Baggage
+  into outbound request headers. This is usually not relevant for experiment
+  context, but do not add sensitive values to it.
+</Callout>
 
 ### 1. Experiment Context: Baggage Shared by All Item Traces
 
@@ -161,6 +174,8 @@ its `langfuse.observation.output` should be the actual output. Create the root
 with the experiment Baggage, then set the expected output and metadata directly
 on it. Its
 `langfuse.experiment.item.root_observation_id` must equal its own OTel `spanId`.
+Prefer this span to also be the OTel trace root, with no parent span or Langfuse
+parent observation.
 
 ```text
 for each item:
@@ -171,7 +186,7 @@ for each item:
   rootId = root.spanContext().spanId
 
   itemAttributes = {
-    "langfuse.experiment.item.id": item.id,
+    "langfuse.experiment.item.id": item.id, // DatasetItem ID when linking a Langfuse-managed dataset
     "langfuse.experiment.item.version": item.version, // optional: Langfuse-managed datasets only
     "langfuse.experiment.item.root_observation_id": rootId,
   }
@@ -184,17 +199,16 @@ for each item:
 ```
 
 To link a [Langfuse-managed dataset](/docs/evaluation/experiments/datasets),
-set the experiment dataset ID and dataset item ID. If you run a specific
-[dataset version](/docs/evaluation/experiments/datasets#versioning), set the
-item version as well. Fetch these IDs and the version from Langfuse so the link
-refers to the correct dataset, item, and version.
+set the experiment dataset ID to `Dataset.id` and
+`langfuse.experiment.item.id` to the `DatasetItem.id` returned by Langfuse. If
+you fetch a
+[specific dataset version](/docs/evaluation/experiments/datasets#fetch-dataset-at-a-specific-version),
+set the item version to the same version timestamp.
 
 When using local data, you can also set the experiment dataset ID and item IDs
 as local correlation identifiers. Use stable IDs to correlate the same local
 dataset across repeated experiment runs. Do not set an item version for local
 data.
-
-{/* TODO: Add a FAQ explaining how to link ingested experiment items to the correct Langfuse dataset version. */}
 
 ### 3. Item Context: Baggage Shared Within One Item Trace
 
@@ -216,7 +230,9 @@ root.end()
 
 <Callout type="info">
   **Scores:** Attach experiment-item scores to the root observation. When using
-  the Scores API, use the root span's `spanId` as the observation ID.
+  the [Scores API](/docs/evaluation/evaluation-methods/scores-via-sdk#trace-or-observation-level-scores),
+  use the root span's `traceId` as `traceId` and its `spanId` as
+  `observationId`.
 </Callout>
 
 ### Choose an Environment for Experiment Runs
