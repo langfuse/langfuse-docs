@@ -112,10 +112,11 @@ simpler interface and are the recommended approach when using Langfuse SDKs.
 
 ## Experiments: Ingesting Experiment Spans
 
-An [experiment](/docs/evaluation/core-concepts#experiments) runs an
-application against a set of test items and evaluates the outputs. Represent
-each experiment item as one trace: a root span for the item execution and any
-child spans for model calls, tools, or other work.
+An [experiment](/docs/evaluation/core-concepts#experiments) runs your
+application against test data. Each input is an experiment item, optionally
+with an expected output. Each item corresponds to one trace that shows how your
+application produced the actual output from that input, with child spans for
+model calls, tool calls, and other work.
 
 To make experiment data show correctly in Langfuse, model three levels of
 context in this order:
