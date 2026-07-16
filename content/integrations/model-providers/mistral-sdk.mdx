@@ -25,25 +25,25 @@ In this notebook, we will explore various use cases where Langfuse can be integr
 - **Async and Streaming Support:** Discover how to use Langfuse with asynchronous and streaming responses from Mistral models, ensuring that real-time and concurrent interactions are fully traceable.
 - **Function Calling:** Understand how to implement and observe external tool integrations with Mistral, allowing the model to interact with custom functions and APIs.
 
-For more detailed guidance on the Mistral SDK or the **@observe** decorator from Langfuse, please refer to the [Mistral SDK repo](https://github.com/mistralai/client-python) and the [Langfuse Documentation](https://langfuse.com/docs/sdk/python/decorators#log-any-llm-call).
+For more detailed guidance on the Mistral SDK or the **@observe** decorator from Langfuse, please refer to the [Mistral SDK repo](https://github.com/mistralai/client-python) and the [Langfuse Documentation](https://langfuse.com/docs/observability/sdk/instrumentation#observe-wrapper).
 
 ## Setup
 
 ```python
-%pip install mistralai langfuse
+%pip install mistralai langfuse --upgrade
 ```
 
 ```python
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your Mistral key
-os.environ["MISTRAL_API_KEY"] = "..."
+os.environ.setdefault("MISTRAL_API_KEY", "...")
 ```
 
 ```python
@@ -57,7 +57,7 @@ mistral_client = Mistral(api_key=os.environ["MISTRAL_API_KEY"])
 
 ### Completions
 
-We are integrating the Mistral AI SDK with Langfuse using the [@observe decorator](https://langfuse.com/docs/sdk/python/decorators), which is crucial for logging and tracing interactions with large language models (LLMs). The @observe(as_type="generation") decorator specifically logs LLM interactions, capturing inputs, outputs, and model parameters. The resulting `mistral_completion` method can then be used across your project.
+We are integrating the Mistral AI SDK with Langfuse using the [@observe decorator](https://langfuse.com/docs/observability/sdk/instrumentation#observe-wrapper), which is crucial for logging and tracing interactions with large language models (LLMs). The `@observe(as_type="generation")` decorator specifically logs LLM interactions, capturing inputs, outputs, and model parameters. The resulting `mistral_completion` method can then be used across your project.
 
 ```python
 from langfuse import observe, get_client
@@ -115,25 +115,32 @@ Optionally, other functions (api handlers, retrieval functions, ...) can be also
 
 #### Simple Example
 
-In the following example, we also added the decorator to the top-level function `find_best_painter_from`. This function calls the mistral_completion function, which is decorated with @observe(as_type="generation"). This hierarchical setup hels to trace more complex applications which involve multiple LLM calls and other non-llm methods which are decorated with @observe.
+In the following example, we also added the decorator to the top-level function `find_best_painter_from`. This function calls the mistral_completion function, which is decorated with @observe(as_type="generation"). This hierarchical setup helps to trace more complex applications which involve multiple LLM calls and other non-llm methods which are decorated with @observe.
 
-You can use langfuse.update_current_generation or langfuse.update_current_trace to add additional details such as input, output, and model parameters to the trace.
+You can use `langfuse.update_current_generation` or `langfuse.update_current_span` to add additional details such as input, output, and model parameters to the current observation. To add attributes such as a user ID, session ID, or tags to the whole trace, wrap your code in the `propagate_attributes` context manager: the attributes are applied to all observations created within its scope. Trace input and output are derived from the root observation (here, the @observe-decorated `find_best_painter_from` function), so there is no need to set them separately.
 
 ```python
+from langfuse import observe, propagate_attributes
+
 @observe()
 def find_best_painter_from(country="France"):
-  response = mistral_completion(
-      model="mistral-small-latest",
-      max_tokens=1024,
-      temperature=0.4,
-      messages=[
-        {
-            "content": "Who is the best painter from {country}? Answer in one short sentence.".format(country=country),
-            "role": "user",
-        },
-      ]
-    )
-  return response.choices[0].message.content
+  with propagate_attributes(
+      user_id="user-123",
+      session_id="session-abc",
+      tags=["mistral-cookbook"],
+  ):
+    response = mistral_completion(
+        model="mistral-small-latest",
+        max_tokens=1024,
+        temperature=0.4,
+        messages=[
+          {
+              "content": "Who is the best painter from {country}? Answer in one short sentence.".format(country=country),
+              "role": "user",
+          },
+        ]
+      )
+    return response.choices[0].message.content
 
 find_best_painter_from()
 ```
@@ -177,7 +184,7 @@ Example trace in Langfuse: https://cloud.langfuse.com/project/cloramnkj0002jz088
 
 ### Streaming Completions
 
-The following example demonstrates how to handle streaming responses from the Mistral model using the @observe(as*type="generation") decorator. The process is similar to the \_Completion* example but includes handling streamed data in real-time.
+The following example demonstrates how to handle streaming responses from the Mistral model using the `@observe(as_type="generation")` decorator. The process is similar to the _Completion_ example but includes handling streamed data in real-time.
 
 Just like in the previous example, we wrap the streaming function with the @observe decorator to capture the input, model parameters, and usage details. Additionally, the function processes the streamed output incrementally, updating the Langfuse context as each chunk is received.
 

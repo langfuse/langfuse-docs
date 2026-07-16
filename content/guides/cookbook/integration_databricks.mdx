@@ -16,10 +16,10 @@ This notebook demonstrates **three** different ways to use Databricks models wit
 2. **LangChain:** Integrate with the Databricks LLM interface in a LangChain pipeline.
 3. **LlamaIndex:** Use Databricks endpoints within LlamaIndex.
 
-> **What is Databricks Model Serving?**  
+> **What is Databricks Model Serving?**\
 Databricks Model Serving allows you to serve large-scale models in a production environment, with automatic scaling and a robust infrastructure. It also enables you to fine-tune LLMs on your private data, ensuring your models can leverage proprietary information while maintaining data privacy.
 
-> **What is Langfuse?**  
+> **What is Langfuse?**\
 [Langfuse](https://langfuse.com) is an open source platform for LLM observability and monitoring. It helps you trace and monitor your AI applications by capturing metadata, prompt details, token usage, latency, and more.
 
 
@@ -53,12 +53,12 @@ Configure your **Langfuse** credentials and **Databricks** credentials as enviro
 import os
 
 # Example environment variables (replace with your actual keys/tokens)
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."  # your public key
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."  # your secret key
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"  # Other regions: https://us.cloud.langfuse.com (US), https://jp.cloud.langfuse.com (Japan), https://hipaa.cloud.langfuse.com (HIPAA)
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")  # your public key
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")  # your secret key
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")  # Other regions: https://us.cloud.langfuse.com (US), https://jp.cloud.langfuse.com (Japan), https://hipaa.cloud.langfuse.com (HIPAA)
 
-os.environ["DATABRICKS_TOKEN"] = "dapi-..."  # Databricks personal access token
-os.environ["DATABRICKS_HOST"] = "https://dbc-XXXXX-XXXX.cloud.databricks.com"
+os.environ.setdefault("DATABRICKS_TOKEN", "dapi-...")  # Databricks personal access token
+os.environ.setdefault("DATABRICKS_HOST", "https://dbc-XXXXX-XXXX.cloud.databricks.com")
 ```
 
 ## Approach 1: Using Databricks Models via the OpenAI SDK
@@ -131,9 +131,9 @@ Databricks models can also be used via LangChain. The [`ChatDatabricks`](https:/
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 ```
@@ -207,9 +207,9 @@ from langfuse import get_client
 from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
  
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
  
 langfuse = get_client()

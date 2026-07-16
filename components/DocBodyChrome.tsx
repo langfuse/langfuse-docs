@@ -13,6 +13,7 @@ import type { ReactNode } from "react";
 
 type Props = {
   children: ReactNode;
+  lang?: string;
   /**
    * When false, renders a plain flex-1 div without prose chrome.
    * Used by wide/marketing sections (pricing, etc.).
@@ -33,6 +34,7 @@ type Props = {
  */
 export function DocBodyChrome({
   children,
+  lang,
   withProse = true,
   versionLabel,
 }: Props) {
@@ -48,7 +50,7 @@ export function DocBodyChrome({
   }
 
   return (
-    <DocsBody className="flex-1">
+    <DocsBody className="flex-1" lang={lang}>
       <div className="mx-auto w-full">
         <div
           className={

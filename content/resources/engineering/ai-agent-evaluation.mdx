@@ -1,0 +1,188 @@
+---
+title: "AI agent evaluation: trajectory, tool calls, and task completion"
+description: "AI agent evaluation explained: how to measure trajectory, tool use, task completion, and multi-turn quality, with offline and online evaluation patterns."
+tags: [guide, evaluation]
+---
+
+# AI agent evaluation
+
+AI agent evaluation is the practice of measuring whether an agent accomplishes its task, and whether it gets there in an acceptable way. Unlike a single LLM call, an agent produces a multi-step execution: it plans, calls tools, reacts to tool results, and often spans several conversation turns. Evaluating only the final answer misses most of what can go wrong.
+
+**TL;DR:** Evaluate agents on four dimensions: trajectory (the path of steps the agent took), tool use (whether it called the right tools with the right arguments), task completion (whether the user's goal was met), and multi-turn quality (whether performance holds across a conversation). Run offline evaluations on datasets before shipping changes and online evaluations on sampled production traffic after. Use deterministic code checks for anything decidable, LLM-as-a-judge for semantic judgments, and human annotation to calibrate both. This guide covers each dimension with worked patterns in Langfuse.
+
+<Callout type="info">
+New to evaluation as a discipline? [Langfuse Academy](/academy) is a free, open explanation of the AI engineering lifecycle: tracing, monitoring, datasets, experiments, and evaluation, and how the pieces fit together. The [evaluation module](/academy/evaluate) covers the fundamentals this guide builds on.
+</Callout>
+
+## What AI agent evaluation measures
+
+Agent quality decomposes into four dimensions, and mature evaluation setups measure all of them rather than a single "overall quality" number. A single aggregate score tells you an agent got worse; a per-dimension score tells you where.
+
+| Dimension       | Question it answers                               | Typical metrics                                                                                 |
+| --------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Trajectory      | Did the agent take a sensible path to the result? | Step count, unnecessary tool calls, loops and retries, required steps present, correct ordering |
+| Tool use        | Did it call the right tools correctly?            | Correct tool selected, argument validity, tool error rate, recovery after failed calls          |
+| Task completion | Did the user get what they asked for?             | Goal achievement (with or without ground truth), answer correctness, resolution rate            |
+| Multi-turn      | Does quality hold across a conversation?          | Context retention across turns, goal drift, turns-to-resolution, per-session outcome            |
+
+The dimensions fail independently. An agent can complete the task with a wasteful trajectory (twelve tool calls where two suffice, which shows up as latency and cost), and an agent can execute a clean trajectory and still miss the goal because the final synthesis was wrong. Tool-use errors are often invisible in the final answer: the agent recovers, but the retry burned tokens and time you are paying for.
+
+## How agent evaluation differs from LLM evaluation
+
+Standard LLM evaluation scores an input-output pair: one prompt, one completion, one judgment. That model breaks for agents in three ways.
+
+**1.** The unit of evaluation is a trace, not a completion. An agent run is a tree of observations (LLM calls, tool executions, retrievals), and different quality questions attach to different nodes. Tool-argument checks belong on tool-call observations, and task completion belongs on the root of the trace.
+
+**2.** Intermediate steps carry independent failure modes. Retrieval can return the wrong documents, a tool can be called with malformed arguments, and a loop can repeat the same failing call. None of these are visible if you only score final text.
+
+**3.** Many agents are conversational, so the session, not the trace, is the unit users experience. A chatbot can produce five individually reasonable turns that collectively fail to resolve the user's issue.
+
+For the input-output methodology that still applies to the LLM calls inside an agent, see our roadmap for [evaluating LLM applications](/blog/2025-11-12-evals). This guide covers what is specific to agents.
+
+## Offline vs. online agent evaluation
+
+Offline evaluation runs your agent against a fixed dataset before you ship; online evaluation scores sampled production traffic after. You need both, because they catch different failures.
+
+|              | Offline (experiments)                           | Online (production evaluators)                             |
+| ------------ | ----------------------------------------------- | ---------------------------------------------------------- |
+| When it runs | Before a change ships, on demand or in CI       | Continuously on live traffic                               |
+| Data         | Curated dataset, often with expected outputs    | Real user inputs, no ground truth                          |
+| Catches      | Regressions from prompt, model, or tool changes | Drift, novel inputs, real-world tool failures              |
+| Cost profile | Bounded by dataset size                         | Controlled by sampling rate                                |
+| In Langfuse  | Datasets and experiments, gated in CI           | Evaluators on live observations, with filters and sampling |
+
+The standard loop: collect failing production traces, turn them into dataset items, reproduce the failure in an experiment, fix it, and keep the item as a permanent regression test. Langfuse supports the whole loop because production [traces](/docs/observability/data-model) and experiment runs share the same data model and the same scores.
+
+## Choosing an evaluation method
+
+Three method families cover agent evaluation, and the right choice depends on whether the check is decidable by code, requires reading, or requires domain expertise.
+
+| Method           | Use for                         | Cost and latency                   | Agent examples                                                                                          |
+| ---------------- | ------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Code evaluators  | Deterministic, objective checks | Free per run, milliseconds         | Required tool was called, arguments parse against a schema, step budget respected, output is valid JSON |
+| LLM-as-a-judge   | Semantic judgment at scale      | Model cost per evaluation, seconds | Task completion without ground truth, reasoning quality, groundedness of the final answer               |
+| Human annotation | Ground truth and calibration    | Expert time                        | Labeling ambiguous trajectories, building the reference set that judges are calibrated against          |
+
+These are layers, not alternatives. A practical setup runs cheap code checks on every sampled trace, an LLM judge on the subset where semantic judgment matters, and routes disagreements or low-confidence cases to [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) for human review. Human labels then recalibrate the judge, which keeps the automated layer honest.
+
+In Langfuse, all three methods produce [scores](/docs/evaluation/scores/overview) with one of four data types: numeric for continuous measures like step count, boolean for pass/fail checks like "used required tool", categorical for labels like `resolved` / `escalated` / `abandoned`, and text for free-form reviewer notes. Scores attach to traces, observations, sessions, or experiment runs, so every dimension of agent quality lands in one queryable system.
+
+## Evaluating tool calls
+
+Tool-call evaluation asserts that the agent selected the right tool, passed valid arguments, and handled the result. As of July 2026, Langfuse exposes recorded tool calls to both code and LLM-as-a-judge evaluators as a structured field, so you assert on them directly instead of parsing raw observation input.
+
+In a [code evaluator](/docs/evaluation/evaluation-methods/code-evaluators), each call on the target observation carries `id`, `name`, `arguments`, `type`, and `index`, with valid JSON arguments parsed:
+
+```python
+def evaluate(ctx):
+    tool_calls = ctx.observation.tool_calls
+    used_search = any(tc.name == "search" for tc in tool_calls)
+    return EvaluationResult(scores=[
+        Score(name="used_search_tool", value=used_search, data_type="BOOLEAN"),
+        Score(name="tool_call_count", value=len(tool_calls), data_type="NUMERIC"),
+    ])
+```
+
+The same contract exists in TypeScript via `ctx.observation.toolCalls`. Code evaluators run inside Langfuse on live production observations or on experiment outputs, execute standard-library code without network egress, and can return several scores per run, so one evaluator can cover tool selection, argument validity, and call-count budget together. They are also available in self-hosted deployments.
+
+For semantic questions about tool use, such as whether the chosen tool was appropriate for the user's request, map the **Tool Calls** variable in an LLM-as-a-judge evaluator. A JSONPath selector like `$[*].name` passes only tool names to the judge; mapping the full array includes arguments.
+
+Two related patterns: in experiments, a tool-call assertion makes a good regression test ("given this input, the agent must call `search`"), and in production, a boolean tool-call score is a good alerting signal because it is free to compute on every sampled trace. Ten more paste-ready checks, including a trajectory budget evaluator, are in our [code evaluator examples](/resources/engineering/code-evaluator-examples).
+
+## Judging task completion
+
+Task completion asks whether the agent achieved the user's goal, and it usually needs an LLM judge because "achieved the goal" is a semantic judgment over the whole run. The judge needs the overall input and final output, not an intermediate step.
+
+In Langfuse, [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators run at the observation level, which is the recommended target as of July 2026 (trace-level judge evaluators are legacy). The pattern for whole-run judgments is to target the root observation of the agent, the span that records the overall request and final response, and map its input and output into the judge prompt. If your instrumentation does not yet write a summary of the run onto the root observation, add that first; the evaluator sees the observation it targets, not its children.
+
+Concretely:
+
+1. Filter the evaluator to the root observation by name or type, optionally narrowed by trace attributes such as tags or user ID.
+2. Map `{{input}}` and `{{output}}` from the root observation's fields, and preview the populated prompt against matched data from the last 24 hours before activating.
+3. Set a sampling rate to control judge cost in production, and choose a score type: boolean for "task completed, yes or no", numeric for degrees of completion, categorical for outcome labels.
+
+For common dimensions you can skip prompt writing: Langfuse ships a catalog of managed evaluators, built with partners such as Ragas, covering dimensions like hallucination, context relevance, toxicity, and helpfulness. For experiments with ground truth, map the dataset item's expected output as the judge's reference. Evaluators and their rules can also be created via the public API, which is useful for version-controlling your evaluation setup, though those endpoints are still marked unstable as of July 2026.
+
+## Scoring trajectories
+
+Trajectory evaluation checks the path, not the destination: which steps ran, in what order, and at what cost. It splits into a quantitative and a qualitative half.
+
+The quantitative half is code-evaluator territory. Step counts, loop detection, required-step presence, and budget checks are all decidable, and the structured tool-call field plus observation metadata give evaluators the raw material. A trajectory score like `within_step_budget` on every sampled production trace turns "the agent has gotten slower and more expensive" from an anecdote into a dashboard line.
+
+The qualitative half is reading trajectories, and that is faster with a visual. The Langfuse [agent graph view](/docs/observability/features/agent-graphs) renders a trace as a graph in two modes (in beta as of July 2026): **Aggregated** collapses repeated steps into single nodes with counters, so `retrieve_docs (3/3)` and a cycle edge reveal the agent's shape and its loops at a glance, while **Expanded** unrolls every call into a DAG in execution order for walking through one specific run. Aggregated mode is the fast way to spot pathological trajectories during error analysis; Expanded mode is the fast way to pin down exactly where one went wrong.
+
+When you find a bad trajectory, codify it: add the input to a dataset, and write the property that was violated ("must not call the payment tool twice") as a code evaluator that runs in every future experiment.
+
+## Evaluating multi-turn conversations
+
+Multi-turn evaluation scores the conversation, not the individual request, because users experience sessions. In Langfuse, every trace can carry a session ID, and scores attach directly to sessions, so conversation-level judgments live at the level they describe.
+
+Session-level scores can be created three ways:
+
+- Domain experts review whole conversations in annotation queues, which support sessions as well as traces and observations, and assign scores such as `resolution` or `conversation_quality` (keyboard-shortcut workflows make high-volume review practical).
+- Your application or evaluation pipeline writes session scores [via the SDK or API](/docs/evaluation/evaluation-methods/scores-via-sdk) by passing only a `session_id`, for example an end-of-conversation judge that reads the full transcript and scores goal completion and context retention.
+- Reviewers score a session manually in the UI while inspecting it.
+
+A useful division of labor: evaluate per-turn quality with observation-level evaluators (each turn's correctness and tool use), and evaluate conversation outcomes with session scores (resolved or not, turns-to-resolution as a numeric score, abandonment as a categorical one). Boolean and categorical session scores are filterable across the Langfuse UI, so "show me all unresolved sessions from the last week" is a table filter, and those sessions feed straight into annotation queues or datasets. For a deeper treatment of judge strategies across turns, see [evaluating multi-turn conversations](/blog/2025-10-09-evaluating-multi-turn-conversations).
+
+## Gating agent changes in CI
+
+Agent changes ship safely when an experiment must pass before merge, the same way tests gate code. Prompt edits, model swaps, and tool-schema changes all alter agent behavior in ways type checkers cannot see, so the regression suite is a dataset plus evaluators.
+
+With the Langfuse [experiments CI/CD integration](/docs/evaluation/experiments/experiments-ci-cd), a GitHub Actions step runs your experiment script against a dataset, posts the result on the pull request, and fails the workflow when a score misses your threshold:
+
+```yaml
+- uses: langfuse/experiment-action@v1.0.0
+  with:
+    langfuse_public_key: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+    langfuse_secret_key: ${{ secrets.LANGFUSE_SECRET_KEY }}
+    langfuse_base_url: https://cloud.langfuse.com
+    experiment_path: experiments/support-agent-gate
+    dataset_name: support-agent-regression-set
+    github_token: ${{ github.token }}
+```
+
+The experiment script uses the SDK's experiment runner (`run_experiment` in Python, `experiment.run` in JS/TS) with item-level evaluators for per-case checks and run-level evaluators for aggregates, and raises a `RegressionError` when a threshold is violated. Pinning a `dataset_version` makes the gate reproducible. The action requires Python SDK v4.6.0+ or JS SDK v5.3.0+.
+
+Experiment results are also accessible programmatically: the public API exposes `GET /api/public/experiments` and `GET /api/public/experiment-items`, and the Langfuse MCP server exposes them as `listExperiments` and `listExperimentItems` tools, so custom pipelines and coding agents can fetch scores and act on regressions without the UI. We used this dataset-experiment loop on ourselves to iterate on an agent skill; the write-up on [evaluating AI agent skills](/blog/2026-02-26-evaluate-ai-agent-skills) is a worked end-to-end example.
+
+## Learn the fundamentals in Langfuse Academy
+
+Agent evaluation sits inside a larger loop: trace production behavior, monitor it, build datasets from real failures, experiment against them, and evaluate the results. [Langfuse Academy](/academy) explains that loop end to end, free and open, with a module per step:
+
+- [The AI engineering loop](/academy/ai-engineering-loop) explains how the steps connect and why the loop matters more than any single tool.
+- [Tracing](/academy/tracing) and [monitoring](/academy/monitoring) cover the visibility an agent evaluation setup depends on.
+- [Datasets](/academy/datasets) and [experiments](/academy/experiments) cover turning production failures into regression tests.
+- [Evaluation](/academy/evaluate) covers how evaluation typically evolves, from manual review to failure-mode definitions to automated evaluators.
+
+If your team is aligning on vocabulary before building an agent evaluation practice, start there; this guide is the agent-specific layer on top.
+
+## FAQ
+
+### What is AI agent evaluation? [#what-is-ai-agent-evaluation]
+
+AI agent evaluation is the practice of measuring the quality of autonomous, multi-step LLM systems across four dimensions: trajectory (the path of steps), tool use (correct tool selection and arguments), task completion (whether the user's goal was met), and multi-turn quality (whether performance holds across a conversation). It differs from standard LLM evaluation because the unit of evaluation is a trace or session rather than a single input-output pair.
+
+### What metrics should I use to evaluate an AI agent? [#agent-evaluation-metrics]
+
+Start with one metric per dimension: a boolean task-completion judgment on the root of each run, a tool-selection correctness check on tool-call observations, a numeric step count with a budget threshold for trajectory efficiency, and a session-level resolution score for conversational agents. Add cost and latency per run, which tracing gives you without extra evaluators. Expand only when a metric has caught a real regression; unused metrics are noise.
+
+### How do you evaluate agent tool calls? [#tool-call-evaluation]
+
+Assert on the recorded tool calls of the observation rather than parsing model output. In Langfuse, code and LLM-as-a-judge evaluators access tool calls as a structured field with `name`, `arguments`, `type`, `id`, and `index`, so a code evaluator can check that a required tool was called or that arguments match a schema, and a judge can rate whether the chosen tool fit the request. Deterministic checks belong in code; appropriateness judgments belong with a judge.
+
+### How do you evaluate an agent without ground truth? [#evaluate-without-ground-truth]
+
+Use reference-free methods: LLM-as-a-judge with a rubric (does the final answer address the stated goal, is it grounded in the tool results the agent retrieved), deterministic property checks that need no reference (valid output format, required tool called, step budget respected), and human annotation on a sample to calibrate the judge. Managed evaluators for dimensions like hallucination judge outputs against the context provided in the trace rather than against an expected answer. Ground truth is only required for exact-match style checks in experiments.
+
+### What is the difference between trace-level and observation-level evaluation? [#trace-vs-observation-evals]
+
+Observation-level evaluators score one operation inside a trace (an LLM call, a tool execution, a retrieval), which makes them fast and precise; in Langfuse they are the recommended target, and trace-level judge evaluators are legacy. To evaluate a whole agent run, target the root observation that records the overall input and final output, and make sure your instrumentation writes the run's summary onto it, because an evaluator sees only the observation it targets.
+
+### How do you evaluate multi-turn conversations? [#multi-turn-evaluation]
+
+Score at two levels: per-turn evaluators for the quality of individual responses, and session-level scores for conversation outcomes such as resolution, goal drift, and turns-to-resolution. In Langfuse, traces share a session ID, scores attach directly to sessions via the UI, SDK, or annotation queues, and boolean or categorical session scores are filterable, so failed conversations can be pulled into review queues or datasets.
+
+### Should agent evaluations run in CI? [#agent-evals-in-ci]
+
+Yes, for any change that alters agent behavior: prompts, models, tool schemas, and orchestration logic. Run an experiment against a versioned dataset of regression cases and fail the pipeline when scores miss a threshold, exactly like a test suite. Keep the CI dataset small enough to run on every pull request (tens to low hundreds of items) and run larger sweeps on a schedule or before releases.

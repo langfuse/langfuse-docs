@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { HomeSection } from "@/components/home/HomeSection";
-import { CornerBox, Heading, TextHighlight } from "@/components/ui";
+import { Button, CornerBox, Heading, TextHighlight } from "@/components/ui";
 import { Text } from "@/components/ui/text";
 import RiveMock from "@/components/home/img/rive-mock.png";
 
@@ -30,7 +30,7 @@ type RiveLabel = {
 
 const OVERVIEW: RiveLabel = {
   heading: "The full LLM engineering loop",
-  body: "Langfuse brings observability, prompts, evals, experiments, and human annotation into one connected workflow — so you can move from prototype to production and keep improving with real usage data. Hover any part of the diagram to learn more.",
+  body: "See how observability, prompts, evals, experiments, and human feedback work together.",
 };
 
 const LABELS: Record<string, RiveLabel> = {
@@ -148,10 +148,10 @@ export const RiveSection = () => {
           repeat.
         </Heading>
         <Text className="text-left max-w-[64ch]">
-          Langfuse helps you ship AI Agents/Products from prototype to
-          production and beyond. Once in production we power your continous
-          improvement loop using production data to make your agents and LLM
-          applications ever more powerful.
+          Langfuse connects tracing, monitoring, datasets, experiments, and
+          evaluation in one continuous loop. Use production signals to
+          understand behavior, test improvements, and ship better agents with
+          confidence.
         </Text>
       </div>
 
@@ -188,20 +188,30 @@ export const RiveSection = () => {
             viewModelBooleanInputs={loadViewModelBooleans}
           />
         </div>
-        <CornerBox className="flex min-h-[120px] w-full flex-col justify-start bg-surface-bg p-2 sm:p-4 -mt-px">
-          <div
-            key={label.heading}
-            className="rive-text-enter flex w-full flex-col gap-1.5"
-          >
-            <Text className="font-medium text-left text-text-primary">
-              {label.heading}
-            </Text>
-            <Text size="s" className="w-full max-w-none text-left">
-              {label.body}
-            </Text>
-          </div>
-        </CornerBox>
       </div>
+
+      <CornerBox className="flex min-h-[120px] w-full flex-col justify-between gap-5 bg-surface-bg p-4 -mt-px sm:flex-row sm:items-center">
+        <div
+          key={label.heading}
+          className="rive-text-enter flex max-w-[64ch] flex-col gap-1.5"
+        >
+          <Text className="font-medium text-left text-text-primary">
+            {label.heading}
+          </Text>
+          <Text size="s" className="w-full max-w-none text-left">
+            {label.body}
+          </Text>
+        </div>
+        <Button
+          variant="secondary"
+          size="default"
+          href="/academy"
+          aria-label="Learn in Academy"
+          wrapperClassName="sm:flex-none"
+        >
+          Learn in Academy
+        </Button>
+      </CornerBox>
     </HomeSection>
   );
 };

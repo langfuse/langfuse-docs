@@ -13,41 +13,7 @@ Ready to start? Check out the [Get Started guide](/docs/observability/get-starte
 
 Langfuse organizes an application's data into three core concepts: observations, traces, and sessions.
 
-```mermaid
-flowchart LR
-
-    subgraph SESSION [session]
-        direction TB
-
-        subgraph TRACE1 [trace]
-            direction LR
-            O1[observation]
-            O2[observation]
-            O3[observation]
-        end
-
-        subgraph TRACE2 [trace]
-            direction LR
-            O4[observation]
-            O5[observation]
-            O6[observation]
-        end
-
-        subgraph TRACE3 [trace]
-            direction LR
-            O7[observation]
-            O8[observation]
-            O9[observation]
-        end
-
-    end
-    classDef sessionBox fill:none,stroke:#888,stroke-width:2px;
-    classDef traceBox fill:none,stroke:#aaa,stroke-width:1.5px;
-
-    %% Assign classes
-    class SESSION sessionBox;
-    class TRACE1,TRACE2,TRACE3 traceBox;
-```
+<TracingHierarchyDiagram />
 
 import ObservationTypesList from "@/components-mdx/observation-types-list.mdx";
 

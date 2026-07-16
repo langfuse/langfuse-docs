@@ -1,4 +1,6 @@
+import { registerTelemetry } from "ai";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { LangfuseVercelAiSdkIntegration } from "@langfuse/vercel-ai-sdk";
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 
 const euSpanProcessor = new LangfuseSpanProcessor({
@@ -19,7 +21,18 @@ const jpSpanProcessor = new LangfuseSpanProcessor({
   baseUrl: process.env.NEXT_PUBLIC_JP_LANGFUSE_BASE_URL,
 });
 
-const spanProcessors = [euSpanProcessor, usSpanProcessor, jpSpanProcessor];
+const internalSpanProcessor = new LangfuseSpanProcessor({
+  publicKey: process.env.NEXT_PUBLIC_INTERNAL_LANGFUSE_PUBLIC_KEY,
+  secretKey: process.env.INTERNAL_LANGFUSE_SECRET_KEY,
+  baseUrl: process.env.NEXT_PUBLIC_INTERNAL_LANGFUSE_BASE_URL,
+});
+
+const spanProcessors = [
+  euSpanProcessor,
+  usSpanProcessor,
+  jpSpanProcessor,
+  internalSpanProcessor,
+];
 
 export const flush = async () =>
   Promise.all(spanProcessors.map((p) => p.forceFlush()));
@@ -29,3 +42,5 @@ const tracerProvider = new NodeTracerProvider({
 });
 
 tracerProvider.register();
+
+registerTelemetry(new LangfuseVercelAiSdkIntegration());

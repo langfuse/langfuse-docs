@@ -54,7 +54,7 @@ We used Claude Agent SDK to run the agents. You can easily integrate Langfuse wi
 
 **Repository structure**
 
-The [repository](https://github.com/langfuse/langfuse-examples/tree/main/applications/evaluating-ai-agent-skills) consists of the script to run the experiment, and repositories to spin up the agents. The skill is intalled globally on the Claude account.
+The [repository](https://github.com/langfuse/langfuse-examples/tree/main/applications/evaluating-ai-agent-skills) consists of the script to run the experiment, and repositories to spin up the agents. The skill is installed globally on the Claude account.
 
 <div>
   <FileTree>
@@ -131,7 +131,7 @@ The root cause was in the skill itself. In our example showing how to set enviro
 ```bash
 export LANGFUSE_PUBLIC_KEY=pk-lf-...
 export LANGFUSE_SECRET_KEY=sk-lf-...
-export LANGFUSE_HOST=https://cloud.langfuse.com  # optional, default is EU
+export LANGFUSE_BASE_URL=https://cloud.langfuse.com
 ```
 
 By changing that one comment to say the host is mandatory, the agent started checking for it upfront and setting it when missing. The number of retries for that specific error went to zero immediately. You can see the before and after in [this commit](https://github.com/langfuse/skills/pull/4/changes/904a0ff1a6b9d4e4cc66ae26eb38d193a53d958b).

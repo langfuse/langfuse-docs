@@ -1,11 +1,12 @@
 import "server-only";
-import type { ComponentProps, ComponentType } from "react";
+import type { ComponentProps, ComponentType, ReactNode } from "react";
 import { DocsPage } from "fumadocs-ui/page";
 import type { TOCItemType } from "fumadocs-core/toc";
 
 import { DocsTocFooter } from "@/components/DocsTocFooter";
 import { DocBodyChrome } from "@/components/DocBodyChrome";
 import { DocsAndPageFooter } from "@/components/DocsAndPageFooter";
+import { DocsBreadcrumb } from "@/components/DocsBreadcrumb";
 import { getMDXComponents } from "@/mdx-components";
 
 type BodyChromeProps = Omit<ComponentProps<typeof DocBodyChrome>, "children">;
@@ -32,10 +33,13 @@ const getIsoDate = (value: unknown): string | undefined => {
 export async function DocsChromePage({
   page,
   bodyChromeProps,
+  bottomSuffix,
 }: {
   page: LoadedPage;
   /** Extra props forwarded to `DocBodyChrome` (e.g. `versionLabel` on self-hosting). */
   bodyChromeProps?: BodyChromeProps;
+  /** Optional node rendered inside DocBodyChrome, after the MDX body. */
+  bottomSuffix?: ReactNode;
 }) {
   const data = page.data;
   const loaded =
@@ -53,7 +57,7 @@ export async function DocsChromePage({
     <DocsPage
       toc={toc}
       lastUpdate={lastModified}
-      breadcrumb={{ includePage: true, includeRoot: true }}
+      breadcrumb={{ component: <DocsBreadcrumb /> }}
       tableOfContent={{
         footer: (
           <DocsTocFooter pageTitle={data.title} lastModified={lastModified} />
@@ -63,6 +67,7 @@ export async function DocsChromePage({
     >
       <DocBodyChrome {...bodyChromeProps}>
         <MDX components={getMDXComponents()} />
+        {bottomSuffix}
       </DocBodyChrome>
     </DocsPage>
   );

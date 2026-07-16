@@ -33,14 +33,14 @@ You’ll also need the Micrometer -> OpenTelemetry bridge and an OTLP exporter. 
         <dependency>
             <groupId>io.opentelemetry.instrumentation</groupId>
             <artifactId>opentelemetry-instrumentation-bom</artifactId>
-            <version>2.17.0</version>
+            <version>2.28.1</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-bom</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.9</version> <!-- Check for the latest 1.0.x release -->
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -56,7 +56,7 @@ You’ll also need the Micrometer -> OpenTelemetry bridge and an OTLP exporter. 
         <groupId>org.springframework.ai</groupId>
         <artifactId>spring-ai-starter-model-openai</artifactId>
     </dependency>
-    <!-- Spring AI needs a reactive web server to run for some reason-->
+    <!-- Web server context required for Spring Boot auto-configuration and the actuator observability endpoints -->
     <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-web</artifactId>
@@ -193,7 +193,7 @@ public class ChatModelCompletionContentObservationFilter implements ObservationF
 
 With these configurations and dependencies in place, your Spring Boot application is ready to produce OpenTelemetry traces. Spring AI’s internal calls (e.g. when you invoke a chat model or generate an embedding) will be recorded as spans.
 
-Each span will carry attributes like `gen_ai.operation.name`, `gen_ai.system` (the provider, e.g. “openai”), model names, token usage, etc., and – since we enabled them – events for the prompt and response content​
+Each span will carry attributes like `gen_ai.operation.name`, `gen_ai.system` (the provider, e.g. “openai”), model names, token usage, etc., and – since we enabled them – events for the prompt and response content.
 
 ## Step 2: Configure Langfuse
 
@@ -206,16 +206,23 @@ Langfuse will act as the “backend” for OpenTelemetry in this setup – essen
 - Sign up for [Langfuse Cloud](https://langfuse.com/cloud) or [self-hosted Langfuse](https://langfuse.com/self-hosting).
 - Set the OTLP endpoint (e.g. `https://cloud.langfuse.com/api/public/otel`) and API keys.
 
-Configure these via environment variables:
+Authentication uses HTTP Basic Auth: build the credential by base64-encoding your `public_key:secret_key` pair, then pass it (along with the ingestion-version header) via the standard OpenTelemetry environment variables:
 
 ```bash
-OTEL_EXPORTER_OTLP_ENDPOINT: set this to the Langfuse OTLP URL (e.g. https://cloud.langfuse.com/api/public/otel).
-OTEL_EXPORTER_OTLP_HEADERS: set this to Authorization=Basic <base64 public:secret>,x-langfuse-ingestion-version=4.
+# Build the Basic Auth string from your Langfuse API keys
+export AUTH_STRING=$(echo -n "pk-lf-...:sk-lf-..." | base64 -w0) # Linux
+# macOS (BSD base64 has no -w0): export AUTH_STRING=$(echo -n "pk-lf-...:sk-lf-..." | base64)
+
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel" # 🇪🇺 EU data region
+# Other regions: 🇺🇸 US https://us.cloud.langfuse.com/api/public/otel, 🇯🇵 Japan https://jp.cloud.langfuse.com/api/public/otel, ⚕️ HIPAA https://hipaa.cloud.langfuse.com/api/public/otel
+# Self-hosted (>= v3.22.0): http://localhost:3000/api/public/otel
+export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING},x-langfuse-ingestion-version=4"
 ```
 
 <Callout type="info">
-  You can find more on authentication via Basic Auth in the
-  [here](/docs/opentelemetry/get-started).
+  See [OpenTelemetry: Get
+  Started](/docs/opentelemetry/get-started) for more on Basic Auth and the
+  `x-langfuse-ingestion-version` header.
 </Callout>
 
 ## Step 3: Run a Test AI Operation
@@ -236,7 +243,7 @@ public void testAiCall() {
 ## Setting userId and sessionId
 
 This section covers how to associate spans from Spring AI with [users](/docs/tracing-features/users) and [sessions](/docs/tracing-features/sessions).
-Create a custom span and set the Langfuse-specific attributes directly:
+Create a custom span and set the Langfuse-specific attributes directly. The `tracer` below is an injected OpenTelemetry `Tracer` (`io.opentelemetry.api.trace.Tracer`), auto-configured by the `opentelemetry-spring-boot-starter`, and `Scope` / `Span` come from the OpenTelemetry API (`io.opentelemetry.context.Scope`, `io.opentelemetry.api.trace.Span`):
 
 ```java
 public String processUserRequest(String userInput, String userId) {
@@ -266,8 +273,8 @@ private String performAiOperation(String userInput) {
     messages.add(new UserMessage(userInput));
 
     Prompt prompt = new Prompt(messages);
-    ChatResponse response = chatClient.call(prompt);
-    return response.getResult().getOutput().getContent();
+    ChatResponse response = chatModel.call(prompt);
+    return response.getResult().getOutput().getText();
 }
 ```
 

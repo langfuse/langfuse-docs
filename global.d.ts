@@ -2,6 +2,15 @@ interface Window {
   _hsq?: any[];
   dataLayer?: any[];
   gtag?: (...args: any[]) => void;
+  lintrk?: (...args: any[]) => void;
+  _linkedin_data_partner_ids?: any[];
+  rdt?: (...args: any[]) => void;
+  twq?: (...args: any[]) => void;
+  signals?: any[] & {
+    page: (...args: any[]) => void;
+    identify: (...args: any[]) => void;
+    form: (...args: any[]) => void;
+  };
 }
 
 // ---------------------------------------------------------------------------

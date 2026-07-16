@@ -31,9 +31,17 @@ import {
   Bot,
   FileCode,
   Wand,
+  Users,
+  ThumbsUp,
 } from "lucide-react";
 
 <TutorialCards>
+  <TutorialCard
+    title="Set Up a User Feedback Loop"
+    description="Capture explicit and implicit user feedback as scores on your traces, and use it to surface the responses worth reviewing."
+    href="/guides/user-feedback-loop"
+    icon={<ThumbsUp />}
+  />
   <TutorialCard
     title="Error Analysis"
     description="Review traces to classify issues like hallucinations, irrelevance, and formatting errors. Turn raw logs into actionable insights."
@@ -118,6 +126,12 @@ Extend your evaluation approach for complex, multi-step applications.
     description="Test whether your judge prompt agrees with how you would label cases, and iterate until it does."
     href="/guides/llm-as-a-judge-calibration-skill"
     icon={<TestTube />}
+  />
+  <TutorialCard
+    title="Human-in-the-Loop Scoring"
+    description="Capture human judgments from your own review tooling and ingest them into Langfuse as structured scores, validated against a score config."
+    href="/guides/human-in-the-loop-scoring"
+    icon={<Users />}
   />
 </TutorialCards>
 

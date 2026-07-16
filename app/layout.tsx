@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { RootProvider } from "fumadocs-ui/provider/next";
+import { AppRootProvider } from "@/components/AppRootProvider";
 import { GoogleTagManager } from "@next/third-parties/google";
 import localFont from "next/font/local";
 import { Inter } from "next/font/google";
@@ -11,6 +11,18 @@ import {
 } from "@/lib/og-url";
 import { PostHogProvider } from "@/components/analytics/PostHogProvider";
 import { AISearch } from "@/components/inkeep/search";
+import { Hubspot } from "@/components/analytics/hubspot";
+import { GoogleAds } from "@/components/analytics/google-ads";
+import { LinkedInInsightTag } from "@/components/analytics/linkedin-ads";
+import { RedditPixel } from "@/components/analytics/reddit-ads";
+import { TwitterPixel } from "@/components/analytics/twitter-ads";
+import { ConversionTracker } from "@/components/analytics/ConversionTracker";
+import { ScarfPixel } from "@/components/analytics/scarf";
+import { CommonRoom } from "@/components/analytics/common-room";
+import { AhrefsAnalytics } from "@/components/analytics/ahrefs";
+import "../style.css";
+import "@vidstack/react/player/styles/base.css";
+import "../src/overrides.css";
 
 const interVariable = Inter({
   subsets: ["latin"],
@@ -31,11 +43,6 @@ const f37Analog = localFont({
   display: "swap",
   weight: "500",
 });
-import { Hubspot } from "@/components/analytics/hubspot";
-import { GoogleAds } from "@/components/analytics/google-ads";
-import "../style.css";
-import "@vidstack/react/player/styles/base.css";
-import "../src/overrides.css";
 
 const defaultOgImageUrl = buildDefaultSiteOgImageUrl();
 
@@ -77,7 +84,7 @@ export default function RootLayout({
           <DevAriaHiddenConsoleFilter />
         )}
         <PostHogProvider>
-          <RootProvider
+          <AppRootProvider
             i18n={{
               locale: "en",
               translations: {
@@ -86,13 +93,20 @@ export default function RootLayout({
             }}
           >
             <AISearch>{children}</AISearch>
-          </RootProvider>
+          </AppRootProvider>
         </PostHogProvider>
         {process.env.NODE_ENV === "production" && (
           <>
             <GoogleTagManager gtmId="GTM-NGLK4TZX" />
             <GoogleAds />
+            <LinkedInInsightTag />
+            <RedditPixel />
+            <TwitterPixel />
+            <ConversionTracker />
+            <ScarfPixel />
             <Hubspot />
+            <CommonRoom />
+            <AhrefsAnalytics />
             <Script
               id="cookieyes"
               type="text/javascript"

@@ -246,7 +246,7 @@ type MarqueeItem = { label: string; href: string; icon: string };
 const marqueeRow1: MarqueeItem[] = [
   {
     label: "Claude Code",
-    href: "/integrations/other/claude-code",
+    href: "/integrations/developer-tools/claude-code",
     icon: "/images/integrations/anthropic_icon.png",
   },
   {
@@ -311,7 +311,7 @@ const marqueeRow1: MarqueeItem[] = [
   },
   {
     label: "Cursor",
-    href: "/integrations/other/cursor",
+    href: "/integrations/developer-tools/cursor",
     icon: "/images/integrations/cursor_icon.png",
   },
   {
@@ -353,9 +353,9 @@ const marqueeRow2: MarqueeItem[] = [
     icon: "/images/integrations/temporal.svg",
   },
   {
-    label: "Agentic Data Stack",
-    href: "/integrations/agentic-data-stack",
-    icon: "/images/integrations/opentelemetry_icon.svg",
+    label: "ClickHouse Agentic Data Stack",
+    href: "/integrations/other/agentic-data-stack",
+    icon: "/images/integrations/clickhouse_icon.svg",
   },
   {
     label: "Mastra",
@@ -496,7 +496,7 @@ export function Integrations() {
         </Heading>
         <Text className="text-left max-w-[52ch]">
           Langfuse works with any language and framework supporting OTel
-          instrumentation. Additionally, 80+ integrations make getting started
+          instrumentation. Additionally, 100+ integrations make getting started
           even easier. No framework lock-in.
         </Text>
       </div>
@@ -525,7 +525,7 @@ export function Integrations() {
               size="m"
               className="font-medium text-left text-text-secondary"
             >
-              80+ more integrations
+              100+ more integrations
             </Text>
           </div>
           <div className="flex flex-col gap-2 w-full">
