@@ -57,8 +57,9 @@ export function Hero() {
         ></Heading>
         <div className="flex flex-col gap-6">
           <Text className="max-w-xl">
-            Trace and evaluate AI Agents. Collaborate with your team to
-            continuously improve quality, cost and latency of your application.
+            Trace, evaluate, and improve AI agents with one open platform. Use
+            production data to understand behavior, collaborate on fixes, and
+            ship better quality at lower cost and latency.
           </Text>
           <div className="flex flex-wrap gap-3 justify-center items-center">
             <Button

@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import { ContactSalesForm } from "@/components/ContactSalesForm";
+import { MarketoContactForm } from "@/components/MarketoContactForm";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import { getGitHubStars } from "@/lib/github-stars";
 import { Link } from "@/components/ui/link";
@@ -218,8 +218,8 @@ function DiscoverYourselfContent() {
 
 function ContactFormSection() {
   return (
-    <div className="relative max-w-md mx-auto p-4 bg-stripe-pattern corner-box-corners border border-line-structure">
-      <ContactSalesForm />
+    <div className="relative w-full max-w-md mx-auto p-4 bg-stripe-pattern corner-box-corners border border-line-structure">
+      <MarketoContactForm />
     </div>
   );
 }

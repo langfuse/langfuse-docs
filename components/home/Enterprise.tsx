@@ -39,7 +39,7 @@ const security = [
   { label: "ISO 27001", href: "/security/iso27001" },
   { label: "GDPR", href: "/security/gdpr" },
   { label: "EU & US Data Regions", href: "/security/data-regions" },
-  { label: "HIPAA eligible", href: "/security/hipaa" },
+  { label: "HIPAA-ready region", href: "/security/hipaa" },
 ];
 
 export const Enterprise = () => {

@@ -127,7 +127,8 @@ Optional **Yearly Commitment**:
 | [Extensive public API](/docs/api-and-data-platform/features/public-api)                             | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Rate limit (general API)](/faq/all/api-limits)                                                     | 30 req/min          | 100 req/min         | 1,000 req/min       | Custom                       |
 | [Rate limit (datasets API)](/faq/all/api-limits)                                                    | 100 req/min         | 200 req/min         | 1,000 req/min       | Custom                       |
-| [Rate limit (metrics API)](/faq/all/api-limits)                                                     | 100 req/day         | 200 req/day         | 2,000 req/day       | Custom                       |
+| [Rate limit (Metrics API v2)](/faq/all/api-limits)                                                  | 100 req/day         | 100 req/hour        | 500 req/hour        | Custom                       |
+| [Rate limit (legacy Metrics API)](/faq/all/api-limits)                                              | 100 req/day         | 2,000 req/day       | 2,000 req/day       | Custom                       |
 | [SLA](/enterprise#faq)                                                                              | --                  | --                  | --                  | Yes                          |
 | **Exports**                                                                                         |                     |                     |                     |                              |
 | [Batch export via UI](/docs/api-and-data-platform/features/query-via-sdk#ui)                        | Yes                 | Yes                 | Yes                 | Yes                          |
