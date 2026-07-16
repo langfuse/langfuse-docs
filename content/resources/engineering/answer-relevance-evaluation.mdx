@@ -149,14 +149,20 @@ print(result.format())
 
 Each item produces a trace with the task execution and two scores (`answer_relevance` and `refusal`); the run carries the aggregate `relevance_rate`. The judge's one-sentence reasoning lands in the score comment, which is what you read when auditing why an item failed.
 
-To make runs comparable over time, move the questions into a Langfuse-hosted dataset and run the same task and evaluators against it. Every execution then becomes a dataset run you can diff in the UI against previous prompt or model versions:
+To make runs comparable over time, move the questions into a Langfuse-hosted dataset and run the same evaluators against it. Every execution then becomes a dataset run you can diff in the UI against previous prompt or model versions. Note one difference: hosted dataset items are objects with an `input` attribute, not dicts, so the task reads `item.input` instead of `item["input"]`:
 
 ```python
 dataset = langfuse.get_dataset("support-questions")
 
+
+def answer_dataset_question(*, item, **kwargs):
+    """Same application task; hosted dataset items expose attributes, not dict keys."""
+    return answer_question(item={"input": item.input}, **kwargs)
+
+
 result = dataset.run_experiment(
     name="Answer relevance, prompt v2",
-    task=answer_question,
+    task=answer_dataset_question,
     evaluators=[answer_relevance],
     run_evaluators=[relevance_rate],
 )
