@@ -261,8 +261,12 @@ Trace and score exports contain the same fields in all file types.
 │   └── {timestamp}.{parquet|json|jsonl|csv}[.gz]
 ├── traces/                   # Traces and observations (legacy) mode only
 │   └── {timestamp}.{parquet|json|jsonl|csv}[.gz]
-└── observations/             # Traces and observations (legacy) mode only
-    └── {timestamp}.{parquet|json|jsonl|csv}[.gz]
+├── observations/             # Traces and observations (legacy) mode only
+│   └── {timestamp}.{parquet|json|jsonl|csv}[.gz]
+└── manifests/                # Run completion manifest, written last
+    └── {timestamp}.json
 ```
 
 Files are partitioned by the configured export frequency (every 20 minutes, hourly, daily, or weekly). Each file covers one time window. The `.gz` suffix applies only to gzip-compressed text formats — Parquet files are never gzip-compressed.
+
+The `manifests/` folder contains one JSON file per completed export run, listing every file the run wrote — see [Run completion manifest](/docs/api-and-data-platform/features/export-to-blob-storage#run-manifest).

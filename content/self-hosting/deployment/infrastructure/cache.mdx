@@ -91,19 +91,20 @@ OR
 
 ### Timeout Configuration
 
-Langfuse supports configurable Redis timeouts to enable fail-fast behavior during Redis outages. Without these, commands can hang indefinitely, causing cascading latency across the application.
+Langfuse applies a socket-level watchdog to every Redis connection it opens: if a connection is expecting data and receives none for 30 seconds, the client destroys the socket and reconnects. This prevents hung connections from blocking BullMQ worker concurrency slots indefinitely. Connections additionally use a fixed TCP keep-alive of 10 seconds to prevent middleboxes from killing idle connections.
 
-| Variable                           | Required / Default | Description                                                                                                                                                                                                   |
-| ---------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `REDIS_COMMAND_TIMEOUT`            | `2000`             | Timeout in milliseconds for individual Redis commands. Commands that exceed this timeout will fail immediately. Applies to the singleton cache client and the rate limiter.                                   |
-| `REDIS_REQUEST_SOCKET_TIMEOUT_MS`  | `5000`             | Socket timeout in milliseconds for request/response Redis connections (singleton cache client, rate limiter). Detects zombie connections by closing sockets that are idle beyond this duration.               |
-| `REDIS_BLOCKING_SOCKET_TIMEOUT_MS` | `30000`            | Socket timeout in milliseconds for all Redis connections including BullMQ queue workers. Set higher than `REDIS_REQUEST_SOCKET_TIMEOUT_MS` to accommodate blocking operations like `BZPOPMIN` used by BullMQ. |
+| Variable                  | Required / Default | Description                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `REDIS_SOCKET_TIMEOUT_MS` | `30000`            | Socket timeout in milliseconds for all Redis connections (web and worker, including BullMQ queue connections). Set to `0` to disable the watchdog. Positive values must be at least `10000`: BullMQ blocking commands (`BZPOPMIN`) legitimately idle for ~5 seconds between packets, and lower values cause healthy idle workers to cycle through reconnects. |
 
-<Callout type="info">
+#### Troubleshooting: `Socket timeout. Expecting data, but didn't receive any in 30000ms.`
 
-The default values are designed to work well for most deployments. Only adjust these if you are experiencing Redis connectivity issues or need to tune fail-fast behavior for your environment. The blocking socket timeout (30s) must be significantly larger than the BullMQ drain delay (~5s) to avoid premature socket closures on idle workers.
+This error is raised by the client-side watchdog described above, not by the Redis server — a healthy Redis instance does not rule it out. Common causes:
 
-</Callout>
+- **CPU starvation of the Langfuse container (most common):** if the Node.js event loop stalls, e.g. because the worker container is CPU-throttled, incoming Redis data is not processed in time and the watchdog fires even though Redis responded promptly. Increase the CPU allocation of the affected container — this has resolved the error for multiple self-hosted deployments even when average CPU utilization appeared low.
+- **Network middleboxes:** NAT gateways, proxies, or firewalls that silently drop connections between Langfuse and Redis.
+
+Raising `REDIS_SOCKET_TIMEOUT_MS` only lengthens the watchdog; it does not address CPU starvation and delays recovery from genuinely hung connections.
 
 ## Deployment Options
 
