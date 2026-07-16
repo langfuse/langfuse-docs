@@ -110,6 +110,99 @@ OpenTelemetry integration, you can use the convenience methods
 which handle attribute propagation automatically. These methods provide a
 simpler interface and are the recommended approach when using Langfuse SDKs.
 
+## Experiments: Propagating Experiment Context to All Spans
+
+An experiment contains one or more experiment items. Each item is one trace:
+it has a root span and may have child spans for model calls, tools, or other
+work. To make the item show up correctly in Langfuse, use three levels of
+attributes:
+
+| Level               | Attributes                                                                                                                                                               | Apply to                       |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------ |
+| Experiment context  | `langfuse.experiment.id`, `langfuse.experiment.name`, `langfuse.experiment.description`, optional `langfuse.experiment.dataset.id`, and `langfuse.experiment.metadata.*` | Every span in every item trace |
+| Item context        | `langfuse.experiment.item.id`, optional `langfuse.experiment.item.version`, and `langfuse.experiment.item.root_observation_id`                                           | Every span in one item trace   |
+| Root-only item data | `langfuse.experiment.item.expected_output` and `langfuse.experiment.item.metadata.*`                                                                                     | The item's root span only      |
+
+The root observation ID is the link between an item and its spans. On the root
+span, set `langfuse.experiment.item.root_observation_id` to that span's own
+OTel `spanId`. Propagate the same value to all child spans of the item.
+
+### Recommended: Use OpenTelemetry Baggage for Experiment Context
+
+Use the same Baggage plus `BaggageSpanProcessor` pattern as for trace
+attributes. Baggage carries experiment and item context; the processor copies
+it to each span as `langfuse.experiment.*` attributes.
+
+The experiment context must be **Baggage only**. Do not create one enclosing
+"experiment" span: each item needs to start a separate trace.
+
+```text
+configureBaggageToSpanAttributeProcessor()
+
+experimentAttributes = {
+  "langfuse.experiment.id": experiment.id,
+  "langfuse.experiment.name": experiment.name,
+  "langfuse.experiment.description": experiment.description,
+  "langfuse.experiment.dataset.id": experiment.datasetId, // optional
+  "langfuse.experiment.metadata.prompt_version": "v4",
+}
+experimentBaggage = baggageFromAttributes(experimentAttributes)
+
+for each item:
+  # Start a new trace, while preserving the experiment Baggage.
+  root = tracer.startSpan(
+    "experiment-item",
+    withBaggage(ROOT_CONTEXT, experimentBaggage),
+  )
+  rootId = root.spanContext().spanId
+
+  itemAttributes = {
+    "langfuse.experiment.item.id": item.id,
+    "langfuse.experiment.item.version": item.version, // optional
+    "langfuse.experiment.item.root_observation_id": rootId,
+  }
+
+  # The root already exists, so set its complete context explicitly.
+  root.setAttributes({
+    ...experimentAttributes,
+    ...itemAttributes,
+    "langfuse.experiment.item.expected_output": jsonEncode(item.expectedOutput),
+    "langfuse.experiment.item.metadata.country": item.metadata.country,
+  })
+
+  # Add item context before creating child spans.
+  itemBaggage = mergeBaggage(
+    experimentBaggage,
+    baggageFromAttributes(itemAttributes),
+  )
+  withContext(withActiveSpan(withBaggage(ROOT_CONTEXT, itemBaggage), root)):
+    runInstrumentedTask(item) # Child spans inherit both contexts.
+
+  root.end()
+```
+
+The root span must be created before the item context because its `spanId` is
+only available after creation. Set the root observation ID on the root directly,
+then add it to Baggage before any child span starts.
+
+Use one attribute per metadata value, for example
+`langfuse.experiment.metadata.prompt_version`. This is the preferred OTel form.
+For object or array expected outputs, send a JSON-encoded string.
+
+<Callout type="info">
+  **Scores:** Attach experiment-item scores to the root observation. When using
+  the Scores API, use the root span's `spanId` as the observation ID.
+</Callout>
+
+### Choose an Environment for Experiment Runs
+
+Experiment runs often deserve a separate environment such as `experiment` so
+they do not mix with production traffic. If the exporter only sends experiment
+runs, set `langfuse.environment=experiment` as a resource attribute. If the
+same exporter also sends production traffic, set and propagate
+`langfuse.environment` on the item root and its child spans instead. See
+[Environments](/docs/observability/features/environments) for details.
+
 ## Ingestion Options
 
 ### OpenTelemetry native Langfuse SDK v4
