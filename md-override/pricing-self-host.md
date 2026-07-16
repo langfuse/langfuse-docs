@@ -99,7 +99,6 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 | [GCP (Terraform)](/self-hosting/deployment/gcp)                                                     | Yes                         | Yes                                        |
 | **Support**                                                                                         |                             |                                            |
 | [Ask AI](/docs/ask-ai)                                                                              | Yes                         | Yes                                        |
-| [Langfuse Assistant (in-app agent)](/docs/langfuse-assistant)                                       | --                          | --                                         |
 | [Community (GitHub)](/support#community)                                                            | Yes                         | Yes                                        |
 | [In-app support](/support#in-app)                                                                   | --                          | Yes                                        |
 | [Private Slack channel](/support#slack)                                                             | --                          | Yes                                        |

@@ -958,7 +958,6 @@ const sections: Section[] = [
         href: "/docs/langfuse-assistant",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": false, Enterprise: false },
         },
       },
       {
