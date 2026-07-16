@@ -20,8 +20,10 @@ This notebook demonstrates how to capture detailed traces from a [Google Agent D
 <Steps>
 ## Step&nbsp;1: Install dependencies
 
+_Note: `google-adk` 2.x requires Python ≥ 3.10. The `"google-adk>=2"` pin ensures pip installs the current ADK 2.x release instead of resolving to an older 1.x version to satisfy OpenTelemetry version constraints._
+
 ```python
-%pip install langfuse google-adk openinference-instrumentation-google-adk -q
+%pip install langfuse "google-adk>=2" openinference-instrumentation-google-adk -q
 ```
 
 ## Step 2: Set up environment variables
@@ -67,7 +69,7 @@ from openinference.instrumentation.google_adk import GoogleADKInstrumentor
 GoogleADKInstrumentor().instrument()
 ```
 
-## Step 3: Build a hello world agent
+## Step 4: Build a hello world agent
 
 Every tool call and model completion is captured as an OpenTelemetry span and forwarded to Langfuse.
 
@@ -82,7 +84,7 @@ def say_hello():
 
 agent = Agent(
     name="hello_agent",
-    model="gemini-2.0-flash",
+    model="gemini-3.5-flash",
     instruction="Always greet using the say_hello tool.",
     tools=[say_hello],
 )
@@ -100,10 +102,13 @@ runner = Runner(agent=agent, app_name=APP_NAME, session_service=session_service)
 user_msg = types.Content(role="user", parts=[types.Part(text="hi")])
 for event in runner.run(user_id=USER_ID, session_id=SESSION_ID, new_message=user_msg):
     if event.is_final_response():
-        print(event.content.parts[0].text)
+        if event.content:
+            print(event.content.parts[0].text)
+        elif event.error_message:
+            print(f"Agent error: {event.error_message}")
 ```
 
-## Step 4: View the trace in Langfuse
+## Step 5: View the trace in Langfuse
 
 Head over to your **Langfuse dashboard → Traces**. You should see traces including all tool calls and model inputs/outputs.
 
