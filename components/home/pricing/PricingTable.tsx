@@ -957,12 +957,7 @@ const sections: Section[] = [
           "In-product AI assistant to explore your Langfuse project data and take selected actions with your approval. Available on Langfuse Cloud only.",
         href: "/docs/langfuse-assistant",
         tiers: {
-          cloud: {
-            Hobby: "Public beta",
-            Core: "Public beta",
-            Pro: "Public beta",
-            Enterprise: "Public beta",
-          },
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": false, Enterprise: false },
         },
       },
