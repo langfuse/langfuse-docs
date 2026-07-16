@@ -71,8 +71,11 @@ export function PropagationRestrictionsCallout({
         )}
         <li>
           Call <strong>early in your trace</strong> to ensure all observations
-          are covered. This way you make sure that all Metrics in Langfuse are
-          accurate.
+          are covered. Only the <strong>currently active observation</strong>{" "}
+          and observations <strong>started while the context is active</strong>{" "}
+          receive the attributes — observations started earlier are not
+          retroactively updated. This way you make sure that all Metrics in
+          Langfuse are accurate.
         </li>
         <li>Invalid values are dropped with a warning</li>
       </ul>

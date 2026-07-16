@@ -18,7 +18,7 @@ If you are new to Langfuse, we recommend familiarizing yourself with the [Langfu
 
 <Callout type="info">
 
-New data is typically available for querying within 15-30 seconds of ingestion, though processing times may vary at times. Please visit [status.langfuse.com](https://status.langfuse.com) if you encounter any issues.
+Ingestion is **asynchronous**: SDK `flush()` only guarantees delivery to the API, not read visibility. New data is typically available for querying within 15-30 seconds of ingestion, though processing times may vary — under heavy or parallel load, visibility can lag longer (there is no fixed SLA). Reading a trace immediately after writing it may return a 404. See [Handling ingestion lag](#ingestion-lag) for the recommended retry pattern, and visit [status.langfuse.com](https://status.langfuse.com) if you encounter persistent issues.
 
 </Callout>
 
@@ -71,6 +71,40 @@ observations = langfuse.api.observations.get_many(
 ```
 
 Use `trace_id` to retrieve the observations that belong to a single trace. Use `parent_observation_id` in the response to reconstruct an observation tree when needed.
+
+### Traces: `list` returns lightweight views [#traces-list-vs-get]
+
+`langfuse.api.trace.list(...)` returns **lightweight trace views**: the `observations` and `scores` fields contain only **IDs (strings)**, not full objects. Trace-level aggregates (`total_cost`, `latency`) are included, but per-observation usage and cost details are not. To get full observation objects, call `langfuse.api.trace.get(trace_id)` per trace (or prefer `observations.get_many(trace_id=...)` above).
+
+List-then-get pagination example for usage/cost aggregation:
+
+```python
+from collections import defaultdict
+from datetime import datetime, timedelta, timezone
+
+usage_by_model = defaultdict(int)
+from_timestamp = datetime.now(timezone.utc) - timedelta(days=1)
+page = 1
+
+while True:
+    traces = langfuse.api.trace.list(
+        from_timestamp=from_timestamp,
+        page=page,
+        limit=50,
+    )
+    for trace_view in traces.data:
+        # trace_view.observations is a list of ID strings only
+        full_trace = langfuse.api.trace.get(trace_view.id)
+        for obs in full_trace.observations:  # full objects incl. usage/cost
+            if obs.usage_details:
+                model = obs.model or "unknown"
+                usage_by_model[model] += obs.usage_details.get("total", 0)
+    if page >= traces.meta.total_pages:
+        break
+    page += 1
+```
+
+If you only need trace-level totals, `trace.list` alone is enough (`trace_view.total_cost`, `trace_view.latency`) — no per-trace `get` required. For large-scale aggregation, prefer the [Metrics API v2](/docs/metrics/features/metrics-api#v2) over paginating row-level data.
 
 ### Metrics
 
@@ -216,6 +250,73 @@ Explore more entities via Intellisense on `langfuse.api`.
 
 </Tab>
 </LangTabs>
+
+## Handling ingestion lag (get-after-write) [#ingestion-lag]
+
+Trace ingestion is asynchronous. `flush()` in the SDKs guarantees that data was **delivered** to the Langfuse API, not that it is **readable** yet. Reading right after writing — e.g. `trace.get(trace_id)` after a flush, fetching a score you just created, or fetching dataset run items right after an experiment — may raise a 404 (`langfuse.api.NotFoundError` in Python) or return incomplete data until processing completes. Typical visibility is within 15-30 seconds; under heavy or parallel load it can take longer, and there is no fixed SLA.
+
+Instead of a fixed `time.sleep()`, use bounded retries with backoff:
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python SDK">
+
+```python
+import time
+
+from langfuse import get_client
+from langfuse.api import NotFoundError
+
+langfuse = get_client()
+
+
+def get_trace_with_retry(trace_id: str, *, timeout: float = 60.0):
+    """Fetch a trace, retrying on 404 until ingestion completes."""
+    deadline = time.monotonic() + timeout
+    delay = 1.0
+    while True:
+        try:
+            return langfuse.api.trace.get(trace_id)
+        except NotFoundError:
+            if time.monotonic() >= deadline:
+                raise
+            time.sleep(delay)
+            delay = min(delay * 2, 10.0)  # exponential backoff, capped
+
+
+langfuse.flush()  # ensure delivery before polling
+trace = get_trace_with_retry(trace_id, timeout=60)
+```
+
+Note: a successful `trace.get` means the trace record exists — observations and scores of that trace may still be arriving. If you depend on completeness (e.g. counting observations or summing costs), additionally check that the expected observations are present before proceeding.
+
+</Tab>
+<Tab title="JS/TS SDK">
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+async function getTraceWithRetry(traceId: string, timeoutMs = 60_000) {
+  const deadline = Date.now() + timeoutMs;
+  let delay = 1_000;
+  while (true) {
+    try {
+      return await langfuse.api.trace.get(traceId);
+    } catch (err: any) {
+      const is404 = err?.statusCode === 404;
+      if (!is404 || Date.now() >= deadline) throw err;
+      await new Promise((r) => setTimeout(r, delay));
+      delay = Math.min(delay * 2, 10_000); // exponential backoff, capped
+    }
+  }
+}
+```
+
+</Tab>
+</LangTabs>
+
+The same pattern applies to any read-after-write on ingested entities: traces, observations, scores, and dataset run items. Entities created via synchronous endpoints (prompts, datasets, dataset items) are readable immediately and do not need retries.
 
 ## Related Resources
 

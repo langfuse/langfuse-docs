@@ -188,6 +188,15 @@ The [Flowise Integration](/docs/flowise) automatically maps the Flowise chatId t
 
 <PropagationRestrictionsCallout attributes={["sessionId"]} />
 
+## Scope and ordering of `sessionId` propagation [#scope-and-ordering]
+
+Propagation is forward-only and follows the active execution context:
+
+- **Covered**: the observation that is currently active when you enter the propagation context, and every observation started while the context is active (any nesting depth, any type).
+- **Not covered**: observations started before entering the context. In the Python SDK, a detached root created with `start_observation()` (which does not become the active span) stays unstamped if you enter `propagate_attributes` afterwards — start it inside the context, or use `start_as_current_observation` for the root and propagate within it.
+
+Where the value lands: each covered observation carries `session.id` in the exported OTel span data, and after ingestion `sessionId` surfaces as a **trace-level field**. When verifying programmatically, read it from the trace (`langfuse.api.trace.get(trace_id).session_id`) — observation objects returned by the public API do not expose a `session_id` field, so asserting on fetched child observations will always fail.
+
 ## Example
 
 Try this feature using the public [example project](/docs/demo).

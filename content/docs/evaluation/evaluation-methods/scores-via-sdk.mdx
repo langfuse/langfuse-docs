@@ -22,6 +22,12 @@ You can add scores via the Langfuse SDKs or API. Scores can take one of four dat
 
 If a score is ingested manually using a `trace_id` to link the score to a trace, it is not necessary to wait until the trace has been created. The score will show up in the scores table and will be linked to the trace once the trace with the same `trace_id` is created.
 
+<Callout type="info">
+
+Score ingestion is asynchronous. A score created via SDK is queued, sent on the next flush, and processed server-side — it is typically queryable via the API/UI within 15-30 seconds, potentially longer under load. If you fetch a score right after creating it, retry with bounded backoff. See [Handling ingestion lag](/docs/api-and-data-platform/features/query-via-sdk#ingestion-lag).
+
+</Callout>
+
 Here are examples by `Score` data types.
 
 For trace and observation scores, `trace_id`/`traceId` is required and `observation_id`/`observationId` is optional. If you attach a score to an observation, always provide both the observation ID and the corresponding trace ID.

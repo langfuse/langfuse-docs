@@ -538,6 +538,8 @@ await startActiveObservation("user-workflow", async () => {
 </Tab>
 </LangTabs>
 
+**Scope**: propagation is forward-only. The attributes are applied to the observation that is currently active when the context is entered, and to every observation started while the context is active. Observations started earlier are not retroactively updated — in the Python SDK, a detached span from `start_observation()` (never the active span) stays unstamped if you enter `propagate_attributes` after starting it. After ingestion, `userId` and `sessionId` surface as trace-level fields (read them via `api.trace.get(trace_id)`); observation objects returned by the public API do not expose these fields. See [Sessions](/docs/observability/features/sessions#scope-and-ordering) and [Users](/docs/observability/features/users#scope-and-ordering) for details.
+
 <PropagationRestrictionsCallout attributes={[]} />
 
 ### Cross-service propagation
