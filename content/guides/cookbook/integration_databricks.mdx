@@ -53,12 +53,12 @@ Configure your **Langfuse** credentials and **Databricks** credentials as enviro
 import os
 
 # Example environment variables (replace with your actual keys/tokens)
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."  # your public key
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."  # your secret key
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"  # Other regions: https://us.cloud.langfuse.com (US), https://jp.cloud.langfuse.com (Japan), https://hipaa.cloud.langfuse.com (HIPAA)
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")  # your public key
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")  # your secret key
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")  # Other regions: https://us.cloud.langfuse.com (US), https://jp.cloud.langfuse.com (Japan), https://hipaa.cloud.langfuse.com (HIPAA)
 
-os.environ["DATABRICKS_TOKEN"] = "dapi-..."  # Databricks personal access token
-os.environ["DATABRICKS_HOST"] = "https://dbc-XXXXX-XXXX.cloud.databricks.com"
+os.environ.setdefault("DATABRICKS_TOKEN", "dapi-...")  # Databricks personal access token
+os.environ.setdefault("DATABRICKS_HOST", "https://dbc-XXXXX-XXXX.cloud.databricks.com")
 ```
 
 ## Approach 1: Using Databricks Models via the OpenAI SDK
@@ -131,9 +131,9 @@ Databricks models can also be used via LangChain. The [`ChatDatabricks`](https:/
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 ```
@@ -207,9 +207,9 @@ from langfuse import get_client
 from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
  
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
  
 langfuse = get_client()

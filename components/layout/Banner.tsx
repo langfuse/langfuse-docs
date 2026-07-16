@@ -5,16 +5,17 @@ export function Banner() {
   return null;
   // return (
   //   <FumadocsBanner
-  //     id="fd-top-banner-town-hall-2026-q2"
+  //     id="fd-top-banner-ai-engineer-world-fair-2026"
   //     height="2rem"
   //     className="bg-black text-white [&_a]:text-white [&_button]:text-white"
   //   >
-  //     <Link href="https://luma.com/7dny2x72">
+  //     <Link href="https://www.ai.engineer/worldsfair">
   //       <span className="sm:hidden">
-  //         [Virtual] Langfuse Town Hall · Jun 11 →
+  //         Langfuse @ AI Engineer · Booth LG-39 →
   //       </span>
   //       <span className="hidden sm:inline">
-  //         [Virtual] Langfuse Town Hall · Jun 11, 9am PT: V4, Releases, Roadmap →
+  //         Langfuse @ AI Engineer World Fair in San Francisco · Find us at booth
+  //         LG-39 →
   //       </span>
   //     </Link>
   //   </FumadocsBanner>

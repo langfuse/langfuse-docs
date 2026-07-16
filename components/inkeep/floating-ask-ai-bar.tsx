@@ -33,7 +33,6 @@ const ASK_AI_BAR_HIDDEN_PATHS: ReadonlyArray<RegExp> = [
   /^\/privacy(\/|$)/,
   /^\/terms(\/|$)/,
   /^\/cookie-policy(\/|$)/,
-  /^\/security\/dpa(\/|$)/,
   // App proxy
   /^\/cloud(\/|$)/,
   // Custom-designed regional / annual landing pages

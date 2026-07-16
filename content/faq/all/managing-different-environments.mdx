@@ -16,9 +16,10 @@ Use **separate projects** if you need different access controls per environment,
 
 ## Environments (Recommended)
 
-The recommended approach for managing different environments in Langfuse is to use the built-in [Environments](/docs/tracing-features/environments) feature. This allows you to organize your traces, observations, and scores from different contexts such as production, staging, or development within the same project.
+The recommended approach for managing different environments in Langfuse is to use the built-in [Environments](/docs/observability/features/environments) feature. This allows you to organize your traces, observations, and scores from different contexts such as production, staging, or development within the same project.
 
 You can configure the environment by setting the `LANGFUSE_TRACING_ENVIRONMENT` environment variable or by using the `environment` parameter in the client initialization.
+In the Python SDK, use `propagate_attributes(environment="...", as_baggage=True)` when a shared service, such as an LLM proxy, should inherit the caller's environment per request.
 
 ## Separate Projects
 

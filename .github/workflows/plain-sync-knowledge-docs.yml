@@ -17,15 +17,12 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install CLI
-        run: npm install -g @team-plain/cli@latest
-
       - name: Index Langfuse.com
-        run: plain index-sitemap https://langfuse.com/sitemap-0.xml
+        run: npx --yes @team-plain/cli@0.4.0 index-sitemap https://langfuse.com/sitemap-0.xml
         env:
           PLAIN_API_KEY: ${{ secrets.PLAIN_API_KEY_WRITE_INDEXED_DOCUMENTS }}
 
       - name: Index GH Discussions
-        run: plain index-sitemap https://langfuse.com/github-discussions-sitemap.xml
+        run: npx --yes @team-plain/cli@0.4.0 index-sitemap https://langfuse.com/github-discussions-sitemap.xml
         env:
           PLAIN_API_KEY: ${{ secrets.PLAIN_API_KEY_WRITE_INDEXED_DOCUMENTS }}

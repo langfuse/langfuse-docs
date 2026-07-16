@@ -5,20 +5,80 @@
  *     - noindex: true  → page is intentionally hidden from search
  *     - canonical: <url> that differs from the page's own URL
  *
- *   .sitemap-all-pages.json — ALL valid page paths (i.e., not excluded).
- *     Used by next-sitemap's additionalPaths to include pages that are
- *     server-rendered (not statically built) and therefore missed by
- *     next-sitemap's default build-output discovery.
+ *   .sitemap-all-pages.json — metadata for every valid (non-excluded) page:
+ *     { loc, lastmod, title, description }. Used by next-sitemap's
+ *     additionalPaths to include pages that are server-rendered (not
+ *     statically built) and to attach an accurate <lastmod> derived from git
+ *     history (instead of the build timestamp). The title/description are
+ *     reused by scripts/generate_llms_txt.js so llms.txt reflects the real
+ *     page metadata rather than titles guessed from the URL slug.
  *
  * Run automatically as part of `prebuild` before `next-sitemap`.
  */
 "use strict";
 const fs = require("fs");
 const path = require("path");
+const { execFileSync } = require("child_process");
 
-const contentDir = path.join(__dirname, "../content");
-const excludesFile = path.join(__dirname, "../.sitemap-excludes.json");
-const allPagesFile = path.join(__dirname, "../.sitemap-all-pages.json");
+const repoRoot = path.join(__dirname, "..");
+const contentDir = path.join(repoRoot, "content");
+const excludesFile = path.join(repoRoot, ".sitemap-excludes.json");
+const allPagesFile = path.join(repoRoot, ".sitemap-all-pages.json");
+
+/**
+ * Build a map of repo-relative content file path -> ISO date of the most
+ * recent git commit that touched it, computed in a single `git log` pass.
+ *
+ * Accurate dates require full git history at build time. CI build jobs use
+ * `fetch-depth: 0`; if the build runs on a shallow clone the dates degrade to
+ * file mtimes, so we warn loudly.
+ */
+function buildGitLastmodMap() {
+  const map = new Map();
+  try {
+    const shallow =
+      execFileSync("git", ["rev-parse", "--is-shallow-repository"], {
+        cwd: repoRoot,
+        encoding: "utf-8",
+      }).trim() === "true";
+    if (shallow) {
+      console.warn(
+        "[generate-sitemap-excludes] WARNING: shallow git clone detected — " +
+          "sitemap <lastmod> dates may be inaccurate. Build with full history " +
+          "(fetch-depth: 0) for accurate freshness signals.",
+      );
+    }
+    const out = execFileSync(
+      "git",
+      ["log", "--name-only", "--format=__COMMIT__\t%cI", "--", "content"],
+      { cwd: repoRoot, encoding: "utf-8", maxBuffer: 512 * 1024 * 1024 },
+    );
+    let currentDate = null;
+    for (const line of out.split("\n")) {
+      if (line.startsWith("__COMMIT__\t")) {
+        currentDate = line.slice("__COMMIT__\t".length).trim();
+      } else if (line && currentDate && !map.has(line)) {
+        // First (newest) commit that touched this path wins.
+        map.set(line, currentDate);
+      }
+    }
+  } catch (err) {
+    console.warn(
+      `[generate-sitemap-excludes] git lastmod lookup failed (${err.message}); ` +
+        "falling back to file mtimes.",
+    );
+  }
+  return map;
+}
+
+/** Fallback last-modified date from the filesystem (ISO string). */
+function fileMtimeISO(filePath) {
+  try {
+    return fs.statSync(filePath).mtime.toISOString();
+  } catch {
+    return undefined;
+  }
+}
 
 // Cookbook routes that have a canonical docsPath duplicate — excluded from sitemap
 let cookbookExcluded = new Set();
@@ -72,6 +132,7 @@ function contentPathToRoute(filePath) {
     security: "security",
     blog: "blog",
     customers: "users",
+    resources: "resources",
     // marketing pages are served at the root (no section prefix)
     marketing: "",
   };
@@ -104,7 +165,11 @@ function walkDir(dir) {
 }
 
 const excludePaths = new Set([...cookbookExcluded]);
-const allRoutes = new Set();
+// route -> { loc, lastmod?, title?, description? }
+const pagesByRoute = new Map();
+
+// Resolve each content file's last-modified date from git in a single pass.
+const gitLastmod = buildGitLastmodMap();
 
 for (const filePath of walkDir(contentDir)) {
   let src;
@@ -131,8 +196,14 @@ for (const filePath of walkDir(contentDir)) {
 
   if (exclude) {
     excludePaths.add(route);
-  } else {
-    allRoutes.add(route);
+  } else if (!pagesByRoute.has(route)) {
+    const relPath = path.relative(repoRoot, filePath).replace(/\\/g, "/");
+    const lastmod = gitLastmod.get(relPath) || fileMtimeISO(filePath);
+    const entry = { loc: route };
+    if (lastmod) entry.lastmod = lastmod;
+    if (fm.title) entry.title = fm.title;
+    if (fm.description) entry.description = fm.description;
+    pagesByRoute.set(route, entry);
   }
 }
 
@@ -144,7 +215,13 @@ console.log(
   `[generate-sitemap-excludes] Wrote ${excludePaths.size} excluded path(s) to .sitemap-excludes.json`,
 );
 
-fs.writeFileSync(allPagesFile, JSON.stringify([...allRoutes].sort(), null, 2));
+const allPages = [...pagesByRoute.values()].sort((a, b) =>
+  a.loc.localeCompare(b.loc),
+);
+const withLastmod = allPages.filter((p) => p.lastmod).length;
+const withDescription = allPages.filter((p) => p.description).length;
+fs.writeFileSync(allPagesFile, JSON.stringify(allPages, null, 2));
 console.log(
-  `[generate-sitemap-excludes] Wrote ${allRoutes.size} page path(s) to .sitemap-all-pages.json`,
+  `[generate-sitemap-excludes] Wrote ${allPages.length} page(s) to .sitemap-all-pages.json ` +
+    `(${withLastmod} with lastmod, ${withDescription} with description)`,
 );

@@ -25,6 +25,7 @@ const getGithubEditUrl = (path: string): string | null => {
     "self-hosting": "content/self-hosting",
     library: "content/library",
     academy: "content/academy",
+    resources: "content/resources",
   };
 
   const contentDir = sectionToDir[section];
