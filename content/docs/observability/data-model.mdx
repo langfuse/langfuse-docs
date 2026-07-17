@@ -77,6 +77,93 @@ For example, when a user asks a question to a chatbot, that interaction, from th
 
 A trace is the logical grouping of all observations that share the same `trace_id`. Trace-level attributes such as `user_id`, `session_id`, `tags`, and `metadata` live on every observation within the trace (the SDKs propagate them automatically), which keeps queries and aggregations fast.
 
+Conceptually, Langfuse stores one observations table. Each row holds the observation-level data plus a copy of the trace-level attributes:
+
+<div className="mt-6 mb-6 overflow-x-auto rounded border bg-card px-4 py-4">
+
+<p className="text-center text-sm mb-3">The observations table: rows with the same `trace_id` form a trace</p>
+
+<table className="w-full text-xs font-mono border-collapse">
+  <thead>
+    <tr>
+      <th colSpan={4} className="border px-2 py-1 font-medium">
+        Observation-level data
+      </th>
+      <th
+        colSpan={4}
+        className="border px-2 py-1 font-medium"
+        style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}
+      >
+        Trace-level data, on every row
+      </th>
+    </tr>
+    <tr>
+      <th className="border px-2 py-1">id</th>
+      <th className="border px-2 py-1">type</th>
+      <th className="border px-2 py-1">name</th>
+      <th className="border px-2 py-1">latency</th>
+      <th className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>trace_id</th>
+      <th className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>trace_name</th>
+      <th className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>user_id</th>
+      <th className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>session_id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td className="border px-2 py-1">obs-1</td>
+      <td className="border px-2 py-1">SPAN</td>
+      <td className="border px-2 py-1">handle-chat</td>
+      <td className="border px-2 py-1">3.1s</td>
+      <td className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>abc123</td>
+      <td className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>chat-request</td>
+      <td className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>u-42</td>
+      <td className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>s-7</td>
+    </tr>
+    <tr>
+      <td className="border px-2 py-1">obs-2</td>
+      <td className="border px-2 py-1">SPAN</td>
+      <td className="border px-2 py-1">retrieval</td>
+      <td className="border px-2 py-1">0.4s</td>
+      <td className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>abc123</td>
+      <td className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>chat-request</td>
+      <td className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>u-42</td>
+      <td className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>s-7</td>
+    </tr>
+    <tr>
+      <td className="border px-2 py-1">obs-3</td>
+      <td className="border px-2 py-1">GENERATION</td>
+      <td className="border px-2 py-1">llm-call</td>
+      <td className="border px-2 py-1">2.6s</td>
+      <td className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>abc123</td>
+      <td className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>chat-request</td>
+      <td className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>u-42</td>
+      <td className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>s-7</td>
+    </tr>
+    <tr className="border-t-2">
+      <td className="border px-2 py-1">obs-4</td>
+      <td className="border px-2 py-1">SPAN</td>
+      <td className="border px-2 py-1">build-report</td>
+      <td className="border px-2 py-1">1.2s</td>
+      <td className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>def789</td>
+      <td className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>export-report</td>
+      <td className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>u-17</td>
+      <td className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>s-9</td>
+    </tr>
+    <tr>
+      <td className="border px-2 py-1">obs-5</td>
+      <td className="border px-2 py-1">GENERATION</td>
+      <td className="border px-2 py-1">summarize</td>
+      <td className="border px-2 py-1">0.9s</td>
+      <td className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>def789</td>
+      <td className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>export-report</td>
+      <td className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>u-17</td>
+      <td className="border px-2 py-1" style={{ backgroundColor: "hsl(var(--muted-blue)/0.12)" }}>s-9</td>
+    </tr>
+  </tbody>
+</table>
+
+</div>
+
 ### Sessions
 
 Optionally, traces can be grouped into [sessions](/docs/observability/features/sessions).
