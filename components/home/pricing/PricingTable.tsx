@@ -1091,6 +1091,20 @@ const sections: Section[] = [
         },
       },
       {
+        name: "AWS PrivateLink",
+        href: "/security/networking",
+        description:
+          "Available for Enterprise customers with a committed contract; subject to regional availability.",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: true,
+          },
+        },
+      },
+      {
         name: "Sign in with Google, AzureAD, GitHub",
         tiers: {
           cloud: {
