@@ -1,12 +1,15 @@
 ---
 title: Versioning
-label: "Version: v3"
 sidebarTitle: "Versioning"
 ---
 
 # Versioning
 
 Versioning is key to ensure compatibility between Langfuse Server, SDKs, and custom integrations via the Public API. Thus, we take [semantic versioning](https://semver.org/) seriously.
+
+<Callout type="info">
+For an overview of current and legacy versions, the SDK ↔ server compatibility matrix, and API version availability, see [Versions & Compatibility](/docs/compatibility). Removal dates for deprecated features are tracked on the [deprecations page](/self-hosting/upgrade/deprecations).
+</Callout>
 
 ## Scope of semantic versioning
 
@@ -22,13 +25,21 @@ The following changes **do not result in a major version bump** as they are cons
 
 ## Compatibility between Langfuse Server and SDKs
 
-Langfuse Server and SDKs are versioned independently to allow for more flexibility in upgrading components:
+Langfuse Server and SDKs are versioned independently to allow for more flexibility in upgrading components. The compatibility rule: **each server major version aims to support the current and the previous SDK major version of each language, and each SDK major requires a minimum server version.** We try extremely hard to uphold this rule, but the v4 transition is an exception: it ends support for older SDK majors on a published schedule (see [deprecations](/self-hosting/upgrade/deprecations) and the [feature availability matrix](/docs/compatibility#sdk-server)).
 
-- **Server**: Can be upgraded independently of SDK versions, unless explicitly noted in release notes
-- **SDKs**: Can remain on older versions while running newer server versions
-- **Compatibility**: New SDK features may require recent server versions
+- **Server**: Can be upgraded independently of SDK versions within the supported range. Major server upgrades can drop support for old SDK majors; check the [feature availability matrix](/docs/compatibility#sdk-server) and the upgrade guide before upgrading.
+- **SDKs**: Older SDK majors keep working on newer servers until they are deprecated and removed (see [deprecations](/self-hosting/upgrade/deprecations)). New SDK majors require the minimum server versions listed in the [compatibility overview](/docs/compatibility#sdk-server).
 
 We recommend keeping the Langfuse Server up to date to ensure access to all features and security updates.
+
+## How Langfuse Cloud is versioned [#cloud]
+
+Langfuse Cloud deploys continuously and always runs the latest Langfuse version. New capabilities are battle-tested on Langfuse Cloud before they ship in a self-hosted release, so Cloud can run ahead of the latest self-hosted version, and some features may be enabled on Cloud before they are available self-hosted.
+
+Consequences:
+
+- On Cloud, server versions are managed for you; only SDK versions and API endpoints matter.
+- Breaking removals on Cloud are announced with a migration window and happen on published dates; on self-hosted they only happen in major releases. Both are tracked on the [deprecations page](/self-hosting/upgrade/deprecations).
 
 ## Release Notes
 

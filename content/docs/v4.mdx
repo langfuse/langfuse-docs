@@ -1,6 +1,6 @@
 ---
-title: "Langfuse Fast Preview: Faster and Observations-First"
-description: Langfuse "Fast Preview" delivers faster performance and introduces an observations-first data model. Enable the preview and upgrade SDKs to get started.
+title: "Langfuse v4: Faster and Observations-First"
+description: Langfuse v4 delivers faster performance and introduces an observations-first data model, on Langfuse Cloud and self-hosted. Upgrade your SDKs to get started.
 ---
 
 import {
@@ -12,11 +12,11 @@ import {
   Zap,
 } from "lucide-react";
 
-# Langfuse Cloud: Fast Preview
+# Langfuse v4
 
 ## At a glance
 
-Langfuse is now observations-first. Queries that used to require expensive joins now run an order of magnitude faster. This change was necessary to let Langfuse scale for agentic applications.
+Langfuse is now observations-first. Queries that used to require expensive joins now run an order of magnitude faster. This change was necessary to let Langfuse scale for agentic applications. Langfuse v4 is available in preview on Langfuse Cloud (as "Fast Preview") and launches for self-hosted deployments by August 1, 2026.
 
 **What changed:** We move from traces and observations as separate entities to observations only. A trace ID remains a correlating identifier for a group of observations. Trace attributes (`user_id`, `session_id`, etc.) must be set on _all_ observations for efficient queries and aggregations. Traces have no longer separate input and output.
 
@@ -143,9 +143,13 @@ This preview is powered by a simplified observation-centric data model. Trace-le
 
 ## OSS and self-hosting
 
-This preview is currently available on Langfuse Cloud. We are working on the migration path for OSS deployments and will share updates here, in the [changelog](/changelog), and in the dedicated [GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518) as they become available.
+Langfuse v4 launches for self-hosted deployments by **August 1, 2026**. Follow the [upgrade documentation](/self-hosting/upgrade) to move from v3 to v4, and check the [Versions & Compatibility overview](/docs/compatibility) for SDK and API version requirements. Updates are shared in the [changelog](/changelog) and in the dedicated [GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518).
 
-## Questions on "Fast Preview"?
+## Migration deadline on Langfuse Cloud [#migration-deadline]
+
+On **November 30, 2026**, the v4 migration completes on Langfuse Cloud: legacy API endpoints and legacy trace ingestion are removed, and remaining legacy exports are switched to their replacements automatically. See the [deprecations page](/self-hosting/upgrade/deprecations) for the full schedule.
+
+## Questions on Langfuse v4?
 
 If you have questions about the rollout, migration steps, SDK upgrades, or anything unclear in the new experience, please ask them in the dedicated [GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518). We will use that thread for rollout updates and answers.
 
@@ -173,12 +177,12 @@ If you have questions about the rollout, migration steps, SDK upgrades, or anyth
     icon={<BarChart3 />}
   />
   <Card
-    title="Dashboard Changes in Fast Preview"
+    title="Dashboard Changes in v4"
     href="/faq/all/dashboard-changes-in-v4"
     icon={<LayoutDashboard />}
   />
   <Card
-    title="Ask Questions on Fast Preview"
+    title="Ask Questions on Langfuse v4"
     href="https://github.com/orgs/langfuse/discussions/12518"
     icon={<Github />}
   />
