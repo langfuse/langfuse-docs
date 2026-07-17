@@ -5,6 +5,10 @@ import { usePostHog } from "posthog-js/react";
 // This preserves existing PostHog event structure while adding type safety
 interface EventDefinitions {
   copy_page: { type: "copy" | "chatgpt" | "claude" | "mcp" };
+  hero_slogan_exposure: {
+    variant: "ai-engineering" | "agent-evals";
+    is_new_assignment: boolean;
+  };
 }
 
 type EventName = keyof EventDefinitions;
