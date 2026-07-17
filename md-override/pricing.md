@@ -140,9 +140,10 @@ Optional **Yearly Commitment**:
 | [PostHog integration](/integrations/analytics/posthog)                                              | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Mixpanel integration](/integrations/analytics/mixpanel)                                            | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Scheduled export to blob storage](/docs/api-and-data-platform/features/query-via-sdk#blob-storage) | --                  | --                  | Teams add-on        | Yes                          |
+| **AI Native Features**                                                                              |                     |                     |                     |                              |
+| [Langfuse Assistant (in-app agent)](/docs/langfuse-assistant)                                       | Yes                 | Yes                 | Yes                 | Yes                          |
 | **Support**                                                                                         |                     |                     |                     |                              |
 | [Ask AI](/docs/ask-ai)                                                                              | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Langfuse Assistant (in-app agent)](/docs/langfuse-assistant)                                       | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Community (GitHub)](/support#community)                                                            | Yes                 | Yes                 | Yes                 | Yes                          |
 | [In-app support](/support#in-app)                                                                   | --                  | Yes                 | Yes                 | Yes                          |
 | [Private Slack channel](/support#slack)                                                             | --                  | --                  | Teams add-on        | Yes                          |

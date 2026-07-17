@@ -97,9 +97,10 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 | [AWS (Terraform)](/self-hosting/deployment/aws)                                                     | Yes                         | Yes                                        |
 | [Azure (Terraform)](/self-hosting/deployment/azure)                                                 | Yes                         | Yes                                        |
 | [GCP (Terraform)](/self-hosting/deployment/gcp)                                                     | Yes                         | Yes                                        |
+| **AI Native Features**                                                                              |                             |                                            |
+| [Langfuse Assistant (in-app agent)](/docs/langfuse-assistant)                                       | --                          | AWS (custom infrastructure)                |
 | **Support**                                                                                         |                             |                                            |
 | [Ask AI](/docs/ask-ai)                                                                              | Yes                         | Yes                                        |
-| [Langfuse Assistant (in-app agent)](/docs/langfuse-assistant)                                       | --                          | AWS (custom infrastructure)                |
 | [Community (GitHub)](/support#community)                                                            | Yes                         | Yes                                        |
 | [In-app support](/support#in-app)                                                                   | --                          | Yes                                        |
 | [Private Slack channel](/support#slack)                                                             | --                          | Yes                                        |

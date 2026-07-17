@@ -940,17 +940,8 @@ const sections: Section[] = [
     ],
   },
   {
-    name: "Support",
-    href: "/support",
+    name: "AI Native Features",
     features: [
-      {
-        name: "Ask AI",
-        href: "/docs/ask-ai",
-        tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": true, Enterprise: true },
-        },
-      },
       {
         name: "Langfuse Assistant (in-app agent)",
         description:
@@ -962,6 +953,20 @@ const sections: Section[] = [
             "Open Source": false,
             Enterprise: "AWS (custom infrastructure)",
           },
+        },
+      },
+    ],
+  },
+  {
+    name: "Support",
+    href: "/support",
+    features: [
+      {
+        name: "Ask AI",
+        href: "/docs/ask-ai",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
         },
       },
       {
