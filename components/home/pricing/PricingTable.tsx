@@ -457,7 +457,7 @@ const sections: Section[] = [
     ],
   },
   {
-    name: "AI Native Features",
+    name: "Langfuse AI",
     features: [
       {
         name: "Langfuse Assistant (in-app agent)",

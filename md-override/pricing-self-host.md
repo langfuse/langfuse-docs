@@ -55,7 +55,7 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 | [Custom via API](/api-and-data-platform/features/public-api)                                        | Yes                         | Yes                                        |
 | Included usage                                                                                      | Unlimited                   | Unlimited                                  |
 | [Multi-modal](/docs/observability/features/multi-modality)                                          | Yes                         | Yes                                        |
-| **AI Native Features**                                                                              |                             |                                            |
+| **Langfuse AI**                                                                                     |                             |                                            |
 | [Langfuse Assistant (in-app agent)](/docs/langfuse-assistant)                                       | --                          | --                                         |
 | **Prompt Management**                                                                               |                             |                                            |
 | [Prompt versioning](/docs/prompt-management/get-started)                                            | Yes                         | Yes                                        |
