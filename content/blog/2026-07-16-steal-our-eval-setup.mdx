@@ -18,7 +18,7 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
   authors={["annabellschafer"]}
 />
 
-"Build custom evals," they say. Yes, but "custom" doesn't mean "from scratch." For a huge chunk of eval design, especially for something as well-trodden as a chatbot, you're solving a problem thousands of teams have already solved. Here's our setup for our docs chatbot, in full.
+"Build custom evals," they say. Yes, but "custom" doesn't mean "from scratch." For a huge chunk of eval design, especially for something as well-trodden as a chatbot, we are solving a problem thousands of teams have already solved. Here's our setup for our docs chatbot, in full.
 
 <Callout type="info">
   Explore the [Langfuse example project](/docs/demo), the public Langfuse
@@ -77,13 +77,13 @@ Before anything else, you need to see what the chatbot is actually doing, not ju
   ![Trace detail view showing a docs chatbot request with user ID, session ID, tool use, and generation input](/images/blog/2026-07-16-steal-our-eval-setup/chatbot-trace-detail.png)
 </Frame>
 
-For chatbots, make sure each trace also carries the surrounding context you will need later. We pass a `userId` so we can see whether the same person comes back with the same topic over time, and a `sessionId` so related turns are grouped into one [session](/docs/observability/features/sessions). A good default is one trace per user message and one session per conversation. That keeps individual traces easy to inspect while still letting you replay the full thread and compare behavior across returning users in the [Users view](/docs/observability/features/users).
+For chatbots, make sure each trace also carries the surrounding context you will need later. We pass a `userId` so we can see whether the same person comes back with the same topic over time, and a `sessionId` so related turns are grouped into one [session](/docs/observability/features/sessions). A good default is one trace per user message and one session per conversation. That keeps individual traces easy to inspect while still letting us replay the full thread and compare behavior across returning users in the [Users view](/docs/observability/features/users).
 
 <Frame fullWidth>
   ![User detail view showing a focused list of chatbot traces for one returning user](/images/blog/2026-07-16-steal-our-eval-setup/user-focused-traces.png)
 </Frame>
 
-What you are looking for is the user's question, the retrieval step showing which docs got pulled in, the tool calls, and the generation step with the final answer. If something is wrong with the answer, the trace tells you whether the problem was bad retrieval or bad generation on top of good retrieval. Those are two very different fixes.
+What we look for is the user's question, the retrieval step showing which docs got pulled in, the tool calls, and the generation step with the final answer. If something is wrong with the answer, the trace tells us whether the problem was bad retrieval or bad generation on top of good retrieval. Those are two very different fixes.
 
 ## Monitor what is going on in prod
 
@@ -94,7 +94,7 @@ Once production tracing is in place, we check for two things:
 
 ### What counts as interesting?
 
-You could review every conversation by hand. We decided to evaluate where we need to look and call that monitoring. A few things reliably mark a chatbot conversation as worth a closer look:
+We could review every conversation by hand. We decided to evaluate where we need to look and call that monitoring. A few things reliably mark a chatbot conversation as worth a closer look:
 
 - The user pushes back or disagrees with the answer.
 - The question is out of scope for what the bot can actually help with.
@@ -130,11 +130,11 @@ We then set up a production monitoring dashboard that shows average scores, user
   ![Monitor configuration for high user disagreement with warning and alert thresholds](/images/blog/2026-07-16-steal-our-eval-setup/monitor-configuration.png)
 </Frame>
 
-## Annotation queues, and why you still look yourself
+## Annotation queues, and why we still look ourselves
 
 Our traces end up in two [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) worth working through: one with flagged conversations, and one with general samples of everything, reviewed on a regular cadence regardless of whether anything was flagged.
 
-Your coding agent can help you get through volume here. But especially in the early setup, most of the value, we would put it somewhere around 80%, comes from a human actually looking at the data. Because lightweight monitoring already points you at the relevant stuff, that look is a lot more efficient than it sounds.
+Your coding agent can help you get through volume here. But especially in the early setup, most of the value, we would put it somewhere around 80%, comes from a human actually looking at the data. Because lightweight monitoring already points us at the relevant stuff, that look is a lot more efficient than it sounds.
 
 For each conversation you review, attach two things: a pass/fail call and a short freeform note on what actually went wrong. Use open coding, not a fixed category list yet. After a first pass, group failure modes and label all failed conversations with their respective category. For each category, decide what to do about it: ignore it, monitor it further, or fix it. The full guide on how to do this systematically is in our [error analysis guide](/academy/monitoring/error-analysis).
 
@@ -169,11 +169,11 @@ For chatbots, three dimensions have held up well as a starting point and are clo
 
 Correctness and behavior match are set up as LLM-as-a-judge evaluators in the app. They are scoped to experiment runs on this specific dataset. Keyword overlap runs as part of the experiment runner and is a deterministic match, so a code-based eval.
 
-This dataset with its evaluators can then be used to run [experiments](/docs/evaluation/experiments/experiments-via-sdk) and understand the quality of your system. We frequently run experiments on newly released models, after changes to the docs, and whenever we add new edge cases to the dataset.
+We use this dataset with its evaluators to run [experiments](/docs/evaluation/experiments/experiments-via-sdk) and understand the quality of our system. We frequently run experiments on newly released models, after changes to the docs, and whenever we add new edge cases to the dataset.
 
-That dataset doubles as your regression suite. We run it as part of [CI](/docs/evaluation/experiments/experiments-ci-cd), so a prompt or model change gets checked against real failure cases before it ships, not after.
+That dataset doubles as our regression suite. We run it as part of [CI](/docs/evaluation/experiments/experiments-ci-cd), so a prompt or model change gets checked against real failure cases before it ships, not after.
 
-## The failure mode that is actually yours
+## The failure mode that is actually ours
 
 CI catches the general stuff. But every system has one or two failure modes that are specific to it, not to chatbots in general.
 
