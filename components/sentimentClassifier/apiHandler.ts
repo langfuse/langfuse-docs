@@ -53,8 +53,8 @@ const handler = async (req: Request) => {
           model: openai("gpt-4o-mini"),
           schema: SentimentSchema,
           prompt: `Analyze the sentiment of the following text. Classify it as positive, negative, or neutral. Provide a confidence score between 0 and 1, a brief explanation of your reasoning, and extract the key phrases that influenced your classification.\n\nText: ${text}`,
-          experimental_telemetry: {
-            isEnabled: true,
+          telemetry: {
+            functionId: "sentiment-classifier",
           },
         });
 

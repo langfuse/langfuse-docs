@@ -35,6 +35,7 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 - `components-mdx/` — custom components used from MDX pages.
 - `cookbook/` — source Jupyter notebooks for cookbook guides.
 - `content/guides/cookbook/` — generated cookbook markdown output.
+- `md-override/` — hand-authored Markdown for routes whose rendered pages are not sourced directly from Markdown/MDX. These files must stay synchronized with their corresponding pages.
 - `public/` — static assets.
 - `scripts/` — build and maintenance scripts.
 - `lib/` — shared utilities/config helpers.
@@ -54,6 +55,7 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 3. Do **not** hand-edit generated files in `content/guides/cookbook/`.
 4. Avoid `pnpm build` for routine edits or small UI/content changes. Prefer targeted checks or `pnpm dev`, and only run the full production build when it is necessary or explicitly requested.
 5. **Always run `pnpm run format` before committing or opening a PR if you edited any file Prettier formats** (see "Passing CI checks on the first try" below). The `format` CI job runs `pnpm run format:check` and fails the build on a single unformatted file.
+6. **Always keep Markdown overrides synchronized.** Before changing a page or route, check whether its URL has a corresponding file in `md-override/`. If it does, treat the rendered page and the Markdown override as one source pair: mirror user-facing copy, links, structure, and factual changes in both files in the same change. Do this even when the page does not include a comment pointing to the override.
 
 ## Passing CI checks on the first try
 
@@ -109,6 +111,7 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
 ## Writing guidelines
 
 - Use sentence case for user-facing headlines, section headings, and hero copy by default. Keep title case for short standalone navigation/UI labels where it reads more naturally (for example, paired nouns like "Questions & Answers" or conventional labels like "Get Started"). Always preserve proper nouns, acronyms, and official product names.
+- Add an `<AvailabilityBanner />` to a feature's docs page when the feature is not available on every Langfuse plan or deployment type. Place it directly below the relevant heading: usually the H1, or an H2/H3 when availability applies only to that section.
 
 ### Changelog entries
 
@@ -134,7 +137,7 @@ Please check the following:
 - Use one H1 per markdown file, with subsections in order (`##`, `###`, etc.)—do not skip heading levels.
 - We never use `.gif` files, only `.mp4` files uploaded to `static.langfuse.com/docs-videos` to optimize for size and performance.
 - When deep-linking to a section via a link that uses the `#` anchor, make sure the anchor is explicitly defined in the source page via `[#anchor]` at the end of the header line, e.g. `## Get Started [#get-started]`.
-- If a page/route includes a top-of-file comment that points to an `md-override` source, verify both files are kept in sync whenever either side is edited.
+- For every edited page or route, check `md-override/` for a corresponding Markdown source. When one exists, verify the rendered page and override remain synchronized; a top-of-file comment is helpful but not required for this rule to apply.
 - When linking to a Langfuse app page from docs, use `https://cloud.langfuse.com/project/~/[path]` — the `~` sentinel redirects to the reader's last-used project and region automatically.
 
 ## Cursor Cloud specific instructions
