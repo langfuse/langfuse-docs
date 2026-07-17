@@ -104,7 +104,7 @@ You could review every conversation by hand. We decided to evaluate where we nee
 
 - The user pushes back or disagrees with the answer.
 - The question is out of scope for what the bot can actually help with.
-- The same question comes up again, reworded, because the first answer did not land.
+- The user is cursing or broadly complaining about the system.
 - The user is clearly frustrated.
 
 The first three run as [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) in Langfuse and target observations that contain the full message history. You can start from the managed evaluator library in Langfuse or copy the prompts from our related post on [high-signal production monitoring](/blog/2026-04-01-llm-as-a-judge-production-monitoring). User frustration is tracked with a code-based all-caps detector, also running in Langfuse, scoped to observations where the user input comes first.
