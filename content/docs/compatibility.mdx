@@ -21,19 +21,19 @@ We try very hard to uphold this rule. v4 breaks backwards compatibility with old
 
 | Deployment                         | How versioning works                                                                                                                                                                                                                                                                                                                                                                                                              |
 | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Langfuse Cloud**                 | Always runs the latest Langfuse version; server versions are managed for you. Only your SDK version and the API endpoints you call matter; the self-hosted server minimums on this page do not apply. Breaking removals happen on published dates (see [deprecations](/self-hosting/upgrade/deprecations)).                                                                                                                       |
+| **Langfuse Cloud**                 | Always runs the latest Langfuse version; server versions are managed for you. Only your SDK version and the API endpoints you call matter; the self-hosted server minimums on this page do not apply. Breaking removals happen on published dates.                                                                                                                                                                                |
 | **Self-hosted (OSS & Enterprise)** | You choose when to upgrade the server. New capabilities are battle-tested on Langfuse Cloud before they ship in a self-hosted release, so Cloud can run ahead of the latest self-hosted version. SDK majors require the minimum server versions below; breaking removals only happen in major server releases (see the [versioning policy](/self-hosting/upgrade/versioning) and [upgrade documentation](/self-hosting/upgrade)). |
 
 ## Langfuse versions [#versions]
 
 Every Langfuse component (server, SDKs, and APIs) moves through these lifecycle stages:
 
-| Stage           | Meaning                                                                                                                                                           |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Preview**     | New capabilities that are production-ready, but interfaces or API design may still change.                                                                        |
-| **GA**          | Recommended and fully supported.                                                                                                                                  |
-| **Deprecated**  | Still works but is superseded; it will be removed on the dates listed on the [deprecations page](/self-hosting/upgrade/deprecations). Migrate to the replacement. |
-| **End of life** | Unsupported, no security patches.                                                                                                                                 |
+| Stage           | Meaning                                                                                                               |
+| --------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **Preview**     | New capabilities that are production-ready, but interfaces or API design may still change.                            |
+| **GA**          | Recommended and fully supported.                                                                                      |
+| **Deprecated**  | Still works but is superseded; it will be removed on the dates noted in the matrix below. Migrate to the replacement. |
+| **End of life** | Unsupported, no security patches.                                                                                     |
 
 ## GA versions [#ga]
 
@@ -162,12 +162,12 @@ GA. Any OpenTelemetry SDK can export to the OTLP endpoint, available since OSS [
 </CompatDetail>
 <CompatDetail name="Legacy ingestion API">
 
-Deprecated. Trace, span, and generation events via the legacy batch ingestion API are not supported on the v4 data model: on Langfuse Cloud they keep working until **November 30, 2026** (see [deprecations](/self-hosting/upgrade/deprecations)), on self-hosted Langfuse v4 they are rejected.
+Deprecated. Trace, span, and generation events via the legacy batch ingestion API are not supported on the v4 data model: on Langfuse Cloud they keep working until **November 30, 2026**, on self-hosted Langfuse v4 they are rejected.
 
 </CompatDetail>
 <CompatDetail name="v1 read APIs">
 
-Deprecated. Removed on Langfuse v4 (Langfuse Cloud: **November 30, 2026**, see [deprecations](/self-hosting/upgrade/deprecations)). The full list and replacements:
+Deprecated. Removed on Langfuse v4 (Langfuse Cloud: **November 30, 2026**). The full list and replacements:
 
 | Deprecated `GET` endpoints                                                                                         | Replacement                                                                                                                   |
 | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -191,13 +191,13 @@ GA. Requires Langfuse v4. See the [Observations API v2](/docs/api-and-data-platf
 
 <CompatDetail name="Trace-level evaluators">
 
-Deprecated. Migrate to [observation-level evaluators](/faq/all/llm-as-a-judge-migration). Trace-level evaluators are not supported on the v4 data model; on Langfuse Cloud they keep running until **November 30, 2026** (see [deprecations](/self-hosting/upgrade/deprecations)).
+Deprecated. Migrate to [observation-level evaluators](/faq/all/llm-as-a-judge-migration). Trace-level evaluators are not supported on the v4 data model; on Langfuse Cloud they keep running until **November 30, 2026**.
 
 </CompatDetail>
 
 <CompatDetail name="Legacy export source (traces and observations)">
 
-Deprecated. Exports built on the legacy "traces and observations" source are replaced by the enriched observations source (v4 data model). On Langfuse Cloud, projects created on or after 2026-05-20 cannot select legacy sources, new legacy export integrations cannot be created since 2026-06-22, and remaining legacy exports are switched to the enriched source automatically on **November 30, 2026** (see [deprecations](/self-hosting/upgrade/deprecations)).
+Deprecated. Exports built on the legacy "traces and observations" source are replaced by the enriched observations source (v4 data model). On Langfuse Cloud, projects created on or after 2026-05-20 cannot select legacy sources, new legacy export integrations cannot be created since 2026-06-22, and remaining legacy exports are switched to the enriched source automatically on **November 30, 2026**.
 
 </CompatDetail>
 
@@ -207,7 +207,7 @@ Deprecated. Exports built on the legacy "traces and observations" source are rep
 
 ### I'm on Langfuse Cloud, which versions do I need to care about? [#faq-cloud]
 
-Only your SDK version and the API endpoints you call. Langfuse Cloud always runs the latest server version, so the self-hosted minimums on this page never apply to you. Keep your SDKs on the GA major version (Python v4, JS/TS v5) and migrate away from deprecated endpoints before the dates on the [deprecations page](/self-hosting/upgrade/deprecations).
+Only your SDK version and the API endpoints you call. Langfuse Cloud always runs the latest server version, so the self-hosted minimums on this page never apply to you. Keep your SDKs on the GA major version (Python v4, JS/TS v5) and migrate away from deprecated endpoints before the dates noted in the matrix above.
 
 ### I self-host Langfuse v3 and upgraded to Python SDK v4 / JS SDK v5, what works? [#faq-new-sdk-old-server]
 
@@ -219,7 +219,7 @@ On the v4 data model, data from Python SDK < 4.0.0, JS SDK < 5.0.0, or OTel expo
 
 ### When do old SDKs stop working on Langfuse Cloud? [#faq-cloud-cutover]
 
-Python SDK v2 and JS/TS SDK v3 (and older) send traces via the legacy batch ingestion API, which is removed on Langfuse Cloud on **November 30, 2026**. Upgrade to the GA SDK majors before then; see the [deprecations page](/self-hosting/upgrade/deprecations) and the [SDK upgrade paths](/docs/observability/sdk/upgrade-path).
+Python SDK v2 and JS/TS SDK v3 (and older) send traces via the legacy batch ingestion API, which is removed on Langfuse Cloud on **November 30, 2026**. Upgrade to the GA SDK majors before then; see the [SDK upgrade paths](/docs/observability/sdk/upgrade-path).
 
 ### Does upgrading my self-hosted server break my SDKs? [#faq-server-upgrade]
 
