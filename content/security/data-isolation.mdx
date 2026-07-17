@@ -1,0 +1,53 @@
+---
+title: Data isolation
+description: How Langfuse Cloud isolates customer data across projects, users, APIs, and supporting services.
+---
+
+# Data isolation
+
+Langfuse Cloud is a multi-tenant SaaS application. Customer data is isolated at the application layer by project scope, authentication, and authorization. This design allows Langfuse to provide a fully managed service while keeping projects and their data separate.
+
+## How project isolation works
+
+Every project has a unique `projectId`. Product records—including traces, observations, scores, datasets, prompts, and exports—are associated with a project. Requests that access project data carry a project context, and the server checks that the authenticated user or API key is authorized to access that project before returning or changing data.
+
+Langfuse does not create a separate application deployment or database for every project in Langfuse Cloud. Instead, the application consistently applies project filters to data access. This is the same logical-isolation pattern used by many multi-tenant SaaS applications.
+
+## User access and RBAC
+
+Users receive access through organization and project memberships. [Role-based access control (RBAC)](/docs/administration/rbac) determines which actions a user can perform, such as viewing traces, managing prompts, or changing project settings. Authorization is enforced server-side for protected application procedures and API operations.
+
+Project roles include `OWNER`, `ADMIN`, `MEMBER`, and `VIEWER`, with permissions defined for specific resources and actions. A user can therefore have access to one project without automatically receiving access to another project in the same organization.
+
+Platform administrators are a separate privileged role and can access projects for operational and support purposes. Customers should use project roles and least-privilege access for normal user administration.
+
+## API and SDK access
+
+API keys are bound to a project. Requests authenticated with a project API key operate within that project’s scope rather than selecting an arbitrary project at request time. Basic authentication provides the project’s general API scope; bearer authentication is restricted to score submission.
+
+Keep API keys private and rotate them when they may have been exposed. For additional control, use separate projects and keys for production, staging, development, or different teams.
+
+## Background processing and supporting services
+
+Langfuse uses supporting services such as Postgres, ClickHouse, Redis/Valkey, and object storage. These services are accessed by Langfuse’s backend and are not exposed directly to customers.
+
+The application remains the tenant boundary across these services:
+
+- Database records and analytical queries use project scope where applicable.
+- Queue and background-job payloads carry project context so workers process jobs for the intended project.
+- Export objects include project context in their storage path and are delivered through time-limited, authorized download links.
+- Service credentials are managed by Langfuse’s backend rather than by individual customers or projects.
+
+These supporting services should not be described as separate, independent tenant authorization layers. Their access is controlled through backend services, credentials, project-aware application logic, network controls, encryption, monitoring, and the broader Langfuse security program.
+
+## Public data sharing
+
+Langfuse supports explicitly marking selected traces or sessions as public. Public access is an intentional exception to the normal membership check and should only be enabled for data that is safe to share. All other trace and session access requires the appropriate project authorization.
+
+## Testing and assurance
+
+Langfuse’s tenant-isolation boundary is included in annual third-party penetration testing. Langfuse Cloud is also covered by SOC 2 Type II and ISO 27001 audits. See the [security overview](/security), [penetration-testing information](/security/penetration-testing), and [security FAQ](/security/security-faq) for more details.
+
+## When to self-host
+
+Langfuse Cloud is the right choice when you want managed operations, regional data residency, and application-level logical isolation. If your requirements mandate a customer-controlled VPC, private connectivity managed entirely by your team, a dedicated infrastructure boundary, or customer-operated database access controls, consider [self-hosted Langfuse](/self-hosting).

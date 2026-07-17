@@ -146,6 +146,7 @@ Optional **Yearly Commitment**:
 | [Support SLA](/enterprise#faq)                                                                      | --                  | --                  | --                  | Yes                          |
 | **Security**                                                                                        |                     |                     |                     |                              |
 | [Data region](/security/data-regions)                                                               | US, EU, or Japan    | US, EU, or Japan    | US, EU, or Japan    | US, EU, Japan, or HIPAA      |
+| [AWS PrivateLink](/security/networking)                                                             | --                  | --                  | --                  | Yes\*                        |
 | Sign in with Google, AzureAD, GitHub                                                                | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Organization-level RBAC](/docs/administration/rbac)                                                | Yes                 | Yes                 | Yes                 | Yes                          |
 | Enterprise SSO (e.g. Okta, EntraID)                                                                 | --                  | --                  | Teams add-on        | Yes                          |
@@ -166,6 +167,8 @@ Optional **Yearly Commitment**:
 | [SOC2 Type II & ISO27001 reports](/security)                                                        | --                  | --                  | Yes                 | Yes                          |
 | [HIPAA compliance](/security/hipaa)                                                                 | --                  | --                  | Yes                 | Yes                          |
 | InfoSec/legal reviews                                                                               | --                  | --                  | --                  | Yearly Commitment            |
+
+\* Available for Enterprise customers with a committed contract and subject to regional availability. See [networking documentation](/security/networking) for details.
 
 ## Graduated Usage Pricing
 
