@@ -19,6 +19,28 @@ You can use a managed service on AWS, or CloudFlare, or host it yourself using M
 We use it as a scalable and durable storage solution for large files with strong read-after-write guarantees.
 This guide covers how to configure S3 within Langfuse and how to connect your own S3-compatible storage.
 
+## Official and Community Support [#support]
+
+Langfuse works with a wide range of blob storage providers.
+We distinguish between officially supported and community-supported options:
+
+| Option                                            | Support Level |
+| ------------------------------------------------- | ------------- |
+| [Amazon S3](#amazon-s3)                           | Official      |
+| [Google Cloud Storage](#google-cloud-storage)     | Official      |
+| [Azure Blob Storage](#azure-blob-storage)         | Official      |
+| [MinIO / AIStor](#minio)                          | Official      |
+| [Cloudflare R2](#cloudflare-r2)                   | Official      |
+| [OCI Object Storage](#oci-object-storage)         | Community     |
+| [Tigris](#tigris)                                 | Community     |
+| [Other S3-compatible providers](#other-providers) | Community     |
+
+For Google Cloud Storage, we recommend the [native integration](#google-cloud-storage); the [S3 interoperability mode](#google-cloud-storage-compatibility-mode) has known limitations.
+
+import SelfHostSupportLevels from "@/components-mdx/self-host-support-levels.mdx";
+
+<SelfHostSupportLevels />
+
 ## Configuration
 
 Langfuse has multiple use-cases for S3 and allows you to configure them individually.
@@ -94,7 +116,7 @@ The following settings apply to all S3 use-cases (events, media, batch exports) 
 This section covers different deployment options and provides example environment variables.
 We will focus on the EVENT_UPLOAD case, as the other cases are similar.
 
-### Amazon S3
+### Amazon S3 [#amazon-s3]
 
 [Amazon S3](https://aws.amazon.com/s3/) is a globally available object storage.
 Langfuse uses the AWS SDK internally to connect to blob storages, as most providers provide an S3-compatible interface.
@@ -175,11 +197,11 @@ LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
 LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 ```
 
-### MinIO
+### MinIO / AIStor [#minio]
 
-[MinIO](https://min.io/) is an open-source object storage server that is compatible with the S3 API.
-It is a popular choice for on-premise deployments and local development.
-Langfuse uses it for local development and as a default in our [Docker Compose](/self-hosting/deployment/docker-compose) and [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) deployment options.
+[MinIO](https://min.io/) and its commercial distribution [AIStor](https://www.min.io/product/aistor) are object storage servers that are compatible with the S3 API.
+They are a popular choice for on-premise deployments and local development.
+Langfuse uses MinIO for local development and as a default in our [Docker Compose](/self-hosting/deployment/docker-compose) and [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) deployment options.
 
 #### Example Configuration
 
@@ -225,7 +247,7 @@ To enable multi-modal tracing and multi-modal datasets, presigned URLs allow SDK
 
 **Production Environment:** In a production environment, configure `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT` with a publicly accessible hostname or IP address that is reachable by your SDK clients and browsers.
 
-### Cloudflare R2
+### Cloudflare R2 [#cloudflare-r2]
 
 [Cloudflare R2](https://www.cloudflare.com/developer-platform/products/r2/) is globally available, S3 compatible object storage by Cloudflare.
 Create a new bucket within the Cloudflare UI and generate an Access Key pair.
@@ -242,30 +264,6 @@ LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID=<access-key-id>
 LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=<secret-access-key>
 LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=https://${ACCOUNT_ID}.r2.cloudflarestorage.com
 ```
-
-### Tigris
-
-[Tigris](https://www.tigrisdata.com/) is S3-compatible object storage with zero egress fees and a free tier (5 GB).
-Create a bucket and access key pair from the [Tigris Dashboard](https://console.tigris.dev/).
-Access keys are prefixed with `tid_` and secrets with `tsec_`.
-
-#### Example Configuration
-
-Set the following environment variables to connect Langfuse with your Tigris bucket:
-
-```yaml
-LANGFUSE_S3_EVENT_UPLOAD_BUCKET=langfuse
-LANGFUSE_S3_EVENT_UPLOAD_REGION=auto
-LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID=tid_YOUR_ACCESS_KEY
-LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=tsec_YOUR_SECRET_KEY
-LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=https://t3.storage.dev
-```
-
-<Callout type="info">
-
-Tigris uses virtual-hosted-style addressing by default. Do not set `LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE` to `true`.
-
-</Callout>
 
 ### Azure Blob Storage [#azure-blob-storage]
 
@@ -317,7 +315,7 @@ The value applies across all authentication methods (JSON credentials, key file,
 
 </Callout>
 
-### Google Cloud Storage (Compatibility Mode)
+### Google Cloud Storage (Compatibility Mode) [#google-cloud-storage-compatibility-mode]
 
 [Google Cloud Storage](https://cloud.google.com/storage) is a globally available object storage by Google Cloud.
 It offers S3-compatibility through its interoperability interface.
@@ -387,7 +385,31 @@ LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=https://objectstorage.us-chicago-1.oraclecloud
 LANGFUSE_S3_EVENT_UPLOAD_PREFIX=events/
 ```
 
-### Other Providers
+### Tigris [#tigris]
+
+[Tigris](https://www.tigrisdata.com/) is S3-compatible object storage with zero egress fees and a free tier (5 GB).
+Create a bucket and access key pair from the [Tigris Dashboard](https://console.tigris.dev/).
+Access keys are prefixed with `tid_` and secrets with `tsec_`.
+
+#### Example Configuration
+
+Set the following environment variables to connect Langfuse with your Tigris bucket:
+
+```yaml
+LANGFUSE_S3_EVENT_UPLOAD_BUCKET=langfuse
+LANGFUSE_S3_EVENT_UPLOAD_REGION=auto
+LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID=tid_YOUR_ACCESS_KEY
+LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=tsec_YOUR_SECRET_KEY
+LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=https://t3.storage.dev
+```
+
+<Callout type="info">
+
+Tigris uses virtual-hosted-style addressing by default. Do not set `LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE` to `true`.
+
+</Callout>
+
+### Other Providers [#other-providers]
 
 Langfuse supports any S3-compatible storage provider.
 Please refer to the provider's documentation on how to create a bucket and generate Access Key pairs.
