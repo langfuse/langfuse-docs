@@ -757,7 +757,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Rate limit (general API routes)",
+        name: "Rate limit (General API)",
         href: "/faq/all/api-limits",
         tiers: {
           cloud: {
@@ -769,7 +769,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Rate limit (datasets api)",
+        name: "Rate limit (Datasets API)",
         href: "/faq/all/api-limits",
         tiers: {
           cloud: {
@@ -807,7 +807,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Rate limit (legacy Metrics API)",
+        name: "Rate limit (Legacy Metrics API)",
         href: "/faq/all/api-limits",
         tiers: {
           cloud: {
