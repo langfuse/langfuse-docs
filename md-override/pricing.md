@@ -128,7 +128,6 @@ Optional **Yearly Commitment**:
 | Users                                                                                               | 2                   | Unlimited           | Unlimited           | Unlimited                    |
 | **API**                                                                                             |                     |                     |                     |                              |
 | [Extensive public API](/docs/api-and-data-platform/features/public-api)                             | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Metrics & Observations APIs (v2)](/docs/metrics/features/metrics-api#v2)                           | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Rate limit (general API)](/faq/all/api-limits)                                                     | 30 req/min          | 100 req/min         | 1,000 req/min       | Custom                       |
 | [Rate limit (datasets API)](/faq/all/api-limits)                                                    | 100 req/min         | 200 req/min         | 1,000 req/min       | Custom                       |
 | [Rate limit (Metrics API v2)](/faq/all/api-limits)                                                  | 100 req/day         | 100 req/hour        | 500 req/hour        | Custom                       |
