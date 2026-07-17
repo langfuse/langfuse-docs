@@ -1,7 +1,7 @@
 ---
 title: What does a good trace look like?
-description: A guide to structuring your Langfuse traces for effective debugging, evaluation, and cost tracking.
-tags: [observability, observability-get-started]
+sidebarTitle: Best Practices
+description: Best practices for structuring Langfuse traces — scope, naming, input/output, and attributes — so that debugging, evaluation, and cost tracking work well.
 ---
 
 import { Fan, Wrench } from "lucide-react";
@@ -9,6 +9,15 @@ import { Fan, Wrench } from "lucide-react";
 # What does a good trace look like?
 
 You see traces appearing in Langfuse, but how do you know if you've done it well? Here are a couple of things you can look at and optimize.
+
+Trace structure is not just cosmetic — many Langfuse features build on top of it:
+
+- [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) target observations by name and type, and read their input and output.
+- [Dashboards](/docs/metrics/features/custom-dashboards) filter and aggregate metrics by trace and observation names.
+- [Dataset experiments](/docs/evaluation/experiments) compare trace input and output across runs.
+- Saved views on the tracing table reference names and attributes.
+
+A well-structured trace makes debugging faster today, and stable names with meaningful input/output keep your evaluators, dashboards, and experiments working as your application evolves.
 
 ## What's the scope of one trace?
 
@@ -20,7 +29,7 @@ A trace represents one self-contained unit of work in your application. Good exa
 - One agent run (the agent receives a task, reasons, calls tools, and produces a result)
 - One pipeline execution (a document comes in, gets chunked, embedded, and stored)
 
-If multiple of these happen in sequence, e.g. a multi-turn conversation, or several agent runs that feed into a final report, that's where [sessions](/docs/observability/features/sessions) come in. Each step is its own trace, and the session ties them together.
+If multiple of these happen in sequence, e.g. a multi-turn conversation, or several agent runs that feed into a final report, that's where [sessions](/docs/observability/features/sessions) come in. Each step is its own trace, and the session ties them together. For a chatbot this means one trace per turn and one session per conversation — you don't know upfront when a conversation ends, and the per-turn model keeps traces small and easy to navigate in the session view.
 
 A trace shows up in the Langfuse UI as a trace tree and an [agent graph](/docs/observability/features/agent-graphs):
 
@@ -47,6 +56,12 @@ For example
 
 Framework integrations typically set these types automatically. If you're instrumenting manually, you can set them via the `as_type` parameter (Python) or `asType` (JS/TS). See the [observation types docs](/docs/observability/features/observation-types) for a full list.
 
+### Is it nested correctly?
+
+A tool call should nest under the `agent` or `span` that orchestrates the step, as a sibling of the `generation` that requested it, so the tree shows which step each action belongs to instead of leaving tool calls dangling at the trace root.
+
+Framework integrations usually get this right automatically. If you're instrumenting manually, see [nesting observations](/docs/observability/sdk/instrumentation#nesting-observations).
+
 ### Is there noise you don't need?
 
 Not every observation in the tree is useful for understanding what your application did. HTTP spans, database queries, and framework internals often add clutter without giving you meaningful insight. If you see observations like these polluting your trace tree, you can [filter them out](/faq/all/unwanted-http-database-spans).
@@ -65,13 +80,23 @@ Observation- and trace names are used in many places:
 - In [dashboards](/docs/metrics/features/custom-dashboards), you can filter and aggregate metrics by observation name.
 - In the tracing table, names help you quickly identify what each step does.
 
-Try to name the observations after what they do: `classify-intent`, `generate-response`, `summarize-results`. This makes it easier to understand what each step does when you're looking at the trace tree, and makes filtering on a specific step easier.
+Because names are referenced in all these places, treat them like an API: when a name changes, evaluators, dashboard queries, and saved filters that target the old name silently stop matching. Pick names deliberately, and expect to keep them stable.
 
-> Try not to name observations after the AI model used (`gpt-4o`, `claude-sonnet`). It breaks as soon as you swap models. The model is already a separate attribute on `generation` observations, use that instead.
+**Use active language.** Name observations after the action they perform, verb first: `classify-intent`, `retrieve-context`, `generate-response`, `summarize-results`. This makes the trace tree read like a description of what your application did, and makes filtering on a specific step easier.
+
+**Keep dynamic values out of names.** Use `process-order`, not `process-order-8945` or `generate-response-retry-2`. A name should identify the operation, not a single execution of it — otherwise every trace produces new names and you can no longer group, filter, or target them. Put run-specific values in [metadata](/docs/observability/features/metadata) instead. (This is the same low-cardinality rule that OpenTelemetry recommends for span names.)
+
+<Callout type="warning">
+
+Try not to name observations after the AI model used (`gpt-4o`, `claude-sonnet`). All filters, evaluators, and dashboards that reference the name break as soon as you swap models. The model is already a separate attribute on `generation` observations, use that instead.
+
+</Callout>
 
 ## Choose meaningful input and output
 
 In general, it's recommended that operations have an input and/or output. If an observation has neither, ask yourself if an observation is actually useful or if you can drop it.
+
+The **root observation** deserves the most care: the trace-level input and output are derived from it. They are shown in the tracing table, read by evaluators, and compared across runs in [dataset experiments](/docs/evaluation/experiments). Set them to what a reviewer needs at a glance — for a chatbot, the user message as input and the assistant response as output — not a raw JSON blob of function arguments. If you need the raw payload for debugging, put it in [metadata](/docs/observability/features/metadata).
 
 For your **most viewed observations**, take some extra care to set them up. You will likely create pre-filtered views on your tracing and session screens. The observations you filter for here are the ones that will get looked at the most. For these, ask yourself: **what do I need to see to quickly evaluate a trace/session at a glance?**
 
@@ -83,6 +108,12 @@ Typical input/output for `GENERATION` observations:
 - For a RAG pipeline: the user query and the generated answer.
 - For a classification task: the text being classified and the predicted label.
 
+<Callout type="info">
+
+Most inputs/outputs can be rendered as a readable, role-labeled conversation rather than a raw JSON blob. If yours show up as raw JSON, you can take a look at the formatting: it should be a list of messages in the standard OpenAI format (each with a `role` and `content`), and it renders tool calls as cards only when they sit in an assistant message's `tool_calls` array with each call's `arguments` given as a JSON-encoded string (for example `"{\"location\": \"Paris\"}"`).
+
+</Callout>
+
 If your input and output fields are showing up empty unintentionally, see [why are the input and output of my trace empty?](/faq/all/empty-trace-input-and-output)
 
 ## Useful attributes
@@ -91,11 +122,15 @@ Observations have a number of attributes that can be useful for your use cases. 
 
 ### Add metadata for context
 
-[Metadata](/docs/observability/features/metadata) is a flexible key-value store on each observation. Some data that might be useful to save under metadata:
+[Metadata](/docs/observability/features/metadata) is a flexible key-value store on each observation. It's the right place for anything that is useful context but doesn't belong in the name or the input/output. Examples of metadata that is useful in practice:
 
-- **Evaluation context**: When configuring [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge), you can reference metadata fields. This is useful for passing ground truth, expected behavior, or other context that the evaluator needs but that isn't part of the actual input/output.
-- **Filtering**: You can filter by metadata keys in the Langfuse UI, which is helpful when you need to find traces with specific characteristics.
+- **Evaluation context**: Ground truth, expected behavior, or other context an [LLM-as-a-judge evaluator](/docs/evaluation/evaluation-methods/llm-as-a-judge) needs but that isn't part of the actual input/output. Evaluators can reference metadata fields in their variable mapping.
+- **Request context**: Internal request IDs, the API route or app version that handled the request, or the experiment variant / feature flags that were active. This lets you correlate a trace with your other systems and filter by rollout.
+- **Retrieval context**: For RAG steps, things like the data source, number of chunks retrieved, or the index queried — useful when debugging why a retrieval step returned poor results.
+- **Raw payloads**: Full request/response objects that would clutter the input/output fields but are occasionally needed for debugging.
 - **Annotation context**: When doing manual review, metadata gives annotators extra information to make better judgments.
+
+You can filter by metadata keys in the Langfuse UI, which is helpful when you need to find traces with specific characteristics.
 
 ### Track model, tokens, and cost on generations [#track-model-tokens-and-cost-on-generations]
 
