@@ -1,7 +1,7 @@
 ---
 title: "Yes, you can steal our eval setup"
 date: 2026/07/16
-description: "A copyable walkthrough of the observability, monitoring, annotation, dataset, and experiment setup behind the Langfuse docs chatbot."
+description: "Evals need to be custom to your app. At least some of them. A good chunk you can, and should be copying. Here is our setup for our docs chatbot."
 tag: engineering
 author: Annabell
 ogImage: /images/blog/2026-07-16-steal-our-eval-setup/score-monitoring-dashboard.png
@@ -12,33 +12,68 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
   title="Yes, you can steal our eval setup"
-  description="A copyable walkthrough of the observability, monitoring, annotation, dataset, and experiment setup behind the Langfuse docs chatbot."
+  description="Evals need to be custom to your app. At least some of them. A good chunk you can, and should be copying. Here is our setup for our docs chatbot."
   date="July 16, 2026"
   image="/images/blog/2026-07-16-steal-our-eval-setup/score-monitoring-dashboard.png"
   authors={["annabellschafer"]}
 />
 
-Everyone is building some kind of agent or AI system right now. The advice you hear everywhere is that your evals need to be custom, built for your specific use case. That is mostly true. What gets less airtime is that within a given use case type, the approach is often surprisingly comparable and copyable.
+The advice you hear and that we also support, is that your evals need to be custom, built for your specific use case. That is mostly true. What gets less airtime is that within a given use case type, the approach is often surprisingly comparable and copyable.
 
-One of the most established things people build is a chatbot. It is the original use case, the thing we will tell our grandchildren about, and still what most people have in mind when they hear "AI". So why would everyone building a chatbot reinvent the eval wheel? You can copy from someone else's chatbot.
+One of the most established things people build is a chatbot. It is the OG use case, the thing we will tell our grandchildren about, and still what most people have in mind when they hear "AI". So why would everyone building a chatbot reinvent the eval wheel? You can copy from someone else's chatbot.
 
 For example, from ours.
 
 We wanted to share exactly how we built the observability and eval setup, plus the continuous improvement loop, for our own docs chatbot. You do not have to take our word for any of it: you can click through the live setup yourself.
 
 <Callout type="info">
-  Explore the [Langfuse example project](/docs/demo), the [public Langfuse
-  project](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi), and
-  the [open-source chatbot
+  Explore the [Langfuse example project](/docs/demo), the public Langfuse
+  project across cloud regions [EU](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi), [Japan](https://jp.cloud.langfuse.com/project/cmmnj9e9n0006ad06nyz28646), and [US](https://us.cloud.langfuse.com/project/cmeic4yr500qmad0772bw0tol),
+  and the [open-source chatbot
   code](https://github.com/langfuse/langfuse-docs/tree/main/components/qaChatbot).
 </Callout>
 
-Quick fact sheet on the chatbot:
-
-- Runs on Vercel AI SDK v7
-- Uses OpenAI models for generation
-- Has access to an Inkeep-powered RAG tool
-- Has access to our docs MCP
+<div className="not-prose my-6 overflow-hidden rounded border border-line-structure bg-surface-1">
+  <div className="border-b border-line-structure px-4 py-3">
+    <p className="font-mono text-[11px] font-medium uppercase text-text-tertiary">
+      Chatbot setup snapshot
+    </p>
+  </div>
+  <dl className="grid sm:grid-cols-2">
+    <div className="border-b border-line-structure px-4 py-3 sm:border-r">
+      <dt className="font-sans text-[12px] font-[430] text-text-tertiary">
+        Runtime
+      </dt>
+      <dd className="mt-1 font-sans text-[14px] font-medium text-text-primary">
+        Vercel AI SDK v7
+      </dd>
+    </div>
+    <div className="border-b border-line-structure px-4 py-3">
+      <dt className="font-sans text-[12px] font-[430] text-text-tertiary">
+        Generation
+      </dt>
+      <dd className="mt-1 font-sans text-[14px] font-medium text-text-primary">
+        OpenAI models
+      </dd>
+    </div>
+    <div className="border-b border-line-structure px-4 py-3 sm:border-b-0 sm:border-r">
+      <dt className="font-sans text-[12px] font-[430] text-text-tertiary">
+        Retrieval
+      </dt>
+      <dd className="mt-1 font-sans text-[14px] font-medium text-text-primary">
+        Inkeep-powered RAG
+      </dd>
+    </div>
+    <div className="px-4 py-3">
+      <dt className="font-sans text-[12px] font-[430] text-text-tertiary">
+        Tool access
+      </dt>
+      <dd className="mt-1 font-sans text-[14px] font-medium text-text-primary">
+        Langfuse docs MCP
+      </dd>
+    </div>
+  </dl>
+</div>
 
 ## Trace every step
 
