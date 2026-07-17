@@ -23,7 +23,9 @@ Platform administrators are a separate privileged role and can access projects f
 
 ## API and SDK access
 
-API keys are bound to a project. Requests authenticated with a project API key operate within that project’s scope rather than selecting an arbitrary project at request time. Basic authentication provides the project’s general API scope; bearer authentication is restricted to score submission.
+Project-scoped API and SDK keys are bound to a project. Requests authenticated with one of these keys operate within that project’s scope rather than selecting an arbitrary project at request time. These key pairs use Basic authentication for the project’s general API scope; bearer authentication is restricted to score submission.
+
+Enterprise organizations can also create [organization-scoped API keys](/docs/administration/scim-and-org-api). These keys use Basic authentication and intentionally have broader access to administer projects, users, and project or organization memberships. Treat them as privileged credentials and limit their use to organization-management workflows.
 
 Keep API keys private and rotate them when they may have been exposed. For additional control, use separate projects and keys for production, staging, development, or different teams.
 
