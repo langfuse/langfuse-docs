@@ -85,6 +85,10 @@ Before anything else, you need to see what the chatbot is actually doing, not ju
 
 For chatbots, make sure each trace also carries the surrounding context you will need later. We pass a `userId` so we can see whether the same person comes back with the same topic over time, and a `sessionId` so related turns are grouped into one [session](/docs/observability/features/sessions). A good default is one trace per user message and one session per conversation. That keeps individual traces easy to inspect while still letting you replay the full thread and compare behavior across returning users in the [Users view](/docs/observability/features/users).
 
+<Frame fullWidth>
+  ![User detail view showing a focused list of chatbot traces for one returning user](/images/blog/2026-07-16-steal-our-eval-setup/user-focused-traces.png)
+</Frame>
+
 What you are looking for is the user's question, the retrieval step showing which docs got pulled in, the tool calls, and the generation step with the final answer. If something is wrong with the answer, the trace tells you whether the problem was bad retrieval or bad generation on top of good retrieval. Those are two very different fixes.
 
 ## Monitor what is going on in prod
