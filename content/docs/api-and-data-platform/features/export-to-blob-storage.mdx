@@ -47,6 +47,10 @@ Exports can be written as Apache Parquet, CSV, JSON, or JSONL files. New integra
 
 Parquet observation exports do not include the per-unit model price columns (`input_price`, `output_price`, `total_price`). These columns snapshot model definition prices at export time and may be deprecated in the future — use `cost_details` and `total_cost` for cost data, which are included in every file type. See [Notes on Parquet exports](/docs/api-and-data-platform/features/blob-storage-export-fields#parquet-exports) in the field reference for details.
 
+<Callout type="warning">
+**Self-hosted deployments running ClickHouse < 25.11:** Parquet export failures may not surface as errors. A run can complete — and its [manifest](#run-manifest) be written — while the Parquet output is incomplete or invalid. Upgrade to ClickHouse >= 25.11, or use a text format (CSV, JSON, or JSONL) for reliable failure detection.
+</Callout>
+
 ## Export source (Fast Preview)
 
 Blob Storage integrations now include an `Export Source` selector. New integrations default to `Enriched observations (recommended)` (trace attributes are directly set on observations).
@@ -145,6 +149,79 @@ Each run exports one time window of data to your bucket, then advances and expor
 
 - **Export delay.** Data is exported with a short delay rather than right up to the current moment, so records still moving through ingestion are not exported half-written. Expect a brief lag between when an event is recorded and when it appears in your bucket.
 - **Catch-up / backfill.** When an integration starts from a historic point — or falls behind — it works forward through the backlog and may write many files in quick succession before settling into its normal cadence. A freshly created full-history integration does this until it catches up to the present.
+
+## Run completion manifest [#run-manifest]
+
+A single export run writes one file per exported table — up to four, depending on the selected export source — so the table files alone don't tell you when a run is complete. As the last object of every successful run, Langfuse writes a manifest file that lists everything the run produced:
+
+```
+{prefix}{project-id}/manifests/{max-timestamp}.json
+```
+
+The manifest is uploaded strictly after all table files of the run. Once it appears, every file it lists is fully available in your bucket; if any upload fails, no manifest is written and the whole run is retried (table files are overwritten under the same keys on retry). The timestamp in the manifest key is the run's `maxTimestamp` in UTC, truncated to whole seconds, with colons replaced by dashes and the milliseconds and trailing `Z` dropped (`2026-07-13T09:00:00.000Z` → `2026-07-13T09-00-00`). This is the same stem used by the run's table files (`{prefix}{project-id}/{table}/{timestamp}.{extension}`), so a run's table files and its manifest share the same timestamp stem.
+
+Example manifest:
+
+```json
+{
+  "version": 1,
+  "projectId": "cm0abcd1234efgh5678ijkl90",
+  "exportSource": "OBSERVATIONS_V2",
+  "window": {
+    "minTimestamp": "2026-07-13T08:00:00.000Z",
+    "maxTimestamp": "2026-07-13T09:00:00.000Z"
+  },
+  "maxTimestamp": "2026-07-13T09:00:00.000Z",
+  "createdAt": "2026-07-13T09:02:11.123Z",
+  "tables": ["observations_v2", "scores"],
+  "files": [
+    {
+      "key": "my-prefix/cm0abcd1234efgh5678ijkl90/observations_v2/2026-07-13T09-00-00.parquet",
+      "table": "observations_v2",
+      "fileType": "PARQUET",
+      "format": "parquet",
+      "compressed": false,
+      "contentType": "application/vnd.apache.parquet",
+      "sizeBytes": 1048576,
+      "rowCount": null
+    },
+    {
+      "key": "my-prefix/cm0abcd1234efgh5678ijkl90/scores/2026-07-13T09-00-00.parquet",
+      "table": "scores",
+      "fileType": "PARQUET",
+      "format": "parquet",
+      "compressed": false,
+      "contentType": "application/vnd.apache.parquet",
+      "sizeBytes": 20480,
+      "rowCount": null
+    }
+  ]
+}
+```
+
+Notes on the schema:
+
+- `version` increments only on breaking changes; new fields may be added without a version bump, so ignore unknown fields when parsing.
+- `window` is the time range of data covered by the run, with both bounds inclusive — a record at exactly `maxTimestamp` also falls into the next run's window. `maxTimestamp` duplicates `window.maxTimestamp`; the timestamp stem in the manifest file name is derived from it as described above.
+- `tables` and `files` reflect the selected export source; `scores` is always included regardless of the source.
+- `files[].key` is the full object key including your configured prefix, so consumers can fetch listed files without reconstructing paths.
+- `files[].fileType` is the configured file type: `JSON`, `CSV`, `JSONL`, or `PARQUET`. `files[].format` additionally encodes compression: one of `parquet`, `json-raw`, `json-gzip`, `jsonl-raw`, `jsonl-gzip`, `csv-raw`, or `csv-gzip`.
+- `files[].sizeBytes` is the uploaded size (after gzip for compressed text formats). `files[].rowCount` is the number of exported rows for text formats and `null` for Parquet files.
+- During [catch-up or backfill](#how-exports-run), each exported window is a separate run with its own manifest, so several manifests can appear in quick succession.
+
+## React to completed export runs [#export-events]
+
+Langfuse does not send a webhook when an export run finishes. Instead, subscribe to your storage provider's native object-created events with a prefix filter on `{prefix}{project-id}/manifests/` — because the manifest is the last object of each run, this gives you one event per completed run. When the event fires, download the manifest and process the objects listed in `files[].key`.
+
+Provider recipes:
+
+- **AWS S3** — [Event Notifications](https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventNotifications.html) on `s3:ObjectCreated:*` to SQS, SNS, or Lambda with a key prefix filter, or [EventBridge rules](https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventBridge.html) matching the object key prefix.
+- **Google Cloud Storage** — [Pub/Sub notifications](https://cloud.google.com/storage/docs/pubsub-notifications) for `OBJECT_FINALIZE` events; set the object name prefix when creating the notification configuration.
+- **Azure Blob Storage** — [Event Grid](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blob-event-overview) subscription on `Microsoft.Storage.BlobCreated` with a `subjectBeginsWith` filter, e.g. `/blobServices/default/containers/<container>/blobs/{prefix}{project-id}/manifests/`.
+- **MinIO** — [Bucket notifications](https://min.io/docs/minio/linux/administration/monitoring/bucket-notifications.html) on `s3:ObjectCreated:*` (webhook, Kafka, AMQP, and more) with a prefix filter.
+- **Backblaze B2** — [Event Notifications](https://www.backblaze.com/docs/cloud-storage-event-notifications) (webhooks) with a prefix filter.
+
+For S3-compatible providers without object-created events (for example, Wasabi or DigitalOcean Spaces), poll the manifest prefix instead: list `{prefix}{project-id}/manifests/` on a schedule and process any manifest newer than your last checkpoint. Manifest names sort lexicographically by export timestamp, so a marker-based (`start-after`) listing keeps polling cheap.
 
 ## Export status [#export-status]
 
