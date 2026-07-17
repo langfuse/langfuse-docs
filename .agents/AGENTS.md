@@ -109,6 +109,7 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
 ## Writing guidelines
 
 - Use sentence case for user-facing headlines, section headings, and hero copy by default. Keep title case for short standalone navigation/UI labels where it reads more naturally (for example, paired nouns like "Questions & Answers" or conventional labels like "Get Started"). Always preserve proper nouns, acronyms, and official product names.
+- Route sales and Enterprise inquiries to the [sales form](/talk-to-us) instead of directing readers to `enterprise@langfuse.com`.
 
 ### Changelog entries
 
