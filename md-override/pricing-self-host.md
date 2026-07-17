@@ -77,12 +77,13 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 | [Human annotation queues](/docs/evaluation/evaluation-methods/annotation#annotation-queues)         | Yes                         | Yes                                        |
 | **Metrics**                                                                                         |                             |                                            |
 | [Custom dashboards](/docs/metrics/features/custom-dashboards)                                       | Yes                         | Yes                                        |
-| [Monitors and alerts](/docs/metrics/features/monitors)                                              | Yes                         | Yes                                        |
+| [Monitors and alerts](/docs/metrics/features/monitors)                                              | Langfuse v4+                | Langfuse v4+                               |
 | **Collaboration**                                                                                   |                             |                                            |
 | Projects                                                                                            | Unlimited                   | Unlimited                                  |
 | Users                                                                                               | Unlimited                   | Unlimited                                  |
 | **API**                                                                                             |                             |                                            |
 | [Extensive public API](/docs/api-and-data-platform/features/public-api)                             | Yes                         | Yes                                        |
+| [Metrics & Observations APIs (v2)](/docs/metrics/features/metrics-api#v2)                           | Langfuse v4+                | Langfuse v4+                               |
 | **Exports**                                                                                         |                             |                                            |
 | [Batch export via UI](/docs/api-and-data-platform/features/query-via-sdk#ui)                        | Yes                         | Yes                                        |
 | [PostHog integration](/integrations/analytics/posthog)                                              | Yes                         | Yes                                        |
