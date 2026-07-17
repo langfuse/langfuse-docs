@@ -20,11 +20,21 @@ Older trace and observation read APIs remain available, but are not recommended 
 
 ## Observations API v2 [#v2]
 
-<Callout type="warning">
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "v4",
+  }}
+/>
 
-**Availability:** The v2 Observations API is available on Langfuse Cloud and on self-hosted deployments running [Langfuse v4](/docs/v4). On self-hosted Langfuse v3, use the [v1 Observations API](/docs/api-and-data-platform/features/public-api) instead. See [Versions & Compatibility](/docs/compatibility#sdk-server).
+<Callout type="info">
 
 **Data availability:** Data from older SDKs (`langfuse-python` < `4.0.0`, `langfuse-js` < `5.0.0`) or direct OpenTelemetry exporters that do not send `x-langfuse-ingestion-version: 4` can be delayed by up to 10 minutes on v2 endpoints. Upgrade to [Python SDK v4.7.0+](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS SDK v5.4.0+](/docs/observability/sdk/upgrade-path/js-v4-to-v5), or set that header on your OTEL span exporter, to see new data in real time.
+
+On self-hosted Langfuse v3, use the [v1 Observations API](/docs/api-and-data-platform/features/public-api) instead; see [Versions & Compatibility](/docs/compatibility#sdk-server).
 
 </Callout>
 
@@ -113,6 +123,8 @@ The v1 API always attempts to parse input/output as JSON which can be expensive.
 | ------------- | --------- | ----- |
 | Default limit | 1000      | 50    |
 | Maximum limit | Unlimited | 1,000 |
+
+On Langfuse Cloud, requests to the v2 Observations API count toward the general per-organization API rate limit (see the [API limits FAQ](/faq/all/api-limits)). Self-hosted instances have no enforced rate limits.
 
 ### Common Use Cases
 
