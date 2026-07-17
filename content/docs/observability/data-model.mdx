@@ -33,8 +33,19 @@ Hierarchical structure of observations in Langfuse
 
 ```mermaid
 classDiagram
-    Trace "1" *-- "n" Observation
-    Observation o-- Observation: Nesting
+    Trace "1" o-- "n" Observation : trace_id
+    Observation o-- Observation : Nesting
+    class Trace {
+      trace_id
+    }
+    class Observation {
+      trace_id
+      user_id
+      session_id
+      tags
+      metadata
+      input / output
+    }
 ```
 
 </div>
@@ -64,7 +75,7 @@ Example trace in Langfuse UI
 A `trace` typically represents a single request or operation.
 For example, when a user asks a question to a chatbot, that interaction, from the user's question to the bot's response, is captured as one trace.
 
-It serves as container of observations. Trace attributes such as `user_id`, `session_id`, `tags`, `metadata`, etc. are propagated to all observations within the trace.
+A trace is the logical grouping of all observations that share the same `trace_id`. Trace-level attributes such as `user_id`, `session_id`, `tags`, and `metadata` live on every observation within the trace (the SDKs propagate them automatically), which keeps queries and aggregations fast.
 
 ### Sessions
 
