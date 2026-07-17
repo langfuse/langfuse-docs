@@ -457,6 +457,24 @@ const sections: Section[] = [
     ],
   },
   {
+    name: "AI Native Features",
+    features: [
+      {
+        name: "Langfuse Assistant (in-app agent)",
+        description:
+          "In-product AI assistant to explore your Langfuse project data and take selected actions with your approval. On self-hosted deployments, only available on Enterprise deployments on AWS with custom infrastructure.",
+        href: "/docs/langfuse-assistant",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: {
+            "Open Source": false,
+            Enterprise: "AWS (custom infrastructure)",
+          },
+        },
+      },
+    ],
+  },
+  {
     name: "Prompt Management",
     href: "/docs/prompt-management/get-started",
     features: [
@@ -934,24 +952,6 @@ const sections: Section[] = [
           selfHosted: {
             "Open Source": true,
             Enterprise: true,
-          },
-        },
-      },
-    ],
-  },
-  {
-    name: "AI Native Features",
-    features: [
-      {
-        name: "Langfuse Assistant (in-app agent)",
-        description:
-          "In-product AI assistant to explore your Langfuse project data and take selected actions with your approval. On self-hosted deployments, only available on Enterprise deployments on AWS with custom infrastructure.",
-        href: "/docs/langfuse-assistant",
-        tiers: {
-          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: {
-            "Open Source": false,
-            Enterprise: "AWS (custom infrastructure)",
           },
         },
       },

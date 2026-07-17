@@ -55,6 +55,8 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 | [Custom via API](/api-and-data-platform/features/public-api)                                        | Yes                         | Yes                                        |
 | Included usage                                                                                      | Unlimited                   | Unlimited                                  |
 | [Multi-modal](/docs/observability/features/multi-modality)                                          | Yes                         | Yes                                        |
+| **AI Native Features**                                                                              |                             |                                            |
+| [Langfuse Assistant (in-app agent)](/docs/langfuse-assistant)                                       | --                          | AWS (custom infrastructure)                |
 | **Prompt Management**                                                                               |                             |                                            |
 | [Prompt versioning](/docs/prompt-management/get-started)                                            | Yes                         | Yes                                        |
 | Prompt fetching                                                                                     | Unlimited                   | Unlimited                                  |
@@ -97,8 +99,6 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 | [AWS (Terraform)](/self-hosting/deployment/aws)                                                     | Yes                         | Yes                                        |
 | [Azure (Terraform)](/self-hosting/deployment/azure)                                                 | Yes                         | Yes                                        |
 | [GCP (Terraform)](/self-hosting/deployment/gcp)                                                     | Yes                         | Yes                                        |
-| **AI Native Features**                                                                              |                             |                                            |
-| [Langfuse Assistant (in-app agent)](/docs/langfuse-assistant)                                       | --                          | AWS (custom infrastructure)                |
 | **Support**                                                                                         |                             |                                            |
 | [Ask AI](/docs/ask-ai)                                                                              | Yes                         | Yes                                        |
 | [Community (GitHub)](/support#community)                                                            | Yes                         | Yes                                        |
