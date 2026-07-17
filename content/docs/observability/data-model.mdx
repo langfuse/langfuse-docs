@@ -15,21 +15,15 @@ Langfuse organizes an application's data into three core concepts: observations,
 
 <TracingHierarchyDiagram />
 
-import ObservationTypesList from "@/components-mdx/observation-types-list.mdx";
 import { ObservationsTableDiagram } from "@/components/ObservationsTableDiagram";
 
 ### Observations & Traces [#observations-and-traces]
 
-`Observations` are the individual steps within a trace. Langfuse supports a number of LLM application specific [observation types](/docs/observability/features/observation-types), for example _generations_, _toolcalls_, _RAG retrieval steps_, etc.
+`Observations` are the individual steps of your application: LLM calls, tool calls, retrieval steps, and so on. They can be nested to reflect the structure of your application, and Langfuse supports several LLM-specific [observation types](/docs/observability/features/observation-types) such as _generations_ and _events_.
 
-Observations can be nested.
+A `trace` represents a single request or operation, for example one chatbot interaction from the user's question to the final response. It is the logical grouping of all observations that share the same `trace_id`.
 
-A `trace` typically represents a single request or operation.
-For example, when a user asks a question to a chatbot, that interaction, from the user's question to the bot's response, is captured as one trace.
-
-A trace is the logical grouping of all observations that share the same `trace_id`. Trace-level attributes such as `user_id`, `session_id`, `tags`, and `metadata` live on every observation within the trace (the SDKs propagate them automatically), which keeps queries and aggregations fast.
-
-Conceptually, Langfuse stores one observations table. Each row holds the observation-level data plus a copy of the trace-level attributes:
+Trace-level attributes such as `user_id`, `session_id`, `tags`, and `metadata` live on every observation within the trace; the SDKs propagate them automatically. Conceptually, Langfuse stores one observations table, and each row holds the observation-level data plus a copy of the trace-level attributes. This keeps queries and aggregations fast:
 
 <ObservationsTableDiagram />
 
