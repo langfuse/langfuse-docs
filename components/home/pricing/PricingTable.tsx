@@ -681,14 +681,14 @@ const sections: Section[] = [
       {
         name: "Monitors and Alerts",
         description:
-          "Threshold-based alerts on your LLM application metrics with notifications via Slack, webhooks, and GitHub Actions. Up to 20 monitors per organization on Langfuse Cloud. Self-hosted deployments require Langfuse v4 and have no monitor limit.",
+          "Threshold-based alerts on your LLM application metrics with notifications via Slack, webhooks, and GitHub Actions. Monitor limits per organization on Langfuse Cloud depend on the plan. Self-hosted deployments require Langfuse v4 and have no monitor limit.",
         href: "/docs/metrics/features/monitors",
         tiers: {
           cloud: {
-            Hobby: "20 monitors",
+            Hobby: "2 monitors",
             Core: "20 monitors",
-            Pro: "20 monitors",
-            Enterprise: "20 monitors",
+            Pro: "50 monitors",
+            Enterprise: "100 monitors",
           },
           selfHosted: {
             "Open Source": "Langfuse v4+",
