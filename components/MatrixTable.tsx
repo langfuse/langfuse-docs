@@ -29,12 +29,15 @@ export function MatrixTable({ children }: { children: ReactNode }) {
 
     // Inject a first header row with "Langfuse Cloud" above the highlighted
     // OSS v4 column (GFM tables only support a single header row).
-    const thead = table.querySelector("thead");
-    const headRow = thead?.querySelector("tr");
+    const thead = table.querySelector<HTMLTableSectionElement>("thead");
+    const headRow = thead?.querySelector<HTMLTableRowElement>("tr");
     // The highlighted Cloud column is the 4th one (kept in sync with the
     // nth-child(4) highlight rules in the wrapper className below).
     const colCount = headRow
-      ? Array.from(headRow.cells).reduce((n, c) => n + c.colSpan, 0)
+      ? Array.from<HTMLTableCellElement>(headRow.cells).reduce(
+          (n, c) => n + c.colSpan,
+          0,
+        )
       : 0;
     if (thead && colCount > 4 && !thead.querySelector("[data-cloud-row]")) {
       const tr = document.createElement("tr");
@@ -53,14 +56,14 @@ export function MatrixTable({ children }: { children: ReactNode }) {
       cleanups.push(() => tr.remove());
     }
 
-    const details = Array.from(
-      root.querySelectorAll<HTMLElement>("[data-compat-detail]"),
+    const details = Array.from<HTMLElement>(
+      root.querySelectorAll("[data-compat-detail]"),
     );
 
     for (const detail of details) {
       const name = detail.getAttribute("data-compat-detail");
-      const row = Array.from(
-        table.querySelectorAll<HTMLTableRowElement>("tbody tr"),
+      const row = Array.from<HTMLTableRowElement>(
+        table.querySelectorAll("tbody tr"),
       ).find((r) => r.cells[0]?.textContent?.trim().startsWith(name!));
       if (!row || row.dataset.compatBound) continue;
       row.dataset.compatBound = "true";
