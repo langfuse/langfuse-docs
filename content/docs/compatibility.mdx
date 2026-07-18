@@ -49,9 +49,9 @@ Every Langfuse component (server, SDKs, and APIs) moves through these lifecycle 
 <MatrixTable
   personas={[
     {
-      id: "cloud-older-sdks",
-      label: "Cloud · older SDKs",
-      sections: ["Python", "JS/TS"],
+      id: "cloud-older-python",
+      label: "Cloud · Python v2",
+      sections: ["Python"],
       rows: [
         "Legacy ingestion API",
         "OpenTelemetry",
@@ -61,15 +61,28 @@ Every Langfuse component (server, SDKs, and APIs) moves through these lifecycle 
       ],
     },
     {
-      id: "cloud-current-sdks",
-      label: "Cloud · current SDKs",
-      sections: ["Read APIs", "Evaluations", "Integrations & exports"],
+      id: "cloud-older-js",
+      label: "Cloud · JS v3",
+      sections: ["JS/TS"],
       rows: [
-        "Python SDK v4",
-        "Python SDK v3",
-        "JS/TS SDK v5",
-        "JS/TS SDK v4",
+        "Legacy ingestion API",
+        "OpenTelemetry",
+        "v1 read APIs",
+        "Trace-level evaluators",
+        "Legacy export source",
       ],
+    },
+    {
+      id: "cloud-current-python",
+      label: "Cloud · Python v3/v4",
+      sections: ["Read APIs", "Evaluations", "Integrations & exports"],
+      rows: ["Python SDK v4", "Python SDK v3"],
+    },
+    {
+      id: "cloud-current-js",
+      label: "Cloud · JS v4/v5",
+      sections: ["Read APIs", "Evaluations", "Integrations & exports"],
+      rows: ["JS/TS SDK v5", "JS/TS SDK v4"],
     },
     { id: "self-hosted", label: "Self-hosted" },
     {
