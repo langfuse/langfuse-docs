@@ -1,188 +1,114 @@
 ---
-title: "Langfuse v4: Faster and Observations-First"
-description: Langfuse v4 delivers faster performance and introduces an observations-first data model, on Langfuse Cloud and self-hosted. Upgrade your SDKs to get started.
+title: "Upgrade to Langfuse v4"
+description: Langfuse v4 introduces the observations-first data model. Find your situation, see the exact steps and deadlines, and upgrade.
 ---
 
-import {
-  BarChart3,
-  Book,
-  Github,
-  LayoutDashboard,
-  Table,
-  Zap,
-} from "lucide-react";
+import { Book, Github, Table, GitCompare } from "lucide-react";
+import { Details, Summary } from "@/components/Details";
+import { VersionTimeline } from "@/components/VersionTimeline";
 
 # Langfuse v4
 
-## At a glance
-
-Langfuse is now observations-first. Queries that used to require expensive joins now run an order of magnitude faster. This change was necessary to let Langfuse scale for agentic applications. Langfuse v4 is available in preview on Langfuse Cloud (as "Fast Preview") and launches for self-hosted deployments by August 1, 2026.
-
-**What changed:** We move from traces and observations as separate entities to observations only. A trace ID remains a correlating identifier for a group of observations. Trace attributes (`user_id`, `session_id`, etc.) must be set on _all_ observations for efficient queries and aggregations. Traces have no longer separate input and output.
-
-**How to adopt:**
-
-- **SDK:** Upgrade to [Python SDK v4.7.0+](/docs/observability/sdk/upgrade-path/python-v3-to-v4) / [JS/TS SDK v5.4.0+](/docs/observability/sdk/upgrade-path/js-v4-to-v5). Replace trace update calls with `propagate_attributes()`.
-- **OTEL:** Set the `x-langfuse-ingestion-version: 4` HTTP header on your span exporter. Propagate trace attributes to _all_ observations. [See setup guide](/integrations/native/opentelemetry)
-- **UI:** If your organization was created before April 14, 2026, 14:00 UTC (15:00 CET), enable the **Preview** toggle (bottom-left) to opt in. Organizations created on/after this cutoff are already on "Fast Preview" and do not see the toggle. Filter observations directly in the new unified table and create saved views for productive defaults. [See saved views guide](/faq/all/explore-observations-in-v4)
-- **Evals:** Migrate LLM-as-a-Judge evals to the observation level. [See evals migration guide](/faq/all/llm-as-a-judge-migration)
-
----
-
-## Overview
-
-Langfuse now delivers faster product performance at scale. Chart loading is much shorter, and browsing traces, users, and sessions is faster. The new Observations API v2 and Metrics API v2 query faster at scale. Observation-level evaluations now execute in seconds without a ClickHouse query per evaluation.
-
-We will keep this page updated as we roll out additional related features and share OSS and self-hosted support updates.
+Langfuse v4 rebuilds the data model around observations: trace-level attributes live on every observation, which removes expensive joins and makes queries an order of magnitude faster at scale. This page is the starting point for upgrading. Find [your situation](#what-you-need-to-do) below, follow the steps, and check the [Versions & Compatibility](/docs/compatibility) page for the full matrix.
 
 <Callout type="info">
-  This version of Langfuse (v4) introduces a **single unified observations table** where all inputs,
-  outputs, and context attributes live directly on observations. See the [guide
-  on working with the observation-centric data model](/faq/all/explore-observations-in-v4) for before/after workflows and saved
-  view setup.
+New to Langfuse? There is nothing to migrate. Start with the [get started guide](/docs/observability/get-started); it already uses v4.
 </Callout>
 
-## Why observations-first?
+## Timeline [#timeline]
 
-As agentic applications grow more complex, a single trace can contain hundreds or thousands of operations — LLM calls, tool executions, retrieval steps, agent handoffs. The old traces table showed one row per request, which meant the operations engineers actually care about were hidden inside. With observations-first, you can directly query across all operations — start with the question ("which LLM calls are slow?") rather than the container ("which trace has a slow call somewhere inside it?").
+<VersionTimeline />
 
-<Cards num={1}>
+| Date                    | What happens                                                                                               | Who is affected                                                           |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| **August 1, 2026**      | v4 ships for self-hosted deployments                                                                       | Self-hosters                                                              |
+| **End of October 2026** | Langfuse Cloud switches to v4 as the only experience; the "Preview" toggle is removed                      | All Langfuse Cloud users                                                  |
+| **November 30, 2026**   | Legacy surfaces are removed on Langfuse Cloud: v1 read APIs, legacy trace ingestion, legacy export sources | Cloud users on Python SDK v2 / JS SDK v3, v1 read APIs, or legacy exports |
+
+On Langfuse Cloud, review your project's remaining migration actions directly [in the app](https://cloud.langfuse.com/project/~/v4).
+
+## What you need to do [#what-you-need-to-do]
+
+### Langfuse Cloud with older SDKs (Python v2 / JS v3 or older) [#cloud-older-sdks]
+
+**Deadline: November 30, 2026.** These SDKs send traces via the legacy ingestion API, which is removed on that date; trace ingestion stops working. Score ingestion is unaffected.
+
+1. Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v3-to-v4) (the guides cover each major-version hop).
+2. Replace `update_current_trace()` / `updateActiveTrace()` with `propagate_attributes()`; it pushes `user_id`, `session_id`, `tags`, and `metadata` to all child observations.
+3. Verify in the [in-app migration view](https://cloud.langfuse.com/project/~/v4) that no required actions remain.
+
+### Langfuse Cloud with current SDKs (Python v3+ / JS v4+) [#cloud-current-sdks]
+
+**Deadline: November 30, 2026** for the v1 read APIs and trace-level evaluators; the SDK upgrade itself is recommended before the end of October 2026 so your data stays real time.
+
+1. Upgrade to Python SDK ≥ 4.7.0 / JS SDK ≥ 5.4.0. Below these versions, data appears with up to a 10-minute delay on the v4 data model.
+2. Replace `update_current_trace()` / `updateActiveTrace()` with `propagate_attributes()` ([Python guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4), [JS guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5)).
+3. Move reads from the v1 endpoints (`api.legacy.*`, or the `api.observations` / `api.metrics` defaults of SDK v3/v4) to the [Observations API v2](/docs/api-and-data-platform/features/observations-api) and [Metrics API v2](/docs/metrics/features/metrics-api).
+4. Migrate trace-level LLM-as-a-judge evaluators to the [observation level](/faq/all/llm-as-a-judge-migration).
+
+### Self-hosted deployments [#self-hosted]
+
+**No forced deadline.** v4 ships by August 1, 2026; v3 continues to receive security patches. Upgrade at your own pace, in this order:
+
+1. Upgrade SDKs first: [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) / [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5). Python SDK v2 and JS SDK v3 cannot send traces to a v4 server.
+2. Migrate trace-level evaluators and legacy export sources, if you use them (see [what changed](#what-changed)).
+3. Upgrade the server from v3 to v4 following the [upgrade documentation](/self-hosting/upgrade).
+4. After the server upgrade, switch API reads from `api.legacy.*` to the default `api.observations` / `api.metrics`; the v2 endpoints are now served by your deployment.
+
+### Direct API and OpenTelemetry users [#api-otel]
+
+**Deadline: November 30, 2026** for the v1 read APIs on Langfuse Cloud.
+
+1. OpenTelemetry: set the `x-langfuse-ingestion-version: 4` header on your span exporter for real-time data, and propagate trace attributes (`user_id`, `session_id`, ...) to all spans ([setup guide](/integrations/native/opentelemetry)).
+2. REST: move v1 reads to `GET /api/public/v2/observations?fromStartTime={datetime}&toStartTime={datetime}`, `GET /api/public/v2/metrics?query={json}`, and `GET /api/public/v3/scores`. The [full endpoint list with replacements](/docs/compatibility#sdk-server) is in the compatibility matrix.
+3. Exports: switch blob storage, PostHog, and Mixpanel integrations from the legacy "traces and observations" source to "enriched observations". Remaining legacy exports are switched automatically on November 30, 2026.
+
+## What changed [#what-changed]
+
+| Before (v3)                                                          | After (v4)                                                                                                                                        |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Separate, mutable traces and observations tables                     | Single immutable observations table; a trace is the set of observations sharing a `trace_id`                                                      |
+| Trace attributes stored on the trace, joined at query time           | Trace attributes live on every observation, propagated by the SDKs                                                                                |
+| `update_current_trace()` / `updateActiveTrace()`                     | `propagate_attributes()`                                                                                                                          |
+| Trace input/output                                                   | Observation input/output (`set_trace_io` remains as a deprecated fallback for legacy trace-level evaluators)                                      |
+| v1 read APIs (observations, metrics, traces, sessions, scores v1/v2) | [Observations API v2](/docs/api-and-data-platform/features/observations-api), [Metrics API v2](/docs/metrics/features/metrics-api), Scores API v3 |
+| Legacy batch ingestion for trace, span, and generation events        | OTLP endpoint `POST /api/public/otel/v1/traces`                                                                                                   |
+| Trace-level LLM-as-a-judge evaluators                                | [Observation-level evaluators](/faq/all/llm-as-a-judge-migration)                                                                                 |
+| Export source "traces and observations"                              | Export source "enriched observations"                                                                                                             |
+
+Why observations-first: agentic applications produce traces with hundreds of operations, and the operations engineers care about were hidden inside one trace row. With observations as the primary entity you query the operations directly ("which LLM calls are slow?"), charts load faster over large time ranges, and observation-level evaluations run in seconds. The [data model docs](/docs/observability/data-model) explain the model; the [observations guide](/faq/all/explore-observations-in-v4) covers day-to-day workflows in the UI.
+
+<Details>
+<Summary>Cloud rollout details (until the end of October 2026)</Summary>
+
+- Organizations created on or after April 14, 2026, 14:00 UTC run v4 by default and do not see a toggle.
+- Organizations created before that date can switch the **Preview** toggle (bottom-left in the UI) on and off until Langfuse Cloud becomes v4-only at the end of October 2026.
+- Cloud projects created on or after May 20, 2026 are locked to the "enriched observations" export source; new legacy export integrations cannot be created since June 22, 2026.
+
+</Details>
+
+## Questions [#questions]
+
+Ask rollout and migration questions in the dedicated [GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518); we use that thread for updates and answers.
+
+<Cards num={2}>
   <Card
-    title="Guide: Working with Observations"
-    href="/faq/all/explore-observations-in-v4"
-    icon={<Table />}
-  />
-</Cards>
-
-## Preview access and rollout timeline
-
-| Organization creation date (Langfuse Cloud)    | Fast Preview default | "Preview" toggle visibility      |
-| ---------------------------------------------- | -------------------- | -------------------------------- |
-| Before April 14, 2026, 14:00 UTC (15:00 CET)   | Optional             | Visible (you can switch on/off)  |
-| On/after April 14, 2026, 14:00 UTC (15:00 CET) | Enabled by default   | Hidden (already on Fast Preview) |
-
-If you signed up recently and do not see the toggle, your organization is already on the new experience by default.
-For organizations created before the cutoff date, the "Preview" toggle is available in the bottom-left corner of the UI to opt in to "Fast Preview".
-
-<Frame className="max-w-xs mx-auto">
-  ![Beta toggle in Langfuse
-  UI](/images/changelog/2026-03-10-v4-preview/v4-beta-togle.png)
-</Frame>
-
-The toggle remains reversible for organizations created before the cutoff date.
-
-**Export source cutoff (2026-05-20):** Cloud projects created on or after this date are locked to **Enriched observations (recommended)** as the export source for blob storage, PostHog, and Mixpanel integrations. Legacy export sources are hidden from the UI for these projects. Projects created before this date retain full choice across all export sources.
-
-<Callout type="info">
-Data from SDKs `langfuse-js` < `5.0.0`, `langfuse-python` < `4.0.0`, or direct OpenTelemetry exporters that do not send `x-langfuse-ingestion-version: 4` can be delayed by up to 10 minutes in the new UI. Upgrade to the latest SDKs or set that header on your OTEL span exporter to see new data in real time.
-</Callout>
-
-### Migrate to the new experience
-
-<Steps>
-
-### Use a compatible ingestion path
-
-To take advantage of the new data model and explore your data in real time, use one of these ingestion paths:
-
-- **Python SDK:** v4.7.0+ ([migration guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4))
-- **JS/TS SDK:** v5.4.0+ ([migration guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5))
-- **Direct OpenTelemetry ingestion:** set `x-langfuse-ingestion-version: 4` on your OTEL span exporter ([OpenTelemetry setup](/integrations/native/opentelemetry))
-
-For SDK users, the key change is that `update_current_trace()` and `updateActiveTrace()` are replaced by `propagate_attributes()`, which automatically pushes attributes like `user_id`, `session_id`, `metadata`, `tags`, and request-scoped `environment` in the Python SDK to all child observations.
-
-### Optional: Migrate LLM-as-a-judge evaluations
-
-Upgrade your LLM-as-a-judge evaluations to run at the observation level instead of the trace level for significantly faster execution. Learn more in the [LLM-as-a-judge migration guide](/faq/all/llm-as-a-judge-migration).
-
-### Optional: Adopt new observations and metrics API endpoints
-
-The [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2) deliver significant performance improvements through the new data model:
-
-- **Selective field retrieval:** Request only the field groups you need instead of full rows.
-- **Cursor-based pagination:** Consistent performance regardless of result set size.
-- **Optimized querying:** Built on the new immutable events table with no joins required.
-
-See the [v2 APIs announcement](/changelog/2025-12-17-v2-metrics-and-observations-api) for migration guidance and a detailed feature comparison.
-
-</Steps>
-
-## What's faster now
-
-### Faster product performance in the UI
-
-Chart loading time is significantly shorter. You can now confidently load charts over large time ranges. Browsing traces, users, and sessions is also much faster, and filters respond more quickly in large projects. [Learn more about the new unified tracing table in the UI](/faq/all/explore-observations-in-v4).
-
-### Faster API workflows
-
-The new [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2) are designed for faster querying and aggregations at scale.
-
-### Faster evaluation workflows
-
-[Observation-level evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) execute in seconds as we do not need to query ClickHouse for each evaluation anymore.
-
-Observation-level evaluators only use data on the observation they run against. They do not automatically read sibling or child observations from the same trace. If you need to judge an overall application or agent invocation, target a root observation that records the overall input and output, and write any additional context the judge needs onto that same observation.
-
-## Under the hood [#under-the-hood]
-
-<Frame fullWidth>
-  ![Langfuse data model
-  overview](/images/changelog/2026-03-10-v4-preview/data-model.png)
-</Frame>
-
-This preview is powered by a simplified observation-centric data model. Trace-level attributes such as `user_id`, `session_id`, and `metadata` now propagate automatically to observations, which helps remove expensive joins and keep the product fast at larger scale. Learn more in the [data model docs](/docs/observability/data-model) and [Explore Observations](/faq/all/explore-observations-in-v4).
-
-### What changes
-
-|                        | Classic model                                   | Observation-centric model                                                                                                                                                           |
-| ---------------------- | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Storage**            | Separate mutable Traces and Observations tables | Single immutable Observations table                                                                                                                                                 |
-| **Context attributes** | Stored on the trace, joined at query time       | Propagated to every observation on SDK side.                                                                                                                                        |
-| **Trace input/output** | Set directly on the trace                       | Removed, use observation IO instead. (For legacy LLM-as-a-judge evaluators that depend on trace input and output, users can use the deprecated `set_trace_io` methods in the SDKs.) |
-| **Mutability**         | Traces and observations are mutable             | Observations are immutable (written once)                                                                                                                                           |
-
-## OSS and self-hosting
-
-Langfuse v4 launches for self-hosted deployments by **August 1, 2026**. Follow the [upgrade documentation](/self-hosting/upgrade) to move from v3 to v4, and check the [Versions & Compatibility overview](/docs/compatibility) for SDK and API version requirements. Updates are shared in the [changelog](/changelog) and in the dedicated [GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518).
-
-## Migration deadline on Langfuse Cloud [#migration-deadline]
-
-On **November 30, 2026**, the v4 migration completes on Langfuse Cloud: legacy API endpoints and legacy trace ingestion are removed, and remaining legacy exports are switched to their replacements automatically. See the [Versions & Compatibility](/docs/compatibility) page for the full schedule.
-
-## Questions on Langfuse v4?
-
-If you have questions about the rollout, migration steps, SDK upgrades, or anything unclear in the new experience, please ask them in the dedicated [GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518). We will use that thread for rollout updates and answers.
-
-## Get started
-
-<Cards num={4}>
-  <Card
-    title="SDK Migration Guides"
+    title="SDK migration guides"
     href="/docs/observability/sdk/upgrade-path"
     icon={<Book />}
   />
   <Card
-    title="UI Tracing Table Setup"
+    title="Versions & Compatibility"
+    href="/docs/compatibility"
+    icon={<GitCompare />}
+  />
+  <Card
+    title="Working with observations"
     href="/faq/all/explore-observations-in-v4"
     icon={<Table />}
   />
   <Card
-    title="Observations API v2"
-    href="/docs/api-and-data-platform/features/observations-api#v2"
-    icon={<Zap />}
-  />
-  <Card
-    title="Metrics API v2"
-    href="/docs/metrics/features/metrics-api#v2"
-    icon={<BarChart3 />}
-  />
-  <Card
-    title="Dashboard Changes in v4"
-    href="/faq/all/dashboard-changes-in-v4"
-    icon={<LayoutDashboard />}
-  />
-  <Card
-    title="Ask Questions on Langfuse v4"
+    title="Ask questions on Langfuse v4"
     href="https://github.com/orgs/langfuse/discussions/12518"
     icon={<Github />}
   />
