@@ -30,7 +30,13 @@ export function MatrixTable({ children }: { children: ReactNode }) {
     // Inject a first header row with "Langfuse Cloud" above the highlighted
     // OSS v4 column (GFM tables only support a single header row).
     const thead = table.querySelector("thead");
-    if (thead && !thead.querySelector("[data-cloud-row]")) {
+    const headRow = thead?.querySelector("tr");
+    // The highlighted Cloud column is the 4th one (kept in sync with the
+    // nth-child(4) highlight rules in the wrapper className below).
+    const colCount = headRow
+      ? Array.from(headRow.cells).reduce((n, c) => n + c.colSpan, 0)
+      : 0;
+    if (thead && colCount > 4 && !thead.querySelector("[data-cloud-row]")) {
       const tr = document.createElement("tr");
       tr.dataset.cloudRow = "true";
       const mk = (colSpan: number, text?: string) => {
@@ -42,7 +48,7 @@ export function MatrixTable({ children }: { children: ReactNode }) {
         }
         return th;
       };
-      tr.append(mk(3), mk(1, "Langfuse Cloud"), mk(1));
+      tr.append(mk(3), mk(1, "Langfuse Cloud"), mk(colCount - 4));
       thead.prepend(tr);
       cleanups.push(() => tr.remove());
     }

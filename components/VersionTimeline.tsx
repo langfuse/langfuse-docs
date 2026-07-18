@@ -55,7 +55,8 @@ const ROWS: { name: string; segments: Segment[] }[] = [
         from: { year: 2026, month: 11 },
         to: AXIS_END,
         href: "/docs/v4",
-        title: "From the end of October 2026: v4 only",
+        title:
+          "From the end of October 2026, v4 is the only experience on Langfuse Cloud; remaining legacy APIs are removed on November 30, 2026",
         className: SEGMENT_STYLES.ga,
       },
     ],
