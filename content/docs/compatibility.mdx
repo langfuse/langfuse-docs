@@ -46,7 +46,44 @@ Every Langfuse component (server, SDKs, and APIs) moves through these lifecycle 
 
 ## Feature availability matrix [#sdk-server]
 
-<MatrixTable>
+<MatrixTable
+  personas={[
+    {
+      id: "cloud-older-sdks",
+      label: "Cloud · older SDKs",
+      sections: ["Python", "JS/TS"],
+      rows: [
+        "Legacy ingestion API",
+        "OpenTelemetry",
+        "v1 read APIs",
+        "Trace-level evaluators",
+        "Legacy export source",
+      ],
+    },
+    {
+      id: "cloud-current-sdks",
+      label: "Cloud · current SDKs",
+      sections: ["Read APIs", "Evaluations", "Integrations & exports"],
+      rows: [
+        "Python SDK v4",
+        "Python SDK v3",
+        "JS/TS SDK v5",
+        "JS/TS SDK v4",
+      ],
+    },
+    { id: "self-hosted", label: "Self-hosted" },
+    {
+      id: "api-otel",
+      label: "API & OpenTelemetry",
+      sections: [
+        "Third-party instrumentation",
+        "Read APIs",
+        "Integrations & exports",
+        "Evaluations",
+      ],
+    },
+  ]}
+>
 
 | Client                                                                                                  | OSS v2 (End of life)                                  | OSS v3 (Deprecated)                                             | OSS v4 (GA)                                                     | Status      |
 | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------------------------- | ----------- |

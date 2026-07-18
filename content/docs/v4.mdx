@@ -6,6 +6,7 @@ description: Langfuse v4 introduces the observations-first data model. Find your
 import { Book, Github, Table, GitCompare } from "lucide-react";
 import { Details, Summary } from "@/components/Details";
 import { VersionTimeline } from "@/components/VersionTimeline";
+import { Steps, Step } from "@/components/docs";
 
 # Langfuse v4
 
@@ -35,42 +36,167 @@ Not sure which combinations are supported? The [compatibility matrix](/docs/comp
 
 **Deadline: November 30, 2026.** These SDKs send traces via the legacy ingestion API, which is removed on that date; trace ingestion stops working. Score ingestion is unaffected.
 
-1. **Ingestion:** upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v3-to-v4) (the guides cover each major-version hop), and replace `update_current_trace()` / `updateActiveTrace()` with `propagate_attributes()`.
-2. **Read APIs:** move reads from the v1 endpoints (`api.legacy.*` or direct REST calls) to the [Observations API v2](/docs/api-and-data-platform/features/observations-api) and [Metrics API v2](/docs/metrics/features/metrics-api). The [full endpoint list with replacements](/docs/compatibility#sdk-server) is in the compatibility matrix.
-3. **Evaluators:** migrate trace-level LLM-as-a-judge evaluators to the [observation level](/faq/all/llm-as-a-judge-migration).
-4. **Exports:** switch blob storage, PostHog, and Mixpanel integrations from the legacy "traces and observations" source to "enriched observations".
-5. **UI:** if your organization was created before April 14, 2026, enable the **Preview** toggle (bottom-left in the UI) to use the v4 experience; newer organizations already run it.
-6. **Verify:** check the [in-app migration view](https://cloud.langfuse.com/project/~/v4) until no required actions remain.
+<Steps>
+
+<Step>
+
+**Ingestion:** upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v3-to-v4) (the guides cover each major-version hop), and replace `update_current_trace()` / `updateActiveTrace()` with `propagate_attributes()`.
+
+</Step>
+
+<Step>
+
+**Read APIs:** move reads from the v1 endpoints (`api.legacy.*` or direct REST calls) to the [Observations API v2](/docs/api-and-data-platform/features/observations-api) and [Metrics API v2](/docs/metrics/features/metrics-api). The [full endpoint list with replacements](/docs/compatibility#sdk-server) is in the compatibility matrix.
+
+</Step>
+
+<Step>
+
+**Evaluators:** migrate trace-level LLM-as-a-judge evaluators to the [observation level](/faq/all/llm-as-a-judge-migration).
+
+</Step>
+
+<Step>
+
+**Exports:** switch blob storage, PostHog, and Mixpanel integrations from the legacy "traces and observations" source to "enriched observations".
+
+</Step>
+
+<Step>
+
+**UI:** if your organization was created before April 14, 2026, enable the **Preview** toggle (bottom-left in the UI) to use the v4 experience; newer organizations already run it.
+
+</Step>
+
+<Step>
+
+**Verify:** check the [in-app migration view](https://cloud.langfuse.com/project/~/v4) until no required actions remain.
+
+</Step>
+
+</Steps>
+
+Exact support for this setup: [filtered compatibility matrix](/docs/compatibility#persona-cloud-older-sdks).
 
 ### Langfuse Cloud with current SDKs (Python v3+ / JS v4+) [#cloud-current-sdks]
 
 **Deadline: November 30, 2026** for the v1 read APIs, trace-level evaluators, and legacy exports; the SDK upgrade itself is recommended before the end of October 2026 so your data stays real time.
 
-1. **Ingestion:** upgrade to Python SDK ≥ 4.7.0 / JS SDK ≥ 5.4.0 (below these versions, data appears with up to a 10-minute delay on the v4 data model) and replace `update_current_trace()` / `updateActiveTrace()` with `propagate_attributes()` ([Python guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4), [JS guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5)).
-2. **Read APIs:** move reads from the v1 endpoints (`api.legacy.*` or direct REST calls) to the [Observations API v2](/docs/api-and-data-platform/features/observations-api) and [Metrics API v2](/docs/metrics/features/metrics-api). The [full endpoint list with replacements](/docs/compatibility#sdk-server) is in the compatibility matrix.
-3. **Evaluators:** migrate trace-level LLM-as-a-judge evaluators to the [observation level](/faq/all/llm-as-a-judge-migration).
-4. **Exports:** switch blob storage, PostHog, and Mixpanel integrations from the legacy "traces and observations" source to "enriched observations".
-5. **UI:** if your organization was created before April 14, 2026, enable the **Preview** toggle (bottom-left in the UI) to use the v4 experience; newer organizations already run it.
-6. **Verify:** check the [in-app migration view](https://cloud.langfuse.com/project/~/v4) until no required actions remain.
+<Steps>
+
+<Step>
+
+**Ingestion:** upgrade to Python SDK ≥ 4.7.0 / JS SDK ≥ 5.4.0 (below these versions, data appears with up to a 10-minute delay on the v4 data model) and replace `update_current_trace()` / `updateActiveTrace()` with `propagate_attributes()` ([Python guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4), [JS guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5)).
+
+</Step>
+
+<Step>
+
+**Read APIs:** move reads from the v1 endpoints (`api.legacy.*` or direct REST calls) to the [Observations API v2](/docs/api-and-data-platform/features/observations-api) and [Metrics API v2](/docs/metrics/features/metrics-api). The [full endpoint list with replacements](/docs/compatibility#sdk-server) is in the compatibility matrix.
+
+</Step>
+
+<Step>
+
+**Evaluators:** migrate trace-level LLM-as-a-judge evaluators to the [observation level](/faq/all/llm-as-a-judge-migration).
+
+</Step>
+
+<Step>
+
+**Exports:** switch blob storage, PostHog, and Mixpanel integrations from the legacy "traces and observations" source to "enriched observations".
+
+</Step>
+
+<Step>
+
+**UI:** if your organization was created before April 14, 2026, enable the **Preview** toggle (bottom-left in the UI) to use the v4 experience; newer organizations already run it.
+
+</Step>
+
+<Step>
+
+**Verify:** check the [in-app migration view](https://cloud.langfuse.com/project/~/v4) until no required actions remain.
+
+</Step>
+
+</Steps>
+
+Exact support for this setup: [filtered compatibility matrix](/docs/compatibility#persona-cloud-current-sdks).
 
 ### Self-hosted deployments [#self-hosted]
 
 **No forced deadline.** v4 ships by August 1, 2026; v3 continues to receive security patches. Upgrade at your own pace, in this order:
 
-1. **Ingestion:** upgrade SDKs first: [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) / [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5). Python SDK v2 and JS SDK v3 cannot send traces to a v4 server.
-2. **Evaluators:** migrate trace-level LLM-as-a-judge evaluators to the [observation level](/faq/all/llm-as-a-judge-migration).
-3. **Exports:** switch blob storage, PostHog, and Mixpanel integrations from the legacy "traces and observations" source to "enriched observations".
-4. **Server:** upgrade from v3 to v4 following the [upgrade documentation](/self-hosting/upgrade). The v4 UI ships with the server; no toggle is needed.
-5. **Read APIs:** move reads from the v1 endpoints (`api.legacy.*` or direct REST calls) to the [Observations API v2](/docs/api-and-data-platform/features/observations-api) and [Metrics API v2](/docs/metrics/features/metrics-api). The [full endpoint list with replacements](/docs/compatibility#sdk-server) is in the compatibility matrix.
+<Steps>
+
+<Step>
+
+**Ingestion:** upgrade SDKs first: [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) / [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5). Python SDK v2 and JS SDK v3 cannot send traces to a v4 server.
+
+</Step>
+
+<Step>
+
+**Evaluators:** migrate trace-level LLM-as-a-judge evaluators to the [observation level](/faq/all/llm-as-a-judge-migration).
+
+</Step>
+
+<Step>
+
+**Exports:** switch blob storage, PostHog, and Mixpanel integrations from the legacy "traces and observations" source to "enriched observations".
+
+</Step>
+
+<Step>
+
+**Server:** upgrade from v3 to v4 following the [upgrade documentation](/self-hosting/upgrade). The v4 UI ships with the server; no toggle is needed.
+
+</Step>
+
+<Step>
+
+**Read APIs:** move reads from the v1 endpoints (`api.legacy.*` or direct REST calls) to the [Observations API v2](/docs/api-and-data-platform/features/observations-api) and [Metrics API v2](/docs/metrics/features/metrics-api). The [full endpoint list with replacements](/docs/compatibility#sdk-server) is in the compatibility matrix.
+
+</Step>
+
+</Steps>
+
+Exact support for this setup: [filtered compatibility matrix](/docs/compatibility#persona-self-hosted).
 
 ### Direct API and OpenTelemetry users [#api-otel]
 
 **Deadline: November 30, 2026** for legacy trace ingestion and the v1 read APIs on Langfuse Cloud.
 
-1. **Ingestion:** everyone still sending trace, span, or generation events to the legacy `POST /api/public/ingestion` API must move to the [OpenTelemetry endpoint](/integrations/native/opentelemetry) `POST /api/public/otel/v1/traces`. Set the `x-langfuse-ingestion-version: 4` header on your span exporter for real-time data, and propagate trace attributes (`user_id`, `session_id`, ...) to all spans.
-2. **Read APIs:** move reads from the v1 endpoints (`api.legacy.*` or direct REST calls) to the [Observations API v2](/docs/api-and-data-platform/features/observations-api) and [Metrics API v2](/docs/metrics/features/metrics-api). The [full endpoint list with replacements](/docs/compatibility#sdk-server) is in the compatibility matrix.
-3. **Evaluators:** migrate trace-level LLM-as-a-judge evaluators to the [observation level](/faq/all/llm-as-a-judge-migration).
-4. **Exports:** switch blob storage, PostHog, and Mixpanel integrations from the legacy "traces and observations" source to "enriched observations".
+<Steps>
+
+<Step>
+
+**Ingestion:** everyone still sending trace, span, or generation events to the legacy `POST /api/public/ingestion` API must move to the [OpenTelemetry endpoint](/integrations/native/opentelemetry) `POST /api/public/otel/v1/traces`. Set the `x-langfuse-ingestion-version: 4` header on your span exporter for real-time data, and propagate trace attributes (`user_id`, `session_id`, ...) to all spans.
+
+</Step>
+
+<Step>
+
+**Read APIs:** move reads from the v1 endpoints (`api.legacy.*` or direct REST calls) to the [Observations API v2](/docs/api-and-data-platform/features/observations-api) and [Metrics API v2](/docs/metrics/features/metrics-api). The [full endpoint list with replacements](/docs/compatibility#sdk-server) is in the compatibility matrix.
+
+</Step>
+
+<Step>
+
+**Evaluators:** migrate trace-level LLM-as-a-judge evaluators to the [observation level](/faq/all/llm-as-a-judge-migration).
+
+</Step>
+
+<Step>
+
+**Exports:** switch blob storage, PostHog, and Mixpanel integrations from the legacy "traces and observations" source to "enriched observations".
+
+</Step>
+
+</Steps>
+
+Exact support for this setup: [filtered compatibility matrix](/docs/compatibility#persona-api-otel).
 
 ## What changed [#what-changed]
 
