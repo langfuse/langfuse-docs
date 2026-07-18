@@ -9,7 +9,7 @@ import { VersionTimeline } from "@/components/VersionTimeline";
 
 # Langfuse v4
 
-Langfuse v4 rebuilds the data model around observations: trace-level attributes live on every observation, which removes expensive joins and makes queries an order of magnitude faster at scale. This page is the starting point for upgrading. Find [your situation](#what-you-need-to-do) below, follow the steps, and check the [Versions & Compatibility](/docs/compatibility) page for the full matrix.
+Langfuse v4 rebuilds the data model around observations: trace-level attributes live on every observation, and records are immutable (written once, never updated). This removes expensive joins and the deduplication of updated records at read time, making queries an order of magnitude faster at scale. This page is the starting point for upgrading. Find [your situation](#what-you-need-to-do) below, follow the steps, and check the [Versions & Compatibility](/docs/compatibility) page for the full matrix.
 
 <Callout type="info">
 New to Langfuse? There is nothing to migrate. Start with the [get started guide](/docs/observability/get-started); it already uses v4.
