@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-export type MatrixPersona = {
+export type MatrixFilter = {
   id: string;
   label: string;
   /** Section-row name prefixes to show. Empty (with empty rows) shows all. */
@@ -21,47 +21,49 @@ export type MatrixPersona = {
  * - A row becomes click-to-expand when a sibling `<CompatDetail name="...">`
  *   exists whose `name` equals the row's first-cell text. Clicking the row
  *   inserts the detail content as a full-width row directly below it.
- * - Optional `personas` render filter pills above the table; the selection is
- *   synced with the `?persona=` URL parameter so other pages can deep-link a
- *   pre-filtered matrix.
+ * - Optional `filters` render filter pills above the table; the selection is
+ *   synced with the `#filter-<id>` URL hash so other pages can deep-link a
+ *   pre-filtered matrix. `filterAliases` maps legacy ids in inbound links to
+ *   current filter ids.
  *
  * The table itself stays plain markdown so it survives in the generated .md
  * sources; the detail blocks are also plain markdown inside CompatDetail.
  */
 export function MatrixTable({
   children,
-  personas,
+  filters,
+  filterAliases,
 }: {
   children: ReactNode;
-  personas?: MatrixPersona[];
+  filters?: MatrixFilter[];
+  filterAliases?: Record<string, string>;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState("all");
+  const [counts, setCounts] = useState<{ visible: number; total: number }>();
 
   useEffect(() => {
-    if (!personas) return;
-    const fromSearch = new URLSearchParams(window.location.search).get(
-      "persona",
-    );
-    const fromHash = /^#persona-(.+)$/.exec(window.location.hash)?.[1];
-    const requested = fromSearch ?? fromHash;
-    if (requested && personas.some((p) => p.id === requested)) {
-      setActive(requested);
-      if (fromHash) {
-        // The hash targets no element; scroll to the matrix ourselves.
-        setTimeout(() => ref.current?.scrollIntoView({ block: "start" }), 100);
-      }
+    if (!filters) return;
+    const fromHash = /^#(?:filter|persona)-(.+)$/.exec(
+      window.location.hash,
+    )?.[1];
+    if (!fromHash) return;
+    const requested = filterAliases?.[fromHash] ?? fromHash;
+    if (requested === "all" || filters.some((f) => f.id === requested)) {
+      if (requested !== "all") setActive(requested);
+      // The hash targets no element; scroll to the matrix ourselves.
+      setTimeout(() => ref.current?.scrollIntoView({ block: "start" }), 100);
     }
-  }, [personas]);
+  }, [filters, filterAliases]);
 
   useEffect(() => {
     const table = ref.current?.querySelector("table");
     if (!table) return;
-    const persona = personas?.find((p) => p.id === active);
+    const filter = filters?.find((f) => f.id === active);
     const showAll =
-      !persona ||
-      ((persona.sections?.length ?? 0) === 0 &&
-        (persona.rows?.length ?? 0) === 0);
+      !filter ||
+      ((filter.sections?.length ?? 0) === 0 &&
+        (filter.rows?.length ?? 0) === 0);
     const rows = Array.from<HTMLTableRowElement>(
       table.querySelectorAll<HTMLTableRowElement>("tbody tr"),
     );
@@ -74,6 +76,8 @@ export function MatrixTable({
     let sectionRow: HTMLTableRowElement | null = null;
     let sectionName = "";
     let sectionHasVisible = false;
+    let visibleCount = 0;
+    let totalCount = 0;
     const finishSection = () => {
       if (sectionRow)
         sectionRow.style.display = sectionHasVisible ? "" : "none";
@@ -90,21 +94,26 @@ export function MatrixTable({
       const name = (r.cells[0]?.textContent ?? "").replace(/^[▸\s]+/, "");
       const visible =
         showAll ||
-        (persona?.sections ?? []).some((s) => sectionName.startsWith(s)) ||
-        (persona?.rows ?? []).some((s) => name.startsWith(s));
+        (filter?.sections ?? []).some((s) => sectionName.startsWith(s)) ||
+        (filter?.rows ?? []).some((s) => name.startsWith(s));
       r.style.display = visible ? "" : "none";
       const next = r.nextElementSibling as HTMLTableRowElement | null;
       if (next?.dataset.compatExpansion)
         next.style.display = visible ? "" : "none";
-      if (visible) sectionHasVisible = true;
+      totalCount += 1;
+      if (visible) {
+        sectionHasVisible = true;
+        visibleCount += 1;
+      }
     }
     finishSection();
-  }, [active, personas]);
+    setCounts({ visible: visibleCount, total: totalCount });
+  }, [active, filters]);
 
-  const selectPersona = (id: string) => {
+  const selectFilter = (id: string) => {
     setActive(id);
     const url = new URL(window.location.href);
-    url.hash = id === "all" ? "" : `persona-${id}`;
+    url.hash = id === "all" ? "" : `filter-${id}`;
     history.replaceState(null, "", url.toString());
   };
 
@@ -235,23 +244,28 @@ export function MatrixTable({
 
   return (
     <div>
-      {personas && (
-        <div className="mb-4 flex flex-wrap gap-2">
-          {[{ id: "all", label: "All" }, ...personas].map((p) => (
+      {filters && (
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          {[{ id: "all", label: "All" }, ...filters].map((f) => (
             <button
-              key={p.id}
+              key={f.id}
               type="button"
-              onClick={() => selectPersona(p.id)}
-              aria-pressed={active === p.id}
+              onClick={() => selectFilter(f.id)}
+              aria-pressed={active === f.id}
               className={`rounded-full border px-3 py-1 text-xs transition-colors ${
-                active === p.id
+                active === f.id
                   ? "border-primary bg-surface-1 font-medium"
                   : "border-border text-muted-foreground hover:bg-surface-1"
               }`}
             >
-              {p.label}
+              {f.label}
             </button>
           ))}
+          {active !== "all" && counts && (
+            <span className="text-xs text-muted-foreground">
+              Showing {counts.visible} of {counts.total} rows
+            </span>
+          )}
         </div>
       )}
       <div

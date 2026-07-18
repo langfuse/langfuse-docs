@@ -47,55 +47,22 @@ Every Langfuse component (server, SDKs, and APIs) moves through these lifecycle 
 ## Feature availability matrix [#sdk-server]
 
 <MatrixTable
-  personas={[
-    {
-      id: "cloud-older-python",
-      label: "Cloud · Python v2",
-      sections: ["Python"],
-      rows: [
-        "Legacy ingestion API",
-        "OpenTelemetry",
-        "v1 read APIs",
-        "Trace-level evaluators",
-        "Legacy export source",
-      ],
-    },
-    {
-      id: "cloud-older-js",
-      label: "Cloud · JS v3",
-      sections: ["JS/TS"],
-      rows: [
-        "Legacy ingestion API",
-        "OpenTelemetry",
-        "v1 read APIs",
-        "Trace-level evaluators",
-        "Legacy export source",
-      ],
-    },
-    {
-      id: "cloud-current-python",
-      label: "Cloud · Python v3/v4",
-      sections: ["Read APIs", "Evaluations", "Integrations & exports"],
-      rows: ["Python SDK v4", "Python SDK v3"],
-    },
-    {
-      id: "cloud-current-js",
-      label: "Cloud · JS v4/v5",
-      sections: ["Read APIs", "Evaluations", "Integrations & exports"],
-      rows: ["JS/TS SDK v5", "JS/TS SDK v4"],
-    },
-    { id: "self-hosted", label: "Self-hosted" },
-    {
-      id: "api-otel",
-      label: "API & OpenTelemetry",
-      sections: [
-        "Third-party instrumentation",
-        "Read APIs",
-        "Integrations & exports",
-        "Evaluations",
-      ],
-    },
+  filters={[
+    { id: "python", label: "Python SDK", sections: ["Python"] },
+    { id: "js", label: "JS/TS SDK", sections: ["JS/TS"] },
+    { id: "otel", label: "OpenTelemetry", sections: ["Third-party instrumentation"] },
+    { id: "rest-api", label: "REST API", sections: ["Read APIs"] },
+    { id: "exports", label: "Exports & integrations", sections: ["Integrations & exports"] },
+    { id: "evals", label: "Evaluations", sections: ["Evaluations"] },
   ]}
+  filterAliases={{
+    "cloud-older-python": "python",
+    "cloud-current-python": "python",
+    "cloud-older-js": "js",
+    "cloud-current-js": "js",
+    "api-otel": "otel",
+    "self-hosted": "all",
+  }}
 >
 
 | Client                                                                                                  | OSS v2 (End of life)                                  | OSS v3 (Deprecated)                                             | OSS v4 (GA)                                                     | Status      |
