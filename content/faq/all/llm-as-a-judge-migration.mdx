@@ -29,7 +29,7 @@ First, upgrade your SDK or ingestion path. Observation-level evaluators run in r
 - **JS/TS SDK:** v5.4.0+ ([upgrade guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5))
 - **Direct OpenTelemetry ingestion:** `x-langfuse-ingestion-version: 4` ([setup guide](/integrations/native/opentelemetry))
 
-After upgrading to the [v4 data model](/docs/v4), input, output, and context are no longer available as separate trace fields. The equivalent values must be available on an observation.
+In the [v4 data model](/docs/v4), a trace is the logical group of observations that share a trace ID, rather than a separate record. Input and output belong to observations. In most cases, an existing root or workflow observation already carries the same input and output that was previously written to the trace. The evaluator upgrade targets that observation. If no single observation contains all required values, the coding assistant helps update your instrumentation.
 
 {/* TODO: Link the in-product evaluator upgrade flow directly to the SDK upgrade guides in this section. */}
 
@@ -39,12 +39,12 @@ After upgrading to the [v4 data model](/docs/v4), input, output, and context are
 
 ### Upgrade in Langfuse
 
-Open **Evaluation > LLM-as-a-Judge**. The upgrade screen walks you through all evaluators that need to be upgraded and recommends one of two paths for each evaluator:
+Open **Evaluation > LLM-as-a-Judge**. The upgrade screen shows the recommended path for your project:
 
-- **Langfuse Assistant:** Selects an existing observation and translates the evaluator configuration in the app.
-- **Coding assistant:** Uses the provided evaluator context and prompt to make any required SDK or instrumentation changes in your coding editor.
+- **In-app upgrade:** Recommended when only minimal configuration changes need to be reviewed and accepted. Langfuse Assistant guides you through these changes in the app.
+- **Coding assistant:** Recommended when the upgrade requires broader configuration or instrumentation changes. The UI provides the skill and project context to use in your coding editor.
 
-The agentic flow makes the upgrade conversational. You can inspect the proposed target observation, filters, and variable mappings, ask why a change is needed, and refine the configuration before creating the evaluator. You do not need to translate or recreate the configuration manually.
+In both paths, the agentic flow makes the upgrade conversational: you can inspect the proposed changes, ask questions, and refine them before creating the new evaluators. You do not need to translate or recreate configurations manually.
 
 </Step>
 
@@ -52,13 +52,21 @@ The agentic flow makes the upgrade conversational. You can inspect the proposed 
 
 ### Review, create, and validate
 
-**How the configuration may change**
+The recommended agent guides you through reviewing the proposed changes, creating the observation-level evaluators, and validating the result against your project data. You can ask questions and refine the target observation, filters, variable mappings, and expected score behavior until the upgrade looks correct.
 
-Review the target observation, filters, and variable mappings proposed by the assistant. Depending on the existing evaluator, the configuration may target the same observation as before, replace trace fields with values from one observation, or require an instrumentation change so all required values are available together. The assistant guides you through the appropriate change; the [technical reference](#technical-reference) below explains the cases in detail.
+When ready, create the observation-level evaluators. You can keep the legacy evaluators active temporarily to compare results, or deactivate them immediately. Confirm that the new evaluators receive the expected input, output, and context and produce the intended number of scores.
+
+If you need to revert, deactivate the new evaluators and reactivate the existing legacy evaluators. Historical evaluation results remain accessible.
+
+The agent explains the relevant changes during the upgrade. The following sections summarize what may differ if you want to understand the underlying behavior.
+
+**How configurations may change**
+
+Depending on the existing evaluator, the proposed configuration may target the same observation as before, replace trace fields with values from one observation, or require an instrumentation change so all required values are available together. The [technical reference](#technical-reference) below explains the cases in detail.
 
 **How resulting scores may differ**
 
-Before creating the evaluator, confirm how the resulting scores may change:
+Score placement and cardinality may change:
 
 - A trace-level evaluator produces one score per matching trace.
 - An observation-level evaluator produces one score per matching observation.
@@ -67,12 +75,6 @@ Before creating the evaluator, confirm how the resulting scores may change:
 <Frame fullWidth>
   ![Before and after the upgrade: the evaluator score moves from the trace to the matched observation](/images/docs/evaluator-score-output-example.png)
 </Frame>
-
-**Create and validate**
-
-Create the observation-level evaluator, then confirm that it receives the expected input, output, and context and produces the intended number of scores. You can keep the legacy evaluator active temporarily to compare results, or deactivate it immediately.
-
-If you need to revert, deactivate the new evaluator and reactivate the existing legacy evaluator. Historical evaluation results remain accessible.
 
 </Step>
 
@@ -85,7 +87,7 @@ The recommended assistant guides you through every change. You do not need to cl
 <details>
 <summary>View technical configuration cases and a before/after example</summary>
 
-Langfuse groups existing configurations by their variable mappings and recommends an assistant based on the required change:
+Existing evaluator configurations typically fall into these cases:
 
 | Current variable mapping                                       | Typical configuration change                                                                                                                                                           |
 | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
