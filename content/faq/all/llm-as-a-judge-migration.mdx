@@ -3,26 +3,27 @@ title: How do I upgrade trace-level evaluators to observation-level evaluators?
 tags: [evaluation]
 ---
 
+import { Steps, Step } from "@/components/docs";
+
 # Upgrade trace-level evaluators
 
-Trace-level evaluators use Langfuse's legacy trace-centric data model and are being deprecated as part of the [Langfuse v4 upgrade](/docs/v4). Existing evaluators continue to run while you upgrade. Based on existing configurations, the overwhelming majority can be upgraded by targeting the observation that already contains the required input, output, and context.
+Trace-level evaluators use Langfuse's legacy trace-centric data model and are being deprecated as part of the [Langfuse v4 upgrade](/docs/v4). Existing evaluators continue to run while you upgrade.
+
+Observation-level evaluators run in real time and scale with larger traces and higher evaluation volume. Any future multi-span support will also use the observation-centric data model, so upgrading is the foundation for future evaluation capabilities.
 
 <Callout type="info">
 **Setting up a new evaluator?** Start with an observation-level evaluator in the [LLM-as-a-Judge setup guide](/docs/evaluation/evaluation-methods/llm-as-a-judge#set-up-step-by-step). This page is only for upgrading existing trace-level evaluators.
 </Callout>
 
-## Why this upgrade is needed
+## Upgrade your evaluator
 
-- **Real-time execution:** The legacy engine waits for and assembles a full trace before evaluating it. Observation-level evaluators run as observations are ingested.
-- **Scalable by design:** Evaluating one observation avoids loading the full trace and scales with larger traces and higher evaluation volume.
-- **Required for future capabilities:** Any future multi-span support will also use the observation-centric data model. Upgrading now is the foundation for it.
+<Steps>
 
-## How to upgrade
+<Step>
 
-<Callout type="warning">
-**First, upgrade your SDK or ingestion path. Do this before changing evaluator configurations.**
+### Before you start
 
-Observation-level evaluators run in real time with:
+First, upgrade your SDK or ingestion path. Observation-level evaluators run in real time with:
 
 - **Python SDK:** v4.7.0+ ([upgrade guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4))
 - **JS/TS SDK:** v5.4.0+ ([upgrade guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5))
@@ -32,44 +33,54 @@ After upgrading to the [v4 data model](/docs/v4), input, output, and context are
 
 {/* TODO: Link the in-product evaluator upgrade flow directly to the SDK upgrade guides in this section. */}
 
-</Callout>
+</Step>
 
-### 1. Start the upgrade in Langfuse
+<Step>
 
-Open **Evaluation > LLM-as-a-Judge**. You will be greeted with the upgrade screen, which walks you through all evaluators that need to be upgraded and recommends the appropriate assistant for each one.
+### Upgrade in Langfuse
 
-### 2. Follow the recommended assistant path
+Open **Evaluation > LLM-as-a-Judge**. The upgrade screen walks you through all evaluators that need to be upgraded and recommends one of two paths for each evaluator:
 
-- **Langfuse Assistant:** Recommended when the evaluator can be upgraded by selecting an existing observation and translating its configuration. This is the fastest path and does not require manual UI setup.
-- **Coding assistant:** Recommended when the SDK or instrumentation must change first. Langfuse provides the relevant context and prompt to use in your coding editor.
+- **Langfuse Assistant:** Selects an existing observation and translates the evaluator configuration in the app.
+- **Coding assistant:** Uses the provided evaluator context and prompt to make any required SDK or instrumentation changes in your coding editor.
 
-The upgrade screen and recommended assistant guide you through the full process. You do not need to recreate evaluator configurations manually in the UI.
+The agentic flow makes the upgrade conversational. You can inspect the proposed target observation, filters, and variable mappings, ask why a change is needed, and refine the configuration before creating the evaluator. You do not need to translate or recreate the configuration manually.
 
-### 3. Review and create the evaluator
+</Step>
 
-Review the proposed target observation, filters, and variable mappings. When creating the observation-level evaluator, you can keep the legacy evaluator active to compare results or deactivate it immediately.
+<Step>
 
-## How resulting evaluation scores might look different
+### Review, create, and validate
 
-A trace-level evaluator produces one score per matching trace. An observation-level evaluator produces one score per matching observation.
+**How the configuration may change**
 
-If three observations in one trace match the filters, the upgraded evaluator produces three scores. This is expected. To keep one score per trace, narrow the filters to one observation using its name, type, or root-observation status.
+Review the target observation, filters, and variable mappings proposed by the assistant. Depending on the existing evaluator, the configuration may target the same observation as before, replace trace fields with values from one observation, or require an instrumentation change so all required values are available together. The assistant guides you through the appropriate change; the [technical reference](#technical-reference) below explains the cases in detail.
+
+**How resulting scores may differ**
+
+Before creating the evaluator, confirm how the resulting scores may change:
+
+- A trace-level evaluator produces one score per matching trace.
+- An observation-level evaluator produces one score per matching observation.
+- If three observations in one trace match the filters, the upgraded evaluator produces three scores. To keep one score per trace, narrow the filters to one observation using its name, type, or root-observation status.
 
 <Frame fullWidth>
   ![Before and after the upgrade: the evaluator score moves from the trace to the matched observation](/images/docs/evaluator-score-output-example.png)
 </Frame>
 
-## Validate the upgrade
+**Create and validate**
 
-1. Confirm that the new evaluator receives the expected input, output, and context.
-2. Check that the number of matched observations and scores per trace is intentional.
-3. If you kept the legacy evaluator active, compare the results and deactivate it when ready.
+Create the observation-level evaluator, then confirm that it receives the expected input, output, and context and produces the intended number of scores. You can keep the legacy evaluator active temporarily to compare results, or deactivate it immediately.
 
 If you need to revert, deactivate the new evaluator and reactivate the existing legacy evaluator. Historical evaluation results remain accessible.
 
-## Optional: How configurations might change
+</Step>
 
-The upgrade screen and recommended assistant guide you through every change. You do not need to classify or update configurations manually. Expand this section only if you want to understand the technical details.
+</Steps>
+
+## Technical reference [#technical-reference]
+
+The recommended assistant guides you through every change. You do not need to classify or update configurations manually. Expand this section only if you want to understand how an existing configuration may be translated.
 
 <details>
 <summary>View technical configuration cases and a before/after example</summary>
@@ -114,6 +125,16 @@ Variable mapping:
 
 </details>
 
+## Upgrade checklist
+
+- [ ] Upgrade the SDK or OpenTelemetry ingestion path.
+- [ ] Open the evaluator upgrade screen in **Evaluation > LLM-as-a-Judge**.
+- [ ] Follow the recommended Langfuse Assistant or coding assistant path.
+- [ ] Review the target observation, filters, and variable mappings.
+- [ ] Confirm the expected number and placement of scores.
+- [ ] Decide whether to keep the legacy evaluator active for comparison.
+- [ ] Validate the evaluator results and deactivate the legacy evaluator when ready.
+
 ## Getting help
 
 - **Troubleshooting**: [Why is my observation-level evaluator not executing?](/faq/all/observation-eval-not-executing)
@@ -123,4 +144,4 @@ Variable mapping:
 
 ---
 
-_Last updated: July 17, 2026_
+_Last updated: July 19, 2026_
