@@ -84,6 +84,13 @@ const ROWS: { name: string; segments: Segment[] }[] = [
   },
 ];
 
+const MARKERS: { at: Month; label: string }[] = [
+  {
+    at: { year: 2026, month: 11 },
+    label: "Oct 31, 2026: legacy APIs and ingestion removed",
+  },
+];
+
 const TICKS: Month[] = [
   { year: 2026, month: 1 },
   { year: 2026, month: 4 },
@@ -146,6 +153,17 @@ export function VersionTimeline() {
               />
             ))}
           </div>
+          {MARKERS.map((m) => (
+            <div
+              key={m.label}
+              className="absolute inset-y-0 left-36 right-0 pointer-events-none"
+            >
+              <span
+                className="absolute inset-y-0 z-10 border-l-2 border-dashed border-amber-600 dark:border-amber-400"
+                style={{ left: `${pct(m.at)}%` }}
+              />
+            </div>
+          ))}
           {ROWS.map((row) => (
             <div
               key={row.name}
@@ -171,6 +189,18 @@ export function VersionTimeline() {
                 ))}
               </div>
             </div>
+          ))}
+        </div>
+        {/* Milestone annotations */}
+        <div className="relative ml-36 mt-1.5 h-5 text-xs">
+          {MARKERS.map((m) => (
+            <span
+              key={m.label}
+              className="absolute -translate-x-1/2 whitespace-nowrap font-medium text-amber-700 dark:text-amber-400"
+              style={{ left: `${pct(m.at)}%` }}
+            >
+              {m.label}
+            </span>
           ))}
         </div>
       </div>
