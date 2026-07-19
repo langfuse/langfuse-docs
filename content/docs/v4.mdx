@@ -26,11 +26,10 @@ New to Langfuse? There is nothing to migrate. Start with the [get started guide]
 
 <VersionTimeline />
 
-| Date                    | What happens                                                                                               | Who is affected                                                           |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| **August 1, 2026**      | v4 ships for self-hosted deployments                                                                       | Self-hosters                                                              |
-| **End of October 2026** | Langfuse Cloud switches to v4 as the only experience; the "Preview" toggle is removed                      | All Langfuse Cloud users                                                  |
-| **November 30, 2026**   | Legacy surfaces are removed on Langfuse Cloud: v1 read APIs, legacy trace ingestion, legacy export sources | Cloud users on Python SDK v2 / JS SDK v3, v1 read APIs, or legacy exports |
+| Date                 | What happens                                                                                                                                                                         | Who is affected          |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------ |
+| **August 1, 2026**   | v4 ships for self-hosted deployments                                                                                                                                                 | Self-hosters             |
+| **October 31, 2026** | Langfuse Cloud switches to v4 as the only experience: the "Preview" toggle is removed, and legacy surfaces (v1 read APIs, legacy trace ingestion, legacy export sources) are removed | All Langfuse Cloud users |
 
 On Langfuse Cloud, review your project's remaining migration actions directly [in the app](https://cloud.langfuse.com/project/~/v4).
 
@@ -40,7 +39,7 @@ On Langfuse Cloud, review your project's remaining migration actions directly [i
 
 ### Langfuse Cloud with older SDKs (Python v2 / JS v3 or older) [#cloud-older-sdks]
 
-**Deadline: November 30, 2026.** These SDKs send traces via the legacy ingestion API, which is removed on that date; trace ingestion stops working. Score ingestion is unaffected.
+**Deadline: October 31, 2026.** These SDKs send traces via the legacy ingestion API, which is removed on that date; trace ingestion stops working. Score ingestion is unaffected.
 
 <Steps>
 
@@ -86,7 +85,7 @@ Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4)
 
 ### Langfuse Cloud with current SDKs (Python v3+ / JS v4+) [#cloud-current-sdks]
 
-**Deadline: November 30, 2026** for the v1 read APIs, trace-level evaluators, and legacy exports; the SDK upgrade itself is recommended before the end of October 2026 so your data stays real time.
+**Deadline: October 31, 2026** for the v1 read APIs, trace-level evaluators, and legacy exports; upgrade your SDKs earlier so your data stays real time.
 
 <Steps>
 
@@ -130,6 +129,40 @@ Upgrade to Python SDK ≥ 4.7.0 / JS SDK ≥ 5.4.0 (below these versions, data a
 
 </Steps>
 
+### Direct API and OpenTelemetry users [#api-otel]
+
+**Deadline: October 31, 2026** for legacy trace ingestion and the v1 read APIs on Langfuse Cloud.
+
+<Steps>
+
+<Step>
+
+**Ingestion**
+
+Everyone still sending trace, span, or generation events to the legacy `POST /api/public/ingestion` API must move to the [OpenTelemetry endpoint](/integrations/native/opentelemetry) `POST /api/public/otel/v1/traces`. Set the `x-langfuse-ingestion-version: 4` header on your span exporter for real-time data, and propagate trace attributes (`user_id`, `session_id`, ...) to all spans.
+
+</Step>
+
+<Step>
+
+<V4StepReadApis />
+
+</Step>
+
+<Step>
+
+<V4StepEvaluators />
+
+</Step>
+
+<Step>
+
+<V4StepExports />
+
+</Step>
+
+</Steps>
+
 ### Self-hosted deployments [#self-hosted]
 
 **No forced deadline.** v4 ships by August 1, 2026; v3 continues to receive security patches. Upgrade at your own pace, in this order:
@@ -167,40 +200,6 @@ Upgrade from v3 to v4 following the [upgrade documentation](/self-hosting/upgrad
 <Step>
 
 <V4StepReadApis />
-
-</Step>
-
-</Steps>
-
-### Direct API and OpenTelemetry users [#api-otel]
-
-**Deadline: November 30, 2026** for legacy trace ingestion and the v1 read APIs on Langfuse Cloud.
-
-<Steps>
-
-<Step>
-
-**Ingestion**
-
-Everyone still sending trace, span, or generation events to the legacy `POST /api/public/ingestion` API must move to the [OpenTelemetry endpoint](/integrations/native/opentelemetry) `POST /api/public/otel/v1/traces`. Set the `x-langfuse-ingestion-version: 4` header on your span exporter for real-time data, and propagate trace attributes (`user_id`, `session_id`, ...) to all spans.
-
-</Step>
-
-<Step>
-
-<V4StepReadApis />
-
-</Step>
-
-<Step>
-
-<V4StepEvaluators />
-
-</Step>
-
-<Step>
-
-<V4StepExports />
 
 </Step>
 
