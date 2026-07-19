@@ -140,7 +140,7 @@ This preview is powered by a simplified observation-centric data model. Trace-le
 | ---------------------- | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Storage**            | Separate mutable Traces and Observations tables | Single immutable Observations table                                                                                                                                                 |
 | **Context attributes** | Stored on the trace, joined at query time       | Propagated to every observation on SDK side.                                                                                                                                        |
-| **Trace input/output** | Set directly on the trace                       | Removed, use observation IO instead. (For legacy LLM-as-a-judge evaluators that depend on trace input and output, users can use the deprecated `set_trace_io` methods in the SDKs.) |
+| **Trace input/output** | Set directly on the trace                       | Removed, use observation IO instead. (For legacy LLM-as-a-judge evaluators that depend on trace input and output, users can use the deprecated trace I/O methods: `set_current_trace_io()` / `span.set_trace_io()` in Python, `setActiveTraceIO()` / `span.setTraceIO()` in JS/TS.) |
 | **Mutability**         | Traces and observations are mutable             | Observations are immutable (written once)                                                                                                                                           |
 
 ## OSS and self-hosting

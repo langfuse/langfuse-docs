@@ -43,7 +43,7 @@ First, upgrade your SDK or ingestion path. Observation-level evaluators run in r
 In the [v4 data model](/docs/v4), a trace is the logical group of observations that share a trace ID, rather than a separate record. Input and output belong to observations. In most cases, an existing root or workflow observation already carries the same input and output that was previously written to the trace. The evaluator upgrade targets that observation. If no single observation contains all required values, the coding assistant helps update your instrumentation.
 
 <Callout type="warning">
-**Keep legacy evaluators running during the transition.** After the SDK upgrade, trace input and output are no longer written automatically. If your existing trace-level evaluators read trace input or output, keep supplying these values with the deprecated `set_current_trace_io()` (Python) / `setActiveTraceIO()` (JS/TS) methods until the new observation-level evaluators are validated, then remove the calls. See [Why are the input and output of a trace empty?](/faq/all/empty-trace-input-and-output) for details.
+**Keep legacy evaluators running during the transition.** After the SDK upgrade, trace input and output are no longer written automatically. If your existing trace-level evaluators read trace input or output, keep supplying these values with the deprecated trace I/O methods — `set_current_trace_io()` or `span.set_trace_io()` in Python, `setActiveTraceIO()` or `span.setTraceIO()` in JS/TS — until the new observation-level evaluators are validated, then remove the calls. See [Why are the input and output of a trace empty?](/faq/all/empty-trace-input-and-output) for details.
 </Callout>
 
 </Step>
