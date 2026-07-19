@@ -37,12 +37,12 @@ Every Langfuse component (server, SDKs, and APIs) moves through these lifecycle 
 
 ## GA versions [#ga]
 
-| Component       | GA version | Package / repo                                                                                                                                                                                                                                                                          | Notes                                                                               |
-| --------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Server          | v4         | [langfuse/langfuse](https://github.com/langfuse/langfuse/releases) <a href="https://github.com/langfuse/langfuse/releases"><img className="inline" src="https://img.shields.io/github/v/release/langfuse/langfuse?style=flat-square&label=release" alt="Langfuse server release" /></a> | [Observations-first data model](/docs/v4); v3 continues to receive security patches |
-| Python SDK      | v4         | [`langfuse`](https://pypi.org/project/langfuse/) <a href="https://pypi.org/project/langfuse/"><img className="inline" src="https://img.shields.io/pypi/v/langfuse?style=flat-square&label=pypi" alt="PyPI langfuse" /></a>                                                              | OpenTelemetry-based since v3. Requires Python 3.9+.                                 |
-| JS/TS SDK       | v5         | [`@langfuse/*`](https://www.npmjs.com/package/@langfuse/tracing) <a href="https://www.npmjs.com/package/@langfuse/tracing"><img className="inline" src="https://img.shields.io/npm/v/@langfuse/tracing?style=flat-square&label=npm" alt="NPM @langfuse/tracing" /></a>                  | OpenTelemetry-based since v4. Requires Node.js 20+.                                 |
-| Other languages | n/a        | [OpenTelemetry](/integrations/native/opentelemetry)                                                                                                                                                                                                                                     | Any OTel SDK to the Langfuse OTel endpoint                                          |
+| Component       | GA version | Package / repo                                                                                                                                                                                                                                                                          | Notes                                                                                            |
+| --------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Server          | v4         | [langfuse/langfuse](https://github.com/langfuse/langfuse/releases) <a href="https://github.com/langfuse/langfuse/releases"><img className="inline" src="https://img.shields.io/github/v/release/langfuse/langfuse?style=flat-square&label=release" alt="Langfuse server release" /></a> | [Observations-first data model](/docs/v4#what-changed); v3 continues to receive security patches |
+| Python SDK      | v4         | [`langfuse`](https://pypi.org/project/langfuse/) <a href="https://pypi.org/project/langfuse/"><img className="inline" src="https://img.shields.io/pypi/v/langfuse?style=flat-square&label=pypi" alt="PyPI langfuse" /></a>                                                              | OpenTelemetry-based since v3. Requires Python 3.9+.                                              |
+| JS/TS SDK       | v5         | [`@langfuse/*`](https://www.npmjs.com/package/@langfuse/tracing) <a href="https://www.npmjs.com/package/@langfuse/tracing"><img className="inline" src="https://img.shields.io/npm/v/@langfuse/tracing?style=flat-square&label=npm" alt="NPM @langfuse/tracing" /></a>                  | OpenTelemetry-based since v4. Requires Node.js 20+.                                              |
+| Other languages | n/a        | [OpenTelemetry](/integrations/native/opentelemetry)                                                                                                                                                                                                                                     | Any OTel SDK to the Langfuse OTel endpoint                                                       |
 
 ## Feature availability matrix [#sdk-server]
 
@@ -100,10 +100,10 @@ GA. Requires self-hosted server ≥ [3.125.0](https://github.com/langfuse/langfu
 
 **Limitations:**
 
-| Capability                      | OSS v3                                                                                                                        | OSS v4                                                |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Tracing (OpenTelemetry)         | Supported                                                                                                                     | Supported (real time with SDK ≥ 4.7.0)                |
-| Public API & querying (`api.*`) | Use the [legacy APIs](/docs/api-and-data-platform/features/public-api) `api.legacy.observations_v1` / `api.legacy.metrics_v1` | Supported (v1 APIs are deprecated until Oct 31, 2026) |
+| Capability                      | OSS v3                                                                                                                                        | OSS v4                                                |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Tracing (OpenTelemetry)         | Supported                                                                                                                                     | Supported (real time with SDK ≥ 4.7.0)                |
+| Public API & querying (`api.*`) | Use the [legacy APIs](/docs/api-and-data-platform/features/public-api#access-via-sdks) `api.legacy.observations_v1` / `api.legacy.metrics_v1` | Supported (v1 APIs are deprecated until Oct 31, 2026) |
 
 </CompatDetail>
 <CompatDetail name="Python SDK v3">
@@ -139,10 +139,10 @@ GA. Requires self-hosted server ≥ [3.95.0](https://github.com/langfuse/langfus
 
 **Limitations:**
 
-| Capability                      | OSS v3                                                                                                                      | OSS v4                                                |
-| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Tracing (OpenTelemetry)         | Supported                                                                                                                   | Supported (real time with SDK ≥ 5.4.0)                |
-| Public API & querying (`api.*`) | Use the [legacy APIs](/docs/api-and-data-platform/features/public-api) `api.legacy.observationsV1` / `api.legacy.metricsV1` | Supported (v1 APIs are deprecated until Oct 31, 2026) |
+| Capability                      | OSS v3                                                                                                                                      | OSS v4                                                |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Tracing (OpenTelemetry)         | Supported                                                                                                                                   | Supported (real time with SDK ≥ 5.4.0)                |
+| Public API & querying (`api.*`) | Use the [legacy APIs](/docs/api-and-data-platform/features/public-api#access-via-sdks) `api.legacy.observationsV1` / `api.legacy.metricsV1` | Supported (v1 APIs are deprecated until Oct 31, 2026) |
 
 </CompatDetail>
 <CompatDetail name="JS/TS SDK v4">
@@ -198,7 +198,7 @@ Deprecated. Removed on Langfuse v4 (Langfuse Cloud: **October 31, 2026**). The f
 
 <CompatDetail name="Observations API v2 & Metrics API v2">
 
-GA. Requires Langfuse v4. See the [Observations API v2](/docs/api-and-data-platform/features/observations-api) and [Metrics API v2](/docs/metrics/features/metrics-api) docs.
+GA. Requires Langfuse v4. See the [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2) docs.
 
 - **Via SDK:** these are the default resources in Python SDK v4 (`api.observations`, `api.metrics`) and JS/TS SDK v5 (`api.observations`, `api.metrics`). On OSS v3, the defaults fail; use `api.legacy.observations_v1` / `api.legacy.metrics_v1` (Python) or `api.legacy.observationsV1` / `api.legacy.metricsV1` (JS/TS).
 - **Via REST:** `GET /api/public/v2/observations?fromStartTime={datetime}&toStartTime={datetime}` and `GET /api/public/v2/metrics?query={json}`.

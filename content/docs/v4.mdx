@@ -16,7 +16,7 @@ import V4StepVerify from "@/components-mdx/v4/step-verify.mdx";
 
 # Langfuse v4
 
-Langfuse v4 rebuilds the data model around observations: trace-level attributes live on every observation, and records are immutable (written once, never updated). This removes expensive joins and the deduplication of updated records at read time, making queries an order of magnitude faster at scale. This page is the starting point for upgrading. Find [your situation](#what-you-need-to-do) below, follow the steps, and check the [Versions & Compatibility](/docs/compatibility) page for the full matrix.
+Langfuse v4 rebuilds the data model around observations: trace-level attributes live on every observation, and records are immutable (written once, never updated). This removes expensive joins and the deduplication of updated records at read time, making queries an order of magnitude faster at scale. This page is the starting point for upgrading. Find [your situation](#what-you-need-to-do) below, follow the steps, and check the [Versions & Compatibility matrix](/docs/compatibility#sdk-server) for what works with what.
 
 <Callout type="info">
 New to Langfuse? There is nothing to migrate. Start with the [get started guide](/docs/observability/get-started); it already uses v4.
@@ -31,7 +31,7 @@ New to Langfuse? There is nothing to migrate. Start with the [get started guide]
 | **August 1, 2026**   | v4 ships for self-hosted deployments                                                                                                                                                 | Self-hosters             |
 | **October 31, 2026** | Langfuse Cloud switches to v4 as the only experience: the "Preview" toggle is removed, and legacy surfaces (v1 read APIs, legacy trace ingestion, legacy export sources) are removed | All Langfuse Cloud users |
 
-On Langfuse Cloud, review your project's remaining migration actions directly [in the app](https://cloud.langfuse.com/project/~/v4).
+On Langfuse Cloud, review your project's remaining [migration actions in the app](https://cloud.langfuse.com/project/~/v4).
 
 ## What you need to do [#what-you-need-to-do]
 
@@ -47,7 +47,7 @@ On Langfuse Cloud, review your project's remaining migration actions directly [i
 
 **Ingestion**
 
-Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v3-to-v4) (the guides cover each major-version hop), and replace `update_current_trace()` / `updateActiveTrace()` with `propagate_attributes()`.
+Upgrade to the latest SDK majors, Python v4 and JS/TS v5; the [SDK upgrade paths](/docs/observability/sdk/upgrade-path) cover each major-version hop. Then replace `update_current_trace()` / `updateActiveTrace()` with `propagate_attributes()`.
 
 </Step>
 
@@ -139,7 +139,7 @@ Upgrade to Python SDK ≥ 4.7.0 / JS SDK ≥ 5.4.0 (below these versions, data a
 
 **Ingestion**
 
-Everyone still sending trace, span, or generation events to the legacy `POST /api/public/ingestion` API must move to the [OpenTelemetry endpoint](/integrations/native/opentelemetry) `POST /api/public/otel/v1/traces`. Set the `x-langfuse-ingestion-version: 4` header on your span exporter for real-time data, and propagate trace attributes (`user_id`, `session_id`, ...) to all spans.
+Everyone still sending trace, span, or generation events to the legacy `POST /api/public/ingestion` API must move to the [OpenTelemetry endpoint](/integrations/native/opentelemetry) `POST /api/public/otel/v1/traces`. Set the `x-langfuse-ingestion-version: 4` header on your span exporter for real-time data, and [propagate trace attributes](/integrations/native/opentelemetry#propagating-attributes) (`user_id`, `session_id`, ...) to all spans.
 
 </Step>
 
@@ -222,7 +222,7 @@ The new mental model: Langfuse stores one immutable observations table. A trace 
 | Trace-level LLM-as-a-judge evaluators                                | [Observation-level evaluators](/faq/all/llm-as-a-judge-migration)                                                                                 |
 | Export source "traces and observations"                              | Export source "enriched observations"                                                                                                             |
 
-Why observations-first: agentic applications produce traces with hundreds of operations, and the operations engineers care about were hidden inside one trace row. With observations as the primary entity you query the operations directly ("which LLM calls are slow?"), charts load faster over large time ranges, and observation-level evaluations run in seconds. The [data model docs](/docs/observability/data-model) explain the model; the [observations guide](/faq/all/explore-observations-in-v4) covers day-to-day workflows in the UI.
+Why observations-first: agentic applications produce traces with hundreds of operations, and the operations engineers care about were hidden inside one trace row. With observations as the primary entity you query the operations directly ("which LLM calls are slow?"), charts load faster over large time ranges, and observation-level evaluations run in seconds. The [data model docs](/docs/observability/data-model#observations-and-traces) explain the model; the [observations guide](/faq/all/explore-observations-in-v4) covers day-to-day workflows in the UI.
 
 <Details>
 <Summary>Cloud rollout details (until the end of October 2026)</Summary>
