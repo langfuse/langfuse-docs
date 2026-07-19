@@ -263,9 +263,6 @@ With your evaluator and model selected, configure which data to run the evaluati
 <Tabs items={["Live Production Data", "Offline Experiment Data"]}>
 <Tab>
 
-<Tabs items={["Observations (Recommended)", "Traces (Legacy)"]}>
-<Tab>
-
 **Configuration Steps**
 
 1. Select "Live Observations" as your evaluation target
@@ -279,36 +276,9 @@ With your evaluator and model selected, configure which data to run the evaluati
   - [JS/TS v3 → v4 migration guide](/docs/observability/sdk/upgrade-path/js-v3-to-v4)
 - **When filtering by trace attributes**: To filter observations by trace-level attributes (`userId`, `sessionId`, `version`, `tags`, `metadata`, `traceName`), use [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes-to-observations) in your instrumentation code. Without this, trace attributes will not be available on observations. If you do set up trace-level attribute filtering and are not propagating attributes to observations, your observations will not be matched by the evaluator.
 
-</Tab>
-
-<Tab>
-
-<Callout type="info">
-**Performance consideration**: We recommend using Observation-level evaluators for production monitoring. They complete in seconds (vs minutes for trace-level), eliminating evaluation delays and backlogs. They also offer better precision and cost efficiency. See [upgrade guide](/faq/all/llm-as-a-judge-migration).
+<Callout type="warning">
+**Deprecation of trace-level evaluators:** The legacy trace-level evaluator feature is built on the old trace-centric data model and will be deprecated by the end of October 2026 — see the [Fast Preview rollout timeline](/docs/v4#rollout-timeline). Multi-span evaluations will build on the new observation-centric data model. To move existing trace-level evaluators, follow the [upgrade guide](/faq/all/llm-as-a-judge-migration).
 </Callout>
-
-**Configuration Steps**
-
-1. Select "Live Traces" as your evaluation target
-2. Filter traces by name, tags, userId, and other trace-level attributes
-3. Choose whether to run on new traces only or include existing traces (backfilling)
-4. Configure sampling percentage (e.g., 5%) to manage evaluation costs and throughput
-5. Preview matched traces from the last 24 hours to validate your filter configuration
-
-<Frame fullWidth>
-  ![Production tracing data](/images/docs/evaluator-trace-filter.png)
-</Frame>
-
-**Requirements**
-
-- **OTel-based SDKs**: If you're using Python v3+ or JS/TS v4+, trace input/output is derived from the root observation by default. To explicitly set trace input/output for these evaluators, use `set_trace_io()` (Python) or `setTraceIO()` (JS/TS). See the [Python v3 → v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) and [JS/TS v4 → v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5) migration guides.
-
-<Callout type="info">
-We recommend migrating to [observation-level evaluators](/faq/all/llm-as-a-judge-migration) instead of using `set_trace_io()` / `setTraceIO()`. Once migrated, you can remove these calls from your codebase entirely.
-</Callout>
-
-</Tab>
-</Tabs>
 
 </Tab>
 <Tab>
