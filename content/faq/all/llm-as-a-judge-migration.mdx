@@ -1,5 +1,6 @@
 ---
 title: How do I upgrade trace-level evaluators to observation-level evaluators?
+description: Step-by-step guide for upgrading legacy trace-level LLM-as-a-Judge evaluators to observation-level evaluators as part of Langfuse Fast Preview (v4).
 tags: [evaluation]
 ---
 
@@ -7,7 +8,17 @@ import { Steps, Step } from "@/components/docs";
 
 # Upgrade trace-level evaluators
 
-Trace-level evaluators use Langfuse's legacy trace-centric data model and are being deprecated as part of the [Langfuse v4 upgrade](/docs/v4). Existing evaluators continue to run while you upgrade.
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "not-available",
+  }}
+/>
+
+Trace-level evaluators use Langfuse's legacy trace-centric data model and are being deprecated as part of [Langfuse Fast Preview (v4)](/docs/v4). Existing evaluators continue to run while you upgrade. Fast Preview is currently available on Langfuse Cloud; for self-hosted support updates, follow the [GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518).
 
 Observation-level evaluators run in real time and scale with larger traces and higher evaluation volume. Any future multi-span support will also use the observation-centric data model, so upgrading is the foundation for future evaluation capabilities.
 
@@ -31,7 +42,9 @@ First, upgrade your SDK or ingestion path. Observation-level evaluators run in r
 
 In the [v4 data model](/docs/v4), a trace is the logical group of observations that share a trace ID, rather than a separate record. Input and output belong to observations. In most cases, an existing root or workflow observation already carries the same input and output that was previously written to the trace. The evaluator upgrade targets that observation. If no single observation contains all required values, the coding assistant helps update your instrumentation.
 
-{/* TODO: Link the in-product evaluator upgrade flow directly to the SDK upgrade guides in this section. */}
+<Callout type="warning">
+**Keep legacy evaluators running during the transition.** After the SDK upgrade, trace input and output are no longer written automatically. If your existing trace-level evaluators read trace input or output, keep supplying these values with the deprecated `set_current_trace_io()` (Python) / `setActiveTraceIO()` (JS/TS) methods until the new observation-level evaluators are validated, then remove the calls. See [Why are the input and output of a trace empty?](/faq/all/empty-trace-input-and-output) for details.
+</Callout>
 
 </Step>
 
@@ -39,9 +52,9 @@ In the [v4 data model](/docs/v4), a trace is the logical group of observations t
 
 ### Upgrade in Langfuse
 
-Open **Evaluation > LLM-as-a-Judge**. The upgrade screen shows the recommended path for your project:
+Click on the **Evaluation** navigation item. The upgrade screen shows the recommended path for your project:
 
-- **In-app upgrade:** Recommended when only minimal configuration changes need to be reviewed and accepted. Langfuse Assistant guides you through these changes in the app.
+- **In-app upgrade:** Recommended when only minimal configuration changes need to be reviewed and accepted. The [Langfuse Assistant](/docs/langfuse-assistant) guides you through these changes in the app.
 - **Coding assistant:** Recommended when the upgrade requires broader configuration or instrumentation changes. The UI provides the skill and project context to use in your coding editor.
 
 In both paths, the agentic flow makes the upgrade conversational: you can inspect the proposed changes, ask questions, and refine them before creating the new evaluators. You do not need to translate or recreate configurations manually.
@@ -70,7 +83,7 @@ Score placement and cardinality may change:
 
 - A trace-level evaluator produces one score per matching trace.
 - An observation-level evaluator produces one score per matching observation.
-- If three observations in one trace match the filters, the upgraded evaluator produces three scores. To keep one score per trace, narrow the filters to one observation using its name, type, or root-observation status.
+- If three observations in one trace match the filters, the upgraded evaluator produces three scores. To keep one score per trace, narrow the filters to one observation using its name, type, or the **Is Root Observation** filter.
 
 <Frame fullWidth>
   ![Before and after the upgrade: the evaluator score moves from the trace to the matched observation](/images/docs/evaluator-score-output-example.png)
@@ -130,10 +143,9 @@ Variable mapping:
 ## Upgrade checklist
 
 - [ ] Upgrade the SDK or OpenTelemetry ingestion path.
-- [ ] Open the evaluator upgrade screen in **Evaluation > LLM-as-a-Judge**.
+- [ ] Open the evaluator upgrade screen by clicking on the **Evaluation** navigation item.
 - [ ] Follow the recommended Langfuse Assistant or coding assistant path.
-- [ ] Review the target observation, filters, and variable mappings.
-- [ ] Confirm the expected number and placement of scores.
+- [ ] Review the newly created observation-level evaluators. Confirm the expected number and placement of scores.
 - [ ] Decide whether to keep the legacy evaluator active for comparison.
 - [ ] Validate the evaluator results and deactivate the legacy evaluator when ready.
 
@@ -141,9 +153,6 @@ Variable mapping:
 
 - **Troubleshooting**: [Why is my observation-level evaluator not executing?](/faq/all/observation-eval-not-executing)
 - **Documentation**: [LLM-as-a-Judge step-by-step set up guide](/docs/evaluation/evaluation-methods/llm-as-a-judge)
+- **Questions on Fast Preview**: Ask in the dedicated [GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518)
 - **GitHub**: Report issues at [github.com/langfuse/langfuse](https://github.com/langfuse/langfuse)
 - **Support**: Contact support@langfuse.com for enterprise customers
-
----
-
-_Last updated: July 19, 2026_
