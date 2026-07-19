@@ -46,7 +46,9 @@ On Langfuse Cloud, review your project's remaining migration actions directly [i
 
 <Step>
 
-**Ingestion:** upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v3-to-v4) (the guides cover each major-version hop), and replace `update_current_trace()` / `updateActiveTrace()` with `propagate_attributes()`.
+**Ingestion**
+
+Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v3-to-v4) (the guides cover each major-version hop), and replace `update_current_trace()` / `updateActiveTrace()` with `propagate_attributes()`.
 
 </Step>
 
@@ -90,7 +92,9 @@ On Langfuse Cloud, review your project's remaining migration actions directly [i
 
 <Step>
 
-**Ingestion:** upgrade to Python SDK ≥ 4.7.0 / JS SDK ≥ 5.4.0 (below these versions, data appears with up to a 10-minute delay on the v4 data model) and replace `update_current_trace()` / `updateActiveTrace()` with `propagate_attributes()` ([Python guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4), [JS guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5)).
+**Ingestion**
+
+Upgrade to Python SDK ≥ 4.7.0 / JS SDK ≥ 5.4.0 (below these versions, data appears with up to a 10-minute delay on the v4 data model) and replace `update_current_trace()` / `updateActiveTrace()` with `propagate_attributes()` ([Python guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4), [JS guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5)).
 
 </Step>
 
@@ -134,7 +138,9 @@ On Langfuse Cloud, review your project's remaining migration actions directly [i
 
 <Step>
 
-**Ingestion:** upgrade SDKs first: [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) / [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5). Python SDK v2 and JS SDK v3 cannot send traces to a v4 server.
+**Ingestion**
+
+Upgrade SDKs first: [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) / [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5). Python SDK v2 and JS SDK v3 cannot send traces to a v4 server.
 
 </Step>
 
@@ -152,7 +158,9 @@ On Langfuse Cloud, review your project's remaining migration actions directly [i
 
 <Step>
 
-**Server:** upgrade from v3 to v4 following the [upgrade documentation](/self-hosting/upgrade). The v4 UI ships with the server; no toggle is needed.
+**Server**
+
+Upgrade from v3 to v4 following the [upgrade documentation](/self-hosting/upgrade). The v4 UI ships with the server; no toggle is needed.
 
 </Step>
 
@@ -172,7 +180,9 @@ On Langfuse Cloud, review your project's remaining migration actions directly [i
 
 <Step>
 
-**Ingestion:** everyone still sending trace, span, or generation events to the legacy `POST /api/public/ingestion` API must move to the [OpenTelemetry endpoint](/integrations/native/opentelemetry) `POST /api/public/otel/v1/traces`. Set the `x-langfuse-ingestion-version: 4` header on your span exporter for real-time data, and propagate trace attributes (`user_id`, `session_id`, ...) to all spans.
+**Ingestion**
+
+Everyone still sending trace, span, or generation events to the legacy `POST /api/public/ingestion` API must move to the [OpenTelemetry endpoint](/integrations/native/opentelemetry) `POST /api/public/otel/v1/traces`. Set the `x-langfuse-ingestion-version: 4` header on your span exporter for real-time data, and propagate trace attributes (`user_id`, `session_id`, ...) to all spans.
 
 </Step>
 
