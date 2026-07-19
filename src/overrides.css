@@ -1075,6 +1075,7 @@ svg .edgeLabel {
 
 .fd-steps > h2,
 .fd-steps > h3,
+.fd-steps > .fd-step,
 .steps > h2,
 .steps > h3 {
   counter-increment: step;
@@ -1088,6 +1089,7 @@ svg .edgeLabel {
 }
 .fd-steps > h2::before,
 .fd-steps > h3::before,
+.fd-steps > .fd-step::before,
 .steps > h2::before,
 .steps > h3::before {
   content: counter(step);
@@ -1105,6 +1107,16 @@ svg .edgeLabel {
   font-size: 0.875rem;
   font-weight: 400;
   border: 1px solid var(--line-structure);
+}
+
+/* Step blocks (non-heading steps): align the numbered square with the first
+   text line instead of the block center, and neutralize fumadocs' default
+   step marker so the square matches the heading-based steps exactly. */
+.fd-steps > .fd-step::before {
+  top: 0.875rem;
+}
+.fd-steps > .fd-step {
+  padding-left: 0;
 }
 
 /* frame decoration */
