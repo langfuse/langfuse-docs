@@ -7,6 +7,7 @@ import { Book, Github, Table, GitCompare } from "lucide-react";
 import { Details, Summary } from "@/components/Details";
 import { VersionTimeline } from "@/components/VersionTimeline";
 import { Steps, Step } from "@/components/docs";
+import { ObservationsTableDiagram } from "@/components/ObservationsTableDiagram";
 
 # Langfuse v4
 
@@ -30,7 +31,7 @@ On Langfuse Cloud, review your project's remaining migration actions directly [i
 
 ## What you need to do [#what-you-need-to-do]
 
-Not sure which combinations are supported? The [compatibility matrix](/docs/compatibility#sdk-server) shows every SDK, API, and export against each server version.
+**Upgrading your SDKs is the most important step**; everything else builds on it. Not sure which combinations are supported? The [compatibility matrix](/docs/compatibility#sdk-server) shows every SDK, API, and export against each server version.
 
 ### Langfuse Cloud with older SDKs (Python v2 / JS v3 or older) [#cloud-older-sdks]
 
@@ -76,8 +77,6 @@ Not sure which combinations are supported? The [compatibility matrix](/docs/comp
 
 </Steps>
 
-Exact support for this setup: filtered compatibility matrix for [Python](/docs/compatibility#filter-python) or [JS/TS](/docs/compatibility#filter-js).
-
 ### Langfuse Cloud with current SDKs (Python v3+ / JS v4+) [#cloud-current-sdks]
 
 **Deadline: November 30, 2026** for the v1 read APIs, trace-level evaluators, and legacy exports; the SDK upgrade itself is recommended before the end of October 2026 so your data stays real time.
@@ -122,8 +121,6 @@ Exact support for this setup: filtered compatibility matrix for [Python](/docs/c
 
 </Steps>
 
-Exact support for this setup: filtered compatibility matrix for [Python](/docs/compatibility#filter-python) or [JS/TS](/docs/compatibility#filter-js).
-
 ### Self-hosted deployments [#self-hosted]
 
 **No forced deadline.** v4 ships by August 1, 2026; v3 continues to receive security patches. Upgrade at your own pace, in this order:
@@ -162,8 +159,6 @@ Exact support for this setup: filtered compatibility matrix for [Python](/docs/c
 
 </Steps>
 
-Exact support for this setup: [compatibility matrix](/docs/compatibility#sdk-server).
-
 ### Direct API and OpenTelemetry users [#api-otel]
 
 **Deadline: November 30, 2026** for legacy trace ingestion and the v1 read APIs on Langfuse Cloud.
@@ -196,9 +191,11 @@ Exact support for this setup: [compatibility matrix](/docs/compatibility#sdk-ser
 
 </Steps>
 
-Exact support for this setup: filtered compatibility matrix for [OpenTelemetry](/docs/compatibility#filter-otel) or the [REST API](/docs/compatibility#filter-rest-api).
-
 ## What changed [#what-changed]
+
+The new mental model: Langfuse stores one immutable observations table. A trace is simply all rows that share a `trace_id`, and trace-level attributes are copied onto every row:
+
+<ObservationsTableDiagram />
 
 | Before (v3)                                                          | After (v4)                                                                                                                                        |
 | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
