@@ -133,6 +133,8 @@ Invalid filter combinations are rejected with HTTP 400 rather than silently igno
 
 **Filtering by score metadata:** the v2 JSON `filter` parameter supported metadata key-value conditions (`stringObject`). v3 has no metadata filter — request `fields=details` and filter on `metadata` client-side.
 
+**Row-count differences after migration:** because v2 joins trace data by default, it silently drops trace-level scores whose referenced trace cannot be found (e.g., the trace was deleted or never ingested). v3 queries scores directly and returns every matching score, so v3 can return rows that the same query on v2 did not.
+
 ### Common Use Cases
 
 **Pulling failing evals:**
