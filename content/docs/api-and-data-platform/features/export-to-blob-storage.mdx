@@ -57,11 +57,15 @@ Blob Storage integrations now include an `Export Source` selector. Where enriche
 
 This source uses enriched observations with trace attributes and provides significantly better export performance. `Scores` are always included, regardless of the selected source.
 
-Available options:
+Available options, and the directories each source writes under `{prefix}{project-id}/` in your bucket:
 
-- `Traces and observations (legacy)`
-- `Traces and observations (legacy) and enriched observations`
-- `Enriched observations (recommended)`
+| Export source                                                | Directories written                                       |
+| ------------------------------------------------------------ | --------------------------------------------------------- |
+| `Traces and observations (legacy)`                           | `traces/`, `observations/`, `scores/`                     |
+| `Traces and observations (legacy) and enriched observations` | `traces/`, `observations/`, `observations_v2/`, `scores/` |
+| `Enriched observations (recommended)`                        | `observations_v2/`, `scores/`                             |
+
+Every run also writes a [run manifest](#run-manifest) under `manifests/`. For the columns in each file, see the [export sources overview](/docs/api-and-data-platform/features/blob-storage-export-fields#export-sources) in the field reference.
 
 <Callout type="warning">
   The `Traces and observations (legacy)` source is deprecated and will be
@@ -69,6 +73,8 @@ Available options:
   observations (recommended)`, and existing legacy integrations are strongly
   recommended to [upgrade](#upgrade-path).
 </Callout>
+
+On Langfuse Cloud, integrations that still export a legacy source (including `Traces and observations (legacy) and enriched observations`) also receive a plain-text deprecation notice at `{prefix}{project-id}/DEPRECATION_NOTICE.txt`. It is refreshed on every successful run — written after the run's [manifest](#run-manifest) and not listed in it — and removed automatically on the next successful run after the integration switches to `Enriched observations (recommended)`. Account for this object if your pipelines diff bucket contents or subscribe to object-created events without a prefix filter.
 
 <Callout type="info">
 **Langfuse Cloud:** Legacy export sources can no longer be newly selected:
@@ -92,7 +98,12 @@ To migrate safely:
 
 1. Switch to `Traces and observations (legacy) and enriched observations`.
 2. Validate downstream jobs and data consumers while both sources are exported (this mode creates duplicate records by design).
-3. Switch to `Enriched observations (recommended)` once validation is complete.
+3. Repoint consumers from the `traces/` and `observations/` directories to `observations_v2/`.
+4. Switch to `Enriched observations (recommended)` once validation is complete.
+
+<Callout type="warning">
+After the switch, the `traces/` and `observations/` directories receive **no further files at all** — not even [empty files](#empty-files), which are otherwise written for windows without data. Pipelines still watching those directories go silent without an error signal, so complete step 3 before switching.
+</Callout>
 
 For a field-level comparison of what changes when you switch sources, see [Differences between enriched and legacy exports](/docs/api-and-data-platform/features/blob-storage-export-fields#enriched-vs-legacy-differences).
 
