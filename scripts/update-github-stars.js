@@ -6,6 +6,14 @@ const path = require("path");
 const GITHUB_REPO_API_URL = "https://api.github.com/repos/langfuse/langfuse";
 const STARS_FILE_PATH = path.join(__dirname, "..", "src", "github-stars.ts");
 
+function getExistingStarCount() {
+  if (!fs.existsSync(STARS_FILE_PATH)) return null;
+
+  const existingContent = fs.readFileSync(STARS_FILE_PATH, "utf8");
+  const match = existingContent.match(/GITHUB_STARS\s*=\s*(\d+)/);
+  return match ? Number(match[1]) : null;
+}
+
 async function updateGitHubStars() {
   try {
     console.log("Fetching GitHub stars...");
@@ -50,7 +58,16 @@ async function updateGitHubStars() {
     console.log(`✅ Updated ${STARS_FILE_PATH} with ${starCount} stars`);
   } catch (error) {
     console.error("❌ Error updating GitHub stars:", error.message);
-    process.exit(1); // Fail the build
+    const existingStarCount = getExistingStarCount();
+
+    if (existingStarCount !== null) {
+      console.warn(
+        `Using existing GitHub stars value (${existingStarCount}) from ${STARS_FILE_PATH}.`,
+      );
+      return;
+    }
+
+    process.exit(1); // Fail only if no checked-in fallback exists.
   }
 }
 
