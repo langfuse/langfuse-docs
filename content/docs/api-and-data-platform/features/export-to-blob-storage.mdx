@@ -53,7 +53,7 @@ Parquet observation exports do not include the per-unit model price columns (`in
 
 ## Export source (Fast Preview)
 
-Blob Storage integrations now include an `Export Source` selector. New integrations default to `Enriched observations (recommended)` (trace attributes are directly set on observations).
+Blob Storage integrations now include an `Export Source` selector. Where enriched export is available — on Langfuse Cloud, and on self-hosted deployments with the v4 preview opt-in (`LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN`) — new integrations default to `Enriched observations (recommended)` (trace attributes are directly set on observations). On self-hosted deployments without the opt-in, enriched export is not available and new integrations default to `Traces and observations (legacy)`.
 
 This source uses enriched observations with trace attributes and provides significantly better export performance. `Scores` are always included, regardless of the selected source.
 
@@ -71,12 +71,19 @@ Available options:
 </Callout>
 
 <Callout type="info">
-  **Cloud projects created on or after 2026-05-20** will not see the Export Source selector — new Cloud projects export as `Enriched observations (recommended)` automatically. The REST API rejects legacy values for these projects with `400 BAD_REQUEST`. Existing projects and all self-hosted deployments are unaffected.
+**Langfuse Cloud:** Legacy export sources can no longer be newly selected:
+
+- Projects created on or after 2026-05-20 cannot use legacy export sources.
+- In older projects, blob storage integrations created on or after 2026-06-22 — including newly configured ones — cannot select legacy export sources either.
+
+In both cases the Export Source selector is not shown and exports use `Enriched observations (recommended)` automatically; the REST API rejects legacy values with `400 BAD_REQUEST`. Blob storage integrations created before 2026-06-22 keep their configured export source and continue to see the selector.
+
+**Self-hosted:** These date cutoffs do not apply. However, once a deployment has completed the v4 migration (`LANGFUSE_MIGRATION_V4_WRITE_MODE=events_only`), legacy export sources are no longer available — including previously saved ones, since the legacy traces/observations tables are no longer written — and the selector is hidden once only the enriched source remains.
 </Callout>
 
 ### Upgrade path for existing configurations [#upgrade-path]
 
-This migration path applies to **pre-cutoff Cloud projects and self-hosted deployments**. Post-cutoff Cloud projects already use `Enriched observations (recommended)` and cannot select legacy sources.
+This migration path applies to **Cloud blob storage integrations created before 2026-06-22 and self-hosted deployments that still write the legacy tables**. Newer Cloud integrations already use `Enriched observations (recommended)` and cannot select legacy sources — including the dual-write source in step 1 below.
 
 Existing integrations continue to use `Traces and observations (legacy)` until changed.
 
