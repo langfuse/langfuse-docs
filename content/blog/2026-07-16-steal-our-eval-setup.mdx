@@ -80,7 +80,7 @@ The structure below follows the [AI engineering loop](/academy/ai-engineering-lo
 Before anything else, you need to see what the chatbot is actually doing, not just what it says at the end. Every retrieval call, every tool use, the full input and output at each step. Tracing is the foundation for everything else: no traces means no monitoring, no clear issue investigation, and no foundation for good datasets.
 
 <Frame fullWidth>
-  ![Trace detail view showing user ID, session ID, tool use, scores, and generation input](/images/blog/2026-07-16-steal-our-eval-setup/chatbot-trace-detail.png)
+  ![Trace detail view showing user ID, session ID, tool use, scores, input, and output](/images/blog/2026-07-16-steal-our-eval-setup/chatbot-trace-detail.png)
 </Frame>
 
 For chatbots, make sure each trace also carries the surrounding context you will need later. We pass a `userId` so we can see whether the same person comes back with the same topic over time, and a `sessionId` so related turns are grouped into one [session](/docs/observability/features/sessions). A good default is one trace per user message and one session per conversation. That keeps individual traces easy to inspect while still letting us replay the full thread and compare behavior across returning users in the [Users view](/docs/observability/features/users).
