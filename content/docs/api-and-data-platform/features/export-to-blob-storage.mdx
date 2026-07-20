@@ -79,6 +79,7 @@ Available options:
 In both cases the Export Source selector is not shown and exports use `Enriched observations (recommended)` automatically; the REST API rejects legacy values with `400 BAD_REQUEST`. Blob storage integrations created before 2026-06-22 keep their configured export source and continue to see the selector.
 
 **Self-hosted:** These date cutoffs do not apply. However, once a deployment has completed the v4 migration (`LANGFUSE_MIGRATION_V4_WRITE_MODE=events_only`), legacy export sources are no longer available — including previously saved ones, since the legacy traces/observations tables are no longer written — and the selector is hidden once only the enriched source remains.
+
 </Callout>
 
 ### Upgrade path for existing configurations [#upgrade-path]
