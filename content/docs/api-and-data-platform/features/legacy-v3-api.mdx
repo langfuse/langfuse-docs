@@ -1,0 +1,436 @@
+---
+title: Legacy v3 API
+sidebarTitle: Legacy v3 API
+description: Reference for the legacy v3 read APIs — traces, observations, sessions, scores, and metrics — for deployments that have not yet migrated to the v4 API.
+---
+
+# Legacy v3 API
+
+<Callout type="info">
+
+This page documents the legacy v3 API. These endpoints work on Langfuse v3 and on self-hosted Langfuse v4 in `legacy` or `dual` write mode. After the cutover to `events_only` mode, the read endpoints return `404` — except the dataset run reads, which keep working (see [Dataset runs](#dataset-runs-v1)); `POST /ingestion` keeps responding with `207` but rejects most event types — see [Ingestion](#ingestion-v1). On Langfuse Cloud they remain available for now, but are deprecated. Migrating? See [Transitioning to the v4 API](/docs/api-migration).
+
+</Callout>
+
+This page is frozen: it receives critical fixes only, and new functionality ships in the v4 API. For authentication and base URLs, see the [Public API documentation](/docs/api-and-data-platform/features/public-api).
+
+## Traces [#traces-v1]
+
+```
+GET /api/public/traces
+GET /api/public/traces/{traceId}
+```
+
+List and fetch trace objects, including trace-level `input`/`output` and pagination via `page`/`limit`. Filter by `name`, `userId`, `sessionId`, `tags`, and timestamp range. See the [API reference](https://api.reference.langfuse.com/#tag/trace/GET/api/public/traces) for all parameters.
+
+**v4 replacement:** [Observations API v2, grouped by `traceId`](/docs/api-migration#traces).
+
+## Observations, spans, and generations [#observations-v1]
+
+```
+GET /api/public/observations
+GET /api/public/observations/{observationId}
+```
+
+List and fetch observations with offset-based pagination; responses always include all fields, and `input`/`output` are parsed as JSON. Filter by `type` (`SPAN`, `GENERATION`, `EVENT`) to retrieve only spans or generations. See the [API reference](https://api.reference.langfuse.com/#tag/legacyobservationsv1/GET/api/public/observations) for all parameters.
+
+**v4 replacement:** [Observations API v2](/docs/api-migration#observations).
+
+## Sessions [#sessions-v1]
+
+```
+GET /api/public/sessions
+GET /api/public/sessions/{sessionId}
+```
+
+List sessions, and fetch a single session including its traces. See the [API reference](https://api.reference.langfuse.com/#tag/sessions/GET/api/public/sessions) for all parameters.
+
+**v4 replacement:** [Observations API v2, grouped by `sessionId`](/docs/api-migration#sessions).
+
+## Scores [#scores-v1]
+
+```
+GET /api/public/v2/scores
+GET /api/public/v2/scores/{scoreId}
+```
+
+List and fetch scores with offset-based pagination. Numeric values are returned in `value` and string values in the separate `stringValue` field. See the [API reference](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v2/scores) for all parameters. Score **writes** via `POST /api/public/scores` are not legacy and continue to work on v4.
+
+The earlier v1 reads `GET /api/public/scores` and `GET /api/public/scores/{scoreId}` were superseded by these v2 endpoints within v3's lifetime (they predate non-numeric scores — see the [announcement](/changelog/2024-07-11-non-numeric-scores-api)) and are no longer listed in the API reference.
+
+**v4 replacement:** [Scores API v3](/docs/api-migration#scores).
+
+## Dataset runs [#dataset-runs-v1]
+
+```
+GET /api/public/datasets/{datasetName}/runs
+GET /api/public/datasets/{datasetName}/runs/{runName}
+```
+
+List a dataset's runs and fetch a single run with its items. See the [API reference](https://api.reference.langfuse.com/#tag/datasets/get/api/public/datasets/{datasetName}/runs/{runName}) for all parameters. Unlike the other reads on this page, these endpoints are not gated by `events_only` mode and keep working on v4.
+
+**v4 replacement:** [Experiments API](/docs/api-migration#dataset-runs).
+
+## Ingestion [#ingestion-v1]
+
+```
+POST /api/public/ingestion
+```
+
+Batched event ingestion for traces, observations, and scores. See the [API reference](https://api.reference.langfuse.com/#tag/ingestion/POST/api/public/ingestion) for the event envelope format. On self-hosted v4 in `events_only` mode, most event types are rejected with a `400` item error; `score-create`, `sdk-log`, and `dataset-run-item-create` continue to work.
+
+The older synchronous write endpoints `POST /api/public/traces`, `/spans`, `/generations`, and `/events` predate the batched Ingestion API. They are long superseded, no longer listed in the API reference, and also stop working after the cutover to `events_only` mode.
+
+**v4 replacement:** [OpenTelemetry ingestion](/docs/api-migration#ingestion).
+
+## Metrics API v1 [#metrics-v1]
+
+```
+GET /api/public/metrics
+```
+
+The v1 Metrics API supports querying across different views (traces, observations, scores) and allows you to:
+
+- Select specific dimensions to group your data
+- Apply multiple metrics with different aggregation methods
+- Filter data based on metadata, timestamps, and other properties
+- Analyze data across time with customizable granularity
+- Order results according to your needs
+
+**v4 replacement:** [Metrics API v2](/docs/api-migration#metrics).
+
+### Query Parameters
+
+The v1 API accepts a JSON query object passed as a URL-encoded parameter:
+
+| Parameter | Type        | Description                                                |
+| --------- | ----------- | ---------------------------------------------------------- |
+| `query`   | JSON string | The encoded query object defining what metrics to retrieve |
+
+#### Query Object Structure
+
+| Field           | Type   | Required | Description                                                                                                                                                              |
+| --------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `view`          | string | Yes      | The data view to query: `"traces"`, `"observations"`, `"scores-numeric"`, or `"scores-categorical"`                                                                      |
+| `dimensions`    | array  | No       | Array of dimension objects to group by, e.g. `[{ "field": "name" }]`                                                                                                     |
+| `metrics`       | array  | Yes      | Array of metric objects to calculate, e.g. `[{ "measure": "latency", "aggregation": "p95" }]`                                                                            |
+| `filters`       | array  | No       | Array of filter objects to narrow results, e.g. `[{ "column": "metadata", "operator": "contains", "key": "customKey", "value": "customValue", "type": "stringObject" }]` |
+| `timeDimension` | object | No       | Configuration for time-based analysis, e.g. `{ "granularity": "day" }`                                                                                                   |
+| `fromTimestamp` | string | Yes      | ISO timestamp for the start of the query period                                                                                                                          |
+| `toTimestamp`   | string | Yes      | ISO timestamp for the end of the query period                                                                                                                            |
+| `orderBy`       | array  | No       | Specification for result ordering, e.g. `[{ "field": "name", "direction": "asc" }]`                                                                                      |
+
+#### Dimension Object Structure
+
+```json
+{ "field": "name" }
+```
+
+#### Metric Object Structure
+
+```json
+{ "measure": "count", "aggregation": "count" }
+```
+
+Common measure types include:
+
+- `count` - Count of records
+- `latency` - Duration/latency metrics
+
+Aggregation types include:
+
+- `sum` - Sum of values
+- `avg` - Average of values
+- `count` - Count of records
+- `max` - Maximum value
+- `min` - Minimum value
+- `p50` - 50th percentile
+- `p75` - 75th percentile
+- `p90` - 90th percentile
+- `p95` - 95th percentile
+- `p99` - 99th percentile
+
+#### Filter Object Structure
+
+```json
+{
+  "column": "metadata",
+  "operator": "contains",
+  "key": "customKey",
+  "value": "customValue",
+  "type": "stringObject"
+}
+```
+
+#### Time Dimension Object
+
+```json
+{
+  "granularity": "day"
+}
+```
+
+Supported granularities include: `hour`, `day`, `week`, `month`, and `auto`.
+
+### Example
+
+Here's an example of querying the number of traces grouped by name:
+
+<LangTabs items={["API", "Python SDK"]}>
+  <Tab label="API">
+
+```bash
+curl \
+-H "Authorization: Basic <BASIC AUTH HEADER>" \
+-G \
+--data-urlencode 'query={
+  "view": "traces",
+  "metrics": [{"measure": "count", "aggregation": "count"}],
+  "dimensions": [{"field": "name"}],
+  "filters": [],
+  "fromTimestamp": "2025-05-01T00:00:00Z",
+  "toTimestamp": "2025-05-13T00:00:00Z"
+}' \
+https://cloud.langfuse.com/api/public/metrics
+```
+
+  </Tab>
+  <Tab label="Python SDK">
+
+```python
+query = """
+{
+  "view": "traces",
+  "metrics": [{"measure": "count", "aggregation": "count"}],
+  "dimensions": [{"field": "name"}],
+  "filters": [],
+  "fromTimestamp": "2025-05-01T00:00:00Z",
+  "toTimestamp": "2025-05-13T00:00:00Z"
+}
+"""
+
+langfuse.api.legacy.metrics_v1.metrics(query = query)
+```
+
+  </Tab>
+</LangTabs>
+
+Response:
+
+```json
+{
+  "data": [
+    { "name": "trace-test-2", "count_count": "10" },
+    { "name": "trace-test-3", "count_count": "5" },
+    { "name": "trace-test-1", "count_count": "3" }
+  ]
+}
+```
+
+### Data Model
+
+The v1 Metrics API provides access to several data views, each with its own set of dimensions and metrics you can query. This section outlines the available options for each view.
+
+#### Available Views
+
+| View                 | Description                         |
+| -------------------- | ----------------------------------- |
+| `traces`             | Query data at the trace level       |
+| `observations`       | Query data at the observation level |
+| `scores-numeric`     | Query numeric and boolean scores    |
+| `scores-categorical` | Query categorical (string) scores   |
+
+#### Trace Dimensions
+
+| Dimension         | Type     | Description                             |
+| ----------------- | -------- | --------------------------------------- |
+| `id`              | string   | Trace ID                                |
+| `name`            | string   | Trace name                              |
+| `tags`            | string[] | Trace tags                              |
+| `userId`          | string   | User ID associated with the trace       |
+| `sessionId`       | string   | Session ID associated with the trace    |
+| `release`         | string   | Release tag                             |
+| `version`         | string   | Version tag                             |
+| `environment`     | string   | Environment (e.g., production, staging) |
+| `observationName` | string   | Name of related observations            |
+| `scoreName`       | string   | Name of related scores                  |
+
+#### Trace Metrics
+
+| Metric              | Description                         |
+| ------------------- | ----------------------------------- |
+| `count`             | Count of traces                     |
+| `observationsCount` | Count of observations within traces |
+| `scoresCount`       | Count of scores within traces       |
+| `latency`           | Trace duration in milliseconds      |
+| `totalTokens`       | Total tokens used in the trace      |
+| `totalCost`         | Total cost of the trace             |
+
+#### Observation Dimensions
+
+| Dimension             | Type   | Description                             |
+| --------------------- | ------ | --------------------------------------- |
+| `id`                  | string | Observation ID                          |
+| `traceId`             | string | Associated trace ID                     |
+| `traceName`           | string | Name of the parent trace                |
+| `environment`         | string | Environment (e.g., production, staging) |
+| `parentObservationId` | string | ID of parent observation                |
+| `type`                | string | Observation type                        |
+| `name`                | string | Observation name                        |
+| `level`               | string | Log level                               |
+| `version`             | string | Version                                 |
+| `providedModelName`   | string | Model name                              |
+| `promptName`          | string | Prompt name                             |
+| `promptVersion`       | string | Prompt version                          |
+| `userId`              | string | User ID from parent trace               |
+| `sessionId`           | string | Session ID from parent trace            |
+| `traceRelease`        | string | Release from parent trace               |
+| `traceVersion`        | string | Version from parent trace               |
+| `scoreName`           | string | Related score name                      |
+
+#### Observation Metrics
+
+| Metric             | Description                          |
+| ------------------ | ------------------------------------ |
+| `count`            | Count of observations                |
+| `latency`          | Observation duration in milliseconds |
+| `totalTokens`      | Total tokens used                    |
+| `totalCost`        | Total cost                           |
+| `timeToFirstToken` | Time to first token in milliseconds  |
+| `countScores`      | Count of related scores              |
+
+#### Score Dimensions (Common)
+
+| Dimension                  | Type   | Description                                |
+| -------------------------- | ------ | ------------------------------------------ |
+| `id`                       | string | Score ID                                   |
+| `name`                     | string | Score name                                 |
+| `environment`              | string | Environment                                |
+| `source`                   | string | Score source                               |
+| `dataType`                 | string | Data type                                  |
+| `traceId`                  | string | Related trace ID                           |
+| `traceName`                | string | Related trace name                         |
+| `userId`                   | string | User ID from trace                         |
+| `sessionId`                | string | Session ID from trace                      |
+| `observationId`            | string | Related observation ID                     |
+| `observationName`          | string | Related observation name                   |
+| `observationModelName`     | string | Model used in related observation          |
+| `observationPromptName`    | string | Prompt name used in related observation    |
+| `observationPromptVersion` | string | Prompt version used in related observation |
+| `configId`                 | string | Configuration ID                           |
+
+#### Score Metrics
+
+##### Numeric Scores
+
+| Metric  | Description         |
+| ------- | ------------------- |
+| `count` | Count of scores     |
+| `value` | Numeric score value |
+
+##### Categorical Scores
+
+| Metric  | Description     |
+| ------- | --------------- |
+| `count` | Count of scores |
+
+Categorical scores have an additional dimension:
+
+| Dimension     | Type   | Description                           |
+| ------------- | ------ | ------------------------------------- |
+| `stringValue` | string | String value of the categorical score |
+
+## Daily Metrics API [#daily-metrics]
+
+<Callout type="warning">
+
+This endpoint is legacy and is no longer listed in the [public API reference](https://api.reference.langfuse.com/). It remains available for backward compatibility, but for new use cases please use the [Metrics API v2](/docs/metrics/features/metrics-api#v2). It offers more flexibility and uses the separate Metrics API v2 rate-limit bucket listed in the [API limits FAQ](/faq/all/api-limits).
+
+</Callout>
+
+```
+GET /api/public/metrics/daily
+```
+
+Via the **Daily Metrics API**, you can retrieve aggregated daily usage and cost metrics from Langfuse for downstream use, e.g., in analytics, billing, and rate-limiting. The API allows you to filter by application type, user, or tags for tailored data retrieval.
+
+**v4 replacement:** [Metrics API v2 with a daily time dimension](/docs/api-migration#daily-metrics-migration).
+
+### Overview
+
+Returned data includes daily timeseries of:
+
+- [Cost](/docs/model-usage-and-cost) in USD
+- Trace and observation count
+- Break down by model name
+- Usage (e.g. tokens) broken down by input and output usage
+
+Optional filters:
+
+- `traceName` to commonly filter by the application type, depending on how you use `name` in your traces
+- `userId` to filter by [user](/docs/observability/features/users)
+- `tags` to filter by [tags](/docs/observability/features/tags)
+- `fromTimestamp`
+- `toTimestamp`
+
+### Example
+
+```
+GET /api/public/metrics/daily?traceName=my-copilot&userId=john&limit=2
+```
+
+```json
+{
+  "data": [
+    {
+      "date": "2024-02-18",
+      "countTraces": 1500,
+      "countObservations": 3000,
+      "totalCost": 102.19,
+      "usage": [
+        {
+          "model": "llama2",
+          "inputUsage": 1200,
+          "outputUsage": 1300,
+          "totalUsage": 2500,
+          "countTraces": 1000,
+          "countObservations": 2000,
+          "totalCost": 50.19
+        },
+        {
+          "model": "gpt-4",
+          "inputUsage": 500,
+          "outputUsage": 550,
+          "totalUsage": 1050,
+          "countTraces": 500,
+          "countObservations": 1000,
+          "totalCost": 52.0
+        }
+      ]
+    },
+    {
+      "date": "2024-02-17",
+      "countTraces": 1250,
+      "countObservations": 2500,
+      "totalCost": 250.0,
+      "usage": [
+        {
+          "model": "llama2",
+          "inputUsage": 1000,
+          "outputUsage": 1100,
+          "totalUsage": 2100,
+          "countTraces": 1250,
+          "countObservations": 2500,
+          "totalCost": 250.0
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 2,
+    "totalItems": 60,
+    "totalPages": 30
+  }
+}
+```
