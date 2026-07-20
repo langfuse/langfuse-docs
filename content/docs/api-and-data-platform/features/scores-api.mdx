@@ -37,12 +37,9 @@ The v3 Scores API is a redesigned endpoint optimized for predictable, high-perfo
 
 <Callout type="warning">
 
-**v2 read sunset**
+**v2 read deprecation**
 
-- **Langfuse Cloud** serves the v2 score read endpoints until **October 31, 2026** (`2026-10-31`). Migrate to v3 before this date.
-- **Self-hosted:** Langfuse v4 and later do not include the v2 score read endpoints. Migrate to v3 before upgrading.
-
-Until the sunset, v2 read responses include a structured `_deprecation` object (message, replacement endpoint, docs URL, and sunset date) so scripts and coding agents get a machine-readable, request-time migration signal.
+The v2 score read endpoints are deprecated. Self-hosted deployments on Langfuse v4 and later do not include them — migrate to v3 before upgrading. On Langfuse Cloud they remain available for a transition period.
 
 </Callout>
 
@@ -198,7 +195,7 @@ scores = langfuse.api.scores_v3.get_many_v3(
     limit=100,
 )
 
-# v2 (deprecated, sunset 2026-10-31): langfuse.api.scores.get_many(...)
+# v2 (deprecated): langfuse.api.scores.get_many(...)
 ```
 
 Also available as async via `langfuse.async_api.scores_v3.get_many_v3(...)`.
@@ -220,7 +217,7 @@ const scores = await langfuse.api.scoresV3.getManyV3({
   limit: 100,
 });
 
-// v2 (deprecated, sunset 2026-10-31): langfuse.api.scores.getMany(...)
+// v2 (deprecated): langfuse.api.scores.getMany(...)
 ```
 
 </Tab>
