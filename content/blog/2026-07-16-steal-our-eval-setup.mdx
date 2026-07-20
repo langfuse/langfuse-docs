@@ -166,7 +166,7 @@ For chatbots, three dimensions have held up well as a starting point and are clo
   ![Expected output on a chatbot dataset item with sample reply, keyword overlap, and behavior label](/images/blog/2026-07-16-steal-our-eval-setup/dataset-expected-output.png)
 </Frame>
 
-Correctness and behavior match are set up as LLM-as-a-judge evaluators in the app. They are scoped to experiment runs on this specific dataset. Keyword overlap runs as part of the experiment runner and is a deterministic match, so a code-based eval.
+Correctness and behavior match are set up as LLM-as-a-judge evaluators in the app. They are scoped to experiment runs on this specific dataset. Keyword overlap runs as part of the [experiment runner script](https://github.com/langfuse/langfuse-docs/blob/main/components/qaChatbot/experiments/run_general_qa_chatbot_experiment.ts) and is a deterministic match, so a code-based eval.
 
 We use this dataset with its evaluators to run [experiments](/docs/evaluation/experiments/experiments-via-sdk) and understand the quality of our system. We frequently run experiments on newly released models, after changes to the docs, and whenever we add new edge cases to the dataset.
 
