@@ -126,7 +126,7 @@ This is not a fully fledged quality evaluation system, but it gives us a signal 
 
 Both relevance and user intent are set up as LLM-as-a-judge evaluators: one numeric, one categorical. The user intent categories are application-specific. For our use case, we use `conceptual-question`, `implementation-question`, `self-hosting`, `pricing-and-comparison`, `ui-feedback`, and `irrelevant-to-langfuse`.
 
-We then set up a production monitoring dashboard that shows average scores, user intent classifications, total score counts, and cost over time. On top of that, we have monitors that notify us in Slack when certain thresholds are reached, such as increased cost, increased time to first token, or a high number of users disagreeing with our chatbot.
+We then set up a [production monitoring dashboard](/docs/metrics/features/custom-dashboards) that shows average scores, user intent classifications, total score counts, and cost over time. On top of that, we have monitors that notify us in Slack when certain thresholds are reached, such as increased cost, increased time to first token, or a high number of users disagreeing with our chatbot.
 
 <Frame fullWidth>
   ![Production score monitoring dashboard for the docs chatbot](/images/blog/2026-07-16-steal-our-eval-setup/score-monitoring-dashboard.png)
