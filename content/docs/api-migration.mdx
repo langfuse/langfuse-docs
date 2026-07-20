@@ -11,7 +11,7 @@ Langfuse v4 introduces an [observations-first data model](/docs/v4): traces and 
 Availability of the legacy endpoints depends on how you run Langfuse:
 
 - **Langfuse Cloud:** legacy endpoints remain available for now, but are deprecated and less performant at scale. New workflows should use the v4 endpoints.
-- **Self-hosted Langfuse v4:** legacy endpoints keep working while your deployment runs in `legacy` or `dual` write mode. After the cutover to `events_only` mode, the legacy read endpoints return `404` — except the dataset run reads, which keep working (see [Dataset runs](#dataset-runs)); the write path degrades differently — see [Ingestion](#ingestion). See the [v3 to v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4) for the upgrade mechanics.
+- **Self-hosted Langfuse v4:** legacy endpoints keep working while your deployment runs in `legacy` or `dual` write mode. After the cutover to `events_only` mode, the legacy read endpoints return `404` — except the dataset run reads, which keep working (see [Dataset runs](#dataset-runs)); the write path degrades differently — see [Ingestion](#ingestion). See [Langfuse v4](/docs/v4) for the rollout status and upgrade guidance for self-hosted deployments.
 
 If you access the API through the Langfuse SDKs, use the SDK upgrade guides instead: [Python v3 to v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) and [JS/TS v4 to v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5). This page covers direct REST usage only.
 
@@ -307,4 +307,4 @@ curl \
 - `POST /traces`, `POST /spans`, `POST /generations`, and `POST /events` return `404`.
 - Score writes via `POST /scores` are unaffected.
 
-In `legacy` and `dual` write modes, the legacy write path keeps working; it breaks after the cutover to `events_only`. See the [v3 to v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4).
+In `legacy` and `dual` write modes, the legacy write path keeps working; it breaks after the cutover to `events_only`. See [Langfuse v4](/docs/v4) for the self-hosted rollout status.
