@@ -177,6 +177,8 @@ Correctness and behavior match are set up as [LLM-as-a-judge evaluators](/docs/e
 
 We use this dataset with its evaluators to run [experiments](/docs/evaluation/experiments/experiments-via-sdk) and understand the quality of our system. We frequently run experiments on newly released models, after changes to the docs, and whenever we add new edge cases to the dataset.
 
+We use the [dataset item metadata](/docs/evaluation/experiments/data-model#datasetitem-object) field to categorize items by where they come from, what the item is for, and which input language we are using. This lets us filter, slice, and dice score data, and makes it easier to keep the dataset balanced over time across those dimensions.
+
 That dataset doubles as our regression suite. We run it as part of [CI](/docs/evaluation/experiments/experiments-ci-cd), so a prompt or model change gets checked against real failure cases before it ships, not after.
 
 ## The failure mode that is actually ours
