@@ -34,17 +34,17 @@ export function Hero() {
               highlightClassName="mix-blend-multiply"
               className="max-[499px]:pr-1.75"
             >
-              AI
+              Platform for
             </TextHighlight>
             <TextHighlight
               highlightClassName="mix-blend-multiply"
               className="min-[500px]:pr-2"
             >
-              Engineering
+              Agent Evals &amp;
             </TextHighlight>
           </span>
           <TextHighlight highlightClassName="mix-blend-multiply">
-            Platform
+            Observability
           </TextHighlight>
         </Heading>
         <Heading
