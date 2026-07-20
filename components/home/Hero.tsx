@@ -32,13 +32,7 @@ export function Hero() {
           <span className="flex min-[500px]:inline">
             <TextHighlight
               highlightClassName="mix-blend-multiply"
-              className="max-[499px]:pr-1.75"
-            >
-              Platform for
-            </TextHighlight>
-            <TextHighlight
-              highlightClassName="mix-blend-multiply"
-              className="min-[500px]:pr-2"
+              className="whitespace-nowrap min-[500px]:pr-2"
             >
               Agent Evals &amp;
             </TextHighlight>
