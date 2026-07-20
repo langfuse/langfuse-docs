@@ -1,7 +1,7 @@
 ---
-title: Certifying LLMs and AI Agents for Financial Services
+title: Building Deployment Gates for LLMs and AI Agents in Financial Services
 date: 2026/07/15
-description: How to use Langfuse datasets and experiments to build internal release gates and audit evidence for LLMs and AI agents in financial services.
+description: How we used Langfuse datasets, experiments, and the public API to build automated pass/fail deployment gates for LLMs and AI agents in financial services.
 tag: guide
 author: Doneyli
 ogImage: /images/blog/2026-07-15-llm-certification-financial-services/og.png
@@ -10,8 +10,8 @@ ogImage: /images/blog/2026-07-15-llm-certification-financial-services/og.png
 import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
-  title="Certifying LLMs and AI Agents for Financial Services"
-  description="How to use Langfuse datasets and experiments to build internal release gates and audit evidence for LLMs and AI agents in financial services."
+  title="Building Deployment Gates for LLMs and AI Agents in Financial Services"
+  description="How we used Langfuse datasets, experiments, and the public API to build automated pass/fail deployment gates for LLMs and AI agents in financial services."
   date="July 15, 2026"
   authors={["doneylidej"]}
 />
@@ -20,34 +20,48 @@ import { Frame } from "@/components/Frame";
 
 One number turned the run red: 81.3%.
 
-I had just finished a 150-item FinanceBench run with Claude Sonnet. The pipeline's default numerical-accuracy gate was 85%, so the model did not certify.
+We had just finished a 150-item FinanceBench run with Claude Sonnet. The gate for numerical accuracy was set at 85%, so the run failed.
 
 <Frame fullWidth>
-  ![Certification results: Claude Sonnet on FinanceBench](/images/blog/2026-07-15-llm-certification-financial-services/benchmark-results.png)
+  ![Gate results: Claude Sonnet on FinanceBench](/images/blog/2026-07-15-llm-certification-financial-services/benchmark-results.png)
 </Frame>
 
-Catching that failure on a dashboard before deployment, rather than in production after, is the argument of this post.
+Caught here, this costs nothing: a number turns red on a dashboard and someone investigates before the release. Caught after deployment, it means a client received a wrong number in a 10-K summary, and in financial services that is a reportable incident rather than an engineering bug.
 
-I have spent the past decade-plus helping financial services organizations build data systems. If you have ever shipped software next to a model risk management team, you know the rhythm: nothing reaches production until someone produces evidence, and producing that evidence by hand takes weeks.
+Financial institutions and organizations in other regulated industries need a reliable way to establish whether the output of an LLM system can be trusted. This project came out of our work with one of the five largest banks in the world. Their model risk management process already required evidence before anything reached production: test results, review sign-offs, documentation. Producing that evidence by hand took weeks, and the process was designed for credit models that changed twice a year. LLM systems change much faster, because prompts get promoted, models get swapped, and tools and retrieval logic evolve. By the time a manual approval lands, the system it tested has often already changed.
 
-That process was designed for credit models that changed twice a year. LLM systems change much faster. Prompts get promoted, models get swapped, tools and retrieval logic evolve, and production traffic drifts. Risk teams are not approving a raw model. They are approving the system built around it: a 10-K analysis assistant, a sentiment triage pipeline, or a client advisory drafting tool.
+So we scripted the evidence. The pipeline in this post runs an LLM system, either a model with a prompt or a full multi-step agent, against golden financial datasets, scores every output with domain-specific evaluators, and produces a PASS/FAIL verdict. Every run, trace, score, and prompt version behind that verdict is stored in Langfuse, where a reviewer can inspect it. The code is available in the [langfuse-llm-certification-finance](https://github.com/doneyli/langfuse-llm-certification-finance) repository, pinned here to the [source state used for this post](https://github.com/doneyli/langfuse-llm-certification-finance/commit/86e14811c7647bbdf40f298d4ea0aca352e3e298).
 
-Here, **certification** means an internal, repeatable release gate and evidence package. It does not replace regulatory approval, independent validation, legal review, or accountable human sign-off.
+A note on the word **certification**, which appears in the repository name, the dataset names, and the screenshots below: it is the internal name we used for this process while building it, and nothing here issues a certificate. The pipeline is a deployment gate that produces reviewable evidence. Regulatory approval, independent validation, legal review, and accountable human sign-off stay with people.
 
-The pipeline turns that evidence into a scripted process: it runs a model or agent against financial datasets, scores the output with domain-specific evaluators, and produces a PASS/FAIL verdict with a full audit trail in Langfuse. The code is available in the [langfuse-llm-certification-finance](https://github.com/doneyli/langfuse-llm-certification-finance) repository, pinned here to the [source state used for this post](https://github.com/doneyli/langfuse-llm-certification-finance/commit/86e14811c7647bbdf40f298d4ea0aca352e3e298).
+## The setup [#the-setup]
 
-That is the distinction I care about: evaluation scores alone do not certify an AI system. A certifiable system produces repeatable evidence across the model, prompt, agent trajectory, and human review. We will start with model evaluation, then go where the real risk conversations happen: [certifying the whole agent](#certifying-the-whole-agent), not just the model inside it.
+```mermaid
+flowchart LR
+    DS["Golden datasets<br/>in Langfuse"] --> RUN["Experiment run<br/>model, prompt variant, or agent"]
+    PM["Prompt management<br/>versioned prompts"] --> RUN
+    RUN --> EV["Evaluators<br/>deterministic + LLM-as-a-judge"]
+    EV --> GATE{"Run-level gate"}
+    GATE -->|PASS / FAIL| OUT["Portal · exports · CI exit code"]
+    PROD["Production traces"] --> AQ["Annotation queue<br/>human review"]
+    AQ -->|promote reviewed failures| DS
+```
+
+The pipeline is a set of Python scripts built on four Langfuse features: [datasets](/docs/evaluation/experiments/datasets), [experiments](/docs/evaluation/experiments/experiments-via-sdk), [prompt management](/docs/prompt-management/get-started), and [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues).
+
+Everything under test goes through the same loop. The target of a run is either a model with a prompt, which serves as a baseline and for model comparisons, or one of three registered agents, which are the systems a review board would actually look at: `10k-analyst`, `sentiment-triage`, and `advisory-draft`. Each run scores the target's outputs on a golden dataset, and a run-level gate turns the scores into a single PASS or FAIL. The verdicts surface in a reviewer-facing portal, in exported evidence packages, and as CI exit codes. The rest of this post walks the loop from left to right.
 
 ## Golden datasets [#golden-datasets]
 
-The pipeline uses two open-source financial benchmarks (a third, purpose-built adversarial set appears in the [agent section](#certifying-the-whole-agent)):
+The pipeline uses three datasets:
 
-| Dataset                  | Source                                                                             | Items  | What it tests                                                                      |
-| ------------------------ | ---------------------------------------------------------------------------------- | ------ | ---------------------------------------------------------------------------------- |
-| **FinanceBench**         | [PatronusAI/financebench](https://huggingface.co/datasets/PatronusAI/financebench) | 150    | Financial Q&A from SEC filings: numerical extraction, reasoning, and justification |
-| **Financial PhraseBank** | [ChanceFocus/en-fpb](https://huggingface.co/datasets/ChanceFocus/en-fpb)           | ~4,850 | Sentiment classification of financial news (positive, negative, neutral)           |
+| Dataset                  | Source                                                                             | Items  | What it tests                                                       | Gates                                          |
+| ------------------------ | ---------------------------------------------------------------------------------- | ------ | -------------------------------------------------------------------- | ------------------------------------------------ |
+| **FinanceBench**         | [PatronusAI/financebench](https://huggingface.co/datasets/PatronusAI/financebench) | 150    | Financial Q&A from SEC filings: numerical extraction and reasoning  | Model baselines and the `10k-analyst` agent      |
+| **Financial PhraseBank** | [ChanceFocus/en-fpb](https://huggingface.co/datasets/ChanceFocus/en-fpb)           | ~4,850 | Sentiment classification of financial news                          | Model baselines and the `sentiment-triage` agent |
+| **Advisory Adversarial** | ships with the repository                                                          | 10     | Client-update briefs that tempt a draft into prohibited phrasing    | The `advisory-draft` agent                       |
 
-These are loaded into Langfuse as [datasets](/docs/evaluation/experiments/datasets), with each item containing an input (the question or text), an expected output (the correct answer or sentiment label), and metadata (source, question type, reasoning type):
+All three are loaded into Langfuse as [datasets](/docs/evaluation/experiments/datasets), with each item containing an input (the question or text), an expected output (the correct answer or label), and metadata (source, question type, reasoning type):
 
 ```python
 from langfuse import Langfuse
@@ -76,13 +90,21 @@ for item in ds:
     )
 ```
 
-The `question_reasoning` field matters later: it is free ground truth for checking whether an agent took the right path, not just whether it produced the right answer.
+The `question_reasoning` field records how each answer should be derived. The agent section below uses it as ground truth for checking whether an agent reached its answer the right way.
 
-One practical detail I lean on constantly: every dataset loads in two sizes. The setup script's `--sample` flag loads 10-item versions (`certification/financebench-sample`) that run end to end in a couple of minutes; that is what I use in live demos and as the fast inner loop while iterating on evaluators and prompts. The full set (`certification/financebench-v1`, all 150 items) is what a formal certification run gets scored against. The task, evaluators, and gates stay the same between the two sizes, which reduces configuration drift. The results can still change materially as coverage expands, so a sample run is a directional check, not certification evidence.
+<Callout type="info">
+  **Pro tip:** load every dataset in two sizes. The setup script's `--sample`
+  flag creates 10-item versions (`certification/financebench-sample`) that run
+  end to end in a couple of minutes; we use those in live demos and while
+  iterating on evaluators and prompts. Formal gate runs are scored against the
+  full set (`certification/financebench-v1`). The task, evaluators, and
+  thresholds are identical for both sizes, so there is no configuration drift,
+  and only full runs count as review evidence.
+</Callout>
 
 ## Running the experiment [#running-the-experiment]
 
-Each dataset item gets sent to the model under test. For FinanceBench items that include evidence excerpts from SEC filings, the prompt includes the source documents as context, simulating a RAG pipeline:
+[`dataset.run_experiment()`](/docs/evaluation/experiments/experiments-via-sdk) expects a **task**: a function that receives one dataset item and returns the output to be scored. Our task sends the item to the model under test. For FinanceBench items that include evidence excerpts from SEC filings, it puts the source documents into the prompt as context, simulating a RAG pipeline:
 
 ```python
 def create_certification_task(model, endpoint, api_key):
@@ -109,9 +131,9 @@ def create_certification_task(model, endpoint, api_key):
     return task
 ```
 
-In the repository this template is not hardcoded: it is fetched from [Langfuse prompt management](/docs/prompt-management/get-started) by name, with the string above as a fallback. That detail matters in a regulated setting, because it means a compliance officer can edit, version, and promote the certification prompt in the Langfuse UI without a code deploy, and every run records exactly which prompt version it was certified against.
+The analyst instructions in this snippet are only a fallback. The repository fetches the template from [Langfuse prompt management](/docs/prompt-management/get-started) by name, so every run records which prompt version it ran against. When a result is questioned months later, the exact wording is part of the evidence.
 
-The task function is passed to [`dataset.run_experiment()`](/docs/evaluation/experiments/experiments-via-sdk), which handles concurrency, tracing, and evaluation in one call:
+The task is passed to `run_experiment()`, which handles concurrency, tracing, and evaluation in one call:
 
 ```python
 from langfuse import get_client
@@ -139,23 +161,23 @@ result = dataset.run_experiment(
 )
 ```
 
-Every model call is traced in Langfuse and scored by the evaluators. Running the same dataset against multiple models produces a side-by-side comparison in the Langfuse UI.
+Every model call is traced in Langfuse and scored by the evaluators. Running the same dataset against multiple models gives you a side-by-side comparison in the Langfuse UI; the portal screenshot further down shows the same comparison, with `claude-sonnet-4-6` and its finance-expert prompt variant as separate rows.
 
 ## Evaluators [#evaluators]
 
-The pipeline deliberately mixes two kinds of evaluators, because they catch different failure modes.
+The pipeline mixes two kinds of evaluators because they catch different failure modes.
 
-**Deterministic evaluators** (fast, cheap, reproducible):
+**Five deterministic evaluators** (fast, cheap, reproducible):
 
-1. **Numerical accuracy** extracts numbers from the output and compares them against the expected answer with a 5% tolerance, handling currency symbols, commas, percentages, and rounding differences.
-2. **Exact match** checks whether the expected answer appears verbatim in the model output.
-3. **Sentiment classification** compares the model's sentiment label against the ground truth from Financial PhraseBank.
-4. **Regulatory compliance** scans model outputs for prohibited phrases like "guaranteed returns" or "risk-free investment."
-5. **Response completeness** scores based on response length and structural formatting.
+1. **Numerical accuracy** extracts numbers from the output and compares them to the expected answer with a 5% tolerance, handling currency symbols, commas, percentages, and rounding differences.
+2. **Exact match** checks whether the expected answer appears verbatim in the output.
+3. **Sentiment classification** compares the sentiment label in the output to the ground-truth label from Financial PhraseBank. This is a plain string comparison; no judge model is involved.
+4. **Regulatory compliance** scans outputs for prohibited phrases like "guaranteed returns" or "risk-free investment."
+5. **Response completeness** scores response length and structural formatting. Despite the name it checks structure; whether the content answers the question is covered by the judge below.
 
-**An LLM-as-a-judge evaluator** for the dimension the deterministic checks cannot see: [groundedness](/docs/evaluation/evaluation-methods/llm-as-a-judge). A judge model (configurable via an environment variable) receives the output, the source evidence, and the question, and scores faithfulness and completeness against a financial auditor rubric, weighted 70/30.
+**One LLM-as-a-judge evaluator** covers the dimension the deterministic checks cannot see: [groundedness](/docs/evaluation/evaluation-methods/llm-as-a-judge). The judge model receives the question, the source evidence, and the model's answer, and scores whether the answer is supported by the evidence, following a financial-auditor rubric.
 
-The run that convinced me you need both came from the seeded 10-item FinanceBench sample: Claude Haiku's numerical accuracy was 60% while groundedness was 97%. Without the judge, the report says "60%, FAILED" and everyone concludes the model is unreliable. With it, you can tell the risk team something far more useful: the model faithfully uses the evidence it is given, and its failure is specifically numerical reasoning. Those are two very different remediation paths, and the distinction is exactly what a model risk assessment needs.
+An example run from the 10-item FinanceBench sample shows why both kinds are needed. Claude Haiku scored 60% on numerical accuracy and 97% on groundedness. Wrong numbers make the model unusable either way, but the pair of scores locates the failure: Haiku reads the evidence faithfully and fails specifically at numerical reasoning. The fix is a calculator tool or a stronger model rather than a different retrieval setup, and that level of nuance is what a model risk reviewer needs from a report.
 
 All evaluators follow the same Langfuse signature. Here is numerical accuracy, condensed from the repository:
 
@@ -179,9 +201,9 @@ def numerical_accuracy_evaluator(*, output, expected_output, **kwargs):
     )
 ```
 
-## The pass/fail gate [#the-pass-fail-gate]
+## The gate and the evidence export [#the-pass-fail-gate]
 
-On top of the item-level evaluators, a run-level `certification_gate` evaluator produces a binary PASS/FAIL verdict. Run evaluators in the Langfuse SDK receive the full list of item results, so the gate averages the relevant score across the run and compares it to the threshold:
+On top of the item-level evaluators, a [run-level evaluator](/docs/evaluation/experiments/experiments-via-sdk#run-level-evaluators) named `certification_gate` produces the binary verdict. Run-level evaluators receive the full list of item results, so the gate averages the relevant score across the run and compares it to the threshold:
 
 ```python
 def certification_gate(score_name, threshold=0.85):
@@ -203,7 +225,7 @@ def certification_gate(score_name, threshold=0.85):
     return evaluator
 ```
 
-The results can be exported as review-ready evidence packages in Markdown, JSON, or CSV using the export script:
+A finished run can be exported as a review-ready evidence package in Markdown, JSON, or CSV:
 
 ```bash
 python setup_datasets.py --dataset financebench --sample
@@ -211,13 +233,13 @@ python run_certification.py --dataset certification/financebench-sample --model 
 python export_results.py --dataset certification/financebench-sample --format markdown
 ```
 
-## Certifying the whole agent, not just the model [#certifying-the-whole-agent]
+## Gating the whole agent [#certifying-the-whole-agent]
 
-Here is the part I care most about, because it is where the certification conversation actually happens. No risk committee approves "Claude Sonnet." They approve the 10-K analysis assistant built on it. The assistant plans, retrieves evidence, calls a calculator tool, and composes an answer. Certifying the model tells you nothing about whether that system is safe to deploy.
+The model-level runs above are baselines. They answer questions like "which model do we build on" and "did the model swap regress anything." The deployment decision is made on something larger: nobody deploys Claude Sonnet, they deploy the 10-K analysis assistant built on it, and that assistant plans, retrieves evidence, calls a calculator tool, and composes an answer. The pipeline therefore registers agents as first-class targets and runs them through the same datasets, evaluators, and gate as the models.
 
-So the pipeline also certifies registered agents end to end. Each agent runs as a multi-step task per dataset item, with one nested span per step, so a reviewer can open any item in Langfuse and see exactly which tool the agent invoked and what it returned. And instead of a single accuracy threshold, each agent defines a **multi-dimensional gate**: every dimension must pass at once, or the certification fails.
+Two things change for agents. First, each agent runs as a multi-step task per dataset item, with one nested span per step, so a reviewer can open any item in Langfuse and see which tool the agent invoked and what it returned. Second, instead of a single accuracy threshold, each agent has its own **multi-dimensional gate**: every dimension must pass at once or the run fails.
 
-| Agent              | Steps (spans)                                  | Gate (all must pass)                                                       |
+| Agent              | Steps (spans)                                  | Gate (all dimensions must pass)                                             |
 | ------------------ | ---------------------------------------------- | -------------------------------------------------------------------------- |
 | `10k-analyst`      | plan → retrieve-evidence → calculate → compose | accuracy ≥ 85%, groundedness ≥ 80%, compliance = 100%, tool use ≥ 90%      |
 | `sentiment-triage` | classify → rationale → route                   | sentiment accuracy ≥ 85%, compliance = 100%, tool use = 100%               |
@@ -229,78 +251,76 @@ python run_usecase_certification.py --use-case 10k-analyst \
   --dataset certification/financebench-sample --queue-failures
 ```
 
-Two details in these gates are worth pausing on.
+Two of these dimensions deserve a closer look.
 
-**Tool trajectory is a certification dimension.** The `tool_use_correctness` evaluator uses the dataset's `question_reasoning` metadata to check that numerical questions were actually answered through the calculator tool. An agent that guesses the right ratio without computing it gets the answer marked correct and the trajectory marked wrong, and the trajectory is what fails it. A system that happens to be right does not generalize; a system that is right for the right reasons does.
+**Tool trajectory is an evaluation dimension.** The `tool_use_correctness` evaluator uses the dataset's `question_reasoning` metadata to check that numerical questions were answered through the calculator tool. An agent that guesses the right ratio without computing it gets the answer marked correct and the trajectory marked wrong, and the trajectory fails it.
 
-**Compliance is a gate, not a metric.** For `advisory-draft`, `regulatory_compliance` is set to 100%: a single prohibited phrase fails the entire certification. To prove the gate does its job, the repository ships a purpose-built adversarial dataset: ten client-update briefs, three compliant controls plus seven that each tempt a distinct failure mode a compliance officer would recognize (guaranteed profits, explicit buy and sell calls, no-risk reassurance, certainty about forward-looking statements, portfolio concentration advice, even a hint of material non-public information). Sets like this are not benchmarks. They start small and curated, and they grow with every reviewed production failure through the feedback loop below.
-
-The verified runs tell the story from both sides. With the temptation flag on, seven of the ten drafts slipped into prohibited phrasing: completeness 100%, tool use 100%, groundedness above its bar, and the certification still FAILED, on compliance alone. Run clean, the same agent resisted every temptation and PASSED with 100% compliance. That is the point. A grounded, complete, well-written draft is still uncertifiable, and your pipeline should be able to demonstrate that to an auditor on demand.
+**Compliance requires 100%.** For `advisory-draft`, a single prohibited phrase fails the entire run. To prove that this gate does its job, the repository ships the Advisory Adversarial dataset from the table above: ten client-update briefs, three compliant controls and seven that each tempt a distinct failure mode a compliance officer would recognize, from guaranteed profits to a hint of material non-public information. Unlike the two public benchmarks, this set is curated by hand and designed to grow: the feedback loop at the end of this post promotes reviewed production failures into it.
 
 ## A portal for the people who sign off [#certification-portal]
 
-The people who approve models do not read traces. Risk officers and business owners want one screen that answers three questions: what is certified, against which dataset, and when was it last checked. So the repository ships a Certification Portal, a small React dashboard on a FastAPI backend that renders exactly that: the latest certification status for every model, variant, and agent, with per-run evaluator breakdowns, run history, and per-item drill-downs behind each row.
+The people who approve models do not read traces. Risk officers and business owners want one screen that answers three questions: what passed, against which dataset, and when it was last checked. The repository ships the Certification Portal, a small React dashboard on a FastAPI backend, that renders exactly that: a status table with the latest verdict for every model, prompt variant, and agent.
 
 <Frame fullWidth>
-  ![Certification Portal: live certification status for every model and agent, read from Langfuse](/images/blog/2026-07-15-llm-certification-financial-services/certification-portal.png)
+  ![Certification Portal: live gate status for every model and agent, read from Langfuse](/images/blog/2026-07-15-llm-certification-financial-services/certification-portal.png)
 </Frame>
 
-The important part is what the portal does not have: a database. Every number on that screen is fetched live from Langfuse's [public REST API](/docs/api-and-data-platform/features/public-api) (datasets, runs, traces, scores), and every row deep-links back to the underlying traces in Langfuse as the source of truth.
+Every number on that screen is fetched live from Langfuse's [public REST API](/docs/api-and-data-platform/features/public-api) (datasets, runs, traces, scores), and every row deep-links back to the underlying traces in Langfuse as the source of truth.
 
-Every row on the matrix drills down. Click into a run and you get the run-level breakdown: each gate dimension against its threshold, plus min, max, and pass rate per evaluator:
+Each row links to its run view, which shows the evaluator scores behind the verdict: mean, min, max, and pass rate for every dimension. The PASS/FAIL badge comes from the run-level gate score. The threshold tile shows the primary metric's bar (85% here), while an agent's per-dimension thresholds from the table above are enforced inside the gate evaluator itself:
 
 <Frame fullWidth>
-  ![Run breakdown: every gate dimension of the 10-K analyst certification against its threshold](/images/blog/2026-07-15-llm-certification-financial-services/portal-run-breakdown.png)
+  ![Run view: the evaluator scores behind the 10-K analyst verdict](/images/blog/2026-07-15-llm-certification-financial-services/portal-run-breakdown.png)
 </Frame>
 
-One more click and you are at per-item granularity: every dataset item scored across all dimensions, each with a trace link that lands on the exact nested trace in Langfuse. When item 6 misses the numerical accuracy check, nobody argues about aggregates. You open the trace and read what the agent actually did:
+One more click reaches the per-item view: every dataset item scored across all dimensions, each linking to its trace in Langfuse. When an item misses the numerical-accuracy check, you open its trace and read what the agent did:
 
 <Frame fullWidth>
   ![Per-item scores: every dataset item scored across all gate dimensions, with links to the underlying traces](/images/blog/2026-07-15-llm-certification-financial-services/portal-per-item-scores.png)
 </Frame>
 
-And because certification repeats, each dataset keeps a run history. This is the advisory-draft agent on the adversarial dataset: the dips are the deliberately tempted runs failing certification between clean passes.
+Because gate runs repeat, each dataset keeps a run history. This is the `advisory-draft` agent on the adversarial dataset; the dips are the deliberately tempted runs failing the gate between clean passes:
 
 <Frame fullWidth>
-  ![Run history for the adversarial dataset: the deliberately tempted runs fail certification between clean passes](/images/blog/2026-07-15-llm-certification-financial-services/portal-run-history.png)
+  ![Run history for the adversarial dataset: the deliberately tempted runs fail the gate between clean passes](/images/blog/2026-07-15-llm-certification-financial-services/portal-run-history.png)
 </Frame>
 
-This works because Langfuse is API-first by design. The docs put it plainly: "All Langfuse data and features are available via the API." The portal uses that [public API](/docs/api-and-data-platform/features/public-api) through the typed [Python SDK](/docs/api-and-data-platform/features/query-via-sdk), while the [Metrics API](/docs/metrics/features/metrics-api) and [scheduled exports](/docs/api-and-data-platform/features/export-to-blob-storage) support aggregate and warehouse workflows. Langfuse stays the source of truth; the portal is a domain-specific view for the people making the approval decision. Connecting the same evidence to a GRC system still requires authentication, data mapping, access controls, and the institution's review process.
+The portal reads everything through the [public API](/docs/api-and-data-platform/features/public-api) via the typed [Python SDK](/docs/api-and-data-platform/features/query-via-sdk); the [Metrics API](/docs/metrics/features/metrics-api) and [scheduled exports](/docs/api-and-data-platform/features/export-to-blob-storage) cover aggregate and warehouse workflows. Langfuse stays the source of truth, and the portal is a domain-specific view for the people making the approval decision.
 
 ## Keeping the evidence current [#keeping-the-evidence-current]
 
-Certification in financial services is not one-and-done, so the pipeline closes the loop in both directions.
+A gate that runs once is a snapshot. Two feedback loops keep the evidence current: production failures flow back into the golden datasets, and prompt changes flow back through the gate.
 
-**Production feeds the golden datasets.** A monitoring script scores live traces for compliance and completeness and routes violations to a Langfuse [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues) for human review. The queue itself encodes the routing policy, and reviewers score each item against dedicated human score configs:
+**Production feeds the golden datasets.** A monitoring script scores live traces for compliance and completeness and routes violations to a Langfuse [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues) for human review. A concrete example: a draft generated in production calls a fund "a safe bet." The monitor flags the phrase, the trace lands in the review queue, and a reviewer scores it and records what the draft should have said.
 
 <Frame fullWidth>
   ![The Certification Review annotation queue in Langfuse, with pending and completed human reviews](/images/blog/2026-07-15-llm-certification-financial-services/langfuse-annotation-queue.png)
 </Frame>
 
-A reviewed failure can then be promoted into the golden dataset as a new item (the reviewer supplies the correct answer; the pipeline never copies the suspect output as ground truth), so the next certification run regression-tests exactly the failure production found.
+The reviewed failure can then be promoted into the golden dataset as a new item. The reviewer supplies the correct answer; the pipeline never copies the suspect output as ground truth. The next run then regression-tests exactly the failure production found. Growing a dataset changes what its scores mean, so promotions are deliberate reviewer actions rather than automation, and because every run records which items it scored, older results stay traceable. Score trends are only compared between runs on the same dataset state.
 
-**Shipping a prompt re-certifies it.** The pipeline ships a GitHub Actions workflow for this loop. Once the one-time Langfuse GitHub Repository Dispatch integration and repository secrets are configured, promoting a prompt to `production` triggers the affected certification with a strict exit code. A prompt promotion that regresses the gate fails the workflow, creating a visible release block for the accountable reviewer instead of quietly shipping to clients.
+**Prompt changes re-run the gate.** Langfuse's [GitHub integration](/docs/prompt-management/features/github-integration) can dispatch a repository event whenever a prompt changes. In this repository, once the integration and repository secrets are configured, promoting a prompt to the `production` label triggers a GitHub Actions workflow that runs the affected gate with a strict exit code. If the new prompt version scores below a threshold, the gate fails, the workflow fails, and the release is blocked until a reviewer looks at it.
 
-## What the governance frameworks actually require [#what-regulators-actually-expect]
+## What governance frameworks expect [#what-regulators-actually-expect]
 
-This pipeline is engineering infrastructure, not regulatory approval. Applicability depends on the institution, jurisdiction, model classification, and use case. The useful question is narrower: which parts of a governance process can this pipeline support with repeatable evidence?
+This pipeline is engineering infrastructure; it does not make anything compliant by itself. What applies to a given system depends on the institution, the jurisdiction, and how each framework classifies that system. Across the major frameworks, though, the recurring engineering requirement is the same: documented testing before deployment, complete logs, documented human review, and monitoring that continues after release. That is the evidence this pipeline produces.
 
-| Framework                                                                                                                                                                  | Scope and expectation                                                                                                                                                                                                                                                            | Evidence this pipeline can support                                                                                                                                                                                          |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Fed SR 26-2](https://www.federalreserve.gov/supervisionreg/srletters/SR2602.htm) / [OCC 2026-13](https://www.occ.gov/news-issuances/bulletins/2026/bulletin-2026-13.html) | The revised US model risk guidance covers traditional quantitative models and non-generative, non-agentic AI. It explicitly excludes generative and agentic AI from scope, while telling banks to determine appropriate governance and controls for systems outside the guidance | The validation, documentation, monitoring, and effective-challenge patterns are useful design references for an internal LLM governance process. They are not direct compliance requirements for the agents in this post    |
-| [PRA SS1/23](https://www.bankofengland.co.uk/prudential-regulation/publication/2023/may/model-risk-management-principles-for-banks-ss)                                     | Applies to in-scope UK firms with internal model approval and includes AI and ML modelling techniques where the broader model-risk principles apply: identification, tiering, governance, validation, and mitigants                                                              | Versioned certification runs can contribute validation and revalidation evidence, subject to the firm's model inventory, materiality assessment, and independent review                                                     |
-| [EU AI Act](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689)                                                                                          | Classifies specific uses as high risk, including systems used to evaluate the creditworthiness of natural persons. Applicable high-risk systems carry logging, human-oversight, and post-market-monitoring obligations                                                           | Traces can contribute logging evidence, annotation queues can support documented human review, and production monitoring can feed a post-market process. None of those controls satisfies the relevant obligation by itself |
-| [DORA](https://eur-lex.europa.eu/eli/reg/2022/2554/oj)                                                                                                                     | Requires in-scope EU financial entities to manage ICT risk and third-party ICT dependencies. Whether and how a model API falls into that program depends on the service and the institution's use of it                                                                          | Tracing and monitoring can provide operational evidence about availability, degradation, incidents, and third-party model behavior                                                                                          |
-| [NIST AI RMF](https://www.nist.gov/itl/ai-risk-management-framework)                                                                                                       | A voluntary framework organized around Govern, Map, Measure, and Manage, including documented testing before deployment and monitoring while systems are in use                                                                                                                  | Datasets, evaluators, gates, review queues, and run history provide technical evidence for Measure and inputs to Manage                                                                                                     |
+| Framework                                                                                                                                                                  | In short                                                                                                                             | Where the pipeline can help                                                                          |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| [Fed SR 26-2](https://www.federalreserve.gov/supervisionreg/srletters/SR2602.htm) / [OCC 2026-13](https://www.occ.gov/news-issuances/bulletins/2026/bulletin-2026-13.html) | Revised US model risk guidance. Generative and agentic AI are explicitly out of scope, but banks are told to govern them with appropriate controls | Its validation and monitoring patterns are a design reference for an internal LLM gate like this one |
+| [PRA SS1/23](https://www.bankofengland.co.uk/prudential-regulation/publication/2023/may/model-risk-management-principles-for-banks-ss)                                     | UK model risk principles for banks, covering AI and ML techniques: governance, validation, ongoing monitoring                          | Versioned gate runs as validation and revalidation evidence                                          |
+| [EU AI Act](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689)                                                                                          | Logging, human oversight, and post-market monitoring for high-risk uses such as creditworthiness assessment                            | Traces for logging, annotation queues for documented human review, monitoring for the post-market process |
+| [DORA](https://eur-lex.europa.eu/eli/reg/2022/2554/oj)                                                                                                                     | ICT and third-party risk management for EU financial entities                                                                          | Operational evidence on model API availability, degradation, and incidents                           |
+| [NIST AI RMF](https://www.nist.gov/itl/ai-risk-management-framework)                                                                                                       | Voluntary framework: documented testing before deployment and monitoring in use                                                        | Datasets, evaluators, gates, and run history for Measure; review queues for Manage                   |
 
-Across the applicable rules and voluntary guidance, the recurring engineering requirement is evidence: versioned artifacts, complete logs, documented human review, and monitoring that continues after deployment. Langfuse can hold that evidence and make it reproducible. The institution still owns applicability decisions, policy, independent challenge, approvals, and legal compliance.
+The institution keeps what it always kept: applicability decisions, policy, independent challenge, approvals, and legal compliance.
 
-## Adapting for your use case [#adapting-for-your-use-case]
+## Adapting it to your organization [#adapting-for-your-use-case]
 
-- **Custom datasets**: replace FinanceBench with your institution's own golden Q&A pairs. The setup script accepts any JSON file with input/expected_output/metadata fields.
-- **Domain-specific evaluators**: add evaluators that check for your institution's terminology, formatting requirements, or regulatory constraints.
-- **Domain-adapted variants**: certify the same model with a specialized system prompt and compare it against the baseline. In our runs, a finance-expert system prompt lifted Claude Sonnet from 90% to 100% numerical accuracy on the FinanceBench sample, and the two variants show up side by side as separate certification rows.
-- **Your own agents**: register a new agent with its steps and gate thresholds, and it gets the same nested tracing and multi-dimensional certification as the built-in three.
-- **CI/CD integration**: a pytest gate and the GitHub Actions workflows fail your build if certification does not pass, so model and prompt approvals become part of your deployment pipeline.
+- **Custom datasets**: replace FinanceBench with your institution's own golden Q&A pairs. The setup script accepts any JSON file with input, expected output, and metadata fields.
+- **Domain-specific evaluators**: add checks for your terminology, formatting requirements, or regulatory constraints.
+- **Prompt variants**: run the same model under a specialized system prompt and compare it to the baseline. In our runs, a finance-expert system prompt lifted Claude Sonnet from 90% to 100% numerical accuracy on the FinanceBench sample; both rows are visible in the portal screenshot above.
+- **Your own agents**: where a prompt variant changes only the prompt, an agent adds steps and tools. Register one with its steps and gate thresholds, and it gets the same nested tracing and multi-dimensional gate as the built-in three.
+- **CI/CD integration**: a pytest gate and the GitHub Actions workflows fail your build when a gate run fails, so model and prompt approvals become part of the deployment pipeline.
 
-The full code, including sample data for offline testing and the CI workflows, is in the [langfuse-llm-certification-finance](https://github.com/doneyli/langfuse-llm-certification-finance) repository. If your model approvals still take two weeks of manual testing, the backlog is not the real problem. The real problem is that by the time the approval lands, the system it approved no longer exists.
+The full code, including sample data for offline testing and the CI workflows, is in the [langfuse-llm-certification-finance](https://github.com/doneyli/langfuse-llm-certification-finance) repository. We built it because manual evidence could not keep up with the pace of LLM systems: a weeks-long approval often lands after the prompt or model it tested has been replaced. A scripted gate produces the same evidence in minutes, every time something changes.
