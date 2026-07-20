@@ -1,4 +1,5 @@
 import { Hero } from "./Hero";
+import { ProblemSolution } from "./ProblemSolution";
 import { FeatureTabsSection } from "./FeatureTabsSection";
 import { RiveSection } from "./RiveSection";
 import { AllTheTools } from "./AllTheTools";
@@ -14,6 +15,7 @@ export const Home = () => (
   <>
     <main className="overflow-hidden relative w-full hero-bg xl:px-5 2xl:px-10">
       <Hero />
+      <ProblemSolution />
       <FeatureTabsSection />
       <RiveSection />
       <AllTheTools />
