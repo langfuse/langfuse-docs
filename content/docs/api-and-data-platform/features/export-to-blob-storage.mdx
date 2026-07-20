@@ -74,7 +74,7 @@ Every run also writes a [run manifest](#run-manifest) under `manifests/`. For th
   recommended to [upgrade](#upgrade-path).
 </Callout>
 
-On Langfuse Cloud, integrations that still export a legacy source (including `Traces and observations (legacy) and enriched observations`) also receive a plain-text deprecation notice at `{prefix}{project-id}/DEPRECATION_NOTICE.txt`. It is refreshed on every successful run — written after the run's [manifest](#run-manifest) and not listed in it — and removed automatically on the next successful run after the integration switches to `Enriched observations (recommended)`. Account for this object if your pipelines diff bucket contents or subscribe to object-created events without a prefix filter.
+On Langfuse Cloud, integrations that still export a legacy source (including `Traces and observations (legacy) and enriched observations`) also receive a plain-text deprecation notice at `{prefix}{project-id}/DEPRECATION_NOTICE.txt`. It is refreshed on every successful run — written best-effort after the run's [manifest](#run-manifest) and not listed in it — and removed automatically on the next successful run after the integration switches to `Enriched observations (recommended)`. The manifest remains the authoritative run-completion marker; do not treat the notice as a completion signal. Account for this object if your pipelines diff bucket contents or subscribe to object-created events without a prefix filter.
 
 <Callout type="info">
 **Langfuse Cloud:** Legacy export sources can no longer be newly selected:
