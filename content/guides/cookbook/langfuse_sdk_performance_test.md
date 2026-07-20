@@ -8,37 +8,41 @@ category: SDKs
 Langfuse shall have a minimal impact on latency. This is achieved by running almost entirely in the background and by batching all requests to the Langfuse API.
 
 Coverage of this performance test:
-- Langfuse SDK: trace(), generation(), span()
+- Langfuse SDK: start_observation(), start_as_current_observation(), @observe decorator
 - Langchain Integration
 - OpenAI Integration
 - LlamaIndex Integration
 
-Limitation: We test integrations using OpenAI's hosted models, making the experiment less controlled but actual latency of the integrations impact more realistic.
+Limitations:
+- We test integrations using OpenAI's hosted models, making the experiment less controlled but actual latency of the integrations impact more realistic.
+- The timing outputs in this notebook are from an older run on a specific machine and network. Absolute numbers will vary, re-run the notebook to benchmark your own environment.
 
 ## Setup
 
-_**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
-
 
 ```python
-%pip install "langfuse<3.0.0" --upgrade
+%pip install langfuse --upgrade
 ```
 
 
 ```python
 import os
 
-os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "")
-os.environ.setdefault("LANGFUSE_SECRET_KEY", "")
-os.environ.setdefault("LANGFUSE_HOST", "")
-os.environ.setdefault("OPENAI_API_KEY", "")
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+
+# Your openai key
+os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...")
 ```
 
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+langfuse = get_client()
 ```
 
 
@@ -61,99 +65,47 @@ def time_func(func, runs=100):
 
 ## Python SDK
 
-`trace()`
+`start_observation()`, manually creating and ending a root span
 
 
 ```python
-time_func(lambda: langfuse.trace(name="perf-trace"))
+time_func(lambda: langfuse.start_observation(name="perf-span").end())
 ```
 
-
-
-
-    count         100.000000
-    mean (sec)      0.000266
-    std (sec)       0.000381
-    min (sec)       0.000154
-    25% (sec)       0.000191
-    50% (sec)       0.000197
-    75% (sec)       0.000211
-    max (sec)       0.003784
-    dtype: float64
-
-
-
-`span()`
+`start_observation(as_type="generation")`, nested as a child observation
 
 
 ```python
-trace = langfuse.trace(name="perf-trace")
+root_span = langfuse.start_observation(name="perf-root-span")
 
-time_func(lambda: trace.span(name="perf-span"))
+time_func(lambda: root_span.start_observation(name="perf-generation", as_type="generation").end())
+
+root_span.end()
 ```
 
-
-
-
-    count         100.000000
-    mean (sec)      0.000162
-    std (sec)       0.000199
-    min (sec)       0.000096
-    25% (sec)       0.000099
-    50% (sec)       0.000106
-    75% (sec)       0.000130
-    max (sec)       0.001635
-    dtype: float64
-
-
-
-`generation()`
+`start_as_current_observation()`, context manager that sets the active observation
 
 
 ```python
-trace = langfuse.trace(name="perf-trace")
+def traced_operation():
+    with langfuse.start_as_current_observation(as_type="span", name="perf-span"):
+        pass
 
-time_func(lambda: trace.generation(name="perf-generation"))
+time_func(traced_operation)
 ```
 
-
-
-
-    count         100.000000
-    mean (sec)      0.000196
-    std (sec)       0.000165
-    min (sec)       0.000132
-    25% (sec)       0.000137
-    50% (sec)       0.000148
-    75% (sec)       0.000173
-    max (sec)       0.001238
-    dtype: float64
-
-
-
-`event()`
+`@observe` decorator, automatically capturing timings, inputs and outputs
 
 
 ```python
-trace = langfuse.trace(name="perf-trace")
+from langfuse import observe
 
-time_func(lambda: trace.event(name="perf-generation"))
+@observe()
+def observed_function():
+    return "ok"
+
+time_func(observed_function)
 ```
-
-
-
-
-    count         100.000000
-    mean (sec)      0.000236
-    std (sec)       0.000300
-    min (sec)       0.000152
-    25% (sec)       0.000177
-    50% (sec)       0.000189
-    75% (sec)       0.000219
-    max (sec)       0.003144
-    dtype: float64
-
-
 
 ## Langchain Integration
 
@@ -181,7 +133,7 @@ from langfuse.langchain import CallbackHandler
 langfuse_handler = CallbackHandler()
 ```
 
-### Bechmark without Langfuse
+### Benchmark without Langfuse
 
 
 ```python
@@ -308,7 +260,7 @@ Docs: https://langfuse.com/integrations/frameworks/llamaindex
 
 
 ```python
-%pip install llama-index --upgrade --quiet
+%pip install llama-index openinference-instrumentation-llama-index --upgrade --quiet
 ```
 
 Sample documents
@@ -325,7 +277,7 @@ Throughout his career, Silverstein has been celebrated for his diverse range of 
 """)
 ```
 
-### Bechmark without Langfuse
+### Benchmark without Langfuse
 
 Index
 
@@ -379,12 +331,10 @@ time_func(lambda: index.as_query_engine().query("What did he do growing up?"))
 
 
 ```python
-from llama_index.core import Settings
-from llama_index.core.callbacks import CallbackManager
-from langfuse.llama_index import LlamaIndexCallbackHandler
+from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
 
-langfuse_callback_handler = LlamaIndexCallbackHandler()
-Settings.callback_manager = CallbackManager([langfuse_callback_handler])
+# Initialize LlamaIndex instrumentation
+LlamaIndexInstrumentor().instrument()
 ```
 
 Index
@@ -394,21 +344,6 @@ Index
 time_func(lambda: VectorStoreIndex.from_documents([doc1,doc2]))
 ```
 
-
-
-
-    count         100.000000
-    mean (sec)      0.178796
-    std (sec)       0.101976
-    min (sec)       0.112530
-    25% (sec)       0.138217
-    50% (sec)       0.163698
-    75% (sec)       0.179563
-    max (sec)       0.992403
-    dtype: float64
-
-
-
 Query
 
 
@@ -416,18 +351,3 @@ Query
 index = VectorStoreIndex.from_documents([doc1,doc2])
 time_func(lambda: index.as_query_engine().query("What did he do growing up?"))
 ```
-
-
-
-
-    count         100.000000
-    mean (sec)      0.802315
-    std (sec)       0.230386
-    min (sec)       0.423413
-    25% (sec)       0.639373
-    50% (sec)       0.784945
-    75% (sec)       0.945300
-    max (sec)       2.164593
-    dtype: float64
-
-

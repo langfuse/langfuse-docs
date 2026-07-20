@@ -397,9 +397,8 @@ This approach is ideal when you need:
 - **Complex multi-turn dialogs** that follow specific patterns
 
 
-
-```python
-import { Langfuse } from "langfuse";
+```typescript
+import { LangfuseClient } from "@langfuse/client";
 
 import {
   oneOf,
@@ -414,10 +413,10 @@ import {
 import { weatherTool, searchEmailTool } from "@qforge/torque/examples";
 import { openai } from "@ai-sdk/openai";
 
-const langfuse = new Langfuse({
+const langfuse = new LangfuseClient({
   publicKey: process.env.LANGFUSE_PUBLIC_KEY,
   secretKey: process.env.LANGFUSE_SECRET_KEY,
-  baseUrl: process.env.LANGFUSE_URL,
+  baseUrl: process.env.LANGFUSE_BASE_URL,
 });
 
 // Generate dataset with Torque's declarative DSL
@@ -470,7 +469,7 @@ await generateDataset(conversationSchema, {
 });
 
 // Read generated JSONL and upload to Langfuse
-await langfuse.createDataset({
+await langfuse.api.datasets.create({
   name: "torque_tool",
   description: "Tool calling conversations generated with Torque DSL",
 });
@@ -482,7 +481,7 @@ const conversations = jsonlContent
   .map((line) => JSON.parse(line));
 
 for (const conversation of conversations) {
-  await langfuse.createDatasetItem({
+  await langfuse.dataset.createItem({
     datasetName: "torque_tool",
     input: conversation.messages,
     metadata: {
@@ -491,9 +490,6 @@ for (const conversation of conversations) {
     },
   });
 }
-
-await langfuse.flushAsync();
-
 ```
 
 **Key advantages of Torque:**
