@@ -1,0 +1,99 @@
+---
+title: "Headless Langfuse: Evaluations From Your Coding Agent"
+description: "Instrument, trace, analyze, build a dataset, and run LLM-as-a-judge evaluations without touching the Langfuse UI — driven entirely from your coding agent with the Langfuse Agent Skill."
+ogImage: /images/videos/headless-langfuse-evaluations.jpg
+---
+
+# Headless Langfuse: Evaluations From Your Coding Agent
+
+Setting up LLM observability and evaluation usually means adding SDK code by hand, clicking through a UI to build test sets, and wiring up evaluators one at a time. This walkthrough does all of it without ever opening the Langfuse UI — by talking to a coding agent instead.
+
+We call this approach **Headless**: the [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill) turns Langfuse into a platform you control through natural language. You describe the job, and your agent runs a research-backed playbook right inside your editor.
+
+<iframe
+  width="100%"
+  className="aspect-[16/9] rounded-lg border mt-6 w-full"
+  src="https://www.youtube-nocookie.com/embed/4ZT7GWEjFVk"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
+
+## The magic ingredient: the Langfuse Agent Skill [#agent-skill]
+
+The [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill) is open source and follows the open [Agent Skills](https://github.com/anthropics/skills) standard, so it works in Claude Code, Cursor, Codex, Windsurf, and whatever else you use.
+
+Under the hood, it gives the agent two things:
+
+- **Programmatic access** to the full Langfuse REST API through the [Langfuse CLI](/docs/api-and-data-platform/features/cli).
+- **Documentation retrieval**, so the agent looks up current best practices instead of guessing.
+
+It uses **progressive disclosure**: only a tiny description sits in the agent's context, and the full instructions load on demand when the task is actually relevant. This keeps context usage low while giving the agent specialized knowledge when it needs it.
+
+## Install it in one line [#install]
+
+import AutoInstall from "@/components-mdx/get-started/auto-install.mdx";
+
+<AutoInstall />
+
+If you're on Cursor, the marketplace plugin bundles the skill automatically, and there's a plugin on the Claude marketplace too. Either way, that's the whole setup — the agent now knows how to speak Langfuse.
+
+## Step 1: Add tracing to your app [#add-tracing]
+
+Start with an app that calls an LLM but has no observability — you're blind to what it's doing in production. Ask the agent:
+
+> Use the Langfuse skill to add tracing to this application following best practices.
+
+The agent reads the docs, detects your stack, and wires in the right integration:
+
+- For a **JavaScript or TypeScript** app, that's the OpenTelemetry span processor plus the Langfuse wrapper.
+- For **Python**, it uses `pip` to install `langfuse`; the SDK is OpenTelemetry-based under the hood.
+
+It also scaffolds the three environment variables you need — public key, secret key, and region — and reminds you to paste in the values from your project settings. It doesn't grab your keys for you, but it does everything around them.
+
+## Step 2: Generate real production data [#generate-data]
+
+Now use the app for a minute — a few good queries, and a couple you know it'll fumble. Over in Langfuse, the [traces](/docs/observability/get-started) roll in: every call, its input, output, latency, and cost. That's your raw material.
+
+## Step 3: Analyze traces headlessly [#analyze]
+
+Instead of clicking through traces yourself, ask the agent to do the analysis:
+
+> Fetch my last 20 Langfuse traces, then analyze them — where is the app underperforming, and which traces failed?
+
+Behind the scenes it calls the CLI, pulls the traces down as JSON, and reasons over them. It comes back with a real analysis: which responses hallucinated, where the latency spikes on long inputs, and the specific trace IDs that failed.
+
+Those failing traces are worth gold — they're exactly the cases you want to guard against.
+
+## Step 4: Turn failures into a dataset [#build-dataset]
+
+A [dataset](/docs/evaluation/experiments/datasets) in Langfuse is a collection of inputs and expected outputs you test against. Ask the agent:
+
+> Create a dataset called `edge-cases` and add those three failing traces to it as items.
+
+The agent creates the dataset and links each failing trace straight to a dataset item. It's the same workflow the docs recommend — select the bad production traces, then have an expert add the expected output — except the agent does the busywork. Now you have a reusable regression set built from real failures.
+
+## Step 5: Set up an LLM-as-a-judge evaluator [#evaluate]
+
+You don't want to grade outputs by hand forever, so set up an [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluator — a capable model that scores outputs against criteria you define. Ask the agent:
+
+> Set up an LLM-as-a-judge evaluator for hallucination and helpfulness, and run it on the `edge-cases` dataset.
+
+Langfuse ships managed evaluators for things like hallucination, toxicity, and helpfulness with no prompt writing required, or you can define a custom rubric. Scores can be numeric, categorical, or boolean, and they attach right to each run.
+
+The recommended pattern is to use [experiments](/docs/evaluation/experiments/data-model) on your dataset while you're iterating, then deploy evaluators on live production traces with sampling. Now every future version of the app gets scored against your worst cases, automatically.
+
+## The full loop [#the-full-loop]
+
+That's the complete evaluation loop — **instrument, trace, analyze, build a dataset, and evaluate** — run entirely from a coding agent, headless.
+
+To go deeper on any single step:
+
+- [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill) and [Langfuse for Agents](/agents) — the skill, CLI, and MCP server for coding agents
+- [Evaluation overview](/docs/evaluation/overview) — all evaluation methods in Langfuse
+- [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge)
+- [Datasets and experiments](/docs/evaluation/experiments/datasets)
+- [Langfuse Academy](/academy) — a deeper course on evaluation
+- [Langfuse Skills on GitHub](https://github.com/langfuse/skills)
