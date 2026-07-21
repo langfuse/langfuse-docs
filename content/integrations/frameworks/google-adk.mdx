@@ -121,6 +121,31 @@ for event in runner.run(user_id=USER_ID, session_id=SESSION_ID, new_message=user
 
 Langfuse automatically maps the `user_id` and `session_id` you pass to `runner.run()` to the trace's **user** and **session** — you get [user](https://langfuse.com/docs/observability/features/users) and [session](https://langfuse.com/docs/observability/features/sessions) tracking without any extra code.
 
+### Example 2: Named and filterable traces [#example-2-named-and-filterable-traces]
+
+By default, traces are named after the ADK app (`invocation [hello_app]`). Use [`propagate_attributes`](https://langfuse.com/docs/observability/sdk/instrumentation) to set a descriptive trace name, tags, and metadata so you can filter traces in Langfuse.
+
+One thing to watch out for: the synchronous `runner.run()` executes the agent on a background worker thread, so OpenTelemetry context — and with it everything set via `propagate_attributes` — does not reach the ADK spans. Use the async `runner.run_async()` API instead, which runs in the current context:
+
+```python
+from langfuse import propagate_attributes
+
+SESSION_ID_2 = "demo-session-2"
+await session_service.create_session(app_name=APP_NAME, user_id=USER_ID, session_id=SESSION_ID_2)
+
+with propagate_attributes(
+    trace_name="hello-agent-request",
+    tags=["google-adk", "cookbook"],
+    metadata={"example": "named-trace"},
+):
+    async for event in runner.run_async(user_id=USER_ID, session_id=SESSION_ID_2, new_message=user_msg):
+        if event.is_final_response():
+            if event.content:
+                print(event.content.parts[0].text)
+            elif event.error_message:
+                print(f"Agent error: {event.error_message}")
+```
+
 ## Step 5: View the trace in Langfuse
 
 Head over to your **Langfuse dashboard → Traces**. You should see traces including all tool calls and model inputs/outputs.
