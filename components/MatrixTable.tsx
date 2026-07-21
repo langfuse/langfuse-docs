@@ -25,18 +25,31 @@ export type MatrixFilter = {
  *   synced with the `#filter-<id>` URL hash so other pages can deep-link a
  *   pre-filtered matrix. `filterAliases` maps legacy ids in inbound links to
  *   current filter ids.
+ * - Optional `highlightColumn` tints one column (the recommended/GA one) in
+ *   the main table and the last column of multi-column detail tables.
  *
  * The table itself stays plain markdown so it survives in the generated .md
  * sources; the detail blocks are also plain markdown inside CompatDetail.
  */
+
+// Tailwind needs literal class strings, so each supported column index has
+// its own precomputed variant.
+const HIGHLIGHT_CLASSES: Record<number, string> = {
+  3: "[&_thead_th:nth-child(3)]:!bg-[hsl(var(--muted-blue)/0.12)] [&_tbody_tr:not([data-compat-expansion])>td:nth-child(3)]:bg-[hsl(var(--muted-blue)/0.12)]",
+  4: "[&_thead_th:nth-child(4)]:!bg-[hsl(var(--muted-blue)/0.12)] [&_tbody_tr:not([data-compat-expansion])>td:nth-child(4)]:bg-[hsl(var(--muted-blue)/0.12)]",
+};
+
 export function MatrixTable({
   children,
   filters,
   filterAliases,
+  highlightColumn,
 }: {
   children: ReactNode;
   filters?: MatrixFilter[];
   filterAliases?: Record<string, string>;
+  /** 1-based column to tint as the recommended/GA column (3 or 4). */
+  highlightColumn?: 3 | 4;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState("all");
@@ -124,35 +137,6 @@ export function MatrixTable({
     if (!table) return;
 
     const cleanups: (() => void)[] = [];
-
-    // Inject a first header row with "Langfuse Cloud" above the highlighted
-    // OSS v4 column (GFM tables only support a single header row).
-    const thead = table.querySelector<HTMLTableSectionElement>("thead");
-    const headRow = thead?.querySelector<HTMLTableRowElement>("tr");
-    // The highlighted Cloud column is the 4th one (kept in sync with the
-    // nth-child(4) highlight rules in the wrapper className below).
-    const colCount = headRow
-      ? Array.from<HTMLTableCellElement>(headRow.cells).reduce(
-          (n, c) => n + c.colSpan,
-          0,
-        )
-      : 0;
-    if (thead && colCount > 4 && !thead.querySelector("[data-cloud-row]")) {
-      const tr = document.createElement("tr");
-      tr.dataset.cloudRow = "true";
-      const mk = (colSpan: number, text?: string) => {
-        const th = document.createElement("th");
-        th.colSpan = colSpan;
-        if (text) {
-          th.textContent = text;
-          th.style.backgroundColor = "hsl(var(--muted-blue)/0.12)";
-        }
-        return th;
-      };
-      tr.append(mk(3), mk(1, "Langfuse Cloud"), mk(colCount - 4));
-      thead.prepend(tr);
-      cleanups.push(() => tr.remove());
-    }
 
     const details = Array.from<HTMLElement>(
       root.querySelectorAll("[data-compat-detail]"),
@@ -270,7 +254,11 @@ export function MatrixTable({
       )}
       <div
         ref={ref}
-        className="[&_th]:px-2.5 [&_td]:px-2.5 [&_td:first-child_code]:text-xs [&_tbody_tr:has(td:first-child>strong):has(td:nth-child(2):empty)]:bg-surface-1 [&_tbody_tr:has(td:first-child>strong):has(td:nth-child(2):empty)_td]:pt-4 [&_tr[role=button]]:cursor-pointer [&_tr[role=button]:hover]:bg-surface-1 [&_tr[aria-expanded=true]]:bg-surface-1 [&_tr[data-compat-expansion]>td]:p-4 [&_tr[data-compat-expansion]>td]:bg-surface-1 [&_thead_th:nth-child(4)]:!bg-[hsl(var(--muted-blue)/0.12)] [&_tbody_tr:not([data-compat-expansion])>td:nth-child(4)]:bg-[hsl(var(--muted-blue)/0.12)] [&_[data-compat-detail]_table:has(thead_th:nth-child(3))_thead_th:last-child]:!bg-[hsl(var(--muted-blue)/0.12)] [&_[data-compat-detail]_table:has(thead_th:nth-child(3))_tbody_td:last-child]:bg-[hsl(var(--muted-blue)/0.12)]"
+        className={`[&_th]:px-2.5 [&_td]:px-2.5 [&_td:first-child_code]:text-xs [&_tbody_tr:has(td:first-child>strong):has(td:nth-child(2):empty)]:bg-surface-1 [&_tbody_tr:has(td:first-child>strong):has(td:nth-child(2):empty)_td]:pt-4 [&_tr[role=button]]:cursor-pointer [&_tr[role=button]:hover]:bg-surface-1 [&_tr[aria-expanded=true]]:bg-surface-1 [&_tr[data-compat-expansion]>td]:p-4 [&_tr[data-compat-expansion]>td]:bg-surface-1 ${
+          highlightColumn
+            ? `${HIGHLIGHT_CLASSES[highlightColumn]} [&_[data-compat-detail]_table:has(thead_th:nth-child(3))_thead_th:last-child]:!bg-[hsl(var(--muted-blue)/0.12)] [&_[data-compat-detail]_table:has(thead_th:nth-child(3))_tbody_td:last-child]:bg-[hsl(var(--muted-blue)/0.12)]`
+            : ""
+        }`}
       >
         {children}
       </div>

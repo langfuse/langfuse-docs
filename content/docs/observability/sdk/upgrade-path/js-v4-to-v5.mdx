@@ -212,8 +212,8 @@ If you still need legacy v1 behavior, switch to the corresponding
   methods point to the Observations v2 and Metrics v2 endpoints, which require
   Langfuse v4 (Langfuse Cloud, or a self-hosted server upgraded to v4). On
   self-hosted Langfuse v3, use `langfuse.api.legacy.observationsV1` and
-  `langfuse.api.legacy.metricsV1` instead. See the [compatibility
-  overview](/docs/compatibility#sdk-server).
+  `langfuse.api.legacy.metricsV1` instead. See the [self-hosted
+  compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
 </Callout>
 
 ### [`@langfuse/langchain`](/integrations/frameworks/langchain) internal changes
@@ -247,5 +247,5 @@ The `traceMethod` wrapper now wraps the traced call in `propagateAttributes()` t
 7. Replace `release`/`environment` attribute usage with env vars (`LANGFUSE_RELEASE`, `LANGFUSE_TRACING_ENVIRONMENT`)
 8. Search for `api.observationsV2` / `api.scoreV2` / `api.metricsV2` → replace with `api.observations` / `api.scores` / `api.metrics`
 9. Search for legacy v1 usage on `api.observations` / `api.score` / `api.metrics` → move to `api.legacy.observationsV1` / `api.legacy.scoreV1` / `api.legacy.metricsV1`
-10. If you self-host Langfuse v3, use `api.legacy.observationsV1` and `api.legacy.metricsV1`; the default `api.observations` / `api.metrics` require Langfuse v4 (see the [compatibility overview](/docs/compatibility#sdk-server))
+10. If you self-host Langfuse v3, use `api.legacy.observationsV1` and `api.legacy.metricsV1`; the default `api.observations` / `api.metrics` require Langfuse v4 (see the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server))
 11. Remove any remaining references to `*V2` aliases (they were removed in v5)

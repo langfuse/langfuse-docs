@@ -216,8 +216,8 @@ If you still need legacy v1 behavior, switch to the corresponding
   methods point to the Observations v2 and Metrics v2 endpoints, which require
   Langfuse v4 (Langfuse Cloud, or a self-hosted server upgraded to v4). On
   self-hosted Langfuse v3, use `langfuse.api.legacy.observations_v1` and
-  `langfuse.api.legacy.metrics_v1` instead. See the [compatibility
-  overview](/docs/compatibility#sdk-server).
+  `langfuse.api.legacy.metrics_v1` instead. See the [self-hosted
+  compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
 </Callout>
 
 ### `start_span()` / `start_generation()` → `start_observation()`
@@ -324,5 +324,5 @@ The SDK now requires Pydantic v2. If your application still uses Pydantic v1, yo
 10. Upgrade Pydantic to v2 if still on v1
 11. Search for `api.observations_v_2` / `api.score_v_2` / `api.metrics_v_2` → replace with `api.observations` / `api.scores` / `api.metrics`
 12. Search for legacy v1 usage on `api.observations` / `api.score` / `api.metrics` → move to `api.legacy.observations_v1` / `api.legacy.score_v1` / `api.legacy.metrics_v1`
-13. If you self-host Langfuse v3, use `api.legacy.observations_v1` and `api.legacy.metrics_v1`; the default `api.observations` / `api.metrics` require Langfuse v4 (see the [compatibility overview](/docs/compatibility#sdk-server))
+13. If you self-host Langfuse v3, use `api.legacy.observations_v1` and `api.legacy.metrics_v1`; the default `api.observations` / `api.metrics` require Langfuse v4 (see the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server))
 14. Remove any remaining references to `*_v_2` aliases (they were removed in v4)

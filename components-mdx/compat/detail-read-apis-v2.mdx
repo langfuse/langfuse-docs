@@ -1,0 +1,5 @@
+GA. Requires Langfuse v4. See the [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2) docs.
+
+- **Via SDK:** these are the default resources in Python SDK v4 (`api.observations`, `api.metrics`) and JS/TS SDK v5 (`api.observations`, `api.metrics`). On OSS v3, the defaults fail; use `api.legacy.observations_v1` / `api.legacy.metrics_v1` (Python) or `api.legacy.observationsV1` / `api.legacy.metricsV1` (JS/TS).
+- **Via REST:** `GET /api/public/v2/observations?fromStartTime={datetime}&toStartTime={datetime}` and `GET /api/public/v2/metrics?query={json}`.
+- **Data freshness:** data from SDKs below Python 4.7.0 / JS 5.4.0, or OTel exporters without the `x-langfuse-ingestion-version: 4` header, can appear on these APIs with up to a 10-minute delay.

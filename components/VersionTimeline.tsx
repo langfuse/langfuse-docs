@@ -70,7 +70,7 @@ const ROWS: { id: string; name: string; segments: Segment[] }[] = [
         label: "v3",
         from: { year: 2026, month: 1 },
         to: { year: 2026, month: 8 },
-        href: "/docs/compatibility#sdk-server",
+        href: "/self-hosting/upgrade/versioning#sdk-server",
         title: "Self-hosted GA version is v3",
         className: SEGMENT_STYLES.previous,
       },

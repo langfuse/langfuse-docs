@@ -6,6 +6,12 @@ description: How Langfuse server, SDK, and API versions relate across Langfuse C
 import { MatrixTable, CompatDetail } from "@/components/MatrixTable";
 import { CompatBadge } from "@/components/CompatBadge";
 import { VersionTimeline } from "@/components/VersionTimeline";
+import DetailOpenTelemetry from "@/components-mdx/compat/detail-opentelemetry.mdx";
+import DetailLegacyIngestion from "@/components-mdx/compat/detail-legacy-ingestion.mdx";
+import DetailV1ReadApis from "@/components-mdx/compat/detail-v1-read-apis.mdx";
+import DetailReadApisV2 from "@/components-mdx/compat/detail-read-apis-v2.mdx";
+import DetailTraceLevelEvaluators from "@/components-mdx/compat/detail-trace-level-evaluators.mdx";
+import DetailLegacyExportSource from "@/components-mdx/compat/detail-legacy-export-source.mdx";
 
 # Versions & Compatibility
 
@@ -19,21 +25,21 @@ Reference for how Langfuse's server, SDK, and API versions relate across Langfus
 
 We try very hard to uphold this rule. v4 breaks backwards compatibility with older SDKs; see the [Langfuse v4 page](/docs/v4) for all information.
 
-| Deployment                         | How versioning works                                                                                                                                                                                                                                                                                                                                                                                                              |
-| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Langfuse Cloud**                 | Always runs the latest Langfuse version; server versions are managed for you. Only your SDK version and the API endpoints you call matter; the self-hosted server minimums on this page do not apply. Breaking removals happen on published dates.                                                                                                                                                                                |
-| **Self-hosted (OSS & Enterprise)** | You choose when to upgrade the server. New capabilities are battle-tested on Langfuse Cloud before they ship in a self-hosted release, so Cloud can run ahead of the latest self-hosted version. SDK majors require the minimum server versions below; breaking removals only happen in major server releases (see the [versioning policy](/self-hosting/upgrade/versioning) and [upgrade documentation](/self-hosting/upgrade)). |
+| Deployment                         | How versioning works                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Langfuse Cloud**                 | Always runs the latest Langfuse version; server versions are managed for you. Only your SDK version and the API endpoints you call matter; the self-hosted server minimums on this page do not apply. Breaking removals happen on published dates.                                                                                                                                                                                                                                                                 |
+| **Self-hosted (OSS & Enterprise)** | You choose when to upgrade the server. New capabilities are battle-tested on Langfuse Cloud before they ship in a self-hosted release, so Cloud can run ahead of the latest self-hosted version. SDK majors require the minimum server versions in the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server); breaking removals only happen in major server releases (see the [versioning policy](/self-hosting/upgrade/versioning) and [upgrade documentation](/self-hosting/upgrade)). |
 
 ## Langfuse versions [#versions]
 
 Every Langfuse component (server, SDKs, and APIs) moves through these lifecycle stages:
 
-| Stage           | Meaning                                                                                                               |
-| --------------- | --------------------------------------------------------------------------------------------------------------------- |
-| **Preview**     | New capabilities that are production-ready, but interfaces or API design may still change.                            |
-| **GA**          | Recommended and fully supported.                                                                                      |
-| **Deprecated**  | Still works but is superseded; it will be removed on the dates noted in the matrix below. Migrate to the replacement. |
-| **End of life** | Unsupported, no security patches.                                                                                     |
+| Stage           | Meaning                                                                                          |
+| --------------- | ------------------------------------------------------------------------------------------------ |
+| **Preview**     | New capabilities that are production-ready, but interfaces or API design may still change.       |
+| **GA**          | Recommended and fully supported.                                                                 |
+| **Deprecated**  | Still works but is superseded; removal is noted in the matrix below. Migrate to the replacement. |
+| **End of life** | Unsupported, no security patches.                                                                |
 
 ## GA versions [#ga]
 
@@ -46,7 +52,12 @@ Every Langfuse component (server, SDKs, and APIs) moves through these lifecycle 
 
 ## Feature availability matrix [#sdk-server]
 
+Langfuse Cloud runs v3 and v4 side by side until the v4 cutover (dates will follow). The v3 column is deprecated: everything marked Deprecated below keeps working until the cutover and is then removed. Click a row for details.
+
+Self-hosting Langfuse? Use the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) instead; it covers each server version and the minimum server version per SDK.
+
 <MatrixTable
+  highlightColumn={3}
   filters={[
     { id: "python", label: "Python SDK", sections: ["Python"] },
     { id: "js", label: "JS/TS SDK", sections: ["JS/TS"] },
@@ -65,156 +76,83 @@ Every Langfuse component (server, SDKs, and APIs) moves through these lifecycle 
   }}
 >
 
-| Client                                                                                                  | OSS v2 (End of life)                                  | OSS v3 (Deprecated)                                             | OSS v4 (GA)                                                     | Status      |
-| ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------------------------- | ----------- |
-| **Python** · [Upgrade guide](/docs/observability/sdk/upgrade-path)                                      |                                                       |                                                                 |                                                                 |             |
-| Python SDK v4                                                                                           | <CompatBadge variant="none">Unsupported</CompatBadge> | <CompatBadge variant="full">≥ 3.125.0</CompatBadge>             | <CompatBadge variant="full">Full</CompatBadge>                  | GA          |
-| Python SDK v3                                                                                           | <CompatBadge variant="none">Unsupported</CompatBadge> | <CompatBadge variant="full">≥ 3.125.0</CompatBadge>             | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      | Deprecated  |
-| Python SDK v2                                                                                           | <CompatBadge variant="full">Full</CompatBadge>        | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      | Deprecated  |
-| Python SDK v1                                                                                           | <CompatBadge variant="full">Full</CompatBadge>        | <CompatBadge variant="none">Unsupported</CompatBadge>           | <CompatBadge variant="none">Unsupported</CompatBadge>           | End of life |
-| **JS/TS** · [Upgrade guide](/docs/observability/sdk/upgrade-path)                                       |                                                       |                                                                 |                                                                 |             |
-| JS/TS SDK v5                                                                                            | <CompatBadge variant="none">Unsupported</CompatBadge> | <CompatBadge variant="full">≥ 3.95.0</CompatBadge>              | <CompatBadge variant="full">Full</CompatBadge>                  | GA          |
-| JS/TS SDK v4                                                                                            | <CompatBadge variant="none">Unsupported</CompatBadge> | <CompatBadge variant="full">≥ 3.95.0</CompatBadge>              | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      | Deprecated  |
-| JS/TS SDK v3 / v2                                                                                       | <CompatBadge variant="full">Full</CompatBadge>        | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      | Deprecated  |
-| JS/TS SDK v1                                                                                            | <CompatBadge variant="full">Full</CompatBadge>        | <CompatBadge variant="none">Unsupported</CompatBadge>           | <CompatBadge variant="none">Unsupported</CompatBadge>           | End of life |
-| **Third-party instrumentation** · [OpenTelemetry docs](/integrations/native/opentelemetry)              |                                                       |                                                                 |                                                                 |             |
-| OpenTelemetry<br />`/api/public/otel/v1/traces`                                                         | <CompatBadge variant="none">Unsupported</CompatBadge> | <CompatBadge variant="full">≥ 3.22.0</CompatBadge>              | <CompatBadge variant="full">Full</CompatBadge>                  | GA          |
-| Scores ingestion<br />`/api/public/scores`                                                              | <CompatBadge variant="full">Full</CompatBadge>        | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="full">Full</CompatBadge>                  | GA          |
-| Legacy ingestion API<br />`/api/public/ingestion`                                                       | <CompatBadge variant="full">Full</CompatBadge>        | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      | Deprecated  |
-| **Read APIs** · [Public API docs](/docs/api-and-data-platform/features/public-api)                      |                                                       |                                                                 |                                                                 |             |
-| Observations API v2 & Metrics API v2<br />`/api/public/v2/...`                                          | <CompatBadge variant="none">Unsupported</CompatBadge> | <CompatBadge variant="none">Unsupported</CompatBadge>           | <CompatBadge variant="full">Full</CompatBadge>                  | GA          |
-| Scores API v3<br />`/api/public/v3/scores`                                                              | <CompatBadge variant="none">Unsupported</CompatBadge> | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="full">Full</CompatBadge>                  | GA          |
-| v1 read APIs<br />`/api/public/...`                                                                     | <CompatBadge variant="full">Full</CompatBadge>        | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      | Deprecated  |
-| **Integrations & exports** · [Export docs](/docs/api-and-data-platform/features/export-to-blob-storage) |                                                       |                                                                 |                                                                 |             |
-| [Blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage)                      | <CompatBadge variant="none">Unsupported</CompatBadge> | <CompatBadge variant="full">Traces & observations</CompatBadge> | <CompatBadge variant="full">Enriched observations</CompatBadge> | GA          |
-| [PostHog integration](/integrations/analytics/posthog)                                                  | <CompatBadge variant="none">Unsupported</CompatBadge> | <CompatBadge variant="full">Traces & observations</CompatBadge> | <CompatBadge variant="full">Enriched observations</CompatBadge> | GA          |
-| [Mixpanel integration](/integrations/analytics/mixpanel)                                                | <CompatBadge variant="none">Unsupported</CompatBadge> | <CompatBadge variant="full">Traces & observations</CompatBadge> | <CompatBadge variant="full">Enriched observations</CompatBadge> | GA          |
-| Legacy export source (traces and observations)                                                          | <CompatBadge variant="none">Unsupported</CompatBadge> | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      | Deprecated  |
-| **Evaluations** · [LLM-as-a-judge docs](/docs/evaluation/evaluation-methods/llm-as-a-judge)             |                                                       |                                                                 |                                                                 |             |
-| Observation-level evaluators                                                                            | <CompatBadge variant="none">Unsupported</CompatBadge> | <CompatBadge variant="full">≥ 3.153.0</CompatBadge>             | <CompatBadge variant="full">Full</CompatBadge>                  | GA          |
-| Trace-level evaluators                                                                                  | <CompatBadge variant="full">Full</CompatBadge>        | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      | Deprecated  |
+| Feature                                                                                                 | Langfuse Cloud v3 (Deprecated)                                  | Langfuse Cloud v4 (GA)                                          |
+| ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------------------------- |
+| **Python** · [Upgrade guide](/docs/observability/sdk/upgrade-path)                                      |                                                                 |                                                                 |
+| Python SDK v4                                                                                           | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="full">Full</CompatBadge>                  |
+| Python SDK v3                                                                                           | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      |
+| Python SDK v2                                                                                           | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      |
+| Python SDK v1                                                                                           | <CompatBadge variant="none">Unsupported</CompatBadge>           | <CompatBadge variant="none">Unsupported</CompatBadge>           |
+| **JS/TS** · [Upgrade guide](/docs/observability/sdk/upgrade-path)                                       |                                                                 |                                                                 |
+| JS/TS SDK v5                                                                                            | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="full">Full</CompatBadge>                  |
+| JS/TS SDK v4                                                                                            | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      |
+| JS/TS SDK v3 / v2                                                                                       | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      |
+| JS/TS SDK v1                                                                                            | <CompatBadge variant="none">Unsupported</CompatBadge>           | <CompatBadge variant="none">Unsupported</CompatBadge>           |
+| **Third-party instrumentation** · [OpenTelemetry docs](/integrations/native/opentelemetry)              |                                                                 |                                                                 |
+| OpenTelemetry<br />`/api/public/otel/v1/traces`                                                         | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="full">Full</CompatBadge>                  |
+| Scores ingestion<br />`/api/public/scores`                                                              | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="full">Full</CompatBadge>                  |
+| Legacy ingestion API<br />`/api/public/ingestion`                                                       | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      |
+| **Read APIs** · [Public API docs](/docs/api-and-data-platform/features/public-api)                      |                                                                 |                                                                 |
+| Observations API v2 & Metrics API v2<br />`/api/public/v2/...`                                          | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="full">Full</CompatBadge>                  |
+| Scores API v3<br />`/api/public/v3/scores`                                                              | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="full">Full</CompatBadge>                  |
+| v1 read APIs<br />`/api/public/...`                                                                     | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      |
+| **Integrations & exports** · [Export docs](/docs/api-and-data-platform/features/export-to-blob-storage) |                                                                 |                                                                 |
+| [Blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage)                      | <CompatBadge variant="full">Traces & observations</CompatBadge> | <CompatBadge variant="full">Enriched observations</CompatBadge> |
+| [PostHog integration](/integrations/analytics/posthog)                                                  | <CompatBadge variant="full">Traces & observations</CompatBadge> | <CompatBadge variant="full">Enriched observations</CompatBadge> |
+| [Mixpanel integration](/integrations/analytics/mixpanel)                                                | <CompatBadge variant="full">Traces & observations</CompatBadge> | <CompatBadge variant="full">Enriched observations</CompatBadge> |
+| Legacy export source (traces and observations)                                                          | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      |
+| **Evaluations** · [LLM-as-a-judge docs](/docs/evaluation/evaluation-methods/llm-as-a-judge)             |                                                                 |                                                                 |
+| Observation-level evaluators                                                                            | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="full">Full</CompatBadge>                  |
+| Trace-level evaluators                                                                                  | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      |
 
-<CompatDetail name="Python SDK v4">
-
-GA. Requires self-hosted server ≥ [3.125.0](https://github.com/langfuse/langfuse/releases/tag/v3.125.0); OSS v2 and older are unsupported.
-
-**Limitations:**
-
-| Capability                      | OSS v3                                                                                                                                        | OSS v4                                                        |
-| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| Tracing (OpenTelemetry)         | Supported                                                                                                                                     | Supported (real time with SDK ≥ 4.7.0)                        |
-| Public API & querying (`api.*`) | Use the [legacy APIs](/docs/api-and-data-platform/features/public-api#access-via-sdks) `api.legacy.observations_v1` / `api.legacy.metrics_v1` | Supported (v1 APIs are deprecated (removal date will follow)) |
-
-</CompatDetail>
 <CompatDetail name="Python SDK v3">
 
-Deprecated. Requires self-hosted server ≥ [3.125.0](https://github.com/langfuse/langfuse/releases/tag/v3.125.0); OSS v2 and older are unsupported.
-
-**Limitations:**
-
-| Capability                      | OSS v3                                            | OSS v4                                            |
-| ------------------------------- | ------------------------------------------------- | ------------------------------------------------- |
-| Tracing (OpenTelemetry)         | Supported                                         | Supported (data delayed up to 10 min)             |
-| Datasets & experiments          | Datasets only (experiments require Python SDK v4) | Datasets only (experiments require Python SDK v4) |
-| Public API & querying (`api.*`) | Supported                                         | v1 APIs are deprecated (removal date will follow) |
+Deprecated. Tracing keeps working, but on the v4 data model data appears with up to a 10-minute delay. Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) (≥ 4.7.0) for real-time data.
 
 </CompatDetail>
 <CompatDetail name="Python SDK v2">
 
-Deprecated.
-
-**Limitations:**
-
-| Capability                       | OSS v2                                            | OSS v3                                            | OSS v4                                            |
-| -------------------------------- | ------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------- |
-| Tracing (legacy batch ingestion) | Supported                                         | Supported                                         | Stops at the Cloud v4 cutover                     |
-| Datasets & experiments           | Datasets only (experiments require Python SDK v4) | Datasets only (experiments require Python SDK v4) | Datasets only (experiments require Python SDK v4) |
-| Media (multimodal)               | Requires OSS v3                                   | Supported                                         | Supported                                         |
-| Public API & querying (`api.*`)  | Supported                                         | Supported                                         | v1 APIs are deprecated (removal date will follow) |
-
-</CompatDetail>
-<CompatDetail name="JS/TS SDK v5">
-
-GA. Requires self-hosted server ≥ [3.95.0](https://github.com/langfuse/langfuse/releases/tag/v3.95.0); OSS v2 and older are unsupported.
-
-**Limitations:**
-
-| Capability                      | OSS v3                                                                                                                                      | OSS v4                                                        |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| Tracing (OpenTelemetry)         | Supported                                                                                                                                   | Supported (real time with SDK ≥ 5.4.0)                        |
-| Public API & querying (`api.*`) | Use the [legacy APIs](/docs/api-and-data-platform/features/public-api#access-via-sdks) `api.legacy.observationsV1` / `api.legacy.metricsV1` | Supported (v1 APIs are deprecated (removal date will follow)) |
+Deprecated. Sends traces via the legacy batch ingestion API, which is removed at the v4 cutover (date will follow); trace ingestion then stops working. Score ingestion is unaffected. Upgrade via the [SDK upgrade paths](/docs/observability/sdk/upgrade-path).
 
 </CompatDetail>
 <CompatDetail name="JS/TS SDK v4">
 
-Deprecated. Requires self-hosted server ≥ [3.95.0](https://github.com/langfuse/langfuse/releases/tag/v3.95.0); OSS v2 and older are unsupported.
-
-**Limitations:**
-
-| Capability                      | OSS v3                                           | OSS v4                                            |
-| ------------------------------- | ------------------------------------------------ | ------------------------------------------------- |
-| Tracing (OpenTelemetry)         | Supported                                        | Supported (data delayed up to 10 min)             |
-| Datasets & experiments          | Datasets only (experiments require JS/TS SDK v5) | Datasets only (experiments require JS/TS SDK v5)  |
-| Public API & querying (`api.*`) | Supported                                        | v1 APIs are deprecated (removal date will follow) |
+Deprecated. Tracing keeps working, but on the v4 data model data appears with up to a 10-minute delay. Upgrade to [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5) (≥ 5.4.0) for real-time data.
 
 </CompatDetail>
 <CompatDetail name="JS/TS SDK v3 / v2">
 
-Deprecated.
-
-**Limitations:**
-
-| Capability                       | OSS v2                                           | OSS v3                                           | OSS v4                                            |
-| -------------------------------- | ------------------------------------------------ | ------------------------------------------------ | ------------------------------------------------- |
-| Tracing (legacy batch ingestion) | Supported                                        | Supported                                        | Stops at the Cloud v4 cutover                     |
-| Datasets & experiments           | Datasets only (experiments require JS/TS SDK v5) | Datasets only (experiments require JS/TS SDK v5) | Datasets only (experiments require JS/TS SDK v5)  |
-| Media (multimodal)               | Requires OSS v3                                  | Supported                                        | Supported                                         |
-| Public API & querying (`api.*`)  | Supported                                        | Supported                                        | v1 APIs are deprecated (removal date will follow) |
+Deprecated. Sends traces via the legacy batch ingestion API, which is removed at the v4 cutover (date will follow); trace ingestion then stops working. Score ingestion is unaffected. Upgrade via the [SDK upgrade paths](/docs/observability/sdk/upgrade-path).
 
 </CompatDetail>
 <CompatDetail name="OpenTelemetry">
 
-GA. Any OpenTelemetry SDK can export to the OTLP endpoint, available since OSS [3.22.0](https://github.com/langfuse/langfuse/releases/tag/v3.22.0). On Langfuse v4, send the `x-langfuse-ingestion-version: 4` header on your span exporter to see data in real time; without it, data can be delayed by up to 10 minutes. (Langfuse SDKs qualify for real time automatically; self-hosted deployments can set `LANGFUSE_MIGRATION_V4_NATIVE_OTEL_BEHAVIOUR=direct` to make all OTLP ingestion real time without the header.) See the [OpenTelemetry setup guide](/integrations/native/opentelemetry).
+<DetailOpenTelemetry />
 
 </CompatDetail>
 <CompatDetail name="Legacy ingestion API">
 
-Deprecated. Trace, span, and generation events via the legacy batch ingestion API are not supported on the v4 data model: on Langfuse Cloud they keep working until the v4 cutover (date will follow), on self-hosted Langfuse v4 they are rejected.
+<DetailLegacyIngestion />
+
+</CompatDetail>
+<CompatDetail name="Observations API v2 & Metrics API v2">
+
+<DetailReadApisV2 />
 
 </CompatDetail>
 <CompatDetail name="v1 read APIs">
 
-Deprecated. Removed on Langfuse v4 (Langfuse Cloud: removal date will follow). The full list and replacements:
-
-| Deprecated `GET` endpoints                                                                                         | Replacement                                                                                                                   |
-| ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| `/api/public/observations`<br />`/api/public/observations/{id}`                                                    | `GET /api/public/v2/observations?fromStartTime={datetime}&toStartTime={datetime}`                                             |
-| `/api/public/traces`<br />`/api/public/traces/{id}`                                                                | `GET /api/public/v2/observations?fromStartTime={datetime}&toStartTime={datetime}`<br />add `&traceId={id}` for a single trace |
-| `/api/public/sessions`<br />`/api/public/sessions/{id}`                                                            | `GET /api/public/v2/observations?filter={urlencoded sessionId filter}&fromStartTime={datetime}&toStartTime={datetime}`        |
-| `/api/public/scores`<br />`/api/public/scores/{id}`<br />`/api/public/v2/scores`<br />`/api/public/v2/scores/{id}` | `GET /api/public/v3/scores`                                                                                                   |
-| `/api/public/metrics`<br />`/api/public/metrics/daily`                                                             | `GET /api/public/v2/metrics?query={json}`                                                                                     |
+<DetailV1ReadApis />
 
 </CompatDetail>
-
-<CompatDetail name="Observations API v2 & Metrics API v2">
-
-GA. Requires Langfuse v4. See the [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2) docs.
-
-- **Via SDK:** these are the default resources in Python SDK v4 (`api.observations`, `api.metrics`) and JS/TS SDK v5 (`api.observations`, `api.metrics`). On OSS v3, the defaults fail; use `api.legacy.observations_v1` / `api.legacy.metrics_v1` (Python) or `api.legacy.observationsV1` / `api.legacy.metricsV1` (JS/TS).
-- **Via REST:** `GET /api/public/v2/observations?fromStartTime={datetime}&toStartTime={datetime}` and `GET /api/public/v2/metrics?query={json}`.
-- **Data freshness:** data from SDKs below Python 4.7.0 / JS 5.4.0, or OTel exporters without the `x-langfuse-ingestion-version: 4` header, can appear on these APIs with up to a 10-minute delay.
-
-</CompatDetail>
-
 <CompatDetail name="Trace-level evaluators">
 
-Deprecated. Migrate to [observation-level evaluators](/faq/all/llm-as-a-judge-migration). Trace-level evaluators are not supported on the v4 data model; on Langfuse Cloud they keep running until the v4 cutover (date will follow).
+<DetailTraceLevelEvaluators />
 
 </CompatDetail>
-
 <CompatDetail name="Legacy export source (traces and observations)">
 
-Deprecated. Exports built on the legacy "traces and observations" source are replaced by the enriched observations source (v4 data model). On Langfuse Cloud, projects created on or after 2026-05-20 cannot select legacy sources, new legacy export integrations cannot be created since 2026-06-22, and remaining legacy exports are switched to the enriched source automatically at the Cloud v4 cutover (date will follow).
+<DetailLegacyExportSource />
 
 </CompatDetail>
 
@@ -224,11 +162,11 @@ Deprecated. Exports built on the legacy "traces and observations" source are rep
 
 ### I'm on Langfuse Cloud, which versions do I need to care about? [#faq-cloud]
 
-Only your SDK version and the API endpoints you call. Langfuse Cloud always runs the latest server version, so the self-hosted minimums on this page never apply to you. Keep your SDKs on the GA major version (Python v4, JS/TS v5) and migrate away from deprecated endpoints before the dates noted in the matrix above.
+Only your SDK version and the API endpoints you call. Langfuse Cloud always runs the latest server version, so self-hosted server minimums never apply to you. Keep your SDKs on the GA major version (Python v4, JS/TS v5) and migrate away from deprecated endpoints before the v4 cutover (dates will follow).
 
 ### I self-host Langfuse v3 and upgraded to Python SDK v4 / JS SDK v5, what works? [#faq-new-sdk-old-server]
 
-Tracing, prompt management, datasets, and scores work fully (server ≥ 3.125.0 for Python, ≥ 3.95.0 for JS/TS). The default `api.observations` and `api.metrics` resources call v2 endpoints that require Langfuse v4; use the `api.legacy.*` resources until you upgrade your server to v4.
+Tracing, prompt management, datasets, and scores work fully (server ≥ 3.125.0 for Python, ≥ 3.95.0 for JS/TS). The default `api.observations` and `api.metrics` resources call v2 endpoints that require Langfuse v4; use the `api.legacy.*` resources until you upgrade your server to v4. The [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) has the full picture per server version.
 
 ### My data takes minutes to show up in the UI, why? [#faq-delay]
 
@@ -240,4 +178,4 @@ Python SDK v2 and JS/TS SDK v3 (and older) send traces via the legacy batch inge
 
 ### Does upgrading my self-hosted server break my SDKs? [#faq-server-upgrade]
 
-Each server major supports the current and previous SDK major of each language. Upgrading v3 → v4 keeps Python SDK v3+/v4 and JS SDK v4/v5 working (older SDKs lose real-time visibility; Python v2 / JS v3 trace ingestion is not supported on v4). Check the matrix above before upgrading.
+Each server major supports the current and previous SDK major of each language. Upgrading v3 → v4 keeps Python SDK v3+/v4 and JS SDK v4/v5 working (older SDKs lose real-time visibility; Python v2 / JS v3 trace ingestion is not supported on v4). Check the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) before upgrading.
