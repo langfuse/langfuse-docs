@@ -58,7 +58,7 @@ The v1 API accepts a JSON query object passed as a URL-encoded parameter:
 
 | Field           | Type   | Required | Description                                                                                                                                                              |
 | --------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `view`          | string | Yes      | The data view to query: `"traces"`, `"observations"`, `"scores-numeric"`, or `"scores-categorical"`                                                                      |
+| `view`          | string | Yes      | The data view to query: `"traces"`, `"observations"`, `"scores-numeric"`, `"scores-categorical"`, or `"scores-boolean"`                                                  |
 | `dimensions`    | array  | No       | Array of dimension objects to group by, e.g. `[{ "field": "name" }]`                                                                                                     |
 | `metrics`       | array  | Yes      | Array of metric objects to calculate, e.g. `[{ "measure": "latency", "aggregation": "p95" }]`                                                                            |
 | `filters`       | array  | No       | Array of filter objects to narrow results, e.g. `[{ "column": "metadata", "operator": "contains", "key": "customKey", "value": "customValue", "type": "stringObject" }]` |
@@ -184,8 +184,9 @@ The v1 Metrics API provides access to several data views, each with its own set 
 | -------------------- | ----------------------------------- |
 | `traces`             | Query data at the trace level       |
 | `observations`       | Query data at the observation level |
-| `scores-numeric`     | Query numeric and boolean scores    |
+| `scores-numeric`     | Query numeric scores                |
 | `scores-categorical` | Query categorical (string) scores   |
+| `scores-boolean`     | Query boolean scores                |
 
 #### Trace Dimensions
 
@@ -274,6 +275,19 @@ The v1 Metrics API provides access to several data views, each with its own set 
 | ------- | ------------------- |
 | `count` | Count of scores     |
 | `value` | Numeric score value |
+
+##### Boolean Scores
+
+| Metric  | Description                                                                                                |
+| ------- | ---------------------------------------------------------------------------------------------------------- |
+| `count` | Count of scores                                                                                            |
+| `value` | Numeric score value, where `0` is false and `1` is true. Use the `avg` aggregation to return the true rate |
+
+Boolean scores have an additional dimension:
+
+| Dimension      | Type    | Description                                           |
+| -------------- | ------- | ----------------------------------------------------- |
+| `booleanValue` | boolean | Boolean value of the score for grouping and filtering |
 
 ##### Categorical Scores
 
