@@ -17,6 +17,13 @@ This notebook demonstrates how to capture detailed traces from a [Google Agent D
 > **Why Langfuse?**\
 > [Langfuse](https://langfuse.com) gives you a detailed dashboard and rich analytics for every prompt, model response, and function call in your agent, making it easy to debug, evaluate, and iterate on LLM apps.
 
+**What this cookbook covers.** We start with the simplest possible trace and add one concept at a time:
+
+1. A hello-world agent with a tool call ([Example 1](#example-1-hello-world-agent-with-a-tool-call))
+2. Named, filterable traces with tags and metadata ([Example 2](#example-2-named-and-filterable-traces))
+3. A multi-agent pipeline whose trace shows every sub-agent ([Example 3](#example-3-multi-agent-pipeline-with-workflow))
+4. Attaching user-feedback scores to a trace ([Example 4](#example-4-score-traces-with-user-feedback))
+
 <Steps>
 ## Step&nbsp;1: Install dependencies
 
@@ -29,6 +36,8 @@ _Note: `google-adk` 2.x requires Python ≥ 3.10. The `"google-adk>=2"` pin ensu
 ## Step 2: Set up environment variables
 
 Fill in the **Langfuse** and your **Gemini API key**.
+
+_Note: the Gemini free tier has low per-model rate limits (per minute and per day). If a cell prints a `429`/`503` agent error, wait a moment and re-run it, temporarily switch the examples to a lighter model such as `gemini-3.1-flash-lite`, or use an API key with billing enabled._
 
 ```python
 import os
@@ -69,9 +78,11 @@ from openinference.instrumentation.google_adk import GoogleADKInstrumentor
 GoogleADKInstrumentor().instrument()
 ```
 
-## Step 4: Build a hello world agent
+## Step 4: Run examples
 
-Every tool call and model completion is captured as an OpenTelemetry span and forwarded to Langfuse.
+### Example 1: Hello world agent with a tool call [#example-1-hello-world-agent-with-a-tool-call]
+
+The smallest possible setup: one agent, one tool. Every tool call and model completion is captured as an OpenTelemetry span and forwarded to Langfuse.
 
 ```python
 from google.adk.agents import Agent
@@ -107,6 +118,8 @@ for event in runner.run(user_id=USER_ID, session_id=SESSION_ID, new_message=user
         elif event.error_message:
             print(f"Agent error: {event.error_message}")
 ```
+
+Langfuse automatically maps the `user_id` and `session_id` you pass to `runner.run()` to the trace's **user** and **session** — you get [user](https://langfuse.com/docs/observability/features/users) and [session](https://langfuse.com/docs/observability/features/sessions) tracking without any extra code.
 
 ## Step 5: View the trace in Langfuse
 
