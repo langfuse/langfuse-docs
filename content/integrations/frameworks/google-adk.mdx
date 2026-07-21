@@ -146,6 +146,43 @@ with propagate_attributes(
                 print(f"Agent error: {event.error_message}")
 ```
 
+### Example 3: Multi-agent pipeline with Workflow [#example-3-multi-agent-pipeline-with-workflow]
+
+Real ADK applications are rarely a single agent. ADK 2.x composes agents (and plain functions or tools) into an execution graph with [`Workflow`](https://adk.dev/workflows/) — and the trace shows every node as its own span, with its own model calls, token usage, and cost.
+
+Here a `researcher` agent stores its result in session state via `output_key`, and a `writer` agent reads it through the `{research_notes}` placeholder in its instruction. The edge chain `("START", researcher, writer)` runs them sequentially:
+
+```python
+from google.adk.workflow import Workflow
+
+researcher = Agent(
+    name="researcher",
+    model="gemini-3.5-flash",
+    instruction="Gather two short facts about the topic. Reply in two bullet points.",
+    output_key="research_notes",  # stores the reply in session state
+)
+writer = Agent(
+    name="writer",
+    model="gemini-3.5-flash",
+    instruction="Write a single friendly sentence summarizing: {research_notes}",
+)
+pipeline = Workflow(name="research_pipeline", edges=[("START", researcher, writer)])
+
+PIPELINE_SESSION_ID = "pipeline-session"
+await session_service.create_session(app_name=APP_NAME, user_id=USER_ID, session_id=PIPELINE_SESSION_ID)
+pipeline_runner = Runner(agent=pipeline, app_name=APP_NAME, session_service=session_service)
+
+topic = types.Content(role="user", parts=[types.Part(text="The Langfuse platform")])
+with propagate_attributes(trace_name="research-pipeline", tags=["google-adk", "multi-agent"]):
+    async for event in pipeline_runner.run_async(user_id=USER_ID, session_id=PIPELINE_SESSION_ID, new_message=topic):
+        if event.is_final_response() and event.content:
+            print(f"[{event.author}]", event.content.parts[0].text)
+```
+
+The trace now contains one `agent_run` span per pipeline stage, each with its own generation.
+
+For dynamic delegation, LLM agents can alternatively coordinate `sub_agents` themselves — the spans nest the same way.
+
 ## Step 5: View the trace in Langfuse
 
 Head over to your **Langfuse dashboard → Traces**. You should see traces including all tool calls and model inputs/outputs.
