@@ -20,9 +20,21 @@ The v2 score read endpoints are deprecated. Use Scores API v3 for all score read
 
 ## Scores API v3 [#v3]
 
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "full",
+  }}
+/>
+
 ```
 GET /api/public/v3/scores
 ```
+
+On self-hosted deployments, the v3 endpoint is available from Langfuse v3.179.0.
 
 The v3 Scores API is a redesigned endpoint optimized for predictable, high-performance score retrieval. It queries scores directly instead of joining trace data, returns a single typed `value` field, and uses cursor-based pagination.
 
@@ -97,7 +109,7 @@ The v2 API uses offset-based pagination (`page` parameter) which becomes increas
 
 1. Make your initial request with a `limit` parameter (default 50, max 100)
 2. If more results exist, the response includes a `cursor` in the `meta` object
-3. Pass this cursor via the `cursor` parameter in your next request to continue where you left off
+3. Pass this cursor via the `cursor` parameter in your next request, repeating the same filter parameters as the initial request — the cursor encodes only the read position, not your query
 4. Repeat until no cursor is returned (you've reached the end)
 
 The response contains no `totalItems`/`totalPages` — total counts were removed by design; iterate the cursor instead. For recurring full exports to your data warehouse, use the [scheduled blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) instead of paginating through the API.
@@ -225,28 +237,28 @@ const scores = await langfuse.api.scoresV3.getManyV3({
 
 ### Parameters
 
-| Parameter       | Type     | Description                                                                                                                                                                                    |
-| --------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `limit`         | integer  | Number of items per page. Defaults to 50, max 100 (larger values return HTTP 400)                                                                                                              |
-| `cursor`        | string   | URL-safe base64 cursor for pagination (from previous response)                                                                                                                                 |
-| `fields`        | string   | Comma-separated field groups to include in addition to core: `details`, `subject`, `annotation`                                                                                                |
-| `id`            | string   | Comma-separated list of score IDs (replaces v2 `scoreIds` and the get-by-id endpoint)                                                                                                          |
-| `name`          | string   | Comma-separated list of score names                                                                                                                                                            |
-| `source`        | string   | Comma-separated list of score sources (`API`, `ANNOTATION`, `EVAL`), case-insensitive                                                                                                          |
-| `dataType`      | string   | Comma-separated list of data types (`NUMERIC`, `BOOLEAN`, `CATEGORICAL`, `TEXT`, `CORRECTION`), case-insensitive. Must be a single value when combined with `value`, `valueMin`, or `valueMax` |
-| `environment`   | string   | Comma-separated list of environments                                                                                                                                                           |
-| `configId`      | string   | Comma-separated list of score config IDs                                                                                                                                                       |
-| `queueId`       | string   | Comma-separated list of annotation queue IDs                                                                                                                                                   |
-| `authorUserId`  | string   | Comma-separated list of author user IDs                                                                                                                                                        |
-| `value`         | string   | Comma-separated list of exact values. Requires a single `dataType` of `NUMERIC`, `BOOLEAN`, or `CATEGORICAL`                                                                                   |
-| `valueMin`      | number   | Inclusive lower bound on the numeric value. Requires `dataType=NUMERIC`                                                                                                                        |
-| `valueMax`      | number   | Inclusive upper bound on the numeric value. Requires `dataType=NUMERIC`                                                                                                                        |
-| `traceId`       | string   | Comma-separated list of trace IDs. Mutually exclusive with `sessionId`, `experimentId`                                                                                                         |
-| `sessionId`     | string   | Comma-separated list of session IDs. Mutually exclusive with `traceId`, `observationId`, `experimentId`                                                                                        |
-| `observationId` | string   | Comma-separated list of observation IDs. Requires `traceId`                                                                                                                                    |
-| `experimentId`  | string   | Comma-separated list of dataset run IDs (replaces v2 `datasetRunId`). Mutually exclusive with `traceId`, `sessionId`, `observationId`                                                          |
-| `fromTimestamp` | datetime | Inclusive lower bound on the score timestamp                                                                                                                                                   |
-| `toTimestamp`   | datetime | Exclusive upper bound on the score timestamp                                                                                                                                                   |
+| Parameter       | Type     | Description                                                                                                                                                                                          |
+| --------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `limit`         | integer  | Number of items per page. Defaults to 50, max 100 (larger values return HTTP 400)                                                                                                                    |
+| `cursor`        | string   | URL-safe base64 cursor for pagination (from previous response)                                                                                                                                       |
+| `fields`        | string   | Comma-separated field groups to include in addition to core: `details`, `subject`, `annotation`                                                                                                      |
+| `id`            | string   | Comma-separated list of score IDs (replaces v2 `scoreIds` and the get-by-id endpoint)                                                                                                                |
+| `name`          | string   | Comma-separated list of score names                                                                                                                                                                  |
+| `source`        | string   | Comma-separated list of score sources (`API`, `ANNOTATION`, `EVAL`), case-insensitive                                                                                                                |
+| `dataType`      | string   | Comma-separated list of data types (`NUMERIC`, `BOOLEAN`, `CATEGORICAL`, `TEXT`, `CORRECTION`), case-insensitive. Must be a single value when combined with `value`, `valueMin`, or `valueMax`       |
+| `environment`   | string   | Comma-separated list of environments                                                                                                                                                                 |
+| `configId`      | string   | Comma-separated list of score config IDs                                                                                                                                                             |
+| `queueId`       | string   | Comma-separated list of annotation queue IDs                                                                                                                                                         |
+| `authorUserId`  | string   | Comma-separated list of author user IDs                                                                                                                                                              |
+| `value`         | string   | Comma-separated list of exact values. Requires a single `dataType` of `NUMERIC`, `BOOLEAN`, or `CATEGORICAL`. For `BOOLEAN` pass `true` or `false`; for `NUMERIC` each value must be a finite number |
+| `valueMin`      | number   | Inclusive lower bound on the numeric value. Requires `dataType=NUMERIC`                                                                                                                              |
+| `valueMax`      | number   | Inclusive upper bound on the numeric value. Requires `dataType=NUMERIC`                                                                                                                              |
+| `traceId`       | string   | Comma-separated list of trace IDs. Mutually exclusive with `sessionId`, `experimentId`                                                                                                               |
+| `sessionId`     | string   | Comma-separated list of session IDs. Mutually exclusive with `traceId`, `observationId`, `experimentId`                                                                                              |
+| `observationId` | string   | Comma-separated list of observation IDs. Requires `traceId`                                                                                                                                          |
+| `experimentId`  | string   | Comma-separated list of dataset run IDs (replaces v2 `datasetRunId`). Mutually exclusive with `traceId`, `sessionId`, `observationId`                                                                |
+| `fromTimestamp` | datetime | Inclusive lower bound on the score timestamp                                                                                                                                                         |
+| `toTimestamp`   | datetime | Exclusive upper bound on the score timestamp                                                                                                                                                         |
 
 ### Sample Response
 
