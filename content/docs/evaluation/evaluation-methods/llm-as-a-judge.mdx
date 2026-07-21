@@ -274,10 +274,10 @@ With your evaluator and model selected, configure which data to run the evaluati
 - **SDK version**: Python v3+ (OTel-based) or JS/TS v4+ (OTel-based)
   - [Python v2 → v3 migration guide](/docs/observability/sdk/upgrade-path/python-v2-to-v3)
   - [JS/TS v3 → v4 migration guide](/docs/observability/sdk/upgrade-path/js-v3-to-v4)
-- **When filtering by trace attributes**: To filter observations by trace-level attributes (`userId`, `sessionId`, `version`, `tags`, `metadata`, `traceName`), use [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes-to-observations) in your instrumentation code. Without this, trace attributes will not be available on observations. If you do set up trace-level attribute filtering and are not propagating attributes to observations, your observations will not be matched by the evaluator.
+- **When filtering by trace attributes**: To filter observations by trace-level attributes (`userId`, `sessionId`, `version`, `tags`, `metadata`, `traceName`), use [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes) in your instrumentation code. Without this, trace attributes will not be available on observations. If you do set up trace-level attribute filtering and are not propagating attributes to observations, your observations will not be matched by the evaluator.
 
 <Callout type="warning">
-**Deprecation of trace-level evaluators:** The legacy trace-level evaluator feature is built on the old trace-centric data model and will be deprecated by the end of October 2026 — see the [Fast Preview rollout timeline](/docs/v4#rollout-timeline). Multi-span evaluations will build on the new observation-centric data model. To move existing trace-level evaluators, follow the [upgrade guide](/faq/all/llm-as-a-judge-migration).
+**Deprecation of trace-level evaluators:** Trace-level evaluators are built on the old trace-centric data model and are deprecated; the removal deadline will be announced (see the [Langfuse v4 rollout timeline](/docs/v4#rollout-timeline)). Multi-span evaluations will build on the new observation-centric data model. To move existing trace-level evaluators, follow the [upgrade guide](/faq/all/llm-as-a-judge-migration).
 </Callout>
 
 </Tab>

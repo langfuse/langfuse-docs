@@ -1,6 +1,6 @@
 ---
 title: How do I upgrade trace-level evaluators to observation-level evaluators?
-description: Step-by-step guide for upgrading legacy trace-level LLM-as-a-Judge evaluators to observation-level evaluators as part of Langfuse Fast Preview (v4).
+description: Step-by-step guide for upgrading deprecated trace-level LLM-as-a-Judge evaluators to observation-level evaluators as part of Langfuse v4.
 tags: [evaluation]
 ---
 
@@ -18,7 +18,7 @@ import { Steps, Step } from "@/components/docs";
   }}
 />
 
-Trace-level evaluators use Langfuse's legacy trace-centric data model and are being deprecated as part of [Langfuse Fast Preview (v4)](/docs/v4). Existing evaluators continue to run while you upgrade. Fast Preview is currently available on Langfuse Cloud; for self-hosted support updates, follow the [GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518).
+Trace-level evaluators use Langfuse's old trace-centric data model and are deprecated as part of [Langfuse v4](/docs/v4). Existing evaluators continue to run while you upgrade. Langfuse v4 is currently available on Langfuse Cloud; for self-hosted rollout updates, follow the [GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518).
 
 Observation-level evaluators run in real time and scale with larger traces and higher evaluation volume. Any future multi-span support will also use the observation-centric data model, so upgrading is the foundation for future evaluation capabilities.
 
@@ -43,7 +43,7 @@ First, upgrade your SDK or ingestion path. Observation-level evaluators run in r
 In the [v4 data model](/docs/v4), a trace is the logical group of observations that share a trace ID, rather than a separate record. Input and output belong to observations. In most cases, an existing root or workflow observation already carries the same input and output that was previously written to the trace. The evaluator upgrade targets that observation. If no single observation contains all required values, the coding assistant helps update your instrumentation.
 
 <Callout type="warning">
-**Keep legacy evaluators running during the transition.** After the SDK upgrade, trace input and output are no longer written automatically. If your existing trace-level evaluators read trace input or output, keep supplying these values with the deprecated trace I/O methods — `set_current_trace_io()` or `span.set_trace_io()` in Python, `setActiveTraceIO()` or `span.setTraceIO()` in JS/TS — until the new observation-level evaluators are validated, then remove the calls. See [Why are the input and output of a trace empty?](/faq/all/empty-trace-input-and-output) for details.
+**Keep existing trace-level evaluators running during the transition.** After the SDK upgrade, trace input and output are no longer written automatically. If your existing trace-level evaluators read trace input or output, keep supplying these values with the deprecated trace I/O methods (`set_current_trace_io()` or `span.set_trace_io()` in Python, `setActiveTraceIO()` or `span.setTraceIO()` in JS/TS) until the new observation-level evaluators are validated, then remove the calls. See [Why are the input and output of a trace empty?](/faq/all/empty-trace-input-and-output) for details.
 </Callout>
 
 </Step>
@@ -67,9 +67,9 @@ In both paths, the agentic flow makes the upgrade conversational: you can inspec
 
 The recommended agent guides you through reviewing the proposed changes, creating the observation-level evaluators, and validating the result against your project data. You can ask questions and refine the target observation, filters, variable mappings, and expected score behavior until the upgrade looks correct.
 
-When ready, create the observation-level evaluators. You can keep the legacy evaluators active temporarily to compare results, or deactivate them immediately. Confirm that the new evaluators receive the expected input, output, and context and produce the intended number of scores.
+When ready, create the observation-level evaluators. You can keep the existing trace-level evaluators active temporarily to compare results, or deactivate them immediately. Confirm that the new evaluators receive the expected input, output, and context and produce the intended number of scores.
 
-If you need to revert, deactivate the new evaluators and reactivate the existing legacy evaluators. Historical evaluation results remain accessible.
+If you need to revert, deactivate the new evaluators and reactivate the existing trace-level evaluators. Historical evaluation results remain accessible.
 
 The agent explains the relevant changes during the upgrade. The following sections summarize what may differ if you want to understand the underlying behavior.
 
@@ -146,13 +146,13 @@ Variable mapping:
 - [ ] Open the evaluator upgrade screen by clicking on the **Evaluation** navigation item.
 - [ ] Follow the recommended Langfuse Assistant or coding assistant path.
 - [ ] Review the newly created observation-level evaluators. Confirm the expected number and placement of scores.
-- [ ] Decide whether to keep the legacy evaluator active for comparison.
-- [ ] Validate the evaluator results and deactivate the legacy evaluator when ready.
+- [ ] Decide whether to keep the trace-level evaluator active for comparison.
+- [ ] Validate the evaluator results and deactivate the trace-level evaluator when ready.
 
 ## Getting help
 
 - **Troubleshooting**: [Why is my observation-level evaluator not executing?](/faq/all/observation-eval-not-executing)
 - **Documentation**: [LLM-as-a-Judge step-by-step set up guide](/docs/evaluation/evaluation-methods/llm-as-a-judge)
-- **Questions on Fast Preview**: Ask in the dedicated [GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518)
+- **Questions on Langfuse v4**: Ask in the dedicated [GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518)
 - **GitHub**: Report issues at [github.com/langfuse/langfuse](https://github.com/langfuse/langfuse)
 - **Support**: Contact support@langfuse.com for enterprise customers
