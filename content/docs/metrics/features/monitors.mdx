@@ -39,11 +39,13 @@ Navigate to [**Monitors**](https://cloud.langfuse.com/project/~/monitors) in you
 
 Choose what data the monitor measures.
 
-| Field           | Description                                                       |
-| --------------- | ----------------------------------------------------------------- |
-| **Data source** | `Observations`, `Scores (numeric)`, or `Scores (categorical)`     |
-| **Metric**      | Aggregation + measure — e.g. `avg latency`, `count`, `p95 cost`   |
-| **Filters**     | Narrow the dataset (model name, tags, user ID, environment, etc.) |
+| Field           | Description                                                                       |
+| --------------- | --------------------------------------------------------------------------------- |
+| **Data source** | `Observations`, `Scores (numeric)`, `Scores (categorical)`, or `Scores (boolean)` |
+| **Metric**      | Aggregation + measure — e.g. `avg latency`, `count`, `p95 cost`                   |
+| **Filters**     | Narrow the dataset (model name, tags, user ID, environment, Boolean value, etc.)  |
+
+For Boolean scores, the average value is the share of scores that are `true`. Use it to alert on rates such as policy-check passes or detected hallucinations.
 
 ### Set alert conditions
 
