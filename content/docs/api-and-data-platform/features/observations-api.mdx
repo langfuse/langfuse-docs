@@ -14,7 +14,7 @@ For general information about API authentication, base URLs, and SDK access, see
 
 <Callout type="info">
 
-Older trace and observation read APIs remain available, but are not recommended as the default for new data extraction workflows because they are less performant at scale. Use Observations API v2 for row-level data extraction.
+The deprecated `GET /api/public/traces` and `GET /api/public/observations` endpoints are documented in the [Deprecated APIs reference](/docs/api-and-data-platform/features/deprecated-apis); to move off them, see [Migration of deprecated APIs](/docs/deprecated-api-migration).
 
 </Callout>
 
@@ -82,7 +82,7 @@ The v1 API returns complete rows with all fields (input/output, usage, metadata,
 | `metrics`       | latency, timeToFirstToken                                                                                              |
 | `trace_context` | tags, release, traceName                                                                                               |
 
-If `fields` is not specified, `core` and `basic` field groups are returned by default. Fields from groups you do not request are **absent** from the response — not `null`. The following fields are an exception and are always present but only populated when the field group `model` is selected: `modelId`, `inputPrice`, `outputPrice`, and `totalPrice`. Note that `inputPrice`, `outputPrice`, and `totalPrice` are returned as **strings** (e.g. `"0.000005"`) to preserve decimal precision — cast them to a numeric type in your pipeline.
+If `fields` is not specified, `core` and `basic` field groups are returned by default. Fields from groups you do not request are **absent** from the response, not `null`. The following fields are an exception and are always present but only populated when the field group `model` is selected: `modelId`, `inputPrice`, `outputPrice`, and `totalPrice`. Note that `inputPrice`, `outputPrice`, and `totalPrice` are returned as **strings** (e.g. `"0.000005"`) to preserve decimal precision; cast them to a numeric type in your pipeline.
 
 **2. Cursor-Based Pagination**
 
@@ -115,14 +115,14 @@ When the response has no `cursor` in `meta` (or `meta.cursor` is `null`), you've
 
 **3. Optimized I/O Handling**
 
-The v1 API always attempts to parse input/output as JSON which can be expensive. The v2 API returns I/O as strings by default. Set `parseIoAsJson: true` only when you need parsed JSON.
+The v1 API always attempts to parse input/output as JSON which can be expensive. The v2 API returns I/O as raw strings; parse them in your pipeline when you need JSON. The `parseIoAsJson` parameter is deprecated: omit it or set it to `false`; setting it to `true` returns a `400` error.
 
-**4. Stricter Limits**
+**4. Higher Limits**
 
-| Feature       | v1        | v2    |
-| ------------- | --------- | ----- |
-| Default limit | 1000      | 50    |
-| Maximum limit | Unlimited | 1,000 |
+| Feature       | v1  | v2    |
+| ------------- | --- | ----- |
+| Default limit | 50  | 50    |
+| Maximum limit | 100 | 1,000 |
 
 On Langfuse Cloud, requests to the v2 Observations API count toward the general per-organization API rate limit (see the [API limits FAQ](/faq/all/api-limits)). Self-hosted instances have no enforced rate limits.
 
@@ -177,7 +177,7 @@ curl \
 | `parentObservationId` | string   | Filter by parent observation ID                                           |
 | `environment`         | string   | Filter by environment                                                     |
 | `version`             | string   | Filter by version tag                                                     |
-| `parseIoAsJson`       | boolean  | Parse input/output as JSON (default: false)                               |
+| `parseIoAsJson`       | boolean  | Deprecated: omit or set to `false`; `true` returns a `400` error          |
 | `filter`              | string   | JSON array of filter conditions (takes precedence over query params)      |
 
 ### Sample Response
