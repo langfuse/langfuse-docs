@@ -1,18 +1,22 @@
 ---
 title: Legacy APIs
 sidebarTitle: Legacy APIs
-description: Reference for the legacy read APIs — traces, observations, sessions, scores, and metrics — for deployments that have not yet migrated to the v4 API.
+description: Reference for Langfuse's legacy APIs — traces, observations, sessions, scores, metrics, and ingestion — for deployments that have not yet migrated to the v4 API.
 ---
+
+import LegacyApiAvailability from "@/components-mdx/legacy-api-availability.mdx";
 
 # Legacy APIs
 
 <Callout type="info">
 
-This page documents the legacy v3 API. These endpoints work on Langfuse v3 and on self-hosted Langfuse v4 in `legacy` or `dual` write mode. After the cutover to `events_only` mode, the read endpoints return `404` — except the dataset run reads, which keep working (see [Dataset runs](#dataset-runs-v1)); `POST /ingestion` keeps responding with `207` but rejects most event types — see [Ingestion](#ingestion-v1). On Langfuse Cloud they remain available for now, but are deprecated. Migrating? See [Transitioning to the v4 API](/docs/api-migration).
+This page documents Langfuse's legacy APIs and is frozen — it receives critical fixes only; new functionality ships in the v4 API. Migrating? See [Transitioning to the v4 API](/docs/api-migration).
 
 </Callout>
 
-This page is frozen: it receives critical fixes only, and new functionality ships in the v4 API. For authentication and base URLs, see the [Public API documentation](/docs/api-and-data-platform/features/public-api).
+<LegacyApiAvailability />
+
+For authentication and base URLs, see the [Public API documentation](/docs/api-and-data-platform/features/public-api).
 
 ## Traces [#traces-v1]
 

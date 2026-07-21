@@ -1,17 +1,16 @@
 ---
 title: Transitioning to the v4 API
 sidebarTitle: API Migration
-description: Per-endpoint mapping from the legacy v3 REST API to the Langfuse v4 API, with parameter mappings, semantic differences, and before/after examples.
+description: Per-endpoint mapping from the legacy REST API to the Langfuse v4 API, with parameter mappings, semantic differences, and before/after examples.
 ---
+
+import LegacyApiAvailability from "@/components-mdx/legacy-api-availability.mdx";
 
 # Transitioning to the v4 API
 
 Langfuse v4 introduces an [observations-first data model](/docs/v4): traces and observations are no longer separate entities, and reads are consolidated onto fewer, faster endpoints. This page maps every REST endpoint that changed to its v4 replacement — with parameter mappings, semantic differences, and before/after examples.
 
-Availability of the legacy endpoints depends on how you run Langfuse:
-
-- **Langfuse Cloud:** legacy endpoints remain available for now, but are deprecated and less performant at scale. New workflows should use the v4 endpoints.
-- **Self-hosted Langfuse v4:** legacy endpoints keep working while your deployment runs in `legacy` or `dual` write mode. After the cutover to `events_only` mode, the legacy read endpoints return `404` — except the dataset run reads, which keep working (see [Dataset runs](#dataset-runs)); the write path degrades differently — see [Ingestion](#ingestion). See [Langfuse v4](/docs/v4) for the rollout status and upgrade guidance for self-hosted deployments.
+<LegacyApiAvailability />
 
 If you access the API through the Langfuse SDKs, use the SDK upgrade guides instead: [Python v3 to v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) and [JS/TS v4 to v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5). This page covers direct REST usage only.
 

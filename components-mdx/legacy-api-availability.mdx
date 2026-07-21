@@ -1,0 +1,7 @@
+Availability of the legacy endpoints depends on how you run Langfuse:
+
+- **Langfuse Cloud** — the legacy endpoints remain available for now, but are deprecated and less performant at scale. New workflows should use the v4 API.
+- **Self-hosted Langfuse v3, or v4 in `legacy` or `dual` write mode** — the legacy endpoints keep working.
+- **Self-hosted Langfuse v4 in `events_only` write mode** — the legacy read endpoints return `404`, except the dataset run reads, which keep working. `POST /ingestion` still responds with `207` but rejects most event types, and the older synchronous write endpoints (`POST /traces`, `/spans`, `/generations`, `/events`) return `404`.
+
+See [Langfuse v4](/docs/v4) for the self-hosted rollout status and upgrade guidance.
