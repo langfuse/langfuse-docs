@@ -97,7 +97,7 @@ curl -G https://cloud.langfuse.com/api/public/v2/observations \
   --data-urlencode "limit=50"
 ```
 
-The v2 API returns observation rows, not trace objects: group rows by `traceId`, and render the input/output of each trace's root observation (the row with `parentObservationId == null`). See [Transitioning to the v4 API](/docs/api-migration#traces) for details.
+The v2 API returns observation rows, not trace objects: group rows by `traceId`, and render the input/output of each trace's root observation (the row with `parentObservationId == null`). See [Migration of deprecated APIs](/docs/deprecated-api-migration#traces) for details.
 
 _See the [API reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations)._
 
@@ -106,10 +106,10 @@ _See the [API reference](https://api.reference.langfuse.com/#tag/observationsv2/
 
 <Callout type="info">
   The Python and JS/TS tabs use the SDK's trace read
-  (`langfuse.api.trace.list`), which calls the legacy `GET /api/public/traces`
+  (`langfuse.api.trace.list`), which calls the deprecated `GET /api/public/traces`
   endpoint and still returns trace objects; the API tab shows the endpoint's
-  v4 replacement, which returns observation rows instead. See [Transitioning
-  to the v4 API](/docs/api-migration#traces) for how the two relate.
+  supported replacement, which returns observation rows instead. See [Migration
+  of deprecated APIs](/docs/deprecated-api-migration#traces) for how the two relate.
 </Callout>
 
 ### Ingest the reviewer's judgment as a score

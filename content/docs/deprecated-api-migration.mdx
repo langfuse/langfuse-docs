@@ -1,38 +1,34 @@
 ---
-title: Transitioning to the v4 API
-sidebarTitle: API Migration
-description: Per-endpoint mapping from the legacy REST API to the Langfuse v4 API, with parameter mappings, semantic differences, and before/after examples.
+title: Migration of deprecated APIs
+sidebarTitle: Deprecated API migration
+description: Per-endpoint mapping from Langfuse's deprecated REST endpoints to their supported replacements, with parameter mappings, semantic differences, and before/after examples.
 ---
 
-import LegacyApiAvailability from "@/components-mdx/legacy-api-availability.mdx";
+# Migration of deprecated APIs
 
-# Transitioning to the v4 API
-
-Langfuse v4 introduces an [observations-first data model](/docs/v4): traces and observations are no longer separate entities, and reads are consolidated onto fewer, faster endpoints. This page maps every REST endpoint that changed to its v4 replacement — with parameter mappings, semantic differences, and before/after examples.
-
-<LegacyApiAvailability />
+This page maps every deprecated Langfuse REST endpoint to its supported replacement — with parameter mappings, semantic differences, and before/after examples. Many of these changes follow from the [observations-first data model](/docs/v4): traces and observations are no longer separate entities, and reads are consolidated onto fewer, faster endpoints.
 
 If you access the API through the Langfuse SDKs, use the SDK upgrade guides instead: [Python v3 to v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) and [JS/TS v4 to v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5). This page covers direct REST usage only.
 
-Still need the legacy endpoints? They are documented in the [Legacy APIs reference](/docs/api-and-data-platform/features/legacy-apis).
+Still need the deprecated endpoints? They are documented in the [Deprecated APIs reference](/docs/api-and-data-platform/features/deprecated-apis).
 
 <Callout type="info">
 
-This page is also served as plain markdown at `https://langfuse.com/docs/api-migration.md` for programmatic use, e.g. by coding agents. The section anchors below are stable.
+This page is also served as plain markdown at `https://langfuse.com/docs/deprecated-api-migration.md` for programmatic use, e.g. by coding agents. The section anchors below are stable.
 
 </Callout>
 
 ## Quick reference [#quick-reference]
 
-| Legacy endpoint (v3)                                                                  | Replacement (v4)                               | Details                       |
-| ------------------------------------------------------------------------------------- | ---------------------------------------------- | ----------------------------- |
-| `GET /observations`, `GET /observations/{id}`                                         | `GET /v2/observations`                         | [Observations](#observations) |
-| `GET /traces`, `GET /traces/{id}`                                                     | `GET /v2/observations`, grouped by `traceId`   | [Traces](#traces)             |
-| `GET /sessions`, `GET /sessions/{id}`                                                 | `GET /v2/observations`, grouped by `sessionId` | [Sessions](#sessions)         |
-| `GET /metrics`, `GET /metrics/daily`                                                  | `GET /v2/metrics`                              | [Metrics](#metrics)           |
-| `GET /scores`, `GET /scores/{id}`, `GET /v2/scores`, `GET /v2/scores/{id}`            | `GET /v3/scores`                               | [Scores](#scores)             |
-| `GET /datasets/{name}/runs`, `GET /datasets/{name}/runs/{runName}`                    | `GET /experiments`, `GET /experiment-items`    | [Dataset runs](#dataset-runs) |
-| `POST /ingestion`, `POST /traces`, `POST /spans`, `POST /generations`, `POST /events` | `POST /otel/v1/traces` (OTLP/HTTP)             | [Ingestion](#ingestion)       |
+| Legacy endpoint (v3)                                                                  | Replacement (v4)                                | Details                       |
+| ------------------------------------------------------------------------------------- | ----------------------------------------------- | ----------------------------- |
+| `GET /observations`, `GET /observations/{id}`                                         | `GET /v2/observations`                          | [Observations](#observations) |
+| `GET /traces`, `GET /traces/{id}`                                                     | `GET /v2/observations`, filtered by `traceId`   | [Traces](#traces)             |
+| `GET /sessions`, `GET /sessions/{id}`                                                 | `GET /v2/observations`, filtered by `sessionId` | [Sessions](#sessions)         |
+| `GET /metrics`, `GET /metrics/daily`                                                  | `GET /v2/metrics`                               | [Metrics](#metrics)           |
+| `GET /scores`, `GET /scores/{id}`, `GET /v2/scores`, `GET /v2/scores/{id}`            | `GET /v3/scores`                                | [Scores](#scores)             |
+| `GET /datasets/{name}/runs`, `GET /datasets/{name}/runs/{runName}`                    | `GET /experiments`, `GET /experiment-items`     | [Dataset runs](#dataset-runs) |
+| `POST /ingestion`, `POST /traces`, `POST /spans`, `POST /generations`, `POST /events` | `POST /otel/v1/traces` (OTLP/HTTP)              | [Ingestion](#ingestion)       |
 
 All paths are relative to `/api/public`.
 

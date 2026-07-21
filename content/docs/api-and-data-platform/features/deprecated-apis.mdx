@@ -1,91 +1,41 @@
 ---
-title: Legacy APIs
-sidebarTitle: Legacy APIs
-description: Reference for Langfuse's legacy APIs — traces, observations, sessions, scores, metrics, and ingestion — for deployments that have not yet migrated to the v4 API.
+title: Deprecated APIs
+sidebarTitle: Deprecated APIs
+description: Reference for Langfuse's deprecated APIs — traces, observations, sessions, scores, metrics, and ingestion — for deployments that have not yet migrated to the current API.
 ---
 
-import LegacyApiAvailability from "@/components-mdx/legacy-api-availability.mdx";
-
-# Legacy APIs
+# Deprecated APIs
 
 <Callout type="info">
 
-This page documents Langfuse's legacy APIs and is frozen — it receives critical fixes only; new functionality ships in the v4 API. Migrating? See [Transitioning to the v4 API](/docs/api-migration).
+The APIs documented on this page are deprecated. They no longer receive fixes — only security patches — and no new functionality; new capabilities ship in the current API. See [Migration of deprecated APIs](/docs/deprecated-api-migration).
 
 </Callout>
 
-<LegacyApiAvailability />
+## Deprecated endpoints [#endpoints]
 
-For authentication and base URLs, see the [Public API documentation](/docs/api-and-data-platform/features/public-api).
+The endpoints below are deprecated. Their parameters are documented in the linked API reference; follow the replacement link to migrate. All paths are relative to `/api/public`.
 
-## Traces [#traces-v1]
+| Deprecated endpoint(s)                       | Parameters                                                                                                | Replacement                                                                             |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `GET /traces`, `/traces/{id}`                | [API reference](https://api.reference.langfuse.com/#tag/trace/GET/api/public/traces)                      | [Observations API v2, filtered by `traceId`](/docs/deprecated-api-migration#traces)     |
+| `GET /observations`, `/observations/{id}`    | [API reference](https://api.reference.langfuse.com/#tag/legacyobservationsv1/GET/api/public/observations) | [Observations API v2](/docs/deprecated-api-migration#observations)                      |
+| `GET /sessions`, `/sessions/{id}`            | [API reference](https://api.reference.langfuse.com/#tag/sessions/GET/api/public/sessions)                 | [Observations API v2, filtered by `sessionId`](/docs/deprecated-api-migration#sessions) |
+| `GET /scores`, `/v2/scores` (+ `/{id}`)      | [API reference](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v2/scores)                  | [Scores API v3](/docs/deprecated-api-migration#scores)                                  |
+| `GET /datasets/{name}/runs` (+ `/{runName}`) | [API reference](https://api.reference.langfuse.com/#tag/datasets)                                         | [Experiments API](/docs/deprecated-api-migration#dataset-runs)                          |
+| `POST /ingestion`                            | [API reference](https://api.reference.langfuse.com/#tag/ingestion/POST/api/public/ingestion)              | [OpenTelemetry ingestion](/docs/deprecated-api-migration#ingestion)                     |
 
-```
-GET /api/public/traces
-GET /api/public/traces/{traceId}
-```
+### Scores [#scores-v1]
 
-List and fetch trace objects, including trace-level `input`/`output` and pagination via `page`/`limit`. Filter by `name`, `userId`, `sessionId`, `tags`, and timestamp range. See the [API reference](https://api.reference.langfuse.com/#tag/trace/GET/api/public/traces) for all parameters.
+The v1 reads `GET /scores` and `GET /scores/{scoreId}` are not in the API reference — they predate non-numeric scores (see the [announcement](/changelog/2024-07-11-non-numeric-scores-api)) and were superseded by the v2 reads. Score **writes** via `POST /scores` are not deprecated.
 
-**v4 replacement:** [Observations API v2, grouped by `traceId`](/docs/api-migration#traces).
+### Dataset runs [#dataset-runs-v1]
 
-## Observations, spans, and generations [#observations-v1]
+Unlike the other reads on this page, the dataset run reads are not gated by `events_only` mode and keep working on self-hosted v4.
 
-```
-GET /api/public/observations
-GET /api/public/observations/{observationId}
-```
+### Ingestion [#ingestion-v1]
 
-List and fetch observations with offset-based pagination; responses always include all fields, and `input`/`output` are parsed as JSON. Filter by `type` (`SPAN`, `GENERATION`, `EVENT`) to retrieve only spans or generations. See the [API reference](https://api.reference.langfuse.com/#tag/legacyobservationsv1/GET/api/public/observations) for all parameters.
-
-**v4 replacement:** [Observations API v2](/docs/api-migration#observations).
-
-## Sessions [#sessions-v1]
-
-```
-GET /api/public/sessions
-GET /api/public/sessions/{sessionId}
-```
-
-List sessions, and fetch a single session including its traces. See the [API reference](https://api.reference.langfuse.com/#tag/sessions/GET/api/public/sessions) for all parameters.
-
-**v4 replacement:** [Observations API v2, grouped by `sessionId`](/docs/api-migration#sessions).
-
-## Scores [#scores-v1]
-
-```
-GET /api/public/v2/scores
-GET /api/public/v2/scores/{scoreId}
-```
-
-List and fetch scores with offset-based pagination. Numeric values are returned in `value` and string values in the separate `stringValue` field. See the [API reference](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v2/scores) for all parameters. Score **writes** via `POST /api/public/scores` are not legacy and continue to work on v4.
-
-The earlier v1 reads `GET /api/public/scores` and `GET /api/public/scores/{scoreId}` were superseded by these v2 endpoints within v3's lifetime (they predate non-numeric scores — see the [announcement](/changelog/2024-07-11-non-numeric-scores-api)) and are no longer listed in the API reference.
-
-**v4 replacement:** [Scores API v3](/docs/api-migration#scores).
-
-## Dataset runs [#dataset-runs-v1]
-
-```
-GET /api/public/datasets/{datasetName}/runs
-GET /api/public/datasets/{datasetName}/runs/{runName}
-```
-
-List a dataset's runs and fetch a single run with its items. See the [API reference](https://api.reference.langfuse.com/#tag/datasets/get/api/public/datasets/{datasetName}/runs/{runName}) for all parameters. Unlike the other reads on this page, these endpoints are not gated by `events_only` mode and keep working on v4.
-
-**v4 replacement:** [Experiments API](/docs/api-migration#dataset-runs).
-
-## Ingestion [#ingestion-v1]
-
-```
-POST /api/public/ingestion
-```
-
-Batched event ingestion for traces, observations, and scores. See the [API reference](https://api.reference.langfuse.com/#tag/ingestion/POST/api/public/ingestion) for the event envelope format. On self-hosted v4 in `events_only` mode, most event types are rejected with a `400` item error; `score-create`, `sdk-log`, and `dataset-run-item-create` continue to work.
-
-The older synchronous write endpoints `POST /api/public/traces`, `/spans`, `/generations`, and `/events` predate the batched Ingestion API. They are long superseded, no longer listed in the API reference, and also stop working after the cutover to `events_only` mode.
-
-**v4 replacement:** [OpenTelemetry ingestion](/docs/api-migration#ingestion).
+On self-hosted v4 in `events_only` mode, `POST /ingestion` still returns `207` but rejects most event types with a `400` item error; `score-create`, `sdk-log`, and `dataset-run-item-create` continue to work. The older synchronous write endpoints `POST /traces`, `/spans`, `/generations`, and `/events` are not in the API reference and also stop working after the cutover to `events_only`.
 
 ## Metrics API v1 [#metrics-v1]
 
@@ -101,7 +51,7 @@ The v1 Metrics API supports querying across different views (traces, observation
 - Analyze data across time with customizable granularity
 - Order results according to your needs
 
-**v4 replacement:** [Metrics API v2](/docs/api-migration#metrics).
+**Replacement:** [Metrics API v2](/docs/deprecated-api-migration#metrics).
 
 ### Query Parameters
 
@@ -348,7 +298,7 @@ Categorical scores have an additional dimension:
 
 <Callout type="warning">
 
-This endpoint is legacy and is no longer listed in the [public API reference](https://api.reference.langfuse.com/). It remains available for backward compatibility, but for new use cases please use the [Metrics API v2](/docs/metrics/features/metrics-api#v2). It offers more flexibility and uses the separate Metrics API v2 rate-limit bucket listed in the [API limits FAQ](/faq/all/api-limits).
+This endpoint is deprecated and is no longer listed in the [public API reference](https://api.reference.langfuse.com/). It remains available for backward compatibility, but for new use cases please use the [Metrics API v2](/docs/metrics/features/metrics-api#v2). It offers more flexibility and uses the separate Metrics API v2 rate-limit bucket listed in the [API limits FAQ](/faq/all/api-limits).
 
 </Callout>
 
@@ -358,7 +308,7 @@ GET /api/public/metrics/daily
 
 Via the **Daily Metrics API**, you can retrieve aggregated daily usage and cost metrics from Langfuse for downstream use, e.g., in analytics, billing, and rate-limiting. The API allows you to filter by application type, user, or tags for tailored data retrieval.
 
-**v4 replacement:** [Metrics API v2 with a daily time dimension](/docs/api-migration#daily-metrics-migration).
+**Replacement:** [Metrics API v2 with a daily time dimension](/docs/deprecated-api-migration#daily-metrics-migration).
 
 ### Overview
 
