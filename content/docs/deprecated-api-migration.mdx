@@ -6,7 +6,7 @@ description: Per-endpoint mapping from Langfuse's deprecated REST endpoints to t
 
 # Migration of deprecated APIs
 
-This page maps every deprecated Langfuse REST endpoint to its supported replacement — with parameter mappings, semantic differences, and before/after examples. Many of these changes follow from the [observations-first data model](/docs/v4): traces and observations are no longer separate entities, and reads are consolidated onto fewer, faster endpoints.
+This page maps every deprecated Langfuse REST endpoint to its replacement, with parameter mappings, semantic differences, and before/after examples. Many of these changes follow from the [observations-first data model](/docs/v4): traces and observations are no longer separate entities, and reads are consolidated onto fewer, faster endpoints.
 
 If you access the API through the Langfuse SDKs, use the SDK upgrade guides instead: [Python v3 to v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) and [JS/TS v4 to v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5). This page covers direct REST usage only.
 
@@ -20,7 +20,7 @@ This page is also served as plain markdown at `https://langfuse.com/docs/depreca
 
 ## Quick reference [#quick-reference]
 
-| Legacy endpoint (v3)                                                                  | Replacement (v4)                                | Details                       |
+| Deprecated endpoint                                                                   | Replacement                                     | Details                       |
 | ------------------------------------------------------------------------------------- | ----------------------------------------------- | ----------------------------- |
 | `GET /observations`, `GET /observations/{id}`                                         | `GET /v2/observations`                          | [Observations](#observations) |
 | `GET /traces`, `GET /traces/{id}`                                                     | `GET /v2/observations`, filtered by `traceId`   | [Traces](#traces)             |
@@ -34,26 +34,26 @@ All paths are relative to `/api/public`.
 
 ## Observations [#observations]
 
-**Legacy:** `GET /observations`, `GET /observations/{observationId}`.
+**Deprecated:** `GET /observations`, `GET /observations/{observationId}`.
 
 **Replacement:** [`GET /v2/observations`](/docs/api-and-data-platform/features/observations-api#v2) ([reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations)).
 
 ### Parameter mapping
 
-| Legacy (v1)                                                                                                                   | v2 equivalent                                                                         |
-| ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `page`                                                                                                                        | `cursor` (from the previous response's `meta.cursor`)                                 |
-| `limit` (default 50, max 100)                                                                                                 | `limit` (default 50, max 1,000)                                                       |
-| `GET /observations/{observationId}`                                                                                           | `filter` condition on the `id` column                                                 |
-| `name`, `userId`, `type`, `traceId`, `level`, `parentObservationId`, `environment`, `version`, `fromStartTime`, `toStartTime` | Unchanged — always set `fromStartTime` and `toStartTime` to keep each request bounded |
-| —                                                                                                                             | `fields` — comma-separated field groups; defaults to `core,basic`                     |
+| Deprecated (v1)                                                                                                               | v2 equivalent                                                                        |
+| ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `page`                                                                                                                        | `cursor` (from the previous response's `meta.cursor`)                                |
+| `limit` (default 50, max 100)                                                                                                 | `limit` (default 50, max 1,000)                                                      |
+| `GET /observations/{observationId}`                                                                                           | `filter` condition on the `id` column                                                |
+| `name`, `userId`, `type`, `traceId`, `level`, `parentObservationId`, `environment`, `version`, `fromStartTime`, `toStartTime` | Unchanged; always set `fromStartTime` and `toStartTime` to keep each request bounded |
+| -                                                                                                                             | `fields`: comma-separated field groups; defaults to `core,basic`                     |
 
 ### Semantic differences
 
-- Responses include only the requested `fields` groups; fields from groups you did not request are **absent**, not `null` — with one exception: `modelId`, `inputPrice`, `outputPrice`, and `totalPrice` are always present but `null` unless the `model` field group is requested.
-- `input`/`output` are returned as raw strings — parse them in your pipeline when you need JSON (v1 parsed them automatically). The `parseIoAsJson` parameter is deprecated: omit it or set it to `false`; setting it to `true` returns a `400` error.
+- Responses include only the requested `fields` groups; fields from groups you did not request are **absent**, not `null`. One exception: `modelId`, `inputPrice`, `outputPrice`, and `totalPrice` are always present but `null` unless the `model` field group is requested.
+- `input`/`output` are returned as raw strings; parse them in your pipeline when you need JSON (v1 parsed them automatically). The `parseIoAsJson` parameter is deprecated: omit it or set it to `false`; setting it to `true` returns a `400` error.
 - Pagination is cursor-based: pass `meta.cursor` from the previous response until no cursor is returned. Results are always sorted by `startTime` descending.
-- When the `model` group is requested, `inputPrice`, `outputPrice`, and `totalPrice` are returned as strings (e.g. `"0.000005"`) to preserve decimal precision — cast them to a numeric type in your pipeline.
+- When the `model` group is requested, `inputPrice`, `outputPrice`, and `totalPrice` are returned as strings (e.g. `"0.000005"`) to preserve decimal precision; cast them to a numeric type in your pipeline.
 
 ### Example
 
@@ -71,29 +71,29 @@ curl \
 
 ## Traces [#traces]
 
-**Legacy:** `GET /traces`, `GET /traces/{traceId}`.
+**Deprecated:** `GET /traces`, `GET /traces/{traceId}`.
 
 **Replacement:** [`GET /v2/observations`](/docs/api-and-data-platform/features/observations-api#v2), grouped by `traceId` on the client side.
 
 ### Parameter mapping
 
-| Legacy (`GET /traces`)         | v2 equivalent                                                       |
-| ------------------------------ | ------------------------------------------------------------------- |
-| `GET /traces/{traceId}`        | `traceId=<traceId>`                                                 |
-| `name`                         | `filter` condition on the `traceName` column                        |
-| `tags`                         | `filter` condition on the `tags` column (`arrayOptions` type)       |
-| `sessionId`                    | `filter` condition on the `sessionId` column                        |
-| `userId`                       | `userId` (unchanged)                                                |
-| `fromTimestamp`, `toTimestamp` | `fromStartTime`, `toStartTime`                                      |
-| `orderBy`                      | Not available — results are always sorted by `startTime` descending |
-| `page`                         | `cursor`                                                            |
+| Deprecated (`GET /traces`)     | v2 equivalent                                                      |
+| ------------------------------ | ------------------------------------------------------------------ |
+| `GET /traces/{traceId}`        | `traceId=<traceId>`                                                |
+| `name`                         | `filter` condition on the `traceName` column                       |
+| `tags`                         | `filter` condition on the `tags` column (`arrayOptions` type)      |
+| `sessionId`                    | `filter` condition on the `sessionId` column                       |
+| `userId`                       | `userId` (unchanged)                                               |
+| `fromTimestamp`, `toTimestamp` | `fromStartTime`, `toStartTime`                                     |
+| `orderBy`                      | Not available; results are always sorted by `startTime` descending |
+| `page`                         | `cursor`                                                           |
 
 Request `fields=core,basic,trace_context` to include the trace-level attributes `traceName`, `tags`, and `release` on each row.
 
 ### Semantic differences
 
 - **The response contains observation rows, not trace objects.** Group rows by `traceId` to reconstruct trace activity.
-- **v4 has no trace-level `input`/`output`.** Reconstruct them from the root observation of each trace — the row with `parentObservationId == null`.
+- **v4 has no trace-level `input`/`output`.** Reconstruct them from the root observation of each trace: the row with `parentObservationId == null`.
 - For trace-level aggregates (counts, costs, latency grouped by `traceName`, `traceRelease`, or `traceVersion`), use the [Metrics API v2](/docs/metrics/features/metrics-api#v2) instead of fetching and aggregating rows yourself.
 
 ### Example
@@ -119,13 +119,13 @@ curl -G \
 
 ## Sessions [#sessions]
 
-**Legacy:** `GET /sessions`, `GET /sessions/{sessionId}`. On self-hosted v4 deployments in `events_only` mode, these return `404`.
+**Deprecated:** `GET /sessions`, `GET /sessions/{sessionId}`. On Langfuse v4, these will return `404`.
 
 **Replacement:** [`GET /v2/observations`](/docs/api-and-data-platform/features/observations-api#v2) with a `filter` condition on the `sessionId` column, grouped by `sessionId` on the client side.
 
 ### Parameter mapping
 
-| Legacy (`GET /sessions`)       | v2 equivalent                                |
+| Deprecated (`GET /sessions`)   | v2 equivalent                                |
 | ------------------------------ | -------------------------------------------- |
 | `GET /sessions/{sessionId}`    | `filter` condition on the `sessionId` column |
 | `fromTimestamp`, `toTimestamp` | `fromStartTime`, `toStartTime`               |
@@ -158,7 +158,7 @@ curl -G \
 
 ## Metrics [#metrics]
 
-**Legacy:** `GET /metrics` (v1) and `GET /metrics/daily`.
+**Deprecated:** `GET /metrics` (v1) and `GET /metrics/daily`.
 
 **Replacement:** [`GET /v2/metrics`](/docs/metrics/features/metrics-api#v2) ([reference](https://api.reference.langfuse.com/#tag/metricsv2/GET/api/public/v2/metrics)).
 
@@ -166,12 +166,12 @@ curl -G \
 
 The query object structure carries over; the key changes are inside the query:
 
-| Legacy (v1)                                                        | v2 equivalent                                                                                    |
+| Deprecated (v1)                                                    | v2 equivalent                                                                                    |
 | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
 | `view: "traces"`                                                   | `view: "observations"` with trace-level dimensions (`traceName`, `traceRelease`, `traceVersion`) |
 | `view: "observations"`, `"scores-numeric"`, `"scores-categorical"` | Unchanged                                                                                        |
-| Grouping by `userId`, `sessionId`, `id`, `traceId`                 | Not available — high-cardinality fields remain available as **filters** only                     |
-| Default result size                                                | `config.row_limit` (default 100) — set explicitly for larger result sets                         |
+| Grouping by `userId`, `sessionId`, `id`, `traceId`                 | Not available; high-cardinality fields remain available as **filters** only                      |
+| Default result size                                                | `config.row_limit` (default 100); set explicitly for larger result sets                          |
 
 ### Semantic differences
 
@@ -205,32 +205,32 @@ curl -G \
   "https://cloud.langfuse.com/api/public/v2/metrics"
 ```
 
-The legacy filters map to v2 `filters` entries: `traceName` and `userId` are available as filter columns; `tags` filters on trace tags.
+The deprecated endpoint's filters map to v2 `filters` entries: `traceName` and `userId` are available as filter columns; `tags` filters on trace tags.
 
 ## Scores [#scores]
 
-**Legacy:** `GET /scores` (v1), `GET /scores/{scoreId}`, `GET /v2/scores`, `GET /v2/scores/{scoreId}`. On self-hosted v4 deployments in `events_only` mode, the v2 score reads return `404`.
+**Deprecated:** `GET /scores` (v1), `GET /scores/{scoreId}`, `GET /v2/scores`, `GET /v2/scores/{scoreId}`. On Langfuse v4, these will return `404`.
 
 **Replacement:** [`GET /v3/scores`](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores). See the [Scores API v3 announcement](/changelog/2026-06-10-scores-v3-api) for background.
 
 ### Parameter mapping
 
-| Legacy (v1/v2)                                                     | v3 equivalent                                                                                                          |
-| ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| `page`                                                             | `cursor` (from the previous response's `meta`); `limit` max 100                                                        |
-| `GET /scores/{scoreId}`, `GET /v2/scores/{scoreId}`                | `id=<scoreId>` filter — there is no get-by-id endpoint in v3                                                           |
-| `value` + `stringValue` (split by type)                            | Single `value` field, typed by `dataType`                                                                              |
-| `operator` + `value` (numeric comparison)                          | `valueMin` / `valueMax` (inclusive bounds, require `dataType=NUMERIC`)                                                 |
-| `datasetRunId`                                                     | `experimentId`                                                                                                         |
-| `fromTimestamp`, `toTimestamp`                                     | Unchanged names — but `fromTimestamp` is now inclusive and `toTimestamp` exclusive                                     |
-| `userId`, `traceTags`                                              | Removed — for trace-level score questions, use the [Metrics API v2](/docs/metrics/features/metrics-api#v2) score views |
-| `name`, `source`, `dataType`, `environment`, `configId`, `queueId` | Unchanged, and now accept comma-separated lists (OR within a parameter, AND across parameters)                         |
+| Deprecated (v1/v2)                                                 | v3 equivalent                                                                                                         |
+| ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `page`                                                             | `cursor` (from the previous response's `meta`); `limit` max 100                                                       |
+| `GET /scores/{scoreId}`, `GET /v2/scores/{scoreId}`                | `id=<scoreId>` filter; there is no get-by-id endpoint in v3                                                           |
+| `value` + `stringValue` (split by type)                            | Single `value` field, typed by `dataType`                                                                             |
+| `operator` + `value` (numeric comparison)                          | `valueMin` / `valueMax` (inclusive bounds, require `dataType=NUMERIC`)                                                |
+| `datasetRunId`                                                     | `experimentId`                                                                                                        |
+| `fromTimestamp`, `toTimestamp`                                     | Unchanged names, but `fromTimestamp` is now inclusive and `toTimestamp` exclusive                                     |
+| `userId`, `traceTags`                                              | Removed; for trace-level score questions, use the [Metrics API v2](/docs/metrics/features/metrics-api#v2) score views |
+| `name`, `source`, `dataType`, `environment`, `configId`, `queueId` | Unchanged, and now accept comma-separated lists (OR within a parameter, AND across parameters)                        |
 
 ### Semantic differences
 
-- **One typed `value` field.** `NUMERIC` scores return a number, `BOOLEAN` scores a boolean, and `CATEGORICAL`/`TEXT`/`CORRECTION` scores a string — no more parallel `value`/`stringValue` fields.
+- **One typed `value` field.** `NUMERIC` scores return a number, `BOOLEAN` scores a boolean, and `CATEGORICAL`/`TEXT`/`CORRECTION` scores a string; no more parallel `value`/`stringValue` fields.
 - **Field groups.** Core fields are always returned; request more via `fields=details,subject,annotation`. The `subject` group replaces the flat `traceId`/`observationId`/`sessionId`/`datasetRunId` response fields with one object describing what the score is attached to (`kind`: `trace`, `observation`, `session`, or `experiment`).
-- Use at most one of the `traceId`, `sessionId`, and `experimentId` filters — they cannot be combined. `observationId` requires `traceId` alongside it (observation IDs are scoped to a trace).
+- Use at most one of the `traceId`, `sessionId`, and `experimentId` filters; they cannot be combined. `observationId` requires `traceId` alongside it (observation IDs are scoped to a trace).
 - `fromTimestamp` is inclusive; `toTimestamp` is exclusive.
 
 ### Example
@@ -249,23 +249,23 @@ curl \
 
 ## Dataset runs → Experiments [#dataset-runs]
 
-**Legacy:** `GET /datasets/{datasetName}/runs`, `GET /datasets/{datasetName}/runs/{runName}`.
+**Deprecated:** `GET /datasets/{datasetName}/runs`, `GET /datasets/{datasetName}/runs/{runName}`.
 
-**Replacement:** [`GET /experiments`](https://api.reference.langfuse.com/#tag/experiments) and `GET /experiment-items`. "Dataset run" and "experiment" refer to the same concept — Langfuse is standardizing on "experiment" ([terminology note](/faq/all/retrieve-experiment-scores)).
+**Replacement:** [`GET /experiments`](https://api.reference.langfuse.com/#tag/experiments) and `GET /experiment-items`. "Dataset run" and "experiment" refer to the same concept; Langfuse is standardizing on "experiment" ([terminology note](/faq/all/retrieve-experiment-scores)).
 
 ### Parameter mapping
 
-| Legacy                                   | v4 equivalent                                                            |
-| ---------------------------------------- | ------------------------------------------------------------------------ |
-| `{datasetName}` path segment             | `datasetId` filter — resolve the ID via `GET /v2/datasets/{datasetName}` |
-| `{runName}` path segment                 | `name` filter on `GET /experiments`                                      |
-| Run items (embedded in the run response) | `GET /experiment-items?experimentId=<id>`                                |
-| `page`                                   | `cursor`; `limit` max 100                                                |
-| —                                        | `fromStartTime` (**required** on both endpoints), `toStartTime`          |
+| Deprecated                               | v4 equivalent                                                           |
+| ---------------------------------------- | ----------------------------------------------------------------------- |
+| `{datasetName}` path segment             | `datasetId` filter; resolve the ID via `GET /v2/datasets/{datasetName}` |
+| `{runName}` path segment                 | `name` filter on `GET /experiments`                                     |
+| Run items (embedded in the run response) | `GET /experiment-items?experimentId=<id>`                               |
+| `page`                                   | `cursor`; `limit` max 100                                               |
+| -                                        | `fromStartTime` (**required** on both endpoints), `toStartTime`         |
 
 ### Semantic differences
 
-- Unlike the other legacy reads, the dataset run reads are **not** gated by `events_only` mode — they keep working on self-hosted v4. Migrate for the richer experiments model, not because the endpoints disappear.
+- Unlike the other deprecated reads, the dataset run reads keep working on Langfuse v4. Migrate for the richer experiments model, not because the endpoints disappear.
 - Experiments are queried by dataset **ID**, not name.
 - Item inputs, outputs, and expected outputs are behind the `fields=io` group on `GET /experiment-items`; scores are behind `fields=scores` on both endpoints. This replaces the old workaround of fetching each run item's trace to collect scores.
 
@@ -293,14 +293,8 @@ curl \
 
 ## Ingestion [#ingestion]
 
-**Legacy:** `POST /ingestion` (batched event ingestion) and the older synchronous endpoints `POST /traces`, `POST /spans`, `POST /generations`, `POST /events`.
+**Deprecated:** `POST /ingestion` (batched event ingestion) and the older synchronous endpoints `POST /traces`, `POST /spans`, `POST /generations`, `POST /events`.
 
-**Replacement:** the OpenTelemetry endpoint [`POST /otel/v1/traces`](https://api.reference.langfuse.com/#tag/opentelemetry/POST/api/public/otel/v1/traces) (OTLP/HTTP), or an upgraded SDK ([Python v4.7.0+](/docs/observability/sdk/upgrade-path/python-v3-to-v4), [JS/TS v5.4.0+](/docs/observability/sdk/upgrade-path/js-v4-to-v5)). Set the `x-langfuse-ingestion-version: 4` header on your OTEL span exporter and propagate trace attributes to all observations — see the [OpenTelemetry integration guide](/integrations/native/opentelemetry).
+**Replacement:** the OpenTelemetry endpoint [`POST /otel/v1/traces`](https://api.reference.langfuse.com/#tag/opentelemetry/POST/api/public/otel/v1/traces) (OTLP/HTTP), or an upgraded SDK ([Python v4.7.0+](/docs/observability/sdk/upgrade-path/python-v3-to-v4), [JS/TS v5.4.0+](/docs/observability/sdk/upgrade-path/js-v4-to-v5)). Set the `x-langfuse-ingestion-version: 4` header on your OTEL span exporter and propagate trace attributes to all observations; see the [OpenTelemetry integration guide](/integrations/native/opentelemetry).
 
-### Write-path behavior on self-hosted v4 (`events_only` mode)
-
-- `POST /ingestion` still responds with `207`, but rejects each event with a `400` item error — **except** for the event types `score-create`, `sdk-log`, and `dataset-run-item-create`, which continue to work.
-- `POST /traces`, `POST /spans`, `POST /generations`, and `POST /events` return `404`.
-- Score writes via `POST /scores` are unaffected.
-
-In `legacy` and `dual` write modes, the legacy write path keeps working; it breaks after the cutover to `events_only`. See [Langfuse v4](/docs/v4) for the self-hosted rollout status.
+Score writes via `POST /scores` are unaffected.

@@ -1,41 +1,34 @@
 ---
 title: Deprecated APIs
 sidebarTitle: Deprecated APIs
-description: Reference for Langfuse's deprecated APIs — traces, observations, sessions, scores, metrics, and ingestion — for deployments that have not yet migrated to the current API.
+description: Reference for Langfuse's deprecated APIs (traces, observations, sessions, scores, metrics, and ingestion) for deployments that have not yet migrated to the current API.
 ---
 
 # Deprecated APIs
 
 <Callout type="info">
 
-The APIs documented on this page are deprecated. They no longer receive fixes — only security patches — and no new functionality; new capabilities ship in the current API. See [Migration of deprecated APIs](/docs/deprecated-api-migration).
+These APIs are deprecated and receive security patches only, no other fixes or new functionality. To migrate, see [Migration of deprecated APIs](/docs/deprecated-api-migration).
 
 </Callout>
 
 ## Deprecated endpoints [#endpoints]
 
-The endpoints below are deprecated. Their parameters are documented in the linked API reference; follow the replacement link to migrate. All paths are relative to `/api/public`.
+All paths are relative to `/api/public`.
 
-| Deprecated endpoint(s)                       | Parameters                                                                                                | Replacement                                                                             |
-| -------------------------------------------- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `GET /traces`, `/traces/{id}`                | [API reference](https://api.reference.langfuse.com/#tag/trace/GET/api/public/traces)                      | [Observations API v2, filtered by `traceId`](/docs/deprecated-api-migration#traces)     |
-| `GET /observations`, `/observations/{id}`    | [API reference](https://api.reference.langfuse.com/#tag/legacyobservationsv1/GET/api/public/observations) | [Observations API v2](/docs/deprecated-api-migration#observations)                      |
-| `GET /sessions`, `/sessions/{id}`            | [API reference](https://api.reference.langfuse.com/#tag/sessions/GET/api/public/sessions)                 | [Observations API v2, filtered by `sessionId`](/docs/deprecated-api-migration#sessions) |
-| `GET /scores`, `/v2/scores` (+ `/{id}`)      | [API reference](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v2/scores)                  | [Scores API v3](/docs/deprecated-api-migration#scores)                                  |
-| `GET /datasets/{name}/runs` (+ `/{runName}`) | [API reference](https://api.reference.langfuse.com/#tag/datasets)                                         | [Experiments API](/docs/deprecated-api-migration#dataset-runs)                          |
-| `POST /ingestion`                            | [API reference](https://api.reference.langfuse.com/#tag/ingestion/POST/api/public/ingestion)              | [OpenTelemetry ingestion](/docs/deprecated-api-migration#ingestion)                     |
+| Deprecated endpoint(s)                              | Parameters                                                                                                | Replacement                                                                             |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `GET /traces`, `/traces/{id}`                       | [API reference](https://api.reference.langfuse.com/#tag/trace/GET/api/public/traces)                      | [Observations API v2, filtered by `traceId`](/docs/deprecated-api-migration#traces)     |
+| `GET /observations`, `/observations/{id}`           | [API reference](https://api.reference.langfuse.com/#tag/legacyobservationsv1/GET/api/public/observations) | [Observations API v2](/docs/deprecated-api-migration#observations)                      |
+| `GET /sessions`, `/sessions/{id}`                   | [API reference](https://api.reference.langfuse.com/#tag/sessions/GET/api/public/sessions)                 | [Observations API v2, filtered by `sessionId`](/docs/deprecated-api-migration#sessions) |
+| `GET /scores`, `/v2/scores` (+ `/{id}`)             | [API reference](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v2/scores)                  | [Scores API v3](/docs/deprecated-api-migration#scores)                                  |
+| `GET /metrics`                                      | [Documented below](#metrics-v1)                                                                           | [Metrics API v2](/docs/deprecated-api-migration#metrics)                                |
+| `GET /metrics/daily`                                | [Documented below](#daily-metrics)                                                                        | [Metrics API v2](/docs/deprecated-api-migration#daily-metrics-migration)                |
+| `GET /datasets/{name}/runs` (+ `/{runName}`)        | [API reference](https://api.reference.langfuse.com/#tag/datasets)                                         | [Experiments API](/docs/deprecated-api-migration#dataset-runs)                          |
+| `POST /ingestion`                                   | [API reference](https://api.reference.langfuse.com/#tag/ingestion/POST/api/public/ingestion)              | [OpenTelemetry ingestion](/docs/deprecated-api-migration#ingestion)                     |
+| `POST /traces`, `/spans`, `/generations`, `/events` | Not in the API reference                                                                                  | [OpenTelemetry ingestion](/docs/deprecated-api-migration#ingestion)                     |
 
-### Scores [#scores-v1]
-
-The v1 reads `GET /scores` and `GET /scores/{scoreId}` are not in the API reference — they predate non-numeric scores (see the [announcement](/changelog/2024-07-11-non-numeric-scores-api)) and were superseded by the v2 reads. Score **writes** via `POST /scores` are not deprecated.
-
-### Dataset runs [#dataset-runs-v1]
-
-Unlike the other reads on this page, the dataset run reads are not gated by `events_only` mode and keep working on self-hosted v4.
-
-### Ingestion [#ingestion-v1]
-
-On self-hosted v4 in `events_only` mode, `POST /ingestion` still returns `207` but rejects most event types with a `400` item error; `score-create`, `sdk-log`, and `dataset-run-item-create` continue to work. The older synchronous write endpoints `POST /traces`, `/spans`, `/generations`, and `/events` are not in the API reference and also stop working after the cutover to `events_only`.
+Score **writes** via `POST /scores` are not deprecated.
 
 ## Metrics API v1 [#metrics-v1]
 
@@ -49,7 +42,7 @@ The v1 Metrics API supports querying across different views (traces, observation
 - Apply multiple metrics with different aggregation methods
 - Filter data based on metadata, timestamps, and other properties
 - Analyze data across time with customizable granularity
-- Order results according to your needs
+- Order results
 
 **Replacement:** [Metrics API v2](/docs/deprecated-api-migration#metrics).
 
@@ -296,17 +289,11 @@ Categorical scores have an additional dimension:
 
 ## Daily Metrics API [#daily-metrics]
 
-<Callout type="warning">
-
-This endpoint is deprecated and is no longer listed in the [public API reference](https://api.reference.langfuse.com/). It remains available for backward compatibility, but for new use cases please use the [Metrics API v2](/docs/metrics/features/metrics-api#v2). It offers more flexibility and uses the separate Metrics API v2 rate-limit bucket listed in the [API limits FAQ](/faq/all/api-limits).
-
-</Callout>
-
 ```
 GET /api/public/metrics/daily
 ```
 
-Via the **Daily Metrics API**, you can retrieve aggregated daily usage and cost metrics from Langfuse for downstream use, e.g., in analytics, billing, and rate-limiting. The API allows you to filter by application type, user, or tags for tailored data retrieval.
+The Daily Metrics API returns aggregated daily usage and cost metrics for downstream use in analytics, billing, and rate limiting. Filter by trace name, user, or tags.
 
 **Replacement:** [Metrics API v2 with a daily time dimension](/docs/deprecated-api-migration#daily-metrics-migration).
 
