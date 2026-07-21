@@ -179,7 +179,11 @@ The pipeline mixes two kinds of evaluators because they catch different failure 
 4. **Regulatory compliance** scans outputs for prohibited phrases like "guaranteed returns" or "risk-free investment."
 5. **Response completeness** scores response length and structural formatting. Despite the name it checks structure; whether the content answers the question is covered by the judge below.
 
-**One LLM-as-a-judge evaluator** covers the dimension the deterministic checks cannot see: [groundedness](/docs/evaluation/evaluation-methods/llm-as-a-judge). The judge model receives the question, the source evidence, and the model's answer, and scores whether the answer is supported by the evidence, following a financial-auditor rubric.
+**One LLM-as-a-judge evaluator** covers the dimension the deterministic checks cannot see: [groundedness](/docs/evaluation/evaluation-methods/llm-as-a-judge). The judge model receives the question, the source evidence, and the model's answer, and scores whether the answer is supported by the evidence, following a financial-auditor rubric. The score lands on the trace with the judge's reasoning attached. Here it catches an answer that padded a failed calculator step with invented figures:
+
+<Frame fullWidth>
+  ![Groundedness 0.46 in Langfuse: the judge's reasoning is attached to the score and flags CapEx and cash-flow figures that appear nowhere in the source documents](/images/blog/2026-07-15-llm-certification-financial-services/langfuse-judge-groundedness.png)
+</Frame>
 
 An example run from the 10-item FinanceBench sample shows why both kinds are needed. Claude Haiku scored 60% on numerical accuracy and 97% on groundedness. Wrong numbers make the model unusable either way, but the pair of scores locates the failure: Haiku reads the evidence faithfully and fails specifically at numerical reasoning. The fix is a calculator tool or a stronger model rather than a different retrieval setup, and that level of nuance is what a model risk reviewer needs from a report.
 
