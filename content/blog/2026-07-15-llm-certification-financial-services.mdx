@@ -161,7 +161,11 @@ result = dataset.run_experiment(
 )
 ```
 
-Every model call is traced in Langfuse and scored by the evaluators. Running the same dataset against multiple models gives you a side-by-side comparison in the Langfuse UI; the portal screenshot further down shows the same comparison, with `claude-sonnet-4-6` and its finance-expert prompt variant as separate rows.
+Every model call is traced in Langfuse and scored by the evaluators. Running the same dataset against multiple models gives a side-by-side comparison in the Langfuse UI, per item and per score:
+
+<Frame fullWidth>
+  ![Compare runs in Langfuse: Claude Opus, Sonnet, and Haiku on the FinanceBench sample, with outputs and scores per item](/images/blog/2026-07-15-llm-certification-financial-services/langfuse-run-comparison.png)
+</Frame>
 
 ## Evaluators [#evaluators]
 
@@ -237,7 +241,13 @@ python export_results.py --dataset certification/financebench-sample --format ma
 
 The model-level runs above are baselines. They answer questions like "which model do we build on" and "did the model swap regress anything." The deployment decision is made on something larger: nobody deploys Claude Sonnet, they deploy the 10-K analysis assistant built on it, and that assistant plans, retrieves evidence, calls a calculator tool, and composes an answer. The pipeline therefore registers agents as first-class targets and runs them through the same datasets, evaluators, and gate as the models.
 
-Two things change for agents. First, each agent runs as a multi-step task per dataset item, with one nested span per step, so a reviewer can open any item in Langfuse and see which tool the agent invoked and what it returned. Second, instead of a single accuracy threshold, each agent has its own **multi-dimensional gate**: every dimension must pass at once or the run fails.
+Two things change for agents. First, each agent runs as a multi-step task per dataset item, with one nested span per step, so a reviewer can open any item in Langfuse and see which tool the agent invoked and what it returned. Here is a `10k-analyst` item with the `calculate` step selected — the tool call's input and its returned value are right there in the trace:
+
+<Frame fullWidth>
+  ![A 10k-analyst trace in Langfuse: one nested span per step (plan, retrieve-evidence, calculate, compose-answer), with the calculate tool span selected showing its input and returned value](/images/blog/2026-07-15-llm-certification-financial-services/langfuse-agent-trace.png)
+</Frame>
+
+Second, instead of a single accuracy threshold, each agent has its own **multi-dimensional gate**: every dimension must pass at once or the run fails.
 
 | Agent              | Steps (spans)                                  | Gate (all dimensions must pass)                                             |
 | ------------------ | ---------------------------------------------- | -------------------------------------------------------------------------- |
