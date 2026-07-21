@@ -719,7 +719,18 @@ print(f"  obs_id_map エントリ数:   {len(obs_id_map)}")
 
 ## 5. スコア
 
-スコアは移行元から `api.scores.get_many` で取得し、移行先ではネイティブの **`create_score`** ヘルパーで再作成します。元の `id` をそのまま保持するので、スクリプトを再実行しても冪等に動きます。`config_id` はセクション1の `config_id_map` で、`trace_id` / `observation_id` はセクション4の `trace_id_map` / `obs_id_map` でそれぞれマッピングし直します。
+スコアは移行元から v3 Scores API (`api.scores_v3.get_many_v3`) で取得し、移行先ではネイティブの **`create_score`** ヘルパーで再作成します。元の `id` をそのまま保持するので、スクリプトを再実行しても冪等に動きます。`config_id` はセクション1の `config_id_map` で、トレース / オブザベーションへの参照はセクション4の `trace_id_map` / `obs_id_map` でそれぞれマッピングし直します。
+
+旧 v2 エンドポイントとの違いのうち、ここで重要になるのは次の3点です。
+
+- **カーソルページネーション** — ページ番号を数える代わりに、`meta.cursor` の不透明なカーソルを空になるまで渡し続けます。
+- **単一の `subject`** — 各スコアは、フラットな `trace_id` / `observation_id` / `session_id` / `dataset_run_id` フィールドの代わりに、1つの `subject` オブジェクト (`kind` + `id`) で対象を参照します。データセット実行は v3 では *experiment* と呼ばれるので、`kind="experiment"` を書き込み側の `dataset_run_id` に対応づけます。ごくまれに2つの参照 (例: トレースとセッションの両方) を持つ古いスコアが存在しますが、v3 ではそのうち1つだけが返されます。従来のフローではそうしたスコアの再作成自体が失敗していたので、悪化することはありません。
+- **型付きの `value`** — `value` は常に数値 + 別フィールドの `string_value` という形ではなく、スコアの `data_type` に応じた型になります (NUMERIC は数値、BOOLEAN は真偽値、CATEGORICAL などは文字列)。
+
+もう1点: v2 はトレースが存在しないスコアを黙って除外していましたが、v3 はそれらも返します。v2 のフローより移行されるスコアがやや多くなる場合は、これまで見えていなかったスコアが移行されるようになったためで、改善であって問題ではありません。
+
+> **セルフホスト環境の場合:** Scores API v3 には [Langfuse v4](https://langfuse.com/docs/v4) が必要です。それより前のセルフホスト環境から移行する場合は v2 のパターンを使ってください: ページベースの `src.api.scores.get_many(page=page, limit=100, ...)` で取得し、フラットな `trace_id` / `observation_id` / `session_id` フィールドと、CATEGORICAL スコアには `string_value` を使います。
+
 
 
 ```python
@@ -727,27 +738,54 @@ trace_id_map = globals().get("trace_id_map", {})
 obs_id_map = globals().get("obs_id_map", {})
 config_id_map = globals().get("config_id_map", {})
 
-page = 1
+# v3 Scores API のフィールドグループ。`core` (id/name/value/dataType/...) は常に
+# 含まれます。`details` は comment/metadata/configId を、`subject` は subject
+# 参照を、`annotation` は authorUserId/queueId を追加します。
+SCORES_FIELDS = "details,subject,annotation"
+
+cursor: Optional[str] = None
 migrated = failed = skipped = 0
 while True:
-    resp = with_retries(lambda: src.api.scores.get_many(
-        page=page,
+    resp = with_retries(lambda: src.api.scores_v3.get_many_v3(
         limit=100,
+        cursor=cursor,
+        fields=SCORES_FIELDS,
         from_timestamp=FROM_TS,
         to_timestamp=TO_TS,
     ))
-    if not resp.data:
-        break
     for s in resp.data:
+        # v3 の subject を、create_score が期待するフラットな参照フィールドに変換する
+        trace_id = observation_id = session_id = dataset_run_id = None
+        kind = s.subject.kind if s.subject else None
+        if kind == "trace":
+            trace_id = s.subject.id
+        elif kind == "observation":
+            observation_id = s.subject.id
+            trace_id = s.subject.trace_id
+        elif kind == "session":
+            session_id = s.subject.id
+        elif kind == "experiment":  # v3 におけるデータセット実行の呼び名
+            dataset_run_id = s.subject.id
+        else:
+            print(f"  スコア {s.id} ({s.name}) をスキップ: 未対応の subject kind {kind!r}")
+            skipped += 1
+            continue
+
         # 参照をマッピングし直す
-        new_trace_id = trace_id_map.get(s.trace_id, s.trace_id) if s.trace_id else None
-        new_obs_id = obs_id_map.get(s.observation_id, s.observation_id) if s.observation_id else None
+        new_trace_id = trace_id_map.get(trace_id, trace_id) if trace_id else None
+        new_obs_id = obs_id_map.get(observation_id, observation_id) if observation_id else None
         new_cfg_id = config_id_map.get(s.config_id, s.config_id) if s.config_id else None
 
-        # 型に応じた値を決める
-        if s.data_type == "CATEGORICAL":
-            value = getattr(s, "string_value", None) or str(s.value)
+        # v3 の `value` は型付きなので、書き込み側が期待する形に変換する
+        if s.data_type == "NUMERIC":
+            value = s.value
+        elif s.data_type == "BOOLEAN":
+            value = 1.0 if s.value else 0.0
+        elif s.data_type == "CATEGORICAL":
+            value = s.value  # すでにカテゴリの文字列
         else:
+            # その他のデータ型 (例: TEXT) は文字列値なので、そのまま渡す
+            print(f"  {s.data_type} スコア {s.id} ({s.name}) をそのまま移行します")
             value = s.value
 
         if value is None:
@@ -761,8 +799,8 @@ while True:
                 data_type=s.data_type,
                 trace_id=new_trace_id,
                 observation_id=new_obs_id,
-                session_id=getattr(s, "session_id", None),
-                dataset_run_id=getattr(s, "dataset_run_id", None),
+                session_id=session_id,
+                dataset_run_id=dataset_run_id,
                 score_id=s.id,  # ID を保持するので、再実行しても重複なく冪等に処理されます
                 comment=s.comment,
                 config_id=new_cfg_id,
@@ -773,13 +811,13 @@ while True:
         except Exception as exc:
             print(f"  スコア {s.id} ({s.name}) の移行に失敗: {exc}")
             failed += 1
-    if page >= getattr(resp.meta, "total_pages", page):
+    cursor = getattr(resp.meta, "cursor", None)
+    if not cursor:
         break
-    page += 1
 
 # スコアをフラッシュする (create_score は dst クライアントのキューにイベントを積むので)
 dst.flush()
-print(f"スコア — 移行: {migrated}, スキップ (値が null): {skipped}, 失敗: {failed}")
+print(f"スコア — 移行: {migrated}, スキップ: {skipped}, 失敗: {failed}")
 ```
 
 ## 6. データセット (アイテム + 実行アイテム)
