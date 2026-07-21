@@ -1,9 +1,10 @@
-Deprecated. Removed on Langfuse v4 (Langfuse Cloud: removal date will follow). The full list and replacements:
+Deprecated. Removed on Langfuse v4 (Langfuse Cloud: removal date will follow). The [migration guide](/docs/deprecated-api-migration) is the canonical per-endpoint mapping with parameter tables and before/after examples; the old endpoints stay documented in the [Deprecated APIs reference](/docs/api-and-data-platform/features/deprecated-apis#endpoints).
 
-| Deprecated `GET` endpoints                                                                                         | Replacement                                                                                                                   |
-| ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| `/api/public/observations`<br />`/api/public/observations/{id}`                                                    | `GET /api/public/v2/observations?fromStartTime={datetime}&toStartTime={datetime}`                                             |
-| `/api/public/traces`<br />`/api/public/traces/{id}`                                                                | `GET /api/public/v2/observations?fromStartTime={datetime}&toStartTime={datetime}`<br />add `&traceId={id}` for a single trace |
-| `/api/public/sessions`<br />`/api/public/sessions/{id}`                                                            | `GET /api/public/v2/observations?filter={urlencoded sessionId filter}&fromStartTime={datetime}&toStartTime={datetime}`        |
-| `/api/public/scores`<br />`/api/public/scores/{id}`<br />`/api/public/v2/scores`<br />`/api/public/v2/scores/{id}` | `GET /api/public/v3/scores`                                                                                                   |
-| `/api/public/metrics`<br />`/api/public/metrics/daily`                                                             | `GET /api/public/v2/metrics?query={json}`                                                                                     |
+| Deprecated `GET` endpoints                                  | Replacement                                                                             |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `/api/public/observations`, `/api/public/observations/{id}` | [Observations API v2](/docs/deprecated-api-migration#observations)                      |
+| `/api/public/traces`, `/api/public/traces/{id}`             | [Observations API v2, filtered by `traceId`](/docs/deprecated-api-migration#traces)     |
+| `/api/public/sessions`, `/api/public/sessions/{id}`         | [Observations API v2, filtered by `sessionId`](/docs/deprecated-api-migration#sessions) |
+| `/api/public/scores`, `/api/public/v2/scores` (+ `/{id}`)   | [Scores API v3](/docs/deprecated-api-migration#scores)                                  |
+| `/api/public/metrics`, `/api/public/metrics/daily`          | [Metrics API v2](/docs/deprecated-api-migration#metrics)                                |
+| `/api/public/datasets/{name}/runs` (+ `/{runName}`)         | [Experiments API](/docs/deprecated-api-migration#dataset-runs)                          |
