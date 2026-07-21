@@ -21,9 +21,17 @@ The older Metrics API remains available, but is not recommended as the default f
 
 ## Metrics API v2 [#v2]
 
-<Callout type="warning">
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "v4",
+  }}
+/>
 
-**Cloud-only:** The v2 Metrics API is only available on Langfuse Cloud. We are working on a robust migration path for self-hosted deployments.
+<Callout type="info">
 
 **Data availability:** Data from older SDKs (`langfuse-python` < `4.0.0`, `langfuse-js` < `5.0.0`) or direct OpenTelemetry exporters that do not send `x-langfuse-ingestion-version: 4` can be delayed by up to 10 minutes on v2 endpoints. Upgrade to [Python SDK v4.7.0+](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS SDK v5.4.0+](/docs/observability/sdk/upgrade-path/js-v4-to-v5), or set that header on your OTEL span exporter, to see new data in real time.
 
@@ -49,7 +57,7 @@ The v2 Metrics API provides significant performance improvements through an opti
 
 ### Row Limit
 
-The v2 Metrics API enforces a default `config.row_limit` of 100 rows per query to ensure consistent performance. You can specify a custom `config.row_limit` in your query to override this default.
+The v2 Metrics API enforces a default `config.row_limit` of 100 rows per query to ensure consistent performance. You can specify a custom `config.row_limit` in your query to override this default, up to a maximum of 1,000 rows.
 
 ### High Cardinality Dimensions
 
