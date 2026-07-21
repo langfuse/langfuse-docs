@@ -221,7 +221,9 @@ The new mental model: Langfuse stores one immutable observations table. A trace 
 | Trace-level LLM-as-a-judge evaluators                                | [Observation-level evaluators](/faq/all/llm-as-a-judge-migration)                                                                                       |
 | Export source "traces and observations"                              | Export source "enriched observations"                                                                                                                   |
 
-Why observations-first: agentic applications produce traces with hundreds of operations, and the operations engineers care about were hidden inside one trace row. With observations as the primary entity you query the operations directly ("which LLM calls are slow?"), charts load faster over large time ranges, and observation-level evaluations run in seconds. The [data model docs](/docs/observability/data-model#observations-and-traces) explain the model; the [observations guide](/faq/all/explore-observations-in-v4) covers day-to-day workflows in the UI.
+**Trace-level input/output is deprecated across the product.** Every feature that previously read a trace's input and output (tables in the UI, LLM-as-a-judge evaluators, exports) now reads the input and output of the right observation, typically the root span or the LLM call that holds the relevant data. Selecting one observation with the right data instead of assembling it across a whole trace is a big part of the faster loading times.
+
+Why observations-first: agentic applications produce traces with hundreds of operations, and the operations engineers care about were hidden inside one trace row. With observations as the primary entity you query the operations directly ("which LLM calls are slow?"), and observation-level evaluations run in seconds. The [data model docs](/docs/observability/data-model#observations-and-traces) explain the model; the [observations guide](/faq/all/explore-observations-in-v4) covers day-to-day workflows in the UI.
 
 <Details>
 <Summary>Cloud rollout details (until the v4 cutover)</Summary>
