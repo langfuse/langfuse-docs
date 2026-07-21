@@ -33,11 +33,12 @@ The Langfuse public API does not currently support programmatic creation of: **L
 
 ## 0. Setup
 
+This notebook needs Python SDK 4.8.1 or newer — earlier 4.x releases do not include the v3 Scores API client.
+
 
 
 ```python
-%pip install --quiet "langfuse>=4.0.0" "opentelemetry-sdk>=1.25.0" "opentelemetry-exporter-otlp-proto-http>=1.25.0"
-
+%pip install --quiet "langfuse>=4.8.1" "opentelemetry-sdk>=1.25.0" "opentelemetry-exporter-otlp-proto-http>=1.25.0"
 ```
 
 
@@ -733,7 +734,7 @@ print(f"  obs_id_map entries:   {len(obs_id_map)}")
 
 ## 5. Scores
 
-Scores are fetched from the source via the v3 Scores API (`api.scores_v3.get_many_v3`) and re-created on the destination via the native **`create_score`** helper. Original `id` is preserved so re-runs are idempotent. `config_id` is remapped through `config_id_map` from Section 1; trace / observation references are remapped through `trace_id_map` / `obs_id_map` from Section 4.
+Scores are fetched from the source via the v3 Scores API (`api.scores_v3.get_many_v3`) and re-created on the destination through the `POST /api/public/scores` endpoint (`api.legacy.score_v1.create`). Original `id` is preserved so re-runs are idempotent. `config_id` is remapped through `config_id_map` from Section 1; trace / observation references are remapped through `trace_id_map` / `obs_id_map` from Section 4.
 
 Compared to the older v2 endpoint, the v3 API differs in three ways that matter here:
 
@@ -741,9 +742,13 @@ Compared to the older v2 endpoint, the v3 API differs in three ways that matter 
 - **Single `subject`** — each score references its target through one `subject` object (`kind` + `id`) instead of flat `trace_id` / `observation_id` / `session_id` / `dataset_run_id` fields. Dataset runs are called *experiments* in v3, so `kind="experiment"` maps back to `dataset_run_id` on the write path. Rare legacy scores carrying two subject links (e.g. both a trace and a session) surface only one of them in v3 — the previous flow failed to re-create those scores entirely, so nothing regresses.
 - **Typed `value`** — `value` follows the score's `data_type` (number for NUMERIC, boolean for BOOLEAN, string for CATEGORICAL and other types) instead of always being numeric alongside a separate `string_value`.
 
-Also note: v2 silently dropped scores whose trace no longer exists, while v3 returns them. If slightly more scores migrate than the v2 flow used to transfer, these previously hidden scores are now carried over — an improvement, not a loss.
+A few behavioral notes:
 
-> **Self-hosted deployments:** the v3 Scores API requires [Langfuse v4](https://langfuse.com/docs/v4). When migrating from an earlier self-hosted instance, use the v2 pattern instead: page-based `src.api.scores.get_many(page=page, limit=100, ...)` with flat `trace_id` / `observation_id` / `session_id` fields and `string_value` for CATEGORICAL scores.
+- v2 silently dropped scores whose trace no longer exists, while v3 returns them. If slightly more scores migrate than the v2 flow used to transfer, these previously hidden scores are now carried over — an improvement, not a loss.
+- Score creation is asynchronous: a success response means the score was accepted for ingestion, not that it is already durably written. Verify the destination project once ingestion has caught up.
+- The create endpoint does not accept a timestamp, so migrated scores carry the migration time as their timestamp; source score timestamps cannot be preserved through the public API.
+
+> **Self-hosted deployments:** the v3 Scores API is available on Langfuse Cloud and on self-hosted instances from v3.180.0. On older self-hosted instances, use the v2 pattern instead: page-based `src.api.scores.get_many(page=page, limit=100, ...)` with flat `trace_id` / `observation_id` / `session_id` fields and `string_value` for CATEGORICAL scores. The v2 read endpoints are removed on deployments fully migrated to [Langfuse v4](https://langfuse.com/docs/v4).
 
 
 
@@ -768,12 +773,18 @@ while True:
         to_timestamp=TO_TS,
     ))
     for s in resp.data:
-        # Map the v3 subject back to the flat reference fields create_score expects.
+        # Map the v3 subject back to the flat reference fields the create
+        # endpoint expects: exactly one of traceId / sessionId / datasetRunId,
+        # and observationId additionally requires traceId.
         trace_id = observation_id = session_id = dataset_run_id = None
         kind = s.subject.kind if s.subject else None
         if kind == "trace":
             trace_id = s.subject.id
         elif kind == "observation":
+            if not s.subject.trace_id:
+                print(f"  skipping score {s.id} ({s.name}): observation subject without a trace")
+                skipped += 1
+                continue
             observation_id = s.subject.id
             trace_id = s.subject.trace_id
         elif kind == "session":
@@ -794,7 +805,7 @@ while True:
         if s.data_type == "NUMERIC":
             value = s.value
         elif s.data_type == "BOOLEAN":
-            value = 1.0 if s.value else 0.0
+            value = 1 if s.value else 0  # write path expects numeric 0/1
         elif s.data_type == "CATEGORICAL":
             value = s.value  # already the category string
         else:
@@ -807,7 +818,11 @@ while True:
             continue
 
         try:
-            with_retries(lambda: dst.create_score(
+            # POST /api/public/scores. The endpoint accepts no timestamp, so
+            # the migrated score is stamped with the migration time. Ingestion
+            # is asynchronous: success means queued, not yet visible.
+            with_retries(lambda: dst.api.legacy.score_v1.create(
+                id=s.id,  # preserves ID for idempotent re-runs
                 name=s.name,
                 value=value,
                 data_type=s.data_type,
@@ -815,11 +830,10 @@ while True:
                 observation_id=new_obs_id,
                 session_id=session_id,
                 dataset_run_id=dataset_run_id,
-                score_id=s.id,  # preserves ID for idempotent re-runs
                 comment=s.comment,
                 config_id=new_cfg_id,
                 metadata=s.metadata,
-                timestamp=s.timestamp,
+                environment=s.environment,
             ))
             migrated += 1
         except Exception as exc:
@@ -829,8 +843,6 @@ while True:
     if not cursor:
         break
 
-# Flush scores (create_score queues events on the dst client)
-dst.flush()
 print(f"Scores — migrated: {migrated}, skipped: {skipped}, failed: {failed}")
 ```
 
