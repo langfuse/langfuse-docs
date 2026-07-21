@@ -227,7 +227,7 @@ This is the most sensitive billing question. Lead with empathy and _facts_, neve
 1. Open Stripe, search by email domain or org → recent invoice, subscription, billing history.
 2. Determine the source of the increase: plan change, usage increase (more traces/observations), seat increase, or one-off charge.
 3. Cross-check the org in Impersonation View → Usage tab → confirm trace/observation volume in the billing period.
-4. **Specifically check for OTEL-related overcounting.** A common case: customers had a pre-existing OTEL setup, and after wiring it to Langfuse it ingested unrelated HTTP/DB/framework spans that drove up volume. See [/faq/all/existing-otel-setup#unwanted-spans-in-langfuse](/faq/all/existing-otel-setup#unwanted-spans-in-langfuse), the fix is `should_export_span` on the SDK (the older `blocked_instrumentation_scopes` parameter is deprecated).
+4. **Check whether their OTEL configuration is exporting non-LLM spans.** A common case: customers wire a pre-existing OTEL setup into Langfuse and their export filter lets HTTP/DB/framework spans through. Those spans are ingested and billed as observations like any other. The customer controls what is exported via `should_export_span` on the SDK (the older `blocked_instrumentation_scopes` parameter is deprecated). See [/faq/all/existing-otel-setup#unwanted-spans-in-langfuse](/faq/all/existing-otel-setup#unwanted-spans-in-langfuse).
 5. Reply with the specific reason, link the invoice or usage view.
 
 **Reply template:**
@@ -299,10 +299,8 @@ Best,
 **Triage steps:**
 
 1. Confirm what was charged and when via Stripe.
-2. Determine if the charge was correct (customer's mistake / they didn't downgrade in time) or our error (billing bug / contract misalignment / EE-license-removal-doesn't-cancel confusion above).
-3. Customer error and they're on a small plan: explain politely, offer goodwill credit if appropriate.
-4. Our error or genuine misunderstanding: refund.
-5. For approval limits and when to loop in the team, follow the internal refund handling guidelines in the private handbook. Do not approve refunds beyond your limit unilaterally.
+2. Do not confirm, deny, or estimate a refund on the thread. Whether a charge is eligible for a refund or goodwill credit, the approval limits, and when to loop in the team all follow the internal refund handling guidelines in the private handbook.
+3. Acknowledge the request, gather the details finance needs, and route it per those guidelines. Do not approve refunds beyond your limit unilaterally.
 
 **Reply template:**
 
@@ -361,7 +359,7 @@ Anything that mentions: "enterprise", "POC", "Account Manager", "MSA", "DPA sign
 **Triage steps:**
 
 1. Acknowledge quickly and route. Do not negotiate pricing on the support thread.
-2. Add the enterprise team (`enterprise@langfuse.com`) to the thread.
+2. Direct the customer to the [contact sales form](/talk-to-us).
 3. For commercial licensing on self-hosted to satisfy OSS compliance tools (e.g. Black Duck flagging the `ee/` directories), confirm with the customer whether they're _actually using_ EE features. Many of these tickets are governance-only and resolve with a confirmation email plus a copy of the license terms.
 
 **Reply template:**
@@ -369,7 +367,7 @@ Anything that mentions: "enterprise", "POC", "Account Manager", "MSA", "DPA sign
 ```text
 Hi {name},
 
-Thanks for reaching out. I'm looping in enterprise@langfuse.com from our enterprise team, they'll be in touch shortly with pricing and contract details.
+Thanks for reaching out. Please use our [contact sales form](https://langfuse.com/talk-to-us) so our enterprise team can follow up with pricing and contract details.
 
 Best,
 {you}
@@ -559,7 +557,7 @@ Happy to confirm:
 1. The core Langfuse features (tracing, observability, prompt management, evaluations, dashboards) are MIT-licensed and free to use in production, with no EE license required.
 2. EE features require LANGFUSE_EE_LICENSE_KEY. Without that env var set, no EE code paths execute. Full list: https://langfuse.com/self-hosting/license-key.
 
-If your compliance review needs this in writing on letterhead, I can route to enterprise@langfuse.com.
+If your compliance review needs this in writing on letterhead, please use our [contact sales form](https://langfuse.com/talk-to-us).
 
 Best,
 {you}
@@ -640,7 +638,7 @@ Related FAQs: [/faq/all/missing-traces](/faq/all/missing-traces), [/faq/all/aws-
 
 <summary>OTEL / OpenTelemetry: unwanted spans, double-counting, semantic conventions</summary>
 
-OTEL is the most common source of _over-ingestion_ surprises. The customer's existing OTEL setup blasts every HTTP request, DB query, and framework span at Langfuse, driving up cost and cluttering the UI.
+A common OTEL configuration issue: the customer's existing OTEL setup exports every HTTP request, DB query, and framework span to Langfuse alongside LLM spans. Because every exported span is ingested and billed as an observation, this increases both cost and UI clutter until the export filter is tightened.
 
 **Triage steps:**
 
@@ -895,7 +893,7 @@ We hold SOC 2 Type II and ISO 27001. Reports go out under NDA to evaluating cust
 ```text
 Hi {name},
 
-Happy to share both. Looping in our enterprise team (enterprise@langfuse.com) who'll send over the SOC 2 Type II and ISO 27001 reports.
+Happy to share both. Please use our [contact sales form](https://langfuse.com/talk-to-us) and our enterprise team will send over the SOC 2 Type II and ISO 27001 reports.
 
 For reference, our public security overview is at https://langfuse.com/security.
 
