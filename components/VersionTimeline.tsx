@@ -29,8 +29,9 @@ const SEGMENT_STYLES = {
     "bg-muted-green/30 text-foreground border border-dashed border-muted-foreground",
 } as const;
 
-const ROWS: { name: string; segments: Segment[] }[] = [
+const ROWS: { id: string; name: string; segments: Segment[] }[] = [
   {
+    id: "cloud",
     name: "Langfuse Cloud",
     segments: [
       {
@@ -62,6 +63,7 @@ const ROWS: { name: string; segments: Segment[] }[] = [
     ],
   },
   {
+    id: "self-hosted",
     name: "Self-hosted (OSS)",
     segments: [
       {
@@ -125,7 +127,15 @@ function pct(m: Month): number {
   return ((monthIndex(m) - monthIndex(AXIS_START)) / AXIS_TOTAL) * 100;
 }
 
-export function VersionTimeline() {
+export function VersionTimeline({
+  deployments,
+}: {
+  /** Which deployment rows to show, e.g. ["cloud"]. Defaults to all. */
+  deployments?: string[];
+} = {}) {
+  const rows = deployments
+    ? ROWS.filter((r) => deployments.includes(r.id))
+    : ROWS;
   return (
     <div className="my-6 overflow-x-auto">
       <div className="min-w-[640px] pr-8">
@@ -164,7 +174,7 @@ export function VersionTimeline() {
               />
             </div>
           ))}
-          {ROWS.map((row) => (
+          {rows.map((row) => (
             <div
               key={row.name}
               className="relative flex items-center gap-0 py-1.5"
