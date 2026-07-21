@@ -183,6 +183,39 @@ The trace now contains one `agent_run` span per pipeline stage, each with its ow
 
 For dynamic delegation, LLM agents can alternatively coordinate `sub_agents` themselves — the spans nest the same way.
 
+### Example 4: Score traces with user feedback [#example-4-score-traces-with-user-feedback]
+
+[Scores](https://langfuse.com/docs/evaluation/evaluation-methods/scores-via-sdk) attach evaluations — user feedback, guardrail results, eval outcomes — to a trace. To score an ADK run, create the trace ID upfront, run the agent inside an enclosing Langfuse span that uses this trace ID, and pass the same ID to `create_score`:
+
+```python
+from langfuse import Langfuse
+
+predefined_trace_id = Langfuse.create_trace_id()
+
+SCORED_SESSION_ID = "scored-session"
+await session_service.create_session(app_name=APP_NAME, user_id=USER_ID, session_id=SCORED_SESSION_ID)
+
+with langfuse.start_as_current_observation(
+    as_type="span",
+    name="adk-request",
+    trace_context={"trace_id": predefined_trace_id},
+) as span:
+    span.update(input="hi")
+    async for event in runner.run_async(user_id=USER_ID, session_id=SCORED_SESSION_ID, new_message=user_msg):
+        if event.is_final_response() and event.content:
+            print(event.content.parts[0].text)
+            span.update(output=event.content.parts[0].text)
+
+# e.g. triggered by a thumbs-up in your application
+langfuse.create_score(
+    trace_id=predefined_trace_id,
+    name="user-feedback",
+    value=1,
+    data_type="NUMERIC",
+    comment="The answer was helpful.",
+)
+```
+
 ## Step 5: View the trace in Langfuse
 
 Head over to your **Langfuse dashboard → Traces**. You should see traces including all tool calls and model inputs/outputs.
