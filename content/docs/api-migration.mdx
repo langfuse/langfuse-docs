@@ -227,6 +227,7 @@ The legacy filters map to v2 `filters` entries: `traceName` and `userId` are ava
 | `value` + `stringValue` (split by type)                            | Single `value` field, typed by `dataType`                                                                              |
 | `operator` + `value` (numeric comparison)                          | `valueMin` / `valueMax` (inclusive bounds, require `dataType=NUMERIC`)                                                 |
 | `datasetRunId`                                                     | `experimentId`                                                                                                         |
+| `fromTimestamp`, `toTimestamp`                                     | Unchanged names — but `fromTimestamp` is now inclusive and `toTimestamp` exclusive                                     |
 | `userId`, `traceTags`                                              | Removed — for trace-level score questions, use the [Metrics API v2](/docs/metrics/features/metrics-api#v2) score views |
 | `name`, `source`, `dataType`, `environment`, `configId`, `queueId` | Unchanged, and now accept comma-separated lists (OR within a parameter, AND across parameters)                         |
 
