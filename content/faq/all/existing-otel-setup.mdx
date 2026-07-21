@@ -388,14 +388,18 @@ setLangfuseTracerProvider(langfuseProvider);
 
 Your Langfuse dashboard shows HTTP requests, database queries, or other infrastructure spans instead of just LLM traces.
 
+<Callout type="warning">
+Every span that reaches Langfuse is ingested as a **billable observation**. If your OpenTelemetry pipeline forwards HTTP, database, or framework spans, they are counted and billed like any other observation, so an over-permissive export configuration can increase your usage and cost significantly. You control what reaches Langfuse through the `should_export_span` / `shouldExportSpan` callback described below. To catch unexpected volume early, set up [spend alerts](/docs/administration/spend-alerts) and review how usage is counted in [billable units](/docs/administration/billable-units).
+</Callout>
+
 **Why this happens**
 
-This usually happens when one of these is true:
+Langfuse attaches its span processor to your [TracerProvider](#global-tracer-provider). If that provider also has OTEL auto-instrumentation attached, spans from your web frameworks, databases, and HTTP clients flow through the same pipeline. They reach Langfuse when one of these is true:
 
-- You configured a custom `should_export_span` / `shouldExportSpan` callback that is too permissive
-- A third-party span matches Langfuse's default LLM-focused criteria (`gen_ai.*` attributes or known LLM scope)
+- Your custom `should_export_span` / `shouldExportSpan` callback is more permissive than the default filter
+- A third-party span matches the default LLM-focused criteria (`gen_ai.*` attributes or a known LLM scope)
 
-This is especially common with [OTEL auto-instrumentation](https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/), which instruments web frameworks, databases, HTTP clients, and more.
+This is especially common with [OTEL auto-instrumentation](https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/), which instruments web frameworks, databases, HTTP clients, and more. You decide what reaches Langfuse: the export filter is yours to configure.
 
 **How to debug**
 
