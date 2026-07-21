@@ -61,13 +61,13 @@ The v2 score read endpoints are deprecated. Self-hosted deployments on Langfuse 
 
 The v2 API split score values across a numeric `value` and a separate `stringValue` field. The v3 API returns a single `value` field whose type follows `dataType`:
 
-| `dataType`    | v3 `value` type | v2 behavior                                                             |
-| ------------- | --------------- | ----------------------------------------------------------------------- |
-| `NUMERIC`     | number          | `value` (number)                                                        |
-| `BOOLEAN`     | boolean         | `value` (`1`/`0`) plus `stringValue` (`"True"`/`"False"`)               |
-| `CATEGORICAL` | string          | `value` (numeric category mapping) plus `stringValue` (category string) |
-| `TEXT`        | string          | `stringValue` only                                                      |
-| `CORRECTION`  | string          | `value` (always `0`) plus `stringValue` (correction content)            |
+| `dataType`    | v3 `value` type | v2 behavior                                                                                                               |
+| ------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `NUMERIC`     | number          | `value` (number)                                                                                                          |
+| `BOOLEAN`     | boolean         | `value` (`1`/`0`) plus `stringValue` (`"True"`/`"False"`)                                                                 |
+| `CATEGORICAL` | string          | `value` (numeric category mapping from the score config; not meaningful without one) plus `stringValue` (category string) |
+| `TEXT`        | string          | `stringValue` only                                                                                                        |
+| `CORRECTION`  | string          | `value` (always `0`) plus `stringValue` (correction content)                                                              |
 
 When migrating, read `value` directly and branch on `dataType` if your pipeline handles mixed score types — no more decoding booleans from `1`/`0` or looking up category strings.
 
