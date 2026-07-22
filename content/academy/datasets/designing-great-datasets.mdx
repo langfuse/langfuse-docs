@@ -1,0 +1,270 @@
+---
+title: Designing great datasets
+sidebarTitle: Designing great datasets
+description: A practical guide to designing Langfuse datasets with clear scope, realistic inputs, evaluable outputs, useful metadata, and interpretable experiment results.
+---
+
+# Designing great datasets
+
+A good dataset is a representation of what your system should handle, how you expect it to behave, and how you will decide whether a change improved or broke something. You can evaluate your system against it and make changes more confidently. On top, a great dataset will over time be the foundation for your coding agent to take over the improvement process and verify its changes.
+
+The [Datasets](/academy/datasets) academy section explains the basic building blocks: input, expected output, and metadata. This guide focuses on the design work that happens before and while you create datasets and dataset items.
+
+The outcome you want is a dataset with:
+
+- a clear goal
+- inputs that match the real application path
+- enough coverage to make experiment results meaningful
+- expected outputs or criteria that can actually be evaluated
+- metadata that makes results sliceable and interpretable
+
+## 1. Start with the goal of the dataset
+
+Before writing rows, define the smallest useful purpose for the dataset. This keeps the dataset from becoming a vague bucket of interesting examples.
+
+Answer these questions:
+
+| Question | What to decide |
+| --- | --- |
+| What behavior are you testing? | The product behavior, prompt, tool call, or agent step the dataset should cover |
+| Where is the system boundary? | Whether this is end-to-end or focused on one internal step |
+| What does production input look like? | The real payload, message, context, or intermediate state the system receives |
+| How will outputs be judged? | Manual review, code-based evaluator, LLM-as-a-judge, or a combination |
+| What job does the dataset have? | Exploration, regression testing, CI gate, guardrail testing, benchmark, or improvement loop |
+| How large should it be? | The smallest size that gives enough signal for that job |
+
+A useful goal is specific enough that you can tell which examples belong and which do not.
+
+For example:
+
+Test a specific routing decision:
+> This dataset tests whether the support-routing agent sends realistic customer requests to the correct team. It uses production-shaped chat payloads, expected route labels, and metadata for source, category, difficulty, and failure mode.
+>
+Test a chatbot end to end:
+> This dataset tests end to end whether the docs chatbot returns the answer we expect it to return. It uses raw message inputs and expects certain answers, keywords, and generally matching behavior. We want to slice it by metadata on question type and difficulty level.
+
+## 2. Define the input distribution
+
+Before collecting examples, decide which kinds of inputs the dataset should represent. This is the bridge between the dataset goal and the rows you will create.
+
+Useful dimensions include:
+
+| Dimension | What to define |
+| --- | --- |
+| Query or task type | The main categories of inputs the system should handle |
+| Level of specification | How vague, partial, or precise user requests usually are |
+| Context availability | Whether the system gets enough context, too much context, conflicting context, or no context |
+| Domain or topic | The product areas, customer jobs, policy areas, or knowledge domains covered |
+| Channel and language | Where the input comes from and which languages or formats matter |
+| Difficulty | Routine cases, ambiguous cases, hard cases, adversarial cases, and critical edge cases |
+| Dataset role | Whether the row represents typical usage, a regression, a known failure mode, or an exploratory gap |
+
+The distribution does not have to mirror production frequency exactly. A regression dataset may intentionally overrepresent failures, edge cases, or high-value paths. What matters is that the mix is deliberate and visible in metadata.
+
+## 3. Choose the right path
+
+There are three common ways to get to a useful dataset. Pick one before writing rows.
+
+| Path | Use when | Work product |
+| --- | --- | --- |
+| Create from scratch | No usable dataset exists for this task, route, or agent step | A first coherent dataset with high-signal rows |
+| Complement existing | A dataset exists, but coverage, balance, item shape, metadata, or expected outputs are weak | An audit plus targeted row additions or fixes |
+| Cover a specific issue | A concrete failure, monitor alert, complaint, or regression needs repeatable coverage | A small regression slice tied to that issue |
+
+Do not create a second overlapping dataset if an existing one only needs targeted improvements. That usually makes future experiment results harder to compare.
+
+## 4. Make inputs production-shaped
+
+The `input` should match the real code path you want to test.
+
+For an end-to-end dataset, this may be the same payload your application receives from a user. For a step-level dataset, it should be the actual intermediate state that step receives in production, not a simplified natural-language summary.
+
+This matters because a dataset can pass while testing the wrong thing. If production uses structured context, tool state, retrieved documents, or conversation history, the dataset input should preserve the parts that affect behavior.
+
+Avoid rows like this when production is structured:
+
+```json
+{
+  "input": "Customer asks about an invoice"
+}
+```
+
+Prefer the shape your system actually consumes:
+
+```json
+{
+  "input": {
+    "message": "I was charged twice for invoice 4831. Can someone fix this?",
+    "channel": "support_chat",
+    "customer_tier": "business",
+    "conversation_context": {
+      "authenticated": true,
+      "previous_issue_count": 1
+    }
+  }
+}
+```
+
+## 5. Decide how evaluation will work
+
+Choose the evaluation style before you write expected outputs.
+
+### 5.1 Reference-based datasets
+
+Use [reference-based evaluation](/academy/evaluate) when you have something specific to compare against: a correct label, expected tool call, required fact, structured target, reference answer, or expected next action.
+
+Reference-based datasets are a natural fit for regression testing and benchmarks because they define what correct behavior looks like for each item.
+
+Examples:
+
+| Output type | Expected output shape | Good evaluator fit |
+| --- | --- | --- |
+| Classification | Exact label | Exact match or code evaluator |
+| Structured JSON | Target object or schema | Schema validation or code evaluator |
+| Tool use | Expected tool name and arguments | Code evaluator |
+| Free-text answer with required facts | Required and forbidden facts | Code evaluator or LLM-as-a-judge |
+| Qualitative answer | Reference answer plus criteria | LLM-as-a-judge or manual review |
+
+Use the cheapest evaluator that captures the requirement. Not every reference-based dataset needs an LLM-as-a-judge setup. Generally, your expected output can have multiple different output types and matching evaluators you run on it (see example below).
+
+### 5.2 Reference-free datasets
+
+Use reference-free evaluation when there is no stable expected output, but every item can be judged against the same criteria.
+
+Examples:
+
+- The response follows a JSON schema.
+- The output language matches the input language.
+- The answer is grounded in the provided context.
+- The response avoids unsafe or forbidden content.
+- The tone follows a required policy.
+
+Reference-free items may only need `input` and metadata. The evaluator judges the actual output directly.
+
+<Callout type="info">
+If you choose reference-free evaluation but cannot name the evaluator or review rubric that will score every row, you have created a review queue, not yet an evaluable dataset. See [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) for this workflow.
+</Callout>
+
+## 6. Design the item schema
+
+Once the goal and evaluation style are clear, define the fields consistently.
+
+| Field | How to think about it |
+| --- | --- |
+| `input` | The payload, message, context, or intermediate state that can be passed into the real application path |
+| `expectedOutput` | The label, structured target, reference answer, expected behavior, required facts, or criteria the evaluator will use |
+| `metadata` | Source, category, scenario, difficulty, failure mode, language, channel, issue, provenance, and review status |
+
+Expected outputs can be JSON and can hold multiple reference types when different evaluators need different fields.
+
+```json
+{
+  "input": {
+    "message": "I was charged twice for invoice 4831. Can someone fix this?",
+    "channel": "support_chat",
+    "customer_tier": "business"
+  },
+  "expectedOutput": {
+    "route": "billing_support",
+    "required_actions": ["acknowledge_duplicate_charge", "ask_for_invoice_id"],
+    "must_not": ["promise_refund_without_review"]
+  },
+  "metadata": {
+    "source": "expert",
+    "category": "billing",
+    "difficulty": "medium",
+    "dataset_role": "regression",
+    "failure_mode": "wrong_route"
+  }
+}
+```
+
+Keep the schema stable enough that evaluators and reviewers know what to consume. Arbitrary per-row fields make experiment results hard to interpret.
+
+## 7. Gather sources and draft the first version
+
+A strong dataset usually combines multiple sources. The order matters.
+
+| Source | Best for | Watch out for |
+| --- | --- | --- |
+| Production traces | Realistic usage, common paths, and observed failures | Production outputs are not automatically correct |
+| Monitors, scores, user feedback, tickets, and complaints | High-value regressions and user-visible problems | These can overrepresent painful edge cases |
+| Existing datasets, CSVs, JSON files, FAQs, policies, or benchmarks | Bootstrapping known coverage quickly | The shape may not match the current application |
+| Expert-written cases | Requirements, policy boundaries, and critical business behavior | Domain assumptions need review |
+| Synthetic examples | Filling named gaps such as rare, adversarial, or boundary cases | Synthetic volume can hide weak real coverage |
+
+Use production traces when you have them, but treat them as seeds, not ground truth. A trace tells you what happened. It does not prove what should have happened.
+
+If you do not have production traces yet, continue with expert input, codebase behavior, existing assets, and synthetic gap fills. Just be explicit that the first dataset version reflects expected behavior rather than observed production distribution.
+
+Start smaller than feels comfortable. A first version with 15 to 30 high-signal items is often more useful than a large dataset with unclear scope.
+
+For a new dataset, cover:
+
+- representative happy paths
+- the most important edge cases
+- known failure modes
+- high-risk or high-value scenarios
+- a small number of hard examples that clarify the system boundary
+
+For a specific issue, use the smallest slice that makes the issue reproducible:
+
+- one failing or borderline case
+- close variants if robustness matters
+- one normal baseline case if the failure should not happen on ordinary input
+
+Add synthetic rows only after you can name the gap. A useful synthetic workflow is:
+
+1. Define 2 to 4 dimensions that target the missing coverage.
+2. Draft combinations of those dimensions.
+3. Check whether the combinations are realistic.
+4. Convert accepted combinations into production-shaped inputs.
+5. Filter for realism, diversity, privacy, and fit.
+
+Label expert-written and synthetic rows in metadata. Do not make them look like production data.
+
+## Audit before you expand
+
+Before uploading or expanding a dataset, review the rows as a set.
+
+Check whether:
+
+- each input can be passed into the intended application path
+- each expected output supports the planned evaluator
+- reference-free rows have a clear evaluator or review rubric
+- metadata values are consistent enough to filter
+- important sources, categories, languages, channels, or failure modes are missing
+- one source dominates because it was easiest to collect
+- rows duplicate each other without adding useful variation
+- PII or sensitive data is handled correctly
+- stale rows no longer match current prompts, tools, policies, or product behavior
+
+For an existing dataset, make the audit explicit before adding rows. Add or fix only the named gaps.
+
+## Keep the dataset's lifecycle clear
+
+Datasets often drift because they silently try to do two jobs at once.
+
+A **regression dataset** should be stable, trusted, and slow to change. It protects behavior you already know you care about.
+
+An **improvement-loop dataset** can change more often. It captures new failures, exploratory examples, and areas where the team is still learning what good looks like.
+
+Both are useful, but they should not be mixed without clear metadata or separate slices. Otherwise, experiment results become hard to interpret: a score change might mean the system changed, or it might mean the dataset changed.
+
+## Hand off to experiments
+
+Once the dataset is ready, run your application against it in an experiment. The experiment stores actual outputs next to inputs, expected outputs, metadata, and scores.
+
+After the first run, review:
+
+- which items failed and why
+- whether failures point to a system problem or a dataset design problem
+- whether expected outputs are too strict, too loose, or ambiguous
+- which repeated checks should become automated evaluators
+- which new production cases should be added later
+
+Do not keep expanding the dataset indefinitely before running it. The first experiment is often what reveals whether the dataset is actually useful.
+
+## Keep improving the dataset
+
+The initial version often needs iteration and should be expanded over time. Monitor your application in production to see where it drifts or fails, review data manually through structured error analysis, and over time add representative examples to strengthen your evaluation confidence.
