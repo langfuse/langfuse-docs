@@ -10,11 +10,11 @@ DeepEval and Langfuse work together through the Langfuse Python SDK: DeepEval co
 
 There are three common ways to combine the two:
 
-| You want to                                  | Approach                                                | Langfuse API                                     |
-| -------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------ |
-| Score production traffic on a schedule       | Fetch traces, run DeepEval metrics, push scores back    | `langfuse.api.trace.list()` + `create_score()`   |
-| Evaluate a change against a test dataset     | Wrap DeepEval metrics as experiment evaluator functions | `dataset.run_experiment(evaluators=[...])`       |
-| Build a test dataset from scratch            | Generate items with DeepEval's Synthesizer, then upload | `create_dataset()` + `create_dataset_item()`     |
+| You want to                              | Approach                                                | Langfuse API                                   |
+| ---------------------------------------- | ------------------------------------------------------- | ---------------------------------------------- |
+| Score production traffic on a schedule   | Fetch traces, run DeepEval metrics, push scores back    | `langfuse.api.trace.list()` + `create_score()` |
+| Evaluate a change against a test dataset | Wrap DeepEval metrics as experiment evaluator functions | `dataset.run_experiment(evaluators=[...])`     |
+| Build a test dataset from scratch        | Generate items with DeepEval's Synthesizer, then upload | `create_dataset()` + `create_dataset_item()`   |
 
 ## What is DeepEval? [#what-is-deepeval]
 

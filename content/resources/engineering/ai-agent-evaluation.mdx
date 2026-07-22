@@ -131,13 +131,13 @@ RAG agent evaluation layers the two retrieval-pipeline metrics, context relevanc
 
 The metrics attach to different steps of the trace:
 
-| Step               | Question it answers                                                 | Method in Langfuse                                                                        |
-| ------------------ | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| Retrieval decision | Did the agent call the retrieval tool when the question required it? | Code evaluator on the structured tool-call field, boolean score                            |
-| Query reformulation | Does the rewritten search query preserve the user's question?       | LLM judge on the retriever observation                                                     |
-| Retrieval quality  | Are the retrieved documents relevant to the question?               | Context-relevance evaluator from the managed catalog, targeting retriever observations     |
-| Generation         | Is every claim in the answer supported by the retrieved context?    | Faithfulness judge comparing the answer against the recorded context                       |
-| Whole run          | Did the final answer address the user's question at acceptable cost? | Task-completion judge on the root observation, plus trajectory checks like a retrieval-call budget |
+| Step                | Question it answers                                                  | Method in Langfuse                                                                                 |
+| ------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Retrieval decision  | Did the agent call the retrieval tool when the question required it? | Code evaluator on the structured tool-call field, boolean score                                    |
+| Query reformulation | Does the rewritten search query preserve the user's question?        | LLM judge on the retriever observation                                                             |
+| Retrieval quality   | Are the retrieved documents relevant to the question?                | Context-relevance evaluator from the managed catalog, targeting retriever observations             |
+| Generation          | Is every claim in the answer supported by the retrieved context?     | Faithfulness judge comparing the answer against the recorded context                               |
+| Whole run           | Did the final answer address the user's question at acceptable cost? | Task-completion judge on the root observation, plus trajectory checks like a retrieval-call budget |
 
 Two instrumentation details make this work in Langfuse. First, mark retrieval steps with the `retriever` [observation type](/docs/observability/features/observation-types) so evaluators can filter to exactly those observations. Second, record the data each judge compares on the observation it targets, because an evaluator sees only the observation it matches: the question and the retrieved documents on the retriever observation for the context-relevance judge, the retrieved context next to the answer on the generation observation for the faithfulness judge, and the original question next to the rewritten query for the reformulation judge.
 

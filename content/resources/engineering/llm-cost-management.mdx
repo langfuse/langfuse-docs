@@ -45,12 +45,12 @@ usage-based pricing. Cost management covers all three.
 
 Each layer answers a different question, and each depends on the one before it:
 
-| Layer         | Question it answers                              | Failure mode if skipped                    |
-| ------------- | ------------------------------------------------ | ------------------------------------------ |
-| **Track**     | What did each model call cost?                   | Numbers that do not reconcile with invoices |
-| **Attribute** | Which user, session, or feature spent it?        | A total nobody can act on                  |
-| **Control**   | Will we notice a spike before the invoice?       | Surprise bills                             |
-| **Optimize**  | Where can we spend less without losing quality?  | Blind cuts that degrade output quality     |
+| Layer         | Question it answers                             | Failure mode if skipped                     |
+| ------------- | ----------------------------------------------- | ------------------------------------------- |
+| **Track**     | What did each model call cost?                  | Numbers that do not reconcile with invoices |
+| **Attribute** | Which user, session, or feature spent it?       | A total nobody can act on                   |
+| **Control**   | Will we notice a spike before the invoice?      | Surprise bills                              |
+| **Optimize**  | Where can we spend less without losing quality? | Blind cuts that degrade output quality      |
 
 ## Track costs accurately [#track-costs-accurately]
 
@@ -220,17 +220,17 @@ highest-spend segments show you where to start. The recurring levers:
 
 Langfuse covers the four layers as follows:
 
-| Task                                   | Langfuse capability                                             |
-| -------------------------------------- | --------------------------------------------------------------- |
-| Per-call usage and cost                | Ingested from responses, or inferred via model definitions      |
-| Custom, gateway, or self-hosted models | Custom model definitions with regex match patterns              |
-| Context-dependent pricing              | Pricing tiers with conditions per model                         |
-| Per-user and per-session cost          | `user_id` / `session_id` propagation                            |
-| Feature and tenant breakdowns          | Tags, metadata, environments                                    |
-| Cost dashboards                        | Curated cost dashboard plus custom dashboards                   |
-| Alerts on LLM spend                    | Monitors with Slack, webhook, and GitHub Actions notifications  |
-| Alerts on the Langfuse Cloud bill      | Spend alerts in organization billing settings                   |
-| Cost data for billing and chargeback   | Metrics API                                                      |
+| Task                                   | Langfuse capability                                            |
+| -------------------------------------- | -------------------------------------------------------------- |
+| Per-call usage and cost                | Ingested from responses, or inferred via model definitions     |
+| Custom, gateway, or self-hosted models | Custom model definitions with regex match patterns             |
+| Context-dependent pricing              | Pricing tiers with conditions per model                        |
+| Per-user and per-session cost          | `user_id` / `session_id` propagation                           |
+| Feature and tenant breakdowns          | Tags, metadata, environments                                   |
+| Cost dashboards                        | Curated cost dashboard plus custom dashboards                  |
+| Alerts on LLM spend                    | Monitors with Slack, webhook, and GitHub Actions notifications |
+| Alerts on the Langfuse Cloud bill      | Spend alerts in organization billing settings                  |
+| Cost data for billing and chargeback   | Metrics API                                                    |
 
 A practical setup order: verify tracked cost against one provider invoice for a sample day,
 add custom model definitions for anything unmatched, propagate `user_id` and `session_id`,

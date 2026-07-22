@@ -62,13 +62,13 @@ In Langfuse, evaluation results are stored as [scores](/docs/evaluation/scores/o
 
 Effective LLM evaluation blends offline and online methods, because each catches errors the other misses.
 
-| Dimension     | Offline evaluation                                        | Online evaluation                                             |
-| ------------- | --------------------------------------------------------- | ------------------------------------------------------------- |
-| Runs on       | Curated [datasets](/docs/evaluation/experiments/datasets) | Live production traces                                        |
-| When          | Before you ship a change                                   | Continuously in production                                    |
-| Catches       | Regressions against known test cases                       | Model drift, unexpected user inputs, new failure modes        |
-| Typical tools | Experiments, CI gates                                      | Sampled LLM-as-a-judge, code evaluators, user feedback, monitors |
-| Limitation    | Test sets can go stale and stop resembling real traffic    | No ground truth; feedback signals are sparse and noisy        |
+| Dimension     | Offline evaluation                                        | Online evaluation                                                |
+| ------------- | --------------------------------------------------------- | ---------------------------------------------------------------- |
+| Runs on       | Curated [datasets](/docs/evaluation/experiments/datasets) | Live production traces                                           |
+| When          | Before you ship a change                                  | Continuously in production                                       |
+| Catches       | Regressions against known test cases                      | Model drift, unexpected user inputs, new failure modes           |
+| Typical tools | Experiments, CI gates                                     | Sampled LLM-as-a-judge, code evaluators, user feedback, monitors |
+| Limitation    | Test sets can go stale and stop resembling real traffic   | No ground truth; feedback signals are sparse and noisy           |
 
 The two form a loop: offline experiments validate a change before deployment, online evaluation catches the edge cases your dataset did not cover, and those edge cases go back into the dataset so the next experiment catches them. Langfuse's [core concepts page](/docs/evaluation/core-concepts) walks through this loop in detail.
 
@@ -76,13 +76,13 @@ The two form a loop: offline experiments validate a change before deployment, on
 
 No single method captures everything about your application's behavior, so most teams mix and match from five families:
 
-| Method                | What it gives you                                            | Cost per result | Scales to production? |
-| --------------------- | ------------------------------------------------------------ | --------------- | --------------------- |
-| User feedback         | The clearest signal of whether output hit the mark           | Free but sparse | Yes                   |
-| Implicit feedback     | Behavioral signals (retries, link clicks, abandonment)       | Free but noisy  | Yes                   |
-| Human annotation      | Deep, trustworthy judgments from experts                     | High            | No                    |
-| Code evaluators       | Deterministic checks (format, regex, exact match, tool calls) | Near zero       | Yes                   |
-| LLM-as-a-judge        | Subjective criteria (helpfulness, faithfulness) at scale     | Low             | Yes, with sampling    |
+| Method            | What it gives you                                             | Cost per result | Scales to production? |
+| ----------------- | ------------------------------------------------------------- | --------------- | --------------------- |
+| User feedback     | The clearest signal of whether output hit the mark            | Free but sparse | Yes                   |
+| Implicit feedback | Behavioral signals (retries, link clicks, abandonment)        | Free but noisy  | Yes                   |
+| Human annotation  | Deep, trustworthy judgments from experts                      | High            | No                    |
+| Code evaluators   | Deterministic checks (format, regex, exact match, tool calls) | Near zero       | Yes                   |
+| LLM-as-a-judge    | Subjective criteria (helpfulness, faithfulness) at scale      | Low             | Yes, with sampling    |
 
 Traces are the underlying thread across all of them: by systematically logging interactions, you create one structured record that every technique draws from.
 

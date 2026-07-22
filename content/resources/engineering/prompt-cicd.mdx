@@ -31,14 +31,14 @@ Hardcoding prompts in the codebase gives them code review by default, but at the
 
 A complete prompt deployment pipeline has six stages. Each stage exists to prevent a specific failure:
 
-| Stage           | What it does                                                        | Failure it prevents                                    |
-| --------------- | ------------------------------------------------------------------- | ------------------------------------------------------ |
-| **1. Version**  | Records every change as an immutable version with a diff and author | "We don't know what changed or who changed it"         |
-| **2. Validate** | Runs the candidate against a golden dataset and scores the outputs  | The fix for one case breaks ten others                 |
-| **3. Gate**     | Blocks promotion until scores clear thresholds and a human approves | Unreviewed changes reaching production                 |
-| **4. Roll out** | Serves the candidate to a fraction of live traffic first            | A change that passed offline tests failing at scale    |
-| **5. Observe**  | Tracks quality, cost, and latency per prompt version in production  | Regressions that only real traffic can surface         |
-| **6. Roll back** | Reverts to the previous version in one step, without a redeploy    | A bad change staying live while a hotfix is built      |
+| Stage            | What it does                                                        | Failure it prevents                                 |
+| ---------------- | ------------------------------------------------------------------- | --------------------------------------------------- |
+| **1. Version**   | Records every change as an immutable version with a diff and author | "We don't know what changed or who changed it"      |
+| **2. Validate**  | Runs the candidate against a golden dataset and scores the outputs  | The fix for one case breaks ten others              |
+| **3. Gate**      | Blocks promotion until scores clear thresholds and a human approves | Unreviewed changes reaching production              |
+| **4. Roll out**  | Serves the candidate to a fraction of live traffic first            | A change that passed offline tests failing at scale |
+| **5. Observe**   | Tracks quality, cost, and latency per prompt version in production  | Regressions that only real traffic can surface      |
+| **6. Roll back** | Reverts to the previous version in one step, without a redeploy     | A bad change staying live while a hotfix is built   |
 
 The rest of this guide builds each stage with Langfuse, and is explicit about which parts are native features and which parts you compose from primitives.
 
@@ -185,21 +185,21 @@ One operational detail matters for rollback speed. The SDKs cache prompts client
 
 Langfuse provides the storage, evaluation, and measurement layers of prompt CI/CD natively; the workflow glue (approvals, traffic percentages) is composed from labels, webhooks, and your CI system. As of July 2026:
 
-| Pipeline capability                     | In Langfuse       | How                                                                    |
-| --------------------------------------- | ----------------- | ---------------------------------------------------------------------- |
-| Immutable prompt versions and diffs     | Native            | Every save creates a version; diff view in the UI                      |
-| Label-based deployment (staging, prod)  | Native            | Labels point at versions; SDKs fetch by label                          |
-| Dataset validation of a prompt version  | Native            | Experiments via UI or SDK, scored by evaluators                        |
-| CI gate that fails on regression        | Native             | `langfuse/experiment-action` plus `RegressionError` thresholds         |
-| Trigger CI on prompt changes            | Native            | GitHub `repository_dispatch` automation or webhooks                    |
-| Restrict who can promote to production  | Native (plan-gated) | Protected prompt labels; Pro Teams add-on, Enterprise, self-hosted EE |
-| Multi-step approval workflow            | Composed          | Protected labels + CI evidence + webhook notifications                 |
-| Weighted traffic split (e.g. 90/10)     | Composed          | Two labels + a random split in application code                        |
-| One-click winner promotion              | Composed          | Read the per-version metrics, then one label move                      |
-| Per-version production metrics          | Native            | Prompt Metrics tab via trace linking                                   |
-| Alerting on quality regressions         | Native            | Monitors on score metrics                                              |
-| One-step rollback                       | Native            | Repoint the `production` label                                         |
-| Audit trail of label changes            | Native (plan-gated) | Audit logs on Enterprise and self-hosted EE                           |
+| Pipeline capability                    | In Langfuse         | How                                                                   |
+| -------------------------------------- | ------------------- | --------------------------------------------------------------------- |
+| Immutable prompt versions and diffs    | Native              | Every save creates a version; diff view in the UI                     |
+| Label-based deployment (staging, prod) | Native              | Labels point at versions; SDKs fetch by label                         |
+| Dataset validation of a prompt version | Native              | Experiments via UI or SDK, scored by evaluators                       |
+| CI gate that fails on regression       | Native              | `langfuse/experiment-action` plus `RegressionError` thresholds        |
+| Trigger CI on prompt changes           | Native              | GitHub `repository_dispatch` automation or webhooks                   |
+| Restrict who can promote to production | Native (plan-gated) | Protected prompt labels; Pro Teams add-on, Enterprise, self-hosted EE |
+| Multi-step approval workflow           | Composed            | Protected labels + CI evidence + webhook notifications                |
+| Weighted traffic split (e.g. 90/10)    | Composed            | Two labels + a random split in application code                       |
+| One-click winner promotion             | Composed            | Read the per-version metrics, then one label move                     |
+| Per-version production metrics         | Native              | Prompt Metrics tab via trace linking                                  |
+| Alerting on quality regressions        | Native              | Monitors on score metrics                                             |
+| One-step rollback                      | Native              | Repoint the `production` label                                        |
+| Audit trail of label changes           | Native (plan-gated) | Audit logs on Enterprise and self-hosted EE                           |
 
 ## FAQ [#faq]
 

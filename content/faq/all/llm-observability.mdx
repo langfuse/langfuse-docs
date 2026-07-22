@@ -42,13 +42,13 @@ An **LLM observability platform** is a system that captures every request an LLM
 
 Five capabilities define the category:
 
-| Capability             | What it covers                                                                                     |
-| ---------------------- | -------------------------------------------------------------------------------------------------- |
+| Capability             | What it covers                                                                                             |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------- |
 | Tracing                | Records each request with its prompts, model responses, token usage, latency, and tool or retrieval steps. |
-| Evaluation             | Attaches quality scores to outputs via automated evaluators, human annotation, or user feedback.    |
-| Prompt management      | Versions prompts centrally so they can be updated and rolled back without a code deployment.        |
-| Cost tracking          | Breaks down token usage and USD cost per model and usage type.                                      |
-| Dashboards and metrics | Aggregates traces and scores into charts for latency, cost, error rates, and quality over time.     |
+| Evaluation             | Attaches quality scores to outputs via automated evaluators, human annotation, or user feedback.           |
+| Prompt management      | Versions prompts centrally so they can be updated and rolled back without a code deployment.               |
+| Cost tracking          | Breaks down token usage and USD cost per model and usage type.                                             |
+| Dashboards and metrics | Aggregates traces and scores into charts for latency, cost, error rates, and quality over time.            |
 
 Langfuse is an open-source example of this category. It captures traces of complete application runs, including nested tool and retrieval steps, and lets teams score them with automated and manual evaluators. [Prompt management](/docs/prompt-management) versions prompts outside the codebase and caches them client-side, so retrieving them adds no latency. [Token and cost tracking](/docs/observability/features/token-and-cost-tracking) infers usage and USD cost from the model name or accepts exact values ingested via SDKs and integrations. To try the platform, [set up your first trace](/docs/observability/get-started); it works with any model or framework, and you can adopt the remaining capabilities incrementally.
 

@@ -41,13 +41,13 @@ As of July 2026, Langfuse Cloud is rolling out an observation-centric data model
 For larger production deployments we recommend ClickHouse Cloud or BYOC, because they remove most of the disk, merge, and replica management covered in this guide; self-managed ClickHouse is a good fit when your team can own those operations.
 See the [support levels](/self-hosting/deployment/infrastructure/clickhouse#support) for the official list; the table below compares the options from an operations perspective.
 
-| Option                                                                                                             | Support level | You operate                                             | Best fit                                                                    |
-| ------------------------------------------------------------------------------------------------------------------ | ------------- | ------------------------------------------------------- | --------------------------------------------------------------------------- |
-| [ClickHouse Cloud](/self-hosting/deployment/infrastructure/clickhouse#cloudbyoc)                                   | Official      | Nothing (managed service)                               | Teams that want managed scaling, backups, and storage-compute separation    |
-| [ClickHouse BYOC](/self-hosting/deployment/infrastructure/clickhouse#cloudbyoc)                                    | Official      | Cloud account only (data plane in your VPC)             | Large deployments with data residency or VPC-boundary requirements          |
-| [ClickHouse Kubernetes Operator](/self-hosting/deployment/infrastructure/clickhouse#clickhouse-kubernetes-operator) | Official      | Disks, merges, upgrades, backups, Keeper                | Teams with ClickHouse experience that need full control on Kubernetes       |
-| [Bitnami Helm chart](/self-hosting/deployment/infrastructure/clickhouse#clickhouse-on-kubernetes-helm)             | Community     | Disks, merges, upgrades, backups, Keeper                | Default dependency of [Langfuse K8s](https://github.com/langfuse/langfuse-k8s) |
-| [Single-container Docker](/self-hosting/deployment/infrastructure/clickhouse#docker)                               | Community     | Everything, with no redundancy                          | Development and testing only                                                |
+| Option                                                                                                              | Support level | You operate                                 | Best fit                                                                       |
+| ------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------- | ------------------------------------------------------------------------------ |
+| [ClickHouse Cloud](/self-hosting/deployment/infrastructure/clickhouse#cloudbyoc)                                    | Official      | Nothing (managed service)                   | Teams that want managed scaling, backups, and storage-compute separation       |
+| [ClickHouse BYOC](/self-hosting/deployment/infrastructure/clickhouse#cloudbyoc)                                     | Official      | Cloud account only (data plane in your VPC) | Large deployments with data residency or VPC-boundary requirements             |
+| [ClickHouse Kubernetes Operator](/self-hosting/deployment/infrastructure/clickhouse#clickhouse-kubernetes-operator) | Official      | Disks, merges, upgrades, backups, Keeper    | Teams with ClickHouse experience that need full control on Kubernetes          |
+| [Bitnami Helm chart](/self-hosting/deployment/infrastructure/clickhouse#clickhouse-on-kubernetes-helm)              | Community     | Disks, merges, upgrades, backups, Keeper    | Default dependency of [Langfuse K8s](https://github.com/langfuse/langfuse-k8s) |
+| [Single-container Docker](/self-hosting/deployment/infrastructure/clickhouse#docker)                                | Community     | Everything, with no redundancy              | Development and testing only                                                   |
 
 Two structural differences matter most for operations:
 
@@ -149,13 +149,13 @@ Run at least 3 replicas for production self-managed ClickHouse; Langfuse fully s
 Watch five signals on a self-hosted ClickHouse: disk usage, parts per partition, merge backlog, replication lag, and Langfuse's ingestion queue length.
 ClickHouse system tables are per-node, so run the queries below against each replica (or aggregate them via the `clusterAllReplicas` table function).
 
-| Signal            | Source                                                     | Alert when                                            |
-| ----------------- | ---------------------------------------------------------- | ----------------------------------------------------- |
-| Disk usage        | `system.disks`, volume metrics                             | Above 80% capacity                                    |
-| Parts count       | `system.parts`                                             | Sustained growth, or "Too many parts" insert errors   |
-| Merge backlog     | `system.merges`                                            | Merges continuously running without draining          |
-| Replication lag   | `system.replicas`                                          | `absolute_delay` rising over minutes                  |
-| Ingestion queue   | `langfuse.queue.ingestion.length` (statsd)                 | Queue length growing steadily                         |
+| Signal          | Source                                     | Alert when                                          |
+| --------------- | ------------------------------------------ | --------------------------------------------------- |
+| Disk usage      | `system.disks`, volume metrics             | Above 80% capacity                                  |
+| Parts count     | `system.parts`                             | Sustained growth, or "Too many parts" insert errors |
+| Merge backlog   | `system.merges`                            | Merges continuously running without draining        |
+| Replication lag | `system.replicas`                          | `absolute_delay` rising over minutes                |
+| Ingestion queue | `langfuse.queue.ingestion.length` (statsd) | Queue length growing steadily                       |
 
 ```sql
 -- Disk headroom per configured disk

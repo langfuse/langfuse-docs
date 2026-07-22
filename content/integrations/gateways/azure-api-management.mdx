@@ -23,11 +23,11 @@ As of July 2026, there is no turnkey APIM-specific Langfuse plugin or policy. Th
 
 Pick the pattern based on where your code runs and how much application context you need in your traces:
 
-| Pattern                         | Where tracing happens                    | Application code changes                       | Best for                                                                             |
-| ------------------------------- | ---------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------ |
-| Client-side SDK instrumentation | In your application (Python, JS/TS)      | Change the SDK import, set the gateway URL     | Richest traces: nested spans, sessions, users, prompt links                          |
-| OpenTelemetry export            | In your application (any OTel language)  | Add OTel instrumentation and an OTLP exporter  | .NET, Java, Go, and teams with an existing OTel or collector setup                   |
-| Server-side ingestion           | In the gateway plus a forwarding worker  | None                                           | Zero application changes; traffic-level visibility without agent or retrieval context |
+| Pattern                         | Where tracing happens                   | Application code changes                      | Best for                                                                              |
+| ------------------------------- | --------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Client-side SDK instrumentation | In your application (Python, JS/TS)     | Change the SDK import, set the gateway URL    | Richest traces: nested spans, sessions, users, prompt links                           |
+| OpenTelemetry export            | In your application (any OTel language) | Add OTel instrumentation and an OTLP exporter | .NET, Java, Go, and teams with an existing OTel or collector setup                    |
+| Server-side ingestion           | In the gateway plus a forwarding worker | None                                          | Zero application changes; traffic-level visibility without agent or retrieval context |
 
 Gateway-level logging and application-level tracing answer different questions: the gateway sees every request and its cost, while application traces explain why a request was made (agent steps, retrieved context, tool calls). Our [LLM gateway explainer](/resources/engineering/llm-gateway) covers this distinction in depth.
 

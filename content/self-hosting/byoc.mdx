@@ -30,14 +30,14 @@ Hybrid and BYOC deployment models for the Langfuse application itself are an exp
 
 The table summarizes how the three Langfuse deployment models differ on the dimensions security reviews care about (as of July 2026):
 
-| Question                     | Langfuse Cloud                                | Self-hosted OSS            | Self-hosted Enterprise                     |
-| ---------------------------- | --------------------------------------------- | -------------------------- | ------------------------------------------ |
-| Where product data lives     | Langfuse-managed AWS and ClickHouse Cloud     | Your infrastructure        | Your infrastructure                        |
-| Who operates the application | Langfuse                                      | Your team                  | Your team, or a partner you choose         |
-| ClickHouse layer             | Managed by Langfuse                           | Self-managed OSS           | ClickHouse Cloud, BYOC, or Private         |
-| Vendor telemetry             | Not applicable                                | Optional, can be disabled  | Required for license compliance            |
-| Air-gapped operation         | No                                            | Yes                        | Talk to us                                 |
-| Certifications and reports   | SOC 2 Type II, ISO 27001, HIPAA-ready region  | Your audit scope           | Your audit scope, vendor reports available |
+| Question                     | Langfuse Cloud                               | Self-hosted OSS           | Self-hosted Enterprise                     |
+| ---------------------------- | -------------------------------------------- | ------------------------- | ------------------------------------------ |
+| Where product data lives     | Langfuse-managed AWS and ClickHouse Cloud    | Your infrastructure       | Your infrastructure                        |
+| Who operates the application | Langfuse                                     | Your team                 | Your team, or a partner you choose         |
+| ClickHouse layer             | Managed by Langfuse                          | Self-managed OSS          | ClickHouse Cloud, BYOC, or Private         |
+| Vendor telemetry             | Not applicable                               | Optional, can be disabled | Required for license compliance            |
+| Air-gapped operation         | No                                           | Yes                       | Talk to us                                 |
+| Certifications and reports   | SOC 2 Type II, ISO 27001, HIPAA-ready region | Your audit scope          | Your audit scope, vendor reports available |
 
 See the [self-hosted pricing page](/pricing-self-host) for the full feature comparison between OSS and Enterprise.
 
@@ -107,11 +107,11 @@ Langfuse Cloud, by contrast, offers fixed regions (US, EU, Japan, and a HIPAA-re
 
 Compliance claims differ by deployment model, and a security review should map each claim to the right scope (as of July 2026):
 
-| Framework     | Langfuse Cloud                                 | Self-hosted                                                     |
-| ------------- | ---------------------------------------------- | --------------------------------------------------------------- |
-| SOC 2 Type II | Certified                                      | Vendor report available for review (Enterprise)                  |
-| ISO 27001     | Certified                                      | Vendor certificate available for review (Enterprise)             |
-| GDPR          | Compliant, [DPA](/dpa) available               | Data stays in your infrastructure under your controls            |
+| Framework     | Langfuse Cloud                                   | Self-hosted                                                      |
+| ------------- | ------------------------------------------------ | ---------------------------------------------------------------- |
+| SOC 2 Type II | Certified                                        | Vendor report available for review (Enterprise)                  |
+| ISO 27001     | Certified                                        | Vendor certificate available for review (Enterprise)             |
+| GDPR          | Compliant, [DPA](/dpa) available                 | Data stays in your infrastructure under your controls            |
 | HIPAA         | HIPAA-ready region with BAA (Pro plan or higher) | Your own HIPAA program governs; PHI stays in your infrastructure |
 
 Two scoping notes for reviewers:
@@ -129,14 +129,14 @@ In addition, Langfuse undergoes annual independent penetration tests, and vulner
 
 In a self-hosted deployment paired with a managed ClickHouse layer, operational responsibility splits as follows:
 
-| Task                                                        | Owner                                                          |
-| ----------------------------------------------------------- | -------------------------------------------------------------- |
-| Langfuse application upgrades and patches                   | Your team, using tagged semver releases                         |
-| Postgres, Redis, and blob storage operations and backups    | Your team (or your cloud provider's managed services)           |
-| ClickHouse infrastructure, upgrades, and backups            | ClickHouse on Cloud/BYOC; your team on self-managed ClickHouse  |
-| Container image scanning and CVE remediation in Langfuse    | Langfuse                                                        |
-| Networking, IAM hygiene, endpoint and webhook security      | Your team                                                       |
-| Architecture and rollout guidance                           | Langfuse (Enterprise support)                                   |
+| Task                                                     | Owner                                                          |
+| -------------------------------------------------------- | -------------------------------------------------------------- |
+| Langfuse application upgrades and patches                | Your team, using tagged semver releases                        |
+| Postgres, Redis, and blob storage operations and backups | Your team (or your cloud provider's managed services)          |
+| ClickHouse infrastructure, upgrades, and backups         | ClickHouse on Cloud/BYOC; your team on self-managed ClickHouse |
+| Container image scanning and CVE remediation in Langfuse | Langfuse                                                       |
+| Networking, IAM hygiene, endpoint and webhook security   | Your team                                                      |
+| Architecture and rollout guidance                        | Langfuse (Enterprise support)                                  |
 
 Langfuse ships tagged semver releases with a documented [versioning policy](/self-hosting/upgrade/versioning), and long-running upgrade migrations are offloaded to background jobs to reduce downtime. On ClickHouse Cloud and BYOC, [backups of the ClickHouse layer are managed automatically](/self-hosting/configuration/backups); the backup guide covers the remaining components.
 
