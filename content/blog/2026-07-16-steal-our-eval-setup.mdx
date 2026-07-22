@@ -19,11 +19,15 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 "Build custom evals," they say. Yes, but "custom" doesn't mean "from scratch." For a huge chunk of eval design, especially for something as well-trodden as a chatbot, teams are solving a problem thousands of teams have already solved. Here's our setup for our docs chatbot, in full. Ready to copy.
 
 <Callout type="info">
-  Explore the [Langfuse example project](/docs/demo), the public Langfuse
+  To follow along, explore the [Langfuse example project](/docs/demo), the public Langfuse
   project across cloud regions [EU](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi), [Japan](https://jp.cloud.langfuse.com/project/cmmnj9e9n0006ad06nyz28646), and [US](https://us.cloud.langfuse.com/project/cmeic4yr500qmad0772bw0tol),
   and the [open-source chatbot
   code](https://github.com/langfuse/langfuse-docs/tree/main/components/qaChatbot).
 </Callout>
+
+## The chatbot we evaluate
+
+Our sample chatbot is a Langfuse documentation chatbot built to answer user questions about Langfuse while staying grounded in the docs. It has access to the [Langfuse Docs MCP](/docs/docs-mcp) and an Inkeep-powered retrieval tool, and uses both to provide a comprehensive answer to the user.
 
 <div className="not-prose my-6 overflow-hidden rounded border border-line-structure bg-surface-1">
   <div className="border-b border-line-structure px-4 py-3">
@@ -72,7 +76,7 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
   </dl>
 </div>
 
-The structure below follows the [AI engineering loop](/academy/ai-engineering-loop): [trace](/academy/tracing) production behavior, [monitor](/academy/monitoring) the right signals, turn reviewed examples into [datasets](/academy/datasets), run [experiments](/academy/experiments), and feed what we learn back into the chatbot.
+To continuously improve the setup, we followed the [AI engineering loop](/academy/ai-engineering-loop): [trace](/academy/tracing) production behavior, [monitor](/academy/monitoring) the right signals, turn reviewed examples into [datasets](/academy/datasets), run [experiments](/academy/experiments), and feed what we learn back into the chatbot.
 
 ## Trace every step
 
