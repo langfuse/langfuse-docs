@@ -1,0 +1,187 @@
+---
+title: "BYOC (Bring Your Own Cloud): Architecture and Security"
+sidebarTitle: "BYOC"
+description: "How Langfuse supports BYOC (bring your own cloud) deployments: control plane and data plane split, telemetry egress, vendor access, residency, and compliance."
+label: "Version: v3"
+---
+
+# BYOC architecture and security
+
+<Callout type="info">
+
+**TL;DR:** Langfuse supports BYOC-style deployments through self-hosting: you run the Langfuse application in your own cloud account and can pair it with ClickHouse BYOC, a fully managed data layer that also runs inside your account. As of July 2026, Langfuse does not operate installations on customer infrastructure, so there is no Langfuse-run control plane with access to your environment. Raw traces, prompts, observations, scores, and dataset contents never leave your account; the only vendor-bound data flow is a small aggregated telemetry event.
+
+</Callout>
+
+This page explains what BYOC means in the context of Langfuse and answers the questions security reviewers ask most often: where the control plane and data plane sit, what leaves your cloud account, who can access what, and which compliance claims apply to which deployment model. It consolidates information that also appears on the [telemetry](/self-hosting/security/telemetry), [networking](/self-hosting/security/networking), and [ClickHouse](/self-hosting/deployment/infrastructure/clickhouse) pages.
+
+## What BYOC means for Langfuse [#what-is-byoc]
+
+BYOC (Bring Your Own Cloud) describes deployments where a vendor-managed service runs on infrastructure inside your own cloud account: the data plane stays with you, while the vendor operates a control plane that provisions, upgrades, and monitors the managed components. Teams choose this model when they need data residency inside their own account, a hard VPC boundary, or a smaller vendor access surface than a multi-tenant SaaS provides.
+
+For Langfuse, the model works as follows:
+
+- **The Langfuse application has no vendor control plane.** You deploy and operate the Langfuse containers yourself, in your own account, using the [self-hosting guides](/self-hosting#deployment-options). Langfuse does not operate installations on customer infrastructure (as of July 2026).
+- **The data layer can be vendor-managed inside your account.** [ClickHouse BYOC](/self-hosting/deployment/infrastructure/clickhouse#cloudbyoc) is a fully managed ClickHouse Cloud deployment on infrastructure in your cloud account, designed for large-scale deployments with strict data residency, compliance, or VPC-boundary requirements. Langfuse Enterprise (self-hosted) is bundled with a ClickHouse commercial plan: ClickHouse Cloud, ClickHouse BYOC, or ClickHouse Private.
+
+Hybrid and BYOC deployment models for the Langfuse application itself are an exploration area on our [roadmap](/docs/roadmap) for customers that need stronger data isolation or direct ClickHouse access.
+
+## Deployment models compared [#deployment-models]
+
+The table summarizes how the three Langfuse deployment models differ on the dimensions security reviews care about (as of July 2026):
+
+| Question                     | Langfuse Cloud                                | Self-hosted OSS            | Self-hosted Enterprise                     |
+| ---------------------------- | --------------------------------------------- | -------------------------- | ------------------------------------------ |
+| Where product data lives     | Langfuse-managed AWS and ClickHouse Cloud     | Your infrastructure        | Your infrastructure                        |
+| Who operates the application | Langfuse                                      | Your team                  | Your team, or a partner you choose         |
+| ClickHouse layer             | Managed by Langfuse                           | Self-managed OSS           | ClickHouse Cloud, BYOC, or Private         |
+| Vendor telemetry             | Not applicable                                | Optional, can be disabled  | Required for license compliance            |
+| Air-gapped operation         | No                                            | Yes                        | Talk to us                                 |
+| Certifications and reports   | SOC 2 Type II, ISO 27001, HIPAA-ready region  | Your audit scope           | Your audit scope, vendor reports available |
+
+See the [self-hosted pricing page](/pricing-self-host) for the full feature comparison between OSS and Enterprise.
+
+## Architecture: application plane and data plane [#architecture]
+
+In a self-hosted Langfuse deployment, every component that stores or processes product data runs inside your account. Langfuse consists of two application containers (Langfuse Web and Langfuse Worker) plus storage components: Postgres for transactional data, ClickHouse for traces, observations, and scores, Redis/Valkey for queues and caching, and S3-compatible blob storage for raw events and multi-modal attachments. An LLM API or gateway is optional and only needed for the playground and LLM-as-a-judge evaluations.
+
+import ArchitectureDiagram from "@/components-mdx/architecture-diagram-v3.mdx";
+
+<ArchitectureDiagram />
+
+{/* TODO(docs+engineering): add a BYOC-specific diagram before publishing. It should show: (1) the customer cloud account containing Langfuse Web/Worker, Postgres, Redis, S3, and the ClickHouse BYOC data plane; (2) the ClickHouse Cloud control plane outside the account, connected only to the ClickHouse layer, with the IAM/permission boundary labeled; (3) the outbound telemetry and optional LLM API arrows. All arrows and the IAM scope label need engineering sign-off; do not publish this page with a diagram that has not been reviewed. */}
+
+When you pair this setup with ClickHouse BYOC, the split looks like this:
+
+- **Data plane (your account):** the Langfuse application containers, Postgres, Redis, blob storage, and the ClickHouse infrastructure itself all run inside your cloud account and your network boundary.
+- **Control plane (vendor-operated, ClickHouse layer only):** ClickHouse Cloud manages the ClickHouse deployment in your account, which gives you the operational model of a managed service while the data stays behind your VPC boundary. The exact IAM role and permission scope this control plane requires in your account is defined by ClickHouse; request it as part of your review (see the [security review questions](#security-review-questions) below).
+
+There is no equivalent control plane for the Langfuse application: nothing outside your account provisions, upgrades, or connects into the Langfuse containers.
+
+## Data flows and egress [#data-flows-egress]
+
+A self-hosted Langfuse deployment does not require internet access, and it can run fully offline or air-gapped (OSS). The outbound connections that exist by default are limited and documented:
+
+- **Deployment telemetry** is sent as a single aggregated event to Langfuse's telemetry pipeline via PostHog Cloud. It contains the Langfuse version, the license key (if configured), up to 30 user email domains with user counts, and aggregate counts of projects, traces, observations, scores, and datasets for the reporting window. Raw email addresses are not sent. See the [telemetry documentation](/self-hosting/security/telemetry) for the exact field list.
+- **A version check** pings a cached version of the GitHub API to check for Langfuse server updates. It fails gracefully when internet access is not available.
+- **Optional LLM API traffic** occurs only if you use the playground or LLM-as-a-judge evaluations. The LLM API or gateway can be deployed in the same VPC or a peered VPC, so this traffic never has to leave your network.
+- **Integrations you configure yourself**, such as blob storage exports, analytics integrations, or webhooks, create egress only to endpoints you choose.
+
+<Callout type="info">
+
+Langfuse does not send raw traces, prompts, observations, scores, or dataset contents from your self-hosted deployment. Only high-level aggregated usage metrics are shared.
+
+</Callout>
+
+Telemetry can be disabled on Langfuse OSS by setting an environment variable on all Langfuse application containers:
+
+```bash
+TELEMETRY_ENABLED=false
+```
+
+On Langfuse Enterprise (self-hosted), telemetry is used for license compliance and cannot be disabled. If you have procurement, network, or privacy questions about this, please [contact us](/talk-to-us).
+
+## Vendor access model [#vendor-access]
+
+Langfuse has no access path into a self-hosted deployment. We do not operate installations on customer infrastructure, the application requires no inbound connection from Langfuse, and the only vendor-bound data flow is the telemetry event described above. Enterprise support (dedicated support engineer, solutions architect, product team access) works through the channels you choose and the information you decide to share.
+
+If your team cannot operate the deployment yourself, partners such as Shakudo offer [managed Langfuse Enterprise deployments on your VPC](/enterprise); in that case the operator is the partner you contract with, not Langfuse.
+
+For the ClickHouse BYOC layer, vendor access is governed by ClickHouse's BYOC access model and the IAM permissions granted in your account. Request the specifics from ClickHouse during your review; the Langfuse docs intentionally do not duplicate them.
+
+## Private connectivity [#private-connectivity]
+
+A BYOC-style Langfuse deployment does not need vendor-side private connectivity because the application already runs inside your VPC. Common patterns from the [deployment strategies guide](/self-hosting/security/deployment-strategies) include VPC peering from application VPCs to a central Langfuse VPC, or placing the Langfuse Web endpoint behind a firewall, proxy, or VPN. Only the Langfuse Web container needs to be reachable by users, APIs, and SDKs.
+
+For the data layer: ClickHouse offers private links for AWS, GCP, and Azure when using ClickHouse Cloud, and a ClickHouse BYOC data plane runs inside your account to begin with. Confirm the private connectivity options for your specific provider and region with ClickHouse.
+
+For comparison, Langfuse Cloud uses public regional endpoints by default; [AWS PrivateLink](/security/networking) is available for Enterprise customers on committed contracts, subject to regional availability and onboarding (as of July 2026).
+
+## Data residency [#data-residency]
+
+Self-hosted Langfuse gives you full control over data residency: you choose the cloud provider, the region, and the network boundary, and product data does not leave your infrastructure. This applies to both the OSS and Enterprise versions.
+
+Langfuse Cloud, by contrast, offers fixed regions (US, EU, Japan, and a HIPAA-ready US region) with full separation between them. If a required jurisdiction or provider is not covered by those regions, self-hosting is the deployment model that covers it.
+
+## Compliance posture by deployment model [#compliance]
+
+Compliance claims differ by deployment model, and a security review should map each claim to the right scope (as of July 2026):
+
+| Framework     | Langfuse Cloud                                 | Self-hosted                                                     |
+| ------------- | ---------------------------------------------- | --------------------------------------------------------------- |
+| SOC 2 Type II | Certified                                      | Vendor report available for review (Enterprise)                  |
+| ISO 27001     | Certified                                      | Vendor certificate available for review (Enterprise)             |
+| GDPR          | Compliant, [DPA](/dpa) available               | Data stays in your infrastructure under your controls            |
+| HIPAA         | HIPAA-ready region with BAA (Pro plan or higher) | Your own HIPAA program governs; PHI stays in your infrastructure |
+
+Two scoping notes for reviewers:
+
+- **The certifications cover Langfuse Cloud and the Langfuse organization.** A self-hosted deployment runs on your infrastructure and inherits your own controls and audit scope. The SOC 2 Type II and ISO 27001 reports included with [Langfuse Enterprise (self-hosted)](/pricing-self-host) support your third-party risk review of Langfuse as a software supplier, and Enterprise includes support for InfoSec and legal reviews.
+- **For HIPAA-regulated workloads in a self-hosted deployment**, PHI never leaves your infrastructure, and the telemetry event contains no trace, prompt, or score contents. Whether the deployment meets HIPAA requirements is determined by your own safeguards. Alternatively, [Langfuse Cloud offers a dedicated HIPAA-ready region](/security/hipaa) with a signed BAA for eligible customers.
+
+## Container image scanning and vulnerability management [#supply-chain]
+
+Langfuse container images are scanned with Snyk on every commit to main, and static code scans run with CodeQL. Dependencies are continuously monitored with Snyk and Dependabot. Identified vulnerabilities are triaged within 24 hours and remediated under severity-based SLAs, with critical issues required to be fixed within 24 hours. See the [vulnerability management](/security/vulnerability-management) page and the [security FAQ](/security/security-faq) for details, including links to example scan runs.
+
+In addition, Langfuse undergoes annual independent penetration tests, and vulnerability disclosure runs through the ClickHouse Bugcrowd program. You are welcome to run your own penetration tests against your self-hosted deployment.
+
+## Operations: who runs what [#operations]
+
+In a self-hosted deployment paired with a managed ClickHouse layer, operational responsibility splits as follows:
+
+| Task                                                        | Owner                                                          |
+| ----------------------------------------------------------- | -------------------------------------------------------------- |
+| Langfuse application upgrades and patches                   | Your team, using tagged semver releases                         |
+| Postgres, Redis, and blob storage operations and backups    | Your team (or your cloud provider's managed services)           |
+| ClickHouse infrastructure, upgrades, and backups            | ClickHouse on Cloud/BYOC; your team on self-managed ClickHouse  |
+| Container image scanning and CVE remediation in Langfuse    | Langfuse                                                        |
+| Networking, IAM hygiene, endpoint and webhook security      | Your team                                                       |
+| Architecture and rollout guidance                           | Langfuse (Enterprise support)                                   |
+
+Langfuse ships tagged semver releases with a documented [versioning policy](/self-hosting/upgrade/versioning), and long-running upgrade migrations are offloaded to background jobs to reduce downtime. On ClickHouse Cloud and BYOC, [backups of the ClickHouse layer are managed automatically](/self-hosting/configuration/backups); the backup guide covers the remaining components.
+
+## Questions to bring to your security review [#security-review-questions]
+
+The managed ClickHouse layer is where a vendor relationship enters an otherwise customer-operated architecture, so most reviewer questions concentrate there. The Langfuse docs intentionally do not duplicate ClickHouse BYOC operational details; collect these answers directly during your evaluation:
+
+- Which IAM role and permission scope does the ClickHouse BYOC control plane require in our cloud account, and which actions can it perform?
+- Which endpoints does the control plane traffic of the managed layer use, and what data does that traffic carry?
+- Is private connectivity (for example PrivateLink or an equivalent) available for the managed data plane in our provider and region?
+- How is Langfuse's license-compliance telemetry handled in a restricted-egress environment?
+- Which subprocessors are involved for the deployment model we are choosing? The live list for Langfuse is published on the [subprocessors page](/subprocessors).
+
+We walk through these questions, together with an architecture diagram of your target setup, as part of Enterprise evaluations. [Talk to us](/talk-to-us) to set this up, or [request the security reports](/request-security-docs) for your vendor review.
+
+## FAQ [#faq]
+
+### Does Langfuse offer a managed BYOC deployment?
+
+As of July 2026, no. Langfuse does not operate installations on customer infrastructure. Teams that need BYOC-style isolation self-host the Langfuse application in their own account and can pair it with ClickHouse BYOC as a managed data layer inside that account. Hybrid and BYOC models for the Langfuse application itself are an exploration area on the [roadmap](/docs/roadmap).
+
+### What data leaves our cloud account in a self-hosted deployment?
+
+By default, only a single aggregated telemetry event (Langfuse version, license key if configured, up to 30 user email domains with counts, and aggregate usage counts) and a version check against a cached GitHub API. Raw traces, prompts, observations, scores, and dataset contents never leave your account. Optional features you configure, such as the LLM playground, evaluations, blob exports, and webhooks, create egress only to endpoints you choose.
+
+### Can we disable telemetry?
+
+On Langfuse OSS, yes: set `TELEMETRY_ENABLED=false` on all Langfuse application containers. On Langfuse Enterprise (self-hosted), telemetry is used for license compliance and cannot be disabled. If that conflicts with your network policy, raise it with us during procurement.
+
+### Does Langfuse have access to our traces or prompts when we self-host?
+
+No. Langfuse does not operate installations on customer infrastructure and has no access path into a self-hosted deployment; the telemetry event contains no trace or prompt contents. Customer data is never used to train internal or third-party models.
+
+### Does a BYOC-style deployment support PrivateLink? [#privatelink]
+
+The Langfuse application runs inside your own VPC, so no vendor-side private link is needed; you connect via VPC peering, VPN, or your standard internal networking. ClickHouse offers private links for AWS, GCP, and Azure on ClickHouse Cloud, and a BYOC data plane runs inside your account; confirm region-specific options with ClickHouse. Separately, Langfuse Cloud offers AWS PrivateLink for Enterprise customers on committed contracts.
+
+### Is self-hosted Langfuse suitable for HIPAA-regulated workloads?
+
+PHI processed by a self-hosted deployment stays in your infrastructure, and the telemetry event contains no trace contents, so HIPAA fit is determined by your own program and safeguards. If you prefer a managed option, Langfuse Cloud offers a dedicated [HIPAA-ready region](/security/hipaa) with a signed BAA for customers on the Pro plan or higher.
+
+### Are Langfuse container images scanned for vulnerabilities?
+
+Yes. Container images are scanned with Snyk on commits to main, static code scans run with CodeQL, and dependencies are monitored with Snyk and Dependabot. Vulnerabilities are triaged within 24 hours, critical issues carry a 24-hour fix SLA, and annual third-party penetration tests cover the platform.
+
+### Who patches and upgrades a self-hosted deployment?
+
+Your team upgrades the Langfuse application using tagged semver releases, and background migrations reduce downtime during major upgrades. On ClickHouse Cloud or BYOC, the ClickHouse layer including its backups is managed for you. Langfuse Enterprise adds a dedicated support engineer and architectural guidance for rollout and upgrades.
