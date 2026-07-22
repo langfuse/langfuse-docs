@@ -727,12 +727,13 @@ print(f"  obs_id_map エントリ数:   {len(obs_id_map)}")
 旧 v2 エンドポイントとの違いのうち、ここで重要になるのは次の3点です。
 
 - **カーソルページネーション** — ページ番号を数える代わりに、`meta.cursor` の不透明なカーソルを空になるまで渡し続けます。
-- **単一の `subject`** — 各スコアは、フラットな `trace_id` / `observation_id` / `session_id` / `dataset_run_id` フィールドの代わりに、1つの `subject` オブジェクト (`kind` + `id`) で対象を参照します。データセット実行は v3 では *experiment* と呼ばれるので、`kind="experiment"` を書き込み側の `dataset_run_id` に対応づけます。ごくまれに2つの参照 (例: トレースとセッションの両方) を持つ古いスコアが存在しますが、v3 ではそのうち1つだけが返されます。従来のフローではそうしたスコアの再作成自体が失敗していたので、悪化することはありません。
+- **単一の `subject`** — 各スコアは、フラットな `trace_id` / `observation_id` / `session_id` / `dataset_run_id` フィールドの代わりに、1つの `subject` オブジェクト (`kind` + `id`) で対象を参照します。データセット実行は v3 では *experiment* と呼ばれます。ごくまれに2つの参照 (例: トレースとセッションの両方) を持つ古いスコアが存在しますが、v3 ではそのうち1つだけが返されます。従来のフローではそうしたスコアの再作成自体が失敗していたので、悪化することはありません。
 - **型付きの `value`** — `value` は常に数値 + 別フィールドの `string_value` という形ではなく、スコアの `data_type` に応じた型になります (NUMERIC は数値、BOOLEAN は真偽値、CATEGORICAL などは文字列)。
 
 挙動については次の点に注意してください。
 
 - v2 はトレースが存在しないスコアを黙って除外していましたが、v3 はそれらも返します。v2 のフローより移行されるスコアがやや多くなる場合は、これまで見えていなかったスコアが移行されるようになったためで、改善であって問題ではありません。
+- データセット実行に紐づくスコア (`kind="experiment"`) はこのセクションではスキップされます。セクション6で実行を再作成する際に移行先では新しい実行IDが割り当てられるため、移行元の実行IDへの参照は無効になってしまうからです。こうしたスコアは、移行先に実行が作成されたあとに、実行名で対応づけて移行してください。
 - スコアの作成は非同期です。成功レスポンスは取り込みキューに入ったことを意味するだけで、その時点で書き込みが完了しているわけではありません。取り込みが追いついてから移行先プロジェクトを確認してください。
 - 作成エンドポイントはタイムスタンプを受け付けないため、移行されたスコアのタイムスタンプは移行時刻になります。元のスコアのタイムスタンプは公開APIでは引き継げません。
 
@@ -761,10 +762,16 @@ while True:
         to_timestamp=TO_TS,
     ))
     for s in resp.data:
+        # 値が null のスコアは、変換より前に弾く必要があります。後続の BOOLEAN
+        # の分岐が、値なしを false に変換してしまうためです。
+        if s.value is None:
+            skipped += 1
+            continue
+
         # v3 の subject を、作成エンドポイントが期待するフラットな参照フィールドに
-        # 変換する: traceId / sessionId / datasetRunId のうちちょうど1つ。
-        # observationId には traceId が必須。
-        trace_id = observation_id = session_id = dataset_run_id = None
+        # 変換する: traceId / sessionId のうちちょうど1つ。observationId には
+        # traceId が必須。
+        trace_id = observation_id = session_id = None
         kind = s.subject.kind if s.subject else None
         if kind == "trace":
             trace_id = s.subject.id
@@ -778,7 +785,11 @@ while True:
         elif kind == "session":
             session_id = s.subject.id
         elif kind == "experiment":  # v3 におけるデータセット実行の呼び名
-            dataset_run_id = s.subject.id
+            # subject の id は移行元プロジェクトの実行ID。移行先では新しい実行IDが
+            # 割り当てられるため、この参照は引き継げません。
+            print(f"  スコア {s.id} ({s.name}) をスキップ: データセット実行のスコアは移行先に実行が作成されたあとに移行してください")
+            skipped += 1
+            continue
         else:
             print(f"  スコア {s.id} ({s.name}) をスキップ: 未対応の subject kind {kind!r}")
             skipped += 1
@@ -801,10 +812,6 @@ while True:
             print(f"  {s.data_type} スコア {s.id} ({s.name}) をそのまま移行します")
             value = s.value
 
-        if value is None:
-            skipped += 1
-            continue
-
         try:
             # POST /api/public/scores。このエンドポイントはタイムスタンプを受け付けない
             # ため、移行されたスコアには移行時刻が記録されます。取り込みは非同期で、
@@ -817,7 +824,6 @@ while True:
                 trace_id=new_trace_id,
                 observation_id=new_obs_id,
                 session_id=session_id,
-                dataset_run_id=dataset_run_id,
                 comment=s.comment,
                 config_id=new_cfg_id,
                 metadata=s.metadata,
