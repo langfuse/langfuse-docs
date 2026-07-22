@@ -23,7 +23,7 @@ Langfuse is now observations-first. Queries that used to require expensive joins
 **How to adopt:**
 
 - **SDK:** Upgrade to [Python SDK v4.7.0+](/docs/observability/sdk/upgrade-path/python-v3-to-v4) / [JS/TS SDK v5.4.0+](/docs/observability/sdk/upgrade-path/js-v4-to-v5). Replace trace update calls with `propagate_attributes()`.
-- **OTEL:** Set the [`x-langfuse-ingestion-version: 4` HTTP header](/integrations/native/opentelemetry#real-time-ingestion) on your span exporter. Propagate trace attributes to _all_ observations. [See setup guide](/integrations/native/opentelemetry)
+- **OTEL:** Set the [`x-langfuse-ingestion-version: 4` HTTP header](/integrations/native/opentelemetry#real-time-ingestion) on your span exporter and emit v4-ready observations. If you use custom ingestion, follow the [OTEL migration guide](/integrations/native/opentelemetry/migration-to-v4).
 - **UI:** If your organization was created before April 14, 2026, 14:00 UTC (15:00 CET), enable the **Preview** toggle (bottom-left) to opt in. Organizations created on/after this cutoff are already on "Fast Preview" and do not see the toggle. Filter observations directly in the new unified table and create saved views for productive defaults. [See saved views guide](/faq/all/explore-observations-in-v4)
 - **Evals:** Migrate LLM-as-a-Judge evals to the observation level. [See evals migration guide](/faq/all/llm-as-a-judge-migration)
 
@@ -87,7 +87,7 @@ To take advantage of the new data model and explore your data in real time, use 
 
 - **Python SDK:** v4.7.0+ ([migration guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4))
 - **JS/TS SDK:** v5.4.0+ ([migration guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5))
-- **Direct OpenTelemetry ingestion:** set `x-langfuse-ingestion-version: 4` on your OTEL span exporter ([real-time ingestion setup](/integrations/native/opentelemetry#real-time-ingestion))
+- **Direct OpenTelemetry ingestion:** follow the [custom ingestion migration guide](/integrations/native/opentelemetry/migration-to-v4) to set the [v4 header](/integrations/native/opentelemetry#real-time-ingestion), propagate context attributes, and move trace input/output to the root observation
 
 For SDK users, the key change is that `update_current_trace()` and `updateActiveTrace()` are replaced by `propagate_attributes()`, which automatically pushes attributes like `user_id`, `session_id`, `metadata`, `tags`, and request-scoped `environment` in the Python SDK to all child observations.
 
