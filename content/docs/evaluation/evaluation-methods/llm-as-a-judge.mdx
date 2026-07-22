@@ -139,7 +139,6 @@ At ingest time, each observation is evaluated against your filter criteria. Matc
 - Monitor toxicity scores on all customer-facing LLM generations
 - Track retrieval relevance for RAG systems by targeting document retrieval observations
 
-
 </Tab>
 
 <Tab>
@@ -238,7 +237,7 @@ With your evaluator and model selected, configure which data to run the evaluati
 - **When filtering by trace attributes**: To filter observations by trace-level attributes (`userId`, `sessionId`, `version`, `tags`, `metadata`, `traceName`), use [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes) in your instrumentation code. Without this, trace attributes will not be available on observations. If you do set up trace-level attribute filtering and are not propagating attributes to observations, your observations will not be matched by the evaluator.
 
 <Callout type="warning">
-**Deprecation of trace-level evaluators:** Trace-level evaluators are built on the old trace-centric data model and are deprecated; the removal deadline will be announced (see the [Langfuse v4 rollout timeline](/docs/v4#rollout-timeline)). Existing trace-level evaluators will continue to run until the deprecation timeline. After the deprecation timeline, the evaluators will stop producing results, and go stable. Multi-span evaluations will build on the new observation-centric data model. To move existing trace-level evaluators, follow the [upgrade guide](/faq/all/llm-as-a-judge-migration).
+**Deprecation of trace-level evaluators:** Trace-level evaluators are built on the old trace-centric data model and are deprecated; the removal deadline will be announced as part of [Langfuse v4](/docs/v4). Existing trace-level evaluators will continue to run until the deprecation timeline. After the deprecation timeline, the evaluators will stop producing results, and go stable. Multi-span evaluations will build on the new observation-centric data model. To move existing trace-level evaluators, follow the [upgrade guide](/faq/all/llm-as-a-judge-migration).
 </Callout>
 
 </Tab>
