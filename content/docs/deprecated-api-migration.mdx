@@ -218,22 +218,22 @@ The deprecated endpoint's filters map to v2 `filters` entries: `traceName` and `
 
 ### Parameter mapping
 
-| Deprecated (v1/v2)                                                 | v3 equivalent                                                                                                         |
-| ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| `page`                                                             | `cursor` (from the previous response's `meta`); `limit` max 100                                                       |
-| `GET /scores/{scoreId}`, `GET /v2/scores/{scoreId}`                | `id=<scoreId>` filter; there is no get-by-id endpoint in v3                                                           |
-| `value` + `stringValue` (split by type)                            | Single `value` field, typed by `dataType`                                                                             |
-| `operator` + `value` (numeric comparison)                          | `valueMin` / `valueMax` (inclusive bounds, require `dataType=NUMERIC`)                                                |
-| `datasetRunId`                                                     | `experimentId`                                                                                                        |
-| `fromTimestamp`, `toTimestamp`                                     | Unchanged names, but `fromTimestamp` is now inclusive and `toTimestamp` exclusive                                     |
-| `userId`, `traceTags`                                              | Removed; for trace-level score questions, use the [Metrics API v2](/docs/metrics/features/metrics-api#v2) score views |
-| `name`, `source`, `dataType`, `environment`, `configId`, `queueId` | Unchanged, and now accept comma-separated lists (OR within a parameter, AND across parameters)                        |
+| Deprecated (v1/v2)                                                                                 | v3 equivalent          |
+| -------------------------------------------------------------------------------------------------- | ---------------------- |
+| `page`                                                                                             | `cursor`               |
+| `GET /scores/{scoreId}`, `GET /v2/scores/{scoreId}`                                                | `id=<scoreId>` filter  |
+| `value` + `stringValue`                                                                            | Single typed `value`   |
+| `operator` + `value`                                                                               | `valueMin`, `valueMax` |
+| `datasetRunId`                                                                                     | `experimentId`         |
+| `userId`, `traceTags`                                                                              | Removed                |
+| `fromTimestamp`, `toTimestamp`, `name`, `source`, `dataType`, `environment`, `configId`, `queueId` | Unchanged              |
 
 ### Semantic differences
 
 - **One typed `value` field.** `NUMERIC` scores return a number, `BOOLEAN` scores a boolean, and `CATEGORICAL`/`TEXT`/`CORRECTION` scores a string; no more parallel `value`/`stringValue` fields.
 - **Field groups.** Core fields are always returned; request more via `fields=details,subject,annotation`. The `subject` group replaces the flat `traceId`/`observationId`/`sessionId`/`datasetRunId` response fields with one object describing what the score is attached to (`kind`: `trace`, `observation`, `session`, or `experiment`).
-- Use at most one of the `traceId`, `sessionId`, and `experimentId` filters; they cannot be combined. `observationId` requires `traceId` alongside it (observation IDs are scoped to a trace).
+- **Cursor pagination.** `cursor` comes from the previous response's `meta`; `limit` max 100. There is no get-by-id endpoint in v3; fetch single scores via the `id` filter.
+- **Filters.** `name`, `source`, `dataType`, `environment`, `configId`, and `queueId` accept comma-separated lists (OR within a parameter, AND across parameters). `valueMin`/`valueMax` are inclusive bounds and require `dataType=NUMERIC`. `userId` and `traceTags` are removed; for trace-level score questions, use the [Metrics API v2](/docs/metrics/features/metrics-api#v2) score views. Use at most one of `traceId`, `sessionId`, and `experimentId`; `observationId` requires `traceId` alongside it (observation IDs are scoped to a trace).
 - `fromTimestamp` is inclusive; `toTimestamp` is exclusive.
 
 ### Example
