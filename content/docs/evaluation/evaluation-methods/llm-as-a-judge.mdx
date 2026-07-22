@@ -76,13 +76,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
       </CardContent>
     </Card>
 
-    <Card className="border">
-      <CardContent className="p-3">
-        <div className="font-semibold text-sm">Traces <span className="text-xs font-normal opacity-70">(Legacy)</span></div>
-        <div className="text-xs text-muted-foreground mt-1">Complete workflow executions</div>
-      </CardContent>
-    </Card>
-
   </div>
 </div>
 
@@ -121,9 +114,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 Evaluate live production traffic to monitor your LLM application performance in real-time.
 
-<Tabs items={["Observations (Recommended)", "Traces (Legacy)"]}>
-<Tab>
-
 Run evaluators on individual observations within your traces—such as LLM calls, retrieval operations, embedding generations, or tool calls.
 
 #### Context available to observation-level evaluators [#observation-evaluator-context]
@@ -149,35 +139,6 @@ At ingest time, each observation is evaluated against your filter criteria. Matc
 - Monitor toxicity scores on all customer-facing LLM generations
 - Track retrieval relevance for RAG systems by targeting document retrieval observations
 
-</Tab>
-
-<Tab>
-
-Run evaluators on complete traces, evaluating entire workflow executions from start to finish.
-
-<Callout type="warning">
-Trace-level LLM-as-a-Judge evaluators are legacy. Migrate to observation-level evaluators and put the data the judge needs on the target observation.
-</Callout>
-
-<Callout type="info">
-**Consider targeting Observations instead**: Observation-level evaluators complete in seconds (vs minutes for trace-level), eliminating evaluation delays. They also offer better precision for production monitoring. See [upgrade guide](/faq/all/llm-as-a-judge-migration).
-</Callout>
-
-**Why target Traces**
-
-- Your evaluation requires full context spanning multiple operations
-- You're on legacy SDK versions (Python v2 or JS/TS v3) and cannot upgrade
-
-**Data Flow**
-
-At ingest time, each trace is evaluated against your filter criteria. Matching traces are added to an evaluation queue and processed asynchronously. Scores are attached to the trace itself, resulting in one score per trace per evaluator.
-
-**Example Use Cases**
-
-- Score the accuracy of a multi-step agent workflow, if and only if evaluator needs full context spanning multiple operations (e.g., retrieval → reranking → generation → citation)
-
-</Tab>
-</Tabs>
 
 </Tab>
 
@@ -277,7 +238,7 @@ With your evaluator and model selected, configure which data to run the evaluati
 - **When filtering by trace attributes**: To filter observations by trace-level attributes (`userId`, `sessionId`, `version`, `tags`, `metadata`, `traceName`), use [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes) in your instrumentation code. Without this, trace attributes will not be available on observations. If you do set up trace-level attribute filtering and are not propagating attributes to observations, your observations will not be matched by the evaluator.
 
 <Callout type="warning">
-**Deprecation of trace-level evaluators:** Trace-level evaluators are built on the old trace-centric data model and are deprecated; the removal deadline will be announced (see the [Langfuse v4 rollout timeline](/docs/v4#rollout-timeline)). Multi-span evaluations will build on the new observation-centric data model. To move existing trace-level evaluators, follow the [upgrade guide](/faq/all/llm-as-a-judge-migration).
+**Deprecation of trace-level evaluators:** Trace-level evaluators are built on the old trace-centric data model and are deprecated; the removal deadline will be announced (see the [Langfuse v4 rollout timeline](/docs/v4#rollout-timeline)). Existing trace-level evaluators will continue to run until the deprecation timeline. After the deprecation timeline, the evaluators will stop producing results, and go stable. Multi-span evaluations will build on the new observation-centric data model. To move existing trace-level evaluators, follow the [upgrade guide](/faq/all/llm-as-a-judge-migration).
 </Callout>
 
 </Tab>
