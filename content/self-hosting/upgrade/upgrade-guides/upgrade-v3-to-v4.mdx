@@ -104,6 +104,18 @@ Metrics, replaced by the [Metrics API v2](/docs/metrics/features/metrics-api#v2)
 | `GET /api/public/metrics`       | Returns `404`  |
 | `GET /api/public/metrics/daily` | Returns `404`  |
 
+Dataset runs, replaced by the [experiments API](https://api.reference.langfuse.com/#tag/experiments) (`GET /api/public/experiments`, `GET /api/public/experiment-items`) for reads and the [Experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk) for writes.
+
+| Endpoint                                          | Behavior on v4 |
+| ------------------------------------------------- | -------------- |
+| `POST /api/public/dataset-run-items`              | Returns `404`  |
+| `GET /api/public/dataset-run-items`               | Returns `404`  |
+| `GET /api/public/datasets/:name/runs`             | Returns `404`  |
+| `GET /api/public/datasets/:name/runs/:runName`    | Returns `404`  |
+| `DELETE /api/public/datasets/:name/runs/:runName` | Returns `404`  |
+
+Create experiment data with the Experiment runner SDK (Python and JS/TS), which applies the required experiment semantics automatically; from other languages, send experiment traces to `POST /api/public/otel/v1/traces` with the [experiment attributes](/integrations/native/opentelemetry#experiments-ingesting-experiment-spans) set.
+
 ### Evaluations [#evaluations]
 
 Trace-based and legacy-dataset-based LLM-as-a-Judge evaluators perform lookups on the old tables. They are marked as `Legacy` in the UI, keep working during the `legacy` and `dual` write phases, and stop running after the [cutover](#cutover) to `events_only`. Migrate them to observation-level evaluators before the cutover; see the [evaluator upgrade guide](/faq/all/llm-as-a-judge-migration).
