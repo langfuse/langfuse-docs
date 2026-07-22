@@ -1,3 +1,3 @@
 **Evaluators**
 
-Migrate trace-level LLM-as-a-judge evaluators to the [observation level](/faq/all/llm-as-a-judge-migration).
+Upgrade trace-level LLM-as-a-judge evaluators to the [observation level](/faq/all/llm-as-a-judge-migration). If an existing evaluator reads trace input or output, keep supplying those values with the deprecated trace I/O methods (`set_current_trace_io()` or `span.set_trace_io()` in Python; `setActiveTraceIO()` or `span.setTraceIO()` in JS/TS) until the new evaluator is validated. Any future multi-span support will also use the observation-centric model.
