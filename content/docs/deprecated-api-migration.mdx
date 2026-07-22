@@ -20,15 +20,18 @@ This page is also served as plain markdown at `https://langfuse.com/docs/depreca
 
 ## Quick reference [#quick-reference]
 
-| Deprecated endpoint                                                                   | Replacement                                     | Details                       |
-| ------------------------------------------------------------------------------------- | ----------------------------------------------- | ----------------------------- |
-| `GET /observations`, `GET /observations/{id}`                                         | `GET /v2/observations`                          | [Observations](#observations) |
-| `GET /traces`, `GET /traces/{id}`                                                     | `GET /v2/observations`, filtered by `traceId`   | [Traces](#traces)             |
-| `GET /sessions`, `GET /sessions/{id}`                                                 | `GET /v2/observations`, filtered by `sessionId` | [Sessions](#sessions)         |
-| `GET /metrics`, `GET /metrics/daily`                                                  | `GET /v2/metrics`                               | [Metrics](#metrics)           |
-| `GET /scores`, `GET /scores/{id}`, `GET /v2/scores`, `GET /v2/scores/{id}`            | `GET /v3/scores`                                | [Scores](#scores)             |
-| `GET /datasets/{name}/runs`, `GET /datasets/{name}/runs/{runName}`                    | `GET /experiments`, `GET /experiment-items`     | [Dataset runs](#dataset-runs) |
-| `POST /ingestion`, `POST /traces`, `POST /spans`, `POST /generations`, `POST /events` | `POST /otel/v1/traces` (OTLP/HTTP)              | [Ingestion](#ingestion)       |
+| Deprecated endpoint                                                                   | Replacement                                                                | Details                       |
+| ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ----------------------------- |
+| `GET /observations`, `GET /observations/{id}`                                         | `GET /v2/observations`                                                     | [Observations](#observations) |
+| `GET /traces`, `GET /traces/{id}`                                                     | `GET /v2/observations`, filtered by `traceId`                              | [Traces](#traces)             |
+| `GET /sessions`, `GET /sessions/{id}`                                                 | `GET /v2/observations`, filtered by `sessionId`                            | [Sessions](#sessions)         |
+| `GET /metrics`, `GET /metrics/daily`                                                  | `GET /v2/metrics`                                                          | [Metrics](#metrics)           |
+| `GET /scores`, `GET /scores/{id}`, `GET /v2/scores`, `GET /v2/scores/{id}`            | `GET /v3/scores`                                                           | [Scores](#scores)             |
+| `GET /datasets/{name}/runs`, `GET /datasets/{name}/runs/{runName}`                    | `GET /experiments`, then `GET /experiment-items`                           | [Dataset runs](#dataset-runs) |
+| `GET /dataset-run-items`                                                              | `GET /experiment-items`                                                    | [Dataset runs](#dataset-runs) |
+| `DELETE /datasets/{name}/runs/{runName}`                                              | No direct replacement; `DELETE /traces` removes the underlying trace data  | [Dataset runs](#dataset-runs) |
+| `POST /dataset-run-items`                                                             | Experiment runner SDK or `POST /otel/v1/traces` with experiment attributes | [Dataset runs](#dataset-runs) |
+| `POST /ingestion`, `POST /traces`, `POST /spans`, `POST /generations`, `POST /events` | `POST /otel/v1/traces` (OTLP/HTTP)                                         | [Ingestion](#ingestion)       |
 
 All paths are relative to `/api/public`.
 
@@ -249,25 +252,48 @@ curl \
 
 ## Dataset runs → Experiments [#dataset-runs]
 
-**Deprecated:** `GET /datasets/{datasetName}/runs`, `GET /datasets/{datasetName}/runs/{runName}`.
+**Deprecated:**
 
-**Replacement:** [`GET /experiments`](https://api.reference.langfuse.com/#tag/experiments) and `GET /experiment-items`. "Dataset run" and "experiment" refer to the same concept; Langfuse is standardizing on "experiment" ([terminology note](/faq/all/retrieve-experiment-scores)).
+- `GET /datasets/{datasetName}/runs`
+- `GET /datasets/{datasetName}/runs/{runName}`
+- `GET /dataset-run-items`
+- `DELETE /datasets/{datasetName}/runs/{runName}`
+- `POST /dataset-run-items`
+
+"Dataset run" and "experiment" refer to the same concept; Langfuse is standardizing on "experiment" ([terminology note](/faq/all/retrieve-experiment-scores)).
+
+### Read experiment data
+
+Use [`GET /experiments`](https://api.reference.langfuse.com/#tag/experiments) to list experiments or find one by its dataset ID and name. Use `GET /experiment-items?experimentId=<id>` to retrieve the items belonging to an experiment.
 
 ### Parameter mapping
 
-| Deprecated                               | v4 equivalent                                                           |
-| ---------------------------------------- | ----------------------------------------------------------------------- |
-| `{datasetName}` path segment             | `datasetId` filter; resolve the ID via `GET /v2/datasets/{datasetName}` |
-| `{runName}` path segment                 | `name` filter on `GET /experiments`                                     |
-| Run items (embedded in the run response) | `GET /experiment-items?experimentId=<id>`                               |
-| `page`                                   | `cursor`; `limit` max 100                                               |
-| -                                        | `fromStartTime` (**required** on both endpoints), `toStartTime`         |
+| Deprecated                                             | v4 equivalent                                                           |
+| ------------------------------------------------------ | ----------------------------------------------------------------------- |
+| `{datasetName}` path segment                           | `datasetId` filter; resolve the ID via `GET /v2/datasets/{datasetName}` |
+| `{runName}` path segment                               | `name` filter on `GET /experiments`                                     |
+| Run items embedded in the run response                 | `GET /experiment-items?experimentId=<id>`                               |
+| `GET /dataset-run-items?datasetId=<id>&runName=<name>` | Resolve the experiment with `GET /experiments`, then list its items     |
+| `page`                                                 | `cursor`; `limit` max 100                                               |
+| -                                                      | `fromStartTime` (**required** on both endpoints), `toStartTime`         |
 
 ### Semantic differences
 
 - Unlike the other deprecated reads, the dataset run reads keep working on Langfuse v4. Migrate for the richer experiments model, not because the endpoints disappear.
 - Experiments are queried by dataset **ID**, not name.
 - Item inputs, outputs, and expected outputs are behind the `fields=io` group on `GET /experiment-items`; scores are behind `fields=scores` on both endpoints. This replaces the old workaround of fetching each run item's trace to collect scores.
+
+### Create experiment data
+
+For Python and JS/TS, use the [Experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk). It applies the required experiment semantics automatically and is the recommended replacement for `POST /dataset-run-items`.
+
+For other languages, send experiment traces to [`POST /otel/v1/traces`](https://api.reference.langfuse.com/#tag/opentelemetry/POST/api/public/otel/v1/traces) and apply the [required experiment attributes](/integrations/native/opentelemetry#experiments-ingesting-experiment-spans).
+
+### Delete experiment data
+
+Langfuse v4 does not provide an endpoint that deletes only an experiment. To delete its tracing data, list the experiment items with `GET /experiment-items?fromStartTime=<timestamp>&experimentId=<id>`, collect their `traceId` values, and pass them to [`DELETE /traces`](https://api.reference.langfuse.com/#tag/trace/DELETE/api/public/traces). The trace deletion endpoint is not deprecated.
+
+This is not semantically equivalent to the deprecated endpoint: deleting the traces also deletes their observations and related scores. See [Data Deletion](/docs/administration/data-deletion) for details.
 
 ### Example
 
