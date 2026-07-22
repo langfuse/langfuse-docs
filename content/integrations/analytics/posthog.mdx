@@ -86,57 +86,61 @@ Is there any additional information that would be helpful? You can request more 
 
 One event per observation, covering every observation type.
 
-- `timestamp`: The start time of the observation.
-- `langfuse_observation_name`: The name of the observation.
-- `langfuse_type`: The observation type: `GENERATION`, `SPAN`, `EVENT`, `AGENT`, `TOOL`, `CHAIN`, `RETRIEVER`, `EVALUATOR`, `EMBEDDING`, or `GUARDRAIL`.
-- `langfuse_trace_name`: Name of the trace related to the observation.
-- `langfuse_trace_id`: The unique identifier of the trace related to the observation.
-- `langfuse_url`: The URL of the observation on the host platform.
-- `langfuse_user_url`: Deeplink to the user profile in Langfuse.
-- `langfuse_id`: Unique identifier of the observation.
-- `langfuse_cost_usd`: Computed total cost of the observation.
-- `langfuse_input_units`: Number of tokens utilized in prompting (for LLM calls).
-- `langfuse_output_units`: Number of tokens produced (for LLM calls).
-- `langfuse_total_units`: Total number of tokens consumed (for LLM calls).
-- `langfuse_session_id`: The session ID associated with the trace of the observation.
-- `langfuse_project_id`: The ID of the project where the observation happened.
-- `langfuse_project_name`: The name of the project where the observation happened.
-- `langfuse_user_id`: The user ID that started the trace linked to the observation. In case it's unavailable, it defaults to `langfuse_unknown_user`.
-- `langfuse_latency`: The observed latency of the observation.
-- `langfuse_time_to_first_token`: The time taken to generate the first token when streaming.
-- `langfuse_release`: Release information of the trace attached with the observation.
-- `langfuse_version`: The versioning info about the observation.
-- `langfuse_model`: The model used (for LLM calls).
-- `langfuse_level`: The level associated with the observation.
-- `langfuse_tags`: Any tags attached to the trace of the observation.
-- `langfuse_environment`: The environment associated with the observation.
-- `langfuse_event_version`: The integration version with Langfuse.
+| Property                       | Description                                                                                                                           |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `timestamp`                    | The start time of the observation.                                                                                                    |
+| `langfuse_observation_name`    | The name of the observation.                                                                                                          |
+| `langfuse_type`                | The observation type: `GENERATION`, `SPAN`, `EVENT`, `AGENT`, `TOOL`, `CHAIN`, `RETRIEVER`, `EVALUATOR`, `EMBEDDING`, or `GUARDRAIL`. |
+| `langfuse_trace_name`          | Name of the trace related to the observation.                                                                                         |
+| `langfuse_trace_id`            | The unique identifier of the trace related to the observation.                                                                        |
+| `langfuse_url`                 | The URL of the observation on the host platform.                                                                                      |
+| `langfuse_user_url`            | Deeplink to the user profile in Langfuse.                                                                                             |
+| `langfuse_id`                  | Unique identifier of the observation.                                                                                                 |
+| `langfuse_cost_usd`            | Computed total cost of the observation.                                                                                               |
+| `langfuse_input_units`         | Number of tokens utilized in prompting (for LLM calls).                                                                               |
+| `langfuse_output_units`        | Number of tokens produced (for LLM calls).                                                                                            |
+| `langfuse_total_units`         | Total number of tokens consumed (for LLM calls).                                                                                      |
+| `langfuse_session_id`          | The session ID associated with the trace of the observation.                                                                          |
+| `langfuse_project_id`          | The ID of the project where the observation happened.                                                                                 |
+| `langfuse_project_name`        | The name of the project where the observation happened.                                                                               |
+| `langfuse_user_id`             | The user ID that started the trace linked to the observation. In case it's unavailable, it defaults to `langfuse_unknown_user`.       |
+| `langfuse_latency`             | The observed latency of the observation.                                                                                              |
+| `langfuse_time_to_first_token` | The time taken to generate the first token when streaming.                                                                            |
+| `langfuse_release`             | Release information of the trace attached with the observation.                                                                       |
+| `langfuse_version`             | The versioning info about the observation.                                                                                            |
+| `langfuse_model`               | The model used (for LLM calls).                                                                                                       |
+| `langfuse_level`               | The level associated with the observation.                                                                                            |
+| `langfuse_tags`                | Any tags attached to the trace of the observation.                                                                                    |
+| `langfuse_environment`         | The environment associated with the observation.                                                                                      |
+| `langfuse_event_version`       | The integration version with Langfuse.                                                                                                |
 
 #### Event: `langfuse score` [#event-score]
 
 One event per score. Score events are identical across all export sources.
 
-- `timestamp`: The time when the score event occurred.
-- `langfuse_score_name`: The name associated with the score.
-- `langfuse_score_value`: The value of the score.
-- `langfuse_score_string_value`: The string value of the score. For BOOLEAN and CATEGORICAL scores, this will be the string representation of the value.
-- `langfuse_score_data_type`: The data type of the score (NUMERIC, BOOLEAN, CATEGORICAL).
-- `langfuse_score_comment`: Any comments attached with the score.
-- `langfuse_score_metadata`: Any metadata attached with the score.
-- `langfuse_score_entity_type`: The entity the score is attached to: `trace`, `session`, `dataset_run`, or `unknown`.
-- `langfuse_dataset_run_id`: The unique identifier of the dataset run, for scores attached to a dataset run.
-- `langfuse_trace_name`: The name of the trace associated with the score.
-- `langfuse_trace_id`: The unique identifier of the trace associated with the score.
-- `langfuse_user_url`: Deeplink to the user profile in Langfuse.
-- `langfuse_id`: The unique identification of the score.
-- `langfuse_session_id`: The session identification related to the score's trace.
-- `langfuse_project_id`: The project identification linked with the score's trace.
-- `langfuse_project_name`: The name of the project linked with the score's trace.
-- `langfuse_user_id`: The user ID that triggered the trace tied with the score. If not available, defaults to `langfuse_unknown_user`.
-- `langfuse_release`: The release information of the trace associated with the score.
-- `langfuse_tags`: Any tags related to the trace of the score.
-- `langfuse_environment`: The environment associated with the score.
-- `langfuse_event_version`: The integration version with Langfuse.
+| Property                      | Description                                                                                                             |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `timestamp`                   | The time when the score event occurred.                                                                                 |
+| `langfuse_score_name`         | The name associated with the score.                                                                                     |
+| `langfuse_score_value`        | The value of the score.                                                                                                 |
+| `langfuse_score_string_value` | The string value of the score. For BOOLEAN and CATEGORICAL scores, this will be the string representation of the value. |
+| `langfuse_score_data_type`    | The data type of the score (NUMERIC, BOOLEAN, CATEGORICAL).                                                             |
+| `langfuse_score_comment`      | Any comments attached with the score.                                                                                   |
+| `langfuse_score_metadata`     | Any metadata attached with the score.                                                                                   |
+| `langfuse_score_entity_type`  | The entity the score is attached to: `trace`, `session`, `dataset_run`, or `unknown`.                                   |
+| `langfuse_dataset_run_id`     | The unique identifier of the dataset run, for scores attached to a dataset run.                                         |
+| `langfuse_trace_name`         | The name of the trace associated with the score.                                                                        |
+| `langfuse_trace_id`           | The unique identifier of the trace associated with the score.                                                           |
+| `langfuse_user_url`           | Deeplink to the user profile in Langfuse.                                                                               |
+| `langfuse_id`                 | The unique identification of the score.                                                                                 |
+| `langfuse_session_id`         | The session identification related to the score's trace.                                                                |
+| `langfuse_project_id`         | The project identification linked with the score's trace.                                                               |
+| `langfuse_project_name`       | The name of the project linked with the score's trace.                                                                  |
+| `langfuse_user_id`            | The user ID that triggered the trace tied with the score. If not available, defaults to `langfuse_unknown_user`.        |
+| `langfuse_release`            | The release information of the trace associated with the score.                                                         |
+| `langfuse_tags`               | Any tags related to the trace of the score.                                                                             |
+| `langfuse_environment`        | The environment associated with the score.                                                                              |
+| `langfuse_event_version`      | The integration version with Langfuse.                                                                                  |
 
 ## Legacy export sources [#export-source]
 
@@ -178,52 +182,56 @@ For rollout details, see the [Simplify for Scale changelog](/changelog/2026-03-1
 
 Sent only by the legacy export sources. There is no enriched equivalent — see [changes from legacy to enriched events](#legacy-vs-enriched).
 
-- `timestamp`: The time the event occurred.
-- `langfuse_trace_name`: The name of the trace.
-- `langfuse_url`: The URL of the trace.
-- `langfuse_user_url`: Deeplink to the user profile in Langfuse.
-- `langfuse_id`: The unique identification of the trace.
-- `langfuse_cost_usd`: The total cost associated with the trace.
-- `langfuse_count_observations`: The number of observations in the trace.
-- `langfuse_session_id`: The session ID related to the event.
-- `langfuse_project_id`: An ID associated with the project related to the event.
-- `langfuse_project_name`: The name of the project related to the event.
-- `langfuse_user_id`: User ID related to the event. If it's null, it's marked as langfuse_unknown_user.
-- `langfuse_latency`: The latency of the event.
-- `langfuse_release`: Information relating to the event release.
-- `langfuse_version`: The version of the event.
-- `langfuse_tags`: Any tags associated with the event.
-- `langfuse_environment`: The environment associated with the trace.
-- `langfuse_event_version`: The integration version of Langfuse.
+| Property                      | Description                                                                       |
+| ----------------------------- | --------------------------------------------------------------------------------- |
+| `timestamp`                   | The time the event occurred.                                                      |
+| `langfuse_trace_name`         | The name of the trace.                                                            |
+| `langfuse_url`                | The URL of the trace.                                                             |
+| `langfuse_user_url`           | Deeplink to the user profile in Langfuse.                                         |
+| `langfuse_id`                 | The unique identification of the trace.                                           |
+| `langfuse_cost_usd`           | The total cost associated with the trace.                                         |
+| `langfuse_count_observations` | The number of observations in the trace.                                          |
+| `langfuse_session_id`         | The session ID related to the event.                                              |
+| `langfuse_project_id`         | An ID associated with the project related to the event.                           |
+| `langfuse_project_name`       | The name of the project related to the event.                                     |
+| `langfuse_user_id`            | User ID related to the event. If it's null, it's marked as langfuse_unknown_user. |
+| `langfuse_latency`            | The latency of the event.                                                         |
+| `langfuse_release`            | Information relating to the event release.                                        |
+| `langfuse_version`            | The version of the event.                                                         |
+| `langfuse_tags`               | Any tags associated with the event.                                               |
+| `langfuse_environment`        | The environment associated with the trace.                                        |
+| `langfuse_event_version`      | The integration version of Langfuse.                                              |
 
 ### Event: `langfuse generation` [#event-generation]
 
 Sent only by the legacy export sources. Only covers observations of type generation; replaced by [`langfuse observation`](#event-observation) in the enriched source.
 
-- `timestamp`: The start time of the generation.
-- `langfuse_generation_name`: The name of the generation.
-- `langfuse_trace_name`: Name of the trace related to the generation.
-- `langfuse_trace_id`: The unique identifier of the trace related to the generation.
-- `langfuse_url`: The URL of the generation on the host platform.
-- `langfuse_user_url`: Deeplink to the user profile in Langfuse.
-- `langfuse_id`: Unique identifier of the generation.
-- `langfuse_cost_usd`: Computed total cost of the generation.
-- `langfuse_input_units`: Number of tokens utilized in prompting the generation.
-- `langfuse_output_units`: Number of tokens produced by the generation.
-- `langfuse_total_units`: Total number of tokens consumed in the generation process.
-- `langfuse_session_id`: The session ID associated with the trace of the generation.
-- `langfuse_project_id`: The project identification where the generation happened.
-- `langfuse_project_name`: The name of the project where the generation happened.
-- `langfuse_user_id`: The user ID that started the trace linked to the generation. In case it's unavailable, it defaults to `langfuse_unknown_user`.
-- `langfuse_latency`: The observed latency of the generation.
-- `langfuse_time_to_first_token`: The time taken to generate the first token when streaming.
-- `langfuse_release`: Release information of the trace attached with the generation.
-- `langfuse_version`: The versioning info about the generation.
-- `langfuse_model`: The model used during this generation's process.
-- `langfuse_level`: The level associated with the generation.
-- `langfuse_tags`: Any tags attached to the trace of the generation.
-- `langfuse_environment`: The environment associated with the generation.
-- `langfuse_event_version`: The integration version with Langfuse.
+| Property                       | Description                                                                                                                    |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `timestamp`                    | The start time of the generation.                                                                                              |
+| `langfuse_generation_name`     | The name of the generation.                                                                                                    |
+| `langfuse_trace_name`          | Name of the trace related to the generation.                                                                                   |
+| `langfuse_trace_id`            | The unique identifier of the trace related to the generation.                                                                  |
+| `langfuse_url`                 | The URL of the generation on the host platform.                                                                                |
+| `langfuse_user_url`            | Deeplink to the user profile in Langfuse.                                                                                      |
+| `langfuse_id`                  | Unique identifier of the generation.                                                                                           |
+| `langfuse_cost_usd`            | Computed total cost of the generation.                                                                                         |
+| `langfuse_input_units`         | Number of tokens utilized in prompting the generation.                                                                         |
+| `langfuse_output_units`        | Number of tokens produced by the generation.                                                                                   |
+| `langfuse_total_units`         | Total number of tokens consumed in the generation process.                                                                     |
+| `langfuse_session_id`          | The session ID associated with the trace of the generation.                                                                    |
+| `langfuse_project_id`          | The project identification where the generation happened.                                                                      |
+| `langfuse_project_name`        | The name of the project where the generation happened.                                                                         |
+| `langfuse_user_id`             | The user ID that started the trace linked to the generation. In case it's unavailable, it defaults to `langfuse_unknown_user`. |
+| `langfuse_latency`             | The observed latency of the generation.                                                                                        |
+| `langfuse_time_to_first_token` | The time taken to generate the first token when streaming.                                                                     |
+| `langfuse_release`             | Release information of the trace attached with the generation.                                                                 |
+| `langfuse_version`             | The versioning info about the generation.                                                                                      |
+| `langfuse_model`               | The model used during this generation's process.                                                                               |
+| `langfuse_level`               | The level associated with the generation.                                                                                      |
+| `langfuse_tags`                | Any tags attached to the trace of the generation.                                                                              |
+| `langfuse_environment`         | The environment associated with the generation.                                                                                |
+| `langfuse_event_version`       | The integration version with Langfuse.                                                                                         |
 
 ## Troubleshooting
 
