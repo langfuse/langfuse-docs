@@ -160,45 +160,7 @@ Everyone still sending trace, span, or generation events to the legacy `POST /ap
 
 ### Self-hosted deployments [#self-hosted]
 
-**No forced deadline.** v3 continues to receive security patches. Upgrade at your own pace, in this order:
-
-<Steps>
-
-<Step>
-
-**Ingestion**
-
-Upgrade SDKs first: [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) (≥ 4.7.0) / [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5) (≥ 5.4.0). On a v4 server, Python SDK v3 and JS SDK v4 keep tracing but data appears with up to a 10-minute delay, and their v1 read APIs (`api.*`) no longer work. Python SDK v2 and JS SDK v3 cannot send traces to a v4 server at all.
-
-</Step>
-
-<Step>
-
-<V4StepEvaluators />
-
-</Step>
-
-<Step>
-
-<V4StepExports />
-
-</Step>
-
-<Step>
-
-**Server**
-
-Upgrade from v3 to v4 following the [upgrade documentation](/self-hosting/upgrade). The v4 UI ships with the server; no toggle is needed.
-
-</Step>
-
-<Step>
-
-<V4StepReadApis />
-
-</Step>
-
-</Steps>
+**No forced deadline.** v3 continues to receive security patches, and breaking removals only happen in major server releases. Follow the [GitHub discussion](https://github.com/orgs/langfuse/discussions/14157) for the self-hosted v4 go-live date; the migration guide for self-hosted deployments ships with the release. Until then, the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) shows what each server version supports.
 
 ## What changed [#what-changed]
 
