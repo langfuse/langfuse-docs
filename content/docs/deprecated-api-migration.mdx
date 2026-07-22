@@ -262,6 +262,17 @@ curl \
 
 "Dataset run" and "experiment" refer to the same concept; Langfuse is standardizing on "experiment" ([terminology note](/faq/all/retrieve-experiment-scores)).
 
+<Callout type="info">
+  **Legacy dataset endpoints:** `GET /api/public/datasets` and
+  `GET /api/public/datasets/{name}` were replaced by their
+  `/api/public/v2/datasets` equivalents independently of this dataset-run
+  migration. Python SDK `v2.37.0+` and JS/TS SDK `v4.0.0+` use the v2 endpoints;
+  direct API integrations should migrate to v2 as well. The additional `runs`
+  property returned by the legacy endpoints does not include v4 experiments.
+  Use `GET /experiments` to list experiments. Other dataset response fields
+  remain current.
+</Callout>
+
 ### Read experiment data
 
 Use [`GET /experiments`](https://api.reference.langfuse.com/#tag/experiments) to list experiments or find one by its dataset ID and name. Use `GET /experiment-items?experimentId=<id>` to retrieve the items belonging to an experiment.
@@ -279,7 +290,6 @@ Use [`GET /experiments`](https://api.reference.langfuse.com/#tag/experiments) to
 
 ### Semantic differences
 
-- Unlike the other deprecated reads, the dataset run reads keep working on Langfuse v4. Migrate for the richer experiments model, not because the endpoints disappear.
 - Experiments are queried by dataset **ID**, not name.
 - Item inputs, outputs, and expected outputs are behind the `fields=io` group on `GET /experiment-items`; scores are behind `fields=scores` on both endpoints. This replaces the old workaround of fetching each run item's trace to collect scores.
 
