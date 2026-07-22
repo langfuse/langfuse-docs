@@ -739,12 +739,13 @@ Scores are fetched from the source via the v3 Scores API (`api.scores_v3.get_man
 Compared to the older v2 endpoint, the v3 API differs in three ways that matter here:
 
 - **Cursor pagination** — pass the opaque `meta.cursor` back until it is empty, instead of counting pages.
-- **Single `subject`** — each score references its target through one `subject` object (`kind` + `id`) instead of flat `trace_id` / `observation_id` / `session_id` / `dataset_run_id` fields. Dataset runs are called *experiments* in v3, so `kind="experiment"` maps back to `dataset_run_id` on the write path. Rare legacy scores carrying two subject links (e.g. both a trace and a session) surface only one of them in v3 — the previous flow failed to re-create those scores entirely, so nothing regresses.
+- **Single `subject`** — each score references its target through one `subject` object (`kind` + `id`) instead of flat `trace_id` / `observation_id` / `session_id` / `dataset_run_id` fields. Dataset runs are called *experiments* in v3. Rare legacy scores carrying two subject links (e.g. both a trace and a session) surface only one of them in v3 — the previous flow failed to re-create those scores entirely, so nothing regresses.
 - **Typed `value`** — `value` follows the score's `data_type` (number for NUMERIC, boolean for BOOLEAN, string for CATEGORICAL and other types) instead of always being numeric alongside a separate `string_value`.
 
 A few behavioral notes:
 
 - v2 silently dropped scores whose trace no longer exists, while v3 returns them. If slightly more scores migrate than the v2 flow used to transfer, these previously hidden scores are now carried over — an improvement, not a loss.
+- Scores attached to dataset runs (`kind="experiment"`) are skipped by this section: the destination assigns new run ids when Section 6 re-creates the runs, so the source run id would be a dangling reference. Migrate these scores after the destination runs exist, matching runs by name.
 - Score creation is asynchronous: a success response means the score was accepted for ingestion, not that it is already durably written. Verify the destination project once ingestion has caught up.
 - The create endpoint does not accept a timestamp, so migrated scores carry the migration time as their timestamp; source score timestamps cannot be preserved through the public API.
 
@@ -773,10 +774,16 @@ while True:
         to_timestamp=TO_TS,
     ))
     for s in resp.data:
+        # A null value must be caught before any conversion — the BOOLEAN
+        # branch below would otherwise turn a missing value into false.
+        if s.value is None:
+            skipped += 1
+            continue
+
         # Map the v3 subject back to the flat reference fields the create
-        # endpoint expects: exactly one of traceId / sessionId / datasetRunId,
-        # and observationId additionally requires traceId.
-        trace_id = observation_id = session_id = dataset_run_id = None
+        # endpoint expects: exactly one of traceId / sessionId, and
+        # observationId additionally requires traceId.
+        trace_id = observation_id = session_id = None
         kind = s.subject.kind if s.subject else None
         if kind == "trace":
             trace_id = s.subject.id
@@ -790,7 +797,11 @@ while True:
         elif kind == "session":
             session_id = s.subject.id
         elif kind == "experiment":  # v3 name for dataset runs
-            dataset_run_id = s.subject.id
+            # The subject id is the source project's run id; the destination
+            # assigns new run ids, so this reference cannot be carried over.
+            print(f"  skipping score {s.id} ({s.name}): dataset-run scores must be migrated after the destination runs exist")
+            skipped += 1
+            continue
         else:
             print(f"  skipping score {s.id} ({s.name}): unsupported subject kind {kind!r}")
             skipped += 1
@@ -813,10 +824,6 @@ while True:
             print(f"  passing through {s.data_type} score {s.id} ({s.name}) as-is")
             value = s.value
 
-        if value is None:
-            skipped += 1
-            continue
-
         try:
             # POST /api/public/scores. The endpoint accepts no timestamp, so
             # the migrated score is stamped with the migration time. Ingestion
@@ -829,7 +836,6 @@ while True:
                 trace_id=new_trace_id,
                 observation_id=new_obs_id,
                 session_id=session_id,
-                dataset_run_id=dataset_run_id,
                 comment=s.comment,
                 config_id=new_cfg_id,
                 metadata=s.metadata,
