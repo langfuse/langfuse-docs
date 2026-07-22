@@ -1,0 +1,290 @@
+---
+title: "LLM cost management: how to track, attribute, and control spend"
+description: "LLM cost management: track token spend accurately, attribute it to users and features, and control it with alerts. Pitfalls and how to solve them in Langfuse."
+tags: [guide]
+---
+
+# What is LLM cost management?
+
+LLM cost management is the practice of tracking what your application spends on model
+calls, attributing that spend to the users and features that caused it, and putting alerts
+and controls in place before an invoice surprises you. It differs from cloud cost management
+because LLM spend is computed per request from token counts and unit prices, and because the
+biggest cost errors are usually measurement errors, not usage.
+
+**TL;DR:** Work in four layers, in order: track costs accurately at the token level, attribute
+them to users, sessions, and features, set alerts on thresholds, and only then optimize.
+Most nasty surprises come from a short list of tracking pitfalls: the same call recorded
+twice through a gateway and an SDK, overlapping token buckets that double-count cached
+tokens, model names that fail to match a price entry, tiered pricing computed at a flat
+rate, and non-LLM telemetry inflating the observability bill itself. Fix measurement first;
+every downstream decision depends on it.
+
+## Why LLM cost management differs from cloud cost management [#llm-vs-cloud-cost-management]
+
+LLM costs behave differently from infrastructure costs in four ways:
+
+1. **Cost is computed, not just billed.** Cloud cost tools reconcile a provider invoice
+   after the fact. LLM cost is derivable per request from token counts and unit prices, so
+   you can measure it in real time, but only if the token counts and prices are right.
+2. **The billing dimensions are token buckets.** Providers price input, output, cached,
+   reasoning, and audio tokens differently, and add pricing tiers on top. A tracking system
+   that only knows "input" and "output" misprices modern models.
+3. **Spend is driven by application decisions.** Context length, retries, agent loops, and
+   prompt changes move the bill, not provisioned capacity. One prompt edit that doubles
+   context length doubles input cost overnight.
+4. **The attribution keys live in your application.** Useful breakdowns are per user, per
+   session, per feature, and per prompt version, not per VM or per resource tag. Only
+   instrumentation inside the application can supply those keys.
+
+There is also a third bill that teams forget: alongside the model providers and any
+[LLM gateway](/resources/engineering/llm-gateway), the observability pipeline itself has
+usage-based pricing. Cost management covers all three.
+
+## The four layers of LLM cost management [#four-layers]
+
+Each layer answers a different question, and each depends on the one before it:
+
+| Layer         | Question it answers                              | Failure mode if skipped                    |
+| ------------- | ------------------------------------------------ | ------------------------------------------ |
+| **Track**     | What did each model call cost?                   | Numbers that do not reconcile with invoices |
+| **Attribute** | Which user, session, or feature spent it?        | A total nobody can act on                  |
+| **Control**   | Will we notice a spike before the invoice?       | Surprise bills                             |
+| **Optimize**  | Where can we spend less without losing quality?  | Blind cuts that degrade output quality     |
+
+## Track costs accurately [#track-costs-accurately]
+
+Accurate tracking means every model call is recorded exactly once, with mutually exclusive
+token buckets and the price that was in effect when the call ran. There are two ways cost
+data enters an observability system: **ingested** from the provider response (the most
+accurate path, since the provider's own numbers are authoritative) or **inferred** from
+token counts and a model price list. In Langfuse, ingested usage and cost always take
+priority over inferred values; see the
+[token and cost tracking docs](/docs/observability/features/token-and-cost-tracking) for
+the full resolution logic.
+
+The pitfalls below account for most cost discrepancies we see reported by engineering teams.
+
+### Pitfall: the same call is recorded twice [#double-counted-costs]
+
+A single request can reach your observability backend from two places: your application SDK
+and your gateway's logging callback. If both paths write to the same project, the call
+appears as two generations and its cost counts twice in every aggregate. Pick one reporting
+path per request, or separate the paths into different projects or environments. The
+application-side path carries more context (agent steps, retrievals, tool calls), so when
+you have to choose, instrument the application and treat gateway logs as the traffic-level
+view.
+
+### Pitfall: token buckets overlap [#overlapping-usage-buckets]
+
+Cost inference multiplies each usage bucket by its unit price, so buckets must be mutually
+exclusive: a token counted in `input_cached_tokens` must not also be counted in `input`.
+Providers disagree here. OpenAI-style `prompt_tokens` includes cached tokens; Anthropic's
+`input_tokens` already excludes cache reads. If inclusive counts are stored as-is, cached
+tokens are priced twice and the tracked cost overstates the invoice.
+
+Langfuse enforces an [exclusive-buckets contract](/docs/observability/features/token-and-cost-tracking#usage-details-contract):
+its integrations and SDK wrappers convert provider counts for you, OpenTelemetry `gen_ai.usage.*`
+attributes are normalized at ingestion, and OpenAI-schema usage objects are recognized and
+converted. Two cases still need care:
+
+- Flat usage keys you pass yourself are stored verbatim, so subtract cached and detail
+  counts from the top-level counts exactly once before ingesting.
+- OpenAI-schema recognition is strict. If a gateway appends any extra key to the usage
+  object (some append a `cost` field), the object is silently treated as flat keys, without
+  the mapping and without the subtraction. Strip extra keys before ingesting.
+
+### Pitfall: the model name does not match a price [#model-name-matching]
+
+Cost inference looks up a price by the model string your instrumentation reports, and that
+string is often not the provider's catalog name. Gateways may prepend or strip provider
+prefixes (`anthropic/claude-sonnet-4-5` vs. `claude-sonnet-4-5`), Amazon Bedrock reports
+region-prefixed inference profile IDs or full ARNs, and fine-tuned models carry suffixes.
+A partial match can be worse than no match, because the string can match a similarly named
+entry and silently apply the wrong price. In Langfuse, models are matched via a regex `match_pattern`, and user-defined
+[custom model definitions](/docs/observability/features/token-and-cost-tracking#custom-model-definitions)
+take priority over the built-in list, so the fix is a custom definition whose pattern
+matches the exact string your traces report. Audit this by grouping cost by model name and
+checking for entries with usage but zero cost.
+
+### Pitfall: pricing is tiered or conditional [#tiered-pricing]
+
+Some providers charge different rates depending on request characteristics, most commonly
+context size: as of July 2026, Anthropic's Claude Sonnet 4.5 and Google's Gemini 2.5 Pro
+apply higher prices when a request exceeds 200K input tokens. A flat per-token multiplication
+underprices exactly the requests that cost the most. Langfuse models this with
+[pricing tiers](/docs/observability/features/token-and-cost-tracking#pricing-tiers): each
+tier has conditions (for example `input > 200000`) and its own per-usage-type prices, tiers
+are evaluated in priority order, and the default tier applies when no condition matches.
+
+### Pitfall: reasoning tokens are invisible to tokenizers [#reasoning-tokens]
+
+Reasoning models bill their internal reasoning tokens as output tokens, and those tokens
+never appear in the response text. Inferring usage by tokenizing input and output therefore
+undercounts, which is why Langfuse does not infer cost for reasoning models when no token
+counts are ingested. Always ingest the provider-reported usage for reasoning models; the
+maintained integrations do this automatically.
+
+### Pitfall: non-LLM telemetry inflates the observability bill [#non-llm-spans]
+
+The third bill deserves its own line item: observability platforms typically price by
+ingested volume, and OpenTelemetry makes it easy to send far more than you intend. Because
+OTel instrumentation shares one global TracerProvider, an existing pipeline can forward
+every HTTP request, database query, and health check into your LLM observability project,
+where each span counts toward [billable units](/docs/administration/billable-units).
+Several teams have been caught out by a surprise invoice this way. The Langfuse Python SDK
+v4+ and JS/TS SDK v5+ apply a default span filter that drops non-LLM spans automatically;
+on older SDKs, filter by instrumentation scope yourself. The
+[unwanted spans FAQ](/faq/all/unwanted-http-database-spans) shows how to diagnose and fix
+this in a few lines:
+
+```python
+# Python SDK v4+: the default filter keeps LLM spans and drops HTTP/DB/framework spans
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+```
+
+## Attribute costs to users, sessions, and features [#attribute-llm-costs]
+
+Attribution turns a total into a decision: "spend rose 40% because power users of feature X
+switched to the long-context model" is actionable, "spend rose 40%" is not. The attribution
+keys must be attached at trace time, because no invoice will ever contain your user IDs.
+In Langfuse, cost and latency break down by user, session, feature, model, and prompt
+version once you propagate the identifiers:
+
+- **`user_id`** enables [per-user cost](/docs/observability/features/users), the basis for
+  fair-use policies, per-seat pricing decisions, and abuse detection.
+- **`session_id`** groups traces into conversations, so you can answer what a whole support
+  thread or agent run cost rather than a single call.
+- **Tags and metadata** mark features, tenants, or experiments and are filterable in the UI
+  and API.
+- **Environments** separate production from staging and development, so test traffic never
+  pollutes production cost reports.
+
+```python
+from langfuse import observe, propagate_attributes
+
+@observe()
+def handle_request(user_query: str):
+    with propagate_attributes(
+        user_id="user_123",
+        session_id="session_abc",
+        tags=["feature:summarize"],
+        metadata={"tenant": "acme-inc"},
+    ):
+        return run_pipeline(user_query)
+```
+
+For downstream systems, the [Metrics API](/docs/metrics/features/metrics-api) returns
+aggregated usage and cost filtered by user, tags, or time window, which is what teams use
+for internal chargeback, customer-facing usage billing, and rate limiting.
+
+## Control spend before the invoice arrives [#control-llm-spend]
+
+Controls catch anomalies in hours instead of at month-end. Three mechanisms cover most
+needs:
+
+1. **Threshold alerts on cost metrics.** In Langfuse,
+   [monitors](/docs/metrics/features/monitors) evaluate a metric such as summed observation
+   cost over a rolling window, filtered by model, tags, user, or environment, with warning
+   and alert thresholds that notify via Slack, webhook, or GitHub Actions.
+2. **Hard budgets and rate limits.** Enforcement belongs in the request path, which is a
+   gateway job: per-team budgets and key-level rate limits stop runaway spend rather than
+   reporting it. Observability tells you what to set the limits to.
+3. **Controls on the observability bill itself.** Langfuse Cloud pricing is unit-based
+   (traces + observations + scores), so [sampling](/docs/observability/features/sampling)
+   and span filtering reduce that bill directly, and
+   [spend alerts](/docs/administration/spend-alerts) notify org admins when the Langfuse
+   Cloud bill itself crosses a threshold. Note the distinction: spend alerts cover what you
+   pay Langfuse, monitors cover what you pay model providers.
+
+## Optimize once measurement is trustworthy [#optimize-llm-costs]
+
+Optimization is the last layer for a reason: once cost data is accurate and attributed, the
+highest-spend segments show you where to start. The recurring levers:
+
+- **Route by task difficulty.** Group cost by model and feature to find high-volume, simple
+  tasks running on premium models, then validate the cheaper model with an
+  [evaluation setup](/resources/engineering/llm-evaluation-strategy) before switching.
+- **Use prompt caching deliberately.** Providers discount cached input tokens; tracking
+  cached tokens as their own priced bucket shows the realized savings per feature and
+  whether your prompts are structured to hit the cache.
+- **Trim context.** In retrieval-heavy and agentic applications, input tokens usually
+  dominate cost. Per-trace token breakdowns reveal oversized system prompts and retrieval
+  that stuffs more chunks than the answer needs.
+- **Cap loops and retries.** Sort traces by cost to find outliers; runaway agent loops and
+  retry storms show up as single traces costing hundreds of times the median.
+
+## LLM cost management in Langfuse [#llm-cost-management-in-langfuse]
+
+Langfuse covers the four layers as follows:
+
+| Task                                   | Langfuse capability                                             |
+| -------------------------------------- | --------------------------------------------------------------- |
+| Per-call usage and cost                | Ingested from responses, or inferred via model definitions      |
+| Custom, gateway, or self-hosted models | Custom model definitions with regex match patterns              |
+| Context-dependent pricing              | Pricing tiers with conditions per model                         |
+| Per-user and per-session cost          | `user_id` / `session_id` propagation                            |
+| Feature and tenant breakdowns          | Tags, metadata, environments                                    |
+| Cost dashboards                        | Curated cost dashboard plus custom dashboards                   |
+| Alerts on LLM spend                    | Monitors with Slack, webhook, and GitHub Actions notifications  |
+| Alerts on the Langfuse Cloud bill      | Spend alerts in organization billing settings                   |
+| Cost data for billing and chargeback   | Metrics API                                                      |
+
+A practical setup order: verify tracked cost against one provider invoice for a sample day,
+add custom model definitions for anything unmatched, propagate `user_id` and `session_id`,
+build one [cost dashboard](/docs/metrics/features/custom-dashboards), and set one monitor on
+total daily cost. Everything else can follow once those numbers are trusted.
+
+## FAQ [#faq]
+
+### How do we track LLM costs for Amazon Bedrock inference profiles? [#faq-bedrock-inference-profiles]
+
+Bedrock calls report the inference profile ID or ARN as the model string, for example a
+region-prefixed identifier rather than the plain model name, so built-in price lists will
+not match it. Create a custom model definition in Langfuse whose regex `match_pattern`
+matches the exact string your traces report, with the per-token prices from your Bedrock
+pricing. User-defined models take priority over Langfuse-maintained ones, so the mapping
+applies to all new generations.
+
+### How do we track the cost of paid tool calls or third-party APIs? [#faq-tool-call-costs]
+
+In Langfuse, cost is tracked on observations of type `generation` and `embedding`, and both
+usage types and cost details accept arbitrary keys. For a paid tool call (a search API, a
+server-side code execution), either record it as its own generation-type observation with
+`cost_details` set to the metered price, or add a dedicated usage type with a price to the
+calling model's definition. Both approaches roll the tool cost into the same per-user and
+per-session aggregates as token spend.
+
+### Can we see LLM cost per user or per session? [#faq-per-user-session-cost]
+
+Yes, provided you propagate the identifiers at trace time. In Langfuse, cost is broken down
+by user, session, model, and prompt version in the UI and dashboards once `user_id` and
+`session_id` are set on your observations, and the Metrics API returns the same aggregates
+filtered by user or session for external systems.
+
+### Why does our tracked LLM cost differ from the provider invoice? [#faq-cost-mismatch]
+
+Work through four causes in order. First, ingested vs. inferred: costs computed from token
+counts and a price list drift when the price list is wrong, so prefer ingesting the
+provider-reported cost or usage. Second, overlapping token buckets: inclusive cached-token
+counts stored without subtraction double-count cache reads. Third, model matching: an
+unmatched or mismatched model name prices calls at zero or at the wrong rate. Fourth,
+timing: Langfuse calculates inferred cost at ingestion with the prices known then, so later
+price changes apply only to new generations.
+
+### Can we get an alert before LLM spend spikes? [#faq-llm-spend-alerts]
+
+Yes. Langfuse monitors evaluate cost metrics such as summed observation cost over windows
+from an hour to a week, with warning and alert thresholds and notifications to Slack,
+webhooks, or GitHub Actions. Filters restrict a monitor to a model, environment, tag, or
+user segment, so you can alert separately on production spend and on a single expensive
+feature. For hard enforcement rather than notification, set budgets at your gateway.
+
+### We fixed a model price. Why are old traces still wrong? [#faq-price-updates]
+
+Langfuse infers cost at ingestion time using the model definition available at that moment,
+and an updated definition applies to new generations only. This is deliberate: historical
+cost reflects what the calls actually cost under the prices in effect. Verify the fix by
+checking a fresh trace, not by re-reading old ones.

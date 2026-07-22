@@ -45,6 +45,12 @@ Once you have that context, use the table below to find the right feature page:
 
 Already know what you're looking for? Browse _Evaluation Methods_ and _Experiments_ in the sidebar.
 
+## Running evals on your existing setup [#existing-setup]
+
+Evaluation in Langfuse runs on the traces and datasets you already capture, so if you use Langfuse for observability, enabling evals adds no new service to your stack. [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) execute your task and evaluation functions in your own environment, locally or [in CI/CD](/docs/evaluation/experiments/experiments-ci-cd), while [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) run inside Langfuse itself, on Langfuse Cloud or a [self-hosted](/self-hosting) deployment.
+
+Langfuse also works with evaluation metric libraries rather than replacing them. Managed evaluators are built together with partners like [Ragas](/guides/cookbook/evaluation_of_rag_with_ragas), and scores computed by any external library can be ingested via the [SDK or API](/docs/evaluation/evaluation-methods/scores-via-sdk). For common metrics, we maintain implementation recipes: [RAG faithfulness evaluation](/resources/engineering/rag-faithfulness-evaluation), [answer relevance evaluation](/resources/engineering/answer-relevance-evaluation), [hallucination detection](/resources/engineering/hallucination-detection), and [code evaluator examples](/resources/engineering/code-evaluator-examples).
+
 ## GitHub Discussions
 
 import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";

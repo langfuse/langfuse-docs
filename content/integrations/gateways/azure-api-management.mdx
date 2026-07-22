@@ -1,0 +1,215 @@
+---
+title: Azure API Management Integration
+sidebarTitle: Azure API Management
+logo: /images/integrations/microsoft_icon.svg
+description: Trace LLM calls routed through Azure API Management (APIM) with Langfuse via client-side SDK instrumentation, OpenTelemetry, or server-side ingestion.
+---
+
+# Trace LLM calls through Azure API Management with Langfuse
+
+Many enterprises route all Azure OpenAI (and other LLM) traffic through Azure API Management (APIM) as a corporate gateway. Langfuse traces this traffic without any changes to the gateway itself: because tracing happens in your application or via telemetry export, it works no matter which proxy sits between your code and the model provider.
+
+As of July 2026, there is no turnkey APIM-specific Langfuse plugin or policy. Three patterns are used in production:
+
+1. [Client-side SDK instrumentation](#client-side-instrumentation): wrap your LLM client with the Langfuse SDK and point its base URL at the gateway.
+2. [OpenTelemetry export](#opentelemetry): send OTLP traces to the Langfuse OTel endpoint, which covers .NET, Java, Go, and existing OTel setups.
+3. [Server-side ingestion](#server-side-ingestion): forward gateway request logs to Langfuse via a small transformation worker.
+
+> **What is Azure API Management?** [Azure API Management](https://azure.microsoft.com/en-us/products/api-management) is Microsoft's managed API gateway. Enterprises commonly place it in front of Azure OpenAI to centralize authentication, apply quotas and policies, and keep model traffic inside their network perimeter. To client applications, the gateway exposes an endpoint that proxies the OpenAI-compatible API.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM observability platform that helps you trace, monitor, and debug your LLM applications. Langfuse is not a proxy: your requests never pass through Langfuse on the way to the model, so it adds no hop to the gateway path.
+
+## Choosing an integration pattern [#choosing-a-pattern]
+
+Pick the pattern based on where your code runs and how much application context you need in your traces:
+
+| Pattern                         | Where tracing happens                    | Application code changes                       | Best for                                                                             |
+| ------------------------------- | ---------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Client-side SDK instrumentation | In your application (Python, JS/TS)      | Change the SDK import, set the gateway URL     | Richest traces: nested spans, sessions, users, prompt links                          |
+| OpenTelemetry export            | In your application (any OTel language)  | Add OTel instrumentation and an OTLP exporter  | .NET, Java, Go, and teams with an existing OTel or collector setup                   |
+| Server-side ingestion           | In the gateway plus a forwarding worker  | None                                           | Zero application changes; traffic-level visibility without agent or retrieval context |
+
+Gateway-level logging and application-level tracing answer different questions: the gateway sees every request and its cost, while application traces explain why a request was made (agent steps, retrieved context, tool calls). Our [LLM gateway explainer](/resources/engineering/llm-gateway) covers this distinction in depth.
+
+## Option 1: Instrument your application and point it at the gateway [#client-side-instrumentation]
+
+This is the recommended pattern when you control the application code. Since APIM proxies the Azure OpenAI API (or another OpenAI-compatible API), your existing SDK calls keep working when the client's endpoint points at the gateway instead of the provider. Wrapping the client with the Langfuse SDK then captures every call, including token usage, latency, and errors.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+
+<Tab>
+
+```bash
+pip install langfuse openai
+```
+
+The Langfuse OpenAI drop-in replacement supports the `AzureOpenAI` client. Set `azure_endpoint` to your gateway URL instead of the Azure OpenAI resource URL, and add any authentication headers your gateway team requires via `default_headers`.
+
+```python
+import os
+
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"  # 🇪🇺 EU region
+# Other regions: 🇺🇸 US https://us.cloud.langfuse.com, 🇯🇵 Japan https://jp.cloud.langfuse.com, ⚕️ HIPAA https://hipaa.cloud.langfuse.com
+
+# Drop-in replacement for the OpenAI SDK
+from langfuse.openai import AzureOpenAI
+
+client = AzureOpenAI(
+    azure_endpoint="https://<your-gateway>.azure-api.net/<your-api-path>",  # your APIM gateway URL
+    api_key="<key-or-token-your-gateway-expects>",
+    api_version="<your-api-version>",
+    default_headers={
+        # Add any additional headers your gateway requires, e.g. a subscription key
+    },
+)
+
+response = client.chat.completions.create(
+    model="<your-deployment-name>",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Tell me a fun fact about space."},
+    ],
+)
+print(response.choices[0].message.content)
+```
+
+If your gateway exposes a plain OpenAI-compatible endpoint rather than the Azure OpenAI API shape, use the standard `OpenAI` client with `base_url` set to the gateway URL instead. See the [OpenAI (Python) integration](/integrations/model-providers/openai-py) for all options, including the `@observe()` decorator for nesting multiple LLM calls under one trace.
+
+</Tab>
+
+<Tab>
+
+```bash
+npm install @langfuse/openai @langfuse/otel @opentelemetry/sdk-node openai
+```
+
+Set up OpenTelemetry with the `LangfuseSpanProcessor`:
+
+```typescript
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+process.env.LANGFUSE_PUBLIC_KEY = "pk-lf-...";
+process.env.LANGFUSE_SECRET_KEY = "sk-lf-...";
+process.env.LANGFUSE_BASE_URL = "https://cloud.langfuse.com"; // 🇪🇺 EU region
+// Other regions: 🇺🇸 US https://us.cloud.langfuse.com, 🇯🇵 Japan https://jp.cloud.langfuse.com, ⚕️ HIPAA https://hipaa.cloud.langfuse.com
+
+const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+
+sdk.start();
+```
+
+Then wrap your OpenAI client with `observeOpenAI` and set `baseURL` to the gateway endpoint:
+
+```typescript
+import { observeOpenAI } from "@langfuse/openai";
+import OpenAI from "openai";
+
+const openaiClient = new OpenAI({
+  baseURL: "https://<your-gateway>.azure-api.net/<your-api-path>",
+  apiKey: "<key-or-token-your-gateway-expects>",
+  defaultHeaders: {
+    // Add any additional headers your gateway requires, e.g. a subscription key
+  },
+});
+
+const client = observeOpenAI(openaiClient, {
+  generationName: "chat-via-apim", // Optional: name of the generation in Langfuse
+});
+
+const response = await client.chat.completions.create({
+  model: "<your-deployment-name>",
+  messages: [
+    { role: "system", content: "You are a helpful assistant." },
+    { role: "user", content: "Tell me a fun fact about space." },
+  ],
+});
+console.log(response.choices[0].message.content);
+```
+
+</Tab>
+
+</LangTabs>
+
+<Callout type="info">
+  Azure OpenAI deployment names often differ from the underlying model names.
+  If cost is missing on your generations, add [custom model
+  definitions](/docs/observability/features/token-and-cost-tracking#custom-model-definitions)
+  that match your deployment names so Langfuse can calculate token costs.
+</Callout>
+
+## Option 2: Send OpenTelemetry traces (works for .NET, Java, Go) [#opentelemetry]
+
+Langfuse operates as an OpenTelemetry backend: any language with an OTel SDK can send OTLP traces to the `/api/public/otel` endpoint. This is the standard path for stacks the Langfuse SDKs do not cover, such as .NET or Java services calling Azure OpenAI through APIM. The gateway is irrelevant to this setup; you instrument the code that makes the calls, wherever the requests are routed.
+
+OpenTelemetry SDKs share the same exporter configuration:
+
+```bash
+# Generate the auth string from your project API keys:
+#   echo -n "pk-lf-...:sk-lf-..." | base64
+OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel" # 🇪🇺 EU data region
+# OTEL_EXPORTER_OTLP_ENDPOINT="https://us.cloud.langfuse.com/api/public/otel" # 🇺🇸 US data region
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING},x-langfuse-ingestion-version=4"
+```
+
+Spans that carry [GenAI semantic convention](https://opentelemetry.io/docs/specs/semconv/gen-ai/) attributes (`gen_ai.*`) render in Langfuse as generations with model, token, and cost data; other spans nest around them as regular observations. Langfuse accepts OTLP over HTTP with protobuf or JSON encoding (gRPC is not supported).
+
+For per-language setup, including a C#/.NET example with the OpenTelemetry .NET SDK, see [Use Langfuse from Go, Java, C#, and Ruby via OpenTelemetry](/resources/engineering/opentelemetry-languages). The full endpoint reference, attribute mapping, and OpenTelemetry Collector configuration live in the [OpenTelemetry integration docs](/integrations/native/opentelemetry).
+
+If your services already export OTel traces to an APM backend, an OpenTelemetry Collector can fan the same spans out to Langfuse in parallel, and its filter processor can restrict what Langfuse receives to LLM-relevant spans.
+
+## Option 3: Forward gateway logs to Langfuse server-side [#server-side-ingestion]
+
+If you cannot change application code at all, you can build traces from what the gateway already sees. APIM's policy system can forward request and response data to downstream Azure services; a small worker (for example an Azure Function consuming that stream) then transforms each logged LLM call into a trace and sends it to Langfuse. Consult the Azure API Management documentation for the logging setup on the gateway side.
+
+For the Langfuse side, two ingestion routes exist:
+
+- The **OTLP endpoint** (`/api/public/otel`) is the recommended route: have the worker emit OpenTelemetry spans with `gen_ai.*` attributes as described in [option 2](#opentelemetry).
+- The **ingestion API** (`POST /api/public/ingestion`, [API reference](https://api.reference.langfuse.com/#tag/ingestion/POST/api/public/ingestion)) accepts batched trace events directly. It is considered legacy and will be replaced by the OpenTelemetry endpoint, so prefer OTLP for new setups. See the [public API docs](/docs/api-and-data-platform/features/public-api) for authentication and general usage.
+
+This pattern yields one generation per gateway request: model, input, output, token usage, and latency. It cannot capture what happened inside your application before the request (agent steps, retrievals, tool calls), so treat it as traffic-level visibility rather than full application tracing. To attach user and session context, propagate identifiers (for example as request headers your worker maps to `userId` and `sessionId`) from the calling application.
+
+## Use the Playground and evaluations behind a corporate gateway [#playground]
+
+The Langfuse [Playground](/docs/prompt-management/features/playground) and [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluations can call models through your gateway. [LLM connections](/docs/administration/llm-connection) support the Azure OpenAI provider as well as any OpenAI-compatible endpoint with a custom base URL and custom headers:
+
+1. Navigate to **Project Settings** > **LLM Connections** and click **Add new LLM API key**.
+2. Select **OpenAI** (for OpenAI-compatible gateway endpoints) or **Azure OpenAI** as the provider.
+3. Enter the API key your gateway expects.
+4. Under **Advanced Settings**, set the **Base URL** to your gateway's endpoint and add any custom headers your gateway requires.
+5. Add the **custom model names** (deployment names) your gateway exposes.
+
+Note that your Langfuse deployment must be able to reach the gateway endpoint over the network, and the gateway must support [tool calling](https://platform.openai.com/docs/guides/function-calling) in the OpenAI format for LLM-as-a-Judge evaluations to work.
+
+## FAQ [#faq]
+
+### Does Langfuse have a native Azure API Management plugin or policy?
+
+No. As of July 2026, Langfuse does not ship an APIM-specific policy, plugin, or exporter. The three patterns on this page (client-side SDK instrumentation, OpenTelemetry export, and server-side log forwarding) are the supported paths, and they cover the same outcome: every LLM call through the gateway traced in Langfuse. If a turnkey integration would help your team, raise or upvote a [feature request on GitHub](/ideas).
+
+### Can we trace LLM traffic through APIM without changing application code?
+
+Yes, via [server-side ingestion](#server-side-ingestion): forward gateway logs to a worker that emits OpenTelemetry spans to the Langfuse OTLP endpoint. You get one generation per request with model, input, output, tokens, and latency. You give up application context such as agent steps and retrievals, which only [client-side instrumentation](#client-side-instrumentation) can capture.
+
+### We are a .NET shop. There is no .NET Langfuse SDK, so how do we integrate?
+
+Use the OpenTelemetry .NET SDK with the OTLP exporter pointed at `https://cloud.langfuse.com/api/public/otel` (or your region's endpoint) and set `gen_ai.*` attributes on the activities around your LLM calls. The [OpenTelemetry languages guide](/resources/engineering/opentelemetry-languages) includes a C#/.NET setup snippet. This works identically whether calls go direct to Azure OpenAI or through APIM.
+
+### Does our LLM traffic pass through Langfuse?
+
+No. Langfuse is an observability platform, not a proxy. Requests flow from your application through APIM to Azure OpenAI as before; the Langfuse SDK or your OTel exporter sends telemetry to Langfuse asynchronously and out of band. A Langfuse outage does not affect your LLM traffic.
+
+### Does this work with self-hosted Langfuse?
+
+Yes. All three patterns work against a [self-hosted Langfuse](/self-hosting) deployment: replace the cloud endpoints with your instance's domain. The OTLP endpoint path (`/api/public/otel`) is the same. Self-hosting keeps traces inside your own network, which often matters to the same teams that run a corporate gateway.
+
+## Learn more
+
+- [What is an LLM gateway?](/resources/engineering/llm-gateway) explains when a gateway is worth running and how it relates to observability.
+- [OpenTelemetry integration](/integrations/native/opentelemetry) documents the OTLP endpoint, attribute mapping, and collector setup.
+- [OpenAI (Python)](/integrations/model-providers/openai-py) and [OpenAI (JS/TS)](/integrations/model-providers/openai-js) cover the SDK wrappers used in option 1.
+- [LLM connections](/docs/administration/llm-connection) covers Playground and evaluation setup behind gateways.

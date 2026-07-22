@@ -1,0 +1,215 @@
+---
+title: Export Langfuse Data to Your Data Warehouse
+sidebarTitle: Export to Warehouse
+description: How to export Langfuse traces, observations, and scores to Snowflake, Databricks, BigQuery, or any data warehouse via blob storage exports or the API.
+---
+
+# Export Langfuse Data to Your Data Warehouse
+
+The recommended way to get Langfuse data into a data warehouse is a [scheduled blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) in Parquet format: Langfuse writes traces, observations, and scores to your S3, GCS, or Azure bucket on a schedule, and your warehouse ingests the files with its native object storage loader (external stages in Snowflake, Auto Loader in Databricks, and similar mechanisms elsewhere). For smaller or ad-hoc extractions, the [public API](/docs/api-and-data-platform/features/public-api) and [UI exports](/docs/api-and-data-platform/features/export-from-ui) are simpler alternatives.
+
+This guide compares the three export paths, walks through the blob storage setup including bucket permissions, and shows warehouse-side loading patterns for Snowflake and Databricks.
+
+## Choose an export path [#export-paths]
+
+Use scheduled blob storage exports for continuous warehouse syncs, the public API for programmatic and selective extraction, and UI exports for one-off filtered downloads.
+
+| Path                                                                                       | Best for                                                             | Formats                    | Cadence                                     | Availability                                                       |
+| ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------- | -------------------------- | ------------------------------------------- | ------------------------------------------------------------------ |
+| [Blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage)         | Continuous warehouse syncs, full-history backfills, large volumes    | Parquet, CSV, JSON, JSONL  | Every 20 minutes, hourly, daily, or weekly | Pro (Team add-on), Enterprise, self-hosted                         |
+| [Public API](/docs/api-and-data-platform/features/public-api)                              | Selective extraction, custom pipelines, evaluation workflows         | JSON                       | On demand                                   | All plans                                                          |
+| [Export from UI](/docs/api-and-data-platform/features/export-from-ui)                      | One-off downloads of a filtered table                                | CSV, JSON                  | Manual                                      | All plans                                                          |
+
+Two additional access paths cover adjacent use cases: the [Metrics API v2](/docs/metrics/features/metrics-api#v2) returns pre-aggregated cost, usage, latency, and score metrics if you only need aggregates in a BI tool, and the [PostHog](/integrations/analytics/posthog) and [Mixpanel](/integrations/analytics/mixpanel) integrations sync data to those analytics platforms directly.
+
+## Set up scheduled exports to S3, GCS, or Azure [#scheduled-exports]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "team-add-on",
+    enterprise: "full",
+    selfHosted: "full",
+  }}
+/>
+
+The blob storage integration writes one file per table per time window to your bucket, on a schedule of every 20 minutes, hourly, daily, or weekly.
+
+<Steps>
+
+### Create a bucket and credentials [#bucket-permissions]
+
+Create a bucket (or container) in S3, an S3-compatible store, Google Cloud Storage, or Azure Blob Storage, and credentials with **List, Get, and Put** permissions on it. On AWS, this policy covers the required actions:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": ["s3:PutObject", "s3:ListBucket", "s3:GetObject"],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:s3:::<my-bucket-name>/*",
+        "arn:aws:s3:::<my-bucket-name>"
+      ],
+      "Sid": "LangfuseExportBucketAccess"
+    }
+  ]
+}
+```
+
+Note that the `s3:ListBucket` statement must target the bucket ARN itself (without `/*`), while `s3:GetObject` and `s3:PutObject` target the objects. A policy that only grants object-level actions produces `AccessDenied` errors on export runs. See the [blob storage documentation](/self-hosting/deployment/infrastructure/blobstorage#amazon-s3) for credential guidance per vendor.
+
+### Configure the integration
+
+Navigate to **Project Settings > Integrations > Blob Storage**, select your storage vendor, and fill in bucket, credentials, and an optional prefix. Choose the file type (**Parquet** is the default for new integrations and the best fit for warehouses, since files load without a per-field casting step), the export frequency, and the export source. Keep the default `Enriched observations (recommended)` source: it writes trace attributes such as `user_id`, `session_id`, and `tags` directly on each observation row, so no warehouse-side join is needed. (On self-hosted deployments, enriched export requires the v4 preview opt-in or a completed v4 migration; see the [export source details](/docs/api-and-data-platform/features/export-to-blob-storage) for what each source writes.) You can also narrow the exported columns via [field groups](/docs/api-and-data-platform/features/export-to-blob-storage#export-field-groups), for example to exclude the `io` group when prompts and completions should not leave Langfuse.
+
+### Choose an export mode
+
+The [export mode](/docs/api-and-data-platform/features/export-to-blob-storage#export-modes) controls how far back the first export reaches: `Full history` backfills everything, `From setup date` exports only new data, and `From custom date` starts at a date you pick. A full-history backfill works through the backlog window by window and can write many files in quick succession before settling into its normal cadence.
+
+### Validate and enable
+
+Use the **Validate** button to confirm Langfuse can write to the bucket, then enable the integration and save. An initial export starts shortly after enabling. The integration settings page shows the [export status](/docs/api-and-data-platform/features/export-to-blob-storage#export-status), including the timestamp data has been exported up to and the last error if a run failed.
+
+</Steps>
+
+Everything can also be configured programmatically via `GET`/`PUT /api/public/integrations/blob-storage`; see the [API reference](https://api.reference.langfuse.com/#tag/blobstorageintegrations).
+
+## Load the exports into your warehouse [#load-into-warehouse]
+
+Point your warehouse's object storage loader at the export directories: with the recommended source these are `{prefix}{project-id}/observations_v2/` and `{prefix}{project-id}/scores/`. List the objects in each directory and ingest what is there rather than assuming a fixed file-per-window pattern, because a window without data may produce an [empty file](/docs/api-and-data-platform/features/export-to-blob-storage#empty-files) or none for a given table.
+
+To trigger loads event-driven instead of on a schedule, subscribe to your provider's object-created events with a prefix filter on `{prefix}{project-id}/manifests/`. Langfuse writes a [run manifest](/docs/api-and-data-platform/features/export-to-blob-storage#run-manifest) as the last object of every successful run, listing every file the run produced, so one manifest event equals one complete run. Provider-specific recipes (S3 Event Notifications, GCS Pub/Sub, Azure Event Grid) are in the [export events section](/docs/api-and-data-platform/features/export-to-blob-storage#export-events).
+
+The snippets below are illustrative warehouse-side patterns, not Langfuse features; adapt paths, authentication, and table definitions to your environment.
+
+### Snowflake [#snowflake]
+
+Create an external stage on the export directory and load with `COPY INTO`. Parquet files carry typed columns, so `MATCH_BY_COLUMN_NAME` maps them without per-field cast logic:
+
+```sql
+CREATE STAGE langfuse_observations_stage
+  URL = 's3://<my-bucket-name>/<prefix><project-id>/observations_v2/'
+  CREDENTIALS = (AWS_KEY_ID = '<key-id>' AWS_SECRET_KEY = '<secret>');
+
+COPY INTO langfuse_observations
+  FROM @langfuse_observations_stage
+  FILE_FORMAT = (TYPE = PARQUET)
+  MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE;
+```
+
+`COPY INTO` skips files it has already loaded, so re-running the statement on a schedule gives you incremental ingestion. For continuous loading, put the same stage behind Snowpipe.
+
+### Databricks [#databricks]
+
+Auto Loader incrementally picks up new files as export runs land in the bucket:
+
+```python
+df = (
+    spark.readStream.format("cloudFiles")
+    .option("cloudFiles.format", "parquet")
+    .load("s3://<my-bucket-name>/<prefix><project-id>/observations_v2/")
+)
+
+(
+    df.writeStream.option(
+        "checkpointLocation", "/Volumes/main/langfuse/checkpoints/observations"
+    )
+    .trigger(availableNow=True)
+    .toTable("main.langfuse.observations")
+)
+```
+
+Repeat the pattern for the `scores/` directory. For analysis of the `metadata` column, parse the JSON-encoded string into a struct or map in a downstream transformation.
+
+### Other engines [#other-engines]
+
+The same directory-based pattern works anywhere Parquet loads from object storage: BigQuery loads the files from GCS with `LOAD DATA`, ClickHouse reads them via the `s3()` table function, and DuckDB or Athena can query the export files in place without loading them at all. If you run a managed ELT tool, use its object storage source connector against the export directories instead of building a custom loader.
+
+## What the exported data contains [#exported-data]
+
+With the recommended `Enriched observations` source, each export run writes two tables: `observations_v2/` (one row per observation, including trace-level context such as `user_id`, `session_id`, `trace_name`, `tags`, and `release`) and `scores/` (one row per score, joinable via `trace_id` and `observation_id`). The [Export Field Reference](/docs/api-and-data-platform/features/blob-storage-export-fields) documents every column, its type, and usage notes.
+
+Because trace context is denormalized onto observation rows, trace-level metrics need no join:
+
+```sql
+SELECT
+  trace_id,
+  SUM(total_cost) AS trace_cost,
+  MAX(end_time) - MIN(start_time) AS trace_latency
+FROM langfuse_observations
+GROUP BY trace_id;
+```
+
+Scores do not include trace attributes inline; join them to the observations table on `trace_id` (deduplicated to one row per trace) following the [score enrichment patterns](/docs/api-and-data-platform/features/blob-storage-export-fields#enriching-scores).
+
+One sizing note: your project's [billable units](/docs/administration/billable-units) count traces, observations, and scores, so unit counts give you a first estimate of the row volume an export will produce.
+
+## Bulk export via the public API [#api-bulk-export]
+
+For programmatic extraction without a bucket in between, page through the [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2). It uses cursor-based pagination, which stays fast at depths where offset-based pagination degrades, and lets you request only the [field groups](/docs/api-and-data-platform/features/observations-api#v2) you need:
+
+```bash
+# First request: bounded time window, selective fields
+curl \
+  -H "Authorization: Basic <BASIC AUTH HEADER>" \
+  "https://cloud.langfuse.com/api/public/v2/observations?fromStartTime=2026-07-01T00:00:00Z&toStartTime=2026-07-02T00:00:00Z&fields=core,basic,usage&limit=1000"
+
+# Response includes: "meta": { "cursor": "eyJsYXN0..." }
+
+# Follow-up requests: pass the cursor until none is returned
+curl \
+  -H "Authorization: Basic <BASIC AUTH HEADER>" \
+  "https://cloud.langfuse.com/api/public/v2/observations?fromStartTime=2026-07-01T00:00:00Z&toStartTime=2026-07-02T00:00:00Z&fields=core,basic,usage&limit=1000&cursor=eyJsYXN0..."
+```
+
+Practical constraints for bulk extraction:
+
+- Always set `fromStartTime` and `toStartTime` to keep each request bounded, and split large backfills into multiple windows.
+- The v2 endpoint returns at most 1,000 rows per page (the default is 50).
+- On Langfuse Cloud, requests count toward the per-organization [API rate limits](/faq/all/api-limits); self-hosted instances have no enforced rate limits.
+- On self-hosted deployments, the v2 endpoints require a v4 deployment.
+
+The same endpoints are available with typed clients in the Python and JS/TS SDKs; see [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk). For exporting the full history of a high-volume project, prefer the blob storage integration in `Full history` mode over paging through the API: it runs server-side, resumes on failure, and does not consume your API rate limit.
+
+## Limits and failure modes [#limits-and-failure-modes]
+
+| Symptom                                                              | Cause and fix                                                                                                                                                                                                                                                                                                                       |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Export runs fail with `AccessDenied`                                 | The credentials lack one of the required permissions. Grant List, Get, and Put on the bucket ([checklist](#bucket-permissions)), then confirm with the **Validate** button.                                                                                                                                                          |
+| Error badge persists after fixing the configuration                  | The error state is sticky and clears only when an export next succeeds. Use **Validate** to confirm the fix without waiting for the next scheduled run; see [re-exporting and configuration changes](/docs/api-and-data-platform/features/export-to-blob-storage#re-exporting).                                                       |
+| Configuration change did not re-export old data                     | Edits apply to future exports only. To re-export history, change the export mode (which resets the sync position) or reset the integration.                                                                                                                                                                                          |
+| Full-history backfill takes long and writes many files               | This is the documented catch-up behavior: each window is a separate run with its own manifest. Track progress via **Data exported up to** on the integration settings page. Repeated failures notify project admins via email and configured notification channels.                                                                  |
+| Empty files appear in the bucket                                     | Empty files are expected for windows where a table has no data. Build loaders to tolerate them; do not alert on their presence.                                                                                                                                                                                                       |
+| `traces/` and `observations/` directories went silent                | The integration was switched to the enriched export source, which writes `observations_v2/` instead. Repoint consumers before switching; see the [upgrade path](/docs/api-and-data-platform/features/export-to-blob-storage#upgrade-path).                                                                                            |
+| Parquet exports incomplete on self-hosted deployments                | Self-hosted deployments running ClickHouse < 25.11 may not surface Parquet export failures. Upgrade ClickHouse or use a text format; see [file formats](/docs/api-and-data-platform/features/export-to-blob-storage#file-formats).                                                                                                    |
+| UI export too large                                                  | On self-hosted deployments, UI batch exports are capped by `BATCH_EXPORT_ROW_LIMIT` (default 1,500,000 rows). For large volumes on any deployment, use the blob storage export instead.                                                                                                                                               |
+| API pagination is slow at depth                                      | Offset-based v1 pagination degrades on large datasets. Use the cursor-based [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) with bounded time windows.                                                                                                                                                 |
+
+## FAQ [#faq]
+
+### How do I export Langfuse data to Snowflake, Databricks, or BigQuery?
+
+Set up a [scheduled blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) to S3, GCS, or Azure in Parquet format, then ingest the export directories with your warehouse's object storage loader (external stage plus `COPY INTO` in Snowflake, Auto Loader in Databricks, `LOAD DATA` in BigQuery). The exports run every 20 minutes, hourly, daily, or weekly and can backfill your full history.
+
+### Does Langfuse have a native Snowflake, Databricks, or ELT connector?
+
+As of July 2026, Langfuse does not offer a native warehouse connector. The supported pattern is the blob storage export, which writes warehouse-ready Parquet files to your own bucket; ELT tools with an object storage source can ingest these directories like any other file feed. Native analytics integrations exist for [PostHog](/integrations/analytics/posthog) and [Mixpanel](/integrations/analytics/mixpanel).
+
+### Can I export all historical data as a one-time backfill?
+
+Yes. Create a blob storage integration with the export mode set to `Full history`, and it backfills from the earliest data in your project before continuing on the regular schedule. Changing an existing integration's export mode resets its sync position, so you can also use it to re-scan history.
+
+### Which export file format should I use for a warehouse?
+
+Use Parquet, the default for new integrations. Parquet files carry typed columns, load directly into warehouses and query engines without per-field casting, and are compressed by the storage engine itself. One caveat: Parquet observation exports omit the per-unit price columns (`input_price`, `output_price`, `total_price`); use `cost_details` and `total_cost` for cost data, which are included in every format.
+
+### Do data retention or deletion settings affect already exported files?
+
+Files in your bucket are yours to manage; configure bucket lifecycle policies if you want them expired. Langfuse [data retention](/docs/administration/data-retention) and [data deletion](/docs/administration/data-deletion) control what is stored and queryable inside Langfuse, which also determines what future export runs can still export. A blob storage export taken before a deletion is one way to keep an archive beyond your retention window.
+
+### How fresh is the exported data?
+
+The shortest export schedule is every 20 minutes, and data is exported with a short ingestion delay so half-written records are not exported. If you need fresher reads than that, query the [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) or the [Metrics API v2](/docs/metrics/features/metrics-api#v2) directly.

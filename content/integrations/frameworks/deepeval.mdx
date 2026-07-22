@@ -1,0 +1,170 @@
+---
+title: "Langfuse Integration with DeepEval"
+sidebarTitle: DeepEval
+description: "Use DeepEval with Langfuse to evaluate LLM applications: run DeepEval metrics in your Python pipeline and store results as scores on traces and experiments."
+---
+
+# LLM evaluation with DeepEval and Langfuse
+
+DeepEval and Langfuse work together through the Langfuse Python SDK: DeepEval computes the evaluation metric, and Langfuse stores the result as a [score](/docs/evaluation/scores/overview) attached to the trace or experiment run it belongs to. You keep DeepEval as your metric library and add tracing, score analytics, and experiment comparison on top. The integration is a few lines of Python in your existing evaluation code, with no additional service to deploy.
+
+There are three common ways to combine the two:
+
+| You want to                                  | Approach                                                | Langfuse API                                     |
+| -------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------ |
+| Score production traffic on a schedule       | Fetch traces, run DeepEval metrics, push scores back    | `langfuse.api.trace.list()` + `create_score()`   |
+| Evaluate a change against a test dataset     | Wrap DeepEval metrics as experiment evaluator functions | `dataset.run_experiment(evaluators=[...])`       |
+| Build a test dataset from scratch            | Generate items with DeepEval's Synthesizer, then upload | `create_dataset()` + `create_dataset_item()`     |
+
+## What is DeepEval? [#what-is-deepeval]
+
+[DeepEval](https://docs.confident-ai.com/docs/getting-started) is an evaluation framework for LLM applications. It provides scores ranging from zero to one for many common LLM metrics, and it lets you create custom metrics by describing the evaluation criteria in plain language (the `GEval` metric). It also includes a `Synthesizer` class for generating synthetic test data.
+
+## What is Langfuse? [#what-is-langfuse]
+
+Langfuse ([GitHub](https://github.com/langfuse/langfuse)) is an open-source platform for LLM [observability](/docs/observability/overview), [prompt management](/docs/prompt-management/overview), and [evaluation](/docs/evaluation/overview). It stores scores next to the traces and experiment runs they evaluate, so you can filter production traffic by quality, chart scores over time, and compare experiment runs side by side.
+
+## How the integration works [#how-it-works]
+
+DeepEval metrics run in your Python process, and Langfuse persists their results as scores. Langfuse [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) execute inside Langfuse with the language standard library only (as of July 2026), so third-party packages like DeepEval cannot run there. Run DeepEval where your code runs instead: in an evaluation pipeline that pushes [scores via the SDK](/docs/evaluation/evaluation-methods/scores-via-sdk), or in evaluator functions of an experiment. Each score stores the metric value, and the score comment carries DeepEval's reasoning, so results stay interpretable in the Langfuse UI.
+
+```bash
+pip install langfuse deepeval
+```
+
+## Score production traces with DeepEval metrics [#score-production-traces]
+
+To evaluate live traffic, fetch traces from Langfuse, run a DeepEval metric on each one, and write the result back with `create_score`. The example below defines a custom `GEval` metric and scores a batch of traces:
+
+```python
+from langfuse import get_client
+from deepeval.metrics import GEval
+from deepeval.test_case import LLMTestCase, LLMTestCaseParams
+
+# Uses LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, LANGFUSE_BASE_URL env vars
+langfuse = get_client()
+
+def joyfulness_score(trace):
+    metric = GEval(
+        name="Joyfulness",
+        criteria="Determine whether the output is engaging and fun.",
+        evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT],
+    )
+    # The shape of trace.input depends on your instrumentation
+    test_case = LLMTestCase(input=str(trace.input), actual_output=str(trace.output))
+    metric.measure(test_case)
+    return {"score": metric.score, "reason": metric.reason}
+
+traces = langfuse.api.trace.list(tags="my-app", limit=10).data
+
+for trace in traces:
+    result = joyfulness_score(trace)
+    langfuse.create_score(
+        trace_id=trace.id,
+        name="joyfulness",
+        value=result["score"],
+        comment=result["reason"],
+    )
+```
+
+Schedule this as a cron job or event-triggered pipeline to evaluate traffic incrementally. The [external evaluation pipeline cookbook](/guides/cookbook/example_external_evaluation_pipelines) walks through the full pattern with batching, filtering by tags and timestamps, and checkpointing.
+
+## Run DeepEval metrics in Langfuse experiments [#experiments]
+
+To evaluate a prompt or model change before release, wrap a DeepEval metric as an evaluator function and pass it to `run_experiment`. Evaluators receive each item's input and output and return an `Evaluation`; Langfuse records the results as scores on the experiment run, so you can compare runs in the UI.
+
+```python
+from langfuse import Evaluation, get_client
+from deepeval.metrics import GEval
+from deepeval.test_case import LLMTestCase, LLMTestCaseParams
+
+langfuse = get_client()
+
+def deepeval_engagement(*, input, output, expected_output, metadata, **kwargs):
+    metric = GEval(
+        name="Engagement",
+        criteria="Determine whether the output is engaging and fun.",
+        evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT],
+    )
+    metric.measure(LLMTestCase(input=str(input), actual_output=str(output)))
+    return Evaluation(name="engagement", value=metric.score, comment=metric.reason)
+
+def my_task(*, item, **kwargs):
+    return my_llm_app(item.input)  # replace with a call to your application
+
+dataset = langfuse.get_dataset("my-evaluation-dataset")
+result = dataset.run_experiment(
+    name="DeepEval metrics on golden dataset",
+    task=my_task,
+    evaluators=[deepeval_engagement],
+)
+print(result.format())
+```
+
+See the [experiments via SDK docs](/docs/evaluation/experiments/experiments-via-sdk) for task definitions, run-level evaluators, and running experiments on local data instead of Langfuse datasets. Model-based metrics pair well with deterministic checks; the [code evaluator examples](/resources/engineering/code-evaluator-examples) page has ten paste-ready ones.
+
+## Generate test datasets with DeepEval's Synthesizer [#synthetic-datasets]
+
+DeepEval's `Synthesizer` generates synthetic evaluation items (goldens) that you can upload as a Langfuse [dataset](/docs/evaluation/experiments/datasets) and use in experiments:
+
+```python
+from langfuse import get_client
+from deepeval.synthesizer import Synthesizer
+from deepeval.synthesizer.config import StylingConfig
+
+styling_config = StylingConfig(
+    input_format="Questions in English that ask for data in a database.",
+    expected_output_format="SQL query based on the given input",
+    task="Answering text-to-SQL queries by querying a database",
+    scenario="Non-technical users querying a database in plain English.",
+)
+
+synthesizer = Synthesizer(styling_config=styling_config)
+synthesizer.generate_goldens_from_scratch(num_goldens=20)
+
+langfuse = get_client()
+langfuse.create_dataset(name="deepeval_synthetic_data")
+
+for golden in synthesizer.synthetic_goldens:
+    langfuse.create_dataset_item(
+        dataset_name="deepeval_synthetic_data",
+        input={"query": golden.input},
+    )
+```
+
+The [synthetic dataset cookbook](/guides/cookbook/example_synthetic_datasets) shows how to control the style of generated items with a `StylingConfig` and compares this approach with other generation methods.
+
+## When to use DeepEval metrics vs. managed Langfuse evaluators [#when-to-use]
+
+Use DeepEval with Langfuse when your team has already standardized on DeepEval metrics, wants metric definitions versioned in the codebase, or runs evaluations in its own pipeline or CI environment. Use Langfuse-managed [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators when you prefer to configure and run evaluations inside Langfuse without operating a separate evaluation process. Both write to the same score data model, so you can mix them: for example, managed judges on sampled production traffic and DeepEval metrics in CI experiments.
+
+## FAQ [#faq]
+
+### Can DeepEval run inside a Langfuse code evaluator?
+
+No. Langfuse [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) provide the language standard library only, and third-party packages are not available in the evaluator runtime (as of July 2026). Run DeepEval in your own Python process and send the results to Langfuse via `create_score` or experiment evaluators.
+
+### Do I need to replace DeepEval to use Langfuse evaluations?
+
+No. DeepEval results land in the same score data model that Langfuse-managed evaluators use. You can keep DeepEval as your metric library and use Langfuse for storing, charting, and comparing the results.
+
+### How do DeepEval results appear in Langfuse?
+
+Each metric result becomes a score with a name, a numeric value, and an optional comment. Storing DeepEval's `reason` output in the comment keeps the metric's explanation visible next to the trace. Scores attached to experiment runs show up in the experiment comparison view.
+
+## More examples [#more-examples]
+
+import { FileCode } from "lucide-react";
+
+<Cards>
+  <Card
+    title="External evaluation pipeline with DeepEval"
+    href="/guides/cookbook/example_external_evaluation_pipelines"
+    icon={<FileCode />}
+  />
+  <Card
+    title="Synthetic dataset generation with DeepEval"
+    href="/guides/cookbook/example_synthetic_datasets"
+    icon={<FileCode />}
+  />
+</Cards>

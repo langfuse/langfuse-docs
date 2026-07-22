@@ -236,7 +236,9 @@ Next, select an evaluator. There are two main ways:
 <Tabs items={["Managed Evaluator", "Custom Evaluator"]}>
 <Tab>
 
-Langfuse ships a growing catalog of evaluators built and maintained by us and partners like **Ragas**. Each evaluator captures best-practice evaluation prompts for a specific quality dimension—e.g. _Hallucination_, _Context-Relevance_, _Toxicity_, _Helpfulness_.
+Langfuse ships a growing catalog of evaluators built and maintained by us and partners like **Ragas**. Each evaluator captures best-practice evaluation prompts for a specific quality dimension, e.g. _Hallucination_, _Context-Relevance_, _Toxicity_, _Helpfulness_.
+
+These dimensions overlap with the metric names used in evaluation libraries: faithfulness and groundedness measure whether the output is supported by the provided context, answer relevance (also called answer relevancy) measures whether the output addresses the question, and context relevance measures retrieval quality. Pick the managed evaluator for the matching quality dimension, or recreate a specific metric definition as a custom evaluator. We also publish judge-prompt recipes for [RAG faithfulness](/resources/engineering/rag-faithfulness-evaluation), [answer relevance](/resources/engineering/answer-relevance-evaluation), and [hallucination detection](/resources/engineering/hallucination-detection).
 
 - **Ready to use**: no prompt writing required.
 - **Continuously expanded**: by adding OSS partner-maintained evaluators and more evaluator types in the future (e.g. regex-based).
