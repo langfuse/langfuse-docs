@@ -65,13 +65,13 @@ Langfuse v4 serves reads from the new APIs that were introduced alongside the da
 
 Ingestion, replaced by [OpenTelemetry-based ingestion](/integrations/native/opentelemetry):
 
-| Endpoint                       | Behavior on v4                                                                                                                      |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `POST /api/public/ingestion`   | Keeps the `207` status code, but returns `400` for every event type except `score-create`, `sdk-log`, and `dataset-run-item-create` |
-| `POST /api/public/traces`      | Returns `404`                                                                                                                       |
-| `POST /api/public/spans`       | Returns `404`                                                                                                                       |
-| `POST /api/public/generations` | Returns `404`                                                                                                                       |
-| `POST /api/public/events`      | Returns `404`                                                                                                                       |
+| Endpoint                       | Behavior on v4                                                                                         |
+|--------------------------------|--------------------------------------------------------------------------------------------------------|
+| `POST /api/public/ingestion`   | Keeps the `207` status code, but returns `400` for every event type except `score-create` or `sdk-log` |
+| `POST /api/public/traces`      | Returns `404`                                                                                          |
+| `POST /api/public/spans`       | Returns `404`                                                                                          |
+| `POST /api/public/generations` | Returns `404`                                                                                          |
+| `POST /api/public/events`      | Returns `404`                                                                                          |
 
 Reads, replaced by the [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2):
 
