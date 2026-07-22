@@ -1,6 +1,6 @@
 ---
 title: Export to Blob Storage
-description: Export traces, observations, enriched observations, and scores to Blob Storage, e.g. S3, GCS, or Azure Blob Storage.
+description: Export enriched observations, scores, and legacy traces and observations to Blob Storage, e.g. S3, GCS, or Azure Blob Storage.
 sidebarTitle: Export to Blob Storage
 ---
 
@@ -19,7 +19,7 @@ import BlobStorageEmptyFiles from "@/components-mdx/blob-storage-empty-files.mdx
   }}
 />
 
-You can create schedule exports to a Blob Storage, e.g. S3, GCS, or Azure Blob Storage, for `traces`, `observations`, enriched observations, and `scores`.
+You can schedule exports to Blob Storage, e.g. S3, GCS, or Azure Blob Storage. Exports contain enriched observations (each observation row includes its trace attributes) and `scores`; integrations on a legacy [export source](#export-source-fast-preview) additionally export separate `traces` and `observations` files.
 
 Those exports can run every `20 minutes`, or on an `hourly`, `daily`, or `weekly` schedule.
 Navigate to your project settings and select `Integrations > Blob Storage` to set up a new export.
@@ -51,11 +51,11 @@ Parquet observation exports do not include the per-unit model price columns (`in
 **Self-hosted deployments running ClickHouse < 25.11:** Parquet export failures may not surface as errors. A run can complete — and its [manifest](#run-manifest) be written — while the Parquet output is incomplete or invalid. Upgrade to ClickHouse >= 25.11, or use a text format (CSV, JSON, or JSONL) for reliable failure detection.
 </Callout>
 
-## Export source (Fast Preview)
+## Export source (Fast Preview) [#export-source-fast-preview]
 
-Blob Storage integrations now include an `Export Source` selector. Where enriched export is available — on Langfuse Cloud, and on self-hosted deployments with the v4 preview opt-in (`LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN`) — new integrations default to `Enriched observations (recommended)` (trace attributes are directly set on observations). On self-hosted deployments without the opt-in, enriched export is not available and new integrations default to `Traces and observations (legacy)`.
+The `Export Source` setting determines which tables the integration exports. Where enriched export is available — on Langfuse Cloud, and on self-hosted deployments with the v4 preview opt-in (`LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN`) — new integrations default to `Enriched observations (recommended)`: trace attributes are set directly on each observation row, which avoids warehouse-side joins and provides significantly better export performance. On self-hosted deployments without the opt-in, enriched export is not available and new integrations default to `Traces and observations (legacy)`.
 
-This source uses enriched observations with trace attributes and provides significantly better export performance. `Scores` are always included, regardless of the selected source.
+`Scores` are always included, regardless of the selected source.
 
 Available options, and the directories each source writes under `{prefix}{project-id}/` in your bucket:
 
