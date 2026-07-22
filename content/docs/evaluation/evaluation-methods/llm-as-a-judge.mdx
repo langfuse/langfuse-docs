@@ -312,6 +312,10 @@ We recommend migrating to [observation-level evaluators](/faq/all/llm-as-a-judge
 </Tab>
 </Tabs>
 
+<Callout type="info">
+**Sampling is applied per evaluator.** Each evaluator draws its own random sample, so two evaluators configured with the same sampling percentage will generally score different subsets of your traffic. If several evaluators must score the same items, set their sampling to 100% and use identical filters, for example by making the sampling decision in your application and applying a [tag](/docs/observability/features/tags) that the evaluators filter on.
+</Callout>
+
 </Tab>
 <Tab>
 
@@ -339,7 +343,7 @@ For observation and experiment targets, **Tool Calls** maps the calls recorded o
 <Tab>
 
 - **Prompt Preview**: As you configure the mapping, Langfuse shows a **live preview of the evaluation prompt populated with actual data**. This preview uses historical data from the last 24 hours that matched your filters. You can navigate through several examples to see how their respective data fills the prompt, helping you build confidence that the mapping is correct.
-- **JSONPath**: If the data is nested (e.g., within a JSON object), you can use a JSONPath expression (like `$.choices[0].message.content`) to precisely locate it.
+- **JSONPath**: If the data is nested (e.g., within a JSON object), you can use a JSONPath expression (like `$.choices[0].message.content`) to precisely locate it. JSONPath expressions including array slices with negative indices are supported; for example, `$[-1:]` selects the last element of an array, such as the latest message in a conversation history.
 
 <Frame fullWidth>![Filter preview](/images/docs/evaluator-mapping.png)</Frame>
 

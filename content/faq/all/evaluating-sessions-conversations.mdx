@@ -15,16 +15,18 @@ Scores in Langfuse can be assigned to traces, observations, or sessions (see the
 1. You can add a [custom score](/docs/evaluation/evaluation-methods/custom-scores) that references the session ID.
 2. You can annotate the session using [annotation queues](/docs/evaluation/evaluation-methods/annotation#annotation-queues).
 
-## Trace-level LLM-as-a-Judge evaluators
+## LLM-as-a-Judge evaluators [#llm-as-a-judge]
 
-[LLM-as-a-Judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) can be applied to traces.
+[LLM-as-a-Judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) can be applied to observations (recommended) or traces (legacy).
 They cannot be applied directly to sessions, as Langfuse does not inherently know when a session has concluded.
 
-It is recommended to evaluate the session using a trace-level LLM-as-a-Judge evaluator. Ensure that the trace contains the complete conversation history. This is typically the case if the conversation is used as input to an LLM call within a trace (i.e., conversation history or short-term memory). You can select this specific information from the observation when setting up the evaluator.
+It is recommended to evaluate the conversation using an observation-level LLM-as-a-Judge evaluator. Target an observation that contains the complete conversation history, typically the root observation or the LLM call that receives the conversation history as input (i.e., conversation history or short-term memory). The evaluator only sees data on the observation it matches, so make sure your application writes the full history onto that observation.
 
 You can either:
 
-1. Evaluate the session on every trace.
-2. Or apply a special [tag](/docs/observability/features/tags) to the final trace of the session (e.g., `conversation_end`) and configure the evaluator to only run on traces with this tag. This approach can help reduce evaluation costs and make metrics more stable.
+1. Evaluate the conversation on every trace of the session.
+2. Or apply a special [tag](/docs/observability/features/tags) to the final trace of the session (e.g., `conversation_end`) and configure the evaluator to only run on observations with this tag. Observation-level evaluators check filter attributes like tags on the observation itself, so propagate trace-level attributes to observations with `propagate_attributes()` (Python) or `propagateAttributes()` (JS/TS); see [this FAQ](/faq/all/observation-eval-not-executing) for details. This approach can help reduce evaluation costs and make metrics more stable.
 
-In both cases, the score will be assigned to the trace.
+In both cases, the score will be assigned to the matched observation.
+
+Trace-level LLM-as-a-Judge evaluators are legacy but continue to work; see the [upgrade guide](/faq/all/llm-as-a-judge-migration) for migrating them to observation-level evaluators.
