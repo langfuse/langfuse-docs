@@ -168,17 +168,6 @@ The new mental model: Langfuse stores one immutable observations table. A trace 
 
 <ObservationsTableDiagram />
 
-| Before (v3)                                                          | After (v4)                                                                                                                                              |
-| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Separate, mutable traces and observations tables                     | Single immutable observations table; a trace is the set of observations sharing a `trace_id`                                                            |
-| Trace attributes stored on the trace, joined at query time           | Trace attributes live on every observation, propagated by the SDKs                                                                                      |
-| `update_current_trace()` / `updateActiveTrace()`                     | `propagate_attributes()`                                                                                                                                |
-| Trace input/output                                                   | Observation input/output (`set_trace_io` is deprecated)                                                                                                 |
-| v1 read APIs (observations, metrics, traces, sessions, scores v1/v2) | [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2), [Metrics API v2](/docs/metrics/features/metrics-api#v2), Scores API v3 |
-| Legacy batch ingestion for trace, span, and generation events        | OTLP endpoint `POST /api/public/otel/v1/traces`                                                                                                         |
-| Trace-level LLM-as-a-judge evaluators                                | [Observation-level evaluators](/faq/all/llm-as-a-judge-migration)                                                                                       |
-| Export source "traces and observations"                              | Export source "enriched observations"                                                                                                                   |
-
 **Trace-level input/output is deprecated across the product.** Every feature that previously read a trace's input and output (tables in the UI, LLM-as-a-judge evaluators, exports) now reads the input and output of the right observation, typically the root span or the LLM call that holds the relevant data. Selecting one observation with the right data instead of assembling it across a whole trace is a big part of the faster loading times.
 
 Why observations-first: agentic applications produce traces with hundreds of operations, and the operations engineers care about were hidden inside one trace row. With observations as the primary entity you query the operations directly ("which LLM calls are slow?"), and observation-level evaluations run in seconds. The [data model docs](/docs/observability/data-model#observations-and-traces) explain the model; the [observations guide](/faq/all/explore-observations-in-v4) covers day-to-day workflows in the UI.
