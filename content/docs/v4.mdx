@@ -172,7 +172,7 @@ Everyone still sending trace, span, or generation events to the legacy `POST /ap
 
 **Ingestion**
 
-Upgrade SDKs first: [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) / [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5). Python SDK v2 and JS SDK v3 cannot send traces to a v4 server.
+Upgrade SDKs first: [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) (≥ 4.7.0) / [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5) (≥ 5.4.0). On a v4 server, Python SDK v3 and JS SDK v4 keep tracing but data appears with up to a 10-minute delay, and their v1 read APIs (`api.*`) no longer work. Python SDK v2 and JS SDK v3 cannot send traces to a v4 server at all.
 
 </Step>
 

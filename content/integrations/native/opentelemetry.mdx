@@ -287,7 +287,7 @@ For long API Keys on GNU systems, you may have to add `-w 0` at the end since `b
 
 <Callout type="info">
 
-If you want spans ingested directly via OpenTelemetry to appear in real time in Langfuse Cloud Fast Preview, include the `x-langfuse-ingestion-version: 4` header. If your setup uses signal-specific header settings, add the same value to `OTEL_EXPORTER_OTLP_TRACES_HEADERS`.
+If you want spans ingested directly via OpenTelemetry to appear in real time on the v4 data model, include the `x-langfuse-ingestion-version: 4` header. If your setup uses signal-specific header settings, add the same value to `OTEL_EXPORTER_OTLP_TRACES_HEADERS`.
 
 </Callout>
 
@@ -297,7 +297,7 @@ If your collector requires signal-specific environment variables, the trace endp
 
 ```bash
 OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="https://cloud.langfuse.com/api/public/otel/v1/traces" # EU data region
-# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com/api/public/otel, 🇯🇵 Japan: https://jp.cloud.langfuse.com/api/public/otel and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com/api/public/otel
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com/api/public/otel/v1/traces, 🇯🇵 Japan: https://jp.cloud.langfuse.com/api/public/otel/v1/traces and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com/api/public/otel/v1/traces
 ```
 
 </Callout>
