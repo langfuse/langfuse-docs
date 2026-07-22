@@ -162,14 +162,3 @@ If you are the sole owner of an organization, you must first transfer ownership 
 ## Deleting a User Account (Self-Host)
 
 Remove the corresponding user record from the `users` table and drop all foreign keys to it using cascade.
-
-## Backups on Langfuse Cloud [#backups]
-
-Deletions remove data across all live data storages.
-In addition, Langfuse Cloud keeps encrypted backups for disaster recovery with short retention windows: Postgres backups are retained for 7 days, ClickHouse backups for 4 days, and S3 object versions for 7 days.
-Backups age out of the system on these schedules.
-See [data regions and infrastructure](/security/data-regions) for details on the backup setup.
-
-Upon contract termination, Langfuse will return or destroy client data within 30 days.
-When an account is voluntarily closed, the associated data is permanently removed within a maximum of 30 days.
-See the [privacy FAQ](/security/privacy-faq) for details.
