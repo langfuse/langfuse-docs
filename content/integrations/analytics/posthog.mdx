@@ -43,7 +43,7 @@ Once integrated, you can build a dashboard in PostHog to visualize your Langfuse
 
 </Steps>
 
-## Export source (Fast Preview, Langfuse v4)
+## Export source (Fast Preview, Langfuse v4) [#export-source]
 
 PostHog integrations now include an `Export Source` selector. New integrations default to `Enriched observations (recommended)` (trace attributes are directly set on observations).
 
@@ -55,6 +55,8 @@ Available options:
 - `Traces and observations (legacy) and enriched observations`
 - `Enriched observations (recommended)`
 
+Each source sends a different set of events with different properties — see the [event reference](#events) below for the exact schemas.
+
 <Callout type="info">
 **Cloud projects created on or after 2026-05-20** will not see the Export Source selector — new Cloud projects use `Enriched observations (recommended)` automatically. Pre-cutoff Cloud projects and all self-hosted deployments keep the full choice.
 </Callout>
@@ -63,7 +65,7 @@ Available options:
 `Traces and observations (legacy)` sources may be deprecated in the future. All new export jobs should use `Enriched observations (recommended)`, and existing legacy jobs are strongly recommended to upgrade.
 </Callout>
 
-### Upgrade path for existing configurations
+### Upgrade path for existing configurations [#upgrade-path]
 
 This migration path applies to **pre-cutoff Cloud projects and self-hosted deployments**. Post-cutoff Cloud projects already use `Enriched observations (recommended)` and cannot select legacy sources.
 
@@ -93,11 +95,11 @@ On an hourly schedule Langfuse batches aggregated events and metrics to your Pos
 
 Matching of metadata helps to join the data from Langfuse with the data from PostHog:
 
-| Langfuse                                                      | PostHog        | Notes                                                                     |
-| ------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------- |
-| `user_id`                                                     | `$distinct_id` |                                                                           |
-| `trace.timestamp`, `generation.started_at`, `score.timestamp` | `timestamp`    |                                                                           |
-| `trace.metadata.$posthog_session_id`                          | `$session_id`  | Optional, you need to add the PostHog session id to your Langfuse traces. |
+| Langfuse                                                       | PostHog        | Notes                                                                     |
+| -------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------- |
+| `user_id`                                                      | `$distinct_id` |                                                                           |
+| `trace.timestamp`, `observation.start_time`, `score.timestamp` | `timestamp`    |                                                                           |
+| `trace.metadata.$posthog_session_id`                           | `$session_id`  | Optional, you need to add the PostHog session id to your Langfuse traces. |
 
 ### User properties
 
@@ -105,22 +107,72 @@ We send the following user properties via `'$set'`:
 
 - `langfuse_user_url`: Deeplink to the [user profile](/docs/tracing-features/users) in Langfuse.
 
-### Events
+### Events [#events]
 
-The integration sends the following events to PostHog.
+Which events the integration sends depends on the selected [export source](#export-source):
+
+| Export source                                                | Events sent                                                                       |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| `Enriched observations (recommended)`                        | [`langfuse observation`](#event-observation)                                      |
+| `Traces and observations (legacy)`                           | [`langfuse trace`](#event-trace), [`langfuse generation`](#event-generation)      |
+| `Traces and observations (legacy) and enriched observations` | All of the above — duplicate records by design, see [upgrade path](#upgrade-path) |
+
+The [`langfuse score`](#event-score) event is always sent, regardless of the selected export source.
 
 Is there any additional information that would be helpful? You can request more events or properties [here](/ideas).
 
-#### Event: `langfuse trace`
+#### Changes from legacy to enriched events [#legacy-vs-enriched]
+
+- **`langfuse generation` is replaced by `langfuse observation`.** The two events are field-for-field identical, with two exceptions: `langfuse_generation_name` is renamed to `langfuse_observation_name`, and a new `langfuse_type` property carries the observation type.
+- **Coverage expands to all observation types.** The legacy source only exports generations; the enriched source exports every observation type. Expect a higher event volume after switching — PostHog bills per event. Filter on `langfuse_type` = `GENERATION` to reproduce the legacy scope.
+- **No standalone trace event.** Trace context is available on every observation event via `langfuse_trace_id` and `langfuse_trace_name`. The trace-level rollup properties have no enriched equivalent: `langfuse_count_observations`, the trace-level `langfuse_cost_usd` and `langfuse_latency` aggregates, and the trace-scoped `langfuse_url`. To approximate them, aggregate observation events by `langfuse_trace_id`.
+- **Score events are identical** in both sources.
+- **Identity and deduplication are unchanged**: the distinct id is still derived from `langfuse_user_id`, `$session_id` handling is the same, and `langfuse_event_version` remains `1.0.0` for all events.
+
+#### Event: `langfuse observation` [#event-observation]
+
+Sent when the export source is `Enriched observations (recommended)` or `Traces and observations (legacy) and enriched observations`. One event per observation, covering every observation type.
+
+- `timestamp`: The start time of the observation.
+- `langfuse_observation_name`: The name of the observation.
+- `langfuse_type`: The observation type: `GENERATION`, `SPAN`, `EVENT`, `AGENT`, `TOOL`, `CHAIN`, `RETRIEVER`, `EVALUATOR`, `EMBEDDING`, or `GUARDRAIL`.
+- `langfuse_trace_name`: Name of the trace related to the observation.
+- `langfuse_trace_id`: The unique identifier of the trace related to the observation.
+- `langfuse_url`: The URL of the observation on the host platform.
+- `langfuse_user_url`: Deeplink to the user profile in Langfuse.
+- `langfuse_id`: Unique identifier of the observation.
+- `langfuse_cost_usd`: Computed total cost of the observation.
+- `langfuse_input_units`: Number of tokens utilized in prompting (for LLM calls).
+- `langfuse_output_units`: Number of tokens produced (for LLM calls).
+- `langfuse_total_units`: Total number of tokens consumed (for LLM calls).
+- `langfuse_session_id`: The session ID associated with the trace of the observation.
+- `langfuse_project_id`: The ID of the project where the observation happened.
+- `langfuse_project_name`: The name of the project where the observation happened.
+- `langfuse_user_id`: The user ID that started the trace linked to the observation. In case it's unavailable, it defaults to `langfuse_unknown_user`.
+- `langfuse_latency`: The observed latency of the observation.
+- `langfuse_time_to_first_token`: The time taken to generate the first token when streaming.
+- `langfuse_release`: Release information of the trace attached with the observation.
+- `langfuse_version`: The versioning info about the observation.
+- `langfuse_model`: The model used (for LLM calls).
+- `langfuse_level`: The level associated with the observation.
+- `langfuse_tags`: Any tags attached to the trace of the observation.
+- `langfuse_environment`: The environment associated with the observation.
+- `langfuse_event_version`: The integration version with Langfuse.
+
+#### Event: `langfuse trace` [#event-trace]
+
+Sent when the export source is `Traces and observations (legacy)` or `Traces and observations (legacy) and enriched observations`. There is no enriched equivalent — see [changes from legacy to enriched events](#legacy-vs-enriched).
 
 - `timestamp`: The time the event occurred.
 - `langfuse_trace_name`: The name of the trace.
 - `langfuse_url`: The URL of the trace.
+- `langfuse_user_url`: Deeplink to the user profile in Langfuse.
 - `langfuse_id`: The unique identification of the trace.
 - `langfuse_cost_usd`: The total cost associated with the trace.
 - `langfuse_count_observations`: The number of observations in the trace.
 - `langfuse_session_id`: The session ID related to the event.
 - `langfuse_project_id`: An ID associated with the project related to the event.
+- `langfuse_project_name`: The name of the project related to the event.
 - `langfuse_user_id`: User ID related to the event. If it's null, it's marked as langfuse_unknown_user.
 - `langfuse_latency`: The latency of the event.
 - `langfuse_release`: Information relating to the event release.
@@ -129,13 +181,16 @@ Is there any additional information that would be helpful? You can request more 
 - `langfuse_environment`: The environment associated with the trace.
 - `langfuse_event_version`: The integration version of Langfuse.
 
-#### Event: `langfuse generation`
+#### Event: `langfuse generation` [#event-generation]
+
+Sent when the export source is `Traces and observations (legacy)` or `Traces and observations (legacy) and enriched observations`. Only covers observations of type generation; replaced by [`langfuse observation`](#event-observation) in the enriched source.
 
 - `timestamp`: The start time of the generation.
 - `langfuse_generation_name`: The name of the generation.
 - `langfuse_trace_name`: Name of the trace related to the generation.
 - `langfuse_trace_id`: The unique identifier of the trace related to the generation.
 - `langfuse_url`: The URL of the generation on the host platform.
+- `langfuse_user_url`: Deeplink to the user profile in Langfuse.
 - `langfuse_id`: Unique identifier of the generation.
 - `langfuse_cost_usd`: Computed total cost of the generation.
 - `langfuse_input_units`: Number of tokens utilized in prompting the generation.
@@ -143,6 +198,7 @@ Is there any additional information that would be helpful? You can request more 
 - `langfuse_total_units`: Total number of tokens consumed in the generation process.
 - `langfuse_session_id`: The session ID associated with the trace of the generation.
 - `langfuse_project_id`: The project identification where the generation happened.
+- `langfuse_project_name`: The name of the project where the generation happened.
 - `langfuse_user_id`: The user ID that started the trace linked to the generation. In case it's unavailable, it defaults to `langfuse_unknown_user`.
 - `langfuse_latency`: The observed latency of the generation.
 - `langfuse_time_to_first_token`: The time taken to generate the first token when streaming.
@@ -154,7 +210,9 @@ Is there any additional information that would be helpful? You can request more 
 - `langfuse_environment`: The environment associated with the generation.
 - `langfuse_event_version`: The integration version with Langfuse.
 
-#### Event `langfuse score`
+#### Event: `langfuse score` [#event-score]
+
+Sent for every export source. The score event schema is identical in the legacy and enriched sources.
 
 - `timestamp`: The time when the score event occurred.
 - `langfuse_score_name`: The name associated with the score.
@@ -163,11 +221,15 @@ Is there any additional information that would be helpful? You can request more 
 - `langfuse_score_data_type`: The data type of the score (NUMERIC, BOOLEAN, CATEGORICAL).
 - `langfuse_score_comment`: Any comments attached with the score.
 - `langfuse_score_metadata`: Any metadata attached with the score.
+- `langfuse_score_entity_type`: The entity the score is attached to: `trace`, `session`, `dataset_run`, or `unknown`.
+- `langfuse_dataset_run_id`: The unique identifier of the dataset run, for scores attached to a dataset run.
 - `langfuse_trace_name`: The name of the trace associated with the score.
 - `langfuse_trace_id`: The unique identifier of the trace associated with the score.
+- `langfuse_user_url`: Deeplink to the user profile in Langfuse.
 - `langfuse_id`: The unique identification of the score.
 - `langfuse_session_id`: The session identification related to the score's trace.
 - `langfuse_project_id`: The project identification linked with the score's trace.
+- `langfuse_project_name`: The name of the project linked with the score's trace.
 - `langfuse_user_id`: The user ID that triggered the trace tied with the score. If not available, defaults to `langfuse_unknown_user`.
 - `langfuse_release`: The release information of the trace associated with the score.
 - `langfuse_tags`: Any tags related to the trace of the score.
