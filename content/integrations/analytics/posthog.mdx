@@ -59,11 +59,11 @@ On an hourly schedule Langfuse batches aggregated events and metrics to your Pos
 
 Matching of metadata helps to join the data from Langfuse with the data from PostHog:
 
-| Langfuse                                    | PostHog        | Notes                                                                     |
-| ------------------------------------------- | -------------- | ------------------------------------------------------------------------- |
-| `user_id`                                   | `$distinct_id` |                                                                           |
-| `observation.start_time`, `score.timestamp` | `timestamp`    | `trace.timestamp` for the [legacy trace event](#event-trace).             |
-| `trace.metadata.$posthog_session_id`        | `$session_id`  | Optional, you need to add the PostHog session id to your Langfuse traces. |
+| Langfuse                                    | PostHog        | Notes                                                                               |
+| ------------------------------------------- | -------------- | ----------------------------------------------------------------------------------- |
+| `user_id`                                   | `$distinct_id` |                                                                                     |
+| `observation.start_time`, `score.timestamp` | `timestamp`    | For [legacy events](#export-source): `trace.timestamp` and `generation.started_at`. |
+| `trace.metadata.$posthog_session_id`        | `$session_id`  | Optional, you need to add the PostHog session id to your Langfuse traces.           |
 
 ### User properties
 

@@ -77,7 +77,7 @@ Matching of metadata helps to join the data from Langfuse with the data from Mix
 | Langfuse                                        | Mixpanel                  | Notes                                                                                                                       |
 | ----------------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | [`user_id`](/docs/observability/features/users) | `distinct_id`, `$user_id` |                                                                                                                             |
-| `observation.start_time`, `score.timestamp`     | `time`                    | Sent as milliseconds since epoch. `trace.timestamp` for the [legacy trace event](#event-trace).                             |
+| `observation.start_time`, `score.timestamp`     | `time`                    | Sent as milliseconds since epoch. For [legacy events](#export-source): `trace.timestamp` and `generation.started_at`.       |
 | `trace.metadata.$mixpanel_session_id`           | `session_id`              | Optional, you need to add the Mixpanel session id to your Langfuse trace [metadata](/docs/observability/features/metadata). |
 
 ### Events [#events]
