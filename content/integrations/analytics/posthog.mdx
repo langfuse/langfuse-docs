@@ -63,17 +63,36 @@ Available options:
 `Traces and observations (legacy)` sources may be deprecated in the future. All new export jobs should use `Enriched observations (recommended)`, and existing legacy jobs are strongly recommended to upgrade.
 </Callout>
 
-### Upgrade path for existing configurations
+### Migrating from the legacy export source [#migrate-export-source]
 
-This migration path applies to **pre-cutoff Cloud projects and self-hosted deployments**. Post-cutoff Cloud projects already use `Enriched observations (recommended)` and cannot select legacy sources.
+This migration path applies to **pre-cutoff Cloud projects and self-hosted deployments**. Post-cutoff Cloud projects already use `Enriched observations (recommended)` and cannot select legacy sources. Existing integrations continue to use `Traces and observations (legacy)` until changed.
 
-Existing integrations continue to use `Traces and observations (legacy)` until changed.
+PostHog is a schemaless event store, so no setup is needed on the PostHog side — the new event name and properties appear automatically once you switch. All migration effort goes into the assets built on top of the events: insights, dashboards, funnels, cohorts, alerts, and warehouse syncs.
 
-To migrate safely:
+#### What changes when you switch
+
+| Aspect                | `Traces and observations (legacy)`                                                                                | `Enriched observations (recommended)`                                                                                             |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Events emitted        | `langfuse trace`, `langfuse generation`, `langfuse score`                                                          | `langfuse observation`, `langfuse score`                                                                                            |
+| Trace-level event     | Dedicated `langfuse trace` event with trace totals (`langfuse_cost_usd`, `langfuse_count_observations`, `langfuse_latency`) | Removed — trace facts are available as `langfuse_trace_id` / `langfuse_trace_name` properties on every observation event            |
+| Observation coverage  | Generations only                                                                                                   | Every observation type (spans, tool calls, agents, embeddings, …), disambiguated via the new `langfuse_type` property               |
+| Observation name      | `langfuse_generation_name`                                                                                         | `langfuse_observation_name`                                                                                                          |
+| Scores                | `langfuse score`, unchanged                                                                                        | `langfuse score`, unchanged                                                                                                          |
+
+Keep in mind:
+
+1. **Nothing is backfilled.** The sync is watermark-based: the old event streams simply stop at the switch date and the new one starts. Dashboards keyed on the old event names show a hard cliff — add a PostHog annotation at the cutover date and keep old dashboards around for lookback.
+2. **Queries need rewriting, not re-pointing.** Insights on `langfuse generation` become insights on `langfuse observation` filtered by `langfuse_type = 'GENERATION'`. Per-trace metrics (total cost, observation count, latency) must be recomputed by aggregating observation events over `langfuse_trace_id`, since there is no trace-summary event anymore.
+3. **Event volume increases.** The legacy source exported one trace event plus generations only; the enriched source exports every observation. Since PostHog bills by event volume, expect a corresponding increase.
+4. **The combined mode double-counts by design.** With `Traces and observations (legacy) and enriched observations`, a generation is exported both as a `langfuse generation` and as a `langfuse observation` event. PostHog does not deduplicate across event names, so metrics that sum cost or tokens across both event types double-count during migration. Use this mode only to build and validate new dashboards side by side.
+5. **The switch is effectively one-way.** Once legacy writes are off, the legacy sources can no longer be selected.
+
+#### Suggested migration steps
 
 1. Switch to `Traces and observations (legacy) and enriched observations`.
-2. Validate downstream dashboards, transformations, and alerts while both sources are exported (this mode creates duplicate records by design).
-3. Switch to `Enriched observations (recommended)` once validation is complete.
+2. Duplicate your dashboards and insights onto the `langfuse observation` event: filter by `langfuse_type`, use `langfuse_observation_name`, and rebuild per-trace metrics as aggregations over `langfuse_trace_id`.
+3. Validate the new numbers against the old ones side by side. Expect intentional coverage differences: the enriched source includes all observation types, not just generations.
+4. Switch to `Enriched observations (recommended)` and annotate the cutover date on any legacy dashboards you keep.
 
 For rollout details, see the [Simplify for Scale changelog](/changelog/2026-03-10-simplify-for-scale).
 
