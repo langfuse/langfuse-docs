@@ -1,0 +1,228 @@
+---
+title: "Prompt CI/CD: version, gate, and roll out prompts like code"
+description: "Learn how to build a prompt CI/CD pipeline: version prompts with labels, validate on datasets, gate promotion in CI, roll out gradually, and roll back fast."
+tags: [guide]
+---
+
+# Prompt CI/CD: version, gate, and roll out prompts like code
+
+A prompt edit changes production behavior the same way a code change does, but in most teams it skips every safeguard that code changes get: no version history, no review, no test suite, no staged rollout. Prompt CI/CD closes that gap. It applies the deployment discipline you already use for code (version, validate, gate, roll out, observe, roll back) to the prompts that steer your LLM application.
+
+**TL;DR:** Treat every prompt change as a deployment. Version each change immutably, validate the candidate against a golden dataset, gate promotion on evaluation scores in CI, roll out with a weighted split between the current and candidate version, watch per-version metrics, and roll back by repointing a label. In Langfuse, versions and deployment labels are native, experiments provide the dataset validation, `langfuse/experiment-action` fails CI on regressions, and promotion or rollback is a single label move with no application redeploy. Approval workflows and traffic splitting are not built-in features; this guide shows how to compose both from labels, protected labels, webhooks, and your CI system.
+
+## What is prompt CI/CD? [#what-is-prompt-cicd]
+
+Prompt CI/CD is the practice of moving prompt changes to production through an automated pipeline with the same stages as a code deployment: every change is versioned, tested against a fixed dataset, blocked when quality drops, rolled out to a fraction of traffic first, and reversible in one step. The term borrows deliberately from software delivery, because the failure it prevents is the same: an unreviewed change reaching all users at once.
+
+The difference from code CI/CD is what "passing" means. A prompt change cannot be type-checked or unit-tested with exact assertions, because LLM outputs are non-deterministic. The pipeline replaces compilers and unit tests with evaluations: scored runs against a dataset, with thresholds that decide whether the change may proceed.
+
+## Why prompt changes need deployment discipline [#why-discipline]
+
+Prompts are configuration that behaves like code. They are short text artifacts, cheap to edit and often owned by product managers or domain experts rather than engineers, yet a one-line edit can change the behavior of every request that passes through them. That combination is what makes undisciplined prompt changes risky:
+
+- A prompt edit has the blast radius of a code deploy but usually ships without review, tests, or a rollback plan.
+- The people best placed to write prompts are often not the people running deployments, so prompt changes route around the engineering release process entirely.
+- A wording change that fixes one complaint can silently break ten other behaviors, and nothing in the edit itself reveals this.
+- Without version history, "what changed and when" becomes unanswerable during an incident.
+
+Hardcoding prompts in the codebase gives them code review by default, but at the cost of a full deployment cycle for every text tweak and an engineering bottleneck for every non-engineer edit. Prompt CI/CD keeps prompts editable outside the codebase while restoring the safeguards.
+
+## The stages of a prompt deployment pipeline [#pipeline-stages]
+
+A complete prompt deployment pipeline has six stages. Each stage exists to prevent a specific failure:
+
+| Stage           | What it does                                                        | Failure it prevents                                    |
+| --------------- | ------------------------------------------------------------------- | ------------------------------------------------------ |
+| **1. Version**  | Records every change as an immutable version with a diff and author | "We don't know what changed or who changed it"         |
+| **2. Validate** | Runs the candidate against a golden dataset and scores the outputs  | The fix for one case breaks ten others                 |
+| **3. Gate**     | Blocks promotion until scores clear thresholds and a human approves | Unreviewed changes reaching production                 |
+| **4. Roll out** | Serves the candidate to a fraction of live traffic first            | A change that passed offline tests failing at scale    |
+| **5. Observe**  | Tracks quality, cost, and latency per prompt version in production  | Regressions that only real traffic can surface         |
+| **6. Roll back** | Reverts to the previous version in one step, without a redeploy    | A bad change staying live while a hotfix is built      |
+
+The rest of this guide builds each stage with Langfuse, and is explicit about which parts are native features and which parts you compose from primitives.
+
+## Stage 1: version every prompt change [#version]
+
+Versioning is native in Langfuse: every save of a prompt creates a new immutable version, and deployment is controlled by labels that point to exactly one version each. Your application code references a label such as `production`, so which version runs in production is a data question, not a code question. The [version control docs](/docs/prompt-management/features/prompt-version-control) cover versions, labels, and the diff view that shows how a prompt evolved between versions.
+
+```python title="Create a new version, deployed to staging only"
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Every save creates a new immutable version
+langfuse.create_prompt(
+    name="support-agent",
+    type="text",
+    prompt="You are a support agent for {{product}}. Answer: {{question}}",
+    labels=["staging"],  # deploy to staging; production is untouched
+)
+```
+
+The version history answers the incident question ("what changed before quality dropped?"), and labels give each environment its own pointer: `staging` for validation, `production` for live traffic, custom labels such as `canary` for rollouts.
+
+### Mirror prompt versions to Git [#git-mirror]
+
+Teams that want prompt history next to code history can sync every prompt version to a repository. Langfuse fires a webhook on every prompt version event, and a small receiver commits the payload to GitHub; the [GitHub integration docs](/docs/prompt-management/features/github-integration) include a complete FastAPI reference implementation and a `repository_dispatch` setup that triggers GitHub Actions directly when prompts change. The Langfuse version history remains the deployment source of truth; the Git mirror adds repo-native review tooling and a backup.
+
+## Stage 2: validate the candidate against a dataset [#validate]
+
+Validation means running the candidate prompt version against a golden dataset of representative inputs and scoring the outputs before any live traffic sees it. In Langfuse, this is an experiment: [experiments via the UI](/docs/evaluation/experiments/experiments-via-ui) run a selected prompt version against a dataset directly from the interface, with LLM-as-a-judge or code evaluators scoring each output, and no application code involved. Product managers who edit prompts can validate their own changes this way, without waiting for an engineer.
+
+For validation that exercises your full application logic rather than the prompt in isolation, the SDK experiment runner executes your actual task function against the same dataset. Either way, the result is a dataset run: aggregate scores per run, and a comparison view that puts the candidate's outputs next to the current production version's outputs, item by item.
+
+The dataset determines what validation can catch. Seed it from production traces (any trace in Langfuse can be added to a dataset from the UI, so every incident becomes a permanent test case), add hand-written edge cases, and keep the promotion-gate dataset small enough to run on every change.
+
+## Stage 3: gate promotion on scores and approval [#gate]
+
+A gate turns validation from advice into a blocker: the candidate cannot be promoted until its scores clear thresholds, and until someone with authority signs off. The score half of this gate is a documented Langfuse workflow; the approval half is composed from primitives, and we describe exactly how below.
+
+### Fail CI when scores drop [#ci-gate]
+
+The [experiments in CI/CD docs](/docs/evaluation/experiments/experiments-ci-cd) show the full setup: an experiment script raises `RegressionError` when an aggregate score misses a threshold, and the official [`langfuse/experiment-action`](https://github.com/langfuse/experiment-action) GitHub Action runs the script against a named Langfuse dataset, posts the scores as a pull request comment, and fails the job on regression. To gate prompt changes specifically, trigger the workflow from Langfuse itself: a GitHub `repository_dispatch` automation fires on prompt version events, so saving a candidate version starts the evaluation run without anyone leaving the Langfuse UI.
+
+```yaml title=".github/workflows/prompt-gate.yml"
+name: Prompt promotion gate
+
+on:
+  repository_dispatch:
+    types: [langfuse-prompt-update]
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      # Pin to the latest release tag (v1.0.6 as of July 2026)
+      - uses: langfuse/experiment-action@v1.0.6
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        with:
+          langfuse_public_key: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+          langfuse_secret_key: ${{ secrets.LANGFUSE_SECRET_KEY }}
+          langfuse_base_url: https://cloud.langfuse.com
+          experiment_path: experiments/prompt-gate.py
+          dataset_name: support-agent-golden-set
+```
+
+The gate script fetches the candidate by its `staging` label and runs it against the dataset; our [LLM regression testing guide](/resources/engineering/llm-regression-testing) walks through the complete script, including evaluators, thresholds, and the prompt-version variant of the gate.
+
+### Compose an approval workflow [#approval-workflow]
+
+Langfuse does not ship a built-in pull-request-style approval flow for prompt promotions as of July 2026. It does ship the primitives that enforce the same guarantee, which is that no single unauthorized person can change what production serves:
+
+1. **Protect the `production` label.** Protected prompt labels let project admins and owners mark a label so that `member` and `viewer` roles cannot move or delete it. Prompt authors can create and label candidate versions freely, but only designated approvers can point `production` at a new version. Label protection is available on the Pro plan with the Teams add-on, on Enterprise, and in self-hosted Enterprise Edition.
+2. **Make evaluation evidence part of the request.** The CI gate from the previous section posts scores to a pull request or records them as a dataset run, so the approver reviews a scored comparison against the current production version, not a text diff alone.
+3. **Notify approvers automatically.** [Webhooks and the Slack integration](/docs/prompt-management/features/webhooks-slack-integrations) fire on prompt version events, so a new candidate version can post to an approvals channel with the version, labels, and commit message.
+4. **Keep an audit trail.** On Enterprise plans and self-hosted Enterprise Edition, audit logs record who changed which label and when, with before and after state.
+
+The resulting workflow is: author saves a candidate with a `staging` label, CI validates it against the dataset automatically, the approver reviews the scores, and the approver (an admin or owner, when the label is protected) moves the `production` label. Teams that mirror prompts to Git can run the review itself as a GitHub pull request and let a CI job move the label on merge.
+
+## Stage 4: roll out gradually [#roll-out]
+
+A gradual rollout serves the candidate to a small fraction of live traffic while the incumbent keeps the rest, the same pattern feature flags provide for code. In Langfuse, the two variants are two labels on the same prompt, and the split is a few lines in your application; the [A/B testing docs](/docs/prompt-management/features/a-b-testing) describe the pattern and when live testing is appropriate. Langfuse does not route or split traffic for you as of July 2026: the rollout percentage lives in your code, and Langfuse tracks quality, cost, and latency per version so the comparison is measurable.
+
+```python title="90/10 canary between two prompt versions"
+import random
+
+from langfuse import get_client
+from langfuse.openai import openai
+
+langfuse = get_client()
+
+user_question = "How do I reset my password?"
+
+# Two labels on the same prompt; both are cached client-side by the SDK
+prompt_stable = langfuse.get_prompt("support-agent", label="production")
+prompt_canary = langfuse.get_prompt("support-agent", label="canary")
+
+# The rollout percentage lives in your application code
+selected = prompt_canary if random.random() < 0.10 else prompt_stable
+
+response = openai.chat.completions.create(
+    model="gpt-4.1",
+    messages=[{"role": "user", "content": selected.compile(question=user_question)}],
+    langfuse_prompt=selected,  # link this generation to the exact prompt version
+)
+```
+
+The `langfuse_prompt` link is what makes the canary measurable: every generation is attributed to the exact version that produced it, so the metrics in the next stage separate cleanly by variant. Promoting the winner is a single label move, in the UI or via the SDK, and requires no redeploy:
+
+```python title="Promote the winning version"
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Point the production label at the winning version
+langfuse.update_prompt(
+    name="support-agent",
+    version=7,
+    new_labels=["production"],
+)
+```
+
+Because your application fetches by label, it picks up the promoted version on its next fetch. There is no built-in "promote winner" button that compares the variants and moves the label for you; the comparison is yours to read (next stage) and the promotion is the one label change above.
+
+## Stage 5: observe per prompt version in production [#observe]
+
+Offline validation only covers inputs you thought to test; production observation catches the rest. When generations are linked to prompt versions, Langfuse aggregates metrics per version in the prompt's Metrics tab: median latency, median input and output tokens, median cost, generation count, and median evaluation score. During a canary, this is the 90/10 scorecard, with each variant's quality and cost side by side on real traffic.
+
+To close the loop from observation back to action, [monitors](/docs/metrics/features/monitors) alert on metric thresholds: a monitor on a score metric with warning and alert thresholds can notify Slack, call a webhook, or trigger a GitHub Actions workflow when quality degrades, turning a slow-burn prompt regression into a page instead of a support ticket.
+
+## Stage 6: roll back in one step [#roll-back]
+
+Rollback is the version stage paying off: because `production` is a label pointing at a version, reverting means pointing it back at the previous version, in the UI or with the same `update_prompt` call used for promotion. No build, no deploy, no code change.
+
+One operational detail matters for rollback speed. The SDKs cache prompts client-side with a default TTL of 60 seconds and revalidate in the background, so running instances serve the rolled-back version within roughly one TTL of the label change, on their next fetch. For most incidents that is faster than any code-deploy rollback; if you need tighter bounds, the cache TTL is configurable per fetch.
+
+## What is native in Langfuse and what you compose [#native-vs-composed]
+
+Langfuse provides the storage, evaluation, and measurement layers of prompt CI/CD natively; the workflow glue (approvals, traffic percentages) is composed from labels, webhooks, and your CI system. As of July 2026:
+
+| Pipeline capability                     | In Langfuse       | How                                                                    |
+| --------------------------------------- | ----------------- | ---------------------------------------------------------------------- |
+| Immutable prompt versions and diffs     | Native            | Every save creates a version; diff view in the UI                      |
+| Label-based deployment (staging, prod)  | Native            | Labels point at versions; SDKs fetch by label                          |
+| Dataset validation of a prompt version  | Native            | Experiments via UI or SDK, scored by evaluators                        |
+| CI gate that fails on regression        | Native             | `langfuse/experiment-action` plus `RegressionError` thresholds         |
+| Trigger CI on prompt changes            | Native            | GitHub `repository_dispatch` automation or webhooks                    |
+| Restrict who can promote to production  | Native (plan-gated) | Protected prompt labels; Pro Teams add-on, Enterprise, self-hosted EE |
+| Multi-step approval workflow            | Composed          | Protected labels + CI evidence + webhook notifications                 |
+| Weighted traffic split (e.g. 90/10)     | Composed          | Two labels + a random split in application code                        |
+| One-click winner promotion              | Composed          | Read the per-version metrics, then one label move                      |
+| Per-version production metrics          | Native            | Prompt Metrics tab via trace linking                                   |
+| Alerting on quality regressions         | Native            | Monitors on score metrics                                              |
+| One-step rollback                       | Native            | Repoint the `production` label                                         |
+| Audit trail of label changes            | Native (plan-gated) | Audit logs on Enterprise and self-hosted EE                           |
+
+## FAQ [#faq]
+
+### Does Langfuse have a built-in approval workflow for prompt changes? [#faq-approval]
+
+Not as a single feature, as of July 2026. The enforced equivalent is composed from primitives: protect the `production` label so only project admins and owners can move it, run the candidate through a CI evaluation gate so approvers review scores rather than text diffs, and use webhooks or the Slack integration to notify approvers when a candidate version is saved. On Enterprise plans and self-hosted Enterprise Edition, audit logs record every label change with user attribution.
+
+### How do I run a 90/10 traffic split between two prompt versions? [#faq-traffic-split]
+
+Label the incumbent `production` and the candidate `canary`, fetch both by label in your application, and select the canary when a random draw falls below 0.10. Langfuse does not split traffic for you; the percentage is application code. What Langfuse provides is the measurement: link each generation to the prompt version that produced it, and the per-version metrics separate the two variants' quality, cost, and latency on live traffic.
+
+### How do I promote the winner after a canary or A/B test? [#faq-promote-winner]
+
+Compare the variants in the prompt's Metrics tab, then move the `production` label to the winning version, either in the Langfuse UI or with `update_prompt` in the SDK. Your application picks up the new version on its next fetch, without a redeploy. As of July 2026, there is no automated promotion based on metric thresholds; the decision and the label move are yours.
+
+### Can a prompt change trigger my CI pipeline automatically? [#faq-trigger-ci]
+
+Yes. A GitHub repository dispatch automation in Langfuse sends a `repository_dispatch` event with the prompt name, version, and labels to your repository whenever a prompt changes, which starts any GitHub Actions workflow listening for it. For other CI systems, prompt version webhooks POST the same payload to any HTTPS endpoint, with HMAC signatures for verification.
+
+### How fast does a prompt rollback take effect? [#faq-rollback-speed]
+
+The label change itself is immediate. Running application instances serve [cached prompts](/docs/prompt-management/features/caching) with a default TTL of 60 seconds and background revalidation, so they pick up the rolled-back version within roughly one TTL of the change. Lower the TTL on fetches where faster convergence matters more than the saved network calls.
+
+### Should prompts live in Git or in a prompt management system? [#faq-git-vs-prompt-management]
+
+The deciding factor is who edits prompts and how often. Prompts in Git get code review for free but require an engineer and a deploy for every change, which turns a two-minute wording fix into a release. Prompts in a management system deploy instantly and are editable by non-engineers, and the pipeline on this page restores the review and testing that Git provided. The two are not exclusive: webhook-driven sync mirrors every Langfuse prompt version into a repository, so teams can keep Git-based review while deployment stays label-based.
