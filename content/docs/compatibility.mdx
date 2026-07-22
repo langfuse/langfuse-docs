@@ -107,22 +107,56 @@ Self-hosting Langfuse? Use the [self-hosted compatibility matrix](/self-hosting/
 
 <CompatDetail name="Python SDK v3">
 
-Deprecated. Tracing keeps working, but on the v4 data model data appears with up to a 10-minute delay. Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) (≥ 4.7.0) for real-time data.
+Deprecated. Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4).
+
+**Limitations:**
+
+| Capability                      | Langfuse Cloud v3                                 | Langfuse Cloud v4                                                           |
+| ------------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------- |
+| Tracing (OpenTelemetry)         | Supported                                         | Supported (data delayed up to 10 min; Python SDK v4 ≥ 4.7.0 for real time)  |
+| Datasets & experiments          | Datasets only (experiments require Python SDK v4) | Datasets only (experiments require Python SDK v4)                           |
+| Public API & querying (`api.*`) | Supported                                         | Supported until the v4 cutover (date will follow); then v1 APIs are removed |
 
 </CompatDetail>
 <CompatDetail name="Python SDK v2">
 
-Deprecated. Sends traces via the legacy batch ingestion API, which is removed at the v4 cutover (date will follow); trace ingestion then stops working. Score ingestion is unaffected. Upgrade via the [SDK upgrade paths](/docs/observability/sdk/upgrade-path).
+Deprecated. Upgrade via the [SDK upgrade paths](/docs/observability/sdk/upgrade-path).
+
+**Limitations:**
+
+| Capability                       | Langfuse Cloud v3                                 | Langfuse Cloud v4                                                                |
+| -------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Tracing (legacy batch ingestion) | Supported                                         | Removed at the v4 cutover (date will follow); trace ingestion then stops working |
+| Score ingestion                  | Supported                                         | Supported                                                                        |
+| Datasets & experiments           | Datasets only (experiments require Python SDK v4) | Datasets only (experiments require Python SDK v4)                                |
+| Public API & querying (`api.*`)  | Supported                                         | Supported until the v4 cutover (date will follow); then v1 APIs are removed      |
 
 </CompatDetail>
 <CompatDetail name="JS/TS SDK v4">
 
-Deprecated. Tracing keeps working, but on the v4 data model data appears with up to a 10-minute delay. Upgrade to [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5) (≥ 5.4.0) for real-time data.
+Deprecated. Upgrade to [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5).
+
+**Limitations:**
+
+| Capability                      | Langfuse Cloud v3                                | Langfuse Cloud v4                                                           |
+| ------------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------- |
+| Tracing (OpenTelemetry)         | Supported                                        | Supported (data delayed up to 10 min; JS/TS SDK v5 ≥ 5.4.0 for real time)   |
+| Datasets & experiments          | Datasets only (experiments require JS/TS SDK v5) | Datasets only (experiments require JS/TS SDK v5)                            |
+| Public API & querying (`api.*`) | Supported                                        | Supported until the v4 cutover (date will follow); then v1 APIs are removed |
 
 </CompatDetail>
 <CompatDetail name="JS/TS SDK v3 / v2">
 
-Deprecated. Sends traces via the legacy batch ingestion API, which is removed at the v4 cutover (date will follow); trace ingestion then stops working. Score ingestion is unaffected. Upgrade via the [SDK upgrade paths](/docs/observability/sdk/upgrade-path).
+Deprecated. Upgrade via the [SDK upgrade paths](/docs/observability/sdk/upgrade-path).
+
+**Limitations:**
+
+| Capability                       | Langfuse Cloud v3                                | Langfuse Cloud v4                                                                |
+| -------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------- |
+| Tracing (legacy batch ingestion) | Supported                                        | Removed at the v4 cutover (date will follow); trace ingestion then stops working |
+| Score ingestion                  | Supported                                        | Supported                                                                        |
+| Datasets & experiments           | Datasets only (experiments require JS/TS SDK v5) | Datasets only (experiments require JS/TS SDK v5)                                 |
+| Public API & querying (`api.*`)  | Supported                                        | Supported until the v4 cutover (date will follow); then v1 APIs are removed      |
 
 </CompatDetail>
 <CompatDetail name="OpenTelemetry">
