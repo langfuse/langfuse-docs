@@ -85,7 +85,9 @@ You can use your editor's Intellisense to explore the API methods and their para
 <Callout type="info">
 
 In Python SDK v4 and JS/TS SDK v5, the high-performance resources are the
-defaults: `api.observations`, `api.scores`, and `api.metrics`. Legacy v1
+defaults: `api.observations`, `api.metrics`, and — for score reads —
+`api.scores_v3` / `api.scoresV3` (`api.scores`, the v2 reads, is
+deprecated; see the [Scores API migration guide](/docs/api-and-data-platform/features/scores-api#upgrade-from-v2)). Legacy v1
 resources moved under `api.legacy.*` (Python: `*_v1`, JS/TS: `*V1`). See
 [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk) for SDK examples.
 
@@ -229,14 +231,15 @@ try {
 
 ## Retrieve Data via the API
 
-For new data extraction workflows, use the v2 data APIs:
+For new data extraction workflows, use the high-performance data APIs:
 
 - [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) - Retrieve observation data (spans, generations, events) from Langfuse for custom workflows, evaluation pipelines, and analytics.
+- [Scores API v3](/docs/api-and-data-platform/features/scores-api#v3) - Retrieve score data (evaluations, annotations, and API-ingested scores) with a typed value field and cursor-based pagination.
 - [Metrics API v2](/docs/metrics/features/metrics-api#v2) - Retrieve aggregated analytics and metrics from your Langfuse data.
 
 <Callout type="info">
 
-Older trace, observation, and metrics read APIs remain available, but are not recommended as the default for new extraction workflows because they are less performant at scale. See [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) for row-level data and [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregates.
+Older trace, observation, score, and metrics read APIs remain available, but are not recommended as the default for new extraction workflows because they are less performant at scale. See [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) for row-level trace and observation data, [Scores API v3](/docs/api-and-data-platform/features/scores-api#v3) for score data, and [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregates.
 
 </Callout>
 
