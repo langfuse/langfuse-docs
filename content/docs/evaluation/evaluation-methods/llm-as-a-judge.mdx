@@ -76,13 +76,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
       </CardContent>
     </Card>
 
-    <Card className="border">
-      <CardContent className="p-3">
-        <div className="font-semibold text-sm">Traces <span className="text-xs font-normal opacity-70">(Legacy)</span></div>
-        <div className="text-xs text-muted-foreground mt-1">Complete workflow executions</div>
-      </CardContent>
-    </Card>
-
   </div>
 </div>
 
@@ -121,9 +114,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 Evaluate live production traffic to monitor your LLM application performance in real-time.
 
-<Tabs items={["Observations (Recommended)", "Traces (Legacy)"]}>
-<Tab>
-
 Run evaluators on individual observations within your traces—such as LLM calls, retrieval operations, embedding generations, or tool calls.
 
 #### Context available to observation-level evaluators [#observation-evaluator-context]
@@ -153,36 +143,6 @@ At ingest time, each observation is evaluated against your filter criteria. Matc
 
 <Tab>
 
-Run evaluators on complete traces, evaluating entire workflow executions from start to finish.
-
-<Callout type="warning">
-Trace-level LLM-as-a-Judge evaluators are legacy. Migrate to observation-level evaluators and put the data the judge needs on the target observation.
-</Callout>
-
-<Callout type="info">
-**Consider targeting Observations instead**: Observation-level evaluators complete in seconds (vs minutes for trace-level), eliminating evaluation delays. They also offer better precision for production monitoring. See [upgrade guide](/faq/all/llm-as-a-judge-migration).
-</Callout>
-
-**Why target Traces**
-
-- Your evaluation requires full context spanning multiple operations
-- You're on legacy SDK versions (Python v2 or JS/TS v3) and cannot upgrade
-
-**Data Flow**
-
-At ingest time, each trace is evaluated against your filter criteria. Matching traces are added to an evaluation queue and processed asynchronously. Scores are attached to the trace itself, resulting in one score per trace per evaluator.
-
-**Example Use Cases**
-
-- Score the accuracy of a multi-step agent workflow, if and only if evaluator needs full context spanning multiple operations (e.g., retrieval → reranking → generation → citation)
-
-</Tab>
-</Tabs>
-
-</Tab>
-
-<Tab>
-
 Run evaluators on controlled test datasets to compare model versions, prompt variations, or system configurations in a reproducible environment.
 
 **Why target Experiments**
@@ -207,7 +167,7 @@ Each experiment run generates traces that are automatically scored by your selec
 </Tab>
 </Tabs>
 
-## Set up step-by-step
+## Set up step-by-step [#set-up-step-by-step]
 
 <Steps>
 
@@ -263,9 +223,6 @@ With your evaluator and model selected, configure which data to run the evaluati
 <Tabs items={["Live Production Data", "Offline Experiment Data"]}>
 <Tab>
 
-<Tabs items={["Observations (Recommended)", "Traces (Legacy)"]}>
-<Tab>
-
 **Configuration Steps**
 
 1. Select "Live Observations" as your evaluation target
@@ -277,38 +234,11 @@ With your evaluator and model selected, configure which data to run the evaluati
 - **SDK version**: Python v3+ (OTel-based) or JS/TS v4+ (OTel-based)
   - [Python v2 → v3 migration guide](/docs/observability/sdk/upgrade-path/python-v2-to-v3)
   - [JS/TS v3 → v4 migration guide](/docs/observability/sdk/upgrade-path/js-v3-to-v4)
-- **When filtering by trace attributes**: To filter observations by trace-level attributes (`userId`, `sessionId`, `version`, `tags`, `metadata`, `traceName`), use [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes-to-observations) in your instrumentation code. Without this, trace attributes will not be available on observations. If you do set up trace-level attribute filtering and are not propagating attributes to observations, your observations will not be matched by the evaluator.
+- **When filtering by trace attributes**: To filter observations by trace-level attributes (`userId`, `sessionId`, `version`, `tags`, `metadata`, `traceName`), use [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes) in your instrumentation code. Without this, trace attributes will not be available on observations. If you do set up trace-level attribute filtering and are not propagating attributes to observations, your observations will not be matched by the evaluator.
 
-</Tab>
-
-<Tab>
-
-<Callout type="info">
-**Performance consideration**: We recommend using Observation-level evaluators for production monitoring. They complete in seconds (vs minutes for trace-level), eliminating evaluation delays and backlogs. They also offer better precision and cost efficiency. See [upgrade guide](/faq/all/llm-as-a-judge-migration).
+<Callout type="warning">
+**Deprecation of trace-level evaluators:** Trace-level evaluators are built on the old trace-centric data model and are deprecated; the removal deadline will be announced as part of [Langfuse v4](/docs/v4). Existing trace-level evaluators will continue to run until the deprecation timeline. After the deprecation timeline, the evaluators will stop producing results, and go stable. Multi-span evaluations will build on the new observation-centric data model. To move existing trace-level evaluators, follow the [upgrade guide](/faq/all/llm-as-a-judge-migration).
 </Callout>
-
-**Configuration Steps**
-
-1. Select "Live Traces" as your evaluation target
-2. Filter traces by name, tags, userId, and other trace-level attributes
-3. Choose whether to run on new traces only or include existing traces (backfilling)
-4. Configure sampling percentage (e.g., 5%) to manage evaluation costs and throughput
-5. Preview matched traces from the last 24 hours to validate your filter configuration
-
-<Frame fullWidth>
-  ![Production tracing data](/images/docs/evaluator-trace-filter.png)
-</Frame>
-
-**Requirements**
-
-- **OTel-based SDKs**: If you're using Python v3+ or JS/TS v4+, trace input/output is derived from the root observation by default. To explicitly set trace input/output for these evaluators, use `set_trace_io()` (Python) or `setTraceIO()` (JS/TS). See the [Python v3 → v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) and [JS/TS v4 → v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5) migration guides.
-
-<Callout type="info">
-We recommend migrating to [observation-level evaluators](/faq/all/llm-as-a-judge-migration) instead of using `set_trace_io()` / `setTraceIO()`. Once migrated, you can remove these calls from your codebase entirely.
-</Callout>
-
-</Tab>
-</Tabs>
 
 </Tab>
 <Tab>
@@ -417,7 +347,7 @@ If your observation-level evaluator isn't executing, see [Why is my observation-
 
 You can run observation-level LLM-as-a-Judge on historical data from the observations table. This is useful if you have already ingested production data and want to score matching observations retroactively with a new or updated evaluator.
 
-**Prerequisite**: Enable the **[Fast Mode](/docs/v4)** toggle for the evaluator. To use the same evaluator on newly ingested data in real time, either upgrade to the latest SDKs (Python v4+ or JS/TS v5+) or, if you ingest directly via OTEL, set `x-langfuse-ingestion-version: 4` on your OTEL span exporter.
+**Prerequisite**: Enable the **[Fast Mode](/docs/v4)** toggle for the evaluator. To use the same evaluator on newly ingested data in real time, either upgrade to the latest SDKs (Python v4+ or JS/TS v5+) or, if you ingest directly via OTEL, [set `x-langfuse-ingestion-version: 4` on your OTEL span exporter](/integrations/native/opentelemetry#real-time-ingestion).
 
 To backfill scores:
 

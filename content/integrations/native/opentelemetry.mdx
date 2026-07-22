@@ -285,11 +285,21 @@ For long API Keys on GNU systems, you may have to add `-w 0` at the end since `b
 
 </Callout>
 
-<Callout type="info">
+### Enable real-time ingestion in Langfuse v4 [#real-time-ingestion]
 
-If you want spans ingested directly via OpenTelemetry to appear in real time on the v4 data model, include the `x-langfuse-ingestion-version: 4` header. If your setup uses signal-specific header settings, add the same value to `OTEL_EXPORTER_OTLP_TRACES_HEADERS`.
+If you send spans directly via OpenTelemetry, include the
+`x-langfuse-ingestion-version: 4` header so that new data appears in real time
+on the v4 data model and the v2 Observations and Metrics APIs. Without
+this header, directly ingested OpenTelemetry data can be delayed by up to 10
+minutes. The `OTEL_EXPORTER_OTLP_HEADERS` configuration above already includes
+the header.
 
-</Callout>
+If your setup uses signal-specific header settings, configure the same header
+on the traces exporter:
+
+```bash
+OTEL_EXPORTER_OTLP_TRACES_HEADERS="Authorization=Basic ${AUTH_STRING},x-langfuse-ingestion-version=4"
+```
 
 <Callout type="info">
 

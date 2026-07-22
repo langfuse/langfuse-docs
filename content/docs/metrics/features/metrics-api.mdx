@@ -33,7 +33,7 @@ The deprecated `GET /api/public/metrics` and `GET /api/public/metrics/daily` end
 
 <Callout type="info">
 
-**Data availability:** Data from older SDKs (`langfuse-python` < `4.0.0`, `langfuse-js` < `5.0.0`) or direct OpenTelemetry exporters that do not send `x-langfuse-ingestion-version: 4` can be delayed by up to 10 minutes on v2 endpoints. Upgrade to [Python SDK v4.7.0+](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS SDK v5.4.0+](/docs/observability/sdk/upgrade-path/js-v4-to-v5), or set that header on your OTEL span exporter, to see new data in real time.
+**Data availability:** Data from older SDKs (`langfuse-python` < `4.0.0`, `langfuse-js` < `5.0.0`) or direct OpenTelemetry exporters that do not send `x-langfuse-ingestion-version: 4` can be delayed by up to 10 minutes on v2 endpoints. Upgrade to [Python SDK v4.7.0+](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS SDK v5.4.0+](/docs/observability/sdk/upgrade-path/js-v4-to-v5), or [set that header on your OTEL span exporter](/integrations/native/opentelemetry#real-time-ingestion) to see new data in real time.
 
 On self-hosted Langfuse v3, use the [Metrics API v1](/docs/api-and-data-platform/features/deprecated-apis#metrics-v1) instead; see the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
 

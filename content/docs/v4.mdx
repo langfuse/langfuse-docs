@@ -138,7 +138,7 @@ Upgrade to Python SDK ≥ 4.7.0 / JS SDK ≥ 5.4.0 (below these versions, data a
 
 **Ingestion**
 
-Everyone still sending trace, span, or generation events to the legacy `POST /api/public/ingestion` API must move to the [OpenTelemetry endpoint](/integrations/native/opentelemetry) `POST /api/public/otel/v1/traces`. Set the `x-langfuse-ingestion-version: 4` header on your span exporter for real-time data, and [propagate trace attributes](/integrations/native/opentelemetry#propagating-attributes) (`user_id`, `session_id`, ...) to all spans.
+Everyone still sending trace, span, or generation events to the legacy `POST /api/public/ingestion` API must move to the [OpenTelemetry endpoint](/integrations/native/opentelemetry) `POST /api/public/otel/v1/traces`. Set the [`x-langfuse-ingestion-version: 4` header](/integrations/native/opentelemetry#real-time-ingestion) on your span exporter for real-time data, and [propagate trace attributes](/integrations/native/opentelemetry#propagating-attributes) (`user_id`, `session_id`, ...) to all spans.
 
 </Step>
 
