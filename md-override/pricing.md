@@ -100,6 +100,8 @@ Optional **Yearly Commitment**:
 | [Multi-modal](/docs/observability/features/multi-modality)                                          | Free while in beta  | Free while in beta  | Free while in beta  | Free while in beta           |
 | Access to historical data                                                                           | 30 days             | 90 days             | 3 years             | 3 years                      |
 | [Ingestion throughput](/faq/all/api-limits)                                                         | 1,000 req/min       | 4,000 req/min       | 20,000 req/min      | Custom                       |
+| **Langfuse AI**                                                                                     |                     |                     |                     |                              |
+| [Langfuse Assistant (in-app agent)](/docs/langfuse-assistant)                                       | Yes                 | Yes                 | Yes                 | Yes                          |
 | **Prompt Management**                                                                               |                     |                     |                     |                              |
 | [Prompt versioning](/docs/prompt-management/get-started)                                            | Yes                 | Yes                 | Yes                 | Yes                          |
 | Prompt fetching                                                                                     | Unlimited           | Unlimited           | Unlimited           | Unlimited                    |
@@ -120,14 +122,19 @@ Optional **Yearly Commitment**:
 | [LLM-as-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge)                       | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Human annotation](/docs/scores/annotation)                                                         | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Human annotation queues](/docs/evaluation/evaluation-methods/annotation#annotation-queues)         | 1 queue             | 3 queues            | Yes                 | Yes                          |
+| **Metrics**                                                                                         |                     |                     |                     |                              |
+| [Custom dashboards](/docs/metrics/features/custom-dashboards)                                       | Yes                 | Yes                 | Yes                 | Yes                          |
+| [Monitors and alerts](/docs/metrics/features/monitors)                                              | 2 monitors          | 20 monitors         | 50 monitors         | 100 monitors                 |
 | **Collaboration**                                                                                   |                     |                     |                     |                              |
 | Projects                                                                                            | Unlimited           | Unlimited           | Unlimited           | Unlimited                    |
 | Users                                                                                               | 2                   | Unlimited           | Unlimited           | Unlimited                    |
 | **API**                                                                                             |                     |                     |                     |                              |
 | [Extensive public API](/docs/api-and-data-platform/features/public-api)                             | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Rate limit (general API)](/faq/all/api-limits)                                                     | 30 req/min          | 100 req/min         | 1,000 req/min       | Custom                       |
-| [Rate limit (datasets API)](/faq/all/api-limits)                                                    | 100 req/min         | 200 req/min         | 1,000 req/min       | Custom                       |
-| [Rate limit (metrics API)](/faq/all/api-limits)                                                     | 100 req/day         | 200 req/day         | 2,000 req/day       | Custom                       |
+| [Rate limit (General API)](/faq/all/api-limits)                                                     | 30 req/min          | 100 req/min         | 1,000 req/min       | Custom                       |
+| [Rate limit (Datasets API)](/faq/all/api-limits)                                                    | 100 req/min         | 200 req/min         | 1,000 req/min       | Custom                       |
+| [Rate limit (Metrics API v2)](/faq/all/api-limits)                                                  | 100 req/day         | 100 req/hour        | 500 req/hour        | Custom                       |
+| [Rate limit (Observations API v2)](/faq/all/api-limits)                                             | 30 req/min          | 100 req/min         | 1,000 req/min       | Custom                       |
+| [Rate limit (Legacy Metrics API)](/faq/all/api-limits)                                              | 100 req/day         | 2,000 req/day       | 2,000 req/day       | Custom                       |
 | [SLA](/enterprise#faq)                                                                              | --                  | --                  | --                  | Yes                          |
 | **Exports**                                                                                         |                     |                     |                     |                              |
 | [Batch export via UI](/docs/api-and-data-platform/features/query-via-sdk#ui)                        | Yes                 | Yes                 | Yes                 | Yes                          |
@@ -145,6 +152,7 @@ Optional **Yearly Commitment**:
 | [Support SLA](/enterprise#faq)                                                                      | --                  | --                  | --                  | Yes                          |
 | **Security**                                                                                        |                     |                     |                     |                              |
 | [Data region](/security/data-regions)                                                               | US, EU, or Japan    | US, EU, or Japan    | US, EU, or Japan    | US, EU, Japan, or HIPAA      |
+| [AWS PrivateLink](/security/networking)                                                             | --                  | --                  | --                  | Yes\*                        |
 | Sign in with Google, AzureAD, GitHub                                                                | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Organization-level RBAC](/docs/administration/rbac)                                                | Yes                 | Yes                 | Yes                 | Yes                          |
 | Enterprise SSO (e.g. Okta, EntraID)                                                                 | --                  | --                  | Teams add-on        | Yes                          |
@@ -165,6 +173,8 @@ Optional **Yearly Commitment**:
 | [SOC2 Type II & ISO27001 reports](/security)                                                        | --                  | --                  | Yes                 | Yes                          |
 | [HIPAA compliance](/security/hipaa)                                                                 | --                  | --                  | Yes                 | Yes                          |
 | InfoSec/legal reviews                                                                               | --                  | --                  | --                  | Yearly Commitment            |
+
+\* Available for Enterprise customers with a committed contract and subject to regional availability. See [networking documentation](/security/networking) for details.
 
 ## Graduated Usage Pricing
 
@@ -254,6 +264,13 @@ The primary way is to reduce the number of billable units you ingest. See [tips 
 **When do I get billed?**
 You get one bill each month. The plan fee is charged at the start of the month, and usage is charged at the end of the month.
 
+**What are Langfuse Cloud Credits, and how do they affect me?**
+A Langfuse Cloud Credit is a prepaid unit of credit, equal to one (1) US dollar, to be applied to a customer's use of Langfuse Cloud. Credits are drawn down according to the then-current pricing at [langfuse.com/pricing](/pricing).
+
+Langfuse Cloud Credits only apply to customers with a committed spend contract for Langfuse Cloud. If you have questions about your credit balance, drawdown schedule, or committed spend contract, please contact your account team.
+
+If you use Langfuse Cloud on a Pay-as-you-Go basis, Langfuse Cloud Credits do not apply to you.
+
 **Can I set up alerts on usage fees?**
 Yes, you can configure [spend alerts](/docs/administration/spend-alerts) to receive email notifications when spending exceeds predefined thresholds.
 
@@ -261,7 +278,7 @@ Yes, you can configure [spend alerts](/docs/administration/spend-alerts) to rece
 Through the organization settings in Langfuse Cloud or the [Customer Portal](/billing-portal).
 
 **Can I redline the contracts?**
-Yes, customized contracts are available for Enterprise customers with a yearly commitment. Contact enterprise@langfuse.com. Default plans are self-serve on standard terms.
+Yes, customized contracts are available for Enterprise customers with a yearly commitment. [Contact sales](/talk-to-us) to discuss your requirements. Default plans are self-serve on standard terms.
 
 **Where is the data stored?**
 Langfuse Cloud is hosted on AWS. Data is stored in the US, EU, Japan, or the HIPAA-compliant US region depending on your selection. See [security documentation](/security) for details.

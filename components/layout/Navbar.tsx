@@ -1,3 +1,4 @@
+import { HiringBadge } from "@/components/HiringBadge";
 import { NavbarExtraContent } from "@/components/NavbarExtraContent";
 import { NavLinks } from "@/components/NavLinks";
 import { type SectionNavData } from "@/lib/nav-tree";
@@ -40,9 +41,12 @@ export function Navbar() {
         <div className={cn(cornersStyle, "hidden relative px-0 lg:flex")}>
           <div className="absolute bottom-[-6px] left-0 w-[6px] h-[5px] bg-left-corner" />
           <div className="absolute hidden wide:block bottom-[-6px] right-0 w-[6px] h-[5px] bg-right-corner" />
-          <div className="flex flex-row-reverse flex-1 gap-2 px-2.5 py-3 rounded-sm md:flex-row md:items-center md:justify-center md:gap-4 bg-surface-1">
-            <InkeepSearchBar className="hidden" />
-            <NavLinks sectionNavData={sectionNavData} />
+          <div className="flex flex-1 gap-2 items-center px-2.5 py-3 rounded-sm bg-surface-1">
+            <HiringBadge className="shrink-0" />
+            <div className="flex flex-1 justify-center items-center min-w-0 gap-4">
+              <InkeepSearchBar className="hidden" />
+              <NavLinks sectionNavData={sectionNavData} />
+            </div>
           </div>
         </div>
         <div

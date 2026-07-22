@@ -27,9 +27,25 @@ import { TracingHierarchyDiagram } from "@/components/academy/TracingHierarchyDi
 import { RagTraceViewDiagram } from "@/components/academy/RagTraceViewDiagram";
 import { DatasetFieldsDiagram } from "@/components/academy/DatasetFieldsDiagram";
 import { ErrorAnalysisProcessDiagram } from "@/components/academy/ErrorAnalysisProcessDiagram";
+import { AnnotatedLoop } from "@/components/academy/AnnotatedLoop";
+import { DatasetBlock } from "@/components/academy/DatasetBlock";
+import { EvaluatorBlock } from "@/components/academy/EvaluatorBlock";
+import { TraceViewDiagram } from "@/components/academy/TraceViewDiagram";
 import { AgentPromptCallout } from "@/components/academy/AgentPromptCallout";
 import { ManualGuideCallout } from "@/components/academy/ManualGuideCallout";
 import { ManualGuideList } from "@/components/academy/ManualGuideList";
+import { LoopDiagram as LoopDiagramJa } from "@/components/academy/japan/LoopDiagram";
+import {
+  OnlineLoop as OnlineLoopJa,
+  OfflineLoop as OfflineLoopJa,
+} from "@/components/academy/japan/LoopSubset";
+import { EvaluationEvolutionDiagram as EvaluationEvolutionDiagramJa } from "@/components/academy/japan/EvaluationEvolutionDiagram";
+import { TracingHierarchyDiagram as TracingHierarchyDiagramJa } from "@/components/academy/japan/TracingHierarchyDiagram";
+import { RagTraceViewDiagram as RagTraceViewDiagramJa } from "@/components/academy/japan/RagTraceViewDiagram";
+import { DatasetFieldsDiagram as DatasetFieldsDiagramJa } from "@/components/academy/japan/DatasetFieldsDiagram";
+import { ErrorAnalysisProcessDiagram as ErrorAnalysisProcessDiagramJa } from "@/components/academy/japan/ErrorAnalysisProcessDiagram";
+import { AgentPromptCallout as AgentPromptCalloutJa } from "@/components/academy/japan/AgentPromptCallout";
+import { ManualGuideCallout as ManualGuideCalloutJa } from "@/components/academy/japan/ManualGuideCallout";
 import { Details, Summary } from "@/components/Details";
 
 // Lazy-load Video so @vidstack/react (~800 KB) is NOT bundled on every MDX page.
@@ -102,9 +118,23 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     RagTraceViewDiagram,
     DatasetFieldsDiagram,
     ErrorAnalysisProcessDiagram,
+    AnnotatedLoop,
+    DatasetBlock,
+    EvaluatorBlock,
+    TraceViewDiagram,
     AgentPromptCallout,
     ManualGuideCallout,
     ManualGuideList,
+    LoopDiagramJa,
+    OnlineLoopJa,
+    OfflineLoopJa,
+    EvaluationEvolutionDiagramJa,
+    TracingHierarchyDiagramJa,
+    RagTraceViewDiagramJa,
+    DatasetFieldsDiagramJa,
+    ErrorAnalysisProcessDiagramJa,
+    AgentPromptCalloutJa,
+    ManualGuideCalloutJa,
     details: Details,
     summary: Summary,
     ...components,

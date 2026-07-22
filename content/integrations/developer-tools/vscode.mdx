@@ -1,0 +1,191 @@
+---
+title: "Use Langfuse in VS Code via MCP"
+sidebarTitle: VS Code
+logo: /images/integrations/vscode_icon.svg
+description: "Connect the Langfuse MCP server to VS Code to query and manage your prompts, traces, and datasets from GitHub Copilot agent mode."
+category: Integrations
+---
+
+# Use Langfuse in VS Code via MCP
+
+This guide shows you how to connect the [Langfuse MCP server](/docs/api-and-data-platform/features/mcp-server) to [VS Code](https://code.visualstudio.com), so you can query and manage your Langfuse data directly from GitHub Copilot's agent mode.
+
+> **What is VS Code?** [**VS Code**](https://code.visualstudio.com) is a code editor from Microsoft with built-in AI assistance through GitHub Copilot. Its [agent mode](https://code.visualstudio.com/docs/copilot/chat/mcp-servers) supports the Model Context Protocol (MCP), letting Copilot call external tools while it helps you write and debug code.
+
+> **What is Langfuse?** [**Langfuse**](https://langfuse.com) is the open-source AI engineering platform. It helps teams collaboratively debug, analyze, and iterate on their LLM applications with features like tracing, prompt management, and evaluation.
+
+## What This Integration Does
+
+Langfuse ships a native [Model Context Protocol (MCP) server](/docs/api-and-data-platform/features/mcp-server) for the data platform. Once connected to VS Code, Copilot agent mode can use it to:
+
+- **Manage prompts**: List, read, create, and update prompts in [Langfuse Prompt Management](/docs/prompt-management/overview) without leaving your editor.
+- **Inspect traces**: Pull traces and observations to debug your LLM application against real production data.
+- **Work with datasets**: Browse datasets and items used for evaluation.
+- **Access the platform programmatically**: Reach the same resources exposed by the Langfuse [Public API](/docs/api-and-data-platform/features/public-api).
+
+<Callout type="info">
+
+This page covers the **authenticated** Langfuse MCP server for the data platform. There is also a public [Docs MCP server](/docs/docs-mcp) that exposes the Langfuse documentation to AI agents — useful in VS Code for [automatically integrating Langfuse tracing](/docs/get-started) into your codebase.
+
+</Callout>
+
+## Prerequisites
+
+- [VS Code](https://code.visualstudio.com) 1.99 or later with [GitHub Copilot](https://code.visualstudio.com/docs/copilot/setup) enabled
+- A [Langfuse](https://langfuse.com) account ([cloud](https://cloud.langfuse.com) or [self-hosted](/self-hosting))
+
+## Quick Start
+
+<Steps>
+
+### Get an Authentication Header
+
+1. Navigate to your project settings in Langfuse and create or copy a **project-scoped API key**:
+   - Public Key: `pk-lf-...`
+   - Secret Key: `sk-lf-...`
+2. Encode the credentials to base64 format:
+
+   ```bash filename="terminal"
+   echo -n "pk-lf-your-public-key:sk-lf-your-secret-key" | base64
+   ```
+
+   You'll use the resulting token as `{your-base64-token}` below.
+
+### Add the MCP Server to VS Code
+
+Create a `.mcp.json` file in your workspace's `.vscode` folder (or add the server via the command palette: `MCP: Add Server...` → `HTTP`). Replace `{your-base64-token}` with your encoded credentials and pick the endpoint for your data region:
+
+<Tabs items={["Cloud EU", "Cloud US", "Cloud Japan", "HIPAA US", "Self-Hosted"]}>
+
+<Tab>
+
+```json filename=".vscode/mcp.json" /{your-base64-token}/
+{
+  "servers": {
+    "langfuse": {
+      "type": "http",
+      "url": "https://cloud.langfuse.com/api/public/mcp",
+      "headers": {
+        "Authorization": "Basic {your-base64-token}"
+      }
+    }
+  }
+}
+```
+
+</Tab>
+
+<Tab>
+
+```json filename=".vscode/mcp.json" /{your-base64-token}/
+{
+  "servers": {
+    "langfuse": {
+      "type": "http",
+      "url": "https://us.cloud.langfuse.com/api/public/mcp",
+      "headers": {
+        "Authorization": "Basic {your-base64-token}"
+      }
+    }
+  }
+}
+```
+
+</Tab>
+
+<Tab>
+
+```json filename=".vscode/mcp.json" /{your-base64-token}/
+{
+  "servers": {
+    "langfuse": {
+      "type": "http",
+      "url": "https://jp.cloud.langfuse.com/api/public/mcp",
+      "headers": {
+        "Authorization": "Basic {your-base64-token}"
+      }
+    }
+  }
+}
+```
+
+</Tab>
+
+<Tab>
+
+```json filename=".vscode/mcp.json" /{your-base64-token}/
+{
+  "servers": {
+    "langfuse": {
+      "type": "http",
+      "url": "https://hipaa.cloud.langfuse.com/api/public/mcp",
+      "headers": {
+        "Authorization": "Basic {your-base64-token}"
+      }
+    }
+  }
+}
+```
+
+</Tab>
+
+<Tab>
+
+```json filename=".vscode/mcp.json" /{your-base64-token}/
+{
+  "servers": {
+    "langfuse": {
+      "type": "http",
+      "url": "https://your-domain.com/api/public/mcp",
+      "headers": {
+        "Authorization": "Basic {your-base64-token}"
+      }
+    }
+  }
+}
+```
+
+</Tab>
+
+</Tabs>
+
+<Callout type="info">
+
+To make the server available across all your workspaces, add the same `langfuse` entry to your user-level MCP configuration instead via `MCP: Open User Configuration` from the command palette.
+
+</Callout>
+
+### Start the Server
+
+Open the `.vscode/mcp.json` file and click **Start** above the `langfuse` server entry, or run `MCP: List Servers` from the command palette and start it from there. VS Code will connect to the Langfuse MCP server.
+
+### Verify the Connection
+
+1. Open the Copilot Chat view and switch to **Agent** mode.
+2. Confirm the Langfuse tools are available via the **Tools** picker.
+3. Ask Copilot to `list all prompts in my Langfuse project`. It should call the `listPrompts` tool and return your prompts.
+
+</Steps>
+
+<Callout type="warning">
+  **Both read and write tools are available by default.** If you only want to
+  use read-only tools, restrict the available tools from VS Code's **Tools**
+  picker in agent mode. For a full list of tools, see the [MCP Reference](https://mcp.reference.langfuse.com).
+</Callout>
+
+## Example Prompts
+
+Once connected, try asking Copilot agent mode:
+
+- "List all prompts in my Langfuse project and show me the latest version of the `chat-assistant` prompt."
+- "Create a new text prompt called `summarizer` with the `production` label."
+- "Update the labels on the `chat-assistant` prompt to promote version 3 to production."
+
+## Resources
+
+- [Langfuse MCP Server](/docs/api-and-data-platform/features/mcp-server) — full configuration reference for the authenticated MCP server
+- [MCP Reference](https://mcp.reference.langfuse.com) — canonical source for MCP servers, setup snippets, tools, and schemas
+- [Prompt Management with MCP](/docs/prompt-management/features/mcp-server) — prompt-specific workflows and examples
+- [Docs MCP Server](/docs/docs-mcp) — public MCP server for the Langfuse documentation
+- [VS Code MCP Servers Documentation](https://code.visualstudio.com/docs/copilot/chat/mcp-servers) — Microsoft's guide to using MCP servers in VS Code
+- [Langfuse for Agents](/agents) — overview of the skill, CLI, and MCP server for coding agents

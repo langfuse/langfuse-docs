@@ -21,11 +21,19 @@ The older Metrics API remains available, but is not recommended as the default f
 
 ## Metrics API v2 [#v2]
 
-<Callout type="warning">
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "v4",
+  }}
+/>
 
-**Cloud-only:** The v2 Metrics API is only available on Langfuse Cloud. We are working on a robust migration path for self-hosted deployments.
+<Callout type="info">
 
-**Data availability:** Data from older SDKs (`langfuse-python` < `4.0.0`, `langfuse-js` < `5.0.0`) or direct OpenTelemetry exporters that do not send `x-langfuse-ingestion-version: 4` can be delayed by up to 10 minutes on v2 endpoints. Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5), or set that header on your OTEL span exporter, to see new data in real time.
+**Data availability:** Data from older SDKs (`langfuse-python` < `4.0.0`, `langfuse-js` < `5.0.0`) or direct OpenTelemetry exporters that do not send `x-langfuse-ingestion-version: 4` can be delayed by up to 10 minutes on v2 endpoints. Upgrade to [Python SDK v4.7.0+](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS SDK v5.4.0+](/docs/observability/sdk/upgrade-path/js-v4-to-v5), or set that header on your OTEL span exporter, to see new data in real time.
 
 </Callout>
 
@@ -41,19 +49,24 @@ The v2 Metrics API provides significant performance improvements through an opti
 
 ### Available Views in v2
 
-| View                 | Description                                                         |
-| -------------------- | ------------------------------------------------------------------- |
-| `observations`       | Query observation-level data with optional trace-level aggregations |
-| `scores-numeric`     | Query numeric and boolean scores                                    |
-| `scores-categorical` | Query categorical (string) scores                                   |
+| View                 | Description                                                                                   |
+| -------------------- | --------------------------------------------------------------------------------------------- |
+| `observations`       | Query observation-level data with optional trace-level aggregations                           |
+| `scores-numeric`     | Query numeric scores                                                                          |
+| `scores-categorical` | Query categorical (string) scores                                                             |
+| `scores-boolean`     | Query boolean scores; group or filter by `booleanValue`, or average `value` for the true rate |
 
 ### Row Limit
 
-The v2 Metrics API enforces a default `rowLimit` of 100 rows per query to ensure consistent performance. You can specify a custom `rowLimit` in your query to override this default.
+The v2 Metrics API enforces a default `config.row_limit` of 100 rows per query to ensure consistent performance. You can specify a custom `config.row_limit` in your query to override this default, up to a maximum of 1,000 rows.
 
 ### High Cardinality Dimensions
 
 Certain dimensions like `id`, `traceId`, `userId`, and `sessionId` cannot be used for grouping in the v2 Metrics API. Grouping by these high cardinality fields is extremely expensive and rarely useful in practice. These dimensions remain available for filtering.
+
+### Ordering by metrics
+
+When ordering by an aggregated metric, use the returned metric field name in the format `{aggregation}_{measure}`, for example `sum_totalCost` for `{ "measure": "totalCost", "aggregation": "sum" }`. When ordering by the time dimension, use the returned field name `time_dimension`.
 
 ### Example: Most expensive models used in observations
 
@@ -68,8 +81,8 @@ curl \
     "filters": [],
     "fromTimestamp": "2025-12-01T00:00:00Z",
     "toTimestamp": "2025-12-16T00:00:00Z",
-    "orderBy": [{"field": "totalCost_sum", "direction": "desc"}],
-    "rowLimit": 1000
+    "orderBy": [{"field": "sum_totalCost", "direction": "desc"}],
+    "config": {"row_limit": 1000}
   }' \
   https://cloud.langfuse.com/api/public/v2/metrics
 ```
@@ -89,7 +102,7 @@ When moving existing queries to v2:
 - Replace `GET /api/public/metrics` with `GET /api/public/v2/metrics`.
 - Replace `view: "traces"` with `view: "observations"` and use trace-level dimensions such as `traceName`, `traceRelease`, or `traceVersion` where supported. `userId` and `sessionId` remain available as filters, but cannot be used for grouping in v2.
 - Review your `metrics` array when migrating trace-view queries. In the v2 `observations` view, measures such as `count`, `latency`, `totalCost`, and `totalTokens` are calculated over observation rows. Use [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and group by `traceId` client-side when you need trace-level counts or trace durations.
-- Set `rowLimit` explicitly when migrating queries that should return more than the default 100 rows.
+- Set `config.row_limit` explicitly when migrating queries that should return more than the default 100 rows.
 - Use [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) instead if you need row-level spans, generations, or events.
 
 The rest of this section documents the legacy v1 endpoint for existing integrations.
@@ -114,7 +127,7 @@ The v1 API accepts a JSON query object passed as a URL-encoded parameter:
 
 | Field           | Type   | Required | Description                                                                                                                                                              |
 | --------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `view`          | string | Yes      | The data view to query: `"traces"`, `"observations"`, `"scores-numeric"`, or `"scores-categorical"`                                                                      |
+| `view`          | string | Yes      | The data view to query: `"traces"`, `"observations"`, `"scores-numeric"`, `"scores-categorical"`, or `"scores-boolean"`                                                  |
 | `dimensions`    | array  | No       | Array of dimension objects to group by, e.g. `[{ "field": "name" }]`                                                                                                     |
 | `metrics`       | array  | Yes      | Array of metric objects to calculate, e.g. `[{ "measure": "latency", "aggregation": "p95" }]`                                                                            |
 | `filters`       | array  | No       | Array of filter objects to narrow results, e.g. `[{ "column": "metadata", "operator": "contains", "key": "customKey", "value": "customValue", "type": "stringObject" }]` |
@@ -240,8 +253,9 @@ The v1 Metrics API provides access to several data views, each with its own set 
 | -------------------- | ----------------------------------- |
 | `traces`             | Query data at the trace level       |
 | `observations`       | Query data at the observation level |
-| `scores-numeric`     | Query numeric and boolean scores    |
+| `scores-numeric`     | Query numeric scores                |
 | `scores-categorical` | Query categorical (string) scores   |
+| `scores-boolean`     | Query boolean scores                |
 
 #### Trace Dimensions
 
@@ -331,6 +345,19 @@ The v1 Metrics API provides access to several data views, each with its own set 
 | `count` | Count of scores     |
 | `value` | Numeric score value |
 
+##### Boolean Scores
+
+| Metric  | Description                                                                                                |
+| ------- | ---------------------------------------------------------------------------------------------------------- |
+| `count` | Count of scores                                                                                            |
+| `value` | Numeric score value, where `0` is false and `1` is true. Use the `avg` aggregation to return the true rate |
+
+Boolean scores have an additional dimension:
+
+| Dimension      | Type    | Description                                           |
+| -------------- | ------- | ----------------------------------------------------- |
+| `booleanValue` | boolean | Boolean value of the score for grouping and filtering |
+
 ##### Categorical Scores
 
 | Metric  | Description     |
@@ -347,7 +374,7 @@ Categorical scores have an additional dimension:
 
 <Callout type="warning">
 
-This endpoint is legacy and is no longer listed in the [public API reference](https://api.reference.langfuse.com/). It remains available for backward compatibility, but for new use cases please use the [Metrics API v2](#v2) above. It has higher rate limits and offers more flexibility.
+This endpoint is legacy and is no longer listed in the [public API reference](https://api.reference.langfuse.com/). It remains available for backward compatibility, but for new use cases please use the [Metrics API v2](#v2) above. It offers more flexibility and uses the separate Metrics API v2 rate-limit bucket listed in the [API limits FAQ](/faq/all/api-limits).
 
 </Callout>
 

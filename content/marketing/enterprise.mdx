@@ -76,11 +76,6 @@ export function TalkToUsButton() {
       <Button size="lg" asChild>
         <Link href="/talk-to-us">Talk to Enterprise team</Link>
       </Button>
-      <Button size="lg" variant="outline" asChild>
-        <Link href="mailto:enterprise@langfuse.com">
-          Email us: enterprise@langfuse.com
-        </Link>
-      </Button>
     </div>
   );
 }
@@ -138,7 +133,7 @@ We're here to help you find the right solution for your use case.
 
 <Callout type="info" emoji="">
   We collect the most common questions and answers here. If you have questions
-  that are not answered, please reach out to us: enterprise@langfuse.com
+  that are not answered, please [contact sales](/talk-to-us).
 </Callout>
 
 <Details>
@@ -182,13 +177,21 @@ Here are our general SLOs of our support for our Enterprise Cloud customers. The
 <Details>
 <Summary>Uptime SLA for our enterprise customers</Summary>
 
-Our Enterprise Cloud customers get an uptime SLA:
+Our Enterprise Cloud customers get an uptime SLA on Langfuse Cloud:
 
-- Guaranteed 99.9% uptime
-- 99.00% to 99.89% inclusive - 10% credit
-- Less than 99% - 20% credit
+**Target:** 99.9% Monthly Uptime Percentage.
 
-If Langfuse fails to maintain an uptime percentage of greater than 99% for any 3 months in a 6 month period, Customer may terminate their agreement upon 10 days written notice to Langfuse. The calculations of uptime do not include: Delays to data ingestion or scheduled maintenance.
+**Service credits** apply when monthly uptime falls below target:
+
+- Below 99.9% but at or above 99.0% — 5% credit
+- Below 99.0% but at or above 95.0% — 10% credit
+- Below 95.0% — 25% credit
+
+Langfuse Cloud is considered "Unavailable" for a one-minute interval when at least three authenticated trace-ingestion API requests were made during that interval and none were accepted. Uptime calculations exclude downtime caused by force majeure events, third-party services outside our control, customer misconfiguration or improper use, planned maintenance announced at least 72 hours in advance, and beta or experimental features.
+
+To claim a credit, open a support case within 24 hours of discovering the unavailability and submit the claim by the end of the month following the affected month, including the incident dates, times, and supporting evidence.
+
+See the full [Langfuse Cloud Service Level Agreement](https://clickhouse.com/legal/agreements/langfuse-service-level-agreement) for the authoritative terms.
 
 </Details>
 
@@ -219,7 +222,7 @@ The Hobby Plan on [Langfuse Cloud](/cloud) includes enough resources to try Lang
 
 Alternatively, you can quickly spin up Langfuse on your own machine using `docker compose up` ([docs](/self-hosting/deployment/docker-compose)).
 
-If you require security and compliance features to run a POC, please reach out to us at enterprise@langfuse.com.
+If you require security and compliance features to run a POC, please [contact sales](/talk-to-us).
 
 </Details>
 

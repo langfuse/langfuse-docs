@@ -1,0 +1,46 @@
+---
+date: 2026-07-13
+title: "Graph View: Aggregated and Expanded modes"
+description: "The trace graph view now offers two layouts, an aggregated overview and an expanded as-it-ran DAG, on a rebuilt deterministic renderer."
+author: Nikita Kabardin
+ogVideo: /images/changelog/2026-07-13-graph-view-modes.mp4
+canonical: https://langfuse.com/docs/observability/features/agent-graphs
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+The **graph view** turns an agent trace into a picture of what your agent did: nodes for steps, edges for how it moved between them. It now runs on a rebuilt renderer and ships with **two modes**, so you can read the same run two ways:
+
+- **See an agent's shape at a glance** with Aggregated: steps that share a name collapse into one node with a counter (`retrieve_docs (3/3)`), and loops draw as cycles.
+- **Follow a single run step by step** with Expanded: every call is its own node, and loops unroll into a DAG in execution order.
+- **Keep your place on large traces**: a deterministic layout draws the graph the same way every time, and the viewport stays put as you pan and zoom.
+
+## A rebuilt graph, on its own renderer
+
+The graph runs on our own renderer: a deterministic layout (built on ELK) drawn onto a stable, zoomable canvas. The graph lays out the _same way every time_ you open a trace, with no reshuffling between renders, and the viewport stays put as you pan and zoom, so you keep your place on a big agent. The layout is built to stay readable as traces grow.
+
+## Two modes: Aggregated and Expanded
+
+An **Aggregated / Expanded** toggle sits in the top-left of the graph. It re-draws the same trace two ways: the difference is whether repeated work is grouped by name or shown call-by-call. Your choice is remembered across traces.
+
+- **Aggregated** (the view you've had, now named) is a **compact overview**. Steps that share a name collapse into a single node with a counter, so `retrieve_docs (3/3)` means it ran three times, and loops are drawn as cycles. It is the fastest way to see an agent's overall _shape_ and complexity without every individual call on screen.
+
+- **Expanded** shows the process **as it ran**. Every call is its own node, so three `litellm_request` calls are three distinct nodes, and loops unroll into an acyclic graph (a DAG) in execution order. It is the more literal view, closer to the trace tree, for following a specific run or pinning down exactly where something happened.
+
+The two answer different questions: reach for Aggregated to understand an agent's structure at a glance, and Expanded to walk through a single execution in the order it ran. Expanded is a straight DAG, so it reads easily even on agents with lots of loops.
+
+The graph view is in beta, and we want to hear what you'd like next.
+
+## Learn more
+
+<Cards num={1}>
+  <Card
+    title="Agent Graphs"
+    href="/docs/observability/features/agent-graphs"
+    icon={<Book />}
+    arrow
+  />
+</Cards>

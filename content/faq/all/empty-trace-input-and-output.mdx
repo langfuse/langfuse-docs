@@ -77,7 +77,7 @@ langfuse.flush()
 If using the `@observe()` decorator:
 
 ```python
-from langfuse import observe, langfuse_context
+from langfuse import observe, get_client
 
 @observe()
 def main():
@@ -85,23 +85,29 @@ def main():
     pass
 
 main()
-langfuse_context.flush()
+get_client().flush()
 ```
 
 </Tab>
 <Tab>
 
 ```typescript
-import { Langfuse } from "langfuse";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
 
-const langfuse = new Langfuse();
+const langfuseSpanProcessor = new LangfuseSpanProcessor();
+
+const sdk = new NodeSDK({
+  spanProcessors: [langfuseSpanProcessor],
+});
+sdk.start();
 
 async function main() {
   // Your code here...
 }
 
 // Ensure data is sent before exit
-main().finally(() => langfuse.shutdown());
+main().finally(() => langfuseSpanProcessor.forceFlush());
 ```
 
 </Tab>
@@ -147,23 +153,19 @@ with langfuse.start_as_current_observation(
 <Tab>
 
 ```typescript
-import { Langfuse } from "langfuse";
+import { startActiveObservation } from "@langfuse/tracing";
 
-const langfuse = new Langfuse();
+await startActiveObservation("my-pipeline", async (rootSpan) => {
+  const userInput = "What's the weather like?";
+  const result = await processRequest(userInput);
 
-const trace = langfuse.trace({ name: "my-pipeline" });
-const span = trace.span({ name: "process-request" });
-
-const userInput = "What's the weather like?";
-const result = await processRequest(userInput);
-
-// Set input/output on the span
-span.update({
-  input: { query: userInput },
-  output: { response: result },
+  // Set input/output on the root span
+  // This will automatically populate the trace
+  rootSpan.update({
+    input: { query: userInput },
+    output: { response: result },
+  });
 });
-
-span.end();
 ```
 
 </Tab>
@@ -201,19 +203,17 @@ with langfuse.start_as_current_observation(
 <Tab>
 
 ```typescript
-import { Langfuse } from "langfuse";
+import { startActiveObservation, setActiveTraceIO } from "@langfuse/tracing";
 
-const langfuse = new Langfuse();
+await startActiveObservation("my-pipeline", async (rootSpan) => {
+  const userInput = "What's the weather like?";
+  const result = await processRequest(userInput);
 
-const trace = langfuse.trace({ name: "my-pipeline" });
-
-const userInput = "What's the weather like?";
-const result = await processRequest(userInput);
-
-// Set input/output directly on the trace
-trace.update({
-  input: { user_question: userInput },
-  output: { answer: result },
+  // Set trace input/output explicitly (deprecated — only for backward compat with legacy trace-level LLM-as-a-judge evaluators)
+  setActiveTraceIO({
+    input: { user_question: userInput },
+    output: { answer: result },
+  });
 });
 ```
 
@@ -391,8 +391,9 @@ langfuse = Langfuse(debug=True)
 </Tab>
 <Tab>
 
-```typescript
-const langfuse = new Langfuse({ debug: true });
+```bash
+# In your environment
+export LANGFUSE_DEBUG="true"
 ```
 
 </Tab>
@@ -411,7 +412,7 @@ pip install --upgrade langfuse
 <Tab>
 
 ```bash
-npm update langfuse
+npm update @langfuse/tracing @langfuse/otel @langfuse/client
 ```
 
 </Tab>

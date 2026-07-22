@@ -1,0 +1,77 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Observability for Z.ai with Langfuse
+sidebarTitle: Z.ai
+logo: /images/integrations/z-ai_icon.svg
+description: Guide on using Z.ai's GLM models with Langfuse via the OpenAI SDK to trace, debug, and evaluate your LLM applications.
+category: Integrations
+---
+
+# Observability for Z.ai with Langfuse
+
+This guide shows you how to integrate Langfuse with Z.ai. Z.ai's API endpoints are fully compatible with the OpenAI SDK, allowing you to trace and monitor your AI applications seamlessly.
+
+> **What is Z.ai?** [Z.ai](https://z.ai/) provides API access to the GLM family of large language models (such as GLM-4.6) through OpenAI-compatible endpoints.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform that helps teams trace API calls, monitor performance, and debug issues in their AI applications.
+
+<Steps>
+## Step 1: Install Dependencies
+
+```python
+%pip install openai langfuse
+```
+
+## Step 2: Set Up Environment Variables
+
+Get your Langfuse keys from the project settings in [Langfuse Cloud](https://langfuse.com/cloud) or set up [self-hosting](https://langfuse.com/self-hosting).
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://langfuse.com/cloud
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region (API host)
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+
+os.environ.setdefault("ZAI_API_BASE", "https://api.z.ai/api/paas/v4/")
+os.environ.setdefault("ZAI_API_KEY", "...")
+```
+
+## Step 3: Use Langfuse OpenAI Drop-in Replacement
+
+Instead of importing `openai` directly, import it from `langfuse.openai`. Requests made through this client are automatically traced in Langfuse. Point the client at the Z.ai base URL and authenticate with your Z.ai API key.
+
+```python
+from langfuse.openai import openai
+
+client = openai.OpenAI(
+  api_key=os.environ.get("ZAI_API_KEY"),
+  base_url=os.environ.get("ZAI_API_BASE")
+)
+```
+
+## Step 4: Run an Example
+
+```python
+response = client.chat.completions.create(
+  model="glm-4.6",
+  messages=[
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "Why is open source important?"},
+  ],
+  name="Z-ai-Trace" # name of the trace
+)
+print(response.choices[0].message.content)
+```
+
+## Step 5: View Traces in Langfuse
+
+After running the example, open [Langfuse Cloud](https://langfuse.com/cloud) to see the full trace including prompts, completions, tool calls, token usage, and latency.
+
+</Steps>
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />

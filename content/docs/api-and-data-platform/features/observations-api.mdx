@@ -20,11 +20,19 @@ Older trace and observation read APIs remain available, but are not recommended 
 
 ## Observations API v2 [#v2]
 
-<Callout type="warning">
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "v4",
+  }}
+/>
 
-**Cloud-only:** The v2 Observations API is only available on Langfuse Cloud. We are working on a robust migration path for self-hosted deployments.
+<Callout type="info">
 
-**Data availability:** Data from older SDKs (`langfuse-python` < `4.0.0`, `langfuse-js` < `5.0.0`) or direct OpenTelemetry exporters that do not send `x-langfuse-ingestion-version: 4` can be delayed by up to 10 minutes on v2 endpoints. Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5), or set that header on your OTEL span exporter, to see new data in real time.
+**Data availability:** Data from older SDKs (`langfuse-python` < `4.0.0`, `langfuse-js` < `5.0.0`) or direct OpenTelemetry exporters that do not send `x-langfuse-ingestion-version: 4` can be delayed by up to 10 minutes on v2 endpoints. Upgrade to [Python SDK v4.7.0+](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS SDK v5.4.0+](/docs/observability/sdk/upgrade-path/js-v4-to-v5), or set that header on your OTEL span exporter, to see new data in real time.
 
 </Callout>
 
@@ -45,7 +53,7 @@ The v2 Observations API is a redesigned endpoint optimized for high-performance 
 
 Always include `fromStartTime` and `toStartTime` to keep each request bounded.
 
-The v2 Observations API returns observation rows, not full trace objects. Group rows by `traceId` when you need to reconstruct trace activity, and use [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregate reporting with trace-level dimensions such as `traceName`, `traceRelease`, or `traceVersion`. For single-observation lookups, pass a URL-encoded `filter` condition on the `id` column; see the [v2 Observations API Reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations) for the filter schema.
+The v2 Observations API returns observation rows, not full trace objects. Group rows by `traceId` when you need to reconstruct trace activity, and use [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregate reporting with trace-level dimensions such as `traceName`, `traceRelease`, or `traceVersion`. For single-observation lookups, pass a URL-encoded `filter` condition on the `id` column; see the [v2 Observations API Reference](https://api.reference.langfuse.com/#tag/observations/GET/api/public/v2/observations) for the filter schema.
 
 ### Key Improvements
 
@@ -113,6 +121,8 @@ The v1 API always attempts to parse input/output as JSON which can be expensive.
 | ------------- | --------- | ----- |
 | Default limit | 1000      | 50    |
 | Maximum limit | Unlimited | 1,000 |
+
+On Langfuse Cloud, requests to the v2 Observations API count toward the general per-organization API rate limit (see the [API limits FAQ](/faq/all/api-limits)). Self-hosted instances have no enforced rate limits.
 
 ### Common Use Cases
 

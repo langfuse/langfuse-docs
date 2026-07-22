@@ -45,7 +45,7 @@ Built on an optimized data model, the v2 Metrics API delivers significantly fast
 
 **The `traces` view is no longer available in v2.** Instead, use the `observations` view which is both faster and more powerful.
 
-**Row limit** - Default limit of 100 rows per query ensures consistent performance. Override with a custom `rowLimit` in your query.
+**Row limit** - Default limit of 100 rows per query ensures consistent performance. Override with a custom `config.row_limit` in your query.
 
 **High cardinality dimensions** - Certain dimensions like `id`, `traceId`, `userId`, and `sessionId` can no longer be used for grouping in the v2 Metrics API. Grouping by these high cardinality fields is not performant and rarely useful in practice. These dimensions remain available for filtering.
 
@@ -94,6 +94,6 @@ import { Book, FileCode } from "lucide-react";
 <Cards num={2}>
   <Card title="Metrics API Documentation" href="/docs/analytics/metrics-api#v2" icon={<Book />} />
   <Card title="Observations API Documentation" href="/docs/api-and-data-platform/features/observations-api" icon={<Book />} />
-  <Card title="v2 Metrics API Reference" href="https://api.reference.langfuse.com/#tag/metricsv2/GET/api/public/v2/metrics" icon={<FileCode />} />
-  <Card title="v2 Observations API Reference" href="https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations" icon={<FileCode />} />
+  <Card title="v2 Metrics API Reference" href="https://api.reference.langfuse.com/#tag/metrics/GET/api/public/v2/metrics" icon={<FileCode />} />
+  <Card title="v2 Observations API Reference" href="https://api.reference.langfuse.com/#tag/observations/GET/api/public/v2/observations" icon={<FileCode />} />
 </Cards>

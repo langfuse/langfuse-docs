@@ -155,6 +155,8 @@ Variables:
 - Scores appear on the specific observation in the trace tree
 - You can have multiple scores per trace (one per evaluated observation)
 
+Observation-level evaluators can only map variables from the matched observation. They do not automatically read sibling or child observations from the same trace. If the judge needs an end-to-end request and response, target a root observation that records those values, and write any additional required context onto that root observation.
+
 <Frame fullWidth>
   ![Score output example](/images/docs/evaluator-score-output-example.png)
 </Frame>

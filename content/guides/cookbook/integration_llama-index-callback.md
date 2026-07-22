@@ -1,47 +1,58 @@
 ---
-title: Integration Llama Index Callback
+title: "Cookbook LlamaIndex Integration"
 description: Example cookbook for the LlamaIndex Langfuse integration.
 category: Integrations
 ---
 
 # Cookbook LlamaIndex Integration
 
-This is a simple cookbook that demonstrates how to use the [LlamaIndex Langfuse integration](https://langfuse.com/integrations/frameworks/llamaindex). It uses a very simple Index and Query.
+This is a simple cookbook that demonstrates how to trace a LlamaIndex application with Langfuse via the [LlamaIndex Langfuse integration](https://langfuse.com/integrations/frameworks/llamaindex). It uses a very simple Index and Query together with the [OpenInference LlamaIndex instrumentation](https://docs.arize.com/phoenix/tracing/integrations-tracing/llamaindex), which automatically exports OpenTelemetry (OTel) spans to Langfuse.
 
-**Any feedback?** Let us know on Discord or GitHub. This is a new integration, and we'd love to hear your thoughts.
+**Any feedback?** Let us know on Discord or GitHub. We'd love to hear your thoughts.
 
 ## Setup
 
-Make sure you have both `llama-index` and `langfuse` installed.
+Make sure you have `llama-index`, `langfuse`, and `openinference-instrumentation-llama-index` installed.
 
 
 ```python
-%pip install llama-index "langfuse<3.0.0" --upgrade
+%pip install llama-index langfuse openinference-instrumentation-llama-index --upgrade
 ```
 
-Initialize the integration. Get your API keys from the [Langfuse project settings](https://cloud.langfuse.com).
-
-
-```python
-from llama_index.core import Settings
-from llama_index.core.callbacks import CallbackManager
-from langfuse.llama_index import LlamaIndexCallbackHandler
- 
-langfuse_callback_handler = LlamaIndexCallbackHandler(
-    public_key="pk-lf-...",
-    secret_key="sk-lf-...",
-    host="https://cloud.langfuse.com"
-)
-Settings.callback_manager = CallbackManager([langfuse_callback_handler])
-```
-
-This example uses OpenAI for embeddings and chat completions.
+Set your Langfuse API keys as environment variables. Get your API keys from the [Langfuse project settings](https://cloud.langfuse.com). This example uses OpenAI for embeddings and chat completions, so you also need to set your OpenAI key.
 
 
 ```python
 import os
 
-os.environ["OPENAI_API_KEY"] = ""
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+
+# Your OpenAI key
+os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...")
+```
+
+With the environment variables set, we can initialize the Langfuse client and register the [OpenInference LlamaIndex instrumentation](https://docs.arize.com/phoenix/tracing/integrations-tracing/llamaindex). This third-party instrumentation automatically captures LlamaIndex operations and exports OpenTelemetry (OTel) spans to Langfuse.
+
+
+```python
+from langfuse import get_client
+from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
+
+langfuse = get_client()
+
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
+
+# Initialize LlamaIndex instrumentation
+LlamaIndexInstrumentor().instrument()
 ```
 
 ## Index
@@ -87,20 +98,15 @@ print(response)
 
 
 ```python
-# As we want to immediately see result in Langfuse, we need to flush the callback handler
-langfuse_callback_handler.flush()
+# As we want to immediately see the result in Langfuse, we flush the Langfuse client
+langfuse.flush()
 ```
 
 Done! ✨ You see traces of your index and query in your Langfuse project.
 
-Example traces (public links):
-1. [Query](https://cloud.langfuse.com/project/cltipxbkn0000cdd7sbfbpovm/traces/f2e7f721-0940-4139-9b3a-e5cc9b0cb2d3)
-2. [Query (chat)](https://cloud.langfuse.com/project/cltipxbkn0000cdd7sbfbpovm/traces/89c62a4d-e992-4923-a6b7-e2f27ae4cff3)
-3. [Session](https://cloud.langfuse.com/project/cltipxbkn0000cdd7sbfbpovm/sessions/notebook-session-2)
+![Example Trace in Langfuse](https://langfuse.com/images/cookbook/integration_llama-index/llama-index-example-trace.png)
 
-Trace in Langfuse:
-
-![Langfuse Traces](https://static.langfuse.com/llamaindex-langfuse-docs.gif)
+[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/12ea412956f99347b0503c1144acd0ec?timestamp=2025-06-05T15:45:52.971Z&display=details)
 
 
 ## Interested in more advanced features?

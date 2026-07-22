@@ -1,5 +1,5 @@
 ---
-title: Prompt Management Openai Functions
+title: "Example: Langfuse Prompt Management for OpenAI functions (Python)"
 description: Cookbook on how to use Langfuse Prompt Management to version control prompts collaboratively when using OpenAI functions.
 category: Prompt Management
 ---
@@ -20,12 +20,12 @@ Langfuse [Prompt Management](https://langfuse.com/docs/prompts) helps to version
 import os
 
 # Get keys for your project
-os.environ["LANGFUSE_PUBLIC_KEY"] = ""
-os.environ["LANGFUSE_SECRET_KEY"] = ""
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")
 
 # OpenAI key
-os.environ["OPENAI_API_KEY"] = ""
+os.environ.setdefault("OPENAI_API_KEY", "")
 ```
 
 
