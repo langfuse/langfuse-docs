@@ -23,7 +23,16 @@ Trace-level evaluators use Langfuse's old trace-centric data model and are depre
 Observation-level evaluators run in real time and scale with larger traces and higher evaluation volume. Any future multi-span support will also use the observation-centric data model, so upgrading is the foundation for future evaluation capabilities.
 
 <Callout type="info">
-**Setting up a new evaluator?** Start with an observation-level evaluator in the [LLM-as-a-Judge setup guide](/docs/evaluation/evaluation-methods/llm-as-a-judge#set-up-step-by-step). This page is only for upgrading existing trace-level evaluators.
+  Only the unstable Evaluation Rules APIs continue to return legacy `trace` and
+  `dataset` evaluator targets. Stable APIs expose v4 evaluator targets only; use
+  the unstable APIs when reading these configurations for migration.
+</Callout>
+
+<Callout type="info">
+  **Setting up a new evaluator?** Start with an observation-level evaluator in
+  the [LLM-as-a-Judge setup
+  guide](/docs/evaluation/evaluation-methods/llm-as-a-judge#set-up-step-by-step).
+  This page is only for upgrading existing trace-level evaluators.
 </Callout>
 
 ## Upgrade your evaluator
@@ -43,7 +52,15 @@ First, upgrade your SDK or ingestion path. Observation-level evaluators run in r
 In the [v4 data model](/docs/v4), a trace is the logical group of observations that share a trace ID, rather than a separate record. Input and output belong to observations. In most cases, an existing root or workflow observation already carries the same input and output that was previously written to the trace. The evaluator upgrade targets that observation. If no single observation contains all required values, the coding assistant helps update your instrumentation.
 
 <Callout type="warning">
-**Keep existing trace-level evaluators running during the transition.** After the SDK upgrade, trace input and output are no longer written automatically. If your existing trace-level evaluators read trace input or output, keep supplying these values with the deprecated trace I/O methods (`set_current_trace_io()` or `span.set_trace_io()` in Python, `setActiveTraceIO()` or `span.setTraceIO()` in JS/TS) until the new observation-level evaluators are validated, then remove the calls. See [Why are the input and output of a trace empty?](/faq/all/empty-trace-input-and-output) for details.
+  **Keep existing trace-level evaluators running during the transition.** After
+  the SDK upgrade, trace input and output are no longer written automatically.
+  If your existing trace-level evaluators read trace input or output, keep
+  supplying these values with the deprecated trace I/O methods
+  (`set_current_trace_io()` or `span.set_trace_io()` in Python,
+  `setActiveTraceIO()` or `span.setTraceIO()` in JS/TS) until the new
+  observation-level evaluators are validated, then remove the calls. See [Why
+  are the input and output of a trace
+  empty?](/faq/all/empty-trace-input-and-output) for details.
 </Callout>
 
 </Step>
@@ -86,7 +103,8 @@ Score placement and cardinality may change:
 - If three observations in one trace match the filters, the upgraded evaluator produces three scores. To keep one score per trace, narrow the filters to one observation using its name, type, or the **Is Root Observation** filter.
 
 <Frame fullWidth>
-  ![Before and after the upgrade: the evaluator score moves from the trace to the matched observation](/images/docs/evaluator-score-output-example.png)
+  ![Before and after the upgrade: the evaluator score moves from the trace to
+  the matched observation](/images/docs/evaluator-score-output-example.png)
 </Frame>
 
 </Step>
@@ -108,6 +126,15 @@ Existing evaluator configurations typically fall into these cases:
 | **`Trace` for every variable**                                 | Select the observation holding the equivalent input, output, and metadata. For end-to-end evaluations, this is often a root observation.                                               |
 | **A mix of `Trace` and one `Observation`**                     | Target that observation and make the trace fields available there via [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes) or an instrumentation update. |
 | **More than one `Observation`, with or without `Trace`**       | Write the required values to a root or dedicated evaluation observation, then target it directly. Any future multi-span support will also use the observation-centric model.           |
+| **`Dataset` target**                                           | Create an `Experiment` successor with the same evaluator configuration. Translate `datasetId` to `experimentDatasetId` and map dataset-item fields to the experiment-item context.     |
+
+Dataset-target evaluators are the simplest v3-to-v4 compatibility migration. A
+dataset run's root observation is the same span that carries the run's input and
+output, so mapping `trace.input` to `observation.input` and `trace.output` to
+`observation.output` is safe. No evaluator-specific instrumentation change is
+needed for this case. Map dataset-item expected output and metadata to the
+experiment-item context. Once the project uses v4 experiment context, deactivate
+the legacy dataset-target evaluator to avoid duplicate scores.
 
 ### Before and after example
 
