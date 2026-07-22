@@ -28,7 +28,7 @@ Adding the `x-langfuse-ingestion-version: 4` header selects the v4 ingestion pat
 
 Your integration is ready for the observation-centric Langfuse v4 data model when it:
 
-- sends traces via OTLP over HTTP to `/api/public/otel` or `/api/public/otel/v1/traces`;
+- sends traces via OTLP over HTTP to `/api/public/otel/v1/traces`;
 - authenticates with Langfuse project keys via Basic Auth and sends `x-langfuse-ingestion-version: 4`;
 - represents every operation as one complete OTEL span with valid trace ID, span ID, timing, and parent context;
 - puts each operation's input and output on its observation, including the overall request and response on the root observation;
