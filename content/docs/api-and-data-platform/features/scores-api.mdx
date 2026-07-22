@@ -14,7 +14,7 @@ For general information about API authentication, base URLs, and SDK access, see
 
 <Callout type="info">
 
-The v2 score read endpoints are deprecated. Use Scores API v3 for all score reads. The score write endpoints (`POST /api/public/scores` and `DELETE /api/public/scores/{scoreId}`) are unchanged — no migration is needed for writes.
+This page covers reading scores. Scores are created via `POST /api/public/scores` or the SDK helpers — see [scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk). Migrating from the deprecated v2 read endpoints? Jump to [Migrating from Scores API v2](#upgrade-from-v2).
 
 </Callout>
 
@@ -36,44 +36,42 @@ GET /api/public/v3/scores
 
 On self-hosted deployments, the v3 endpoint is available from Langfuse v3.179.0.
 
-The v3 Scores API is a redesigned endpoint optimized for predictable, high-performance score retrieval. It queries scores directly instead of joining trace data, returns a single typed `value` field, and uses cursor-based pagination.
+The Scores API queries scores directly instead of joining trace data, which keeps response times predictable at any volume. Responses carry a single typed `value` field, and results are paginated with a cursor.
 
-### Upgrade from Scores API v2 [#upgrade-from-v2]
+### Typed `value` Field
 
-| Existing usage                                             | Recommended replacement                                                                                  |
-| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| List scores with `GET /api/public/v2/scores`               | Use `GET /api/public/v3/scores`                                                                          |
-| Fetch one score with `GET /api/public/v2/scores/{scoreId}` | Use `GET /api/public/v3/scores?id=<scoreId>` — v3 has no get-by-id endpoint; the `id` filter replaces it |
-| Create scores with `POST /api/public/scores`               | Unchanged                                                                                                |
-| Delete scores with `DELETE /api/public/scores/{scoreId}`   | Unchanged                                                                                                |
+Every score has a single `value` field whose type follows `dataType` — no decoding of booleans from `1`/`0` or looking up category strings:
 
-<Callout type="warning">
+| `dataType`    | `value` type | Notes                         |
+| ------------- | ------------ | ----------------------------- |
+| `NUMERIC`     | number       |                               |
+| `BOOLEAN`     | boolean      |                               |
+| `CATEGORICAL` | string       | The category                  |
+| `TEXT`        | string       |                               |
+| `CORRECTION`  | string       | Empty string if no correction |
 
-**v2 read deprecation**
+If your pipeline handles mixed score types, branch on `dataType`.
 
-The v2 score read endpoints are deprecated. Self-hosted deployments on Langfuse v4 and later do not include them — migrate to v3 before upgrading. On Langfuse Cloud they remain available for a transition period.
+### Field Groups
 
-</Callout>
+Responses always include a lean core — `id`, `projectId`, `name`, `value`, `dataType`, `source`, `timestamp`, `environment`, `createdAt`, `updatedAt` — and you opt into additional groups via a comma-separated `fields` parameter:
 
-### Key Changes
+```
+?fields=details,subject,annotation
+```
 
-**1. One Typed `value` Field**
+| Group        | Fields                                                   |
+| ------------ | -------------------------------------------------------- |
+| core         | Always included (see above)                              |
+| `details`    | comment, configId, metadata                              |
+| `subject`    | subject (the entity the score is attached to, see below) |
+| `annotation` | authorUserId, queueId                                    |
 
-The v2 API split score values across a numeric `value` and a separate `stringValue` field. The v3 API returns a single `value` field whose type follows `dataType`:
+Unknown group names return HTTP 400.
 
-| `dataType`    | v3 `value` type | v2 behavior                                                                                                               |
-| ------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `NUMERIC`     | number          | `value` (number)                                                                                                          |
-| `BOOLEAN`     | boolean         | `value` (`1`/`0`) plus `stringValue` (`"True"`/`"False"`)                                                                 |
-| `CATEGORICAL` | string          | `value` (numeric category mapping from the score config; not meaningful without one) plus `stringValue` (category string) |
-| `TEXT`        | string          | `stringValue` only                                                                                                        |
-| `CORRECTION`  | string          | `value` (always `0`) plus `stringValue` (correction content)                                                              |
+### `subject` Object
 
-When migrating, read `value` directly and branch on `dataType` if your pipeline handles mixed score types — no more decoding booleans from `1`/`0` or looking up category strings.
-
-**2. `subject` Object Replaces Flat Reference Fields**
-
-v2 score objects carried flat, nullable `traceId`, `observationId`, `sessionId`, and `datasetRunId` fields. v3 replaces them with an opt-in `subject` object (request it via `fields=subject`) that is discriminated by `kind`:
+Every score is attached to exactly one entity. Request the `subject` field group to see which one — it is discriminated by `kind`:
 
 ```json
 { "kind": "observation", "id": "obs-1", "traceId": "trace-1" }
@@ -82,67 +80,26 @@ v2 score objects carried flat, nullable `traceId`, `observationId`, `sessionId`,
 - `kind: "trace"` — `id` is the trace ID
 - `kind: "observation"` — `id` is the observation ID; includes the parent `traceId`
 - `kind: "session"` — `id` is the session ID
-- `kind: "experiment"` — `id` is the dataset run ID (v2's `datasetRunId` is renamed to experiment)
+- `kind: "experiment"` — `id` is the dataset run ID
 
-**3. Re-Partitioned Field Groups**
-
-v2 had two field groups, `score` and `trace`, both returned by default. v3 always returns a lean core and lets you opt into additional groups via a comma-separated `fields` parameter:
-
-```
-?fields=details,subject,annotation
-```
-
-| Group        | Fields                                                                                                      |
-| ------------ | ----------------------------------------------------------------------------------------------------------- |
-| core         | Always included: id, projectId, name, value, dataType, source, timestamp, environment, createdAt, updatedAt |
-| `details`    | comment, configId, metadata                                                                                 |
-| `subject`    | subject (the entity the score is attached to, see above)                                                    |
-| `annotation` | authorUserId, queueId                                                                                       |
-
-Unknown group names return HTTP 400. The v2 `trace` group (the trace's `userId`, `tags`, `environment`, `sessionId`) has no v3 equivalent because v3 does not join trace data — see [removed capabilities](#removed-capabilities).
-
-**4. Cursor-Based Pagination**
-
-The v2 API uses offset-based pagination (`page` parameter) which becomes increasingly slow for large datasets. The v3 API uses cursor-based pagination for better and more consistent performance.
-
-**How it works:**
+### Cursor-Based Pagination
 
 1. Make your initial request with a `limit` parameter (default 50, max 100)
 2. If more results exist, the response includes a `cursor` in the `meta` object
 3. Pass this cursor via the `cursor` parameter in your next request, repeating the same filter parameters as the initial request — the cursor encodes only the read position, not your query
 4. Repeat until no cursor is returned (you've reached the end)
 
-The response contains no `totalItems`/`totalPages` — total counts were removed by design; iterate the cursor instead. For recurring full exports to your data warehouse, use the [scheduled blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) instead of paginating through the API.
+The response contains no total counts — iterate the cursor until it is absent. For recurring full exports to your data warehouse, use the [scheduled blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) instead of paginating through the API.
 
-**5. New Filter Semantics**
+### Filtering
 
 - **Multi-value filters:** most filters accept comma-separated lists — `id`, `name`, `source`, `dataType`, `environment`, `configId`, `queueId`, `authorUserId`, `traceId`, `sessionId`, `observationId`, `experimentId`. Values within one parameter are OR-ed, parameters are AND-ed: `name=hallucination,toxicity&source=EVAL` returns eval scores named either `hallucination` or `toxicity`.
-- **Value filters replace `operator`:** use `value` for exact matches (comma-separated, requires a single `dataType` of `NUMERIC`, `BOOLEAN`, or `CATEGORICAL`) or `valueMin`/`valueMax` for inclusive numeric range bounds (require `dataType=NUMERIC`).
+- **Value filters:** use `value` for exact matches (comma-separated, requires a single `dataType` of `NUMERIC`, `BOOLEAN`, or `CATEGORICAL`) or `valueMin`/`valueMax` for inclusive numeric range bounds (require `dataType=NUMERIC`).
 - **Mutual exclusivity:** `traceId`, `sessionId`, and `experimentId` are mutually exclusive. `observationId` requires `traceId` because observation IDs are scoped to a trace.
 - **Case-insensitive enums:** `source` and `dataType` accept any casing (`numeric` and `NUMERIC` are equivalent).
 - **Timestamp bounds:** `fromTimestamp` is inclusive, `toTimestamp` is exclusive.
 
 Invalid filter combinations are rejected with HTTP 400 rather than silently ignored.
-
-### Removed Capabilities and Workarounds [#removed-capabilities]
-
-| v2 capability                         | v3 replacement                                                                    |
-| ------------------------------------- | --------------------------------------------------------------------------------- |
-| `userId` / `traceTags` filters        | Removed (HTTP 400) — v3 does not join trace data by design. See workaround below. |
-| `operator` parameter                  | Use `value` (exact multi-match) or `valueMin`/`valueMax` (numeric range).         |
-| Raw JSON `filter` parameter           | Map each condition to the typed query parameters. See metadata note below.        |
-| `totalItems` / `totalPages` in `meta` | Removed by design — iterate the cursor.                                           |
-| `scoreIds` parameter                  | Renamed to `id` (same comma-separated semantics).                                 |
-| `datasetRunId` parameter              | Renamed to `experimentId`.                                                        |
-
-**Filtering by trace properties (`userId`, `traceTags`):**
-
-- **Row-level:** query the [traces API](https://api.reference.langfuse.com/#tag/trace/GET/api/public/traces) with `userId`/`tags` filters first to collect the matching trace IDs, then pass them to v3's multi-value `traceId` filter (e.g. `traceId=t-1,t-2,t-3`).
-- **Aggregates:** if you only need aggregate score metrics per user, tag, or other trace-level dimensions, use the [Metrics API](/docs/metrics/features/metrics-api) instead — it supports trace-level dimensions and filters directly.
-
-**Filtering by score metadata:** the v2 JSON `filter` parameter supported metadata key-value conditions (`stringObject`). v3 has no metadata filter — request `fields=details` and filter on `metadata` client-side.
-
-**Row-count differences after migration:** because v2 joins trace data by default, it silently drops trace-level scores whose referenced trace cannot be found (e.g., the trace was deleted or never ingested). v3 queries scores directly and returns every matching score, so v3 can return rows that the same query on v2 did not.
 
 ### Common Use Cases
 
@@ -162,7 +119,7 @@ curl \
   "https://cloud.langfuse.com/api/public/v3/scores?traceId=trace-1,trace-2&fields=details,subject"
 ```
 
-**Fetching a single score by ID (replaces v2 get-by-id):**
+**Fetching a single score by ID:**
 
 ```bash
 curl \
@@ -188,7 +145,7 @@ curl \
 
 ### SDK Access [#sdk-access]
 
-The generated SDK clients expose the v3 endpoint directly. Score creation via the SDK helpers (e.g. `create_score` in Python) is unaffected by this migration.
+The generated SDK clients expose the v3 endpoint directly. Score creation uses separate SDK helpers (e.g. `create_score` in Python) — this client is for reads.
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">
@@ -242,7 +199,7 @@ const scores = await langfuse.api.scoresV3.getManyV3({
 | `limit`         | integer  | Number of items per page. Defaults to 50, max 100 (larger values return HTTP 400)                                                                                                                    |
 | `cursor`        | string   | URL-safe base64 cursor for pagination (from previous response)                                                                                                                                       |
 | `fields`        | string   | Comma-separated field groups to include in addition to core: `details`, `subject`, `annotation`                                                                                                      |
-| `id`            | string   | Comma-separated list of score IDs (replaces v2 `scoreIds` and the get-by-id endpoint)                                                                                                                |
+| `id`            | string   | Comma-separated list of score IDs                                                                                                                                                                    |
 | `name`          | string   | Comma-separated list of score names                                                                                                                                                                  |
 | `source`        | string   | Comma-separated list of score sources (`API`, `ANNOTATION`, `EVAL`), case-insensitive                                                                                                                |
 | `dataType`      | string   | Comma-separated list of data types (`NUMERIC`, `BOOLEAN`, `CATEGORICAL`, `TEXT`, `CORRECTION`), case-insensitive. Must be a single value when combined with `value`, `valueMin`, or `valueMax`       |
@@ -256,7 +213,7 @@ const scores = await langfuse.api.scoresV3.getManyV3({
 | `traceId`       | string   | Comma-separated list of trace IDs. Mutually exclusive with `sessionId`, `experimentId`                                                                                                               |
 | `sessionId`     | string   | Comma-separated list of session IDs. Mutually exclusive with `traceId`, `observationId`, `experimentId`                                                                                              |
 | `observationId` | string   | Comma-separated list of observation IDs. Requires `traceId`                                                                                                                                          |
-| `experimentId`  | string   | Comma-separated list of dataset run IDs (replaces v2 `datasetRunId`). Mutually exclusive with `traceId`, `sessionId`, `observationId`                                                                |
+| `experimentId`  | string   | Comma-separated list of dataset run IDs (experiment IDs). Mutually exclusive with `traceId`, `sessionId`, `observationId`                                                                            |
 | `fromTimestamp` | datetime | Inclusive lower bound on the score timestamp                                                                                                                                                         |
 | `toTimestamp`   | datetime | Exclusive upper bound on the score timestamp                                                                                                                                                         |
 
@@ -323,3 +280,67 @@ With `fields=details,subject,annotation`:
 **API Reference:** See the full [v3 Scores API Reference](https://api.reference.langfuse.com/#tag/scoresv3/GET/api/public/v3/scores) for all available parameters, response schemas, and interactive examples.
 
 </Callout>
+
+## Migrating from Scores API v2 [#upgrade-from-v2]
+
+<Callout type="warning">
+
+**v2 read deprecation**
+
+The v2 score read endpoints are deprecated. Self-hosted deployments on Langfuse v4 and later do not include them — migrate to v3 before upgrading. On Langfuse Cloud they remain available for a transition period.
+
+</Callout>
+
+Full endpoint mapping — only reads change, the write endpoints stay as they are:
+
+| Existing usage                                             | Recommended replacement                                                                                  |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| List scores with `GET /api/public/v2/scores`               | Use `GET /api/public/v3/scores`                                                                          |
+| Fetch one score with `GET /api/public/v2/scores/{scoreId}` | Use `GET /api/public/v3/scores?id=<scoreId>` — v3 has no get-by-id endpoint; the `id` filter replaces it |
+| Create scores with `POST /api/public/scores`               | Unchanged                                                                                                |
+| Delete scores with `DELETE /api/public/scores/{scoreId}`   | Unchanged                                                                                                |
+
+In the SDKs, replace `langfuse.api.scores.get_many(...)` (Python) / `langfuse.api.scores.getMany(...)` (JS/TS) with the v3 client shown under [SDK access](#sdk-access).
+
+### Response Changes
+
+**One typed `value` field.** The v2 API split score values across a numeric `value` and a separate `stringValue` field. v3 returns a single `value` typed by `dataType` (see [above](#v3)):
+
+| `dataType`    | v2 behavior                                                                                                               | v3 `value` |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `NUMERIC`     | `value` (number)                                                                                                          | number     |
+| `BOOLEAN`     | `value` (`1`/`0`) plus `stringValue` (`"True"`/`"False"`)                                                                 | boolean    |
+| `CATEGORICAL` | `value` (numeric category mapping from the score config; not meaningful without one) plus `stringValue` (category string) | string     |
+| `TEXT`        | `stringValue` only                                                                                                        | string     |
+| `CORRECTION`  | `value` (always `0`) plus `stringValue` (correction content)                                                              | string     |
+
+When migrating, read `value` directly and branch on `dataType` if your pipeline handles mixed score types.
+
+**`subject` object replaces flat reference fields.** v2 score objects carried flat, nullable `traceId`, `observationId`, `sessionId`, and `datasetRunId` fields. v3 replaces them with the opt-in [`subject` object](#v3) (request `fields=subject`); dataset runs appear as `kind: "experiment"` (v2's `datasetRunId`).
+
+**Re-partitioned field groups.** v2 had two field groups, `score` and `trace`, both returned by default. v3 always returns the core fields and offers `details`, `subject`, and `annotation` as opt-ins. The v2 `trace` group (the trace's `userId`, `tags`, `environment`, `sessionId`) has no v3 equivalent because v3 does not join trace data — see [removed capabilities](#removed-capabilities).
+
+### Query Changes
+
+- **Cursor pagination replaces offset pagination.** v2's `page` parameter and `totalItems`/`totalPages` meta are gone — pass `limit` and follow the `cursor` instead.
+- **`operator` is replaced by typed value filters.** Use `value` (exact multi-match) or `valueMin`/`valueMax` (numeric range).
+- **Renamed parameters:** `scoreIds` → `id`, `datasetRunId` → `experimentId` (same comma-separated semantics).
+- **Stricter validation:** `traceId`/`sessionId`/`experimentId` are mutually exclusive and `observationId` requires `traceId`; invalid combinations return HTTP 400 instead of being silently ignored.
+
+### Removed Capabilities and Workarounds [#removed-capabilities]
+
+| v2 capability                         | v3 replacement                                                                    |
+| ------------------------------------- | --------------------------------------------------------------------------------- |
+| `userId` / `traceTags` filters        | Removed (HTTP 400) — v3 does not join trace data by design. See workaround below. |
+| `operator` parameter                  | Use `value` (exact multi-match) or `valueMin`/`valueMax` (numeric range).         |
+| Raw JSON `filter` parameter           | Map each condition to the typed query parameters. See metadata note below.        |
+| `totalItems` / `totalPages` in `meta` | Removed by design — iterate the cursor.                                           |
+
+**Filtering by trace properties (`userId`, `traceTags`):**
+
+- **Row-level:** query the [traces API](https://api.reference.langfuse.com/#tag/trace/GET/api/public/traces) with `userId`/`tags` filters first to collect the matching trace IDs, then pass them to v3's multi-value `traceId` filter (e.g. `traceId=t-1,t-2,t-3`).
+- **Aggregates:** if you only need aggregate score metrics per user, tag, or other trace-level dimensions, use the [Metrics API](/docs/metrics/features/metrics-api) instead — it supports trace-level dimensions and filters directly.
+
+**Filtering by score metadata:** the v2 JSON `filter` parameter supported metadata key-value conditions (`stringObject`). v3 has no metadata filter — request `fields=details` and filter on `metadata` client-side.
+
+**Row-count differences after migration:** because v2 joins trace data by default, it silently drops trace-level scores whose referenced trace cannot be found (e.g., the trace was deleted or never ingested). v3 queries scores directly and returns every matching score, so v3 can return rows that the same query on v2 did not.
