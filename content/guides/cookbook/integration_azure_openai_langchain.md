@@ -20,16 +20,16 @@ This cookbook demonstrates use of Langfuse with Azure OpenAI and Langchain for p
 import os
 
 # get keys for your project from https://cloud.langfuse.com
-os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-***")
-os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-***")
-os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-***");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-***");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # your azure openai configuration
-os.environ.setdefault("AZURE_OPENAI_ENDPOINT", "your Azure OpenAI endpoint")
-os.environ.setdefault("AZURE_OPENAI_API_KEY", "your Azure OpenAI API key")
-os.environ.setdefault("OPENAI_API_TYPE", "azure")
-os.environ.setdefault("OPENAI_API_VERSION", "2023-09-01-preview")
+os.environ.setdefault("AZURE_OPENAI_ENDPOINT", "your Azure OpenAI endpoint");
+os.environ.setdefault("AZURE_OPENAI_API_KEY", "your Azure OpenAI API key");
+os.environ.setdefault("OPENAI_API_TYPE", "azure");
+os.environ.setdefault("OPENAI_API_VERSION", "2023-09-01-preview");
 ```
 
 We'll use the native Langfuse integration for Langchain. Learn more it in the [documentation](https://langfuse.com/integrations/frameworks/langchain).
