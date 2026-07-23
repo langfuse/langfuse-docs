@@ -34,7 +34,7 @@ From Python SDK v4 and JS/TS SDK v5 onward, the high-performance data APIs
 are the defaults:
 
 - `api.observations` (formerly `api.observations_v_2` / `api.observationsV2`)
-- `api.scores_v3` / `api.scoresV3` — the v3 scores reads; `api.scores` (v2 reads) is deprecated, see the [Scores API migration guide](/docs/api-and-data-platform/features/scores-api#upgrade-from-v2)
+- `api.scores_v3` / `api.scoresV3` — the v3 scores reads; `api.scores` (v2 reads) is deprecated, see [Migration of deprecated APIs](/faq/all/deprecated-api-migration#scores)
 - `api.metrics` (formerly `api.metrics_v_2` / `api.metricsV2`)
 
 The old v2 aliases were removed in Python SDK v4 and JS/TS SDK v5.
@@ -107,7 +107,7 @@ scores = langfuse.api.scores_v3.get_many_v3(id="ScoreId")
 scores = langfuse.api.scores.get_many(score_ids="ScoreId")
 ```
 
-To move existing v2 score reads to v3, see the [Scores API migration guide](/docs/api-and-data-platform/features/scores-api#upgrade-from-v2).
+To move existing v2 score reads to v3, see [Migration of deprecated APIs](/faq/all/deprecated-api-migration#scores).
 
 Prompts:
 
@@ -207,7 +207,7 @@ const scoresV3 = await langfuse.api.scoresV3.getManyV3();
 const scores = await langfuse.api.scores.getMany();
 ```
 
-To move existing v2 score reads to v3, see the [Scores API migration guide](/docs/api-and-data-platform/features/scores-api#upgrade-from-v2).
+To move existing v2 score reads to v3, see [Migration of deprecated APIs](/faq/all/deprecated-api-migration#scores).
 
 Prompts:
 
@@ -230,7 +230,7 @@ Explore more entities via Intellisense on `langfuse.api`.
 ## Related Resources
 
 - To move existing trace or observation reads to v2, see [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2).
-- To move existing score reads to v3, see the [Scores API migration guide](/docs/api-and-data-platform/features/scores-api#upgrade-from-v2).
+- To move existing score reads to v3, see [Migration of deprecated APIs](/faq/all/deprecated-api-migration#scores).
 - To move existing metrics queries to v2, see [Metrics API v2](/docs/metrics/features/metrics-api#v2).
 - For large-scale data exports (e.g., all traces for fine-tuning or analytics), consider using the [Blob Storage Export](/docs/api-and-data-platform/features/export-to-blob-storage) to automatically sync data to S3, GCS, or Azure on a schedule instead of paginating through the API.
 - To manually export filtered data from the Langfuse UI, see [Export from UI](/docs/api-and-data-platform/features/export-from-ui).
