@@ -5,10 +5,18 @@ export const runtime = "edge";
 
 const emailSchema = z.string().email();
 
+// Loops mailing list IDs.
+// - `product`: general monthly product update newsletter.
+// - `oss`: self-hosting / open source feature updates.
+const MAILING_LISTS: Record<string, string> = {
+  product: "cmbzj9z64074z0iyj7jj38ra6",
+  oss: "cmrxmvmg80x8z0j40drdb1v3y",
+};
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, source } = body;
+    const { email, source, list } = body;
 
     if (!emailSchema.safeParse(email).success) {
       return NextResponse.json(
@@ -16,6 +24,8 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
+
+    const mailingListId = MAILING_LISTS[list === "oss" ? "oss" : "product"];
 
     const loopsResponse = await fetch(
       "https://app.loops.so/api/v1/contacts/create",
@@ -25,7 +35,7 @@ export async function POST(request: NextRequest) {
           email,
           source,
           mailingLists: {
-            cmbzj9z64074z0iyj7jj38ra6: true,
+            [mailingListId]: true,
           },
         }),
         headers: {
