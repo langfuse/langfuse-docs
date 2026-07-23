@@ -63,6 +63,7 @@ import DetailLegacyExportSource from "@/components-mdx/compat/detail-legacy-expo
     { id: "js", label: "JS/TS SDK", sections: ["JS/TS"] },
     { id: "otel", label: "OpenTelemetry", sections: ["Third-party instrumentation"] },
     { id: "rest-api", label: "REST API", sections: ["Read APIs"] },
+    { id: "metrics", label: "Metrics & alerts", sections: ["Metrics & alerts"] },
     { id: "exports", label: "Exports & integrations", sections: ["Integrations & exports"] },
     { id: "evals", label: "Evaluations", sections: ["Evaluations"] },
   ]}
@@ -88,6 +89,8 @@ import DetailLegacyExportSource from "@/components-mdx/compat/detail-legacy-expo
 | Observations API v2 & Metrics API v2<br />`/api/public/v2/...`                                          | <CompatBadge variant="none">Unsupported</CompatBadge> | <CompatBadge variant="none">Unsupported</CompatBadge>           | <CompatBadge variant="full">Full</CompatBadge>                  | GA          |
 | Scores API v3<br />`/api/public/v3/scores`                                                              | <CompatBadge variant="none">Unsupported</CompatBadge> | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="full">Full</CompatBadge>                  | GA          |
 | Deprecated read APIs<br />`traces, observations, sessions, scores, metrics, dataset runs`               | <CompatBadge variant="full">Full</CompatBadge>        | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="none">Unsupported</CompatBadge>           | Deprecated  |
+| **Metrics & alerts** · [Monitors docs](/docs/metrics/features/monitors)                                 |                                                       |                                                                 |                                                                 |             |
+| [Monitors and alerts](/docs/metrics/features/monitors)                                                  | <CompatBadge variant="none">Unsupported</CompatBadge> | <CompatBadge variant="none">Unsupported</CompatBadge>           | <CompatBadge variant="full">Full</CompatBadge>                  | GA          |
 | **Integrations & exports** · [Export docs](/docs/api-and-data-platform/features/export-to-blob-storage) |                                                       |                                                                 |                                                                 |             |
 | [Blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage)                      | <CompatBadge variant="none">Unsupported</CompatBadge> | <CompatBadge variant="full">Traces & observations</CompatBadge> | <CompatBadge variant="full">Enriched observations</CompatBadge> | GA          |
 | [PostHog integration](/integrations/analytics/posthog)                                                  | <CompatBadge variant="none">Unsupported</CompatBadge> | <CompatBadge variant="full">Traces & observations</CompatBadge> | <CompatBadge variant="full">Enriched observations</CompatBadge> | GA          |
@@ -194,6 +197,12 @@ Deprecated.
 <CompatDetail name="Observations API v2 & Metrics API v2">
 
 <DetailReadApisV2 />
+
+</CompatDetail>
+
+<CompatDetail name="Monitors and alerts">
+
+GA. Requires Langfuse v4. Threshold-based alerts on your LLM application metrics with notifications via Slack, webhooks, and GitHub Actions; self-hosted deployments have no monitor limit. See the [monitors docs](/docs/metrics/features/monitors).
 
 </CompatDetail>
 
