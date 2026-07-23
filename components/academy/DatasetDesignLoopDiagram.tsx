@@ -7,7 +7,16 @@ const INNER_H = 360;
 const CARD_W = 160;
 const CARD_H = 92;
 
-const STEPS = [
+type DatasetDesignLoopStep = {
+  num: string;
+  title: string;
+  meta: string;
+  x: number;
+  y: number;
+  variant?: "terminal";
+};
+
+const STEPS: DatasetDesignLoopStep[] = [
   {
     num: "01",
     title: "Define goal",
@@ -51,7 +60,7 @@ const STEPS = [
     y: 184,
     variant: "terminal",
   },
-] as const;
+];
 
 function estimateInitialScale(): number {
   if (typeof window === "undefined") return 0.69;
@@ -61,7 +70,7 @@ function estimateInitialScale(): number {
   );
 }
 
-function StepCard({ step }: { step: (typeof STEPS)[number] }) {
+function StepCard({ step }: { step: DatasetDesignLoopStep }) {
   return (
     <div
       className={`dataset-design-loop__card ${
