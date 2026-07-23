@@ -29,9 +29,9 @@ Follow this guide to:
 
 <Callout type="warn">
 
-  Langfuse v3 will receive security patches until end of January 2027.
-  If you require further support, please contact [support](/support).
-  {/* TODO: Custom reach-out to Enterprise Self-Hosters that we can also patch major bug fixes */}
+Langfuse v3 will receive security patches until end of January 2027.
+If you require further support, please contact [support](/support).
+{/* TODO: Custom reach-out to Enterprise Self-Hosters that we can also patch major bug fixes */}
 
 </Callout>
 
@@ -80,7 +80,7 @@ Langfuse v4 serves reads from the new APIs that were introduced alongside the da
 Ingestion, replaced by [OpenTelemetry-based ingestion](/integrations/native/opentelemetry):
 
 | Endpoint                       | Behavior on v4                                                                                         |
-|--------------------------------|--------------------------------------------------------------------------------------------------------|
+| ------------------------------ | ------------------------------------------------------------------------------------------------------ |
 | `POST /api/public/ingestion`   | Keeps the `207` status code, but returns `400` for every event type except `score-create` or `sdk-log` |
 | `POST /api/public/traces`      | Returns `404`                                                                                          |
 | `POST /api/public/spans`       | Returns `404`                                                                                          |
@@ -153,7 +153,7 @@ New deployments skip all of this — see [new deployments](#new-deployments).
 Langfuse v4 raises the minimum infrastructure versions:
 
 | Component  | Requirement                                                                                                 |
-|------------|-------------------------------------------------------------------------------------------------------------|
+| ---------- | ----------------------------------------------------------------------------------------------------------- |
 | ClickHouse | **25.12 minimum, 26.4 recommended.** Required for lightweight updates, the JSON type, and full-text search. |
 | PostgreSQL | 16 recommended                                                                                              |
 | Redis      | 7.2 recommended                                                                                             |
@@ -198,8 +198,8 @@ LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN=false
 ```
 
 Ingestion writes into both the old and the new tables: compatible SDKs directly, older SDKs via the [dual-write pipeline](#dual-write) with a ~10 minute delay.
-  Each user can switch to the new read experience via the toggle in the UI, and the new [v2 APIs](#api-changes) become available — both gated by `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN` (default `true`).
-  Expect higher server load and S3 costs than `events_only` (comparable to v3 processing) until you complete the [cutover](#cutover).
+Each user can switch to the new read experience via the toggle in the UI, and the new [v2 APIs](#api-changes) become available — both gated by `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN` (default `true`).
+Expect higher server load and S3 costs than `events_only` (comparable to v3 processing) until you complete the [cutover](#cutover).
 
 </Tab>
 
