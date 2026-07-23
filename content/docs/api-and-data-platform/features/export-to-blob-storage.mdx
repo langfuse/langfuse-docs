@@ -77,7 +77,7 @@ Groups are listed in the order they appear in the UI; fields within each group a
 | `trace_context` | `release`, `tags`, `trace_name`                                                                              |
 | `tools`         | `tool_call_names`, `tool_calls`, `tool_definitions`                                                          |
 
-Field groups also apply to [legacy export sources](#legacy-export-sources), with a smaller column set per group; see [differences between enriched and legacy exports](/docs/api-and-data-platform/features/blob-storage-export-fields#enriched-vs-legacy-differences).
+Field groups also apply to [legacy export sources](#legacy-export-sources), where three groups (`basic`, `usage`, `trace_context`) contain fewer columns; see the comparison in that section.
 
 <Callout type="info">
   Per-unit pricing fields (`input_price`, `output_price`, `total_price`) live in the `model` group; they come from the matched model definition. Deselecting `model` skips the worker-side model pricing lookup entirely. The `usage_pricing_tier_id` and `usage_pricing_tier_name` fields stay in the `usage` group. With the Parquet file type, these three price columns are not included even when `model` is selected. See [File formats](#file-formats).
@@ -238,6 +238,14 @@ The `Export Source` setting determines which tables the integration exports. Leg
 | `Traces and observations (legacy)`                           | `traces/`, `observations/`, `scores/`                     |
 
 For the columns in each file, see the [export sources overview](/docs/api-and-data-platform/features/blob-storage-export-fields#export-sources) in the field reference.
+
+[Field groups](#export-field-groups) apply to legacy observation exports as well, but three groups contain fewer columns in the legacy `observations` file; all other groups are identical to the enriched export:
+
+| Group           | Enriched (`observations_v2`)                                                                                 | Legacy (`observations`)                                     |
+| --------------- | ------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------- |
+| `basic`         | `bookmarked`, `environment`, `level`, `name`, `public`, `session_id`, `status_message`, `user_id`, `version` | `environment`, `level`, `name`, `status_message`, `version` |
+| `usage`         | `cost_details`, `total_cost`, `usage_details`, `usage_pricing_tier_id`, `usage_pricing_tier_name`            | Same, without `usage_pricing_tier_id`                       |
+| `trace_context` | `release`, `tags`, `trace_name`                                                                              | No effect; these fields live in the separate `traces` file  |
 
 Where legacy sources are still available:
 
