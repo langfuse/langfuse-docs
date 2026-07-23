@@ -25,9 +25,15 @@ Those exports can run every `20 minutes`, or on an `hourly`, `daily`, or `weekly
 Navigate to your project settings and select `Integrations > Blob Storage` to set up a new export.
 Select whether you want to use S3, a S3 compatible storage, Google Cloud Storage, or Azure Blob Storage.
 
+For every column in each exported file, see the [Export Field Reference](/docs/api-and-data-platform/features/blob-storage-export-fields).
+
+The rest of this page walks through [setting up an export](#set-up-an-export) (file formats, exported columns, and how far back to export), [consuming exports in your pipeline](#consume-exports) (what lands in your bucket and how to detect completed runs), and [monitoring and reconfiguring](#monitor-and-reconfigure) a running integration.
+
 Older integrations may still export via a deprecated legacy source with separate `traces` and `observations` files; see [Legacy export sources](#legacy-export-sources) for the differences and the upgrade path.
 
-## Start exporting via Blob Storage
+## Set up an export [#set-up-an-export]
+
+### Create the integration
 
 To set up the export navigate to `Your Project` > `Settings` > `Integrations` > `Blob Storage`.
 
@@ -40,7 +46,7 @@ Read [our blob storage documentation](/self-hosting/deployment/infrastructure/bl
   ![Blob Storage Integration Setup](/images/docs/blob-storage.png)
 </Frame>
 
-## File formats [#file-formats]
+### File formats [#file-formats]
 
 Exports can be written as Apache Parquet, CSV, JSON, or JSONL files. New integrations default to **Parquet**.
 
@@ -53,11 +59,7 @@ Parquet observation exports do not include the per-unit model price columns (`in
 **Self-hosted deployments running ClickHouse < 25.11:** Parquet export failures may not surface as errors. A run can complete (and its [manifest](#run-manifest) be written) while the Parquet output is incomplete or invalid. Upgrade to ClickHouse >= 25.11, or use a text format (CSV, JSON, or JSONL) for reliable failure detection.
 </Callout>
 
-## Exported fields
-
-For a complete reference of all fields included in each export file (traces, observations, enriched observations, and scores), see the [Export Field Reference](/docs/api-and-data-platform/features/blob-storage-export-fields).
-
-## Choose which columns are exported [#export-field-groups]
+### Choose which columns are exported [#export-field-groups]
 
 Field groups let you choose which column groups appear in each row of the observation export. Eleven groups cover the full row, ten of which are toggleable; toggle them in **Project Settings → Integrations → Blob Storage** under **Export Field Groups**.
 
@@ -85,7 +87,7 @@ Field groups also apply to [legacy export sources](#legacy-export-sources), wher
 
 New integrations default to all eleven groups, so behavior matches earlier exports unless you narrow the selection.
 
-### Configure via REST API [#field-groups-rest-api]
+#### Configure via REST API [#field-groups-rest-api]
 
 `GET` and `PUT /api/public/integrations/blob-storage` accept and return:
 
@@ -96,7 +98,7 @@ New integrations default to all eleven groups, so behavior matches earlier expor
 
 See the [API reference](https://api.reference.langfuse.com/#tag/blobstorageintegrations) for the full schema.
 
-## Export modes [#export-modes]
+### Export modes [#export-modes]
 
 The **Export Mode** determines how far back the integration starts exporting from:
 
@@ -108,14 +110,16 @@ The **Export Mode** determines how far back the integration starts exporting fro
 
 Changing the mode resets the sync position, so it's also the mechanism for re-scanning history. See [Re-exporting data and configuration changes](#re-exporting).
 
-## How exports run [#how-exports-run]
+## Consume exports in your pipeline [#consume-exports]
+
+### How exports run [#how-exports-run]
 
 Each run exports one time window of data to your bucket, then advances and exports the next window on your configured schedule.
 
 - **Export delay.** Data is exported with a short delay rather than right up to the current moment, so records still moving through ingestion are not exported half-written. Expect a brief lag between when an event is recorded and when it appears in your bucket.
 - **Catch-up / backfill.** When an integration starts from a historic point (or falls behind), it works forward through the backlog and may write many files in quick succession before settling into its normal cadence. A freshly created full-history integration does this until it catches up to the present.
 
-## Run completion manifest [#run-manifest]
+### Run completion manifest [#run-manifest]
 
 A single export run writes one file per exported table (up to four, depending on the selected export source), so the table files alone don't tell you when a run is complete. As the last object of every successful run, Langfuse writes a manifest file that lists everything the run produced:
 
@@ -174,7 +178,7 @@ Notes on the schema:
 - `files[].sizeBytes` is the uploaded size (after gzip for compressed text formats). `files[].rowCount` is the number of exported rows for text formats and `null` for Parquet files.
 - During [catch-up or backfill](#how-exports-run), each exported window is a separate run with its own manifest, so several manifests can appear in quick succession.
 
-## React to completed export runs [#export-events]
+### React to completed export runs [#export-events]
 
 Langfuse does not send a webhook when an export run finishes. Instead, subscribe to your storage provider's native object-created events with a prefix filter on `{prefix}{project-id}/manifests/`. Because the manifest is the last object of each run, this gives you one event per completed run. When the event fires, download the manifest and process the objects listed in `files[].key`.
 
@@ -188,7 +192,13 @@ Provider recipes:
 
 For S3-compatible providers without object-created events (for example, Wasabi or DigitalOcean Spaces), poll the manifest prefix instead: list `{prefix}{project-id}/manifests/` on a schedule and process any manifest newer than your last checkpoint. Manifest names sort lexicographically by export timestamp, so a marker-based (`start-after`) listing keeps polling cheap.
 
-## Export status [#export-status]
+### Empty files in your bucket [#empty-files]
+
+<BlobStorageEmptyFiles />
+
+## Monitor and reconfigure [#monitor-and-reconfigure]
+
+### Export status [#export-status]
 
 The integration settings page shows a status badge:
 
@@ -212,13 +222,9 @@ If a worker crashes mid-export, a 2-hour safety-valve TTL ensures the badge reve
 
 Langfuse retries failed exports on the next run. Repeated failures notify project admins by email and the configured Slack or webhook channel. Configure it under **Project Settings → Notifications**.
 
-## Re-exporting data and configuration changes [#re-exporting]
+### Re-exporting data and configuration changes [#re-exporting]
 
 <BlobStorageReExporting />
-
-## Empty files in your bucket [#empty-files]
-
-<BlobStorageEmptyFiles />
 
 ## Legacy export sources [#legacy-export-sources]
 
@@ -260,11 +266,11 @@ To migrate an existing legacy integration safely:
 
 1. Switch to `Traces and observations (legacy) and enriched observations`.
 2. Validate downstream jobs and data consumers while both sources are exported (this mode creates duplicate records by design). See [differences between enriched and legacy exports](/docs/api-and-data-platform/features/blob-storage-export-fields#enriched-vs-legacy-differences) for the field-level comparison.
-3. Repoint consumers from the `traces/` and `observations/` directories to `observations_v2/`.
+3. Repoint consumers from the `traces/` and `observations/` directories to `observations_v2/`. Prefer driving consumers from the [run manifest](#run-manifest) instead of watching directories; each manifest lists exactly the files its run wrote.
 4. Switch to `Enriched observations (recommended)` once validation is complete.
 
 <Callout type="warning">
-After the switch, the `traces/` and `observations/` directories receive **no further files at all**, not even [empty files](#empty-files), which are otherwise written for windows without data. Pipelines still watching those directories go silent without an error signal, so complete step 3 before switching.
+After the switch, the `traces/` and `observations/` directories receive **no further files at all**, not even [empty files](#empty-files), which are otherwise written for windows without data. Pipelines still watching those directories go silent without an error signal, so complete step 3 before switching. Pipelines driven by the [run manifest](#run-manifest) are not affected: manifests continue to list exactly what each run writes, so manifest-driven consumers follow the source switch automatically.
 </Callout>
 
 ## Alternatives
