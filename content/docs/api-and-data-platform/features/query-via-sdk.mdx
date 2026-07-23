@@ -39,12 +39,9 @@ are the defaults:
 
 The old v2 aliases were removed in Python SDK v4 and JS/TS SDK v5.
 
-The older trace, observation, score, and metrics read APIs remain available, but they
-are not recommended as the default for new data extraction workflows because
-they are less performant at scale. See [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2)
-for row-level data, [Scores API v3](/docs/api-and-data-platform/features/scores-api#v3)
-for score data, and [Metrics API v2](/docs/metrics/features/metrics-api#v2)
-for aggregates.
+The `api.legacy.*` resources call the deprecated endpoints; see
+[Migration of deprecated APIs](/faq/all/deprecated-api-migration) for
+replacements and the endpoint reference.
 
 </Callout>
 
@@ -122,7 +119,7 @@ Datasets:
 # Namespaces:
 # - langfuse.api.datasets.*
 # - langfuse.api.dataset_items.*
-# - langfuse.api.dataset_run_items.*
+# - langfuse.api.experiments.*
 ```
 
 #### Async equivalents
@@ -222,7 +219,7 @@ Datasets:
 // Namespaces:
 // - langfuse.api.datasets.*
 // - langfuse.api.datasetItems.*
-// - langfuse.api.datasetRunItems.*
+// - langfuse.api.experiments.*
 ```
 
 Explore more entities via Intellisense on `langfuse.api`.

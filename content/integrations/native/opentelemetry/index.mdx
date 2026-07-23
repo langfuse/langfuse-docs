@@ -35,6 +35,13 @@ As the [Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/attrib
   wiring this up in production.
 </Callout>
 
+<Callout type="info">
+  OTLP replaces the deprecated `POST /api/public/ingestion` API. See
+  [Migration of deprecated APIs](/faq/all/deprecated-api-migration#ingestion) for
+  the endpoint mapping; the deprecated endpoint itself is documented in its
+  [endpoint reference section](/faq/all/deprecated-api-migration#endpoints).
+</Callout>
+
 ```mermaid
 flowchart LR
   subgraph App["Application"]
@@ -109,7 +116,7 @@ OpenTelemetry integration, you can use the convenience methods
 which handle attribute propagation automatically. These methods provide a
 simpler interface and are the recommended approach when using Langfuse SDKs.
 
-## Experiments: Ingesting Experiment Spans
+## Experiments: Ingesting Experiment Spans [#experiments-ingesting-experiment-spans]
 
 <Callout type="info">
   **Using Python or TypeScript?** Use [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)
@@ -281,7 +288,7 @@ For long API Keys on GNU systems, you may have to add `-w 0` at the end since `b
 
 If you send spans directly via OpenTelemetry, include the
 `x-langfuse-ingestion-version: 4` header so that new data appears in real time
-in Langfuse Cloud Fast Preview and the v2 Observations and Metrics APIs. Without
+on the v4 data model and the v2 Observations and Metrics APIs. Without
 this header, directly ingested OpenTelemetry data can be delayed by up to 10
 minutes. The `OTEL_EXPORTER_OTLP_HEADERS` configuration above already includes
 the header.
@@ -299,7 +306,7 @@ If your collector requires signal-specific environment variables, the trace endp
 
 ```bash
 OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="https://cloud.langfuse.com/api/public/otel/v1/traces" # EU data region
-# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com/api/public/otel, 🇯🇵 Japan: https://jp.cloud.langfuse.com/api/public/otel and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com/api/public/otel
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com/api/public/otel/v1/traces, 🇯🇵 Japan: https://jp.cloud.langfuse.com/api/public/otel/v1/traces and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com/api/public/otel/v1/traces
 ```
 
 </Callout>
