@@ -1,6 +1,6 @@
 ---
 title: Export to Blob Storage
-description: Export traces, observations, enriched observations, and scores to Blob Storage, e.g. S3, GCS, or Azure Blob Storage.
+description: Export enriched observations, scores, and legacy traces and observations to Blob Storage, e.g. S3, GCS, or Azure Blob Storage.
 sidebarTitle: Export to Blob Storage
 ---
 
@@ -19,7 +19,7 @@ import BlobStorageEmptyFiles from "@/components-mdx/blob-storage-empty-files.mdx
   }}
 />
 
-You can create schedule exports to a Blob Storage, e.g. S3, GCS, or Azure Blob Storage, for `traces`, `observations`, enriched observations, and `scores`.
+You can schedule exports to Blob Storage, e.g. S3, GCS, or Azure Blob Storage. By default, exports contain enriched observations (each observation row includes its trace attributes) and `scores`; integrations on a legacy [export source](#export-source-fast-preview) export separate `traces` and `observations` files (plus `scores`) instead.
 
 Those exports can run every `20 minutes`, or on an `hourly`, `daily`, or `weekly` schedule.
 Navigate to your project settings and select `Integrations > Blob Storage` to set up a new export.
@@ -47,17 +47,25 @@ Exports can be written as Apache Parquet, CSV, JSON, or JSONL files. New integra
 
 Parquet observation exports do not include the per-unit model price columns (`input_price`, `output_price`, `total_price`). These columns snapshot model definition prices at export time and may be deprecated in the future — use `cost_details` and `total_cost` for cost data, which are included in every file type. See [Notes on Parquet exports](/docs/api-and-data-platform/features/blob-storage-export-fields#parquet-exports) in the field reference for details.
 
-## Export source (Fast Preview)
+<Callout type="warning">
+**Self-hosted deployments running ClickHouse < 25.11:** Parquet export failures may not surface as errors. A run can complete — and its [manifest](#run-manifest) be written — while the Parquet output is incomplete or invalid. Upgrade to ClickHouse >= 25.11, or use a text format (CSV, JSON, or JSONL) for reliable failure detection.
+</Callout>
 
-Blob Storage integrations now include an `Export Source` selector. New integrations default to `Enriched observations (recommended)` (trace attributes are directly set on observations).
+## Export source (Fast Preview) [#export-source-fast-preview]
 
-This source uses enriched observations with trace attributes and provides significantly better export performance. `Scores` are always included, regardless of the selected source.
+The `Export Source` setting determines which tables the integration exports. Where enriched export is available — on Langfuse Cloud, and on self-hosted deployments with the v4 preview opt-in (`LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN`) — new integrations default to `Enriched observations (recommended)`: trace attributes are set directly on each observation row, which avoids warehouse-side joins and provides significantly better export performance. On self-hosted deployments without the opt-in, enriched export is not available and new integrations default to `Traces and observations (legacy)`.
 
-Available options:
+`Scores` are always included, regardless of the selected source.
 
-- `Traces and observations (legacy)`
-- `Traces and observations (legacy) and enriched observations`
-- `Enriched observations (recommended)`
+Available options, and the directories each source writes under `{prefix}{project-id}/` in your bucket:
+
+| Export source                                                | Directories written                                       |
+| ------------------------------------------------------------ | --------------------------------------------------------- |
+| `Traces and observations (legacy)`                           | `traces/`, `observations/`, `scores/`                     |
+| `Traces and observations (legacy) and enriched observations` | `traces/`, `observations/`, `observations_v2/`, `scores/` |
+| `Enriched observations (recommended)`                        | `observations_v2/`, `scores/`                             |
+
+Every run also writes a [run manifest](#run-manifest) under `manifests/`. For the columns in each file, see the [export sources overview](/docs/api-and-data-platform/features/blob-storage-export-fields#export-sources) in the field reference.
 
 <Callout type="warning">
   The `Traces and observations (legacy)` source is deprecated and will be
@@ -66,13 +74,23 @@ Available options:
   recommended to [upgrade](#upgrade-path).
 </Callout>
 
+On Langfuse Cloud, integrations that still export a legacy source (including `Traces and observations (legacy) and enriched observations`) also receive a plain-text deprecation notice at `{prefix}{project-id}/DEPRECATION_NOTICE.txt`. It is refreshed on every successful run — written best-effort after the run's [manifest](#run-manifest) and not listed in it — and removed automatically on the next successful run after the integration switches to `Enriched observations (recommended)`. The manifest remains the authoritative run-completion marker; do not treat the notice as a completion signal. Account for this object if your pipelines diff bucket contents or subscribe to object-created events without a prefix filter.
+
 <Callout type="info">
-  **Cloud projects created on or after 2026-05-20** will not see the Export Source selector — new Cloud projects export as `Enriched observations (recommended)` automatically. The REST API rejects legacy values for these projects with `400 BAD_REQUEST`. Existing projects and all self-hosted deployments are unaffected.
+**Langfuse Cloud:** Legacy export sources can no longer be newly selected:
+
+- Projects created on or after 2026-05-20 cannot use legacy export sources.
+- In older projects, blob storage integrations created on or after 2026-06-22 — including newly configured ones — cannot select legacy export sources either.
+
+In both cases the Export Source selector is not shown and exports use `Enriched observations (recommended)` automatically; the REST API rejects legacy values with `400 BAD_REQUEST`. Blob storage integrations created before 2026-06-22 keep their configured export source and continue to see the selector.
+
+**Self-hosted:** These date cutoffs do not apply. However, once a deployment has completed the v4 migration (`LANGFUSE_MIGRATION_V4_WRITE_MODE=events_only`), legacy export sources are no longer available — including previously saved ones, since the legacy traces/observations tables are no longer written — and the selector is hidden once only the enriched source remains.
+
 </Callout>
 
 ### Upgrade path for existing configurations [#upgrade-path]
 
-This migration path applies to **pre-cutoff Cloud projects and self-hosted deployments**. Post-cutoff Cloud projects already use `Enriched observations (recommended)` and cannot select legacy sources.
+This migration path applies to **Cloud blob storage integrations created before 2026-06-22 and self-hosted deployments that still write the legacy tables**. Newer Cloud integrations already use `Enriched observations (recommended)` and cannot select legacy sources — including the dual-write source in step 1 below.
 
 Existing integrations continue to use `Traces and observations (legacy)` until changed.
 
@@ -80,7 +98,12 @@ To migrate safely:
 
 1. Switch to `Traces and observations (legacy) and enriched observations`.
 2. Validate downstream jobs and data consumers while both sources are exported (this mode creates duplicate records by design).
-3. Switch to `Enriched observations (recommended)` once validation is complete.
+3. Repoint consumers from the `traces/` and `observations/` directories to `observations_v2/`.
+4. Switch to `Enriched observations (recommended)` once validation is complete.
+
+<Callout type="warning">
+After the switch, the `traces/` and `observations/` directories receive **no further files at all** — not even [empty files](#empty-files), which are otherwise written for windows without data. Pipelines still watching those directories go silent without an error signal, so complete step 3 before switching.
+</Callout>
 
 For a field-level comparison of what changes when you switch sources, see [Differences between enriched and legacy exports](/docs/api-and-data-platform/features/blob-storage-export-fields#enriched-vs-legacy-differences).
 
@@ -145,6 +168,79 @@ Each run exports one time window of data to your bucket, then advances and expor
 
 - **Export delay.** Data is exported with a short delay rather than right up to the current moment, so records still moving through ingestion are not exported half-written. Expect a brief lag between when an event is recorded and when it appears in your bucket.
 - **Catch-up / backfill.** When an integration starts from a historic point — or falls behind — it works forward through the backlog and may write many files in quick succession before settling into its normal cadence. A freshly created full-history integration does this until it catches up to the present.
+
+## Run completion manifest [#run-manifest]
+
+A single export run writes one file per exported table — up to four, depending on the selected export source — so the table files alone don't tell you when a run is complete. As the last object of every successful run, Langfuse writes a manifest file that lists everything the run produced:
+
+```
+{prefix}{project-id}/manifests/{max-timestamp}.json
+```
+
+The manifest is uploaded strictly after all table files of the run. Once it appears, every file it lists is fully available in your bucket; if any upload fails, no manifest is written and the whole run is retried (table files are overwritten under the same keys on retry). The timestamp in the manifest key is the run's `maxTimestamp` in UTC, truncated to whole seconds, with colons replaced by dashes and the milliseconds and trailing `Z` dropped (`2026-07-13T09:00:00.000Z` → `2026-07-13T09-00-00`). This is the same stem used by the run's table files (`{prefix}{project-id}/{table}/{timestamp}.{extension}`), so a run's table files and its manifest share the same timestamp stem.
+
+Example manifest:
+
+```json
+{
+  "version": 1,
+  "projectId": "cm0abcd1234efgh5678ijkl90",
+  "exportSource": "OBSERVATIONS_V2",
+  "window": {
+    "minTimestamp": "2026-07-13T08:00:00.000Z",
+    "maxTimestamp": "2026-07-13T09:00:00.000Z"
+  },
+  "maxTimestamp": "2026-07-13T09:00:00.000Z",
+  "createdAt": "2026-07-13T09:02:11.123Z",
+  "tables": ["observations_v2", "scores"],
+  "files": [
+    {
+      "key": "my-prefix/cm0abcd1234efgh5678ijkl90/observations_v2/2026-07-13T09-00-00.parquet",
+      "table": "observations_v2",
+      "fileType": "PARQUET",
+      "format": "parquet",
+      "compressed": false,
+      "contentType": "application/vnd.apache.parquet",
+      "sizeBytes": 1048576,
+      "rowCount": null
+    },
+    {
+      "key": "my-prefix/cm0abcd1234efgh5678ijkl90/scores/2026-07-13T09-00-00.parquet",
+      "table": "scores",
+      "fileType": "PARQUET",
+      "format": "parquet",
+      "compressed": false,
+      "contentType": "application/vnd.apache.parquet",
+      "sizeBytes": 20480,
+      "rowCount": null
+    }
+  ]
+}
+```
+
+Notes on the schema:
+
+- `version` increments only on breaking changes; new fields may be added without a version bump, so ignore unknown fields when parsing.
+- `window` is the time range of data covered by the run, with both bounds inclusive — a record at exactly `maxTimestamp` also falls into the next run's window. `maxTimestamp` duplicates `window.maxTimestamp`; the timestamp stem in the manifest file name is derived from it as described above.
+- `tables` and `files` reflect the selected export source; `scores` is always included regardless of the source.
+- `files[].key` is the full object key including your configured prefix, so consumers can fetch listed files without reconstructing paths.
+- `files[].fileType` is the configured file type: `JSON`, `CSV`, `JSONL`, or `PARQUET`. `files[].format` additionally encodes compression: one of `parquet`, `json-raw`, `json-gzip`, `jsonl-raw`, `jsonl-gzip`, `csv-raw`, or `csv-gzip`.
+- `files[].sizeBytes` is the uploaded size (after gzip for compressed text formats). `files[].rowCount` is the number of exported rows for text formats and `null` for Parquet files.
+- During [catch-up or backfill](#how-exports-run), each exported window is a separate run with its own manifest, so several manifests can appear in quick succession.
+
+## React to completed export runs [#export-events]
+
+Langfuse does not send a webhook when an export run finishes. Instead, subscribe to your storage provider's native object-created events with a prefix filter on `{prefix}{project-id}/manifests/` — because the manifest is the last object of each run, this gives you one event per completed run. When the event fires, download the manifest and process the objects listed in `files[].key`.
+
+Provider recipes:
+
+- **AWS S3** — [Event Notifications](https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventNotifications.html) on `s3:ObjectCreated:*` to SQS, SNS, or Lambda with a key prefix filter, or [EventBridge rules](https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventBridge.html) matching the object key prefix.
+- **Google Cloud Storage** — [Pub/Sub notifications](https://cloud.google.com/storage/docs/pubsub-notifications) for `OBJECT_FINALIZE` events; set the object name prefix when creating the notification configuration.
+- **Azure Blob Storage** — [Event Grid](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blob-event-overview) subscription on `Microsoft.Storage.BlobCreated` with a `subjectBeginsWith` filter, e.g. `/blobServices/default/containers/<container>/blobs/{prefix}{project-id}/manifests/`.
+- **MinIO** — [Bucket notifications](https://min.io/docs/minio/linux/administration/monitoring/bucket-notifications.html) on `s3:ObjectCreated:*` (webhook, Kafka, AMQP, and more) with a prefix filter.
+- **Backblaze B2** — [Event Notifications](https://www.backblaze.com/docs/cloud-storage-event-notifications) (webhooks) with a prefix filter.
+
+For S3-compatible providers without object-created events (for example, Wasabi or DigitalOcean Spaces), poll the manifest prefix instead: list `{prefix}{project-id}/manifests/` on a schedule and process any manifest newer than your last checkpoint. Manifest names sort lexicographically by export timestamp, so a marker-based (`start-after`) listing keeps polling cheap.
 
 ## Export status [#export-status]
 

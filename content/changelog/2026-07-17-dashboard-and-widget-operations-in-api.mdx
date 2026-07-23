@@ -1,0 +1,97 @@
+---
+date: 2026-07-17
+title: Manage dashboards via API, CLI, and MCP
+description: Create and manage dashboards and widgets programmatically through the public API and Langfuse CLI, let AI agents build them via the Langfuse MCP server, or ask the Langfuse Assistant in the UI.
+author: Lysander
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, Code, LayoutDashboard } from "lucide-react";
+
+<ChangelogHeader />
+
+You can now create and manage dashboards end-to-end in code and through your agent. New endpoints under `/api/public/unstable` cover dashboards, the placements on their grid, and the reusable widgets those placements reference. The [Langfuse CLI](/docs/api-and-data-platform/features/cli) picks the endpoints up automatically, and the [Langfuse MCP server](/docs/api-and-data-platform/features/mcp-server) exposes the same operations as tools.
+
+This opens up a few workflows beyond the dashboard editor in the UI:
+
+- **Dashboards as code**: keep dashboard definitions in version control and apply the same monitoring setup across projects and environments.
+- **Agent-built dashboards**: ask an AI agent for a dashboard, e.g. error traces for a certain feature over time. Reads run automatically, and every change goes through human-in-the-loop approval.
+- **Incremental edits**: add, move, or resize a single tile through the placement endpoints without resubmitting the whole layout. Omit the position and the server appends the tile for you.
+
+The same tools power the [Langfuse Assistant](/docs/langfuse-assistant) in the UI, so you can ask it to create or update dashboards and widgets directly. The Assistant is available when AI features are enabled for your organization (org admins can enable them in the organization settings).
+
+## New endpoints [#new-endpoints]
+
+- `/dashboards` — list, create, read, update, and delete dashboards, including their filters and full layout definition. See the [dashboards API reference](https://api.reference.langfuse.com/#tag/unstabledashboards).
+- `/dashboards/{dashboardId}/placements` — add, move or resize, and remove individual tiles on a dashboard's grid, documented alongside the [dashboards API reference](https://api.reference.langfuse.com/#tag/unstabledashboards).
+- `/dashboard-widgets` — list, create, read, update, and delete the reusable widgets that placements reference. See the [dashboard widgets API reference](https://api.reference.langfuse.com/#tag/unstabledashboardwidgets).
+
+## New MCP tools [#new-mcp-tools]
+
+<table className="[&_code]:rounded-full [&_code]:border [&_code]:border-border [&_code]:bg-muted [&_code]:px-2 [&_code]:py-1 [&_code]:text-muted-foreground">
+  <tbody>
+    <tr>
+      <td className="px-3">
+        <strong>Dashboards</strong>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 leading-3">
+          <code>listDashboards</code>
+          <code>getDashboard</code>
+          <code>createDashboard</code>
+          <code>updateDashboard</code>
+          <code>deleteDashboard</code>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td className="px-3">
+        <strong>Placements</strong>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 leading-3">
+          <code>addDashboardPlacement</code>
+          <code>updateDashboardPlacement</code>
+          <code>deleteDashboardPlacement</code>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td className="px-3">
+        <strong>Widgets</strong>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 leading-3">
+          <code>listDashboardWidgets</code>
+          <code>getDashboardWidget</code>
+          <code>createDashboardWidget</code>
+          <code>updateDashboardWidget</code>
+          <code>deleteDashboardWidget</code>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<Callout type="info">
+  These endpoints and MCP tools are **unstable** and may change while the
+  dashboard and widget contract is being finalized. The dashboard editor in the
+  UI remains fully supported.
+</Callout>
+
+## Get started
+
+<Cards num={3}>
+  <Card
+    title="Custom dashboards"
+    href="/docs/metrics/features/custom-dashboards"
+    icon={<LayoutDashboard />}
+    arrow
+  />
+  <Card
+    title="API reference"
+    href="https://api.reference.langfuse.com/#tag/unstabledashboards"
+    icon={<Code />}
+    arrow
+  />
+  <Card
+    title="MCP server documentation"
+    href="/docs/api-and-data-platform/features/mcp-server"
+    icon={<Book />}
+    arrow
+  />
+</Cards>

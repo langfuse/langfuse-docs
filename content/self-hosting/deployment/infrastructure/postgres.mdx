@@ -16,7 +16,25 @@ Follow one of the [deployment guides](/self-hosting#deployment-options) to get s
 Langfuse requires a persistent Postgres database to store its state.
 You can use a managed service on AWS, Azure, or GCP, or host it yourself.
 
-Langfuse supports Postgres versions >= 12 and uses the `public` schema in the selected database.
+Langfuse supports Postgres versions >= 12 and uses the `public` schema in the selected database. For Langfuse v4, PostgreSQL 16 is recommended — see the [v3 to v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#step-1).
+
+## Official and Community Support [#support]
+
+Langfuse works with PostgreSQL and Postgres-compatible databases.
+We distinguish between officially supported and community-supported options:
+
+| Option                                                                    | Support Level |
+| ------------------------------------------------------------------------- | ------------- |
+| [PostgreSQL](https://www.postgresql.org/) (>= 12, self-hosted or managed) | Official      |
+| [Amazon Aurora PostgreSQL](https://aws.amazon.com/rds/aurora/)            | Official      |
+| Other Postgres-compatible databases (e.g., Google AlloyDB, YugabyteDB)    | Community     |
+
+Managed services that run PostgreSQL, such as Amazon RDS, Azure Database for PostgreSQL, and GCP Cloud SQL, are covered by the official support level.
+Aurora PostgreSQL is the default in our [AWS (Terraform)](/self-hosting/deployment/aws) deployment.
+
+import SelfHostSupportLevels from "@/components-mdx/self-host-support-levels.mdx";
+
+<SelfHostSupportLevels />
 
 ## Use Cases
 

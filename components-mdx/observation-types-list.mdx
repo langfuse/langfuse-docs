@@ -20,11 +20,13 @@ generations of AI models incl. prompts, [token usage and costs](/docs/observabil
 - <Bot size={16} className="text-purple-600 inline mr-1" /> `agent` decides on the
 application flow and can for example use tools with the guidance of a LLM.
 - <Wrench size={16} className="text-orange-600 inline mr-1" /> `tool` represents
-a tool call, for example to a weather API.
+a single action that does something, such as a function or API call (for example a
+weather API).
 - <Link size={16} className="text-pink-600 inline mr-1" /> `chain` is a link between
 different application steps, like passing context from a retriever to a LLM call.
 - <Search size={16} className="text-teal-600 inline mr-1" /> `retriever` represents
-data retrieval steps, such as a call to a vector store or a database.
+a data-retrieval step that only looks something up rather than changing state, such
+as a call to a vector store, database, or other knowledge source.
 - <WandSparkles size={16} className="text-indigo-600 inline mr-1" /> `evaluator`
 represents functions that assess relevance/correctness/helpfulness of a LLM's outputs.
 - <Layers3 size={16} className="text-amber-600 inline mr-1" /> `embedding` is a call

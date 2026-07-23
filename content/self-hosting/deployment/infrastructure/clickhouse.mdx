@@ -17,7 +17,25 @@ This is a deep dive into ClickHouse configuration. Follow one of the [deployment
 It is optimized for high write throughput and fast analytical queries.
 This guide covers how to configure ClickHouse within Langfuse and what to keep in mind when (optionally) bringing your own ClickHouse.
 
-Langfuse supports ClickHouse versions >= 24.3.
+Langfuse v3 supports ClickHouse versions >= 24.3. Langfuse v4 requires ClickHouse >= 25.12 (26.4 recommended) for lightweight updates, the JSON type, and full-text search — see the [v3 to v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#step-1).
+
+## Official and Community Support [#support]
+
+ClickHouse can be consumed as a managed service or self-managed on your own infrastructure.
+We distinguish between officially supported and community-supported deployment options:
+
+| Option                                                                          | Support Level |
+| ------------------------------------------------------------------------------- | ------------- |
+| [ClickHouse Cloud](#cloudbyoc)                                                  | Official      |
+| [ClickHouse BYOC (Bring Your Own Cloud)](#cloudbyoc)                            | Official      |
+| [ClickHouse Kubernetes Operator](#clickhouse-kubernetes-operator)               | Official      |
+| [ClickHouse on Kubernetes (Bitnami Helm chart)](#clickhouse-on-kubernetes-helm) | Community     |
+| [Single-container Docker (development only)](#docker)                           | Community     |
+| Other managed ClickHouse offerings                                              | Community     |
+
+import SelfHostSupportLevels from "@/components-mdx/self-host-support-levels.mdx";
+
+<SelfHostSupportLevels />
 
 ## Configuration
 
@@ -43,7 +61,7 @@ You must set `LANGFUSE_AUTO_CLICKHOUSE_MIGRATION_DISABLED = true` and run ClickH
 Clone the Langfuse repository, adjust the cluster name in `./packages/shared/clickhouse/migrations/clustered/*.sql` and run `cd ./packages/shared && sh ./clickhouse/scripts/up.sh`
 to manually apply the migrations.
 
-### Timezones
+### Timezones [#timezones]
 
 <Callout type="warning">
 
@@ -61,7 +79,7 @@ This should return `UTC`. If it does not, update your ClickHouse server configur
 
 The same requirement applies to [Postgres](/self-hosting/deployment/infrastructure/postgres) — all infrastructure components must use UTC. Please vote on this [GitHub Discussion](https://github.com/orgs/langfuse/discussions/5046) if you would like us to consider supporting other timezones.
 
-## User Permissions
+## User Permissions [#user-permissions]
 
 The ClickHouse user specified in `CLICKHOUSE_USER` must have the following grants to allow Langfuse to operate correctly:
 
@@ -96,7 +114,7 @@ If you do query ClickHouse directly:
 
 - Use a dedicated read-only user or a dedicated read-only compute group where available.
 - Keep direct analytical traffic away from the primary ingestion path. On ClickHouse Cloud or BYOC, use separate compute groups and configure `CLICKHOUSE_READ_ONLY_URL` for supported Langfuse read paths, especially Public API and filter/helper reads.
-- Always include project and time filters where possible. Langfuse tracing data is optimized around project and time access patterns including monthly partioning.
+- Always include project and time filters where possible. Langfuse tracing data is optimized around project and time access patterns including monthly partitioning.
 - Do not write directly to Langfuse tables. Use the Public API or SDKs for creating and updating Langfuse data.
 - If a missing API filter or field forces you to query ClickHouse directly, please open a [GitHub issue](https://github.com/langfuse/langfuse/issues) with your use case; APIs are the preferred long-term extension point.
 
@@ -152,11 +170,20 @@ CLICKHOUSE_MIGRATION_SSL=true
 - **'error: driver: bad connection in line 0' during migration**: If you see the previous error message during startup of your web container, ensure that the `CLICKHOUSE_MIGRATION_SSL` flag is set and that Langfuse Web can access your ClickHouse environment. Review the IP whitelisting if applicable and whether the instance has access to the Private Link.
 - **Code: 80. DB::Exception: It's not initial query. ON CLUSTER is not allowed for Replicated database. (INCORRECT_QUERY)** (on ClickHouse Cloud Azure): ClickHouse Cloud Azure does not seem to handle the ON CLUSTER and Replicated settings well. We recommend to set `CLICKHOUSE_CLUSTER_ENABLED=false` for now. This should not make any difference on performance or high availability.
 
-### ClickHouse on Kubernetes (Helm)
+### ClickHouse Kubernetes Operator [#clickhouse-kubernetes-operator]
+
+The official [ClickHouse Kubernetes Operator](https://clickhouse.com/docs/clickhouse-operator/overview) ([GitHub](https://github.com/ClickHouse/clickhouse-operator)) automates the deployment, configuration, and management of self-managed ClickHouse and ClickHouse Keeper clusters on Kubernetes, including upgrades, scaling, and high availability.
+It is the officially supported option for running self-managed ClickHouse on Kubernetes.
+
+Follow the [operator documentation](https://clickhouse.com/docs/clickhouse-operator/overview) to provision a cluster, then connect Langfuse to it using the environment variables described above.
+The same [user permissions](#user-permissions) and [timezone](#timezones) requirements apply.
+
+### ClickHouse on Kubernetes (Helm) [#clickhouse-on-kubernetes-helm]
 
 The [Bitnami ClickHouse Helm Chart](https://github.com/bitnami/charts/tree/main/bitnami/clickhouse) provides a production ready deployment of ClickHouse using a given Kubernetes cluster.
 We use it as a dependency for [Langfuse K8s](https://github.com/langfuse/langfuse-k8s).
 See [Langfuse on Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) for more details on how to deploy Langfuse on Kubernetes.
+This deployment option is community-supported; for an officially supported self-managed setup on Kubernetes, consider the [ClickHouse Kubernetes Operator](#clickhouse-kubernetes-operator).
 
 #### Example Configuration
 
@@ -262,7 +289,7 @@ CLICKHOUSE_PASSWORD=changeme
   - Consider implementing automatic PVC expansion using tools like [volume-autoscaler](https://github.com/DevOps-Nirvana/Kubernetes-Volume-Autoscaler)
   - For high-growth environments, consider using [blob storage as disk](#blob-storage-as-disk) for automatic scaling
 
-### Docker
+### Docker [#docker]
 
 You can run ClickHouse in a single [Docker](https://hub.docker.com/r/clickhouse/clickhouse-server) container for development purposes.
 As there is no redundancy, this is **not recommended for production workloads**.
@@ -391,7 +418,7 @@ This is useful for auto-scaling storages that live outside the container orchest
 For a full overview of the feature, see the [ClickHouse External Disks documentation](https://clickhouse.com/docs/en/operations/storing-data).
 
 Below, we give a config.xml example to use S3 and Azure Blob Storage as disks for ClickHouse Docker containers using Docker Compose.
-Keep in mind that metadata is still stored on local disk, i.e. you need to use a persistent volume for the ClickHouse container or risk loosing access to your tables.
+Keep in mind that metadata is still stored on local disk, i.e. you need to use a persistent volume for the ClickHouse container or risk losing access to your tables.
 
 <Callout type="warning">
 
