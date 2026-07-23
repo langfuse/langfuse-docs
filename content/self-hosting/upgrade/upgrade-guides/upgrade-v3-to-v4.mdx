@@ -27,6 +27,14 @@ Follow this guide to:
 2. Upgrade in three independent steps, retaining your current behavior as long as you need it.
 3. Complete the move to the new data model on your own schedule.
 
+<Callout type="warn">
+
+  Langfuse v3 will receive security patches until end of January 2027.
+  If you require further support, please contact [support](/support).
+  {/* TODO: Custom reach-out to Enterprise Self-Hosters that we can also patch major bug fixes */}
+
+</Callout>
+
 ## What changes
 
 ### The new data model [#data-model]
@@ -54,6 +62,12 @@ The infrastructure architecture is unchanged. Langfuse v4 runs on the same compo
 ### UI changes [#ui-changes]
 
 The main exploration surface is a single **Observations** view — the same experience that is live on Langfuse Cloud. There are no separate tabs for traces and observations anymore; `trace_id` acts like any other filter column (like `session_id` or `user_id`) to group related observations. See [working with observations](/faq/all/explore-observations-in-v4) for common views and workflows, and [dashboard changes](/faq/all/dashboard-changes-in-v4) for how charts behave on the new model.
+
+<Video
+  src="https://static.langfuse.com/docs-videos/2026-03-10-demo-saved-views.mp4"
+  aspectRatio={16 / 9}
+  className="mt-3"
+/>
 
 Scores and comments that were previously attached to a trace are shown on the corresponding root observation.
 
@@ -138,11 +152,11 @@ New deployments skip all of this — see [new deployments](#new-deployments).
 
 Langfuse v4 raises the minimum infrastructure versions:
 
-| Component  | Requirement                                                                                                                                                                             |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ClickHouse | **25.12 minimum, 26.4 recommended.** Required for lightweight updates, the JSON type, and full-text search. On versions below 26.6, set `CLICKHOUSE_DISABLE_LAZY_MATERIALIZATION=true`. |
-| PostgreSQL | 16 recommended                                                                                                                                                                          |
-| Redis      | 7.2 recommended                                                                                                                                                                         |
+| Component  | Requirement                                                                                                 |
+|------------|-------------------------------------------------------------------------------------------------------------|
+| ClickHouse | **25.12 minimum, 26.4 recommended.** Required for lightweight updates, the JSON type, and full-text search. |
+| PostgreSQL | 16 recommended                                                                                              |
+| Redis      | 7.2 recommended                                                                                             |
 
 Upgrade ClickHouse **before** the server upgrade. Langfuse v3 releases are fully compatible with current ClickHouse versions, so you can perform the ClickHouse upgrade on your existing v3 deployment and operate it as long as you like before continuing. See the [ClickHouse deployment guide](/self-hosting/deployment/infrastructure/clickhouse) for version and operations guidance.
 
@@ -178,11 +192,14 @@ LANGFUSE_MIGRATION_V4_NATIVE_OTEL_BEHAVIOUR=dual_write
 # (see step 3):
 LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL=false
 # Optional: set false to keep the v3 read experience for all users while
-# dual-writing (hides the toggle, disables the v2 APIs); defaults to true:
-# LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN=false
+# dual-writing (hides the toggle, disables the v2 APIs); defaults to true.
+# Flip to true or remove overwrite, if you want to allow users to opt-in to v4 experience.
+LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN=false
 ```
 
-Ingestion writes into both the old and the new tables: compatible SDKs directly, older SDKs via the [dual-write pipeline](#dual-write) with a ~10 minute delay. Each user can switch to the new read experience via the toggle in the UI, and the new [v2 APIs](#api-changes) become available — both gated by `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN` (default `true`). Expect higher server load and S3 costs than `events_only` (comparable to v3 processing) until you complete the [cutover](#cutover).
+Ingestion writes into both the old and the new tables: compatible SDKs directly, older SDKs via the [dual-write pipeline](#dual-write) with a ~10 minute delay.
+  Each user can switch to the new read experience via the toggle in the UI, and the new [v2 APIs](#api-changes) become available — both gated by `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN` (default `true`).
+  Expect higher server load and S3 costs than `events_only` (comparable to v3 processing) until you complete the [cutover](#cutover).
 
 </Tab>
 
@@ -199,15 +216,11 @@ LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN=false
 LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL=false
 ```
 
-{/* TODO: verify whether validateV4Flags requires the explicit dual_write OTel setting with legacy write mode, or handles it implicitly */}
-
 <Callout type="warning">
 
 Keep the historic backfill **disabled** while you run `legacy`. The backfill runs exactly once; if it runs before the dual write is active, everything ingested between the backfill and your later switch to `dual` would be permanently missing from the new tables.
 
 </Callout>
-
-{/* TODO: verify whether the backfill is automatically deferred while write mode is legacy — if so, the explicit flag and warning can be dropped */}
 
 </Tab>
 
@@ -227,13 +240,18 @@ Langfuse v4 expects instrumentation that propagates shared attributes (like `use
 - [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5)
 - any native [OpenTelemetry integration](/integrations/native/opentelemetry)
 
-These SDK versions are fully compatible with Langfuse v3 servers, so this step can start before, during, or after the server upgrade. Every migrated producer writes into the new tables directly (no delay) and reduces the load of the dual-write phase.
+These SDK versions are fully compatible with Langfuse v3 servers, so this step can start before, during, or after the server upgrade.
+Every migrated producer writes into the new tables directly (no delay) and reduces the load of the dual-write phase.
 
 Also migrate [trace-level evaluators](#evaluations) and [export configurations](#exports) in this step.
 
 ### Switch to the dual write mode
 
-If you started on `legacy`, set `LANGFUSE_MIGRATION_V4_WRITE_MODE=dual`, set `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN=true` (or remove the `false` override), and redeploy. From this moment, all incoming data lands in both the old and the new tables, and users can switch to the new read experience via the toggle in the UI.
+If you started on `legacy`, set `LANGFUSE_MIGRATION_V4_WRITE_MODE=dual` and redeploy.
+From this moment, all incoming data lands in both the old and the new tables.
+
+Set `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN=true` (or remove the overwrite) to allow users to opt-in to the new experience.
+Usually, this is recommended after the dual write was active for a few days.
 
 Confirm the dual write is healthy before continuing: data from compatible SDKs appears immediately, data from older SDKs with a ~10 minute delay. The [health endpoint](#dual-write) can monitor the propagation job.
 
@@ -243,11 +261,11 @@ Data ingested before the dual write became active only exists in the old tables.
 
 **Option A: Automated backfill (default).** Set `LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL=true` (or remove the `false` override) and redeploy. A chain of [background migrations](#historic-backfill) rewrites all historic traces, observations, and dataset run items into the new tables — without downtime, gradually, newest first. Requires the ~3x disk headroom from [step 1](#step-1).
 
-**Option B: Retention-based rollover.** If your deployment enforces a global [data retention](/docs/administration/data-retention) policy (e.g. 30 or 90 days), you can skip the backfill entirely: keep `LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL=false` and simply keep dual-writing until one full retention window has elapsed since you enabled `dual`. At that point, everything within retention exists in the new tables, and older data has aged out by policy.
+**Option B: Retention-based rollover.** If your deployment enforces a global [data retention](/docs/administration/data-retention) policy (e.g. 30 or 90 days), you can skip the backfill entirely: keep `LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL=false` and simply keep dual-writing until one full retention window has elapsed since you enabled `dual`. At that point, everything within retention exists in the new tables, and older data has aged out by policy. Set `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN=true` once you want to allow users to switch to the Langfuse v4 experience.
 
 ### Cut over to the v4 defaults [#cutover]
 
-Once all producers run compatible SDKs **and** historic data is covered (backfill completed, or a full retention window dual-written), remove the migration overrides so the v4 defaults apply:
+Once all producers run compatible SDKs **and** historic data is covered (backfill completed, or a full retention window dual-written), remove the migration overrides (`LANGFUSE_MIGRATION_V4_WRITE_MODE`, `LANGFUSE_MIGRATION_V4_NATIVE_OTEL_BEHAVIOUR`, `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN`) or set them as follows:
 
 ```bash
 # Remove these overrides (or set them explicitly):
@@ -300,14 +318,13 @@ On Langfuse v4, the new behavior is the default — these variables exist to ret
 | `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN`                   | `true` (default) / `false`                  | Gates the v4 read paths (UI toggle and v2 APIs). Set `false` to keep the v3 read experience while on `legacy` or `dual`; must remain `true` with `events_only`.                                                       |
 | `LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL`    | `true` (default) / `false`                  | Set `false` to defer the backfill (required while on `legacy`) or to skip it permanently for the retention-based rollover.                                                                                            |
 | `LANGFUSE_BACKGROUND_MIGRATION_V4_DROP_PID_TID_SORTING_TABLES` | `false` (default) / `true`                  | Set `true` after a successful backfill to drop intermediate scratch tables and free disk space.                                                                                                                       |
-| `CLICKHOUSE_DISABLE_LAZY_MATERIALIZATION`                      | `true` / `false` (default)                  | Set `true` on ClickHouse versions below 26.6 due to incompatibility issues.                                                                                                                                           |
 
 ## How the dual write works [#dual-write]
 
 The dual write bridges older SDKs onto the new data model:
 
 - Incoming events from older SDKs are written to `traces`/`observations` as before, plus into a staging table (`observations_batch_staging`) partitioned into 3-minute windows.
-- A worker job periodically picks up completed partitions, joins them with the `traces` table to propagate trace-level attributes (user, session, tags, release, version), and inserts the result into `events_full`. This is why data from older SDKs appears with a **~10 minute delay** in the UI and APIs.
+- A worker job periodically picks up completed partitions, joins them with the `traces` table to propagate trace-level attributes (user, session, tags, release, version, metadata), and inserts the result into `events_full`. This is why data from older SDKs appears with a **~10 minute delay** in the UI and APIs.
 - Compatible SDKs (Python v4, JS/TS v5) propagate attributes client-side and write into the new tables **directly**, without delay — and reduce the ClickHouse load of the dual-write phase.
 - Native OpenTelemetry spans follow `LANGFUSE_MIGRATION_V4_NATIVE_OTEL_BEHAVIOUR`: with `dual_write`, spans go through the staging pipeline unless they carry the `x-langfuse-ingestion-version: 4` header; with `direct` (the v4 default), all OTel spans are written directly, assuming client-side propagation.
 
