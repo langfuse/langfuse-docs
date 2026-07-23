@@ -14,7 +14,7 @@ For general information about API authentication, base URLs, and SDK access, see
 
 <Callout type="info">
 
-This page covers reading scores. Scores are created via `POST /api/public/scores` or the SDK helpers — see [scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk). The deprecated `GET /api/public/scores` and `GET /api/public/v2/scores` read endpoints are documented, with migration steps, in [Migration of deprecated APIs](/faq/all/deprecated-api-migration#scores).
+This page covers reading scores. Scores are created via `POST /api/public/scores` or the SDK helpers; see [scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk). The deprecated `GET /api/public/scores` and `GET /api/public/v2/scores` read endpoints are documented, with migration steps, in [Migration of deprecated APIs](/faq/all/deprecated-api-migration#scores).
 
 </Callout>
 
@@ -38,7 +38,7 @@ Responses carry a single typed `value` field, and results are paginated with a c
 
 ### `value` Field
 
-Every score carries exactly one `value` — its type is determined by the score's `dataType`:
+Every score carries exactly one `value`. Its type is determined by the score's `dataType`:
 
 | `dataType`    | `value` type | Notes                         |
 | ------------- | ------------ | ----------------------------- |
@@ -52,7 +52,7 @@ If your pipeline handles mixed score types, branch on `dataType`.
 
 ### Field Groups
 
-Responses always include a lean core — `id`, `projectId`, `name`, `value`, `dataType`, `source`, `timestamp`, `environment`, `createdAt`, `updatedAt` — and you opt into additional groups via a comma-separated `fields` parameter:
+Responses always include a lean core (`id`, `projectId`, `name`, `value`, `dataType`, `source`, `timestamp`, `environment`, `createdAt`, `updatedAt`), and you opt into additional groups via a comma-separated `fields` parameter:
 
 ```
 ?fields=details,subject,annotation
@@ -69,29 +69,29 @@ Unknown group names return HTTP 400.
 
 ### `subject` Object
 
-Every score is attached to exactly one entity. Request the `subject` field group to see which one — it is discriminated by `kind`:
+Every score is attached to exactly one entity. Request the `subject` field group to see which one; it is discriminated by `kind`:
 
 ```json
 { "kind": "observation", "id": "obs-1", "traceId": "trace-1" }
 ```
 
-- `kind: "trace"` — `id` is the trace ID
-- `kind: "observation"` — `id` is the observation ID; includes the parent `traceId`
-- `kind: "session"` — `id` is the session ID
-- `kind: "experiment"` — `id` is the dataset run ID
+- `kind: "trace"`: `id` is the trace ID
+- `kind: "observation"`: `id` is the observation ID; includes the parent `traceId`
+- `kind: "session"`: `id` is the session ID
+- `kind: "experiment"`: `id` is the dataset run ID
 
 ### Cursor-Based Pagination
 
 1. Make your initial request with a `limit` parameter (default 50, max 100)
 2. If more results exist, the response includes a `cursor` in the `meta` object
-3. Pass this cursor via the `cursor` parameter in your next request, repeating the same filter parameters as the initial request — the cursor encodes only the read position, not your query
+3. Pass this cursor via the `cursor` parameter in your next request, repeating the same filter parameters as the initial request (the cursor encodes only the read position, not your query)
 4. Repeat until no cursor is returned (you've reached the end)
 
 For recurring full exports to your data warehouse, use the [scheduled blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) instead of paginating through the API.
 
 ### Filtering
 
-- **Multi-value filters:** most filters accept comma-separated lists — `id`, `name`, `source`, `dataType`, `environment`, `configId`, `queueId`, `authorUserId`, `traceId`, `sessionId`, `observationId`, `experimentId`. Values within one parameter are OR-ed, parameters are AND-ed: `name=hallucination,toxicity&source=EVAL` returns eval scores named either `hallucination` or `toxicity`.
+- **Multi-value filters:** most filters accept comma-separated lists: `id`, `name`, `source`, `dataType`, `environment`, `configId`, `queueId`, `authorUserId`, `traceId`, `sessionId`, `observationId`, `experimentId`. Values within one parameter are OR-ed, parameters are AND-ed: `name=hallucination,toxicity&source=EVAL` returns eval scores named either `hallucination` or `toxicity`.
 - **Value filters:** use `value` for exact matches (comma-separated, requires a single `dataType` of `NUMERIC`, `BOOLEAN`, or `CATEGORICAL`) or `valueMin`/`valueMax` for inclusive numeric range bounds (require `dataType=NUMERIC`).
 - **Mutual exclusivity:** `traceId`, `sessionId`, and `experimentId` are mutually exclusive. `observationId` requires `traceId` because observation IDs are scoped to a trace.
 - **Case-insensitive enums:** `source` and `dataType` accept any casing (`numeric` and `NUMERIC` are equivalent).
@@ -143,7 +143,7 @@ curl \
 
 ### SDK Access [#sdk-access]
 
-The generated SDK clients expose the v3 endpoint directly. Score creation uses separate SDK helpers (e.g. `create_score` in Python) — this client is for reads.
+The generated SDK clients expose the v3 endpoint directly. Score creation uses separate SDK helpers (e.g. `create_score` in Python); this client is for reads.
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">
