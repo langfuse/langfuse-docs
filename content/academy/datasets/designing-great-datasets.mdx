@@ -152,6 +152,8 @@ Use the first run to check:
 - whether failures point to the system, the dataset, or missing context
 - what to change before adding more rows
 
+Use this review to keep iterating until the dataset answers the goal you set at the start.
+
 ## Keep the dataset connected to production
 
 Dataset design is iterative in two ways. During the initial design, experiment results help you refine the input shape, expected output, metadata, and evaluator. After the dataset is useful, production traces help you keep it grounded in what the system actually sees.
@@ -159,6 +161,18 @@ Dataset design is iterative in two ways. During the initial design, experiment r
 Continuously add interesting production examples: common paths, new edge cases, user-visible failures, high-value scenarios, and cases where the product has drifted. This keeps the dataset a mirror of production while still preserving a clear evaluation goal.
 
 Keep the dataset's job clear as it grows. A regression dataset should stay stable enough to compare runs over time. An improvement-loop dataset can change more often as you discover new failures and refine the system. Use metadata to distinguish stable regression rows from newly added production examples.
+
+## Closing checklist
+
+Before you treat the dataset as ready, check that it has:
+
+- **Goal:** a clear purpose and system boundary
+- **Real-path inputs:** inputs that can run through the intended application path
+- **Coverage:** enough representative, risky, and high-value cases for the dataset's job
+- **Evaluable outputs:** expected outputs, criteria, or rubrics that can actually be scored
+- **Sliceable metadata:** stable fields that make results easy to filter and interpret
+
+If one of these is weak, return to the relevant step before expanding the dataset.
 
 <Details>
 <Summary>Typical gotchas</Summary>
