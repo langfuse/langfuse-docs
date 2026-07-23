@@ -26,7 +26,7 @@ This page covers reading scores. Scores are created via `POST /api/public/scores
     core: "full",
     pro: "full",
     enterprise: "full",
-    selfHosted: "full",
+    selfHosted: "v3.179",
   }}
 />
 
@@ -34,13 +34,11 @@ This page covers reading scores. Scores are created via `POST /api/public/scores
 GET /api/public/v3/scores
 ```
 
-On self-hosted deployments, the v3 endpoint is available from Langfuse v3.179.0.
+Responses carry a single typed `value` field, and results are paginated with a cursor.
 
-The Scores API queries scores directly instead of joining trace data, which keeps response times predictable at any volume. Responses carry a single typed `value` field, and results are paginated with a cursor.
+### `value` Field
 
-### Typed `value` Field
-
-Every score has a single `value` field whose type follows `dataType` — no decoding of booleans from `1`/`0` or looking up category strings:
+Every score carries exactly one `value` — its type is determined by the score's `dataType`:
 
 | `dataType`    | `value` type | Notes                         |
 | ------------- | ------------ | ----------------------------- |
@@ -89,7 +87,7 @@ Every score is attached to exactly one entity. Request the `subject` field group
 3. Pass this cursor via the `cursor` parameter in your next request, repeating the same filter parameters as the initial request — the cursor encodes only the read position, not your query
 4. Repeat until no cursor is returned (you've reached the end)
 
-The response contains no total counts — iterate the cursor until it is absent. For recurring full exports to your data warehouse, use the [scheduled blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) instead of paginating through the API.
+For recurring full exports to your data warehouse, use the [scheduled blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) instead of paginating through the API.
 
 ### Filtering
 

@@ -20,6 +20,7 @@ const availabilities: {
   },
   { id: "full", label: "Available" },
   { id: "v4", label: "Langfuse v4+" },
+  { id: "v3.179", label: "Langfuse v3.179.0+" },
   { id: "private-beta", label: "Private Beta" },
   { id: "public-beta", label: "Public Beta" },
   { id: "not-available", label: "Not Available" },
