@@ -76,7 +76,7 @@ Example:
 curl -u public-key:secret-key https://cloud.langfuse.com/api/public/projects
 ```
 
-## Access via SDKs
+## Access via SDKs [#access-via-sdks]
 
 Both the Langfuse [Python SDK](/docs/sdk/python/sdk-v3) and the [JS/TS SDK](/docs/sdk/typescript/guide) provide a strongly-typed wrapper around our public REST API for your convenience. The API methods are accessible via the `api` property on the Langfuse client instance in both SDKs.
 
@@ -87,9 +87,13 @@ You can use your editor's Intellisense to explore the API methods and their para
 In Python SDK v4 and JS/TS SDK v5, the high-performance resources are the
 defaults: `api.observations`, `api.metrics`, and — for score reads —
 `api.scores_v3` / `api.scoresV3` (`api.scores`, the v2 reads, is
-deprecated; see the [Scores API migration guide](/docs/api-and-data-platform/features/scores-api#upgrade-from-v2)). Legacy v1
+deprecated; see the [Scores API migration guide](/docs/api-and-data-platform/features/scores-api#upgrade-from-v2)). Deprecated v1
 resources moved under `api.legacy.*` (Python: `*_v1`, JS/TS: `*V1`). See
 [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk) for SDK examples.
+
+Observations API v2 and Metrics API v2 are available on Langfuse Cloud and
+self-hosted Langfuse v4. On self-hosted Langfuse v3, use the `api.legacy.*`
+resources. See [Versions & Compatibility](/docs/compatibility#sdk-server).
 
 </Callout>
 
@@ -228,7 +232,7 @@ try {
 </Callout>
 
 - [OpenTelemetry Traces Ingestion Endpoint](https://api.reference.langfuse.com/#tag/opentelemetry/POST/api/public/otel/v1/traces) implements the OTLP/HTTP specification for trace ingestion, providing native OpenTelemetry integration for Langfuse Observability.
-- (Legacy) [Ingestion API](https://api.reference.langfuse.com/#tag/ingestion/POST/api/public/ingestion) allows trace ingestion using an API.
+- (Deprecated) [Ingestion API](https://api.reference.langfuse.com/#tag/ingestion/POST/api/public/ingestion) allows trace ingestion using an API.
 
 ## Retrieve Data via the API
 
@@ -240,7 +244,7 @@ For new data extraction workflows, use the high-performance data APIs:
 
 <Callout type="info">
 
-Older trace, observation, score, and metrics read APIs remain available, but are not recommended as the default for new extraction workflows because they are less performant at scale. See [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) for row-level trace and observation data, [Scores API v3](/docs/api-and-data-platform/features/scores-api#v3) for score data, and [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregates.
+The deprecated trace, observation, score, and metrics read APIs are documented, with migration steps, in [Migration of deprecated APIs](/faq/all/deprecated-api-migration); for score reads, see the [Scores API migration guide](/docs/api-and-data-platform/features/scores-api#upgrade-from-v2).
 
 </Callout>
 
