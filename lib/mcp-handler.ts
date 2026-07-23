@@ -46,8 +46,6 @@ const MCP_SERVER_INSTRUCTIONS = [
   "If the user wants to provide feedback about Langfuse docs or something is not working well, ask permission, show the exact payload, avoid secrets/customer data/trace payloads, then use submitFeedback.",
 ].join("\n");
 
-const FEEDBACK_INTAKE_URL = "https://cloud.langfuse.com/api/feedback/docs-mcp";
-
 export const mcpHandler = createMcpHandler(
   (server) => {
     (server as any).tool(
@@ -81,24 +79,27 @@ export const mcpHandler = createMcpHandler(
       },
       async (input) => {
         try {
-          const token = process.env.LANGFUSE_FEEDBACK_INTAKE_TOKEN;
-          if (!token) throw new Error("Feedback intake is not configured");
+          // Same sink as the docs feedback widget (app/api/feedback/route.ts),
+          // tagged so MCP submissions are distinguishable downstream.
+          const webhookUrl = process.env.WEBSITE_FEEDBACK_WEBHOOK;
+          if (!webhookUrl) throw new Error("Feedback intake is not configured");
 
-          const response = await fetch(FEEDBACK_INTAKE_URL, {
+          const response = await fetch(webhookUrl, {
             method: "POST",
             redirect: "error",
             signal: AbortSignal.timeout(5000),
             headers: {
-              Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
-            body: JSON.stringify(input),
+            body: JSON.stringify({
+              type: "docs-mcp-feedback",
+              ...input,
+            }),
           });
           if (!response.ok) {
             throw new Error(`Feedback intake returned ${response.status}`);
           }
 
-          const result = (await response.json()) as { id: string };
           trackMcpToolUsage("submitFeedback", "success", {
             target_type: input.targetType,
           });
@@ -106,7 +107,7 @@ export const mcpHandler = createMcpHandler(
             content: [
               {
                 type: "text",
-                text: `Feedback submitted. Reference ID: ${result.id}`,
+                text: "Feedback submitted to the Langfuse team. Thank you!",
               },
             ],
           };
