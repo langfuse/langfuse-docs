@@ -49,8 +49,8 @@ Examples: `integration_fireworks_ai.ipynb`, `integration_groq_sdk.ipynb`, `integ
 ### Env var cell additions
 
 ```python
-os.environ.setdefault("<PARTNER>_API_BASE", "https://api.<partner>.com/v1")
-os.environ.setdefault("<PARTNER>_API_KEY", "...")
+os.environ.setdefault("<PARTNER>_API_BASE", "https://api.<partner>.com/v1");
+os.environ.setdefault("<PARTNER>_API_KEY", "...");
 ```
 
 ### Skip the Langfuse client auth_check cell
