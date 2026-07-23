@@ -1,11 +1,11 @@
 ---
-title: How do I work with observations in Langfuse v4?
-sidebarTitle: Explore Observations in Langfuse v4
+title: How do I work with observations in Langfuse Fast Preview (Langfuse v4)?
+sidebarTitle: Explore Observations in Langfuse Fast Preview
 description: Guide for transitioning from the traces table to the unified observations table in Langfuse v4, with before/after workflow comparisons and SDK upgrade steps.
 tags: [observability, tracing, evaluation]
 ---
 
-# Explore Observations in Langfuse v4
+# Explore Observations in Langfuse Cloud Fast Preview
 
 ## How to think about the new model
 
@@ -15,7 +15,7 @@ As agentic applications grow more complex, a single trace can contain hundreds o
 
 You will notice more rows in the table than before — that's expected. Each row is now one operation, not one trace. The key is to use filters and [saved views](/changelog/2025-05-20-save-table-views) to focus on what matters. Filter by observation name, type, or model to surface the operations you care about, then save that as a view. The filter sidebar shows available values with counts, so you can discover which models, observation names, or error levels are most common before committing to a filter.
 
-For conceptual background, see the [observation-centric data model](/docs/v4#under-the-hood). For broader release context, see the [Langfuse v4 docs](/docs/v4).
+For conceptual background, see the [observation-centric data model](/docs/v4#under-the-hood). For broader release context, see the [Fast Preview docs](/docs/v4).
 
 ## Common views
 
@@ -29,6 +29,7 @@ These are some of the most useful starting points. Each can be saved as a [saved
 | Errors for a specific user            | Filter by `user_id` and `level = ERROR`                                                                |
 | Operations scoped to a session        | Filter by `session_id`, sort by `latency` descending                                                   |
 | All operations for one trace          | Filter by `trace_id`                                                                                   |
+| Application entry points              | Filter `Is Root Observation = true`                                                                    |
 | Model latency comparison              | Filter `type = generation`, group by `model` in a [dashboard](/docs/metrics) or sort by `model` column |
 | Cost, latency, or errors by dimension | [Self-serve dashboards](/docs/metrics)                                                                 |
 
@@ -40,6 +41,19 @@ We recommend setting up 2-3 saved views for your most common debugging workflows
   className="mt-3"
 />
 
+## Start with root observations
+
+For projects that ingest with Python SDK v4.7.0+ or JS/TS SDK v5.4.0+, Langfuse applies `Is Root Observation = true` when you open the observations table without a saved view, shared filter link, or other table state. This gives you a focused list of application entry points before you drill into their child operations.
+
+The filter includes both kinds of roots:
+
+- **Outer roots** are top-level observations with no parent.
+- **App roots** are the highest exported application observations beneath parents excluded by SDK span filtering.
+
+App roots matter when an OpenTelemetry instrumentation or infrastructure span is the outer parent of your application spans. The Langfuse SDK may filter that parent from export, but the exported child still carries its parent span ID. A filter based only on observations without a parent would therefore miss the application entry point. App-root-aware SDKs mark that entry point so `Is Root Observation` can include it alongside outer roots.
+
+The filter is visible in the sidebar and you can remove it to inspect every operation. Langfuse remembers that choice. Existing saved/default views and links with table filters keep their own state. If the automatic filter finds no matching roots while other observations exist, Langfuse removes it automatically.
+
 ## Upgrade checklist
 
 ### Ingest with a compatible setup
@@ -48,7 +62,7 @@ Use one of these ingestion paths so your data appears in the unified table in re
 
 - Python SDK v4.7.0+: [migration guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4)
 - JS/TS SDK v5.4.0+: [migration guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5)
-- Direct OpenTelemetry ingestion: set `x-langfuse-ingestion-version: 4` on your OTEL span exporter. If you use OTLP HTTP environment variables, add `x-langfuse-ingestion-version=4` to `OTEL_EXPORTER_OTLP_HEADERS`. See [OpenTelemetry setup](/integrations/native/opentelemetry).
+- Direct OpenTelemetry ingestion: follow the [custom ingestion migration guide](/integrations/native/opentelemetry/migration-to-v4) to set the [v4 header](/integrations/native/opentelemetry#real-time-ingestion) and audit attribute propagation, root input/output, and span immutability.
 
 <Callout type="info">
 If you are still sending data via **older SDK versions**, or via **direct OpenTelemetry ingestion without `x-langfuse-ingestion-version: 4`**, traces can appear in the unified tracing table with a **delay of up to 10 minutes**.
@@ -76,8 +90,8 @@ If something feels confusing, missing, or slower than expected, share feedback v
 ### Why are observations delayed or missing in the unified table?
 
 The most common reason is that data is still being sent via older SDK versions or through a direct OpenTelemetry exporter without `x-langfuse-ingestion-version: 4`.
-On Langfuse v4, those setups can lead to multi-minute delays before traces show up in the unified table.
-If this happens, upgrade to Python SDK v4.7.0+ or JS/TS SDK v5.4.0+, or add the ingestion version header to your OTEL exporter.
+In the new Fast Preview experience, those setups can lead to multi-minute delays before traces show up in the unified table.
+If this happens, upgrade to Python SDK v4.7.0+ or JS/TS SDK v5.4.0+, or follow the [custom ingestion migration guide](/integrations/native/opentelemetry/migration-to-v4) for your OTEL exporter, including the [real-time ingestion header](/integrations/native/opentelemetry#real-time-ingestion).
 
 ### How can I get a focused view of my most important operations?
 
@@ -89,5 +103,5 @@ This is the most common reaction when first switching to the observations table.
 
 ### Can I get the old experience back?
 
-Yes, for now. On Langfuse Cloud, you can switch the new experience off in the UI and return to the previous tracing experience. On self-hosted deployments, the `legacy` and `dual` [write modes](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4) retain the previous behavior while your migration is in flight.
+Yes. For now, you can switch the Fast Preview experience off in the UI and return to the previous tracing experience.
 This is temporary, though: the unified table will become the standard experience, so it is worth setting up saved views and instrumentation for the new model.

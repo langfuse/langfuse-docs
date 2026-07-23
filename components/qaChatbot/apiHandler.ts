@@ -78,6 +78,13 @@ export const handler = async (req: Request) => {
       }));
 
       const compiledPrompt = prompt.compile({}, { chat_history: chatHistory });
+      const systemPrompt = compiledPrompt
+        .filter((message) => message.role === "system")
+        .map((message) => message.content)
+        .join("\n\n");
+      const modelMessages = compiledPrompt.filter(
+        (message) => message.role !== "system",
+      );
 
       const mcpClient = await startActiveObservation(
         "create-mcp-client",
@@ -103,12 +110,18 @@ export const handler = async (req: Request) => {
             reasoningEffort,
           } satisfies OpenAIResponsesProviderOptions,
         },
-        messages: compiledPrompt,
+        instructions: systemPrompt || undefined,
+        messages: modelMessages,
         tools: tools as Parameters<typeof streamText>[0]["tools"],
         stopWhen: stepCountIs(10),
-        experimental_telemetry: {
-          isEnabled: true,
-          metadata: { langfusePrompt: prompt.toJSON() },
+        runtimeContext: {
+          langfusePrompt: prompt,
+        },
+        telemetry: {
+          functionId: "qa-chatbot",
+          includeRuntimeContext: {
+            langfusePrompt: true,
+          },
         },
         onFinish: async (result) => {
           await mcpClient.close();

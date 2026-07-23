@@ -1,0 +1,143 @@
+---
+title: Migrate custom ingestion to Langfuse v4
+sidebarTitle: Migrate ingestion to v4
+description: Move custom Langfuse tracing from the legacy ingestion API or an existing OpenTelemetry pipeline to the observation-centric v4 format.
+---
+
+# Migrate custom ingestion to Langfuse v4
+
+Use this guide if you send tracing data to Langfuse through a custom integration. It covers both migrations from the legacy `/api/public/ingestion` endpoint and updates to existing OpenTelemetry (OTEL) pipelines.
+
+<Callout type="info">
+  **Using Python or JavaScript/TypeScript?** Use the [Langfuse SDK](/docs/observability/sdk/overview) instead of building directly on the OTEL API. The SDK handles Langfuse attributes, propagation, media, filtering, and export for you. Follow the [Python v3 → v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS v4 → v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5) migration guide. For other languages, use the [native OpenTelemetry API for your language](https://opentelemetry.io/docs/languages/) and export spans to Langfuse.
+</Callout>
+
+## Choose your migration path
+
+| Current setup                                                           | Migration path                                                                               |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Custom events sent to `/api/public/ingestion`                           | [Replace legacy ingestion events with OTEL spans](#migrate-from-the-legacy-ingestion-api)    |
+| OTEL without `x-langfuse-ingestion-version: 4`                          | [Update the exporter and audit the span format](#make-an-existing-otel-integration-v4-ready) |
+| OTEL with trace context only on the root span                           | [Propagate context to every relevant span](#propagate-trace-context-to-observations)         |
+| OTEL using `langfuse.trace.input` or `langfuse.trace.output`            | [Move the overall input and output to the root observation](#move-trace-input-and-output)    |
+| OTEL that re-exports a span to update data already accepted by Langfuse | [Export one complete span](#export-complete-immutable-spans)                                 |
+
+Adding the `x-langfuse-ingestion-version: 4` header selects the v4 ingestion path, but the header alone does not make a legacy or incomplete span format v4-ready. Complete the applicable migration steps below before switching production traffic.
+
+## V4-ready ingestion checklist
+
+Your integration is ready for the observation-centric Langfuse v4 data model when it:
+
+- sends traces via OTLP over HTTP to `/api/public/otel/v1/traces`;
+- authenticates with Langfuse project keys via Basic Auth and sends `x-langfuse-ingestion-version: 4`;
+- represents every operation as one complete OTEL span with valid trace ID, span ID, timing, and parent context;
+- puts each operation's input and output on its observation, including the overall request and response on the root observation;
+- copies trace-wide context needed for filtering or aggregation to every relevant span;
+- uses explicit Langfuse metadata attributes for metadata that must be filterable;
+- exports a span once rather than re-ingesting the same ID to update it; and
+- targets observations, rather than legacy trace input/output, for evaluations.
+
+See the [OTEL endpoint configuration](/integrations/native/opentelemetry#opentelemetry-endpoint) and [complete attribute mapping](/integrations/native/opentelemetry#property-mapping) for the stable transport and schema reference.
+
+## Migrate from the legacy ingestion API [#migrate-from-the-legacy-ingestion-api]
+
+The legacy `/api/public/ingestion` endpoint accepts Langfuse-specific create and update events. The OTEL endpoint instead accepts standard OTLP spans. Use your language's [native OpenTelemetry API](https://opentelemetry.io/docs/languages/) to create and finish spans, and configure its OTLP/HTTP exporter to send them to Langfuse.
+
+Do not translate each legacy API request into a separate OTEL export. Build the operation locally, set its final attributes, end it, and let the OTEL SDK export the completed span.
+
+### Map legacy events to OTEL spans
+
+| Legacy ingestion concept                                 | V4-ready OTEL representation                                                                                  |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Trace record                                             | One OTEL trace ID shared by all observations. There is no separately ingested trace entity.                   |
+| Trace name                                               | `langfuse.trace.name`, copied to every span where the name must be queryable                                  |
+| Trace user, session, tags, release, version, environment | Corresponding `langfuse.*` attributes copied to every relevant span                                           |
+| Trace metadata                                           | `langfuse.trace.metadata.<key>` copied to every relevant span                                                 |
+| Trace input and output                                   | `langfuse.observation.input` and `langfuse.observation.output` on the root span                               |
+| Span, generation, or event                               | An OTEL span with `langfuse.observation.type` set to `span`, `generation`, or `event`                         |
+| Parent observation ID                                    | OTEL parent span context                                                                                      |
+| Observation input and output                             | `langfuse.observation.input` and `langfuse.observation.output` on that span                                   |
+| Observation metadata                                     | `langfuse.observation.metadata.<key>`                                                                         |
+| Model, model parameters, usage, cost, or prompt link     | The matching [Langfuse OTEL attributes](/integrations/native/opentelemetry#observation-level-attributes)      |
+| Create followed by update events                         | One span assembled in memory and exported after it ends                                                       |
+| Score event                                              | The dedicated [Scores SDK or API](/docs/evaluation/evaluation-methods/scores-via-sdk), not an OTLP trace span |
+
+OTEL attributes support scalar values and arrays of scalar values. Serialize structured input, output, model parameters, usage, cost, and metadata values as JSON strings where required by the [attribute mapping](/integrations/native/opentelemetry#property-mapping).
+
+### Configure the OTLP exporter
+
+The exact setup depends on the OpenTelemetry SDK for your language. At minimum, configure:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel"
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING},x-langfuse-ingestion-version=4"
+```
+
+Use the host for your Langfuse region or self-hosted deployment. If your exporter uses signal-specific variables, configure `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` with `/api/public/otel/v1/traces` and set the same headers in `OTEL_EXPORTER_OTLP_TRACES_HEADERS`. See [endpoint configuration and authentication](/integrations/native/opentelemetry#opentelemetry-endpoint) for all regions and protocols.
+
+## Make an existing OTEL integration v4-ready [#make-an-existing-otel-integration-v4-ready]
+
+Existing OTEL integrations already use the correct transport, but their span attributes may still depend on the legacy trace model. Audit the following behaviors before adding the v4 header to production traffic.
+
+### Propagate trace context to observations [#propagate-trace-context-to-observations]
+
+Langfuse v4 queries observations directly. Attributes that exist only on the root span are therefore unavailable when filtering or aggregating its child observations.
+
+Copy these attributes to every span where they must be queryable:
+
+- `langfuse.user.id` or `user.id`
+- `langfuse.session.id` or `session.id`
+- `langfuse.trace.name`
+- `langfuse.trace.tags`
+- `langfuse.trace.metadata.<key>`
+- `langfuse.version`
+- `langfuse.release`
+- `langfuse.environment`
+
+The recommended implementation uses OTEL Baggage with a processor that copies selected baggage entries to span attributes. See [Propagating Trace Attributes to All Spans](/integrations/native/opentelemetry#propagating-attributes) for the implementation pattern and its security considerations.
+
+### Move trace input and output [#move-trace-input-and-output]
+
+Langfuse v4 has no separate trace input or output. A trace is a group of observations correlated by trace ID. Put the overall application's request and response on its root observation:
+
+- replace `langfuse.trace.input` with `langfuse.observation.input` on the root span;
+- replace `langfuse.trace.output` with `langfuse.observation.output` on the root span; and
+- keep operation-specific input and output on the corresponding child spans.
+
+The legacy trace input/output attributes remain available only for backward compatibility with trace-level LLM-as-a-judge evaluators. [Migrate those evaluators to the observation level](/faq/all/llm-as-a-judge-migration) before removing the compatibility attributes.
+
+### Export complete immutable spans [#export-complete-immutable-spans]
+
+It is normal to update an active span in memory before ending it. After Langfuse has accepted the span, however, do not export another record with the same span ID to add or change attributes.
+
+Langfuse v4 does not reliably deduplicate repeated records on the read path. Re-ingesting the same ID can create duplicate observations, inflate metrics, and produce inconsistent query results. See [How to update traces, observations, and scores](/faq/all/tracing-data-updates#traces-and-observations).
+
+### Make metadata filterable
+
+Unmapped OTEL span attributes appear under `metadata.attributes`, and resource attributes appear under `metadata.resourceAttributes`. These catch-all objects are useful for inspection but their nested keys are not directly filterable in Langfuse.
+
+Use `langfuse.trace.metadata.<key>` for trace-wide dimensions and `langfuse.observation.metadata.<key>` for operation-specific dimensions. Copy trace-wide metadata to every span on which it must be filterable. See [How Metadata Mapping Works](/integrations/native/opentelemetry#metadata-mapping).
+
+### Preserve a root observation
+
+Export the application root span and preserve OTEL parent context so Langfuse can reconstruct the observation hierarchy. If a collector filters spans, confirm that it does not remove the root while retaining only its children.
+
+For overall application or agent evaluations, target a root observation containing the overall input, output, and any other context required by the evaluator. Observation-level evaluators do not automatically read sibling or child observations.
+
+## Validate before cutover
+
+Send a canary trace containing a root span, one generation, and one additional child span. Give it a unique tag or metadata value, then confirm:
+
+1. All three observations appear in the unified observations table without the legacy ingestion delay.
+2. Their hierarchy, start times, and end times are correct.
+3. The root observation contains the overall input and output.
+4. User, session, tags, environment, version, release, trace name, and required metadata are available on every observation where you need to filter or aggregate them.
+5. The generation contains its model, model parameters, token usage, cost, and prompt link where applicable.
+6. Any observation-level evaluator matches the intended observation and receives all mapped variables.
+7. The [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) returns the expected observation rows and fields.
+
+<Callout type="warning">
+  Do not dual-send the same logical spans with the same IDs through legacy REST and OTEL into the same project. Validate in a separate project or use distinct canary trace IDs. Otherwise, the v4 data model may contain duplicate observations.
+</Callout>
+
+After the canary passes, shift traffic to OTEL and monitor ingestion errors, observation counts, and evaluation execution. Stop sending trace, span, generation, and event payloads to `/api/public/ingestion`; continue using the dedicated APIs for resources such as scores.

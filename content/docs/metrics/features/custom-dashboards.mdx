@@ -157,6 +157,19 @@ Export your dashboard data for further analysis or integration with external too
 - Integration with external analytics tools
 - Programmatic access via the [Metrics API](/docs/metrics/features/metrics-api)
 
+### Manage Dashboards via API, CLI, and MCP [#manage-dashboards-via-api]
+
+Beyond the dashboard editor in the UI, you can create and manage dashboards, their tile placements, and reusable widgets programmatically:
+
+- **Public API**: Endpoints under `/api/public/unstable` cover dashboards, placements, and widgets. See the [dashboards](https://api.reference.langfuse.com/#tag/unstabledashboards) and [dashboard widgets](https://api.reference.langfuse.com/#tag/unstabledashboardwidgets) API references.
+- **Langfuse CLI**: The [CLI](/docs/api-and-data-platform/features/cli) picks up these endpoints automatically, so you can keep dashboard definitions in version control and apply them across projects and environments.
+- **MCP server**: The [Langfuse MCP server](/docs/api-and-data-platform/features/mcp-server) exposes the same operations as tools, letting AI agents build and edit dashboards with human-in-the-loop approval for changes. The same tools power the [Langfuse Assistant](/docs/langfuse-assistant) in the UI.
+
+<Callout type="info">
+  These endpoints and MCP tools are **unstable** and may change while the
+  dashboard and widget contract is being finalized.
+</Callout>
+
 ## Use Cases and Examples
 
 ### Production Monitoring Dashboard

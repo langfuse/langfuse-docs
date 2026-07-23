@@ -22,6 +22,23 @@ At least version 7 is required and the instance must have `maxmemory-policy=noev
 
 This guide covers how to configure Redis within Langfuse and what to keep in mind when bringing your own Redis.
 
+## Official and Community Support [#support]
+
+Langfuse works with Redis and Redis-compatible stores.
+We distinguish between officially supported and community-supported options:
+
+| Option                                                         | Support Level |
+| -------------------------------------------------------------- | ------------- |
+| [Redis](https://redis.io/) (>= 7, self-hosted or managed)      | Official      |
+| [Valkey](#valkey-vs-redis) (>= 8, self-hosted or managed)      | Official      |
+| Other Redis-compatible stores (e.g., Dragonfly, KeyDB, Garnet) | Community     |
+
+Managed services that run Redis or Valkey, such as [Amazon ElastiCache](https://aws.amazon.com/elasticache/redis/), [Azure Cache for Redis](https://azure.microsoft.com/en-us/products/cache/), and [GCP Memorystore](https://cloud.google.com/memorystore), are covered by the official support level.
+
+import SelfHostSupportLevels from "@/components-mdx/self-host-support-levels.mdx";
+
+<SelfHostSupportLevels />
+
 ## Configuration
 
 Langfuse accepts the following environment variables to fine-tune your Redis usage.
@@ -123,12 +140,12 @@ You must set the parameter `maxmemory-policy` to `noeviction` to ensure that the
 ### Redis on Kubernetes (Helm)
 
 Bitnami offers Helm Charts for [Redis](https://github.com/bitnami/charts/tree/main/bitnami/redis) and [Valkey](https://github.com/bitnami/charts/tree/main/bitnami/valkey).
-We use the Valkey chart as a dependency for [Langfuse K8s](https://github.com/bitnami/charts/tree/main/bitnami/clickhouse).
+We use the Valkey chart as a dependency for [Langfuse K8s](https://github.com/langfuse/langfuse-k8s).
 See [Langfuse on Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) for more details on how to deploy Langfuse on Kubernetes.
 
 #### Example Configuration
 
-For a minimum production setup, we recommend to use the following values.yaml overwrites when deploying the Clickhouse Helm chart:
+For a minimum production setup, we recommend to use the following values.yaml overwrites when deploying the Valkey Helm chart:
 
 ```yaml
 valkey:
@@ -314,10 +331,10 @@ For every ~100000 events per minute we recommend about 1GB of memory for the Red
 Redis allows users to restrict the keys and commands that a given user can access [Redis ACL Docs](https://redis.io/docs/latest/operate/oss_and_stack/management/security/acl/).
 Langfuse expects that the provided user has access to all keys and commands within the given database, i.e. the access control should be defined as `on ~* +@all`.
 
-## Valkey vs Redis
+## Valkey vs Redis [#valkey-vs-redis]
 
 [Valkey](https://github.com/valkey-io/valkey) was created as an open source (BSD) alternative to Redis.
 It is a drop-in replacement for Redis and is compatible with the Redis protocol.
-According to the maintainers their major version 8.0.0 retains compatibility to Redis v7 in most instances.
-We do not extensively test new Langfuse releases with Valkey, but have not encountered any issues in internal experiments using it.
-Therefore, you can consider Valkey as an option, but you may hit compatibility issues in case its behaviour diverges from Redis.
+According to the maintainers, major version 8.0.0 retains compatibility to Redis v7 in most instances.
+Both are [officially supported](#support) — Valkey is the default in our [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) deployment.
+If you notice diverging behavior between Redis and Valkey, please create a [GitHub issue](/issues).

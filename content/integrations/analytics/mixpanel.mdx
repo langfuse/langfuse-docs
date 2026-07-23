@@ -66,40 +66,6 @@ You can use the `AI Company KPIs` template to get started with a pre-built dashb
 
 </Steps>
 
-## Export source (Langfuse v4)
-
-Mixpanel integrations now include an `Export Source` selector. New integrations default to `Enriched observations (recommended)` (trace attributes are directly set on observations).
-
-This source uses enriched observations with trace attributes and provides significantly better export performance. `Scores` are always included, regardless of the selected source.
-
-Available options:
-
-- `Traces and observations (legacy)`
-- `Traces and observations (legacy) and enriched observations`
-- `Enriched observations (recommended)`
-
-<Callout type="info">
-**Cloud projects created on or after 2026-05-20** will not see the Export Source selector — new Cloud projects use `Enriched observations (recommended)` automatically. Pre-cutoff Cloud projects and all self-hosted deployments keep the full choice.
-</Callout>
-
-<Callout type="warning">
-`Traces and observations (legacy)` sources may be deprecated in the future. All new export jobs should use `Enriched observations (recommended)`, and existing legacy jobs are strongly recommended to upgrade.
-</Callout>
-
-### Upgrade path for existing configurations
-
-This migration path applies to **pre-cutoff Cloud projects and self-hosted deployments**. Post-cutoff Cloud projects already use `Enriched observations (recommended)` and cannot select legacy sources.
-
-Existing integrations continue to use `Traces and observations (legacy)` until changed.
-
-To migrate safely:
-
-1. Switch to `Traces and observations (legacy) and enriched observations`.
-2. Validate downstream dashboards, transformations, and alerts while both sources are exported (this mode creates duplicate records by design).
-3. Switch to `Enriched observations (recommended)` once validation is complete.
-
-For rollout details, see the [Simplify for Scale changelog](/changelog/2026-03-10-simplify-for-scale).
-
 ## Integration details [#details]
 
 On an hourly schedule, Langfuse batches aggregated events and metrics to your Mixpanel instance.
@@ -108,95 +74,199 @@ On an hourly schedule, Langfuse batches aggregated events and metrics to your Mi
 
 Matching of metadata helps to join the data from Langfuse with the data from Mixpanel:
 
-| Langfuse                                                      | Mixpanel                  | Notes                                                                                                                       |
-| ------------------------------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| [`user_id`](/docs/observability/features/users)               | `distinct_id`, `$user_id` |                                                                                                                             |
-| `trace.timestamp`, `generation.started_at`, `score.timestamp` | `time`                    | Sent as milliseconds since epoch                                                                                            |
-| `trace.metadata.$mixpanel_session_id`                         | `session_id`              | Optional, you need to add the Mixpanel session id to your Langfuse trace [metadata](/docs/observability/features/metadata). |
+| Langfuse                                        | Mixpanel                  | Notes                                                                                                                       |
+| ----------------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| [`user_id`](/docs/observability/features/users) | `distinct_id`, `$user_id` |                                                                                                                             |
+| `observation.start_time`, `score.timestamp`     | `time`                    | Sent as milliseconds since epoch. For [legacy events](#export-source): `trace.timestamp` and `generation.started_at`.       |
+| `trace.metadata.$mixpanel_session_id`           | `session_id`              | Optional, you need to add the Mixpanel session id to your Langfuse trace [metadata](/docs/observability/features/metadata). |
 
-### Events
+### Events [#events]
 
-The integration sends the following events to Mixpanel.
+The integration sends one `[Langfuse] Observation` event per observation and one `[Langfuse] Score` event per score.
 
 Is there any additional information that would be helpful? You can request more events or properties [here](/ideas).
 
-#### Event: `[Langfuse] Trace`
+<Callout type="info">
+  Projects using a legacy export source receive different events — see [Legacy
+  export sources](#export-source) below.
+</Callout>
 
-- `time`: Milliseconds since epoch when the event occurred.
-- `distinct_id`: User ID or anonymous identifier.
-- `$user_id`: User ID sent to Mixpanel's native user ID field.
-- `$insert_id`: Unique identifier for deduplication.
-- `session_id`: Optional session identifier (from `$mixpanel_session_id` in metadata, or falls back to Langfuse session_id).
-- `langfuse_trace_name`: The name of the trace.
-- `langfuse_url`: The URL of the trace.
-- `langfuse_user_url`: Deeplink to the user profile in Langfuse.
-- `langfuse_id`: The unique identification of the trace.
-- `langfuse_cost_usd`: The total cost associated with the trace.
-- `langfuse_count_observations`: The number of observations in the trace.
-- `langfuse_session_id`: The session ID related to the event.
-- `langfuse_project_id`: An ID associated with the project related to the event.
-- `langfuse_user_id`: User ID related to the event. If it's null, it's marked as langfuse_unknown_user.
-- `langfuse_latency`: The latency of the event.
-- `langfuse_release`: Information relating to the event release.
-- `langfuse_version`: The version of the event.
-- `langfuse_tags`: Any tags associated with the event.
-- `langfuse_environment`: The environment associated with the trace.
-- `langfuse_event_version`: The integration version of Langfuse.
+#### Event: `[Langfuse] Observation` [#event-observation]
 
-#### Event: `[Langfuse] Generation`
+One event per observation, covering every observation type.
 
-- `time`: Milliseconds since epoch when the generation started.
-- `distinct_id`: User ID or anonymous identifier.
-- `$user_id`: User ID sent to Mixpanel's native user ID field.
-- `$insert_id`: Unique identifier for deduplication.
-- `session_id`: Optional session identifier (from `$mixpanel_session_id` in metadata, or falls back to Langfuse session_id).
-- `langfuse_generation_name`: The name of the generation.
-- `langfuse_trace_name`: Name of the trace related to the generation.
-- `langfuse_trace_id`: The unique identifier of the trace related to the generation.
-- `langfuse_url`: The URL of the generation on the host platform.
-- `langfuse_user_url`: Deeplink to the user profile in Langfuse.
-- `langfuse_id`: Unique identifier of the generation.
-- `langfuse_cost_usd`: Computed total cost of the generation.
-- `langfuse_input_units`: Number of tokens utilized in prompting the generation.
-- `langfuse_output_units`: Number of tokens produced by the generation.
-- `langfuse_total_units`: Total number of tokens consumed in the generation process.
-- `langfuse_session_id`: The session ID associated with the trace of the generation.
-- `langfuse_project_id`: The project identification where the generation happened.
-- `langfuse_user_id`: The user ID that started the trace linked to the generation. In case it's unavailable, it defaults to `langfuse_unknown_user`.
-- `langfuse_latency`: The observed latency of the generation.
-- `langfuse_time_to_first_token`: The time taken to generate the first token when streaming.
-- `langfuse_release`: Release information of the trace attached with the generation.
-- `langfuse_version`: The versioning info about the generation.
-- `langfuse_model`: The model used during this generation's process.
-- `langfuse_level`: The level associated with the generation.
-- `langfuse_tags`: Any tags attached to the trace of the generation.
-- `langfuse_environment`: The environment associated with the generation.
-- `langfuse_event_version`: The integration version with Langfuse.
+| Property                       | Description                                                                                                                           |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `time`                         | Milliseconds since epoch when the observation started.                                                                                |
+| `distinct_id`                  | User ID or anonymous identifier.                                                                                                      |
+| `$user_id`                     | User ID sent to Mixpanel's native user ID field.                                                                                      |
+| `$insert_id`                   | Unique identifier for deduplication.                                                                                                  |
+| `session_id`                   | Optional session identifier (from `$mixpanel_session_id` in metadata, or falls back to Langfuse session_id).                          |
+| `langfuse_observation_name`    | The name of the observation.                                                                                                          |
+| `langfuse_type`                | The observation type: `GENERATION`, `SPAN`, `EVENT`, `AGENT`, `TOOL`, `CHAIN`, `RETRIEVER`, `EVALUATOR`, `EMBEDDING`, or `GUARDRAIL`. |
+| `langfuse_trace_name`          | Name of the trace related to the observation.                                                                                         |
+| `langfuse_trace_id`            | The unique identifier of the trace related to the observation.                                                                        |
+| `langfuse_url`                 | The URL of the observation on the host platform.                                                                                      |
+| `langfuse_user_url`            | Deeplink to the user profile in Langfuse.                                                                                             |
+| `langfuse_id`                  | Unique identifier of the observation.                                                                                                 |
+| `langfuse_cost_usd`            | Computed total cost of the observation.                                                                                               |
+| `langfuse_input_units`         | Number of tokens utilized in prompting (for LLM calls).                                                                               |
+| `langfuse_output_units`        | Number of tokens produced (for LLM calls).                                                                                            |
+| `langfuse_total_units`         | Total number of tokens consumed (for LLM calls).                                                                                      |
+| `langfuse_session_id`          | The session ID associated with the trace of the observation.                                                                          |
+| `langfuse_project_id`          | The ID of the project where the observation happened.                                                                                 |
+| `langfuse_project_name`        | The name of the project where the observation happened.                                                                               |
+| `langfuse_user_id`             | The user ID that started the trace linked to the observation. In case it's unavailable, it defaults to `langfuse_unknown_user`.       |
+| `langfuse_latency`             | The observed latency of the observation.                                                                                              |
+| `langfuse_time_to_first_token` | The time taken to generate the first token when streaming.                                                                            |
+| `langfuse_release`             | Release information of the trace attached with the observation.                                                                       |
+| `langfuse_version`             | The versioning info about the observation.                                                                                            |
+| `langfuse_model`               | The model used (for LLM calls).                                                                                                       |
+| `langfuse_level`               | The level associated with the observation.                                                                                            |
+| `langfuse_tags`                | Any tags attached to the trace of the observation.                                                                                    |
+| `langfuse_environment`         | The environment associated with the observation.                                                                                      |
+| `langfuse_event_version`       | The integration version with Langfuse.                                                                                                |
 
-#### Event: `[Langfuse] Score`
+#### Event: `[Langfuse] Score` [#event-score]
 
-- `time`: Milliseconds since epoch when the score event occurred.
-- `distinct_id`: User ID or anonymous identifier.
-- `$user_id`: User ID sent to Mixpanel's native user ID field.
-- `$insert_id`: Unique identifier for deduplication.
-- `session_id`: Optional session identifier (from `$mixpanel_session_id` in metadata, or falls back to Langfuse session_id).
-- `langfuse_score_name`: The name associated with the score.
-- `langfuse_score_value`: The value of the score.
-- `langfuse_score_string_value`: The string value of the score. For BOOLEAN and CATEGORICAL scores, this will be the string representation of the value.
-- `langfuse_score_data_type`: The data type of the score (NUMERIC, BOOLEAN, CATEGORICAL).
-- `langfuse_score_comment`: Any comments attached with the score.
-- `langfuse_score_metadata`: Any metadata attached with the score.
-- `langfuse_trace_name`: The name of the trace associated with the score.
-- `langfuse_trace_id`: The unique identifier of the trace associated with the score.
-- `langfuse_user_url`: Deeplink to the user profile in Langfuse.
-- `langfuse_id`: The unique identification of the score.
-- `langfuse_session_id`: The session identification related to the score's trace.
-- `langfuse_project_id`: The project identification linked with the score's trace.
-- `langfuse_user_id`: The user ID that triggered the trace tied with the score. If not available, defaults to `langfuse_unknown_user`.
-- `langfuse_release`: The release information of the trace associated with the score.
-- `langfuse_tags`: Any tags related to the trace of the score.
-- `langfuse_environment`: The environment associated with the score.
-- `langfuse_event_version`: The integration version with Langfuse.
+One event per score.
+
+| Property                      | Description                                                                                                             |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `time`                        | Milliseconds since epoch when the score event occurred.                                                                 |
+| `distinct_id`                 | User ID or anonymous identifier.                                                                                        |
+| `$user_id`                    | User ID sent to Mixpanel's native user ID field.                                                                        |
+| `$insert_id`                  | Unique identifier for deduplication.                                                                                    |
+| `session_id`                  | Optional session identifier (from `$mixpanel_session_id` in metadata, or falls back to Langfuse session_id).            |
+| `langfuse_score_name`         | The name associated with the score.                                                                                     |
+| `langfuse_score_value`        | The value of the score.                                                                                                 |
+| `langfuse_score_string_value` | The string value of the score. For BOOLEAN and CATEGORICAL scores, this will be the string representation of the value. |
+| `langfuse_score_data_type`    | The data type of the score (NUMERIC, BOOLEAN, CATEGORICAL).                                                             |
+| `langfuse_score_comment`      | Any comments attached with the score.                                                                                   |
+| `langfuse_score_metadata`     | Any metadata attached with the score.                                                                                   |
+| `langfuse_score_entity_type`  | The entity the score is attached to: `trace`, `session`, `dataset_run`, or `unknown`.                                   |
+| `langfuse_dataset_run_id`     | The unique identifier of the dataset run, for scores attached to a dataset run.                                         |
+| `langfuse_trace_name`         | The name of the trace associated with the score.                                                                        |
+| `langfuse_trace_id`           | The unique identifier of the trace associated with the score.                                                           |
+| `langfuse_user_url`           | Deeplink to the user profile in Langfuse.                                                                               |
+| `langfuse_id`                 | The unique identification of the score.                                                                                 |
+| `langfuse_session_id`         | The session identification related to the score's trace.                                                                |
+| `langfuse_project_id`         | The project identification linked with the score's trace.                                                               |
+| `langfuse_project_name`       | The name of the project linked with the score's trace.                                                                  |
+| `langfuse_user_id`            | The user ID that triggered the trace tied with the score. If not available, defaults to `langfuse_unknown_user`.        |
+| `langfuse_release`            | The release information of the trace associated with the score.                                                         |
+| `langfuse_tags`               | Any tags related to the trace of the score.                                                                             |
+| `langfuse_environment`        | The environment associated with the score.                                                                              |
+| `langfuse_event_version`      | The integration version with Langfuse.                                                                                  |
+
+## Legacy export sources [#export-source]
+
+Cloud projects created before 2026-05-20 and self-hosted deployments have an `Export Source` selector in the integration settings (introduced with Langfuse v4, Fast Preview). Cloud projects created on or after 2026-05-20 always use `Enriched observations (recommended)` — the schema documented [above](#events) — and can skip this section.
+
+Available options:
+
+- `Enriched observations (recommended)`: sends the [`[Langfuse] Observation`](#event-observation) events documented above. Provides significantly better export performance and covers every observation type.
+- `Traces and observations (legacy)`: sends the [`[Langfuse] Trace`](#event-trace) and [`[Langfuse] Generation`](#event-generation) events documented below.
+- `Traces and observations (legacy) and enriched observations`: sends all of the above. This creates duplicate records by design, as a validation aid during migration.
+
+[`[Langfuse] Score`](#event-score) events are always sent, regardless of the selected export source.
+
+<Callout type="warning">
+`Traces and observations (legacy)` sources may be deprecated in the future. All new export jobs should use `Enriched observations (recommended)`, and existing legacy jobs are strongly recommended to upgrade.
+</Callout>
+
+### Migrating from the legacy export source [#migrate-export-source]
+
+New integrations default to `Enriched observations (recommended)`; existing integrations continue to use `Traces and observations (legacy)` until changed.
+
+Mixpanel is a schemaless event store, so no setup is needed on the Mixpanel side — the new event name and properties appear automatically once you switch. All migration effort goes into the assets built on top of the events: reports, boards, funnels, cohorts, alerts, and warehouse syncs.
+
+Keep in mind:
+
+1. **Nothing is backfilled.** The sync is watermark-based: the old event streams stop at the switch date and the new one starts. Reports keyed on the old event names show a hard cliff — add a Mixpanel annotation at the cutover date and keep old boards around for lookback.
+2. **Queries need rewriting, not re-pointing.** Reports on `[Langfuse] Generation` become reports on `[Langfuse] Observation` filtered by `langfuse_type = 'GENERATION'`. Per-trace metrics (total cost, observation count, latency) must be recomputed by aggregating observation events over `langfuse_trace_id`, since there is no trace-summary event anymore — see [changes from legacy to enriched events](#legacy-vs-enriched).
+3. **The combined mode double-counts by design.** With `Traces and observations (legacy) and enriched observations`, a generation is exported both as a `[Langfuse] Generation` and as a `[Langfuse] Observation` event. Mixpanel's `$insert_id` deduplication is scoped per event name, so these are not collapsed, and metrics that sum cost or tokens across both event types double-count during migration. Use this mode only to build and validate new boards side by side.
+4. **The switch is effectively one-way.** Once legacy writes are off, the legacy sources can no longer be selected.
+
+To migrate:
+
+1. Switch to `Traces and observations (legacy) and enriched observations`.
+2. Duplicate your reports and boards onto the `[Langfuse] Observation` event: filter by `langfuse_type`, use `langfuse_observation_name`, and rebuild per-trace metrics as aggregations over `langfuse_trace_id`.
+3. Validate the new numbers against the old ones side by side. Expect intentional coverage differences: the enriched source includes all observation types, not just generations.
+4. Switch to `Enriched observations (recommended)` and annotate the cutover date on any legacy boards you keep.
+
+For rollout details, see the [enriched observations default changelog](/changelog/2026-05-20-blob-storage-enriched-default).
+
+### Changes from legacy to enriched events [#legacy-vs-enriched]
+
+- **`[Langfuse] Generation` is replaced by `[Langfuse] Observation`.** The two events are field-for-field identical, with two exceptions: `langfuse_generation_name` is renamed to `langfuse_observation_name`, and a new `langfuse_type` property carries the observation type.
+- **Coverage expands to all observation types.** The legacy source only exports generations; the enriched source exports every observation type. Expect a higher event volume after switching — Mixpanel bills per event. Filter on `langfuse_type` = `GENERATION` to reproduce the legacy scope.
+- **No standalone trace event.** Trace context is available on every observation event via `langfuse_trace_id` and `langfuse_trace_name`. The trace-level rollup properties have no enriched equivalent: `langfuse_count_observations`, the trace-level `langfuse_cost_usd` and `langfuse_latency` aggregates, and the trace-scoped `langfuse_url`. To approximate them, aggregate observation events by `langfuse_trace_id`.
+- **Score events are identical** in both sources.
+- **Identity and deduplication are unchanged**: `distinct_id` is still derived from `langfuse_user_id`, `session_id` and `$insert_id` handling is the same, and `langfuse_event_version` remains `1.0.0` for all events.
+
+### Event: `[Langfuse] Trace` [#event-trace]
+
+Sent only by the legacy export sources. There is no enriched equivalent — see [changes from legacy to enriched events](#legacy-vs-enriched).
+
+| Property                      | Description                                                                                                  |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `time`                        | Milliseconds since epoch when the event occurred.                                                            |
+| `distinct_id`                 | User ID or anonymous identifier.                                                                             |
+| `$user_id`                    | User ID sent to Mixpanel's native user ID field.                                                             |
+| `$insert_id`                  | Unique identifier for deduplication.                                                                         |
+| `session_id`                  | Optional session identifier (from `$mixpanel_session_id` in metadata, or falls back to Langfuse session_id). |
+| `langfuse_trace_name`         | The name of the trace.                                                                                       |
+| `langfuse_url`                | The URL of the trace.                                                                                        |
+| `langfuse_user_url`           | Deeplink to the user profile in Langfuse.                                                                    |
+| `langfuse_id`                 | The unique identification of the trace.                                                                      |
+| `langfuse_cost_usd`           | The total cost associated with the trace.                                                                    |
+| `langfuse_count_observations` | The number of observations in the trace.                                                                     |
+| `langfuse_session_id`         | The session ID related to the event.                                                                         |
+| `langfuse_project_id`         | An ID associated with the project related to the event.                                                      |
+| `langfuse_project_name`       | The name of the project related to the event.                                                                |
+| `langfuse_user_id`            | User ID related to the event. If it's null, it's marked as langfuse_unknown_user.                            |
+| `langfuse_latency`            | The latency of the event.                                                                                    |
+| `langfuse_release`            | Information relating to the event release.                                                                   |
+| `langfuse_version`            | The version of the event.                                                                                    |
+| `langfuse_tags`               | Any tags associated with the event.                                                                          |
+| `langfuse_environment`        | The environment associated with the trace.                                                                   |
+| `langfuse_event_version`      | The integration version of Langfuse.                                                                         |
+
+### Event: `[Langfuse] Generation` [#event-generation]
+
+Sent only by the legacy export sources. Only covers observations of type generation; replaced by [`[Langfuse] Observation`](#event-observation) in the enriched source.
+
+| Property                       | Description                                                                                                                    |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `time`                         | Milliseconds since epoch when the generation started.                                                                          |
+| `distinct_id`                  | User ID or anonymous identifier.                                                                                               |
+| `$user_id`                     | User ID sent to Mixpanel's native user ID field.                                                                               |
+| `$insert_id`                   | Unique identifier for deduplication.                                                                                           |
+| `session_id`                   | Optional session identifier (from `$mixpanel_session_id` in metadata, or falls back to Langfuse session_id).                   |
+| `langfuse_generation_name`     | The name of the generation.                                                                                                    |
+| `langfuse_trace_name`          | Name of the trace related to the generation.                                                                                   |
+| `langfuse_trace_id`            | The unique identifier of the trace related to the generation.                                                                  |
+| `langfuse_url`                 | The URL of the generation on the host platform.                                                                                |
+| `langfuse_user_url`            | Deeplink to the user profile in Langfuse.                                                                                      |
+| `langfuse_id`                  | Unique identifier of the generation.                                                                                           |
+| `langfuse_cost_usd`            | Computed total cost of the generation.                                                                                         |
+| `langfuse_input_units`         | Number of tokens utilized in prompting the generation.                                                                         |
+| `langfuse_output_units`        | Number of tokens produced by the generation.                                                                                   |
+| `langfuse_total_units`         | Total number of tokens consumed in the generation process.                                                                     |
+| `langfuse_session_id`          | The session ID associated with the trace of the generation.                                                                    |
+| `langfuse_project_id`          | The project identification where the generation happened.                                                                      |
+| `langfuse_project_name`        | The name of the project where the generation happened.                                                                         |
+| `langfuse_user_id`             | The user ID that started the trace linked to the generation. In case it's unavailable, it defaults to `langfuse_unknown_user`. |
+| `langfuse_latency`             | The observed latency of the generation.                                                                                        |
+| `langfuse_time_to_first_token` | The time taken to generate the first token when streaming.                                                                     |
+| `langfuse_release`             | Release information of the trace attached with the generation.                                                                 |
+| `langfuse_version`             | The versioning info about the generation.                                                                                      |
+| `langfuse_model`               | The model used during this generation's process.                                                                               |
+| `langfuse_level`               | The level associated with the generation.                                                                                      |
+| `langfuse_tags`                | Any tags attached to the trace of the generation.                                                                              |
+| `langfuse_environment`         | The environment associated with the generation.                                                                                |
+| `langfuse_event_version`       | The integration version with Langfuse.                                                                                         |
 
 ## Troubleshooting
 
