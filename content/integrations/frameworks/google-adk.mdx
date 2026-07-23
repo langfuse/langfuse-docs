@@ -119,6 +119,8 @@ for event in runner.run(user_id=USER_ID, session_id=SESSION_ID, new_message=user
             print(f"Agent error: {event.error_message}")
 ```
 
+    Hello! Hello Langfuse 👋
+
 Langfuse automatically maps the `user_id` and `session_id` you pass to `runner.run()` to the trace's **user** and **session** — you get [user](https://langfuse.com/docs/observability/features/users) and [session](https://langfuse.com/docs/observability/features/sessions) tracking without any extra code.
 
 ### Example 2: Named and filterable traces [#example-2-named-and-filterable-traces]
@@ -145,6 +147,8 @@ with propagate_attributes(
             elif event.error_message:
                 print(f"Agent error: {event.error_message}")
 ```
+
+    Hello Langfuse 👋
 
 ### Example 3: Multi-agent pipeline with Workflow [#example-3-multi-agent-pipeline-with-workflow]
 
@@ -178,6 +182,10 @@ with propagate_attributes(trace_name="research-pipeline", tags=["google-adk", "m
         if event.is_final_response() and event.content:
             print(f"[{event.author}]", event.content.parts[0].text)
 ```
+
+    [researcher] * Langfuse is an open-source LLM (Large Language Model) engineering platform designed for tracing, debugging, and monitoring AI applications.
+    * It provides features for prompt management, tracking API costs and latency, and evaluating the quality of LLM outputs using both automated and manual methods.
+    [writer] Langfuse is a wonderful open-source LLM engineering platform that helps you easily monitor, debug, and optimize your AI applications by tracking costs, managing prompts, and evaluating output quality all in one place!
 
 The trace now contains one `agent_run` span per pipeline stage, each with its own generation.
 
@@ -215,6 +223,8 @@ langfuse.create_score(
     comment="The answer was helpful.",
 )
 ```
+
+    Hello Langfuse 👋
 
 _Tip: the wrapper span also gives the trace a clean preview: the Input/Output shown at the trace level come from the root span, so the plain values set via `span.update(...)` are what you see at the top of the trace._
 
