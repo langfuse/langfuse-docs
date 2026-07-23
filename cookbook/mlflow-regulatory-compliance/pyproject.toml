@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mlflow-regulatory-compliance"
+version = "0.1.0"
+description = "NIST AI RMF-aligned regulatory compliance evaluation metrics for MLflow"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.9"
+authors = [
+    {name = "Gary Atwal", email = "garyatwal2017@gmail.com"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Quality Assurance",
+]
+keywords = [
+    "mlflow",
+    "compliance",
+    "nist",
+    "ai-rmf",
+    "evaluation",
+    "pii",
+    "bias",
+    "governance",
+    "regulatory",
+]
+dependencies = [
+    "mlflow>=2.10",
+    "pandas>=1.5",
+]
+
+[project.urls]
+Homepage = "https://github.com/garyatwal/mlflow-regulatory-compliance"
+Repository = "https://github.com/garyatwal/mlflow-regulatory-compliance"
+Issues = "https://github.com/garyatwal/mlflow-regulatory-compliance/issues"
+
+[project.entry-points."mlflow.model_evaluator"]
+regulatory-compliance = "mlflow_regulatory_compliance.evaluators.compliance_evaluator:RegulatoryComplianceEvaluator"
+
+[tool.setuptools.packages.find]
+include = ["mlflow_regulatory_compliance*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501"]
