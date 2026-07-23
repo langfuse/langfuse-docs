@@ -47,20 +47,20 @@ Do not translate each legacy API request into a separate OTEL export. Build the 
 
 ### Map legacy events to OTEL spans
 
-| Legacy ingestion concept                                 | V4-ready OTEL representation                                                                                  |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Trace record                                             | One OTEL trace ID shared by all observations. There is no separately ingested trace entity.                   |
-| Trace name                                               | `langfuse.trace.name`, copied to every span where the name must be queryable                                  |
-| Trace user, session, tags, release, version, environment | Corresponding `langfuse.*` attributes copied to every relevant span                                           |
-| Trace metadata                                           | `langfuse.trace.metadata.<key>` copied to every relevant span                                                 |
-| Trace input and output                                   | `langfuse.observation.input` and `langfuse.observation.output` on the root span                               |
-| Span, generation, or event                               | An OTEL span with `langfuse.observation.type` set to `span`, `generation`, or `event`                         |
-| Parent observation ID                                    | OTEL parent span context                                                                                      |
-| Observation input and output                             | `langfuse.observation.input` and `langfuse.observation.output` on that span                                   |
-| Observation metadata                                     | `langfuse.observation.metadata.<key>`                                                                         |
-| Model, model parameters, usage, cost, or prompt link     | The matching [Langfuse OTEL attributes](/integrations/native/opentelemetry#observation-level-attributes)      |
-| Create followed by update events                         | One span assembled in memory and exported after it ends                                                       |
-| Score event                                              | The dedicated [Scores SDK or API](/docs/evaluation/evaluation-methods/scores-via-sdk), not an OTLP trace span |
+| Legacy ingestion concept                                 | V4-ready OTEL representation                                                                                                   |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Trace record                                             | One OTEL trace ID shared by all observations. There is no separately ingested trace entity.                                    |
+| Trace name                                               | `langfuse.trace.name`, copied to every span where the name must be queryable                                                   |
+| Trace user, session, tags, release, version, environment | Corresponding `langfuse.*` attributes copied to every relevant span                                                            |
+| Trace metadata                                           | `langfuse.trace.metadata.<key>` copied to every relevant span                                                                  |
+| Trace input and output (deprecated)                      | Trace input/output is deprecated. Use `langfuse.observation.input` and `langfuse.observation.output` on the root span instead. |
+| Span, generation, or event                               | An OTEL span with `langfuse.observation.type` set to `span`, `generation`, or `event`                                          |
+| Parent observation ID                                    | OTEL parent span context                                                                                                       |
+| Observation input and output                             | `langfuse.observation.input` and `langfuse.observation.output` on that span                                                    |
+| Observation metadata                                     | `langfuse.observation.metadata.<key>`                                                                                          |
+| Model, model parameters, usage, cost, or prompt link     | The matching [Langfuse OTEL attributes](/integrations/native/opentelemetry#observation-level-attributes)                       |
+| Create followed by update events                         | One span assembled in memory and exported after it ends                                                                        |
+| Score event                                              | The dedicated [Scores SDK or API](/docs/evaluation/evaluation-methods/scores-via-sdk), not an OTLP trace span                  |
 
 OTEL attributes support scalar values and arrays of scalar values. Serialize structured input, output, model parameters, usage, cost, and metadata values as JSON strings where required by the [attribute mapping](/integrations/native/opentelemetry#property-mapping).
 

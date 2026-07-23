@@ -1,7 +1,7 @@
 ---
 title: OpenTelemetry (OTEL) for LLM Observability
 description: Connect Langfuse to OpenTelemetry (OTEL) and send OTLP traces from your application or collector to Langfuse.
-sidebarTitle: OpenTelemetry
+sidebarTitle: Overview
 logo: /images/integrations/opentelemetry_icon.svg
 ---
 
@@ -16,6 +16,58 @@ Use this page if your application, framework, or collector already emits OpenTel
 <Callout type="info">
   **Using Python or JavaScript/TypeScript?** Use the [Langfuse SDK](/docs/observability/sdk/overview) instead of building directly on the OTEL API. The SDK handles Langfuse attributes, propagation, media, filtering, and export for you. For other languages, use the [native OpenTelemetry API for your language](https://opentelemetry.io/docs/languages/) and export spans to Langfuse.
 </Callout>
+
+## OpenTelemetry endpoint [#opentelemetry-endpoint]
+
+Langfuse can receive traces on the `/api/public/otel` (OTLP) endpoint.
+
+If you use a Collector that uses the OpenTelemetry SDK to export traces, you can use the following configuration:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel" # 🇪🇺 EU data region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com/api/public/otel, 🇯🇵 Japan: https://jp.cloud.langfuse.com/api/public/otel and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com/api/public/otel
+# OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:3000/api/public/otel" # 🏠 Local deployment (>= v3.22.0)
+
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING},x-langfuse-ingestion-version=4"
+```
+
+<Callout type="info">
+
+Langfuse uses [Basic Auth](https://en.wikipedia.org/wiki/Basic_access_authentication) to authenticate requests.
+
+You can use the following command to get the base64 encoded API keys (referred to as `AUTH_STRING`): `echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64`.
+For long API Keys on GNU systems, you may have to add `-w 0` at the end since `base64` auto-wraps columns.
+
+</Callout>
+
+### Enable real-time ingestion in Langfuse v4 [#real-time-ingestion]
+
+If you send spans directly via OpenTelemetry, include the
+`x-langfuse-ingestion-version: 4` header so that new data appears in real time
+on the v4 data model and the v2 Observations and Metrics APIs. Without
+this header, directly ingested OpenTelemetry data can be delayed by up to 10
+minutes. The `OTEL_EXPORTER_OTLP_HEADERS` configuration above already includes
+the header.
+
+If your setup uses signal-specific header settings, configure the same header
+on the traces exporter:
+
+```bash
+OTEL_EXPORTER_OTLP_TRACES_HEADERS="Authorization=Basic ${AUTH_STRING},x-langfuse-ingestion-version=4"
+```
+
+<Callout type="info">
+
+If your collector requires signal-specific environment variables, the trace endpoint is `/api/public/otel/v1/traces`.
+
+```bash
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="https://cloud.langfuse.com/api/public/otel/v1/traces" # EU data region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com/api/public/otel/v1/traces, 🇯🇵 Japan: https://jp.cloud.langfuse.com/api/public/otel/v1/traces and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com/api/public/otel/v1/traces
+```
+
+</Callout>
+
+Please note that Langfuse currently supports OTLP over HTTP with both `HTTP/JSON` and `HTTP/protobuf`. `gRPC` is not supported yet.
 
 <Callout type="warning">
   **Migrating to Langfuse v4?** If you send custom events to the legacy `/api/public/ingestion` endpoint, or already send OTEL spans that rely on trace input/output or root-only attributes, follow the [custom ingestion migration guide](/integrations/native/opentelemetry/migration-to-v4).
@@ -116,141 +168,6 @@ OpenTelemetry integration, you can use the convenience methods
 which handle attribute propagation automatically. These methods provide a
 simpler interface and are the recommended approach when using Langfuse SDKs.
 
-## Experiments: Ingesting Experiment Spans [#experiments-ingesting-experiment-spans]
-
-<Callout type="info">
-  **Using Python or TypeScript?** Use [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)
-  with the [Langfuse SDKs](/docs/observability/sdk/overview). They handle these
-  attributes automatically. This guide is for direct OpenTelemetry ingestion,
-  primarily when no Langfuse SDK is available for your language.
-</Callout>
-
-An [experiment](/docs/evaluation/core-concepts#experiments) runs your
-application against test data. Each input is an experiment item, optionally
-with an expected output. Each item corresponds to one trace that shows how your
-application produced the actual output from that input, with child spans for
-model calls, tool calls, and other work.
-
-To make experiment data show correctly in Langfuse, model three levels of
-context in this order:
-
-| Level                | Purpose                                                                                                                    | How to apply it                      | Attributes                                                                                                                                                                                                           |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Experiment context   | Propagates the experiment's identity to every span in every item trace, so Langfuse can synthesize them as one experiment. | Baggage                              | `langfuse.experiment.id`, `langfuse.experiment.name`, `langfuse.experiment.dataset.id`, `langfuse.experiment.description` (optional), `langfuse.experiment.metadata.*` (optional), `langfuse.environment` (optional) |
-| Experiment item root | Identifies one item trace root and stores its input, expected output, and actual output.                                   | Attributes directly on the root span | `langfuse.observation.input`, `langfuse.observation.output`, `langfuse.experiment.item.expected_output` (optional), `langfuse.experiment.item.metadata.*` (optional)                                                 |
-| Item context         | Propagates one item's identity to the root and child spans in that item's trace.                                           | Root attributes, then Baggage        | `langfuse.experiment.item.id`, `langfuse.experiment.item.root_observation_id`, `langfuse.experiment.item.version` (optional)                                                                                         |
-
-Configure a `BaggageSpanProcessor` as described in the [Baggage propagation
-pattern](#recommended-use-opentelemetry-baggage-for-propagation).
-It copies Baggage entries to each newly created span. The following sections
-show how each level is represented.
-
-<Callout type="info">
-  **Baggage is sent to downstream services:** OpenTelemetry injects Baggage
-  into outbound request headers. This is usually not relevant for experiment
-  context, but do not add sensitive values to it.
-</Callout>
-
-### 1. Experiment Context: Baggage Shared by All Item Traces
-
-Create experiment Baggage once. Start every item execution with this Baggage
-and no active parent span: each execution must remain a separate trace. Do not
-create an enclosing "experiment" span.
-
-```text
-experimentBaggage = baggageFromAttributes({
-  "langfuse.experiment.id": experiment.id, // unique per experiment
-  "langfuse.experiment.name": experiment.name, // unique per experiment
-  "langfuse.experiment.dataset.id": experiment.datasetId, // recommended: Manage datasets in Langfuse
-  "langfuse.experiment.description": experiment.description, // optional
-  "langfuse.experiment.metadata.prompt_version": "v4", // optional
-  "langfuse.environment": "experiment", // optional: separate environment for experiment traffic
-})
-```
-
-### 2. Experiment Item Root: One Trace Per Item
-
-An experiment item has an input, an expected output, and the actual output from
-your application. Its trace captures the execution that produces the actual
-output from that input. Langfuse expects exactly one trace per experiment item.
-
-Langfuse needs a clear root span to identify the item trace and its data. The
-root's `langfuse.observation.input` should be the experiment item input, and
-its `langfuse.observation.output` should be the actual output. Create the root
-with the experiment Baggage, then set the expected output and metadata directly
-on it. Its
-`langfuse.experiment.item.root_observation_id` must equal its own OTel `spanId`.
-Prefer this span to also be the OTel trace root, with no parent span or Langfuse
-parent observation.
-
-```text
-for each item:
-  root = tracer.startSpan(
-    "experiment-item",
-    withBaggage(ROOT_CONTEXT, experimentBaggage),
-  )
-  rootId = root.spanContext().spanId
-
-  itemAttributes = {
-    "langfuse.experiment.item.id": item.id, // DatasetItem ID when linking a Langfuse-managed dataset
-    "langfuse.experiment.item.version": item.version, // optional: Langfuse-managed datasets only
-    "langfuse.experiment.item.root_observation_id": rootId,
-  }
-
-  root.setAttributes({
-    ...itemAttributes,
-    "langfuse.experiment.item.expected_output": jsonEncode(item.expectedOutput), // optional
-    "langfuse.experiment.item.metadata.country": item.metadata.country, // optional
-  })
-```
-
-To link a [Langfuse-managed dataset](/docs/evaluation/experiments/datasets),
-set the experiment dataset ID to `Dataset.id` and
-`langfuse.experiment.item.id` to the `DatasetItem.id` returned by Langfuse. If
-you fetch a
-[specific dataset version](/docs/evaluation/experiments/datasets#fetch-dataset-at-a-specific-version),
-set the item version to the same version timestamp.
-
-When using local data, you can also set the experiment dataset ID and item IDs
-as local correlation identifiers. Use stable IDs to correlate the same local
-dataset across repeated experiment runs. Do not set an item version for local
-data.
-
-### 3. Item Context: Baggage Shared Within One Item Trace
-
-Before starting child spans, add the item identity and root ID to Baggage. This
-lets Langfuse link model calls, tool calls, and other work to the experiment
-item.
-
-```text
-itemBaggage = mergeBaggage(
-  experimentBaggage,
-  baggageFromAttributes(itemAttributes),
-)
-
-withContext(withActiveSpan(withBaggage(ROOT_CONTEXT, itemBaggage), root)):
-  runInstrumentedTask(item)
-
-root.end()
-```
-
-<Callout type="info">
-  **Scores:** Attach experiment-item scores to the root observation. When using
-  the [Scores API](/docs/evaluation/evaluation-methods/scores-via-sdk#trace-or-observation-level-scores),
-  use the root span's `traceId` as `traceId` and its `spanId` as
-  `observationId`.
-</Callout>
-
-### Choose an Environment for Experiment Runs
-
-Experiment runs often deserve a separate environment such as `experiment` so
-they do not mix with production traffic. If the exporter only sends experiment
-runs, set `langfuse.environment=experiment` as a resource attribute. If the
-same exporter also sends production traffic, add `langfuse.environment` to the
-experiment Baggage. This applies it to every item trace and span in the
-experiment. See [Environments](/docs/observability/features/environments) for
-details.
-
 ## Ingestion Options
 
 ### OpenTelemetry native Langfuse SDK v4
@@ -261,61 +178,13 @@ Because it lives in the shared OpenTelemetry context, spans from other OTEL-inst
 
 Get started by following the dedicated guide for the Python implementation here: [/docs/observability/sdk/overview](/docs/observability/sdk/overview).
 
-### OpenTelemetry endpoint [#opentelemetry-endpoint]
-
-Langfuse can receive traces on the `/api/public/otel` (OTLP) endpoint.
-
-If you use a Collector that uses the OpenTelemetry SDK to export traces, you can use the following configuration:
-
-```bash
-OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel" # 🇪🇺 EU data region
-# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com/api/public/otel, 🇯🇵 Japan: https://jp.cloud.langfuse.com/api/public/otel and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com/api/public/otel
-# OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:3000/api/public/otel" # 🏠 Local deployment (>= v3.22.0)
-
-OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING},x-langfuse-ingestion-version=4"
-```
-
-<Callout type="info">
-
-Langfuse uses [Basic Auth](https://en.wikipedia.org/wiki/Basic_access_authentication) to authenticate requests.
-
-You can use the following command to get the base64 encoded API keys (referred to as `AUTH_STRING`): `echo -n "pk-lf-1234567890:sk-lf-1234567890" | base64`.
-For long API Keys on GNU systems, you may have to add `-w 0` at the end since `base64` auto-wraps columns.
-
-</Callout>
-
-### Enable real-time ingestion in Langfuse v4 [#real-time-ingestion]
-
-If you send spans directly via OpenTelemetry, include the
-`x-langfuse-ingestion-version: 4` header so that new data appears in real time
-on the v4 data model and the v2 Observations and Metrics APIs. Without
-this header, directly ingested OpenTelemetry data can be delayed by up to 10
-minutes. The `OTEL_EXPORTER_OTLP_HEADERS` configuration above already includes
-the header.
-
-If your setup uses signal-specific header settings, configure the same header
-on the traces exporter:
-
-```bash
-OTEL_EXPORTER_OTLP_TRACES_HEADERS="Authorization=Basic ${AUTH_STRING},x-langfuse-ingestion-version=4"
-```
-
-<Callout type="info">
-
-If your collector requires signal-specific environment variables, the trace endpoint is `/api/public/otel/v1/traces`.
-
-```bash
-OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="https://cloud.langfuse.com/api/public/otel/v1/traces" # EU data region
-# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com/api/public/otel/v1/traces, 🇯🇵 Japan: https://jp.cloud.langfuse.com/api/public/otel/v1/traces and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com/api/public/otel/v1/traces
-```
-
-</Callout>
-
-Please note that Langfuse currently supports OTLP over HTTP with both `HTTP/JSON` and `HTTP/protobuf`. `gRPC` is not supported yet.
-
 ### Custom via OpenTelemetry SDKs
 
 You can use the OpenTelemetry SDKs to directly export traces to Langfuse with the configuration mentioned above. Thereby, Language support of Langfuse is extended to other languages than the ones supported by the [Langfuse SDKs](/docs/sdk/overview) (Python and JS/TS).
+
+### Run experiments via OpenTelemetry [#experiments-ingesting-experiment-spans]
+
+To group direct-OTEL traces as Langfuse experiments, add the experiment and item attributes described in [Ingest experiment spans with OpenTelemetry](/integrations/native/opentelemetry/experiments).
 
 ### Use OpenTelemetry GenAI Instrumentation Libraries
 
