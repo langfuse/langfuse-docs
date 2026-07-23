@@ -95,7 +95,7 @@ Self-hosting Langfuse? Use the [self-hosted compatibility matrix](/self-hosting/
 | **Read APIs** · [Public API docs](/docs/api-and-data-platform/features/public-api)                      |                                                                 |                                                                 |
 | Observations API v2 & Metrics API v2<br />`/api/public/v2/...`                                          | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="full">Full</CompatBadge>                  |
 | Scores API v3<br />`/api/public/v3/scores`                                                              | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="full">Full</CompatBadge>                  |
-| v1 read APIs<br />`/api/public/...`                                                                     | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      |
+| Deprecated read APIs<br />`traces, observations, sessions, scores, metrics, dataset runs`               | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      |
 | **Integrations & exports** · [Export docs](/docs/api-and-data-platform/features/export-to-blob-storage) |                                                                 |                                                                 |
 | [Blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage)                      | <CompatBadge variant="full">Traces & observations</CompatBadge> | <CompatBadge variant="full">Enriched observations</CompatBadge> |
 | [PostHog integration](/integrations/analytics/posthog)                                                  | <CompatBadge variant="full">Traces & observations</CompatBadge> | <CompatBadge variant="full">Enriched observations</CompatBadge> |
@@ -111,11 +111,11 @@ Deprecated. Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/pyth
 
 **Limitations:**
 
-| Capability                      | Langfuse Cloud v3                                 | Langfuse Cloud v4                                                           |
-| ------------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------- |
-| Tracing (OpenTelemetry)         | Supported                                         | Supported (data delayed up to 10 min; Python SDK v4 ≥ 4.7.0 for real time)  |
-| Datasets & experiments          | Datasets only (experiments require Python SDK v4) | Datasets only (experiments require Python SDK v4)                           |
-| Public API & querying (`api.*`) | Supported                                         | Supported until the v4 cutover (date will follow); then v1 APIs are removed |
+| Capability                      | Langfuse Cloud v3                                 | Langfuse Cloud v4                                                                            |
+| ------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Tracing (OpenTelemetry)         | Supported                                         | Supported (data delayed up to 10 min; Python SDK v4 ≥ 4.7.0 for real time)                   |
+| Datasets & experiments          | Datasets only (experiments require Python SDK v4) | Datasets only (experiments require Python SDK v4)                                            |
+| Public API & querying (`api.*`) | Supported                                         | Supported until the v4 cutover (date will follow); then the deprecated read APIs are removed |
 
 </CompatDetail>
 <CompatDetail name="Python SDK v2">
@@ -124,12 +124,12 @@ Deprecated. Upgrade via the [SDK upgrade paths](/docs/observability/sdk/upgrade-
 
 **Limitations:**
 
-| Capability                       | Langfuse Cloud v3                                 | Langfuse Cloud v4                                                                |
-| -------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------- |
-| Tracing (legacy batch ingestion) | Supported                                         | Removed at the v4 cutover (date will follow); trace ingestion then stops working |
-| Score ingestion                  | Supported                                         | Supported                                                                        |
-| Datasets & experiments           | Datasets only (experiments require Python SDK v4) | Datasets only (experiments require Python SDK v4)                                |
-| Public API & querying (`api.*`)  | Supported                                         | Supported until the v4 cutover (date will follow); then v1 APIs are removed      |
+| Capability                       | Langfuse Cloud v3                                 | Langfuse Cloud v4                                                                            |
+| -------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Tracing (legacy batch ingestion) | Supported                                         | Removed at the v4 cutover (date will follow); trace ingestion then stops working             |
+| Score ingestion                  | Supported                                         | Supported                                                                                    |
+| Datasets & experiments           | Datasets only (experiments require Python SDK v4) | Datasets only (experiments require Python SDK v4)                                            |
+| Public API & querying (`api.*`)  | Supported                                         | Supported until the v4 cutover (date will follow); then the deprecated read APIs are removed |
 
 </CompatDetail>
 <CompatDetail name="JS/TS SDK v4">
@@ -138,11 +138,11 @@ Deprecated. Upgrade to [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4
 
 **Limitations:**
 
-| Capability                      | Langfuse Cloud v3                                | Langfuse Cloud v4                                                           |
-| ------------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------- |
-| Tracing (OpenTelemetry)         | Supported                                        | Supported (data delayed up to 10 min; JS/TS SDK v5 ≥ 5.4.0 for real time)   |
-| Datasets & experiments          | Datasets only (experiments require JS/TS SDK v5) | Datasets only (experiments require JS/TS SDK v5)                            |
-| Public API & querying (`api.*`) | Supported                                        | Supported until the v4 cutover (date will follow); then v1 APIs are removed |
+| Capability                      | Langfuse Cloud v3                                | Langfuse Cloud v4                                                                            |
+| ------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| Tracing (OpenTelemetry)         | Supported                                        | Supported (data delayed up to 10 min; JS/TS SDK v5 ≥ 5.4.0 for real time)                    |
+| Datasets & experiments          | Datasets only (experiments require JS/TS SDK v5) | Datasets only (experiments require JS/TS SDK v5)                                             |
+| Public API & querying (`api.*`) | Supported                                        | Supported until the v4 cutover (date will follow); then the deprecated read APIs are removed |
 
 </CompatDetail>
 <CompatDetail name="JS/TS SDK v3 / v2">
@@ -151,12 +151,12 @@ Deprecated. Upgrade via the [SDK upgrade paths](/docs/observability/sdk/upgrade-
 
 **Limitations:**
 
-| Capability                       | Langfuse Cloud v3                                | Langfuse Cloud v4                                                                |
-| -------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------- |
-| Tracing (legacy batch ingestion) | Supported                                        | Removed at the v4 cutover (date will follow); trace ingestion then stops working |
-| Score ingestion                  | Supported                                        | Supported                                                                        |
-| Datasets & experiments           | Datasets only (experiments require JS/TS SDK v5) | Datasets only (experiments require JS/TS SDK v5)                                 |
-| Public API & querying (`api.*`)  | Supported                                        | Supported until the v4 cutover (date will follow); then v1 APIs are removed      |
+| Capability                       | Langfuse Cloud v3                                | Langfuse Cloud v4                                                                            |
+| -------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| Tracing (legacy batch ingestion) | Supported                                        | Removed at the v4 cutover (date will follow); trace ingestion then stops working             |
+| Score ingestion                  | Supported                                        | Supported                                                                                    |
+| Datasets & experiments           | Datasets only (experiments require JS/TS SDK v5) | Datasets only (experiments require JS/TS SDK v5)                                             |
+| Public API & querying (`api.*`)  | Supported                                        | Supported until the v4 cutover (date will follow); then the deprecated read APIs are removed |
 
 </CompatDetail>
 <CompatDetail name="OpenTelemetry">
@@ -174,7 +174,7 @@ Deprecated. Upgrade via the [SDK upgrade paths](/docs/observability/sdk/upgrade-
 <DetailReadApisV2 />
 
 </CompatDetail>
-<CompatDetail name="v1 read APIs">
+<CompatDetail name="Deprecated read APIs">
 
 <DetailV1ReadApis />
 
