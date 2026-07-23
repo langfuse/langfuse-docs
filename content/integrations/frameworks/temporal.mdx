@@ -297,6 +297,112 @@ async def main():
 await main()
 ```
 
+## TypeScript/JavaScript Example
+
+For TypeScript or JavaScript Temporal applications, use Temporal's OpenTelemetry plugin together with the Langfuse OpenTelemetry span processor. The same Langfuse credentials from step 2 apply.
+
+Install the Temporal SDK, the Temporal OpenTelemetry plugin, and the Langfuse OpenTelemetry integration:
+
+```bash
+npm install @temporalio/client @temporalio/worker @temporalio/workflow @temporalio/activity @temporalio/interceptors-opentelemetry-v2 @langfuse/tracing @langfuse/otel @opentelemetry/sdk-node @opentelemetry/resources @opentelemetry/semantic-conventions
+```
+
+Create an OpenTelemetry setup file that exports spans to Langfuse:
+
+```typescript filename="instrumentation.ts"
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { resourceFromAttributes } from "@opentelemetry/resources";
+import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+export const resource = resourceFromAttributes({
+  [ATTR_SERVICE_NAME]: "temporal-research-agent",
+});
+
+export const spanProcessor = new LangfuseSpanProcessor();
+
+export function setupOtelSdk() {
+  const sdk = new NodeSDK({
+    resource,
+    spanProcessors: [spanProcessor],
+  });
+
+  sdk.start();
+  return sdk;
+}
+```
+
+Register Temporal's OpenTelemetry plugin on the worker. Define your workflows and activities as usual; the plugin propagates trace context across workflow and activity execution.
+
+```typescript filename="worker.ts"
+import { Worker } from "@temporalio/worker";
+import { OpenTelemetryPlugin } from "@temporalio/interceptors-opentelemetry-v2";
+import * as activities from "./activities";
+import { resource, setupOtelSdk, spanProcessor } from "./instrumentation";
+
+async function main() {
+  const otelSdk = setupOtelSdk();
+
+  const worker = await Worker.create({
+    workflowsPath: require.resolve("./workflows"),
+    activities,
+    taskQueue: "research-task-queue",
+    plugins: [new OpenTelemetryPlugin({ resource, spanProcessor })],
+  });
+
+  try {
+    await worker.run();
+  } finally {
+    await otelSdk.shutdown();
+  }
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
+```
+
+Use the same plugin on the Temporal client so the client span becomes the parent of the workflow trace.
+
+```typescript filename="client.ts"
+import { randomUUID } from "node:crypto";
+import { Client, Connection } from "@temporalio/client";
+import { OpenTelemetryPlugin } from "@temporalio/interceptors-opentelemetry-v2";
+import { ResearchWorkflow } from "./workflows";
+import { resource, setupOtelSdk, spanProcessor } from "./instrumentation";
+
+async function main() {
+  const otelSdk = setupOtelSdk();
+  const connection = await Connection.connect({
+    address: process.env.TEMPORAL_ADDRESS ?? "localhost:7233",
+  });
+
+  const client = new Client({
+    connection,
+    namespace: process.env.TEMPORAL_NAMESPACE ?? "default",
+    plugins: [new OpenTelemetryPlugin({ resource, spanProcessor })],
+  });
+
+  try {
+    const result = await client.workflow.execute(ResearchWorkflow, {
+      workflowId: randomUUID(),
+      taskQueue: "research-task-queue",
+      args: ["Caribbean vacation spots in April"],
+    });
+
+    console.log(result);
+  } finally {
+    await otelSdk.shutdown();
+  }
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
+```
+
 ## 8. View Traces in Langfuse
 
 After running the workflow, you can view the complete trace in Langfuse. The trace will show:
