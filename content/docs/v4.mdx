@@ -1,6 +1,6 @@
 ---
-title: "Upgrade to Langfuse v4"
-description: Langfuse v4 introduces the observations-first data model. Find your situation, see the exact steps and deadlines, and upgrade.
+title: "Langfuse v4 is live"
+description: Langfuse v4 is live on Cloud, with an observations-first data model that makes tables, dashboards, APIs, and evaluations dramatically faster at scale.
 ---
 
 import { Book, Github, Table, GitCompare } from "lucide-react";
@@ -8,33 +8,37 @@ import { Details, Summary } from "@/components/Details";
 import { VersionTimeline } from "@/components/VersionTimeline";
 import { ObservationsTableDiagram } from "@/components/ObservationsTableDiagram";
 
-# Langfuse v4
+# Langfuse v4 is live
 
-Langfuse v4 rebuilds the data model around observations: trace-level attributes live on every observation, and records are immutable (written once, never updated). Reads no longer need joins or deduplication, so queries run an order of magnitude faster at scale. This page explains what changed and why. To migrate, follow the [step-by-step upgrade guide](/faq/all/upgrade-to-langfuse-v4); the [Versions & Compatibility matrix](/docs/compatibility#sdk-server) shows what works with what.
+Langfuse v4 is live on Langfuse Cloud. It makes tables, dashboards, APIs, and evaluations dramatically faster at scale. Dashboard load times for large projects improve by at least 10x.
+
+At its core is an observations-first data model built for agentic systems. Query any LLM call, tool execution, or agent step directly, without costly joins or read-time deduplication.
 
 <Callout type="info">
 New to Langfuse? There is nothing to migrate. Start with the [get started guide](/docs/observability/get-started); it already uses v4.
 </Callout>
+
+## What’s new [#what-changed]
+
+Every operation is now a first-class queryable object. Find slow LLM calls, expensive models, failed tool calls, or individual agent steps directly across any number of traces.
+
+Under the hood, Langfuse stores one immutable observations table. A trace is all rows that share a `trace_id`, and trace-level attributes are copied onto every row:
+
+<ObservationsTableDiagram />
+
+**Trace-level input/output is deprecated across the product.** Tables, LLM-as-a-judge evaluators, and exports now read input and output from the relevant observation, usually the root span or LLM call.
+
+Selecting one observation instead of assembling data across an entire trace is more precise and a major reason v4 loads faster.
+
+Observations-first lets you query and evaluate the relevant sub-agent, tool call, or LLM call directly. Immutable observations also avoid repeated trace-output updates and costly read-time deduplication.
+
+Learn more in the [data model docs](/docs/observability/data-model#observations-and-traces) and the [observations guide](/faq/all/explore-observations-in-v4).
 
 ## Timeline [#timeline]
 
 <VersionTimeline />
 
 On Langfuse Cloud, review your project's remaining [migration actions in the app](https://cloud.langfuse.com/project/~/v4).
-
-## Upgrade [#upgrade]
-
-Follow the [step-by-step upgrade guide](/faq/all/upgrade-to-langfuse-v4). It covers each situation: Langfuse Cloud with older SDKs, Langfuse Cloud with current SDKs, direct API and OpenTelemetry users, and self-hosted deployments.
-
-## What changed [#what-changed]
-
-The new mental model: Langfuse stores one immutable observations table. A trace is simply all rows that share a `trace_id`, and trace-level attributes are copied onto every row:
-
-<ObservationsTableDiagram />
-
-**Trace-level input/output is deprecated across the product.** Every feature that previously read a trace's input and output (tables in the UI, LLM-as-a-judge evaluators, exports) now reads the input and output of the right observation, typically the root span or the LLM call that holds the relevant data. Selecting one observation with the right data instead of assembling it across a whole trace is a big part of the faster loading times.
-
-Why observations-first: two problems drove this change. First, agentic traces got big, and a single trace input/output is no longer what you are interested in: you care about a specific sub-agent, a specific tool call, or a specific LLM call inside the run. With observations as the primary entity you query those directly ("which LLM calls are slow?"), and observation-level evaluations run in seconds. Second, scalability: applications continuously updated the trace output as the agent progressed, and every update created another record version that Langfuse had to deduplicate at read time, degrading performance across the product. Immutable observations remove that cost. The [data model docs](/docs/observability/data-model#observations-and-traces) explain the model; the [observations guide](/faq/all/explore-observations-in-v4) covers day-to-day workflows in the UI.
 
 <Details>
 <Summary>Cloud rollout details (until the v4 cutover)</Summary>
@@ -44,6 +48,12 @@ Why observations-first: two problems drove this change. First, agentic traces go
 - Cloud projects created on or after May 20, 2026 are locked to the "enriched observations" export source; new legacy export integrations cannot be created since June 22, 2026.
 
 </Details>
+
+## Upgrade [#upgrade]
+
+Follow the [step-by-step upgrade guide](/faq/all/upgrade-to-langfuse-v4). It covers Langfuse Cloud, direct API and OpenTelemetry users, and self-hosted deployments.
+
+Check the [Versions & Compatibility matrix](/docs/compatibility#sdk-server) to see which SDK and server versions work together.
 
 ## Questions [#questions]
 
