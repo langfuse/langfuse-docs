@@ -33,7 +33,7 @@ To set up the export navigate to `Your Project` > `Settings` > `Integrations` > 
 
 Fill in the settings to authenticate with your vendor, enable the integration, and press save.
 An initial export starts shortly after you enable the integration and then continues on the schedule you selected.
-The export supports Parquet (default), CSV, JSON, and JSONL file formats — see [File formats](#file-formats).
+The export supports Parquet (default), CSV, JSON, and JSONL file formats. See [File formats](#file-formats).
 Read [our blob storage documentation](/self-hosting/deployment/infrastructure/blobstorage) for more information on how to get credentials for your specific vendor.
 
 <Frame className="my-10" fullWidth>
@@ -44,13 +44,13 @@ Read [our blob storage documentation](/self-hosting/deployment/infrastructure/bl
 
 Exports can be written as Apache Parquet, CSV, JSON, or JSONL files. New integrations default to **Parquet**.
 
-- **Parquet** is a columnar binary format that is encoded and compressed by the storage engine and can be loaded directly by most data warehouses and query engines. Because Parquet files are already compressed, gzip compression does not apply to Parquet exports.
+- **Parquet** is a columnar binary format that is encoded and compressed by the storage engine and can be loaded directly by most data warehouses and query engines.
 - **CSV, JSON, and JSONL** are text formats that can optionally be gzip-compressed.
 
-Parquet observation exports do not include the per-unit model price columns (`input_price`, `output_price`, `total_price`). These columns snapshot model definition prices at export time and may be deprecated in the future — use `cost_details` and `total_cost` for cost data, which are included in every file type. See [Notes on Parquet exports](/docs/api-and-data-platform/features/blob-storage-export-fields#parquet-exports) in the field reference for details.
+Parquet observation exports do not include the per-unit model price columns (`input_price`, `output_price`, `total_price`). These columns snapshot model definition prices at export time and may be deprecated in the future. Use `cost_details` and `total_cost` for cost data, which are included in every file type. See [Notes on Parquet exports](/docs/api-and-data-platform/features/blob-storage-export-fields#parquet-exports) in the field reference for details.
 
 <Callout type="warning">
-**Self-hosted deployments running ClickHouse < 25.11:** Parquet export failures may not surface as errors. A run can complete — and its [manifest](#run-manifest) be written — while the Parquet output is incomplete or invalid. Upgrade to ClickHouse >= 25.11, or use a text format (CSV, JSON, or JSONL) for reliable failure detection.
+**Self-hosted deployments running ClickHouse < 25.11:** Parquet export failures may not surface as errors. A run can complete (and its [manifest](#run-manifest) be written) while the Parquet output is incomplete or invalid. Upgrade to ClickHouse >= 25.11, or use a text format (CSV, JSON, or JSONL) for reliable failure detection.
 </Callout>
 
 ## Exported fields
@@ -80,7 +80,7 @@ Groups are listed in the order they appear in the UI; fields within each group a
 Field groups also apply to [legacy export sources](#legacy-export-sources), with a smaller column set per group; see [differences between enriched and legacy exports](/docs/api-and-data-platform/features/blob-storage-export-fields#enriched-vs-legacy-differences).
 
 <Callout type="info">
-  Per-unit pricing fields (`input_price`, `output_price`, `total_price`) live in the `model` group — they come from the matched model definition. Deselecting `model` skips the worker-side model pricing lookup entirely. The `usage_pricing_tier_id` and `usage_pricing_tier_name` fields stay in the `usage` group. With the Parquet file type, these three price columns are not included even when `model` is selected — see [File formats](#file-formats).
+  Per-unit pricing fields (`input_price`, `output_price`, `total_price`) live in the `model` group; they come from the matched model definition. Deselecting `model` skips the worker-side model pricing lookup entirely. The `usage_pricing_tier_id` and `usage_pricing_tier_name` fields stay in the `usage` group. With the Parquet file type, these three price columns are not included even when `model` is selected. See [File formats](#file-formats).
 </Callout>
 
 New integrations default to all eleven groups, so behavior matches earlier exports unless you narrow the selection.
@@ -89,10 +89,10 @@ New integrations default to all eleven groups, so behavior matches earlier expor
 
 `GET` and `PUT /api/public/integrations/blob-storage` accept and return:
 
-- `exportSource` — `OBSERVATIONS_V2`. The values `LEGACY_TRACES_OBSERVATIONS` and `LEGACY_TRACES_AND_ENRICHED_OBSERVATIONS` exist for [legacy integrations](#legacy-export-sources) only.
-- `exportFieldGroups` — a list of group names. Must include `core` when provided. Applies to observation exports for all export sources. When omitted on update, the existing value is preserved.
-- `fileType` — `PARQUET` (default for new integrations), `CSV`, `JSON`, or `JSONL`.
-- `compressed` — boolean; defaults to `true` for new integrations. When `true`, files are written as `.csv.gz`, `.json.gz`, or `.jsonl.gz`. Does not apply to `PARQUET` — Parquet files are compressed by the storage engine and always written as plain `.parquet` files.
+- `exportSource`: `OBSERVATIONS_V2`. The values `LEGACY_TRACES_OBSERVATIONS` and `LEGACY_TRACES_AND_ENRICHED_OBSERVATIONS` exist for [legacy integrations](#legacy-export-sources) only.
+- `exportFieldGroups`: a list of group names. Must include `core` when provided. Applies to observation exports for all export sources. When omitted on update, the existing value is preserved.
+- `fileType`: `PARQUET` (default for new integrations), `CSV`, `JSON`, or `JSONL`.
+- `compressed`: boolean; defaults to `true` for new integrations. When `true`, files are written as `.csv.gz`, `.json.gz`, or `.jsonl.gz`. Does not apply to `PARQUET`; Parquet files are compressed by the storage engine and always written as plain `.parquet` files.
 
 See the [API reference](https://api.reference.langfuse.com/#tag/blobstorageintegrations) for the full schema.
 
@@ -103,21 +103,21 @@ The **Export Mode** determines how far back the integration starts exporting fro
 | Mode                 | Starts from                           | When to use                                                                                                          |
 | -------------------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | **Full history**     | The earliest data in your project     | You want a complete one-time backfill of all existing data alongside ongoing exports.                                |
-| **From setup date**  | The moment you enable the integration | You only care about data going forward and don't need history — the lightest option to get started.                  |
+| **From setup date**  | The moment you enable the integration | You only care about data going forward and don't need history; this is the lightest option to get started.           |
 | **From custom date** | A start date you choose               | You want history from a specific point (for example, the start of a quarter) without exporting everything before it. |
 
-Changing the mode resets the sync position, so it's also the mechanism for re-scanning history — see [Re-exporting data and configuration changes](#re-exporting).
+Changing the mode resets the sync position, so it's also the mechanism for re-scanning history. See [Re-exporting data and configuration changes](#re-exporting).
 
 ## How exports run [#how-exports-run]
 
 Each run exports one time window of data to your bucket, then advances and exports the next window on your configured schedule.
 
 - **Export delay.** Data is exported with a short delay rather than right up to the current moment, so records still moving through ingestion are not exported half-written. Expect a brief lag between when an event is recorded and when it appears in your bucket.
-- **Catch-up / backfill.** When an integration starts from a historic point — or falls behind — it works forward through the backlog and may write many files in quick succession before settling into its normal cadence. A freshly created full-history integration does this until it catches up to the present.
+- **Catch-up / backfill.** When an integration starts from a historic point (or falls behind), it works forward through the backlog and may write many files in quick succession before settling into its normal cadence. A freshly created full-history integration does this until it catches up to the present.
 
 ## Run completion manifest [#run-manifest]
 
-A single export run writes one file per exported table — up to four, depending on the selected export source — so the table files alone don't tell you when a run is complete. As the last object of every successful run, Langfuse writes a manifest file that lists everything the run produced:
+A single export run writes one file per exported table (up to four, depending on the selected export source), so the table files alone don't tell you when a run is complete. As the last object of every successful run, Langfuse writes a manifest file that lists everything the run produced:
 
 ```
 {prefix}{project-id}/manifests/{max-timestamp}.json
@@ -167,7 +167,7 @@ Example manifest:
 Notes on the schema:
 
 - `version` increments only on breaking changes; new fields may be added without a version bump, so ignore unknown fields when parsing.
-- `window` is the time range of data covered by the run, with both bounds inclusive — a record at exactly `maxTimestamp` also falls into the next run's window. `maxTimestamp` duplicates `window.maxTimestamp`; the timestamp stem in the manifest file name is derived from it as described above.
+- `window` is the time range of data covered by the run, with both bounds inclusive: a record at exactly `maxTimestamp` also falls into the next run's window. `maxTimestamp` duplicates `window.maxTimestamp`; the timestamp stem in the manifest file name is derived from it as described above.
 - `tables` and `files` reflect the selected export source; `scores` is always included regardless of the source.
 - `files[].key` is the full object key including your configured prefix, so consumers can fetch listed files without reconstructing paths.
 - `files[].fileType` is the configured file type: `JSON`, `CSV`, `JSONL`, or `PARQUET`. `files[].format` additionally encodes compression: one of `parquet`, `json-raw`, `json-gzip`, `jsonl-raw`, `jsonl-gzip`, `csv-raw`, or `csv-gzip`.
@@ -176,15 +176,15 @@ Notes on the schema:
 
 ## React to completed export runs [#export-events]
 
-Langfuse does not send a webhook when an export run finishes. Instead, subscribe to your storage provider's native object-created events with a prefix filter on `{prefix}{project-id}/manifests/` — because the manifest is the last object of each run, this gives you one event per completed run. When the event fires, download the manifest and process the objects listed in `files[].key`.
+Langfuse does not send a webhook when an export run finishes. Instead, subscribe to your storage provider's native object-created events with a prefix filter on `{prefix}{project-id}/manifests/`. Because the manifest is the last object of each run, this gives you one event per completed run. When the event fires, download the manifest and process the objects listed in `files[].key`.
 
 Provider recipes:
 
-- **AWS S3** — [Event Notifications](https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventNotifications.html) on `s3:ObjectCreated:*` to SQS, SNS, or Lambda with a key prefix filter, or [EventBridge rules](https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventBridge.html) matching the object key prefix.
-- **Google Cloud Storage** — [Pub/Sub notifications](https://cloud.google.com/storage/docs/pubsub-notifications) for `OBJECT_FINALIZE` events; set the object name prefix when creating the notification configuration.
-- **Azure Blob Storage** — [Event Grid](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blob-event-overview) subscription on `Microsoft.Storage.BlobCreated` with a `subjectBeginsWith` filter, e.g. `/blobServices/default/containers/<container>/blobs/{prefix}{project-id}/manifests/`.
-- **MinIO** — [Bucket notifications](https://min.io/docs/minio/linux/administration/monitoring/bucket-notifications.html) on `s3:ObjectCreated:*` (webhook, Kafka, AMQP, and more) with a prefix filter.
-- **Backblaze B2** — [Event Notifications](https://www.backblaze.com/docs/cloud-storage-event-notifications) (webhooks) with a prefix filter.
+- **AWS S3**: [Event Notifications](https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventNotifications.html) on `s3:ObjectCreated:*` to SQS, SNS, or Lambda with a key prefix filter, or [EventBridge rules](https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventBridge.html) matching the object key prefix.
+- **Google Cloud Storage**: [Pub/Sub notifications](https://cloud.google.com/storage/docs/pubsub-notifications) for `OBJECT_FINALIZE` events; set the object name prefix when creating the notification configuration.
+- **Azure Blob Storage**: [Event Grid](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blob-event-overview) subscription on `Microsoft.Storage.BlobCreated` with a `subjectBeginsWith` filter, e.g. `/blobServices/default/containers/<container>/blobs/{prefix}{project-id}/manifests/`.
+- **MinIO**: [Bucket notifications](https://min.io/docs/minio/linux/administration/monitoring/bucket-notifications.html) on `s3:ObjectCreated:*` (webhook, Kafka, AMQP, and more) with a prefix filter.
+- **Backblaze B2**: [Event Notifications](https://www.backblaze.com/docs/cloud-storage-event-notifications) (webhooks) with a prefix filter.
 
 For S3-compatible providers without object-created events (for example, Wasabi or DigitalOcean Spaces), poll the manifest prefix instead: list `{prefix}{project-id}/manifests/` on a schedule and process any manifest newer than your last checkpoint. Manifest names sort lexicographically by export timestamp, so a marker-based (`start-after`) listing keeps polling cheap.
 
@@ -203,9 +203,9 @@ The integration settings page shows a status badge:
 
 The status card on the same page also surfaces:
 
-- **Data exported up to** — timestamp of the last successfully exported window (or `Never (pending)`).
-- **Next export scheduled** — when the next run will happen.
-- **Export mode** — `Full history`, `From setup date`, or `From custom date` (plus the start date where applicable).
+- **Data exported up to**: timestamp of the last successfully exported window (or `Never (pending)`).
+- **Next export scheduled**: when the next run will happen.
+- **Export mode**: `Full history`, `From setup date`, or `From custom date` (plus the start date where applicable).
 - A **Last export failed** alert with the error message and time when in the Error state.
 
 If a worker crashes mid-export, a 2-hour safety-valve TTL ensures the badge reverts from Running to its underlying state (typically Queued) so the next scheduled run can proceed. Reload the page to see the latest status.
@@ -242,9 +242,9 @@ For the columns in each file, see the [export sources overview](/docs/api-and-da
 Where legacy sources are still available:
 
 - **Langfuse Cloud:** only integrations created before 2026-06-22 in projects created before 2026-05-20 keep their configured legacy source and see the selector. All other integrations use `Enriched observations (recommended)` automatically, and the REST API rejects legacy values with `400 BAD_REQUEST`.
-- **Self-hosted:** enriched export requires the v4 preview opt-in (`LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN`); without it, integrations use the legacy source. Once a deployment completes the v4 migration (`LANGFUSE_MIGRATION_V4_WRITE_MODE=events_only`), legacy sources are no longer available — including previously saved ones — and the selector is hidden.
+- **Self-hosted:** enriched export requires the v4 preview opt-in (`LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN`); without it, integrations use the legacy source. Once a deployment completes the v4 migration (`LANGFUSE_MIGRATION_V4_WRITE_MODE=events_only`), legacy sources are no longer available (including previously saved ones), and the selector is hidden.
 
-On Langfuse Cloud, integrations that still export a legacy source also receive a plain-text deprecation notice at `{prefix}{project-id}/DEPRECATION_NOTICE.txt`. It is refreshed on every successful run — written best-effort after the run's [manifest](#run-manifest) and not listed in it — and removed automatically on the next successful run after the integration switches to `Enriched observations (recommended)`. The manifest remains the authoritative run-completion marker; account for this object if your pipelines diff bucket contents or subscribe to object-created events without a prefix filter.
+On Langfuse Cloud, integrations that still export a legacy source also receive a plain-text deprecation notice at `{prefix}{project-id}/DEPRECATION_NOTICE.txt`. It is refreshed on every successful run (written best-effort after the run's [manifest](#run-manifest) and not listed in it) and removed automatically on the next successful run after the integration switches to `Enriched observations (recommended)`. The manifest remains the authoritative run-completion marker; account for this object if your pipelines diff bucket contents or subscribe to object-created events without a prefix filter.
 
 ### Upgrade path [#upgrade-path]
 
@@ -256,7 +256,7 @@ To migrate an existing legacy integration safely:
 4. Switch to `Enriched observations (recommended)` once validation is complete.
 
 <Callout type="warning">
-After the switch, the `traces/` and `observations/` directories receive **no further files at all** — not even [empty files](#empty-files), which are otherwise written for windows without data. Pipelines still watching those directories go silent without an error signal, so complete step 3 before switching.
+After the switch, the `traces/` and `observations/` directories receive **no further files at all**, not even [empty files](#empty-files), which are otherwise written for windows without data. Pipelines still watching those directories go silent without an error signal, so complete step 3 before switching.
 </Callout>
 
 ## Alternatives
