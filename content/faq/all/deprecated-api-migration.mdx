@@ -633,26 +633,26 @@ Categorical scores have an additional dimension:
 GET /api/public/metrics/daily
 ```
 
-The Daily Metrics API returns aggregated daily usage and cost metrics for downstream use in analytics, billing, and rate limiting. Filter by trace name, user, or tags.
+The Daily Metrics API returns aggregated daily usage and cost metrics for downstream use in analytics, billing, and rate limiting, and allows you to:
+
+- Retrieve daily timeseries of [cost](/docs/model-usage-and-cost) in USD and trace and observation counts
+- Break down usage (e.g. tokens, split by input and output) and cost by model name
+- Filter by trace name, user, or tags
 
 **Replacement:** [Metrics API v2 with a daily time dimension](#daily-metrics-migration).
 
-### Overview
+### Query Parameters
 
-Returned data includes daily timeseries of:
+All parameters are optional:
 
-- [Cost](/docs/model-usage-and-cost) in USD
-- Trace and observation count
-- Break down by model name
-- Usage (e.g. tokens) broken down by input and output usage
-
-Optional filters:
-
-- `traceName` to commonly filter by the application type, depending on how you use `name` in your traces
-- `userId` to filter by [user](/docs/observability/features/users)
-- `tags` to filter by [tags](/docs/observability/features/tags)
-- `fromTimestamp`
-- `toTimestamp`
+| Parameter       | Type     | Description                                                                              |
+| --------------- | -------- | ---------------------------------------------------------------------------------------- |
+| `traceName`     | string   | Filter by trace name, commonly the application type depending on how you use trace names |
+| `userId`        | string   | Filter by [user](/docs/observability/features/users)                                     |
+| `tags`          | string[] | Filter by [tags](/docs/observability/features/tags)                                      |
+| `fromTimestamp` | datetime | Start of the date range                                                                  |
+| `toTimestamp`   | datetime | End of the date range                                                                    |
+| `page`, `limit` | number   | Page-based pagination                                                                    |
 
 ### Example
 
