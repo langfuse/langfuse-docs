@@ -56,15 +56,17 @@ export const mcpHandler = createMcpHandler(
         "Do not include secrets, credentials, customer data, trace payloads, or unrelated context.",
       ].join("\n"),
       {
-        targetType: z.enum([
-          "skill",
-          "mcp-tool",
-          "cli",
-          "docs",
-          "public-api",
-          "other",
-        ]),
-        target: z.string().trim().min(1).max(200),
+        targetType: z
+          .enum(["skill", "mcp-tool", "cli", "docs", "public-api", "other"])
+          .describe("Category of the thing the feedback is about."),
+        target: z
+          .string()
+          .trim()
+          .min(1)
+          .max(200)
+          .describe(
+            "The specific instance within targetType: the skill name, MCP tool name, CLI command, API endpoint path, or docs page path (e.g. 'queryMetrics', '/docs/mcp'). An identifier, not a sentence.",
+          ),
         feedback: z.string().trim().min(1).max(3000),
         goal: z.string().trim().min(1).max(1500).optional(),
         referenceUrl: z
