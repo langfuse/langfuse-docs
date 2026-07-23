@@ -200,7 +200,7 @@ Only your SDK version and the API endpoints you call. Langfuse Cloud always runs
 
 ### I self-host Langfuse v3 and upgraded to Python SDK v4 / JS SDK v5, what works? [#faq-new-sdk-old-server]
 
-Tracing, prompt management, datasets, and scores work fully (server ≥ 3.125.0 for Python, ≥ 3.95.0 for JS/TS). The default `api.observations` and `api.metrics` resources call v2 endpoints that require Langfuse v4; use the `api.legacy.*` resources until you upgrade your server to v4. The [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) has the full picture per server version.
+Tracing, prompt management, datasets, and scores work fully (server ≥ 3.63.0 for Python, ≥ 3.95.0 for JS/TS; server ≥ 3.125.0 recommended for Python usage/cost parsing via OTel Collectors). The default `api.observations` and `api.metrics` resources call v2 endpoints that require Langfuse v4; use the `api.legacy.*` resources until you upgrade your server to v4. The [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) has the full picture per server version.
 
 ### My data takes minutes to show up in the UI, why? [#faq-delay]
 
