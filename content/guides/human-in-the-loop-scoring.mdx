@@ -97,7 +97,7 @@ curl -G https://cloud.langfuse.com/api/public/v2/observations \
   --data-urlencode "limit=50"
 ```
 
-The v2 API returns observation rows, not trace objects: group rows by `traceId`, and render the input/output of each trace's root observation (the row with `parentObservationId == null`). See [Migration of deprecated APIs](/docs/deprecated-api-migration#traces) for details.
+The v2 API returns observation rows, not trace objects: group rows by `traceId`, and render the input/output of each trace's root observation (the row with `parentObservationId == null`). See [Migration of deprecated APIs](/faq/all/deprecated-api-migration#traces) for details.
 
 _See the [API reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations)._
 
@@ -109,7 +109,7 @@ _See the [API reference](https://api.reference.langfuse.com/#tag/observationsv2/
   (`langfuse.api.trace.list`), which calls the deprecated `GET /api/public/traces`
   endpoint and returns trace objects. The API tab uses the replacement, which
   returns observation rows. See [Migration of deprecated
-  APIs](/docs/deprecated-api-migration#traces) for how the two relate.
+  APIs](/faq/all/deprecated-api-migration#traces) for how the two relate.
 </Callout>
 
 ### Ingest the reviewer's judgment as a score

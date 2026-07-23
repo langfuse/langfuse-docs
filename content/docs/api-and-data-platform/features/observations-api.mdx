@@ -16,7 +16,7 @@ For general information about API authentication, base URLs, and SDK access, see
 
 <Callout type="info">
 
-The deprecated `GET /api/public/traces` and `GET /api/public/observations` endpoints are documented in the [Deprecated APIs reference](/docs/api-and-data-platform/features/deprecated-apis); to move off them, see [Migration of deprecated APIs](/docs/deprecated-api-migration).
+The deprecated `GET /api/public/traces` and `GET /api/public/observations` endpoints are documented, with migration steps, in [Migration of deprecated APIs](/faq/all/deprecated-api-migration).
 
 </Callout>
 
@@ -48,7 +48,7 @@ The v2 Observations API is a redesigned endpoint optimized for high-performance 
 
 ### Upgrade from older trace and observation reads [#upgrade-from-older-reads]
 
-The [migration guide](/docs/deprecated-api-migration) maps every deprecated read endpoint (`/api/public/traces`, `/api/public/observations`, `/api/public/sessions`, ...) to its v2 replacement, with parameter mappings and before/after examples. Always include `fromStartTime` and `toStartTime` to keep each request bounded.
+The [migration guide](/faq/all/deprecated-api-migration) maps every deprecated read endpoint (`/api/public/traces`, `/api/public/observations`, `/api/public/sessions`, ...) to its v2 replacement, with parameter mappings and before/after examples. Always include `fromStartTime` and `toStartTime` to keep each request bounded.
 
 The v2 Observations API returns observation rows, not full trace objects. Group rows by `traceId` when you need to reconstruct trace activity, and use [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregate reporting with trace-level dimensions such as `traceName`, `traceRelease`, or `traceVersion`. For single-observation lookups, pass a URL-encoded `filter` condition on the `id` column; see the [v2 Observations API Reference](https://api.reference.langfuse.com/#tag/observations/GET/api/public/v2/observations) for the filter schema.
 

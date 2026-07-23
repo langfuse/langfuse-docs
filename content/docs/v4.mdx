@@ -6,17 +6,11 @@ description: Langfuse v4 introduces the observations-first data model. Find your
 import { Book, Github, Table, GitCompare } from "lucide-react";
 import { Details, Summary } from "@/components/Details";
 import { VersionTimeline } from "@/components/VersionTimeline";
-import { Steps, Step } from "@/components/docs";
 import { ObservationsTableDiagram } from "@/components/ObservationsTableDiagram";
-import V4StepReadApis from "@/components-mdx/v4/step-read-apis.mdx";
-import V4StepEvaluators from "@/components-mdx/v4/step-evaluators.mdx";
-import V4StepExports from "@/components-mdx/v4/step-exports.mdx";
-import V4StepUiToggle from "@/components-mdx/v4/step-ui-toggle.mdx";
-import V4StepVerify from "@/components-mdx/v4/step-verify.mdx";
 
 # Langfuse v4
 
-Langfuse v4 rebuilds the data model around observations: trace-level attributes live on every observation, and records are immutable (written once, never updated). Reads no longer need joins or deduplication, so queries run an order of magnitude faster at scale. This page is the starting point for upgrading. Find [your situation](#what-you-need-to-do) below, follow the steps, and check the [Versions & Compatibility matrix](/docs/compatibility#sdk-server) for what works with what.
+Langfuse v4 rebuilds the data model around observations: trace-level attributes live on every observation, and records are immutable (written once, never updated). Reads no longer need joins or deduplication, so queries run an order of magnitude faster at scale. This page explains what changed and why. To migrate, follow the [step-by-step upgrade guide](/faq/all/upgrade-to-langfuse-v4); the [Versions & Compatibility matrix](/docs/compatibility#sdk-server) shows what works with what.
 
 <Callout type="info">
 New to Langfuse? There is nothing to migrate. Start with the [get started guide](/docs/observability/get-started); it already uses v4.
@@ -28,139 +22,9 @@ New to Langfuse? There is nothing to migrate. Start with the [get started guide]
 
 On Langfuse Cloud, review your project's remaining [migration actions in the app](https://cloud.langfuse.com/project/~/v4).
 
-## What you need to do [#what-you-need-to-do]
+## Upgrade [#upgrade]
 
-**Upgrading your SDKs is the most important step**; everything else builds on it. Not sure which combinations are supported? The [compatibility matrix](/docs/compatibility#sdk-server) shows every SDK, API, and export on Langfuse Cloud; self-hosters use the [self-hosted matrix](/self-hosting/upgrade/versioning#sdk-server).
-
-### Langfuse Cloud with older SDKs (Python v2 / JS v3 or older) [#cloud-older-sdks]
-
-**Deadline: will be announced.** These SDKs send traces via the legacy ingestion API, which is removed when Langfuse Cloud switches to v4; trace ingestion then stops working. Score ingestion is unaffected.
-
-<Steps>
-
-<Step>
-
-**Ingestion**
-
-Upgrade to the latest SDK majors, Python v4 and JS/TS v5; the [SDK upgrade paths](/docs/observability/sdk/upgrade-path) cover each major-version hop. Then replace `update_current_trace()` / `updateActiveTrace()` with `propagate_attributes()`.
-
-</Step>
-
-<Step>
-
-<V4StepReadApis />
-
-</Step>
-
-<Step>
-
-<V4StepEvaluators />
-
-</Step>
-
-<Step>
-
-<V4StepExports />
-
-</Step>
-
-<Step>
-
-<V4StepUiToggle />
-
-</Step>
-
-<Step>
-
-<V4StepVerify />
-
-</Step>
-
-</Steps>
-
-### Langfuse Cloud with current SDKs (Python v3+ / JS v4+) [#cloud-current-sdks]
-
-**Deadline: will be announced** for the deprecated read APIs, trace-level evaluators, and legacy exports; upgrade your SDKs now so your data stays real time.
-
-<Steps>
-
-<Step>
-
-**Ingestion**
-
-Upgrade to Python SDK ≥ 4.7.0 / JS SDK ≥ 5.4.0 (below these versions, data appears with up to a 10-minute delay on the v4 data model) and replace `update_current_trace()` / `updateActiveTrace()` with `propagate_attributes()` ([Python guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4), [JS guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5)).
-
-</Step>
-
-<Step>
-
-<V4StepReadApis />
-
-</Step>
-
-<Step>
-
-<V4StepEvaluators />
-
-</Step>
-
-<Step>
-
-<V4StepExports />
-
-</Step>
-
-<Step>
-
-<V4StepUiToggle />
-
-</Step>
-
-<Step>
-
-<V4StepVerify />
-
-</Step>
-
-</Steps>
-
-### Direct API and OpenTelemetry users [#api-otel]
-
-**Deadline: will be announced** for legacy trace ingestion and the deprecated read APIs on Langfuse Cloud.
-
-<Steps>
-
-<Step>
-
-**Ingestion**
-
-Everyone still sending trace, span, or generation events to the legacy `POST /api/public/ingestion` API must move to the [OpenTelemetry endpoint](/integrations/native/opentelemetry) `POST /api/public/otel/v1/traces`. Set the [`x-langfuse-ingestion-version: 4` header](/integrations/native/opentelemetry#real-time-ingestion) on your span exporter for real-time data, and [propagate trace attributes](/integrations/native/opentelemetry#propagating-attributes) (`user_id`, `session_id`, ...) to all spans.
-
-</Step>
-
-<Step>
-
-<V4StepReadApis />
-
-</Step>
-
-<Step>
-
-<V4StepEvaluators />
-
-</Step>
-
-<Step>
-
-<V4StepExports />
-
-</Step>
-
-</Steps>
-
-### Self-hosted deployments [#self-hosted]
-
-**No forced deadline.** v3 continues to receive security patches, and breaking removals only happen in major server releases. Follow the [GitHub discussion](https://github.com/orgs/langfuse/discussions/14157) for the self-hosted v4 go-live date; the migration guide for self-hosted deployments ships with the release. Until then, the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) shows what each server version supports.
+Follow the [step-by-step upgrade guide](/faq/all/upgrade-to-langfuse-v4). It covers each situation: Langfuse Cloud with older SDKs, Langfuse Cloud with current SDKs, direct API and OpenTelemetry users, and self-hosted deployments.
 
 ## What changed [#what-changed]
 
@@ -187,8 +51,8 @@ Ask rollout and migration questions in the dedicated [GitHub Discussion](https:/
 
 <Cards num={2}>
   <Card
-    title="SDK migration guides"
-    href="/docs/observability/sdk/upgrade-path"
+    title="Step-by-step upgrade guide"
+    href="/faq/all/upgrade-to-langfuse-v4"
     icon={<Book />}
   />
   <Card
