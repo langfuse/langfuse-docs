@@ -113,7 +113,7 @@ runner = Runner(agent=agent, app_name=APP_NAME, session_service=session_service)
 user_msg = types.Content(role="user", parts=[types.Part(text="hi")])
 for event in runner.run(user_id=USER_ID, session_id=SESSION_ID, new_message=user_msg):
     if event.is_final_response():
-        if event.content:
+        if event.content and event.content.parts:
             print(event.content.parts[0].text)
         elif event.error_message:
             print(f"Agent error: {event.error_message}")
@@ -142,7 +142,7 @@ with propagate_attributes(
 ):
     async for event in runner.run_async(user_id=USER_ID, session_id=SESSION_ID_2, new_message=user_msg):
         if event.is_final_response():
-            if event.content:
+            if event.content and event.content.parts:
                 print(event.content.parts[0].text)
             elif event.error_message:
                 print(f"Agent error: {event.error_message}")
@@ -179,7 +179,7 @@ pipeline_runner = Runner(agent=pipeline, app_name=APP_NAME, session_service=sess
 topic = types.Content(role="user", parts=[types.Part(text="The Langfuse platform")])
 with propagate_attributes(trace_name="research-pipeline", tags=["google-adk", "multi-agent"]):
     async for event in pipeline_runner.run_async(user_id=USER_ID, session_id=PIPELINE_SESSION_ID, new_message=topic):
-        if event.is_final_response() and event.content:
+        if event.is_final_response() and event.content and event.content.parts:
             print(f"[{event.author}]", event.content.parts[0].text)
 ```
 
@@ -203,6 +203,7 @@ predefined_trace_id = Langfuse.create_trace_id()
 SCORED_SESSION_ID = "scored-session"
 await session_service.create_session(app_name=APP_NAME, user_id=USER_ID, session_id=SCORED_SESSION_ID)
 
+final_response = None
 with langfuse.start_as_current_observation(
     as_type="span",
     name="adk-request",
@@ -210,18 +211,20 @@ with langfuse.start_as_current_observation(
 ) as span:
     span.update(input="hi")
     async for event in runner.run_async(user_id=USER_ID, session_id=SCORED_SESSION_ID, new_message=user_msg):
-        if event.is_final_response() and event.content:
-            print(event.content.parts[0].text)
-            span.update(output=event.content.parts[0].text)
+        if event.is_final_response() and event.content and event.content.parts:
+            final_response = event.content.parts[0].text
+            print(final_response)
+            span.update(output=final_response)
 
 # e.g. triggered by a thumbs-up in your application
-langfuse.create_score(
-    trace_id=predefined_trace_id,
-    name="user-feedback",
-    value=1,
-    data_type="NUMERIC",
-    comment="The answer was helpful.",
-)
+if final_response is not None:
+    langfuse.create_score(
+        trace_id=predefined_trace_id,
+        name="user-feedback",
+        value=1,
+        data_type="NUMERIC",
+        comment="The answer was helpful.",
+    )
 ```
 
     Hello Langfuse 👋
