@@ -4,6 +4,8 @@ sidebarTitle: Observations API
 description: Retrieve observations from Langfuse with high-performance v2 endpoints featuring cursor-based pagination and selective field retrieval.
 ---
 
+import DataFreshness from "@/components-mdx/compat/data-freshness.mdx";
+
 # Observations API
 
 The Observations API allows you to retrieve observation data (spans, generations, events) from Langfuse for use in custom workflows, evaluation pipelines, and analytics.
@@ -14,17 +16,27 @@ For general information about API authentication, base URLs, and SDK access, see
 
 <Callout type="info">
 
-Older trace and observation read APIs remain available, but are not recommended as the default for new data extraction workflows because they are less performant at scale. Use Observations API v2 for row-level data extraction.
+The deprecated `GET /api/public/traces` and `GET /api/public/observations` endpoints are documented, with migration steps, in [Migration of deprecated APIs](/faq/all/deprecated-api-migration).
 
 </Callout>
 
 ## Observations API v2 [#v2]
 
-<Callout type="warning">
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "v4",
+  }}
+/>
 
-**Cloud-only:** The v2 Observations API is only available on Langfuse Cloud. We are working on a robust migration path for self-hosted deployments.
+<Callout type="info">
 
-**Data availability:** Data from older SDKs (`langfuse-python` < `4.0.0`, `langfuse-js` < `5.0.0`) or direct OpenTelemetry exporters that do not send `x-langfuse-ingestion-version: 4` can be delayed by up to 10 minutes on v2 endpoints. Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5), or set that header on your OTEL span exporter, to see new data in real time.
+<DataFreshness />
+
+On self-hosted Langfuse v3, use the [v1 Observations API](https://api.reference.langfuse.com/#tag/observations/GET/api/public/observations) instead; see the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
 
 </Callout>
 
@@ -36,16 +48,9 @@ The v2 Observations API is a redesigned endpoint optimized for high-performance 
 
 ### Upgrade from older trace and observation reads [#upgrade-from-older-reads]
 
-| Existing usage                                                            | Recommended replacement                                                                                 |
-| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| List traces with `GET /api/public/traces`                                 | Use `GET /api/public/v2/observations?fromStartTime=<from>&toStartTime=<to>` and group rows by `traceId` |
-| Fetch one trace with `GET /api/public/traces/{traceId}`                   | Use `GET /api/public/v2/observations?traceId=<traceId>&fromStartTime=<from>&toStartTime=<to>`           |
-| List observations with `GET /api/public/observations`                     | Use `GET /api/public/v2/observations?fromStartTime=<from>&toStartTime=<to>`                             |
-| Fetch one observation with `GET /api/public/observations/{observationId}` | Use `GET /api/public/v2/observations?filter=<id filter>&fromStartTime=<from>&toStartTime=<to>`          |
+The [migration guide](/faq/all/deprecated-api-migration) maps every deprecated read endpoint (`/api/public/traces`, `/api/public/observations`, `/api/public/sessions`, ...) to its v2 replacement, with parameter mappings and before/after examples. Always include `fromStartTime` and `toStartTime` to keep each request bounded.
 
-Always include `fromStartTime` and `toStartTime` to keep each request bounded.
-
-The v2 Observations API returns observation rows, not full trace objects. Group rows by `traceId` when you need to reconstruct trace activity, and use [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregate reporting with trace-level dimensions such as `traceName`, `traceRelease`, or `traceVersion`. For single-observation lookups, pass a URL-encoded `filter` condition on the `id` column; see the [v2 Observations API Reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations) for the filter schema.
+The v2 Observations API returns observation rows, not full trace objects. Group rows by `traceId` when you need to reconstruct trace activity, and use [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregate reporting with trace-level dimensions such as `traceName`, `traceRelease`, or `traceVersion`. For single-observation lookups, pass a URL-encoded `filter` condition on the `id` column; see the [v2 Observations API Reference](https://api.reference.langfuse.com/#tag/observations/GET/api/public/v2/observations) for the filter schema.
 
 ### Key Improvements
 
@@ -72,7 +77,7 @@ The v1 API returns complete rows with all fields (input/output, usage, metadata,
 | `metrics`       | latency, timeToFirstToken                                                                                              |
 | `trace_context` | tags, release, traceName                                                                                               |
 
-If `fields` is not specified, `core` and `basic` field groups are returned by default. Fields from groups you do not request are **absent** from the response — not `null`. The following fields are an exception and are always present but only populated when the field group `model` is selected: `modelId`, `inputPrice`, `outputPrice`, and `totalPrice`. Note that `inputPrice`, `outputPrice`, and `totalPrice` are returned as **strings** (e.g. `"0.000005"`) to preserve decimal precision — cast them to a numeric type in your pipeline.
+If `fields` is not specified, `core` and `basic` field groups are returned by default. Fields from groups you do not request are **absent** from the response, not `null`. The following fields are an exception and are always present but only populated when the field group `model` is selected: `modelId`, `inputPrice`, `outputPrice`, and `totalPrice`. Note that `inputPrice`, `outputPrice`, and `totalPrice` are returned as **strings** (e.g. `"0.000005"`) to preserve decimal precision; cast them to a numeric type in your pipeline.
 
 **2. Cursor-Based Pagination**
 
@@ -105,14 +110,16 @@ When the response has no `cursor` in `meta` (or `meta.cursor` is `null`), you've
 
 **3. Optimized I/O Handling**
 
-The v1 API always attempts to parse input/output as JSON which can be expensive. The v2 API returns I/O as strings by default. Set `parseIoAsJson: true` only when you need parsed JSON.
+The v1 API always attempts to parse input/output as JSON which can be expensive. The v2 API returns I/O as raw strings; parse them in your pipeline when you need JSON. The `parseIoAsJson` parameter is deprecated: omit it or set it to `false`; setting it to `true` returns a `400` error.
 
-**4. Stricter Limits**
+**4. Higher Limits**
 
-| Feature       | v1        | v2    |
-| ------------- | --------- | ----- |
-| Default limit | 1000      | 50    |
-| Maximum limit | Unlimited | 1,000 |
+| Feature       | v1  | v2    |
+| ------------- | --- | ----- |
+| Default limit | 50  | 50    |
+| Maximum limit | 100 | 1,000 |
+
+On Langfuse Cloud, requests to the v2 Observations API count toward the general per-organization API rate limit (see the [API limits FAQ](/faq/all/api-limits)). Self-hosted instances have no enforced rate limits.
 
 ### Common Use Cases
 
@@ -165,7 +172,7 @@ curl \
 | `parentObservationId` | string   | Filter by parent observation ID                                           |
 | `environment`         | string   | Filter by environment                                                     |
 | `version`             | string   | Filter by version tag                                                     |
-| `parseIoAsJson`       | boolean  | Parse input/output as JSON (default: false)                               |
+| `parseIoAsJson`       | boolean  | Deprecated: omit or set to `false`; `true` returns a `400` error          |
 | `filter`              | string   | JSON array of filter conditions (takes precedence over query params)      |
 
 ### Sample Response

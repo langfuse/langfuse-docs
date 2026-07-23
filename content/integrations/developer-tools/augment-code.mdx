@@ -253,7 +253,7 @@ FALLBACK_ENV_DIRS = [
 
 # --- Langfuse import (fail-open) ---
 try:
-    from langfuse import Langfuse
+    from langfuse import Langfuse, propagate_attributes
 except Exception:
     sys.exit(0)
 
@@ -414,7 +414,7 @@ def emit_conversation(lf: Langfuse, session_id: str, payload: Dict[str, Any],
     info(f"Emitting trace: conv_id={session_id}, model={model}, "
          f"tools={len(tool_calls)} (mcp={len(mcp_calls)}, bash={len(bash_calls)})")
 
-    with lf.start_as_current_span(
+    with lf.start_as_current_observation(
         name="Auggie Conversation",
         input={"role": "user", "content": user_text},
         metadata={
@@ -429,13 +429,12 @@ def emit_conversation(lf: Langfuse, session_id: str, payload: Dict[str, Any],
             "mcp_tool_count": len(mcp_calls),
             "bash_tool_count": len(bash_calls),
         },
-    ) as span:
-        lf.update_current_trace(
-            session_id=session_id,
-            name="Auggie Conversation",
-            tags=["auggie"],
-            user_id=user_email or None,
-        )
+    ) as span, propagate_attributes(
+        session_id=session_id,
+        trace_name="Auggie Conversation",
+        tags=["auggie"],
+        user_id=user_email or None,
+    ):
 
         with lf.start_as_current_observation(
             name="Auggie Response",
@@ -641,7 +640,7 @@ FALLBACK_ENV_DIRS = [
 
 # --- Langfuse import (fail-open) ---
 try:
-    from langfuse import Langfuse
+    from langfuse import Langfuse, propagate_attributes
 except Exception:
     sys.exit(0)
 
@@ -786,7 +785,7 @@ def emit_tool_use(lf: Langfuse, fields: Dict[str, Any]) -> None:
     if has_error:
         tags.append("tool-error")
 
-    with lf.start_as_current_span(
+    with lf.start_as_current_observation(
         name=f"PostToolUse – {tool_name}",
         input={"user_prompt_preview": user_prompt_trunc},
         metadata={
@@ -798,13 +797,12 @@ def emit_tool_use(lf: Langfuse, fields: Dict[str, Any]) -> None:
             "timestamp":        fields["timestamp"],
             "user_prompt_meta": user_prompt_meta,
         },
-    ) as span:
-        lf.update_current_trace(
-            session_id=conversation_id,
-            name=f"PostToolUse – {tool_name}",
-            tags=tags,
-            user_id=fields["user_email"] or None,
-        )
+    ) as span, propagate_attributes(
+        session_id=conversation_id,
+        trace_name=f"PostToolUse – {tool_name}",
+        tags=tags,
+        user_id=fields["user_email"] or None,
+    ):
 
         tool_input: Dict[str, Any] = {}
         if fields["is_mcp_tool"]:
