@@ -100,7 +100,13 @@ def setup_langfuse(
     return trace_provider, clients
 
 
-LANGFUSE_DOCS_MCP = mcp.MCPServerHTTP(url="https://langfuse.com/api/mcp")
+# client_session_timeout_seconds defaults to 5s, which the RAG-backed
+# searchLangfuseDocs tool regularly exceeds (the MCP client then reports
+# "An internal error occurred" to the LLM).
+LANGFUSE_DOCS_MCP = mcp.MCPServerHTTP(
+    url="https://langfuse.com/api/mcp",
+    client_session_timeout_seconds=30,
+)
 
 
 class Kelly(Agent):
