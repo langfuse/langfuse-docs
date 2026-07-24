@@ -45,7 +45,7 @@ Then, we use LlamaIndex to initialize both a Mistral language model and an embed
 # Set the Mistral API key
 import os
 
-os.environ.setdefault("MISTRAL_API_KEY", "...")
+os.environ.setdefault("MISTRAL_API_KEY", "...");
 
 # Ensures that sync and async code can be used together without issues
 import nest_asyncio
@@ -80,9 +80,9 @@ Next, we initialize the Langfuse client. [Sign up](https://cloud.langfuse.com/au
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
-os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
-os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 ```
 

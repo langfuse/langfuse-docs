@@ -28,13 +28,13 @@ Initialize the Langfuse client with your API keys from the project settings in t
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
-os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
-os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your openai key
-os.environ.setdefault("OPENAI_API_KEY", "sk-proj-..")
+os.environ.setdefault("OPENAI_API_KEY", "sk-proj-..");
 ```
 
 
@@ -125,7 +125,7 @@ async for chunk in chain2.astream({"person": "bill gates", "language": "english"
 
 ```python
 import os
-os.environ.setdefault("SERPAPI_API_KEY", "...")
+os.environ.setdefault("SERPAPI_API_KEY", "...");
 ```
 
 
@@ -174,10 +174,10 @@ chain.invoke(query, config={"callbacks":[langfuse_handler]})
 
 
 ```python
-os.environ.setdefault("AZURE_OPENAI_ENDPOINT", "<Azure OpenAI endpoint>")
-os.environ.setdefault("AZURE_OPENAI_API_KEY", "<Azure OpenAI API key>")
-os.environ.setdefault("OPENAI_API_TYPE", "azure")
-os.environ.setdefault("OPENAI_API_VERSION", "2023-09-01-preview")
+os.environ.setdefault("AZURE_OPENAI_ENDPOINT", "<Azure OpenAI endpoint>");
+os.environ.setdefault("AZURE_OPENAI_API_KEY", "<Azure OpenAI API key>");
+os.environ.setdefault("OPENAI_API_TYPE", "azure");
+os.environ.setdefault("OPENAI_API_VERSION", "2023-09-01-preview");
 ```
 
 

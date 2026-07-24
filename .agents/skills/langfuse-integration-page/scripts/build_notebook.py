@@ -94,20 +94,22 @@ def _metadata_comment(meta: dict[str, str]) -> str:
 
 
 def _env_var_block(extras: list[dict[str, str]]) -> str:
+    # Every setdefault ends with ";" — it returns the live env value (a real
+    # key, if one is set), and the semicolon stops Jupyter echoing it as output.
     lines = [
         "import os",
         "",
         "# Get keys for your project from the project settings page: https://langfuse.com/cloud",
-        'os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")',
-        'os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")',
-        'os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region (API host)',
+        'os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...");',
+        'os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...");',
+        'os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region (API host)',
         '# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com',
     ]
     if extras:
         lines.append("")
         for e in extras:
             c = f"  # {e['comment']}" if e.get("comment") else ""
-            lines.append(f'os.environ.setdefault("{e["key"]}", "{e["value"]}"){c}')
+            lines.append(f'os.environ.setdefault("{e["key"]}", "{e["value"]}");{c}')
     return "\n".join(lines)
 
 
