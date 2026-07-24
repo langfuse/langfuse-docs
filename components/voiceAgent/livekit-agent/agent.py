@@ -15,6 +15,9 @@ from livekit.agents import (
     Agent,
     AgentServer,
     AgentSession,
+    AudioConfig,
+    BackgroundAudioPlayer,
+    BuiltinAudioClip,
     JobContext,
     cli,
     inference,
@@ -342,6 +345,16 @@ async def entrypoint(ctx: JobContext):
                 "transcript": False,
             },
         )
+
+        # Audible cue while the agent is thinking or calling the docs tools, so
+        # slower turns (e.g. RAG searches) don't feel like dead air.
+        background_audio = BackgroundAudioPlayer(
+            thinking_sound=[
+                AudioConfig(BuiltinAudioClip.KEYBOARD_TYPING, volume=0.6),
+                AudioConfig(BuiltinAudioClip.KEYBOARD_TYPING2, volume=0.5),
+            ],
+        )
+        await background_audio.start(room=ctx.room, agent_session=session)
 
 
 if __name__ == "__main__":
