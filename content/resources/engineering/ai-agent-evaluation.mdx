@@ -125,6 +125,24 @@ Session-level scores can be created three ways:
 
 A useful division of labor: evaluate per-turn quality with observation-level evaluators (each turn's correctness and tool use), and evaluate conversation outcomes with session scores (resolved or not, turns-to-resolution as a numeric score, abandonment as a categorical one). Boolean and categorical session scores are filterable across the Langfuse UI, so "show me all unresolved sessions from the last week" is a table filter, and those sessions feed straight into annotation queues or datasets. For a deeper treatment of judge strategies across turns, see [evaluating multi-turn conversations](/blog/2025-10-09-evaluating-multi-turn-conversations).
 
+## Evaluating RAG agents [#evaluating-rag-agents]
+
+RAG agent evaluation layers the two retrieval-pipeline metrics, context relevance on the retrieval step and faithfulness on the generation step, onto the agent dimensions above. A RAG agent differs from a fixed RAG pipeline in one structural way: retrieval is a tool the agent chooses to use. The agent decides whether to retrieve at all, rewrites the user's question into search queries, picks between retrieval tools when several are available, and may retrieve repeatedly before answering. Each of those decisions is a failure mode a fixed pipeline does not have: the agent can answer from parametric knowledge when it should have searched, reformulate the query so the retriever returns the wrong documents, or loop on retrieval without converging.
+
+The metrics attach to different steps of the trace:
+
+| Step                | Question it answers                                                  | Method in Langfuse                                                                                 |
+| ------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Retrieval decision  | Did the agent call the retrieval tool when the question required it? | Code evaluator on the structured tool-call field, boolean score                                    |
+| Query reformulation | Does the rewritten search query preserve the user's question?        | LLM judge on the retriever observation                                                             |
+| Retrieval quality   | Are the retrieved documents relevant to the question?                | Context-relevance evaluator from the managed catalog, targeting retriever observations             |
+| Generation          | Is every claim in the answer supported by the retrieved context?     | Faithfulness judge comparing the answer against the recorded context                               |
+| Whole run           | Did the final answer address the user's question at acceptable cost? | Task-completion judge on the root observation, plus trajectory checks like a retrieval-call budget |
+
+Two instrumentation details make this work in Langfuse. First, mark retrieval steps with the `retriever` [observation type](/docs/observability/features/observation-types) so evaluators can filter to exactly those observations. Second, record the data each judge compares on the observation it targets, because an evaluator sees only the observation it matches: the question and the retrieved documents on the retriever observation for the context-relevance judge, the retrieved context next to the answer on the generation observation for the faithfulness judge, and the original question next to the rewritten query for the reformulation judge.
+
+Per-step scores are what make a bad RAG agent run diagnosable. Low faithfulness while the context was relevant is a generation problem, so fix the answering prompt. Irrelevant context despite a reasonable query is a retrieval problem, so fix the index or the embedding model. A missing retrieval call is a tool-choice problem, and the boolean code check catches it on every sampled trace at no judge cost. The judge prompt design and runnable SDK code for the generation-side metrics are on their own pages: [RAG faithfulness evaluation](/resources/engineering/rag-faithfulness-evaluation) covers the claim-level groundedness judge, and [answer relevance evaluation](/resources/engineering/answer-relevance-evaluation) covers question-answer fit. This section places those metrics in the agent loop; those pages implement them.
+
 ## Gating agent changes in CI
 
 Agent changes ship safely when an experiment must pass before merge, the same way tests gate code. Prompt edits, model swaps, and tool-schema changes all alter agent behavior in ways type checkers cannot see, so the regression suite is a dataset plus evaluators.
@@ -182,6 +200,10 @@ Observation-level evaluators score one operation inside a trace (an LLM call, a 
 ### How do you evaluate multi-turn conversations? [#multi-turn-evaluation]
 
 Score at two levels: per-turn evaluators for the quality of individual responses, and session-level scores for conversation outcomes such as resolution, goal drift, and turns-to-resolution. In Langfuse, traces share a session ID, scores attach directly to sessions via the UI, SDK, or annotation queues, and boolean or categorical session scores are filterable, so failed conversations can be pulled into review queues or datasets.
+
+### How do I evaluate a RAG agent? [#evaluate-rag-agent]
+
+Combine agent metrics with RAG metrics, each attached to the step it describes: a boolean code check that the retrieval tool was called when the question required it, a context-relevance score on retriever observations, a faithfulness judge that verifies the answer against the recorded retrieved context, and a task-completion judge on the root observation for the overall run. Instrument retrieval steps with the `retriever` observation type and record the retrieved documents on the observations your evaluators target. Per-step scores show whether a bad answer came from skipping retrieval, retrieving the wrong documents, or generating claims the context does not support.
 
 ### Should agent evaluations run in CI? [#agent-evals-in-ci]
 

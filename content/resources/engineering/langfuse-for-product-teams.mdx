@@ -1,0 +1,210 @@
+---
+title: "Langfuse for product teams: review conversations without code"
+description: "How product teams use Langfuse without writing code: session replay, annotation queues, user feedback, dashboards, and natural language questions over traces."
+tags: [guide]
+---
+
+# Langfuse for product teams: review conversations without code
+
+Langfuse is usually set up by engineers, but most of the questions it answers belong to
+product managers: what did users experience, is quality improving, which conversations went
+wrong. This page is a tour of the Langfuse workflows that product managers, analysts, and
+domain experts run entirely in the UI, plus the one-time instrumentation engineers do so the
+rest of the team can self-serve.
+
+**TL;DR:** After engineers propagate a `sessionId` and `userId` with each trace, everything
+in this guide is point-and-click: replay whole conversations in the session view, score and
+annotate them through annotation queues, chart user feedback and quality scores in custom
+dashboards, and ask questions about your data in plain language via the Langfuse Assistant.
+
+## What product teams need from LLM observability [#what-product-teams-need]
+
+Product teams need to see what users experienced, judge whether it was good, and track
+whether it is getting better, without filing an engineering ticket for each question.
+Langfuse covers each of these needs with a UI feature that requires no code:
+
+| Product question                           | Where to answer it in Langfuse        |
+| ------------------------------------------ | ------------------------------------- |
+| What did this user actually experience?    | Session replay view                   |
+| Which conversations need expert review?    | Annotation queues                     |
+| What do users think of the answers?        | User feedback captured as scores      |
+| Is quality trending up or down?            | Custom dashboards and score analytics |
+| What changed this week, in plain language? | Langfuse Assistant                    |
+
+You can try all of the read-only workflows with live data in the public
+[example project](/docs/demo) before your own instrumentation exists.
+
+## Reviewing conversations with sessions [#session-review]
+
+Sessions turn a pile of individual traces into readable conversations. Engineers attach a
+`sessionId` to every trace, and Langfuse groups all traces that share it into one
+[session](/docs/observability/features/sessions) with a replay view of the entire
+interaction. For a chatbot the common pattern is one trace per turn and one session per
+conversation, so the session view reads top to bottom like a transcript.
+
+From the session view, a reviewer can:
+
+- Read the full conversation in order, and open any single turn to see what the application
+  did behind the answer.
+- Bookmark a session to find it again later.
+- Publish a session as a public link to share outside the project.
+- Add scores through the Annotate drawer to record a human quality judgment.
+- Leave comments with @mentions to flag a conversation for a teammate.
+
+The sessions table shows score aggregates per session, so a conversation-level rating (for
+example a "resolution" score) is visible in the list without opening each session. Any
+combination of filters, columns, and sorting on the table can be stored as a saved view with
+its own permalink, which gives the team a shared "review these" starting point.
+
+## Scoring and annotating without writing code [#annotation]
+
+All human evaluation in Langfuse happens through scores, and scores can be created entirely
+in the UI. An engineer or admin defines score configs once (for example a 1 to 5 "accuracy"
+rating, a categorical "failure mode", a boolean "resolved"), and reviewers apply them from
+then on.
+
+### Annotation queues for structured review [#annotation-queues]
+
+[Annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) are built for
+domain experts who review a batch of items against fixed criteria. Someone selects traces,
+observations, or sessions from a table via checkboxes and adds them to a queue; assigned
+reviewers then work through the queue item by item, scoring each on the configured dimensions
+and clicking "Complete + next". Processing is fully keyboard-driven (arrow keys to navigate,
+number keys to pick categorical options, press `?` for the cheatsheet), which matters when a
+reviewer has 200 conversations to get through. Reviewers can also record a corrected output,
+the answer the model should have given, and Langfuse shows it as a diff against the original.
+
+Outside of queues, every trace, observation, and session detail page has an Annotate button
+for ad-hoc scoring, so a PM reading a single bad conversation can score it on the spot.
+
+### User feedback from your application [#user-feedback]
+
+[User feedback](/docs/observability/features/user-feedback) brings end users into the review
+loop. Engineers wire up a thumbs up/down (or star rating, or implicit signals such as
+retries) once, and each rating arrives in Langfuse as a score attached to the exact trace it
+rates. From there the workflow is UI-only: filter traces to `user-feedback < 1` to read the
+conversations users disliked, add the worst ones to an annotation queue, and chart the
+feedback rate over time in a dashboard.
+
+## Dashboards for product metrics [#dashboards]
+
+Custom dashboards are Langfuse's self-serve analytics layer, and building one requires no
+code or query language. A widget is configured in the UI by picking a data source (traces,
+observations, or scores), a metric (count, latency, cost, score values), dimensions to group
+by (user, model, time, trace name), filters, and a chart type. Widgets combine into
+[dashboards](/docs/metrics/features/custom-dashboards) via drag and drop, and chart data
+exports to CSV.
+
+Dashboards product teams commonly build on top of the instrumentation described below:
+
+- A quality dashboard plots average user feedback and human annotation scores over time,
+  which turns "the bot feels worse" into a measurable trend.
+- A usage dashboard groups trace counts and cost by user to show adoption and heavy users.
+- A launch dashboard filters everything to one release or feature via trace metadata to watch
+  a rollout.
+
+Langfuse also ships curated dashboards for latency, cost, and usage that work with zero
+setup, and the project Home page is itself a dashboard you can replace with your own. For
+score-specific analysis there is a zero-configuration Analytics tab in the Scores section
+with distributions, trends, and agreement metrics, for example to check how well an automated
+LLM judge agrees with your human annotators on the same conversations.
+
+## Asking questions in natural language [#natural-language]
+
+### Langfuse Assistant in the UI [#langfuse-assistant]
+
+The [Langfuse Assistant](/docs/langfuse-assistant) is an in-product assistant that answers
+questions about your project data in plain language, directly in the Langfuse Cloud UI. You
+can ask things like "Which traces had the highest latency yesterday?", "What's my token spend
+this week, broken down by model?", or "Open the traces table filtered to errors from today".
+It queries traces, observations, sessions, and metrics, proposes links to the relevant
+Langfuse pages, and asks for explicit approval before any action that changes data. As of
+July 2026 the Assistant is in public beta on Langfuse Cloud and not available on self-hosted
+deployments.
+
+On the traces and observations tables, an Ask AI button additionally builds filters from a
+plain-language description ("enterprise customers in the membership-support queue") without
+knowing the field names. It is Cloud-only, off by default, and enabled by an organization
+owner or admin in the organization's AI feature settings.
+
+### Your own AI tools via the MCP server [#mcp-server]
+
+For analysis outside the Langfuse UI, the native
+[Langfuse MCP server](/docs/api-and-data-platform/features/mcp-server) connects AI assistants
+such as Claude Code or Cursor to your project data with a project-scoped API key. A PM
+comfortable with any MCP-capable chat tool can then ask open-ended questions like "read the
+last 50 low-rated conversations and group the complaints into themes", which is exploratory
+work no predefined dashboard covers. Both read and write tools are enabled by default, so
+have engineering restrict the client to read-only tools for analysis-only setups.
+
+## The one-time engineering setup [#setup]
+
+Everything above depends on engineers instrumenting the application once. The critical part
+is propagating identifiers, because sessions and user views only exist if every trace carries
+a `sessionId` and `userId`:
+
+```python
+from langfuse import observe, propagate_attributes
+
+@observe()
+def handle_chat_turn(user_id: str, session_id: str, message: str):
+    # All observations in this trace inherit both identifiers,
+    # so the trace appears in the session replay and the user view
+    with propagate_attributes(user_id=user_id, session_id=session_id):
+        return generate_reply(message)  # your existing application logic
+```
+
+The rest of the setup checklist:
+
+- Create score configs for the dimensions reviewers should rate, since annotation queues and
+  the Annotate drawer require them.
+- Wire user feedback from the frontend or backend so ratings land as scores on traces.
+- Invite product teammates with the Member role, which lets them view the project's data and
+  create scores, but not change project configuration.
+- Optionally seed one or two dashboards and saved views so the team starts from a curated
+  picture instead of an empty table.
+
+After this, the review, annotation, dashboard, and Assistant workflows run without further
+engineering involvement.
+
+## FAQ [#faq]
+
+### Can non-technical team members use Langfuse? [#non-technical-users]
+
+Yes, for review and analysis work. Once engineers instrument the application with session and
+user identifiers, product managers and domain experts can replay conversations, score and
+annotate them in annotation queues, build dashboards, and ask the Langfuse Assistant
+questions in plain language, all without writing code. Initial instrumentation, score config
+creation, and user feedback wiring are engineering tasks.
+
+### How do product managers review AI conversations in Langfuse? [#review-conversations]
+
+Through the sessions view: all traces sharing a `sessionId` are grouped into one session with
+a top-to-bottom replay of the conversation. Reviewers read the transcript, open individual
+turns for detail, add scores via the Annotate drawer, and leave comments for teammates. For
+systematic review, conversations are added to an annotation queue and worked through against
+predefined scoring dimensions.
+
+### Can I score LLM outputs without writing code? [#score-without-code]
+
+Yes. Scores can be created entirely in the Langfuse UI, either ad hoc via the Annotate button
+on any trace, observation, or session, or systematically through annotation queues with
+predefined score configs. Scores added in the UI land in the same data model as automated
+evaluations, so they appear in dashboards, score analytics, and filters alongside
+LLM-as-a-Judge results and user feedback.
+
+### Can I analyze what users ask my AI product? [#analyze-user-questions]
+
+Yes, and it is a two-part answer. For ad-hoc exploration, the Langfuse Assistant and the MCP
+server let a reasoning model read conversations and report themes. For recurring charts such
+as intent distribution over time, run an intent classification pipeline that writes labels
+back as categorical scores; the guide on
+[chatbot analytics](/resources/engineering/chatbot-intent-analytics) covers four working
+patterns for this.
+
+### Does this work on self-hosted Langfuse? [#self-hosted]
+
+Mostly. Session review, annotation queues, manual scoring, user feedback, custom dashboards,
+and score analytics are available on self-hosted deployments. As of July 2026, the Langfuse
+Assistant is Cloud-only, and the typed filter search bar (including its Ask AI query builder)
+requires the v4 data model on Langfuse Cloud, with open-source support planned to follow.

@@ -1,0 +1,127 @@
+---
+title: "Route OpenTelemetry to Langfuse through Azure API Management"
+sidebarTitle: Azure API Management
+logo: /images/integrations/microsoft_icon.svg
+description: "Expose an OpenTelemetry endpoint through Azure API Management (APIM) and forward OTLP traces to Langfuse, keeping telemetry egress under gateway governance."
+category: Integrations
+---
+
+# Route OpenTelemetry to Langfuse through Azure API Management
+
+This guide covers one pattern: exposing an OpenTelemetry endpoint through Azure API Management (APIM) so that services inside your network send OTLP traces to a gateway-managed URL, and APIM forwards them to Langfuse. Teams that already route model traffic through APIM use this to keep telemetry egress under the same gateway governance as LLM calls: one approved egress point, gateway-side authentication, and no service talking to the internet directly.
+
+> **What is Azure API Management?** [Azure API Management](https://azure.microsoft.com/en-us/products/api-management) is Microsoft's managed API gateway. Enterprises commonly place it in front of Azure OpenAI to centralize authentication, apply quotas and policies, and keep model traffic inside their network perimeter; Microsoft documents this pattern as APIM's [AI gateway capabilities](https://learn.microsoft.com/en-us/azure/api-management/genai-gateway-capabilities).
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com/) is an open-source LLM engineering platform that helps teams trace, debug, and evaluate their LLM applications. Langfuse is not a proxy: your requests never pass through Langfuse on the way to the model, so it adds no hop to the gateway path.
+
+This guide is about the telemetry route, not about instrumenting your application. To generate the spans in the first place, instrument your services with the [Langfuse SDKs](/docs/observability/get-started) or, for languages the SDKs do not cover, any [OpenTelemetry SDK](/resources/engineering/opentelemetry-languages).
+
+## How the pattern works [#how-it-works]
+
+Three parts make up the route:
+
+1. **Services export OTLP to the gateway.** Each service points its OpenTelemetry exporter at an APIM-managed URL instead of an external endpoint, so telemetry never leaves the network on its own path.
+2. **APIM forwards the spans to Langfuse.** An [APIM API definition](https://learn.microsoft.com/en-us/azure/api-management/add-api-manually) accepts the OTLP/HTTP requests and a [policy](https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-policies) forwards them to the Langfuse OTLP endpoint, attaching the Langfuse authentication header at the gateway with the [set-header policy](https://learn.microsoft.com/en-us/azure/api-management/set-header-policy).
+3. **Langfuse ingests the spans.** Spans that carry [GenAI semantic convention](https://opentelemetry.io/docs/specs/semconv/gen-ai/) attributes (`gen_ai.*`) render as generations with model, token usage, and cost; surrounding spans nest around them as regular observations.
+
+The Langfuse-side contract is the same regardless of what forwards the spans: OTLP over HTTP with protobuf or JSON encoding (gRPC is not supported), sent to `/api/public/otel`, authenticated with Basic Auth built from your project API keys.
+
+## Set up the route [#set-up]
+
+<Steps>
+
+### Set up Langfuse
+
+1. Sign up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-host Langfuse](/self-hosting).
+2. Create a project and copy your API keys from the project settings.
+
+### Build the Langfuse endpoint configuration
+
+APIM needs two things to forward spans: the Langfuse OTLP endpoint as the backend URL, and the authentication header to attach on the way out.
+
+```bash
+# Build the Basic Auth string from your Langfuse project API keys
+AUTH_STRING="$(printf '%s' 'pk-lf-...:sk-lf-...' | base64 | tr -d '\n')"
+
+# Backend URL for the APIM API definition
+# https://cloud.langfuse.com/api/public/otel   # 🇪🇺 EU data region
+# https://us.cloud.langfuse.com/api/public/otel # 🇺🇸 US data region
+
+# Header to set in the APIM outbound policy
+# Authorization: Basic ${AUTH_STRING}
+# x-langfuse-ingestion-version: 4
+```
+
+Langfuse Cloud also offers Japan (`https://jp.cloud.langfuse.com`) and HIPAA (`https://hipaa.cloud.langfuse.com`) data regions; the endpoint path is the same. The `x-langfuse-ingestion-version=4` header makes directly ingested spans appear in real time in Langfuse Cloud Fast Preview. The traces route specifically is `/api/public/otel/v1/traces`.
+
+### Expose the OTel endpoint in APIM
+
+Create an APIM API that accepts `POST` requests for the OTLP path and forwards them to the Langfuse [backend](https://learn.microsoft.com/en-us/azure/api-management/backends) URL, attaching the two headers above in the outbound policy via [set-header](https://learn.microsoft.com/en-us/azure/api-management/set-header-policy). Setting the Langfuse credentials at the gateway means services inside the network never hold Langfuse API keys.
+
+### Point your services at the gateway
+
+Configure each service's OpenTelemetry exporter to send to the APIM URL:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT="https://<your-apim-instance>.azure-api.net/<your-otel-api-path>"
+OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+```
+
+If APIM requires a [subscription key](https://learn.microsoft.com/en-us/azure/api-management/api-management-subscriptions) or other gateway-side authentication for the OTLP API, add it via `OTEL_EXPORTER_OTLP_HEADERS` per your gateway configuration.
+
+### View traces in Langfuse
+
+Open the [Traces view](https://cloud.langfuse.com/project/~/traces) in Langfuse. Each exported span batch appears within seconds; generations show model, input, output, token usage, and latency.
+
+<Callout type="info">
+  Azure OpenAI deployment names often differ from the underlying model names.
+  If cost is missing on your generations, add [custom model
+  definitions](/docs/observability/features/token-and-cost-tracking#custom-model-definitions)
+  that match your deployment names so Langfuse can calculate token costs.
+</Callout>
+
+</Steps>
+
+## Troubleshooting [#troubleshooting]
+
+### No traces appear in Langfuse
+
+1. **Spans are lost on exit.** Batch span processors send asynchronously, so call your SDK's shutdown or force-flush method before short-lived processes terminate.
+2. **The exporter uses gRPC.** Langfuse supports OTLP over HTTP with protobuf or JSON only, so set the exporter protocol to `http/protobuf` (or `http/json`) end to end, including through the gateway.
+3. **The gateway strips or rewrites the path.** The forwarded request must reach `/api/public/otel/v1/traces` on the Langfuse side; check the APIM API's path mapping.
+
+### Authentication errors
+
+Verify that the Basic Auth string is the base64 encoding of `<public key>:<secret key>` with no trailing newline (the `printf ... | base64 | tr -d '\n'` command above handles this), that the APIM outbound policy actually attaches the header, and that the endpoint region matches the region your keys belong to.
+
+### Generations show no model, usage, or cost
+
+Spans without `gen_ai.*` attributes render as regular observations, so ensure your instrumentation sets the GenAI semantic convention attributes. Instrumentation is covered in the [Langfuse SDK docs](/docs/observability/get-started) and the [OpenTelemetry languages guide](/resources/engineering/opentelemetry-languages).
+
+## FAQ [#faq]
+
+### Does Langfuse have a native Azure API Management plugin or policy?
+
+No. As of July 2026, Langfuse does not ship an APIM-specific policy, plugin, or exporter. Forwarding OTLP through an APIM-exposed endpoint as described here is the supported path. If a turnkey integration would help your team, raise or upvote a [feature request on GitHub](/ideas).
+
+### Why route telemetry through the gateway instead of exporting directly?
+
+Governance and key management. Services send telemetry to an internal gateway URL instead of an external endpoint, egress happens at one approved point, and Langfuse API keys live only in the gateway policy rather than in every service.
+
+### Does our LLM traffic pass through Langfuse?
+
+No. Langfuse is an observability platform, not a proxy. Requests flow from your application through APIM to Azure OpenAI as before; telemetry is forwarded asynchronously and out of band. A Langfuse outage does not affect your LLM traffic.
+
+### Can the Langfuse Playground and evaluations call models through our gateway?
+
+Yes. [LLM connections](/docs/administration/llm-connection) support the Azure OpenAI provider as well as any OpenAI-compatible endpoint with a custom base URL and custom headers, so the [Playground](/docs/prompt-management/features/playground) and [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluations can route model calls through APIM. Your Langfuse deployment must be able to reach the gateway over the network.
+
+### Does this work with self-hosted Langfuse?
+
+Yes. Point the APIM backend at your instance's domain instead of the cloud endpoints; the endpoint path (`/api/public/otel`) is the same on [self-hosted Langfuse](/self-hosting). Self-hosting keeps traces inside your own network, which often matters to the same teams that run a corporate gateway.
+
+## Learn more
+
+- The [OpenTelemetry integration](/integrations/native/opentelemetry) documents the OTLP endpoint, attribute mapping, and Collector setup in full.
+- [Langfuse SDK docs](/docs/observability/get-started) and the [OpenTelemetry languages guide](/resources/engineering/opentelemetry-languages) cover instrumenting your application.
+- [What is an LLM gateway?](/resources/engineering/llm-gateway) explains when a gateway is worth running and how it relates to observability.

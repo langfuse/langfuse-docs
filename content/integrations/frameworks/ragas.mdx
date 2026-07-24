@@ -1,44 +1,237 @@
 ---
-title: "Langfuse Integration with Ragas"
+title: "Run Ragas evaluations on Langfuse experiments and traces"
 sidebarTitle: Ragas
 logo: /images/integrations/ragas_icon.svg
-description: "Optimize your RAG pipelines with Langfuse and Ragas integration for efficient evaluation, monitoring, and performance enhancement."
+description: "Use Ragas metrics as evaluators in Langfuse experiments: run faithfulness and answer relevancy with run_experiment, and score production RAG traces."
 ---
 
-# RAG Pipeline Evaluation with Ragas and Langfuse
+# Run Ragas evaluations on Langfuse experiments and traces
 
-Ragas and Langfuse is a powerful combination that can help you evaluate and monitor your Retrieval-Augmented Generation (RAG) pipelines.
+**TL;DR:** Ragas metrics plug directly into Langfuse experiments as evaluator functions. You keep the Ragas metric implementations your team already trusts, and the resulting scores land on Langfuse traces and dataset runs, so consecutive experiment runs are comparable in the Langfuse UI and production traces can be scored with the same metrics. This page shows the wiring: initialize Ragas metrics, wrap each one as an evaluator, and pass them to `run_experiment` in the Langfuse Python SDK.
 
-## What is Langfuse?
+## How Ragas and Langfuse fit together [#how-ragas-and-langfuse-fit-together]
 
-Langfuse ([GitHub](https://github.com/langfuse/langfuse)) is a platform for LLM [tracing](/docs/tracing), [prompt management](/docs/prompts/get-started), and [evaluation](/docs/scores/overview). It allows you to score your traces and spans, providing insights into the performance of your RAG pipelines. Langfuse supports various integrations, including [OpenAI](/integrations/model-providers/openai-py), [Langchain](/integrations/frameworks/langchain), and [more](/integrations).
+[Ragas](https://docs.ragas.io/) is an open-source library for model-based evaluation of Retrieval-Augmented Generation (RAG) pipelines. Its metrics, including faithfulness, answer relevancy, and context precision, are reference-free: they compare the answer against the question and the retrieved context rather than against ground-truth answers, so they run on any dataset and on production traffic.
 
-## What is Ragas?
+Langfuse ([GitHub](https://github.com/langfuse/langfuse)) provides the evaluation infrastructure around those metrics: [datasets](/docs/evaluation/experiments/datasets) hold your test cases, the experiment runner executes and traces your application against them, and scores attach to traces and dataset runs where you can compare, segment, and monitor them over time.
 
-[Ragas](https://docs.ragas.io/) is an open-source tool designed for model-based evaluation of RAG pipelines. It performs reference-free evaluations, meaning you don't need ground-truth data to assess your system's performance. Ragas can evaluate various aspects of your RAG pipeline, such as faithfulness, answer relevancy, and context precision.
+The division of labor is clean: Ragas defines and computes the metric, Langfuse stores the score next to the trace that produced the answer. You do not have to choose between them.
 
-**Common use cases for Ragas include:**
+## Run Ragas metrics in a Langfuse experiment [#run-ragas-metrics-in-a-langfuse-experiment]
 
-- **Evaluate RAG Pipelines:** Generate synthetic test sets and assess pipeline performance using metrics like faithfulness and answer relevance.
-- **Custom Prompt Adaptation:** Write and optimize custom prompts with automatic adaptation for improved retrieval and generation.
-- **CI Pipeline Integration:** Integrate Ragas with CI pipelines using Pytest for automated evaluation and monitoring.
+The Langfuse Python SDK v4 experiment runner (`run_experiment`) accepts a list of evaluator functions and supports async evaluators, which is exactly what a Ragas metric needs. The steps below build a complete experiment: a dataset of questions, a small RAG task, and Ragas `Faithfulness` and `ResponseRelevancy` as evaluators. See [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) for the full experiment runner reference.
 
-## Key Benefits of using Langfuse with Ragas
+### 1. Install dependencies and configure credentials
 
-- **Score Traces**: [Score](/docs/scores/overview) your traces and spans, providing insights into the performance of your RAG pipelines.
-- **Detailed Analytics**: Segment and [analyze](/docs/analytics/overview) traces to identify low-quality scores and improve your system's performance.
-- **Score Reporting**: Drill down into detailed reports for specific use cases and user segments.
+```bash
+pip install langfuse ragas langchain-openai openai
+```
 
-## Getting Started
+```python
+import os
 
-Check out the notebook for end-to-end examples of RAG evaluations with Ragas and Langfuse:
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+
+# Your openai key
+os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...")
+```
+
+### 2. Initialize the Ragas metrics
+
+Ragas metrics need a judge LLM, and some (like `ResponseRelevancy`) also need an embedding model. Initialize them once and reuse them across evaluators.
+
+```python
+from langchain_openai.chat_models import ChatOpenAI
+from langchain_openai.embeddings import OpenAIEmbeddings
+
+from ragas.embeddings import LangchainEmbeddingsWrapper
+from ragas.llms import LangchainLLMWrapper
+from ragas.metrics import Faithfulness, ResponseRelevancy
+from ragas.metrics.base import MetricWithEmbeddings, MetricWithLLM
+from ragas.run_config import RunConfig
+
+metrics = [Faithfulness(), ResponseRelevancy()]
+
+llm = LangchainLLMWrapper(ChatOpenAI())
+embeddings = LangchainEmbeddingsWrapper(OpenAIEmbeddings())
+
+for metric in metrics:
+    if isinstance(metric, MetricWithLLM):
+        metric.llm = llm
+    if isinstance(metric, MetricWithEmbeddings):
+        metric.embeddings = embeddings
+    metric.init(RunConfig())
+```
+
+### 3. Create a dataset in Langfuse
+
+The dataset items carry only the questions. No `expected_output` is needed because the Ragas metrics used here are reference-free.
+
+```python
+from langfuse import get_client
+
+# Reads LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, LANGFUSE_BASE_URL from the environment
+langfuse = get_client()
+
+langfuse.create_dataset(name="ragas-rag-demo")
+for question in [
+    "How long do I have to return an order?",
+    "When does express shipping arrive?",
+    "Does the warranty cover water damage?",
+]:
+    langfuse.create_dataset_item(
+        dataset_name="ragas-rag-demo",
+        input={"question": question},
+    )
+```
+
+### 4. Define the RAG task
+
+The task returns the retrieved contexts alongside the answer. This is the one contract the bridge depends on: Ragas needs the question, the answer, and the exact contexts, and the experiment runner passes the task output to every evaluator. Replace the toy corpus and retriever with your vector store.
+
+```python
+from langfuse.openai import OpenAI  # drop-in OpenAI client, traced automatically
+
+client = OpenAI()
+
+DOCUMENTS = [
+    "Orders can be refunded within 30 days of delivery. Refunds are issued to "
+    "the original payment method within 5 business days.",
+    "Standard shipping takes 3 to 5 business days within the EU. Express "
+    "shipping delivers within 24 hours for orders placed before 2pm.",
+    "All devices include a 2-year manufacturer warranty covering hardware "
+    "defects. Water damage is not covered by the warranty.",
+]
+
+def retrieve(question: str) -> list[str]:
+    words = question.lower().split()
+    ranked = sorted(DOCUMENTS, key=lambda d: -sum(w in d.lower() for w in words))
+    return ranked[:2]
+
+def rag_task(*, item, **kwargs):
+    question = item.input["question"]
+    contexts = retrieve(question)
+    context_block = "\n\n".join(contexts)
+    response = client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=[
+            {
+                "role": "system",
+                "content": "Answer using only the provided context. If the "
+                "context is insufficient, say you do not know.",
+            },
+            {
+                "role": "user",
+                "content": f"Context:\n{context_block}\n\nQuestion: {question}",
+            },
+        ],
+    )
+    # Return the contexts alongside the answer so evaluators can verify against them
+    return {
+        "answer": response.choices[0].message.content,
+        "contexts": contexts,
+    }
+```
+
+### 5. Wrap each Ragas metric as an evaluator
+
+An experiment evaluator receives the item input and the task output and returns an `Evaluation`. Ragas metrics score a `SingleTurnSample` via `single_turn_ascore`, so the wrapper builds the sample from those arguments and awaits the metric. `run_experiment` supports async evaluators natively.
+
+```python
+from langfuse import Evaluation
+from ragas.dataset_schema import SingleTurnSample
+
+def make_ragas_evaluator(metric):
+    async def evaluator(*, input, output, **kwargs):
+        sample = SingleTurnSample(
+            user_input=input["question"],
+            retrieved_contexts=output["contexts"],
+            response=output["answer"],
+        )
+        score = await metric.single_turn_ascore(sample)
+        return Evaluation(name=metric.name, value=float(score))
+
+    return evaluator
+
+ragas_evaluators = [make_ragas_evaluator(metric) for metric in metrics]
+```
+
+### 6. Run the experiment
+
+```python
+dataset = langfuse.get_dataset("ragas-rag-demo")
+
+result = dataset.run_experiment(
+    name="Ragas baseline",
+    description="Faithfulness and answer relevancy via Ragas metrics",
+    task=rag_task,
+    evaluators=ragas_evaluators,
+)
+
+print(result.format())
+```
+
+Every task execution is traced, and the `faithfulness` and `answer_relevancy` scores attach to each item's trace and to the dataset run. Consecutive runs on the same dataset are comparable side by side in the Langfuse UI, so you can rerun the experiment after a retrieval or prompt change and see the metric deltas per item. To gate releases on these scores, add a run-level evaluator that aggregates them and wire the experiment into [CI/CD](/docs/evaluation/experiments/experiments-ci-cd).
+
+## Score production traces with Ragas [#score-production-traces]
+
+The same metrics run on live traffic. Because Ragas metrics are reference-free, any trace that recorded the question, the retrieved contexts, and the answer can be scored after the fact:
+
+1. **Fetch a sample of traces** from Langfuse via the SDK (`langfuse.api.trace.list`) and read the question, contexts, and answer from their observations.
+2. **Evaluate the batch with Ragas**, either per sample via `single_turn_ascore` or in bulk via `ragas.evaluate`.
+3. **Write the scores back** with `langfuse.create_score(name=..., value=..., trace_id=...)` so each score appears on the trace that produced the answer.
+
+The [Ragas cookbook](/guides/cookbook/evaluation_of_rag_with_ragas) walks through both variants end to end, including scoring individual traces at request time and batch-scoring a periodic sample.
+
+If you want RAG scoring on production traffic without operating an evaluation job at all, Langfuse's managed [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators run server-side against sampled observations, and the managed evaluator catalog includes evaluators built in partnership with Ragas.
+
+## Choose between Ragas metrics, managed evaluators, and code evaluators [#choose-evaluation-method]
+
+All three methods write scores to the same traces, datasets, and dashboards, so the choice is about where the evaluation logic lives and runs.
+
+| Method                                                                       | Runs where                            | Best for                                                                            | Requires                                                |
+| ---------------------------------------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Ragas metrics as SDK evaluators                                              | Your process, inside `run_experiment` | Teams standardized on Ragas metric definitions; offline experiments and CI          | `ragas` library, judge LLM, embeddings for some metrics |
+| [Managed LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) | Server-side in Langfuse               | Sampling production traffic without your own eval job; editable judge prompts in UI | LLM connection in Langfuse                              |
+| [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators)       | In Langfuse, authored in the UI       | Deterministic checks (format, regex, exact match) reused across experiments         | No external library                                     |
+
+Use Ragas evaluators when your team already speaks in Ragas metric names and you want those exact implementations, prompts maintained by the Ragas project included, producing the scores. Use managed LLM-as-a-judge when you want the judge prompt visible and editable in the same platform as your traces, or when scores should accrue on sampled production traffic continuously. Use code evaluators for checks that need no LLM at all. The approaches combine: many teams run Ragas metrics in offline experiments and a managed judge online.
+
+## Metric deep dives [#metric-deep-dives]
+
+For the reasoning behind the two headline RAG metrics, including judge prompt design and how the Ragas implementations work, see the dedicated guides:
+
+- [RAG faithfulness evaluation](/resources/engineering/rag-faithfulness-evaluation) covers claim-based groundedness scoring and how to build the judge yourself.
+- [Answer relevance evaluation](/resources/engineering/answer-relevance-evaluation) covers the metric Ragas calls `answer_relevancy` and compares its embedding-based mechanics to a direct LLM judge.
 
 import { FileCode } from "lucide-react";
 
 <Cards>
   <Card
-    title="Evaluation of RAG pipelines with Ragas"
+    title="Cookbook: Evaluation of RAG pipelines with Ragas"
     href="/guides/cookbook/evaluation_of_rag_with_ragas"
     icon={<FileCode />}
   />
 </Cards>
+
+## FAQ
+
+### Do Ragas evaluations in Langfuse require ground-truth answers? [#ragas-ground-truth]
+
+No. The Ragas metrics used on this page (faithfulness, answer relevancy) are reference-free: they compare the answer against the retrieved context and the question, both of which exist for every request. That is why the dataset in the example carries no `expected_output` and why the same metrics can score sampled production traces. Reference-based Ragas metrics exist too and need an expected output per dataset item.
+
+### How do Ragas scores show up in Langfuse? [#ragas-scores-in-langfuse]
+
+As regular Langfuse scores, named after the metric (`faithfulness`, `answer_relevancy`). In an experiment, each score attaches to the trace of the item that produced it and aggregates on the dataset run. When scoring production traces, `langfuse.create_score` attaches the value to the trace you pass. From there they behave like any other score: filterable in the traces table, chartable, and comparable across experiment runs.
+
+### Can I run Ragas metrics on a dataset that lives outside Langfuse? [#ragas-local-datasets]
+
+Yes. `langfuse.run_experiment` also accepts local data (a list of dicts with `input` and optional `expected_output`) instead of a Langfuse-hosted dataset. Task executions are still traced and evaluator scores still attach to those traces; only the dataset run comparison in the UI requires a Langfuse-hosted dataset. See [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) for both variants.
+
+### Do I need Ragas to evaluate RAG pipelines in Langfuse? [#ragas-required]
+
+No. Faithfulness and relevance are metrics, not library features: you can implement them as your own LLM-as-a-judge evaluator functions, use Langfuse's managed evaluator catalog, or use Ragas. Choose Ragas when you want the metric implementations and prompts maintained by the Ragas project; choose a custom or managed judge when you want the rubric under your own version control or running server-side in Langfuse.

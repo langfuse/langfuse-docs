@@ -1,0 +1,15 @@
+---
+title: How long does it take for traces to appear in Langfuse?
+tags: [observability, tracing]
+---
+
+# How long does it take for traces to appear in Langfuse?
+
+Traces typically appear in Langfuse within seconds of being flushed by the SDK. The Langfuse SDKs send trace data asynchronously in batches, so there is a short gap between an operation running in your application and the corresponding trace being visible in the UI. See [queuing and batching](/docs/observability/features/queuing-batching) for how this works and how to tune it.
+
+Two factors determine the delay you see:
+
+1. **Flushing**: The SDK must flush its event queue before data is sent. Long-running applications flush automatically on an interval. In short-lived environments such as serverless functions, batch scripts, or notebooks, flush manually before the process exits, otherwise events can be lost or delayed.
+2. **Ingestion path**: On Langfuse Cloud Fast Preview (v4), data sent via Python SDK v4.7.0+, JS/TS SDK v5.4.0+, or direct OpenTelemetry ingestion with the `x-langfuse-ingestion-version: 4` header appears in the unified tracing table in real time. Data sent via older SDK versions, or via direct OpenTelemetry ingestion without that header, can appear with a delay of up to 10 minutes. See [Explore Observations in Fast Preview](/faq/all/explore-observations-in-v4) for upgrade steps.
+
+If traces still do not appear after a few minutes, work through the [missing traces troubleshooting guide](/faq/all/missing-traces). On self-hosted instances, see [missing events after ingestion](/faq/all/self-hosting-missing-events-after-ingestion).
