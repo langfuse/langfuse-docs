@@ -144,6 +144,8 @@ export function buildSectionMetadata(
     },
     ...(pageData.noindex ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
+      type:
+        section === "blog" || section === "changelog" ? "article" : "website",
       images: [{ url: ogImage }],
       url: canonicalUrl,
       ...(ogVideoUrl ? { videos: [{ url: ogVideoUrl }] } : {}),

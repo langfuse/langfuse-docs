@@ -60,6 +60,7 @@ export const metadata: Metadata = {
     shortcut: ["/favicon.ico"],
   },
   openGraph: {
+    type: "website",
     images: [{ url: defaultOgImageUrl }],
   },
   twitter: {
