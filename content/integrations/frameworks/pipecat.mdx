@@ -210,90 +210,6 @@ patch_trace_input_output()
 
 </Steps>
 
-## Record and Attach Conversation Audio [#record-audio]
-
-Traces capture transcripts and timings; the recording captures how the conversation actually
-sounded. Pipecat's `AudioBufferProcessor` records both sides of the conversation, and
-Langfuse renders attached [audio files](/docs/observability/features/multi-modality) with an
-audio player on the trace.
-
-Because Pipecat owns the root span, capture the conversation's trace ID with a small span
-processor, then attach the recording to the trace when the audio buffer flushes. This
-requires the Langfuse Python SDK (`pip install langfuse`) and your `LANGFUSE_PUBLIC_KEY`,
-`LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` environment variables in addition to the OTLP
-exporter setup above:
-
-```python filename="main.py"
-import wave
-
-from langfuse import get_client
-from langfuse.media import LangfuseMedia
-from opentelemetry import trace
-from opentelemetry.sdk.trace import SpanProcessor
-
-from pipecat.processors.audio.audio_buffer_processor import AudioBufferProcessor
-
-
-class RootTraceIdCapture(SpanProcessor):
-    """Remembers the trace ID of the conversation's root span."""
-
-    def __init__(self):
-        self.trace_id = None
-
-    def on_start(self, span, parent_context=None):
-        if span.parent is None and self.trace_id is None:
-            self.trace_id = format(span.get_span_context().trace_id, "032x")
-
-
-# Add after setup_tracing()
-capture = RootTraceIdCapture()
-trace.get_tracer_provider().add_span_processor(capture)
-
-audiobuffer = AudioBufferProcessor(
-    num_channels=2,  # stereo: user left, agent right
-    auto_start_recording=True,
-)
-
-pipeline = Pipeline(
-    [
-        transport.input(),
-        stt,
-        user_aggregator,
-        llm,
-        tts,
-        transport.output(),
-        audiobuffer,  # after transport.output() to capture what the user heard
-        assistant_aggregator,
-    ]
-)
-
-
-@audiobuffer.event_handler("on_audio_data")
-async def on_audio_data(buffer, audio, sample_rate, num_channels):
-    path = f"conversation-{conversation_id}.wav"
-    with wave.open(path, "wb") as wf:
-        wf.setnchannels(num_channels)
-        wf.setsampwidth(2)
-        wf.setframerate(sample_rate)
-        wf.writeframes(audio)
-
-    # Attach the recording to the conversation's trace in Langfuse
-    langfuse = get_client()
-    recording = LangfuseMedia(file_path=path, content_type="audio/wav")
-    with langfuse.start_as_current_span(
-        name="conversation-recording",
-        trace_context={"trace_id": capture.trace_id},
-    ) as span:
-        span.update_trace(metadata={"recording": recording})
-    langfuse.flush()
-```
-
-With the default `buffer_size=0`, `on_audio_data` fires once when recording stops at the end
-of the conversation. For long calls, set a positive `buffer_size` to stream audio chunks
-incrementally (see Pipecat's [audio recording guide](https://docs.pipecat.ai/pipecat/fundamentals/recording-audio)).
-For a broader overview of voice-agent tracing patterns, see
-[Trace voice agents in Langfuse](/resources/engineering/voice-agent-tracing).
-
 ## Masking Sensitive Content
 
 Pipecat exports raw conversation content in span attributes (LLM messages, transcripts, TTS
@@ -332,7 +248,6 @@ The tracing system consists of:
 
 - [End-to-end example](https://github.com/pipecat-ai/pipecat-examples/tree/main/open-telemetry/langfuse)
 - [Pipecat Tracing Documentation](https://docs.pipecat.ai/api-reference/server/utilities/opentelemetry)
-- [Pipecat Audio Recording Guide](https://docs.pipecat.ai/pipecat/fundamentals/recording-audio)
 - [Trace voice agents in Langfuse](/resources/engineering/voice-agent-tracing)
 
 ## GitHub Discussions
