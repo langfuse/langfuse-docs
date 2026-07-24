@@ -103,16 +103,30 @@ Because Home is a normal dashboard, every tile is a regular widget. You can drop
 
 ## Managing and sharing widgets
 
-Every widget, both on a dashboard tile and in the widget library, has a **⋯ menu**:
+Every widget has a **⋯ menu**, both on a dashboard tile and on its row in the widget library. From it you can:
 
-- **Copy** copies the widget to your clipboard. Paste it onto any dashboard with **⌘/Ctrl+V**, and it is added and scrolled into view. Paste only activates when the clipboard actually holds a Langfuse widget.
+- **Copy to clipboard** copies the widget so you can paste it onto another dashboard.
+- **Paste to the right** inserts the widget from your clipboard next to the current tile. This item shows on dashboard tiles when the dashboard is editable, and is disabled unless the clipboard holds a Langfuse widget.
 - **Duplicate** creates a copy of the widget in the current project.
-- **Download JSON** exports the widget as a portable file.
+- **Download as JSON** exports the widget as a portable file.
+- **Download data as CSV** exports the widget's current query result. This item shows on dashboard tiles and becomes available once the widget has loaded its data.
 
-Widgets and dashboards use a **versioned JSON format**. A widget carries `{"$langfuseWidget": true, "version": 1}`, and a dashboard the matching `$langfuseDashboard` envelope with each referenced widget's config inlined, so it travels without database IDs. That makes them portable across projects and instances:
+The widget library row menu offers the same **Copy to clipboard**, **Duplicate**, and **Download as JSON** actions, plus **Delete**.
 
-- **Export** a single widget or a whole dashboard as a JSON file.
-- **Import** by dragging the JSON file onto a dashboard. Langfuse validates that it is a Langfuse widget or dashboard and recreates the widgets in your project.
+### Copy and paste widgets
+
+Copy a widget, then paste it onto any dashboard with **⌘/Ctrl+V**. The widget is added to the dashboard and scrolled into view. Paste works only when the clipboard holds a Langfuse widget: other clipboard contents are left untouched, and pasting requires edit access to the target dashboard. Because the copied widget carries its full configuration, you can paste it across dashboards, projects, and instances. Filters that do not apply in the target view are dropped, and Langfuse tells you when that happens.
+
+### Import and export as JSON
+
+Widgets and dashboards use a **versioned JSON format**. A widget exports as `{"$langfuseWidget": true, "version": 1, ...}`, and a dashboard as the matching `{"$langfuseDashboard": true, "version": 1, ...}` envelope with each referenced widget's configuration inlined, so it carries no database IDs. This makes widgets and dashboards portable across projects and instances.
+
+- **Export** a widget from its **⋯ menu** with **Download as JSON**.
+- **Import** by dragging a Langfuse widget or dashboard JSON file onto a dashboard. Langfuse validates the file and recreates the widgets in your project. A dashboard file also restores its widget layout. Files that are not Langfuse widget or dashboard exports are rejected.
+
+### Environment filter precedence
+
+A widget can carry its own environment filter. When it does, that filter overrides the dashboard's environment selector for that widget, and only for the environment. Widgets without their own environment filter follow the dashboard's environment selector as usual, along with the rest of the dashboard filter bar. This keeps a widget that is scoped to a specific environment showing data even when the dashboard selector is set to a different one.
 
 ## Advanced Features
 
