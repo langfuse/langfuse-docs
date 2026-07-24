@@ -1,0 +1,83 @@
+---
+title: Chart any table
+description: Toggle the Observations table into a chart over the same query. Pick a chart type, metric, aggregation, and breakdown, then add the chart to a dashboard.
+sidebarTitle: Chart any table
+---
+
+# Chart any table
+
+The Observations table has a **Table | Chart** toggle in its toolbar. Switch to **Chart** and the rows you have filtered down to are plotted as a chart, over the same query. Switch back to **Table** and you are looking at the same data as a list again. Nothing about the query changes between the two views: the same filters, the same time range, the same data, shown two ways.
+
+The view you are in is stored in the URL, along with the chart's type, metric, aggregation, and breakdown. The chart is reversible and shareable: send someone the link and they land on the same chart, with the same filters, that you were looking at. Only settings you changed from the defaults appear in the URL, so a plain chart link stays short.
+
+<Callout type="info">
+  The chart view runs on the [Langfuse v4](/docs/v4) data model and appears on the
+  full Observations table. On self-hosted deployments it is available after
+  [upgrading to Langfuse v4](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4).
+</Callout>
+
+## The Visualize panel [#visualize]
+
+When you switch to **Chart**, a **Visualize** panel defines how the filtered rows are plotted. A chart is the combination of four choices, and the panel shows a one-line summary of the current selection such as "Average latency by model over time".
+
+### Chart type
+
+- **Line**, **Area**, and **Bars** plot a value over time.
+- **Ranked** shows the top breakdown values as a horizontal ranking, largest first.
+- **Pie** shows the breakdown values as shares of a whole.
+- **Number** shows a single value for the whole range and ignores the breakdown.
+
+Ranked and Pie are categorical and show the top values of your breakdown.
+
+### Metric
+
+The value to plot: **Count** of rows, **Latency**, **Cost**, or **Tokens**. Count is the default.
+
+### Aggregation
+
+How the metric is reduced within each series and time bucket. The available options depend on the metric:
+
+- **Count** is always counted.
+- **Latency** supports Average, Median (p50), p95, p99, Max, and Min.
+- **Cost** and **Tokens** support Sum, Average, p95, and Max.
+
+Changing the metric resets the aggregation to one it supports.
+
+### Breakdown
+
+The dimension to split the chart by. Each value of the breakdown becomes its own series, for example its own line or slice. The options are **Total (no breakdown)**, **Model**, **Name**, **Level**, **Type**, and **Environment**.
+
+For example, chart type **Line**, metric **Latency**, aggregation **p95**, breakdown **Model** gives you "p95 latency by model over time". Switch the metric to **Count** for "count of events by model over time" over the exact same filtered rows.
+
+Time buckets are chosen automatically from the selected time range. A very short range may not produce enough buckets to chart, in which case Langfuse asks you to widen the range.
+
+## Filters the chart cannot apply [#filter-compatibility]
+
+The chart reuses the table's filters. Most of them carry over unchanged: environment, type, name, level, model, trace name, user, session, version, prompt name, tags, tool names, and the experiment fields all apply to the chart exactly as they do to the table.
+
+A few filters do not translate to an aggregated time series. Instead of silently dropping them or hiding the chart, Langfuse keeps the chart visible and deactivates those filters in place: the matching sidebar facet is dimmed, and the matching search-bar token is dimmed and struck through. Hovering either one explains that the filter still applies to the table, even though the chart cannot use it. You always see the chart, and you always know exactly which of your active filters it reflects.
+
+The filters the chart cannot apply are:
+
+- **Numeric measures** used as filters (filtering by latency, cost, or token count). Note that latency, cost, and tokens are still available as chart metrics; only filtering the rows by their value is unavailable on the chart.
+- **Scores**, **metadata**, and **comments** filters.
+- **Full-text search** and field-scoped text search (`input:`, `output:`).
+- **Presence checks** (`has:` and `-has:`).
+
+These reflect what the chart's aggregate query can express today rather than a permanent limit.
+
+## Add to dashboard [#add-to-dashboard]
+
+A chart you built in the table does not have to stay there. **Add to dashboard** saves the current chart, with its type, metric, aggregation, breakdown, and the filters it applied, as a widget on one of your [custom dashboards](/docs/metrics/features/custom-dashboards). Pick the target dashboard, and Langfuse creates the widget and drops you into that dashboard to place it. The saved widget is a normal dashboard widget, indistinguishable from one built by hand, and it shows the same numbers the chart did.
+
+The chart's time range is not saved with the widget; the host dashboard supplies the range instead. Adding a chart to a dashboard requires permission to edit dashboards in the project.
+
+## Relationship to the Filter Search Bar
+
+The [Filter Search Bar](/docs/observability/features/filter-search-bar) and the chart are two views over the same query. The search bar is how you narrow the rows down; the chart is one way to look at what is left. Filter to the slice you want by typing, toggle to **Chart** to see its trend, then use **Add to dashboard** if the view is worth keeping.
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-dashboards"]} />

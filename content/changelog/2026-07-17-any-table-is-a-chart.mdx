@@ -1,0 +1,51 @@
+---
+date: 2026-07-17
+title: "Any table is a chart"
+description: "Toggle the Observations table into a chart over the same query. Pick a chart type, metric, aggregation, and breakdown, then add it to a dashboard."
+author: Nikita Kabardin
+ogVideo: /images/changelog/2026-07-17-any-table-is-a-chart.mp4
+canonical: https://langfuse.com/docs/observability/features/events-table-charts
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+You already filter the Observations table down to the exact rows you care about. Now you can see that same slice as a chart without leaving the page. A **Table | Chart** toggle in the toolbar turns the current view into a time series, and a **Visualize** panel picks how to plot it.
+
+The chart runs on the same query as the table: the same filters, the same time range, the same data. You are not building a new query, you are looking at the one you already have from a different angle.
+
+## Shape the chart
+
+The **Visualize** panel defines the chart along four dimensions:
+
+- **Chart type**: Line, Area, Bars, Ranked, Pie, or Number.
+- **Metric**: Count, Latency, Cost, or Tokens.
+- **Aggregation**: Count, Sum, Average, or a percentile such as p95, with the options depending on the metric.
+- **Breakdown**: split by a dimension such as model, environment, or name, so each series is one value of that dimension.
+
+"Count of events by model" and "p95 latency by model" are two selections in the same panel over the same filtered rows.
+
+## Same filters, honestly
+
+The chart reuses the table's filters. A few of them do not translate to an aggregated time series, such as filtering by score, metadata, or free-text search. Rather than silently drop those or hide the chart, Langfuse keeps the chart visible and deactivates just those filters in place, dimmed with a note that they still apply to the table. You always see the chart, and you always know exactly which of your filters it reflects.
+
+## Add it to a dashboard
+
+When a view is worth keeping, **Add to dashboard** saves the current chart, filters and all, as a widget on one of your custom dashboards. The exploratory chart you built in the table becomes a permanent tile you can arrange next to the rest.
+
+## Why
+
+The Observations table and custom dashboards were two separate places: one to find rows, one to plot them. This closes the gap. The fastest path from "these traces look off" to "here is the trend" is now a single toggle, and the same view that answered your question can graduate straight into a dashboard.
+
+## Learn more
+
+<Cards num={1}>
+  <Card
+    title="Chart any table"
+    href="/docs/observability/features/events-table-charts"
+    icon={<Book />}
+    arrow
+  />
+</Cards>
