@@ -19,7 +19,7 @@ import BlobStorageEmptyFiles from "@/components-mdx/blob-storage-empty-files.mdx
   }}
 />
 
-You can schedule exports to Blob Storage, e.g. S3, GCS, or Azure Blob Storage. Exports contain enriched observations (each observation row includes its trace attributes) and `scores`; every run writes to `observations_v2/`, `scores/`, and `manifests/` under `{prefix}{project-id}/` in your bucket. This is also the recommended path to [export Langfuse data to ClickHouse](/docs/api-and-data-platform/features/export-to-warehouse).
+You can schedule exports to Blob Storage, e.g. S3, GCS, or Azure Blob Storage. Exports contain enriched observations (each observation row includes its trace attributes) and `scores`; every run writes to `observations_v2/`, `scores/`, and `manifests/` under `{prefix}{project-id}/` in your bucket.
 
 Those exports can run every `20 minutes`, or on an `hourly`, `daily`, or `weekly` schedule.
 Navigate to your project settings and select `Integrations > Blob Storage` to set up a new export.
