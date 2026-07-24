@@ -16,7 +16,6 @@ This is a deep dive into ClickHouse configuration. Follow one of the [deployment
 [ClickHouse](https://github.com/ClickHouse/ClickHouse) is the main OLAP storage solution within Langfuse for our Trace, Observation, and Score entities.
 It is optimized for high write throughput and fast analytical queries.
 This guide covers how to configure ClickHouse within Langfuse and what to keep in mind when (optionally) bringing your own ClickHouse.
-For day-2 operations such as sizing, disk management, monitoring, backups, and troubleshooting, see the [ClickHouse operations playbook](/self-hosting/deployment/infrastructure/clickhouse-operations).
 
 Langfuse supports ClickHouse versions >= 24.3.
 
@@ -321,7 +320,7 @@ CLICKHOUSE_PASSWORD=clickhouse
 CLICKHOUSE_CLUSTER_ENABLED=false
 ```
 
-## Migrating to a New Instance [#migrating-to-a-new-instance]
+## Migrating to a New Instance
 
 You may want to move Langfuse to a different ClickHouse instance, e.g. when switching providers or moving from a single-node to a clustered setup.
 We recommend the following approach:
@@ -412,7 +411,7 @@ kubectl create secret generic clickhouse-encryption-key \
   --from-literal=key="00112233445566778899aabbccddeeff"
 ```
 
-## Blob Storage as Disk [#blob-storage-as-disk]
+## Blob Storage as Disk
 
 ClickHouse supports blob storages (AWS S3, Azure Blob Storage, Google Cloud Storage) as disks.
 This is useful for auto-scaling storages that live outside the container orchestrator and increases availability und durability of the data.
