@@ -1,21 +1,12 @@
 ---
 title: "How Langfuse runs ClickHouse at agent scale"
-date: 2026/07/22
+tags: [engineering]
 description: "Why Langfuse stores agent traces in ClickHouse and how we operate it at scale: the data model, the write path, read isolation, and the trade-offs we engineer around."
-tag: engineering, architecture
-author: Jannik
 ---
 
-import { BlogHeader } from "@/components/blog/BlogHeader";
+# How Langfuse runs ClickHouse at agent scale
 
-<BlogHeader
-  title="How Langfuse runs ClickHouse at agent scale"
-  description="Why Langfuse stores agent traces in ClickHouse and how we operate it at scale: the data model, the write path, read isolation, and the trade-offs we engineer around."
-  date="July 22, 2026"
-  authors={["jannikmaierhoefer"]}
-/>
-
-Langfuse stores every trace, observation, and score in ClickHouse. The same architecture serves Langfuse Cloud, where we hold petabytes of tracing data for thousands of teams, and self-hosted deployments, which run the exact same open-source codebase. Agent workloads are the reason this architecture looks the way it does: deep traces, high write volume, and analytical read patterns are a poor fit for a row store and a natural fit for a columnar one, provided you design around the trade-offs a columnar database makes.
+Langfuse stores every trace, observation, and score in ClickHouse. The same architecture serves Langfuse Cloud, where we hold petabytes of tracing data for thousands of teams, and self-hosted deployments, which run the exact same open-source codebase. Langfuse [joined ClickHouse](/blog/joining-clickhouse) at the beginning of 2026, so the team building the database and the team running one of its larger production workloads now work in the same company. Agent workloads are the reason this architecture looks the way it does: deep traces, high write volume, and analytical read patterns are a poor fit for a row store and a natural fit for a columnar one, provided you design around the trade-offs a columnar database makes.
 
 This post covers what agent traffic does to an observability datastore, how we model trace data in ClickHouse, how the write and read paths are built so that neither can starve the other, and where ClickHouse forces explicit engineering decisions rather than giving you something for free.
 

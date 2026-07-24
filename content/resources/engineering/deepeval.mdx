@@ -1,12 +1,12 @@
 ---
-title: "Langfuse Integration with DeepEval"
-sidebarTitle: DeepEval
+title: "Using DeepEval with Langfuse: LLM evaluation guide"
+tags: [guide]
 description: "Use DeepEval with Langfuse to evaluate LLM applications: run DeepEval metrics in your Python pipeline and store results as scores on traces and experiments."
 ---
 
 # LLM evaluation with DeepEval and Langfuse
 
-DeepEval and Langfuse work together through the Langfuse Python SDK: DeepEval computes the evaluation metric, and Langfuse stores the result as a [score](/docs/evaluation/scores/overview) attached to the trace or experiment run it belongs to. You keep DeepEval as your metric library and add tracing, score analytics, and experiment comparison on top. The integration is a few lines of Python in your existing evaluation code, with no additional service to deploy.
+DeepEval and Langfuse work together through the Langfuse Python SDK: DeepEval computes the evaluation metric, and Langfuse stores the result as a [score](/docs/evaluation/scores/overview) attached to the trace or experiment run it belongs to. You keep DeepEval as your metric library and add tracing, score analytics, and experiment comparison on top. The setup is a few lines of Python in your existing evaluation code, with no additional service to deploy.
 
 There are three common ways to combine the two:
 
@@ -24,7 +24,7 @@ There are three common ways to combine the two:
 
 Langfuse ([GitHub](https://github.com/langfuse/langfuse)) is an open-source platform for LLM [observability](/docs/observability/overview), [prompt management](/docs/prompt-management/overview), and [evaluation](/docs/evaluation/overview). It stores scores next to the traces and experiment runs they evaluate, so you can filter production traffic by quality, chart scores over time, and compare experiment runs side by side.
 
-## How the integration works [#how-it-works]
+## How DeepEval and Langfuse fit together [#how-it-works]
 
 DeepEval metrics run in your Python process, and Langfuse persists their results as scores. Langfuse [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) execute inside Langfuse with the language standard library only (as of July 2026), so third-party packages like DeepEval cannot run there. Run DeepEval where your code runs instead: in an evaluation pipeline that pushes [scores via the SDK](/docs/evaluation/evaluation-methods/scores-via-sdk), or in evaluator functions of an experiment. Each score stores the metric value, and the score comment carries DeepEval's reasoning, so results stay interpretable in the Langfuse UI.
 

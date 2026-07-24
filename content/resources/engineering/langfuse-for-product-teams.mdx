@@ -16,8 +16,6 @@ rest of the team can self-serve.
 in this guide is point-and-click: replay whole conversations in the session view, score and
 annotate them through annotation queues, chart user feedback and quality scores in custom
 dashboards, and ask questions about your data in plain language via the Langfuse Assistant.
-The honest limits as of July 2026: the sessions list cannot be filtered by properties of the
-traces inside a session, and the Assistant is a Cloud-only beta.
 
 ## What product teams need from LLM observability [#what-product-teams-need]
 
@@ -168,25 +166,6 @@ The rest of the setup checklist:
 
 After this, the review, annotation, dashboard, and Assistant workflows run without further
 engineering involvement.
-
-## Current limits for non-engineers [#current-limits]
-
-Some workflows product teams ask for are not in Langfuse yet. As of July 2026, these are the
-constraints worth knowing before you commit a review process to the tool:
-
-- **The sessions list cannot be filtered by properties of the traces inside a session**, such
-  as trace metadata or a per-trace score. The practical workaround is to filter the traces
-  table instead (it supports session ID as a column and rich per-trace filters) and open the
-  session from a matching trace.
-- **LLM-as-a-Judge evaluators run on traces and observations, not directly on sessions.** To
-  auto-evaluate whole conversations, the documented pattern is to evaluate a trace that
-  contains the full conversation history, optionally only on traces tagged as the final turn
-  of a conversation.
-- **The Assistant and the typed filter bar with Ask AI are Cloud features.** The Assistant is
-  a public beta on Langfuse Cloud and not available self-hosted; the filter search bar
-  requires the v4 data model, with open-source support to follow.
-- **Free-form text scores do not chart.** Numeric, categorical, and boolean scores aggregate
-  in dashboards and score analytics; text scores are for qualitative notes only.
 
 ## FAQ [#faq]
 
