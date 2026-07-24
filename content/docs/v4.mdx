@@ -1,82 +1,117 @@
 ---
-title: "Langfuse v4 is live"
-description: Langfuse v4 is live on Cloud, with an observations-first data model that makes tables, dashboards, APIs, and evaluations dramatically faster at scale.
+title: "Langfuse v4"
+seoTitle: "Langfuse v4: Faster observability for agentic applications"
+description: Langfuse v4 makes every LLM call, tool execution, and agent step directly queryable for faster debugging, evaluation, and analytics at scale.
 ---
 
-import { Book, Github, Table, GitCompare } from "lucide-react";
+import {
+  Book,
+  Cloud,
+  Github,
+  GitCompare,
+  Rocket,
+  Server,
+  Table,
+} from "lucide-react";
 import { Details, Summary } from "@/components/Details";
+import {
+  V4LandingHero,
+  V4WorkflowGrid,
+} from "@/components/V4Landing";
 import { VersionTimeline } from "@/components/VersionTimeline";
 import { ObservationsTableDiagram } from "@/components/ObservationsTableDiagram";
 
-# Langfuse v4 is live
+<V4LandingHero />
 
-Langfuse v4 is live on Langfuse Cloud. It makes tables, dashboards, APIs, and evaluations dramatically faster at scale. Dashboard load times for large projects improve by at least 10x.
+## Work at the level agents run [#workflows]
 
-At its core is an observations-first data model built for agentic systems. Query any LLM call, tool execution, or agent step directly, without costly joins or read-time deduplication.
+Agentic traces can contain hundreds or thousands of operations. The useful answer is often inside one model call, tool execution, or sub-agent—not at the top of the trace.
 
-<Callout type="info">
-New to Langfuse? There is nothing to migrate. Start with the [get started guide](/docs/observability/get-started); it already uses v4.
-</Callout>
+V4 makes observations the primary entity, so you can start with the question you want to answer and query the relevant operations directly.
 
-## What’s new [#what-changed]
+<V4WorkflowGrid />
 
-Every operation is now a first-class queryable object. Find slow LLM calls, expensive models, failed tool calls, or individual agent steps directly across any number of traces.
+## One table, every operation [#data-model]
 
-Under the hood, Langfuse stores one immutable observations table. A trace is all rows that share a `trace_id`, and trace-level attributes are copied onto every row:
+V4 stores every operation as an immutable observation. Trace attributes live on each row, while `trace_id` groups related observations into a trace.
+
+This removes costly joins and read-time deduplication from the most common queries. Tables, dashboards, APIs, and evaluations stay responsive as traces and projects grow.
 
 <ObservationsTableDiagram />
 
-**Trace-level input/output is deprecated across the product.** Tables, LLM-as-a-judge evaluators, and exports now read input and output from the relevant observation, usually the root span or LLM call.
-
-Selecting one observation instead of assembling data across an entire trace is more precise and a major reason v4 loads faster.
-
-Observations-first lets you query and evaluate the relevant sub-agent, tool call, or LLM call directly. Immutable observations also avoid repeated trace-output updates and costly read-time deduplication.
-
-Learn more in the [data model docs](/docs/observability/data-model#observations-and-traces) and the [observations guide](/faq/all/explore-observations-in-v4).
-
-## Timeline [#timeline]
-
-<VersionTimeline />
-
-On Langfuse Cloud, review your project's remaining [migration actions in the app](https://cloud.langfuse.com/project/~/v4).
-
-<Details>
-<Summary>Cloud rollout details (until the v4 cutover)</Summary>
-
-- Organizations created on or after April 14, 2026, 14:00 UTC run v4 by default and do not see a toggle.
-- Organizations created before that date can switch the **Preview** toggle (bottom-left in the UI) on and off until Langfuse Cloud becomes v4-only (date will follow).
-- Cloud projects created on or after May 20, 2026 are locked to the "enriched observations" export source; new legacy export integrations cannot be created since June 22, 2026.
-
-</Details>
-
-## Upgrade [#upgrade]
-
-Follow the [step-by-step upgrade guide](/faq/all/upgrade-to-langfuse-v4). It covers Langfuse Cloud, direct API and OpenTelemetry users, and self-hosted deployments.
-
-Check the [Versions & Compatibility matrix](/docs/compatibility#sdk-server) to see which SDK and server versions work together.
-
-## Questions [#questions]
-
-Ask rollout and migration questions in the dedicated [GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518); we use that thread for updates and answers.
+<Callout type="info" title="Input and output live on observations">
+Trace-level input and output are deprecated. Tables, evaluators, and exports now use the relevant observation—usually the root span or LLM call—so the selected data is precise and loads faster.
+</Callout>
 
 <Cards num={2}>
   <Card
-    title="Step-by-step upgrade guide"
-    href="/faq/all/upgrade-to-langfuse-v4"
+    title="Understand the v4 data model"
+    description="See how observations, traces, sessions, and scores relate."
+    href="/docs/observability/data-model#observations-and-traces"
     icon={<Book />}
   />
   <Card
-    title="Versions & Compatibility"
-    href="/docs/compatibility"
-    icon={<GitCompare />}
-  />
-  <Card
-    title="Working with observations"
+    title="Explore observations in the UI"
+    description="Build focused views for agents, tools, models, users, and sessions."
     href="/faq/all/explore-observations-in-v4"
     icon={<Table />}
   />
+</Cards>
+
+## Choose your path [#get-started]
+
+V4 is already the default for new Langfuse integrations. Existing projects can use the migration path that matches their deployment and ingestion setup.
+
+<Cards num={3}>
   <Card
-    title="Ask questions on Langfuse v4"
+    title="New to Langfuse"
+    description="Instrument an application with the current SDKs and start on v4."
+    href="/docs/observability/get-started"
+    icon={<Rocket />}
+  />
+  <Card
+    title="Langfuse Cloud"
+    description="Review the remaining migration actions for your project."
+    href="https://cloud.langfuse.com/project/~/v4"
+    icon={<Cloud />}
+  />
+  <Card
+    title="Upgrade an existing setup"
+    description="Follow the guide for SDKs, APIs, OpenTelemetry, and self-hosting."
+    href="/faq/all/upgrade-to-langfuse-v4"
+    icon={<Server />}
+  />
+</Cards>
+
+## Rollout timeline [#timeline]
+
+The timeline shows when V4 features become the only experience on Langfuse Cloud and when V4 reaches self-hosted deployments.
+
+<VersionTimeline />
+
+<Details>
+<Summary>Cloud rollout details</Summary>
+
+- Organizations created on or after April 14, 2026, 14:00 UTC run v4 by default and do not see a toggle.
+- Organizations created before that date can switch the **Preview** toggle in the bottom-left of the UI until Langfuse Cloud becomes v4-only.
+- Cloud projects created on or after May 20, 2026 use the enriched observations export source. New legacy export integrations cannot be created.
+
+</Details>
+
+## Go deeper [#resources]
+
+Use the compatibility matrix to plan versions, or join the V4 discussion for rollout questions and updates.
+
+<Cards num={2}>
+  <Card
+    title="Versions and compatibility"
+    description="Check which SDK and server versions work together."
+    href="/docs/compatibility#sdk-server"
+    icon={<GitCompare />}
+  />
+  <Card
+    title="V4 rollout discussion"
+    description="Ask questions and follow rollout updates on GitHub."
     href="https://github.com/orgs/langfuse/discussions/12518"
     icon={<Github />}
   />
