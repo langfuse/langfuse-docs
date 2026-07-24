@@ -8,6 +8,11 @@ sidebarTitle: Filter Search Bar
 
 The Filter Search Bar lets you filter and search the Observations and Traces tables by typing a single line of text instead of assembling filters in the sidebar. It parses your query into the same filters the sidebar produces, autocompletes fields and values as you type, and serializes the full query into the URL so you can share an exact view with a link.
 
+<Video
+  src="https://static.langfuse.com/docs-videos/2026-06-19-filter-search-bar.mp4"
+  aspectRatio={16 / 9}
+/>
+
 ```
 level:ERROR type:TOOL environment:production latency:>2 name:*checkout*
 ```
@@ -59,9 +64,9 @@ Use dot paths for nested fields:
 - `metadata.region:eu`
 - `scores.accuracy:>0.8`
 - `scores.is_hallucination:false`
-- `traceScores.helpfulness:positive`
+- `scores.helpfulness:positive`
 
-Score filters support numeric, categorical, and boolean values.
+`scores.*` matches a score by name regardless of its level, so a single namespace covers observation-, trace-, session-, and experiment-level scores. Score filters support numeric, categorical, and boolean values.
 
 Quote keys that contain spaces or special characters after the prefix: `scores."Answer Relevance":>=0.9`, `metadata."my key":eu`.
 
@@ -124,6 +129,10 @@ The full query is serialized into the URL, so sending someone the link reproduce
 ## Reserved tokens
 
 Some operator-like tokens are not supported yet and are flagged instead of being treated as text: `!`, and the lowercase words `and`, `or`, and `not`. Use `-field:value` to exclude and `field:(A OR B)` to match several values of one field. To search for a reserved word as literal text, quote it (`"or"`).
+
+## Incomplete filters
+
+A bare field name with no value, such as `type`, `level`, or `env` on its own, is not yet a complete expression. The bar flags it as invalid and does not apply it to the query until you finish it, for example `type:TOOL`. To search for one of these words as literal text instead, quote it (`"type"`).
 
 ## GitHub Discussions
 
