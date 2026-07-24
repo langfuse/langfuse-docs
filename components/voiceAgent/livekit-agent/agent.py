@@ -4,8 +4,9 @@ from datetime import datetime, timezone
 
 import httpx
 from dotenv import load_dotenv
-from langfuse import Langfuse, LangfuseSpan
+from langfuse import Langfuse
 from langfuse.media import LangfuseMedia
+from opentelemetry import trace as otel_trace
 from opentelemetry.sdk.trace import SpanProcessor, TracerProvider
 from opentelemetry.util.types import AttributeValue
 
@@ -160,26 +161,29 @@ class Alloy(Agent):
 
 server = AgentServer()
 
-# Wrapper root observations and Langfuse clients per room, shared between the
+# Wrapper root spans and Langfuse clients per room, shared between the
 # entrypoint and on_session_end.
-_recording_context: dict[str, tuple[LangfuseSpan, list[Langfuse]]] = {}
+_recording_context: dict[str, tuple[otel_trace.Span, list[Langfuse]]] = {}
 
 
 async def on_session_end(ctx: JobContext) -> None:
     """Attach the session recording to the conversation's root observation.
 
     Runs in-process after the AgentSession closed; the stereo OGG written by
-    `record={"audio": True}` is complete at this point. The wrapper root
-    observation opened in the entrypoint is still open, so the recording lands
-    directly in the top-level observation's metadata. The first region's client
-    uploads the file via the SDK's media handling; the remaining regions receive
-    the same file through their media API (the media ID is derived from the
-    file's SHA-256 client-side, so the reference is identical in every region).
+    `record={"audio": True}` is complete at this point. The wrapper root span
+    opened in the entrypoint is still open, so the media reference lands
+    directly in the top-level observation's metadata. The file is then uploaded
+    to every configured region through the Langfuse media API (the media ID is
+    derived from the file's SHA-256 client-side, so the reference is identical
+    in every region).
     """
     context = _recording_context.pop(ctx.room.name, None)
     if context is None:
         return
     root_span, langfuse_clients = context
+    span_context = root_span.get_span_context()
+    trace_id = format(span_context.trace_id, "032x")
+    observation_id = format(span_context.span_id, "016x")
 
     recording = None
     audio_bytes = b""
@@ -191,23 +195,26 @@ async def on_session_end(ctx: JobContext) -> None:
                 content_bytes=audio_bytes,
                 content_type="audio/ogg",
             )
-            # Uploads the file (via the first client, deduplicated by content
-            # hash) and renders as an audio player on the root observation.
-            root_span.update(metadata={"recording": recording})
+            # The media reference renders as an audio player on the root
+            # observation once the file is uploaded below.
+            root_span.set_attribute(
+                "langfuse.observation.metadata.recording",
+                recording._reference_string,
+            )
         else:
             logger.warning("no session recording found at %s", audio_path)
     finally:
         root_span.end()
 
-    # Upload the same file to the remaining regions so the media reference
+    # Upload the file to every configured region so the media reference
     # resolves everywhere.
     if recording is not None:
         sha256 = recording._content_sha256_hash
-        for client in langfuse_clients[1:]:
+        for client in langfuse_clients:
             try:
                 res = await client.async_api.media.get_upload_url(
-                    trace_id=root_span.trace_id,
-                    observation_id=root_span.id,
+                    trace_id=trace_id,
+                    observation_id=observation_id,
                     content_type="audio/ogg",
                     content_length=len(audio_bytes),
                     sha256hash=sha256,
@@ -233,10 +240,10 @@ async def on_session_end(ctx: JobContext) -> None:
                 logger.exception(
                     "failed to upload recording to %s", client._base_url
                 )
+        logger.info("attached session recording to trace %s", trace_id)
 
     for client in langfuse_clients:
         client.flush()
-    logger.info("attached session recording to trace %s", root_span.trace_id)
 
 
 @server.rtc_session(on_session_end=on_session_end)
@@ -264,15 +271,19 @@ async def entrypoint(ctx: JobContext):
     def _on_metrics_collected(ev: MetricsCollectedEvent):
         metrics.log_metrics(ev.metrics)
 
-    # Wrap the whole conversation in a root observation. LiveKit's agent_session
-    # span is created without an explicit OTel context, so it nests under this
-    # span, which stays open until on_session_end attaches the recording.
-    with langfuse_clients[0].start_as_current_observation(
-        name="voice-conversation",
-        end_on_exit=False,  # ended in on_session_end
-    ) as root_span:
-        _recording_context[ctx.room.name] = (root_span, langfuse_clients)
+    # Wrap the whole conversation in a root span. LiveKit's agent_session span
+    # is created without an explicit OTel context, so it nests under this span,
+    # which stays open until on_session_end attaches the recording.
+    #
+    # The span is created with a plain OTel tracer (NOT a Langfuse client): the
+    # LangfuseSpanProcessor only exports SDK-created spans to the project of
+    # the client that created them, so in this multi-region setup a raw span is
+    # the only kind that all regions' processors export.
+    tracer = trace_provider.get_tracer("voice-agent")
+    root_span = tracer.start_span("voice-conversation")
+    _recording_context[ctx.room.name] = (root_span, langfuse_clients)
 
+    with otel_trace.use_span(root_span, end_on_exit=False):  # ended in on_session_end
         await session.start(
             agent=Kelly(),
             room=ctx.room,
