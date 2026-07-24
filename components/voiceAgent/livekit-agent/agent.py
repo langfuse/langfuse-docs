@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from datetime import datetime, timezone
@@ -161,26 +162,36 @@ class Alloy(Agent):
 
 server = AgentServer()
 
-# Wrapper root spans and Langfuse clients per room, shared between the
-# entrypoint and on_session_end.
-_recording_context: dict[str, tuple[otel_trace.Span, list[Langfuse]]] = {}
+# Wrapper root spans, Langfuse clients, agent session, and the store-audio
+# preference per room, shared between the entrypoint and on_session_end.
+_recording_context: dict[
+    str, tuple[otel_trace.Span, list[Langfuse], AgentSession, bool]
+] = {}
+
+
+def _transcript_messages(session: AgentSession) -> list[dict[str, str]]:
+    """The conversation as chat messages (system prompt excluded)."""
+    return [
+        {"role": item.role, "content": item.text_content or ""}
+        for item in session.history.items
+        if item.type == "message" and item.role in ("user", "assistant")
+    ]
 
 
 async def on_session_end(ctx: JobContext) -> None:
-    """Attach the session recording to the conversation's root observation.
+    """Enrich the conversation's root observation once the session closed.
 
-    Runs in-process after the AgentSession closed; the stereo OGG written by
-    `record={"audio": True}` is complete at this point. The wrapper root span
-    opened in the entrypoint is still open, so the media reference lands
-    directly in the top-level observation's metadata. The file is then uploaded
-    to every configured region through the Langfuse media API (the media ID is
-    derived from the file's SHA-256 client-side, so the reference is identical
-    in every region).
+    The wrapper root span opened in the entrypoint is still open at this point,
+    so the full transcript lands on the top-level observation's input/output
+    and, if the user opted in, the stereo OGG written by `record={"audio": True}`
+    lands in its metadata. The file is then uploaded to every configured region
+    through the Langfuse media API (the media ID is derived from the file's
+    SHA-256 client-side, so the reference is identical in every region).
     """
     context = _recording_context.pop(ctx.room.name, None)
     if context is None:
         return
-    root_span, langfuse_clients = context
+    root_span, langfuse_clients, session, store_audio = context
     span_context = root_span.get_span_context()
     trace_id = format(span_context.trace_id, "032x")
     observation_id = format(span_context.span_id, "016x")
@@ -188,8 +199,27 @@ async def on_session_end(ctx: JobContext) -> None:
     recording = None
     audio_bytes = b""
     try:
+        # Full transcript as the root observation's input/output (lifts to the
+        # trace input/output as well).
+        messages = _transcript_messages(session)
+        if messages:
+            last = messages[-1]
+            if last["role"] == "assistant":
+                root_span.set_attribute(
+                    "langfuse.observation.input", json.dumps(messages[:-1])
+                )
+                root_span.set_attribute(
+                    "langfuse.observation.output", last["content"]
+                )
+            else:
+                root_span.set_attribute(
+                    "langfuse.observation.input", json.dumps(messages)
+                )
+
         audio_path = ctx.session_directory / "audio.ogg"
-        if audio_path.exists():
+        if not store_audio:
+            logger.info("audio recording disabled for this session")
+        elif audio_path.exists():
             audio_bytes = audio_path.read_bytes()
             recording = LangfuseMedia(
                 content_bytes=audio_bytes,
@@ -271,9 +301,14 @@ async def entrypoint(ctx: JobContext):
     def _on_metrics_collected(ev: MetricsCollectedEvent):
         metrics.log_metrics(ev.metrics)
 
+    # The demo UI sets the store_audio participant attribute via the access
+    # token ("Store audio recording on the trace" toggle, default on).
+    participant = await ctx.wait_for_participant()
+    store_audio = participant.attributes.get("store_audio", "true") != "false"
+
     # Wrap the whole conversation in a root span. LiveKit's agent_session span
     # is created without an explicit OTel context, so it nests under this span,
-    # which stays open until on_session_end attaches the recording.
+    # which stays open until on_session_end attaches transcript and recording.
     #
     # The span is created with a plain OTel tracer (NOT a Langfuse client): the
     # LangfuseSpanProcessor only exports SDK-created spans to the project of
@@ -281,15 +316,25 @@ async def entrypoint(ctx: JobContext):
     # the only kind that all regions' processors export.
     tracer = trace_provider.get_tracer("voice-agent")
     root_span = tracer.start_span("voice-conversation")
-    _recording_context[ctx.room.name] = (root_span, langfuse_clients)
+    _recording_context[ctx.room.name] = (
+        root_span,
+        langfuse_clients,
+        session,
+        store_audio,
+    )
 
     with otel_trace.use_span(root_span, end_on_exit=False):  # ended in on_session_end
         await session.start(
             agent=Kelly(),
             room=ctx.room,
-            # Record the conversation audio (stereo OGG in ctx.session_directory);
-            # other recording features stay off to keep prior behavior.
-            record={"audio": True, "traces": False, "logs": False, "transcript": False},
+            # Record the conversation audio (stereo OGG in ctx.session_directory)
+            # unless the user opted out; other recording features stay off.
+            record={
+                "audio": store_audio,
+                "traces": False,
+                "logs": False,
+                "transcript": False,
+            },
         )
 
 
