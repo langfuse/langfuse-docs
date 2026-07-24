@@ -24,26 +24,29 @@ _Example of a Pipecat agent conversation in Langfuse._
 
 - **Hierarchical Tracing**: Track entire conversations, turns, and service calls
 - **Service Tracing**: Detailed spans for TTS, STT, and LLM services with rich context
-- **TTFB Metrics**: Capture Time To First Byte metrics for latency analysis
-- **Usage Statistics**: Track character counts for TTS and token usage for LLMs
+- **Latency Metrics**: Capture time-to-first-byte (`metrics.ttfb`, in seconds) per service and end-to-end turn latency (`turn.user_bot_latency_seconds`)
+- **Usage Statistics**: Track character counts for TTS and token usage for LLMs, including audio and reasoning token counts for speech-to-speech models
 
 ## Trace Structure
 
 Traces are organized hierarchically:
 
 ```
-Conversation (conversation-uuid)
-├── turn-1
-│   ├── stt_deepgramsttservice
-│   ├── llm_openaillmservice
-│   └── tts_cartesiattsservice
-└── turn-2
-    ├── stt_deepgramsttservice
-    ├── llm_openaillmservice
-    └── tts_cartesiattsservice
-    turn-N
-    └── ...
+conversation
+├── turn
+│   ├── stt
+│   ├── llm
+│   └── tts
+└── turn
+    ├── stt
+    ├── llm
+    └── tts
 ```
+
+Speech-to-speech services (e.g., OpenAI Realtime, Gemini Live) emit a different hierarchy
+under each turn: `llm_setup`, `llm_response`, `llm_tool_call`, and `llm_tool_result` spans,
+with audio token usage reported via `gen_ai.usage.audio.input_tokens` and
+`gen_ai.usage.audio.output_tokens` (pipecat-ai 1.6.0+).
 
 This organization helps you track conversation-to-conversation and turn-to-turn.
 
@@ -51,9 +54,9 @@ This organization helps you track conversation-to-conversation and turn-to-turn.
 
 1. **One trace = one full conversation**: Due to the way Pipecat structures its OpenTelemetry spans, a single trace represents one complete conversation. This differs from the typical Langfuse pattern where one trace equals one interaction, and full conversations are grouped under a [session](/docs/observability/features/sessions). With Pipecat, there's no need to group traces under a session—your entire conversation is already contained within a single trace.
 
-2. **Default trace name**: By default, all traces are named `conversation` or the conversation uuid. See [Renaming Traces](#renaming-traces) below for an example of how to patch the spans to customize your trace name.
+2. **Default trace name**: By default, all traces are named `conversation` or the conversation uuid. See [Set the trace name, session, and user](#renaming-traces) below for how to customize this with `additional_span_attributes`.
 
-Learn more about Pipecat span attributes in the [Pipecat documentation](https://docs.pipecat.ai/server/utilities/opentelemetry).
+Learn more about Pipecat span attributes in the [Pipecat documentation](https://docs.pipecat.ai/api-reference/server/utilities/opentelemetry).
 
 ## End-to-end Examples
 
@@ -104,13 +107,22 @@ OTEL_EXPORTER_OTLP_HEADERS=Authorization=Basic%20<base64_encoded_api_key>,x-lang
 
 For more details, please refer to the Langfuse [OpenTelemetry documentation](/docs/opentelemetry/get-started).
 
-### Add OpenTelemetry to your Pipeline Task
+### Add OpenTelemetry to your Pipeline Worker
 
-Enable tracing in your Pipecat application:
+Install Pipecat with its tracing extra and the OTLP HTTP exporter:
+
+```bash
+pip install "pipecat-ai[tracing]" opentelemetry-exporter-otlp-proto-http
+```
+
+Then enable tracing in your Pipecat application:
 
 ```python filename="main.py"
 # Initialize OpenTelemetry with the http exporter
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+
+from pipecat.pipeline.worker import PipelineParams, PipelineWorker
+from pipecat.utils.tracing.setup import setup_tracing
 
 # Configured automatically from .env
 exporter = OTLPSpanExporter()
@@ -120,23 +132,53 @@ setup_tracing(
     exporter=exporter,
 )
 
-# Enable tracing in your PipelineTask
-task = PipelineTask(
+# Enable tracing in your PipelineWorker
+worker = PipelineWorker(
     pipeline,
     params=PipelineParams(
         allow_interruptions=True,
-        enable_metrics=True,  # Required for some service metrics
+        enable_metrics=True,  # Required for TTFB and processing-time metrics
+        enable_usage_metrics=True,  # Required for token/character usage
     ),
-    enable_tracing=True,  # Enables both turn and conversation tracing
+    enable_tracing=True,
     conversation_id="customer-123",  # Optional - will auto-generate if not provided
 )
 ```
 
+<Callout type="info">
+  `PipelineTask` was deprecated in pipecat-ai 1.3.0 in favor of `PipelineWorker`
+  (same parameters) and is scheduled for removal in 2.0. On older Pipecat versions,
+  use `PipelineTask` from `pipecat.pipeline.task` instead.
+</Callout>
+
 For more details, please refer to the [OpenTelemetry Python Documentation](https://opentelemetry-python.readthedocs.io/).
 
-### Add Trace Input and Output
+### Set the Trace Name, Session, and User [#renaming-traces]
 
-By default, Pipecat traces don't include the conversation input and output at the trace level. You can patch Pipecat's service decorators to set the `langfuse.trace.input` and `langfuse.trace.output` attributes, capturing the first LLM call's messages as the trace input and the last LLM response as the trace output:
+By default, all Pipecat traces are named `conversation` or use the conversation UUID. Pass
+`additional_span_attributes` to set attributes on the root `conversation` span — including
+Langfuse's [trace attributes](/docs/observability/features/metadata) such as the trace name,
+[session](/docs/observability/features/sessions), [user](/docs/observability/features/users),
+and tags — without any patching:
+
+```python filename="main.py"
+worker = PipelineWorker(
+    pipeline,
+    params=PipelineParams(enable_metrics=True, enable_usage_metrics=True),
+    enable_tracing=True,
+    conversation_id=conversation_id,
+    additional_span_attributes={
+        "langfuse.trace.name": "pipecat-chatbot",
+        "langfuse.session.id": conversation_id,
+        "langfuse.user.id": user_id,
+        "langfuse.trace.tags": ["voice-agent"],
+    },
+)
+```
+
+### Add Trace Input and Output (Optional)
+
+By default, Pipecat traces don't include the conversation input and output at the trace level. You can patch Pipecat's service decorators to set the `langfuse.trace.input` and `langfuse.trace.output` attributes, capturing the first LLM call's messages as the trace input and the last LLM response as the trace output (verified with pipecat-ai 1.6.0; this patch targets Pipecat internals and may need updating with future releases):
 
 ```python filename="main.py"
 def patch_trace_input_output():
@@ -166,44 +208,109 @@ def patch_trace_input_output():
 patch_trace_input_output()
 ```
 
-### Renaming Traces (Optional) [#renaming-traces]
+</Steps>
 
-By default, all Pipecat traces are named `conversation` or use the conversation UUID. To customize the trace name, extend the patch to set the `langfuse.trace.name` attribute:
+## Record and Attach Conversation Audio [#record-audio]
+
+Traces capture transcripts and timings; the recording captures how the conversation actually
+sounded. Pipecat's `AudioBufferProcessor` records both sides of the conversation, and
+Langfuse renders attached [audio files](/docs/observability/features/multi-modality) with an
+audio player on the trace.
+
+Because Pipecat owns the root span, capture the conversation's trace ID with a small span
+processor, then attach the recording to the trace when the audio buffer flushes. This
+requires the Langfuse Python SDK (`pip install langfuse`) and your `LANGFUSE_PUBLIC_KEY`,
+`LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` environment variables in addition to the OTLP
+exporter setup above:
 
 ```python filename="main.py"
-def patch_trace_name():
-    from pipecat.utils.tracing import service_decorators
-    original = service_decorators.add_llm_span_attributes
-    first_call = [True]
+import wave
 
-    def patched(span, *args, **kwargs):
-        original(span, *args, **kwargs)
+from langfuse import get_client
+from langfuse.media import LangfuseMedia
+from opentelemetry import trace
+from opentelemetry.sdk.trace import SpanProcessor
 
-        # Set a custom trace name on the first LLM call
-        if first_call[0]:
-            span.set_attribute("langfuse.trace.name", "pipecat-chatbot")
-            first_call[0] = False
+from pipecat.processors.audio.audio_buffer_processor import AudioBufferProcessor
 
-    service_decorators.add_llm_span_attributes = patched
 
-# Apply patch before tracing setup
-patch_trace_name()
+class RootTraceIdCapture(SpanProcessor):
+    """Remembers the trace ID of the conversation's root span."""
+
+    def __init__(self):
+        self.trace_id = None
+
+    def on_start(self, span, parent_context=None):
+        if span.parent is None and self.trace_id is None:
+            self.trace_id = format(span.get_span_context().trace_id, "032x")
+
+
+# Add after setup_tracing()
+capture = RootTraceIdCapture()
+trace.get_tracer_provider().add_span_processor(capture)
+
+audiobuffer = AudioBufferProcessor(
+    num_channels=2,  # stereo: user left, agent right
+    auto_start_recording=True,
+)
+
+pipeline = Pipeline(
+    [
+        transport.input(),
+        stt,
+        user_aggregator,
+        llm,
+        tts,
+        transport.output(),
+        audiobuffer,  # after transport.output() to capture what the user heard
+        assistant_aggregator,
+    ]
+)
+
+
+@audiobuffer.event_handler("on_audio_data")
+async def on_audio_data(buffer, audio, sample_rate, num_channels):
+    path = f"conversation-{conversation_id}.wav"
+    with wave.open(path, "wb") as wf:
+        wf.setnchannels(num_channels)
+        wf.setsampwidth(2)
+        wf.setframerate(sample_rate)
+        wf.writeframes(audio)
+
+    # Attach the recording to the conversation's trace in Langfuse
+    langfuse = get_client()
+    recording = LangfuseMedia(file_path=path, content_type="audio/wav")
+    with langfuse.start_as_current_span(
+        name="conversation-recording",
+        trace_context={"trace_id": capture.trace_id},
+    ) as span:
+        span.update_trace(metadata={"recording": recording})
+    langfuse.flush()
 ```
 
-You can combine both patches into a single function if you want to set the trace name, input, and output together.
+With the default `buffer_size=0`, `on_audio_data` fires once when recording stops at the end
+of the conversation. For long calls, set a positive `buffer_size` to stream audio chunks
+incrementally (see Pipecat's [audio recording guide](https://docs.pipecat.ai/pipecat/fundamentals/recording-audio)).
+For a broader overview of voice-agent tracing patterns, see
+[Trace voice agents in Langfuse](/resources/engineering/voice-agent-tracing).
 
-</Steps>
+## Masking Sensitive Content
+
+Pipecat exports raw conversation content in span attributes (LLM messages, transcripts, TTS
+text). Since spans go directly to the OTLP endpoint, redaction must happen client-side: add
+your own scrubbing `SpanProcessor` to the tracer provider before the exporter to remove or
+hash PII before it leaves your infrastructure.
 
 ## Understanding the Traces
 
 - **Conversation Spans**: The top-level span representing an entire conversation
-- **Turn Spans**: Child spans of conversations that represent each turn in the dialog
+- **Turn Spans**: Child spans of conversations that represent each turn in the dialog, with attributes like `turn.number`, `turn.was_interrupted`, and `turn.user_bot_latency_seconds` (time from the user finishing to the bot responding)
 - **Service Spans**: Detailed service operations nested under turns
 - **Service Attributes**: Each service includes rich context about its operation:
   - **TTS**: Voice ID, character count, service type
   - **STT**: Transcription text, language, model
-  - **LLM**: Messages, tokens used, model, service configuration
-- **Metrics**: Performance data like `metrics.ttfb_ms` and processing durations
+  - **LLM**: Messages, tokens used (`gen_ai.usage.input_tokens`/`output_tokens`, plus `gen_ai.usage.audio.*` for speech-to-speech models), model, provider (`gen_ai.provider.name`), service configuration
+- **Metrics**: Performance data like `metrics.ttfb` (time to first byte, in seconds) and processing durations
 
 ## How It Works
 
@@ -224,7 +331,9 @@ The tracing system consists of:
 ## References
 
 - [End-to-end example](https://github.com/pipecat-ai/pipecat-examples/tree/main/open-telemetry/langfuse)
-- [Pipecat Tracing Documentation](https://docs.pipecat.ai/server/utilities/opentelemetry)
+- [Pipecat Tracing Documentation](https://docs.pipecat.ai/api-reference/server/utilities/opentelemetry)
+- [Pipecat Audio Recording Guide](https://docs.pipecat.ai/pipecat/fundamentals/recording-audio)
+- [Trace voice agents in Langfuse](/resources/engineering/voice-agent-tracing)
 
 ## GitHub Discussions
 
