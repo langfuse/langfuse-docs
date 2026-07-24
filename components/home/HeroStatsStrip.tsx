@@ -12,7 +12,7 @@ function StatItems() {
   return (
     <>
       <Text size="s" className="whitespace-nowrap shrink-0">
-        Used by <b className="text-primary">19</b> of Fortune 50
+        Used by <b className="text-primary">21</b> of Fortune 50
       </Text>
       <Dot />
       <Text size="s" className="whitespace-nowrap shrink-0">
