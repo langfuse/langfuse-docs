@@ -3,6 +3,10 @@ import * as z from "zod/v3";
 import { PostHog } from "posthog-node";
 import { waitUntil } from "@vercel/functions";
 import { searchLangfuseDocsWithInkeep } from "@/lib/inkeep-search-backend";
+import {
+  buildDocsMcpFeedbackMessage,
+  sendFeedbackToSlack,
+} from "@/lib/feedback-slack";
 
 const posthog = process.env.NEXT_PUBLIC_POSTHOG_KEY
   ? new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
@@ -81,26 +85,10 @@ export const mcpHandler = createMcpHandler(
       },
       async (input) => {
         try {
-          // Same sink as the docs feedback widget (app/api/feedback/route.ts),
-          // tagged so MCP submissions are distinguishable downstream.
-          const webhookUrl = process.env.WEBSITE_FEEDBACK_WEBHOOK;
-          if (!webhookUrl) throw new Error("Feedback intake is not configured");
-
-          const response = await fetch(webhookUrl, {
-            method: "POST",
-            redirect: "error",
-            signal: AbortSignal.timeout(5000),
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              type: "docs-mcp-feedback",
-              ...input,
-            }),
-          });
-          if (!response.ok) {
-            throw new Error(`Feedback intake returned ${response.status}`);
-          }
+          const id = crypto.randomUUID();
+          await sendFeedbackToSlack(
+            buildDocsMcpFeedbackMessage({ id, ...input }),
+          );
 
           trackMcpToolUsage("submitFeedback", "success", {
             target_type: input.targetType,
@@ -109,7 +97,7 @@ export const mcpHandler = createMcpHandler(
             content: [
               {
                 type: "text",
-                text: "Feedback submitted to the Langfuse team. Thank you!",
+                text: `Feedback submitted to the Langfuse team. Reference ID: ${id}`,
               },
             ],
           };

@@ -1,34 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  buildDocsWebsiteFeedbackMessage,
+  sendFeedbackToSlack,
+} from "@/lib/feedback-slack";
 
 export const runtime = "edge";
 
 export async function POST(request: NextRequest) {
   try {
-    if (!process.env.WEBSITE_FEEDBACK_WEBHOOK) {
-      throw new Error("WEBSITE_FEEDBACK_WEBHOOK is not set");
+    const body = (await request.json()) as {
+      page?: unknown;
+      feedback?: unknown;
+      comment?: unknown;
+    };
+
+    const page = typeof body.page === "string" ? body.page : "";
+    const rating = typeof body.feedback === "string" ? body.feedback : "";
+    const comment =
+      typeof body.comment === "string" && body.comment.trim().length > 0
+        ? body.comment
+        : undefined;
+
+    if (!page || !["positive", "negative"].includes(rating)) {
+      return NextResponse.json({}, { status: 400, statusText: "Bad Request" });
     }
 
-    const body = await request.json();
-
-    const webhookResponse = await fetch(process.env.WEBSITE_FEEDBACK_WEBHOOK, {
-      method: "POST",
-      body: JSON.stringify({
-        type: "docs-feedback",
-        ...body,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (webhookResponse.status === 200) {
-      return NextResponse.json({ status: "OK" });
-    }
-    console.error(webhookResponse);
-    return NextResponse.json(
-      {},
-      { status: 500, statusText: "Internal Server Error" },
+    await sendFeedbackToSlack(
+      buildDocsWebsiteFeedbackMessage({ page, rating, comment }),
     );
+
+    return NextResponse.json({ status: "OK" });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
