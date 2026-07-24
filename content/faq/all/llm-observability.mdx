@@ -36,6 +36,36 @@ To evaluate the quality of LLM outputs, developers need to define and track rele
 
 Understanding user behavior and intent is crucial for LLM applications. Observability enables developers to classify and analyze user inputs, helping them adapt their applications to real-world contexts. This involves gathering insights into **user behavior, preferences, and pain points**, ultimately improving the overall user experience.
 
+## What Is an LLM Observability Platform? [#llm-observability-platform]
+
+An **LLM observability platform** is a system that captures every request an LLM application handles and turns that data into something a team can debug, evaluate, and improve. It replaces a patchwork of log files, evaluation scripts, and prompt spreadsheets with one place where execution data, quality scores, and prompts live together.
+
+Five capabilities define the category:
+
+| Capability             | What it covers                                                                                             |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Tracing                | Records each request with its prompts, model responses, token usage, latency, and tool or retrieval steps. |
+| Evaluation             | Attaches quality scores to outputs via automated evaluators, human annotation, or user feedback.           |
+| Prompt management      | Versions prompts centrally so they can be updated and rolled back without a code deployment.               |
+| Cost tracking          | Breaks down token usage and USD cost per model and usage type.                                             |
+| Dashboards and metrics | Aggregates traces and scores into charts for latency, cost, error rates, and quality over time.            |
+
+Langfuse is an open-source example of this category. It captures traces of complete application runs, including nested tool and retrieval steps, and lets teams score them with automated and manual evaluators. [Prompt management](/docs/prompt-management) versions prompts outside the codebase and caches them client-side, so retrieving them adds no latency. [Token and cost tracking](/docs/observability/features/token-and-cost-tracking) infers usage and USD cost from the model name or accepts exact values ingested via SDKs and integrations. To try the platform, [set up your first trace](/docs/observability/get-started); it works with any model or framework, and you can adopt the remaining capabilities incrementally.
+
+## How Do You Monitor LLM Outputs in Production? [#llm-output-monitoring]
+
+You monitor LLM outputs in production by attaching evaluation scores to live traces and then tracking, visualizing, and alerting on those scores, rather than reading individual outputs by hand. In Langfuse, four mechanisms work together:
+
+**1.** **Online evaluation** scores live production traffic automatically. An [LLM-as-a-Judge evaluator](/docs/evaluation/evaluation-methods/llm-as-a-judge) runs on incoming traces or observations and returns a numeric, categorical, or boolean score, for example a hallucination check that returns `true` or `false` per response.
+
+**2.** **User feedback** captures whether outputs actually helped users. Explicit signals like thumbs up/down, star ratings, and comments, or implicit signals like retries and accepted suggestions, are stored as [scores linked to traces](/docs/observability/features/user-feedback), so you can filter for poorly rated interactions and inspect the full context.
+
+**3.** **Dashboards** show how output quality develops over time. [Custom dashboards](/docs/metrics/features/custom-dashboards) chart score averages, cost, and latency from live data, with filters and breakdowns by model, user, environment, or score value.
+
+**4.** **Monitors** alert you when a metric crosses a threshold, so a quality regression does not depend on someone watching a chart. [Monitors](/docs/metrics/features/monitors) evaluate a metric over a time window, support warning and alert thresholds, and send notifications to Slack, trigger GitHub Actions, or call your own webhooks. As of July 2026, monitors also support boolean scores: the average of a boolean score is the share of `true` results, so you can alert when the rate of failed policy checks or detected hallucinations exceeds a limit you set.
+
+Together these mechanisms form a loop: evaluators and users score outputs, dashboards reveal trends, and monitors turn those trends into actionable alerts.
+
 ## How Langfuse Makes LLM Observability Easy
 
 Let's talk about **[Langfuse](/)**, the open-source AI engineering platform designed to tackle the challenges of LLM observability. Langfuse is **model and framework agnostic**, making it easy to integrate with various LLM applications.

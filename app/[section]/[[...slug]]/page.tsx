@@ -8,6 +8,7 @@ import {
   MARKETING_SECTIONS,
 } from "@/lib/section-registry";
 import { loadPage, buildSectionMetadata, primitiveOnly } from "@/lib/mdx-page";
+import { buildPageUrl } from "@/lib/og-url";
 import { getMDXComponents } from "@/mdx-components";
 import { WrappedDataProvider } from "@/components/wrapped/WrappedDataContext";
 import { DocBodyChrome } from "@/components/DocBodyChrome";
@@ -109,6 +110,12 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
     section,
     config.title,
     effectiveSlug,
+    // Marketing pages route as `/${section}` but use `[section]` as their
+    // Fumadocs slug, so the default `pagePath` would double the segment
+    // (e.g. `/careers/careers`). Pin the canonical to the real public path.
+    isMarketing
+      ? { canonicalFallback: buildPageUrl(`/${section}`) }
+      : undefined,
   );
 }
 
