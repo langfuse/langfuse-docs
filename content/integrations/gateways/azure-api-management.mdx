@@ -10,7 +10,7 @@ category: Integrations
 
 This guide covers one pattern: exposing an OpenTelemetry endpoint through Azure API Management (APIM) so that services inside your network send OTLP traces to a gateway-managed URL, and APIM forwards them to Langfuse. Teams that already route model traffic through APIM use this to keep telemetry egress under the same gateway governance as LLM calls: one approved egress point, gateway-side authentication, and no service talking to the internet directly.
 
-> **What is Azure API Management?** [Azure API Management](https://azure.microsoft.com/en-us/products/api-management) is Microsoft's managed API gateway. Enterprises commonly place it in front of Azure OpenAI to centralize authentication, apply quotas and policies, and keep model traffic inside their network perimeter.
+> **What is Azure API Management?** [Azure API Management](https://azure.microsoft.com/en-us/products/api-management) is Microsoft's managed API gateway. Enterprises commonly place it in front of Azure OpenAI to centralize authentication, apply quotas and policies, and keep model traffic inside their network perimeter; Microsoft documents this pattern as APIM's [AI gateway capabilities](https://learn.microsoft.com/en-us/azure/api-management/genai-gateway-capabilities).
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com/) is an open-source LLM engineering platform that helps teams trace, debug, and evaluate their LLM applications. Langfuse is not a proxy: your requests never pass through Langfuse on the way to the model, so it adds no hop to the gateway path.
 
@@ -21,7 +21,7 @@ This guide is about the telemetry route, not about instrumenting your applicatio
 Three parts make up the route:
 
 1. **Services export OTLP to the gateway.** Each service points its OpenTelemetry exporter at an APIM-managed URL instead of an external endpoint, so telemetry never leaves the network on its own path.
-2. **APIM forwards the spans to Langfuse.** An APIM API definition accepts the OTLP/HTTP requests and a policy forwards them to the Langfuse OTLP endpoint, attaching the Langfuse authentication header at the gateway. The policy configuration lives entirely on the Azure side; consult the Azure API Management documentation for the specifics of exposing a pass-through API and setting outbound headers.
+2. **APIM forwards the spans to Langfuse.** An [APIM API definition](https://learn.microsoft.com/en-us/azure/api-management/add-api-manually) accepts the OTLP/HTTP requests and a [policy](https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-policies) forwards them to the Langfuse OTLP endpoint, attaching the Langfuse authentication header at the gateway with the [set-header policy](https://learn.microsoft.com/en-us/azure/api-management/set-header-policy).
 3. **Langfuse ingests the spans.** Spans that carry [GenAI semantic convention](https://opentelemetry.io/docs/specs/semconv/gen-ai/) attributes (`gen_ai.*`) render as generations with model, token usage, and cost; surrounding spans nest around them as regular observations.
 
 The Langfuse-side contract is the same regardless of what forwards the spans: OTLP over HTTP with protobuf or JSON encoding (gRPC is not supported), sent to `/api/public/otel`, authenticated with Basic Auth built from your project API keys.
@@ -56,7 +56,7 @@ Langfuse Cloud also offers Japan (`https://jp.cloud.langfuse.com`) and HIPAA (`h
 
 ### Expose the OTel endpoint in APIM
 
-Create an APIM API that accepts `POST` requests for the OTLP path and forwards them to the Langfuse backend URL, attaching the two headers above in the outbound policy. Setting the Langfuse credentials at the gateway means services inside the network never hold Langfuse API keys. The policy specifics (API definition, `set-header`, backend configuration) are standard APIM configuration; consult the Azure API Management documentation.
+Create an APIM API that accepts `POST` requests for the OTLP path and forwards them to the Langfuse [backend](https://learn.microsoft.com/en-us/azure/api-management/backends) URL, attaching the two headers above in the outbound policy via [set-header](https://learn.microsoft.com/en-us/azure/api-management/set-header-policy). Setting the Langfuse credentials at the gateway means services inside the network never hold Langfuse API keys.
 
 ### Point your services at the gateway
 
@@ -67,7 +67,7 @@ OTEL_EXPORTER_OTLP_ENDPOINT="https://<your-apim-instance>.azure-api.net/<your-ot
 OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 ```
 
-If APIM requires a subscription key or other gateway-side authentication for the OTLP API, add it via `OTEL_EXPORTER_OTLP_HEADERS` per your gateway configuration.
+If APIM requires a [subscription key](https://learn.microsoft.com/en-us/azure/api-management/api-management-subscriptions) or other gateway-side authentication for the OTLP API, add it via `OTEL_EXPORTER_OTLP_HEADERS` per your gateway configuration.
 
 ### View traces in Langfuse
 
