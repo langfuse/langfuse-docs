@@ -51,6 +51,25 @@ curl http://localhost:3030/api/health
 - `200 OK` - Worker service is functioning normally and database connection is successful
 - `503 Service Unavailable` - Worker service is not functioning or cannot connect to the database
 
+**Event propagation staleness (v4 dual write):**
+
+While a [v3 to v4 migration](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#dual-write) runs in the `dual` write mode, the worker executes an event-propagation job that moves data from older SDKs into the new `events` tables.
+A dedicated probe can fail when this job stops making progress:
+
+```bash
+curl "http://localhost:3030/api/health?failIfEventPropagationStuck=true"
+```
+
+- Returns `503` when the job's last run started more than `LANGFUSE_EVENT_PROPAGATION_STUCK_THRESHOLD_MINUTES` (default `15`) ago. The response body includes diagnostics (last run time, current propagation delay).
+- The check reads only Redis and never fails on deployments where the job does not run (write mode `legacy` or `events_only`, or the queue consumer disabled), so it is safe to keep configured permanently.
+- A job that has never run — for example, on a deployment that has not enabled the `dual` write mode yet — is not considered stuck. The heartbeat lives in Redis, so it survives container restarts; see the probe guidance below for restarts.
+
+<Callout type="warning">
+
+When using this parameter in a Kubernetes liveness probe, set `initialDelaySeconds` to at least `60`: the heartbeat only refreshes when the job's minute-boundary cron next runs, so a shorter delay can crash-loop a freshly restarted container.
+
+</Callout>
+
 ## Readiness Check Endpoint
 
 The readiness check indicates whether the web application is ready to receive traffic, particularly useful during graceful shutdowns.
