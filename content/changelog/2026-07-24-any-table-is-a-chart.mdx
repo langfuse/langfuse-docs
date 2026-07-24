@@ -1,0 +1,49 @@
+---
+date: 2026-07-24
+title: "Any table is a chart"
+description: "Toggle the Observations table into a chart over the same query. Pick a chart type, metric, aggregation, and breakdown, then add it to a dashboard."
+author: Nikita Kabardin
+ogVideo: /images/changelog/2026-07-24-any-table-is-a-chart.mp4
+canonical: https://langfuse.com/docs/observability/features/events-table-charts
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+You already filter the Observations table down to the exact rows you care about. Now you can see that same slice as a chart without leaving the page. A **Table | Chart** toggle in the toolbar turns the current view into a time series, and a **Visualize** panel picks how to plot it.
+
+The chart runs on the same query as the table: the same filters, the same time range, the same data. You are not building a new query, you are looking at the one you already have from a different angle. Finding the rows and seeing their trend are now one action, so the path from noticing that something looks off to reading the trend behind it is a single toggle.
+
+## Shape the chart
+
+The **Visualize** panel defines the chart along four dimensions:
+
+- **Chart type**: Line, Area, Bars, Ranked, Pie, or Number.
+- **Metric**: Count, Latency, Cost, or Tokens.
+- **Aggregation**: Count, Sum, Average, or a percentile such as p95, with the options depending on the metric.
+- **Breakdown**: split by a dimension such as model, environment, or name, so each series is one value of that dimension.
+
+"Count of events by model" and "p95 latency by model" are two selections in the same panel over the same filtered rows.
+
+The chart reuses the table's filters, so the slice you charted is the slice you filtered to.
+
+## Add it to a dashboard
+
+When a view is worth keeping, **Add to dashboard** saves the current chart, filters and all, as a widget on one of your custom dashboards. The exploratory chart you built in the table graduates straight into a permanent tile you can arrange next to the rest.
+
+## Known limitations
+
+Some filters cannot be applied in chart view: filtering by a numeric measure such as latency, cost, or token count, and filtering by scores, metadata, comments, full-text search, or presence (`has:`) checks. Rather than hide the chart, Langfuse shows those filters deactivated in place, dimmed or struck through with a tooltip that they still apply to the table, and charts the remaining applicable filters.
+
+## Learn more
+
+<Cards num={1}>
+  <Card
+    title="Chart any table"
+    href="/docs/observability/features/events-table-charts"
+    icon={<Book />}
+    arrow
+  />
+</Cards>
