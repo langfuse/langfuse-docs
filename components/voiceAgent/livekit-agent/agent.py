@@ -27,7 +27,6 @@ from livekit.agents.telemetry import set_tracer_provider
 from livekit.agents.tts import FallbackAdapter as FallbackTTSAdapter
 from livekit.agents.voice import MetricsCollectedEvent
 from livekit.plugins import openai, silero
-from livekit.plugins.turn_detector.multilingual import MultilingualModel
 
 logger = logging.getLogger("langfuse-trace-example")
 
@@ -115,23 +114,24 @@ class Kelly(Agent):
             ),
             llm=FallbackLLMAdapter(
                 llm=[
-                    inference.LLM("openai/gpt-4.1-mini"),
-                    inference.LLM("google/gemini-2.5-flash"),
+                    inference.LLM("openai/gpt-5.4-mini"),
+                    inference.LLM("google/gemini-3.5-flash"),
                 ]
             ),
             stt=FallbackSTTAdapter(
                 stt=[
-                    inference.STT("deepgram/nova-3"),
-                    inference.STT("cartesia/ink-whisper"),
+                    inference.STT("deepgram/nova-3", language="multi"),
+                    inference.STT("assemblyai/universal-streaming"),
                 ]
             ),
             tts=FallbackTTSAdapter(
                 tts=[
-                    inference.TTS("cartesia"),
+                    inference.TTS("cartesia/sonic-3.5"),
                     inference.TTS("rime/arcana"),
                 ]
             ),
-            turn_detection=MultilingualModel(),
+            # Turn detection defaults to inference.TurnDetector() (the new
+            # audio-native end-of-turn model) in livekit-agents 1.6+.
         )
 
     async def on_enter(self):
