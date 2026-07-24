@@ -1,24 +1,24 @@
 ---
-title: Export Langfuse Data to Your Data Warehouse
-sidebarTitle: Export to Warehouse
-description: How to export Langfuse traces, observations, and scores to Snowflake, Databricks, BigQuery, or any data warehouse via blob storage exports or the API.
+title: Export Langfuse Data to ClickHouse
+sidebarTitle: Export to ClickHouse
+description: How to export Langfuse traces, observations, and scores to your ClickHouse data warehouse via blob storage exports or the API.
 ---
 
-# Export Langfuse Data to Your Data Warehouse
+# Export Langfuse Data to ClickHouse
 
-The recommended way to get Langfuse data into a data warehouse is a [scheduled blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) in Parquet format: Langfuse writes traces, observations, and scores to your S3, GCS, or Azure bucket on a schedule, and your warehouse ingests the files with its native object storage loader (external stages in Snowflake, Auto Loader in Databricks, and similar mechanisms elsewhere). For smaller or ad-hoc extractions, the [public API](/docs/api-and-data-platform/features/public-api) and [UI exports](/docs/api-and-data-platform/features/export-from-ui) are simpler alternatives.
+The recommended way to get Langfuse data into ClickHouse is a [scheduled blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) in Parquet format: Langfuse writes traces, observations, and scores to your S3, GCS, or Azure bucket on a schedule, and ClickHouse ingests the files with the [`s3` table function](https://clickhouse.com/docs/reference/functions/table-functions/s3) for batch loads or [ClickPipes](https://clickhouse.com/docs/integrations/clickpipes/object-storage/amazon-s3/overview) for continuous ingestion into ClickHouse Cloud. For smaller or ad-hoc extractions, the [public API](/docs/api-and-data-platform/features/public-api) and [UI exports](/docs/api-and-data-platform/features/export-from-ui) are simpler alternatives.
 
-This guide compares the three export paths, walks through the blob storage setup including bucket permissions, and shows warehouse-side loading patterns for Snowflake and Databricks.
+This guide compares the three export paths, walks through the blob storage setup including bucket permissions, and shows the ClickHouse-side loading patterns. ClickHouse is the warehouse we document here: Langfuse [joined ClickHouse](/blog/joining-clickhouse) in January 2026 and already uses ClickHouse as the main storage for traces, observations, and scores, so this is the destination we know best.
 
 ## Choose an export path [#export-paths]
 
-Use scheduled blob storage exports for continuous warehouse syncs, the public API for programmatic and selective extraction, and UI exports for one-off filtered downloads.
+Use scheduled blob storage exports for continuous ClickHouse syncs, the public API for programmatic and selective extraction, and UI exports for one-off filtered downloads.
 
-| Path                                                                               | Best for                                                          | Formats                   | Cadence                                    | Availability                               |
-| ---------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------- | ------------------------------------------ | ------------------------------------------ |
-| [Blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) | Continuous warehouse syncs, full-history backfills, large volumes | Parquet, CSV, JSON, JSONL | Every 20 minutes, hourly, daily, or weekly | Pro (Team add-on), Enterprise, self-hosted |
-| [Public API](/docs/api-and-data-platform/features/public-api)                      | Selective extraction, custom pipelines, evaluation workflows      | JSON                      | On demand                                  | All plans                                  |
-| [Export from UI](/docs/api-and-data-platform/features/export-from-ui)              | One-off downloads of a filtered table                             | CSV, JSON                 | Manual                                     | All plans                                  |
+| Path                                                                               | Best for                                                                | Formats                   | Cadence                                    | Availability                               |
+| ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------- | ------------------------------------------ | ------------------------------------------ |
+| [Blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) | Continuous syncs into ClickHouse, full-history backfills, large volumes | Parquet, CSV, JSON, JSONL | Every 20 minutes, hourly, daily, or weekly | Pro (Team add-on), Enterprise, self-hosted |
+| [Public API](/docs/api-and-data-platform/features/public-api)                      | Selective extraction, custom pipelines, evaluation workflows            | JSON                      | On demand                                  | All plans                                  |
+| [Export from UI](/docs/api-and-data-platform/features/export-from-ui)              | One-off downloads of a filtered table                                   | CSV, JSON                 | Manual                                     | All plans                                  |
 
 Two additional access paths cover adjacent use cases: the [Metrics API v2](/docs/metrics/features/metrics-api#v2) returns pre-aggregated cost, usage, latency, and score metrics if you only need aggregates in a BI tool, and the [PostHog](/integrations/analytics/posthog) and [Mixpanel](/integrations/analytics/mixpanel) integrations sync data to those analytics platforms directly.
 
@@ -63,7 +63,7 @@ Note that the `s3:ListBucket` statement must target the bucket ARN itself (witho
 
 ### Configure the integration
 
-Navigate to **Project Settings > Integrations > Blob Storage**, select your storage vendor, and fill in bucket, credentials, and an optional prefix. Choose the file type (**Parquet** is the default for new integrations and the best fit for warehouses, since files load without a per-field casting step), the export frequency, and the export source. Keep the default `Enriched observations (recommended)` source: it writes trace attributes such as `user_id`, `session_id`, and `tags` directly on each observation row, so no warehouse-side join is needed. (On self-hosted deployments, enriched export requires the v4 preview opt-in or a completed v4 migration; see the [export source details](/docs/api-and-data-platform/features/export-to-blob-storage) for what each source writes.) You can also narrow the exported columns via [field groups](/docs/api-and-data-platform/features/export-to-blob-storage#export-field-groups), for example to exclude the `io` group when prompts and completions should not leave Langfuse.
+Navigate to **Project Settings > Integrations > Blob Storage**, select your storage vendor, and fill in bucket, credentials, and an optional prefix. Choose the file type (**Parquet** is the default for new integrations and the best fit for ClickHouse, since files load without a per-field casting step), the export frequency, and the export source. Keep the default `Enriched observations (recommended)` source: it writes trace attributes such as `user_id`, `session_id`, and `tags` directly on each observation row, so no downstream join is needed. (On self-hosted deployments, enriched export requires the v4 preview opt-in or a completed v4 migration; see the [export source details](/docs/api-and-data-platform/features/export-to-blob-storage) for what each source writes.) You can also narrow the exported columns via [field groups](/docs/api-and-data-platform/features/export-to-blob-storage#export-field-groups), for example to exclude the `io` group when prompts and completions should not leave Langfuse.
 
 ### Choose an export mode
 
@@ -77,56 +77,79 @@ Use the **Validate** button to confirm Langfuse can write to the bucket, then en
 
 Everything can also be configured programmatically via `GET`/`PUT /api/public/integrations/blob-storage`; see the [API reference](https://api.reference.langfuse.com/#tag/blobstorageintegrations).
 
-## Load the exports into your warehouse [#load-into-warehouse]
+## Load the exports into ClickHouse [#load-into-clickhouse]
 
-Point your warehouse's object storage loader at the export directories: with the recommended source these are `{prefix}{project-id}/observations_v2/` and `{prefix}{project-id}/scores/`. List the objects in each directory and ingest what is there rather than assuming a fixed file-per-window pattern, because a window without data may produce an [empty file](/docs/api-and-data-platform/features/export-to-blob-storage#empty-files) or none for a given table.
+Point ClickHouse at the export directories: with the recommended source these are `{prefix}{project-id}/observations_v2/` and `{prefix}{project-id}/scores/`. Three ingestion patterns cover most setups: the `s3` table function for ad-hoc queries and batch loads on any ClickHouse deployment, ClickPipes for managed continuous ingestion into ClickHouse Cloud, and the `S3Queue` engine for continuous ingestion on self-managed ClickHouse. List the objects in each directory and ingest what is there rather than assuming a fixed file-per-window pattern, because a window without data may produce an [empty file](/docs/api-and-data-platform/features/export-to-blob-storage#empty-files) or none for a given table.
 
 To trigger loads event-driven instead of on a schedule, subscribe to your provider's object-created events with a prefix filter on `{prefix}{project-id}/manifests/`. Langfuse writes a [run manifest](/docs/api-and-data-platform/features/export-to-blob-storage#run-manifest) as the last object of every successful run, listing every file the run produced, so one manifest event equals one complete run. Provider-specific recipes (S3 Event Notifications, GCS Pub/Sub, Azure Event Grid) are in the [export events section](/docs/api-and-data-platform/features/export-to-blob-storage#export-events).
 
-The snippets below are illustrative warehouse-side patterns, not Langfuse features; adapt paths, authentication, and table definitions to your environment.
+The snippets below are ClickHouse-side patterns documented in the linked ClickHouse docs; adapt paths, authentication, and table definitions to your environment.
 
-### Snowflake [#snowflake]
+### Batch loads with the s3 table function [#s3-table-function]
 
-Create an external stage on the export directory and load with `COPY INTO`. Parquet files carry typed columns, so `MATCH_BY_COLUMN_NAME` maps them without per-field cast logic:
+The [`s3` table function](https://clickhouse.com/docs/reference/functions/table-functions/s3) reads files straight from the bucket, so you can inspect, query, and load the exports with plain SQL. Parquet files carry typed columns and ClickHouse [infers the schema](https://clickhouse.com/docs/concepts/features/interfaces/schema-inference) from them, so no column list is needed to get started:
 
 ```sql
-CREATE STAGE langfuse_observations_stage
-  URL = 's3://<my-bucket-name>/<prefix><project-id>/observations_v2/'
-  CREDENTIALS = (AWS_KEY_ID = '<key-id>' AWS_SECRET_KEY = '<secret>');
+-- Inspect the schema ClickHouse infers from the export files
+DESCRIBE s3(
+  'https://<my-bucket-name>.s3.amazonaws.com/<prefix><project-id>/observations_v2/*.parquet',
+  '<key-id>',
+  '<secret>',
+  'Parquet'
+);
 
-COPY INTO langfuse_observations
-  FROM @langfuse_observations_stage
-  FILE_FORMAT = (TYPE = PARQUET)
-  MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE;
+-- Create a destination table from the inferred schema
+CREATE TABLE langfuse_observations
+ENGINE = MergeTree
+ORDER BY () EMPTY AS
+SELECT * FROM s3(
+  'https://<my-bucket-name>.s3.amazonaws.com/<prefix><project-id>/observations_v2/*.parquet',
+  '<key-id>',
+  '<secret>',
+  'Parquet'
+);
+
+-- Load the files
+INSERT INTO langfuse_observations
+SELECT * FROM s3(
+  'https://<my-bucket-name>.s3.amazonaws.com/<prefix><project-id>/observations_v2/*.parquet',
+  '<key-id>',
+  '<secret>',
+  'Parquet'
+);
 ```
 
-`COPY INTO` skips files it has already loaded, so re-running the statement on a schedule gives you incremental ingestion. For continuous loading, put the same stage behind Snowpipe.
+`INSERT INTO ... SELECT` from `s3()` streams the data, so only a few blocks reside in memory at a time. The inferred schema maps columns to Nullable types and the example sets no sorting key; once your query patterns are clear, define explicit types and an `ORDER BY` key following the [schema design guide](https://clickhouse.com/docs/guides/clickhouse/data-modelling/schema-design). You can also skip loading entirely and query the Parquet files in place with `SELECT ... FROM s3(...)`.
 
-### Databricks [#databricks]
+One thing to know for recurring batch loads: the `s3` table function does not track which files it has already loaded, so re-running the same wildcard `INSERT` duplicates rows. Scope each run to new files, for example by deriving the file list from the [run manifest](/docs/api-and-data-platform/features/export-to-blob-storage#run-manifest) of each export run, or use one of the continuous options below, which track processed files for you.
 
-Auto Loader incrementally picks up new files as export runs land in the bucket:
+For exports written to GCS or Azure, the same pattern works with the [`gcs`](https://clickhouse.com/docs/reference/functions/table-functions/gcs) and [`azureBlobStorage`](https://clickhouse.com/docs/reference/functions/table-functions/azureBlobStorage) table functions.
 
-```python
-df = (
-    spark.readStream.format("cloudFiles")
-    .option("cloudFiles.format", "parquet")
-    .load("s3://<my-bucket-name>/<prefix><project-id>/observations_v2/")
+### Continuous ingestion with ClickPipes on ClickHouse Cloud [#clickpipes]
+
+[ClickPipes for object storage](https://clickhouse.com/docs/integrations/clickpipes/object-storage/amazon-s3/overview) is the managed way to keep ClickHouse Cloud tables in sync with the export bucket. A pipe supports one-time and continuous ingestion with exactly-once semantics, reads Parquet, CSV, TSV, JSON, and Avro, and works with [S3](https://clickhouse.com/docs/integrations/clickpipes/object-storage/amazon-s3/overview) and S3-compatible stores, [Google Cloud Storage](https://clickhouse.com/docs/integrations/clickpipes/object-storage/google-cloud-storage/overview), and [Azure Blob Storage](https://clickhouse.com/docs/integrations/clickpipes/object-storage/azure-blob-storage/overview) as sources.
+
+Create one pipe per table in the ClickHouse Cloud console, pointed at `<prefix><project-id>/observations_v2/*.parquet` and `<prefix><project-id>/scores/*.parquet`, and enable continuous ingestion. In continuous mode the pipe polls for new files (every 30 seconds by default) and by default expects each new file to sort lexicographically after the last ingested one. Langfuse export file names are timestamp stems such as `2026-07-13T09-00-00.parquet`, so each run's files sort after the previous run's and meet this requirement. One caveat: if you later [reset the export mode to re-export history](/docs/api-and-data-platform/features/export-to-blob-storage#re-exporting), the re-exported windows carry names that sort before the last ingested file, so load them with a separate one-time pipe or an `s3()` batch load instead.
+
+### Continuous ingestion with S3Queue on self-managed ClickHouse [#s3queue]
+
+On self-managed ClickHouse, the [S3Queue table engine](https://clickhouse.com/docs/reference/engines/table-engines/integrations/s3queue) provides the same continuous pattern: it tracks processed files and starts importing in the background as soon as a materialized view is attached to it.
+
+```sql
+CREATE TABLE langfuse_observations_queue
+ENGINE = S3Queue(
+  'https://<my-bucket-name>.s3.amazonaws.com/<prefix><project-id>/observations_v2/*.parquet',
+  '<key-id>',
+  '<secret>',
+  'Parquet'
 )
+SETTINGS mode = 'ordered';
 
-(
-    df.writeStream.option(
-        "checkpointLocation", "/Volumes/main/langfuse/checkpoints/observations"
-    )
-    .trigger(availableNow=True)
-    .toTable("main.langfuse.observations")
-)
+CREATE MATERIALIZED VIEW langfuse_observations_mv TO langfuse_observations AS
+SELECT * FROM langfuse_observations_queue;
 ```
 
-Repeat the pattern for the `scores/` directory. For analysis of the `metadata` column, parse the JSON-encoded string into a struct or map in a downstream transformation.
-
-### Other engines [#other-engines]
-
-The same directory-based pattern works anywhere Parquet loads from object storage: BigQuery loads the files from GCS with `LOAD DATA`, ClickHouse reads them via the `s3()` table function, and DuckDB or Athena can query the export files in place without loading them at all. If you run a managed ELT tool, use its object storage source connector against the export directories instead of building a custom loader.
+`ordered` mode processes files in lexicographic order, which matches the timestamp-stem file names Langfuse writes; the `mode` setting must be set explicitly on ClickHouse 24.6 and later. Repeat the queue-plus-view pair for the `scores/` directory.
 
 ## What the exported data contains [#exported-data]
 
@@ -190,21 +213,21 @@ The same endpoints are available with typed clients in the Python and JS/TS SDKs
 
 ## FAQ [#faq]
 
-### How do I export Langfuse data to Snowflake, Databricks, or BigQuery?
+### How do I export Langfuse data to ClickHouse?
 
-Set up a [scheduled blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) to S3, GCS, or Azure in Parquet format, then ingest the export directories with your warehouse's object storage loader (external stage plus `COPY INTO` in Snowflake, Auto Loader in Databricks, `LOAD DATA` in BigQuery). The exports run every 20 minutes, hourly, daily, or weekly and can backfill your full history.
+Set up a [scheduled blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) to S3, GCS, or Azure in Parquet format, then ingest the export directories with the [`s3` table function](#s3-table-function) for batch loads, [ClickPipes](#clickpipes) for continuous ingestion into ClickHouse Cloud, or the [S3Queue engine](#s3queue) on self-managed ClickHouse. The exports run every 20 minutes, hourly, daily, or weekly and can backfill your full history.
 
-### Does Langfuse have a native Snowflake, Databricks, or ELT connector?
+### Does Langfuse have a native ClickHouse connector?
 
-As of July 2026, Langfuse does not offer a native warehouse connector. The supported pattern is the blob storage export, which writes warehouse-ready Parquet files to your own bucket; ELT tools with an object storage source can ingest these directories like any other file feed. Native analytics integrations exist for [PostHog](/integrations/analytics/posthog) and [Mixpanel](/integrations/analytics/mixpanel).
+As of July 2026, Langfuse does not offer a native warehouse connector. The supported pattern is the blob storage export, which writes ClickHouse-ready Parquet files to your own bucket; ClickPipes, the `S3Queue` engine, and the `s3` table function all ingest these directories without extra tooling. Native analytics integrations exist for [PostHog](/integrations/analytics/posthog) and [Mixpanel](/integrations/analytics/mixpanel).
 
 ### Can I export all historical data as a one-time backfill?
 
 Yes. Create a blob storage integration with the export mode set to `Full history`, and it backfills from the earliest data in your project before continuing on the regular schedule. Changing an existing integration's export mode resets its sync position, so you can also use it to re-scan history.
 
-### Which export file format should I use for a warehouse?
+### Which export file format should I use for ClickHouse?
 
-Use Parquet, the default for new integrations. Parquet files carry typed columns, load directly into warehouses and query engines without per-field casting, and are compressed by the storage engine itself. One caveat: Parquet observation exports omit the per-unit price columns (`input_price`, `output_price`, `total_price`); use `cost_details` and `total_cost` for cost data, which are included in every format.
+Use Parquet, the default for new integrations. Parquet files carry typed columns, ClickHouse infers the table schema from them, and they are compressed by the storage engine itself. One caveat: Parquet observation exports omit the per-unit price columns (`input_price`, `output_price`, `total_price`); use `cost_details` and `total_cost` for cost data, which are included in every format.
 
 ### Do data retention or deletion settings affect already exported files?
 
