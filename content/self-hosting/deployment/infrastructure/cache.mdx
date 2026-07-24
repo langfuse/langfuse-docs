@@ -18,9 +18,26 @@ It is used to accept new events quickly on the API and defer their processing an
 This allows Langfuse to handle request peaks gracefully.
 
 You can use a managed service on AWS, Azure, or GCP, or host it yourself.
-At least version 7 is required and the instance must have `maxmemory-policy=noeviction` configured.
+At least version 7 is required and the instance must have `maxmemory-policy=noeviction` configured. For Langfuse v4, Redis 7.2 is recommended — see the [v3 to v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#step-1).
 
 This guide covers how to configure Redis within Langfuse and what to keep in mind when bringing your own Redis.
+
+## Official and Community Support [#support]
+
+Langfuse works with Redis and Redis-compatible stores.
+We distinguish between officially supported and community-supported options:
+
+| Option                                                         | Support Level |
+| -------------------------------------------------------------- | ------------- |
+| [Redis](https://redis.io/) (>= 7, self-hosted or managed)      | Official      |
+| [Valkey](#valkey-vs-redis) (>= 8, self-hosted or managed)      | Official      |
+| Other Redis-compatible stores (e.g., Dragonfly, KeyDB, Garnet) | Community     |
+
+Managed services that run Redis or Valkey, such as [Amazon ElastiCache](https://aws.amazon.com/elasticache/redis/), [Azure Cache for Redis](https://azure.microsoft.com/en-us/products/cache/), and [GCP Memorystore](https://cloud.google.com/memorystore), are covered by the official support level.
+
+import SelfHostSupportLevels from "@/components-mdx/self-host-support-levels.mdx";
+
+<SelfHostSupportLevels />
 
 ## Configuration
 
@@ -74,19 +91,20 @@ OR
 
 ### Timeout Configuration
 
-Langfuse supports configurable Redis timeouts to enable fail-fast behavior during Redis outages. Without these, commands can hang indefinitely, causing cascading latency across the application.
+Langfuse applies a socket-level watchdog to every Redis connection it opens: if a connection is expecting data and receives none for 30 seconds, the client destroys the socket and reconnects. This prevents hung connections from blocking BullMQ worker concurrency slots indefinitely. Connections additionally use a fixed TCP keep-alive of 10 seconds to prevent middleboxes from killing idle connections.
 
-| Variable                           | Required / Default | Description                                                                                                                                                                                                   |
-| ---------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `REDIS_COMMAND_TIMEOUT`            | `2000`             | Timeout in milliseconds for individual Redis commands. Commands that exceed this timeout will fail immediately. Applies to the singleton cache client and the rate limiter.                                   |
-| `REDIS_REQUEST_SOCKET_TIMEOUT_MS`  | `5000`             | Socket timeout in milliseconds for request/response Redis connections (singleton cache client, rate limiter). Detects zombie connections by closing sockets that are idle beyond this duration.               |
-| `REDIS_BLOCKING_SOCKET_TIMEOUT_MS` | `30000`            | Socket timeout in milliseconds for all Redis connections including BullMQ queue workers. Set higher than `REDIS_REQUEST_SOCKET_TIMEOUT_MS` to accommodate blocking operations like `BZPOPMIN` used by BullMQ. |
+| Variable                  | Required / Default | Description                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `REDIS_SOCKET_TIMEOUT_MS` | `30000`            | Socket timeout in milliseconds for all Redis connections (web and worker, including BullMQ queue connections). Set to `0` to disable the watchdog. Positive values must be at least `10000`: BullMQ blocking commands (`BZPOPMIN`) legitimately idle for ~5 seconds between packets, and lower values cause healthy idle workers to cycle through reconnects. |
 
-<Callout type="info">
+#### Troubleshooting: `Socket timeout. Expecting data, but didn't receive any in 30000ms.`
 
-The default values are designed to work well for most deployments. Only adjust these if you are experiencing Redis connectivity issues or need to tune fail-fast behavior for your environment. The blocking socket timeout (30s) must be significantly larger than the BullMQ drain delay (~5s) to avoid premature socket closures on idle workers.
+This error is raised by the client-side watchdog described above, not by the Redis server — a healthy Redis instance does not rule it out. Common causes:
 
-</Callout>
+- **CPU starvation of the Langfuse container (most common):** if the Node.js event loop stalls, e.g. because the worker container is CPU-throttled, incoming Redis data is not processed in time and the watchdog fires even though Redis responded promptly. Increase the CPU allocation of the affected container — this has resolved the error for multiple self-hosted deployments even when average CPU utilization appeared low.
+- **Network middleboxes:** NAT gateways, proxies, or firewalls that silently drop connections between Langfuse and Redis.
+
+Raising `REDIS_SOCKET_TIMEOUT_MS` only lengthens the watchdog; it does not address CPU starvation and delays recovery from genuinely hung connections.
 
 ## Deployment Options
 
@@ -122,12 +140,12 @@ You must set the parameter `maxmemory-policy` to `noeviction` to ensure that the
 ### Redis on Kubernetes (Helm)
 
 Bitnami offers Helm Charts for [Redis](https://github.com/bitnami/charts/tree/main/bitnami/redis) and [Valkey](https://github.com/bitnami/charts/tree/main/bitnami/valkey).
-We use the Valkey chart as a dependency for [Langfuse K8s](https://github.com/bitnami/charts/tree/main/bitnami/clickhouse).
+We use the Valkey chart as a dependency for [Langfuse K8s](https://github.com/langfuse/langfuse-k8s).
 See [Langfuse on Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) for more details on how to deploy Langfuse on Kubernetes.
 
 #### Example Configuration
 
-For a minimum production setup, we recommend to use the following values.yaml overwrites when deploying the Clickhouse Helm chart:
+For a minimum production setup, we recommend to use the following values.yaml overwrites when deploying the Valkey Helm chart:
 
 ```yaml
 valkey:
@@ -313,10 +331,10 @@ For every ~100000 events per minute we recommend about 1GB of memory for the Red
 Redis allows users to restrict the keys and commands that a given user can access [Redis ACL Docs](https://redis.io/docs/latest/operate/oss_and_stack/management/security/acl/).
 Langfuse expects that the provided user has access to all keys and commands within the given database, i.e. the access control should be defined as `on ~* +@all`.
 
-## Valkey vs Redis
+## Valkey vs Redis [#valkey-vs-redis]
 
 [Valkey](https://github.com/valkey-io/valkey) was created as an open source (BSD) alternative to Redis.
 It is a drop-in replacement for Redis and is compatible with the Redis protocol.
-According to the maintainers their major version 8.0.0 retains compatibility to Redis v7 in most instances.
-We do not extensively test new Langfuse releases with Valkey, but have not encountered any issues in internal experiments using it.
-Therefore, you can consider Valkey as an option, but you may hit compatibility issues in case its behaviour diverges from Redis.
+According to the maintainers, major version 8.0.0 retains compatibility to Redis v7 in most instances.
+Both are [officially supported](#support) — Valkey is the default in our [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) deployment.
+If you notice diverging behavior between Redis and Valkey, please create a [GitHub issue](/issues).

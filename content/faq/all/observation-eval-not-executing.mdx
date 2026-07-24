@@ -48,11 +48,11 @@ You need version `4.0.0` or higher. If you're on v3, follow the [JS/TS v3 → v4
 </Tab>
 </LangTabs>
 
-**If you're using a custom ingestion pipeline** (not an SDK), you need to send data to the OTEL endpoint instead of the legacy ingestion endpoint. See [OpenTelemetry integration](/integrations/native/opentelemetry#opentelemetry-endpoint) for details on the endpoint format and authentication.
+**If you're using a custom ingestion pipeline** (not an SDK), you need to send data to the OTEL endpoint instead of the legacy ingestion endpoint. Follow the [custom ingestion migration guide](/integrations/native/opentelemetry/migration-to-v4) to convert legacy events and emit v4-ready observations.
 
 ## Trace-level attributes not propagated to observations
 
-When your evaluator uses trace-level filters like `tags`, `userId`, `sessionId`, or `metadata`, the evaluator checks these attributes **on the observation itself**, it does not look up the parent trace. If you only set these attributes on the trace (e.g., via `update_current_trace()`), the observations won't have them, and the evaluator won't match.
+When your evaluator uses trace-level filters like `tags`, `userId`, `sessionId`, or `metadata`, the evaluator checks these attributes **on the observation itself**, it does not look up the parent trace. If you only set these attributes on the trace (e.g., via `update_current_trace()` in Python SDK v3 / `updateActiveTrace()` in JS SDK v4 or earlier), the observations won't have them, and the evaluator won't match.
 
 **Solution**: Use `propagate_attributes()` (Python) or `propagateAttributes()` (JS/TS) to copy trace-level attributes to all observations created within a scope.
 

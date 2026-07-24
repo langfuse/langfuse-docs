@@ -13,7 +13,7 @@ Custom dashboards provide a flexible, self-service analytics solution built on a
 Whether you're monitoring production performance, analyzing user feedback trends, or correlating costs with quality metrics, dashboards give you the visualization tools to make data-driven decisions.
 
 <Callout type="info">
-On [Fast Preview](/docs/v4), some dashboard behaviors are slightly updated. See [Dashboard changes in Fast Preview](/faq/all/dashboard-changes-in-v4) for the full reference.
+On [Langfuse v4](/docs/v4), some dashboard behaviors are slightly updated. See [Dashboard changes in Langfuse v4](/faq/all/dashboard-changes-in-v4) for the full reference.
 </Callout>
 
 <iframe
@@ -90,7 +90,29 @@ Jump-start your analytics with Langfuse-curated dashboards that focus on common 
 - **Cost Dashboard**: Track token usage and associated costs over time
 - **Usage Dashboard**: Understand your Langfuse platform utilization
 
-These pre-built dashboards can be used as-is or cloned and customized to match your specific requirements.
+These pre-built dashboards can be used as-is, or edited freely. Langfuse-managed dashboards and widgets keep all of their edit controls (drag, resize, delete, add, and edit). The first change you make opens a dialog that duplicates the dashboard into your project and applies your change to the copy, so you customize a managed dashboard without touching the original.
+
+## Home dashboard
+
+Your project **Home** page is a dashboard. Out of the box it renders from a Langfuse-curated default: the classic overview (traces, model cost, latency percentiles, scores, and model usage), now built from regular widgets. Each project chooses which dashboard shows on Home:
+
+1. On **Home**, open the **dashboard selector** in the header and pick any dashboard to preview it there. The choice is reflected in the URL, so you can share the exact view.
+2. Click **Set as default** to make it the project's Home. This changes the page for everyone in the project, so you confirm before it applies.
+
+Because Home is a normal dashboard, every tile is a regular widget. You can drop the classic Home widgets (traces over time, model usage, latency percentiles, score analytics) onto any custom dashboard, or build your own Home from scratch.
+
+## Managing and sharing widgets
+
+Every widget, both on a dashboard tile and in the widget library, has a **⋯ menu**:
+
+- **Copy** copies the widget to your clipboard. Paste it onto any dashboard with **⌘/Ctrl+V**, and it is added and scrolled into view. Paste only activates when the clipboard actually holds a Langfuse widget.
+- **Duplicate** creates a copy of the widget in the current project.
+- **Download JSON** exports the widget as a portable file.
+
+Widgets and dashboards use a **versioned JSON format**. A widget carries `{"$langfuseWidget": true, "version": 1}`, and a dashboard the matching `$langfuseDashboard` envelope with each referenced widget's config inlined, so it travels without database IDs. That makes them portable across projects and instances:
+
+- **Export** a single widget or a whole dashboard as a JSON file.
+- **Import** by dragging the JSON file onto a dashboard. Langfuse validates that it is a Langfuse widget or dashboard and recreates the widgets in your project.
 
 ## Advanced Features
 
@@ -134,6 +156,19 @@ Export your dashboard data for further analysis or integration with external too
 - CSV export of dashboard data
 - Integration with external analytics tools
 - Programmatic access via the [Metrics API](/docs/metrics/features/metrics-api)
+
+### Manage Dashboards via API, CLI, and MCP [#manage-dashboards-via-api]
+
+Beyond the dashboard editor in the UI, you can create and manage dashboards, their tile placements, and reusable widgets programmatically:
+
+- **Public API**: Endpoints under `/api/public/unstable` cover dashboards, placements, and widgets. See the [dashboards](https://api.reference.langfuse.com/#tag/unstabledashboards) and [dashboard widgets](https://api.reference.langfuse.com/#tag/unstabledashboardwidgets) API references.
+- **Langfuse CLI**: The [CLI](/docs/api-and-data-platform/features/cli) picks up these endpoints automatically, so you can keep dashboard definitions in version control and apply them across projects and environments.
+- **MCP server**: The [Langfuse MCP server](/docs/api-and-data-platform/features/mcp-server) exposes the same operations as tools, letting AI agents build and edit dashboards with human-in-the-loop approval for changes. The same tools power the [Langfuse Assistant](/docs/langfuse-assistant) in the UI.
+
+<Callout type="info">
+  These endpoints and MCP tools are **unstable** and may change while the
+  dashboard and widget contract is being finalized.
+</Callout>
 
 ## Use Cases and Examples
 

@@ -1,11 +1,11 @@
-Editing an integration — credentials, bucket, prefix, frequency, file type, export source, field groups, or compression — applies to **future exports only**. It does not re-export data that was already exported (or skipped) under the previous configuration; the export continues from where it left off.
+Editing an integration (credentials, bucket, prefix, frequency, file type, export source, field groups, or compression) applies to **future exports only**. It does not re-export data that was already exported (or skipped) under the previous configuration; the export continues from where it left off.
 
 There are two ways to re-export historic data:
 
-1. **Change the Export Mode** (`Full history` / `From setup date` / `From custom date`). Changing the mode resets the sync position so the new mode's start-date logic takes effect — for example, switching to `Full history` re-scans from the earliest data. Editing other fields does not reset this.
+1. **Change the Export Mode** (`Full history` / `From setup date` / `From custom date`). Changing the mode resets the sync position so the new mode's start-date logic takes effect. For example, switching to `Full history` re-scans from the earliest data. Editing other fields does not reset this.
 2. **Reset the integration.** The **Reset** button removes the integration; you then reconfigure it from scratch and it starts fresh.
 
-**Run Now** triggers an immediate export of data **since the last sync** — it does not re-export history.
+**Run Now** triggers an immediate export of data **since the last sync**; it does not re-export history.
 
 <Callout type="info">
   The **Error** state is sticky: fixing a misconfiguration (for example, wrong credentials) does not immediately clear the Error badge or the "Last export failed" alert. The recorded error is cleared only when an export next succeeds. Use the **Validate** button to confirm a new configuration works without waiting for the next scheduled run.
