@@ -11,6 +11,7 @@ const features = [
   {
     icon: TextQuote,
     title: "Observability",
+    href: "#observability",
     items: [
       "Log traces",
       "Lowest level transparency",
@@ -20,6 +21,7 @@ const features = [
   {
     icon: GitPullRequestArrow,
     title: "Prompts",
+    href: "#prompts",
     items: [
       "Version control and deploy",
       "Collaborate on prompts",
@@ -29,6 +31,7 @@ const features = [
   {
     icon: ThumbsUp,
     title: "Evaluation",
+    href: "#evaluation",
     items: [
       "Measure output quality",
       "Monitor production health",
@@ -44,6 +47,14 @@ const platformFeature = {
     "API-first architecture",
     "Data exports to blob storage",
     "Enterprise security and administration",
+  ],
+  links: [
+    { label: "Metrics", href: "/docs/metrics/overview" },
+    {
+      label: "API & Data Platform",
+      href: "/docs/api-and-data-platform/overview",
+    },
+    { label: "Administration", href: "/docs/administration/overview" },
   ],
 };
 
@@ -72,6 +83,12 @@ export const FeatureOverview = () => {
                 </li>
               ))}
             </ul>
+            <a
+              href={feature.href}
+              className="mt-4 inline-flex w-fit text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
+              Learn more --&gt;
+            </a>
           </CornerBox>
         </div>
       ))}
@@ -95,6 +112,17 @@ export const FeatureOverview = () => {
               </li>
             ))}
           </ul>
+          <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
+            {platformFeature.links.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="inline-flex w-fit text-sm font-medium text-primary underline-offset-4 hover:underline"
+              >
+                {link.label} --&gt;
+              </a>
+            ))}
+          </div>
         </CornerBox>
       </div>
     </div>
