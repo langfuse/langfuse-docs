@@ -1,0 +1,155 @@
+---
+title: "Neon AI Gateway Integration"
+sidebarTitle: Neon AI Gateway
+description: "Learn how to integrate Langfuse with Neon AI Gateway using the OpenAI SDK."
+---
+
+# Neon AI Gateway Integration
+
+In this guide, we'll show you how to integrate [Langfuse](/) with [Neon AI Gateway](https://neon.com/docs/ai-gateway/overview).
+
+> **What is Neon AI Gateway?** [Neon AI Gateway](https://neon.com/docs/ai-gateway/overview) is an OpenAI-compatible inference endpoint provided by Neon. One Neon credential gives access to models from multiple providers, so there are no separate provider accounts or provider API keys. Each Neon branch has its own gateway host, and credentials are scoped to a branch and its descendants.
+
+> **What is Langfuse?** [Langfuse](/) is an open source AI engineering platform that helps teams trace LLM calls, monitor performance, and debug issues in their AI applications.
+
+Since Neon AI Gateway uses the OpenAI API schema, we can use Langfuse's native integration with the OpenAI SDK, available in both [Python](/integrations/model-providers/openai-py) and [TypeScript](/integrations/model-providers/openai-js).
+
+<Callout type="info">
+  Neon AI Gateway is in beta. It requires a paid Neon plan and a project in the AWS US East (Ohio) region (`aws-us-east-2`).
+</Callout>
+
+## Get started
+
+```bash
+pip install langfuse openai
+```
+
+Neon exposes two environment variables. `NEON_AI_GATEWAY_TOKEN` is the bearer credential and `NEON_AI_GATEWAY_BASE_URL` is the bare branch host with no path. Create the credential with the `ai_gateway:invoke` scope in the Neon Console, or run `neon env pull --file .env` to write both variables for the current branch. See [AI Gateway authentication](https://neon.com/docs/ai-gateway/authentication) for details.
+
+```python
+import os
+
+# Set your Langfuse API keys
+LANGFUSE_SECRET_KEY="sk-lf-..."
+LANGFUSE_PUBLIC_KEY="pk-lf-..."
+# 🇪🇺 EU region
+LANGFUSE_BASE_URL="https://cloud.langfuse.com"
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+
+# Neon AI Gateway credential and branch host
+os.environ["NEON_AI_GATEWAY_TOKEN"] = "nt_live_..."
+os.environ["NEON_AI_GATEWAY_BASE_URL"] = "https://<your-neon-branch-host>"
+```
+
+## Example 1: Simple LLM Call
+
+Neon serves chat completions at `/v1/chat/completions`, so append `/v1` to the branch host and pass the credential as `api_key`. The [Langfuse OpenAI SDK wrapper](/integrations/model-providers/openai-py) then logs each call as a generation.
+
+- `base_url` is the branch host plus `/v1`.
+- `model` takes a short Neon model ID such as `gpt-5-mini`, `gemini-3-flash`, or `qwen3-next-80b-a3b-instruct`.
+
+```python
+# Import the Langfuse OpenAI SDK wrapper
+from langfuse.openai import openai
+import os
+
+# Create an OpenAI client pointed at your Neon branch host
+client = openai.OpenAI(
+    api_key=os.environ["NEON_AI_GATEWAY_TOKEN"],
+    base_url=f"{os.environ['NEON_AI_GATEWAY_BASE_URL']}/v1",
+)
+
+# Make a chat completion request
+response = client.chat.completions.create(
+    model="gpt-5-mini",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Tell me a fun fact about space."}
+    ],
+    name="fun-fact-request"  # Optional: Name of the generation in Langfuse
+)
+
+# Print the assistant's reply
+print(response.choices[0].message.content)
+```
+
+## Example 2: Nested LLM Calls
+
+The `@observe()` decorator captures execution details of any Python function, including nested LLM calls, inputs, outputs, and execution times.
+
+```python
+from langfuse import observe
+from langfuse.openai import openai
+import os
+
+client = openai.OpenAI(
+    api_key=os.environ["NEON_AI_GATEWAY_TOKEN"],
+    base_url=f"{os.environ['NEON_AI_GATEWAY_BASE_URL']}/v1",
+)
+
+@observe()  # This decorator enables tracing of the function
+def analyze_text(text: str):
+    # First LLM call: Summarize the text
+    summary_response = summarize_text(text)
+    summary = summary_response.choices[0].message.content
+
+    # Second LLM call: Analyze the sentiment of the summary
+    sentiment_response = analyze_sentiment(summary)
+    sentiment = sentiment_response.choices[0].message.content
+
+    return {
+        "summary": summary,
+        "sentiment": sentiment
+    }
+
+@observe()  # Nested function to be traced
+def summarize_text(text: str):
+    return client.chat.completions.create(
+        model="gpt-5-mini",
+        messages=[
+            {"role": "system", "content": "You summarize texts in a concise manner."},
+            {"role": "user", "content": f"Summarize the following text:\n{text}"}
+        ],
+        name="summarize-text"
+    )
+
+@observe()  # Nested function to be traced
+def analyze_sentiment(summary: str):
+    return client.chat.completions.create(
+        model="gpt-5-mini",
+        messages=[
+            {"role": "system", "content": "You analyze the sentiment of texts."},
+            {"role": "user", "content": f"Analyze the sentiment of the following summary:\n{summary}"}
+        ],
+        name="analyze-sentiment"
+    )
+
+# Example usage
+text_to_analyze = "Neon branches a Postgres database in seconds, which makes preview environments cheap to create."
+analyze_text(text_to_analyze)
+```
+
+## Switching branches
+
+A Neon credential is valid on the branch it was created on and on every branch descended from it, so a credential minted on `main` also works for preview and CI branches forked from `main`. Only `NEON_AI_GATEWAY_BASE_URL` changes between environments. Point it at the branch you want to trace and the Langfuse traces follow.
+
+## Cost tracking
+
+Neon returns token usage but no cost field, and `GET /v1/models` currently reports `pricing` as `null`. Langfuse therefore has no cost to ingest for these generations, so cost is not tracked automatically. To see spend in Langfuse, define the Neon model IDs as [custom model definitions](/docs/observability/features/token-and-cost-tracking#custom-model-definitions) with prices from the [Neon model catalog](https://neon.com/docs/ai-gateway/models), which is also published as the [`neon` provider on models.dev](https://models.dev/providers/neon).
+
+Note that inference is free during the Neon beta, so any prices you configure describe what the models will cost once billing begins.
+
+## Response content shape
+
+For most models `message.content` is a plain string. For Gemini 3.x, `gpt-oss-120b`, and `qwen35-122b-a10b`, Neon returns an array of typed content blocks instead. Langfuse records whichever shape the model returns, so handle both in code that reads the completion:
+
+```python
+content = response.choices[0].message.content
+text = content if isinstance(content, str) else next(
+    (block["text"] for block in content if block.get("type") == "text"), ""
+)
+```
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
