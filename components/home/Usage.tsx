@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 // Export usage stats constants
 export const SDK_INSTALLS_PER_MONTH = 50_000_000;
 export const DOCKER_PULLS = 6_000_000;
-export const FORTUNE_500_COMPANIES = 63;
-export const FORTUNE_50_COMPANIES = 19;
+export const FORTUNE_500_COMPANIES = 129;
+export const FORTUNE_50_COMPANIES = 21;
 
 export const Usage = ({ noPadding = false }: { noPadding?: boolean }) => {
   const stats = [
