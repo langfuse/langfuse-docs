@@ -207,21 +207,43 @@ for (const filePath of walkDir(contentDir)) {
   }
 }
 
-fs.writeFileSync(
-  excludesFile,
-  JSON.stringify([...excludePaths].sort(), null, 2),
-);
-console.log(
-  `[generate-sitemap-excludes] Wrote ${excludePaths.size} excluded path(s) to .sitemap-excludes.json`,
-);
+async function main() {
+  // OpenAPI pages are virtual and have no content files for this script to
+  // discover. Generate their metadata from the same live schema and Fumadocs
+  // source options used by the docs renderer so sitemap routes stay exact.
+  const { loadOpenAPIReferencePages } =
+    await import("./openapi-reference-artifacts.mjs");
+  const openapiPages = await loadOpenAPIReferencePages();
+  for (const page of openapiPages) {
+    pagesByRoute.set(page.route, {
+      loc: page.route,
+      title: page.title,
+      ...(page.description ? { description: page.description } : {}),
+    });
+  }
 
-const allPages = [...pagesByRoute.values()].sort((a, b) =>
-  a.loc.localeCompare(b.loc),
-);
-const withLastmod = allPages.filter((p) => p.lastmod).length;
-const withDescription = allPages.filter((p) => p.description).length;
-fs.writeFileSync(allPagesFile, JSON.stringify(allPages, null, 2));
-console.log(
-  `[generate-sitemap-excludes] Wrote ${allPages.length} page(s) to .sitemap-all-pages.json ` +
-    `(${withLastmod} with lastmod, ${withDescription} with description)`,
-);
+  fs.writeFileSync(
+    excludesFile,
+    JSON.stringify([...excludePaths].sort(), null, 2),
+  );
+  console.log(
+    `[generate-sitemap-excludes] Wrote ${excludePaths.size} excluded path(s) to .sitemap-excludes.json`,
+  );
+
+  const allPages = [...pagesByRoute.values()].sort((a, b) =>
+    a.loc.localeCompare(b.loc),
+  );
+  const withLastmod = allPages.filter((p) => p.lastmod).length;
+  const withDescription = allPages.filter((p) => p.description).length;
+  fs.writeFileSync(allPagesFile, JSON.stringify(allPages, null, 2));
+  console.log(
+    `[generate-sitemap-excludes] Wrote ${allPages.length} page(s) to .sitemap-all-pages.json ` +
+      `(${withLastmod} with lastmod, ${withDescription} with description, ` +
+      `${openapiPages.length} virtual OpenAPI pages)`,
+  );
+}
+
+main().catch((error) => {
+  console.error("[generate-sitemap-excludes] Failed:", error);
+  process.exitCode = 1;
+});

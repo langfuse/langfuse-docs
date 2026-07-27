@@ -13,6 +13,7 @@ const INTRO_DESCRIPTION =
   "Langfuse is an **open-source AI engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow.";
 const MAIN_SECTIONS = ["docs", "integrations"];
 const OPTIONAL_SECTIONS = ["self-hosting"];
+const LLM_EXCLUDED_PATH_PREFIXES = ["/docs/api"];
 
 // Map section keys to sub-file names and display names
 const SECTION_CONFIG = {
@@ -39,6 +40,12 @@ function generateTitle(url) {
     .pop()
     .replace(/-/g, " ")
     .replace(/\b\w/g, (l) => l.toUpperCase());
+}
+
+function isExcludedFromLLMs(pathname) {
+  return LLM_EXCLUDED_PATH_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
 }
 
 // Load per-page metadata (title/description) keyed by URL pathname. Lets
@@ -96,6 +103,7 @@ async function generateLLMsList() {
     const urls = result.urlset.url.map((url) => url.loc[0]);
     urls.forEach((url) => {
       const pathname = new URL(url).pathname;
+      if (isExcludedFromLLMs(pathname)) return;
       const urlPath = pathname.split("/")[1]; // Get first part of path
       const meta = pageMeta.get(pathname) || {};
       const entry = {

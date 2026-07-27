@@ -50,7 +50,7 @@ import { Details, Summary } from "@/components/Details";
 
 // Lazy-load Video so @vidstack/react (~800 KB) is NOT bundled on every MDX page.
 // It only downloads on pages that actually render a <Video> tag.
-const Video = dynamic(() =>
+const LazyVideo = dynamic(() =>
   import("@/components/Video").then((m) => ({ default: m.Video })),
 );
 
@@ -93,7 +93,9 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     img: Image,
     p: MdxParagraph,
     Frame,
-    Video,
+    Video: (props: React.ComponentProps<typeof LazyVideo>) => (
+      <LazyVideo {...props} />
+    ),
     LangTabs,
     Callout,
     Tabs: LangTabsWithTab,

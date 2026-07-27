@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { HoverCorners } from "./ui/corner-box";
 
 export type PageFooterNavItem = {
-  name: string;
+  name: ReactNode;
   description?: string;
   url: string;
 };
@@ -24,12 +25,14 @@ type PageFooterNavLinkProps = {
 function PageFooterNavLink({ item, direction }: PageFooterNavLinkProps) {
   const label = direction === "next" ? "Next" : "Previous";
   const Icon = direction === "next" ? ArrowRight : ArrowLeft;
+  const ariaLabel =
+    typeof item.name === "string" ? `${label}: ${item.name}` : undefined;
 
   return (
     <Link
       className="group relative flex h-full min-h-18 items-center p-1 group button-wrapper cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       href={item.url}
-      aria-label={`${label}: ${item.name}`}
+      aria-label={ariaLabel}
     >
       <HoverCorners />
       <div

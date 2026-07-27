@@ -234,6 +234,11 @@ export default defineConfig({
     // CSS vars are generated and fumadocs-ui's CSS switches them per dark/light mode.
     rehypeCodeOptions: {
       lazy: false,
+      // Shiki 4 treats fenced language names as case-sensitive. Preserve
+      // historical docs that use the uppercase `JSON` fence label.
+      langAlias: {
+        JSON: "json",
+      },
       themes: {
         light: monokaiProLight,
         dark: "monokai",

@@ -55,7 +55,7 @@ const menuItems: {
       { name: "Self-Hosting", href: "/self-hosting" },
       { name: "SDKs", href: "/docs/observability/sdk/overview" },
       { name: "Integrations", href: "/integrations" },
-      { name: "API Reference", href: "/docs/api-and-data-platform/overview" },
+      { name: "API Reference", href: "/docs/api" },
       { name: "Status", href: "https://status.langfuse.com" },
       { name: "Talk to Us", href: "/talk-to-us" },
     ],

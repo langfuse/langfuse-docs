@@ -93,7 +93,10 @@ export function DocsBreadcrumb() {
       }
     }
 
-    result.unshift({ name: root.name, url: resolveSectionUrl(root) });
+    result.unshift({
+      name: root.name,
+      url: resolveSectionUrl(root as PageTree.Root | PageTree.Folder),
+    });
     return result;
   }, [path, root]);
 

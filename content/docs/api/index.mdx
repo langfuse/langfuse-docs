@@ -1,0 +1,46 @@
+---
+title: API reference
+sidebarTitle: API Reference
+description: Explore the Langfuse Public API and try requests from your browser.
+---
+
+# API reference
+
+Use the Langfuse Public API to access and manage traces, observations, scores, prompts, datasets, and other project resources.
+
+Choose an endpoint from the navigation to view its parameters, request and response schemas, code examples, and interactive playground.
+
+<Cards num={2}>
+  <Card
+    title="Public API guide"
+    description="Learn how to authenticate and use the Langfuse SDK API clients."
+    href="/docs/api-and-data-platform/features/public-api"
+  />
+  <Card
+    title="OpenAPI specification"
+    description="Download the complete OpenAPI specification."
+    href="https://cloud.langfuse.com/generated/api/openapi.yml"
+  />
+</Cards>
+
+## Authentication [#authentication]
+
+The API uses [Basic Auth](https://en.wikipedia.org/wiki/Basic_access_authentication). Create API keys in your Langfuse project settings, then use the public key as the username and the secret key as the password.
+
+```bash
+curl -u public-key:secret-key https://cloud.langfuse.com/api/public/projects
+```
+
+## API servers [#api-servers]
+
+Select the server for your Langfuse data region in the interactive API pages:
+
+| Region      | Server                                                        |
+| ----------- | ------------------------------------------------------------- |
+| Cloud EU    | `https://cloud.langfuse.com`                                  |
+| Cloud US    | `https://us.cloud.langfuse.com`                               |
+| Cloud Japan | `https://jp.cloud.langfuse.com`                               |
+| HIPAA US    | `https://hipaa.cloud.langfuse.com`                            |
+| Self-hosted | Your Langfuse deployment URL, such as `http://localhost:3000` |
+
+For self-hosted deployments, the available endpoints depend on the Langfuse version you run.

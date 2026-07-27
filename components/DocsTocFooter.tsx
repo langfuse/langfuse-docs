@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useI18n } from "fumadocs-ui/contexts/i18n";
 import React, { useState, useEffect, useMemo, forwardRef } from "react";
 import { allAuthors, Author, AuthorHoverCardContent } from "./Authors";
 import contributorsData from "@/data/generated/contributors.json";
@@ -129,7 +128,6 @@ const LocalizedLastUpdate = ({
   date: Date;
   className?: string;
 }) => {
-  const { text } = useI18n();
   const [formattedDate, setFormattedDate] = useState("");
 
   useEffect(() => {
@@ -138,7 +136,7 @@ const LocalizedLastUpdate = ({
 
   return (
     <p className={className}>
-      {text.lastUpdate}
+      Last updated on
       {formattedDate ? ` ${formattedDate}` : null}
     </p>
   );

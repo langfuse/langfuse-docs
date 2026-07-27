@@ -1,5 +1,7 @@
 import "server-only";
 import { loader } from "fumadocs-core/source";
+import { openapi } from "./openapi";
+import { OPENAPI_SOURCE_OPTIONS } from "./openapi-schema.js";
 import {
   docs,
   selfHosting,
@@ -78,9 +80,15 @@ const shortcutLinkTransformer: any = {
 // ---------------------------------------------------------------------------
 // Loaders
 // ---------------------------------------------------------------------------
+const openapiSource = await openapi.staticSource(OPENAPI_SOURCE_OPTIONS);
+
 export const source = loader({
   baseUrl: baseUrl("docs"),
-  source: docs.toFumadocsSource(),
+  source: {
+    docs: docs.toFumadocsSource(),
+    openapi: openapiSource,
+  },
+  plugins: [openapi.loaderPlugin()],
   pageTree: {
     idPrefix: "docs",
     transformers: [shortcutLinkTransformer, shortTitleTransformer],

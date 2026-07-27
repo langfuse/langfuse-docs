@@ -201,10 +201,6 @@ function applyOverrides() {
   }
 }
 
-cleanOutputDir();
-copyAll();
-applyOverrides();
-
 /**
  * Inline imports of MDX components from the components-mdx directory.
  * Only resolves paths starting with "@/components-mdx/".
@@ -285,3 +281,18 @@ function resolveComponentPath(rootDir, relImport) {
   if (fs.existsSync(withMd)) return withMd;
   return null;
 }
+
+async function main() {
+  cleanOutputDir();
+  copyAll();
+  applyOverrides();
+
+  const { generateOpenAPIMarkdown } =
+    await import("./openapi-reference-artifacts.mjs");
+  await generateOpenAPIMarkdown(OUTPUT_DIR);
+}
+
+main().catch((error) => {
+  console.error("copy_md_sources: failed:", error);
+  process.exitCode = 1;
+});

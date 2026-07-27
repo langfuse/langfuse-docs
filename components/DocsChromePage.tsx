@@ -8,6 +8,7 @@ import { DocBodyChrome } from "@/components/DocBodyChrome";
 import { DocsAndPageFooter } from "@/components/DocsAndPageFooter";
 import { DocsBreadcrumb } from "@/components/DocsBreadcrumb";
 import { getMDXComponents } from "@/mdx-components";
+import { OpenAPIPage } from "@/components/api-page";
 
 type BodyChromeProps = Omit<ComponentProps<typeof DocBodyChrome>, "children">;
 
@@ -42,6 +43,24 @@ export async function DocsChromePage({
   bottomSuffix?: ReactNode;
 }) {
   const data = page.data;
+  if (typeof data.getOpenAPIPageProps === "function") {
+    const toc: TOCItemType[] = data.toc ?? [];
+
+    return (
+      <DocsPage
+        full
+        className="openapi-docs-page"
+        toc={toc}
+        breadcrumb={{ component: <DocsBreadcrumb /> }}
+        footer={{ component: <DocsAndPageFooter /> }}
+      >
+        <div className="min-w-0 flex-1 py-4">
+          <OpenAPIPage {...data.getOpenAPIPageProps()} />
+        </div>
+      </DocsPage>
+    );
+  }
+
   const loaded =
     typeof data.load === "function"
       ? await data.load()

@@ -10,10 +10,16 @@ import {
   useFolderDepth,
 } from "fumadocs-ui/components/sidebar/base";
 import { useTreePath } from "fumadocs-ui/contexts/tree";
-import { isActive } from "fumadocs-ui/utils/urls";
 import type * as PageTree from "fumadocs-core/page-tree";
 
 import { cn } from "@/lib/utils";
+
+function isActive(href: string, pathname: string) {
+  const normalize = (value: string) =>
+    value.length > 1 && value.endsWith("/") ? value.slice(0, -1) : value;
+
+  return normalize(href) === normalize(pathname);
+}
 
 export const SIDEBAR_NAV_ROW_CLASS =
   "relative flex w-full max-w-[calc(100%-16px)] mx-auto flex-row items-center gap-2 rounded-lg p-2 text-start text-text-tertiary wrap-anywhere [&_svg]:size-4 [&_svg]:shrink-0 transition-colors hover:text-text-primary/80 hover:transition-none";
