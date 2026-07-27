@@ -104,7 +104,7 @@ The [MCP Reference](https://mcp.reference.langfuse.com) is the canonical source 
 
 ### Client Setup
 
-<Tabs items={["Claude Code", "Cursor", "Other MCP Clients"]}>
+<Tabs items={["Claude Code", "Codex", "Cursor", "Pi Agent", "Other MCP Clients"]}>
 
 <Tab>
 
@@ -137,6 +137,64 @@ The [MCP Reference](https://mcp.reference.langfuse.com) is the canonical source 
    ```
 
 2. Verify the connection by asking Claude Code to `list all prompts in the project`. Claude Code should use the `listPrompts` tool to return the list of prompts.
+
+</Tab>
+
+<Tab>
+
+1. Add the Langfuse MCP server to `~/.codex/config.toml`, replace `{your-base64-token}` with your encoded credentials:
+
+<Tabs items={["Cloud EU", "Cloud US", "Cloud Japan", "HIPAA US", "Self-Hosted"]}>
+
+<Tab>
+
+```toml filename="~/.codex/config.toml" /{your-base64-token}/
+[mcp_servers.langfuse]
+url = "https://cloud.langfuse.com/api/public/mcp"
+http_headers = { "Authorization" = "Basic {your-base64-token}" }
+```
+
+</Tab>
+<Tab>
+
+```toml filename="~/.codex/config.toml" /{your-base64-token}/
+[mcp_servers.langfuse]
+url = "https://us.cloud.langfuse.com/api/public/mcp"
+http_headers = { "Authorization" = "Basic {your-base64-token}" }
+```
+
+</Tab>
+<Tab>
+
+```toml filename="~/.codex/config.toml" /{your-base64-token}/
+[mcp_servers.langfuse]
+url = "https://jp.cloud.langfuse.com/api/public/mcp"
+http_headers = { "Authorization" = "Basic {your-base64-token}" }
+```
+
+</Tab>
+<Tab>
+
+```toml filename="~/.codex/config.toml" /{your-base64-token}/
+[mcp_servers.langfuse]
+url = "https://hipaa.cloud.langfuse.com/api/public/mcp"
+http_headers = { "Authorization" = "Basic {your-base64-token}" }
+```
+
+</Tab>
+<Tab>
+
+```toml filename="~/.codex/config.toml" /{your-base64-token}/
+[mcp_servers.langfuse]
+url = "https://your-domain.com/api/public/mcp"
+http_headers = { "Authorization" = "Basic {your-base64-token}" }
+```
+
+</Tab>
+</Tabs>
+
+2. Restart Codex and run `codex mcp list` to confirm the server is registered.
+3. Verify the connection by asking Codex to `list all prompts in the project`. Codex should use the `listPrompts` tool to return the list of prompts.
 
 </Tab>
 
@@ -243,6 +301,106 @@ The [MCP Reference](https://mcp.reference.langfuse.com) is the canonical source 
 
 5. Save the file and restart Cursor
 6. The server should appear in the MCP settings with a green dot indicating it's active
+
+</Tab>
+
+<Tab>
+
+[Pi](https://pi.dev) does not ship with built-in MCP support. Use the community-maintained [`pi-mcp-adapter`](https://github.com/nicobailon/pi-mcp-adapter) extension, which exposes MCP servers to Pi through a single proxy tool.
+
+1. Install the extension and restart Pi:
+
+   ```bash
+   pi install npm:pi-mcp-adapter
+   ```
+
+2. Add the Langfuse MCP server to `~/.pi/agent/mcp.json`, replace `{your-base64-token}` with your encoded credentials:
+
+<Tabs items={["Cloud EU", "Cloud US", "Cloud Japan", "HIPAA US", "Self-Hosted"]}>
+
+<Tab>
+
+```json filename="~/.pi/agent/mcp.json" /{your-base64-token}/
+{
+  "mcpServers": {
+    "langfuse": {
+      "url": "https://cloud.langfuse.com/api/public/mcp",
+      "headers": {
+        "Authorization": "Basic {your-base64-token}"
+      }
+    }
+  }
+}
+```
+
+</Tab>
+<Tab>
+
+```json filename="~/.pi/agent/mcp.json" /{your-base64-token}/
+{
+  "mcpServers": {
+    "langfuse": {
+      "url": "https://us.cloud.langfuse.com/api/public/mcp",
+      "headers": {
+        "Authorization": "Basic {your-base64-token}"
+      }
+    }
+  }
+}
+```
+
+</Tab>
+<Tab>
+
+```json filename="~/.pi/agent/mcp.json" /{your-base64-token}/
+{
+  "mcpServers": {
+    "langfuse": {
+      "url": "https://jp.cloud.langfuse.com/api/public/mcp",
+      "headers": {
+        "Authorization": "Basic {your-base64-token}"
+      }
+    }
+  }
+}
+```
+
+</Tab>
+<Tab>
+
+```json filename="~/.pi/agent/mcp.json" /{your-base64-token}/
+{
+  "mcpServers": {
+    "langfuse": {
+      "url": "https://hipaa.cloud.langfuse.com/api/public/mcp",
+      "headers": {
+        "Authorization": "Basic {your-base64-token}"
+      }
+    }
+  }
+}
+```
+
+</Tab>
+<Tab>
+
+```json filename="~/.pi/agent/mcp.json" /{your-base64-token}/
+{
+  "mcpServers": {
+    "langfuse": {
+      "url": "https://your-domain.com/api/public/mcp",
+      "headers": {
+        "Authorization": "Basic {your-base64-token}"
+      }
+    }
+  }
+}
+```
+
+</Tab>
+</Tabs>
+
+3. Restart Pi and verify the connection by asking Pi to `list all prompts in the project`. Pi should use the `listPrompts` tool via the MCP proxy to return the list of prompts.
 
 </Tab>
 
