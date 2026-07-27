@@ -32,6 +32,8 @@ type RiveAnimationProps = {
   /** Visual zoom factor (1 = default, >1 zoom in). */
   zoom?: number;
   autoplay?: boolean;
+  /** Called once when the Rive runtime has initialized this instance. */
+  onReady?: () => void;
   /** Called with the list of currently-active state names on every state machine transition. */
   onStateChange?: (states: string[]) => void;
   /**
@@ -74,11 +76,13 @@ function RiveInstance({
   zoom = 1,
   autoplay = true,
   onLoaded,
+  onReady,
   onStateChange,
   stateMachineBooleanInputs,
   stateMachineBooleanInputsOn,
   viewModelBooleanInputs,
 }: RiveAnimationProps & { onLoaded?: (smNames: string[]) => void }) {
+  const readyRiveRef = useRef<Rive | null>(null);
   const stateMachinesList =
     !stateMachine || stateMachine === "auto"
       ? undefined
@@ -140,7 +144,11 @@ function RiveInstance({
       }
     }
     onLoaded?.(rive.stateMachineNames ?? []);
-  }, [rive, onLoaded]);
+    if (readyRiveRef.current !== rive) {
+      readyRiveRef.current = rive;
+      onReady?.();
+    }
+  }, [rive, onLoaded, onReady]);
 
   useEffect(() => {
     if (!rive) return;

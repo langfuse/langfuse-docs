@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  useMemo,
-  useEffect,
-  useRef,
-  useCallback,
-  useReducer,
-  useState,
-} from "react";
+import { useEffect, useRef, useCallback, useReducer, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { TabContent } from "./TabContent";
@@ -113,6 +106,8 @@ export const FeatureTabs = ({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const reduceMotion = useReducedMotion();
   const [observeRoot, setObserveRoot] = useState<HTMLDivElement | null>(null);
+  const [isDesktopViewport, setIsDesktopViewport] = useState(false);
+  const [canPreloadNextImage, setCanPreloadNextImage] = useState(false);
   const isMountedRef = useRef(true);
 
   const isAutoAdvancePausedRef = useRef(state.isAutoAdvancePaused);
@@ -157,6 +152,36 @@ export const FeatureTabs = ({
       observer.disconnect();
     };
   }, [observeRoot]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 768px)");
+    const updateViewport = () => setIsDesktopViewport(mediaQuery.matches);
+
+    updateViewport();
+    mediaQuery.addEventListener("change", updateViewport);
+    return () => mediaQuery.removeEventListener("change", updateViewport);
+  }, []);
+
+  useEffect(() => {
+    if (!observeRoot || !isDesktopViewport || canPreloadNextImage) return;
+
+    if (!("IntersectionObserver" in window)) {
+      setCanPreloadNextImage(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setCanPreloadNextImage(true);
+        observer.disconnect();
+      },
+      { rootMargin: "600px 0px", threshold: 0 },
+    );
+
+    observer.observe(observeRoot);
+    return () => observer.disconnect();
+  }, [canPreloadNextImage, isDesktopViewport, observeRoot]);
 
   const clearAutoAdvanceTimer = useCallback(() => {
     if (autoAdvanceTimerRef.current) {
@@ -322,14 +347,8 @@ export const FeatureTabs = ({
 
   const activeIndex = features.findIndex((f) => f.id === activeTab);
   const n = features.length;
-  const preloadNeighborIndices = useMemo(() => {
-    if (n < 2 || activeIndex < 0) {
-      return new Set<number>();
-    }
-    const prev = (activeIndex - 1 + n) % n;
-    const next = (activeIndex + 1) % n;
-    return new Set([prev, next]);
-  }, [n, activeIndex]);
+  const nextFeature =
+    n > 1 && activeIndex >= 0 ? features[(activeIndex + 1) % n] : undefined;
 
   return (
     <div
@@ -347,35 +366,21 @@ export const FeatureTabs = ({
         )}
       </div>
 
-      {/* Preload light images for previous/next tab only (current is in TabContent) */}
-      <CornerBox
-        aria-hidden="true"
-        className="overflow-hidden absolute pointer-events-none"
-        style={{ width: 1, height: 1, opacity: 0.01 }}
-      >
-        {features.map((feature, index) => {
-          if (!preloadNeighborIndices.has(index)) {
-            return null;
-          }
-          const isNext = index === (activeIndex + 1 + n) % n;
-          return (
-            <div
-              key={`preload-${feature.id}`}
-              className="relative"
-              style={{ width: 806, height: 410 }}
-            >
-              <Image
-                src={feature.image.light}
-                alt=""
-                fill
-                quality={100}
-                sizes="806px"
-                loading={isNext ? "eager" : "lazy"}
-              />
-            </div>
-          );
-        })}
-      </CornerBox>
+      {isDesktopViewport && canPreloadNextImage && nextFeature ? (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute size-px overflow-hidden opacity-0"
+        >
+          <Image
+            src={nextFeature.image.light}
+            alt=""
+            fill
+            quality={85}
+            sizes="(min-width: 1280px) 808px, (min-width: 768px) 648px"
+            loading="eager"
+          />
+        </div>
+      ) : null}
 
       {/* Title bar with corner box */}
       <CornerBox
@@ -459,7 +464,7 @@ export const FeatureTabs = ({
                 animate="animate"
                 exit="exit"
               >
-                <TabContent feature={activeFeature} priority />
+                <TabContent feature={activeFeature} />
               </motion.div>
             ) : null}
           </AnimatePresence>
@@ -474,10 +479,10 @@ export const FeatureTabs = ({
             alt={mobileFeature?.image.alt}
             width={1360}
             height={1640}
-            quality={100}
+            quality={85}
             className="absolute left-0 top-0 min-w-full min-h-full object-cover object-top-left"
-            sizes="(min-width: 640px) 1360px"
-            priority
+            sizes="(max-width: 767px) calc(100vw - 32px)"
+            loading="lazy"
           />
         </div>
       </CornerBox>

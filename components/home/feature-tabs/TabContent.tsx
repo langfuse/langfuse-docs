@@ -7,11 +7,9 @@ import type { SyntheticEvent } from "react";
 export interface TabContentProps {
   feature: FeatureTabData;
   className?: string;
-  /** Pass false if this panel is off-screen or deprioritized for LCP. */
-  priority?: boolean;
 }
 
-export const TabContent = ({ feature, priority = true }: TabContentProps) => {
+export const TabContent = ({ feature }: TabContentProps) => {
   const handleImageError = useCallback(
     (e: SyntheticEvent<HTMLImageElement>) => {
       const img = e.currentTarget;
@@ -31,31 +29,18 @@ export const TabContent = ({ feature, priority = true }: TabContentProps) => {
     [],
   );
 
-  const sizes = "(min-width: 1280px) 2205px";
+  const sizes = "(min-width: 1280px) 808px, (min-width: 768px) 648px";
 
   return (
     <div className="relative w-full aspect-[2205/1291]">
-      {/* Light theme image */}
       <Image
         src={feature.image.light}
         alt={feature.image.alt}
         fill
-        quality={100}
-        className="object-contain object-center sm:object-cover sm:object-top-left dark:hidden"
+        quality={85}
+        className="object-contain object-center sm:object-cover sm:object-top-left"
         sizes={sizes}
-        priority={priority}
-        onError={handleImageError}
-      />
-
-      {/* Dark theme image */}
-      <Image
-        src={feature.image.dark}
-        alt={feature.image.alt}
-        fill
-        quality={100}
-        className="hidden object-contain object-center sm:object-cover sm:object-top-left dark:block"
-        sizes={sizes}
-        priority={priority}
+        loading="lazy"
         onError={handleImageError}
       />
     </div>

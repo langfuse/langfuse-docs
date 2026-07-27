@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { HomeSection } from "@/components/home/HomeSection";
 import { CornerBox, Heading, Link, TextHighlight } from "@/components/ui";
 import { Text } from "@/components/ui/text";
 
 const ASSISTANT_VIDEO_SRC =
   "https://static.langfuse.com/docs-videos/in-app-agent.mp4";
+const ASSISTANT_VIDEO_POSTER = "/images/home/in-app-agent-poster.webp";
 
 const ASSISTANT_HREF = "/docs/langfuse-assistant";
 
@@ -58,6 +60,58 @@ const ASSISTANT_USE_CASES = [
     detail: "Create regression datasets and score configs",
   },
 ];
+
+function DeferredAssistantVideo() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (!("IntersectionObserver" in window)) {
+      setShouldLoad(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setShouldLoad(true);
+        observer.disconnect();
+      },
+      { rootMargin: "800px 0px", threshold: 0 },
+    );
+
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
+
+  const handleCanPlay = () => {
+    const playPromise = videoRef.current?.play();
+    playPromise?.catch(() => {
+      // Autoplay can still be blocked by browser or user preferences.
+    });
+  };
+
+  return (
+    <div className="relative aspect-video w-full overflow-hidden rounded-[2px] border border-line-structure shadow-sm">
+      <video
+        ref={videoRef}
+        src={shouldLoad ? ASSISTANT_VIDEO_SRC : undefined}
+        poster={ASSISTANT_VIDEO_POSTER}
+        autoPlay
+        preload="none"
+        muted
+        loop
+        playsInline
+        onCanPlay={handleCanPlay}
+        aria-label="The Langfuse Assistant investigating project data in the Langfuse app"
+        className="absolute inset-0 size-full object-cover"
+      />
+    </div>
+  );
+}
 
 function ToolCard({ tool, index }: { tool: ToolItem; index: number }) {
   return (
@@ -150,15 +204,7 @@ function AssistantFeature() {
       </div>
 
       <div className="border-t border-line-structure bg-surface-1 p-3 sm:p-4">
-        <video
-          src={ASSISTANT_VIDEO_SRC}
-          autoPlay
-          muted
-          loop
-          playsInline
-          aria-label="The Langfuse Assistant investigating project data in the Langfuse app"
-          className="aspect-video h-auto w-full rounded-[2px] border border-line-structure object-cover shadow-sm"
-        />
+        <DeferredAssistantVideo />
       </div>
     </CornerBox>
   );

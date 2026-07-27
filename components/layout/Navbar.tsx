@@ -4,7 +4,7 @@ import { NavLinks } from "@/components/NavLinks";
 import { type SectionNavData } from "@/lib/nav-tree";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
-import InkeepSearchBar from "@/components/inkeep/InkeepSearchBar";
+import { InkeepSearchModal } from "@/components/inkeep/InkeepSearchModal";
 
 export const sectionNavData: SectionNavData[] = [
   { name: "Docs", href: "/docs" },
@@ -44,7 +44,6 @@ export function Navbar() {
           <div className="flex flex-1 gap-2 items-center px-2.5 py-3 rounded-sm bg-surface-1">
             <HiringBadge className="shrink-0" />
             <div className="flex flex-1 justify-center items-center min-w-0 gap-4">
-              <InkeepSearchBar className="hidden" />
               <NavLinks sectionNavData={sectionNavData} />
             </div>
           </div>
@@ -65,6 +64,7 @@ export function Navbar() {
           </div>
         </div>
       </nav>
+      <InkeepSearchModal />
     </header>
   );
 }

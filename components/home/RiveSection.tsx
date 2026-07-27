@@ -67,6 +67,8 @@ const LABELS: Record<string, RiveLabel> = {
 export const RiveSection = () => {
   const [label, setLabel] = useState<RiveLabel>(OVERVIEW);
   const [riveSectionInView, setRiveSectionInView] = useState(false);
+  const [shouldMountRive, setShouldMountRive] = useState(false);
+  const [riveReady, setRiveReady] = useState(false);
   const riveViewportRef = useRef<HTMLDivElement>(null);
   const inViewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -75,6 +77,10 @@ export const RiveSection = () => {
   useEffect(() => {
     const el = riveViewportRef.current;
     if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setRiveSectionInView(true);
+      return;
+    }
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -98,6 +104,27 @@ export const RiveSection = () => {
       observer.disconnect();
       if (inViewTimerRef.current) clearTimeout(inViewTimerRef.current);
     };
+  }, []);
+
+  useEffect(() => {
+    const el = riveViewportRef.current;
+    if (!el || !window.matchMedia("(min-width: 768px)").matches) return;
+
+    if (typeof IntersectionObserver === "undefined") {
+      setShouldMountRive(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setShouldMountRive(true);
+        observer.disconnect();
+      },
+      { threshold: 0, rootMargin: "600px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   const loadViewModelBooleans = useMemo(
@@ -134,6 +161,10 @@ export const RiveSection = () => {
     }
   }, []);
 
+  const handleRiveReady = useCallback(() => {
+    setRiveReady(true);
+  }, []);
+
   return (
     <HomeSection id="llm-engineering-loop" className="pt-[120px]">
       <div className="flex flex-col gap-4 items-start">
@@ -163,9 +194,8 @@ export const RiveSection = () => {
             alt="Langfuse platform overview"
             fill
             className="object-cover object-center -translate-y-4"
-            sizes="(max-width: 768px) 100vw, 800px"
-            quality={100}
-            priority
+            sizes="(max-width: 767px) calc(100vw - 32px)"
+            quality={85}
           />
         </div>
       </div>
@@ -178,15 +208,38 @@ export const RiveSection = () => {
           onPointerEnter={handlePointerEnter}
           onPointerLeave={handlePointerLeave}
         >
-          <RiveAnimation
-            src={RIVE_FILE}
-            stateMachine="Langfuse_SM"
-            fit="cover"
-            zoom={1.4}
-            className="w-full h-full -translate-x-4 -translate-y-6"
-            onStateChange={handleStateChange}
-            viewModelBooleanInputs={loadViewModelBooleans}
-          />
+          <div className="relative w-full h-full">
+            {!riveReady && (
+              <Image
+                src={RiveMock}
+                alt="Langfuse platform overview"
+                fill
+                className="object-cover object-center"
+                sizes="800px"
+                quality={85}
+              />
+            )}
+            {shouldMountRive && (
+              <div
+                className={
+                  riveReady
+                    ? "absolute inset-0 opacity-100"
+                    : "absolute inset-0 opacity-0"
+                }
+              >
+                <RiveAnimation
+                  src={RIVE_FILE}
+                  stateMachine="Langfuse_SM"
+                  fit="cover"
+                  zoom={1.4}
+                  className="w-full h-full -translate-x-4 -translate-y-6"
+                  onReady={handleRiveReady}
+                  onStateChange={handleStateChange}
+                  viewModelBooleanInputs={loadViewModelBooleans}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
