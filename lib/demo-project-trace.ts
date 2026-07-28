@@ -15,11 +15,6 @@ type PublicDemoTraceParams = {
   tags?: string[];
 };
 
-type PublishPublicDemoTraceParams = PublicDemoTraceParams & {
-  readbackAttempts?: number;
-  readbackDelayMs?: number;
-};
-
 type PublishableTrace = {
   traceId?: string;
   setTraceAsPublic: () => unknown;
@@ -84,9 +79,7 @@ export const publishPublicDemoTraceLink = async ({
   userId,
   sessionId,
   tags,
-  readbackAttempts = 9,
-  readbackDelayMs = 3000,
-}: PublishPublicDemoTraceParams): Promise<DemoTraceLink> => {
+}: PublicDemoTraceParams): Promise<DemoTraceLink> => {
   if (!traceId) {
     return {};
   }
@@ -99,16 +92,6 @@ export const publishPublicDemoTraceLink = async ({
       sessionId,
       tags,
     });
-
-    const isPublic = await waitForPublicTrace({
-      traceId,
-      attempts: readbackAttempts,
-      delayMs: readbackDelayMs,
-    });
-
-    if (!isPublic) {
-      return { traceId };
-    }
 
     return createDemoTraceLink(traceId);
   } catch (err) {
@@ -155,41 +138,3 @@ const createPublicDemoTraceEvent = async ({
     ],
   });
 };
-
-const waitForPublicTrace = async ({
-  traceId,
-  attempts,
-  delayMs,
-}: {
-  traceId: string;
-  attempts: number;
-  delayMs: number;
-}) => {
-  for (let attempt = 1; attempt <= attempts; attempt++) {
-    try {
-      const response = await demoProjectLangfuseClient.api.trace.get(traceId);
-      const trace =
-        typeof response === "object" && response !== null && "data" in response
-          ? response.data
-          : response;
-
-      if (isPublicTrace(trace)) {
-        return true;
-      }
-    } catch {
-      // Trace ingestion is eventually consistent; retry below.
-    }
-
-    if (attempt < attempts) {
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
-    }
-  }
-
-  return false;
-};
-
-const isPublicTrace = (trace: unknown): trace is { public: true } =>
-  typeof trace === "object" &&
-  trace !== null &&
-  "public" in trace &&
-  trace.public === true;

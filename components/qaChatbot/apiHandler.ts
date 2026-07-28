@@ -162,84 +162,134 @@ export const handler = async (req: Request) => {
               },
             );
 
-            const tools = await mcpClient.tools();
-
+            let mcpClientClosed = false;
             const closeMcpClient = async () => {
+              if (mcpClientClosed) return;
+              mcpClientClosed = true;
+
               await mcpClient.close().catch((err) => {
                 console.warn("Failed to close QA chatbot MCP client", err);
               });
             };
 
-            const result = streamText({
-              model: openai(String(prompt.config.model)),
-              providerOptions: {
-                openai: {
-                  reasoningSummary,
-                  textVerbosity,
-                  reasoningEffort,
-                } satisfies OpenAIResponsesProviderOptions,
-              },
-              instructions: systemPrompt || undefined,
-              messages: modelMessages,
-              tools: tools as Parameters<typeof streamText>[0]["tools"],
-              stopWhen: stepCountIs(10),
-              runtimeContext: {
-                langfusePrompt,
-              },
-              experimental_telemetry: {
-                isEnabled: true,
-                functionId: "qa-chatbot",
-                includeRuntimeContext: {
-                  langfusePrompt: true,
-                },
-                integrations: [langfuseAiTelemetry],
-              },
-              onError: async ({ error }) => {
+            let removeAbortHandler = () => {};
+
+            try {
+              const tools = await mcpClient.tools();
+              let outputText = "";
+              let traceMetadataEnqueued = false;
+
+              const finalizeTrace = async ({
+                output,
+                error,
+              }: {
+                output?: unknown;
+                error?: unknown;
+              } = {}) => {
                 await closeMcpClient();
-                await finishPublicTrace({ error });
-              },
-            });
+                await finishPublicTrace({ output, error });
+              };
 
-            let outputText = "";
-            const publicTraceStream = result
-              .toUIMessageStream({
-                generateMessageId: () => rootObservation.traceId,
-                sendSources: true,
-                sendReasoning: true,
-              })
-              .pipeThrough(
-                new TransformStream<any, any>({
-                  async transform(chunk, controller) {
-                    if (chunk.type === "text-delta") {
-                      outputText += chunk.delta;
-                    }
+              const enqueueTraceMetadata = (
+                controller: TransformStreamDefaultController<any>,
+              ) => {
+                if (!publishedTraceUrl || traceMetadataEnqueued) {
+                  return;
+                }
 
-                    if (chunk.type === "finish") {
-                      await closeMcpClient();
-                      await finishPublicTrace({ output: outputText });
+                traceMetadataEnqueued = true;
+                controller.enqueue({
+                  type: "message-metadata",
+                  messageMetadata: { traceUrl: publishedTraceUrl },
+                });
+              };
 
-                      if (publishedTraceUrl) {
-                        controller.enqueue({
-                          type: "message-metadata",
-                          messageMetadata: { traceUrl: publishedTraceUrl },
-                        });
+              const handleAbort = () => {
+                void finalizeTrace({
+                  output: outputText,
+                  error: new Error("Client aborted the response stream"),
+                });
+              };
+
+              removeAbortHandler = () => {
+                req.signal.removeEventListener("abort", handleAbort);
+              };
+
+              req.signal.addEventListener("abort", handleAbort, {
+                once: true,
+              });
+
+              const result = streamText({
+                model: openai(String(prompt.config.model)),
+                providerOptions: {
+                  openai: {
+                    reasoningSummary,
+                    textVerbosity,
+                    reasoningEffort,
+                  } satisfies OpenAIResponsesProviderOptions,
+                },
+                instructions: systemPrompt || undefined,
+                messages: modelMessages,
+                tools: tools as Parameters<typeof streamText>[0]["tools"],
+                stopWhen: stepCountIs(10),
+                runtimeContext: {
+                  langfusePrompt,
+                },
+                experimental_telemetry: {
+                  isEnabled: true,
+                  functionId: "qa-chatbot",
+                  includeRuntimeContext: {
+                    langfusePrompt: true,
+                  },
+                  integrations: [langfuseAiTelemetry],
+                },
+                onError: async ({ error }) => {
+                  removeAbortHandler();
+                  await finalizeTrace({ error });
+                },
+              });
+
+              const publicTraceStream = result
+                .toUIMessageStream({
+                  generateMessageId: () => rootObservation.traceId,
+                  sendSources: true,
+                  sendReasoning: true,
+                })
+                .pipeThrough(
+                  new TransformStream<any, any>({
+                    async transform(chunk, controller) {
+                      if (chunk.type === "text-delta") {
+                        outputText += chunk.delta;
                       }
-                    }
 
-                    controller.enqueue(chunk);
-                  },
-                  async flush() {
-                    if (!traceEnded) {
-                      await closeMcpClient();
-                      await finishPublicTrace({ output: outputText });
-                    }
-                  },
-                }),
-              );
+                      if (chunk.type === "finish") {
+                        removeAbortHandler();
+                        await finalizeTrace({ output: outputText });
+                        enqueueTraceMetadata(controller);
+                      }
 
-            return createUIMessageStreamResponse({
-              stream: publicTraceStream,
-            });
+                      controller.enqueue(chunk);
+                    },
+                    async flush(controller) {
+                      removeAbortHandler();
+
+                      if (!traceEnded) {
+                        await finalizeTrace({ output: outputText });
+                      }
+
+                      enqueueTraceMetadata(controller);
+                    },
+                  }),
+                );
+
+              return createUIMessageStreamResponse({
+                stream: publicTraceStream,
+              });
+            } catch (err) {
+              removeAbortHandler();
+              await closeMcpClient();
+              throw err;
+            }
           },
         );
       } catch (err) {
