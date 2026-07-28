@@ -248,7 +248,6 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                           >
                             <Response>{part.text}</Response>
                             {message.role === "assistant" &&
-                              isNotFirstMessage &&
                               isLastTextPart &&
                               isTraceLinkReady && (
                                 <DemoTraceLink
