@@ -643,7 +643,7 @@ console.log(await result.format());
 
 When setting up Experiments via SDK, it can be useful to allow triggering the experiment runs from the Langfuse UI.
 
-You need to set up a webhook to receive the trigger request from Langfuse.
+You need to set up an HTTP endpoint to receive the trigger request from Langfuse.
 
 <Steps>
 
@@ -670,6 +670,8 @@ You need to set up a webhook to receive the trigger request from Langfuse.
 
 **Enter** the URL of your external evaluation service that will receive the webhook when experiments are triggered.
 **Specify** a default config that will be sent to your webhook. Users can modify this when triggering experiments.
+
+Remote experiment trigger requests can optionally include the same HMAC-signed `x-langfuse-signature` header used by [prompt webhooks](/docs/prompt-management/features/webhooks-slack-integrations). Enable request signing in the setup form and configure additional custom headers in **Advanced Options**. Existing triggers without signing or custom headers continue to work. Your endpoint should return a 2xx response quickly and run the experiment asynchronously.
 
 <Frame className="max-w-lg">
   ![New Experiment Button](/images/docs/trigger-remote-experiment-2.png)

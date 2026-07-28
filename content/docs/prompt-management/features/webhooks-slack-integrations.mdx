@@ -54,7 +54,7 @@ Choose the prompt‑version actions that should fire the webhook:
 - **Headers**: Default headers include:
   - `Content-Type: application/json`
   - `User-Agent: Langfuse/1.0`
-  - `x-langfuse-signature: <sig>` (see note on HMAC signature verification below)
+  - `x-langfuse-signature: t=<timestamp>,v1=<signature>` (see note on HMAC signature verification below)
 - **Add custom static headers if required.**
 
 ### Inspect the payload
@@ -119,7 +119,7 @@ def verify_langfuse_signature(
     raw_body : str
         The request body exactly as received (no decoding or reformatting).
     signature_header : str
-        The value of the `Langfuse-Signature` header, e.g. "t=1720701136,s=0123abcd...".
+        The value of the `x-langfuse-signature` header, e.g. "t=1720701136,v1=0123abcd...".
     secret : str
         Your Langfuse signing secret.
 
