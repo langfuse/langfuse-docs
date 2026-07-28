@@ -1,15 +1,15 @@
 import { openai } from "@ai-sdk/openai";
 import { generateObject } from "ai";
 import { z } from "zod";
-import {
-  observe,
-  propagateAttributes,
-  setActiveTraceIO,
-  getActiveTraceId,
-} from "@langfuse/tracing";
-import { after } from "next/server";
+import { propagateAttributes, startActiveObservation } from "@langfuse/tracing";
+import { LangfuseVercelAiSdkIntegration } from "@langfuse/vercel-ai-sdk";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
+import {
+  createPublicDemoTraceLink,
+  makeDemoTracePublic,
+  publishPublicDemoTraceLink,
+} from "@/lib/demo-project-trace";
 
 const SentimentSchema = z.object({
   sentiment: z.enum(["positive", "negative", "neutral"]),
@@ -17,6 +17,8 @@ const SentimentSchema = z.object({
   explanation: z.string(),
   keyPhrases: z.array(z.string()),
 });
+
+const langfuseAiTelemetry = new LangfuseVercelAiSdkIntegration();
 
 export type SentimentResult = z.infer<typeof SentimentSchema>;
 
@@ -38,36 +40,80 @@ const handler = async (req: Request) => {
     });
   }
 
-  return propagateAttributes(
-    {
-      traceName: "Sentiment-Classifier",
-      tags: ["sentiment-classifier"],
-      userId,
-    },
-    async () => {
-      const traceId = getActiveTraceId();
-      setActiveTraceIO({ input: text });
-
+  return startActiveObservation(
+    "sentiment-classifier",
+    async (rootObservation) => {
       try {
-        const result = await generateObject({
-          model: openai("gpt-4o-mini"),
-          schema: SentimentSchema,
-          prompt: `Analyze the sentiment of the following text. Classify it as positive, negative, or neutral. Provide a confidence score between 0 and 1, a brief explanation of your reasoning, and extract the key phrases that influenced your classification.\n\nText: ${text}`,
-          telemetry: {
-            functionId: "sentiment-classifier",
+        return await propagateAttributes(
+          {
+            traceName: "Sentiment-Classifier",
+            tags: ["sentiment-classifier"],
+            userId,
           },
-        });
+          async () => {
+            rootObservation.update({ input: text });
+            rootObservation.setTraceIO({ input: text });
+            makeDemoTracePublic(rootObservation);
+            await createPublicDemoTraceLink({
+              traceId: rootObservation.traceId,
+              name: "Sentiment-Classifier",
+              input: text,
+              userId,
+              tags: ["sentiment-classifier"],
+            });
 
-        setActiveTraceIO({ output: result.object });
+            const result = await generateObject({
+              model: openai("gpt-4o-mini"),
+              schema: SentimentSchema,
+              prompt: `Analyze the sentiment of the following text. Classify it as positive, negative, or neutral. Provide a confidence score between 0 and 1, a brief explanation of your reasoning, and extract the key phrases that influenced your classification.\n\nText: ${text}`,
+              experimental_telemetry: {
+                isEnabled: true,
+                functionId: "sentiment-classifier",
+                integrations: [langfuseAiTelemetry],
+              },
+            });
 
-        after(async () => await flush());
+            rootObservation.update({ output: result.object });
+            rootObservation.setTraceIO({ output: result.object });
+            makeDemoTracePublic(rootObservation);
+            rootObservation.end();
 
-        return new Response(
-          JSON.stringify({ result: result.object, traceId }),
-          { status: 200, headers: { "Content-Type": "application/json" } },
+            let traceUrl: string | undefined;
+            try {
+              await flush();
+              const publishedTraceLink = await publishPublicDemoTraceLink({
+                traceId: rootObservation.traceId,
+                name: "Sentiment-Classifier",
+                userId,
+                tags: ["sentiment-classifier"],
+              });
+              traceUrl = publishedTraceLink.traceUrl;
+            } catch (err) {
+              console.warn("Failed to flush public Langfuse trace", err);
+            }
+
+            return new Response(
+              JSON.stringify({
+                result: result.object,
+                traceId: rootObservation.traceId,
+                traceUrl,
+              }),
+              { status: 200, headers: { "Content-Type": "application/json" } },
+            );
+          },
         );
       } catch (err) {
-        after(async () => await flush());
+        rootObservation.update({
+          level: "ERROR",
+          statusMessage: err instanceof Error ? err.message : String(err),
+        });
+        rootObservation.end();
+
+        try {
+          await flush();
+        } catch (flushErr) {
+          console.warn("Failed to flush errored Langfuse trace", flushErr);
+        }
 
         return new Response(
           JSON.stringify({
@@ -78,11 +124,12 @@ const handler = async (req: Request) => {
         );
       }
     },
+    {
+      endOnExit: false,
+    },
   );
 };
 
-export const POST = observe(handler, {
-  name: "sentiment-classifier",
-});
+export const POST = handler;
 
-export const maxDuration = 30;
+export const maxDuration = 60;
