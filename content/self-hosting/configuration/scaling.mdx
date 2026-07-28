@@ -30,9 +30,16 @@ On very high loads, it may become necessary to apply additional settings that in
 For most environments, we recommend to scale the worker containers by their CPU load as this is a straightforward metric to measure.
 A load above 50% for a 2 CPU container is an indicator that the instance is saturated and that the throughput should increase by adding more containers.
 
-In addition, the Langfuse worker also publishes queue length metrics via statsd that can be used to scale the worker containers.
-`langfuse.queue.ingestion.length` is the main metric that we use to make scaling decisions.
+In addition, the Langfuse worker publishes tagged queue depth metrics via StatsD that can be used to scale the worker containers.
+`langfuse.queue.ingestion.depth` with the tag `type:waiting` is the main metric that we use to make scaling decisions.
 The queue metrics can also be published to AWS CloudWatch by setting `ENABLE_AWS_CLOUDWATCH_METRIC_PUBLISHING=true` to configure auto-scalers based on AWS metrics.
+
+<details>
+<summary>Queue metric for Langfuse versions before 3.169.0</summary>
+
+Langfuse versions before [3.169.0](https://github.com/langfuse/langfuse/releases/tag/v3.169.0) do not emit the tagged queue depth metric. Use the legacy `langfuse.queue.ingestion.length` metric when configuring autoscaling for these versions.
+
+</details>
 
 ### Reducing ClickHouse reads within the ingestion processing
 
