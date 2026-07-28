@@ -227,6 +227,7 @@ export const SentimentClassifier = ({
               </div>
 
               <DemoTraceLink
+                traceId={result.traceId}
                 traceUrl={result.traceUrl}
                 source="sentiment_classifier"
               />

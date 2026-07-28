@@ -46,14 +46,9 @@ const handler = async (req: Request) => {
           },
           async () => {
             rootObservation.update({ input: prompt });
-            rootObservation.setTraceIO({ input: prompt });
             makeDemoTracePublic(rootObservation);
             await createPublicDemoTraceLink({
               traceId: rootObservation.traceId,
-              name: "Image-Generator",
-              input: prompt,
-              userId,
-              tags: ["image-generator"],
             });
 
             const result = await getOpenAI().images.generate({
@@ -98,7 +93,6 @@ const handler = async (req: Request) => {
                 },
               }),
             });
-            rootObservation.setTraceIO({ output: imageMedia });
             makeDemoTracePublic(rootObservation);
             rootObservation.end();
 
@@ -107,9 +101,6 @@ const handler = async (req: Request) => {
               await flush();
               const publishedTraceLink = await publishPublicDemoTraceLink({
                 traceId: rootObservation.traceId,
-                name: "Image-Generator",
-                userId,
-                tags: ["image-generator"],
               });
               traceUrl = publishedTraceLink.traceUrl;
             } catch (err) {

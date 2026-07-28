@@ -1,5 +1,6 @@
 import { LangfuseClient } from "@langfuse/client";
 import { getActiveTraceId, setActiveTraceAsPublic } from "@langfuse/tracing";
+import { createPublicDemoProjectTraceUrl } from "@/lib/demo-trace-url";
 
 export type DemoTraceLink = {
   traceId?: string;
@@ -8,11 +9,6 @@ export type DemoTraceLink = {
 
 type PublicDemoTraceParams = {
   traceId?: string;
-  name: string;
-  input?: unknown;
-  userId?: string;
-  sessionId?: string;
-  tags?: string[];
 };
 
 type PublishableTrace = {
@@ -40,64 +36,28 @@ export const createDemoTraceLink = async (
     };
   } catch (err) {
     console.warn("Failed to resolve public Langfuse trace URL", err);
-    return { traceId };
+    return {
+      traceId,
+      traceUrl: createPublicDemoProjectTraceUrl(traceId),
+    };
   }
 };
 
 export const createPublicDemoTraceLink = async ({
   traceId = getActiveTraceId(),
-  name,
-  input,
-  userId,
-  sessionId,
-  tags,
 }: PublicDemoTraceParams): Promise<DemoTraceLink> => {
-  if (!traceId) {
-    return {};
-  }
-
-  try {
-    await createPublicDemoTraceEvent({
-      traceId,
-      name,
-      input,
-      userId,
-      sessionId,
-      tags,
-    });
-  } catch (err) {
-    console.warn("Failed to create public Langfuse trace", err);
-    return { traceId };
-  }
-
   return createDemoTraceLink(traceId);
 };
 
 export const publishPublicDemoTraceLink = async ({
   traceId = getActiveTraceId(),
-  name,
-  userId,
-  sessionId,
-  tags,
 }: PublicDemoTraceParams): Promise<DemoTraceLink> => {
   if (!traceId) {
     return {};
   }
 
-  try {
-    await createPublicDemoTraceEvent({
-      traceId,
-      name,
-      userId,
-      sessionId,
-      tags,
-    });
-
-    return createDemoTraceLink(traceId);
-  } catch (err) {
-    console.warn("Failed to publish public Langfuse trace", err);
-    return { traceId };
-  }
+  await waitForReadableDemoTrace(traceId);
+  return createDemoTraceLink(traceId);
 };
 
 export const makeDemoTracePublic = (trace?: PublishableTrace) => {
@@ -108,33 +68,25 @@ export const makeDemoTracePublic = (trace?: PublishableTrace) => {
   setActiveTraceAsPublic();
 };
 
-const createPublicDemoTraceEvent = async ({
-  traceId,
-  name,
-  input,
-  userId,
-  sessionId,
-  tags,
-}: PublicDemoTraceParams & { traceId: string }) => {
-  const timestamp = new Date().toISOString();
+const waitForReadableDemoTrace = async (traceId: string) => {
+  for (const delayMs of [0, 250, 500, 1000, 1500, 2000]) {
+    if (delayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
 
-  await demoProjectLangfuseClient.api.ingestion.batch({
-    batch: [
-      {
-        id: crypto.randomUUID(),
-        type: "trace-create",
-        timestamp,
-        body: {
-          id: traceId,
-          timestamp,
-          name,
-          public: true,
-          ...(input !== undefined && { input }),
-          ...(userId && { userId }),
-          ...(sessionId && { sessionId }),
-          ...(tags && { tags }),
-        },
-      },
-    ],
-  });
+    try {
+      await demoProjectLangfuseClient.api.trace.get(traceId);
+      return true;
+    } catch (err) {
+      const statusCode =
+        typeof err === "object" && err !== null && "statusCode" in err
+          ? err.statusCode
+          : undefined;
+
+      if (statusCode !== 404) {
+        console.warn("Failed to verify public Langfuse trace readiness", err);
+        return;
+      }
+    }
+  }
 };
