@@ -16,23 +16,24 @@ For existing projects, complete the applicable steps below.
 
 ## 1. Upgrade trace ingestion [#ingestion]
 
-Python v2 and JS/TS v3 (and older) depend on legacy ingestion, which stops after the v4 cutover. Python v3 and JS/TS v4 are deprecated and can show data with up to a 10-minute delay.
+Move off legacy ingestion before the v4 cutover. Deprecated SDKs can delay data by up to 10 minutes.
 
-| Current setup                                               | Action                                                                                                                                                                                               |
-| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Langfuse Python SDK below 4.7.0                             | Upgrade to Python SDK 4.7.0 or later. Follow the [SDK upgrade paths](/docs/observability/sdk/upgrade-path) for each major-version change.                                                            |
-| Langfuse JS/TS SDK below 5.4.0                              | Upgrade to JS/TS SDK 5.4.0 or later. Follow the [SDK upgrade paths](/docs/observability/sdk/upgrade-path) for each major-version change.                                                             |
-| <a id="api-otel"></a>Custom REST ingestion or OpenTelemetry | Follow the [custom ingestion v4 guide](/integrations/native/opentelemetry/migration-to-v4). It covers OTLP/HTTP, real-time ingestion, attribute propagation, root input/output, and immutable spans. |
+| Your setup                                                  | Do this                                                                                                  |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Python SDK below 4.7.0                                      | [Upgrade the Python SDK](/docs/observability/sdk/upgrade-path) to 4.7.0 or later.                        |
+| JS/TS SDK below 5.4.0                                       | [Upgrade the JS/TS SDK](/docs/observability/sdk/upgrade-path) to 5.4.0 or later.                         |
+| <a id="api-otel"></a>Custom REST or OpenTelemetry ingestion | [Migrate custom ingestion](/integrations/native/opentelemetry/migration-to-v4) to the v4 OTLP/HTTP path. |
 
 ## 2. Migrate the v3 features you use [#features]
 
-Skip any row that does not apply to your project.
+Only follow the rows that apply to your project.
 
-| If you use                                                       | Action before the v4 cutover                                                                                                                                                                                                                                                                                           |
-| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Deprecated SDK resources or REST endpoints                       | Use the [endpoint migration guide](/faq/all/deprecated-api-migration) to move to Observations API v2, Metrics API v2, Scores API v3, or the Experiments APIs. Deprecated reads return `404` after cutover.                                                                                                             |
-| Trace-level or legacy-dataset LLM-as-a-Judge evaluators          | [Migrate to observation-level evaluators](/faq/all/llm-as-a-judge-migration). Legacy evaluators stop producing scores after cutover.                                                                                                                                                                                   |
-| Blob storage, PostHog, or Mixpanel with the legacy export source | Migrate to enriched observations using the [blob storage](/docs/api-and-data-platform/features/export-to-blob-storage#upgrade-path), [PostHog](/integrations/analytics/posthog#migrate-export-source), or [Mixpanel](/integrations/analytics/mixpanel#migrate-export-source) guide. Legacy exports stop after cutover. |
+| Check        | Do this                                                                                                                                                                  |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| APIs         | [Migrate deprecated API calls](/faq/all/deprecated-api-migration) to the supported Observations, Metrics, Scores, and Experiments APIs.                                  |
+| Evaluators   | [Move trace-level and legacy-dataset evaluators](/faq/all/llm-as-a-judge-migration) to observation-level evaluators.                                                     |
+| Exports      | [Switch blob storage exports](/docs/api-and-data-platform/features/export-to-blob-storage#upgrade-path) to enriched observations.                                        |
+| Integrations | Switch [PostHog](/integrations/analytics/posthog#migrate-export-source) and [Mixpanel](/integrations/analytics/mixpanel#migrate-export-source) to enriched observations. |
 
 ## 3. Complete the rollout [#rollout]
 
