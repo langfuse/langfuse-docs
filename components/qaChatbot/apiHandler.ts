@@ -115,6 +115,7 @@ export const handler = async (req: Request) => {
       const tools = await mcpClient.tools();
       let publishedTraceUrl: string | undefined;
       let assistantText = "";
+      let currentText = "";
       let isTraceFinalized = false;
       let isMcpClientClosed = false;
 
@@ -129,7 +130,7 @@ export const handler = async (req: Request) => {
         isTraceFinalized = true;
 
         runWithActiveSpan(() => {
-          updateActiveObservation({ output: assistantText });
+          updateActiveObservation({ output: assistantText || currentText });
           setActiveTraceAsPublic();
           activeSpan?.end();
         });
@@ -178,29 +179,48 @@ export const handler = async (req: Request) => {
         stream: createUIMessageStream({
           async execute({ writer }) {
             const reader = uiMessageStream.getReader();
+            let streamCompleted = false;
 
             try {
               while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
 
+                if (value.type === "text-start") {
+                  currentText = "";
+                }
+
                 if (value.type === "text-delta") {
-                  assistantText += value.delta;
+                  currentText += value.delta;
+                }
+
+                if (value.type === "text-end") {
+                  if (currentText) {
+                    assistantText = currentText;
+                  }
+                  currentText = "";
                 }
 
                 writer.write(value);
               }
 
-              await finalizeTrace();
-              writer.write({
-                type: "message-metadata",
-                messageMetadata: {
-                  traceUrl: publishedTraceUrl ?? DEMO_PUBLIC_TRACE_FALLBACK_URL,
-                },
-              });
+              streamCompleted = true;
             } finally {
-              reader.releaseLock();
-              await closeMcpClient();
+              await finalizeTrace();
+              try {
+                if (streamCompleted) {
+                  writer.write({
+                    type: "message-metadata",
+                    messageMetadata: {
+                      traceUrl:
+                        publishedTraceUrl ?? DEMO_PUBLIC_TRACE_FALLBACK_URL,
+                    },
+                  });
+                }
+              } finally {
+                reader.releaseLock();
+                await closeMcpClient();
+              }
             }
           },
         }),

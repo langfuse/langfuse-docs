@@ -12,7 +12,10 @@ import { after } from "next/server";
 import { trace } from "@opentelemetry/api";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
-import { getPublicDemoTraceUrl } from "@/lib/demo-public-trace";
+import {
+  DEMO_PUBLIC_TRACE_FALLBACK_URL,
+  getPublicDemoTraceUrl,
+} from "@/lib/demo-public-trace";
 
 const SentimentSchema = z.object({
   sentiment: z.enum(["positive", "negative", "neutral"]),
@@ -65,8 +68,13 @@ const handler = async (req: Request) => {
         updateActiveObservation({ output: result.object });
 
         trace.getActiveSpan()?.end();
-        await flush();
-        const traceUrl = await getPublicDemoTraceUrl(traceId);
+        let traceUrl = DEMO_PUBLIC_TRACE_FALLBACK_URL;
+        try {
+          await flush();
+          traceUrl = await getPublicDemoTraceUrl(traceId);
+        } catch (error) {
+          console.warn("Failed to publish demo trace link", error);
+        }
 
         return new Response(
           JSON.stringify({ result: result.object, traceId, traceUrl }),
