@@ -8,6 +8,11 @@ export type DemoTraceLink = {
 
 type PublicDemoTraceParams = {
   traceId?: string;
+  name: string;
+  input?: unknown;
+  userId?: string;
+  sessionId?: string;
+  tags?: string[];
 };
 
 type PublishableTrace = {
@@ -41,19 +46,58 @@ export const createDemoTraceLink = async (
 
 export const createPublicDemoTraceLink = async ({
   traceId = getActiveTraceId(),
-}: PublicDemoTraceParams): Promise<DemoTraceLink> => {
-  return createDemoTraceLink(traceId);
-};
-
-export const publishPublicDemoTraceLink = async ({
-  traceId = getActiveTraceId(),
+  name,
+  input,
+  userId,
+  sessionId,
+  tags,
 }: PublicDemoTraceParams): Promise<DemoTraceLink> => {
   if (!traceId) {
     return {};
   }
 
-  await waitForReadableDemoTrace(traceId);
+  try {
+    await createPublicDemoTraceEvent({
+      traceId,
+      name,
+      input,
+      userId,
+      sessionId,
+      tags,
+    });
+  } catch (err) {
+    console.warn("Failed to create public Langfuse trace", err);
+    return { traceId };
+  }
+
   return createDemoTraceLink(traceId);
+};
+
+export const publishPublicDemoTraceLink = async ({
+  traceId = getActiveTraceId(),
+  name,
+  userId,
+  sessionId,
+  tags,
+}: PublicDemoTraceParams): Promise<DemoTraceLink> => {
+  if (!traceId) {
+    return {};
+  }
+
+  try {
+    await createPublicDemoTraceEvent({
+      traceId,
+      name,
+      userId,
+      sessionId,
+      tags,
+    });
+
+    return createDemoTraceLink(traceId);
+  } catch (err) {
+    console.warn("Failed to publish public Langfuse trace", err);
+    return { traceId };
+  }
 };
 
 export const makeDemoTracePublic = (trace?: PublishableTrace) => {
@@ -64,25 +108,33 @@ export const makeDemoTracePublic = (trace?: PublishableTrace) => {
   setActiveTraceAsPublic();
 };
 
-const waitForReadableDemoTrace = async (traceId: string) => {
-  for (const delayMs of [0, 250, 500, 1000, 1500, 2000]) {
-    if (delayMs > 0) {
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
-    }
+const createPublicDemoTraceEvent = async ({
+  traceId,
+  name,
+  input,
+  userId,
+  sessionId,
+  tags,
+}: PublicDemoTraceParams & { traceId: string }) => {
+  const timestamp = new Date().toISOString();
 
-    try {
-      await demoProjectLangfuseClient.api.trace.get(traceId);
-      return true;
-    } catch (err) {
-      const statusCode =
-        typeof err === "object" && err !== null && "statusCode" in err
-          ? err.statusCode
-          : undefined;
-
-      if (statusCode !== 404) {
-        console.warn("Failed to verify public Langfuse trace readiness", err);
-        return;
-      }
-    }
-  }
+  await demoProjectLangfuseClient.api.ingestion.batch({
+    batch: [
+      {
+        id: crypto.randomUUID(),
+        type: "trace-create",
+        timestamp,
+        body: {
+          id: traceId,
+          timestamp,
+          name,
+          public: true,
+          ...(input !== undefined && { input }),
+          ...(userId && { userId }),
+          ...(sessionId && { sessionId }),
+          ...(tags && { tags }),
+        },
+      },
+    ],
+  });
 };

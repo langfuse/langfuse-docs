@@ -8,6 +8,7 @@ import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId";
 import { scoreDemoFeedback } from "@/components/demoLangfuseBrowserClients";
 import { SendIcon, ThumbsUpIcon, ThumbsDownIcon } from "lucide-react";
+import { DemoTraceLink } from "@/components/demoTraceLink";
 
 type SentimentResult = {
   sentiment: "positive" | "negative" | "neutral";
@@ -224,6 +225,11 @@ export const SentimentClassifier = ({
               <div className="text-sm text-foreground">
                 {result.result.explanation}
               </div>
+
+              <DemoTraceLink
+                traceUrl={result.traceUrl}
+                source="sentiment_classifier"
+              />
 
               {/* Key phrases */}
               {result.result.keyPhrases.length > 0 && (

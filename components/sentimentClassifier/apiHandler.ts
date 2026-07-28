@@ -52,9 +52,14 @@ const handler = async (req: Request) => {
           },
           async () => {
             rootObservation.update({ input: text });
+            rootObservation.setTraceIO({ input: text });
             makeDemoTracePublic(rootObservation);
             await createPublicDemoTraceLink({
               traceId: rootObservation.traceId,
+              name: "Sentiment-Classifier",
+              input: text,
+              userId,
+              tags: ["sentiment-classifier"],
             });
 
             const result = await generateObject({
@@ -69,6 +74,7 @@ const handler = async (req: Request) => {
             });
 
             rootObservation.update({ output: result.object });
+            rootObservation.setTraceIO({ output: result.object });
             makeDemoTracePublic(rootObservation);
             rootObservation.end();
 
@@ -77,6 +83,9 @@ const handler = async (req: Request) => {
               await flush();
               const publishedTraceLink = await publishPublicDemoTraceLink({
                 traceId: rootObservation.traceId,
+                name: "Sentiment-Classifier",
+                userId,
+                tags: ["sentiment-classifier"],
               });
               traceUrl = publishedTraceLink.traceUrl;
             } catch (err) {
