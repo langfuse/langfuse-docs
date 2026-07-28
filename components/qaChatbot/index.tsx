@@ -237,6 +237,12 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                         const traceUrl = message.metadata?.traceUrl;
                         const isTraceLinkReady =
                           Boolean(traceUrl || message.id) && !hasStreamingParts;
+                        const shouldShowTraceLink =
+                          message.role === "assistant" &&
+                          isLastMessage &&
+                          isLastTextPart &&
+                          isMessageComplete &&
+                          isTraceLinkReady;
                         // Add spacing if next part is a different type (for consistent spacing between different types)
                         const nextPart = message.parts[i + 1];
                         const hasNextPartDifferentType =
@@ -247,16 +253,14 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                             className={hasNextPartDifferentType ? "mb-4" : ""}
                           >
                             <Response>{part.text}</Response>
-                            {message.role === "assistant" &&
-                              isLastTextPart &&
-                              isTraceLinkReady && (
-                                <DemoTraceLink
-                                  traceId={message.id}
-                                  traceUrl={traceUrl}
-                                  source="qa_chatbot"
-                                  className="mt-3"
-                                />
-                              )}
+                            {shouldShowTraceLink && (
+                              <DemoTraceLink
+                                traceId={message.id}
+                                traceUrl={traceUrl}
+                                source="qa_chatbot"
+                                className="mt-3"
+                              />
+                            )}
                             {message.role === "assistant" &&
                               isLastMessage &&
                               isNotFirstMessage &&
