@@ -20,7 +20,9 @@ export const DemoTraceLink = ({
   className,
 }: DemoTraceLinkProps) => {
   const capture = usePostHogClientCapture();
-  const isPreparingTrace = !traceUrl && Boolean(traceId);
+  const href =
+    traceUrl ||
+    (traceId ? `https://cloud.langfuse.com/project/~/traces/${traceId}` : null);
 
   const linkContent = (
     <>
@@ -50,15 +52,13 @@ export const DemoTraceLink = ({
           className="size-3.5 shrink-0"
         />
         <span className="min-w-0 text-left sm:whitespace-nowrap">
-          {traceUrl ? "View trace in Langfuse" : "Preparing trace..."}
+          View trace in Langfuse
         </span>
-        {traceUrl && (
-          <ArrowUpRight
-            aria-hidden="true"
-            className="size-4 shrink-0 text-text-secondary transition-[color,transform] group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-text-primary"
-            strokeWidth={2.25}
-          />
-        )}
+        <ArrowUpRight
+          aria-hidden="true"
+          className="size-4 shrink-0 text-text-secondary transition-[color,transform] group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-text-primary"
+          strokeWidth={2.25}
+        />
       </span>
     </>
   );
@@ -68,30 +68,17 @@ export const DemoTraceLink = ({
     className,
   );
 
-  if (!traceUrl && !isPreparingTrace) return null;
-
-  if (isPreparingTrace) {
-    return (
-      <span
-        role="status"
-        aria-live="polite"
-        aria-disabled="true"
-        className={cn(linkClassName, "cursor-wait opacity-80")}
-      >
-        {linkContent}
-      </span>
-    );
-  }
+  if (!href) return null;
 
   return (
     <a
-      href={traceUrl}
+      href={href}
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => {
         capture("demo:view_trace_in_langfuse_clicked", {
           source,
-          trace_url: traceUrl,
+          trace_url: href,
         });
       }}
       className={linkClassName}
