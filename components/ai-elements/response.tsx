@@ -160,6 +160,94 @@ function parseIncompleteMarkdown(text: string): string {
   return result;
 }
 
+const looseCodeLabelPattern = /^(\s*)([-*+]\s+)Code:\s*$/i;
+
+function inferCodeLanguage(codeLines: string[]): string {
+  const code = codeLines.join("\n");
+
+  if (/^\s*(from|import|def|class)\s/m.test(code) || /^\s*@\w+/m.test(code)) {
+    return "python";
+  }
+
+  if (
+    /^\s*(import|export)\s.+\sfrom\s/m.test(code) ||
+    /^\s*(const|let|var|type|interface)\s/m.test(code)
+  ) {
+    return "typescript";
+  }
+
+  if (/^\s*(curl|pnpm|npm|npx|pip|uv|python|node)\s/m.test(code)) {
+    return "bash";
+  }
+
+  return "text";
+}
+
+function normalizeLooseListCodeBlocks(text: string): string {
+  if (!text || typeof text !== "string") {
+    return text;
+  }
+
+  const lines = text.split("\n");
+  const normalized: string[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const match = line.match(looseCodeLabelPattern);
+
+    if (!match) {
+      normalized.push(line);
+      continue;
+    }
+
+    const baseIndent = match[1];
+    const contentIndent = `${baseIndent}  `;
+    const codeLines: string[] = [];
+    let j = i + 1;
+
+    while (j < lines.length) {
+      const candidate = lines[j];
+
+      if (candidate.trim() === "") {
+        codeLines.push("");
+        j++;
+        continue;
+      }
+
+      if (candidate.startsWith(contentIndent)) {
+        codeLines.push(candidate.slice(contentIndent.length));
+        j++;
+        continue;
+      }
+
+      break;
+    }
+
+    while (codeLines.length > 0 && codeLines[codeLines.length - 1] === "") {
+      codeLines.pop();
+      j--;
+    }
+
+    const firstCodeLine = codeLines.find((codeLine) => codeLine.trim() !== "");
+    if (!firstCodeLine || firstCodeLine.trim().startsWith("```")) {
+      normalized.push(line);
+      continue;
+    }
+
+    const listIndent = `${baseIndent}  `;
+    normalized.push(
+      line,
+      "",
+      `${listIndent}\`\`\`${inferCodeLanguage(codeLines)}`,
+    );
+    normalized.push(...codeLines.map((codeLine) => `${listIndent}${codeLine}`));
+    normalized.push(`${listIndent}\`\`\``);
+    i = j - 1;
+  }
+
+  return normalized.join("\n");
+}
+
 // Create a hardened version of ReactMarkdown
 const HardenedMarkdown = hardenReactMarkdown(ReactMarkdown);
 
@@ -321,7 +409,7 @@ const components: Options["components"] = {
     );
   },
   pre: ({ node, className, children }) => {
-    let language = "javascript";
+    let language = "text";
 
     if (typeof node?.properties?.className === "string") {
       language = node.properties.className.replace("language-", "");
@@ -330,7 +418,13 @@ const components: Options["components"] = {
     // Extract code content from children safely
     let code = "";
     if (isValidElement(children)) {
-      const element = children as ReactElement<{ children?: ReactNode }>;
+      const element = children as ReactElement<{
+        children?: ReactNode;
+        className?: string;
+      }>;
+      if (element.props?.className?.startsWith("language-")) {
+        language = element.props.className.replace("language-", "");
+      }
       const inner = element.props?.children;
       if (typeof inner === "string") {
         code = inner;
@@ -365,11 +459,16 @@ export const Response = memo(
     parseIncompleteMarkdown: shouldParseIncompleteMarkdown = true,
     ...props
   }: ResponseProps) => {
+    const normalizedChildren =
+      typeof children === "string"
+        ? normalizeLooseListCodeBlocks(children)
+        : children;
+
     // Parse the children to remove incomplete markdown tokens if enabled
     const parsedChildren =
-      typeof children === "string" && shouldParseIncompleteMarkdown
-        ? parseIncompleteMarkdown(children)
-        : children;
+      typeof normalizedChildren === "string" && shouldParseIncompleteMarkdown
+        ? parseIncompleteMarkdown(normalizedChildren)
+        : normalizedChildren;
 
     return (
       <div
