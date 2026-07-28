@@ -128,7 +128,7 @@ def verify_langfuse_signature(
     bool
         True if the signature is valid, otherwise False.
     """
-    # Split "t=timestamp,s=signature" into the two expected key/value chunks
+    # Split "t=timestamp,v1=signature" into the two expected key/value chunks
     try:
         ts_pair, sig_pair = signature_header.split(",", 1)
     except ValueError:  # wrong format / missing comma
