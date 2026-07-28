@@ -7,17 +7,22 @@ import { cn } from "@/lib/utils";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 
 type DemoTraceLinkProps = {
+  traceId?: string | null;
   traceUrl?: string | null;
   source: "qa_chatbot" | "image_generator" | "sentiment_classifier";
   className?: string;
 };
 
 export const DemoTraceLink = ({
+  traceId,
   traceUrl,
   source,
   className,
 }: DemoTraceLinkProps) => {
   const capture = usePostHogClientCapture();
+  const href =
+    traceUrl ||
+    (traceId ? `https://cloud.langfuse.com/project/~/traces/${traceId}` : null);
 
   const linkContent = (
     <>
@@ -58,27 +63,20 @@ export const DemoTraceLink = ({
 
   const linkClassName = cn(
     "group relative inline-flex w-fit p-1.5 no-underline hover:no-underline focus-visible:outline-none",
-    !traceUrl && "pointer-events-none",
     className,
   );
 
-  if (!traceUrl) {
-    return (
-      <span aria-disabled="true" className={linkClassName}>
-        {linkContent}
-      </span>
-    );
-  }
+  if (!href) return null;
 
   return (
     <a
-      href={traceUrl}
+      href={href}
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => {
         capture("demo:view_trace_in_langfuse_clicked", {
           source,
-          trace_url: traceUrl,
+          trace_url: href,
         });
       }}
       className={linkClassName}

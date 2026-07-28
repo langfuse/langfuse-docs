@@ -204,6 +204,7 @@ export const ImageGenerator = ({
 
               <div className="flex justify-center">
                 <DemoTraceLink
+                  traceId={currentImage.traceId}
                   traceUrl={currentImage.traceUrl}
                   source="image_generator"
                 />
