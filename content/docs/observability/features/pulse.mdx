@@ -1,0 +1,103 @@
+---
+title: Pulse
+description: A compact outlier chart strip above the events table. See cost, latency, and token spikes over time, then click or drag a spike to narrow the table to that window.
+sidebarTitle: Pulse
+---
+
+import { Book } from "lucide-react";
+
+# Pulse
+
+Pulse is a compact chart strip above the events table. Each bar covers a slice of time and shows the worst single event in that slice: the most expensive call, the slowest response, the biggest token burst. The spike you are hunting for is a tall bar, not a row you have to sort your way down to. Click or drag a spike and the table narrows to that window.
+
+<Video
+  src="https://static.langfuse.com/changelog-videos/2025-07-28-pulse.mp4"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+<Callout type="info">
+  Pulse runs on the [Langfuse v4](/docs/v4) data model. On Langfuse Cloud, turn
+  on **Fast** on the events table to use it. On self-hosted deployments, it is
+  available after [upgrading to Langfuse
+  v4](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4).
+</Callout>
+
+Pulse is open by default above the events table. Close it with the **×** in its top-right corner, and reopen it with the **Pulse** button in the table toolbar.
+
+## What each bar shows [#bars]
+
+Each bar is one time bucket. Its height is a single aggregate of the events in that bucket, so a tall bar is a bucket that holds an outlier. The default aggregate is the maximum, so a bar shows the worst single event in its slice.
+
+The bars span the full selected time range. A bucket with no events is a gap on the baseline rather than absent space, so a quiet stretch reads as a flat baseline and a spike stands out against it. Bars use a square-root height scale: real cost and latency outliers run many times the base load, and a linear scale would flatten everything but the peak, so the scale keeps the base load readable while the outlier still dominates.
+
+Bucket width adapts to the range and the available width. Langfuse picks the finest bucket that fits the range into the strip, from one minute up to one week, so a one-hour range and a one-month range both fill the strip with bars.
+
+Hover a bar to read its time bucket, the metric value, and how many events fell in it. When events exist in a bucket but carry no value for the current metric, the bar shows a faint activity tick instead of a height, so a missing metric never reads as "nothing happened". When the range holds no events at all, the strip reads **No events in range**; when it holds events but none carry the current metric, it reads **No [metric] data in range**.
+
+## Metric modes [#metrics]
+
+A dropdown at the left of the strip switches what the bars plot:
+
+- **Cost**
+- **Latency**
+- **Tokens**
+- **Split** shows Cost, Latency, and Tokens side by side at once.
+
+Split fits three charts when the strip is wide enough, drops to Cost and Latency on a narrower strip, and is offered as an option only when at least two fit.
+
+Each metric plots the aggregate that fits it. Where a metric offers more than one aggregate, a second dropdown next to the metric name switches it:
+
+| Metric  | Aggregates          | Default |
+| ------- | ------------------- | ------- |
+| Cost    | `max`, `sum`        | `max`   |
+| Latency | `max`, `p95`, `avg` | `max`   |
+| Tokens  | `max`               | `max`   |
+
+`max` is the outlier view: each bar is the single worst event in its bucket. `sum`, `p95`, and `avg` describe the bucket as a whole instead. Your metric and aggregate choices are remembered across visits.
+
+## Navigate to an outlier [#navigate]
+
+Pulse turns spotting a spike into navigating to it.
+
+- **Click a bar** and the table's time range narrows to that bucket, showing exactly the events in the spike.
+- **Drag across a range of bars** to select a wider span. The selection applies when you release.
+- **Browser Back** returns you to the range you started from, so exploring costs you nothing.
+
+An empty bucket does not navigate, since there would be nothing to show.
+
+On touch devices, a tap or drag previews the span with a pinned tooltip and an **Explore this window** action instead of changing the range immediately, so an accidental touch never moves you.
+
+## Filters it applies [#filters]
+
+Pulse plots the same filtered query as the events table below it. The time range, the sidebar facets, and the [search bar](/docs/observability/features/filter-search-bar) all carry over.
+
+A few filters cannot be expressed as an aggregate over time, so the strip cannot apply them:
+
+- **Numeric measures** used as filters (filtering by latency, cost, or token value). These are still available as strip metrics; only filtering the rows by their value is unavailable.
+- **Scores**, **metadata**, and **comments** filters.
+- **Full-text search** and field-scoped text search (`input:`, `output:`).
+- **Presence checks** (`has:` and `-has:`).
+
+When any of these are active, the strip shows a **"N filters not applied"** note. The table still honors those filters; only the strip shows the unfiltered distribution for them. This is the reverse of [chart view](/docs/observability/features/events-table-charts#filter-compatibility), where those filters are dimmed instead, because the chart replaces the table rather than sitting above it.
+
+## Pulse and charting the table [#vs-chart]
+
+Pulse and [Chart any table](/docs/observability/features/events-table-charts) both draw the events table's data, but they answer different questions. Pulse is an always-on strip above the table for finding and jumping to outliers, one bar per time bucket, with the worst event as the default. Charting the table replaces the table with a full, configurable chart (type, metric, aggregation, breakdown) of the same filtered query, and can be saved to a dashboard. Use Pulse to spot and drill into a spike; switch to a chart when you want to shape a view and keep it.
+
+## Learn more
+
+<Cards num={2}>
+  <Card
+    title="Chart any table"
+    href="/docs/observability/features/events-table-charts"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Filter Search Bar"
+    href="/docs/observability/features/filter-search-bar"
+    icon={<Book />}
+    arrow
+  />
+</Cards>
