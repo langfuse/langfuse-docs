@@ -43,6 +43,7 @@ import { scoreDemoFeedback } from "@/components/demoLangfuseBrowserClients";
 import { FeedbackDialog } from "./FeedbackPopover";
 import { cn } from "@/lib/utils";
 import { DemoTraceLink } from "@/components/demoTraceLink";
+import { createPublicDemoProjectTraceUrl } from "@/lib/demo-trace-url";
 import type { UIMessage } from "ai";
 
 type ChatMessageMetadata = {
@@ -234,7 +235,9 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                           status !== "submitted" &&
                           status !== "streaming" &&
                           !hasStreamingParts;
-                        const traceUrl = message.metadata?.traceUrl;
+                        const traceUrl =
+                          message.metadata?.traceUrl ??
+                          createPublicDemoProjectTraceUrl(message.id);
                         const isTraceLinkReady =
                           Boolean(traceUrl) && !hasStreamingParts;
                         const shouldShowTraceLink =

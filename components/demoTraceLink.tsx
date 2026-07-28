@@ -4,6 +4,7 @@ import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { createPublicDemoProjectTraceUrl } from "@/lib/demo-trace-url";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 
 type DemoTraceLinkProps = {
@@ -14,11 +15,13 @@ type DemoTraceLinkProps = {
 };
 
 export const DemoTraceLink = ({
+  traceId,
   traceUrl,
   source,
   className,
 }: DemoTraceLinkProps) => {
   const capture = usePostHogClientCapture();
+  const resolvedTraceUrl = traceUrl ?? createPublicDemoProjectTraceUrl(traceId);
 
   const linkContent = (
     <>
@@ -64,17 +67,17 @@ export const DemoTraceLink = ({
     className,
   );
 
-  if (!traceUrl) return null;
+  if (!resolvedTraceUrl) return null;
 
   return (
     <a
-      href={traceUrl}
+      href={resolvedTraceUrl}
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => {
         capture("demo:view_trace_in_langfuse_clicked", {
           source,
-          trace_url: traceUrl,
+          trace_url: resolvedTraceUrl,
         });
       }}
       className={linkClassName}

@@ -1,5 +1,6 @@
 import { LangfuseClient } from "@langfuse/client";
 import { getActiveTraceId, setActiveTraceAsPublic } from "@langfuse/tracing";
+import { createPublicDemoProjectTraceUrl } from "@/lib/demo-trace-url";
 
 export type DemoTraceLink = {
   traceId?: string;
@@ -35,7 +36,10 @@ export const createDemoTraceLink = async (
     };
   } catch (err) {
     console.warn("Failed to resolve public Langfuse trace URL", err);
-    return { traceId };
+    return {
+      traceId,
+      traceUrl: createPublicDemoProjectTraceUrl(traceId),
+    };
   }
 };
 
