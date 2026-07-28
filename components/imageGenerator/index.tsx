@@ -14,12 +14,14 @@ import {
   ThumbsUpIcon,
   ThumbsDownIcon,
 } from "lucide-react";
+import { DemoTraceLink } from "@/components/demoTraceLink";
 
 type GeneratedImage = {
   base64: string;
   mediaType: string;
   prompt: string;
   traceId: string;
+  traceUrl?: string;
 };
 
 const EXAMPLE_PROMPTS = [
@@ -80,6 +82,7 @@ export const ImageGenerator = ({
         mediaType: data.image.mediaType,
         prompt: textPrompt,
         traceId: data.traceId,
+        traceUrl: data.traceUrl,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -196,6 +199,13 @@ export const ImageGenerator = ({
                   uint8Array={new Uint8Array()}
                   alt={currentImage.prompt}
                   className="max-w-md rounded-[2px] border border-line-structure"
+                />
+              </div>
+
+              <div className="flex justify-center">
+                <DemoTraceLink
+                  traceUrl={currentImage.traceUrl}
+                  source="image_generator"
                 />
               </div>
 
