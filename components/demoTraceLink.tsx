@@ -19,24 +19,8 @@ export const DemoTraceLink = ({
 }: DemoTraceLinkProps) => {
   const capture = usePostHogClientCapture();
 
-  if (!traceUrl) return null;
-
-  return (
-    <a
-      href={traceUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      onClick={() => {
-        capture("demo:view_trace_in_langfuse_clicked", {
-          source,
-          trace_url: traceUrl,
-        });
-      }}
-      className={cn(
-        "group relative inline-flex w-fit p-1.5 no-underline hover:no-underline focus-visible:outline-none",
-        className,
-      )}
-    >
+  const linkContent = (
+    <>
       <span
         aria-hidden="true"
         className="pointer-events-none absolute left-0 top-0 h-4 w-4 border-l-2 border-t-2 border-text-secondary transition-colors group-hover:border-text-primary"
@@ -69,6 +53,37 @@ export const DemoTraceLink = ({
           strokeWidth={2.25}
         />
       </span>
+    </>
+  );
+
+  const linkClassName = cn(
+    "group relative inline-flex w-fit p-1.5 no-underline hover:no-underline focus-visible:outline-none",
+    !traceUrl && "pointer-events-none",
+    className,
+  );
+
+  if (!traceUrl) {
+    return (
+      <span aria-disabled="true" className={linkClassName}>
+        {linkContent}
+      </span>
+    );
+  }
+
+  return (
+    <a
+      href={traceUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={() => {
+        capture("demo:view_trace_in_langfuse_clicked", {
+          source,
+          trace_url: traceUrl,
+        });
+      }}
+      className={linkClassName}
+    >
+      {linkContent}
     </a>
   );
 };
