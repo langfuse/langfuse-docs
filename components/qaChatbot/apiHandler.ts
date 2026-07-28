@@ -58,7 +58,7 @@ export const handler = async (req: Request) => {
           : fn();
 
       runWithActiveSpan(() => {
-        updateActiveObservation({ input: inputText });
+        updateActiveObservation({ input: inputText }, { asType: "generation" });
         setActiveTraceAsPublic();
       });
 
@@ -130,7 +130,10 @@ export const handler = async (req: Request) => {
         isTraceFinalized = true;
 
         runWithActiveSpan(() => {
-          updateActiveObservation({ output: assistantText || currentText });
+          updateActiveObservation(
+            { output: assistantText || currentText },
+            { asType: "generation" },
+          );
           setActiveTraceAsPublic();
           activeSpan?.end();
         });
