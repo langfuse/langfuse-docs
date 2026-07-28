@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { ArrowUpRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
@@ -32,7 +33,7 @@ export const DemoTraceLink = ({
         });
       }}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-[2px] border border-line-structure bg-surface-bg px-2 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary",
+        "corner-box-corners inline-flex items-center gap-3 rounded-[2px] border-2 border-line-cta bg-surface-cta-primary px-5 py-2.5 text-base font-semibold text-text-primary no-underline transition-colors hover:bg-surface-cta-primary/90 hover:text-text-primary",
         className,
       )}
     >
@@ -42,9 +43,10 @@ export const DemoTraceLink = ({
         width={14}
         height={14}
         aria-hidden="true"
-        className="size-3.5 shrink-0"
+        className="size-4 shrink-0"
       />
       View trace in Langfuse
+      <ArrowUpRight className="size-4.5 shrink-0" aria-hidden="true" />
     </a>
   );
 };
