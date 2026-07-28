@@ -49,7 +49,6 @@ const handler = async (req: Request) => {
     },
     async () => {
       const traceId = getActiveTraceId();
-      setActiveTraceAsPublic();
       updateActiveObservation({ input: prompt });
 
       try {
@@ -99,6 +98,7 @@ const handler = async (req: Request) => {
           { asType: "generation" },
         );
 
+        setActiveTraceAsPublic();
         trace.getActiveSpan()?.end();
         let traceUrl = DEMO_PUBLIC_TRACE_FALLBACK_URL;
         try {

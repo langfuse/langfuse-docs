@@ -59,7 +59,6 @@ export const handler = async (req: Request) => {
 
       runWithActiveSpan(() => {
         updateActiveObservation({ input: inputText }, { asType: "generation" });
-        setActiveTraceAsPublic();
       });
 
       const prompt = await tracedGetPrompt("langfuse-docs-assistant-chat", {
