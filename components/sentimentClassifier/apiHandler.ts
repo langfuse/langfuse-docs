@@ -84,8 +84,6 @@ const handler = async (req: Request) => {
               const publishedTraceLink = await publishPublicDemoTraceLink({
                 traceId: rootObservation.traceId,
                 name: "Sentiment-Classifier",
-                input: text,
-                output: result.object,
                 userId,
                 tags: ["sentiment-classifier"],
               });

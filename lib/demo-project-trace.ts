@@ -10,14 +10,10 @@ type PublicDemoTraceParams = {
   traceId?: string;
   name: string;
   input?: unknown;
-  output?: unknown;
   userId?: string;
   sessionId?: string;
   tags?: string[];
 };
-
-const DEMO_TRACE_READINESS_TIMEOUT_MS = 10_000;
-const DEMO_TRACE_READINESS_POLL_INTERVAL_MS = 500;
 
 type PublishableTrace = {
   traceId?: string;
@@ -74,14 +70,12 @@ export const createPublicDemoTraceLink = async ({
     return { traceId };
   }
 
-  return { traceId };
+  return createDemoTraceLink(traceId);
 };
 
 export const publishPublicDemoTraceLink = async ({
   traceId = getActiveTraceId(),
   name,
-  input,
-  output,
   userId,
   sessionId,
   tags,
@@ -91,21 +85,12 @@ export const publishPublicDemoTraceLink = async ({
   }
 
   try {
-    if (input !== undefined || output !== undefined) {
-      await createPublicDemoTraceEvent({
-        traceId,
-        name,
-        input,
-        output,
-        userId,
-        sessionId,
-        tags,
-      });
-    }
-
-    await waitForPublicDemoTrace({
+    await createPublicDemoTraceEvent({
       traceId,
-      requireOutput: output !== undefined,
+      name,
+      userId,
+      sessionId,
+      tags,
     });
 
     return createDemoTraceLink(traceId);
@@ -127,7 +112,6 @@ const createPublicDemoTraceEvent = async ({
   traceId,
   name,
   input,
-  output,
   userId,
   sessionId,
   tags,
@@ -146,7 +130,6 @@ const createPublicDemoTraceEvent = async ({
           name,
           public: true,
           ...(input !== undefined && { input }),
-          ...(output !== undefined && { output }),
           ...(userId && { userId }),
           ...(sessionId && { sessionId }),
           ...(tags && { tags }),
@@ -155,41 +138,3 @@ const createPublicDemoTraceEvent = async ({
     ],
   });
 };
-
-const waitForPublicDemoTrace = async ({
-  traceId,
-  requireOutput,
-}: {
-  traceId: string;
-  requireOutput: boolean;
-}) => {
-  const deadline = Date.now() + DEMO_TRACE_READINESS_TIMEOUT_MS;
-  let lastError: unknown;
-
-  while (Date.now() < deadline) {
-    try {
-      const trace = await demoProjectLangfuseClient.api.trace.get(traceId, {
-        fields: "core,io,observations",
-      });
-      const hasObservations =
-        Array.isArray(trace.observations) && trace.observations.length > 0;
-      const hasOutput = !requireOutput || trace.output !== undefined;
-
-      if (trace.public && hasObservations && hasOutput) {
-        return;
-      }
-    } catch (err) {
-      lastError = err;
-    }
-
-    await wait(DEMO_TRACE_READINESS_POLL_INTERVAL_MS);
-  }
-
-  throw new Error(
-    `Timed out waiting for public Langfuse trace ${traceId} to be ready`,
-    { cause: lastError },
-  );
-};
-
-const wait = (ms: number) =>
-  new Promise<void>((resolve) => setTimeout(resolve, ms));
