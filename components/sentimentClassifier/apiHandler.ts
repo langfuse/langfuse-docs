@@ -4,12 +4,15 @@ import { z } from "zod";
 import {
   observe,
   propagateAttributes,
-  setActiveTraceIO,
+  setActiveTraceAsPublic,
   getActiveTraceId,
+  updateActiveObservation,
 } from "@langfuse/tracing";
 import { after } from "next/server";
+import { trace } from "@opentelemetry/api";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
+import { getPublicDemoTraceUrl } from "@/lib/demo-public-trace";
 
 const SentimentSchema = z.object({
   sentiment: z.enum(["positive", "negative", "neutral"]),
@@ -46,7 +49,8 @@ const handler = async (req: Request) => {
     },
     async () => {
       const traceId = getActiveTraceId();
-      setActiveTraceIO({ input: text });
+      setActiveTraceAsPublic();
+      updateActiveObservation({ input: text });
 
       try {
         const result = await generateObject({
@@ -58,12 +62,14 @@ const handler = async (req: Request) => {
           },
         });
 
-        setActiveTraceIO({ output: result.object });
+        updateActiveObservation({ output: result.object });
 
-        after(async () => await flush());
+        trace.getActiveSpan()?.end();
+        await flush();
+        const traceUrl = await getPublicDemoTraceUrl(traceId);
 
         return new Response(
-          JSON.stringify({ result: result.object, traceId }),
+          JSON.stringify({ result: result.object, traceId, traceUrl }),
           { status: 200, headers: { "Content-Type": "application/json" } },
         );
       } catch (err) {

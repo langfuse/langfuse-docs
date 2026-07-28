@@ -1,28 +1,32 @@
 import { openai, OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
-import { streamText, UIMessage, stepCountIs } from "ai";
+import {
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+  streamText,
+  toUIMessageStream,
+  UIMessage,
+  stepCountIs,
+} from "ai";
 import { createMCPClient } from "@ai-sdk/mcp";
 import {
   observe,
   propagateAttributes,
   startActiveObservation,
   updateActiveObservation,
-  setActiveTraceIO,
+  setActiveTraceAsPublic,
+  getActiveTraceId,
 } from "@langfuse/tracing";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp";
-import { LangfuseClient } from "@langfuse/client";
-import { getActiveTraceId } from "@langfuse/tracing";
-import { after } from "next/server";
 import { flush } from "@/src/instrumentation";
-import { trace } from "@opentelemetry/api";
-
-const langfuseClient = new LangfuseClient({
-  baseUrl: process.env.NEXT_PUBLIC_EU_LANGFUSE_BASE_URL,
-  publicKey: process.env.NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY,
-  secretKey: process.env.EU_LANGFUSE_SECRET_KEY,
-});
+import { context, trace } from "@opentelemetry/api";
+import {
+  DEMO_PUBLIC_TRACE_FALLBACK_URL,
+  demoProjectLangfuseClient,
+  getPublicDemoTraceUrl,
+} from "@/lib/demo-public-trace";
 
 const tracedGetPrompt = observe(
-  langfuseClient.prompt.get.bind(langfuseClient.prompt),
+  demoProjectLangfuseClient.prompt.get.bind(demoProjectLangfuseClient.prompt),
   { name: "get-langfuse-prompt" },
 );
 
@@ -46,8 +50,17 @@ export const handler = async (req: Request) => {
       userId,
     },
     async () => {
-      updateActiveObservation({ input: inputText }, { asType: "generation" });
-      setActiveTraceIO({ input: inputText });
+      const traceId = getActiveTraceId();
+      const activeSpan = trace.getActiveSpan();
+      const runWithActiveSpan = <T>(fn: () => T) =>
+        activeSpan
+          ? context.with(trace.setSpan(context.active(), activeSpan), fn)
+          : fn();
+
+      runWithActiveSpan(() => {
+        updateActiveObservation({ input: inputText });
+        setActiveTraceAsPublic();
+      });
 
       const prompt = await tracedGetPrompt("langfuse-docs-assistant-chat", {
         type: "chat",
@@ -100,6 +113,35 @@ export const handler = async (req: Request) => {
       );
 
       const tools = await mcpClient.tools();
+      let publishedTraceUrl: string | undefined;
+      let assistantText = "";
+      let isTraceFinalized = false;
+      let isMcpClientClosed = false;
+
+      const closeMcpClient = async () => {
+        if (isMcpClientClosed) return;
+        isMcpClientClosed = true;
+        await mcpClient.close();
+      };
+
+      const finalizeTrace = async () => {
+        if (isTraceFinalized) return;
+        isTraceFinalized = true;
+
+        runWithActiveSpan(() => {
+          updateActiveObservation({ output: assistantText });
+          setActiveTraceAsPublic();
+          activeSpan?.end();
+        });
+
+        try {
+          await flush();
+          publishedTraceUrl = await getPublicDemoTraceUrl(traceId);
+        } catch (error) {
+          console.warn("Failed to publish demo trace link", error);
+          publishedTraceUrl = DEMO_PUBLIC_TRACE_FALLBACK_URL;
+        }
+      };
 
       const result = streamText({
         model: openai(String(prompt.config.model)),
@@ -123,30 +165,45 @@ export const handler = async (req: Request) => {
             langfusePrompt: true,
           },
         },
-        onFinish: async (result) => {
-          await mcpClient.close();
-
-          const latestText = Array.isArray((result as any).content)
-            ? [...((result as any).content as Array<any>)]
-                .reverse()
-                .find((part: any) => part?.type === "text")?.text
-            : (result as any).content;
-
-          updateActiveObservation(
-            { output: latestText },
-            { asType: "generation" },
-          );
-          setActiveTraceIO({ output: latestText });
-          trace.getActiveSpan()?.end();
-        },
       });
 
-      after(async () => await flush());
-
-      return result.toUIMessageStreamResponse({
-        generateMessageId: () => getActiveTraceId(),
+      const uiMessageStream = toUIMessageStream({
+        stream: result.stream,
+        generateMessageId: () => traceId ?? crypto.randomUUID(),
         sendSources: true,
         sendReasoning: true,
+      });
+
+      return createUIMessageStreamResponse({
+        stream: createUIMessageStream({
+          async execute({ writer }) {
+            const reader = uiMessageStream.getReader();
+
+            try {
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                if (value.type === "text-delta") {
+                  assistantText += value.delta;
+                }
+
+                writer.write(value);
+              }
+
+              await finalizeTrace();
+              writer.write({
+                type: "message-metadata",
+                messageMetadata: {
+                  traceUrl: publishedTraceUrl ?? DEMO_PUBLIC_TRACE_FALLBACK_URL,
+                },
+              });
+            } finally {
+              reader.releaseLock();
+              await closeMcpClient();
+            }
+          },
+        }),
       });
     },
   );
