@@ -124,7 +124,7 @@ export const handler = async (req: Request) => {
         await mcpClient.close();
       };
 
-      const finalizeTrace = async () => {
+      const finalizeTrace = async (publishTrace: boolean) => {
         if (isTraceFinalized) return;
         isTraceFinalized = true;
 
@@ -133,16 +133,27 @@ export const handler = async (req: Request) => {
             { output: assistantText || currentText },
             { asType: "generation" },
           );
-          setActiveTraceAsPublic();
+          if (publishTrace) {
+            setActiveTraceAsPublic();
+          }
           activeSpan?.end();
         });
 
         try {
           await flush();
-          publishedTraceUrl = await getPublicDemoTraceUrl(traceId);
+          if (publishTrace) {
+            publishedTraceUrl = await getPublicDemoTraceUrl(traceId);
+          }
         } catch (error) {
-          console.warn("Failed to publish demo trace link", error);
-          publishedTraceUrl = DEMO_PUBLIC_TRACE_FALLBACK_URL;
+          console.warn(
+            publishTrace
+              ? "Failed to publish demo trace link"
+              : "Failed to flush demo trace",
+            error,
+          );
+          if (publishTrace) {
+            publishedTraceUrl = DEMO_PUBLIC_TRACE_FALLBACK_URL;
+          }
         }
       };
 
@@ -208,7 +219,7 @@ export const handler = async (req: Request) => {
 
               streamCompleted = true;
             } finally {
-              await finalizeTrace();
+              await finalizeTrace(streamCompleted);
               try {
                 if (streamCompleted) {
                   writer.write({
