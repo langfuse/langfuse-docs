@@ -14,15 +14,11 @@ type DemoTraceLinkProps = {
 };
 
 export const DemoTraceLink = ({
-  traceId,
   traceUrl,
   source,
   className,
 }: DemoTraceLinkProps) => {
   const capture = usePostHogClientCapture();
-  const href =
-    traceUrl ||
-    (traceId ? `https://cloud.langfuse.com/project/~/traces/${traceId}` : null);
 
   const linkContent = (
     <>
@@ -68,17 +64,17 @@ export const DemoTraceLink = ({
     className,
   );
 
-  if (!href) return null;
+  if (!traceUrl) return null;
 
   return (
     <a
-      href={href}
+      href={traceUrl}
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => {
         capture("demo:view_trace_in_langfuse_clicked", {
           source,
-          trace_url: href,
+          trace_url: traceUrl,
         });
       }}
       className={linkClassName}

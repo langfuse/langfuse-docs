@@ -236,7 +236,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                           !hasStreamingParts;
                         const traceUrl = message.metadata?.traceUrl;
                         const isTraceLinkReady =
-                          Boolean(traceUrl || message.id) && !hasStreamingParts;
+                          Boolean(traceUrl) && !hasStreamingParts;
                         const shouldShowTraceLink =
                           message.role === "assistant" &&
                           isLastMessage &&
