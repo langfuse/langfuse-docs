@@ -1,30 +1,28 @@
 import { openai, OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
-import {
-  createUIMessageStreamResponse,
-  streamText,
-  stepCountIs,
-  type UIMessage,
-} from "ai";
+import { streamText, UIMessage, stepCountIs } from "ai";
 import { createMCPClient } from "@ai-sdk/mcp";
 import {
   observe,
   propagateAttributes,
   startActiveObservation,
+  updateActiveObservation,
+  setActiveTraceIO,
 } from "@langfuse/tracing";
-import { LangfuseVercelAiSdkIntegration } from "@langfuse/vercel-ai-sdk";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp";
+import { LangfuseClient } from "@langfuse/client";
+import { getActiveTraceId } from "@langfuse/tracing";
+import { after } from "next/server";
 import { flush } from "@/src/instrumentation";
-import {
-  createPublicDemoTraceLink,
-  demoProjectLangfuseClient,
-  makeDemoTracePublic,
-  publishPublicDemoTraceLink,
-} from "@/lib/demo-project-trace";
+import { trace } from "@opentelemetry/api";
 
-const langfuseAiTelemetry = new LangfuseVercelAiSdkIntegration();
+const langfuseClient = new LangfuseClient({
+  baseUrl: process.env.NEXT_PUBLIC_EU_LANGFUSE_BASE_URL,
+  publicKey: process.env.NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY,
+  secretKey: process.env.EU_LANGFUSE_SECRET_KEY,
+});
 
 const tracedGetPrompt = observe(
-  demoProjectLangfuseClient.prompt.get.bind(demoProjectLangfuseClient.prompt),
+  langfuseClient.prompt.get.bind(langfuseClient.prompt),
   { name: "get-langfuse-prompt" },
 );
 
@@ -40,281 +38,124 @@ export const handler = async (req: Request) => {
     (part) => part.type === "text",
   )?.text;
 
-  return startActiveObservation(
-    "handle-chatbot-message",
-    async (rootObservation) => {
-      try {
-        return await propagateAttributes(
-          {
-            traceName: "QA-Chatbot",
-            tags: ["qa-chatbot"],
-            sessionId: chatId,
-            userId,
-          },
-          async () => {
-            rootObservation.update({ input: inputText });
-            rootObservation.setTraceIO({ input: inputText });
-            makeDemoTracePublic(rootObservation);
-            await createPublicDemoTraceLink({
-              traceId: rootObservation.traceId,
-              name: "QA-Chatbot",
-              input: inputText,
-              userId,
-              sessionId: chatId,
-              tags: ["qa-chatbot"],
-            });
-            let traceEnded = false;
-            let publishedTraceUrl: string | undefined;
-
-            const finishPublicTrace = async ({
-              output,
-              error,
-            }: {
-              output?: unknown;
-              error?: unknown;
-            } = {}) => {
-              if (traceEnded) return;
-
-              if (error) {
-                rootObservation.update({
-                  level: "ERROR",
-                  statusMessage:
-                    error instanceof Error ? error.message : String(error),
-                });
-              } else {
-                rootObservation.update({ output });
-                rootObservation.setTraceIO({ output });
-              }
-
-              makeDemoTracePublic(rootObservation);
-              rootObservation.end();
-              traceEnded = true;
-
-              try {
-                await flush();
-                const publishedTraceLink = await publishPublicDemoTraceLink({
-                  traceId: rootObservation.traceId,
-                  name: "QA-Chatbot",
-                  userId,
-                  sessionId: chatId,
-                  tags: ["qa-chatbot"],
-                });
-                publishedTraceUrl = publishedTraceLink.traceUrl;
-              } catch (err) {
-                console.warn("Failed to flush public Langfuse trace", err);
-              }
-            };
-
-            const prompt = await tracedGetPrompt(
-              "langfuse-docs-assistant-chat",
-              {
-                type: "chat",
-              },
-            );
-
-            const reasoningSummary = prompt.config.reasoningSummary as
-              | "low"
-              | "medium"
-              | "high"
-              | undefined;
-            const textVerbosity = prompt.config.textVerbosity as
-              | "low"
-              | "medium"
-              | "high"
-              | undefined;
-            const reasoningEffort = prompt.config.reasoningEffort as
-              | "low"
-              | "medium"
-              | "high"
-              | undefined;
-
-            const chatHistory = messages.map((msg) => ({
-              role: msg.role,
-              content: msg.parts
-                .filter((part) => part.type === "text")
-                .map((part) => part.text)
-                .join(""),
-            }));
-
-            const compiledPrompt = prompt.compile(
-              {},
-              { chat_history: chatHistory },
-            );
-            const langfusePrompt = prompt.toJSON();
-            const systemPrompt = compiledPrompt
-              .filter((message) => message.role === "system")
-              .map((message) => message.content)
-              .join("\n\n");
-            const modelMessages = compiledPrompt.filter(
-              (message) => message.role !== "system",
-            );
-
-            const mcpClient = await startActiveObservation(
-              "create-mcp-client",
-              async () => {
-                const mcpUrl = new URL("https://langfuse.com/api/mcp", req.url);
-
-                return createMCPClient({
-                  transport: new StreamableHTTPClientTransport(mcpUrl, {
-                    sessionId: `qa-chatbot-${crypto.randomUUID()}`,
-                  }),
-                });
-              },
-            );
-
-            let mcpClientClosed = false;
-            const closeMcpClient = async () => {
-              if (mcpClientClosed) return;
-              mcpClientClosed = true;
-
-              await mcpClient.close().catch((err) => {
-                console.warn("Failed to close QA chatbot MCP client", err);
-              });
-            };
-
-            let removeAbortHandler = () => {};
-
-            try {
-              const tools = await mcpClient.tools();
-              let outputText = "";
-              let traceMetadataEnqueued = false;
-
-              const finalizeTrace = async ({
-                output,
-                error,
-              }: {
-                output?: unknown;
-                error?: unknown;
-              } = {}) => {
-                await closeMcpClient();
-                await finishPublicTrace({ output, error });
-              };
-
-              const enqueueTraceMetadata = (
-                controller: TransformStreamDefaultController<any>,
-              ) => {
-                if (!publishedTraceUrl || traceMetadataEnqueued) {
-                  return;
-                }
-
-                traceMetadataEnqueued = true;
-                controller.enqueue({
-                  type: "message-metadata",
-                  messageMetadata: { traceUrl: publishedTraceUrl },
-                });
-              };
-
-              const handleAbort = () => {
-                void finalizeTrace({
-                  output: outputText,
-                  error: new Error("Client aborted the response stream"),
-                });
-              };
-
-              removeAbortHandler = () => {
-                req.signal.removeEventListener("abort", handleAbort);
-              };
-
-              req.signal.addEventListener("abort", handleAbort, {
-                once: true,
-              });
-
-              const result = streamText({
-                model: openai(String(prompt.config.model)),
-                providerOptions: {
-                  openai: {
-                    reasoningSummary,
-                    textVerbosity,
-                    reasoningEffort,
-                  } satisfies OpenAIResponsesProviderOptions,
-                },
-                instructions: systemPrompt || undefined,
-                messages: modelMessages,
-                tools: tools as Parameters<typeof streamText>[0]["tools"],
-                stopWhen: stepCountIs(10),
-                runtimeContext: {
-                  langfusePrompt,
-                },
-                experimental_telemetry: {
-                  isEnabled: true,
-                  functionId: "qa-chatbot",
-                  includeRuntimeContext: {
-                    langfusePrompt: true,
-                  },
-                  integrations: [langfuseAiTelemetry],
-                },
-                onError: async ({ error }) => {
-                  removeAbortHandler();
-                  await finalizeTrace({ error });
-                },
-              });
-
-              const publicTraceStream = result
-                .toUIMessageStream({
-                  generateMessageId: () => rootObservation.traceId,
-                  sendSources: true,
-                  sendReasoning: true,
-                })
-                .pipeThrough(
-                  new TransformStream<any, any>({
-                    async transform(chunk, controller) {
-                      if (chunk.type === "text-delta") {
-                        outputText += chunk.delta;
-                      }
-
-                      if (chunk.type === "finish") {
-                        removeAbortHandler();
-                        await finalizeTrace({ output: outputText });
-                        enqueueTraceMetadata(controller);
-                      }
-
-                      controller.enqueue(chunk);
-                    },
-                    async flush(controller) {
-                      removeAbortHandler();
-
-                      if (!traceEnded) {
-                        await finalizeTrace({ output: outputText });
-                      }
-
-                      enqueueTraceMetadata(controller);
-                    },
-                  }),
-                );
-
-              return createUIMessageStreamResponse({
-                stream: publicTraceStream,
-              });
-            } catch (err) {
-              removeAbortHandler();
-              await closeMcpClient();
-              throw err;
-            }
-          },
-        );
-      } catch (err) {
-        rootObservation.update({
-          level: "ERROR",
-          statusMessage: err instanceof Error ? err.message : String(err),
-        });
-        rootObservation.end();
-
-        try {
-          await flush();
-        } catch (flushErr) {
-          console.warn("Failed to flush errored Langfuse trace", flushErr);
-        }
-
-        throw err;
-      }
-    },
+  return propagateAttributes(
     {
-      asType: "agent",
-      endOnExit: false,
+      traceName: "QA-Chatbot",
+      tags: ["qa-chatbot"],
+      sessionId: chatId,
+      userId,
+    },
+    async () => {
+      updateActiveObservation({ input: inputText }, { asType: "generation" });
+      setActiveTraceIO({ input: inputText });
+
+      const prompt = await tracedGetPrompt("langfuse-docs-assistant-chat", {
+        type: "chat",
+      });
+
+      const reasoningSummary = prompt.config.reasoningSummary as
+        | "low"
+        | "medium"
+        | "high"
+        | undefined;
+      const textVerbosity = prompt.config.textVerbosity as
+        | "low"
+        | "medium"
+        | "high"
+        | undefined;
+      const reasoningEffort = prompt.config.reasoningEffort as
+        | "low"
+        | "medium"
+        | "high"
+        | undefined;
+
+      const chatHistory = messages.map((msg) => ({
+        role: msg.role,
+        content: msg.parts
+          .filter((part) => part.type === "text")
+          .map((part) => part.text)
+          .join(""),
+      }));
+
+      const compiledPrompt = prompt.compile({}, { chat_history: chatHistory });
+      const systemPrompt = compiledPrompt
+        .filter((message) => message.role === "system")
+        .map((message) => message.content)
+        .join("\n\n");
+      const modelMessages = compiledPrompt.filter(
+        (message) => message.role !== "system",
+      );
+
+      const mcpClient = await startActiveObservation(
+        "create-mcp-client",
+        async () => {
+          const mcpUrl = new URL("https://langfuse.com/api/mcp", req.url);
+
+          return createMCPClient({
+            transport: new StreamableHTTPClientTransport(mcpUrl, {
+              sessionId: `qa-chatbot-${crypto.randomUUID()}`,
+            }),
+          });
+        },
+      );
+
+      const tools = await mcpClient.tools();
+
+      const result = streamText({
+        model: openai(String(prompt.config.model)),
+        providerOptions: {
+          openai: {
+            reasoningSummary,
+            textVerbosity,
+            reasoningEffort,
+          } satisfies OpenAIResponsesProviderOptions,
+        },
+        instructions: systemPrompt || undefined,
+        messages: modelMessages,
+        tools: tools as Parameters<typeof streamText>[0]["tools"],
+        stopWhen: stepCountIs(10),
+        runtimeContext: {
+          langfusePrompt: prompt,
+        },
+        telemetry: {
+          functionId: "qa-chatbot",
+          includeRuntimeContext: {
+            langfusePrompt: true,
+          },
+        },
+        onFinish: async (result) => {
+          await mcpClient.close();
+
+          const latestText = Array.isArray((result as any).content)
+            ? [...((result as any).content as Array<any>)]
+                .reverse()
+                .find((part: any) => part?.type === "text")?.text
+            : (result as any).content;
+
+          updateActiveObservation(
+            { output: latestText },
+            { asType: "generation" },
+          );
+          setActiveTraceIO({ output: latestText });
+          trace.getActiveSpan()?.end();
+        },
+      });
+
+      after(async () => await flush());
+
+      return result.toUIMessageStreamResponse({
+        generateMessageId: () => getActiveTraceId(),
+        sendSources: true,
+        sendReasoning: true,
+      });
     },
   );
 };
 
-export const POST = handler;
+export const POST = observe(handler, {
+  name: "handle-chatbot-message",
+  endOnExit: false, // end after stream has finished
+  asType: "agent",
+});
 
-export const maxDuration = 120;
+export const maxDuration = 30;
