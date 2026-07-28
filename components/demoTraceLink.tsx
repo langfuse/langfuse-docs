@@ -42,7 +42,7 @@ export const DemoTraceLink = ({
         aria-hidden="true"
         className="pointer-events-none absolute bottom-0 right-0 h-3 w-3 border-b-2 border-r-2 border-text-secondary transition-colors group-hover:border-text-primary"
       />
-      <span className="relative inline-flex min-h-[34px] items-center gap-2.5 border border-text-secondary bg-[#f4ff63] px-4 py-2 font-sans text-[15px] font-semibold leading-none text-text-primary shadow-[0_1px_0_rgba(0,0,0,0.22)] transition-colors group-hover:bg-[#f7ff7a] group-focus-visible:ring-2 group-focus-visible:ring-ring group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-surface-bg">
+      <span className="relative inline-flex min-h-[32px] w-full min-w-0 items-center justify-center gap-2 border border-line-cta bg-surface-cta-primary px-3 py-1.5 font-sans text-[14px] font-semibold leading-tight text-text-primary shadow-[0_1px_0_rgba(0,0,0,0.18)] transition-colors group-hover:bg-surface-cta-primary/80 group-focus-visible:ring-2 group-focus-visible:ring-ring group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-surface-bg sm:w-auto sm:px-4 sm:text-[15px]">
         <Image
           src="/langfuse-icon.svg"
           alt=""
@@ -51,7 +51,9 @@ export const DemoTraceLink = ({
           aria-hidden="true"
           className="size-3.5 shrink-0"
         />
-        <span className="whitespace-nowrap">View trace in Langfuse</span>
+        <span className="min-w-0 text-left sm:whitespace-nowrap">
+          View trace in Langfuse
+        </span>
         <ArrowUpRight
           aria-hidden="true"
           className="size-4 shrink-0 text-text-secondary transition-[color,transform] group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-text-primary"
@@ -62,7 +64,7 @@ export const DemoTraceLink = ({
   );
 
   const linkClassName = cn(
-    "group relative inline-flex w-fit p-1 no-underline hover:no-underline focus-visible:outline-none",
+    "group relative inline-flex max-w-full p-1 no-underline hover:no-underline focus-visible:outline-none sm:w-fit",
     className,
   );
 
