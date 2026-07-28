@@ -95,6 +95,8 @@ export const handler = async (req: Request) => {
                 const publishedTraceLink = await publishPublicDemoTraceLink({
                   traceId: rootObservation.traceId,
                   name: "QA-Chatbot",
+                  input: inputText,
+                  output,
                   userId,
                   sessionId: chatId,
                   tags: ["qa-chatbot"],
