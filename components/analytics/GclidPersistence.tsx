@@ -41,24 +41,34 @@ function hasAdvertisementConsent(): boolean {
   return consentCookie?.includes("advertisement:yes") ?? false;
 }
 
-function persistGclid() {
-  const gclid = new URLSearchParams(window.location.search).get("gclid");
-  if (!gclid || !GCLID_FORMAT.test(gclid)) return;
-  if (!hasAdvertisementConsent()) return;
-
+function syncGclidCookie(gclid: string | null) {
   const { hostname, protocol } = window.location;
   const isLangfuseDomain =
     hostname === "langfuse.com" || hostname.endsWith(".langfuse.com");
-
-  document.cookie = [
-    `lf_gclid=${gclid}`,
+  const cookieAttributes = [
     // scope to .langfuse.com so cloud.langfuse.com receives the cookie;
     // host-only elsewhere (previews, localhost)
     ...(isLangfuseDomain ? ["domain=.langfuse.com"] : []),
     "path=/",
-    `max-age=${NINETY_DAYS_IN_SECONDS}`,
     "samesite=lax",
     ...(protocol === "https:" ? ["secure"] : []),
+  ];
+
+  if (!hasAdvertisementConsent()) {
+    // consent absent or revoked: expire any previously stored value —
+    // CookieYes can't auto-clear custom cookies it doesn't know about
+    document.cookie = ["lf_gclid=", ...cookieAttributes, "max-age=0"].join(
+      "; ",
+    );
+    return;
+  }
+
+  if (!gclid || !GCLID_FORMAT.test(gclid)) return;
+
+  document.cookie = [
+    `lf_gclid=${gclid}`,
+    ...cookieAttributes,
+    `max-age=${NINETY_DAYS_IN_SECONDS}`,
   ].join("; ");
 }
 
@@ -69,15 +79,20 @@ function persistGclid() {
 // `cloud_signup_complete` analytics event). Last ad click wins; the 90-day
 // lifetime matches the conversion action's click-through window in Google
 // Ads. Only stored with CookieYes "advertisement" consent — checked on mount
-// and again when the visitor answers the consent banner after landing.
+// and again on every consent change; revoking consent expires the cookie.
 export function GclidPersistence() {
   useEffect(() => {
-    persistGclid();
-    // the consent banner is usually answered on the landing page itself,
-    // while the gclid is still in the URL — persist as soon as consent lands
-    document.addEventListener("cookieyes_consent_update", persistGclid);
-    return () =>
-      document.removeEventListener("cookieyes_consent_update", persistGclid);
+    // capture once at mount: this component lives in the root layout, so the
+    // consent listener survives client-side navigations where the gclid is
+    // no longer in the URL by the time the visitor answers the banner
+    const gclid = new URLSearchParams(window.location.search).get("gclid");
+    const sync = () => syncGclidCookie(gclid);
+
+    sync();
+    // re-sync when the visitor answers the banner or edits their consent in
+    // the preference center: grants persist the click, revocations clear it
+    document.addEventListener("cookieyes_consent_update", sync);
+    return () => document.removeEventListener("cookieyes_consent_update", sync);
   }, []);
 
   return null;
