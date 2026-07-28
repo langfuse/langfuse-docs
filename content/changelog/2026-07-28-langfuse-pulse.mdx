@@ -1,0 +1,53 @@
+---
+date: 2026-07-28
+title: "Pulse: find the outliers in your traces"
+description: "A compact chart strip above the traces table. See cost, latency, and token spikes over time, then click or drag a spike to narrow the table to that window."
+author: Nikita Kabardin
+ogVideo: https://static.langfuse.com/changelog-videos/2025-07-28-pulse.mp4
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, Cloud } from "lucide-react";
+
+<ChangelogHeader />
+
+The events table is where you go when something in your traces looks off. **Pulse** puts a compact chart strip right above it, so the spikes in your data are the first thing you see. Each bar covers a slice of time and shows the worst single event in that slice: the most expensive call, the slowest response, the biggest token burst. The outlier you are hunting for is a tall bar, not a row you have to sort your way down to.
+
+## Find it, then drill into it
+
+Pulse turns spotting an outlier into navigating to it. Click a tall bar and the table narrows to that time window, showing exactly the events that made the spike. Drag across a range of bars to select a wider span; it applies when you let go. Browser Back returns you to where you started, so poking around costs you nothing.
+
+Switch what the strip plots from a single dropdown: **Cost**, **Latency**, **Tokens**, or **Split** to see all three at once. Each mode carries the aggregate that fits it, so cost shows max or total and latency shows max, p95, or average over the same time buckets. The strip sizes its bars to the width it has and spans the full time range, so a quiet stretch reads as a flat baseline instead of empty space.
+
+This is how you hunt down expensive or slow outliers on the [Langfuse v4](/docs/v4) data model: one cheap aggregate query over time, rather than a per-row sort across your whole dataset.
+
+## The table keeps up
+
+Two smaller changes make the table itself easier to read as you narrow things down.
+
+**Filter facet counts now match your filters.** The count next to each facet value recomputes against everything you have already applied, not just the time range. With `environment:production` active, the Status facet shows how many production events sit at each level, so a count you click always has rows behind it.
+
+**An approximate total.** The traces table now shows `Total ≈ X` next to the pagination controls, a quick read on how large your current result set is. It is a cheap estimate that loads on its own, so the table never waits on it.
+
+## Learn more
+
+<Cards num={3}>
+  <Card
+    title="Chart any table"
+    href="/docs/observability/features/events-table-charts"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Filter Search Bar"
+    href="/docs/observability/features/filter-search-bar"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Open the traces table"
+    href="https://cloud.langfuse.com/project/~/traces"
+    icon={<Cloud />}
+    arrow
+  />
+</Cards>
