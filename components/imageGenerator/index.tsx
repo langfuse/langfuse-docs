@@ -14,7 +14,6 @@ import {
   ThumbsUpIcon,
   ThumbsDownIcon,
 } from "lucide-react";
-import { DemoTraceLink } from "@/components/demoTraceLink";
 
 type GeneratedImage = {
   base64: string;
@@ -199,13 +198,6 @@ export const ImageGenerator = ({
                   uint8Array={new Uint8Array()}
                   alt={currentImage.prompt}
                   className="max-w-md rounded-[2px] border border-line-structure"
-                />
-              </div>
-
-              <div className="flex justify-center">
-                <DemoTraceLink
-                  traceUrl={currentImage.traceUrl}
-                  source="image_generator"
                 />
               </div>
 

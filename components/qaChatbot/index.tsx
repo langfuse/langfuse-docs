@@ -42,7 +42,6 @@ import {
 import { scoreDemoFeedback } from "@/components/demoLangfuseBrowserClients";
 import { FeedbackDialog } from "./FeedbackPopover";
 import { cn } from "@/lib/utils";
-import { DemoTraceLink } from "@/components/demoTraceLink";
 import type { UIMessage } from "ai";
 
 type ChatMessageMetadata = {
@@ -234,9 +233,6 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                           status !== "submitted" &&
                           status !== "streaming" &&
                           !hasStreamingParts;
-                        const traceUrl = message.metadata?.traceUrl;
-                        const isTraceLinkReady =
-                          Boolean(traceUrl) && !hasStreamingParts;
                         // Add spacing if next part is a different type (for consistent spacing between different types)
                         const nextPart = message.parts[i + 1];
                         const hasNextPartDifferentType =
@@ -247,16 +243,6 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                             className={hasNextPartDifferentType ? "mb-4" : ""}
                           >
                             <Response>{part.text}</Response>
-                            {message.role === "assistant" &&
-                              isNotFirstMessage &&
-                              isLastTextPart &&
-                              isTraceLinkReady && (
-                                <DemoTraceLink
-                                  traceUrl={traceUrl}
-                                  source="qa_chatbot"
-                                  className="mt-3"
-                                />
-                              )}
                             {message.role === "assistant" &&
                               isLastMessage &&
                               isNotFirstMessage &&

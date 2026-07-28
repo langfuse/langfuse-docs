@@ -53,15 +53,9 @@ export const handler = async (req: Request) => {
           },
           async () => {
             rootObservation.update({ input: inputText });
-            rootObservation.setTraceIO({ input: inputText });
             makeDemoTracePublic(rootObservation);
             await createPublicDemoTraceLink({
               traceId: rootObservation.traceId,
-              name: "QA-Chatbot",
-              input: inputText,
-              userId,
-              sessionId: chatId,
-              tags: ["qa-chatbot"],
             });
             let traceEnded = false;
             let publishedTraceUrl: string | undefined;
@@ -83,7 +77,6 @@ export const handler = async (req: Request) => {
                 });
               } else {
                 rootObservation.update({ output });
-                rootObservation.setTraceIO({ output });
               }
 
               makeDemoTracePublic(rootObservation);
@@ -94,10 +87,6 @@ export const handler = async (req: Request) => {
                 await flush();
                 const publishedTraceLink = await publishPublicDemoTraceLink({
                   traceId: rootObservation.traceId,
-                  name: "QA-Chatbot",
-                  userId,
-                  sessionId: chatId,
-                  tags: ["qa-chatbot"],
                 });
                 publishedTraceUrl = publishedTraceLink.traceUrl;
               } catch (err) {

@@ -10,10 +10,6 @@ interface EventDefinitions {
     path: string;
     prompt_char_count: number;
   };
-  "demo:view_trace_in_langfuse_clicked": {
-    source: "qa_chatbot" | "image_generator" | "sentiment_classifier";
-    trace_url: string;
-  };
 }
 
 type EventName = keyof EventDefinitions;
