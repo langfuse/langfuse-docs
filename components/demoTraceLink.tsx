@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { ArrowUpRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
@@ -32,19 +33,42 @@ export const DemoTraceLink = ({
         });
       }}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-[2px] border border-line-structure bg-surface-bg px-2 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary",
+        "group relative inline-flex w-fit p-1.5 no-underline hover:no-underline focus-visible:outline-none",
         className,
       )}
     >
-      <Image
-        src="/langfuse-icon.svg"
-        alt=""
-        width={14}
-        height={14}
+      <span
         aria-hidden="true"
-        className="size-3.5 shrink-0"
+        className="pointer-events-none absolute left-0 top-0 h-4 w-4 border-l-2 border-t-2 border-text-secondary transition-colors group-hover:border-text-primary"
       />
-      View trace in Langfuse
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute right-0 top-0 h-4 w-4 border-r-2 border-t-2 border-text-secondary transition-colors group-hover:border-text-primary"
+      />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-0 left-0 h-4 w-4 border-b-2 border-l-2 border-text-secondary transition-colors group-hover:border-text-primary"
+      />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-0 right-0 h-4 w-4 border-b-2 border-r-2 border-text-secondary transition-colors group-hover:border-text-primary"
+      />
+      <span className="relative inline-flex min-h-[46px] items-center gap-4 border border-text-secondary bg-[#f4ff63] px-7 py-3 font-sans text-[19px] font-semibold leading-none text-text-primary shadow-[0_1px_0_rgba(0,0,0,0.22)] transition-colors group-hover:bg-[#f7ff7a] group-focus-visible:ring-2 group-focus-visible:ring-ring group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-surface-bg">
+        <Image
+          src="/langfuse-icon.svg"
+          alt=""
+          width={18}
+          height={18}
+          aria-hidden="true"
+          className="size-[18px] shrink-0"
+        />
+        <span className="whitespace-nowrap">View trace in Langfuse</span>
+        <ArrowUpRight
+          aria-hidden="true"
+          className="size-5 shrink-0 text-text-secondary transition-[color,transform] group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-text-primary"
+          strokeWidth={2.25}
+        />
+      </span>
     </a>
   );
 };
