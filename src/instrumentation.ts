@@ -1,6 +1,4 @@
-import { registerTelemetry } from "ai";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
-import { LangfuseVercelAiSdkIntegration } from "@langfuse/vercel-ai-sdk";
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 
 const euSpanProcessor = new LangfuseSpanProcessor({
@@ -34,13 +32,20 @@ const spanProcessors = [
   internalSpanProcessor,
 ];
 
-export const flush = async () =>
-  Promise.all(spanProcessors.map((p) => p.forceFlush()));
+export const flush = async () => {
+  const results = await Promise.allSettled(
+    spanProcessors.map((p) => p.forceFlush()),
+  );
+
+  for (const result of results) {
+    if (result.status === "rejected") {
+      console.warn("Failed to flush Langfuse span processor", result.reason);
+    }
+  }
+};
 
 const tracerProvider = new NodeTracerProvider({
   spanProcessors,
 });
 
 tracerProvider.register();
-
-registerTelemetry(new LangfuseVercelAiSdkIntegration());
