@@ -48,6 +48,16 @@ export const createPublicDemoTraceLink = async ({
 export const publishPublicDemoTraceLink = async ({
   traceId = getActiveTraceId(),
 }: PublicDemoTraceParams): Promise<DemoTraceLink> => {
+  if (!traceId) {
+    return {};
+  }
+
+  const traceIsReady = await waitForReadableDemoTrace(traceId);
+
+  if (!traceIsReady) {
+    return { traceId };
+  }
+
   return createDemoTraceLink(traceId);
 };
 
@@ -57,4 +67,29 @@ export const makeDemoTracePublic = (trace?: PublishableTrace) => {
   }
 
   setActiveTraceAsPublic();
+};
+
+const waitForReadableDemoTrace = async (traceId: string) => {
+  for (const delayMs of [0, 250, 500, 1000, 1500, 2000]) {
+    if (delayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+
+    try {
+      await demoProjectLangfuseClient.api.trace.get(traceId);
+      return true;
+    } catch (err) {
+      const statusCode =
+        typeof err === "object" && err !== null && "statusCode" in err
+          ? err.statusCode
+          : undefined;
+
+      if (statusCode !== 404) {
+        console.warn("Failed to verify public Langfuse trace readiness", err);
+        return false;
+      }
+    }
+  }
+
+  return false;
 };
