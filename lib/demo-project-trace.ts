@@ -52,12 +52,7 @@ export const publishPublicDemoTraceLink = async ({
     return {};
   }
 
-  const traceIsReady = await waitForReadableDemoTrace(traceId);
-
-  if (!traceIsReady) {
-    return { traceId };
-  }
-
+  await waitForReadableDemoTrace(traceId);
   return createDemoTraceLink(traceId);
 };
 
@@ -86,10 +81,8 @@ const waitForReadableDemoTrace = async (traceId: string) => {
 
       if (statusCode !== 404) {
         console.warn("Failed to verify public Langfuse trace readiness", err);
-        return false;
+        return;
       }
     }
   }
-
-  return false;
 };
