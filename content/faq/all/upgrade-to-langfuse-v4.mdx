@@ -1,165 +1,50 @@
 ---
 title: How do I upgrade to Langfuse v4?
 sidebarTitle: Upgrade to Langfuse v4
-description: Step-by-step upgrade instructions for Langfuse v4 by situation - older SDKs, current SDKs, direct API and OpenTelemetry users, and self-hosted deployments.
+description: Upgrade to Langfuse v4 by updating ingestion, migrating the v3 features you use, and completing the rollout for your deployment.
 tags: [platform]
 ---
 
-import { Steps, Step } from "@/components/docs";
-import V4StepReadApis from "@/components-mdx/v4/step-read-apis.mdx";
-import V4StepEvaluators from "@/components-mdx/v4/step-evaluators.mdx";
-import V4StepExports from "@/components-mdx/v4/step-exports.mdx";
-import V4StepUiToggle from "@/components-mdx/v4/step-ui-toggle.mdx";
-import V4StepVerify from "@/components-mdx/v4/step-verify.mdx";
-
 # Upgrade to Langfuse v4
 
-Langfuse v4 rebuilds the data model around observations; the [Langfuse v4 page](/docs/v4) explains what changed and why. Find your situation below and follow the steps.
+Langfuse v4 uses an observations-first data model. The [v4 overview](/docs/v4) explains what changed. New managed projects already use v4 and need no migration.
 
-**Upgrading your SDKs is the most important step**; everything else builds on it. Not sure which combinations are supported? The [compatibility matrix](/docs/compatibility#sdk-server) shows every SDK, API, and export supported by Langfuse v4; self-hosters use the [self-hosted matrix](/self-hosting/upgrade/versioning#sdk-server).
+For existing projects, complete the applicable steps below.
 
-## Langfuse v4 with older SDKs (Python v2 / JS v3 or older) [#cloud-older-sdks]
+## 1. Upgrade trace ingestion [#ingestion]
 
-**Deadline: will be announced.** These SDKs send traces via the legacy ingestion API, which is removed in Langfuse v4; trace ingestion then stops working. Score ingestion is unaffected.
+Python v2 and JS/TS v3 (and older) depend on legacy ingestion, which stops after the v4 cutover. Python v3 and JS/TS v4 are deprecated and can show data with up to a 10-minute delay.
 
-<Steps>
+| Current setup                          | Action                                                                                                                                                                                               |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Langfuse Python SDK below 4.7.0        | Upgrade to Python SDK 4.7.0 or later. Follow the [SDK upgrade paths](/docs/observability/sdk/upgrade-path) for each major-version change.                                                            |
+| Langfuse JS/TS SDK below 5.4.0         | Upgrade to JS/TS SDK 5.4.0 or later. Follow the [SDK upgrade paths](/docs/observability/sdk/upgrade-path) for each major-version change.                                                             |
+| Custom REST ingestion or OpenTelemetry | Follow the [custom ingestion v4 guide](/integrations/native/opentelemetry/migration-to-v4). It covers OTLP/HTTP, real-time ingestion, attribute propagation, root input/output, and immutable spans. |
 
-<Step>
+## 2. Migrate the v3 features you use [#features]
 
-**Ingestion**
+Skip any row that does not apply to your project.
 
-Upgrade to the latest SDK majors, Python v4 and JS/TS v5; the [SDK upgrade paths](/docs/observability/sdk/upgrade-path) cover each major-version hop. Then replace `update_current_trace()` / `updateActiveTrace()` with `propagate_attributes()`.
+| If you use                                                       | Action before the v4 cutover                                                                                                                                                                                                                                                                                           |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Deprecated SDK resources or REST endpoints                       | Use the [endpoint migration guide](/faq/all/deprecated-api-migration) to move to Observations API v2, Metrics API v2, Scores API v3, or the Experiments APIs. Deprecated reads return `404` after cutover.                                                                                                             |
+| Trace-level or legacy-dataset LLM-as-a-Judge evaluators          | [Migrate to observation-level evaluators](/faq/all/llm-as-a-judge-migration). Legacy evaluators stop producing scores after cutover.                                                                                                                                                                                   |
+| Blob storage, PostHog, or Mixpanel with the legacy export source | Migrate to enriched observations using the [blob storage](/docs/api-and-data-platform/features/export-to-blob-storage#upgrade-path), [PostHog](/integrations/analytics/posthog#migrate-export-source), or [Mixpanel](/integrations/analytics/mixpanel#migrate-export-source) guide. Legacy exports stop after cutover. |
 
-</Step>
+## 3. Complete the rollout [#rollout]
 
-<Step>
+### Managed projects [#managed]
 
-<V4StepReadApis />
+If your organization still shows the **Preview** toggle, enable it. Then open the [in-app migration checklist](https://cloud.langfuse.com/project/~/v4) and resolve every required action.
 
-</Step>
+The managed cutover date has not been announced. Follow the [v4 timeline](/docs/v4#timeline) for updates.
 
-<Step>
+### Self-hosted deployments [#self-hosted]
 
-<V4StepEvaluators />
+Self-hosted v4 is currently a release candidate. Use the [v3 to v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4) to test the migration in staging, but wait for a stable v4 release before migrating production.
 
-</Step>
-
-<Step>
-
-<V4StepExports />
-
-</Step>
-
-<Step>
-
-<V4StepUiToggle />
-
-</Step>
-
-<Step>
-
-<V4StepVerify />
-
-</Step>
-
-</Steps>
-
-## Langfuse v4 with current SDKs (Python v3+ / JS v4+) [#cloud-current-sdks]
-
-**Deadline: will be announced** for the deprecated read APIs, trace-level evaluators, and legacy exports; upgrade your SDKs now so your data stays real time.
-
-<Steps>
-
-<Step>
-
-**Ingestion**
-
-Upgrade to Python SDK ≥ 4.7.0 / JS SDK ≥ 5.4.0 (below these versions, data appears with up to a 10-minute delay on the v4 data model) and replace `update_current_trace()` / `updateActiveTrace()` with `propagate_attributes()` ([Python guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4), [JS guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5)).
-
-</Step>
-
-<Step>
-
-<V4StepReadApis />
-
-</Step>
-
-<Step>
-
-<V4StepEvaluators />
-
-</Step>
-
-<Step>
-
-<V4StepExports />
-
-</Step>
-
-<Step>
-
-<V4StepUiToggle />
-
-</Step>
-
-<Step>
-
-<V4StepVerify />
-
-</Step>
-
-</Steps>
-
-## Direct API and OpenTelemetry users [#api-otel]
-
-**Deadline: will be announced** for legacy trace ingestion and the deprecated read APIs in Langfuse v4.
-
-<Steps>
-
-<Step>
-
-**Ingestion**
-
-Everyone still sending trace, span, or generation events to the legacy `POST /api/public/ingestion` API must move to the [OpenTelemetry endpoint](/integrations/native/opentelemetry) `POST /api/public/otel/v1/traces`. Set the [`x-langfuse-ingestion-version: 4` header](/integrations/native/opentelemetry#real-time-ingestion) on your span exporter for real-time data, and [propagate trace attributes](/integrations/native/opentelemetry#propagating-attributes) (`user_id`, `session_id`, ...) to all spans.
-
-</Step>
-
-<Step>
-
-<V4StepReadApis />
-
-</Step>
-
-<Step>
-
-<V4StepEvaluators />
-
-</Step>
-
-<Step>
-
-<V4StepExports />
-
-</Step>
-
-<Step>
-
-<V4StepUiToggle />
-
-</Step>
-
-<Step>
-
-<V4StepVerify />
-
-</Step>
-
-</Steps>
-
-## Self-hosted deployments [#self-hosted]
-
-**No forced deadline.** v3 continues to receive security patches, and breaking removals only happen in major server releases. Follow the [self-hosted v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4) to migrate your deployment. The [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) shows what each server version supports.
+There is no forced cutover date. Langfuse v3 receives security patches through January 2027. The [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) lists supported SDKs and APIs.
 
 ## Questions [#questions]
 
-Ask rollout and migration questions in the dedicated [GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518); we use that thread for updates and answers.
+Use the [general v4 discussion](https://github.com/orgs/langfuse/discussions/12518) for managed rollout questions and the [self-hosted v4 discussion](https://github.com/orgs/langfuse/discussions/14157) for server migration questions.
