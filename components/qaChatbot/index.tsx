@@ -235,6 +235,8 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                           status !== "streaming" &&
                           !hasStreamingParts;
                         const traceUrl = message.metadata?.traceUrl;
+                        const isTraceLinkReady =
+                          Boolean(traceUrl) && !hasStreamingParts;
                         // Add spacing if next part is a different type (for consistent spacing between different types)
                         const nextPart = message.parts[i + 1];
                         const hasNextPartDifferentType =
@@ -248,7 +250,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                             {message.role === "assistant" &&
                               isNotFirstMessage &&
                               isLastTextPart &&
-                              isMessageComplete && (
+                              isTraceLinkReady && (
                                 <DemoTraceLink
                                   traceUrl={traceUrl}
                                   source="qa_chatbot"
