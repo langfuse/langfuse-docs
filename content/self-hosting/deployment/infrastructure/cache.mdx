@@ -320,6 +320,12 @@ REDIS_TLS_ENABLED=true # required if REDIS_SENTINEL_TLS_ENABLED=true
 REDIS_SENTINEL_TLS_ENABLED=true
 ```
 
+## Detecting a Stalled Worker [#worker-liveness]
+
+Redis-level disruptions that invalidate BullMQ job locks — key eviction under a non-`noeviction` memory policy, a `FLUSHALL`, or a failover — can leave the worker container running while it silently stops consuming all queues.
+The worker health endpoint provides an opt-in check (`?failIfQueueConsumptionStuck=true`) that fails once no jobs have been processed for a configurable period, so a liveness probe can restart the container automatically.
+See [Health and Readiness Check Endpoints](/self-hosting/configuration/health-readiness-endpoints) for details.
+
 ## Sizing Recommendations
 
 Langfuse uses Redis mainly for queuing event metadata that should be processed by the worker.
