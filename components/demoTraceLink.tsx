@@ -33,26 +33,10 @@ export const DemoTraceLink = ({
         });
       }}
       className={cn(
-        "relative mx-2 my-2 inline-flex items-center gap-3 overflow-visible whitespace-nowrap rounded-[2px] border border-line-structure bg-surface-cta-primary px-5 py-2 text-sm font-semibold text-text-primary no-underline transition-colors hover:border-line-structure hover:bg-surface-cta-primary/90 hover:text-text-primary",
+        "inline-flex items-center gap-3 whitespace-nowrap rounded-[2px] border border-line-structure bg-surface-cta-primary px-5 py-2 text-sm font-semibold text-text-primary no-underline transition-colors hover:border-line-structure hover:bg-surface-cta-primary/90 hover:text-text-primary",
         className,
       )}
     >
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute -left-2 -top-2 size-4 border-l-2 border-t-2 border-line-cta"
-      />
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-2 -top-2 size-4 border-r-2 border-t-2 border-line-cta"
-      />
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute -bottom-2 -left-2 size-4 border-b-2 border-l-2 border-line-cta"
-      />
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute -bottom-2 -right-2 size-4 border-b-2 border-r-2 border-line-cta"
-      />
       <Image
         src="/langfuse-icon.svg"
         alt=""
