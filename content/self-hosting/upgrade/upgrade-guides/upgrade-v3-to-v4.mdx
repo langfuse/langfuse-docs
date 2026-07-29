@@ -7,7 +7,6 @@ description: A guide to upgrade a Langfuse v3 setup to v4.
 
 <Callout type="info">
 
-We tried to make this upgrade as seamless as possible.
 Please ask in the [v4 rollout GitHub Discussion](https://github.com/orgs/langfuse/discussions/14157) or contact [support](/support) in case you have any questions while upgrading to v4.
 
 </Callout>
@@ -17,15 +16,10 @@ Please ask in the [v4 rollout GitHub Discussion](https://github.com/orgs/langfus
 Langfuse v4 moves to an observation-centric data model built on a new, wide, and (mostly) immutable ClickHouse table.
 This eliminates joins and deduplication at read time and optimizes for the most performant ClickHouse access patterns.
 Initial table loads for large amounts of data go from seconds to milliseconds, and dashboard load times for large projects improve by 10x or more over longer time ranges.
-Read the [technical deep dive](/blog/2026-03-10-simplify-langfuse-for-scale) and the [overview of the new experience](/docs/v4) for more background.
 
-Langfuse Cloud has been running on this data model since early 2026.
+The new data model also unlocks a set of new features for self-hosted deployments: [full-text search](/docs/observability/features/full-text-search) across inputs, outputs, and metadata, the [filter search bar](/docs/observability/features/filter-search-bar), [monitors and alerts](/docs/metrics/features/monitors), and the significantly faster [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2).
 
-Follow this guide to:
-
-1. Understand what changes with Langfuse v4 and what does not.
-2. Upgrade in three independent steps, retaining your current behavior as long as you need it.
-3. Complete the move to the new data model on your own schedule.
+Langfuse Cloud has been running on this data model since early 2026. Read the [technical deep dive](/blog/2026-03-10-simplify-langfuse-for-scale) and the [overview of the new experience](/docs/v4) for more background.
 
 <Callout type="warn">
 
@@ -35,7 +29,32 @@ If you require further support, please contact [support](/support).
 
 </Callout>
 
+## Migration overview [#overview]
+
+The migration consists of three independent steps. Each step leaves your deployment in a stable state, so you can schedule them separately, pause in between, and retain your current behavior as long as you need it:
+
+1. [Upgrade your infrastructure](#step-1): bring ClickHouse to a v4-compatible version while still on Langfuse v3.
+2. [Upgrade the server to Langfuse v4](#step-2): retain your current ingestion behavior with the `legacy` or `dual` write mode. All schema migrations are applied automatically.
+3. [Move to the new data model](#step-3): upgrade your SDKs, migrate API consumers, evaluators, and exports, bring historic data into the new data model, and cut over to the v4 defaults.
+
+For historic data, you choose between [two options](#historic-data) in step 3: an **automated backfill** rewrites all existing data into the new tables in the background (plan for roughly 3x disk headroom in ClickHouse), or a **retention-based rollover** skips the backfill entirely by keeping the dual write active until your [data retention](/docs/administration/data-retention) window has rolled over.
+
+New deployments skip all of this; see [new deployments](#new-deployments).
+
 ## What changes
+
+### Breaking changes at a glance [#breaking-changes]
+
+The [feature availability matrix](/self-hosting/upgrade/versioning#sdk-server) is the canonical overview of what each server version supports.
+In summary, once your deployment runs the v4 defaults (write mode `events_only`), the following v3 surfaces stop working:
+
+- **SDKs**: Python SDK v2 and older and JS/TS SDK v3 and older are rejected at ingestion; see [SDK upgrade](#sdk-upgrade).
+- **Ingestion APIs**: the legacy batch ingestion endpoints are replaced by OpenTelemetry-based ingestion; see [API changes](#api-changes).
+- **Read APIs**: the deprecated read endpoints for traces, observations, sessions, scores, metrics, and dataset runs are replaced by newer APIs; see [API changes](#api-changes).
+- **Evaluators**: trace-level and legacy-dataset LLM-as-a-Judge evaluators stop running; see [evaluations](#evaluations).
+- **Exports**: the "Traces and observations (legacy)" export source stops producing data; see [batch exports and integrations](#exports).
+
+All of these keep working while you run the `legacy` or `dual` write mode, so you decide when the breaking changes take effect during your migration.
 
 ### The new data model [#data-model]
 
@@ -46,7 +65,7 @@ Langfuse v4 introduces two new ClickHouse tables that replace `traces` and `obse
 
 Traces are represented as root spans within the same table instead of a separate entity. Existing traces are converted into virtual root spans (type `SPAN`, with span ID `t-<trace_id>`) so that historic data remains browsable.
 
-The table schemas and all data migrations ship as regular migrations with Langfuse v4 — there is no manual schema work.
+The table schemas and all data migrations ship as regular migrations with Langfuse v4; there is no manual schema work.
 
 {/* TODO: add ingestion + propagation flow diagrams, see https://github.com/langfuse/langfuse/pull/12128 and blog assets */}
 
@@ -61,7 +80,10 @@ The infrastructure architecture is unchanged. Langfuse v4 runs on the same compo
 
 ### UI changes [#ui-changes]
 
-The main exploration surface is a single **Observations** view — the same experience that is live on Langfuse Cloud. There are no separate tabs for traces and observations anymore; `trace_id` acts like any other filter column (like `session_id` or `user_id`) to group related observations. See [working with observations](/faq/all/explore-observations-in-v4) for common views and workflows, and [dashboard changes](/faq/all/dashboard-changes-in-v4) for how charts behave on the new model.
+The main exploration surface is a single **Observations** view, the same experience that is live on Langfuse Cloud.
+Traces do not go away: every trace is represented by its root observation, and the table opens filtered to `Is Root Observation = true` by default, which shows exactly one row per trace like the previous traces table.
+Remove the filter to explore all observations, and use `trace_id` like any other filter column (like `session_id` or `user_id`) to group related observations.
+See [working with observations](/faq/all/explore-observations-in-v4) for common views and workflows, and [dashboard changes](/faq/all/dashboard-changes-in-v4) for how charts behave on the new model.
 
 <Video
   src="https://static.langfuse.com/docs-videos/2026-03-10-demo-saved-views.mp4"
@@ -73,7 +95,9 @@ Scores and comments that were previously attached to a trace are shown on the co
 
 ### API changes [#api-changes]
 
-Langfuse v4 serves reads from the new APIs that were introduced alongside the data model. The following legacy endpoints are unavailable on deployments that run the default write mode (`events_only`) — that is, all new deployments and migrated deployments after the [cutover](#cutover). **While you run the `legacy` or `dual` write mode during your migration, these endpoints keep working as before.**
+Langfuse v4 serves reads from the new APIs that were introduced alongside the data model.
+The following legacy endpoints are unavailable on deployments that run the default write mode (`events_only`), that is, all new deployments and migrated deployments after the [cutover](#cutover).
+**While you run the `legacy` or `dual` write mode during your migration, these endpoints keep working as before.**
 
 {/* TODO: verify the final endpoint list against the `rejectInEventsOnlyMode` gates in the codebase before publishing (e.g. PATCH /spans/:id, PATCH /generations/:id, score writes via POST /ingestion) */}
 
@@ -136,17 +160,7 @@ Trace-based and legacy-dataset-based LLM-as-a-Judge evaluators perform lookups o
 
 ### Batch exports and integrations [#exports]
 
-The blob storage, PostHog, and Mixpanel integrations must be configured to use the enriched observations export source ([changelog](/changelog/2026-05-20-blob-storage-enriched-default)). The classic `LEGACY_TRACES_OBSERVATIONS` export source ("Traces and observations (legacy)") does not produce any data after the [cutover](#cutover) to `events_only`.
-
-## Migration overview [#overview]
-
-The migration consists of three independent steps. Each step leaves your deployment in a stable state, so you can schedule them separately and pause in between:
-
-1. [Upgrade your infrastructure](#step-1) — bring ClickHouse to a v4-compatible version while still on Langfuse v3.
-2. [Upgrade the server to Langfuse v4](#step-2) — retain your current ingestion behavior with the `legacy` or `dual` write mode. All schema migrations are applied automatically.
-3. [Move to the new data model](#step-3) — upgrade your SDKs, migrate historic data (automated backfill, or a retention-based rollover), and cut over to the v4 defaults.
-
-New deployments skip all of this — see [new deployments](#new-deployments).
+The blob storage, PostHog, and Mixpanel integrations read their data through an **export source** that is configured per integration in the project settings. The source "Traces and observations (legacy)" (`LEGACY_TRACES_OBSERVATIONS`) exports from the old tables and stops producing data after the [cutover](#cutover) to `events_only`. Switch each integration to the "Enriched observations" source before the cutover; see the [export upgrade path](/docs/api-and-data-platform/features/export-to-blob-storage#upgrade-path) and the [changelog](/changelog/2026-05-20-blob-storage-enriched-default).
 
 ## Step 1: Upgrade your infrastructure [#step-1]
 
@@ -155,16 +169,17 @@ Langfuse v4 raises the minimum infrastructure versions:
 | Component  | Requirement                                                                                                 |
 | ---------- | ----------------------------------------------------------------------------------------------------------- |
 | ClickHouse | **25.12 minimum, 26.4 recommended.** Required for lightweight updates, the JSON type, and full-text search. |
-| PostgreSQL | 16 recommended                                                                                              |
-| Redis      | 7.2 recommended                                                                                             |
+| PostgreSQL | 15 minimum, 16 recommended                                                                                  |
+| Redis      | 7.0 minimum, 7.2 recommended                                                                                |
 
 Upgrade ClickHouse **before** the server upgrade. Langfuse v3 releases are fully compatible with current ClickHouse versions, so you can perform the ClickHouse upgrade on your existing v3 deployment and operate it as long as you like before continuing. See the [ClickHouse deployment guide](/self-hosting/deployment/infrastructure/clickhouse) for version and operations guidance.
 
-If you plan to use the [historic backfill](#historic-backfill) in step 3, also make sure the ClickHouse disks can handle roughly **3x the current data volume** — data is copied into the `events` tables and, for the `observations` table, additionally into an intermediate format that is cleaned up at the end.
+If you plan to use the [automated backfill](#historic-data) for historic data in step 3, also make sure the ClickHouse disks can handle roughly **3x the current data volume**: data is copied into the `events` tables and, for the `observations` table, additionally into an intermediate format that is cleaned up at the end.
 
 ## Step 2: Upgrade the server to Langfuse v4 [#step-2]
 
-Perform a regular [server upgrade](/self-hosting/upgrade) to the latest Langfuse v4 release. All ClickHouse schema migrations (the new `events` tables) are applied automatically on startup — including for deployments that adopted the tables early; existing tables are detected and skipped.
+Perform a regular [server upgrade](/self-hosting/upgrade) to the latest Langfuse v4 release.
+All ClickHouse schema migrations (the new `events` tables) are applied automatically on startup. Deployments that adopted the tables early via the v3 preview are handled as well: existing tables are detected and skipped.
 
 The only decision to make is the **write mode** you start with. It controls which tables ingestion writes to, and thereby how much of the v3 behavior you retain:
 
@@ -174,9 +189,9 @@ The only decision to make is the **write mode** you start with. It controls whic
 
 **Choose this if** all producers already use compatible SDKs ([see below](#sdk-upgrade)) and you do not depend on [deprecated endpoints](#api-changes) or [trace-level evaluators](#evaluations). Typical for small setups that can coordinate an SDK upgrade ahead of the server upgrade.
 
-No configuration is needed — this is the v4 default. Writes go exclusively to the new `events` tables, and the [historic backfill](#historic-backfill) starts automatically after the upgrade. Data from incompatible SDKs is rejected.
+No configuration is needed; this is the v4 default. Writes go exclusively to the new `events` tables, and the [historic backfill](#historic-backfill) starts automatically after the upgrade. Data from incompatible SDKs is rejected.
 
-With this choice, your migration is already complete — step 3 does not apply.
+With this choice, your migration is already complete; step 3 does not apply.
 
 </Tab>
 
@@ -198,7 +213,7 @@ LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN=false
 ```
 
 Ingestion writes into both the old and the new tables: compatible SDKs directly, older SDKs via the [dual-write pipeline](#dual-write) with a ~10 minute delay.
-Each user can switch to the new read experience via the toggle in the UI, and the new [v2 APIs](#api-changes) become available — both gated by `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN` (default `true`).
+Each user can switch to the new read experience via the toggle in the UI, and the new [v2 APIs](#api-changes) become available (both gated by `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN`, default `true`).
 Expect higher server load and S3 costs than `events_only` (comparable to v3 processing) until you complete the [cutover](#cutover).
 
 </Tab>
@@ -210,7 +225,7 @@ Expect higher server load and S3 costs than `events_only` (comparable to v3 proc
 ```bash
 LANGFUSE_MIGRATION_V4_WRITE_MODE=legacy
 LANGFUSE_MIGRATION_V4_NATIVE_OTEL_BEHAVIOUR=dual_write
-# Keep the v4 read paths (UI toggle, v2 APIs) off — the events tables
+# Keep the v4 read paths (UI toggle, v2 APIs) off; the events tables
 # are not written in legacy mode:
 LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN=false
 LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL=false
@@ -232,7 +247,7 @@ If you started with the `dual` or `legacy` write mode, complete the migration wi
 
 <Steps>
 
-### Upgrade your producers to compatible SDKs [#sdk-upgrade]
+### Migrate SDKs, API consumers, evaluators, and exports [#sdk-upgrade]
 
 Langfuse v4 expects instrumentation that propagates shared attributes (like `userId` and `sessionId`) on the client side:
 
@@ -243,7 +258,13 @@ Langfuse v4 expects instrumentation that propagates shared attributes (like `use
 These SDK versions are fully compatible with Langfuse v3 servers, so this step can start before, during, or after the server upgrade.
 Every migrated producer writes into the new tables directly (no delay) and reduces the load of the dual-write phase.
 
-Also migrate [trace-level evaluators](#evaluations) and [export configurations](#exports) in this step.
+Producers are only one side; everything that reads from Langfuse needs to move to the new data model as well before the cutover:
+
+- **API consumers** that call the [deprecated endpoints](#api-changes): move them to the Observations API v2, Metrics API v2, Scores API v3, and experiments API. See the [API migration guide](/faq/all/deprecated-api-migration).
+- **[Trace-level evaluators](#evaluations)**: recreate them as observation-level evaluators. See the [evaluator upgrade guide](/faq/all/llm-as-a-judge-migration).
+- **[Export configurations](#exports)**: switch blob storage, PostHog, and Mixpanel integrations to the enriched observations source.
+
+The [general v4 upgrade guide](/faq/all/upgrade-to-langfuse-v4) walks through the same checklist with per-feature instructions.
 
 ### Switch to the dual write mode
 
@@ -259,9 +280,25 @@ Confirm the dual write is healthy before continuing: data from compatible SDKs a
 
 Data ingested before the dual write became active only exists in the old tables. Two options bring it into the new data model:
 
-**Option A: Automated backfill (default).** Set `LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL=true` (or remove the `false` override) and redeploy. A chain of [background migrations](#historic-backfill) rewrites all historic traces, observations, and dataset run items into the new tables — without downtime, gradually, newest first. Requires the ~3x disk headroom from [step 1](#step-1).
+<Tabs items={["Automated backfill (default)", "Retention-based rollover"]}>
 
-**Option B: Retention-based rollover.** If your deployment enforces a global [data retention](/docs/administration/data-retention) policy (e.g. 30 or 90 days), you can skip the backfill entirely: keep `LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL=false` and simply keep dual-writing until one full retention window has elapsed since you enabled `dual`. At that point, everything within retention exists in the new tables, and older data has aged out by policy. Set `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN=true` once you want to allow users to switch to the Langfuse v4 experience.
+<Tab>
+
+**Choose this if** you want all historic data available in the new experience.
+
+Set `LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL=true` (or remove the `false` override) and redeploy. A chain of [background migrations](#historic-backfill) rewrites all historic traces, observations, and dataset run items into the new tables: without downtime, gradually, newest first. Requires the ~3x disk headroom from [step 1](#step-1).
+
+</Tab>
+
+<Tab>
+
+**Choose this if** your deployment enforces a global [data retention](/docs/administration/data-retention) policy (e.g. 30 or 90 days), so you can skip the backfill entirely.
+
+Keep `LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL=false` and simply keep dual-writing until one full retention window has elapsed since you enabled `dual`. At that point, everything within retention exists in the new tables, and older data has aged out by policy. Set `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN=true` once you want to allow users to switch to the Langfuse v4 experience.
+
+</Tab>
+
+</Tabs>
 
 ### Cut over to the v4 defaults [#cutover]
 
@@ -274,15 +311,15 @@ Once all producers run compatible SDKs **and** historic data is covered (backfil
 # LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN=true
 ```
 
-This stops all writes into the old `traces`/`observations` tables and reduces load, storage, and S3 costs. From this point, the [deprecated endpoints](#api-changes) return `404`, incompatible SDKs are rejected, and [trace-level evaluators](#evaluations) stop running — this is the point of commitment.
+This stops all writes into the old `traces`/`observations` tables and reduces load, storage, and S3 costs. From this point, the [deprecated endpoints](#api-changes) return `404`, incompatible SDKs are rejected, and [trace-level evaluators](#evaluations) stop running. This is the point of commitment.
 
 ### Clean up storage (optional) [#cleanup]
 
 Two optional cleanups reduce your ClickHouse footprint after the migration:
 
-**Drop the backfill scratch table.** If you ran the backfill (Option A), set `LANGFUSE_BACKGROUND_MIGRATION_V4_DROP_PID_TID_SORTING_TABLES=true` after confirming the result to drop the intermediate scratch table and free the disk space.
+**Drop the backfill scratch table.** If you ran the backfill, set `LANGFUSE_BACKGROUND_MIGRATION_V4_DROP_PID_TID_SORTING_TABLES=true` after confirming the result to drop the intermediate scratch table and free the disk space.
 
-**Truncate the old tables.** After the [cutover](#cutover), the `traces` and `observations` tables receive no writes and are not read by any v4 feature — they only consume disk space. If you no longer need them as an archive, reclaim the space:
+**Truncate the old tables.** After the [cutover](#cutover), the `traces` and `observations` tables receive no writes and are not read by any v4 feature; they only consume disk space. If you no longer need them as an archive, reclaim the space:
 
 ```sql
 TRUNCATE TABLE traces;
@@ -293,11 +330,11 @@ TRUNCATE TABLE traces ON CLUSTER default;
 TRUNCATE TABLE observations ON CLUSTER default;
 ```
 
-Use `TRUNCATE` rather than `DROP` — Langfuse expects the tables to exist.
+Use `TRUNCATE` rather than `DROP` because Langfuse expects the tables to exist.
 
 <Callout type="warning">
 
-Truncating is irreversible. Only truncate after the [cutover](#cutover) is complete and you have verified that all historic data you need is visible in the new experience (backfill finished, or a full retention window dual-written). The old tables are the source of the [historic backfill](#historic-backfill) and your last option to roll back to a v3 read path — truncating removes both.
+Truncating is irreversible. Only truncate after the [cutover](#cutover) is complete and you have verified that all historic data you need is visible in the new experience (backfill finished, or a full retention window dual-written). The old tables are the source of the [historic backfill](#historic-backfill) and your last option to roll back to a v3 read path; truncating removes both.
 
 </Callout>
 
@@ -309,7 +346,7 @@ Fresh installs need none of the above: deploy Langfuse v4 following the regular 
 
 ## Configuration reference [#configuration]
 
-On Langfuse v4, the new behavior is the default — these variables exist to retain v3 behaviors while your migration is in flight:
+On Langfuse v4, the new behavior is the default. These variables exist to retain v3 behaviors while your migration is in flight:
 
 | Variable                                                       | Values / v4 default                         | Use during the migration                                                                                                                                                                                              |
 | -------------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -325,7 +362,7 @@ The dual write bridges older SDKs onto the new data model:
 
 - Incoming events from older SDKs are written to `traces`/`observations` as before, plus into a staging table (`observations_batch_staging`) partitioned into 3-minute windows.
 - A worker job periodically picks up completed partitions, joins them with the `traces` table to propagate trace-level attributes (user, session, tags, release, version, metadata), and inserts the result into `events_full`. This is why data from older SDKs appears with a **~10 minute delay** in the UI and APIs.
-- Compatible SDKs (Python v4, JS/TS v5) propagate attributes client-side and write into the new tables **directly**, without delay — and reduce the ClickHouse load of the dual-write phase.
+- Compatible SDKs (Python v4, JS/TS v5) propagate attributes client-side and write into the new tables **directly**, without delay, which also reduces the ClickHouse load of the dual-write phase.
 - Native OpenTelemetry spans follow `LANGFUSE_MIGRATION_V4_NATIVE_OTEL_BEHAVIOUR`: with `dual_write`, spans go through the staging pipeline unless they carry the `x-langfuse-ingestion-version: 4` header; with `direct` (the v4 default), all OTel spans are written directly, assuming client-side propagation.
 
 Staging partitions are kept for 48 hours, which gives you a multi-day grace period to recover the propagation job after an incident without losing staging data. You can monitor the propagation pipeline via the worker health endpoint: `GET /api/health?failIfEventPropagationStuck=true` (worker container, port 3030) returns `503` if the job has not made progress within `LANGFUSE_EVENT_PROPAGATION_STUCK_THRESHOLD_MINUTES` (default `15`). The check passes on deployments where the dual write does not run, so it is safe to keep configured after the cutover. See [health and readiness endpoints](/self-hosting/configuration/health-readiness-endpoints) for probe configuration.
@@ -334,7 +371,7 @@ Staging partitions are kept for 48 hours, which gives you a multi-day grace peri
 
 The historic backfill rewrites existing `traces` and `observations` (and dataset run items) into the new `events` tables so that data ingested **before** the dual write became active is visible alongside new data. It runs as a chain of [background migrations](/self-hosting/upgrade/background-migrations) on the worker, without downtime and without impact on new ingestion.
 
-Enable it only **after the dual write is active and confirmed healthy** — the backfill runs once, and anything ingested after its cutoff but before the dual write started would be permanently missing from the new tables.
+Enable it only **after the dual write is active and confirmed healthy**: the backfill runs once, and anything ingested after its cutoff but before the dual write started would be permanently missing from the new tables.
 
 ### What runs, and in what order
 
@@ -350,7 +387,7 @@ The backfill is an ordered chain. Each step only starts after its predecessor fi
 
 ### What you will observe
 
-- Historic data appears **gradually, newest first**, as each batch completes — not all at once. For a period you may see only recent (dual-written) data while older data is still being rewritten.
+- Historic data appears **gradually, newest first**, as each batch completes, not all at once. For a period you may see only recent (dual-written) data while older data is still being rewritten.
 - There is no downtime and no impact on new ingestion, though a large backfill adds load and temporary storage (the scratch table, up to ~3x data volume) to your ClickHouse cluster until step 5 cleans it up.
 - The migrations are resumable: they can be interrupted (e.g. by a deployment) and continue where they left off.
 - Because the new tables use a `ReplacingMergeTree`, re-runs and overlaps with the dual write are de-duplicated; the most recently written version wins.
@@ -361,13 +398,13 @@ Track progress on the background migrations page in the UI; see [background migr
 
 - The v4 schema migrations are additive (new tables only). While you run the `legacy` or `dual` write mode, the old `traces`/`observations` tables keep receiving all data, so you can roll the server back to the latest v3 release without data loss. {/* TODO: verify that a v3 deployment tolerates the applied v4 migrations for a clean downgrade */}
 - The historic backfill never modifies the old tables; it only reads from them.
-- Once you complete the [cutover](#cutover) to `events_only`, new data lands only in the new tables. Rolling back to a v3 read path from that point would miss the data written since the switch — treat the cutover as the point of commitment.
+- Once you complete the [cutover](#cutover) to `events_only`, new data lands only in the new tables. Rolling back to a v3 read path from that point would miss the data written since the switch; treat the cutover as the point of commitment.
 
 ## FAQ [#faq]
 
 {/* Seeded from https://github.com/orgs/langfuse/discussions/12518 and https://github.com/orgs/langfuse/discussions/14157 */}
 
-**I adopted the events tables early via the v3 preview — do I need to do anything special?**
+**Do I need to do anything special if I adopted the events tables early via the v3 preview?**
 No. The v4 migrations detect the existing tables and skip their creation. Your deployment upgrades like any other; keep the environment variables you set for the preview until you complete the [cutover](#cutover).
 
 **Is it safe to upgrade the SDKs before the server?**
@@ -377,7 +414,7 @@ Yes. Python SDK v4 and JS/TS SDK v5 are fully compatible with Langfuse v3 server
 They are transition modes: `legacy` forgoes all v4 performance improvements, and `dual` doubles the write load and storage costs. We recommend completing the [cutover](#cutover) once your producers are migrated.
 
 **Do I need new infrastructure components?**
-No. The infrastructure is identical to v3 (web/worker, PostgreSQL, ClickHouse, Redis, S3) — only the minimum/recommended versions changed, see [step 1](#step-1).
+No. The infrastructure is identical to v3 (web/worker, PostgreSQL, ClickHouse, Redis, S3); only the minimum/recommended versions changed, see [step 1](#step-1).
 
 **How do I fetch a trace by ID now?**
 Use the [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) with a `traceId` filter. Providing a time range in addition is recommended for performance, but not required.
@@ -398,6 +435,6 @@ Langfuse validates the migration configuration on startup and exits on invalid c
 
 If you experience any issues during the migration, please:
 
-1. Ask in the [v4 rollout GitHub Discussion](https://github.com/orgs/langfuse/discussions/14157) — we use it as the central thread for the self-hosted rollout. Background on the architecture change is collected in the [announcement discussion](https://github.com/orgs/langfuse/discussions/12518).
+1. Ask in the [v4 rollout GitHub Discussion](https://github.com/orgs/langfuse/discussions/14157); we use it as the central thread for the self-hosted rollout. Background on the architecture change is collected in the [announcement discussion](https://github.com/orgs/langfuse/discussions/12518).
 2. Create a [GitHub Issue](/issues) for bugs.
 3. Enterprise customers can reach out to [support](/support) directly.
