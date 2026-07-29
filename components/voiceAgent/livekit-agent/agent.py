@@ -15,6 +15,9 @@ from livekit.agents import (
     Agent,
     AgentServer,
     AgentSession,
+    AudioConfig,
+    BackgroundAudioPlayer,
+    BuiltinAudioClip,
     JobContext,
     cli,
     inference,
@@ -100,7 +103,13 @@ def setup_langfuse(
     return trace_provider, clients
 
 
-LANGFUSE_DOCS_MCP = mcp.MCPServerHTTP(url="https://langfuse.com/api/mcp")
+# client_session_timeout_seconds defaults to 5s, which the RAG-backed
+# searchLangfuseDocs tool regularly exceeds (the MCP client then reports
+# "An internal error occurred" to the LLM).
+LANGFUSE_DOCS_MCP = mcp.MCPServerHTTP(
+    url="https://langfuse.com/api/mcp",
+    client_session_timeout_seconds=30,
+)
 
 
 class Kelly(Agent):
@@ -336,6 +345,16 @@ async def entrypoint(ctx: JobContext):
                 "transcript": False,
             },
         )
+
+        # Audible cue while the agent is thinking or calling the docs tools, so
+        # slower turns (e.g. RAG searches) don't feel like dead air.
+        background_audio = BackgroundAudioPlayer(
+            thinking_sound=[
+                AudioConfig(BuiltinAudioClip.KEYBOARD_TYPING, volume=0.6),
+                AudioConfig(BuiltinAudioClip.KEYBOARD_TYPING2, volume=0.5),
+            ],
+        )
+        await background_audio.start(room=ctx.room, agent_session=session)
 
 
 if __name__ == "__main__":
