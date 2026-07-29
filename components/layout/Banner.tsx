@@ -5,11 +5,11 @@ export function Banner() {
   return (
     <FumadocsBanner
       height="2rem"
-      className="bg-black text-white [&_a]:text-white [&_button]:text-white"
+      className="bg-black text-white [&_a]:text-white"
     >
       <Link href="/docs/v4">
         <span className="sm:hidden">
-          Langfuse v4: 165× faster ·{" "}
+          Langfuse v4: up to 165× faster ·{" "}
           <span className="underline underline-offset-2">Read more</span>
         </span>
         <span className="hidden sm:inline">
