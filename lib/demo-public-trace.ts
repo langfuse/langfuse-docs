@@ -37,14 +37,11 @@ export const getPublicDemoTraceUrl = async (
     }
 
     try {
-      const observations =
-        await demoProjectLangfuseClient.api.observations.getMany({
-          traceId,
-          fields: "core,basic",
-          limit: 100,
-        });
+      const trace = await demoProjectLangfuseClient.api.trace.get(traceId, {
+        fields: "core",
+      });
 
-      if (observations.data.some((observation) => observation.public)) {
+      if (trace.public) {
         return traceUrl;
       }
     } catch {
