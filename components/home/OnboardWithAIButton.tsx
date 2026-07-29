@@ -62,26 +62,10 @@ export function OnboardWithAIButton() {
   const capture = usePostHogClientCapture();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const isCopyingRef = useRef(false);
   const promptRef = useRef<HTMLElement>(null);
 
-  const handleOpenChange = (nextOpen: boolean) => {
-    if (!nextOpen && isCopyingRef.current) return;
-    setOpen(nextOpen);
-  };
-
   const handleCopy = async () => {
-    isCopyingRef.current = true;
-    let didCopy = false;
-
-    try {
-      didCopy = await copyPromptToClipboard(promptRef.current);
-    } finally {
-      window.requestAnimationFrame(() => {
-        isCopyingRef.current = false;
-      });
-    }
-
+    const didCopy = await copyPromptToClipboard(promptRef.current);
     if (!didCopy) return;
 
     setCopied(true);
@@ -89,12 +73,11 @@ export function OnboardWithAIButton() {
   };
 
   return (
-    <Popover modal open={open} onOpenChange={handleOpenChange}>
+    <Popover modal open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="secondary"
           size="default"
-          shortcutKey="a"
           icon={<Sparkles className="h-3.5 w-3.5" />}
           onClick={() => {
             capture("home:onboard_with_ai_clicked", {
@@ -110,20 +93,6 @@ export function OnboardWithAIButton() {
         align="center"
         sideOffset={8}
         className="w-[min(92vw,460px)] rounded-[2px] border-line-structure bg-surface-bg p-0 text-left shadow-lg"
-        onPointerDownOutside={(event) => {
-          const target = event.target;
-          if (
-            target instanceof HTMLElement &&
-            target.closest("[data-ai-onboarding-copy]")
-          ) {
-            event.preventDefault();
-          }
-        }}
-        onFocusOutside={(event) => {
-          if (isCopyingRef.current) {
-            event.preventDefault();
-          }
-        }}
       >
         <div className="flex flex-col gap-3 p-4">
           <div className="flex items-start justify-between gap-3">
@@ -139,9 +108,6 @@ export function OnboardWithAIButton() {
               data-ai-onboarding-copy
               variant="secondary"
               size="small"
-              onPointerDownCapture={() => {
-                isCopyingRef.current = true;
-              }}
               onClick={handleCopy}
               icon={
                 copied ? (
