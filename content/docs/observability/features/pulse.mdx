@@ -1,6 +1,6 @@
 ---
 title: Pulse
-description: A compact outlier chart strip above the events table. See cost, latency, and token spikes over time, then click or drag a spike to narrow the table to that window.
+description: A compact outlier chart strip above the events table. See cost and latency spikes over time, then click or drag a spike to narrow the table to that window.
 sidebarTitle: Pulse
 ---
 
@@ -8,7 +8,7 @@ import { Book } from "lucide-react";
 
 # Pulse
 
-Pulse is a compact chart strip above the events table. Each bar covers a slice of time and shows the worst single event in that slice: the most expensive call, the slowest response, the biggest token burst. The spike you are hunting for is a tall bar, not a row you have to sort your way down to. Click or drag a spike and the table narrows to that window.
+Pulse is a compact chart strip above the events table. Each bar covers a slice of time: the total cost spent in it, or its p95 latency. The spike you are hunting for is a tall bar, not a row you have to sort your way down to. Click or drag a spike and the table narrows to that window.
 
 <Video
   src="https://static.langfuse.com/changelog-videos/2025-07-28-pulse.mp4"
@@ -23,11 +23,11 @@ Pulse is a compact chart strip above the events table. Each bar covers a slice o
   to Langfuse v4](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4).
 </Callout>
 
-Pulse is open by default above the events table. Close it with the **×** in its top-right corner, and reopen it with the **Pulse** button in the table toolbar.
+Pulse is always on above the events table.
 
 ## What each bar shows [#bars]
 
-Each bar is one time bucket. Its height is a single aggregate of the events in that bucket, so a tall bar is a bucket that holds an outlier. The default aggregate is the maximum, so a bar shows the worst single event in its slice.
+Each bar is one time bucket. Its height is a single aggregate of the events in that bucket, so a tall bar is a bucket that stands out: an expensive stretch of traffic or a slow window.
 
 The bars span the full selected time range. A bucket with no events is a gap on the baseline rather than absent space, so a quiet stretch reads as a flat baseline and a spike stands out against it. Bars use a square-root height scale: real cost and latency outliers run many times the base load, and a linear scale would flatten everything but the peak, so the scale keeps the base load readable while the outlier still dominates.
 
@@ -39,22 +39,10 @@ Hover a bar to read its time bucket, the metric value, and how many events fell 
 
 A dropdown at the left of the strip switches what the bars plot:
 
-- **Cost**
-- **Latency**
-- **Tokens**
-- **Split** shows Cost, Latency, and Tokens side by side at once.
+- **Cost** — the total spent in each bucket.
+- **Latency** — how slow the bucket ran: `p95` by default, with the median (`p50`) available from a second dropdown next to the metric name.
 
-Split fits three charts when the strip is wide enough, drops to Cost and Latency on a narrower strip, and is offered as an option only when at least two fit.
-
-Each metric plots the aggregate that fits it. Where a metric offers more than one aggregate, a second dropdown next to the metric name switches it:
-
-| Metric  | Aggregates          | Default |
-| ------- | ------------------- | ------- |
-| Cost    | `max`, `sum`        | `max`   |
-| Latency | `max`, `p95`, `avg` | `max`   |
-| Tokens  | `max`               | `max`   |
-
-`max` is the outlier view: each bar is the single worst event in its bucket. `sum`, `p95`, and `avg` describe the bucket as a whole instead. Your metric and aggregate choices are remembered across visits.
+Your metric and aggregate choices are remembered across visits.
 
 ## Navigate to an outlier [#navigate]
 
@@ -74,7 +62,7 @@ Pulse plots the same filtered query as the events table below it. The time range
 
 A few filters cannot be expressed as an aggregate over time, so the strip cannot apply them:
 
-- **Numeric measures** used as filters (filtering by latency, cost, or token value). These are still available as strip metrics; only filtering the rows by their value is unavailable.
+- **Numeric measures** used as filters (filtering by latency, cost, or token value). Cost and latency remain available as strip metrics; only filtering the rows by their value is unavailable.
 - **Scores**, **metadata**, and **comments** filters.
 - **Full-text search** and field-scoped text search (`input:`, `output:`).
 - **Presence checks** (`has:` and `-has:`).
@@ -83,7 +71,7 @@ When any of these are active, the strip shows a **"N filters not applied"** note
 
 ## Pulse and charting the table [#vs-chart]
 
-Pulse and [Chart any table](/docs/observability/features/events-table-charts) both draw the events table's data, but they answer different questions. Pulse is an always-on strip above the table for finding and jumping to outliers, one bar per time bucket, with the worst event as the default. Charting the table replaces the table with a full, configurable chart (type, metric, aggregation, breakdown) of the same filtered query, and can be saved to a dashboard. Use Pulse to spot and drill into a spike; switch to a chart when you want to shape a view and keep it.
+Pulse and [Chart any table](/docs/observability/features/events-table-charts) both draw the events table's data, but they answer different questions. Pulse is an always-on strip above the table for finding and jumping to outliers, one bar per time bucket. Charting the table replaces the table with a full, configurable chart (type, metric, aggregation, breakdown) of the same filtered query, and can be saved to a dashboard. Use Pulse to spot and drill into a spike; switch to a chart when you want to shape a view and keep it.
 
 ## Learn more
 
