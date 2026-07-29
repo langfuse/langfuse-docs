@@ -12,7 +12,7 @@ export const DEMO_PUBLIC_TRACE_FALLBACK_URL =
 export const DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL =
   "https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces/065031c8732a2ee49a4631de846a0eda?observation=d7e0df7ae717629e";
 
-const READINESS_POLL_DELAYS_MS = [0, 250, 500, 1_000] as const;
+const READINESS_POLL_DELAYS_MS = [0, 500, 1_000, 2_000] as const;
 
 const wait = (delayMs: number) =>
   new Promise((resolve) => setTimeout(resolve, delayMs));
