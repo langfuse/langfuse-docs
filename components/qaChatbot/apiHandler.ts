@@ -20,6 +20,7 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 import { flush } from "@/src/instrumentation";
 import { context, trace } from "@opentelemetry/api";
 import {
+  DEMO_PUBLIC_TRACE_FALLBACK_URL,
   demoProjectLangfuseClient,
   getPublicDemoTraceUrl,
 } from "@/lib/demo-public-trace";
@@ -150,6 +151,9 @@ export const handler = async (req: Request) => {
               : "Failed to flush demo trace",
             error,
           );
+          if (publishTrace) {
+            publishedTraceUrl = DEMO_PUBLIC_TRACE_FALLBACK_URL;
+          }
         }
       };
 
@@ -217,11 +221,12 @@ export const handler = async (req: Request) => {
             } finally {
               await finalizeTrace(streamCompleted);
               try {
-                if (streamCompleted && publishedTraceUrl) {
+                if (streamCompleted) {
                   writer.write({
                     type: "message-metadata",
                     messageMetadata: {
-                      traceUrl: publishedTraceUrl,
+                      traceUrl:
+                        publishedTraceUrl ?? DEMO_PUBLIC_TRACE_FALLBACK_URL,
                     },
                   });
                 }

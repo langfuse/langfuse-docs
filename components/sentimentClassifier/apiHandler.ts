@@ -12,7 +12,10 @@ import { after } from "next/server";
 import { trace } from "@opentelemetry/api";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
-import { getPublicDemoTraceUrl } from "@/lib/demo-public-trace";
+import {
+  DEMO_PUBLIC_TRACE_FALLBACK_URL,
+  getPublicDemoTraceUrl,
+} from "@/lib/demo-public-trace";
 
 const SentimentSchema = z.object({
   sentiment: z.enum(["positive", "negative", "neutral"]),
@@ -65,7 +68,7 @@ const handler = async (req: Request) => {
 
         setActiveTraceAsPublic();
         trace.getActiveSpan()?.end();
-        let traceUrl: string | null = null;
+        let traceUrl = DEMO_PUBLIC_TRACE_FALLBACK_URL;
         try {
           await flush();
           traceUrl = await getPublicDemoTraceUrl(traceId);
