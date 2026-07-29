@@ -1,0 +1,45 @@
+---
+date: 2026-07-28
+title: "Pulse: find the outliers in your traces"
+description: "A compact chart strip above the events table. See cost and latency spikes over time, then click or drag a spike to narrow the table to that window."
+author: Nikita Kabardin
+ogVideo: https://static.langfuse.com/changelog-videos/2025-07-28-pulse.mp4
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, Cloud } from "lucide-react";
+
+<ChangelogHeader />
+
+The events table is where you go when something in your traces looks off. **Pulse** puts a compact chart strip right above it, so the spikes in your data are the first thing you see. Each bar covers a slice of time: the total cost you spent in it, or how slow it ran at the 95th percentile. The outlier you are hunting for is a tall bar, not a row you have to sort your way down to.
+
+## Find it, then drill into it
+
+Pulse turns spotting an outlier into navigating to it. Click a tall bar and the table narrows to that time window, showing exactly the events that made the spike. Drag across a range of bars to select a wider span; it applies when you let go. Browser Back returns you to where you started, so poking around costs you nothing.
+
+One dropdown switches what the strip plots: **Cost** or **Latency**. Cost shows the total spent in each bucket; latency defaults to p95, with the median (p50) one click away. The bars are time buckets across your full range, so a quiet stretch reads as a flat baseline rather than empty space.
+
+This is how you hunt down expensive or slow outliers on the [Langfuse v4](/docs/v4) data model: one cheap aggregate query over time, rather than a per-row sort across your whole dataset.
+
+## Learn more
+
+<Cards num={3}>
+  <Card
+    title="Chart any table"
+    href="/docs/observability/features/events-table-charts"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Filter Search Bar"
+    href="/docs/observability/features/filter-search-bar"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Open the events table"
+    href="https://cloud.langfuse.com/project/~/traces"
+    icon={<Cloud />}
+    arrow
+  />
+</Cards>
