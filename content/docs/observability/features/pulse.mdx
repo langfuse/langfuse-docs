@@ -1,6 +1,6 @@
 ---
 title: Pulse
-description: A compact outlier chart strip above the events table. See cost and latency spikes over time, then click or drag a spike to narrow the table to that window.
+description: A compact outlier chart strip above the events table. See count, cost, and latency spikes over time, then click or drag a spike to narrow the table to that window.
 sidebarTitle: Pulse
 ---
 
@@ -8,7 +8,7 @@ import { Book } from "lucide-react";
 
 # Pulse
 
-Pulse is a compact chart strip above the events table. Each bar covers a slice of time: the total cost spent in it, or its p95 latency. The spike you are hunting for is a tall bar, not a row you have to sort your way down to. Click or drag a spike and the table narrows to that window.
+Pulse is a compact chart strip above the events table. Each bar covers a slice of time and shows the number of observations by default. You can also use it to see the total cost spent or p95 latency. The spike you are hunting for is a tall bar, not a row you have to sort your way down to. Click or drag a spike and the table narrows to that window.
 
 <Video
   src="https://static.langfuse.com/changelog-videos/2025-07-28-pulse.mp4"
@@ -27,9 +27,9 @@ Pulse is always on above the events table.
 
 ## What each bar shows [#bars]
 
-Each bar is one time bucket. Its height is a single aggregate of the events in that bucket, so a tall bar is a bucket that stands out: an expensive stretch of traffic or a slow window.
+Each bar is one time bucket. Its height is a single aggregate of the events in that bucket, so a tall bar is a bucket that stands out: a high-volume, expensive, or slow window.
 
-The bars span the full selected time range. A bucket with no events is a gap on the baseline rather than absent space, so a quiet stretch reads as a flat baseline and a spike stands out against it. Bars use a square-root height scale: real cost and latency outliers run many times the base load, and a linear scale would flatten everything but the peak, so the scale keeps the base load readable while the outlier still dominates.
+The bars span the full selected time range. A bucket with no events is a gap on the baseline rather than absent space, so a quiet stretch reads as a flat baseline and a spike stands out against it. Bars use a square-root height scale: real count, cost, and latency outliers can run many times the base load, and a linear scale would flatten everything but the peak, so the scale keeps the base load readable while the outlier still dominates.
 
 Bucket width adapts to the range and the available width. Langfuse picks the finest bucket that fits the range into the strip, from one minute up to one week, so a one-hour range and a one-month range both fill the strip with bars.
 
@@ -39,6 +39,7 @@ Hover a bar to read its time bucket, the metric value, and how many events fell 
 
 A dropdown at the left of the strip switches what the bars plot:
 
+- **Count** — the number of observations in each bucket. This is the default.
 - **Cost** — the total spent in each bucket.
 - **Latency** — how slow the bucket ran: `p95` by default, with the median (`p50`) available from a second dropdown next to the metric name.
 
@@ -67,7 +68,7 @@ A few filters cannot be expressed as an aggregate over time, so the strip cannot
 - **Full-text search** and field-scoped text search (`input:`, `output:`).
 - **Presence checks** (`has:` and `-has:`).
 
-When any of these are active, the strip shows a **"N filters not applied"** note. The table still honors those filters; only the strip shows the unfiltered distribution for them. This is the reverse of [chart view](/docs/observability/features/events-table-charts#filter-compatibility), where those filters are dimmed instead, because the chart replaces the table rather than sitting above it.
+When any of these filters or searches are active, Pulse disables the strip instead of showing aggregate data that does not represent the filtered table. The table remains available and continues to honor the active filters.
 
 ## Pulse and charting the table [#vs-chart]
 
