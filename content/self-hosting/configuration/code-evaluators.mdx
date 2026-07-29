@@ -7,6 +7,8 @@ sidebarTitle: "Code evaluators"
 
 # Code evaluators
 
+This page covers self-hosted infrastructure setup. For an introduction to the feature, see [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators).
+
 Self-hosted code evaluators are picked up by the Langfuse worker and executed through a dispatcher backend. The dispatcher currently invokes either AWS Lambda or the local insecure runner synchronously. Production self-hosted deployments need a dispatcher for execution.
 
 Code evaluator availability is derived from `LANGFUSE_CODE_EVAL_DISPATCHER`. If this variable is unset, code evaluators are disabled for self-hosted deployments. Set it on the web service so the UI can show the supported code evaluator templates, and on the worker service so executions can be dispatched.
