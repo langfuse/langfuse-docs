@@ -13,8 +13,8 @@ import { context, trace } from "@opentelemetry/api";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
 import {
+  buildDemoTraceRedirectUrl,
   DEMO_PUBLIC_TRACE_FALLBACK_URL,
-  getPublicDemoTraceUrl,
 } from "@/lib/demo-public-trace";
 
 const SentimentSchema = z.object({
@@ -81,11 +81,10 @@ const handler = async (req: Request) => {
         let traceUrl = DEMO_PUBLIC_TRACE_FALLBACK_URL;
         try {
           await flush();
-          traceUrl = await getPublicDemoTraceUrl(
+          traceUrl = buildDemoTraceRedirectUrl({
             traceId,
-            DEMO_PUBLIC_TRACE_FALLBACK_URL,
-            rootObservationId,
-          );
+            observationId: rootObservationId,
+          });
         } catch (error) {
           console.warn("Failed to publish demo trace link", error);
         }

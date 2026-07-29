@@ -20,9 +20,9 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 import { flush } from "@/src/instrumentation";
 import { context, trace } from "@opentelemetry/api";
 import {
+  buildDemoTraceRedirectUrl,
   DEMO_PUBLIC_TRACE_FALLBACK_URL,
   demoProjectLangfuseClient,
-  getPublicDemoTraceUrl,
 } from "@/lib/demo-public-trace";
 
 const tracedGetPrompt = observe(
@@ -142,11 +142,10 @@ export const handler = async (req: Request) => {
         try {
           await flush();
           if (publishTrace) {
-            publishedTraceUrl = await getPublicDemoTraceUrl(
+            publishedTraceUrl = buildDemoTraceRedirectUrl({
               traceId,
-              DEMO_PUBLIC_TRACE_FALLBACK_URL,
-              activeSpan?.spanContext().spanId,
-            );
+              observationId: activeSpan?.spanContext().spanId,
+            });
           }
         } catch (error) {
           console.warn(

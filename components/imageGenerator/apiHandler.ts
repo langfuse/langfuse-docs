@@ -12,8 +12,8 @@ import { context, trace } from "@opentelemetry/api";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
 import {
+  buildDemoTraceRedirectUrl,
   DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL,
-  getPublicDemoTraceUrl,
 } from "@/lib/demo-public-trace";
 
 let _openai: OpenAI | null = null;
@@ -113,11 +113,11 @@ const handler = async (req: Request) => {
         let traceUrl = DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL;
         try {
           await flush();
-          traceUrl = await getPublicDemoTraceUrl(
+          traceUrl = buildDemoTraceRedirectUrl({
             traceId,
-            DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL,
-            rootObservationId,
-          );
+            observationId: rootObservationId,
+            fallbackKind: "image-generation",
+          });
         } catch (error) {
           console.warn("Failed to publish demo trace link", error);
         }
