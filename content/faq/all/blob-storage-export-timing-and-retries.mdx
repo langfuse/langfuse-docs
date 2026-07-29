@@ -1,0 +1,27 @@
+---
+title: How do blob storage export timing and retries work?
+description: How export delay, catch-up, backfills, and retries affect when files appear in blob storage.
+tags: [platform, integration]
+---
+
+# How do blob storage export timing and retries work?
+
+The [blob storage integration](/docs/api-and-data-platform/features/export-to-blob-storage) exports one time window per run.
+
+## Export delay
+
+Exports intentionally lag behind ingestion so records are not exported while they are still being written. A short delay between an event reaching Langfuse and appearing in your bucket is expected.
+
+## Catch-up and backfills
+
+An integration starting from historic data, or catching up after downtime, works through completed windows until it reaches the delayed live boundary. This can produce many files and manifests in quick succession.
+
+The configured frequency controls the size of each window, not the speed of a backfill.
+
+## Retries
+
+If an upload fails, Langfuse does not write a manifest. The run retries on the next execution and overwrites data objects under the same keys.
+
+Repeated failures notify project admins through configured notification channels. If a worker stops during a run, its running state expires after two hours so a later execution can retry.
+
+Process only runs with a completed [manifest](/docs/api-and-data-platform/features/export-to-blob-storage#run-manifest).
