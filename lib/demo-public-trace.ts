@@ -12,14 +12,21 @@ export const DEMO_PUBLIC_TRACE_FALLBACK_URL =
 export const DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL =
   "https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces/065031c8732a2ee49a4631de846a0eda?observation=d7e0df7ae717629e";
 
-const READINESS_POLL_DELAYS_MS = [0, 500, 1_000, 2_000] as const;
+const READINESS_POLL_DELAYS_MS = [0, 500, 1_000, 2_500] as const;
 
 const wait = (delayMs: number) =>
   new Promise((resolve) => setTimeout(resolve, delayMs));
 
+const withObservationId = (traceUrl: string, observationId: string) => {
+  const url = new URL(traceUrl);
+  url.searchParams.set("observation", observationId);
+  return url.toString();
+};
+
 export const getPublicDemoTraceUrl = async (
   traceId?: string | null,
   fallbackUrl = DEMO_PUBLIC_TRACE_FALLBACK_URL,
+  observationId?: string | null,
 ): Promise<string> => {
   if (!traceId) return fallbackUrl;
 
@@ -31,23 +38,36 @@ export const getPublicDemoTraceUrl = async (
     return fallbackUrl;
   }
 
+  const traceUrlWithObservation = observationId
+    ? withObservationId(traceUrl, observationId)
+    : null;
+
   for (const delayMs of READINESS_POLL_DELAYS_MS) {
     if (delayMs > 0) {
       await wait(delayMs);
     }
 
     try {
-      const trace = await demoProjectLangfuseClient.api.trace.get(traceId, {
-        fields: "core",
-      });
+      const observations =
+        await demoProjectLangfuseClient.api.observations.getMany({
+          traceId,
+          fields: "core,basic",
+          limit: 100,
+        });
 
-      if (trace.public) {
-        return traceUrl;
+      const publicObservation = observations.data.find(
+        (observation) =>
+          observation.public &&
+          (!observationId || observation.id === observationId),
+      );
+
+      if (publicObservation) {
+        return withObservationId(traceUrl, publicObservation.id);
       }
     } catch {
       // Continue briefly; ingestion and public trace sharing can lag behind forceFlush.
     }
   }
 
-  return fallbackUrl;
+  return traceUrlWithObservation ?? fallbackUrl;
 };

@@ -142,7 +142,11 @@ export const handler = async (req: Request) => {
         try {
           await flush();
           if (publishTrace) {
-            publishedTraceUrl = await getPublicDemoTraceUrl(traceId);
+            publishedTraceUrl = await getPublicDemoTraceUrl(
+              traceId,
+              DEMO_PUBLIC_TRACE_FALLBACK_URL,
+              activeSpan?.spanContext().spanId,
+            );
           }
         } catch (error) {
           console.warn(

@@ -9,7 +9,7 @@ import {
   updateActiveObservation,
 } from "@langfuse/tracing";
 import { after } from "next/server";
-import { trace } from "@opentelemetry/api";
+import { context, trace } from "@opentelemetry/api";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
 import {
@@ -52,7 +52,16 @@ const handler = async (req: Request) => {
     },
     async () => {
       const traceId = getActiveTraceId();
-      updateActiveObservation({ input: text });
+      const activeSpan = trace.getActiveSpan();
+      const rootObservationId = activeSpan?.spanContext().spanId;
+      const runWithActiveSpan = <T>(fn: () => T) =>
+        activeSpan
+          ? context.with(trace.setSpan(context.active(), activeSpan), fn)
+          : fn();
+
+      runWithActiveSpan(() => {
+        updateActiveObservation({ input: text });
+      });
 
       try {
         const result = await generateObject({
@@ -64,14 +73,19 @@ const handler = async (req: Request) => {
           },
         });
 
-        updateActiveObservation({ output: result.object });
-
-        setActiveTraceAsPublic();
-        trace.getActiveSpan()?.end();
+        runWithActiveSpan(() => {
+          updateActiveObservation({ output: result.object });
+          setActiveTraceAsPublic();
+          activeSpan?.end();
+        });
         let traceUrl = DEMO_PUBLIC_TRACE_FALLBACK_URL;
         try {
           await flush();
-          traceUrl = await getPublicDemoTraceUrl(traceId);
+          traceUrl = await getPublicDemoTraceUrl(
+            traceId,
+            DEMO_PUBLIC_TRACE_FALLBACK_URL,
+            rootObservationId,
+          );
         } catch (error) {
           console.warn("Failed to publish demo trace link", error);
         }
@@ -97,6 +111,7 @@ const handler = async (req: Request) => {
 
 export const POST = observe(handler, {
   name: "sentiment-classifier",
+  endOnExit: false,
 });
 
 export const maxDuration = 30;
