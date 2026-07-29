@@ -17,7 +17,7 @@ const AI_ONBOARDING_PROMPT = `Install the Langfuse Agent Skill from github.com/l
 and use it to add tracing to this application with Langfuse
 following best practices.`;
 
-async function copyPromptToClipboard(sourceElement: HTMLElement | null) {
+async function copyPromptToClipboard(sourceElement: HTMLElement) {
   if (typeof navigator !== "undefined" && navigator.clipboard) {
     try {
       await navigator.clipboard.writeText(AI_ONBOARDING_PROMPT);
@@ -27,34 +27,16 @@ async function copyPromptToClipboard(sourceElement: HTMLElement | null) {
     }
   }
 
-  if (sourceElement) {
-    const selection = window.getSelection();
-    const range = document.createRange();
-    range.selectNodeContents(sourceElement);
-    selection?.removeAllRanges();
-    selection?.addRange(range);
-
-    try {
-      return document.execCommand("copy");
-    } finally {
-      selection?.removeAllRanges();
-    }
-  }
-
-  const textArea = document.createElement("textarea");
-  textArea.value = AI_ONBOARDING_PROMPT;
-  textArea.setAttribute("readonly", "");
-  textArea.style.position = "fixed";
-  textArea.style.left = "-9999px";
-  const container =
-    document.querySelector("[data-slot='popover-content']") ?? document.body;
-  container.appendChild(textArea);
-  textArea.select();
+  const selection = window.getSelection();
+  const range = document.createRange();
+  range.selectNodeContents(sourceElement);
+  selection?.removeAllRanges();
+  selection?.addRange(range);
 
   try {
     return document.execCommand("copy");
   } finally {
-    container.removeChild(textArea);
+    selection?.removeAllRanges();
   }
 }
 
@@ -66,6 +48,8 @@ export function OnboardWithAIButton() {
   const promptRef = useRef<HTMLElement>(null);
 
   const handleCopy = async () => {
+    if (!promptRef.current) return;
+
     const didCopy = await copyPromptToClipboard(promptRef.current);
     if (!didCopy) return;
 
