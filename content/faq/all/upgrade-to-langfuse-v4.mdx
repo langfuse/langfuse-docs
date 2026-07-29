@@ -57,6 +57,13 @@ Select **Migration Status** to review organization-wide progress. The page shows
 
 Self-hosted v4 is currently a release candidate. Use the [v3 to v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4) to test the migration in staging, but wait for a stable v4 release before migrating production.
 
+For existing self-hosted deployments, use this order:
+
+1. Upgrade your SDKs and instrumentation.
+2. Upgrade Langfuse to v4 using the `legacy` or `dual` write mode.
+3. As one of the final migration steps, move trace-level evaluators to observation targets and legacy-dataset evaluators to experiment targets.
+4. Switch to `events_only` once the new evaluators are validated.
+
 There is no forced cutover date. Langfuse v3 receives security patches through January 2027. The [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) lists supported SDKs and APIs.
 
 ## Questions [#questions]
