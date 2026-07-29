@@ -7,7 +7,7 @@ export const demoProjectLangfuseClient = new LangfuseClient({
 });
 
 export const DEMO_PUBLIC_TRACE_FALLBACK_URL =
-  "https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces/c6dd4487746b4e155f9395da828a2752?observation=300576dc5b33a15e&timestamp=2026-07-27T09:30:37.092Z&traceId=c6dd4487746b4e155f9395da828a2752";
+  "https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces/2d6b96f2-0a4d-4366-99a5-1ad558c66e99";
 
 const READINESS_POLL_DELAYS_MS = [0, 250, 500, 1_000] as const;
 
@@ -33,12 +33,18 @@ export const getPublicDemoTraceUrl = async (
     }
 
     try {
-      await demoProjectLangfuseClient.api.trace.get(traceId, {
-        fields: "core",
-      });
-      return traceUrl;
+      const observations =
+        await demoProjectLangfuseClient.api.observations.getMany({
+          traceId,
+          fields: "core,basic",
+          limit: 100,
+        });
+
+      if (observations.data.some((observation) => observation.public)) {
+        return traceUrl;
+      }
     } catch {
-      // Continue briefly; ingestion can lag behind forceFlush.
+      // Continue briefly; ingestion and public trace sharing can lag behind forceFlush.
     }
   }
 
