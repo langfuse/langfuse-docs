@@ -8,47 +8,32 @@ const realtimeIngestionHeaders = {
   "x-langfuse-ingestion-version": "4",
 };
 
-const createSpanProcessor = ({
-  publicKey,
-  secretKey,
-  baseUrl,
-}: {
-  publicKey?: string;
-  secretKey?: string;
-  baseUrl?: string;
-}) => {
-  if (!publicKey || !secretKey || !baseUrl) return null;
-
-  return new LangfuseSpanProcessor({
-    publicKey,
-    secretKey,
-    baseUrl,
-    additionalHeaders: realtimeIngestionHeaders,
-  });
-};
-
-const euSpanProcessor = createSpanProcessor({
+const euSpanProcessor = new LangfuseSpanProcessor({
   publicKey: process.env.NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY,
   secretKey: process.env.EU_LANGFUSE_SECRET_KEY,
   baseUrl: process.env.NEXT_PUBLIC_EU_LANGFUSE_BASE_URL,
+  additionalHeaders: realtimeIngestionHeaders,
 });
 
-const usSpanProcessor = createSpanProcessor({
+const usSpanProcessor = new LangfuseSpanProcessor({
   publicKey: process.env.NEXT_PUBLIC_US_LANGFUSE_PUBLIC_KEY,
   secretKey: process.env.US_LANGFUSE_SECRET_KEY,
   baseUrl: process.env.NEXT_PUBLIC_US_LANGFUSE_BASE_URL,
+  additionalHeaders: realtimeIngestionHeaders,
 });
 
-const jpSpanProcessor = createSpanProcessor({
+const jpSpanProcessor = new LangfuseSpanProcessor({
   publicKey: process.env.NEXT_PUBLIC_JP_LANGFUSE_PUBLIC_KEY,
   secretKey: process.env.JP_LANGFUSE_SECRET_KEY,
   baseUrl: process.env.NEXT_PUBLIC_JP_LANGFUSE_BASE_URL,
+  additionalHeaders: realtimeIngestionHeaders,
 });
 
-const internalSpanProcessor = createSpanProcessor({
+const internalSpanProcessor = new LangfuseSpanProcessor({
   publicKey: process.env.NEXT_PUBLIC_INTERNAL_LANGFUSE_PUBLIC_KEY,
   secretKey: process.env.INTERNAL_LANGFUSE_SECRET_KEY,
   baseUrl: process.env.NEXT_PUBLIC_INTERNAL_LANGFUSE_BASE_URL,
+  additionalHeaders: realtimeIngestionHeaders,
 });
 
 const spanProcessors = [
@@ -56,7 +41,7 @@ const spanProcessors = [
   usSpanProcessor,
   jpSpanProcessor,
   internalSpanProcessor,
-].filter((processor): processor is LangfuseSpanProcessor => processor !== null);
+];
 
 export const flush = async () => {
   const results = await Promise.allSettled(
