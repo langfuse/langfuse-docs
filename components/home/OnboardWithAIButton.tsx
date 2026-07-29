@@ -13,8 +13,9 @@ import {
 } from "@/components/ui";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 
-const AI_ONBOARDING_PROMPT =
-  "Install the Langfuse Agent Skill from github.com/langfuse/skills and use it to onboard this application to Langfuse. First, check if Langfuse API credentials are available in the workspace. If not ask the user to sign up at cloud.langfuse.com, create api keys and add them to the environment. Then proceed to add tracing to this application.";
+const AI_ONBOARDING_PROMPT = `Install the Langfuse Agent Skill from github.com/langfuse/skills
+and use it to add tracing to this application with Langfuse
+following best practices.`;
 
 async function copyPromptToClipboard(sourceElement: HTMLElement | null) {
   if (typeof navigator !== "undefined" && navigator.clipboard) {
