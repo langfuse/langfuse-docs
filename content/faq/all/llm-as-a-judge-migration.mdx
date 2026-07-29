@@ -14,11 +14,11 @@ import { Steps, Step } from "@/components/docs";
     core: "full",
     pro: "full",
     enterprise: "full",
-    selfHosted: "not-available",
+    selfHosted: "full",
   }}
 />
 
-Trace-level evaluators use Langfuse's old trace-centric data model and are deprecated as part of [Langfuse v4](/docs/v4). Existing evaluators continue to run while you upgrade. Langfuse v4 is currently available on Langfuse Cloud; for self-hosted rollout updates, follow the [GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518).
+Trace-level evaluators use Langfuse's old trace-centric data model and are deprecated as part of [Langfuse v4](/docs/v4). Existing evaluators continue to run while you upgrade.
 
 Observation-level evaluators run in real time and scale with larger traces and higher evaluation volume. Any future multi-span support will also use the observation-centric data model, so upgrading is the foundation for future evaluation capabilities.
 
@@ -72,8 +72,8 @@ In the [v4 data model](/docs/v4), a trace is the logical group of observations t
 
 Click on the **Evaluation** navigation item. The upgrade screen shows the recommended path for your project:
 
-- **In-app upgrade:** Recommended when only minimal configuration changes need to be reviewed and accepted. The [Langfuse Assistant](/docs/langfuse-assistant) guides you through these changes in the app.
-- **Coding assistant:** Recommended when the upgrade requires broader configuration or instrumentation changes. The UI provides the skill and project context to use in your coding editor.
+- **In-app upgrade (Langfuse Cloud):** Recommended when only minimal configuration changes need to be reviewed and accepted. The [Langfuse Assistant](/docs/langfuse-assistant) guides you through these changes in the app.
+- **Coding assistant:** Recommended when the upgrade requires broader configuration or instrumentation changes, and for self-hosted deployments where the Langfuse Assistant is unavailable. The UI provides the skill and project context to use in your coding editor.
 
 In both paths, the agentic flow makes the upgrade conversational: you can inspect the proposed changes, ask questions, and refine them before creating the new evaluators. You do not need to translate or recreate configurations manually.
 
