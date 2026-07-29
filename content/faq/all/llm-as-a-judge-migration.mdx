@@ -14,7 +14,7 @@ import { Steps, Step } from "@/components/docs";
     core: "full",
     pro: "full",
     enterprise: "full",
-    selfHosted: "full",
+    selfHosted: "v4",
   }}
 />
 
@@ -44,7 +44,10 @@ Observation-level evaluators run in real time and scale with larger traces and h
 
 ### Before you start
 
-First, upgrade your SDK or ingestion path. Observation-level evaluators run in real time with:
+- **Langfuse Cloud:** First, upgrade your SDK or ingestion path, then upgrade your evaluators.
+- **Self-hosted:** Keep existing evaluators active while you upgrade your SDK or instrumentation and Langfuse using `legacy` or `dual` mode. Migrate the evaluators as a final step before switching to `events_only`.
+
+Observation-level evaluators run in real time with:
 
 - **Python SDK:** v4.7.0+ ([upgrade guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4))
 - **JS/TS SDK:** v5.4.0+ ([upgrade guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5))
