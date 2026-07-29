@@ -7,6 +7,7 @@ import { HomeSection } from "@/components/home/HomeSection";
 import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
 import { cn } from "@/lib/utils";
 import { HeroStatsStrip } from "@/components/home/HeroStatsStrip";
+import { OnboardWithAIButton } from "@/components/home/OnboardWithAIButton";
 
 export function Hero() {
   return (
@@ -72,6 +73,7 @@ export function Hero() {
             >
               Documentation
             </Button>
+            <OnboardWithAIButton />
           </div>
         </div>
       </CornerBox>
