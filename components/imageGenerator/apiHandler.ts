@@ -11,10 +11,7 @@ import { after } from "next/server";
 import { trace } from "@opentelemetry/api";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
-import {
-  DEMO_PUBLIC_TRACE_FALLBACK_URL,
-  getPublicDemoTraceUrl,
-} from "@/lib/demo-public-trace";
+import { getPublicDemoTraceUrl } from "@/lib/demo-public-trace";
 
 let _openai: OpenAI | null = null;
 const getOpenAI = () => (_openai ??= new OpenAI());
@@ -100,7 +97,7 @@ const handler = async (req: Request) => {
 
         setActiveTraceAsPublic();
         trace.getActiveSpan()?.end();
-        let traceUrl = DEMO_PUBLIC_TRACE_FALLBACK_URL;
+        let traceUrl: string | null = null;
         try {
           await flush();
           traceUrl = await getPublicDemoTraceUrl(traceId);

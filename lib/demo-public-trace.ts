@@ -6,9 +6,6 @@ export const demoProjectLangfuseClient = new LangfuseClient({
   secretKey: process.env.EU_LANGFUSE_SECRET_KEY,
 });
 
-export const DEMO_PUBLIC_TRACE_FALLBACK_URL =
-  "https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces/2d6b96f2-0a4d-4366-99a5-1ad558c66e99";
-
 const READINESS_POLL_DELAYS_MS = [0, 250, 500, 1_000] as const;
 
 const wait = (delayMs: number) =>
@@ -16,15 +13,15 @@ const wait = (delayMs: number) =>
 
 export const getPublicDemoTraceUrl = async (
   traceId?: string | null,
-): Promise<string> => {
-  if (!traceId) return DEMO_PUBLIC_TRACE_FALLBACK_URL;
+): Promise<string | null> => {
+  if (!traceId) return null;
 
   let traceUrl: string;
   try {
     traceUrl = await demoProjectLangfuseClient.getTraceUrl(traceId);
   } catch (error) {
     console.warn("Failed to build demo trace URL", error);
-    return DEMO_PUBLIC_TRACE_FALLBACK_URL;
+    return null;
   }
 
   for (const delayMs of READINESS_POLL_DELAYS_MS) {
@@ -48,5 +45,5 @@ export const getPublicDemoTraceUrl = async (
     }
   }
 
-  return DEMO_PUBLIC_TRACE_FALLBACK_URL;
+  return null;
 };
