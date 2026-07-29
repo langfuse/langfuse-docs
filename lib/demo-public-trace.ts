@@ -38,10 +38,6 @@ export const getPublicDemoTraceUrl = async (
     return fallbackUrl;
   }
 
-  const traceUrlWithObservation = observationId
-    ? withObservationId(traceUrl, observationId)
-    : null;
-
   for (const delayMs of READINESS_POLL_DELAYS_MS) {
     if (delayMs > 0) {
       await wait(delayMs);
@@ -69,5 +65,5 @@ export const getPublicDemoTraceUrl = async (
     }
   }
 
-  return traceUrlWithObservation ?? fallbackUrl;
+  return fallbackUrl;
 };
