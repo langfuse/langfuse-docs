@@ -11,8 +11,6 @@ Please ask in the [v4 rollout GitHub Discussion](https://github.com/orgs/langfus
 
 </Callout>
 
-{/* TODO: add release date once v4 is tagged */}
-
 Langfuse v4 moves to an observation-centric data model built on a new, wide, and (mostly) immutable ClickHouse table.
 This eliminates joins and deduplication at read time and optimizes for the most performant ClickHouse access patterns.
 Initial table loads for large amounts of data go from seconds to milliseconds, and dashboard load times for large projects improve by 10x or more over longer time ranges.
@@ -25,7 +23,6 @@ Langfuse Cloud has been running on this data model since early 2026. Read the [t
 
 Langfuse v3 will receive security patches until end of January 2027.
 If you require further support, please contact [support](/support).
-{/* TODO: Custom reach-out to Enterprise Self-Hosters that we can also patch major bug fixes */}
 
 </Callout>
 
@@ -67,8 +64,6 @@ Traces are represented as root spans within the same table instead of a separate
 
 The table schemas and all data migrations ship as regular migrations with Langfuse v4; there is no manual schema work.
 
-{/* TODO: add ingestion + propagation flow diagrams, see https://github.com/langfuse/langfuse/pull/12128 and blog assets */}
-
 <Frame className="my-6" fullWidth>
   ![Dual write into the events
   tables](/images/blog/2026-03-10-simplify-langfuse-for-scale/dual_write.png)
@@ -99,8 +94,6 @@ Langfuse v4 serves reads from the new APIs that were introduced alongside the da
 The following legacy endpoints are unavailable on deployments that run the default write mode (`events_only`), that is, all new deployments and migrated deployments after the [cutover](#cutover).
 **While you run the `legacy` or `dual` write mode during your migration, these endpoints keep working as before.**
 
-{/* TODO: verify the final endpoint list against the `rejectInEventsOnlyMode` gates in the codebase before publishing (e.g. PATCH /spans/:id, PATCH /generations/:id, score writes via POST /ingestion) */}
-
 Ingestion, replaced by [OpenTelemetry-based ingestion](/integrations/native/opentelemetry):
 
 | Endpoint                       | Behavior on v4                                                                                         |
@@ -125,8 +118,6 @@ Reads, replaced by the [Observations API v2](/docs/api-and-data-platform/feature
 | `GET /api/public/generations`      | Returns `404`  |
 
 Scores, replaced by the [Scores API v3](https://api.reference.langfuse.com/#tag/scoresv3):
-
-{/* TODO: link Scores API v3 docs page once available, see /changelog/2026-06-10-scores-v3-api */}
 
 | Endpoint                        | Behavior on v4 |
 | ------------------------------- | -------------- |
@@ -396,7 +387,7 @@ Track progress on the background migrations page in the UI; see [background migr
 
 ## Rollback and safety [#rollback]
 
-- The v4 schema migrations are additive (new tables only). While you run the `legacy` or `dual` write mode, the old `traces`/`observations` tables keep receiving all data, so you can roll the server back to the latest v3 release without data loss. {/* TODO: verify that a v3 deployment tolerates the applied v4 migrations for a clean downgrade */}
+- The v4 schema migrations are additive (new tables only). While you run the `legacy` or `dual` write mode, the old `traces`/`observations` tables keep receiving all data, so you can roll the server back to the latest v3 release without data loss.
 - The historic backfill never modifies the old tables; it only reads from them.
 - Once you complete the [cutover](#cutover) to `events_only`, new data lands only in the new tables. Rolling back to a v3 read path from that point would miss the data written since the switch; treat the cutover as the point of commitment.
 
