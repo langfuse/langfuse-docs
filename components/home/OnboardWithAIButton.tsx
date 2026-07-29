@@ -132,3 +132,42 @@ export function OnboardWithAIButton() {
     </Popover>
   );
 }
+
+export function HomeHeroCtaButtons() {
+  const pathname = usePathname() ?? "/";
+  const capture = usePostHogClientCapture();
+
+  return (
+    <div className="flex flex-wrap gap-3 justify-center items-center">
+      <Button
+        variant="primary"
+        size="default"
+        shortcutKey="s"
+        href="/cloud"
+        onClick={() => {
+          capture("home:start_free_clicked", {
+            source: "home_hero",
+            path: pathname,
+          });
+        }}
+      >
+        Start free
+      </Button>
+      <Button
+        variant="secondary"
+        size="default"
+        shortcutKey="d"
+        href="/docs"
+        onClick={() => {
+          capture("home:documentation_clicked", {
+            source: "home_hero",
+            path: pathname,
+          });
+        }}
+      >
+        Documentation
+      </Button>
+      <OnboardWithAIButton />
+    </div>
+  );
+}

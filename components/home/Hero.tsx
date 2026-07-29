@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { CornerBox } from "@/components/ui/corner-box";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
@@ -7,7 +6,7 @@ import { HomeSection } from "@/components/home/HomeSection";
 import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
 import { cn } from "@/lib/utils";
 import { HeroStatsStrip } from "@/components/home/HeroStatsStrip";
-import { OnboardWithAIButton } from "@/components/home/OnboardWithAIButton";
+import { HomeHeroCtaButtons } from "@/components/home/OnboardWithAIButton";
 
 export function Hero() {
   return (
@@ -56,25 +55,7 @@ export function Hero() {
             production data to understand behavior, collaborate on fixes, and
             ship better quality at lower cost and latency.
           </Text>
-          <div className="flex flex-wrap gap-3 justify-center items-center">
-            <Button
-              variant="primary"
-              size="default"
-              shortcutKey="s"
-              href="/cloud"
-            >
-              Start free
-            </Button>
-            <Button
-              variant="secondary"
-              size="default"
-              shortcutKey="d"
-              href="/docs"
-            >
-              Documentation
-            </Button>
-            <OnboardWithAIButton />
-          </div>
+          <HomeHeroCtaButtons />
         </div>
       </CornerBox>
       <CornerBox className="pr-px pb-px -mt-px">
