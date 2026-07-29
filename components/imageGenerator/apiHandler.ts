@@ -12,7 +12,7 @@ import { trace } from "@opentelemetry/api";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
 import {
-  DEMO_PUBLIC_TRACE_FALLBACK_URL,
+  DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL,
   getPublicDemoTraceUrl,
 } from "@/lib/demo-public-trace";
 
@@ -100,10 +100,13 @@ const handler = async (req: Request) => {
 
         setActiveTraceAsPublic();
         trace.getActiveSpan()?.end();
-        let traceUrl = DEMO_PUBLIC_TRACE_FALLBACK_URL;
+        let traceUrl = DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL;
         try {
           await flush();
-          traceUrl = await getPublicDemoTraceUrl(traceId);
+          traceUrl = await getPublicDemoTraceUrl(
+            traceId,
+            DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL,
+          );
         } catch (error) {
           console.warn("Failed to publish demo trace link", error);
         }
