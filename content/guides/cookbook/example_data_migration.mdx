@@ -404,7 +404,7 @@ print(f"Prompts — migrated: {migrated}, failed: {failed}")
 
 This is the core of the migration. We push each source trace (and its nested observations) into the destination's OTLP ingestion endpoint at `/api/public/otel/v1/traces`. The OTLP endpoint is the **only** way to set the authoritative `start_time` / `end_time` of an observation at ingest — the legacy REST ingestion rewrites those fields.
 
-> **Self-hosted deployments:** the v2 Observations API requires [Langfuse v4](https://langfuse.com/docs/v4); self-hosted v4 support is in progress. If you are migrating from a self-hosted Langfuse instance, replace the `observations.get_many(...)` calls below with `src.api.trace.get(trace.id).observations` (which hits the v1 endpoint).
+> **Self-hosted deployments:** the v2 Observations API requires [Langfuse v4](https://langfuse.com/docs/v4), which is generally available for self-hosted deployments. If you are migrating from a self-hosted instance that still runs Langfuse v3, replace the `observations.get_many(...)` calls below with `src.api.trace.get(trace.id).observations` (which hits the v1 endpoint).
 
 
 
