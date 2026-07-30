@@ -5,9 +5,29 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useRouter, usePathname } from "next/navigation";
 import { useSearchParams } from "next/navigation";
-import { EXAMPLE_PROJECT_CTA, WALKTHROUGH_TABS } from "./constants";
-import { BookOpen, ExternalLink, Joystick } from "lucide-react";
+import { WALKTHROUGH_TABS } from "./constants";
+import { BookOpen, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+interface VideoPlayerProps {
+  videoId: string;
+  title: string;
+}
+
+function VideoPlayer({ videoId, title }: VideoPlayerProps) {
+  return (
+    <iframe
+      width="100%"
+      className="aspect-[16/9] rounded-[2px] mt-3"
+      src={`https://www.youtube-nocookie.com/embed/${videoId}`}
+      title={title}
+      frameBorder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerPolicy="strict-origin-when-cross-origin"
+      allowFullScreen
+    />
+  );
+}
 
 function WatchWalkthroughsInner({ className }: { className?: string }) {
   const router = useRouter();
@@ -57,16 +77,11 @@ function WatchWalkthroughsInner({ className }: { className?: string }) {
                 <h3 className="mb-2 text-xl font-semibold">{tab.title}</h3>
                 <p>{tab.description}</p>
               </div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
-                <Button
-                  icon={<Joystick size={16} />}
-                  href={EXAMPLE_PROJECT_CTA.href}
-                >
-                  <span className="flex items-center gap-2">
-                    {EXAMPLE_PROJECT_CTA.title}
-                    <ExternalLink size={12} className="ml-auto" />
-                  </span>
-                </Button>
+              <VideoPlayer
+                videoId={tab.videoId}
+                title={`Langfuse ${tab.label.toLowerCase()} video`}
+              />
+              <div className="mt-4 flex justify-center">
                 <Button icon={<BookOpen size={16} />} href={tab.docs.href}>
                   <span className="flex items-center gap-2">
                     {tab.docs.title}
