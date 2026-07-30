@@ -13,21 +13,25 @@ A good dataset allows you to evaluate your system and make changes more confiden
 
 The [Datasets](/academy/datasets) academy section explains the basic building blocks: input, expected output, and metadata. This guide focuses on the design work that happens before and while you create datasets and dataset items.
 
-Dataset design is iterative, but the first version should not be a loose collection of examples. A good starting point is a minimally complete dataset: about 15-30 rows that can run through your application, cover the most important input slices, and have an evaluator or review rubric. Run that version early, fix the schema and evaluator, then expand into the gaps you see from those runs or from production input.
+Dataset design is iterative. A good starting point is a minimally complete dataset: about 15-30 rows that can run through your application, cover the most important input slices, and have an evaluator or review rubric. Run that version early, fix the schema and evaluator, then expand into the gaps you see from those runs or from production input.
+
+<Callout type="info">
+Your application will very likely have more than one evaluation dataset. Datasets are often scoped to a specific part of the system or to one sub-step the agent takes.
+</Callout>
 
 <DatasetDesignLoopDiagram />
 
 ## 1. Start with the goal of the dataset
 
-Before writing rows, define the smallest useful decision the dataset should support. This keeps the dataset from becoming a vague bucket of interesting examples.
+Before writing rows, define the smallest useful goal the dataset should support. This keeps the dataset from becoming a vague bucket of interesting examples.
 
 For example:
 
-- Can we ship this prompt change without breaking support routing?
+- Can we ship a prompt change without breaking support routing?
 - Does the docs chatbot answer common integration questions well enough?
 - Does the agent call the right tool when a customer asks for a refund?
 
-That decision defines the system boundary. An end-to-end dataset should use the payload your application receives from a user or system. A step-level dataset should use the structured state that step receives in production.
+That goal defines the system boundary. An end-to-end dataset should use the payload your application receives from a user or system. A step-level dataset should use the structured state that step receives in production.
 
 It also defines the dataset's job. Exploration datasets can change quickly while you are learning. Regression datasets should stay stable enough to compare runs over time. CI or benchmark datasets need stricter review because a bad row can block good changes.
 
@@ -48,7 +52,7 @@ Start with three source types:
 
 - **Production traces:** show realistic usage, common paths, and observed failures. Scores, user feedback, tickets, and complaints are discovery signals for useful traces; they are not a separate source type.
 - **Existing assets:** old datasets, FAQs, policies, docs, support macros, CSVs, JSON files, and benchmarks can bootstrap known coverage quickly.
-- **Synthetic cases:** expert-written and AI-generated examples can fill gaps and give you an idea of what your experts expect the application to face.
+- **Synthetic cases:** expert-written and AI-generated examples can fill gaps and give you an idea of what your application is expected to face.
 
 For each source, ask what it can teach you:
 
@@ -61,9 +65,11 @@ This step should change your assumptions. You might learn that production traces
 
 Use this input to choose the distribution, evaluator, and item schema in the next steps.
 
-<Callout type="info">
-If no other data is available, synthetic data can be a useful starting point. See the [synthetic datasets cookbook](/guides/cookbook/example_synthetic_datasets) for examples.
-</Callout>
+<ManualGuideCallout
+  href="/guides/cookbook/example_synthetic_datasets"
+  topic="Synthetic datasets"
+  lede="Use synthetic data as a starting point when no other data is available."
+/>
 
 ## 3. Choose the input distribution
 
@@ -85,7 +91,26 @@ Use [reference-based evaluation](/academy/evaluate#reference-based-vs-reference-
 
 Use [reference-free evaluation](/academy/evaluate#reference-based-vs-reference-free) when there is no stable expected output, but every item can be judged against the same rule or rubric. This works for checks such as valid JSON, language match, grounding in provided context, safety, or tone. The trade-off is that the evaluator or rubric carries more weight, so ambiguous rubrics produce ambiguous results.
 
+For example, a docs chatbot dataset can use either approach:
+
+<Tabs items={["Reference-free evaluator", "Reference-based evaluator"]}>
+<Tab>
+
+The dataset stores realistic user questions as inputs. The evaluator checks whether each answer is grounded in the retrieved documentation and does not invent unsupported facts. There is no row-specific expected answer, but every row can be judged against the same grounding rubric.
+
+</Tab>
+<Tab>
+
+Each dataset item stores the user question plus expected facts, required sources, or a reference answer. The evaluator compares the chatbot response against that expected output. This takes more preparation, but failures are easier to inspect and can often be scored more deterministically.
+
+</Tab>
+</Tabs>
+
 Choose the cheapest evaluator that captures the requirement: [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) for deterministic checks, [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) for language-quality judgments, and [manual evaluation](/academy/evaluate#how-evaluation-typically-evolves) while you are still learning what good and bad outputs look like.
+
+<Callout type="info">
+If you are still exploring how evaluation works, see the [Academy page on evaluation](/academy/evaluate).
+</Callout>
 
 If you choose reference-free evaluation but cannot name the evaluator or review rubric that will score every row, you have created a review queue, not yet an evaluable dataset. See [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) for this workflow.
 
@@ -164,9 +189,11 @@ There are three useful expansion patterns:
 - **Bad-trace expansion:** add a reviewed dataset item whenever you find a serious production failure. This works well once the system is live and you can continuously mine traces.
 - **Purpose-specific datasets:** keep separate datasets for stable regression, adversarial inputs, single-step datasets versus end-to-end sets.
 
-<Callout type="info">
-For a practical example of how datasets and evaluation can look for a docs chatbot, see the [Pydantic AI MCP agent evaluation guide](/guides/cookbook/example_pydantic_ai_mcp_agent_evaluation).
-</Callout>
+<ManualGuideCallout
+  href="/guides/cookbook/example_pydantic_ai_mcp_agent_evaluation"
+  topic="Docs chatbot evaluation"
+  lede="See a practical example of how datasets and evaluation can look for a docs chatbot."
+/>
 
 ## Closing checklist
 
