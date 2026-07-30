@@ -31,9 +31,7 @@ For example:
 - Does the docs chatbot answer common integration questions well enough?
 - Does the agent call the right tool when a customer asks for a refund?
 
-That goal defines the system boundary. An end-to-end dataset should use the payload your application receives from a user or system. A step-level dataset should use the structured state that step receives in production.
-
-It also defines the dataset's job. Exploration datasets can change quickly while you are learning. Regression datasets should stay stable enough to compare runs over time. CI or benchmark datasets need stricter review because a bad row can block good changes.
+That goal defines the dataset boundary and job: end-to-end datasets use the payload the application receives, while step-level datasets use the structured state a step sees in production. Exploration datasets can change while you learn; regression, CI, and benchmark datasets should stay stable and get stricter review.
 
 If two jobs need different inputs, evaluators, or release decisions, split them. A stable regression dataset and an adversarial-input dataset can both be useful, but combining them without a clear split makes aggregate scores harder to interpret.
 
