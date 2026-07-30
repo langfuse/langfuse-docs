@@ -73,19 +73,19 @@ Observation columns are configurable; score columns are fixed.
 
 New integrations select all eleven field groups. `core` is required; disable other groups to reduce file size or omit sensitive data.
 
-| Group           | Fields                                                                                                       |
-| --------------- | ------------------------------------------------------------------------------------------------------------ |
-| `core`          | `end_time`, `id`, `parent_observation_id`, `project_id`, `start_time`, `trace_id`, `type`                    |
-| `basic`         | `bookmarked`, `environment`, `level`, `name`, `public`, `session_id`, `status_message`, `user_id`, `version` |
-| `time`          | `completion_start_time`, `created_at`, `updated_at`                                                          |
-| `io`            | `input`, `output`                                                                                            |
-| `metadata`      | `metadata`                                                                                                   |
-| `model`         | `input_price`, `model_id`, `model_parameters`, `output_price`, `provided_model_name`, `total_price`          |
-| `usage`         | `cost_details`, `total_cost`, `usage_details`, `usage_pricing_tier_id`, `usage_pricing_tier_name`            |
-| `prompt`        | `prompt_id`, `prompt_name`, `prompt_version`                                                                 |
-| `metrics`       | `latency`, `time_to_first_token`                                                                             |
-| `trace_context` | `release`, `tags`, `trace_name`                                                                              |
-| `tools`         | `tool_call_names`, `tool_calls`, `tool_definitions`                                                          |
+| Group           | Fields                                                                                                                              |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `core`          | `end_time`, `id`, `parent_observation_id`, `project_id`, `start_time`, `trace_id`, `type`                                           |
+| `basic`         | `bookmarked`, `environment`, `is_root_observation`, `level`, `name`, `public`, `session_id`, `status_message`, `user_id`, `version` |
+| `time`          | `completion_start_time`, `created_at`, `updated_at`                                                                                 |
+| `io`            | `input`, `output`                                                                                                                   |
+| `metadata`      | `metadata`                                                                                                                          |
+| `model`         | `input_price`, `model_id`, `model_parameters`, `output_price`, `provided_model_name`, `total_price`                                 |
+| `usage`         | `cost_details`, `total_cost`, `usage_details`, `usage_pricing_tier_id`, `usage_pricing_tier_name`                                   |
+| `prompt`        | `prompt_id`, `prompt_name`, `prompt_version`                                                                                        |
+| `metrics`       | `latency`, `time_to_first_token`                                                                                                    |
+| `trace_context` | `release`, `tags`, `trace_name`                                                                                                     |
+| `tools`         | `tool_call_names`, `tool_calls`, `tool_definitions`                                                                                 |
 
 Changes apply only to future exports. See the [observation field reference](/docs/api-and-data-platform/features/blob-storage-export-fields#enriched-observations) for types and descriptions.
 

@@ -14,11 +14,11 @@ import { Steps, Step } from "@/components/docs";
     core: "full",
     pro: "full",
     enterprise: "full",
-    selfHosted: "not-available",
+    selfHosted: "v4",
   }}
 />
 
-Trace-level evaluators use Langfuse's old trace-centric data model and are deprecated as part of [Langfuse v4](/docs/v4). Existing evaluators continue to run while you upgrade. Langfuse v4 is currently available on Langfuse Cloud; for self-hosted rollout updates, follow the [GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518).
+Trace-level evaluators use Langfuse's old trace-centric data model and are deprecated as part of [Langfuse v4](/docs/v4). Existing evaluators continue to run while you upgrade.
 
 Observation-level evaluators run in real time and scale with larger traces and higher evaluation volume. Any future multi-span support will also use the observation-centric data model, so upgrading is the foundation for future evaluation capabilities.
 
@@ -44,7 +44,10 @@ Observation-level evaluators run in real time and scale with larger traces and h
 
 ### Before you start
 
-First, upgrade your SDK or ingestion path. Observation-level evaluators run in real time with:
+- **Langfuse Cloud:** First, upgrade your SDK or ingestion path, then upgrade your evaluators.
+- **Self-hosted:** Keep existing evaluators active while you upgrade your SDK or instrumentation and Langfuse using `legacy` or `dual` mode. Migrate the evaluators as a final step before switching to `events_only`.
+
+Observation-level evaluators run in real time with:
 
 - **Python SDK:** v4.7.0+ ([upgrade guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4))
 - **JS/TS SDK:** v5.4.0+ ([upgrade guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5))
@@ -72,8 +75,8 @@ In the [v4 data model](/docs/v4), a trace is the logical group of observations t
 
 Click on the **Evaluation** navigation item. The upgrade screen shows the recommended path for your project:
 
-- **In-app upgrade:** Recommended when only minimal configuration changes need to be reviewed and accepted. The [Langfuse Assistant](/docs/langfuse-assistant) guides you through these changes in the app.
-- **Coding assistant:** Recommended when the upgrade requires broader configuration or instrumentation changes. The UI provides the skill and project context to use in your coding editor.
+- **In-app upgrade (Langfuse Cloud):** Recommended when only minimal configuration changes need to be reviewed and accepted. The [Langfuse Assistant](/docs/langfuse-assistant) guides you through these changes in the app.
+- **Coding assistant:** Recommended when the upgrade requires broader configuration or instrumentation changes, and for self-hosted deployments where the Langfuse Assistant is unavailable. The UI provides the skill and project context to use in your coding editor.
 
 In both paths, the agentic flow makes the upgrade conversational: you can inspect the proposed changes, ask questions, and refine them before creating the new evaluators. You do not need to translate or recreate configurations manually.
 
@@ -94,6 +97,8 @@ The agent explains the relevant changes during the upgrade. The following sectio
 **How configurations may change**
 
 Depending on the existing evaluator, the proposed configuration may target the same observation as before, replace trace fields with values from one observation, or require an instrumentation change so all required values are available together. The [common configuration scenarios](#common-configuration-scenarios) below explains the cases in detail.
+
+When remapping a trace-level evaluator, the default observation filter is `isRootObservation = true`. This targets logical roots, including observations explicitly marked as application roots by the SDK. Review this filter alongside any name or type filters before creating the upgraded evaluator.
 
 **How resulting scores may differ**
 
@@ -161,10 +166,13 @@ Filters:
   environment not in ["sdk-experiment"]
   traceName = "user-workflow"
   type = "SPAN"
+  isRootObservation = true
 Variable mapping:
   query = observation.input.key
   generation = observation.output
 ```
+
+The default `isRootObservation = true` filter keeps this example focused on the logical root instead of evaluating every matching observation in the trace.
 
 </details>
 
