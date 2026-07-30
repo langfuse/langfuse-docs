@@ -52,9 +52,13 @@ Organizations that operate multiple Langfuse deployments (e.g. for development, 
   Switcher](/images/docs/ui-customization-instance-switcher.png)
 </Frame>
 
-| Variable                     | Description                                                                                                                                                                      |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LANGFUSE_UI_INSTANCE_LINKS` | JSON array of `{"name", "url"}` objects. Example: `[{"name":"Staging","url":"https://langfuse-staging.example.com"},{"name":"Production","url":"https://langfuse.example.com"}]` |
+| Variable                     | Description                                                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_UI_INSTANCE_LINKS` | JSON array of objects with a `name` and a `url`. See the example below. Unset hides the switcher. |
+
+```bash filename=".env"
+LANGFUSE_UI_INSTANCE_LINKS='[{"name":"Staging","url":"https://langfuse-staging.example.com"},{"name":"Production","url":"https://langfuse.example.com"}]'
+```
 
 Notes:
 
