@@ -18,7 +18,7 @@ It is used to accept new events quickly on the API and defer their processing an
 This allows Langfuse to handle request peaks gracefully.
 
 You can use a managed service on AWS, Azure, or GCP, or host it yourself.
-At least version 7 is required and the instance must have `maxmemory-policy=noeviction` configured.
+At least version 7 is required and the instance must have `maxmemory-policy=noeviction` configured. For Langfuse v4, Redis 7.2 is recommended — see the [v3 to v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#step-1).
 
 This guide covers how to configure Redis within Langfuse and what to keep in mind when bringing your own Redis.
 
@@ -319,6 +319,12 @@ REDIS_AUTH=your-redis-password
 REDIS_TLS_ENABLED=true # required if REDIS_SENTINEL_TLS_ENABLED=true
 REDIS_SENTINEL_TLS_ENABLED=true
 ```
+
+## Detecting a Stalled Worker [#worker-liveness]
+
+Redis-level disruptions that invalidate BullMQ job locks — key eviction under a non-`noeviction` memory policy, a `FLUSHALL`, or a failover — can leave the worker container running while it silently stops consuming all queues.
+The worker health endpoint provides an opt-in check (`?failIfQueueConsumptionStuck=true`) that fails once no jobs have been processed for a configurable period, so a liveness probe can restart the container automatically.
+See [Health and Readiness Check Endpoints](/self-hosting/configuration/health-readiness-endpoints) for details.
 
 ## Sizing Recommendations
 

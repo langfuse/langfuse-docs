@@ -24,7 +24,8 @@ export const POST = async (req: Request) => {
     );
   }
 
-  const { userId }: { userId: string } = await req.json();
+  const { userId, storeAudio }: { userId: string; storeAudio?: boolean } =
+    await req.json();
 
   const roomName = `voice-demo-${crypto.randomUUID()}`;
   const participantName = userId;
@@ -32,6 +33,9 @@ export const POST = async (req: Request) => {
   const token = new AccessToken(apiKey, apiSecret, {
     identity: participantName,
     name: participantName,
+    // Read by the agent to decide whether to record the conversation audio
+    // and attach it to the Langfuse trace (defaults to true).
+    attributes: { store_audio: String(storeAudio !== false) },
   });
 
   token.addGrant({

@@ -30,9 +30,24 @@ On very high loads, it may become necessary to apply additional settings that in
 For most environments, we recommend to scale the worker containers by their CPU load as this is a straightforward metric to measure.
 A load above 50% for a 2 CPU container is an indicator that the instance is saturated and that the throughput should increase by adding more containers.
 
-In addition, the Langfuse worker also publishes queue length metrics via statsd that can be used to scale the worker containers.
-`langfuse.queue.ingestion.length` is the main metric that we use to make scaling decisions.
+In addition, the Langfuse worker publishes tagged queue depth metrics via StatsD that can be used to scale the worker containers.
+`langfuse.queue.ingestion.depth` with the tag `type:waiting` is the main metric that we use to make scaling decisions.
 The queue metrics can also be published to AWS CloudWatch by setting `ENABLE_AWS_CLOUDWATCH_METRIC_PUBLISHING=true` to configure auto-scalers based on AWS metrics.
+
+<Callout type="info">
+
+Starting with Langfuse [3.170.0](https://github.com/langfuse/langfuse/releases/tag/v3.170.0), tagged queue metrics ending in `.depth`, `.rate`, or `.dlq_oldest_age` are published in the `Langfuse` CloudWatch namespace with every tag except `unit` flattened into the metric name as a `.tag_value` segment, sorted by tag name, instead of publishing the tags as dimensions. Therefore, the StatsD metric and tag above are published to CloudWatch as `langfuse.queue.ingestion.depth.type_waiting`.
+
+</Callout>
+
+<details>
+<summary>Queue metric compatibility for Langfuse 3.169.0 and earlier</summary>
+
+Langfuse versions before [3.169.0](https://github.com/langfuse/langfuse/releases/tag/v3.169.0) do not emit the tagged queue depth metric. Use the legacy `langfuse.queue.ingestion.length` metric when configuring autoscaling for these versions.
+
+Langfuse 3.169.0 emits the tagged depth metric to StatsD, but its CloudWatch publisher does not flatten the tags and therefore does not provide a distinct waiting-depth series. Upgrade to 3.170.0 or later before using the queue depth metric for CloudWatch autoscaling.
+
+</details>
 
 ### Reducing ClickHouse reads within the ingestion processing
 
