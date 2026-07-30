@@ -18,7 +18,7 @@ import {
 } from "@langfuse/tracing";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp";
 import { flush } from "@/src/instrumentation";
-import { context, trace } from "@opentelemetry/api";
+import { context, ROOT_CONTEXT, trace } from "@opentelemetry/api";
 import {
   buildDemoTraceRedirectUrl,
   DEMO_PUBLIC_TRACE_FALLBACK_URL,
@@ -245,10 +245,13 @@ export const handler = async (req: Request) => {
   );
 };
 
-export const POST = observe(handler, {
+const observedPost = observe(handler, {
   name: "handle-chatbot-message",
   endOnExit: false, // end after stream has finished
   asType: "agent",
 });
+
+export const POST = (req: Request) =>
+  context.with(ROOT_CONTEXT, () => observedPost(req));
 
 export const maxDuration = 30;

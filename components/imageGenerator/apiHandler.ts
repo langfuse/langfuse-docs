@@ -8,7 +8,7 @@ import {
 } from "@langfuse/tracing";
 import { LangfuseMedia } from "@langfuse/core";
 import { after } from "next/server";
-import { context, trace } from "@opentelemetry/api";
+import { context, ROOT_CONTEXT, trace } from "@opentelemetry/api";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
 import {
@@ -145,11 +145,14 @@ const handler = async (req: Request) => {
   );
 };
 
-export const POST = observe(handler, {
+const observedPost = observe(handler, {
   name: "image-generator",
   asType: "generation",
   captureOutput: false,
   endOnExit: false,
 });
+
+export const POST = (req: Request) =>
+  context.with(ROOT_CONTEXT, () => observedPost(req));
 
 export const maxDuration = 60;
