@@ -120,7 +120,9 @@ Run evaluators on individual observations within your traces—such as LLM calls
 
 Observation-level evaluators map variables from the matched observation. They can use fields on that observation, such as `input`, `output`, and `metadata`.
 
-They do not load sibling or child observations from the same trace. If your evaluator needs the overall request and response of an application or agent invocation, target a root observation that records that overall input and output. The evaluator still only sees data on that root observation; it will not automatically include data from child observations unless your application writes the required summary or context onto the root observation.
+They do not load sibling or child observations from the same trace. If your evaluator needs the overall request and response of an application or agent invocation, target a logical root observation that records that overall input and output. A logical root is an observation without a physical parent or an observation explicitly marked as an application root by the SDK. It can therefore have a physical parent. The evaluator still only sees data on that root observation; it will not automatically include data from child observations unless your application writes the required summary or context onto the root observation.
+
+Use the **Is Root Observation** filter to target logical roots. This is different from filtering for an empty physical parent, which only selects observations without a physical parent.
 
 **Why target Observations**
 
@@ -226,7 +228,7 @@ With your evaluator and model selected, configure which data to run the evaluati
 **Configuration Steps**
 
 1. Select "Live Observations" as your evaluation target
-2. Filter to specific observations using observation type, trace name, trace tags, userId, sessionId, metadata, and other attributes
+2. Filter to specific observations using observation type, logical-root status, trace name, trace tags, userId, sessionId, metadata, and other attributes
 3. Configure sampling percentage (e.g., 5%) to manage evaluation costs and throughput
 
 **Requirements**
@@ -332,6 +334,17 @@ The setup is split into two resources:
 A typical flow is to create an evaluator, read back its `variables` and `outputDefinition`, then create one or more evaluation rules that reference it.
 
 The endpoints are designed to be explored and consumed by coding agents. The recommended way to set up evaluators programmatically is to point an agent at the API reference and have it create the evaluators and wire up the evaluation rules for you.
+
+Observation evaluation rules support a boolean `isRootObservation` filter with the `=` and `<>` operators. To target logical roots, include this filter in the rule:
+
+```json
+{
+  "type": "boolean",
+  "column": "isRootObservation",
+  "operator": "=",
+  "value": true
+}
+```
 
 <Callout type="info">
   These endpoints are currently **unstable** and may change while the underlying evaluation data model is being redesigned. See the [Evaluators](https://api.reference.langfuse.com/#tag/unstableevaluators) and [Evaluation Rules](https://api.reference.langfuse.com/#tag/unstableevaluationrules) API reference for the full request and response schemas.

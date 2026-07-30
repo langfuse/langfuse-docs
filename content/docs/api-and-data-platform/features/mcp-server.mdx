@@ -88,6 +88,17 @@ The [MCP Reference](https://mcp.reference.langfuse.com) is the canonical source 
   access to write operations. For a full list of tools, see the [MCP Reference](https://mcp.reference.langfuse.com).
 </Callout>
 
+## Filter logical root observations [#logical-root-observations]
+
+The observation tools distinguish logical roots from physical parentage:
+
+- `listObservations` accepts the optional boolean `isRootObservation` filter. Set it to `true` to match observations without a physical parent or observations explicitly marked as application roots by the SDK.
+- Physical-parent filtering remains separate. An application-root observation can match `isRootObservation: true` even when it has a physical parent.
+- `isRootObservation` is included in the default observation fields returned by `listObservations`.
+- `getObservationFilterValues` supports `isRootObservation` as a filter-value column, so you can discover and combine logical-root values with other observation filters.
+
+For the complete tool schemas and request examples, see the [MCP Reference](https://mcp.reference.langfuse.com).
+
 ## Set up [#set-up]
 
 <Steps>
