@@ -106,17 +106,17 @@ Many things are hard to produce but cheap to check, once someone has done the pr
 
 Once you know what kind of evaluator to use, you'll need to decide what data you're going to serve as input, and what its output will be. While very dependent on your use case, there are a couple of guiding principles.
 
-### Granularity -> not one "God Evaluator" [#one-evaluator-per-failure-mode]
+### Granularity → not one "God Evaluator" [#one-evaluator-per-failure-mode]
 
 It might be tempting to create a single judge that rates accuracy, tone of voice, and completeness together on a 1-10 scale. This is sometimes also called a _God Evaluator_<Ref refs={references} id="yan-product-evals" />. The problem with this is that your resulting score does not tell you what to fix.
 
 For LLM-as-a-Judge evaluators specifically, narrow ones are also easier to build. Getting a judge to agree with you on one specific criterion is a much lower bar than agreeing on "quality".
 
-### Input -> actions over words [#outcome-not-claim]
+### Input → actions over words [#outcome-not-claim]
 
 It's fully possible that an agent ends a support conversation with "Your refund of $200 has been processed, you're all set!" while no refund exists. If your evaluators are going off of only a transcript, you might be having a lot of false-positives. Instead, a check on the refunds table would catch every case. Anthropic's guide to agent evals<Ref refs={references} id="anthropic-agent-evals" /> condenses this into a rule: **grade the outcome in the environment, not the claim in the transcript**.
 
-### Output -> prefer binary or categorical [#binary-verdicts]
+### Output → prefer binary or categorical [#binary-verdicts]
 
 Prefer a binary or categorical score instead of a scale, for two reasons:
 
