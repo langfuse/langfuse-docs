@@ -85,10 +85,10 @@ Use [reference-free evaluation](/academy/evaluate#reference-based-vs-reference-f
 
 For example, a docs chatbot dataset can use either approach:
 
-| Approach                 | `input` shape                      | `expectedOutput` shape                              | Evaluator approach                                                                                                                                   |
-| ------------------------ | ---------------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Reference-free grounding | `{ question, retrievedContext[] }` | Omit `expectedOutput` or set it to `null`           | LLM-as-a-judge checks whether the answer is grounded in the retrieved documentation, answers the question, and avoids unsupported facts.             |
-| Reference-based answer   | `{ question }`                     | `{ requiredFacts[], requiredSources[], mustNot[] }` | A code or LLM evaluator compares the answer against the required facts and sources. This takes more preparation, but failures are easier to inspect. |
+| Approach        | `input` shape                      | `expectedOutput` shape                              | Evaluator approach                                                                                                                                   |
+| --------------- | ---------------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Reference-free  | `{ question, retrievedContext[] }` | Omit `expectedOutput` or set it to `null`           | LLM-as-a-judge checks whether the answer is grounded in the retrieved documentation, answers the question, and avoids unsupported facts.             |
+| Reference-based | `{ question }`                     | `{ requiredFacts[], requiredSources[], mustNot[] }` | A code or LLM evaluator compares the answer against the required facts and sources. This takes more preparation, but failures are easier to inspect. |
 
 Choose the cheapest evaluator that captures the requirement: [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) for deterministic checks, [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) for language-quality judgments, and [manual evaluation](/academy/evaluate#how-evaluation-typically-evolves) while you are still learning what good and bad outputs look like.
 

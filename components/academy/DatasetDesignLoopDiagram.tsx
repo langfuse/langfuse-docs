@@ -54,7 +54,7 @@ const STEPS: DatasetDesignLoopStep[] = [
   },
   {
     num: "06",
-    title: "Draft dataset",
+    title: "Build dataset",
     meta: "rows / gaps",
     x: 428,
     y: 184,
@@ -133,7 +133,7 @@ export function DatasetDesignLoopDiagram() {
   return (
     <figure
       className="dataset-design-loop not-prose"
-      aria-label="Dataset design loop from goal definition through source inspection, input distribution, evaluation design, schema design, dataset drafting, experiment runs, and iteration"
+      aria-label="Dataset design loop from goal definition through source inspection, input distribution, evaluation design, schema design, dataset building, experiment runs, and iteration"
     >
       <div
         ref={wrapRef}
