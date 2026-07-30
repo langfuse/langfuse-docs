@@ -72,7 +72,7 @@ function EventCard({ event }: { event: LumaEvent }) {
             sizes="(max-width: 640px) 100vw, 384px"
           />
         ) : (
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,var(--surface-surface-2),transparent_60%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,var(--surface-2),transparent_60%)]" />
         )}
       </div>
 
@@ -184,8 +184,8 @@ export function EventsCalendar({
                 className={cn(
                   "rounded-[1px] border px-2 py-1 text-[12px] font-[450] transition-colors",
                   format === item.id
-                    ? "border-line-structure bg-[#403d391a] text-text-primary"
-                    : "border-transparent text-text-secondary hover:bg-[#403d3909] hover:text-text-primary",
+                    ? "border-line-structure bg-surface-1 text-text-primary"
+                    : "border-transparent text-text-secondary hover:bg-surface-1 hover:text-text-primary",
                 )}
               >
                 {item.label}
