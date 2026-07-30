@@ -54,7 +54,7 @@ const STEPS: DatasetDesignLoopStep[] = [
   },
   {
     num: "06",
-    title: "Draft v0",
+    title: "Draft dataset",
     meta: "rows / gaps",
     x: 428,
     y: 184,
@@ -133,7 +133,7 @@ export function DatasetDesignLoopDiagram() {
   return (
     <figure
       className="dataset-design-loop not-prose"
-      aria-label="Dataset design loop from goal definition through source inspection, input distribution, evaluation design, schema design, first draft, experiment runs, and iteration"
+      aria-label="Dataset design loop from goal definition through source inspection, input distribution, evaluation design, schema design, dataset drafting, experiment runs, and iteration"
     >
       <div
         ref={wrapRef}
@@ -210,11 +210,11 @@ export function DatasetDesignLoopDiagram() {
             />
             <path
               className="dataset-design-loop__return-band"
-              d="M704 276 C704 324 620 334 548 334 C508 334 508 292 508 276 V124"
+              d="M704 276 C704 324 620 334 548 334 C508 334 508 306 508 276"
             />
             <path
               className="dataset-design-loop__return-line"
-              d="M704 276 C704 324 620 334 548 334 C508 334 508 292 508 276 V124"
+              d="M704 276 C704 324 620 334 548 334 C508 334 508 306 508 276"
               markerEnd="url(#dataset-design-loop-arrow-cta)"
             />
           </svg>

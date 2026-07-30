@@ -54,14 +54,8 @@ Start with three source types:
 - **Existing assets:** old datasets, FAQs, policies, docs, support macros, CSVs, JSON files, and benchmarks can bootstrap known coverage quickly.
 - **Synthetic cases:** expert-written and AI-generated examples can fill gaps and give you an idea of what your application is expected to face.
 
-For each source, ask what it can teach you:
-
-- What input shape does it expose?
-- Which scenarios and failure modes show up?
-- Which metadata fields are reliable enough to carry into the dataset?
-- Does it contain PII or sensitive data that needs handling before upload?
-
-This step should change your assumptions. You might learn that production traces lack the retrieval context your evaluator needs, that tickets expose better failure labels than traces, or that there is already a good set of end-to-end examples, because support created a 'FAQ' at some point.
+For each source, review input topics, input and output shapes, and failure modes.
+You might learn that production traces lack the retrieval context your evaluator needs, that tickets from legacy systems expose better failure labels than traces, or that there is already a good set of end-to-end examples, because support created a 'FAQ' at some point.
 
 Use this input to choose the distribution, evaluator, and item schema in the next steps.
 
@@ -154,7 +148,7 @@ You do not need to copy every production field, but preserve the fields that can
 
 Keep the schema stable enough that evaluators and reviewers know what to consume. Arbitrary per-row fields make experiment results hard to interpret. Decide the schema before collecting rows in bulk; otherwise, you will spend time collecting examples that cannot run through the experiment path.
 
-## 6. Draft a minimally complete first version
+## 6. Draft a first version
 
 Once the goal, distribution, evaluation method, and schema are concrete, start turning selected source examples into rows. Use the sources you inspected earlier, but only add rows that fit the contract.
 
@@ -169,25 +163,21 @@ Do not wait until the dataset feels complete. Run the first coherent version in 
 
 ## 7. Run the first experiment and expand deliberately
 
-Use the first run to check:
+Use the first run to check whether the input shape works with the real application path, if the evaluator outcomes make sense, and if the expected output shape works for the intended purpose.
 
-- whether the input shape works with the real application path
-- whether the evaluator has enough information
-- whether failures point to the system, the dataset, missing context, or the evaluator
-- whether expected outputs or rubrics are too strict, too loose, or unclear
-
-After the first run, expand through named changes:
+After the first run, expand and iterate until you arrive at scope and shape that helps you feel confident about shipping changes.
 
 - Add rows when a failure reveals a missing scenario, difficulty level, or source.
 - Edit rows when the expected output, rubric, input shape, or metadata is ambiguous.
 - Archive rows when they no longer match current prompts, tools, policies, or product behavior.
-- Split the dataset when one purpose starts to hide another, such as mixing happy paths, adversarial inputs, and known failures without clear metadata.
 
-There are three useful expansion patterns:
+## How datasets evolve over time
 
-- **Minimal complete dataset first:** start with a small anticipated set, run it, then fill named gaps. This is the default when a system is new or the evaluation contract is still forming.
+Datasets have to evolve with your application. By [monitoring production](/academy/monitoring) and frequently reviewing data through structured [error analysis](/academy/monitoring/error-analysis), your datasets can evolve over time to represent the production scope of your system. There are three useful expansion patterns:
+
+- **Production-mirroring**: add interesting cases from production no matter if good or bad, to expand the coverage of your dataset over time
 - **Bad-trace expansion:** add a reviewed dataset item whenever you find a serious production failure. This works well once the system is live and you can continuously mine traces.
-- **Purpose-specific datasets:** keep separate datasets for stable regression, adversarial inputs, single-step datasets versus end-to-end sets.
+- **Purpose-specific datasets:** build separate datasets for stable regression, adversarial inputs, single-step datasets versus end-to-end sets.
 
 <ManualGuideCallout
   href="/guides/cookbook/example_pydantic_ai_mcp_agent_evaluation"
@@ -195,25 +185,18 @@ There are three useful expansion patterns:
   lede="See a practical example of how datasets and evaluation can look for a docs chatbot."
 />
 
-## Closing checklist
+## Where to start
 
-Before you treat the dataset as ready, check that it has:
-
-- **Goal:** a clear purpose and system boundary
-- **Source understanding:** a reviewed sample of available traces, assets, and synthetic gaps
-- **Real-path inputs:** inputs that can run through the intended application path
-- **Coverage:** enough representative, risky, and high-value cases for the dataset's job
-- **Evaluable outputs:** expected outputs, criteria, or rubrics that can actually be scored
-- **Sliceable metadata:** stable fields that make results easy to filter and interpret
-
-If one of these is weak, return to the relevant step before expanding the dataset.
+- **Start with one release question.** Pick a product area and the smallest end-to-end dataset that can answer whether a specific change can ship.
+- **Use 15-30 rows.** Cover the most common scenarios, a few high-risk cases, and one or two known failures.
+- **Keep every row runnable and evaluable.** Each input should pass through the application path and be scorable by the evaluator or review rubric.
+- **Expand after the first run.** Add bad traces for production failures you want to prevent from coming back, create purpose-specific datasets when one dataset starts mixing different jobs, and add synthetic rows only for named gaps.
 
 <Details>
-<Summary>Golden rules</Summary>
+<Summary>A set of Golden rules to check your dataset against</Summary>
 
-- Inspect sources early to understand the data, then collect rows once the dataset contract is clear.
+- Do not mix eval styles, have every item in the same shape with the same eval target.
 - Keep every input runnable through the intended application path.
-- Make every row evaluable: expected outputs should support the planned evaluator, and reference-free rows need a clear evaluator or review rubric.
 - Deduplicate rows unless each variation tests a distinct behavior.
 - Keep metadata values consistent enough to filter and interpret results.
 - Label the dataset role and source so results are easy to slice.
@@ -221,6 +204,5 @@ If one of these is weak, return to the relevant step before expanding the datase
 - Add synthetic rows only for named gaps.
 - Handle PII and sensitive data before it enters the dataset.
 - Archive or update stale rows when prompts, tools, policies, or product behavior change.
-- Audit existing datasets before adding rows, then add or fix only the named gaps.
 
 </Details>
