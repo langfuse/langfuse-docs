@@ -66,7 +66,7 @@ Use this input to choose the distribution of inputs, evaluators, and item schema
 
 ## 3. Choose the input distribution
 
-For a first dataset, keep the distribution simple. Start with the few slices that tell you what to do after a run:
+For a first dataset, keep the input distribution simple. Start with the few slices that tell you what to do after a run:
 
 - **Scenario type:** the main jobs, intents, routes, or task families. For a support-routing dataset, this might be billing, account access, technical issue, and sales request.
 - **Difficulty or risk:** routine, ambiguous, hard, adversarial, or business-critical cases. Include more than happy paths, but do not make the first dataset all edge cases.
@@ -75,6 +75,10 @@ For a first dataset, keep the distribution simple. Start with the few slices tha
 For a support-routing dataset, the first version might use a simple scenario-by-difficulty matrix:
 
 <DatasetDistributionMatrix />
+
+<Callout type="info">
+Input distribution is the deliberate mix of cases in the dataset: which scenarios appear, how difficult they are, and why each row is included. It is the coverage plan that helps you interpret experiment results by slice.
+</Callout>
 
 The distribution does not have to mirror production frequency exactly. A regression dataset may intentionally overrepresent failures, edge cases, or high-value paths. What counts is that the mix is deliberate and visible in metadata.
 
