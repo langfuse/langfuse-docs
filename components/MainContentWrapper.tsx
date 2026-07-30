@@ -40,7 +40,6 @@ const pathsWithoutFooterWidgets = [
   "/brand",
   "/careers",
   "/press",
-  "/watch-demo",
   "/enterprise",
   "/events",
   "/changelog",
