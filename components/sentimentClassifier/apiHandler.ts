@@ -9,7 +9,7 @@ import {
   updateActiveObservation,
 } from "@langfuse/tracing";
 import { after } from "next/server";
-import { context, ROOT_CONTEXT, trace } from "@opentelemetry/api";
+import { context, trace } from "@opentelemetry/api";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
 import {
@@ -108,12 +108,9 @@ const handler = async (req: Request) => {
   );
 };
 
-const observedPost = observe(handler, {
+export const POST = observe(handler, {
   name: "sentiment-classifier",
   endOnExit: false,
 });
-
-export const POST = (req: Request) =>
-  context.with(ROOT_CONTEXT, () => observedPost(req));
 
 export const maxDuration = 30;
