@@ -140,15 +140,13 @@ For a support-routing dataset, one row could look like this:
 }
 ```
 
-The `input` is the customer message plus the small amount of context the router receives. The `expectedOutput` defines what correct behavior means for this item: choose the billing route, take the required actions, and avoid promising a refund before review. The `metadata` records where the row came from, what scenario it covers, and why it belongs in the dataset.
+The `input` keeps only the context the router needs. The `expectedOutput` states the behavior to check: route to billing, ask for the invoice ID, and do not promise a refund before review. The `metadata` records the row's source, scenario, difficulty, and role.
 
-You do not need to copy every production field, but preserve the fields that can affect behavior, such as conversation history, retrieved context, tool state, routing metadata, or user attributes. Avoid replacing structured context with a natural-language summary.
-
-Keep the schema stable enough that evaluators and reviewers know what to consume. Arbitrary per-row fields make experiment results hard to interpret. Decide the schema before collecting rows in bulk; otherwise, you will spend time collecting examples that cannot run through the experiment path.
+Keep the schema stable before collecting rows in bulk. Preserve behavior-shaping fields such as conversation history, retrieved context, tool state, routing metadata, or user attributes, but avoid arbitrary per-row fields or natural-language summaries of structured context.
 
 ## 6. Draft a first version
 
-Once the goal, distribution, evaluation method, and schema are concrete, start turning selected source examples into rows. Use the sources you inspected earlier, but only add rows that fit the contract.
+Once the goal, distribution, evaluation method, and schema are concrete, start turning selected source examples into rows. Use the sources you inspected earlier, and add them in a format that matches the defined schema.
 
 For a minimally complete first version, choose enough rows to test the whole contract along your input distribution:
 
