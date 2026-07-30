@@ -26,36 +26,43 @@ const STEPS: DatasetDesignLoopStep[] = [
   },
   {
     num: "02",
-    title: "Gather sources",
-    meta: "traces / experts",
+    title: "Inspect sources",
+    meta: "sample / patterns",
     x: 232,
     y: 32,
   },
   {
     num: "03",
-    title: "Define input distribution",
-    meta: "coverage / roles",
-    x: 36,
-    y: 184,
+    title: "Choose distribution",
+    meta: "slices / roles",
+    x: 428,
+    y: 32,
   },
   {
     num: "04",
     title: "Choose eval style",
     meta: "reference / free",
-    x: 232,
+    x: 36,
     y: 184,
   },
   {
     num: "05",
     title: "Design schema",
     meta: "input / output",
-    x: 428,
+    x: 232,
     y: 184,
   },
   {
     num: "06",
+    title: "Draft v0",
+    meta: "rows / gaps",
+    x: 428,
+    y: 184,
+  },
+  {
+    num: "07",
     title: "Run experiment",
-    meta: "failures / fit",
+    meta: "failures / iterate",
     x: 624,
     y: 184,
     variant: "terminal",
@@ -81,7 +88,9 @@ function StepCard({ step }: { step: DatasetDesignLoopStep }) {
       <span className="dataset-design-loop__num">{step.num}</span>
       <span
         className={`dataset-design-loop__title ${
-          step.num === "03" ? "dataset-design-loop__title--compact" : ""
+          step.num === "03" || step.num === "04"
+            ? "dataset-design-loop__title--compact"
+            : ""
         }`}
       >
         {step.title}
@@ -124,7 +133,7 @@ export function DatasetDesignLoopDiagram() {
   return (
     <figure
       className="dataset-design-loop not-prose"
-      aria-label="Dataset design loop from goal definition through sources, input distribution, evaluation design, schema design, experiment runs, and iteration"
+      aria-label="Dataset design loop from goal definition through source inspection, input distribution, evaluation design, schema design, first draft, experiment runs, and iteration"
     >
       <div
         ref={wrapRef}
@@ -176,7 +185,12 @@ export function DatasetDesignLoopDiagram() {
             />
             <path
               className="dataset-design-loop__arrow"
-              d="M312 124 V148 H116 V184"
+              d="M392 78 H428"
+              markerEnd="url(#dataset-design-loop-arrow)"
+            />
+            <path
+              className="dataset-design-loop__arrow"
+              d="M508 124 V148 H116 V184"
               markerEnd="url(#dataset-design-loop-arrow)"
             />
             <path
@@ -196,11 +210,11 @@ export function DatasetDesignLoopDiagram() {
             />
             <path
               className="dataset-design-loop__return-band"
-              d="M704 276 C704 324 560 334 410 334 H158 C130 334 116 314 116 284"
+              d="M704 276 C704 324 620 334 548 334 C508 334 508 292 508 276 V124"
             />
             <path
               className="dataset-design-loop__return-line"
-              d="M704 276 C704 324 560 334 410 334 H158 C130 334 116 314 116 284"
+              d="M704 276 C704 324 620 334 548 334 C508 334 508 292 508 276 V124"
               markerEnd="url(#dataset-design-loop-arrow-cta)"
             />
           </svg>
