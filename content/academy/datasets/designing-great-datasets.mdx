@@ -21,7 +21,7 @@ The outcome you want is a dataset with:
 - expected outputs or criteria that can actually be evaluated
 - metadata that makes results sliceable and interpretable
 
-Dataset design is often iterative. The input and output shapes get fleshed out by trying things, running experiments, and building a clearer view of what you want to evaluate.
+Dataset design is often iterative. The input and output shapes get fleshed out by trying things, running experiments, and building a clearer view of what you want to evaluate. A good starting point is a set of ~20 inputs and outputs that represent what you anticipate for your system. This can then be gradually expanded based on new production data and failure modes.
 
 <DatasetDesignLoopDiagram />
 
@@ -53,19 +53,17 @@ For example:
 
 ## 2. Gather sources
 
-A strong dataset usually combines multiple sources. The order is important.
+A strong dataset usually combines data from multiple sources.
 
 | Source                                                                            | Best for                                                                 | Watch out for                                    |
 | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------ |
-| Production traces                                                                 | Realistic usage, common paths, and observed failures                     | Production outputs are not automatically correct |
-| Traces/cases with attached scores, user feedback, tickets, and complaints         | High-value regressions and user-visible problems                         | These can overrepresent painful edge cases       |
+| Production traces, specifically those with attached scores that indicate failure  | Realistic usage, common paths, and observed failures                     | Production outputs are not automatically correct |
 | Existing datasets, CSVs, JSON files, FAQs, policies, system exports or benchmarks | Bootstrapping known coverage quickly, e.g. from a previously used system | The shape may not match the current application  |
-| Expert-written cases                                                              | Requirements, policy boundaries, and critical business behavior          | Domain assumptions need review                   |
-| Synthetic examples                                                                | Filling named gaps such as rare, adversarial, or boundary cases          | Synthetic volume can hide weak real coverage     |
+| Synthetic examples, both expert and AI written                                    | Filling named gaps such as rare, adversarial, or boundary cases          | Synthetic volume can hide weak real coverage     |
 
 Use production traces when you have them, but treat them as seeds, not ground truth. A trace tells you what happened. It does not prove what should have happened.
 
-If you do not have production traces yet, continue with expert input, codebase behavior, existing assets, and synthetic gap fills. Just be explicit that the first dataset version reflects expected behavior rather than observed production distribution.
+If you do not have production traces yet, continue with expert input, existing assets, and synthetic gap fills. Just be explicit that the first dataset version reflects expected behavior rather than observed production distribution.
 
 ## 3. Define the input distribution
 
@@ -75,9 +73,6 @@ Before turning sources into dataset rows, decide which kinds of inputs the datas
 | ---------------------- | --------------------------------------------------------------------------------------------------- |
 | Query or task type     | The main categories of inputs the system should handle                                              |
 | Level of specification | How vague, partial, or precise user requests usually are                                            |
-| Context availability   | Whether the system gets enough context, too much context, conflicting context, or no context        |
-| Domain or topic        | The product areas, customer jobs, policy areas, or knowledge domains covered                        |
-| Channel and language   | Where the input comes from and which languages or formats matter                                    |
 | Difficulty             | Routine cases, ambiguous cases, hard cases, adversarial cases, and critical edge cases              |
 | Dataset role           | Whether the row represents typical usage, a regression, a known failure mode, or an exploratory gap |
 
@@ -175,31 +170,14 @@ Before you treat the dataset as ready, check that it has:
 If one of these is weak, return to the relevant step before expanding the dataset.
 
 <Details>
-<Summary>Typical gotchas</Summary>
-
-Before uploading or expanding a dataset, review the rows as a set.
-
-Check whether:
-
-- each input can be passed into the intended application path
-- each expected output supports the planned evaluator
-- reference-free rows have a clear evaluator or review rubric
-- metadata values are consistent enough to filter
-- important sources, categories, languages, channels, or failure modes are missing
-- one source dominates because it was easiest to collect
-- rows duplicate each other without adding useful variation
-- PII or sensitive data is handled correctly
-- stale rows no longer match current prompts, tools, policies, or product behavior
-
-For an existing dataset, make the audit explicit before adding rows. Add or fix only the named gaps.
-
-After running first experiments review:
-
-- each input can be passed into the intended application path
-- whether the evaluator has enough information to score the output
-- whether failures point to a system problem, a dataset ambiguity, or missing context
-- whether expected outputs or rubrics are too strict, too loose, or unclear
-- which metadata slices make the results easier to interpret
-- which rows should be added, edited, archived, or split into another dataset
-
+<Summary>Golden rules</Summary>
+- Deduplicate rows unless each variation tests a distinct behavior.
+- Handle PII and sensitive data before it enters the dataset.
+- Keep every input runnable through the intended application path.
+- Make every row evaluable: expected outputs should support the planned evaluator, and reference-free rows need a clear evaluator or review rubric.
+- Keep metadata values consistent enough to filter and interpret results.
+- Deduplicate rows unless each variation tests a distinct behavior.
+- Handle PII and sensitive data before it enters the dataset.
+- Archive or update stale rows when prompts, tools, policies, or product behavior change.
+- Audit existing datasets before adding rows, then add or fix only the named gaps.
 </Details>
