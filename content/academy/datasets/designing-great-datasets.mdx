@@ -7,7 +7,7 @@ description: A practical guide to designing Langfuse datasets with clear scope, 
 import { Details, Summary } from "@/components/Details";
 import { DatasetDesignLoopDiagram } from "@/components/academy/DatasetDesignLoopDiagram";
 
-# Designing great datasets
+# Designing datasets for AI applications
 
 A good dataset allows you to evaluate your system and make changes more confidently. It represents what your system should handle, how you expect it to behave, and how you will decide whether a change improved or broke something.
 
@@ -36,8 +36,8 @@ If two jobs need different inputs, evaluators, or release decisions, split them.
 <Callout type="info">
 A good early starting point for a dataset is looking at the most common examples end to end. This gives you the foundation and the general understanding from which you can expand.
 
-Over time, teams add datasets for single steps, adversarial cases, red teaming, or specific sub-use cases in their application.
-We have even seen datasets for checking company name spelling.
+Over time, teams add datasets for single steps, adversarial cases, red teaming, or specific sub-use cases in their application. We have even seen datasets for checking company name spelling.
+
 </Callout>
 
 ## 2. Inspect available sources
@@ -48,7 +48,7 @@ Start with three source types:
 
 - **Production traces:** show realistic usage, common paths, and observed failures. Scores, user feedback, tickets, and complaints are discovery signals for useful traces; they are not a separate source type.
 - **Existing assets:** old datasets, FAQs, policies, docs, support macros, CSVs, JSON files, and benchmarks can bootstrap known coverage quickly.
-- **Synthetic cases:** expert-written and AI-generated examples can fill in and give you an idea of what your experts expect the application to face.
+- **Synthetic cases:** expert-written and AI-generated examples can fill gaps and give you an idea of what your experts expect the application to face.
 
 For each source, ask what it can teach you:
 
@@ -60,6 +60,10 @@ For each source, ask what it can teach you:
 This step should change your assumptions. You might learn that production traces lack the retrieval context your evaluator needs, that tickets expose better failure labels than traces, or that there is already a good set of end-to-end examples, because support created a 'FAQ' at some point.
 
 Use this input to choose the distribution, evaluator, and item schema in the next steps.
+
+<Callout type="info">
+If no other data is available, synthetic data can be a useful starting point. See the [synthetic datasets cookbook](/guides/cookbook/example_synthetic_datasets) for examples.
+</Callout>
 
 ## 3. Choose the input distribution
 
