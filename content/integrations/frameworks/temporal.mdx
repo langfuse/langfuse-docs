@@ -62,7 +62,9 @@ os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")  # 🇪
 # Your OpenAI key (any OpenAI-compatible endpoint also works via OPENAI_BASE_URL)
 os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...")
 
-# Temporal server address (use Temporal Cloud or a local dev server)
+# Temporal server address (defaults to a local dev server). For Temporal
+# Cloud, set TEMPORAL_ADDRESS to your Cloud gRPC endpoint, TEMPORAL_NAMESPACE
+# to your Cloud namespace, and TEMPORAL_API_KEY to an API key.
 os.environ.setdefault("TEMPORAL_ADDRESS", "localhost:7233")
 os.environ.setdefault("TEMPORAL_NAMESPACE", "default")
 TASK_QUEUE = "langfuse-tracing-task-queue"
@@ -381,9 +383,15 @@ from ticket_triage_workflow import TicketTriageWorkflow
 
 
 async def main() -> None:
+    # TEMPORAL_API_KEY authenticates to Temporal Cloud (TLS is enabled
+    # automatically when an API key is used); leave it unset for a local
+    # dev server.
+    api_key = os.environ.get("TEMPORAL_API_KEY") or None
     client = await Client.connect(
         os.environ["TEMPORAL_ADDRESS"],
         namespace=os.environ["TEMPORAL_NAMESPACE"],
+        api_key=api_key,
+        tls=api_key is not None,
         # Emits spans for Temporal operations and propagates trace context
         # across the client, workflow, and activity boundaries.
         plugins=[OpenTelemetryPlugin(add_temporal_spans=True)],
@@ -448,7 +456,9 @@ async def main() -> None:
 await main()
 ```
 
-    Started workflow: ticket-triage-0d20c92b
+    Started workflow: ticket-triage-de40754e
+
+
     Approval decision: approved
 
 
@@ -460,13 +470,13 @@ await main()
 
     Hi there,
 
-    Thank you for reaching out, and I'm sorry for the inconvenience! I can see you're on our Enterprise plan, and I want to get this sorted out quickly for you.
+    Thank you for bringing this to our attention! I'm sorry for the inconvenience — being charged twice is definitely not okay, and we want to get this sorted out for you right away.
 
-    I've flagged your account as high priority and confirmed the duplicate charge on your July invoice. We'll process a full refund for the extra payment right away — please allow **3–5 business days** for it to appear on your statement.
+    I've flagged your account (Acme Corp) as high priority and our billing team is already looking into the duplicate July charge. We'll process a full refund for the extra payment within **3-5 business days**.
 
-    If you have any questions in the meantime, don't hesitate to reply here and we'll be happy to help.
+    You'll receive a confirmation email once the refund is issued. If you have any questions in the meantime, don't hesitate to reach out!
 
-    Best regards,
+    Warm regards,
     Support Team
 
 ## 8. View the Trace in Langfuse
