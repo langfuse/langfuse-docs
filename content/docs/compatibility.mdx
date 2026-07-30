@@ -19,7 +19,7 @@ Reference for how Langfuse's server, SDK, and API versions relate across Langfus
 
 <VersionTimeline />
 
-[Langfuse v4](/docs/v4) is generally available: Langfuse Cloud, where v4 has been rolling out in preview since March 2026, will switch to v4 as the only experience, at which point remaining legacy APIs and ingestion paths are also removed. Self-hosted release is on the way, exact dates will follow.
+[Langfuse v4](/docs/v4) is generally available on Langfuse Cloud and self-hosted. On Cloud, where v4 has been rolling out in preview since March 2026, Langfuse will switch to v4 as the only experience, at which point remaining legacy APIs and ingestion paths are also removed (cutover date will follow). Self-hosted deployments can [upgrade to v4](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4) now.
 
 **The compatibility rule:** each Langfuse server major version aims to support the current and the previous SDK major version of each language. New SDK versions require a recent server version, as some features may not be available on older servers; see the [feature availability matrix](#sdk-server).
 
@@ -204,7 +204,7 @@ Tracing, prompt management, datasets, and scores work fully (server ≥ 3.63.0).
 
 ### My data takes minutes to show up in the UI, why? [#faq-delay]
 
-On the v4 data model, data from Python SDK < 4.0.0, JS SDK < 5.0.0, or OTel exporters without the `x-langfuse-ingestion-version: 4` header can be delayed by up to 10 minutes. Upgrade to Python SDK ≥ 4.7.0 / JS SDK ≥ 5.4.0 (or set the header) for real-time data.
+On the v4 data model, data from Python SDK < 4.7.0, JS SDK < 5.4.0, or OTel exporters without the `x-langfuse-ingestion-version: 4` header can be delayed by up to 10 minutes. Upgrade to Python SDK ≥ 4.7.0 / JS SDK ≥ 5.4.0 (or set the header) for real-time data.
 
 ### When do old SDKs stop working on Langfuse Cloud? [#faq-cloud-cutover]
 
