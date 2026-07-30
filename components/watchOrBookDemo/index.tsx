@@ -39,7 +39,7 @@ function SwitchToggle({
         href="/watch-demo"
         className="text-sm font-medium hover:text-primary transition-colors"
       >
-        Watch videos
+        See Demo
       </Link>
     </div>
   );
@@ -237,8 +237,8 @@ export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
         </Heading>
         <Text className="m-0">
           {isDiscoverOpen
-            ? "Watch short videos to see how Langfuse helps you build better LLM applications"
-            : "Learn more about Langfuse — talk to us or watch videos"}
+            ? "Explore the interactive example project and our docs to see how Langfuse helps you build better LLM applications"
+            : "Learn more about Langfuse — talk to us or explore the demo yourself"}
         </Text>
       </div>
 
