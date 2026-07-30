@@ -9,7 +9,7 @@ import { DatasetDesignLoopDiagram } from "@/components/academy/DatasetDesignLoop
 
 # Designing datasets for AI applications
 
-A good dataset allows you and your agent to [evaluate](/academy/evaluate) your system and make changes more confidently. It represents what your system should handle, how you expect it to behave, and how you will decide whether a change improved or broke something.
+A dataset is a repeatable set of examples that represent the scope of your application, and that you use to measure and improve your system. By running your application against the same inputs over time, you can track quality with metrics, compare changes, and catch regressions before they affect production users.
 
 The [Datasets](/academy/datasets) academy section explains the basic building blocks: input, expected output, and metadata. This guide focuses on the design work that happens before and while you create datasets and dataset items.
 
@@ -31,20 +31,19 @@ For example:
 - Does the docs chatbot answer common integration questions well enough?
 - Does the agent call the right tool when a customer asks for a refund?
 
-That goal defines the dataset boundary and job: end-to-end datasets use the payload the application receives, while step-level datasets use the structured state a step sees in production. Exploration datasets can change while you learn; regression, CI, and benchmark datasets should stay stable and get stricter review.
-
-If two jobs need different inputs, evaluators, or release decisions, split them. A stable regression dataset and an adversarial-input dataset can both be useful, but combining them without a clear split makes aggregate scores harder to interpret.
-
-<Callout type="info">
 A good early starting point for a dataset is looking at the most common examples end to end. This gives you the foundation and the general understanding from which you can expand.
 
 Over time, teams add datasets for single steps, adversarial cases, red teaming, or specific sub-use cases in their application. We have even seen datasets for checking company name spelling.
 
+The goal you set for your dataset defines boundary and job: end-to-end datasets use the payload the application receives, while step-level datasets use the structured state a step sees in production.
+
+<Callout type="info">
+If two jobs need different inputs, evaluators, or release decisions, split them. A stable regression dataset and an adversarial-input dataset can both be useful, but combining them without a clear split makes aggregate scores harder to interpret.
 </Callout>
 
 ## 2. Inspect available sources
 
-Before choosing dimensions or writing rows, inspect a small sample of the material you could use. The goal is to understand what exists and how it's different from what you expected.
+Before selecting examples or writing dataset items, inspect a small sample of the material you could use. The goal is to understand what exists and how it's different from what you expected.
 
 Start with three source types:
 
@@ -85,7 +84,7 @@ Add more dimensions only when they change behavior or help interpret results. Ch
 
 ## 4. Decide how evaluation will work
 
-Choose the evaluation style before you write expected outputs. This determines what the dataset item needs to contain and how useful the first experiment will be.
+Choose the evaluation style before you write expected outputs. This determines what the dataset item needs to contain and how useful the first results will be.
 
 Use [reference-based evaluation](/academy/evaluate#reference-based-vs-reference-free) when each item has a known target: a correct label, expected tool call, required fact, structured output, reference answer, or expected next action. This is the best fit for regression tests and CI gates because failures are easier to inspect. The trade-off is that references take work to write and can become brittle if they over-specify wording instead of behavior.
 
@@ -115,6 +114,10 @@ Define:
 - `input`: the object you will pass into the system boundary
 - `expectedOutput`: only the reference data the evaluator or reviewer needs; omit it for deliberate reference-free evaluation
 - `metadata`: stable slice and provenance fields such as source, scenario type, difficulty, dataset role, and review status
+
+<Callout type="info">
+Once you have decided on an item schema, enforce it so your team can effectively collaborate on adding items [in the right structure](/docs/evaluation/experiments/datasets#schema-enforcement).
+</Callout>
 
 For a support-routing dataset, one row could look like this:
 
@@ -146,7 +149,7 @@ Keep the schema stable before collecting rows in bulk. Preserve behavior-shaping
 
 ## 6. Draft a first version
 
-Once the goal, distribution, evaluation method, and schema are concrete, start turning selected source examples into rows. Use the sources you inspected earlier, and add them in a format that matches the defined schema.
+Once the goal, distribution, evaluation method, and schema are concrete, start turning selected source examples into dataset items. Use the sources you inspected earlier, and add them in a format that matches the defined schema.
 
 For a minimally complete first version, choose enough rows to test the whole contract along your input distribution:
 
@@ -171,8 +174,8 @@ After the first run, expand and iterate until you arrive at scope and shape that
 
 Datasets have to evolve with your application. By [monitoring production](/academy/monitoring) and frequently reviewing data through structured [error analysis](/academy/monitoring/error-analysis), your datasets can evolve over time to represent the production scope of your system. There are three useful expansion patterns:
 
-- **Production-mirroring**: add interesting cases from production no matter if good or bad, to expand the coverage of your dataset over time
-- **Bad-trace expansion:** add a reviewed dataset item whenever you find a serious production failure. This works well once the system is live and you can continuously mine traces.
+- **Production-mirroring**: add interesting cases from production no matter if good or bad, to expand the coverage of your dataset over time.
+- **Bad-trace expansion:** add a reviewed dataset item whenever you find a serious production failure. This works well once the system is live and you can continuously mine traces. For scoring, use automated evaluators such as [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) or [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators), or send examples to [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) for manual review.
 - **Purpose-specific datasets:** build separate datasets for stable regression, adversarial inputs, single-step evaluations.
 
 <ManualGuideCallout
@@ -181,7 +184,7 @@ Datasets have to evolve with your application. By [monitoring production](/acade
   lede="See a practical example of how datasets and evaluation can look for a docs chatbot."
 />
 
-## Where to start
+## Put it into practice
 
 - **Start with one release question.** Pick a product area and the smallest end-to-end dataset that can answer whether a specific change can ship.
 - **Use 15-30 rows.** Cover the most common scenarios, a few high-risk cases, and one or two known failures.
@@ -191,6 +194,7 @@ Datasets have to evolve with your application. By [monitoring production](/acade
 <Details>
 <Summary>A set of Golden rules to check your dataset against</Summary>
 
+- Anything that is additional information, notes, comments belongs into metdata. Not into expected outputs.
 - Do not mix eval styles, have every item in the same shape with the same eval target.
 - Keep every input runnable through the intended application path.
 - Deduplicate rows unless each variation tests a distinct behavior.
