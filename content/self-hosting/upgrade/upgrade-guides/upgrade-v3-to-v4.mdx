@@ -176,7 +176,7 @@ If you plan to use the [automated backfill](#historic-data) for historic data in
 ## Step 2: Upgrade the server to Langfuse v4 [#step-2]
 
 Perform a regular [server upgrade](/self-hosting/upgrade) to the latest Langfuse v4 release.
-All ClickHouse schema migrations (the new `events` tables) are applied automatically on startup. Deployments that ran the v4 preview (v3-tagged images with the preview environment variables) are handled as well: existing tables are detected and skipped.
+All ClickHouse schema migrations (the new `events` tables) are applied automatically on startup. Deployments that ran the Langfuse v4 preview (v3-tagged images with the preview environment variables) are handled as well: existing tables are detected and skipped.
 
 The only decision to make is the **write mode** you start with. It controls which tables ingestion writes to, and thereby how much of the v3 behavior you retain. The `legacy` and `dual` modes are migration utilities, not permanent operating modes: they will be removed in an upcoming major version, so plan to complete the [cutover](#cutover) to `events_only` as part of your migration.
 
@@ -402,8 +402,8 @@ Track progress on the background migrations page in the UI; see [background migr
 
 {/* Seeded from https://github.com/orgs/langfuse/discussions/12518 and https://github.com/orgs/langfuse/discussions/14157 */}
 
-**Do I need to do anything special if I ran the v4 preview on a v3-tagged image?**
-No. If you adopted the `events` tables early by running the v4 preview (a v3-tagged image with the preview environment variables), the v4 migrations detect the existing tables and skip their creation. Your deployment upgrades like any other; keep the environment variables you set for the preview until you complete the [cutover](#cutover).
+**Do I need to do anything special if I ran the Langfuse v4 preview on a v3-tagged image?**
+No. If you adopted the `events` tables early by running the Langfuse v4 preview (a v3-tagged image with the preview environment variables), the v4 migrations detect the existing tables and skip their creation. Your deployment upgrades like any other; keep the environment variables you set for the preview until you complete the [cutover](#cutover).
 
 **Is it safe to upgrade the SDKs before the server?**
 Yes. Python SDK v4 and JS/TS SDK v5 are fully compatible with Langfuse v3 servers. Two caveats: `client.api.observations.*` and `client.api.metrics.*` point to the new v2 endpoints which are not available on v3 servers (use `client.api.legacy.*` in the meantime), and trace input/output must be set explicitly if you depart from the default root-span behavior.
