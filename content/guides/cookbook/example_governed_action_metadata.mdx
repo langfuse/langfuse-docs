@@ -103,8 +103,11 @@ with langfuse.start_as_current_observation(
         }
     )
 
-    if governance["governance_verdict"] != "allow":
-        tool_span.update(output={"status": "blocked"})
+    if (
+        governance["governance_verdict"] != "allow"
+        or governance["approval_status"] != "approved"
+    ):
+        tool_span.update(output={"status": "blocked_or_waiting_for_approval"})
     else:
         result = close_support_ticket("SUP-1842")
         tool_span.update(
@@ -173,8 +176,11 @@ await startActiveObservation("agent-tool-close-ticket", async (span) => {
     },
   });
 
-  if (governance.governance_verdict !== "allow") {
-    span.update({ output: { status: "blocked" } });
+  if (
+    governance.governance_verdict !== "allow" ||
+    governance.approval_status !== "approved"
+  ) {
+    span.update({ output: { status: "blocked_or_waiting_for_approval" } });
     return;
   }
 
