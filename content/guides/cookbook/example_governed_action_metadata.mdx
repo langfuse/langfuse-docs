@@ -1,0 +1,227 @@
+---
+title: "Example: Attaching Governed Action Metadata"
+description: Add governance, approval, replay, and verifier evidence to Langfuse traces and spans around agent tool execution.
+category: Observability
+sidebarTitle: Governed Action Metadata
+---
+
+# Example: Attaching Governed Action Metadata
+
+Agent systems often call tools that have side effects, such as updating a CRM,
+opening a pull request, sending a message, or changing infrastructure. When a
+separate policy engine, approval workflow, or verifier evaluates those actions,
+you can attach the resulting evidence to Langfuse metadata so the trace remains
+auditable alongside the model and tool observations.
+
+This pattern is vendor-neutral: capture stable references to the governed action,
+the governance decision, approval state, replay or proof material, and the
+external verifier that can reproduce or validate the decision. Keep metadata
+values short and avoid storing secrets or large proof payloads directly in
+Langfuse. Store large artifacts externally and link to them with a proof URL.
+
+## Recommended Metadata Shape
+
+Use one compact object for the action evidence so it is easy to filter, inspect,
+and forward to downstream review workflows.
+
+```json
+{
+  "governed_action": {
+    "action_ref": "ticket-close:SUP-1842",
+    "action_hash": "sha256:8b4c2d9f0f6a...",
+    "governance_verdict": "allow",
+    "approval_status": "approved",
+    "replay_url": "https://governance.example.com/replays/act_01J...",
+    "proof_url": "https://governance.example.com/proofs/act_01J...",
+    "external_verifier_ref": "verifier:policy-v7:run-01J..."
+  }
+}
+```
+
+- `action_ref`: Stable application-level identifier for the action being taken.
+- `action_hash`: Digest over the action payload, policy inputs, or canonicalized
+  request.
+- `governance_verdict`: Decision from a policy engine or verifier, for example
+  `allow`, `deny`, or `review_required`.
+- `approval_status`: Human or automated approval state, for example `approved`,
+  `pending`, or `rejected`.
+- `replay_url` or `proof_url`: Link to the replay, receipt, attestation, or proof
+  artifact stored outside Langfuse.
+- `external_verifier_ref`: Identifier for the external verifier, policy version,
+  or verification run.
+
+## Add Evidence Before and After Tool Execution
+
+Attach the governance decision before the tool executes, then update the same
+span with the execution result and final approval or verification state. This
+makes it clear which tool call was approved and what actually happened.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab title="Python SDK">
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+
+def request_governance(action_payload: dict) -> dict:
+    """Call your policy engine, approval workflow, or verifier."""
+    return {
+        "action_ref": "ticket-close:SUP-1842",
+        "action_hash": "sha256:8b4c2d9f0f6a...",
+        "governance_verdict": "allow",
+        "approval_status": "approved",
+        "replay_url": "https://governance.example.com/replays/act_01J...",
+        "proof_url": "https://governance.example.com/proofs/act_01J...",
+        "external_verifier_ref": "verifier:policy-v7:run-01J...",
+    }
+
+
+def close_support_ticket(ticket_id: str) -> dict:
+    """Run the side-effecting tool call."""
+    return {"ticket_id": ticket_id, "status": "closed"}
+
+
+with langfuse.start_as_current_observation(
+    as_type="span",
+    name="agent-tool-close-ticket",
+    input={"ticket_id": "SUP-1842"},
+) as tool_span:
+    action_payload = {
+        "tool": "close_support_ticket",
+        "ticket_id": "SUP-1842",
+        "requested_status": "closed",
+    }
+
+    governance = request_governance(action_payload)
+
+    tool_span.update(
+        metadata={
+            "governed_action": governance,
+            "governed_action_phase": "before_tool_execution",
+        }
+    )
+
+    if governance["governance_verdict"] != "allow":
+        tool_span.update(output={"status": "blocked"})
+    else:
+        result = close_support_ticket("SUP-1842")
+        tool_span.update(
+            output=result,
+            metadata={
+                "governed_action": {
+                    **governance,
+                    "execution_status": "succeeded",
+                },
+                "governed_action_phase": "after_tool_execution",
+            },
+        )
+```
+
+</Tab>
+<Tab title="JS/TS SDK">
+
+```ts
+import { startActiveObservation } from "@langfuse/tracing";
+
+type GovernedActionEvidence = {
+  action_ref: string;
+  action_hash: string;
+  governance_verdict: "allow" | "deny" | "review_required";
+  approval_status: "approved" | "pending" | "rejected";
+  replay_url?: string;
+  proof_url?: string;
+  external_verifier_ref: string;
+};
+
+async function requestGovernance(
+  actionPayload: Record<string, unknown>
+): Promise<GovernedActionEvidence> {
+  // Call your policy engine, approval workflow, or verifier.
+  return {
+    action_ref: "ticket-close:SUP-1842",
+    action_hash: "sha256:8b4c2d9f0f6a...",
+    governance_verdict: "allow",
+    approval_status: "approved",
+    replay_url: "https://governance.example.com/replays/act_01J...",
+    proof_url: "https://governance.example.com/proofs/act_01J...",
+    external_verifier_ref: "verifier:policy-v7:run-01J...",
+  };
+}
+
+async function closeSupportTicket(ticketId: string) {
+  // Run the side-effecting tool call.
+  return { ticketId, status: "closed" };
+}
+
+await startActiveObservation("agent-tool-close-ticket", async (span) => {
+  span.update({ input: { ticketId: "SUP-1842" } });
+
+  const actionPayload = {
+    tool: "closeSupportTicket",
+    ticketId: "SUP-1842",
+    requestedStatus: "closed",
+  };
+
+  const governance = await requestGovernance(actionPayload);
+
+  span.update({
+    metadata: {
+      governed_action: governance,
+      governed_action_phase: "before_tool_execution",
+    },
+  });
+
+  if (governance.governance_verdict !== "allow") {
+    span.update({ output: { status: "blocked" } });
+    return;
+  }
+
+  const result = await closeSupportTicket("SUP-1842");
+
+  span.update({
+    output: result,
+    metadata: {
+      governed_action: {
+        ...governance,
+        execution_status: "succeeded",
+      },
+      governed_action_phase: "after_tool_execution",
+    },
+  });
+});
+```
+
+</Tab>
+</LangTabs>
+
+## Trace-Level Correlation
+
+If several spans in a trace share the same governance context, add a short
+trace-level correlation key and keep the larger evidence on the specific tool
+span. This avoids duplicating proof links on every observation while still
+allowing trace-level filtering.
+
+```python
+from langfuse import get_client, propagate_attributes
+
+langfuse = get_client()
+
+with langfuse.start_as_current_observation(
+    as_type="span",
+    name="agent-run",
+) as root_span:
+    with propagate_attributes(
+        metadata={
+            "governance_session_ref": "gov-session-01J...",
+            "governance_policy_version": "policy-v7",
+        }
+    ):
+        # Run the agent. Add detailed governed_action metadata only to
+        # side-effecting tool spans as shown above.
+        pass
+```
+
+See the [metadata documentation](/docs/observability/features/metadata) for
+details on propagated and non-propagated metadata.
