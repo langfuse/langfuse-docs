@@ -198,7 +198,7 @@ export const ImageGenerator = ({
                   mediaType={currentImage.mediaType}
                   uint8Array={new Uint8Array()}
                   alt={currentImage.prompt}
-                  className="max-w-md rounded-[2px] border border-line-structure"
+                  className="max-w-xs rounded-[2px] border border-line-structure"
                 />
               </div>
 
