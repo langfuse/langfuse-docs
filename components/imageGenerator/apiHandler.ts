@@ -116,6 +116,7 @@ const handler = async (req: Request) => {
           traceUrl = buildDemoTraceRedirectUrl({
             traceId,
             observationId: rootObservationId,
+            fallbackKind: "image-generation",
           });
         } catch (error) {
           console.warn("Failed to publish demo trace link", error);
