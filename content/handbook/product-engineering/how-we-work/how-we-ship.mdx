@@ -70,6 +70,32 @@ You can pull in anyone on the team at any time; 15 minutes of shared discussion 
 - **No uncertainty**: the engineer understands the challenges of the issue/feature and how to implement it. Go ahead and build.
 - **Uncertainty or questions**: tag your lead on the Linear ticket with a clear, specific question to get an answer or buy-in for the change.
 
+## Rollout safety
+
+Urgent work disrupts plans and risks rushed results, so reserve it for cases such as security vulnerabilities, pressing customer issues, and deal-blocking requests. Aim not to create unnecessary urgency, and use mechanisms such as feature flags to make changes safely.
+
+The following is a mental checklist:
+
+**"I am confident this change works and we are aligned on the change as a team"**
+
+Ship it! 🚀
+
+**"I'm confident this works but people on the team might have different opinions on how it should work"**
+
+Ask for review on the PR or share the preview deployment on Slack. Once we are aligned, ship it! 🏌️
+
+**"I think this will work but I wouldn’t have capacity to fix something it might break"**
+
+Put it behind a feature flag, default users to on. Should something break, we simply turn it off and fix it without pressure. ⛳️
+
+**"Not sure this works for everybody" /"Maybe existing users would be frustrated by this change" / "There might be bugs"**
+
+Put it behind a feature flag, ask users to enable it themselves and give feedback. Once confident (give it a few days), default all users to on or immediately remove the flag.
+
+**"This feature has rough edges and might substantially change based on early feedback” / "This feature is cloud only and we don't want to communicate it as stable in OSS"**
+
+Put it behind a feature flag, ask users to enable it themselves and give feedback. Consider keeping it under a "Beta" label even after removing the feature flag (see Monitors, Langfuse Assistant as examples). There should be a clear path of how this feature moves out of the Beta status. ⛳️
+
 ## Releases
 
 - **Complex changes/projects**: agree on a release plan: which PRs to merge and release, and in what order.
