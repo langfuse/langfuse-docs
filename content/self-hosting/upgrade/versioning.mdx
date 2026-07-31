@@ -89,6 +89,8 @@ import DetailLegacyExportSource from "@/components-mdx/compat/detail-legacy-expo
 | Observations API v2 & Metrics API v2<br />`/api/public/v2/...`                                          | <CompatBadge variant="none">Unsupported</CompatBadge> | <CompatBadge variant="none">Unsupported</CompatBadge>           | <CompatBadge variant="full">Full</CompatBadge>                  | GA          |
 | Scores API v3<br />`/api/public/v3/scores`                                                              | <CompatBadge variant="none">Unsupported</CompatBadge> | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="full">Full</CompatBadge>                  | GA          |
 | Deprecated read APIs<br />`traces, observations, sessions, scores, metrics, dataset runs`               | <CompatBadge variant="full">Full</CompatBadge>        | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="none">Unsupported</CompatBadge>           | Deprecated  |
+| **Experiments & dataset runs** · [Experiments docs](/docs/evaluation/experiments/experiments-via-sdk) |                                                       |                                                                 |                                                                 |             |
+| Legacy dataset run item API<br />`POST /api/public/dataset-run-items`                                  | <CompatBadge variant="full">Full</CompatBadge>        | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      | Self-hosted v3 only |
 | **Metrics & alerts** · [Monitors docs](/docs/metrics/features/monitors)                                 |                                                       |                                                                 |                                                                 |             |
 | [Monitors and alerts](/docs/metrics/features/monitors)                                                  | <CompatBadge variant="none">Unsupported</CompatBadge> | <CompatBadge variant="none">Unsupported</CompatBadge>           | <CompatBadge variant="full">Full</CompatBadge>                  | GA          |
 | **Integrations & exports** · [Export docs](/docs/api-and-data-platform/features/export-to-blob-storage) |                                                       |                                                                 |                                                                 |             |
@@ -191,6 +193,14 @@ Deprecated.
 <CompatDetail name="Deprecated read APIs">
 
 <DetailV1ReadApis />
+
+</CompatDetail>
+
+<CompatDetail name="Legacy dataset run item API">
+
+Deprecated. Use `POST /api/public/dataset-run-items` only with self-hosted Langfuse v3 deployments. Do not use it with Langfuse v4 or `events_only`; use the [Experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk) or [OTEL experiment ingestion](/integrations/native/opentelemetry#experiments-ingesting-experiment-spans) instead.
+
+On `events_only`, the endpoint may return a stale object rather than `404` for SDK backwards compatibility. This is not a supported v4 ingestion path.
 
 </CompatDetail>
 

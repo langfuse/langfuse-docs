@@ -94,6 +94,8 @@ Langfuse v4 serves reads from the new APIs that were introduced alongside the da
 The following legacy endpoints are unavailable on deployments that run the default write mode (`events_only`), that is, all new deployments and migrated deployments after the [cutover](#cutover).
 **While you run the `legacy` or `dual` write mode during your migration, these endpoints keep working as before.**
 
+`POST /api/public/dataset-run-items` is the exception to the response behavior above: on `events_only`, it may return a stale object rather than `404` for SDK backwards compatibility. It remains deprecated and must not be used with Langfuse v4 or `events_only`.
+
 Ingestion, replaced by [OpenTelemetry-based ingestion](/integrations/native/opentelemetry):
 
 | Endpoint                       | Behavior on v4                                                                                         |
@@ -133,11 +135,11 @@ Metrics, replaced by the [Metrics API v2](/docs/metrics/features/metrics-api#v2)
 | `GET /api/public/metrics`       | Returns `404`  |
 | `GET /api/public/metrics/daily` | Returns `404`  |
 
-Dataset runs, replaced by the [experiments API](https://api.reference.langfuse.com/#tag/experiments) (`GET /api/public/experiments`, `GET /api/public/experiment-items`) for reads and the [Experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk) for writes.
+Dataset runs, replaced by the [experiments API](https://api.reference.langfuse.com/#tag/experiments) (`GET /api/public/experiments`, `GET /api/public/experiment-items`) for reads and the [Experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk) for writes. The legacy `POST /api/public/dataset-run-items` endpoint is only supported for self-hosted deployments still running v3. Do not use it with v4 or `events_only`.
 
 | Endpoint                                          | Behavior on v4 |
 | ------------------------------------------------- | -------------- |
-| `POST /api/public/dataset-run-items`              | Returns `404`  |
+| `POST /api/public/dataset-run-items`              | Returns a stale compatibility object; do not use on v4 or `events_only` |
 | `GET /api/public/dataset-run-items`               | Returns `404`  |
 | `GET /api/public/datasets/:name/runs`             | Returns `404`  |
 | `GET /api/public/datasets/:name/runs/:runName`    | Returns `404`  |
