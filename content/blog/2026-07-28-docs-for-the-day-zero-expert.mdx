@@ -1,0 +1,118 @@
+---
+title: "Please don't package all your docs into skills"
+date: 2026/07/28
+description: ""
+tag: engineering
+author: Lotte
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Please don't package all your docs into skills"
+  description=""
+  date="July 28, 2026"
+  authors={["lotteverheyden"]}
+/>
+
+This should be about how the dynamics are rapidly changing, these new interfaces/frameworks are emerging in response to that, everyone wants to support them all, and often they're just doing things (like packaging docs into skills).
+
+## UX, DX, and now AX?
+
+For a long time, devtools had 2 main audiences, which means 2 experiences to optimize for:
+
+- UX: more focused on the user of the UI, often optimized for intuitiveness, wow-factor, etc.
+- DX: for the engineers responsible for the integration of the tool into the company's systems. These users are often in a very different working mode. Optimized for clarity, complete, well-structured information, and flexibility
+
+Over the past year, a clear new player emerged, and quickly took over to the point where engineers are pretty comfortable being out of the loop for (large parts of) the implementation. Agents are a very different kind of "person", with different traits, so different things to optimize for.
+
+### How agents are different from engineers [#agents-vs-engineers-traits]
+
+TODO: describe agents and their specific traits
+
+- often start with 0 experience with the tool (new session)
+- sometimes seem to lack "common sense" or choose to do something convoluted where humans wouldn't, because it would take humans an unreasonable amount of time (which is not the case for agents)
+- can be overconfident and sometimes "guess" endpoints/parameters based on what they've see before
+- having implemented more advanced features is not necessarily correlated to having better full product understanding (while it was for human engineers)
+  - we sometimes forget that by the time a human can do the complex implementations, they are usually quite advanced and have spent many hours with the tool, so they have developed a feeling for what the good approach is
+
+
+
+> **Nuance:** Agents don't start from zero everywhere. They have training priors: deep "experience" with React or Postgres, stale or absent experience with newer and fast-moving tools. So the zero-experience problem bites hardest exactly where Langfuse lives (post-cutoff SDK versions). And it's worse than a gap: priors are confidently wrong, an agent will happily write v2-style code against v4. That means AX docs have two jobs: fill missing experience _and override wrong experience_.
+
+> **Nuance:** Memory weakens "every session starts at zero" (CLAUDE.md, per-repo memory), but only per-user. The vendor can't rely on any of it, so docs and skills remain the vendor's only lever for shipping experience.
+
+
+
+## This shifts the dynamics for devtool _Developer Experience_
+
+"Developer" is now not just the engineer, but the engineer + an agent. The agent creates a new layer between the tool and the engineer that abstracts away the code logic and enables the engineer to just communicate in natural language.
+
+This means that, where before, the engineer was responsible and accountable for the implementation, now there's a split:
+
+- the agent becomes responsible for the implementation, but
+- the engineer stays accountable
+
+<Frame fullWidth>
+  ![Then: the developer did the implementation and was accountable for it. Now: the AI agent does the implementation, and the developer stays accountable.](/images/blog/2026-07-28-docs-for-the-day-zero-expert/then-now-implementation-accountability.png)
+</Frame>
+
+This creates an interesting dynamic, where technical docs that describe the "how" in detail become input for the agent, but everything describing the "why", and conceptual workings of the product stay for the human.
+
+Together with this, the speed of implementation increased dramatically, and the focus of the engineer could shift from things like syntax to more high level system design.
+
+TODO: make this above stronger
+
+## The interfaces of devtools
+
+Devtools have many interfaces and resources these days:
+| Interface | For | Value |
+| ------------------ | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| UI | humans navigating the product by hand | manual interaction, natural discovery of information/features |
+| API | agents and scripts | programmatically interacting with the tool |
+| SDK | agents and scripts | programmatically interacting with the tool |
+| CLI | agents | agents interacting with the tool |
+| MCP | agents | agents interacting with the tool |
+| Reference docs | agents | understanding exactly all options of API/CLI/.. |
+| Feature docs | humans and agents | understanding why a feature exists, seeing an example of how to use it, discovery of tool capabilities |
+| Guide/academy docs | humans (mainly) | Understanding the high level concepts, the "why" behind implementation decisions, being able to explain why things are best practices |
+| skill | agents | steering the agent on top of the interfaces above |
+
+### Diataxis was written for humans
+
+The Diataxis framework for documentation was written with only the human engineer in mind. It assumes the reader brings judgment, and needs information. 
+
+TODO: finish this (describe why which quadrant is for humans/agents + role of skill)
+
+<Frame fullWidth>
+  ![Diátaxis framework: Tutorials are for humans; How-to guides and Explanation serve humans and agents; Reference serves agents; skills sit outside the grid to provide judgment for agents.](/images/blog/2026-07-28-docs-for-the-day-zero-expert/diataxis-humans-agents-skills.png)
+</Frame>
+
+> "Reference is for agents now": Humans still spot-check reference during review; they just stop _reading_ it linearly.
+
+
+### Consequences for agent-facing interfaces
+
+Because [agents behave differently than human engineers](#agents-vs-engineers-traits), ideal agent-facing interfaces look slightly different from ideal human-facing ones: 
+- naming should minimize risk of incorrect hallucinations (give example of agents using deprecated API endpoints because they have "trace" in the name instead of "observation")
+- skill should steer the agent to use a good approach or add good judgement, that humans don't need
+- ..
+
+> **Nuance:** Is a skill a doc type, or something else? There's a sharper framing available than "fifth quadrant": Diátaxis assumes the reader brings judgment and needs information. Skills are the inverse: the reader (agent) brings capability and needs judgment. Docs describe the tool; skills prescribe behavior.
+
+## Principles we live by
+
+- always test your agent + observe
+- make it as easy as possible for agents to acquire information about your product (markdown export, skill, llms.txt, ...)
+- use progressive disclosure to your advantage
+  - → keep main skill file concise, put a lot in reference files
+  - ↳ we need to be inclusive of models: people might be using a smaller model and it should still work, so we can't overload their context window
+- if it makes sense to have it in docs, always lean towards putting it in docs
+  - → not all coding agents will have the skill installed
+  - → you have no control over when people update the skill, but you do have control over up to date docs
+
+> **Nuance:** The docs-over-skills principle is quietly contrarian right now (everyone is shipping skills), and your reasons are good ones: reach and freshness. Contrarian plus defensible is a good place for a blog post to stand.
+
+## Do you still need docs for humans?
+
+- → YES: see accountability => reason we invest into academy and workshop now 
