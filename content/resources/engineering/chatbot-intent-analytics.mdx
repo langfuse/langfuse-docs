@@ -1,0 +1,268 @@
+---
+title: "Chatbot analytics: analyzing what users ask your AI chatbot"
+description: "Four working patterns for chatbot analytics on LLM traces: offline intent classification, LLM-as-a-judge detection, score dashboards, and agent-driven analysis."
+tags: [guide, evaluation]
+---
+
+# Chatbot analytics: analyzing what users ask your AI chatbot
+
+Once an AI chatbot is in production, the questions shift from "does it work" to "what are
+users actually asking, and how well do we handle it". Answering that requires conversation
+content, not click events, which is why chatbot intent analytics is built on LLM traces.
+
+**TL;DR:** Classify every conversation into intents and write the labels back to Langfuse as
+categorical scores, either from an offline batch job or with a built-in LLM-as-a-judge
+evaluator running on live traffic. Numeric, categorical, and boolean scores chart natively in
+custom dashboards and score analytics; free-form text scores do not, so store anything you
+want to chart as one of the three chartable types. For open-ended questions like "what new
+topics appeared this week", point a reasoning model at your traces via the Langfuse MCP
+server or API.
+
+## Why chatbot analytics needs trace data
+
+Product analytics tools tell you how many sessions happened and where users dropped off. They
+do not tell you what users asked, what the model answered, or whether the answer was any
+good, because the conversation content never reaches them. Intent analytics needs three
+things that live in an LLM observability platform:
+
+1. **The full conversation content.** Each trace in Langfuse carries the user input, the
+   model output, and every intermediate step (retrieval, tool calls). This is the raw
+   material any intent classification runs on.
+2. **Conversation grouping.** Multi-turn chats are grouped into
+   [sessions](/docs/observability/features/sessions), so you can analyze a whole conversation
+   rather than isolated messages.
+3. **A place to put the labels.** Langfuse scores attach classification results (intent,
+   out-of-scope flags, quality ratings) to the exact trace or session they describe. That is
+   what makes the results filterable and chartable later, next to cost, latency, and user
+   feedback for the same conversations.
+
+The four patterns below build on each other, but each works standalone.
+
+## Pattern 1: offline intent classification over traces
+
+The most common setup is a scheduled batch job: fetch yesterday's chatbot traces via the API,
+classify each user message with a small LLM, and write the label back as a **categorical
+score**. Scores are the right write-back object here because they can be added long after the
+trace was created and they aggregate natively in dashboards.
+
+The script below is complete and runnable; adjust the trace name and input extraction to your
+application's trace structure.
+
+```python
+import os
+from datetime import datetime, timedelta, timezone
+
+from langfuse import get_client
+from openai import OpenAI
+
+# Authenticates via LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, LANGFUSE_BASE_URL
+langfuse = get_client()
+openai_client = OpenAI()  # uses OPENAI_API_KEY
+
+INTENTS = [
+    "order_status",
+    "returns_and_refunds",
+    "product_question",
+    "account_issue",
+    "pricing_and_plans",
+    "other",
+]
+
+
+def classify_intent(user_message: str) -> str:
+    response = openai_client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "Classify the user message into exactly one of these intents: "
+                    + ", ".join(INTENTS)
+                    + ". Respond with the intent label only."
+                ),
+            },
+            {"role": "user", "content": user_message},
+        ],
+    )
+    label = response.choices[0].message.content.strip()
+    return label if label in INTENTS else "other"
+
+
+# Classify all chatbot traces from the last 24 hours
+to_ts = datetime.now(timezone.utc)
+from_ts = to_ts - timedelta(days=1)
+
+page = 1
+while True:
+    traces = langfuse.api.trace.list(
+        name="chat-turn",  # the trace name your chatbot uses
+        from_timestamp=from_ts,
+        to_timestamp=to_ts,
+        page=page,
+        limit=50,
+    )
+    if not traces.data:
+        break
+    for trace in traces.data:
+        # Adjust extraction to your trace input structure
+        message = (
+            trace.input.get("message")
+            if isinstance(trace.input, dict)
+            else str(trace.input or "")
+        )
+        if not message:
+            continue
+        langfuse.create_score(
+            trace_id=trace.id,
+            name="intent",
+            value=classify_intent(message),
+            data_type="CATEGORICAL",
+            score_id=f"intent-{trace.id}",  # idempotency key, same-day reruns overwrite
+        )
+    page += 1
+
+langfuse.flush()
+```
+
+Three details worth getting right:
+
+- **Use a stable `score_id`.** A deterministic id like `intent-{trace_id}` makes a rerun (for
+  example with an improved classifier) overwrite the existing score instead of duplicating it.
+  Overwriting requires the id, the name, and the score's date to match, so a rerun on a later
+  day adds a second score rather than replacing the first.
+- **Score sessions for conversation-level intents.** If one conversation spans many traces,
+  pass `session_id` instead of `trace_id` to `create_score` and classify the whole
+  conversation once.
+- **Start with a fixed label set.** A predefined taxonomy keeps charts stable week over week.
+  When you do not know the intents yet, run an embedding-and-clustering pass first; the
+  [intent classification cookbook](/guides/cookbook/example_intent_classification_pipeline)
+  shows both a supervised classifier and unsupervised clustering with LLM-generated cluster
+  labels over Langfuse traces.
+
+## Pattern 2: LLM-as-a-judge for intent and out-of-scope detection
+
+If you would rather not run your own pipeline, Langfuse's built-in
+[LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) do the same
+classification on live production traffic, managed inside Langfuse. You write a judge prompt
+with `{{input}}` and `{{output}}` variables, pick a score type, and Langfuse runs it on new
+traffic automatically.
+
+Two evaluator setups cover the common chatbot asks:
+
+- **Intent classification** is a custom evaluator with a **categorical** score type: define
+  the allowed categories (the same taxonomy as in pattern 1) and Langfuse enforces that the
+  judge output maps to one of them. Enable "Allow multiple matches" if a message can carry
+  two intents.
+- **Unexpected-request detection** is a custom evaluator with a **boolean** score type, with
+  a rubric like "return true if the user request falls outside the assistant's documented
+  scope". The judge's reasoning is stored alongside the score, so a spike in out-of-scope
+  flags comes with explanations you can read.
+
+Operationally: evaluators support a sampling percentage (classifying 10 percent of traffic is
+usually enough for distribution monitoring and cuts judge cost by 10x), and running them on
+observations rather than whole traces is the recommended, faster path. Filter to the final
+response observation of your chatbot so you classify one message per turn, not every internal
+step.
+
+## Pattern 3: dashboards on intent and quality scores
+
+Score write-back pays off in the charts. In [custom
+dashboards](/docs/metrics/features/custom-dashboards), a widget on the categorical scores
+data source grouped by score value plots intent volume per category over time, and a boolean
+`out_of_scope` score becomes a rate line. Widgets on other data sources support score
+filters, so a cost or latency widget can be narrowed to the conversations matching a score.
+The Scores section also has a zero-config analytics tab with distribution and trend charts
+per score, plus agreement metrics when you want to compare two scores (for example your
+offline classifier against an LLM judge on the same traces).
+
+Be deliberate about score types, because they decide what can be charted. As of July 2026:
+
+| Score type    | Example value           | Charts in dashboards and score analytics |
+| ------------- | ----------------------- | ---------------------------------------- |
+| `NUMERIC`     | `0.87`                  | Yes                                      |
+| `CATEGORICAL` | `"returns_and_refunds"` | Yes                                      |
+| `BOOLEAN`     | `1` (true)              | Yes                                      |
+| `TEXT`        | free-form string        | No                                       |
+
+Text scores (free-form strings up to 500 characters) are for qualitative notes; they cannot
+be meaningfully aggregated, so they are not supported in score analytics, experiments, or
+LLM-as-a-judge. The practical consequence: if your classifier returns a structured JSON
+result, do not store the blob as one text score. Split it into separate scores, for example a
+categorical `intent`, a boolean `out_of_scope`, and a numeric `classification_confidence`,
+and each one becomes chartable on its own.
+
+## Pattern 4: ad-hoc analysis with a reasoning model
+
+Classification pipelines answer questions you defined in advance. For the open-ended ones
+("what new complaint themes appeared after the pricing change", "summarize what users
+struggled with this week"), give a capable model direct access to your trace data and ask in
+natural language. Langfuse ships a native [MCP
+server](/docs/api-and-data-platform/features/mcp-server) at
+`https://cloud.langfuse.com/api/public/mcp` (and `/api/public/mcp` on self-hosted
+deployments) that AI assistants and agents connect to with a project-scoped API key; for
+coding agents that can run CLI tools, the Langfuse agent skill is the recommended setup.
+
+```bash
+# Register the Langfuse MCP server in Claude Code (EU region)
+claude mcp add --transport http langfuse https://cloud.langfuse.com/api/public/mcp \
+    --header "Authorization: Basic {base64 of pk-lf-...:sk-lf-...}"
+```
+
+Prompts that work well against chatbot traces: "fetch the last 50 conversations flagged
+out_of_scope and group them into themes", or "compare what users asked before and after
+Monday's deploy". A reasoning model reads a sample of conversations and reports patterns in
+minutes, which is the exploratory step that precedes adding a new label to your taxonomy.
+
+The honest constraint: an agent reads what fits in its context window, so this pattern
+samples rather than counts. Use it for discovery and hypothesis generation, then promote
+recurring findings into a pattern 1 or pattern 2 classifier for exact, chartable numbers.
+
+## From intent data to a better chatbot
+
+Intent analytics is only worth the setup if it changes the product. The three follow-ups we
+see teams actually ship:
+
+1. **Answer the top intents before the chatbot has to.** The intent distribution is a ranked
+   list of what users want; the largest clusters are candidates for FAQ pages, documentation,
+   or a dedicated flow that does the job better than free-form chat.
+2. **Fix prompts where a specific intent underperforms.** Filter traces to one intent with
+   negative user feedback or a failing judge score, read the conversations, and adjust the
+   system prompt or retrieval for that case. Segmented scores turn "the bot feels worse" into
+   "returns_and_refunds satisfaction dropped this week".
+3. **Turn bad conversations into test cases.** Add failing traces to a
+   [dataset](/docs/evaluation/experiments/datasets) and run experiments against it before
+   shipping prompt changes, so the conversations that failed once become the regression suite
+   that keeps them from failing again.
+
+## FAQ
+
+### How do I analyze what users ask my AI chatbot? [#analyze-user-questions]
+
+Trace every conversation in an LLM observability platform, then classify each user message
+into intents and store the labels as categorical scores on the traces. Run the
+classification either as an offline batch job over the trace API or as an LLM-as-a-judge
+evaluator on live traffic. The intent distribution, its trend over time, and quality metrics
+per intent then come from dashboard widgets over the score data.
+
+### Should I store intent labels as tags or scores? [#tags-vs-scores]
+
+Use scores when you classify conversations after the fact, which is the usual case for
+intent analytics: scores can be attached to existing traces at any time, carry a data type,
+and aggregate in dashboards and score analytics. Tags are set during tracing and suit
+attributes you already know at request time, such as the app feature that triggered the
+conversation.
+
+### Do I need to classify every conversation? [#classification-sampling]
+
+No. For monitoring the intent distribution and out-of-scope rate, a 10 to 25 percent sample
+is typically representative and proportionally cheaper; LLM-as-a-judge evaluators have a
+built-in sampling percentage for exactly this. Classify everything only when you need
+per-conversation follow-up, such as routing every out-of-scope request to a review queue.
+
+### What is the difference between chatbot analytics and product analytics? [#chatbot-vs-product-analytics]
+
+Product analytics measures user behavior around the chatbot: sessions, retention, funnels,
+drop-off. Chatbot analytics on traces measures the conversations themselves: what users
+asked, what the model did, what it cost, and whether the answer was good, often combined with
+[user feedback](/docs/observability/features/user-feedback) captured in the chat UI. Most
+teams run both and connect them through shared user and session identifiers.

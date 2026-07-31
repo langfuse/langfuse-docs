@@ -1,0 +1,239 @@
+---
+title: "Golden dataset evaluation: build and maintain LLM test sets"
+description: "Golden dataset evaluation for LLM apps: build test sets from production traces, keep them fresh, and compare prompt versions over time with experiments."
+tags: [guide, evaluation]
+---
+
+# Golden dataset evaluation: build and maintain LLM test sets
+
+A golden dataset is the fixed set of test cases you run your LLM application against before every meaningful change. Building one is not hard; keeping it representative for six months while your prompts, models, and users all change is the part most teams get wrong. This guide covers what a good golden dataset looks like, how to build one from the data you already have, how to maintain it as production evolves, and how to use it to compare prompt versions over time. The concepts are tool-agnostic; the implementation uses Langfuse, where datasets, experiments, and traces live in one place.
+
+**TL;DR:** A golden dataset is a curated collection of inputs with reviewed reference outputs (or explicit pass criteria) that represents what your application must handle. Good ones are scoped to one component or behavior, sized for their job (tens of items for a fast PR gate, hundreds to a thousand for a full regression set), cover your known failure modes, and grow from production failures instead of staying frozen. Build it from real traces first, CSV imports and synthetic generation second. Maintain it with schema validation, deduplication, and item versioning. Compare prompt versions by running one experiment per version against the same pinned dataset version and reading score deltas against a designated baseline.
+
+## What a golden dataset is
+
+A golden dataset (also called a gold set or reference set) is a collection of test cases where each item records an input your application should handle and, usually, a reviewed definition of what a correct response looks like. "Golden" means the items are curated and trusted: someone with domain knowledge confirmed the expected output, or deliberately decided the item does not need one because a reference-free check (format, safety, tone) is the pass criterion.
+
+That trust is the entire value. When an experiment against the golden dataset shows a score drop, you want the conclusion to be "the change regressed quality," not "item 23 has a wrong label." An unreviewed pile of examples produces scores nobody acts on; a golden dataset produces scores that block or promote releases.
+
+Teams need one because informal spot-checking does not survive iteration. The first prompt tweak you eyeball; by the tenth, you cannot remember which earlier behavior you traded away. A fixed, trusted test set turns "does the new prompt feel better" into a measured comparison, and it is the prerequisite for everything downstream: regression testing in CI, model migration decisions, and honest before/after numbers for stakeholders.
+
+## What a good golden dataset looks like
+
+A good golden dataset mirrors what your system encounters in production and is scoped tightly enough that a failure points at a cause. Three properties matter most.
+
+**Scope: one dataset per component or behavior.** A dataset can target the end-to-end flow or a single step like retrieval, routing, or summarization, but it should not mix them. You will end up with several datasets, each answering one question. Langfuse supports folder-style names (`support-agent/golden`, `support-agent/adversarial`) to keep them organized.
+
+**Size: matched to the job, not maximized.** More items mean more coverage but slower, costlier runs. The [Langfuse Academy datasets module](/academy/datasets) suggests these working sizes:
+
+| Purpose                             | Typical size                                               |
+| ----------------------------------- | ---------------------------------------------------------- |
+| Exploring a single issue            | ~10 items                                                  |
+| Testing model capability boundaries | ~10 complex unsolved examples                              |
+| CI checks on larger changes         | 100 to 1000 items, covering the production distribution    |
+| Guardrail penetration testing       | Large and growing, add cases as they surface in production |
+
+For a gate that runs on every pull request, keep a subset of tens to low hundreds of items so the check stays fast, and reserve the full set for release branches or nightly runs.
+
+**Coverage of failure modes, not just happy paths.** Every failure mode you have observed in production deserves at least a few items: the ambiguous question, the multi-part request, the input in the wrong language, the prompt-injection attempt. A dataset of easy cases scores 95 percent forever and tells you nothing. A useful heuristic: if a class of input has ever caused an incident or a support ticket, it belongs in the dataset.
+
+Freshness is the property that decays silently. A golden dataset assembled in January describes January's traffic; by July, users ask different questions and your product has new features. Treat the dataset as an append-mostly log that tracks production (the maintenance section below covers how), and date your items in metadata so you can see at a glance how stale the set is.
+
+## Building a golden dataset in Langfuse
+
+Everything in this section is a UI action or an SDK call against data you already have. There is no separate evaluation service to deploy or keep in sync: datasets live in the same Langfuse project as your traces, the SDK calls run inside your existing codebase, and if you self-host Langfuse, nothing leaves your infrastructure. The [datasets documentation](/docs/evaluation/experiments/datasets) is the full feature reference; this section covers the workflow.
+
+### Start from production traces
+
+Real traffic beats invented examples, so start there. In the Langfuse UI, every trace and observation has an "+ Add to dataset" action, which is the right tool while you review failures one by one. For bulk collection, filter the observations table (by score, user feedback, tags, or any other column), select the rows, and use **Actions** → **Add to dataset**. A field-mapping step controls how observation data becomes a dataset item: use whole fields as-is, extract values with JSON path expressions, or build custom objects from multiple fields. Batch additions run in the background with partial success, so a few malformed rows do not block the rest.
+
+Programmatically, the same operation is one SDK call, and linking the source trace preserves the full execution context for anyone reviewing the item later:
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+langfuse.create_dataset_item(
+    dataset_name="support-agent/golden",
+    input={"question": "How do I cancel my subscription?"},
+    expected_output={"answer": "Go to Settings > Billing > Cancel plan. The plan stays active until the end of the billing period."},
+    source_trace_id="<trace_id>",
+    source_observation_id="<observation_id>",  # optional: link a specific span or generation
+)
+```
+
+The expected output typically starts as the model's actual production output, corrected by a domain expert. That review step is what makes the item golden rather than merely logged.
+
+### Import existing test cases via CSV
+
+If test cases already live in a spreadsheet, upload the CSV in the dataset UI. A header row is required; you then drag each column onto `input`, `expected output`, or `metadata`, and multiple columns dropped on the same field are combined into one structured JSON object. Unmapped columns are ignored. CSV import is for text and structured JSON items; use the item editor or SDK for items with media attachments.
+
+Dataset items can carry media attachments (images, audio, documents) in `input`, `expected_output`, and `metadata` as of June 2026, so vision and document workflows get golden datasets too. SDK-based experiments support these items with Python SDK 4.10.0+ and JS/TS `@langfuse/client` 5.6.0+; UI-based experiments do not support them yet.
+
+### Augment synthetically where real data is thin
+
+Synthetic generation fills coverage gaps that production has not exercised yet: paraphrases of known-hard inputs, edge cases for a feature that just launched, adversarial phrasings of the same intent. Generate variations with an LLM, then review them with the same rigor as real items, because unreviewed synthetic items dilute the trust that makes the dataset golden. The [synthetic datasets cookbook](/guides/cookbook/example_synthetic_datasets) has runnable pipelines for this. Keep the ratio in check: synthetic items should extend a production-grounded core, not replace it.
+
+### Enforce structure with dataset schemas
+
+Once several people and pipelines write to a dataset, malformed items creep in and break experiment runs at the worst time. Langfuse datasets accept optional JSON Schemas for `input` and `expected_output`; once set, every item is validated on creation, update, and CSV import, and invalid items are rejected with the exact validation error:
+
+```python
+langfuse.create_dataset(
+    name="support-agent/golden",
+    input_schema={
+        "type": "object",
+        "properties": {"question": {"type": "string"}},
+        "required": ["question"],
+    },
+    expected_output_schema={
+        "type": "object",
+        "properties": {"answer": {"type": "string"}},
+        "required": ["answer"],
+    },
+)
+```
+
+Define the schema on day one. Retrofitting one onto a thousand inconsistent items is a cleanup project; enforcing it from the start is free.
+
+## Maintaining a golden dataset
+
+A golden dataset is maintained the way a test suite is maintained: every escaped bug becomes a test, duplicates get merged, and obsolete cases get retired deliberately rather than silently.
+
+### Turn production failures into items as they occur
+
+The highest-value new items are the cases your application just failed. Wire the pipeline so that flagged production traces flow into the dataset while the failure is fresh: a reviewer working through an annotation queue can add the trace to a dataset directly, and a scheduled script can sweep for negative signals automatically. The script below collects yesterday's thumbs-down feedback into the golden dataset:
+
+```python
+from datetime import datetime, timedelta, timezone
+from langfuse import get_client
+
+langfuse = get_client()
+
+scores = langfuse.api.scores.get_many(
+    name="user-feedback",
+    from_timestamp=datetime.now(timezone.utc) - timedelta(days=1),
+    limit=100,
+)
+
+for score in scores.data:
+    if score.value == 0 and score.trace_id:  # thumbs-down
+        trace = langfuse.api.trace.get(score.trace_id)
+        langfuse.create_dataset_item(
+            dataset_name="support-agent/golden",
+            input=trace.input,
+            expected_output=None,  # a reviewer supplies the corrected answer
+            metadata={"source": "production-failure", "added": str(datetime.now(timezone.utc).date())},
+            source_trace_id=score.trace_id,
+        )
+```
+
+Items arriving this way are candidates, not yet golden: route them through expert review to fill in the corrected expected output before they count in experiments. A broader [LLM evaluation strategy](/resources/engineering/llm-evaluation-strategy) builds on this same loop, connecting production monitoring back to offline testing.
+
+### Deduplicate before items pile up
+
+Twenty near-identical phrasings of the same question overweight that case in every average score and slow every run. Deduplicate on intake: before adding an item, check whether the dataset already covers the same intent, either by exact-matching normalized inputs fetched via `langfuse.api.dataset_items.list` or by embedding similarity for paraphrases. When you find a cluster of near-duplicates, keep the hardest one or two variants and drop the rest. Dataset schemas help here too, since consistent structure makes duplicates easier to detect.
+
+### Version the dataset, and run experiments against pinned versions
+
+Langfuse datasets are versioned automatically: every addition, update, deletion, or archival of items creates a new version identified by timestamp, with item-level diffs. This solves the core bookkeeping problem of a living golden dataset, which is that scores from different dates are only comparable if you know which dataset state each run saw. Experiments record the dataset state they ran against, and you can fetch a dataset as of any timestamp to reproduce or extend old comparisons:
+
+```python
+from datetime import datetime, timezone
+from langfuse import get_client
+
+langfuse = get_client()
+
+# The dataset exactly as it was when the baseline experiment ran
+baseline_version = datetime(2026, 7, 1, 9, 0, 0, tzinfo=timezone.utc)
+dataset = langfuse.get_dataset("support-agent/golden", version=baseline_version)
+```
+
+Note that versioning applies to dataset items only; changing a dataset's schema does not create a new version.
+
+### Retire items deliberately
+
+Retire an item when the behavior it tests no longer exists (a removed feature, a deprecated flow) or when the expected output has become wrong (a policy change made the reference answer incorrect). Archive rather than delete: archived items drop out of future experiment runs, but stay in the version history, so historical runs remain interpretable.
+
+```python
+langfuse.create_dataset_item(
+    dataset_name="support-agent/golden",
+    id="<item_id>",
+    status="ARCHIVED",
+)
+```
+
+Do not retire an item just because your application keeps passing it. Passing items are doing their job, which is proving the behavior still holds. A reasonable cadence is a quarterly review pass over items older than six months, checking each against current product behavior.
+
+## Comparing prompt versions over time
+
+With a trusted dataset in place, comparing prompt versions becomes mechanical: run one [experiment](/docs/evaluation/experiments/experiments-via-sdk) per prompt version against the same dataset version, score each run with the same evaluators, and read the deltas.
+
+### Run one experiment per prompt version
+
+Fetch each prompt version from prompt management and run it through the SDK's experiment runner, which handles concurrency, tracing, and score attachment. Recording the prompt version in the run name and metadata makes runs identifiable in the UI months later:
+
+```python
+from langfuse import get_client, Evaluation
+from langfuse.openai import OpenAI
+
+langfuse = get_client()
+dataset = langfuse.get_dataset("support-agent/golden")
+
+def correctness(*, output, expected_output, **kwargs):
+    match = expected_output and expected_output["answer"].lower() in output.lower()
+    return Evaluation(name="correctness", value=1.0 if match else 0.0)
+
+for version in [7, 8]:
+    prompt = langfuse.get_prompt("support-agent", version=version)
+
+    def task(*, item, prompt=prompt, **kwargs):
+        compiled = prompt.compile(question=item.input["question"])
+        response = OpenAI().chat.completions.create(
+            model="gpt-4.1",
+            messages=[{"role": "user", "content": compiled}],
+        )
+        return response.choices[0].message.content
+
+    result = dataset.run_experiment(
+        name=f"support-agent prompt v{version}",
+        description=f"Prompt version {version} on the golden dataset",
+        task=task,
+        evaluators=[correctness],
+        metadata={"prompt_version": version},
+    )
+    print(result.format())
+```
+
+Because experiments run against the latest dataset version by default, pin a version (previous section) when a comparison spans days or weeks of dataset growth; otherwise the two runs are tested on different sets of items. If the change under test is prompt-only, you can skip the code entirely: [experiments via UI](/docs/evaluation/experiments/experiments-via-ui) run a selected prompt version against a dataset with a configured model and optional evaluators, directly from the dataset page.
+
+### Read the deltas against a baseline
+
+In the experiments table, select two runs and click **Compare**, then designate one (typically the current production version) as the baseline. The compare view matches rows by dataset item, so each row shows baseline and candidate output for the same input, with green and red deltas for scores, cost, and latency. The Charts tab summarizes the aggregate picture, which answers the first question: did quality move, and at what cost.
+
+The item-level table answers the second, more important question: what exactly got worse. Filter the columns to build a regression worklist, for example all items where the candidate's correctness dropped or cost rose more than 10 percent, then open each row's trace to see why. Two reading disciplines keep the deltas honest: verify that the evaluator's verdict matches actual output quality on a few spot-checked rows before trusting an aggregate, and treat a small aggregate delta composed of large offsetting item-level swings as a behavior change worth reading, not a wash.
+
+Over longer horizons, the experiments table on a dataset is the timeline: every run records its prompt version metadata, its scores, and its dataset version, so "how has quality developed across prompt versions 5 through 12" is answered by scanning one table.
+
+### Automate the comparison in CI
+
+Once the manual loop works, move it into CI so every pull request that touches a prompt runs the golden dataset automatically and fails on regression. Langfuse ships a GitHub Action (`langfuse/experiment-action`) that loads a dataset, optionally pinned to a version, runs your experiment script, posts scores as a PR comment, and fails the job on a raised regression. The full setup, including thresholds and non-GitHub CI systems, is covered in our [LLM regression testing guide](/resources/engineering/llm-regression-testing).
+
+## FAQ
+
+### How large should a golden dataset be? [#dataset-size]
+
+Large enough to cover your failure modes, small enough that you actually run it. Start with 20 to 50 reviewed items covering your most important behaviors, which already catches gross regressions. Grow toward 100 to 1000 items for a full regression set that mirrors the production distribution, and keep a subset of tens to low hundreds for per-PR CI gates. Coverage of distinct failure modes matters more than raw count: 100 diverse items beat 1000 near-duplicates.
+
+### Does every item need a ground-truth expected output? [#ground-truth]
+
+No. The expected output exists to serve reference-based evaluators (exact match, similarity, fact coverage), and it can be a literal answer, a gold reference response, or a list of criteria the output must satisfy. Items checked only by reference-free evaluators, such as format validity, safety, or tone, need no expected output at all. Many golden datasets mix both kinds, and a single item's expected output field can hold several reference types as JSON.
+
+### How do we detect and handle dataset drift? [#dataset-drift]
+
+Dataset drift means your golden dataset no longer resembles production traffic, so passing it stops predicting production quality. The clearest symptom is divergence between strong experiment scores and weakening production signals such as user feedback or online evaluator scores. Counter it structurally: continuously add sampled recent traces and fresh failures, record an `added` date in item metadata so you can measure the age distribution of the set, and retire items for behaviors that no longer exist. Dataset versioning keeps older comparisons valid while the set evolves.
+
+### Can we share a golden dataset across projects? [#share-across-projects]
+
+Datasets in Langfuse are scoped to a single project, and there is currently no built-in cross-project sharing (as of July 2026). To reuse a dataset elsewhere, export the items from the UI as CSV or JSON, or copy them programmatically via the SDK, recreating items with `create_dataset_item` in the target project. The [data migration cookbook](/guides/cookbook/example_data_migration) includes a complete script that copies datasets, items, and runs between projects while preserving item IDs.

@@ -16,6 +16,11 @@ const { CONTENT_DIR_TO_URL_PREFIX } = require("../lib/content-dir-map.js");
 const SOURCE_DIR = path.join(process.cwd(), "content");
 const OUTPUT_DIR = path.join(process.cwd(), "public", "md-src");
 const OVERRIDE_DIR = path.join(process.cwd(), "md-override");
+const SELF_HOSTING_FOOTER_PATH = path.join(
+  process.cwd(),
+  "components-mdx",
+  "self-host-help-footer.mdx",
+);
 
 // Directories whose .md output is historical changelog content. Agents fetch
 // these pages (via the ".md" route or the docs MCP `getLangfuseDocsPage` tool)
@@ -151,8 +156,14 @@ function copyAll() {
     const dir = path.dirname(dest);
     ensureDir(dir);
     const originalContent = fs.readFileSync(file, "utf8");
+    const destRel = path.relative(OUTPUT_DIR, dest).split(path.sep).join("/");
+    const isSelfHostingPage =
+      destRel === "self-hosting.md" || destRel.startsWith("self-hosting/");
+    const contentWithSharedFooter = isSelfHostingPage
+      ? `${originalContent}\n\n${fs.readFileSync(SELF_HOSTING_FOOTER_PATH, "utf8")}`
+      : originalContent;
     const inlined = replaceComponentsWithMarkdown(
-      inlineComponentsMdx(originalContent, file),
+      inlineComponentsMdx(contentWithSharedFooter, file),
     );
     let processed = stripMdxForPlainMarkdown(inlined, {
       unwrapCalloutsForPlainMd: true,
@@ -160,7 +171,6 @@ function copyAll() {
 
     // For changelog entries, prepend an AI-agent notice so models use the page
     // to confirm a feature exists rather than copying release-time examples.
-    const destRel = path.relative(OUTPUT_DIR, dest).split(path.sep).join("/");
     const isChangelogEntry =
       destRel.startsWith(`${CHANGELOG_URL_PREFIX}/`) &&
       destRel !== `${CHANGELOG_URL_PREFIX}/index.md`;

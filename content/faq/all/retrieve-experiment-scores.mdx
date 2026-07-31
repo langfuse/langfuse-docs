@@ -17,51 +17,32 @@ Langfuse supports two types of experiment scores:
 
 ## Via API/SDK
 
-### Experiment-Level Scores
-
-Support coming soon: Fetch experiment-level scores using the Langfuse SDK or scores API with the `datasetRunId` parameter.
-See the [Scores Data Model](/docs/evaluation/scores/data-model#scores) for details on score properties.
-
-### Experiment-Item-Level Scores
-
-<Callout type="warning">
-**Current Workaround**: The method below is a workaround for retrieving experiment-item-level scores. We recommend:
-1. Using the [Experiment Runner SDK](/changelog/2025-09-17-experiment-runner-sdk) which provides direct access to all scores in context
-2. We may add a dedicated API route for experiment scores/metrics in the near future
-</Callout>
-
-To retrieve experiment-item-level scores programmatically:
-
-<Steps>
-
-### Step 1: Fetch the experiment run
-
-Get the experiment run details including all trace IDs:
+Use the [Experiments API](https://api.reference.langfuse.com/#tag/experiments) to retrieve both score levels. Include `fields=scores` when listing experiments for experiment-level scores or experiment items for item- and trace-level scores. Both endpoints require `fromStartTime` and use cursor-based pagination.
 
 <LangTabs items={["Python SDK", "JS/TS SDK", "API"]}>
 <Tab>
 
 ```python
+from datetime import datetime, timezone
 from langfuse import Langfuse
-from urllib.parse import quote
 
 langfuse = Langfuse()
+from_start = datetime(2026, 1, 1, tzinfo=timezone.utc)
 
-dataset_name = "your-dataset-name"
-run_name = "your-run-name"
-
-# URL encode names if they contain special characters
-encoded_dataset_name = quote(dataset_name, safe="")
-encoded_run_name = quote(run_name, safe="")
-
-# Fetch experiment run
-run = langfuse.get_run(
-    dataset_name=encoded_dataset_name,
-    run_name=encoded_run_name
+# Find the experiment and include its scores
+experiments = langfuse.api.experiments.list(
+    from_start_time=from_start,
+    name="your-experiment-name",
+    fields="core,scores",
 )
+experiment = experiments.data[0]
 
-# Extract trace IDs
-trace_ids = [item["trace_id"] for item in run["dataset_run_items"]]
+# Fetch its items and include item and trace scores
+items = langfuse.api.experiments.list_items(
+    from_start_time=from_start,
+    experiment_id=experiment.id,
+    fields="core,io,scores",
+)
 ```
 
 </Tab>
@@ -71,78 +52,34 @@ trace_ids = [item["trace_id"] for item in run["dataset_run_items"]]
 import { LangfuseClient } from "@langfuse/client";
 
 const langfuse = new LangfuseClient();
+const fromStartTime = "2026-01-01T00:00:00Z";
 
-const datasetName = "your-dataset-name";
-const runName = "your-run-name";
-
-// URL encode names if they contain special characters
-const encodedDatasetName = encodeURIComponent(datasetName);
-const encodedRunName = encodeURIComponent(runName);
-
-// Fetch experiment run; must use encoded names for fetching runs
-const run = await langfuse.dataset.getRun({
-  datasetName: encodedDatasetName,
-  runName: encodedRunName
+// Find the experiment and include its scores
+const experiments = await langfuse.api.experiments.list({
+  fromStartTime,
+  name: "your-experiment-name",
+  fields: "core,scores",
 });
+const experiment = experiments.data[0];
 
-// Extract trace IDs
-const traceIds = run.datasetRunItems.map(item => item.traceId);
+// Fetch its items and include item and trace scores
+const items = await langfuse.api.experiments.listItems({
+  fromStartTime,
+  experimentId: experiment.id,
+  fields: "core,io,scores",
+});
 ```
 
 </Tab>
 <Tab>
 
 ```bash
-GET https://api.langfuse.com/api/public/datasets/{datasetName}/runs/{runName}
+GET /api/public/experiments?fromStartTime=2026-01-01T00:00:00Z&name=your-experiment-name&fields=core,scores
+GET /api/public/experiment-items?fromStartTime=2026-01-01T00:00:00Z&experimentId=<experiment-id>&fields=core,io,scores
 ```
-
-[API Reference](https://api.reference.langfuse.com/#tag/datasets/get/api/public/datasets/{datasetName}/runs/{runName})
 
 </Tab>
 </LangTabs>
-
-### Step 2: Fetch scores for each trace
-
-Use the trace IDs to retrieve scores for each experiment item:
-
-<LangTabs items={["Python SDK", "JS/TS SDK", "API"]}>
-<Tab>
-
-```python
-# Fetch trace details including scores
-for trace_id in trace_ids:
-    trace = langfuse.get_trace(trace_id)
-    scores = trace["scores"]
-
-    print(f"Trace {trace_id}: {scores}")
-```
-
-</Tab>
-<Tab>
-
-```ts
-// Fetch trace details including scores
-for (const traceId of traceIds) {
-  const trace = await langfuse.trace.get(traceId);
-  const scores = trace.scores;
-
-  console.log(`Trace ${traceId}:`, scores);
-}
-```
-
-</Tab>
-<Tab>
-
-```bash
-GET https://api.langfuse.com/api/public/traces/{traceId}
-```
-
-[API Reference](https://api.reference.langfuse.com/#tag/trace/get/api/public/traces/{traceId})
-
-</Tab>
-</LangTabs>
-
-</Steps>
 
 ### Recommended: Use Experiment Runner SDK
 

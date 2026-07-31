@@ -4,6 +4,7 @@ import {
   nativeIntegrationsMeta,
   dataPlatformIntegrationsMeta,
 } from "@/lib/integrations-meta";
+import { cn } from "@/lib/utils";
 
 function additionalLinksFromMeta(metaConfig: Record<string, any>) {
   return Object.entries(metaConfig)
@@ -62,6 +63,7 @@ const categoryConfig: Record<
         frontMatter: {
           title: "OpenAI (Python)",
           logo: "/images/integrations/openai_icon.svg",
+          logoAppearance: "dark",
         },
         title: "OpenAI (Python)",
       },
@@ -70,6 +72,7 @@ const categoryConfig: Record<
         frontMatter: {
           title: "Vercel AI SDK",
           logo: "/images/integrations/vercel_ai_sdk_icon.png",
+          logoAppearance: "multicolor",
         },
         title: "Vercel AI SDK",
       },
@@ -94,6 +97,7 @@ const categoryConfig: Record<
         frontMatter: {
           title: "OpenAI Agents",
           logo: "/images/integrations/openai_icon.svg",
+          logoAppearance: "dark",
         },
         title: "OpenAI Agents",
       },
@@ -138,11 +142,28 @@ export const categoryOrder = Object.keys(categoryConfig);
 type IntegrationPage = { route: string; name?: string; frontMatter: any };
 type ProcessedIntegrationPage = IntegrationPage & { title: string };
 
+function IntegrationLogo({ frontMatter }: { frontMatter: any }) {
+  if (!frontMatter?.logo) return null;
+  const logoAppearance = frontMatter.logoAppearance;
+
+  return (
+    <img
+      src={frontMatter.logo}
+      alt=""
+      className={cn(
+        "w-5 h-5 object-contain",
+        logoAppearance === "dark" && "dark:brightness-0 dark:invert",
+        logoAppearance === "light" && "invert dark:invert-0",
+      )}
+    />
+  );
+}
+
 function loadFilesystemPages(category: string): IntegrationPage[] {
   try {
     const allParams = integrationsSource.generateParams();
     return allParams
-      .filter(({ slug }) => slug.length >= 2 && slug[0] === category)
+      .filter(({ slug }) => slug.length === 2 && slug[0] === category)
       .map(({ slug }) => {
         const page = integrationsSource.getPage(slug);
         if (!page) return null;
@@ -206,11 +227,7 @@ function IntegrationCards({
               className=""
               icon={
                 page.frontMatter?.logo ? (
-                  <img
-                    src={page.frontMatter.logo}
-                    alt=""
-                    className="w-5 h-5 object-contain"
-                  />
+                  <IntegrationLogo frontMatter={page.frontMatter} />
                 ) : undefined
               }
               arrow
@@ -232,11 +249,7 @@ function IntegrationCards({
                 className=""
                 icon={
                   page.frontMatter?.logo ? (
-                    <img
-                      src={page.frontMatter.logo}
-                      alt=""
-                      className="w-5 h-5 object-contain"
-                    />
+                    <IntegrationLogo frontMatter={page.frontMatter} />
                   ) : undefined
                 }
                 arrow

@@ -1,0 +1,189 @@
+---
+title: Hallucination detection for LLM apps
+description: "Hallucination detection for LLM apps: taxonomy, LLM-as-a-judge evaluators on production traces, offline experiments with references, and code pre-screens."
+tags: [guide, evaluation]
+---
+
+# Hallucination detection for LLM apps
+
+A hallucination is an output that asserts something false or unsupported: a fabricated citation, a confident wrong number, an API method that does not exist. Hallucination detection is the practice of scoring outputs for unsupported claims automatically, so that the failure shows up as a metric on a dashboard instead of a complaint from a user. This page covers what counts as a hallucination, the detection methods that work in practice, and how to design the judge that does the detecting, with Langfuse as the worked implementation.
+
+**TL;DR:** Production hallucination detection runs an LLM-as-a-judge evaluator on a sample of live traffic; the judge is reference-free, checking the output against the input and context recorded on the same observation, so no ground truth is required. Offline detection runs experiments against a dataset with reference answers before each release, where a judge can verify claims against known-correct outputs. Deterministic code pre-screens (missing citations, numbers absent from context) flag risk signals for free and route only flagged traces to the paid judge. Score verdicts as binary hallucinated/clean, with the failing claims listed in the score comment.
+
+## What counts as a hallucination
+
+A hallucination is a claim in the output that the available evidence does not support. Two distinctions determine how you detect it.
+
+**Intrinsic versus extrinsic.** An intrinsic hallucination contradicts the source material: the context says the limit is 100 requests per minute and the answer says 1,000. An extrinsic hallucination adds material the source does not contain: the answer cites a paper that was never retrieved, or invents a config flag. Extrinsic claims may even be true, but an application that promises grounded answers cannot verify them, so detection treats unsupported and false the same way.
+
+**Grounded-context versus open-domain.** The second axis is what evidence exists to check against:
+
+| Setting                                                  | Evidence available                           | Detection approach                                                                         |
+| -------------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Grounded context (RAG, tool results, provided documents) | The context is recorded alongside the output | Compare output claims against the recorded context                                         |
+| Open-domain (model answers from its own knowledge)       | No context to compare against                | Judge with world knowledge, reference answers in offline tests, or self-consistency checks |
+
+Grounded-context detection is a comparison problem and by far the more tractable case: the evidence travels with the trace. Open-domain detection is harder, because there is nothing on the trace that proves the claim either way; offline reference datasets and judge world knowledge carry more of the load there.
+
+## Hallucination detection vs faithfulness vs relevance
+
+Three metrics get conflated under "the answer is wrong", and they fail independently, so they need separate evaluators.
+
+- **Hallucination detection** asks whether the output makes claims the evidence does not support. It applies to any LLM application, with or without retrieval.
+- **Faithfulness** is the grounded-context subcase applied to RAG: is every claim in the answer supported by the retrieved documents? [RAG faithfulness evaluation](/resources/engineering/rag-faithfulness-evaluation) covers that case in depth, including how to separate retrieval failures from generation failures.
+- **Answer relevance** asks whether the output addresses the question at all. An answer can be fully grounded and still off-topic, or perfectly on-topic and fabricated. [Answer relevance evaluation](/resources/engineering/answer-relevance-evaluation) covers that dimension.
+
+If your application is a RAG pipeline, the faithfulness page is the deeper treatment of your main hallucination risk. This page covers the general detection problem: the taxonomy, the production and offline wiring, and judge design that applies to all three metrics.
+
+## Three detection methods
+
+| Method                              | Needs references                     | Cost per check                | Where it runs                   |
+| ----------------------------------- | ------------------------------------ | ----------------------------- | ------------------------------- |
+| LLM-as-a-judge on production traces | No                                   | One judge-model call          | Live traffic, sampled           |
+| Judge in offline experiments        | Yes (dataset with reference answers) | One judge-model call per item | Before release, in CI or ad hoc |
+| Deterministic code pre-screens      | No                                   | None                          | Every trace                     |
+
+### Method 1: LLM-as-a-judge on production traces
+
+Langfuse ships a catalog of managed [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators, built and maintained by Langfuse and partners like Ragas. Hallucination is one of the managed dimensions, alongside Context-Relevance, Toxicity, and Helpfulness, so no prompt writing is required to start. The Hallucination evaluator is reference-free: it judges the output against the input and context you map from the observation, which is exactly why it works on production traffic where no expected output exists.
+
+Setup, in order:
+
+1. On the Evaluators page, click `+ Set up Evaluator` and set a default judge model via an LLM Connection. The model must support structured output so verdicts parse reliably.
+2. Pick the managed Hallucination evaluator from the catalog (or define a custom prompt with `{{variables}}` if your domain needs a stricter rubric).
+3. Target live observations, the recommended production target. Filter to the observations worth judging, for example only final answer generations in traces tagged `customer-facing`, and set a sampling percentage. Judging 5 to 10 percent of traffic is usually enough to see the trend without paying to judge everything.
+4. Map your observation fields onto the evaluator's variables. Langfuse previews the populated judge prompt with real data from the last 24 hours, and JSONPath expressions handle nested fields.
+
+One mechanic matters for correctness: observation-level evaluators see only the data on the observation they target, not sibling or child observations. If the judge needs the retrieved context to check groundedness, your instrumentation must put that context on the target observation, or you target a root observation that records the overall input and output. Scores land asynchronously on the observation, and you can backfill historical traffic by enabling the evaluator's Fast Mode, selecting rows in the traces table, and running Actions → Evaluate.
+
+### Method 2: Offline detection with reference datasets
+
+Before a prompt or model change ships, run the candidate against a dataset whose items carry reference answers, and have a judge verify claims against the reference. This catches hallucination regressions where production monitoring would only catch them after users saw them. With the Python SDK, [experiments via the SDK](/docs/evaluation/experiments/experiments-via-sdk) wrap the loop: `run_experiment` executes your task per item, applies evaluators, and records the run in Langfuse for comparison.
+
+```python
+import json
+
+from langfuse import Evaluation, get_client
+from openai import OpenAI
+
+langfuse = get_client()
+judge_client = OpenAI()
+
+JUDGE_PROMPT = """Check the generated answer against the reference answer.
+
+Question: {question}
+Reference answer: {reference}
+Generated answer: {answer}
+
+List every factual claim in the generated answer that contradicts the reference
+or asserts something the reference does not support. If there are none, return
+an empty list. Reply as JSON: {{"unsupported_claims": [...], "hallucinated": <bool>}}"""
+
+
+def hallucination_judge(*, input, output, expected_output, **kwargs):
+    response = judge_client.chat.completions.create(
+        model="gpt-4.1",
+        response_format={"type": "json_object"},
+        messages=[
+            {
+                "role": "user",
+                "content": JUDGE_PROMPT.format(
+                    question=input, reference=expected_output, answer=output
+                ),
+            }
+        ],
+    )
+    verdict = json.loads(response.choices[0].message.content)
+    return Evaluation(
+        name="hallucinated",
+        value=1.0 if verdict["hallucinated"] else 0.0,
+        comment="; ".join(verdict["unsupported_claims"]) or None,
+    )
+
+
+def hallucination_rate(*, item_results, **kwargs):
+    values = [
+        e.value
+        for r in item_results
+        for e in r.evaluations
+        if e.name == "hallucinated"
+    ]
+    return Evaluation(
+        name="hallucination_rate",
+        value=sum(values) / len(values) if values else None,
+    )
+
+
+def my_task(*, item, **kwargs):
+    return answer_question(item.input)  # call your application here
+
+
+dataset = langfuse.get_dataset("qa-with-references")
+
+result = dataset.run_experiment(
+    name="Hallucination check",
+    description="Judge outputs against reference answers",
+    task=my_task,
+    evaluators=[hallucination_judge],
+    run_evaluators=[hallucination_rate],
+)
+print(result.format())
+```
+
+The judge returns the binary verdict as the score and the offending claims in the comment, so a failed item is debuggable from the run view without rereading the full output. The `hallucination_rate` run evaluator gives each experiment run a single comparable number, which is the value a CI gate would assert on. Build the dataset from production: any trace the production judge flags is a candidate item, with a corrected reference supplied during review.
+
+### Method 3: Deterministic pre-screens
+
+Some hallucination risk signals are decidable without a model. They are not hallucination detection by themselves, since no regex verifies semantics, but they are free, deterministic, and run on every trace, which makes them the right first layer. Two honest examples:
+
+- **Citation presence.** A grounded answer that cites none of the retrieved sources is a hallucination risk even when it reads well. The [code evaluator examples](/resources/engineering/code-evaluator-examples) page has a paste-ready version (example 4) plus nine other deterministic checks.
+- **Unsupported numbers.** A number in the answer that appears nowhere in the provided context is a specific, checkable risk flag. As a Langfuse code evaluator, authored in the UI and run on observations:
+
+```python
+import re
+
+def evaluate(ctx):
+    context = str((ctx.observation.metadata or {}).get("retrieved_context", ""))
+    answer = str(ctx.observation.output)
+    answer_nums = set(re.findall(r"-?\d+(?:\.\d+)?", answer.replace(",", "")))
+    context_nums = set(re.findall(r"-?\d+(?:\.\d+)?", context.replace(",", "")))
+    unsupported = answer_nums - context_nums
+    return EvaluationResult(scores=[
+        Score(name="unsupported_numbers", value=bool(unsupported), data_type="BOOLEAN",
+              comment=f"Not in context: {sorted(unsupported)}" if unsupported else None)
+    ])
+```
+
+Expect false positives (derived values, dates the model formatted differently), which is acceptable for a screen whose job is routing, not verdicts.
+
+## Designing the hallucination judge
+
+**Claim-level checking, answer-level verdicts.** A judge that scores the whole answer in one pass misses the single fabricated detail inside an otherwise correct response. Instruct the judge to enumerate the factual claims and check each one, as the prompt above does, then aggregate: the answer is hallucinated if any claim fails. The per-claim list goes into the score comment, which is what makes a flagged trace reviewable and what lets you calibrate the judge against human labels claim by claim.
+
+**Binary verdicts.** Score hallucination as pass/fail, not on a 1-to-5 scale. Binary scoring forces a precise definition of what separates acceptable from unacceptable, while graded scales leave every reader wondering what a 3 means; this is the standing recommendation in the [Langfuse Academy evaluation module](/academy/evaluate), and hallucination is the clearest case for it, because one fabricated claim is a failure regardless of how good the rest of the answer is.
+
+**Escalation, cheapest layer first.** Run the free code screens on all traffic. Run the judge on everything a screen flags, plus a sample of clean traffic to catch what patterns miss. Route judge-flagged traces in high-stakes flows to an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues), where human verdicts double as calibration data for the judge and as reference answers for the offline dataset. Each layer reduces the volume the next, more expensive layer has to handle.
+
+## Hallucination detection without new infrastructure
+
+Hallucination detection is often postponed because it sounds like another service to deploy and operate. If your application already sends traces to Langfuse, it is not: LLM-as-a-judge evaluators, code evaluators, datasets, and experiments run inside the same Langfuse deployment that receives the traces, so the setup above adds zero new services to your architecture. The only external call is the one Langfuse makes to your judge model through an LLM Connection, using the provider credentials you configure.
+
+The same holds off the cloud. Langfuse is open source and [self-hostable](/self-hosting), so the full detection loop, from trace ingestion through judge execution to score storage, can run on infrastructure your team controls. Teams with data-residency constraints run detection on the same self-hosted instance that does their tracing.
+
+## FAQ
+
+### What is the difference between hallucination detection and faithfulness evaluation? [#hallucination-vs-faithfulness]
+
+Faithfulness is the RAG-specific instance of hallucination detection: it checks whether every claim in the answer is supported by the retrieved context. Hallucination detection is the broader metric, covering open-domain answers with no retrieved context and fabrications that contradict the input rather than the documents. If your application is a RAG pipeline, faithfulness is the version of this metric you should implement first.
+
+### Can you detect hallucinations without ground truth? [#detection-without-ground-truth]
+
+Yes, with a reference-free judge. The managed Hallucination evaluator in Langfuse checks the output against the input and context recorded on the same observation, so it needs no expected output and runs on live production traffic. What reference-free detection cannot do is verify open-domain claims that no recorded evidence supports or contradicts; those need reference datasets in offline experiments, or a judge trusted for its world knowledge.
+
+### How reliable is an LLM judge at detecting hallucinations? [#judge-reliability]
+
+Reliable enough to trend on and to route with, not reliable enough to treat every verdict as truth. Judges perform best with a binary rubric and claim-level checking, and worst on subtle domain facts, where the judge can share blind spots with the model being judged (especially when both come from the same model family). Calibrate against human labels: route a sample of judge verdicts to an annotation queue, measure agreement, and tighten the rubric until agreement is stable.
+
+### Can hallucination detection block a bad answer before the user sees it? [#blocking-at-request-time]
+
+No. Evaluator scores are produced asynchronously, after the response has shipped, which makes them the right tool for detecting regressions, routing traces to review, and building regression datasets. A check that must stop an answer in flight is a guardrail and belongs in your application code at request time, and the guardrail's decisions should then be scored like any other output.

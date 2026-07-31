@@ -126,29 +126,27 @@ for await (const chunk of stream) {
 
 ## Example 3: Add additional metadata and parameters
 
-The trace is a core object in Langfuse, and you can add rich metadata to it. Refer to the JS/TS SDK documentation and the [reference](https://js.reference.langfuse.com/functions/_langfuse_openai.observeOpenAI.html) for comprehensive details.
+You can pass additional trace and generation attributes to the `observeOpenAI` wrapper. Refer to the [integration guide](https://langfuse.com/integrations/model-providers/openai-js) for comprehensive details.
 
 Example usage:
 
-- Assigning a custom name to identify a specific trace type
-- Enabling user-level tracking
-- Tracking experiments through versions and releases
-- Adding custom metadata
+- Assigning a custom trace and generation name
+- Enabling user-level and session-level tracking
+- Adding tags and custom metadata
 
 
 ```typescript
 import OpenAI from "npm:openai";
-import { observeOpenAI } from "npm:langfuse";
+import { observeOpenAI } from "npm:@langfuse/openai";
 
 // Initialize OpenAI SDK with Langfuse and custom parameters
 const openaiWithLangfuse = observeOpenAI(new OpenAI(), {
-    generationName: "OpenAI Custom Trace",
-    metadata: {env: "dev"},
+    traceName: "OpenAI Custom Trace",
+    generationName: "OpenAI Custom Generation",
+    generationMetadata: {env: "dev"},
     sessionId: "session-id",
     userId: "user-id",
     tags: ["custom"],
-    version: "0.0.1",
-    release: "beta",
 })
 
 // Call OpenAI
@@ -222,62 +220,64 @@ if (tool_call[0].function.name === "getWeather") {
 
 ## Example 5: Group multiple generations into a single trace
 
-Use the context manager of the Langfuse TypeScript SDK to group two OpenAI generations together and update the top level span. 
+Use `propagateAttributes` to apply trace attributes (name, tags, metadata) to all observations created inside its callback, and the `startActiveObservation` context manager to group two OpenAI generations under a single root span. Input and output are set on the root observation.
 
 
 ```typescript
-import { startObservation, startActiveObservation, propagateAttributes } from "npm:@langfuse/tracing";
+import { startActiveObservation, propagateAttributes } from "npm:@langfuse/tracing";
 import OpenAI from "npm:openai";
 import { observeOpenAI } from "npm:@langfuse/openai";
 
 const country = "Germany";
- 
-await startActiveObservation("user-request", async (span) => {
- 
-  const capital = (
-    await observeOpenAI(new OpenAI(), {
-      parent: span,
-      generationName: "get-capital",
-    }).chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        { role: "system", content: "What is the capital of the country?" },
-        { role: "user", content: country },
-      ],
-    })
-  ).choices[0].message.content;
- 
-  const poem = (
-    await observeOpenAI(new OpenAI(), {
-      parent: span,
-      generationName: "generate-poem",
-    }).chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: "You are a poet. Create a poem about this city.",
-        },
-        { role: "user", content: capital },
-      ],
-    })
-  ).choices[0].message.content;
 
-  // Propagate trace attributes
-  await propagateAttributes({
+// Propagate trace attributes to all observations created inside the callback
+await propagateAttributes(
+  {
     traceName: "City poem generator",
     tags: ["updated"],
-    metadata: {"env": "development"},
-    release: "v0.0.2",
-  }, async () => {});
+    metadata: { env: "development" },
+  },
+  async () => {
+    await startActiveObservation("user-request", async (span) => {
+      // Generations created inside the callback are automatically nested under the active span
+      const capital = (
+        await observeOpenAI(new OpenAI(), {
+          generationName: "get-capital",
+        }).chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            { role: "system", content: "What is the capital of the country?" },
+            { role: "user", content: country },
+          ],
+        })
+      ).choices[0].message.content;
 
-  // Set input and output on the root observation
-  span.update({
-    input: country,
-    output: poem,
-  });
+      const poem = (
+        await observeOpenAI(new OpenAI(), {
+          generationName: "generate-poem",
+        }).chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: "You are a poet. Create a poem about this city.",
+            },
+            { role: "user", content: capital },
+          ],
+        })
+      ).choices[0].message.content;
 
-});
+      // Set input and output on the root observation
+      span.update({
+        input: country,
+        output: poem,
+      });
+    });
+  },
+);
+
+// Ensure all spans are flushed to Langfuse
+await langfuseSpanProcessor.forceFlush();
 ```
 
 ![Langfuse Trace](https://langfuse.com/images/cookbook/example-js-sdk/js_integration_openai_grouped.png)

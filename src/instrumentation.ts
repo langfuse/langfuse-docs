@@ -1,4 +1,6 @@
+import { registerTelemetry } from "ai";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { LangfuseVercelAiSdkIntegration } from "@langfuse/vercel-ai-sdk";
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 
 const euSpanProcessor = new LangfuseSpanProcessor({
@@ -40,3 +42,5 @@ const tracerProvider = new NodeTracerProvider({
 });
 
 tracerProvider.register();
+
+registerTelemetry(new LangfuseVercelAiSdkIntegration());

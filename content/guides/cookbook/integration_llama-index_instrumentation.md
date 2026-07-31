@@ -1,22 +1,20 @@
 ---
 title: "Cookbook LlamaIndex Integration (Instrumentation Module)"
-description: Example cookbook for the experimental LlamaIndex Langfuse integration using the instrumentation module of LlamaIndex.
+description: Example cookbook for the LlamaIndex Langfuse integration using the instrumentation module of LlamaIndex.
 category: Integrations
 ---
 
 # Cookbook LlamaIndex Integration (Instrumentation Module)
 
-This is a simple cookbook that demonstrates how to use the [LlamaIndex Langfuse integration](https://langfuse.com/integrations/frameworks/llamaindex) using the [instrumentation module](https://docs.llamaindex.ai/en/stable/module_guides/observability/instrumentation/) by LlamaIndex (available in llama-index v0.10.20 and later).
-
-**Note: This integration is in beta.** Please report any issues or feedback via [GitHub](/issues).
+This is a simple cookbook that demonstrates how to trace LlamaIndex applications with Langfuse based on the [instrumentation module](https://docs.llamaindex.ai/en/stable/module_guides/observability/instrumentation/) of LlamaIndex. It uses the [OpenInference LlamaIndex instrumentation](https://docs.arize.com/phoenix/tracing/integrations-tracing/llamaindex), which builds on LlamaIndex's instrumentation module and exports OpenTelemetry (OTel) spans to Langfuse. See the [LlamaIndex integration docs](https://langfuse.com/integrations/frameworks/llamaindex) for more details.
 
 ## Setup
 
-Make sure you have both `llama-index` and `langfuse` installed.
+Make sure you have `llama-index`, `langfuse`, and `openinference-instrumentation-llama-index` installed.
 
 
 ```python
-%pip install "langfuse<3.0.0" llama_index --upgrade
+%pip install langfuse openinference-instrumentation-llama-index llama-index --upgrade
 ```
 
 Initialize the integration. Get your API keys from the Langfuse project settings. This example uses OpenAI for embeddings and chat completions. You can also use any other model supported by LlamaIndex.
@@ -36,14 +34,23 @@ os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # ðŸ‡ªð
 os.environ.setdefault("OPENAI_API_KEY", "")
 ```
 
-Register the Langfuse `LlamaIndexInstrumentor`:
+Initialize the Langfuse client and register the OpenInference `LlamaIndexInstrumentor`. The instrumentor hooks into LlamaIndex's instrumentation module and exports OTel spans to Langfuse:
 
 
 ```python
-from langfuse.llama_index import LlamaIndexInstrumentor
+from langfuse import get_client
+from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
 
-instrumentor = LlamaIndexInstrumentor()
-instrumentor.start()
+langfuse = get_client()
+
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
+
+# Initialize LlamaIndex instrumentation
+LlamaIndexInstrumentor().instrument()
 ```
 
 ## Index
@@ -99,15 +106,21 @@ Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/trac
 
 ## Custom trace properties
 
-You can use the `instrumentor.observe` context manager to manage trace IDs, set custom trace properties, and access the trace client for later scoring.
+You can set custom trace attributes such as `user_id`, `session_id`, or `tags` with the `propagate_attributes` context manager. To group multiple operations into a single trace and score it, wrap them in a root observation via `langfuse.start_as_current_observation` and use `score_trace` on the root span.
 
 
 ```python
-with instrumentor.observe(user_id='my-user', session_id='my-session') as trace:
-    response = index.as_query_engine().query("What did he do growing up?")
+from langfuse import propagate_attributes
 
-# Use the trace client yielded by the context manager for e.g. scoring:
-trace.score(name="my-score", value=0.5)
+with langfuse.start_as_current_observation(as_type="span", name="llama-index-query") as span:
+    with propagate_attributes(user_id="my-user", session_id="my-session"):
+        response = index.as_query_engine().query("What did he do growing up?")
+    span.update(output=str(response))
+
+    # Score the trace, e.g. based on user feedback
+    span.score_trace(name="my-score", value=0.5)
+
+langfuse.flush()
 ```
 
 Example trace: https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/6f554d6b-a2bc-4fba-904f-aa54de2897ca

@@ -1,0 +1,264 @@
+---
+title: "LLM regression testing: fail CI before regressions ship"
+description: "Set up LLM regression testing that fails CI: golden datasets, experiment thresholds, RegressionError, and GitHub Actions via langfuse/experiment-action."
+tags: [guide, evaluation]
+---
+
+# LLM regression testing: fail CI before regressions ship
+
+A prompt tweak that fixes one complaint can quietly break ten other answers. LLM regression testing catches that break before it merges: every change to a prompt, model, or retrieval component runs against a fixed set of test cases, gets scored, and fails the CI pipeline when a score drops below a threshold. This guide shows the complete setup with Langfuse, from the gate script to the GitHub Actions workflow that blocks the pull request.
+
+**TL;DR:** An LLM regression test runs your application against a golden dataset, scores every output with evaluators (deterministic code checks plus an LLM judge), and raises `RegressionError` when an aggregate score misses your threshold. In GitHub Actions, `langfuse/experiment-action` runs that script against a Langfuse dataset, posts the scores as a pull request comment, and fails the job on regression. If you already trace with Langfuse, the gate needs no new services: the same SDK and the same API keys.
+
+## What is LLM regression testing?
+
+LLM regression testing is the practice of verifying that a change to an LLM application did not degrade output quality on inputs that used to work. Because LLM outputs are non-deterministic, the check is not an exact-match assertion but an evaluation: each output gets scored, and the test passes when scores meet a defined threshold. The unit under test is application behavior, not a function.
+
+A regression gate should run whenever any component that shapes outputs changes:
+
+- **Prompt edits**, including a new version of a prompt managed outside the codebase.
+- **Model swaps and provider model upgrades**, where the same prompt can behave differently.
+- **RAG and retrieval changes**, such as a new chunking strategy or embedding model.
+- **Tool and agent changes**, where a reworded tool description shifts an agent's behavior.
+
+This page covers the offline gate in depth. For where the gate sits inside a complete evaluation program, with quality dimensions, production monitoring, and human review, see the broader guide on [building an LLM evaluation strategy](/resources/engineering/llm-evaluation-strategy).
+
+## The minimal regression gate: golden dataset, experiment, threshold
+
+Three pieces make a regression gate:
+
+1. **A golden dataset** of representative inputs with expected outputs, stored as a Langfuse dataset so it is versioned and shared.
+2. **An experiment** that runs your application against every dataset item and scores the outputs with evaluators.
+3. **A threshold check** that raises `RegressionError` when an aggregate score is too low, which is what fails the pipeline.
+
+The script below is a complete gate using the Langfuse Python SDK (v4). It combines a deterministic code evaluator, which is free and gives the same verdict every run, with an LLM-as-a-judge evaluator for the quality dimension a string check cannot decide. The `experiment(context)` entry point is the contract for the GitHub Action in the next section: the `RunnerContext` initializes the Langfuse client, loads the dataset configured in the workflow, and attaches CI metadata (commit SHA, branch, job URL, actor) to the run.
+
+```python title="experiments/regression-gate.py"
+import json
+
+from langfuse import Evaluation, RegressionError, RunnerContext
+from langfuse.openai import OpenAI
+
+client = OpenAI()
+
+THRESHOLDS = {
+    "avg_contains_answer": 0.9,
+    "avg_faithfulness": 0.8,
+}
+
+
+def support_agent_task(*, item, **kwargs):
+    """Run the application under test on one dataset item."""
+    response = client.chat.completions.create(
+        model="gpt-4.1",
+        messages=[
+            {"role": "system", "content": "Answer using only the provided context."},
+            {"role": "user", "content": item.input["question"]},
+        ],
+    )
+    return response.choices[0].message.content
+
+
+def contains_answer(*, output, expected_output, **kwargs):
+    """Code evaluator: deterministic, free, runs on every item."""
+    passed = bool(expected_output) and expected_output.lower() in (output or "").lower()
+    return Evaluation(name="contains_answer", value=1.0 if passed else 0.0)
+
+
+def faithfulness_judge(*, input, output, expected_output, **kwargs):
+    """LLM-as-a-judge evaluator: returns a binary verdict with a reason."""
+    judgment = client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=[
+            {
+                "role": "user",
+                "content": (
+                    "Is the answer faithful to the reference? "
+                    'Respond with JSON: {"score": 0 or 1, "reason": "<one sentence>"}\n'
+                    f"Question: {input}\nReference: {expected_output}\nAnswer: {output}"
+                ),
+            }
+        ],
+        response_format={"type": "json_object"},
+    )
+    verdict = json.loads(judgment.choices[0].message.content)
+    return Evaluation(
+        name="faithfulness",
+        value=float(verdict["score"]),
+        comment=verdict["reason"],
+    )
+
+
+def average_of(score_name: str):
+    """Build a run-level evaluator that averages one item-level score."""
+
+    def run_evaluator(*, item_results, **kwargs):
+        values = [
+            evaluation.value
+            for result in item_results
+            for evaluation in result.evaluations
+            if evaluation.name == score_name
+            and isinstance(evaluation.value, (int, float))
+        ]
+        return Evaluation(
+            name=f"avg_{score_name}",
+            value=sum(values) / len(values) if values else 0.0,
+        )
+
+    return run_evaluator
+
+
+def experiment(context: RunnerContext):
+    result = context.run_experiment(
+        name="PR gate: support agent",
+        task=support_agent_task,
+        evaluators=[contains_answer, faithfulness_judge],
+        run_evaluators=[average_of("contains_answer"), average_of("faithfulness")],
+    )
+
+    scores = {e.name: e.value for e in result.run_evaluations}
+
+    for metric, threshold in THRESHOLDS.items():
+        value = scores.get(metric)
+        if not isinstance(value, (int, float)) or value < threshold:
+            raise RegressionError(
+                result=result,  # lets the action include scores in the PR comment
+                metric=metric,
+                value=float(value) if isinstance(value, (int, float)) else 0.0,
+                threshold=threshold,
+            )
+
+    return result
+```
+
+Replace `support_agent_task` with a call into your actual application. Everything else is reusable: the evaluators score whatever the task returns, and the threshold loop turns any run-level score into a gate. To run the same experiment outside CI, fetch the dataset and call `langfuse.get_dataset("support-agent-golden-set").run_experiment(...)` with the same task and evaluators.
+
+## Fail CI with GitHub Actions: langfuse/experiment-action
+
+[`langfuse/experiment-action`](https://github.com/langfuse/experiment-action) is the official GitHub Action for running Langfuse experiments in CI. Given the script above, it does four things:
+
+1. Loads the dataset named in the workflow, optionally pinned to a `dataset_version` timestamp for reproducible runs.
+2. Executes every experiment script found at `experiment_path` (a file, directory, or glob; Python, TypeScript, and JavaScript are supported).
+3. Posts or updates a pull request comment with pass/regression/error status per script, run-level scores, an item-level results table, and a link to the experiment in Langfuse.
+4. Fails the job when a script raises `RegressionError` (`should_fail_on_regression`, default `true`) or crashes (`should_fail_on_script_error`, default `true`).
+
+```yaml title=".github/workflows/llm-regression-tests.yml"
+name: LLM regression tests
+
+on:
+  pull_request:
+
+permissions:
+  contents: read # check out the repository
+  pull-requests: write # post the experiment result comment
+  actions: read # optional: link results to this job's logs
+
+jobs:
+  regression-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      # Pin to the latest release tag (v1.0.6 as of July 2026)
+      - uses: langfuse/experiment-action@v1.0.6
+        env:
+          # Provider keys for your task and judge; the experiment
+          # subprocess inherits the step environment.
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        with:
+          langfuse_public_key: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+          langfuse_secret_key: ${{ secrets.LANGFUSE_SECRET_KEY }}
+          langfuse_base_url: https://cloud.langfuse.com # or your self-hosted URL
+          experiment_path: experiments/regression-gate.py
+          dataset_name: support-agent-golden-set
+          dataset_version: "2026-07-01T00:00:00Z" # optional: pin for reproducibility
+          github_token: ${{ github.token }} # enables the PR comment
+```
+
+The action installs the latest Langfuse SDK by default and requires Python SDK v4.6.0+ or JS SDK v5.3.0+; set `python_sdk_version` or `js_sdk_version` to pin a specific version, or `should_skip_sdk_installation: true` if you manage the environment yourself. A `result_json` output exposes the normalized results for downstream steps, for example a Slack notification or an artifact upload. The full input reference and the JS/TS variant of the gate script are in the [experiments in CI/CD documentation](/docs/evaluation/experiments/experiments-ci-cd).
+
+With `on: pull_request`, every PR that touches the application gets a scored verdict before review. Marking the job as a required status check in branch protection makes the gate binding: a regression cannot merge.
+
+## Run the gate in pytest or Vitest on other CI systems
+
+The GitHub Action is a convenience wrapper, not a requirement. On GitLab CI, Jenkins, CircleCI, or any other runner, the same `run_experiment` call works inside your existing test framework: run the experiment in a pytest or Vitest test, read the run-level score from `result.run_evaluations`, and assert it against the threshold. A failing assertion fails the suite, and the suite fails the pipeline. Our guide to [testing LLM applications](/blog/2025-10-21-testing-llm-applications) walks through the full pytest setup, including local datasets for gates that should not depend on any network fetch.
+
+## Prompt-version regression testing before label promotion
+
+Prompts managed in Langfuse are versioned, and deployment is controlled by labels: your application fetches the version tagged `production`, so promoting a new prompt version means moving that label. That structure gives prompt changes the same gate as code changes, without a redeploy:
+
+1. Save the candidate as a new prompt version and give it a `staging` label.
+2. Run the regression experiment with the candidate version against the golden dataset.
+3. Promote the `production` label only when the experiment clears the thresholds.
+
+The gate script changes in one place: the task fetches the candidate by label instead of hardcoding the prompt, and passes it to the generation so the run is linked to the exact prompt version.
+
+```python title="experiments/prompt-gate.py (task excerpt)"
+from langfuse import get_client
+from langfuse.openai import OpenAI
+
+langfuse = get_client()
+client = OpenAI()
+
+candidate = langfuse.get_prompt("support-agent", label="staging")
+
+
+def support_agent_task(*, item, **kwargs):
+    response = client.chat.completions.create(
+        model="gpt-4.1",
+        messages=[
+            {"role": "system", "content": candidate.compile()},
+            {"role": "user", "content": item.input["question"]},
+        ],
+        langfuse_prompt=candidate,  # link this run to the exact prompt version
+    )
+    return response.choices[0].message.content
+```
+
+Linking pays off twice. The prompt's Metrics tab aggregates scores, latency, and cost per prompt version across all linked generations. And because the gate creates a dataset run per experiment, the comparison view puts the candidate's run next to the production version's run on the same dataset, item by item, before you decide.
+
+The promotion itself can be locked down. [Protected prompt labels](/docs/prompt-management/features/prompt-version-control) prevent `member` and `viewer` roles from moving or deleting a label like `production`; only project `admin` and `owner` roles can. A passing experiment plus an authorized approver moving the label becomes your promotion gate. Label protection is available on the Pro plan with the Teams add-on, on Enterprise, and in self-hosted Enterprise Edition.
+
+## Comparing regression runs over time
+
+Every gate run against a Langfuse dataset is recorded as a dataset run, so the history accumulates automatically. The experiment comparison view shows runs side by side: aggregate scores per run, per-item outputs, and which specific items regressed between two runs. When the PR comment says `avg_faithfulness` dropped from 0.86 to 0.71, the comparison view answers the follow-up question of which ten items broke and what the outputs looked like. CI metadata attached by the action (commit SHA, branch, actor) makes each run traceable to the change that produced it.
+
+The gate only covers inputs you thought to test, so pair it with an online complement. Sampled LLM-as-a-judge evaluators score a percentage of production traffic, and [monitors](/docs/metrics/features/monitors) (available on Langfuse Cloud) alert on those score metrics with warning and alert thresholds, routing breaches to Slack, webhooks, or a GitHub Actions trigger. The offline gate stops regressions you can reproduce; monitors catch the ones production finds for you.
+
+## Building the golden dataset the gate runs against
+
+The dataset determines what the gate can catch, and the strongest source is production: in Langfuse, any trace or observation can be added to a dataset directly from the UI, so every incident becomes a permanent regression test with one action. Add hand-written edge cases for failures you fear but have not seen, and source expected outputs from domain experts correcting real outputs rather than writing ideals from scratch. Keep the PR-gate dataset small enough to run on every pull request, tens to low hundreds of items, and reserve the full set for release branches. Our guide to [golden dataset evaluation](/resources/engineering/golden-dataset-evaluation) covers construction, sizing, and maintenance in depth.
+
+## How a Langfuse regression gate compares to Promptfoo
+
+[Promptfoo](https://github.com/promptfoo/promptfoo) is an MIT-licensed CLI and library for evaluating and red-teaming LLM apps, and a well-established way to run eval assertions in CI. It runs evaluations entirely locally, with test cases and graders defined in configuration files, and it needs no platform behind it (facts checked July 2026). For teams that want declarative prompt-and-model matrix testing with no external state, it is a reasonable default, and it can fetch Langfuse-managed prompts through the [Promptfoo integration](/integrations/other/promptfoo).
+
+The trade-off is where your evaluation data lives. With a config-file harness, datasets, scores, and history live in the repo and the CI logs, disconnected from production. If you already trace with Langfuse, the regression gate described on this page adds zero new services: it authenticates with the same public and secret key your tracing uses, runs against Langfuse Cloud or your self-hosted instance, and writes results where your production traces, datasets, and prompt versions already are. Failed production traces become dataset items without an export step, gate scores land on the prompt version that produced them, and the comparison view spans CI runs and manual experiments alike.
+
+Choose Promptfoo when you want a self-contained local harness and have no observability platform in the loop. Choose the Langfuse gate when Langfuse is already your source of truth for traces, datasets, or prompts, and you want regression testing wired into that same data instead of parallel to it.
+
+## FAQ
+
+### How many dataset items does a CI regression gate need? [#how-many-items]
+
+Enough to cover your known failure modes, and small enough to run on every pull request: tens to low hundreds of items is the practical range for a PR gate. Below roughly 20 items, one flaky output moves an average score by 5 percentage points or more, which makes thresholds noisy. Keep a larger full regression set for release branches or nightly runs, where latency and evaluation cost matter less.
+
+### How do I keep LLM judges from making CI flaky? [#flaky-judges]
+
+Make the judge as deterministic as you can: pin the judge model version, use a binary pass/fail verdict with an explicit rubric instead of a 1-to-10 scale, and request structured JSON output. Averaging over the whole dataset dampens single-item noise, and setting the threshold with a margin below your baseline (for example 0.8 when the baseline is 0.88) absorbs normal variance. For checks that must never flake, use deterministic code evaluators as the blocking gate and treat judge metrics as warnings until they prove stable.
+
+### How do I test a model upgrade before rolling it out? [#model-upgrades]
+
+Run the same regression experiment with the new model against the same golden dataset, ideally pinned to the same dataset version, and compare the runs in the experiment comparison view. Record the model name in the experiment metadata so runs stay attributable. This works for provider-forced upgrades too: when a model you depend on is deprecated, the gate tells you whether the replacement clears your thresholds before production does.
+
+### When should a regression block the merge instead of warning? [#block-vs-warn]
+
+Block on deterministic metrics with clear pass criteria, such as format validity, required-content checks, and safety patterns, plus any judge metric that has been stable across enough runs to trust. Warn on judge metrics you are still calibrating: run them in the experiment and post them to the PR comment, but keep them out of the `RegressionError` thresholds (or set `should_fail_on_regression: false` in a separate advisory workflow). Promote a metric from warning to blocking once its baseline has held steady and false alarms have stopped.
+
+### Can I migrate from Promptfoo to Langfuse regression gates? [#migrate-from-promptfoo]
+
+Yes. The concepts map directly: Promptfoo test cases become Langfuse dataset items, assertions become evaluator functions, and the CI invocation becomes `langfuse/experiment-action`. See the step-by-step guide to [migrating from Promptfoo](/resources/engineering/migrate-from-promptfoo) for the concept mapping and code before-and-after.

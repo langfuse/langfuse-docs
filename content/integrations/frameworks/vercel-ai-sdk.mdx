@@ -3,6 +3,7 @@ source: ⚠️ Jupyter Notebook
 title: Observability and Tracing for the Vercel AI SDK
 sidebarTitle: Vercel AI SDK
 logo: /images/integrations/vercel_ai_sdk_icon.png
+logoAppearance: multicolor
 description: Open source observability for Vercel AI SDK applications with Langfuse - metrics, evaluations, prompt management, playground, datasets.
 category: Integrations
 ---
@@ -299,8 +300,9 @@ tracerProvider.register();
 
 The example below shows a chat endpoint that uses the Langfuse `observe()` wrapper to create a trace, adds session and user metadata, and properly handles streaming responses. Concretely:
 
-- `observe()` creates a Langfuse trace around your handler
+- `observe()` creates a root observation around your handler
 - `propagateAttributes()` adds session and user metadata for better trace organization
+- `updateActiveObservation()` sets input and output on the root observation
 - `forceFlush()` ensures traces are sent before the serverless function terminates
 - `endOnExit: false` keeps the observation open until the streaming response completes
 
@@ -314,7 +316,7 @@ import { openai } from "@ai-sdk/openai";
 import {
   observe,
   propagateAttributes,
-  setActiveTraceIO,
+  updateActiveObservation,
 } from "@langfuse/tracing";
 import { trace } from "@opentelemetry/api";
 
@@ -328,13 +330,12 @@ const handler = async (req: Request) => {
   }: { messages: UIMessage[]; chatId: string; userId: string } =
     await req.json();
 
-  // Set session id and user id on active trace
   const inputText = messages[messages.length - 1].parts.find(
     (part) => part.type === "text"
   )?.text;
 
-  // Set input on the active trace
-  setActiveTraceIO({
+  // Set input on the root observation
+  updateActiveObservation({
     input: inputText,
   });
 
@@ -353,16 +354,16 @@ const handler = async (req: Request) => {
           isEnabled: true,
         },
         onFinish: async (result) => {
-          // Update trace with final output after stream completes
-          setActiveTraceIO({
+          // Set final output on the root observation after stream completes
+          updateActiveObservation({
             output: result.content,
           });
 
           // End span manually after stream has finished
-          trace.getActiveSpan().end();
+          trace.getActiveSpan()?.end();
         },
         onError: async (error) => {
-          setActiveTraceIO({
+          updateActiveObservation({
             output: error,
           });
 

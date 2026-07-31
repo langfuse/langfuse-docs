@@ -1,20 +1,18 @@
 ---
 title: "Langfuse Tracing and Prompt Management for Azure OpenAI and Langchain"
-description: This cookbook demonstate use of Langfuse with Azure OpenAI and Langchain for prompt versioning and evaluations.
+description: This cookbook demonstrates use of Langfuse with Azure OpenAI and Langchain for prompt versioning and evaluations.
 category: Integrations
 ---
 
 # Langfuse Tracing and Prompt Management for Azure OpenAI and Langchain
 
-This cookbook demonstate use of Langfuse with Azure OpenAI and Langchain for prompt versioning and evaluations.
+This cookbook demonstrates use of Langfuse with Azure OpenAI and Langchain for prompt versioning and evaluations.
 
 ## Setup
 
-_**Note:** This guide uses our Python SDK v2. We have a new, improved SDK available based on OpenTelemetry. Please check out the [SDK v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and simpler to use SDK._
-
 
 ```python
-%pip install --quiet "langfuse<3.0.0" langchain langchain-openai --upgrade
+%pip install --quiet langfuse langchain langchain-openai --upgrade
 ```
 
 
@@ -24,7 +22,7 @@ import os
 # get keys for your project from https://cloud.langfuse.com
 os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-***")
 os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-***")
-os.environ.setdefault("LANGFUSE_HOST", "https://cloud.langfuse.com") # for EU data region
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # your azure openai configuration
@@ -38,12 +36,14 @@ We'll use the native Langfuse integration for Langchain. Learn more it in the [d
 
 
 ```python
-from langfuse.callback import CallbackHandler
+from langfuse import get_client
+from langfuse.langchain import CallbackHandler
 
+# Initialize Langfuse CallbackHandler for Langchain (tracing)
 langfuse_handler = CallbackHandler()
 
 # optional, verify your Langfuse credentials
-langfuse_handler.auth_check()
+get_client().auth_check()
 ```
 
 Langchain imports
@@ -51,14 +51,11 @@ Langchain imports
 
 ```python
 from langchain_openai import AzureChatOpenAI
-from langchain.chains import LLMChain
-from langchain.prompts import PromptTemplate
-from langchain.prompts.chat import (
+from langchain_core.prompts import (
     ChatPromptTemplate,
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
-from langchain.schema import HumanMessage
 ```
 
 ## Simple example
@@ -66,8 +63,8 @@ from langchain.schema import HumanMessage
 
 ```python
 from langchain_openai import AzureChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-from langfuse.callback import CallbackHandler
+from langchain_core.prompts import ChatPromptTemplate
+from langfuse.langchain import CallbackHandler
 
 langfuse_handler = CallbackHandler()
 
@@ -90,8 +87,8 @@ Learn more about Langfuse Prompt Management in the [docs](https://langfuse.com/d
 
 ```python
 # Initialize the Langfuse Client
-from langfuse import Langfuse
-langfuse = Langfuse()
+from langfuse import get_client
+langfuse = get_client()
 
 template = """
 You are an AI assistant travel assistant that provides vacation recommendations to users. 
@@ -102,7 +99,7 @@ You should also be able to provide information about the weather, local customs,
 langfuse.create_prompt(
     name="travel_consultant",
     prompt=template,
-    is_active=True,
+    labels=["production"],
 )
 ```
 
@@ -132,13 +129,14 @@ human_message_prompt = HumanMessagePromptTemplate.from_template("{text}")
 chat_prompt = ChatPromptTemplate.from_messages(
     [system_message_prompt, human_message_prompt]
 )
-chain = LLMChain(llm=llm, prompt=chat_prompt)
-result = chain.run(
-    f"Where should I go on vaction in Decemember for warm weather and beaches?",
-    callbacks=[langfuse_handler],
+chain = chat_prompt | llm
+
+result = chain.invoke(
+    {"text": "Where should I go on vacation in December for warm weather and beaches?"},
+    config={"callbacks": [langfuse_handler]},
 )
 
-print(result)
+print(result.content)
 ```
 
 ## Multiple Langchain runs in same Langfuse trace
@@ -148,8 +146,8 @@ Langchain setup
 
 ```python
 from langchain_openai import AzureChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-from langchain.schema import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
 from operator import itemgetter
 
 prompt1 = ChatPromptTemplate.from_template(
@@ -171,45 +169,49 @@ chain2 = (
 )
 ```
 
-Run the chain multiple times within the same Langfuse trace.
+Run the chain multiple times within the same Langfuse trace by wrapping the invocations in an enclosing span (created via `start_as_current_observation`). Trace attributes such as `user_id` are set via `propagate_attributes`.
 
 
 ```python
-# Create trace using Langfuse Client
-langfuse = Langfuse()
-trace = langfuse.trace(name="chain_of_thought_example", user_id="user-1234")
+from langfuse import get_client, propagate_attributes
+from langfuse.langchain import CallbackHandler
 
-# Create a handler scoped to this trace
-langfuse_handler = trace.get_langchain_handler()
+langfuse = get_client()
+langfuse_handler = CallbackHandler()
 
-# First run
-chain2.invoke(
-    {"type": "business", "language": "german"}, config={"callbacks": [langfuse_handler]}
-)
+# Create an enclosing span to group both runs into a single trace
+with langfuse.start_as_current_observation(
+    as_type="span", name="chain_of_thought_example"
+) as root_span:
+    with propagate_attributes(user_id="user-1234"):
+        # First run
+        chain2.invoke(
+            {"type": "business", "language": "german"},
+            config={"callbacks": [langfuse_handler]},
+        )
 
-# Second run
-chain2.invoke(
-    {"type": "business", "language": "english"}, config={"callbacks": [langfuse_handler]}
-)
+        # Second run
+        chain2.invoke(
+            {"type": "business", "language": "english"},
+            config={"callbacks": [langfuse_handler]},
+        )
 ```
 
 ## Adding scores
 
 When evaluating traces of your LLM application in Langfuse, you need to add [scores](https://langfuse.com/docs/scores) to the trace. For simplicity, we'll add a mocked score. Check out the docs for more information on complex score types.
 
-Get the trace_id. We use the previous run where we created the trace using `langfuse.trace()`. You can also get the trace_id via `langfuse_handler.get_trace_id()`.
+Get the `trace_id` from the enclosing span of the previous run. Inside an active observation, you can also get it via `langfuse.get_current_trace_id()`.
 
 
 ```python
-trace_id = trace.id
+trace_id = root_span.trace_id
 ```
 
 
 ```python
 # Add score to the trace via the Langfuse Python Client
-langfuse = Langfuse()
-
-trace = langfuse.score(
+langfuse.create_score(
     trace_id=trace_id,
     name="user-explicit-feedback",
     value=1,

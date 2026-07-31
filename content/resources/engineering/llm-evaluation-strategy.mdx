@@ -1,0 +1,191 @@
+---
+title: How to build an LLM evaluation strategy
+description: "How to build an LLM evaluation strategy: quality dimensions from failure modes, evaluator selection, CI release gates, production monitoring, and human review."
+tags: [guide, evaluation]
+---
+
+# How to build an LLM evaluation strategy
+
+Most LLM evaluation content explains methods: what a judge prompt looks like, how to compute similarity, when exact match is enough. Rolling evaluation out across a team is a different problem. Someone has to decide which dimensions of quality matter for this application, which method measures each one, what score blocks a release, and what evidence exists when leadership asks how you know the system works. This guide covers that rollout, step by step, with Langfuse as the worked example.
+
+**TL;DR:** An LLM evaluation strategy assigns every quality dimension you care about to the cheapest method that measures it reliably, then wires those measurements into the points where decisions happen: experiments before merging, gates in CI, sampled evaluators on production traffic, and a human review loop for the judgments automation cannot make. Build it in six steps: derive dimensions from observed failure modes, pick a method per dimension, establish an offline baseline with datasets and experiments, gate changes in CI, monitor production with sampled evaluators and alerts, and close the loop by turning production failures into new test cases.
+
+## Why teams need a strategy, not just evaluators
+
+An evaluator without a decision attached produces a number nobody acts on. Teams that "have evals" but cannot say what happens when a score drops have monitoring, not a strategy. A strategy specifies, for every quality dimension:
+
+1. **What** is measured, defined precisely enough that two people would score the same trace the same way.
+2. **How** it is measured: deterministic code, a model judge, or a human reviewer.
+3. **When** it is measured: in experiments before release, on production traffic, or both.
+4. **What happens** when the measurement crosses a threshold: the release is blocked, an alert fires, or a reviewer gets the trace.
+
+This mapping is also the artifact you show people who do not read traces. Engineering leadership wants to know whether the next release regresses quality, and teams operating under regulatory obligations need to show who checked what. "We run a hallucination judge" answers neither; a documented dimension-to-method-to-threshold mapping answers both. The [evaluation core concepts](/docs/evaluation/core-concepts) page covers the underlying building blocks; the rest of this guide is about assembling them.
+
+## Step 1: Define quality dimensions from real failure modes
+
+Derive dimensions from traces, not from a metric catalog. Generic metrics like "coherence" produce scores that never change and never trigger action. Instead, read 50 to 100 real interactions from production or a pilot and write down what actually went wrong. Each recurring failure becomes a candidate dimension:
+
+- The assistant answered a question it should have escalated, which becomes a boolean `out_of_scope_handled` score.
+- The answer omitted a required disclaimer, which becomes a boolean `disclosure_present` score.
+- The response contradicted the retrieved documents, which becomes a numeric `faithfulness` score.
+- The agent called the wrong tool or looped, which becomes trajectory checks like `used_required_tool` and `within_step_budget`.
+
+Resist compound dimensions. A single 1-to-5 "compliance" score hides exactly the information a reviewer needs, so split it into sub-scores, one per named criterion: whether the answer stayed inside the advice boundary, whether required disclosures appeared, whether the tone fit the audience. In Langfuse, each sub-score is its own score config (boolean, categorical, or numeric), and because automated evaluators and human annotators write to the same score configs, their results stay comparable on one timeline.
+
+Start with three to five dimensions. Every dimension you define creates evaluators to maintain and thresholds to argue about, and a short list you act on beats a long list you ignore.
+
+## Step 2: Choose an evaluation method per dimension
+
+Use the cheapest method that measures the dimension reliably: code where the check is decidable, an LLM judge where the check requires reading, and humans where the check requires domain accountability or produces ground truth.
+
+| Method           | Right for                                                                              | Cost and latency             | Consistency                                      |
+| ---------------- | -------------------------------------------------------------------------------------- | ---------------------------- | ------------------------------------------------ |
+| Code evaluators  | Format validation, policy patterns, numeric tolerance, trajectory and tool-call checks | No LLM cost, milliseconds    | Deterministic, same verdict every time           |
+| LLM-as-a-judge   | Faithfulness, helpfulness, tone, reasoning quality                                     | Per-call LLM cost, seconds   | Consistent with a good rubric, not deterministic |
+| Human annotation | Ground truth, judge calibration, domain and compliance sign-off                        | Reviewer time, hours to days | Authoritative, varies between reviewers          |
+
+The strongest setups chain the three: a free deterministic screen runs on everything, the judge runs on what the screen flags plus a sample of the rest, and humans review where the judge is uncertain or the stakes are high. Our [code evaluator examples](/resources/engineering/code-evaluator-examples) page has ten paste-ready deterministic checks to start from. For agent applications, evaluators can read recorded tool calls through a dedicated structured field (available since July 2026), so trajectory dimensions like "did the agent call search before answering" are decidable in code rather than requiring a judge.
+
+## Step 3: Build the offline foundation: datasets, experiments, and CI gates
+
+Before improving anything, establish what current quality is. That takes three pieces:
+
+1. **A dataset that represents reality.** Build it from real traces, not invented examples: in Langfuse you can add any production observation to a [dataset](/docs/evaluation/experiments/datasets) directly from the UI, including batch selection from the observations table. Add hand-written edge cases for the failures you fear but have not seen yet. Expected outputs can come from domain experts correcting real outputs.
+2. **Experiments as the comparison mechanism.** An experiment runs your application against the dataset and applies your evaluators to every output. The first run against your current version is the baseline; every prompt change, model swap, and retrieval tweak afterwards is a comparison against it, not a matter of opinion.
+3. **A gate in CI.** Once experiments exist, run them on every release so a quality regression fails the build the same way a broken unit test does.
+
+For GitHub, the [experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd) setup uses `langfuse/experiment-action`: it loads the dataset (optionally pinned to a version for reproducible runs), executes your experiment script, posts the scores as a PR comment, and fails the job when your script raises `RegressionError`:
+
+```python
+from langfuse import Evaluation, RegressionError, RunnerContext
+
+THRESHOLD = 0.95
+
+
+def answer_support_question(item, **kwargs):
+    ...  # call your application with the dataset item
+
+
+def exact_match(*, output, expected_output, **kwargs):
+    passed = output.strip() == (expected_output or "").strip()
+    return Evaluation(name="exact_match", value=1.0 if passed else 0.0)
+
+
+def avg_accuracy(*, item_results, **kwargs):
+    scores = [
+        e.value
+        for r in item_results
+        for e in r.evaluations
+        if e.name == "exact_match" and isinstance(e.value, (int, float))
+    ]
+    return Evaluation(name="avg_accuracy", value=sum(scores) / len(scores) if scores else 0.0)
+
+
+def experiment(context: RunnerContext):
+    result = context.run_experiment(
+        name="PR gate: support agent",
+        task=answer_support_question,
+        evaluators=[exact_match],
+        run_evaluators=[avg_accuracy],
+    )
+    accuracy = next(
+        (e.value for e in result.run_evaluations if e.name == "avg_accuracy"),
+        None,
+    )
+    if not isinstance(accuracy, (int, float)) or accuracy < THRESHOLD:
+        raise RegressionError(
+            result=result,
+            metric="avg_accuracy",
+            value=float(accuracy) if isinstance(accuracy, (int, float)) else 0.0,
+            threshold=THRESHOLD,
+        )
+    return result
+```
+
+On other CI systems, the same experiment runner works inside Pytest or Vitest, with threshold assertions failing the test suite. Keep the gate dataset small enough to run on every PR (tens to low hundreds of items) and reserve the full regression set for release branches.
+
+## Step 4: Monitor production with sampled evaluators and alerts
+
+Offline evaluation only covers inputs you thought to test, and production traffic will not match your dataset's distribution for long. The online half of the strategy runs evaluators on live traffic:
+
+- **Sampled judges on live observations.** [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) run on production observations matching your filters, with a sampling percentage to control cost. Sampling 5 to 10 percent of traffic is usually enough to see quality trends without paying to judge everything.
+- **Routing evaluators by intent.** Different conversation types deserve different rubrics: an evaluator that scores product advice makes no sense on a billing question. Classify intent in your application, write it to the trace as a tag or metadata, and create one evaluator per intent with a matching filter. Each evaluator then judges only the traffic its rubric was written for.
+- **Alerts on score thresholds.** [Monitors](/docs/metrics/features/monitors) (on Langfuse Cloud) evaluate numeric or categorical score metrics against warning and alert thresholds over a time window, and route breaches to Slack, webhooks, or a GitHub Actions trigger. A falling faithfulness average pages someone before users complain.
+
+One boundary to respect: online evaluator scores are produced asynchronously, after the response has shipped. They are for detecting regressions, routing traces to review, and building datasets, not for blocking a bad answer in flight. If a check must change behavior at request time, it belongs in your application code as a guardrail, and that guardrail's decisions then get evaluated like everything else.
+
+## Step 5: Run the human review loop
+
+Automated scores tell you the trend; humans define what "good" means and catch what rubrics miss. [Annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) make this a workflow instead of screen-sharing: you define which score configs a queue uses, assign reviewers, and route traces, observations, or whole sessions into it for structured scoring.
+
+Four practices make the loop work in a team setting:
+
+- **Human and automated scores share score configs.** Because annotators write to the same score dimensions as your judges, you can put both on one chart, spot where they disagree, and use the human scores as the calibration reference.
+- **Different reviewer groups get different queues.** Engineers can triage flagged traces in one queue while domain or compliance reviewers score the same traffic in a separate queue against their own sub-score criteria. Assignment, score configs, and progress are per queue, so each group sees only the review job meant for them.
+- **Reviewers capture corrections, not just scores.** A reviewer who marks an output wrong can also record what the output should have been via [corrections](/docs/observability/features/corrections). Corrected outputs are exactly the expected outputs your datasets need.
+- **Scoring works retroactively.** Reviewers can annotate historical traces at any time, and automated evaluators can backfill scores over historical observations from the traces table. A criterion you defined this week can still be measured against last quarter's traffic.
+
+The question every team eventually asks is when human review can be reduced in favor of automated thresholds. The mechanism is calibration: have humans and the judge score the same items, measure agreement per dimension, and iterate on the rubric until agreement is stable. Where the judge has earned trust, shift humans from reviewing everything to reviewing judge-flagged items, disagreement cases, and a random sample that verifies the judge itself has not drifted. How much residual human coverage your obligations require is a policy decision for your organization; the strategy's job is to make the trade-off measurable instead of rhetorical.
+
+## Step 6: Close the loop from production failures to the next release
+
+Measurement only pays off when it changes the application. The loop that connects the previous steps:
+
+1. A production trace fails: a score crosses a threshold, an alert fires, or a reviewer flags it.
+2. The trace goes into a dataset, with a corrected expected output where a reviewer supplied one. Your regression set now contains this failure forever.
+3. You iterate on the prompt (or retrieval, or tool definitions) and run an experiment against the updated dataset, comparing the candidate to the current baseline.
+4. If the experiment wins, you promote the change. For prompts managed in Langfuse, promotion means moving the `production` label to the new version; [protected labels](/docs/prompt-management/features/prompt-version-control) restrict who can move it, so an experiment result plus an authorized approver becomes your promotion gate. (Label protection requires the Teams add-on, an Enterprise plan, or self-hosted EE.)
+5. The CI gate from step 3 keeps the fix from silently regressing later.
+
+Each pass through the loop grows the dataset, tightens the evaluators, and makes the next incident shorter. If your team is new to the underlying features, [Langfuse Academy](/academy) walks through this loop end to end, from tracing through datasets and experiments to production monitoring.
+
+## What the strategy produces as evidence in regulated environments
+
+Teams under financial-conduct, consumer-protection, or similar obligations need to demonstrate, not assert, that AI features are quality-controlled. The strategy above produces that evidence as a side effect when four properties hold:
+
+- **Everything is versioned.** Prompts are versioned with labeled deployments, datasets are versioned, and every experiment records which prompt version ran against which dataset version and what it scored. "What was live in March and how did we know it was safe" becomes a lookup, not an archaeology project.
+- **Gates are deterministic where possible.** A code evaluator returns the same verdict on the same input every time, so a release blocked (or passed) by a threshold is a reproducible fact. Deterministic gates are much easier to defend than "the judge felt differently that day."
+- **Every score has an author.** Scores record their source: which evaluator, which pipeline, or which human reviewer. Compliance sub-scores from a named reviewer on a specific trace are per-criterion evidence, which is stronger than a bare approval. On Enterprise plans and self-hosted EE, [audit logs](/docs/administration/audit-logs) additionally record who changed evaluators, prompts, and configuration, with before and after state.
+- **Review coverage is measurable.** Because human review runs through queues with defined score configs, you can state what percentage of traffic was reviewed, by whom, against which criteria, and how reviewer scores tracked automated ones.
+
+Which artifacts your specific regulator expects is a question for your compliance team, not for an engineering guide. The engineering job is to make sure the artifacts exist by construction, so that answering the question does not require a manual evidence-gathering scramble.
+
+## If you already run an in-house evaluation loop
+
+Many teams arrive with a homegrown setup: scripts that score outputs, or an application that critiques and retries its own answers. Keep what works. External evaluation pipelines can [write scores to Langfuse via the SDK](/docs/evaluation/evaluation-methods/scores-via-sdk), so an in-house evaluator coexists with platform-managed ones and its results land on the same traces.
+
+What a platform adds on top of a working loop is mostly organizational:
+
+- **Shared visibility.** Scores live next to the traces they judge, where engineers, product, and reviewers all look, instead of in a notebook one person owns.
+- **Datasets built from production without glue code.** Turning a failed trace into a regression test is a UI action rather than an export script.
+- **Gates maintained as configuration.** CI experiment gates, sampling rates, and thresholds are declared and versioned rather than living in bespoke scripts that decay.
+- **Review tooling you do not have to build.** Annotation queues, reviewer assignment, and score configs replace the internal labeling tool that nobody wants to maintain.
+- **An audit trail.** Score history, versioned prompts and datasets, and (on Enterprise) audit logs exist without extra work.
+
+One distinction worth drawing: a self-repair loop inside the application, where the model critiques and retries its own output, is a runtime behavior, not an evaluation strategy. It changes individual answers, but it cannot tell you whether quality is trending up, whether the retry step actually helps, or what to show a reviewer. You still need external measurement of the system, self-repair included.
+
+## FAQ
+
+### How many quality dimensions should an evaluation strategy start with? [#how-many-dimensions]
+
+Start with three to five, each derived from a failure mode you have observed in real traces. Every dimension carries ongoing cost: an evaluator to maintain, a threshold to defend, and alerts to triage. Expand the list when a new failure mode appears in production, not preemptively.
+
+### Can multiple people review and score the same trace? [#multiple-reviewers]
+
+Yes. Annotation queues in Langfuse support assigning multiple reviewers, and the same traces can be routed to separate queues with different score configs, for example an engineering triage queue and a compliance review queue with its own sub-score criteria. Each score records who created it, so parallel reviews stay attributable.
+
+### Can we score traces retroactively? [#retroactive-scoring]
+
+Yes, in two ways. Humans can annotate any historical trace, observation, or session at any time, and automated evaluators can backfill scores over historical observations by selecting them in the traces table and running an evaluation on the selection (this requires the evaluator's Fast Mode setting). This means a newly defined criterion can be measured against past traffic instead of starting from zero.
+
+### When can automated thresholds replace human review? [#automated-thresholds]
+
+After calibration, and usually partially rather than completely. Have humans and your LLM judge score the same items, measure agreement per dimension, and refine the rubric until agreement is stable. Then reduce human coverage to judge-flagged items, disagreements, and a verification sample; how much residual review you keep for high-stakes flows is a policy decision your measurements should inform.
+
+### How do we evaluate multi-turn conversations rather than single responses? [#multi-turn]
+
+Scores in Langfuse can attach to sessions, not just traces and observations, and annotation queues accept sessions, so human reviewers can score a whole conversation. For automated judges, target an observation that records the full conversation context you want judged, since evaluators read the data present on their target.
+
+### What is the difference between offline and online evaluation? [#offline-vs-online]
+
+Offline evaluation runs your application against a fixed dataset in experiments, before changes ship, and is where baselines and CI gates live. Online evaluation scores live production traffic, sampled to control cost, and is where drift, regressions, and unexpected inputs surface. A complete strategy needs both, connected by datasets that grow from production failures.
