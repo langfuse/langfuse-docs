@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import type { DemoTraceFallbackKind } from "@/lib/demo-public-trace";
 import {
-  getDemoTraceFallbackUrl,
+  DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL,
   getPublicDemoTraceUrl,
 } from "@/lib/demo-public-trace";
 import { rateLimit } from "@/lib/rateLimit";
@@ -17,11 +16,7 @@ const redirectWithoutCaching = (url: string) => {
 };
 
 export async function GET(request: NextRequest) {
-  const fallbackKind: DemoTraceFallbackKind =
-    request.nextUrl.searchParams.get("fallback") === "image-generation"
-      ? "image-generation"
-      : "default";
-  const fallbackUrl = getDemoTraceFallbackUrl(fallbackKind);
+  const fallbackUrl = DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL;
   const traceId = request.nextUrl.searchParams.get("traceId");
   const observationId = request.nextUrl.searchParams.get("observationId");
 

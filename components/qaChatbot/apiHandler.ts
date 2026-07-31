@@ -1,29 +1,18 @@
 import { openai, OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
-import {
-  createUIMessageStream,
-  createUIMessageStreamResponse,
-  streamText,
-  toUIMessageStream,
-  UIMessage,
-  stepCountIs,
-} from "ai";
+import { streamText, UIMessage, stepCountIs } from "ai";
 import { createMCPClient } from "@ai-sdk/mcp";
 import {
   observe,
   propagateAttributes,
   startActiveObservation,
   updateActiveObservation,
-  setActiveTraceAsPublic,
   getActiveTraceId,
 } from "@langfuse/tracing";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp";
 import { flush } from "@/src/instrumentation";
 import { context, trace } from "@opentelemetry/api";
-import {
-  buildDemoTraceRedirectUrl,
-  DEMO_PUBLIC_TRACE_FALLBACK_URL,
-  demoProjectLangfuseClient,
-} from "@/lib/demo-public-trace";
+import { after } from "next/server";
+import { demoProjectLangfuseClient } from "@/lib/demo-public-trace";
 
 const tracedGetPrompt = observe(
   demoProjectLangfuseClient.prompt.get.bind(demoProjectLangfuseClient.prompt),
@@ -112,52 +101,12 @@ export const handler = async (req: Request) => {
       );
 
       const tools = await mcpClient.tools();
-      let publishedTraceUrl: string | undefined;
-      let assistantText = "";
-      let currentText = "";
-      let isTraceFinalized = false;
       let isMcpClientClosed = false;
 
       const closeMcpClient = async () => {
         if (isMcpClientClosed) return;
         isMcpClientClosed = true;
         await mcpClient.close();
-      };
-
-      const finalizeTrace = async (publishTrace: boolean) => {
-        if (isTraceFinalized) return;
-        isTraceFinalized = true;
-
-        runWithActiveSpan(() => {
-          updateActiveObservation(
-            { output: assistantText || currentText },
-            { asType: "generation" },
-          );
-          if (publishTrace) {
-            setActiveTraceAsPublic();
-          }
-          activeSpan?.end();
-        });
-
-        try {
-          await flush();
-          if (publishTrace) {
-            publishedTraceUrl = buildDemoTraceRedirectUrl({
-              traceId,
-              observationId: activeSpan?.spanContext().spanId,
-            });
-          }
-        } catch (error) {
-          console.warn(
-            publishTrace
-              ? "Failed to publish demo trace link"
-              : "Failed to flush demo trace",
-            error,
-          );
-          if (publishTrace) {
-            publishedTraceUrl = DEMO_PUBLIC_TRACE_FALLBACK_URL;
-          }
-        }
       };
 
       const result = streamText({
@@ -182,64 +131,31 @@ export const handler = async (req: Request) => {
             langfusePrompt: true,
           },
         },
+        onFinish: async (result) => {
+          await closeMcpClient();
+
+          const latestText = Array.isArray((result as any).content)
+            ? [...((result as any).content as Array<any>)]
+                .reverse()
+                .find((part: any) => part?.type === "text")?.text
+            : (result as any).content;
+
+          runWithActiveSpan(() => {
+            updateActiveObservation(
+              { output: latestText },
+              { asType: "generation" },
+            );
+            activeSpan?.end();
+          });
+        },
       });
 
-      const uiMessageStream = toUIMessageStream({
-        stream: result.stream,
+      after(async () => await flush());
+
+      return result.toUIMessageStreamResponse({
         generateMessageId: () => traceId ?? crypto.randomUUID(),
         sendSources: true,
         sendReasoning: true,
-      });
-
-      return createUIMessageStreamResponse({
-        stream: createUIMessageStream({
-          async execute({ writer }) {
-            const reader = uiMessageStream.getReader();
-            let streamCompleted = false;
-
-            try {
-              while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                if (value.type === "text-start") {
-                  currentText = "";
-                }
-
-                if (value.type === "text-delta") {
-                  currentText += value.delta;
-                }
-
-                if (value.type === "text-end") {
-                  if (currentText) {
-                    assistantText = currentText;
-                  }
-                  currentText = "";
-                }
-
-                writer.write(value);
-              }
-
-              streamCompleted = true;
-            } finally {
-              await finalizeTrace(streamCompleted);
-              try {
-                if (streamCompleted) {
-                  writer.write({
-                    type: "message-metadata",
-                    messageMetadata: {
-                      traceUrl:
-                        publishedTraceUrl ?? DEMO_PUBLIC_TRACE_FALLBACK_URL,
-                    },
-                  });
-                }
-              } finally {
-                reader.releaseLock();
-                await closeMcpClient();
-              }
-            }
-          },
-        }),
       });
     },
   );
