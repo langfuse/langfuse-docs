@@ -213,6 +213,8 @@ Ingestion writes into both the old and the new tables: compatible SDKs directly,
 Each user can switch to the new read experience via the toggle in the UI, and the new [v2 APIs](#api-changes) become available (both gated by `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN`, default `true`).
 Expect higher server load and S3 costs than `events_only` (comparable to v3 processing) until you complete the [cutover](#cutover).
 
+We also recommend expanding the health check of the **worker** container to `GET /api/health?failIfEventPropagationStuck=true` (port 3030): it returns `503` when the [propagation job](#dual-write) that moves data from older SDKs into the new tables has stopped making progress, so a stuck dual write surfaces in your existing monitoring instead of going unnoticed. The check passes on deployments where the dual write does not run, so it is safe to keep after the cutover. See [health and readiness endpoints](/self-hosting/configuration/health-readiness-endpoints) for probe configuration.
+
 </Tab>
 
 <Tab>
