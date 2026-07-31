@@ -98,6 +98,8 @@ The agent explains the relevant changes during the upgrade. The following sectio
 
 Depending on the existing evaluator, the proposed configuration may target the same observation as before, replace trace fields with values from one observation, or require an instrumentation change so all required values are available together. The [common configuration scenarios](#common-configuration-scenarios) below explains the cases in detail.
 
+When remapping a trace-level evaluator, the default observation filter is `isRootObservation = true`. This targets logical roots, including observations explicitly marked as application roots by the SDK. Review this filter alongside any name or type filters before creating the upgraded evaluator.
+
 **How resulting scores may differ**
 
 Score placement and cardinality may change:
@@ -164,10 +166,13 @@ Filters:
   environment not in ["sdk-experiment"]
   traceName = "user-workflow"
   type = "SPAN"
+  isRootObservation = true
 Variable mapping:
   query = observation.input.key
   generation = observation.output
 ```
+
+The default `isRootObservation = true` filter keeps this example focused on the logical root instead of evaluating every matching observation in the trace.
 
 </details>
 
