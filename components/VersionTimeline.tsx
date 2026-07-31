@@ -43,12 +43,12 @@ const ROWS: { id: string; name: string; segments: Segment[] }[] = [
         className: SEGMENT_STYLES.previous,
       },
       {
-        label: "v3 + v4 Preview",
+        label: "v3 + v4 preview",
         from: { year: 2026, month: 3 },
         to: { year: 2026, month: 11 },
         href: "/docs/v4",
         title:
-          "Since March 10, 2026: v3 with all v4 features available in preview",
+          "Since March 10, 2026: Langfuse v3 with all v4 features available in the Langfuse v4 preview",
         className: SEGMENT_STYLES.preview,
       },
       {
