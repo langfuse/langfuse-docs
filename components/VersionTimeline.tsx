@@ -69,18 +69,18 @@ const ROWS: { id: string; name: string; segments: Segment[] }[] = [
       {
         label: "v3",
         from: { year: 2026, month: 1 },
-        to: { year: 2026, month: 7 },
+        to: { year: 2026, month: 8 },
         href: "/self-hosting/upgrade/versioning#sdk-server",
-        title: "Self-hosted GA version was v3 until July 2026",
+        title:
+          "Self-hosted v3 was the GA version until July 2026; it receives security patches until end of January 2027",
         className: SEGMENT_STYLES.previous,
       },
       {
         label: "v4",
-        from: { year: 2026, month: 7 },
+        from: { year: 2026, month: 8 },
         to: AXIS_END,
         href: "/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4",
-        title:
-          "Self-hosted v4 is generally available since July 29, 2026; follow the v3 to v4 upgrade guide",
+        title: "Self-hosted v4 is generally available since July 29, 2026",
         className: SEGMENT_STYLES.ga,
       },
     ],
