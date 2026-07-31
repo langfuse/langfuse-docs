@@ -4,11 +4,10 @@ import { z } from "zod";
 import {
   observe,
   propagateAttributes,
+  setActiveTraceIO,
   getActiveTraceId,
-  updateActiveObservation,
 } from "@langfuse/tracing";
 import { after } from "next/server";
-import { context, trace } from "@opentelemetry/api";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
 
@@ -47,15 +46,7 @@ const handler = async (req: Request) => {
     },
     async () => {
       const traceId = getActiveTraceId();
-      const activeSpan = trace.getActiveSpan();
-      const runWithActiveSpan = <T>(fn: () => T) =>
-        activeSpan
-          ? context.with(trace.setSpan(context.active(), activeSpan), fn)
-          : fn();
-
-      runWithActiveSpan(() => {
-        updateActiveObservation({ input: text });
-      });
+      setActiveTraceIO({ input: text });
 
       try {
         const result = await generateObject({
@@ -67,10 +58,8 @@ const handler = async (req: Request) => {
           },
         });
 
-        runWithActiveSpan(() => {
-          updateActiveObservation({ output: result.object });
-          activeSpan?.end();
-        });
+        setActiveTraceIO({ output: result.object });
+
         after(async () => await flush());
 
         return new Response(
@@ -94,7 +83,6 @@ const handler = async (req: Request) => {
 
 export const POST = observe(handler, {
   name: "sentiment-classifier",
-  endOnExit: false,
 });
 
 export const maxDuration = 30;

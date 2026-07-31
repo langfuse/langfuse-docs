@@ -6,16 +6,23 @@ import {
   propagateAttributes,
   startActiveObservation,
   updateActiveObservation,
-  getActiveTraceId,
+  setActiveTraceIO,
 } from "@langfuse/tracing";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp";
-import { flush } from "@/src/instrumentation";
-import { context, trace } from "@opentelemetry/api";
+import { LangfuseClient } from "@langfuse/client";
+import { getActiveTraceId } from "@langfuse/tracing";
 import { after } from "next/server";
-import { demoProjectLangfuseClient } from "@/lib/demo-public-trace";
+import { flush } from "@/src/instrumentation";
+import { trace } from "@opentelemetry/api";
+
+const langfuseClient = new LangfuseClient({
+  baseUrl: process.env.NEXT_PUBLIC_EU_LANGFUSE_BASE_URL,
+  publicKey: process.env.NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY,
+  secretKey: process.env.EU_LANGFUSE_SECRET_KEY,
+});
 
 const tracedGetPrompt = observe(
-  demoProjectLangfuseClient.prompt.get.bind(demoProjectLangfuseClient.prompt),
+  langfuseClient.prompt.get.bind(langfuseClient.prompt),
   { name: "get-langfuse-prompt" },
 );
 
@@ -39,16 +46,8 @@ export const handler = async (req: Request) => {
       userId,
     },
     async () => {
-      const traceId = getActiveTraceId();
-      const activeSpan = trace.getActiveSpan();
-      const runWithActiveSpan = <T>(fn: () => T) =>
-        activeSpan
-          ? context.with(trace.setSpan(context.active(), activeSpan), fn)
-          : fn();
-
-      runWithActiveSpan(() => {
-        updateActiveObservation({ input: inputText }, { asType: "generation" });
-      });
+      updateActiveObservation({ input: inputText }, { asType: "generation" });
+      setActiveTraceIO({ input: inputText });
 
       const prompt = await tracedGetPrompt("langfuse-docs-assistant-chat", {
         type: "chat",
@@ -101,13 +100,6 @@ export const handler = async (req: Request) => {
       );
 
       const tools = await mcpClient.tools();
-      let isMcpClientClosed = false;
-
-      const closeMcpClient = async () => {
-        if (isMcpClientClosed) return;
-        isMcpClientClosed = true;
-        await mcpClient.close();
-      };
 
       const result = streamText({
         model: openai(String(prompt.config.model)),
@@ -132,7 +124,7 @@ export const handler = async (req: Request) => {
           },
         },
         onFinish: async (result) => {
-          await closeMcpClient();
+          await mcpClient.close();
 
           const latestText = Array.isArray((result as any).content)
             ? [...((result as any).content as Array<any>)]
@@ -140,20 +132,19 @@ export const handler = async (req: Request) => {
                 .find((part: any) => part?.type === "text")?.text
             : (result as any).content;
 
-          runWithActiveSpan(() => {
-            updateActiveObservation(
-              { output: latestText },
-              { asType: "generation" },
-            );
-            activeSpan?.end();
-          });
+          updateActiveObservation(
+            { output: latestText },
+            { asType: "generation" },
+          );
+          setActiveTraceIO({ output: latestText });
+          trace.getActiveSpan()?.end();
         },
       });
 
       after(async () => await flush());
 
       return result.toUIMessageStreamResponse({
-        generateMessageId: () => traceId ?? crypto.randomUUID(),
+        generateMessageId: () => getActiveTraceId(),
         sendSources: true,
         sendReasoning: true,
       });
