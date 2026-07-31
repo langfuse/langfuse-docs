@@ -4,7 +4,6 @@ import { z } from "zod";
 import {
   observe,
   propagateAttributes,
-  setActiveTraceAsPublic,
   getActiveTraceId,
   updateActiveObservation,
 } from "@langfuse/tracing";
@@ -12,10 +11,6 @@ import { after } from "next/server";
 import { context, trace } from "@opentelemetry/api";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
-import {
-  buildDemoTraceRedirectUrl,
-  DEMO_PUBLIC_TRACE_FALLBACK_URL,
-} from "@/lib/demo-public-trace";
 
 const SentimentSchema = z.object({
   sentiment: z.enum(["positive", "negative", "neutral"]),
@@ -53,7 +48,6 @@ const handler = async (req: Request) => {
     async () => {
       const traceId = getActiveTraceId();
       const activeSpan = trace.getActiveSpan();
-      const rootObservationId = activeSpan?.spanContext().spanId;
       const runWithActiveSpan = <T>(fn: () => T) =>
         activeSpan
           ? context.with(trace.setSpan(context.active(), activeSpan), fn)
@@ -75,22 +69,12 @@ const handler = async (req: Request) => {
 
         runWithActiveSpan(() => {
           updateActiveObservation({ output: result.object });
-          setActiveTraceAsPublic();
           activeSpan?.end();
         });
-        let traceUrl = DEMO_PUBLIC_TRACE_FALLBACK_URL;
-        try {
-          await flush();
-          traceUrl = buildDemoTraceRedirectUrl({
-            traceId,
-            observationId: rootObservationId,
-          });
-        } catch (error) {
-          console.warn("Failed to publish demo trace link", error);
-        }
+        after(async () => await flush());
 
         return new Response(
-          JSON.stringify({ result: result.object, traceId, traceUrl }),
+          JSON.stringify({ result: result.object, traceId }),
           { status: 200, headers: { "Content-Type": "application/json" } },
         );
       } catch (err) {

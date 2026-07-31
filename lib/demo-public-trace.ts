@@ -6,13 +6,8 @@ export const demoProjectLangfuseClient = new LangfuseClient({
   secretKey: process.env.EU_LANGFUSE_SECRET_KEY,
 });
 
-export const DEMO_PUBLIC_TRACE_FALLBACK_URL =
-  "https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces/da6ce560ef05a1cf2215722e130d1dbc?observation=23d18c604943f460";
-
 export const DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL =
   "https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces/065031c8732a2ee49a4631de846a0eda?observation=d7e0df7ae717629e";
-
-export type DemoTraceFallbackKind = "default" | "image-generation";
 
 const READINESS_POLL_DELAYS_MS = [0, 500, 1_000, 2_000, 4_000] as const;
 
@@ -25,28 +20,20 @@ const withObservationId = (traceUrl: string, observationId: string) => {
   return url.toString();
 };
 
-export const getDemoTraceFallbackUrl = (fallbackKind: DemoTraceFallbackKind) =>
-  fallbackKind === "image-generation"
-    ? DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL
-    : DEMO_PUBLIC_TRACE_FALLBACK_URL;
-
 export const buildDemoTraceRedirectUrl = ({
   traceId,
   observationId,
-  fallbackKind = "default",
 }: {
   traceId?: string | null;
   observationId?: string | null;
-  fallbackKind?: DemoTraceFallbackKind;
 }) => {
   if (!traceId || !observationId) {
-    return getDemoTraceFallbackUrl(fallbackKind);
+    return DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL;
   }
 
   const params = new URLSearchParams({
     traceId,
     observationId,
-    fallback: fallbackKind,
   });
 
   return `/api/demo-public-trace?${params.toString()}`;
@@ -54,7 +41,7 @@ export const buildDemoTraceRedirectUrl = ({
 
 export const getPublicDemoTraceUrl = async (
   traceId?: string | null,
-  fallbackUrl = DEMO_PUBLIC_TRACE_FALLBACK_URL,
+  fallbackUrl = DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL,
   observationId?: string | null,
 ): Promise<string> => {
   if (!traceId) return fallbackUrl;
