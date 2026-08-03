@@ -6,6 +6,16 @@ description: Retrieve experiment runs, items, outputs, and evaluation scores fro
 
 # Experiments API
 
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "v4",
+  }}
+/>
+
 The Experiments API lets you retrieve experiment data from Langfuse for
 analysis, evaluation pipelines, notebooks, and CI/CD workflows. An experiment
 is a run of your application against test data. Each experiment item represents
@@ -19,8 +29,8 @@ For the complete request and response contract, see the
 
 | If you want to...                                                                           | Use                                                                                                         |
 | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| List experiment runs and their summaries                                                    | `GET /api/public/experiments`                                                                               |
-| Retrieve experiment items and their inputs, outputs, expected outputs, metadata, and scores | `GET /api/public/experiment-items`                                                                          |
+| List experiment runs and their summaries                                                    | `GET /api/public/experiments?fromStartTime=2026-01-01T00:00:00Z`                                            |
+| Retrieve experiment items and their inputs, outputs, expected outputs, metadata, and scores | `GET /api/public/experiment-items?fromStartTime=2026-01-01T00:00:00Z`                                       |
 | Retrieve the complete trace and observation tree for an item                                | [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2), using the item's `traceId` |
 | Query evaluation scores independently                                                       | [Scores API v3](/docs/api-and-data-platform/features/scores-api#v3)                                         |
 
