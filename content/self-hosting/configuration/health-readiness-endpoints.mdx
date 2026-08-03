@@ -70,6 +70,25 @@ When using this parameter in a Kubernetes liveness probe, set `initialDelaySecon
 
 </Callout>
 
+**Queue consumption liveness:**
+
+Connectivity checks alone cannot detect a worker whose queue consumers have silently stopped — for example after a Redis incident that invalidates BullMQ job locks (`FLUSHALL`, key eviction, failover; see the [cache configuration guide](/self-hosting/deployment/infrastructure/cache#worker-liveness)). A dedicated probe can fail when no queue processes jobs anymore:
+
+```bash
+curl "http://localhost:3030/api/health?failIfQueueConsumptionStuck=true"
+```
+
+- Returns `503` when the worker has neither picked up nor completed a single job — across all queues — for more than `LANGFUSE_QUEUE_CONSUMPTION_STUCK_THRESHOLD_MINUTES` (default `60`). The response body includes diagnostics (registered consumers, last job activity).
+- Built-in scheduled jobs keep a healthy worker busy at least once per hour, so use this parameter in a liveness probe to restart a wedged container automatically.
+- The signal is tracked in memory per container and measured from worker startup, so a freshly started container gets the full threshold as grace period; no `initialDelaySeconds` requirement applies.
+- Containers that run no queue consumers never fail this check.
+
+<Callout type="info">
+
+In deployments with many worker replicas and little traffic, each scheduled job runs on only one replica. If replicas can legitimately sit idle for long periods, raise the threshold to avoid unnecessary restarts.
+
+</Callout>
+
 ## Readiness Check Endpoint
 
 The readiness check indicates whether the web application is ready to receive traffic, particularly useful during graceful shutdowns.

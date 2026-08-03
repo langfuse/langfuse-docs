@@ -16,32 +16,39 @@ This notebook demonstrates how to **integrate Langfuse** into your **Temporal wo
 
 > **What is Langfuse?**: [Langfuse](https://langfuse.com/) is an open-source observability platform for AI agents and LLM applications. It helps you visualize and monitor LLM calls, tool usage, cost, latency, and more.
 
-## Use Case: Deep Research Agent with Temporal
+## Use Case: AI Ticket Triage with Human Approval
 
-In this example, we'll build a **deep research agent** that:
+In this example, we build a support ticket triage pipeline that:
 
-- Uses Temporal workflows to orchestrate long-running research tasks
-- Leverages the OpenAI Agents SDK for research planning and content generation
+- Uses a Temporal workflow to orchestrate the triage steps durably
+- Calls an LLM from Temporal activities to classify the ticket and draft a reply
+- Waits for a human approval, delivered to the workflow as a Temporal update
 - Sends all observability data to Langfuse via OpenTelemetry
+
+The integration is built on Temporal's OpenTelemetry support ([`temporalio.contrib.opentelemetry`](https://python.temporal.io/temporalio.contrib.opentelemetry.html)) together with Langfuse's [native OpenTelemetry endpoint](https://langfuse.com/integrations/native/opentelemetry) — no Langfuse-specific SDK is required:
+
+- **`OpenTelemetryPlugin`** emits spans for Temporal operations (`StartWorkflow`, `RunWorkflow`, `RunActivity`, `HandleUpdate`, ...) and propagates trace context across the client, workflow, and activity boundaries, so everything lands in a single, correctly nested Langfuse trace — even when workflows and activities run on different workers.
+- **Replay-safe tracing**: Temporal replays workflow code to recover state after worker restarts and failures. The plugin's tracer provider generates deterministic span IDs and emits each span exactly once, so replays never produce duplicate observations in Langfuse.
+- **LLM calls run in Temporal activities** and are auto-instrumented, so Langfuse renders them as generation observations — with model, token usage, cost, and prompt/completion content — nested under the activity that made them.
 
 This setup allows you to:
 
-- **Track workflow execution**: See all workflow runs, activities, and their status
+- **Track workflow execution**: See workflow runs, activities, and update handlers with real durations and status
 - **Monitor LLM calls**: View prompts, completions, token usage, and costs
-- **Debug failures**: Identify bottlenecks and errors in your research pipeline
-- **Evaluate quality**: Assess the quality of research outputs over time
+- **Debug failures**: Identify bottlenecks, retries, and errors in your pipeline
+- **Group and filter**: Use Langfuse sessions, users, and tags to organize traces per workflow run
 
 ## 1. Install Dependencies
 
-Install Temporal SDK, OpenTelemetry packages, and Langfuse:
+Install the Temporal SDK (with its OpenTelemetry extra), the OpenAI SDK, the OTLP exporter, and OpenTelemetry instrumentation for OpenAI:
 
 ```python
-%pip install temporalio openai openai-agents langfuse openinference-instrumentation-openai-agents
+%pip install "temporalio[opentelemetry]" openai opentelemetry-exporter-otlp-proto-http openinference-instrumentation-openai
 ```
 
 ## 2. Configure Environment & API Keys
 
-Set up your Langfuse, Temporal, and OpenAI credentials. You can get Langfuse keys by signing up for a free [Langfuse Cloud](https://langfuse.com/cloud) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting).
+Set up your Langfuse, OpenAI, and Temporal credentials. You can get Langfuse keys by signing up for a free [Langfuse Cloud](https://langfuse.com/cloud) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting).
 
 ```python
 import os
@@ -49,205 +56,306 @@ import os
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
 os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...");
 os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...");
-os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com");  # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
-# Your openai key
+# Your OpenAI key (any OpenAI-compatible endpoint also works via OPENAI_BASE_URL)
 os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...");
 
-# Temporal server address (use Temporal Cloud or local dev server)
-os.environ.setdefault("TEMPORAL_HOST", "localhost:7233");
+# Temporal server address (defaults to a local dev server). For Temporal
+# Cloud, set TEMPORAL_ADDRESS to your Cloud gRPC endpoint, TEMPORAL_NAMESPACE
+# to your Cloud namespace, and TEMPORAL_API_KEY to an API key.
+os.environ.setdefault("TEMPORAL_ADDRESS", "localhost:7233");
 os.environ.setdefault("TEMPORAL_NAMESPACE", "default");
-os.environ.setdefault("TEMPORAL_TASK_QUEUE", "agents-task-queue");
+TASK_QUEUE = "langfuse-tracing-task-queue"
 ```
 
-    'agents-task-queue'
+## 3. Connect OpenTelemetry to Langfuse
 
-## 3. OpenTelemetry Tracing for OpenAI Agents
+Create a tracer provider with [`create_tracer_provider`](https://python.temporal.io/temporalio.contrib.opentelemetry.html) from the Temporal SDK and attach a standard OTLP exporter pointed at Langfuse's OpenTelemetry endpoint. Langfuse authenticates OTLP requests with Basic auth built from your project API keys.
 
-Use the [`OpenAIAgentsInstrumentor`](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-openai-agents/examples) library to wrap the OpenaAI Agents SDK and send OpenTelemetry spans to Langfuse.
+The provider returned by `create_tracer_provider` is what makes tracing safe under Temporal's durable execution model: span IDs are generated deterministically from workflow state, and spans are not re-exported when Temporal replays workflow code — each logical span reaches Langfuse exactly once.
 
 ```python
-from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
+import base64
 
-OpenAIAgentsInstrumentor().instrument()
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from temporalio.contrib.opentelemetry import create_tracer_provider
+
+LANGFUSE_AUTH = base64.b64encode(
+    f"{os.environ['LANGFUSE_PUBLIC_KEY']}:{os.environ['LANGFUSE_SECRET_KEY']}".encode()
+).decode()
+
+exporter = OTLPSpanExporter(
+    # Langfuse's OTLP endpoint is HTTP-based, so use the http exporter (not grpc).
+    endpoint=f"{os.environ['LANGFUSE_BASE_URL'].rstrip('/')}/api/public/otel/v1/traces",
+    headers={
+        "Authorization": f"Basic {LANGFUSE_AUTH}",
+        "x-langfuse-ingestion-version": "4",  # real-time ingestion
+    },
+)
+
+# Replay-safe tracer provider from the Temporal SDK: deterministic span IDs,
+# spans emitted exactly once even when Temporal replays workflow code.
+provider = create_tracer_provider(
+    resource=Resource.create({SERVICE_NAME: "ticket-triage"})
+)
+provider.add_span_processor(BatchSpanProcessor(exporter, schedule_delay_millis=500))
+trace.set_tracer_provider(provider)
 ```
 
-## 4. Initialize Langfuse Client
-
-Verify the Langfuse connection:
+Verify that your Langfuse credentials work:
 
 ```python
-from langfuse import get_client
+import json
+import urllib.request
 
-langfuse = get_client()
-
-# Verify connection
-if langfuse.auth_check():
-    print("✅ Langfuse client is authenticated and ready!")
-else:
-    print("❌ Authentication failed. Please check your credentials and host.")
+request = urllib.request.Request(
+    f"{os.environ['LANGFUSE_BASE_URL'].rstrip('/')}/api/public/projects",
+    headers={"Authorization": f"Basic {LANGFUSE_AUTH}"},
+)
+try:
+    with urllib.request.urlopen(request, timeout=10):
+        print("✅ Langfuse credentials verified!")
+except Exception as exc:
+    print(f"❌ Could not verify Langfuse credentials: {exc}")
 ```
 
-## 5. Define Temporal Activities
+    ✅ Langfuse credentials verified!
 
-Create activities that will be executed as part of the research workflow. Each activity represents a discrete step in the research process.
+## 4. Instrument the OpenAI SDK
+
+[OpenInference's OpenAI instrumentation](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-openai) records every OpenAI API call as an OpenTelemetry span carrying the model name, token usage, and prompt/completion content, which Langfuse renders as a generation observation. Because the LLM calls in this example run inside Temporal activities, these spans automatically nest under the corresponding activity spans.
+
+Any OpenTelemetry-based instrumentation works here — see the [Langfuse OpenTelemetry docs](https://langfuse.com/integrations/native/opentelemetry) for other options.
 
 ```python
-from __future__ import annotations
+from openinference.instrumentation.openai import OpenAIInstrumentor
 
-import asyncio
-from temporalio import workflow
-from agents import Agent, RunConfig, Runner, WebSearchTool, custom_span, gen_trace_id, trace
-from agents.model_settings import ModelSettings
-from pydantic import BaseModel
+OpenAIInstrumentor().instrument()
+```
 
-# Planner Agent Models
-class WebSearchItem(BaseModel):
-    reason: str
-    "Your reasoning for why this search is important to the query."
+## 5. Define the Activities
 
-    query: str
-    "The search term to use for the web search."
+In Temporal, all I/O — including LLM calls — belongs in activities. Temporal retries activities according to a retry policy you control, and every attempt is visible in both the Temporal UI and Langfuse. Workflow code stays deterministic and is loaded by Temporal's workflow sandbox, so the workflow and its activities are defined in importable modules: in a notebook we write the files with `%%writefile`; in your application these are ordinary source files.
 
-class WebSearchPlan(BaseModel):
-    searches: list[WebSearchItem]
-    """A list of web searches to perform to best answer the query."""
+```python
+%%writefile ticket_triage_activities.py
+"""Activities for the ticket triage workflow. All I/O and LLM calls live here."""
 
-# Writer Agent Models
-class ReportData(BaseModel):
-    short_summary: str
-    """A short 2-3 sentence summary of the findings."""
+import json
+import os
+from dataclasses import dataclass
+from typing import Optional
 
-    markdown_report: str
-    """The final report"""
+from openai import AsyncOpenAI
+from temporalio import activity
 
-    follow_up_questions: list[str]
-    """Suggested topics to research further"""
 
-# Agent factory functions
-def new_planner_agent():
-    return Agent(
-        name="PlannerAgent",
-        instructions=(
-            "You are a helpful research assistant. Given a query, come up with a set of web searches "
-            "to perform to best answer the query. Output between 5 and 20 terms to query for."
-        ),
-        model="gpt-4o",
-        output_type=WebSearchPlan,
+@dataclass
+class Ticket:
+    ticket_id: str
+    customer_email: str
+    subject: str
+    body: str
+
+
+@dataclass
+class Classification:
+    category: str
+    priority: str
+
+
+@dataclass
+class AccountInfo:
+    customer_email: str
+    account_name: str
+    plan: str
+
+
+@dataclass
+class DraftReplyInput:
+    ticket: Ticket
+    classification: Classification
+    account: AccountInfo
+
+
+@dataclass
+class ApprovalDecision:
+    approved: bool
+    reviewer: str
+
+
+@dataclass
+class TriageResult:
+    status: str
+    reply: Optional[str] = None
+
+
+def _openai_client() -> AsyncOpenAI:
+    # max_retries=0: Temporal's activity retry policy owns retries instead of
+    # the OpenAI client, with full visibility in the Temporal UI.
+    return AsyncOpenAI(max_retries=0)
+
+
+def _model() -> str:
+    return os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+
+
+@activity.defn
+async def classify_ticket(ticket: Ticket) -> Classification:
+    response = await _openai_client().chat.completions.create(
+        model=_model(),
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "Classify the support ticket. Respond with ONLY a JSON object like "
+                    '{"category": "billing|bug|how-to|other", "priority": "low|normal|high"}.'
+                ),
+            },
+            {"role": "user", "content": f"{ticket.subject}\n\n{ticket.body}"},
+        ],
     )
-
-def new_search_agent():
-    return Agent(
-        name="Search agent",
-        instructions=(
-            "You are a research assistant. Given a search term, you search the web for that term and "
-            "produce a concise summary of the results. The summary must 2-3 paragraphs and less than 300 "
-            "words. Capture the main points. Write succinctly, no need to have complete sentences or good "
-            "grammar. This will be consumed by someone synthesizing a report, so its vital you capture the "
-            "essence and ignore any fluff. Do not include any additional commentary other than the summary "
-            "itself."
-        ),
-        tools=[WebSearchTool()],
-        model_settings=ModelSettings(tool_choice="required"),
-    )
-
-def new_writer_agent():
-    return Agent(
-        name="WriterAgent",
-        instructions=(
-            "You are a senior researcher tasked with writing a cohesive report for a research query. "
-            "You will be provided with the original query, and some initial research done by a research "
-            "assistant.\n"
-            "You should first come up with an outline for the report that describes the structure and "
-            "flow of the report. Then, generate the report and return that as your final output.\n"
-            "The final output should be in markdown format, and it should be lengthy and detailed. Aim "
-            "for 5-10 pages of content, at least 1000 words."
-        ),
-        model="o3-mini",
-        output_type=ReportData,
-    )
-```
-
-## 6. Define Temporal Workflow
-
-Create a workflow that orchestrates the research activities. Temporal ensures the workflow executes reliably, even if failures occur.
-
-```python
-class ResearchManager:
-    def __init__(self):
-        self.run_config = RunConfig()
-        self.search_agent = new_search_agent()
-        self.planner_agent = new_planner_agent()
-        self.writer_agent = new_writer_agent()
-
-    async def run(self, query: str) -> str:
-        trace_id = gen_trace_id()
-        with trace("Research trace", trace_id=trace_id):
-            search_plan = await self._plan_searches(query)
-            search_results = await self._perform_searches(search_plan)
-            report = await self._write_report(query, search_results)
-
-        return report.markdown_report
-
-    async def _plan_searches(self, query: str) -> WebSearchPlan:
-        result = await Runner.run(
-            self.planner_agent,
-            f"Query: {query}",
-            run_config=self.run_config,
+    text = response.choices[0].message.content or ""
+    try:
+        data = json.loads(text[text.index("{") : text.rindex("}") + 1])
+        return Classification(
+            category=str(data.get("category", "other")),
+            priority=str(data.get("priority", "normal")),
         )
-        return result.final_output_as(WebSearchPlan)
+    except ValueError:
+        return Classification(category="other", priority="normal")
 
-    async def _perform_searches(self, search_plan: WebSearchPlan) -> list[str]:
-        with custom_span("Search the web"):
-            num_completed = 0
-            tasks = [
-                asyncio.create_task(self._search(item)) for item in search_plan.searches
-            ]
-            results = []
-            for task in workflow.as_completed(tasks):
-                result = await task
-                if result is not None:
-                    results.append(result)
-                num_completed += 1
-            return results
 
-    async def _search(self, item: WebSearchItem) -> str | None:
-        input = f"Search term: {item.query}\nReason for searching: {item.reason}"
-        try:
-            result = await Runner.run(
-                self.search_agent,
-                input,
-                run_config=self.run_config,
-            )
-            return str(result.final_output)
-        except Exception:
-            return None
+@activity.defn
+async def lookup_account(customer_email: str) -> AccountInfo:
+    # A non-LLM activity: appears in Langfuse as a plain span observation
+    # alongside the generation observations from the LLM activities.
+    return AccountInfo(
+        customer_email=customer_email, account_name="Acme Corp", plan="enterprise"
+    )
 
-    async def _write_report(self, query: str, search_results: list[str]) -> ReportData:
-        input = f"Original query: {query}\nSummarized search results: {search_results}"
-        result = await Runner.run(
-            self.writer_agent,
-            input,
-            run_config=self.run_config,
-        )
 
-        return result.final_output_as(ReportData)
+@activity.defn
+async def draft_reply(input: DraftReplyInput) -> str:
+    response = await _openai_client().chat.completions.create(
+        model=_model(),
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You are a support agent. Draft a short, friendly reply (under 120 "
+                    "words) using the provided classification and account details."
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Ticket: {input.ticket.subject}\n{input.ticket.body}\n\n"
+                    f"Category: {input.classification.category}, "
+                    f"priority: {input.classification.priority}\n"
+                    f"Account: {input.account.account_name} ({input.account.plan} plan)"
+                ),
+            },
+        ],
+    )
+    return response.choices[0].message.content or ""
 ```
 
+    Writing ticket_triage_activities.py
+
+## 6. Define the Workflow
+
+The workflow orchestrates the activities and then waits — durably — for a human decision, delivered as a Temporal update. Workflow code is fully deterministic and runs inside Temporal's standard workflow sandbox.
+
+With the OpenTelemetry plugin, the regular OpenTelemetry API also works inside workflow code: the custom `triage` span below gets a deterministic span ID and is emitted exactly once, no matter how many times Temporal replays the workflow.
+
 ```python
+%%writefile ticket_triage_workflow.py
+"""Ticket triage workflow: deterministic, sandboxed, and fully traced."""
+
+from datetime import timedelta
+from typing import Optional
+
 from temporalio import workflow
+from temporalio.common import RetryPolicy
+
+with workflow.unsafe.imports_passed_through():
+    from opentelemetry import trace
+
+    from ticket_triage_activities import (
+        ApprovalDecision,
+        Classification,
+        DraftReplyInput,
+        Ticket,
+        TriageResult,
+        classify_ticket,
+        draft_reply,
+        lookup_account,
+    )
+
+# Bounded retries so a misconfigured LLM endpoint or API key fails fast.
+LLM_RETRY_POLICY = RetryPolicy(maximum_attempts=3)
+
 
 @workflow.defn
-class ResearchWorkflow:
+class TicketTriageWorkflow:
+    def __init__(self) -> None:
+        self._approval: Optional[ApprovalDecision] = None
+
     @workflow.run
-    async def run(self, query: str) -> str:
-        return await ResearchManager().run(query)
+    async def run(self, ticket: Ticket) -> TriageResult:
+        # A custom span grouping the two triage steps — plain OpenTelemetry,
+        # replay-safe under the plugin's tracer provider.
+        with trace.get_tracer(__name__).start_as_current_span("triage"):
+            classification: Classification = await workflow.execute_activity(
+                classify_ticket,
+                ticket,
+                start_to_close_timeout=timedelta(seconds=60),
+                retry_policy=LLM_RETRY_POLICY,
+            )
+            account = await workflow.execute_activity(
+                lookup_account,
+                ticket.customer_email,
+                start_to_close_timeout=timedelta(seconds=10),
+            )
+
+        # Durably wait for a human decision, delivered as a Temporal update.
+        await workflow.wait_condition(lambda: self._approval is not None)
+        assert self._approval is not None
+        if not self._approval.approved:
+            return TriageResult(status="declined")
+
+        reply = await workflow.execute_activity(
+            draft_reply,
+            DraftReplyInput(
+                ticket=ticket, classification=classification, account=account
+            ),
+            start_to_close_timeout=timedelta(seconds=60),
+            retry_policy=LLM_RETRY_POLICY,
+        )
+        return TriageResult(status="replied", reply=reply)
+
+    @workflow.update
+    async def approve(self, decision: ApprovalDecision) -> str:
+        self._approval = decision
+        return "approved" if decision.approved else "declined"
+
+    @approve.validator
+    def approve_validator(self, decision: ApprovalDecision) -> None:
+        if decision.approved and not decision.reviewer:
+            raise ValueError("approval requires a reviewer")
 ```
+
+    Writing ticket_triage_workflow.py
 
 ## 7. Run the Workflow
 
-When you execute the research workflow, both Temporal `OpenAIAgentsPlugin` and the OpenInference `OpenAIAgentsInstrumentor` will send OTel spans to Langfuse.
+Register `OpenTelemetryPlugin(add_temporal_spans=True)` on the Temporal client — workers created from that client inherit it automatically. The plugin propagates trace context across every boundary and emits spans for Temporal operations, so the client, workflow, activities, and LLM calls all join one Langfuse trace. Langfuse trace-level attributes (name, session, user, tags) are set on a root span around the whole interaction; using the workflow ID as the Langfuse session ID makes it easy to find the trace for any workflow run.
 
 **Note**: This requires a running Temporal server. You can start a local dev server with:
 
@@ -255,58 +363,162 @@ When you execute the research workflow, both Temporal `OpenAIAgentsPlugin` and t
 temporal server start-dev
 ```
 
+In production, the worker runs in its own process (and the starter in another); a notebook runs them side by side for convenience.
+
 ```python
-import sys
-import os
+import uuid
+
 from temporalio.client import Client
+from temporalio.contrib.opentelemetry import OpenTelemetryPlugin
 from temporalio.worker import Worker
-from temporalio.contrib.openai_agents import OpenAIAgentsPlugin
-from temporalio.worker import UnsandboxedWorkflowRunner
 
-async def main():
-    tls = os.environ.get("TEMPORAL_TLS", "").lower() in ("1", "true", "yes")
-    api_key = os.environ.get("TEMPORAL_API_KEY")
+from ticket_triage_activities import (
+    ApprovalDecision,
+    Ticket,
+    classify_ticket,
+    draft_reply,
+    lookup_account,
+)
+from ticket_triage_workflow import TicketTriageWorkflow
 
-    plugin = OpenAIAgentsPlugin()
 
+async def main() -> None:
+    # TEMPORAL_API_KEY authenticates to Temporal Cloud (TLS is enabled
+    # automatically when an API key is used); leave it unset for a local
+    # dev server.
+    api_key = os.environ.get("TEMPORAL_API_KEY") or None
     client = await Client.connect(
-        target_host=os.environ.get("TEMPORAL_ADDRESS", "localhost:7233"),
-        namespace=os.environ.get("TEMPORAL_NAMESPACE", "default"),
-        api_key=api_key or None,
-        tls=tls,
-        plugins=[plugin]
+        os.environ["TEMPORAL_ADDRESS"],
+        namespace=os.environ["TEMPORAL_NAMESPACE"],
+        api_key=api_key,
+        tls=api_key is not None,
+        # Emits spans for Temporal operations and propagates trace context
+        # across the client, workflow, and activity boundaries.
+        plugins=[OpenTelemetryPlugin(add_temporal_spans=True)],
     )
 
     worker = Worker(
         client,
-        task_queue=os.environ.get("TEMPORAL_TASK_QUEUE", "openai-agents-task-queue"),
-        workflows=[ResearchWorkflow],
-        workflow_runner=UnsandboxedWorkflowRunner()
+        task_queue=TASK_QUEUE,
+        workflows=[TicketTriageWorkflow],
+        activities=[classify_ticket, lookup_account, draft_reply],
+    )
+
+    # A fresh workflow ID per run avoids Temporal workflow ID conflicts and
+    # gives each run its own Langfuse session; the trace itself is keyed by
+    # the root span opened below, which is new on every run.
+    workflow_id = f"ticket-triage-{uuid.uuid4().hex[:8]}"
+    ticket = Ticket(
+        ticket_id="T-1001",
+        customer_email="ada@acme.example",
+        subject="Charged twice for the July invoice",
+        body=(
+            "My card statement shows two identical charges for our July invoice. "
+            "Can you refund the duplicate?"
+        ),
     )
 
     async with worker:
-        handle = await client.start_workflow(
-            ResearchWorkflow.run,
-            id="research-workflow-01",
-            task_queue=os.environ.get("TEMPORAL_TASK_QUEUE", "openai-agents-task-queue"),
-            args=["Caribbean vacation spots in April, optimizing for surfing, hiking and water sports"],
-        )
-        result = await handle.result()
-        print("\nWorkflow result:\n", result)
+        # Langfuse trace-level attributes are set on the trace's root span.
+        with trace.get_tracer(__name__).start_as_current_span(
+            "ticket-triage",
+            attributes={
+                "langfuse.trace.name": "ticket-triage",
+                "langfuse.session.id": workflow_id,
+                "langfuse.user.id": "demo-user",
+                "langfuse.trace.tags": ["temporal", "ticket-triage"],
+            },
+        ):
+            handle = await client.start_workflow(
+                TicketTriageWorkflow.run,
+                ticket,
+                id=workflow_id,
+                task_queue=TASK_QUEUE,
+            )
+            print(f"Started workflow: {workflow_id}")
+
+            # A human (here: this notebook) approves the triage via an update.
+            decision = await handle.execute_update(
+                TicketTriageWorkflow.approve,
+                ApprovalDecision(approved=True, reviewer="demo-reviewer"),
+            )
+            print(f"Approval decision: {decision}")
+
+            result = await handle.result()
+
+    print(f"\nWorkflow status: {result.status}")
+    print(f"\nDrafted reply:\n{result.reply}")
+
+    # Flush buffered spans before a short-lived process exits.
+    provider.force_flush()
+
 
 await main()
 ```
 
-## 8. View Traces in Langfuse
+    Started workflow: ticket-triage-de40754e
 
-After running the workflow, you can view the complete trace in Langfuse. The trace will show:
 
-- **Workflow execution**: The entire `ResearchWorkflow` with timing and status
-- **Activity spans**: Each activity (`plan_research`, `execute_research`) as nested spans
-- **LLM calls**: OpenAI API calls with prompts, completions, and token usage
-- **Cost tracking**: Estimated costs based on token usage
-- **Latency metrics**: Time spent in each component
+    Approval decision: approved
 
-![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_temporal/temporal-research-workflow-trace.png)
 
-**Example Trace**: [View in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/02c0ff139fa7df3142e4bd436d72c09b?timestamp=2025-10-22T09:05:59.516Z)
+
+    Workflow status: replied
+
+    Drafted reply:
+    Subject: Re: Duplicate Charge on July Invoice
+
+    Hi there,
+
+    Thank you for bringing this to our attention! I'm sorry for the inconvenience — being charged twice is definitely not okay, and we want to get this sorted out for you right away.
+
+    I've flagged your account (Acme Corp) as high priority and our billing team is already looking into the duplicate July charge. We'll process a full refund for the extra payment within **3-5 business days**.
+
+    You'll receive a confirmation email once the refund is issued. If you have any questions in the meantime, don't hesitate to reach out!
+
+    Warm regards,
+    Support Team
+
+## 8. View the Trace in Langfuse
+
+Open your Langfuse project and go to **Traces** — the run above appears as a single trace named `ticket-triage`, with the full execution tree correctly nested:
+
+```
+ticket-triage                                   (trace root: session, user, tags)
+├── StartWorkflow:TicketTriageWorkflow          (client)
+│   └── RunWorkflow:TicketTriageWorkflow        (workflow)
+│       ├── triage                              (custom span from workflow code)
+│       │   ├── StartActivity:classify_ticket
+│       │   │   └── RunActivity:classify_ticket
+│       │   │       └── ChatCompletion          (generation: model, tokens, cost)
+│       │   └── StartActivity:lookup_account
+│       │       └── RunActivity:lookup_account
+│       └── StartActivity:draft_reply
+│           └── RunActivity:draft_reply
+│               └── ChatCompletion              (generation: model, tokens, cost)
+└── StartWorkflowUpdate:approve                 (client)
+    ├── ValidateUpdate:approve
+    └── HandleUpdate:approve
+```
+
+What you get:
+
+- **Temporal operations as spans** with real durations — workflow execution, activity executions, and the update handler (`ValidateUpdate`/`HandleUpdate`) that carried the human approval.
+- **LLM calls as generations** with model, token usage, cost, and prompt/completion content, nested under the activity that made them.
+- **Cross-references to Temporal**: every Temporal span carries `temporalWorkflowID` and `temporalRunID` attributes, so you can jump from any observation to the exact workflow execution in the Temporal UI.
+- **Sessions and users**: the workflow ID doubles as the Langfuse session ID, so the **Sessions** view groups all traces for a given workflow run, and `langfuse.user.id` enables per-user filtering.
+
+![Example trace in Langfuse](https://langfuse.com/images/cookbook/integration_temporal/temporal-ticket-triage-trace.png)
+
+## Notes on Durable Execution
+
+- **Replays are invisible in Langfuse.** Temporal recovers workflow state by re-executing workflow code (on worker restarts, failovers, or cache evictions). The plugin's tracer provider assigns deterministic span IDs and suppresses re-export during replay, so a workflow that replays any number of times still produces exactly one clean trace. Trace context is carried in Temporal headers persisted in workflow history, so parenting also survives replays and worker changes.
+- **Flush before short-lived processes exit.** The OTLP span processor batches in the background; call `provider.force_flush()` at the end of starters (as above) and on worker shutdown.
+- **Use a fresh workflow ID per run.** The workflow ID doubles as the Langfuse session ID, so each run groups cleanly in the Sessions view. (The trace itself is keyed by the starter's root span, which is new on every run.)
+
+## Learn More
+
+- [Temporal OpenTelemetry integration (Python SDK API reference)](https://python.temporal.io/temporalio.contrib.opentelemetry.html)
+- [Temporal Python samples](https://github.com/temporalio/samples-python) — including a runnable `langfuse_tracing` sample with a self-hosted Langfuse docker-compose setup
+- [Langfuse OpenTelemetry docs](https://langfuse.com/integrations/native/opentelemetry) — property mapping, supported semantic conventions, and other OTel-based instrumentations
+- [Temporal documentation](https://docs.temporal.io/) — workflows, activities, updates, and durable execution concepts

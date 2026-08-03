@@ -78,7 +78,7 @@ curl -u public-key:secret-key https://cloud.langfuse.com/api/public/projects
 
 ## Access via SDKs [#access-via-sdks]
 
-Both the Langfuse [Python SDK](/docs/sdk/python/sdk-v3) and the [JS/TS SDK](/docs/sdk/typescript/guide) provide a strongly-typed wrapper around our public REST API for your convenience. The API methods are accessible via the `api` property on the Langfuse client instance in both SDKs.
+Both the Langfuse [Python SDK](/docs/observability/sdk/overview) and the [JS/TS SDK](/docs/observability/sdk/overview) provide a strongly-typed wrapper around our public REST API for your convenience. The API methods are accessible via the `api` property on the Langfuse client instance in both SDKs.
 
 You can use your editor's Intellisense to explore the API methods and their parameters.
 
@@ -87,7 +87,7 @@ You can use your editor's Intellisense to explore the API methods and their para
 In Python SDK v4 and JS/TS SDK v5, the high-performance resources are the
 defaults: `api.observations`, `api.metrics`, and — for score reads —
 `api.scores_v3` / `api.scoresV3` (`api.scores`, the v2 reads, is
-deprecated; see the [Scores API migration guide](/docs/api-and-data-platform/features/scores-api#upgrade-from-v2)). Deprecated v1
+deprecated; see [Migration of deprecated APIs](/faq/all/deprecated-api-migration#scores)). Deprecated v1
 resources moved under `api.legacy.*` (Python: `*_v1`, JS/TS: `*V1`). See
 [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk) for SDK examples.
 
@@ -106,7 +106,7 @@ When fetching [prompts](/docs/prompts/get-started#use-prompt), please use the `g
 <LangTabs items={["Python SDK", "JS/TS SDK", "Java SDK"]}>
 <Tab>
 
-When using the [Python SDK](/docs/sdk/python/sdk-v3):
+When using the [Python SDK](/docs/observability/sdk/overview):
 
 ```python
 from langfuse import get_client
@@ -224,11 +224,13 @@ try {
 ## Ingest Traces via the API
 
 <Callout type="info">
-  The OpenTelemetry Endpoint will replace the Ingestion API in the future.
-  Therefore, it is strongly recommended to switch to the OpenTelemetry Endpoint
-  for trace ingestion. Follow the [custom ingestion migration
-  guide](/integrations/native/opentelemetry/migration-to-v4) to map legacy events
-  to v4-ready OTEL spans.
+  The OpenTelemetry endpoint is the supported path for trace ingestion. The
+  legacy Ingestion API is deprecated and is removed on Langfuse Cloud at the v4
+  cutover (date will follow); on self-hosted v4 it is unavailable once you run
+  the default `events_only` write mode. Switch to the OpenTelemetry endpoint
+  now. Follow the [custom ingestion migration
+  guide](/integrations/native/opentelemetry/migration-to-v4) to map legacy
+  events to v4-ready OTEL spans.
 </Callout>
 
 - [OpenTelemetry Traces Ingestion Endpoint](https://api.reference.langfuse.com/#tag/opentelemetry/POST/api/public/otel/v1/traces) implements the OTLP/HTTP specification for trace ingestion, providing native OpenTelemetry integration for Langfuse Observability.
@@ -244,7 +246,7 @@ For new data extraction workflows, use the high-performance data APIs:
 
 <Callout type="info">
 
-The deprecated trace, observation, score, and metrics read APIs are documented, with migration steps, in [Migration of deprecated APIs](/faq/all/deprecated-api-migration); for score reads, see the [Scores API migration guide](/docs/api-and-data-platform/features/scores-api#upgrade-from-v2).
+The deprecated trace, observation, score, and metrics read APIs are documented, with migration steps, in [Migration of deprecated APIs](/faq/all/deprecated-api-migration).
 
 </Callout>
 

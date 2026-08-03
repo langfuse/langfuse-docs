@@ -228,6 +228,7 @@ The deprecated endpoint's filters map to v2 `filters` entries: `traceName` and `
 | `datasetRunId`                                                     | `experimentId`                                                                                                        |
 | `fromTimestamp`, `toTimestamp`                                     | Unchanged names, but `fromTimestamp` is now inclusive and `toTimestamp` exclusive                                     |
 | `userId`, `traceTags`                                              | Removed; for trace-level score questions, use the [Metrics API v2](/docs/metrics/features/metrics-api#v2) score views |
+| `filter` (JSON, e.g. metadata conditions)                          | Removed; for metadata conditions, request `fields=details` and filter on `metadata` client-side                       |
 | `name`, `source`, `dataType`, `environment`, `configId`, `queueId` | Unchanged, and now accept comma-separated lists (OR within a parameter, AND across parameters)                        |
 
 ### Semantic differences
@@ -236,6 +237,8 @@ The deprecated endpoint's filters map to v2 `filters` entries: `traceName` and `
 - **Field groups.** Core fields are always returned; request more via `fields=details,subject,annotation`. The `subject` group replaces the flat `traceId`/`observationId`/`sessionId`/`datasetRunId` response fields with one object describing what the score is attached to (`kind`: `trace`, `observation`, `session`, or `experiment`).
 - Use at most one of the `traceId`, `sessionId`, and `experimentId` filters; they cannot be combined. `observationId` requires `traceId` alongside it (observation IDs are scoped to a trace).
 - `fromTimestamp` is inclusive; `toTimestamp` is exclusive.
+- **No trace joins.** v3 queries scores directly and does not return trace fields (the v2 `trace` field group is gone). For row-level filtering by trace properties, query the [traces API](https://api.reference.langfuse.com/#tag/trace/GET/api/public/traces) with `userId`/`tags` filters first to collect the matching trace IDs, then pass them to v3's comma-separated `traceId` filter.
+- **Row counts can differ.** v2 silently dropped scores whose referenced trace could not be found (e.g., deleted or never ingested); v3 returns every matching score, so the same query can return more rows on v3.
 
 ### Example
 

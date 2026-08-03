@@ -17,120 +17,23 @@ Langfuse supports two types of experiment scores:
 
 ## Via API/SDK
 
-Use the [Experiments API](https://api.reference.langfuse.com/#tag/experiments) to retrieve both score levels. Include `fields=scores` when listing experiments for experiment-level scores or experiment items for item- and trace-level scores. Both endpoints require `fromStartTime` and use cursor-based pagination.
+Use the [Experiments API](/docs/api-and-data-platform/features/experiments-api)
+to retrieve both score levels. Use the [API reference](https://api.reference.langfuse.com/#tag/experiments)
+for endpoint parameters, filters, pagination, and response fields.
 
-<LangTabs items={["Python SDK", "JS/TS SDK", "API"]}>
-<Tab>
-
-```python
-from datetime import datetime, timezone
-from langfuse import Langfuse
-
-langfuse = Langfuse()
-from_start = datetime(2026, 1, 1, tzinfo=timezone.utc)
-
-# Find the experiment and include its scores
-experiments = langfuse.api.experiments.list(
-    from_start_time=from_start,
-    name="your-experiment-name",
-    fields="core,scores",
-)
-experiment = experiments.data[0]
-
-# Fetch its items and include item and trace scores
-items = langfuse.api.experiments.list_items(
-    from_start_time=from_start,
-    experiment_id=experiment.id,
-    fields="core,io,scores",
-)
-```
-
-</Tab>
-<Tab>
-
-```ts
-import { LangfuseClient } from "@langfuse/client";
-
-const langfuse = new LangfuseClient();
-const fromStartTime = "2026-01-01T00:00:00Z";
-
-// Find the experiment and include its scores
-const experiments = await langfuse.api.experiments.list({
-  fromStartTime,
-  name: "your-experiment-name",
-  fields: "core,scores",
-});
-const experiment = experiments.data[0];
-
-// Fetch its items and include item and trace scores
-const items = await langfuse.api.experiments.listItems({
-  fromStartTime,
-  experimentId: experiment.id,
-  fields: "core,io,scores",
-});
-```
-
-</Tab>
-<Tab>
-
-```bash
-GET /api/public/experiments?fromStartTime=2026-01-01T00:00:00Z&name=your-experiment-name&fields=core,scores
-GET /api/public/experiment-items?fromStartTime=2026-01-01T00:00:00Z&experimentId=<experiment-id>&fields=core,io,scores
-```
-
-</Tab>
-</LangTabs>
+For full trace and observation details, use the [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2).
+For score-centric queries across experiments, traces, or observations, use the
+[Scores API v3](/docs/api-and-data-platform/features/scores-api#v3).
 
 ### Recommended: Use Experiment Runner SDK
 
-For a better developer experience, use the [Experiment Runner SDK](/changelog/2025-09-17-experiment-runner-sdk) which provides built-in access to all experiment scores and results:
-
-<LangTabs items={["Python SDK", "JS/TS SDK"]}>
-<Tab>
-
-```python
-from langfuse import get_client
-
-langfuse = get_client()
-
-# Run experiment with automatic score collection
-result = langfuse.run_experiment(
-    name="my-experiment",
-    data=my_dataset,
-    task=my_task,
-    evaluators=[my_evaluator]  # optional
-)
-
-# Access all scores directly
-print(result.format())  # includes all scores in formatted output
-```
-
-</Tab>
-<Tab>
-
-```ts
-import { LangfuseClient } from "@langfuse/client";
-
-const langfuse = new LangfuseClient();
-
-// Run experiment with automatic score collection
-const result = await langfuse.experiment.run({
-  name: "my-experiment",
-  data: myDataset,
-  task: myTask,
-  evaluators: [myEvaluator]  // optional
-});
-
-// Access all scores directly
-console.log(await result.format());  // includes all scores in formatted output
-```
-
-</Tab>
-</LangTabs>
+When running a new experiment, the [Experiment Runner SDK](/docs/evaluation/experiments/experiments-via-sdk)
+returns scores and results directly. Use the Experiments API when you need to
+retrieve results from a previous run.
 
 ## Related Resources
 
 - [Scores Data Model](/docs/evaluation/scores/data-model#scores)
 - [Run-Level Scores Changelog](/changelog/2025-05-07-run-level-scores)
-- [Experiment Runner SDK](/changelog/2025-09-17-experiment-runner-sdk)
-- [Experiments Documentation](/docs/evaluation/experiments/experiments-via-sdk)
+- [Experiment Runner SDK](/docs/evaluation/experiments/experiments-via-sdk)
+- [Experiments API](/docs/api-and-data-platform/features/experiments-api)

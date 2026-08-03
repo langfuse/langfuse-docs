@@ -54,7 +54,7 @@ Setup, in order:
 3. Target live observations, the recommended production target. Filter to the observations worth judging, for example only final answer generations in traces tagged `customer-facing`, and set a sampling percentage. Judging 5 to 10 percent of traffic is usually enough to see the trend without paying to judge everything.
 4. Map your observation fields onto the evaluator's variables. Langfuse previews the populated judge prompt with real data from the last 24 hours, and JSONPath expressions handle nested fields.
 
-One mechanic matters for correctness: observation-level evaluators see only the data on the observation they target, not sibling or child observations. If the judge needs the retrieved context to check groundedness, your instrumentation must put that context on the target observation, or you target a root observation that records the overall input and output. Scores land asynchronously on the observation, and you can backfill historical traffic by enabling the evaluator's Fast Mode, selecting rows in the traces table, and running Actions → Evaluate.
+One mechanic matters for correctness: observation-level evaluators see only the data on the observation they target, not sibling or child observations. If the judge needs the retrieved context to check groundedness, your instrumentation must put that context on the target observation, or you target a root observation that records the overall input and output. Scores land asynchronously on the observation, and you can backfill historical traffic by enabling the evaluator's Langfuse v4 preview toggle, selecting rows in the traces table, and running Actions → Evaluate.
 
 ### Method 2: Offline detection with reference datasets
 
