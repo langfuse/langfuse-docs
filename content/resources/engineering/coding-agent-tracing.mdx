@@ -38,17 +38,17 @@ Three drivers show up consistently:
 
 All nine developer-tool integrations, as of July 2026:
 
-| Agent                                                          | Mechanism                                          | Setup shape                                              |
-| -------------------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------------- |
-| [Claude Code](/integrations/developer-tools/claude-code)       | Stop hook script (runs after each response)        | Hook script + Langfuse keys in env                       |
-| [OpenAI Codex](/integrations/developer-tools/codex)            | Codex hooks (Stop hook per turn)                   | Plugin in `~/.codex/config.toml`; Node 22+, Codex 0.146+ |
-| [GitHub Copilot](/integrations/developer-tools/github-copilot) | Native OpenTelemetry export                        | Point OTLP exporter at Langfuse; no SDK, no code changes |
-| [Cursor](/integrations/developer-tools/cursor)                 | Agent-session tracing                              | See integration page                                     |
-| [Kiro IDE](/integrations/developer-tools/kiro)                 | Agent activity tracing                             | See integration page                                     |
-| [Kiro CLI](/integrations/developer-tools/kiro-cli)             | Terminal session tracing                           | See integration page                                     |
-| [OpenCode](/integrations/developer-tools/opencode)             | Session tracing (turns, tools, retries, reasoning) | See integration page                                     |
-| [Augment Code](/integrations/developer-tools/augment-code)     | Conversation + tool execution tracing              | See integration page                                     |
-| [VS Code (MCP)](/integrations/developer-tools/vscode)          | Langfuse MCP server in Copilot agent mode          | Query prompts/traces/datasets from the editor            |
+| Agent                                                          | Mechanism                                          | Setup shape                                                                |
+| -------------------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------------------------------- |
+| [Claude Code](/integrations/developer-tools/claude-code)       | Stop hook script (runs after each response)        | Hook script + Langfuse keys in env                                         |
+| [OpenAI Codex](/integrations/developer-tools/codex)            | Codex hooks (Stop hook per turn)                   | Plugin in `~/.codex/config.toml`; Node 22+, Codex 0.146+ for current setup |
+| [GitHub Copilot](/integrations/developer-tools/github-copilot) | Native OpenTelemetry export                        | Point OTLP exporter at Langfuse; no SDK, no code changes                   |
+| [Cursor](/integrations/developer-tools/cursor)                 | Agent-session tracing                              | See integration page                                                       |
+| [Kiro IDE](/integrations/developer-tools/kiro)                 | Agent activity tracing                             | See integration page                                                       |
+| [Kiro CLI](/integrations/developer-tools/kiro-cli)             | Terminal session tracing                           | See integration page                                                       |
+| [OpenCode](/integrations/developer-tools/opencode)             | Session tracing (turns, tools, retries, reasoning) | See integration page                                                       |
+| [Augment Code](/integrations/developer-tools/augment-code)     | Conversation + tool execution tracing              | See integration page                                                       |
+| [VS Code (MCP)](/integrations/developer-tools/vscode)          | Langfuse MCP server in Copilot agent mode          | Query prompts/traces/datasets from the editor                              |
 
 The VS Code entry is the inverse direction: instead of tracing the agent, it gives the agent
 access to your Langfuse data via MCP. This becomes useful once traces exist and you want to analyze them

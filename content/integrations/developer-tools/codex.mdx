@@ -20,7 +20,7 @@ The easiest way to set this up is the [Langfuse Codex Plugin](https://github.com
 codex plugin marketplace add langfuse/codex-observability-plugin
 ```
 
-Then install the tracing plugin, enable hooks, review and trust the Langfuse hook, and set your Langfuse keys (full steps below). Requires Node.js 22+ and Codex 0.146+.
+Then install the tracing plugin, enable hooks, review and trust the Langfuse hook, and set your Langfuse keys (full steps below). Requires Node.js 22+; the current `hooks` setup below requires Codex 0.146+.
 
 </Callout>
 
@@ -59,14 +59,14 @@ Tracing is **opt-in** via the `TRACE_TO_LANGFUSE` environment variable. The hook
 
 ### Check your Codex version
 
-These instructions require Codex 0.146 or later. Codex 0.146 removed the old `plugin_hooks` feature flag; use the current `hooks` flag shown below instead.
+Use Codex 0.146 or later for this setup. The tracing plugin existed before Codex 0.146, but Codex 0.146 removed the old `plugin_hooks` feature flag; the current setup uses the `hooks` flag and hook review flow shown below.
 
 ```bash
 codex --version
 codex features list
 ```
 
-If your Codex version is older than 0.146, update Codex before installing the tracing plugin.
+If your Codex version is older than 0.146, update Codex before following this guide.
 
 ### Add the plugin marketplace
 
@@ -175,7 +175,7 @@ The credential variables also accept a `LANGFUSE_CODEX_` prefix (for example `LA
 
 ### No traces appearing in Langfuse
 
-1. **Codex is too old.** Run `codex --version`. These instructions require Codex 0.146 or later because the old `plugin_hooks` feature flag was removed. Update Codex if your version is older.
+1. **Codex is too old or still uses legacy hook config.** Run `codex --version`. This guide assumes Codex 0.146 or later because the old `plugin_hooks` feature flag was removed. Update Codex if your version is older, and replace any old `plugin_hooks` config with `hooks`.
 2. **Hooks are not enabled.** Run `codex features list` and confirm the `hooks` feature is enabled. If it is disabled, set `hooks = true` under `[features]` in `~/.codex/config.toml`.
 3. **The plugin isn't installed or enabled.** Run `codex plugin list --json` and confirm `tracing@codex-observability-plugin` appears with `installed: true` and `enabled: true`. If it is missing, run `codex plugin add tracing@codex-observability-plugin`; if it is disabled, confirm the plugin table in `~/.codex/config.toml` has `enabled = true`.
 4. **The Stop hook is not trusted.** "Installed" and "enabled" do not mean "trusted." Start Codex, open `/hooks` if needed, then review and trust the Langfuse `Stop` hook.
