@@ -57,6 +57,17 @@ Tracing is **opt-in** via the `TRACE_TO_LANGFUSE` environment variable. The hook
 1. Sign up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-host Langfuse](/self-hosting).
 2. Create a new project and copy your API keys from the project settings.
 
+### Check your Codex version
+
+These instructions require Codex 0.146 or later. Codex 0.146 removed the old `plugin_hooks` feature flag; use the current `hooks` flag shown below instead.
+
+```bash
+codex --version
+codex features list
+```
+
+If your Codex version is older than 0.146, update Codex before installing the tracing plugin.
+
 ### Add the plugin marketplace
 
 Add the Langfuse marketplace via the Codex CLI:
@@ -164,13 +175,14 @@ The credential variables also accept a `LANGFUSE_CODEX_` prefix (for example `LA
 
 ### No traces appearing in Langfuse
 
-1. **Hooks are not enabled.** Run `codex features list` and confirm the `hooks` feature is enabled. If it is disabled, set `hooks = true` under `[features]` in `~/.codex/config.toml`.
-2. **The plugin isn't installed or enabled.** Run `codex plugin list --json` and confirm `tracing@codex-observability-plugin` appears with `installed: true` and `enabled: true`. If it is missing, run `codex plugin add tracing@codex-observability-plugin`; if it is disabled, confirm the plugin table in `~/.codex/config.toml` has `enabled = true`.
-3. **The Stop hook is not trusted.** "Installed" and "enabled" do not mean "trusted." Start Codex, open `/hooks` if needed, then review and trust the Langfuse `Stop` hook.
-4. **Tracing isn't turned on.** `TRACE_TO_LANGFUSE` must be the exact string `"true"` and visible to the Codex process, unless you enabled tracing in `~/.codex/langfuse.json`. Also verify the public key starts with `pk-lf-`.
-5. **Restart and test again.** Fully restart Codex, start a new session, and send two short messages before checking Langfuse. A successful local test should show `hook: Stop` followed by `hook: Stop Completed`.
-6. **Check the sidecar state.** The plugin uses a `.langfuse` sidecar to remember which turns were uploaded. If you are retesting the same transcript, that state can prevent duplicate uploads.
-7. **Enable debug logging.** Set `LANGFUSE_CODEX_DEBUG=true` to log to stderr and surface the actual cause.
+1. **Codex is too old.** Run `codex --version`. These instructions require Codex 0.146 or later because the old `plugin_hooks` feature flag was removed. Update Codex if your version is older.
+2. **Hooks are not enabled.** Run `codex features list` and confirm the `hooks` feature is enabled. If it is disabled, set `hooks = true` under `[features]` in `~/.codex/config.toml`.
+3. **The plugin isn't installed or enabled.** Run `codex plugin list --json` and confirm `tracing@codex-observability-plugin` appears with `installed: true` and `enabled: true`. If it is missing, run `codex plugin add tracing@codex-observability-plugin`; if it is disabled, confirm the plugin table in `~/.codex/config.toml` has `enabled = true`.
+4. **The Stop hook is not trusted.** "Installed" and "enabled" do not mean "trusted." Start Codex, open `/hooks` if needed, then review and trust the Langfuse `Stop` hook.
+5. **Tracing isn't turned on.** `TRACE_TO_LANGFUSE` must be the exact string `"true"` and visible to the Codex process, unless you enabled tracing in `~/.codex/langfuse.json`. Also verify the public key starts with `pk-lf-`.
+6. **Restart and test again.** Fully restart Codex, start a new session, and send two short messages before checking Langfuse. A successful local test should show `hook: Stop` followed by `hook: Stop Completed`.
+7. **Check the sidecar state.** The plugin uses a `.langfuse` sidecar to remember which turns were uploaded. If you are retesting the same transcript, that state can prevent duplicate uploads.
+8. **Enable debug logging.** Set `LANGFUSE_CODEX_DEBUG=true` to log to stderr and surface the actual cause.
 
 ### Authentication errors
 
