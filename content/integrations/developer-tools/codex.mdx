@@ -20,7 +20,7 @@ The easiest way to set this up is the [Langfuse Codex Plugin](https://github.com
 codex plugin marketplace add langfuse/codex-observability-plugin
 ```
 
-Then install the tracing plugin, enable its hook, and set your Langfuse keys (full steps below). Requires Node.js 22+ and Codex 0.128+.
+Then install the tracing plugin, enable hooks, review and trust the Langfuse hook, and set your Langfuse keys (full steps below). Requires Node.js 22+ and Codex 0.146+.
 
 </Callout>
 
@@ -38,7 +38,7 @@ Using Codex's plugin hooks, this integration reads the transcript Codex writes f
 
 ## How it works
 
-Codex provides a plugin system with [hooks](https://github.com/openai/codex) that run custom commands at lifecycle points. This integration uses the **Stop hook**, which runs after each Codex turn.
+Codex provides a plugin system with [hooks](https://learn.chatgpt.com/docs/hooks) that run custom commands at lifecycle points. This integration uses the **Stop hook**, which runs after each Codex turn.
 
 1. The plugin registers a `Stop` hook that runs each time Codex finishes a turn.
 2. The hook reads Codex's session transcript (the rollout file).
@@ -73,22 +73,27 @@ Install the tracing plugin from the marketplace:
 codex plugin add tracing@codex-observability-plugin
 ```
 
-Enable plugin hooks and the tracing plugin globally in `~/.codex/config.toml`, or only for a specific project in `<project>/.codex/config.toml`:
+Enable hooks and the tracing plugin globally in `~/.codex/config.toml`, or only for a specific project in `<project>/.codex/config.toml`:
 
 ```toml
 [features]
-plugin_hooks = true
+hooks = true
 
 [plugins."tracing@codex-observability-plugin"]
 enabled = true
 ```
 
-When Codex first runs the plugin hook, approve the **Langfuse Stop hook** if Codex asks for permission. Codex stores hook trust separately from plugin installation. If you previously trusted the hook but it remains inactive, make sure this generated hook-state entry is enabled:
+### Review and trust the hook
 
-```toml
-[hooks.state."tracing@codex-observability-plugin:hooks/hooks.json:stop:0:0"]
-enabled = true
+Start Codex after installing and enabling the plugin:
+
+```bash
+codex
 ```
+
+When **Hooks need review** appears, review the Langfuse `Stop` hook and trust it. You can also type `/hooks` in the Codex CLI to inspect, review, and trust hooks.
+
+Codex stores hook trust separately from plugin installation and plugin enablement. Plugin updates can change the hook definition hash, so Codex may require another review after an update.
 
 ### Set your Langfuse credentials [#set-credentials]
 
@@ -159,11 +164,13 @@ The credential variables also accept a `LANGFUSE_CODEX_` prefix (for example `LA
 
 ### No traces appearing in Langfuse
 
-1. **The plugin isn't installed or enabled.** Run `codex plugin add tracing@codex-observability-plugin`, then confirm `plugin_hooks = true` and the `tracing@codex-observability-plugin` plugin is enabled in `~/.codex/config.toml`.
-2. **The Stop hook is disabled.** Approve the Langfuse Stop hook when Codex prompts you. If the hook has already been trusted, verify that its generated entry under `[hooks.state]` has `enabled = true`.
-3. **Tracing isn't turned on.** `TRACE_TO_LANGFUSE` must be the exact string `"true"` and visible to the Codex process, unless you enabled tracing in `~/.codex/langfuse.json`. Also verify the public key starts with `pk-lf-`.
-4. **Restart and test again.** Fully restart Codex, start a new session, and send two short messages before checking Langfuse.
-5. **Enable debug logging.** Set `LANGFUSE_CODEX_DEBUG=true` to log to stderr and surface the actual cause.
+1. **Hooks are not enabled.** Run `codex features list` and confirm the `hooks` feature is enabled. If it is disabled, set `hooks = true` under `[features]` in `~/.codex/config.toml`.
+2. **The plugin isn't installed or enabled.** Run `codex plugin list --json` and confirm `tracing@codex-observability-plugin` appears with `installed: true` and `enabled: true`. If it is missing, run `codex plugin add tracing@codex-observability-plugin`; if it is disabled, confirm the plugin table in `~/.codex/config.toml` has `enabled = true`.
+3. **The Stop hook is not trusted.** "Installed" and "enabled" do not mean "trusted." Start Codex, open `/hooks` if needed, then review and trust the Langfuse `Stop` hook.
+4. **Tracing isn't turned on.** `TRACE_TO_LANGFUSE` must be the exact string `"true"` and visible to the Codex process, unless you enabled tracing in `~/.codex/langfuse.json`. Also verify the public key starts with `pk-lf-`.
+5. **Restart and test again.** Fully restart Codex, start a new session, and send two short messages before checking Langfuse. A successful local test should show `hook: Stop` followed by `hook: Stop Completed`.
+6. **Check the sidecar state.** The plugin uses a `.langfuse` sidecar to remember which turns were uploaded. If you are retesting the same transcript, that state can prevent duplicate uploads.
+7. **Enable debug logging.** Set `LANGFUSE_CODEX_DEBUG=true` to log to stderr and surface the actual cause.
 
 ### Authentication errors
 
@@ -182,6 +189,7 @@ When enabled, the plugin uploads completed Codex transcript data to Langfuse, in
 
 - [Langfuse Codex Plugin (GitHub)](https://github.com/langfuse/codex-observability-plugin)
 - [OpenAI Codex documentation](https://github.com/openai/codex)
+- [OpenAI Codex hooks documentation](https://learn.chatgpt.com/docs/hooks)
 - [Langfuse Sessions](/docs/observability/features/sessions)
 - [Langfuse TypeScript SDK](/docs/observability/sdk/overview)
 - [Tracing coding agents with Langfuse](/resources/engineering/coding-agent-tracing)
