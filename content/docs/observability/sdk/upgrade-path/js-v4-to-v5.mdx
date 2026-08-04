@@ -6,7 +6,7 @@ category: SDKs
 
 # JS/TS v4 → v5
 
-The JS/TS SDK v5 introduces the **[observation-centric data model](/docs/observability/data-model)**. In this model, correlating attributes (`userId`, `sessionId`, `metadata`, `tags`) propagate to every observation rather than living only on the trace. This enables single-table queries without expensive joins, significantly improving query performance at scale.
+The JS/TS SDK v5 introduces the **[observations-first data model](/docs/observability/data-model)**. In this model, correlating attributes (`userId`, `sessionId`, `metadata`, `tags`) propagate to every observation rather than living only on the trace. This enables single-table queries without expensive joins, significantly improving query performance at scale.
 
 This changes how you set trace attributes: instead of imperatively updating the trace with `updateActiveTrace()`, you use `propagateAttributes()` — a function that wraps a callback, automatically applying attributes to all child observations created within its scope.
 

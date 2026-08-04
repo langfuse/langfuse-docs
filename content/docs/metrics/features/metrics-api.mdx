@@ -15,6 +15,17 @@ GET /api/public/v2/metrics
 The **Metrics API** enables you to retrieve customized analytics from your Langfuse data.
 This endpoint allows you to specify dimensions, metrics, filters, and time granularity to build powerful custom reports and dashboards for your LLM applications.
 
+## What you can do
+
+Use the Metrics API to:
+
+- Aggregate cost, token usage, volume, latency, and score data.
+- Group results by supported dimensions, such as model or trace attributes.
+- Filter data and analyze trends over time.
+- Power custom reports, dashboards, billing, and monitoring workflows.
+
+For supported views, fields, query parameters, response schemas, and interactive examples, see the [v2 Metrics API Reference](https://api.reference.langfuse.com/#tag/metricsv2/GET/api/public/v2/metrics). For practical Python examples, see the [Metrics API v2 cookbook](/guides/cookbook/example_metrics_api_v2).
+
 <Callout type="info">
 
 The deprecated `GET /api/public/metrics` and `GET /api/public/metrics/daily` endpoints are documented, with migration steps, in [Migration of deprecated APIs](/faq/all/deprecated-api-migration).
@@ -45,7 +56,7 @@ On self-hosted Langfuse v3, use the [Metrics API v1](/faq/all/deprecated-api-mig
 GET /api/public/v2/metrics
 ```
 
-The v2 Metrics API provides significant performance improvements through an optimized data architecture built on a new events table schema that minimizes database work per query.
+The v2 Metrics API provides significant performance improvements through an optimized data architecture built on the wide observations table, which minimizes database work per query.
 
 ### Key Changes from v1
 
@@ -90,9 +101,3 @@ curl \
   }' \
   https://cloud.langfuse.com/api/public/v2/metrics
 ```
-
-<Callout type="info">
-
-**API Reference:** See the full [v2 Metrics API Reference](https://api.reference.langfuse.com/#tag/metricsv2/GET/api/public/v2/metrics) for all available parameters, response schemas, and interactive examples.
-
-</Callout>

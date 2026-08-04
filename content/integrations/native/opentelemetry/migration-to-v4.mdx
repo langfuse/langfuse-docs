@@ -1,7 +1,7 @@
 ---
 title: Migrate custom ingestion to Langfuse v4
 sidebarTitle: Migrate ingestion to v4
-description: Move custom Langfuse tracing from the legacy ingestion API or an existing OpenTelemetry pipeline to the observation-centric v4 format.
+description: Move custom Langfuse tracing from the legacy ingestion API or an existing OpenTelemetry pipeline to the observations-first v4 format.
 ---
 
 # Migrate custom ingestion to Langfuse v4
@@ -26,7 +26,7 @@ Adding the `x-langfuse-ingestion-version: 4` header selects the v4 ingestion pat
 
 ## V4-ready ingestion checklist
 
-Your integration is ready for the observation-centric Langfuse v4 data model when it:
+Your integration is ready for the observations-first Langfuse v4 data model when it:
 
 - sends traces via OTLP over HTTP to `/api/public/otel/v1/traces`;
 - authenticates with Langfuse project keys via Basic Auth and sends `x-langfuse-ingestion-version: 4`;

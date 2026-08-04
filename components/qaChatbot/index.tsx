@@ -42,6 +42,9 @@ import {
 import { scoreDemoFeedback } from "@/components/demoLangfuseBrowserClients";
 import { FeedbackDialog } from "./FeedbackPopover";
 import { cn } from "@/lib/utils";
+import type { UIMessage } from "ai";
+
+type ChatMessage = UIMessage;
 
 type ChatProps = HTMLAttributes<HTMLDivElement>;
 
@@ -79,7 +82,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
     });
   }, []);
 
-  const { messages, sendMessage, status, regenerate } = useChat({
+  const { messages, sendMessage, status, regenerate } = useChat<ChatMessage>({
     messages: [],
     transport: new DefaultChatTransport({
       api: "/api/qa-chatbot",
