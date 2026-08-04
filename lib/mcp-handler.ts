@@ -47,7 +47,7 @@ const MCP_SERVER_INSTRUCTIONS = [
   "For project-scoped Langfuse data or actions such as prompts, datasets, scores, comments, metrics, observations, models, or project-specific feedback, prefer the authenticated Langfuse app MCP server when it is available.",
   "When Langfuse agent skills are installed, use them for end-to-end workflows, repo-specific guidance, and agent setup patterns; use this docs server to fetch or verify current documentation.",
   "Inspect the available tools and their schemas dynamically; do not assume a fixed tool list.",
-  "If the user wants to provide feedback about Langfuse docs or something is not working well, ask permission, show the exact payload, avoid secrets/customer data/trace payloads, then use submitFeedback.",
+  "If the user wants to provide feedback about Langfuse docs or something is not working well, ask permission and show the exact payload; if they want a reply, include only an email address they explicitly provide in the feedback text; exclude secrets, customer/project data, trace payloads, and unrelated context, then use submitFeedback.",
 ].join("\n");
 
 export const mcpHandler = createMcpHandler(
@@ -57,7 +57,8 @@ export const mcpHandler = createMcpHandler(
       [
         "Submit explicit user-approved feedback to the Langfuse team.",
         "Before calling, ask permission and show the exact payload.",
-        "Do not include secrets, credentials, customer data, trace payloads, or unrelated context.",
+        "If the user wants a reply, ask them to include their email address in the feedback text; only use an address they explicitly provide and show it in the exact payload preview.",
+        "Do not include secrets, credentials, customer/project data, trace payloads, or unrelated context; the only contact detail to include is an explicitly provided reply email.",
       ].join("\n"),
       {
         targetType: z
