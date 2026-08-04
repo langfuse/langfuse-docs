@@ -54,19 +54,19 @@ Set up your Langfuse, OpenAI, and Temporal credentials. You can get Langfuse key
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
-os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
-os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")  # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com");  # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your OpenAI key (any OpenAI-compatible endpoint also works via OPENAI_BASE_URL)
-os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...")
+os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...");
 
 # Temporal server address (defaults to a local dev server). For Temporal
 # Cloud, set TEMPORAL_ADDRESS to your Cloud gRPC endpoint, TEMPORAL_NAMESPACE
 # to your Cloud namespace, and TEMPORAL_API_KEY to an API key.
-os.environ.setdefault("TEMPORAL_ADDRESS", "localhost:7233")
-os.environ.setdefault("TEMPORAL_NAMESPACE", "default")
+os.environ.setdefault("TEMPORAL_ADDRESS", "localhost:7233");
+os.environ.setdefault("TEMPORAL_NAMESPACE", "default");
 TASK_QUEUE = "langfuse-tracing-task-queue"
 ```
 
