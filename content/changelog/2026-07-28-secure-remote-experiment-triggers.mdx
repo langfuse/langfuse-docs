@@ -1,0 +1,28 @@
+---
+date: 2026-07-28
+title: Secure remote experiment triggers
+description: Authenticate remote experiment trigger requests with signed and custom headers.
+author: Marlies
+canonical: /docs/evaluation/experiments/experiments-via-sdk#optional-trigger-sdk-experiment-from-ui
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+Remote experiment triggers can now be secured before your evaluation service starts a run.
+
+- Enable the optional `x-langfuse-signature` HMAC header so your service can verify that requests came from Langfuse.
+- Add custom headers for service-specific authentication or routing.
+- Return a fast 2xx response and continue the experiment asynchronously.
+
+Existing remote experiment configurations continue to work without signing or custom headers.
+
+<Cards num={1}>
+  <Card
+    title="Remote experiment trigger documentation"
+    href="/docs/evaluation/experiments/experiments-via-sdk#optional-trigger-sdk-experiment-from-ui"
+    icon={<Book />}
+  />
+</Cards>

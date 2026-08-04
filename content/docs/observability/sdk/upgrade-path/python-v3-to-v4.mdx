@@ -6,7 +6,7 @@ category: SDKs
 
 # Python v3 → v4
 
-The Python SDK v4 introduces the **[observation-centric data model](/docs/observability/data-model)**. In this model, correlating attributes (`user_id`, `session_id`, `metadata`, `tags`) propagate to every observation rather than living only on the trace. This enables single-table queries without expensive joins, significantly improving query performance at scale.
+The Python SDK v4 introduces the **[observations-first data model](/docs/observability/data-model)**. In this model, correlating attributes (`user_id`, `session_id`, `metadata`, `tags`) propagate to every observation rather than living only on the trace. This enables single-table queries without expensive joins, significantly improving query performance at scale.
 
 This changes how you set trace attributes: instead of imperatively updating the trace object with `update_current_trace()`, you use `propagate_attributes()` — a context manager that automatically applies attributes to the current and all child observations created within its scope.
 
