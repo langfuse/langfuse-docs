@@ -243,7 +243,7 @@ With your evaluator and model selected, configure which data to run the evaluati
 </Callout>
 
 <Callout type="info">
-**Sampling is applied per evaluator.** Each evaluator draws its own random sample, so two evaluators configured with the same sampling percentage will generally score different subsets of your traffic. If several evaluators must score the same items, set their sampling to 100% and use identical filters, for example by making the sampling decision in your application and applying a [tag](/docs/observability/features/tags) that the evaluators filter on.
+**Sampling is deterministic per trace or observation.** Evaluators with the same sampling percentage select the same subset of matching traffic.
 </Callout>
 
 </Tab>
