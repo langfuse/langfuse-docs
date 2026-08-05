@@ -30,13 +30,13 @@ import os
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
 
-os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf...")
-os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf...")
-os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf...");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf...");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Set your Cohere API key from your Cohere account settings
-os.environ.setdefault("COHERE_API_KEY", "...")
+os.environ.setdefault("COHERE_API_KEY", "...");
 ```
 
 ## Step 3: Use Cohere with the OpenAI SDK

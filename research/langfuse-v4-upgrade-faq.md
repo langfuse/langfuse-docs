@@ -70,7 +70,7 @@ The FAQ should say “migrate any deprecated API calls using the endpoint-by-end
 - The April 14, 2026 organization-creation threshold and Preview toggle apply to the managed rollout, not to self-hosted deployments generally. A concise and less brittle instruction is: “If your organization still shows the Preview toggle, enable it.” Source: [managed rollout details](https://langfuse.com/docs/v4#timeline).
 - The in-app migration URL points to `cloud.langfuse.com`, so it should be labeled as the managed-project checklist instead of appearing as a universal verification step. Source: [v4 overview](https://langfuse.com/docs/v4#timeline).
 - Self-hosted deployments have no forced migration date. The precise support statement is that v3 receives security patches through the end of January 2027, and breaking removals occur with the v4 server/cutover rather than on the managed-service schedule. Sources: [self-hosted upgrade guide](https://langfuse.com/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4), [versioning policy](https://langfuse.com/self-hosting/upgrade/versioning).
-- As of 2026-07-28, self-hosted v4 is not a stable release. GitHub lists v3.224.2 as the latest stable server release and v4.0.0-rc.3 as a pre-release. The v4 release candidate announcement asks users to test development or staging and wait for a stable release before migrating production. The local self-hosted guide also retains a TODO to add the v4 release date. The FAQ should link the guide, as requested, but say it is for preparing or testing the migration until the stable release ships. Sources: [Langfuse server releases](https://github.com/langfuse/langfuse/releases), [v4.0.0-rc.0 release guidance](https://github.com/langfuse/langfuse/releases/tag/v4.0.0-rc.0), [self-hosting preview update](https://github.com/orgs/langfuse/discussions/14157), [local guide release-date TODO](../content/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4.mdx).
+- As of 2026-07-29, self-hosted v4.0.0 is generally available (non-prerelease). Prefer the [v3 to v4 upgrade guide](https://langfuse.com/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4), and still recommend testing in staging before production. Sources: [Langfuse server releases](https://github.com/langfuse/langfuse/releases), [v4.0.0](https://github.com/langfuse/langfuse/releases/tag/v4.0.0).
 
 ## Problems in the current FAQ
 
@@ -83,7 +83,7 @@ The FAQ should say “migrate any deprecated API calls using the endpoint-by-end
 7. **Conditional work is presented as mandatory.** Read APIs, trace-level evaluators, and legacy exports only matter when a project uses them.
 8. **Direct OTEL advice is incomplete.** The header and propagated IDs are necessary but not sufficient; root I/O and immutable-span semantics matter too.
 9. **The UI toggle and in-app checklist are deployment-specific.** Both are currently repeated under all managed ingestion scenarios without being labeled as managed-service actions.
-10. **Self-hosted status is too optimistic.** Linking the guide is correct, but “follow the guide to migrate your deployment” omits the current release-candidate status and first-party instruction to wait for a stable release before production migration.
+10. **Self-hosted status must stay current.** As of v4.0.0 GA, linking the upgrade guide and recommending a staging dry-run before production is correct; do not describe self-hosted v4 as a release candidate.
 
 ## Recommended page structure
 

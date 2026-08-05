@@ -31,6 +31,7 @@ Each row represents one observation and includes its trace context. Only the [se
 | `environment`             | string                     | Environment label.                                                                                                                |
 | `type`                    | string                     | Observation type: `SPAN`, `GENERATION`, `EVENT`, `AGENT`, `TOOL`, `CHAIN`, `RETRIEVER`, `EVALUATOR`, `EMBEDDING`, or `GUARDRAIL`. |
 | `parent_observation_id`   | string                     | Parent observation identifier; empty for a root observation.                                                                      |
+| `is_root_observation`     | boolean                    | Whether the observation is a logical root.                                                                                        |
 | `start_time`              | string (timestamp)         | When the observation started.                                                                                                     |
 | `end_time`                | string (timestamp) or null | When the observation ended.                                                                                                       |
 | `name`                    | string                     | User-defined observation name.                                                                                                    |
@@ -141,7 +142,7 @@ Legacy observations use the same observation field groups, with these difference
 
 | Group           | Difference in the legacy file                                                                      |
 | --------------- | -------------------------------------------------------------------------------------------------- |
-| `basic`         | Does not include `bookmarked`, `public`, `session_id`, or `user_id`.                               |
+| `basic`         | Does not include `bookmarked`, `is_root_observation`, `public`, `session_id`, or `user_id`.        |
 | `usage`         | Does not include `usage_pricing_tier_id`.                                                          |
 | `trace_context` | Has no effect; `release`, `tags`, and the trace name are available in the separate `traces/` file. |
 
