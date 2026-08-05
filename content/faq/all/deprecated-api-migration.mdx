@@ -98,7 +98,7 @@ Request `fields=core,basic,trace_context` to include the trace-level attributes 
 
 - **The response contains observation rows, not trace objects.** Group rows by `traceId` to reconstruct trace activity.
 - **v4 has no trace-level `input`/`output`.** Reconstruct them from the root observation of each trace: the row with `parentObservationId == null`.
-- For trace-level aggregates (counts, costs, latency grouped by `traceName`, `traceRelease`, or `traceVersion`), use the [Metrics API v2](/docs/metrics/features/metrics-api#v2) instead of fetching and aggregating rows yourself.
+- For trace-level aggregates (counts, costs, latency grouped by `traceName`, `traceRelease`, or `traceVersion`), use the [Metrics API v2](/docs/metrics/features/metrics-api) instead of fetching and aggregating rows yourself.
 
 ### Example
 
@@ -140,7 +140,7 @@ curl -G \
 
 - The response contains observation rows; a "session" is the set of rows sharing a `sessionId`. Group by `sessionId` (and within a session, by `traceId`) to reconstruct the session structure.
 - Like traces, sessions have no dedicated input/output object in v4. Reconstruct the conversation from the root observations of the traces within the session.
-- `sessionId` is a high-cardinality field: it is available for **filtering** in the [Metrics API v2](/docs/metrics/features/metrics-api#v2), but not for grouping.
+- `sessionId` is a high-cardinality field: it is available for **filtering** in the [Metrics API v2](/docs/metrics/features/metrics-api), but not for grouping.
 
 ### Example
 
@@ -164,7 +164,7 @@ curl -G \
 
 **Deprecated:** `GET /metrics` (v1) and `GET /metrics/daily`.
 
-**Replacement:** [`GET /v2/metrics`](/docs/metrics/features/metrics-api#v2) ([reference](https://api.reference.langfuse.com/#tag/metricsv2/GET/api/public/v2/metrics)).
+**Replacement:** [`GET /v2/metrics`](/docs/metrics/features/metrics-api) ([reference](https://api.reference.langfuse.com/#tag/metricsv2/GET/api/public/v2/metrics)).
 
 ### Parameter mapping
 
@@ -219,17 +219,17 @@ The deprecated endpoint's filters map to v2 `filters` entries: `traceName` and `
 
 ### Parameter mapping
 
-| Deprecated (v1/v2)                                                 | v3 equivalent                                                                                                         |
-| ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| `page`                                                             | `cursor` (from the previous response's `meta`); `limit` max 100                                                       |
-| `GET /scores/{scoreId}`, `GET /v2/scores/{scoreId}`                | `id=<scoreId>` filter; there is no get-by-id endpoint in v3                                                           |
-| `value` + `stringValue` (split by type)                            | Single `value` field, typed by `dataType`                                                                             |
-| `operator` + `value` (numeric comparison)                          | `valueMin` / `valueMax` (inclusive bounds, require `dataType=NUMERIC`)                                                |
-| `datasetRunId`                                                     | `experimentId`                                                                                                        |
-| `fromTimestamp`, `toTimestamp`                                     | Unchanged names, but `fromTimestamp` is now inclusive and `toTimestamp` exclusive                                     |
-| `userId`, `traceTags`                                              | Removed; for trace-level score questions, use the [Metrics API v2](/docs/metrics/features/metrics-api#v2) score views |
-| `filter` (JSON, e.g. metadata conditions)                          | Removed; for metadata conditions, request `fields=details` and filter on `metadata` client-side                       |
-| `name`, `source`, `dataType`, `environment`, `configId`, `queueId` | Unchanged, and now accept comma-separated lists (OR within a parameter, AND across parameters)                        |
+| Deprecated (v1/v2)                                                 | v3 equivalent                                                                                                      |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `page`                                                             | `cursor` (from the previous response's `meta`); `limit` max 100                                                    |
+| `GET /scores/{scoreId}`, `GET /v2/scores/{scoreId}`                | `id=<scoreId>` filter; there is no get-by-id endpoint in v3                                                        |
+| `value` + `stringValue` (split by type)                            | Single `value` field, typed by `dataType`                                                                          |
+| `operator` + `value` (numeric comparison)                          | `valueMin` / `valueMax` (inclusive bounds, require `dataType=NUMERIC`)                                             |
+| `datasetRunId`                                                     | `experimentId`                                                                                                     |
+| `fromTimestamp`, `toTimestamp`                                     | Unchanged names, but `fromTimestamp` is now inclusive and `toTimestamp` exclusive                                  |
+| `userId`, `traceTags`                                              | Removed; for trace-level score questions, use the [Metrics API v2](/docs/metrics/features/metrics-api) score views |
+| `filter` (JSON, e.g. metadata conditions)                          | Removed; for metadata conditions, request `fields=details` and filter on `metadata` client-side                    |
+| `name`, `source`, `dataType`, `environment`, `configId`, `queueId` | Unchanged, and now accept comma-separated lists (OR within a parameter, AND across parameters)                     |
 
 ### Semantic differences
 

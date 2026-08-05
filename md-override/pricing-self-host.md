@@ -85,7 +85,7 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 | Users                                                                                               | Unlimited                   | Unlimited                                  |
 | **API**                                                                                             |                             |                                            |
 | [Extensive public API](/docs/api-and-data-platform/features/public-api)                             | Yes                         | Yes                                        |
-| [Metrics & Observations APIs (v2)](/docs/metrics/features/metrics-api#v2)                           | Langfuse v4+                | Langfuse v4+                               |
+| [Metrics & Observations APIs (v2)](/docs/metrics/features/metrics-api)                              | Langfuse v4+                | Langfuse v4+                               |
 | **Exports**                                                                                         |                             |                                            |
 | [Batch export via UI](/docs/api-and-data-platform/features/query-via-sdk#ui)                        | Yes                         | Yes                                        |
 | [PostHog integration](/integrations/analytics/posthog)                                              | Yes                         | Yes                                        |

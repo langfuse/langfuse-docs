@@ -8,6 +8,16 @@ import DataFreshness from "@/components-mdx/compat/data-freshness.mdx";
 
 # Metrics API
 
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "v4",
+  }}
+/>
+
 ```
 GET /api/public/v2/metrics
 ```
@@ -20,7 +30,7 @@ This endpoint allows you to specify dimensions, metrics, filters, and time granu
 Use the Metrics API to:
 
 - Aggregate cost, token usage, volume, latency, and score data.
-- Group results by supported dimensions, such as model or trace attributes.
+- Group results by supported dimensions, such as model, trace name, trace release, or trace version.
 - Filter data and analyze trends over time.
 - Power custom reports, dashboards, billing, and monitoring workflows.
 
@@ -32,18 +42,6 @@ The deprecated `GET /api/public/metrics` and `GET /api/public/metrics/daily` end
 
 </Callout>
 
-## Metrics API v2 [#v2]
-
-<AvailabilityBanner
-  availability={{
-    hobby: "full",
-    core: "full",
-    pro: "full",
-    enterprise: "full",
-    selfHosted: "v4",
-  }}
-/>
-
 <Callout type="info">
 
 <DataFreshness />
@@ -52,11 +50,7 @@ On self-hosted Langfuse v3, use the [Metrics API v1](/faq/all/deprecated-api-mig
 
 </Callout>
 
-```
-GET /api/public/v2/metrics
-```
-
-The v2 Metrics API provides significant performance improvements through an optimized data architecture built on the wide observations table, which minimizes database work per query.
+The Metrics API provides significant performance improvements through an optimized data architecture built on the wide observations table, which minimizes database work per query.
 
 ### Key Changes from v1
 

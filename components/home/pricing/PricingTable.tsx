@@ -748,7 +748,7 @@ const sections: Section[] = [
         name: "Metrics & Observations APIs (v2)",
         description:
           "High-performance v2 endpoints for aggregate metrics and row-level observation data. On self-hosted deployments, these APIs require Langfuse v4.",
-        href: "/docs/metrics/features/metrics-api#v2",
+        href: "/docs/metrics/features/metrics-api",
         tiers: {
           selfHosted: {
             "Open Source": "Langfuse v4+",
