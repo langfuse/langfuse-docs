@@ -38,12 +38,6 @@ For supported views, fields, query parameters, response schemas, and interactive
 
 <Callout type="info">
 
-The deprecated `GET /api/public/metrics` and `GET /api/public/metrics/daily` endpoints are documented, with migration steps, in [Migration of deprecated APIs](/faq/all/deprecated-api-migration).
-
-</Callout>
-
-<Callout type="info">
-
 <DataFreshness />
 
 On self-hosted Langfuse v3, use the [Metrics API v1](/faq/all/deprecated-api-migration#metrics-v1) instead; see the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
@@ -51,10 +45,6 @@ On self-hosted Langfuse v3, use the [Metrics API v1](/faq/all/deprecated-api-mig
 </Callout>
 
 The Metrics API provides significant performance improvements through an optimized data architecture built on the wide observations table, which minimizes database work per query.
-
-### Key Changes from v1
-
-**The `traces` view is no longer available in v2.** Instead, use the `observations` view which is both faster and more powerful compared to v1.
 
 ### Available Views in v2
 
@@ -64,6 +54,16 @@ The Metrics API provides significant performance improvements through an optimiz
 | `scores-numeric`     | Query numeric scores                                                                          |
 | `scores-categorical` | Query categorical (string) scores                                                             |
 | `scores-boolean`     | Query boolean scores; group or filter by `booleanValue`, or average `value` for the true rate |
+
+### Key Changes from v1
+
+<Callout type="info">
+
+The deprecated `GET /api/public/metrics` and `GET /api/public/metrics/daily` endpoints are documented, with migration steps, in [Migration of deprecated APIs](/faq/all/deprecated-api-migration).
+
+</Callout>
+
+**The `traces` view is no longer available in v2.** Instead, use the `observations` view which is both faster and more powerful compared to v1.
 
 ### Row Limit
 
