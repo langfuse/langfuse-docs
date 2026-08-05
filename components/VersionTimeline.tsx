@@ -43,12 +43,12 @@ const ROWS: { id: string; name: string; segments: Segment[] }[] = [
         className: SEGMENT_STYLES.previous,
       },
       {
-        label: "v3 + v4 Preview",
+        label: "v3 + v4 preview",
         from: { year: 2026, month: 3 },
         to: { year: 2026, month: 11 },
         href: "/docs/v4",
         title:
-          "Since March 10, 2026: v3 with all v4 features available in preview",
+          "Since March 10, 2026: Langfuse v3 with all v4 features available in the Langfuse v4 preview",
         className: SEGMENT_STYLES.preview,
       },
       {
@@ -71,17 +71,17 @@ const ROWS: { id: string; name: string; segments: Segment[] }[] = [
         from: { year: 2026, month: 1 },
         to: { year: 2026, month: 8 },
         href: "/self-hosting/upgrade/versioning#sdk-server",
-        title: "Self-hosted GA version is v3",
+        title:
+          "Self-hosted v3 was the GA version until July 2026; it receives security patches until end of January 2027",
         className: SEGMENT_STYLES.previous,
       },
       {
-        label: "v4 (dates will follow)",
+        label: "v4",
         from: { year: 2026, month: 8 },
         to: AXIS_END,
-        href: "/self-hosting/upgrade",
-        title:
-          "v4 for self-hosted deployments is coming soon; the release date will follow",
-        className: SEGMENT_STYLES.expected,
+        href: "/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4",
+        title: "Self-hosted v4 is generally available since July 29, 2026",
+        className: SEGMENT_STYLES.ga,
       },
     ],
   },

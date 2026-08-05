@@ -45,19 +45,19 @@ Langfuse の公開APIでは現在、次のリソースをプログラムから�
 import os
 
 # --- 移行元 (SOURCE) プロジェクトの認証情報 ---
-os.environ.setdefault("LANGFUSE_SOURCE_PUBLIC_KEY", "pk-lf-...")
-os.environ.setdefault("LANGFUSE_SOURCE_SECRET_KEY", "sk-lf-...")
-os.environ.setdefault("LANGFUSE_SOURCE_HOST", "https://cloud.langfuse.com")  # 例: EU クラウド
+os.environ.setdefault("LANGFUSE_SOURCE_PUBLIC_KEY", "pk-lf-...");
+os.environ.setdefault("LANGFUSE_SOURCE_SECRET_KEY", "sk-lf-...");
+os.environ.setdefault("LANGFUSE_SOURCE_HOST", "https://cloud.langfuse.com");  # 例: EU クラウド
 
 # --- 移行先 (DESTINATION) プロジェクトの認証情報 ---
-os.environ.setdefault("LANGFUSE_DEST_PUBLIC_KEY", "pk-lf-...")
-os.environ.setdefault("LANGFUSE_DEST_SECRET_KEY", "sk-lf-...")
-os.environ.setdefault("LANGFUSE_DEST_HOST", "https://jp.cloud.langfuse.com")  # 例: JP クラウド
+os.environ.setdefault("LANGFUSE_DEST_PUBLIC_KEY", "pk-lf-...");
+os.environ.setdefault("LANGFUSE_DEST_SECRET_KEY", "sk-lf-...");
+os.environ.setdefault("LANGFUSE_DEST_HOST", "https://jp.cloud.langfuse.com");  # 例: JP クラウド
 
 # --- オブザベーション移行の時間フィルタ (任意, ISO 8601) ---
 # 空にすると全トレースが対象になります。
-os.environ.setdefault("LANGFUSE_MIGRATE_FROM_TIMESTAMP", "2026-03-01T00:00:00Z")  # 例: "2025-01-01T00:00:00Z"
-os.environ.setdefault("LANGFUSE_MIGRATE_TO_TIMESTAMP", "2026-04-20T00:00:00Z")    # 例: "2025-02-01T00:00:00Z"
+os.environ.setdefault("LANGFUSE_MIGRATE_FROM_TIMESTAMP", "2026-03-01T00:00:00Z");  # 例: "2025-01-01T00:00:00Z"
+os.environ.setdefault("LANGFUSE_MIGRATE_TO_TIMESTAMP", "2026-04-20T00:00:00Z");    # 例: "2025-02-01T00:00:00Z"
 ```
 
 
@@ -395,7 +395,7 @@ print(f"プロンプト — 移行: {migrated}, 失敗: {failed}")
 
 ここがデータ移行のメインパートです。移行元の各トレース (とネストされたオブザベーション) を、移行先の OTLP インジェストエンドポイント `/api/public/otel/v1/traces` に送ります。オブザベーションの `start_time` / `end_time` を取り込み時点で正しくセットできるのは OTLP エンドポイント **だけ** です。従来のREST経由のインジェストだと、これらのフィールドは上書きされてしまいます。
 
-> **セルフホスト環境の場合:** Observations API v2 には [Langfuse v4](https://langfuse.com/docs/v4) が必要です。セルフホスト向けの v4 対応は現在準備中です。セルフホストの Langfuse から移行する場合は、下の `observations.get_many(...)` の呼び出しを `src.api.trace.get(trace.id).observations` (v1 エンドポイント) に置き換えてください。
+> **セルフホスト環境の場合:** Observations API v2 には [Langfuse v4](https://langfuse.com/docs/v4) が必要です。セルフホスト向けにも v4 は一般提供されています。まだ Langfuse v3 を利用しているセルフホスト環境から移行する場合は、下の `observations.get_many(...)` の呼び出しを `src.api.trace.get(trace.id).observations` (v1 エンドポイント) に置き換えてください。
 
 
 ```python

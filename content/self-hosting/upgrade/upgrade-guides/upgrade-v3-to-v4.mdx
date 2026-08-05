@@ -7,11 +7,11 @@ description: A guide to upgrade a Langfuse v3 setup to v4.
 
 <Callout type="info">
 
-Please ask in the [v4 rollout GitHub Discussion](https://github.com/orgs/langfuse/discussions/14157) or contact [support](/support) in case you have any questions while upgrading to v4.
+Please ask in the [v4 GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518) or contact [support](/support) in case you have any questions while upgrading to v4.
 
 </Callout>
 
-Langfuse v4 moves to an observation-centric data model built on a new, wide, and (mostly) immutable ClickHouse table.
+Langfuse v4 moves to an observations-first data model built on a new, wide, and (mostly) immutable ClickHouse table.
 This eliminates joins and deduplication at read time and optimizes for the most performant ClickHouse access patterns.
 Initial table loads for large amounts of data go from seconds to milliseconds, and dashboard load times for large projects improve by 10x or more over longer time ranges.
 
@@ -133,15 +133,15 @@ Metrics, replaced by the [Metrics API v2](/docs/metrics/features/metrics-api#v2)
 | `GET /api/public/metrics`       | Returns `404`  |
 | `GET /api/public/metrics/daily` | Returns `404`  |
 
-Dataset runs, replaced by the [experiments API](https://api.reference.langfuse.com/#tag/experiments) (`GET /api/public/experiments`, `GET /api/public/experiment-items`) for reads and the [Experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk) for writes.
+Dataset runs, replaced by the [experiments API](https://api.reference.langfuse.com/#tag/experiments) (`GET /api/public/experiments`, `GET /api/public/experiment-items`) for reads and the [Experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk) for writes. The legacy `POST /api/public/dataset-run-items` endpoint is deprecated and must not be used with Langfuse v4.
 
-| Endpoint                                          | Behavior on v4 |
-| ------------------------------------------------- | -------------- |
-| `POST /api/public/dataset-run-items`              | Returns `404`  |
-| `GET /api/public/dataset-run-items`               | Returns `404`  |
-| `GET /api/public/datasets/:name/runs`             | Returns `404`  |
-| `GET /api/public/datasets/:name/runs/:runName`    | Returns `404`  |
-| `DELETE /api/public/datasets/:name/runs/:runName` | Returns `404`  |
+| Endpoint                                          | Behavior on v4                                                        |
+| ------------------------------------------------- | --------------------------------------------------------------------- |
+| `POST /api/public/dataset-run-items`              | Returns stale compatibility object for legacy SDKs. Do not use in v4. |
+| `GET /api/public/dataset-run-items`               | Returns `404`                                                         |
+| `GET /api/public/datasets/:name/runs`             | Returns `404`                                                         |
+| `GET /api/public/datasets/:name/runs/:runName`    | Returns `404`                                                         |
+| `DELETE /api/public/datasets/:name/runs/:runName` | Returns `404`                                                         |
 
 Create experiment data with the Experiment runner SDK (Python and JS/TS), which applies the required experiment semantics automatically; from other languages, send experiment traces to `POST /api/public/otel/v1/traces` with the [experiment attributes](/integrations/native/opentelemetry#experiments-ingesting-experiment-spans) set.
 
@@ -165,14 +165,20 @@ Langfuse v4 raises the minimum infrastructure versions:
 
 Upgrade ClickHouse **before** the server upgrade. Langfuse v3 releases are fully compatible with current ClickHouse versions, so you can perform the ClickHouse upgrade on your existing v3 deployment and operate it as long as you like before continuing. See the [ClickHouse deployment guide](/self-hosting/deployment/infrastructure/clickhouse) for version and operations guidance.
 
+<Callout type="warning">
+
+**Helm chart with built-in ClickHouse:** deployments that run the ClickHouse instance bundled with the [Langfuse Helm chart](https://github.com/langfuse/langfuse-k8s) (`clickhouse.deploy: true`) cannot upgrade to Langfuse v4 yet, as the chart does not provide an upgrade path to a v4-compatible ClickHouse version. [Subscribe to the self-hosting mailing list](/self-hosting#subscribe) to get notified as soon as an upgrade path is available. Deployments that connect to an external ClickHouse are not affected.
+
+</Callout>
+
 If you plan to use the [automated backfill](#historic-data) for historic data in step 3, also make sure the ClickHouse disks can handle roughly **3x the current data volume**: data is copied into the `events` tables and, for the `observations` table, additionally into an intermediate format that is cleaned up at the end.
 
 ## Step 2: Upgrade the server to Langfuse v4 [#step-2]
 
 Perform a regular [server upgrade](/self-hosting/upgrade) to the latest Langfuse v4 release.
-All ClickHouse schema migrations (the new `events` tables) are applied automatically on startup. Deployments that adopted the tables early via the v3 preview are handled as well: existing tables are detected and skipped.
+All ClickHouse schema migrations (the new `events` tables) are applied automatically on startup. Deployments that ran the Langfuse v4 preview (v3-tagged images with the preview environment variables) are handled as well: existing tables are detected and skipped.
 
-The only decision to make is the **write mode** you start with. It controls which tables ingestion writes to, and thereby how much of the v3 behavior you retain:
+The only decision to make is the **write mode** you start with. It controls which tables ingestion writes to, and thereby how much of the v3 behavior you retain. The `legacy` and `dual` modes are migration utilities, not permanent operating modes: they will be removed in an upcoming major version, so plan to complete the [cutover](#cutover) to `events_only` as part of your migration.
 
 <Tabs items={["events_only (default)", "dual", "legacy"]}>
 
@@ -203,9 +209,11 @@ LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL=false
 LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN=false
 ```
 
-Ingestion writes into both the old and the new tables: compatible SDKs directly, older SDKs via the [dual-write pipeline](#dual-write) with a ~10 minute delay.
+Ingestion writes into both the old and the new tables: Python SDK ≥ 4.7.0 / JS/TS SDK ≥ 5.4.0 (and OTel with `x-langfuse-ingestion-version: 4`) write directly; older SDKs go through the [dual-write pipeline](#dual-write) with a ~10 minute delay.
 Each user can switch to the new read experience via the toggle in the UI, and the new [v2 APIs](#api-changes) become available (both gated by `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN`, default `true`).
 Expect higher server load and S3 costs than `events_only` (comparable to v3 processing) until you complete the [cutover](#cutover).
+
+We also recommend expanding the health check of the **worker** container to `GET /api/health?failIfEventPropagationStuck=true` (port 3030): it returns `503` when the [propagation job](#dual-write) that moves data from older SDKs into the new tables has stopped making progress, so a stuck dual write surfaces in your existing monitoring instead of going unnoticed. The check passes on deployments where the dual write does not run, so it is safe to keep after the cutover. See [health and readiness endpoints](/self-hosting/configuration/health-readiness-endpoints) for probe configuration.
 
 </Tab>
 
@@ -247,7 +255,8 @@ Langfuse v4 expects instrumentation that propagates shared attributes (like `use
 - any native [OpenTelemetry integration](/integrations/native/opentelemetry)
 
 These SDK versions are fully compatible with Langfuse v3 servers, so this step can start before, during, or after the server upgrade.
-Every migrated producer writes into the new tables directly (no delay) and reduces the load of the dual-write phase.
+For real-time visibility on the v4 data model, use Python SDK ≥ 4.7.0, JS/TS SDK ≥ 5.4.0, or send `x-langfuse-ingestion-version: 4` on direct OpenTelemetry exporters. Older patch versions of Python v4 / JS v5 still ingest, but can appear with a ~10 minute delay until you reach those minimums.
+Every migrated producer that meets the real-time thresholds writes into the new tables directly (no delay) and reduces the load of the dual-write phase.
 
 Producers are only one side; everything that reads from Langfuse needs to move to the new data model as well before the cutover:
 
@@ -265,7 +274,7 @@ From this moment, all incoming data lands in both the old and the new tables.
 Set `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN=true` (or remove the overwrite) to allow users to opt-in to the new experience.
 Usually, this is recommended after the dual write was active for a few days.
 
-Confirm the dual write is healthy before continuing: data from compatible SDKs appears immediately, data from older SDKs with a ~10 minute delay. The [health endpoint](#dual-write) can monitor the propagation job.
+Confirm the dual write is healthy before continuing: data from Python SDK ≥ 4.7.0, JS/TS SDK ≥ 5.4.0, or OTel with `x-langfuse-ingestion-version: 4` appears immediately; data from older SDKs appears with a ~10 minute delay. The [health endpoint](#dual-write) can monitor the propagation job.
 
 ### Migrate historic data [#historic-data]
 
@@ -337,7 +346,7 @@ Fresh installs need none of the above: deploy Langfuse v4 following the regular 
 
 ## Configuration reference [#configuration]
 
-On Langfuse v4, the new behavior is the default. These variables exist to retain v3 behaviors while your migration is in flight:
+On Langfuse v4, the new behavior is the default. These variables exist to retain v3 behaviors while your migration is in flight; they will be removed in an upcoming major version:
 
 | Variable                                                       | Values / v4 default                         | Use during the migration                                                                                                                                                                                              |
 | -------------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -353,7 +362,7 @@ The dual write bridges older SDKs onto the new data model:
 
 - Incoming events from older SDKs are written to `traces`/`observations` as before, plus into a staging table (`observations_batch_staging`) partitioned into 3-minute windows.
 - A worker job periodically picks up completed partitions, joins them with the `traces` table to propagate trace-level attributes (user, session, tags, release, version, metadata), and inserts the result into `events_full`. This is why data from older SDKs appears with a **~10 minute delay** in the UI and APIs.
-- Compatible SDKs (Python v4, JS/TS v5) propagate attributes client-side and write into the new tables **directly**, without delay, which also reduces the ClickHouse load of the dual-write phase.
+- Compatible SDKs (Python ≥ 4.7.0, JS/TS ≥ 5.4.0) propagate attributes client-side and write into the new tables **directly**, without delay, which also reduces the ClickHouse load of the dual-write phase. Python SDK 4.0.0–4.6.x and JS/TS SDK 5.0.0–5.3.x still ingest on v4 but can appear with the same ~10 minute delay until upgraded.
 - Native OpenTelemetry spans follow `LANGFUSE_MIGRATION_V4_NATIVE_OTEL_BEHAVIOUR`: with `dual_write`, spans go through the staging pipeline unless they carry the `x-langfuse-ingestion-version: 4` header; with `direct` (the v4 default), all OTel spans are written directly, assuming client-side propagation.
 
 Staging partitions are kept for 48 hours, which gives you a multi-day grace period to recover the propagation job after an incident without losing staging data. You can monitor the propagation pipeline via the worker health endpoint: `GET /api/health?failIfEventPropagationStuck=true` (worker container, port 3030) returns `503` if the job has not made progress within `LANGFUSE_EVENT_PROPAGATION_STUCK_THRESHOLD_MINUTES` (default `15`). The check passes on deployments where the dual write does not run, so it is safe to keep configured after the cutover. See [health and readiness endpoints](/self-hosting/configuration/health-readiness-endpoints) for probe configuration.
@@ -395,14 +404,14 @@ Track progress on the background migrations page in the UI; see [background migr
 
 {/* Seeded from https://github.com/orgs/langfuse/discussions/12518 and https://github.com/orgs/langfuse/discussions/14157 */}
 
-**Do I need to do anything special if I adopted the events tables early via the v3 preview?**
-No. The v4 migrations detect the existing tables and skip their creation. Your deployment upgrades like any other; keep the environment variables you set for the preview until you complete the [cutover](#cutover).
+**Do I need to do anything special if I ran the Langfuse v4 preview on a v3-tagged image?**
+No. If you adopted the `events` tables early by running the Langfuse v4 preview (a v3-tagged image with the preview environment variables), the v4 migrations detect the existing tables and skip their creation. Your deployment upgrades like any other; keep the environment variables you set for the preview until you complete the [cutover](#cutover).
 
 **Is it safe to upgrade the SDKs before the server?**
 Yes. Python SDK v4 and JS/TS SDK v5 are fully compatible with Langfuse v3 servers. Two caveats: `client.api.observations.*` and `client.api.metrics.*` point to the new v2 endpoints which are not available on v3 servers (use `client.api.legacy.*` in the meantime), and trace input/output must be set explicitly if you depart from the default root-span behavior.
 
 **Can I stay on the `legacy` or `dual` write mode long-term?**
-They are transition modes: `legacy` forgoes all v4 performance improvements, and `dual` doubles the write load and storage costs. We recommend completing the [cutover](#cutover) once your producers are migrated.
+No. They are transition modes that will be removed in an upcoming major version: `legacy` forgoes all v4 performance improvements, and `dual` doubles the write load and storage costs. Complete the [cutover](#cutover) once your producers are migrated.
 
 **Do I need new infrastructure components?**
 No. The infrastructure is identical to v3 (web/worker, PostgreSQL, ClickHouse, Redis, S3); only the minimum/recommended versions changed, see [step 1](#step-1).
@@ -417,7 +426,7 @@ They are attached to the root observation of the trace and remain visible in the
 The [historic backfill](#historic-backfill) rewrites data gradually, newest first. Depending on your data volume, it can take from minutes to days until all historic data is visible.
 
 **Why does data from some SDKs appear with a ~10 minute delay?**
-Data from SDKs older than Python v4 / JS v5 flows through the [dual-write pipeline](#dual-write), which processes micro-batches with a delay. Upgrading the SDK removes the delay.
+Data from SDKs older than Python 4.7.0 / JS/TS 5.4.0 (and OTel exporters without `x-langfuse-ingestion-version: 4`) flows through the [dual-write pipeline](#dual-write), which processes micro-batches with a delay. Upgrading to those minimums (or setting the header) removes the delay.
 
 **Langfuse does not start after I set the migration variables.**
 Langfuse validates the migration configuration on startup and exits on invalid combinations (for example, `events_only` write mode together with `dual_write` OTel behavior or with `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN=false`). Double-check values and exact variable names, including the uppercase `V4`.
@@ -426,6 +435,6 @@ Langfuse validates the migration configuration on startup and exits on invalid c
 
 If you experience any issues during the migration, please:
 
-1. Ask in the [v4 rollout GitHub Discussion](https://github.com/orgs/langfuse/discussions/14157); we use it as the central thread for the self-hosted rollout. Background on the architecture change is collected in the [announcement discussion](https://github.com/orgs/langfuse/discussions/12518).
+1. Ask in the [v4 GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518); we use it as the central thread for the v4 release and answer questions there.
 2. Create a [GitHub Issue](/issues) for bugs.
 3. Enterprise customers can reach out to [support](/support) directly.
