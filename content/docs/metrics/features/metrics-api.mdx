@@ -83,15 +83,17 @@ Certain dimensions like `id`, `traceId`, `userId`, and `sessionId` cannot be use
 
 The v2-only `isRootObservation` boolean dimension identifies application entry points. `true` includes both outer roots with no parent and app roots whose OpenTelemetry instrumentation or infrastructure parent was filtered from export by the SDK. Use it to count, filter, or group application entry points without missing the latter case. See [Logical root observations](/docs/api-and-data-platform/features/observations-api#logical-root-observations) for the distinction between physical and logical roots and trace-counting edge cases.
 
-For example, add this filter to a query to count semantic roots:
+For example, add this condition to a query's `filters` array to count semantic roots:
 
 ```json
-{
-  "column": "isRootObservation",
-  "operator": "=",
-  "value": true,
-  "type": "boolean"
-}
+[
+  {
+    "column": "isRootObservation",
+    "operator": "=",
+    "value": true,
+    "type": "boolean"
+  }
+]
 ```
 
 ### Ordering by metrics
