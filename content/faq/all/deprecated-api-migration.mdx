@@ -179,7 +179,8 @@ The query object structure carries over; the key changes are inside the query:
 
 ### Semantic differences
 
-- **The `traces` view is removed.** In the `observations` view, measures such as `count`, `latency`, `totalCost`, and `totalTokens` are calculated over observation rows, not traces. For trace-level counts, filter on the v2-only `isRootObservation = true` dimension; it includes both outer roots and app roots whose OpenTelemetry parent is external. For trace durations or raw per-trace data, use [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and group by `traceId` client-side.
+- **The `traces` view is removed.** In the `observations` view, measures such as `count`, `latency`, `totalCost`, and `totalTokens` are calculated over observation rows, not traces. For trace-level counts, filter on the v2-only `isRootObservation = true` dimension; it includes both outer roots and SDK-marked app roots beneath an instrumentation or infrastructure parent that was filtered from export.
+- **`isRootObservation` counts semantic roots, not arbitrary distinct trace IDs.** A trace should not submit more than one semantic root; multiple matching roots indicate an integration issue. The filter omits rootless traces, such as distributed traces whose root lives in another service that does not export to the same Langfuse project. For projects that can contain rootless traces, or for trace durations and raw per-trace data, use [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and group by `traceId` client-side.
 - When ordering by an aggregated metric, use the returned field name in the format `{aggregation}_{measure}`, e.g. `sum_totalCost`.
 
 ### Example
