@@ -11,6 +11,14 @@ import { DatasetDesignLoopDiagram } from "@/components/academy/DatasetDesignLoop
 
 A dataset is a repeatable set of examples that represent the scope of your application, and that you use to measure and improve your system. By running your application against the same inputs over time, you can track quality with metrics, compare changes, and catch regressions before they affect production users.
 
+<Callout type="info">
+Haven't determined what is worth evaluating in a repeatable manner? Check out
+
+- [error analysis](/academy/monitoring/error-analysis), a structured way to find the failure modes in your application worth checking
+- the datasets in the [Langfuse demo project](/docs/demo) and in our [Academy examples](/academy/examples) to get an idea of a dataset scope
+
+</Callout>
+
 The [Datasets](/academy/datasets) academy section explains the basic building blocks: input, expected output, and metadata. This guide focuses on the design work that happens before and while you create datasets and dataset items.
 
 Dataset design is iterative. A good starting point is a minimally complete dataset: about 15-30 rows that can run through your application, cover the most important input slices, and have an evaluator or review rubric. Run that version early, fix the schema and evaluator, then expand into the gaps you see from those runs or from production input.
@@ -99,11 +107,9 @@ For example, a docs chatbot dataset can use either approach:
 
 Choose the cheapest evaluator that captures the requirement: [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) for deterministic checks, [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) for language-quality judgments, and [manual evaluation](/academy/evaluate#how-evaluation-typically-evolves) while you are still learning what good and bad outputs look like.
 
-<Callout type="info">
-If you are still exploring how evaluation works, see the [Academy page on evaluation](/academy/evaluate).
-</Callout>
+At this stage, you only need to decide how each dataset item will be reviewed: by an automated evaluator, manual annotation, or both. For the deeper work of designing the evaluator itself, see the [Academy page on evaluation](/academy/evaluate).
 
-If you choose reference-free evaluation but cannot name the evaluator or review rubric that will score every row, you have created a review queue, not yet an evaluable dataset. See [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) for this workflow.
+If you cannot yet name the evaluator or review rubric that will score each row, go for a review workflow first and use [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) to label examples manually.
 
 ## 5. Design the item schema
 
