@@ -37,13 +37,13 @@ import os
 
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
-os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "")
-os.environ.setdefault("LANGFUSE_SECRET_KEY", "")
-os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your openai key
-os.environ.setdefault("OPENAI_API_KEY", "")
+os.environ.setdefault("OPENAI_API_KEY", "");
 ```
 
 ## Step by step

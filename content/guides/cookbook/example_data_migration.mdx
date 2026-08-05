@@ -46,19 +46,19 @@ This notebook needs Python SDK 4.8.1 or newer — earlier 4.x releases do not in
 import os
 
 # --- SOURCE project credentials ---
-os.environ.setdefault("LANGFUSE_SOURCE_PUBLIC_KEY", "pk-lf-..")
-os.environ.setdefault("LANGFUSE_SOURCE_SECRET_KEY", "sk-lf-...")
-os.environ.setdefault("LANGFUSE_SOURCE_HOST", "https://cloud.langfuse.com")  # e.g. EU cloud
+os.environ.setdefault("LANGFUSE_SOURCE_PUBLIC_KEY", "pk-lf-..");
+os.environ.setdefault("LANGFUSE_SOURCE_SECRET_KEY", "sk-lf-...");
+os.environ.setdefault("LANGFUSE_SOURCE_HOST", "https://cloud.langfuse.com");  # e.g. EU cloud
 
 # --- DESTINATION project credentials ---
-os.environ.setdefault("LANGFUSE_DEST_PUBLIC_KEY", "pk-lf-..")
-os.environ.setdefault("LANGFUSE_DEST_SECRET_KEY", "sk-lf-...")
-os.environ.setdefault("LANGFUSE_DEST_HOST", "https://hipaa.cloud.langfuse.com")  # e.g. HIPAA cloud
+os.environ.setdefault("LANGFUSE_DEST_PUBLIC_KEY", "pk-lf-..");
+os.environ.setdefault("LANGFUSE_DEST_SECRET_KEY", "sk-lf-...");
+os.environ.setdefault("LANGFUSE_DEST_HOST", "https://hipaa.cloud.langfuse.com");  # e.g. HIPAA cloud
 
 # --- Optional time filter for the observations migration (ISO 8601) ---
 # Leave empty to migrate all traces.
-os.environ.setdefault("LANGFUSE_MIGRATE_FROM_TIMESTAMP", "2026-03-01T00:00:00Z")  # e.g. "2025-01-01T00:00:00Z"
-os.environ.setdefault("LANGFUSE_MIGRATE_TO_TIMESTAMP", "2026-04-20T00:00:00Z")    # e.g. "2025-02-01T00:00:00Z"
+os.environ.setdefault("LANGFUSE_MIGRATE_FROM_TIMESTAMP", "2026-03-01T00:00:00Z");  # e.g. "2025-01-01T00:00:00Z"
+os.environ.setdefault("LANGFUSE_MIGRATE_TO_TIMESTAMP", "2026-04-20T00:00:00Z");    # e.g. "2025-02-01T00:00:00Z"
 
 ```
 
@@ -404,7 +404,7 @@ print(f"Prompts — migrated: {migrated}, failed: {failed}")
 
 This is the core of the migration. We push each source trace (and its nested observations) into the destination's OTLP ingestion endpoint at `/api/public/otel/v1/traces`. The OTLP endpoint is the **only** way to set the authoritative `start_time` / `end_time` of an observation at ingest — the legacy REST ingestion rewrites those fields.
 
-> **Self-hosted deployments:** the v2 Observations API requires [Langfuse v4](https://langfuse.com/docs/v4); self-hosted v4 support is in progress. If you are migrating from a self-hosted Langfuse instance, replace the `observations.get_many(...)` calls below with `src.api.trace.get(trace.id).observations` (which hits the v1 endpoint).
+> **Self-hosted deployments:** the v2 Observations API requires [Langfuse v4](https://langfuse.com/docs/v4), which is generally available for self-hosted deployments. If you are migrating from a self-hosted instance that still runs Langfuse v3, replace the `observations.get_many(...)` calls below with `src.api.trace.get(trace.id).observations` (which hits the v1 endpoint).
 
 
 

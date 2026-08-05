@@ -1,9 +1,9 @@
 ---
-title: Dashboard Changes in Langfuse v4
+title: Dashboard changes in Langfuse v4
 description: How dashboards change in Langfuse v4 — what stays the same, what's different, and expected numerical differences compared to Langfuse v3.
 ---
 
-# Dashboard Changes in Langfuse v4
+# Dashboard changes in Langfuse v4
 
 This page explains how dashboards behave differently in [Langfuse v4](/docs/v4) compared to Langfuse v3. If you are on the new experience — via the toggle on Langfuse Cloud or a [self-hosted v4 deployment](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4) — use this as a reference for understanding any differences you observe.
 
@@ -20,7 +20,7 @@ In Langfuse, **observations** (also known as "spans" in OpenTelemetry) are the i
 
 In Langfuse v3, a `trace` is a first-class record in its own table, and observations are separate records that reference it via a foreign key. Queries JOIN these tables at read time to combine trace metadata with observation metrics.
 
-Langfuse v4 adopts an [OpenTelemetry-native data model](/docs/observability/data-model). In OTEL, there is no "trace" object — only observations arranged in a parent-child hierarchy. The root observation (an observation with no parent) _is_ the trace. A trace ID is a shared identifier that groups related observations together.
+Langfuse v4 adopts an [OpenTelemetry-native data model](/docs/observability/data-model). In OTEL, there is no separate "trace" object — only observations arranged in a parent-child hierarchy. A trace is the set of observations that share a `trace_id`; the root observation (an observation with no parent) represents that trace in the UI.
 
 In Langfuse v4, all data lives in a single denormalized ClickHouse table — the **wide observations table**. Each observation row carries the full trace context (user ID, session ID, tags, environment, etc.) already materialized on it — no JOINs required. For data ingested via older SDKs (both Langfuse and OTEL), Langfuse creates a **synthetic root observation** for each trace to fit the unified model (see [section 6](#6-synthetic-root-observations-appear-in-the-wide-observations-table)). Newer OTEL SDKs that use direct event writes do not need synthetic root observations — the real OTEL root observation already serves as the natural root entry. See the [SDK upgrade guides](/docs/observability/sdk/upgrade-path) for migration instructions.
 
@@ -64,7 +64,7 @@ In Langfuse v3, this chart has two tabs: "Traces" (trace count over time) and "O
 
 _Applies to: home dashboard_
 
-The trace latency table currently queries the traces view, which is one of the slowest dashboard queries at scale. If the performance cannot be brought to acceptable levels before release, this tile will be removed from the Langfuse v4 dashboard. Observation-level latency metrics (which query the wide observations table directly) will remain.
+The trace latency table currently queries the traces view, which is one of the slowest dashboard queries at scale. Observation-level latency metrics (which query the wide observations table directly) remain. If this tile is still slow for your project, prefer observation-level latency widgets instead.
 
 ### 4. Trace time bucketing uses the root observation's start time
 

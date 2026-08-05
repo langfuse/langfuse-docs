@@ -178,9 +178,9 @@ Make manifest processing idempotent. Provider events can be delivered more than 
 
 Most integrations can switch directly once their consumer supports the enriched layout:
 
-On self-hosted v4, first [switch the server to `dual` write mode](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#step-3) with v4 preview enabled and [complete the historic data migration](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#historic-data).
+On self-hosted Langfuse v4, first [switch the server to `dual` write mode](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#step-3) with the Langfuse v4 preview enabled and [complete the historic data migration](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#historic-data).
 
-Enriched export sources are unavailable in `legacy` mode or when v4 preview is disabled. Switch the integration before the server's [`events_only` cutover](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#cutover).
+Enriched export sources are unavailable in `legacy` mode or when the Langfuse v4 preview is disabled. Switch the integration before the server's [`events_only` cutover](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#cutover).
 
 1. **Prepare the new consumer.** Process `observations_v2/` and `scores/` from each manifest's `files[].key`. Use the [enriched field reference](/docs/api-and-data-platform/features/blob-storage-export-fields#enriched-observations).
 2. **Switch the export.** Select **Enriched observations (recommended)**.
@@ -201,4 +201,4 @@ Do not load both observation layouts into the same production dataset. Check the
 
 - **All deployments:** `traces/` and `observations/` stop receiving files after the switch, including empty files. Use `manifests/` as the run-completion signal.
 - **Langfuse Cloud:** Ignore `DEPRECATION_NOTICE.txt` when processing exports; it is not part of a run.
-- **Self-hosted v4:** Optional dual-layout validation is available only during `dual` write mode with v4 preview enabled.
+- **Self-hosted Langfuse v4:** Optional dual-layout validation is available only during `dual` write mode with the Langfuse v4 preview enabled.
