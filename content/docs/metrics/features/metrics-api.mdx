@@ -81,9 +81,7 @@ Certain dimensions like `id`, `traceId`, `userId`, and `sessionId` cannot be use
 
 ### Semantic-root filtering and grouping
 
-The v2-only `isRootObservation` boolean dimension identifies application entry points. `true` includes both outer roots with no parent and app roots whose OpenTelemetry instrumentation or infrastructure parent was filtered from export by the SDK. Use it to count, filter, or group application entry points without missing the latter case.
-
-A trace should not submit more than one semantic root; multiple matching roots indicate an integration issue. The filter omits rootless traces, such as distributed traces whose root lives in another service that does not export to the same Langfuse project. For complete trace counts in projects that can contain rootless traces, use [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and group by `traceId` client-side.
+The v2-only `isRootObservation` boolean dimension identifies application entry points. `true` includes both outer roots with no parent and app roots whose OpenTelemetry instrumentation or infrastructure parent was filtered from export by the SDK. Use it to count, filter, or group application entry points without missing the latter case. See [Logical root observations](/docs/api-and-data-platform/features/observations-api#logical-root-observations) for the distinction between physical and logical roots and trace-counting edge cases.
 
 For example, add this filter to a query to count semantic roots:
 
