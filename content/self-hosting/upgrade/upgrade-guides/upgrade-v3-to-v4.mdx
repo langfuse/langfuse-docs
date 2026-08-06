@@ -143,7 +143,14 @@ Dataset runs, replaced by the [experiments API](https://api.reference.langfuse.c
 | `GET /api/public/datasets/:name/runs/:runName`    | Returns `404`                                                         |
 | `DELETE /api/public/datasets/:name/runs/:runName` | Returns `404`                                                         |
 
-Create experiment data with the Experiment runner SDK (Python and JS/TS), which applies the required experiment semantics automatically; from other languages, send experiment traces to `POST /api/public/otel/v1/traces` with the [experiment attributes](/integrations/native/opentelemetry#experiments-ingesting-experiment-spans) set.
+### Experiment instrumentation [#experiment-instrumentation]
+
+If your application creates experiment data, replace `POST /api/public/dataset-run-items` as part of the migration:
+
+- **Python or JS/TS:** use the [Experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk). It creates the required experiment traces and attributes automatically.
+- **Other languages or direct integrations:** send each experiment item as one trace to [`POST /api/public/otel/v1/traces`](https://api.reference.langfuse.com/#tag/opentelemetry/POST/api/public/otel/v1/traces) and follow the [experiment attribute propagation guide](/integrations/native/opentelemetry#experiments-ingesting-experiment-spans).
+
+Do not create new experiment data through `POST /api/public/dataset-run-items`; it is retained only as a compatibility path for older SDKs and is not part of the v4 write path.
 
 ### Evaluations [#evaluations]
 
