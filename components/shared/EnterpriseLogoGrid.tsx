@@ -3,7 +3,6 @@
 import Image from "next/image";
 import type { StaticImageData } from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
-import accorLogo from "../home/img/accor.svg";
 import canvaLogo from "../home/img/canva.svg";
 import circlebackLogo from "../home/img/circleback.svg";
 import ciscoLogo from "../home/img/cisco.svg";
@@ -36,10 +35,6 @@ const companies: CompanyLogo[] = [
     name: "Canva",
     logo: canvaLogo,
     customerStoryPath: "/users/canva",
-  },
-  {
-    name: "Accor",
-    logo: accorLogo,
   },
   {
     name: "Twilio",

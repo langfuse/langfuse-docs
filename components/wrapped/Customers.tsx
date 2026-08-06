@@ -11,7 +11,6 @@ import { WrappedSection } from "./components/WrappedSection";
 import { WrappedGrid, WrappedGridItem } from "./components/WrappedGrid";
 import { SectionHeading } from "./components/SectionHeading";
 import { HoverStars } from "./components/HoverStars";
-import accorLogo from "../home/img/accor.svg";
 import canvaLogo from "../home/img/canva.svg";
 import circlebackLogo from "../home/img/circleback.svg";
 import freeeLogo from "../home/img/freee.svg";
@@ -63,7 +62,6 @@ const companiesWithStories = [
 
 // Companies without customer stories (logos only)
 const companiesWithoutStories = [
-  { name: "Accor", logo: accorLogo },
   { name: "Samsara", logo: samsaraLogo },
   { name: "Twilio", logo: twilioLogo },
   { name: "Telus", logo: telusLogo },
@@ -246,7 +244,6 @@ export function Customers() {
       { type: "story", name: "Canva" },
       { type: "story", name: "SumUp" },
       // Continue with rest in desired order...
-      { type: "logo", name: "Accor" },
       { type: "logo", name: "Samsara" },
       { type: "logo", name: "Twilio" },
       { type: "logo", name: "Telus" },
