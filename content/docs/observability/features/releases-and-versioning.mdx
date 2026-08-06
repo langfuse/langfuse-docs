@@ -29,6 +29,14 @@ flowchart LR
 
 A `release` tracks the overall version of your application. Commonly it is set to the _semantic version_ or _git commit hash_ of your application.
 
+<Callout type="info">
+  `release` is a trace-level deployment attribute and should be configured via
+  SDK initialization, the `LANGFUSE_RELEASE` environment variable, or automatic
+  platform detection. It is not an observation-level attribute and cannot be set
+  on individual spans or generations via span/generation update helpers. Use
+  [`version`](#versions) for observation-level versioning.
+</Callout>
+
 The SDKs look for a `release` in the following order:
 
 1. SDK initialization
