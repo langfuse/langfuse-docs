@@ -1,0 +1,53 @@
+---
+title: Experiments API
+sidebarTitle: Experiments API
+description: Retrieve experiment runs, items, outputs, and evaluation scores from Langfuse.
+---
+
+# Experiments API
+
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "v4",
+  }}
+/>
+
+The Experiments API lets you retrieve experiment data from Langfuse for
+analysis, evaluation pipelines, notebooks, and CI/CD workflows. An experiment
+is a run of your application against test data. Each experiment item represents
+one input, its expected output, and the actual output produced by your
+application.
+
+For the complete request and response contract, see the
+[Experiments API reference](https://api.reference.langfuse.com/#tag/experiments).
+
+## Choose the right API
+
+| If you want to...                                                                           | Use                                                                                                         |
+| ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| List experiment runs and their summaries                                                    | `GET /api/public/experiments?fromStartTime=2026-01-01T00:00:00Z`                                            |
+| Retrieve experiment items and their inputs, outputs, expected outputs, metadata, and scores | `GET /api/public/experiment-items?fromStartTime=2026-01-01T00:00:00Z`                                       |
+| Retrieve the complete trace and observation tree for an item                                | [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2), using the item's `traceId` |
+| Query evaluation scores independently                                                       | [Scores API v3](/docs/api-and-data-platform/features/scores-api#v3)                                         |
+
+The experiment endpoints support filtering, cursor-based pagination, and
+optional response fields. Refer to the [Experiments API reference](https://api.reference.langfuse.com/#tag/experiments)
+for the available filters and response fields.
+
+## Experiment-level and item-level scores
+
+Experiment-level scores summarize the complete run. Item-level and trace-level
+scores evaluate individual experiment items. The Experiments API returns both
+levels in their corresponding responses, while the [Scores API v3](/docs/api-and-data-platform/features/scores-api#v3)
+is useful when scores are the primary data you want to query.
+
+## Related resources
+
+- [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) — run experiments with the Python or JS/TS SDK.
+- [Experiments data model](/docs/evaluation/experiments/data-model) — understand how datasets, experiments, items, traces, observations, and scores relate.
+- [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) — retrieve row-level trace and observation data.
+- [Scores API v3](/docs/api-and-data-platform/features/scores-api#v3) — retrieve evaluation and annotation scores.

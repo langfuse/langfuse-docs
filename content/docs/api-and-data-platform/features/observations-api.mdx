@@ -61,6 +61,8 @@ The v2 API distinguishes physical parentage from logical root status:
 
 An application-root observation can therefore have `isRootObservation: true` and a non-null `parentObservationId`. Use `isRootObservation` when you want application roots, and `parentObservationId` when you need to query the physical observation tree.
 
+The logical-root filter assumes one exported application root per trace. If a trace has no exported root in this project — for example, its root lives in another service — `isRootObservation = true` will not match it; group by `traceId` when you need complete trace counts. Multiple matching roots indicate an integration issue.
+
 ### Key Improvements
 
 **1. Selective Field Retrieval**
