@@ -1,7 +1,7 @@
 ---
 title: Guide - Building an intent classification pipeline
 description: Build an intent classification pipeline to understand how users are using your LLM application and how performance differs by intent.
-category: Classification
+category: Examples
 ---
 
 # LLM Application Intent Classification

@@ -1,5 +1,7 @@
 ---
 title: OpenLIT Integration via OpenTelemetry
+sidebarTitle: OpenLIT
+logo: /images/integrations/opentelemetry_icon.svg
 description: Example cookbook for the OpenLIT Langfuse integration using OpenTelemetry.
 category: Integrations
 ---
@@ -12,7 +14,6 @@ Langfuse is an [OpenTelemetry backend](https://langfuse.com/docs/opentelemetry/g
 
 Install the necessary Python packages: `openai`, `langfuse`, and `openlit`. These will allow you to interact with OpenAI as well as setup the instrumentation for tracing.
 
-
 ```python
 %pip install openai langfuse openlit --upgrade
 ```
@@ -20,7 +21,6 @@ Install the necessary Python packages: `openai`, `langfuse`, and `openlit`. Thes
 ## Step 2: Configure Environment Variables
 
 Before sending any requests, you need to configure your credentials and endpoints. First, set up the Langfuse authentication by providing your public and secret keys. Then, configure the OpenTelemetry exporter endpoint and headers to point to Langfuse's backend. You should also specify your OpenAI API key.
-
 
 ```python
 import os
@@ -37,12 +37,11 @@ os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...");
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
 
-
 ```python
 from langfuse import get_client
- 
+
 langfuse = get_client()
- 
+
 # Verify connection
 if langfuse.auth_check():
     print("Langfuse client is authenticated and ready!")
@@ -54,7 +53,6 @@ else:
 
 With the environment set up, import the needed libraries and initialize OpenLIT instrumentation. We set `tracer=tracer` to use the tracer we created in the previous step.
 
-
 ```python
 import openlit
 
@@ -65,7 +63,6 @@ openlit.init(disable_batch=True)
 ## Step 4: Make a Chat Completion Request
 
 For this example, we will make a simple chat completion request to the OpenAI Chat API. This will generate trace data that you can later view in the Langfuse dashboard.
-
 
 ```python
 from openai import OpenAI
