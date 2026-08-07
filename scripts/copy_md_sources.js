@@ -12,6 +12,11 @@ const {
   replaceComponentsWithMarkdown,
 } = require("../lib/markdown-component-renderers.js");
 const { CONTENT_DIR_TO_URL_PREFIX } = require("../lib/content-dir-map.js");
+const {
+  buildAgentInstructionsFooter,
+} = require("../lib/agent-instructions-footer.js");
+
+const SITE_URL = "https://langfuse.com";
 
 const SOURCE_DIR = path.join(process.cwd(), "content");
 const OUTPUT_DIR = path.join(process.cwd(), "public", "md-src");
@@ -75,6 +80,20 @@ function injectChangelogAgentNotice(processed, originalContent) {
     return `${frontmatter}\n${notice}\n\n${body}`;
   }
   return `${notice}\n\n${processed.replace(/^\s*\n/, "")}`;
+}
+
+/**
+ * Append the agent instructions footer to a page's markdown. Applied to every
+ * generated page (including md-override/ files) so agents that land on any
+ * single .md page can discover the rest of the agent surface: the ".md"
+ * convention, /api/search-docs, llms.txt, the docs MCP server, and the skill.
+ * @param {string} markdown
+ * @param {string} destRel  path relative to public/md-src, e.g. "docs/foo.md"
+ * @returns {string}
+ */
+function appendAgentInstructionsFooter(markdown, destRel) {
+  const footer = buildAgentInstructionsFooter(`${SITE_URL}/${destRel}`);
+  return `${markdown.replace(/\s*$/, "")}\n\n${footer}`;
 }
 
 /**
@@ -178,6 +197,8 @@ function copyAll() {
       processed = injectChangelogAgentNotice(processed, originalContent);
     }
 
+    processed = appendAgentInstructionsFooter(processed, destRel);
+
     fs.writeFileSync(dest, processed, "utf8");
     copied += 1;
   }
@@ -203,7 +224,12 @@ function applyOverrides() {
     const rel = path.relative(OVERRIDE_DIR, file);
     const dest = path.join(OUTPUT_DIR, rel);
     ensureDir(path.dirname(dest));
-    fs.copyFileSync(file, dest);
+    const destRel = rel.split(path.sep).join("/");
+    fs.writeFileSync(
+      dest,
+      appendAgentInstructionsFooter(fs.readFileSync(file, "utf8"), destRel),
+      "utf8",
+    );
     overridden += 1;
   }
   if (overridden > 0) {
