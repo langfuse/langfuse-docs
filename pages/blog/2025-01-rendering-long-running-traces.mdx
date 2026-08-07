@@ -1,0 +1,322 @@
+---
+title: "Rendering Long-Running Traces: Handling 200K Observations In React Without Stack Overflow"
+date: 2025/01/15
+description: "How we built Langfuse's trace viewer to handle extreme cases - from typical 100-observation traces to 10-hour agents with 200K observations - without degrading performance."
+tag: engineering, performance, react
+author: Michael
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Rendering Long-Running Traces: Handling 200K Observations In React Without Stack Overflow"
+  description="How we built Langfuse's trace viewer to handle extreme cases - from typical 100-observation traces to 10-hour agents with 200K observations - without degrading performance."
+  date="Jan 15, 2025"
+  authors={["Michael"]}
+/>
+
+Langfuse is agnostic to what users trace. We don't impose structure or limits on how teams instrument their LLM applications. This flexibility is powerful, but it means we need to handle everything from simple chatbot calls to complex autonomous agents.
+
+When we built the trace viewer, we designed for the typical case: traces with 100-200 observations, maybe 10-20 levels of nesting. This worked well for most users - until it didn't. As AI capabilities improved, we started seeing production traces from multi-hour autonomous agents. The edge case that broke our assumptions: we saw single traces with over 200,000 observations and 10,000+ levels of nesting depth.
+
+Research like [METR's work on long-horizon task completion](https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/) suggests this trend will accelerate. As models become more capable, agents will run longer and generate more observations. What's an edge case today may become common tomorrow.
+
+## The Technical Challenge
+
+Each Trace can have a number of observations. Our API returns these observations as a flat list. Each observation has an ID and optionally references a parent observation ID. LLM applications involve operations that can run in parallel: tool calls executing concurrently, sub-agents spawning in parallel, multiple API requests happening simultaneously. To make execution flow comprehensible, we need to reconstruct this hierarchy and display it as a tree structure. Users need to see which operations spawned which sub-operations, understand the nesting depth, and navigate the execution graph.
+
+Building this tree becomes the first step in rendering any trace. Our original implementation had three critical bottlenecks at scale:
+
+**1. Stack Overflow from Recursive Tree Building**
+
+JavaScript has a call stack limit of roughly 10,000 frames. Our recursive tree-building algorithm would crash when traces exceeded this depth.
+
+```typescript
+// This works for typical traces...
+function buildTree(node) {
+  return {
+    ...node,
+    children: node.children.map((child) => buildTree(child)),
+  };
+}
+
+// ...but crashes on deep agent traces with "Maximum call stack size exceeded"
+```
+
+**2. Quadratic Complexity in Parent-Child Lookups**
+
+Observations reference their parent by ID. Our initial implementation used `array.find()` to locate parents:
+
+```typescript
+observations.forEach((obs) => {
+  const parent = observations.find((o) => o.id === obs.parentObservationId);
+  if (parent) parent.children.push(obs);
+});
+```
+
+This is O(n²) complexity. For 200 observations, that's 40,000 operations - barely noticeable. For 200,000 observations, it's 40 billion operations. The difference between "instant" and "never finishes."
+
+**3. Just-in-Time Aggregation on Every Selection**
+
+Displaying aggregate metrics (total cost, token counts) for an observation requires summing values across all its descendants. Our initial implementation calculated these on-demand when a user selected an observation:
+
+```typescript
+// Recalculated on every selection
+function calculateTotalCost(observation: Observation): Decimal {
+  let total = observation.cost ?? new Decimal(0);
+
+  // Recursively traverse all children
+  for (const child of observation.children) {
+    total = total.plus(calculateTotalCost(child));
+  }
+
+  return total;
+}
+```
+
+This meant rebuilding aggregates and traversing the entire subtree on every click. For an observation with thousands of descendants, users experienced 200-300ms delays when selecting observations - the UI felt sluggish and unresponsive.
+
+## Implementation
+
+### Iterative Tree Building
+
+To handle arbitrary depth, we replaced recursion with an explicit stack-based approach.
+
+```typescript
+function buildDependencyGraph(observations: Observation[]): {
+  nodeRegistry: Map<string, ProcessingNode>;
+  leafIds: string[];
+} {
+  const nodeRegistry = new Map<string, ProcessingNode>();
+
+  // Pass 1: Create nodes
+  for (const obs of observations) {
+    nodeRegistry.set(obs.id, {
+      observation: obs,
+      childrenIds: [],
+      inDegree: 0,
+      depth: 0,
+    });
+  }
+
+  // Pass 2: Build parent-child relationships
+  for (const obs of observations) {
+    if (obs.parentObservationId) {
+      const parent = nodeRegistry.get(obs.parentObservationId);
+      if (parent) {
+        parent.childrenIds.push(obs.id);
+      }
+    }
+  }
+
+  // Pass 3: Calculate depth via breadth-first traversal
+  const rootIds: string[] = [];
+  for (const [id, node] of nodeRegistry) {
+    if (!node.observation.parentObservationId) {
+      rootIds.push(id);
+      node.depth = 0;
+    }
+  }
+
+  // BFS using index-based queue traversal
+  const queue = [...rootIds];
+  let queueIndex = 0;
+  while (queueIndex < queue.length) {
+    const currentId = queue[queueIndex++];
+    const currentNode = nodeRegistry.get(currentId)!;
+
+    for (const childId of currentNode.childrenIds) {
+      const childNode = nodeRegistry.get(childId)!;
+      childNode.depth = currentNode.depth + 1;
+      queue.push(childId);
+    }
+  }
+
+  // Pass 4: Identify leaf nodes for topological sort
+  const leafIds: string[] = [];
+  for (const [id, node] of nodeRegistry) {
+    node.inDegree = node.childrenIds.length;
+    if (node.childrenIds.length === 0) {
+      leafIds.push(id);
+    }
+  }
+
+  return { nodeRegistry, leafIds };
+}
+```
+
+_([View full implementation](https://github.com/langfuse/langfuse/blob/main/web/src/components/trace2/lib/tree-building.ts))_
+
+**Key decisions:**
+
+- **Explicit queue instead of recursion**: Handles unlimited depth
+- **Index-based traversal** (`queue[index++]`): Avoids O(n) cost of `array.shift()`
+- **Multiple passes**: Clarity over cleverness - each pass has a single responsibility
+
+### Map-Based Lookups
+
+We replaced linear search with hash-based lookup for parent-child relationships:
+
+```typescript
+// Before: O(n) for each lookup, O(n²) total
+observations.forEach((obs) => {
+  const parent = observations.find((o) => o.id === obs.parentObservationId);
+});
+
+// After: O(1) for each lookup, O(n) total
+const nodeMap = new Map(observations.map((o) => [o.id, o]));
+observations.forEach((obs) => {
+  const parent = nodeMap.get(obs.parentObservationId);
+});
+```
+
+This trades additional memory (2n instead of n) for faster lookups: 200ms becomes &lt;1ms on large datasets.
+
+### Topological Sort for Bottom-Up Aggregation
+
+Instead of calculating aggregates on-demand, we compute them once during tree building and store them in each node. This transforms an O(n) traversal on every click into an O(1) lookup.
+
+The key is processing nodes in the right order - children before parents - so each node's aggregate values are ready when we need them. Topological sort gives us this ordering in a single pass:
+
+```typescript
+function buildTreeNodesBottomUp(
+  nodeRegistry: Map<string, ProcessingNode>,
+  leafIds: string[],
+  traceStartTime: Date,
+): string[] {
+  // Start with leaf nodes (no dependencies)
+  const queue = [...leafIds];
+  let queueIndex = 0;
+  const rootIds: string[] = [];
+
+  while (queueIndex < queue.length) {
+    const currentId = queue[queueIndex++];
+    const currentNode = nodeRegistry.get(currentId)!;
+
+    // All children have been processed - their costs are available
+    const childrenTotalCost = currentNode.childrenIds
+      .map((id) => nodeRegistry.get(id)!.treeNode!.totalCost)
+      .reduce((acc, cost) => (acc ? acc.plus(cost) : cost), undefined);
+
+    const totalCost = currentNode.nodeCost
+      ? currentNode.nodeCost.plus(childrenTotalCost ?? 0)
+      : childrenTotalCost;
+
+    // Create tree node with aggregated data
+    currentNode.treeNode = {
+      id: currentNode.observation.id,
+      totalCost,
+      // ... other fields
+    };
+
+    // Decrement parent's in-degree; queue if ready
+    if (currentNode.observation.parentObservationId) {
+      const parent = nodeRegistry.get(
+        currentNode.observation.parentObservationId,
+      )!;
+      parent.inDegree--;
+      if (parent.inDegree === 0) {
+        queue.push(currentNode.observation.parentObservationId);
+      }
+    } else {
+      rootIds.push(currentId);
+    }
+  }
+
+  return rootIds;
+}
+```
+
+When we process a node, all its children have already been processed. Their costs and token counts are already computed and stored.
+
+Selecting any observation - even one with 50,000 descendants - now takes &lt;1ms. The cost is pre-calculated and stored in the tree node:
+
+```typescript
+// In the UI component
+function ObservationDetailView({ observationId }) {
+  const { nodeMap } = useTraceData();
+  const node = nodeMap.get(observationId); // O(1) lookup
+
+  // totalCost already computed during tree building
+  return <div>Total Cost: {node.totalCost}</div>;
+}
+```
+
+### Context Memoization to Avoid Rebuilds
+
+With aggregates pre-calculated, we need to ensure the tree is only built once. React Context with memoization provides this guarantee:
+
+```typescript
+// contexts/TraceDataContext.tsx
+export function TraceDataProvider({ trace, observations, scores, children }) {
+  const { minObservationLevel } = useViewPreferences();
+
+  const uiData = useMemo(() => {
+    return buildTraceUiData(trace, observations, minObservationLevel);
+  }, [trace, observations, minObservationLevel]);
+
+  return (
+    <Context.Provider
+      value={{
+        trace,
+        observations,
+        scores,
+        tree: uiData.tree,
+        nodeMap: uiData.nodeMap,
+        searchItems: uiData.searchItems,
+      }}
+    >
+      {children}
+    </Context.Provider>
+  );
+}
+```
+
+Memoization ensures we only rebuild the tree when data actually changes, not on every render. Combined with bottom-up aggregation during build, this means we pay the O(n) cost exactly once - when the trace loads. Every subsequent interaction is O(1).
+
+### Bonus: React Virtualization
+
+With 200K+ nodes in a tree, rendering all DOM elements would cause a browser crash. We use virtualization to render only the visible rows in the viewport. As users scroll, we dynamically render new rows and unmount off-screen ones. This keeps the DOM size constant regardless of tree size - typically 50-100 elements plus a generous overscroll margin even for massive traces.
+
+The virtualization library handles the viewport calculations while our tree structure provides the data. When the virtualizer requests row 50,000, we use the tree's navigation to locate and render that specific node without iterating through all preceding nodes or requiring a recalculation of the expensive tree building algorithm.
+
+## Trade-offs
+
+**Advantages:**
+
+- Handles unlimited nesting depth without stack overflow
+- O(n) complexity for tree building instead of O(n²)
+- O(1) lookups via Map instead of O(n) array search
+- O(1) aggregate reads instead of O(n) subtree traversal on every selection
+
+**Disadvantages:**
+
+- More complex than naive recursive approach
+- Requires understanding of graph algorithms (topological sort, BFS)
+- Extra memory overhead (2n for Map + array storage)
+
+**Remaining Limitation:**
+
+The bottleneck in loading traces in Langfuse is now the data fetching operation. For long-running traces with 200K observations, fetching data from the database and transferring it to the client takes a few seconds. Once the data arrives, building the tree and rendering the UI completes in under 100ms. After that, all interactions remain responsive with &lt;1ms selection and navigation times.
+
+## Results
+
+On a trace with 200,000 observations:
+
+- Tree building and initial render: &lt;100ms (one-time cost after data arrives)
+- Observation selection: &lt;1ms via Map lookup with pre-calculated costs
+- Aggregate display: &lt;1ms (direct read, no traversal)
+- Expand/collapse: &lt;1ms (no tree rebuild)
+- Memory: ~120MB (acceptable for browser context)
+- No stack overflow regardless of depth
+
+These optimizations add complexity but enable the trace viewer to handle production workloads at scale.
+
+_The full implementation is available in the Langfuse repository:_
+
+- _[tree-building.ts](https://github.com/langfuse/langfuse/blob/main/web/src/components/trace2/lib/tree-building.ts) - Core algorithms_
+- _[TraceDataContext.tsx](https://github.com/langfuse/langfuse/blob/main/web/src/components/trace2/contexts/TraceDataContext.tsx) - React integration_
+
+---
+
+**Building Langfuse?** We're growing our engineering team. If you care about building developer tools that handle edge cases gracefully, [check out our open positions](https://langfuse.com/careers).
