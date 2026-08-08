@@ -1,7 +1,6 @@
 ---
 title: Prompt Management Performance Benchmark
 description: Performance benchmark on Langfuse Prompt Management measuring latency of retrieving and compiling prompts.
-category: Prompt Management
 ---
 
 # Langfuse Prompt Management Performance Test
@@ -14,11 +13,9 @@ The test accounts for network latency, so absolute values may vary based on geog
 
 The test requires a prompt named `perf-test` to be set up in the authenticated project.
 
-
 ```python
 %pip install langfuse
 ```
-
 
 ```python
 import os
@@ -30,7 +27,6 @@ os.environ.setdefault("LANGFUSE_SECRET_KEY", "");
 os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 ```
-
 
 ```python
 import time
@@ -46,7 +42,6 @@ langfuse = Langfuse()
 assert langfuse.auth_check(), "Langfuse client not initialized – check your environment variables."
 ```
 
-
 ```python
 N_RUNS = 1_000
 prompt_name = "perf-test"
@@ -61,7 +56,6 @@ for _ in tqdm(range(N_RUNS), desc="Benchmarking"):
 
 durations_series = pd.Series(durations, name="seconds")
 ```
-
 
 ```python
 stats = durations_series.describe(percentiles=[0.25, 0.5, 0.75, 0.99])
@@ -81,7 +75,6 @@ min         0.032702 sec
 99%         0.068914 sec
 max         0.409609 sec
 ```
-
 
 ```python
 plt.figure(figsize=(8,4))
