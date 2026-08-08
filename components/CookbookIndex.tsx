@@ -1,27 +1,15 @@
 import { guidesSource } from "@/lib/source";
-import { FileCode, Video, ArrowRight } from "lucide-react";
+import { FileCode, ArrowRight } from "lucide-react";
 import { Cards, Card } from "@/components/docs";
 
 type CookbookPage = ReturnType<typeof guidesSource.getPages>[number];
 
-export const CookbookIndex = ({
-  categories,
-  includeVideos,
-}: {
-  categories?: string[];
-  includeVideos?: boolean;
-}) => (
+export const CookbookIndex = ({ categories }: { categories?: string[] }) => (
   <>
     {Object.entries(
       guidesSource
         .getPages()
-        .filter(
-          (page) =>
-            page.url.startsWith("/guides/cookbook/") ||
-            (includeVideos &&
-              page.url.startsWith("/guides/videos/") &&
-              !!page.data.category),
-        )
+        .filter((page) => page.url.startsWith("/guides/cookbook/"))
         .reduce(
           (acc, page) => {
             const category =
@@ -64,13 +52,7 @@ export const CookbookIndex = ({
                   href={page.url}
                   key={page.url}
                   className="no-underline group"
-                  icon={
-                    page.url.startsWith("/guides/videos/") ? (
-                      <Video className="h-3 w-3" />
-                    ) : (
-                      <FileCode className="h-3 w-3" />
-                    )
-                  }
+                  icon={<FileCode className="h-3 w-3" />}
                 >
                   <div className="flex flex-1 items-center gap-3 w-full justify-between">
                     <span className="flex-1 text-text-secondary group-hover:text-text-primary transition-colors duration-220">
