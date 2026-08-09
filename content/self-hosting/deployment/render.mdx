@@ -1,0 +1,45 @@
+---
+title: Deploy Langfuse v4 on Render
+description: Use this guide to deploy Langfuse v4 on Render with a prebuilt Blueprint.
+label: "Version: v4"
+sidebarTitle: "Render"
+---
+
+# Render
+
+You can deploy Langfuse v4 on [Render](https://render.com/) with a prebuilt Blueprint.
+The Blueprint creates the Langfuse web and worker services and the required data stores.
+See the [architecture overview](/self-hosting#architecture) for more details.
+
+<Callout type="warning">
+
+This Blueprint is for tests and small workloads. It does not provide high availability for ClickHouse or MinIO, and it does not configure backups. Do not use it for production workloads.
+
+</Callout>
+
+## Deploy
+
+Use the following button to deploy the Langfuse v4 Blueprint on Render:
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/renderinc/langfuse-blueprint)
+
+Before you apply the Blueprint, review the service plans, disk sizes, and estimated cost. Render creates these resources:
+
+- Langfuse v4 web and worker services
+- A managed PostgreSQL 18 database
+- A managed Render Key Value instance
+- A private ClickHouse service with a persistent disk
+- A public MinIO service with a persistent disk
+
+MinIO has a public endpoint because Langfuse sends presigned media URLs to browsers and SDK clients. MinIO still requires signed requests.
+
+For more details, see the [Blueprint repository](https://github.com/renderinc/langfuse-blueprint).
+
+## Features
+
+Langfuse supports many configuration options and self-hosted features.
+For more details, see the [configuration guide](/self-hosting/configuration).
+
+import SelfHostFeatures from "@/components-mdx/self-host-features.mdx";
+
+<SelfHostFeatures />
