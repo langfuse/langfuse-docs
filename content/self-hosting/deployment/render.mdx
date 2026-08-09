@@ -1,21 +1,15 @@
 ---
 title: Deploy Langfuse v4 on Render
-description: Use this guide to deploy Langfuse v4 on Render with a prebuilt Blueprint.
+description: Use this guide to deploy Langfuse v4 at production scale on Render with a prebuilt Blueprint.
 label: "Version: v4"
 sidebarTitle: "Render"
 ---
 
 # Render
 
-You can deploy Langfuse v4 on [Render](https://render.com/) with a prebuilt Blueprint.
-The Blueprint creates the Langfuse web and worker services and the required data stores.
+You can deploy Langfuse v4 at production scale on [Render](https://render.com/) with a prebuilt Blueprint.
+Unlike the Docker Compose setup, the Blueprint creates separate Render resources for the Langfuse web service, worker, and each data store.
 See the [architecture overview](/self-hosting#architecture) for more details.
-
-<Callout type="warning">
-
-This Blueprint is for tests and small workloads. It does not provide high availability for ClickHouse or MinIO, and it does not configure backups. Do not use it for production workloads.
-
-</Callout>
 
 ## Deploy
 
@@ -30,6 +24,8 @@ Before you apply the Blueprint, review the service plans, disk sizes, and estima
 - A managed Render Key Value instance
 - A private ClickHouse service with a persistent disk
 - A public MinIO service with a persistent disk
+
+Select service plans and disk sizes that match your expected workload. Configure backups and recovery procedures before you send production traffic.
 
 MinIO has a public endpoint because Langfuse sends presigned media URLs to browsers and SDK clients. MinIO still requires signed requests.
 
