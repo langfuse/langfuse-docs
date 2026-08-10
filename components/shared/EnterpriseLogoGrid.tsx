@@ -33,6 +33,10 @@ type CompanyLogo = {
 
 const companies: CompanyLogo[] = [
   {
+    name: "Ramp",
+    logo: rampLogo,
+  },
+  {
     name: "Canva",
     logo: canvaLogo,
     customerStoryPath: "/users/canva",
@@ -96,10 +100,6 @@ const companies: CompanyLogo[] = [
   //   name: "Expedia Group",
   //   logo: expediaGroupLogo,
   // },
-  {
-    name: "Ramp",
-    logo: rampLogo,
-  },
   {
     name: "Rocket Money",
     logo: rocketMoneyLogo,
