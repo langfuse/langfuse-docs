@@ -86,17 +86,32 @@ Checkout [docs](https://langfuse.com/docs/sdk/python#generation) on how to set t
 
 
 ```python
-def fetch_all_pages(name=None, user_id = None, limit=50):
-    page = 1
+import json
+
+
+def fetch_all_pages(trace_name=None, user_id=None, limit=50):
+    cursor = None
     all_data = []
+    filters = [{"type": "boolean", "column": "isRootObservation", "operator": "=", "value": True}]
+
+    if trace_name is not None:
+        filters.append({"type": "string", "column": "traceName", "operator": "=", "value": trace_name})
 
     while True:
-        response = langfuse.api.trace.list(name=name, limit=limit, user_id=user_id, page=page)
+        response = langfuse.api.observations.get_many(
+            user_id=user_id,
+            limit=limit,
+            cursor=cursor,
+            fields="core,basic,io,trace_context",
+            filter=json.dumps(filters),
+        )
         if not response.data:
             break
 
         all_data.extend(response.data)
-        page += 1
+        cursor = getattr(response.meta, "cursor", None)
+        if not cursor:
+            break
 
     return all_data
 ```
@@ -166,7 +181,7 @@ def execute_eval_and_score():
       )
       print(eval_result)
 
-      langfuse.create_score(name=criterion, trace_id=generation.id, observation_id=generation.id, value=eval_result["score"], comment=eval_result['reasoning'])
+      langfuse.create_score(name=criterion, trace_id=generation.trace_id, observation_id=generation.id, value=eval_result["score"], comment=eval_result['reasoning'])
 
 execute_eval_and_score()
 
@@ -188,7 +203,7 @@ def eval_hallucination():
     )
     print(eval_result)
     if eval_result is not None and eval_result["score"] is not None and eval_result["reasoning"] is not None:
-      langfuse.create_score(name='hallucination', trace_id=generation.id, observation_id=generation.id, value=eval_result["score"], comment=eval_result['reasoning'])
+      langfuse.create_score(name='hallucination', trace_id=generation.trace_id, observation_id=generation.id, value=eval_result["score"], comment=eval_result['reasoning'])
 
 ```
 

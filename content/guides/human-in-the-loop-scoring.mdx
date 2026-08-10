@@ -49,15 +49,27 @@ Pull the traces your reviewers should look at, then render their inputs and outp
 
 ```python
 from langfuse import get_client
+import json
 
 langfuse = get_client()
 
-# List recent traces for review, e.g. all traces of a given name
-response = langfuse.api.trace.list(name="support-conversation", limit=50)
+# List one root observation per trace for review, e.g. all traces of a given name
+filters = json.dumps([
+    {"type": "boolean", "column": "isRootObservation", "operator": "=", "value": True},
+    {"type": "string", "column": "traceName", "operator": "=", "value": "support-conversation"},
+])
 
-for trace in response.data:
-    # Render trace.input / trace.output in your review tool
-    print(trace.id, trace.input)
+response = langfuse.api.observations.get_many(
+    filter=filters,
+    fields="core,basic,io,trace_context",
+    from_start_time="2026-07-01T00:00:00Z",
+    to_start_time="2026-07-16T00:00:00Z",
+    limit=50,
+)
+
+for root_observation in response.data:
+    # Render the root observation's input / output in your review tool
+    print(root_observation.trace_id, root_observation.input)
 ```
 
 _See the [Python SDK reference](https://python.reference.langfuse.com)._
@@ -70,15 +82,23 @@ import { LangfuseClient } from "@langfuse/client";
 
 const langfuse = new LangfuseClient();
 
-// List recent traces for review, e.g. all traces of a given name
-const response = await langfuse.api.trace.list({
-  name: "support-conversation",
+// List one root observation per trace for review, e.g. all traces of a given name
+const filter = JSON.stringify([
+  { type: "boolean", column: "isRootObservation", operator: "=", value: true },
+  { type: "string", column: "traceName", operator: "=", value: "support-conversation" },
+]);
+
+const response = await langfuse.api.observations.getMany({
+  filter,
+  fields: "core,basic,io,trace_context",
+  fromStartTime: "2026-07-01T00:00:00Z",
+  toStartTime: "2026-07-16T00:00:00Z",
   limit: 50,
 });
 
-for (const trace of response.data) {
-  // Render trace.input / trace.output in your review tool
-  console.log(trace.id, trace.input);
+for (const rootObservation of response.data) {
+  // Render the root observation's input / output in your review tool
+  console.log(rootObservation.traceId, rootObservation.input);
 }
 ```
 
@@ -105,11 +125,12 @@ _See the [API reference](https://api.reference.langfuse.com/#tag/observationsv2/
 </LangTabs>
 
 <Callout type="info">
-  The Python and JS/TS tabs use the SDK's trace read
-  (`langfuse.api.trace.list`), which calls the deprecated `GET /api/public/traces`
-  endpoint and returns trace objects. The API tab uses the replacement, which
-  returns observation rows. See [Migration of deprecated
-  APIs](/faq/all/deprecated-api-migration#traces) for how the two relate.
+  All three tabs use the supported observations-first read path. Query logical
+  root observations (`isRootObservation = true`) when you need one review row
+  per trace, and group by `traceId` or fetch all observations for a given
+  `traceId` when your reviewers need the full trace activity. See [Migration of
+  deprecated APIs](/faq/all/deprecated-api-migration#traces) for the mapping
+  from older trace reads.
 </Callout>
 
 ### Ingest the reviewer's judgment as a score

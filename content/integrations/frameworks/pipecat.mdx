@@ -134,9 +134,9 @@ task = PipelineTask(
 
 For more details, please refer to the [OpenTelemetry Python Documentation](https://opentelemetry-python.readthedocs.io/).
 
-### Add Trace Input and Output
+### Add observation input and output
 
-By default, Pipecat traces don't include the conversation input and output at the trace level. You can patch Pipecat's service decorators to set the `langfuse.trace.input` and `langfuse.trace.output` attributes, capturing the first LLM call's messages as the trace input and the last LLM response as the trace output:
+By default, Pipecat traces do not promote the conversation input and output onto a Langfuse observation. You can patch Pipecat's service decorators to set `langfuse.observation.input` and `langfuse.observation.output`, capturing the first LLM call's messages as the observation input and the last LLM response as the observation output:
 
 ```python filename="main.py"
 def patch_trace_input_output():
@@ -147,17 +147,17 @@ def patch_trace_input_output():
     def patched(span, *args, **kwargs):
         original(span, *args, **kwargs)
 
-        # Set the input of the first LLM call as the trace input
+        # Set the input of the first LLM call as the observation input
         if first_call[0] and kwargs.get("messages"):
-            span.set_attribute("langfuse.trace.input", kwargs["messages"])
+            span.set_attribute("langfuse.observation.input", kwargs["messages"])
             first_call[0] = False
 
-        # Set the output of each LLM call as the trace output (last one wins)
+        # Set the output of each LLM call as the observation output (last one wins)
         orig_set = span.set_attribute
         def new_set(key, value):
             orig_set(key, value)
             if key == "output":
-                orig_set("langfuse.trace.output", value)
+                orig_set("langfuse.observation.output", value)
         span.set_attribute = new_set
 
     service_decorators.add_llm_span_attributes = patched

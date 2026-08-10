@@ -205,22 +205,52 @@ We can now retrieve the traces like regular production data and evaluate them us
 
 
 ```python
+import json
+
+
+def parse_json_if_needed(value):
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            return value
+    return value
+
+
 def get_traces(name=None, limit=10000, user_id=None):
     all_data = []
-    page = 1
- 
+    cursor = None
+    filters = [{"type": "boolean", "column": "isRootObservation", "operator": "=", "value": True}]
+
+    if name is not None:
+        filters.append({"type": "string", "column": "traceName", "operator": "=", "value": name})
+
     while True:
-        response = langfuse.api.trace.list(
-            name=name, page=page, user_id=user_id, order_by=None
+        response = langfuse.api.observations.get_many(
+            user_id=user_id,
+            limit=1000,
+            cursor=cursor,
+            fields="core,basic,io,trace_context",
+            filter=json.dumps(filters),
         )
         if not response.data:
             break
-        page += 1
         all_data.extend(response.data)
         if len(all_data) > limit:
             break
- 
+        cursor = getattr(response.meta, "cursor", None)
+        if not cursor:
+            break
+
     return all_data[:limit]
+
+
+def get_trace_observations(trace_id):
+    return langfuse.api.observations.get_many(
+        trace_id=trace_id,
+        fields="core,basic,io",
+        limit=1000,
+    ).data
 ```
 
 Optional: create a random sample to reduce evaluation costs.
@@ -246,17 +276,22 @@ evaluation_batch = {
 }
  
 for t in traces_sample:
-    observations = [langfuse.api.observations.get(o) for o in t.observations]
+    question = None
+    context = None
+    answer = None
+    observations = get_trace_observations(t.trace_id)
     for o in observations:
+        input_payload = parse_json_if_needed(o.input)
+        output_payload = parse_json_if_needed(o.output)
         if o.name == 'retrieval':
-            question = o.input['question']
-            context = o.output['context']
+            question = input_payload['question']
+            context = output_payload['context']
         if o.name=='generation':
-            answer = o.output['response']
+            answer = output_payload['response']
     evaluation_batch['question'].append(question)
     evaluation_batch['context'].append(context)
-    evaluation_batch['response'].append(response)
-    evaluation_batch['trace_id'].append(t.id)
+    evaluation_batch['response'].append(answer)
+    evaluation_batch['trace_id'].append(t.trace_id)
 
 
 data = [dict(zip(evaluation_batch,t)) for t in zip(*evaluation_batch.values())]

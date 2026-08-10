@@ -31,31 +31,18 @@ This guide demonstrates how to **integrate Langfuse** into your **Kong API Gatew
 | vLLM              | `/generate`, `/v1/completions`                              | ✅     |
 | Custom Providers  | Extensible detection framework                              | ✅     |
 
-## 1. Install the Kong Plugin
+## 1. Enable Kong's OpenTelemetry plugin
 
-Below we install the Kong Langfuse Tracing plugin using one of the available methods.
+Kong AI Gateway emits GenAI spans through Kong's built-in OpenTelemetry plugin. Use that OTLP export path for Langfuse rather than the older custom Langfuse tracing plugin.
 
 ### Prerequisites
 
-- Kong Gateway 3.0+ installed and running
+- Kong Gateway 3.13+ installed and running
 - Langfuse account ([sign up](https://cloud.langfuse.com))
 - Access to Kong's Admin API
+- Base64-encoded Langfuse credentials (`pk-lf-...:sk-lf-...`)
 
-### Option 1: Via LuaRocks (Recommended)
-
-```bash
-luarocks install kong-plugin-ai-tracing
-```
-
-### Option 2: From Source
-
-```bash
-git clone https://github.com/Ramtinboreili/kong-langfuse-tracing.git
-cd kong-langfuse-tracing
-luarocks make rockspec/kong-plugin-ai-tracing-1.0.0-1.rockspec
-```
-
-### Option 3: Docker Compose
+### Docker Compose
 
 ```yaml
 version: '3.8'
@@ -63,14 +50,11 @@ services:
   kong:
     image: kong:3.4
     environment:
-      KONG_PLUGINS: bundled,ai-tracing
-      KONG_LUA_PACKAGE_PATH: /usr/local/kong/plugins/?.lua;;
+      KONG_PLUGINS: bundled,opentelemetry
       KONG_DATABASE: postgres
       KONG_PG_HOST: postgres
       KONG_PG_USER: kong
       KONG_PG_PASSWORD: kong
-    volumes:
-      - ./plugins/ai-tracing:/usr/local/kong/plugins/ai-tracing
     ports:
       - "8000:8000"
       - "8001:8001"
@@ -82,10 +66,10 @@ Add the plugin to your Kong configuration:
 
 ```bash
 # In kong.conf
-plugins = bundled,ai-tracing
+plugins = bundled,opentelemetry
 
 # Or via environment variable
-export KONG_PLUGINS=bundled,ai-tracing
+export KONG_PLUGINS=bundled,opentelemetry
 ```
 
 Restart Kong Gateway to load the plugin.
@@ -100,41 +84,45 @@ export LANGFUSE_PUBLIC_KEY="pk-lf-..."
 export LANGFUSE_SECRET_KEY="sk-lf-..."
 export LANGFUSE_BASE_URL="https://cloud.langfuse.com" # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+export LANGFUSE_BASIC_AUTH=$(printf "%s:%s" "$LANGFUSE_PUBLIC_KEY" "$LANGFUSE_SECRET_KEY" | base64 | tr -d '\n')
 ```
 
-## 3. Enable Plugin on Kong Service
+## 3. Export Kong spans to Langfuse
 
-Configure the plugin for your AI service using Kong's Admin API:
+Configure the OpenTelemetry plugin using Kong's Admin API:
 
 ```bash
-curl -X POST http://localhost:8001/services/YOUR_AI_SERVICE/plugins \
+curl -X POST http://localhost:8001/plugins \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "ai-tracing",
+    "name": "opentelemetry",
     "config": {
-      "langfuse_enabled": true,
-      "langfuse_public_key": "pk-lf-...",
-      "langfuse_secret_key": "sk-lf-...",
-      "langfuse_endpoint": "https://cloud.langfuse.com/api/public/ingestion",
-      "environment": "production"
+      "traces_endpoint": "https://cloud.langfuse.com/api/public/otel/v1/traces",
+      "headers": {
+        "Authorization": "Basic <base64-encoded-pk-sk>",
+        "x-langfuse-ingestion-version": "4"
+      },
+      "sampling_rate": 1,
+      "propagation": {
+        "default_format": "w3c"
+      }
     }
   }'
 ```
 
 ### Configuration Parameters
 
-| Parameter             | Type    | Default                                           | Required | Description                                          |
-| --------------------- | ------- | ------------------------------------------------- | -------- | ---------------------------------------------------- |
-| `langfuse_enabled`    | boolean | `false`                                           | Yes      | Enable/disable Langfuse integration                  |
-| `langfuse_public_key` | string  | -                                                 | Yes      | Your Langfuse public API key                         |
-| `langfuse_secret_key` | string  | -                                                 | Yes      | Your Langfuse secret API key                         |
-| `langfuse_endpoint`   | string  | `https://cloud.langfuse.com/api/public/ingestion` | No       | Langfuse API endpoint                                |
-| `langfuse_timeout`    | number  | `5000`                                            | No       | HTTP timeout in milliseconds                         |
-| `environment`         | string  | `production`                                      | No       | Environment tag for filtering traces                 |
-| `log_level`           | string  | `info`                                            | No       | Logging verbosity (`debug`, `info`, `warn`, `error`) |
+| Parameter                              | Type   | Default                                                | Required | Description                                              |
+| -------------------------------------- | ------ | ------------------------------------------------------ | -------- | -------------------------------------------------------- |
+| `traces_endpoint`                      | string | `https://cloud.langfuse.com/api/public/otel/v1/traces` | Yes      | Langfuse OTLP/HTTP traces endpoint                       |
+| `headers.Authorization`                | string | -                                                      | Yes      | Basic auth header built from `pk-lf-...:sk-lf-...`       |
+| `headers.x-langfuse-ingestion-version` | string | `"4"`                                                  | Yes      | Enables real-time ingestion on Langfuse v4               |
+| `sampling_rate`                        | number | `1`                                                    | No       | Fraction of requests to trace                            |
+| `propagation.default_format`           | string | `w3c`                                                  | No       | Preserve distributed trace IDs across Kong pipeline hops |
 
 <Callout type="info">
-For self-hosted Langfuse instances, update `langfuse_endpoint` to your instance URL followed by `/api/public/ingestion`.
+For self-hosted Langfuse instances, set `traces_endpoint` to your instance URL
+followed by `/api/public/otel/v1/traces`.
 </Callout>
 
 ## 4. Hello World Example
@@ -348,13 +336,13 @@ curl -X POST http://localhost:8001/services/ai-service-prod/plugins \
 ```bash
 # View plugin status
 curl http://localhost:8001/services/YOUR_SERVICE/plugins | \
-  jq '.data[] | select(.name=="ai-tracing")'
+  jq '.data[] | select(.name=="opentelemetry")'
 
 # Check Kong logs
-docker-compose logs kong | grep "ai-tracing"
+docker-compose logs kong | grep "opentelemetry"
 
 # Test Langfuse endpoint
-curl -I https://cloud.langfuse.com/api/public/ingestion
+curl -I https://cloud.langfuse.com/api/public/otel/v1/traces
 ```
 
 3. **Review Logs**: Check Kong logs for errors

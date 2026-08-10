@@ -195,6 +195,7 @@ The `fetch_traces()` function has arguments to filter the traces by tags, timest
 ```python
 from langfuse import get_client
 from datetime import datetime, timedelta
+import json
 
 BATCH_SIZE = 10
 TOTAL_TRACES = 50
@@ -205,12 +206,38 @@ now = datetime.now()
 five_am_today = datetime(now.year, now.month, now.day, 5, 0)
 five_am_yesterday = five_am_today - timedelta(days=1)
 
-traces_batch = langfuse.api.trace.list(page=1,
-                                     limit=BATCH_SIZE,
-                                     tags="ext_eval_pipelines",
-                                     from_timestamp=five_am_yesterday,
-                                     to_timestamp=datetime.now()
-                                   ).data
+
+def parse_json_if_needed(value):
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            return value
+    return value
+
+
+def get_trace_input(trace):
+    payload = parse_json_if_needed(trace.input)
+    if isinstance(payload, dict) and "args" in payload:
+        return payload["args"][0]
+    return payload
+
+
+def fetch_root_observations_batch(*, limit, cursor=None, to_start_time=None):
+    return langfuse.api.observations.get_many(
+        limit=limit,
+        cursor=cursor,
+        fields="core,basic,io,trace_context",
+        from_start_time=five_am_yesterday,
+        to_start_time=to_start_time or datetime.now(),
+        filter=json.dumps([
+            {"type": "boolean", "column": "isRootObservation", "operator": "=", "value": True},
+            {"type": "arrayOptions", "column": "tags", "operator": "all of", "value": ["ext_eval_pipelines"]},
+        ]),
+    )
+
+
+traces_batch = fetch_root_observations_batch(limit=BATCH_SIZE).data
 
 print(f"Traces in first batch: {len(traces_batch)}")
 ```
@@ -286,15 +313,15 @@ test_tone_score = openai.chat.completions.create(
         {
             "role": "user",
             "content": template_tone_eval.format(
-                text=traces_batch[1].output),
+                text=parse_json_if_needed(traces_batch[1].output)),
         }
     ],
     model="gpt-4o",
 
     temperature=0
 ).choices[0].message.content
-print(f"User query: {traces_batch[1].input['args'][0]}")
-print(f"Model answer: {traces_batch[1].output}")
+print(f"User query: {get_trace_input(traces_batch[1])}")
+print(f"Model answer: {parse_json_if_needed(traces_batch[1].output)}")
 print(f"Dominant tones: {test_tone_score}")
 ```
 
@@ -339,9 +366,10 @@ def joyfulness_score(trace):
 		    criteria="Determine whether the output is engaging and fun.",
 		    evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT],
 		)
+		input_payload = parse_json_if_needed(trace.input)
 		test_case = LLMTestCase(
-    input=trace.input["args"],
-    actual_output=trace.output)
+    input=input_payload["args"] if isinstance(input_payload, dict) and "args" in input_payload else input_payload,
+    actual_output=parse_json_if_needed(trace.output))
 
 		joyfulness_metric.measure(test_case)
 
@@ -383,41 +411,50 @@ We'll fetch the data in batches of 10 traces and then iterate through each trace
 
 
 ```python
-import math
+processed = 0
+cursor = None
+batch_number = 1
 
-for page_number in range(1, math.ceil(TOTAL_TRACES/BATCH_SIZE)):
+while processed < TOTAL_TRACES:
+    response = fetch_root_observations_batch(
+        limit=min(BATCH_SIZE, TOTAL_TRACES - processed),
+        cursor=cursor,
+        to_start_time=five_am_today,
+    )
+    traces_batch = response.data
+    if not traces_batch:
+        break
 
-    traces_batch = langfuse.api.trace.list(
-        tags="ext_eval_pipelines",
-        page=page_number,
-        from_timestamp=five_am_yesterday,
-        to_timestamp=five_am_today,
-        limit=BATCH_SIZE
-    ).data
+    cursor = getattr(response.meta, "cursor", None)
 
     for trace in traces_batch:
-        print(f"Processing {trace.name}")
+        processed += 1
+        print(f"Processing {trace.trace_id}")
 
         if trace.output is None:
-            print(f"Warning: \n Trace {trace.name} had no generated output, \
+            print(f"Warning: \n Trace {trace.trace_id} had no generated output, \
             it was skipped")
             continue
 
         langfuse.create_score(
-            trace_id=trace.id,
+            trace_id=trace.trace_id,
             name="tone",
             value=tone_score(trace)
         )
 
         jscore = joyfulness_score(trace)
         langfuse.create_score(
-            trace_id=trace.id,
+            trace_id=trace.trace_id,
             name="joyfulness",
             value=jscore["score"],
             comment=jscore["reason"]
         )
 
-    print(f"Batch {page_number} processed 🚀 \n")
+    print(f"Batch {batch_number} processed 🚀 \n")
+    batch_number += 1
+
+    if not cursor:
+        break
 ```
 
 If your pipeline ran successfully, you should see your score in the Langfuse UI.
