@@ -13,6 +13,7 @@ import khanacademyLogo from "../home/img/khan.svg";
 import magicPatternsLogo from "../home/img/magic.svg";
 import merckLogo from "../home/img/merck.svg";
 import pigmentLogo from "../home/img/pigment.svg";
+import rampLogo from "../home/img/ramp.svg";
 import rocketMoneyLogo from "../home/img/rocket-money.svg";
 import samsaraLogo from "../home/img/samsara.svg";
 import sumupLogo from "../home/img/sumup.svg";
@@ -98,6 +99,10 @@ const companies: CompanyLogo[] = [
   {
     name: "Rocket Money",
     logo: rocketMoneyLogo,
+  },
+  {
+    name: "Ramp",
+    logo: rampLogo,
   },
 ];
 
