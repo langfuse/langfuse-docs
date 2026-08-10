@@ -6,13 +6,14 @@ import { motion, useReducedMotion } from "framer-motion";
 import canvaLogo from "../home/img/canva.svg";
 import circlebackLogo from "../home/img/circleback.svg";
 import ciscoLogo from "../home/img/cisco.svg";
-import expediaGroupLogo from "../home/img/expedia.svg";
+// import expediaGroupLogo from "../home/img/expedia.svg";
 import freeeLogo from "../home/img/freee.svg";
 import intuitLogo from "../home/img/intuit.svg";
 import khanacademyLogo from "../home/img/khan.svg";
 import magicPatternsLogo from "../home/img/magic.svg";
 import merckLogo from "../home/img/merck.svg";
 import pigmentLogo from "../home/img/pigment.svg";
+import rampLogo from "../home/img/ramp.svg";
 import rocketMoneyLogo from "../home/img/rocket-money.svg";
 import samsaraLogo from "../home/img/samsara.svg";
 import sumupLogo from "../home/img/sumup.svg";
@@ -91,9 +92,13 @@ const companies: CompanyLogo[] = [
     name: "Cisco",
     logo: ciscoLogo,
   },
+  // {
+  //   name: "Expedia Group",
+  //   logo: expediaGroupLogo,
+  // },
   {
-    name: "Expedia Group",
-    logo: expediaGroupLogo,
+    name: "Ramp",
+    logo: rampLogo,
   },
   {
     name: "Rocket Money",
