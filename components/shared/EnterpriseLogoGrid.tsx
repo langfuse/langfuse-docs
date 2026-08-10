@@ -141,7 +141,7 @@ const LogoImage = ({
       src={logo}
       alt={`${name} logo`}
       className={cn(
-        "h-[56px] object-cover max-w-full",
+        "h-[56px] w-auto max-w-full object-contain",
         hoverable
           ? "hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] transition-[filter] duration-200"
           : "",
