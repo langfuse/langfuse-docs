@@ -131,7 +131,7 @@ direction LR
 | `traceId`       | string | Yes      | ID of the trace to link to this run        |
 | `observationId` | string | No       | ID of the observation to link to this run  |
 
-Within a dataset run, Langfuse currently exposes at most one `DatasetRunItem` per `datasetItemId`. Multiple run items for the same dataset item may be accepted on write, but only one is returned when reading the run.
+Within a dataset run, Langfuse currently exposes at most one `DatasetRunItem` per `datasetItemId`. Multiple run items for the same dataset item may be accepted on write, but only one is returned when reading the run; repeated executions are not currently supported ([#5855](https://github.com/langfuse/langfuse/issues/5855)).
 
 <Callout type="info">
 Most of the time, we recommend that DatasetRunItems reference TraceIDs directly. The reference to ObservationID exists for backwards compatibility with older SDK versions.
