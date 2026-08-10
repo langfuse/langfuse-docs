@@ -17,6 +17,7 @@ showInCustomerIndex: true
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
 import { CustomerQuote } from "@/components/customers/CustomerQuote";
+import { CustomerScreenshotCarousel } from "@/components/customers/CustomerScreenshotCarousel";
 import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
 <BlogHeader
@@ -45,11 +46,30 @@ And Ravenna's agents run reliably because Ravenna runs on Langfuse.
 
 Ravenna challenges incumbents like ServiceNow, Jira Service Management, and Freshservice. The difference: Ravenna built the entire platform AI-first from the ground up rather than bolting AI onto legacy software. Agents are first-class citizens of the architecture, not add-ons.
 
-<div className="flex justify-center">
-  <Frame fullWidth className="w-2/3">
-    ![Ravenna AI-native internal service desk platform](/images/customers/ravenna/ravenna-overview.png)
-  </Frame>
-</div>
+<CustomerScreenshotCarousel
+  slides={[
+    {
+      src: "/images/customers/ravenna/ravenna-agent-builder.png",
+      alt: "Ravenna agent builder showing a Customer Support agent response and configuration panel.",
+      label: "Agent builder",
+    },
+    {
+      src: "/images/customers/ravenna/ravenna-workflow-builder.png",
+      alt: "Ravenna workflow builder showing a ticket trigger, approval steps, and a Slack message action.",
+      label: "Workflow builder",
+    },
+    {
+      src: "/images/customers/ravenna/ravenna-skill-builder.png",
+      alt: "Ravenna skill builder for password reset with tool permissions and Slack integration settings.",
+      label: "Skill builder",
+    },
+    {
+      src: "/images/customers/ravenna/ravenna-ticket-list.png",
+      alt: "Ravenna ticket list showing filtered employee support requests.",
+      label: "Ticket list",
+    },
+  ]}
+/>
 
 ## From RAG chatbot to agentic platform
 
