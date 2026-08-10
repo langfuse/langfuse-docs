@@ -62,13 +62,13 @@ In Langfuse, evaluation results are stored as [scores](/docs/evaluation/scores/o
 
 Effective LLM evaluation blends offline and online methods, because each catches errors the other misses.
 
-| Dimension     | Offline evaluation                                        | Online evaluation                                                |
-| ------------- | --------------------------------------------------------- | ---------------------------------------------------------------- |
-| Runs on       | Curated [datasets](/docs/evaluation/experiments/datasets) | Live production traces                                           |
-| When          | Before you ship a change                                  | Continuously in production                                       |
-| Catches       | Regressions against known test cases                      | Model drift, unexpected user inputs, new failure modes           |
-| Typical tools | Experiments, CI gates                                     | Sampled LLM-as-a-judge, code evaluators, user feedback, monitors |
-| Limitation    | Test sets can go stale and stop resembling real traffic   | No ground truth; feedback signals are sparse and noisy           |
+| Dimension     | Offline evaluation                                        | Online evaluation                                              |
+| ------------- | --------------------------------------------------------- | -------------------------------------------------------------- |
+| Runs on       | Curated [datasets](/docs/evaluation/experiments/datasets) | Live production traces                                         |
+| When          | Before you ship a change                                  | Continuously in production                                     |
+| Catches       | Regressions against known test cases                      | Model drift, unexpected user inputs, new failure modes         |
+| Typical tools | Experiments, CI gates                                     | Sampled LLM-as-a-judge, code evaluators, user feedback, alerts |
+| Limitation    | Test sets can go stale and stop resembling real traffic   | No ground truth; feedback signals are sparse and noisy         |
 
 The two form a loop: offline experiments validate a change before deployment, online evaluation catches the edge cases your dataset did not cover, and those edge cases go back into the dataset so the next experiment catches them. Langfuse's [core concepts page](/docs/evaluation/core-concepts) walks through this loop in detail.
 
@@ -235,11 +235,11 @@ Interpretation is key: don't just note "Variant B is 10% better", analyze why, l
 
 ## Monitor production and alert on regressions [#production-monitoring]
 
-Offline gates cannot catch what production sends you, so the last step is watching your evaluation scores continuously. In Langfuse, [score analytics](/docs/evaluation/scores/score-analytics) and [custom dashboards](/docs/metrics/features/custom-dashboards) trend every score over time, and [monitors](/docs/metrics/features/monitors) fire an alert through Slack, webhooks, or GitHub Actions when a metric leaves the range you expect, for example when average cost per trace crosses a ceiling or a quality score falls below your bar.
+Offline gates cannot catch what production sends you, so the last step is watching your evaluation scores continuously. In Langfuse, [score analytics](/docs/evaluation/scores/score-analytics) and [custom dashboards](/docs/metrics/features/custom-dashboards) trend every score over time, and [alerts](/docs/metrics/features/alerts) fire a notification through Slack, webhooks, or GitHub Actions when a metric leaves the range you expect, for example when average cost per trace crosses a ceiling or a quality score falls below your bar.
 
-As of July 2026, dashboards and monitors also support boolean scores: the average of a boolean score is the share of `true` results, so you can chart a hallucination-detection rate or a policy-check pass rate and alert when it crosses a threshold.
+As of July 2026, dashboards and alerts also support boolean scores: the average of a boolean score is the share of `true` results, so you can chart a hallucination-detection rate or a policy-check pass rate and alert when it crosses a threshold.
 
-→ **[Monitors and Alerts](/docs/metrics/features/monitors)**
+→ **[Alerts](/docs/metrics/features/alerts)**
 
 </Steps>
 
@@ -318,6 +318,6 @@ Partially, as of July 2026. SDK experiment evaluators are plain functions in you
 
 ## Takeaway
 
-Evaluating LLM applications is a journey, not a destination. Start with observability to illuminate your system, then layer in error analysis, automated evaluators, testing, synthetic data, and experiments, and keep monitors watching your scores in production. Tailor these steps to your app's complexity, whether it's a simple Q&A tool or a multi-turn agent.
+Evaluating LLM applications is a journey, not a destination. Start with observability to illuminate your system, then layer in error analysis, automated evaluators, testing, synthetic data, and experiments, and keep alerts watching your scores in production. Tailor these steps to your app's complexity, whether it's a simple Q&A tool or a multi-turn agent.
 
 Start your evaluation journey with [Langfuse](/docs/evaluation/overview) today and turn insights into impact.

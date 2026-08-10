@@ -29,7 +29,7 @@ A complete agent observability setup captures:
 - **Sessions and users** group multi-turn conversations so behavior can be analyzed per conversation and per user.
 - **Quality signals** such as [user feedback](/docs/observability/features/user-feedback) and evaluation scores are attached directly to traces.
 
-[Langfuse](/) is an open-source AI engineering platform that implements this end to end: [tracing](/docs/observability/overview) with typed observations, agent graph visualization, tool-call analytics, production monitors, and [evaluation](/docs/evaluation/overview) on top of the captured data. The rest of this post walks through each of these capabilities and how to instrument the most common agent stacks.
+[Langfuse](/) is an open-source AI engineering platform that implements this end to end: [tracing](/docs/observability/overview) with typed observations, agent graph visualization, tool-call analytics, production alerts, and [evaluation](/docs/evaluation/overview) on top of the captured data. The rest of this post walks through each of these capabilities and how to instrument the most common agent stacks.
 
 ## Why agents need dedicated observability
 
@@ -320,8 +320,8 @@ Once an agent is live, observability shifts from inspecting individual traces to
 
 - **Cost and token tracking** aggregates model usage per trace, user, session, and model, so an agent that starts burning budget shows up in [cost dashboards](/docs/observability/features/token-and-cost-tracking) immediately.
 - **Custom dashboards** chart any trace or observation metric over time, including the `toolCalls` and `toolDefinitions` metrics described above, with [dashboards](/docs/metrics/features/custom-dashboards) built from the same filters used in the tables.
-- **Monitors and alerts** watch a metric like average cost per trace, an evaluation score, or p95 latency, and fire through Slack, webhooks, or GitHub Actions when it leaves the expected range. [Monitors](/docs/metrics/features/monitors) are available on Langfuse Cloud.
-- **User feedback**, explicit (ratings) and implicit (retries, abandonment, corrections), lands as [scores on traces](/docs/observability/features/user-feedback), feeding the same dashboards and monitors as evaluator scores.
+- **Alerts** watch a metric like average cost per trace, an evaluation score, or p95 latency, and fire through Slack, webhooks, or GitHub Actions when it leaves the expected range. [Alerts](/docs/metrics/features/alerts) are available on Langfuse Cloud.
+- **User feedback**, explicit (ratings) and implicit (retries, abandonment, corrections), lands as [scores on traces](/docs/observability/features/user-feedback), feeding the same dashboards and alerts as evaluator scores.
 
 For a method to turn this stream of production data into a concrete list of what to fix, the Langfuse Academy [monitoring module](/academy/monitoring) and its deep dive on [error analysis](/academy/monitoring/error-analysis) walk through finding and quantifying recurring failure patterns in traces.
 
