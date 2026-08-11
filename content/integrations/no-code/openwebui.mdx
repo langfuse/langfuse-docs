@@ -21,11 +21,13 @@ Langfuse offers open source observability and evaluations for OpenWebUI. By enab
 - Cost data by user and model
 - [Evaluations](/docs/evaluation/overview)
 
-## How to integrate Langfuse with OpenWebUI:
+## How to integrate Langfuse with OpenWebUI
 
-[Pipelines](https://github.com/open-webui/pipelines/) in OpenWebUi is an UI-agnostic framework for OpenAI API plugins. It enables the injection of plugins that intercept, process, and forward user prompts to the final LLM, allowing for enhanced control and customization of prompt handling.
+[Pipelines](https://github.com/open-webui/pipelines/) is OpenWebUI's UI-agnostic framework for OpenAI API plugins. It can inject plugins that intercept, process, and forward user prompts to the final LLM.
 
-To trace your application data with Langfuse, you can use the [Langfuse pipeline](https://github.com/open-webui/pipelines/blob/039f9c54f8e9f9bcbabde02c2c853e80d25c79e4/examples/filters/langfuse_v3_filter_pipeline.py), which enables real-time monitoring and analysis of message interactions.
+To trace your application data with Langfuse, install the [Langfuse v4 filter pipeline](https://github.com/open-webui/pipelines/blob/main/examples/filters/langfuse_v4_filter_pipeline.py). It requires `langfuse>=4.7,<5` and uses the OpenTelemetry-based Langfuse Python SDK v4.
+
+The pipeline groups all turns from one chat into a single Langfuse trace. For each turn, it records the user input and the model response as parented observations while propagating the OpenWebUI user, chat session, and tags. Generations include the model, input, output, and token usage when OpenWebUI provides it.
 
 ## Quick Start Guide
 
@@ -54,21 +56,20 @@ In the **Admin Panel > Settings**, create and save a new connection of type Open
 
 ### Adding the Langfuse Filter Pipeline
 
-Next, navigate to **Admin Panel > Settings >Pipelines** and add the Langfuse Filter Pipeline. Specify that Pipelines is listening on http://host.docker.internal:9099 (as configured earlier) and install the [Langfuse Filter Pipeline](https://github.com/open-webui/pipelines/blob/039f9c54f8e9f9bcbabde02c2c853e80d25c79e4/examples/filters/langfuse_v3_filter_pipeline.py) by using the _Install from GitHub URL_ option with the following URL:
+Next, navigate to **Admin Panel > Settings > Pipelines** and add the Langfuse v4 Filter Pipeline. Specify that Pipelines is listening on http://host.docker.internal:9099 (as configured earlier) and use the _Install from GitHub URL_ option with the following URL:
 
 ```
-https://github.com/open-webui/pipelines/blob/main/examples/filters/langfuse_v3_filter_pipeline.py
+https://github.com/open-webui/pipelines/blob/main/examples/filters/langfuse_v4_filter_pipeline.py
 ```
 
-Now, add your Langfuse API keys below. If you haven't signed up to Langfuse yet, you can get your API keys by creating an account [here](https://cloud.langfuse.com).
+The pipeline metadata installs a compatible Langfuse Python SDK version automatically. After installation, add your Langfuse public and secret keys and, if required, change the Langfuse host. If you haven't signed up to Langfuse yet, create an account in [Langfuse Cloud](https://cloud.langfuse.com).
 
 ![OpenWebUI add Langfuse Pipeline](/images/docs/openwebui-add-pipeline.png)
 
 <Callout type="info">
-  Capture usage (token counts) for OpenAi models while streaming is enabled, you
-  have to navigate to the model settings in OpenWebUI and check the "Usage"
-  [box](https://github.com/open-webui/open-webui/discussions/5770#discussioncomment-10778586)
-  below *Capabilities*.
+  To capture token usage for OpenAI models while streaming is enabled, navigate
+  to the model settings in OpenWebUI and enable the "Usage"
+  [capability](https://github.com/open-webui/open-webui/discussions/5770#discussioncomment-10778586).
 </Callout>
 
 ### Step 4: See your traces in Langfuse
