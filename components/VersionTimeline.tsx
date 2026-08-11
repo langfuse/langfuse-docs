@@ -57,7 +57,7 @@ const ROWS: { id: string; name: string; segments: Segment[] }[] = [
         to: AXIS_END,
         href: "/docs/v4",
         title:
-          "Langfuse Cloud switches to v4 as the only experience and legacy APIs are removed; the exact date will follow",
+          "On November 9, 2026, Langfuse Cloud switches to v4 as the only experience and legacy APIs, features, and ingestion are removed",
         className: SEGMENT_STYLES.ga,
       },
     ],
@@ -90,7 +90,7 @@ const ROWS: { id: string; name: string; segments: Segment[] }[] = [
 const MARKERS: { at: Month; label: string }[] = [
   {
     at: { year: 2026, month: 11 },
-    label: "Legacy APIs and ingestion removed (date will follow)",
+    label: "Nov 9: Legacy APIs, features, and ingestion removed",
   },
 ];
 
