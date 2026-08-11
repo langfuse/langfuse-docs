@@ -1,7 +1,7 @@
 ---
 title: "Langfuse v4 is live"
 date: 2026/08/13
-description: "Langfuse v4 makes tables, dashboards, APIs, and evaluations faster with an observations-first data model built for agents at scale."
+description: "Langfuse v4 makes agent debugging and evaluation faster with an observations-first data model and at least 10x faster dashboards for large projects."
 tag: product, engineering
 author: Max
 ogImage: /images/changelog/2026-03-10-v4-preview/v4-banner.png
@@ -11,28 +11,48 @@ highlight: true
 import { BlogHeader } from "@/components/blog/BlogHeader";
 import { Frame } from "@/components/Frame";
 import {
-  BookOpen,
   ChartLine,
-  GitCompare,
+  Cloud,
   Github,
   LayoutDashboard,
+  Rocket,
   Search,
+  ServerCog,
   Target,
 } from "lucide-react";
 
 <BlogHeader
   title="Langfuse v4 is live"
-  description="Faster tables, dashboards, APIs, and evaluations with an observations-first data model built for agents at scale."
+  description="Query and evaluate every agent step directly, with initial table loads in milliseconds and at least 10x faster dashboards for large projects."
   date="August 13, 2026"
   authors={["maxdeichmann"]}
   image="/images/changelog/2026-03-10-v4-preview/v4-banner.png"
 />
 
-Langfuse v4 is live on Langfuse Cloud and generally available for [self-hosted deployments](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4). It makes tables, dashboards, APIs, and evaluations faster at scale. Dashboard load times for large projects improve by at least 10x.
+Langfuse v4 is live on Langfuse Cloud and generally available for [self-hosted deployments](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4). It makes it faster to debug, evaluate, and monitor complex LLM applications by letting you work with every LLM call, tool execution, and agent step directly. Initial table loads over large datasets drop from seconds to milliseconds, and dashboards over longer time ranges load at least 10x faster in large projects.
 
-Many Langfuse Cloud users do not need to change anything. If one of your projects requires an update, we will email its owners and admins separately with the exact actions detected for that project. You will have three months to complete them. Self-hosted users decide when to upgrade, and Langfuse v3 will receive security patches through January 2027.
+<Cards num={3}>
+  <Card
+    title="New to Langfuse"
+    description="There is nothing to migrate. Start tracing with the v4 data model."
+    href="/docs/observability/get-started"
+    icon={<Rocket />}
+  />
+  <Card
+    title="Using Langfuse Cloud"
+    description="Open Action required and complete only the checks detected for your project."
+    href="/faq/all/upgrade-to-langfuse-v4#managed"
+    icon={<Cloud />}
+  />
+  <Card
+    title="Self-hosting Langfuse"
+    description="Plan the upgrade on your schedule and review the infrastructure requirements first."
+    href="/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4"
+    icon={<ServerCog />}
+  />
+</Cards>
 
-With v4, you can find the failed tool call inside a long-running agent, isolate the model calls driving a cost spike, or evaluate one sub-agent directly. Filter the Observations table, turn that result into a chart, and save it to a dashboard without building a separate query.
+Every step in an application, such as an LLM call, tool call, or retrieval, is an **observation**. A **trace** groups the observations for one request. In v4, you can find the failed tool call inside a long-running agent, isolate the model calls driving a cost spike, or score one sub-agent's output directly.
 
 ## Investigate any step across your agents
 
@@ -59,89 +79,122 @@ Agent traces can contain hundreds or thousands of operations. Langfuse v4 makes 
   />
   <Card
     title="Evaluate the relevant operation"
-    description="Target one LLM call, tool execution, or sub-agent instead of only the trace."
+    description="Score one LLM call, tool execution, or sub-agent without evaluating the entire request."
     href="/docs/evaluation/evaluation-methods/llm-as-a-judge"
     icon={<Target />}
   />
 </Cards>
 
-## The observations-first model makes queries faster
+Pulse keeps the aggregate and the underlying observations in one workflow, so investigating an outlier no longer starts with a full-table sort.
 
-Every LLM call, tool execution, and agent step is now a first-class observation that you can query directly. Trace context such as `user_id`, `session_id`, tags, and metadata lives on each observation, so Langfuse does not need to join a trace table to an observations table when you filter or aggregate data.
+<Video
+  src="https://static.langfuse.com/changelog-videos/2025-07-28-pulse.mp4"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
 
-Observations are also immutable for the main ingestion path. This removes costly read-time deduplication and lets ClickHouse scan the data efficiently. Initial table loads over large datasets go from seconds to milliseconds, while dashboards over longer time ranges load at least 10x faster.
+## Upgrade Langfuse Cloud projects
+
+New managed projects already use v4 and need no migration. For existing projects, open **Action required** in the sidebar. The panel is the source of truth for your project: it marks each category as **Up to date**, **Not detected**, or shows the number of affected items. Organization owners can use **Migration Status** for a project-by-project overview.
 
 <Frame fullWidth>
-  ![Langfuse v3 stored mutable traces and observations separately, while v4 stores immutable observations with trace context in one table](/images/blog/2026-03-10-simplify-langfuse-for-scale/schema.png)
+  ![The Langfuse v4 migration panel lists the exact SDK, evaluator, API, and integration actions detected for a Cloud project](/images/docs/v4/migration-project-panel.png)
+</Frame>
+
+**You only need to complete the actions shown for your project.** Depending on what Langfuse detects, those can include:
+
+- Upgrade to Python SDK 4.7.0 or later or JS/TS SDK 5.4.0 or later for real-time v4 ingestion.
+- Migrate custom REST or OpenTelemetry ingestion to the v4 OTLP/HTTP path and validate a canary before moving production traffic.
+- Replace deprecated API calls with the current Observations, Metrics, Scores, and Experiments APIs.
+- Recreate trace-level evaluators with observation targets and legacy-dataset evaluators with experiment targets.
+- Migrate blob storage, PostHog, and Mixpanel exports and their downstream consumers to enriched observations.
+
+Before the Cloud cutover, older current-major SDK patches can take up to ten minutes to appear in v4. At cutover, legacy trace ingestion stops, deprecated read endpoints return `404`, and trace-level evaluators stop producing scores. Remaining legacy Cloud exports switch to enriched observations.
+
+We will email project owners and admins a summary of the actions detected for their projects. **Action required** remains the live source of truth. We will publish the exact Cloud cutover date in the [v4 timeline](/docs/v4#timeline). The [Cloud upgrade guide](/faq/all/upgrade-to-langfuse-v4) covers every check and its migration steps.
+
+## Plan a self-hosted upgrade
+
+Langfuse v4 is generally available for self-hosted deployments. There is no forced cutover date, and Langfuse v3 will receive security patches through January 2027.
+
+<Callout type="warn">
+  **Check your deployment topology first.** Helm installations using the
+  chart's bundled ClickHouse (`clickhouse.deploy: true`) cannot upgrade yet
+  because the chart does not provide a v4-compatible ClickHouse upgrade path.
+  Deployments using an external ClickHouse are unaffected. [Subscribe to the
+  self-hosting mailing list](/self-hosting#subscribe) for updates.
+</Callout>
+
+The migration modes let you separate the server upgrade from the data-model cutover:
+
+1. Verify the infrastructure minimums: ClickHouse 25.12 or later, PostgreSQL 15 or later, and Redis 7.0 or later. If you will backfill historic data, plan roughly 3x your current ClickHouse data volume as temporary disk headroom.
+2. Before the first v4 deployment, choose a write mode. Use `legacy` to retain full v3 behavior or `dual` to write both models while validating v4. Use the default `events_only` only when all producers and consumers are compatible.
+3. Upgrade producers and migrate API consumers, evaluators, experiments, custom OpenTelemetry ingestion, exports, and their downstream consumers.
+4. If you started in `legacy`, switch to `dual` and verify that event propagation is healthy.
+5. After dual write is healthy, run the online historic backfill or, if you enforce global retention, keep dual writing for one full retention window.
+6. Validate API reads, evaluator score counts, exports, and historic-data coverage, then switch to `events_only`.
+
+During `dual`, data from older producers can take about ten minutes to appear in the v4 view. Historic data appears gradually, newest first, during the backfill. Monitor the dual-write worker health check and background-migration status before treating either as missing data.
+
+The switch to `events_only` is the point of commitment: old table writes stop, deprecated endpoints return `404`, incompatible SDKs are rejected, and trace-level evaluators stop. While `legacy` or `dual` keeps the old tables current, you can roll the server back to the latest v3 release without a data gap.
+
+The [self-hosted v3 to v4 guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4) covers the migration variables, health checks, historic-data options, and rollback process. Check the [compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) before choosing SDK and server versions.
+
+## How trace-level workflows change in v4
+
+Traces remain the way to inspect one request end to end. For projects using Python SDK 4.7.0 or later or JS/TS SDK 5.4.0 or later, the Observations table opens with `Is Root Observation = true` by default, giving you a one-row-per-entry-point view. Remove the filter when you want to search every operation. Saved views and shared links retain their own filters.
+
+The same model changes the interfaces around a trace:
+
+| Previous pattern                                     | v4 pattern                                                                 |
+| ---------------------------------------------------- | -------------------------------------------------------------------------- |
+| Trace-level input and output                         | Input and output on the relevant observation, usually the root observation |
+| Trace-level LLM-as-a-Judge evaluator                 | Observation-level evaluator for one matching operation                     |
+| Legacy dataset evaluator or dataset-run integration  | Experiments that run from datasets or local test data                      |
+| Legacy trace, span, generation, and event ingestion  | OTLP/HTTP ingestion                                                        |
+| Deprecated read APIs                                 | Observations v2, Metrics v2, Scores v3, and Experiments APIs               |
+| Legacy traces-and-observations exports and consumers | Enriched observations and updated downstream consumers                     |
+
+Only the patterns your project uses require migration. Observation-level evaluators see one matching operation at a time, so narrow their filters or update instrumentation when an existing evaluator combines data from multiple spans. If dashboards or alerts are operational controls, compare key charts before cutover because [some counts and time buckets differ from v3](/faq/all/dashboard-changes-in-v4).
+
+## Denormalized observations remove read-time joins
+
+Conceptually, v4 queries one denormalized observations model. Trace context such as `user_id`, `session_id`, and tags is propagated onto observations, so Langfuse does not need to join a trace table to an observations table when you filter or aggregate data.
+
+Physically, Langfuse keeps a full-fidelity events table and a lighter projection for table and chart queries. Completed observations are written once on the direct ingestion path, which removes costly read-time deduplication. A small set of UI mutations still uses lightweight updates.
+
+<Frame fullWidth>
+  ![Langfuse v3 stored mutable traces and observations separately, while v4 queries denormalized observations with trace context](/images/blog/2026-03-10-simplify-langfuse-for-scale/schema.png)
 </Frame>
 
 The same model powers [full-text search](/docs/observability/features/full-text-search), [alerts](/docs/metrics/features/alerts), the [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2), and the [Metrics API v2](/docs/metrics/features/metrics-api#v2).
 
 For the implementation story and performance work behind this release, read [Simplifying Langfuse for Scale](/blog/2026-03-10-simplify-langfuse-for-scale).
 
-## Trace-level concepts move to observations
+## Choose your next step
 
-Traces remain the way to inspect one request end to end. In v4, a trace is the set of observations that share a `trace_id`, and its root observation is the default row in the main table. Remove the `Is Root Observation = true` filter when you want to search every operation across traces.
-
-The migration follows the same principle throughout the product:
-
-| Previous interface                                  | v4 interface                                                               |
-| --------------------------------------------------- | -------------------------------------------------------------------------- |
-| Trace-level input and output                        | Input and output on the relevant observation, usually the root observation |
-| Trace-level LLM-as-a-Judge evaluator                | Observation-level evaluator                                                |
-| Legacy dataset evaluator or dataset-run integration | Experiment target and Experiment runner                                    |
-| Legacy ingestion and read APIs                      | OpenTelemetry ingestion and the current public APIs                        |
-| Legacy traces-and-observations export source        | Enriched observations                                                      |
-
-These changes follow the direction of agentic applications: evaluations can target any level of an observation tree, experiments no longer need to be tied to datasets, and each operation can be queried without first assembling its entire trace.
-
-## Upgrade Langfuse Cloud projects
-
-New Cloud projects already use v4 and have nothing to migrate. For existing projects, open **Action required** in the Langfuse sidebar to see the checks that apply to your project. Organization owners can use **Migration Status** for a project-by-project overview.
-
-<Frame fullWidth>
-  ![The Langfuse v4 migration panel lists the exact SDK, evaluator, API, and integration actions detected for a Cloud project](/images/docs/v4/migration-project-panel.png)
-</Frame>
-
-Depending on what Langfuse detects, your checklist can include:
-
-- Upgrade to Python SDK 4.7.0 or later or JS/TS SDK 5.4.0 or later for real-time v4 ingestion.
-- Move custom REST or OpenTelemetry ingestion to the v4 OTLP/HTTP path.
-- Replace deprecated API calls with the current Observations, Metrics, Scores, and Experiments APIs.
-- Move trace-level evaluators to observation targets and legacy-dataset evaluators to experiment targets.
-- Switch blob storage, PostHog, or Mixpanel exports to enriched observations.
-
-We will send project owners and admins a separate email containing only the actions detected for their projects. Complete those actions within the three-month migration window. The [Cloud upgrade guide](/faq/all/upgrade-to-langfuse-v4) has the instructions for every check.
-
-## Upgrade self-hosted deployments when you are ready
-
-Langfuse v4 is generally available for self-hosted deployments. There is no forced cutover date, and the migration modes let you separate the server upgrade from the data-model cutover:
-
-1. Upgrade the required infrastructure, including ClickHouse 25.12 or later.
-2. Deploy the Langfuse v4 server in `legacy` or `dual` write mode to retain current behavior while you migrate.
-3. Upgrade SDKs and migrate the APIs, evaluators, experiments, and exports that your deployment uses.
-4. Move historic data with the automated background backfill or keep dual writing for one retention period.
-5. Switch to the `events_only` write mode when the new data path is complete.
-
-The [self-hosted v3 to v4 guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4) covers infrastructure requirements, migration modes, historic data options, validation, and rollback. Check the [compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) before choosing SDK and server versions.
-
-## Start using Langfuse v4
-
-Read the [Langfuse v4 overview](/docs/v4), follow the [upgrade guide](/faq/all/upgrade-to-langfuse-v4), or ask a question in the dedicated [GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518).
-
-<Cards num={3}>
+<Cards num={2}>
   <Card
-    title="Langfuse v4 overview"
-    href="/docs/v4"
-    icon={<BookOpen />}
+    title="Get started with Langfuse"
+    description="Trace your first application with the v4 data model."
+    href="/docs/observability/get-started"
+    icon={<Rocket />}
   />
   <Card
-    title="Versions and compatibility"
-    href="/docs/compatibility"
-    icon={<GitCompare />}
+    title="Review your Cloud migration"
+    description="Follow the instructions for each action detected in your project."
+    href="/faq/all/upgrade-to-langfuse-v4"
+    icon={<Cloud />}
   />
   <Card
-    title="v4 GitHub Discussion"
+    title="Upgrade a self-hosted deployment"
+    description="Plan the infrastructure, dual-write, backfill, and cutover steps."
+    href="/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4"
+    icon={<ServerCog />}
+  />
+  <Card
+    title="Ask about Langfuse v4"
+    description="Join the dedicated GitHub Discussion for rollout and migration questions."
     href="https://github.com/orgs/langfuse/discussions/12518"
     icon={<Github />}
   />
