@@ -31,7 +31,7 @@ export const references = [
 # Choosing what to evaluate
 
 "I have traces, how do I set up evals?" is a question we hear all the time.
-We'll tackle it here, from which qualities deserve a standing metric to what role does each metric plays.
+We'll tackle it here, from which qualities deserve a standing metric to what role each metric plays.
 
 ## Three kinds of metrics [#the-three-roles]
 
@@ -41,11 +41,11 @@ In the end, you'll end up with a set of metrics that each fall in one of the fol
 | ----------------------- | ------------------------------------------------------- | ---------------------------------------- |
 | **Goal metrics**        | Is quality improving on the things we are building for? | Error analysis, product goals            |
 | **Guardrails**          | Did we regress on something that must never break?      | Requirements, compliance, past incidents |
-| **Operational metrics** | What does it cost, how many requests per hour           | Tracing, for free                        |
+| **Operational metrics** | What does it cost, and how many requests per hour?      | Tracing, for free                        |
 
 A good setup uses a mix of the three together. Goal metrics are the ones you actively push up, guardrails catch the failures you can't afford even once, and operational metrics give you more insight into the system.
 
-**The less metrics you can keep without feeling like you're missing visibility, the better:**
+**The fewer metrics you can keep without feeling like you're missing visibility, the better:**
 
 - every metric is an extra evaluator/dataset to run and maintain
 - when everything is important, nothing is<Ref refs={references} id="hamel-field-guide" />
@@ -146,7 +146,7 @@ To start, bootstrap with two generic scores: a free-text note describing what ha
 A metric set describes your application as it is today. Three habits keep it current:
 
 - **Re-run error analysis after significant changes.** Prompt rewrites, model swaps, and new features might change the failure distribution; [when to run it](/academy/monitoring/error-analysis#when-to-run-it) is covered on the error analysis page.
-- **Retire metrics that stopped catching things.** With an exception of guardrail checks, a score that sits at 100% for months carries no information and you can most likely drop it.
+- **Retire metrics that stopped catching things.** With the exception of guardrail checks, a score that sits at 100% for months carries no information and you can most likely drop it.
 - **Watch the metrics you optimize.** Goodhart's law applies here:<Ref refs={references} id="goodhart-variants" /> when you tune prompts against certain metrics, you can overfit at some point. It's important to [re-validate against new human labels](/guides/llm-as-a-judge-calibration-skill) from time to time.
 
 ## Where to start
