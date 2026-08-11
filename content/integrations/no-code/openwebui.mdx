@@ -25,7 +25,7 @@ Langfuse offers open source observability and evaluations for OpenWebUI. By enab
 
 [Pipelines](https://github.com/open-webui/pipelines/) is OpenWebUI's UI-agnostic framework for OpenAI API plugins. It can inject plugins that intercept, process, and forward user prompts to the final LLM.
 
-To trace your application data with Langfuse, install the [Langfuse v4 filter pipeline](https://github.com/open-webui/pipelines/blob/main/examples/filters/langfuse_v4_filter_pipeline.py). It requires `langfuse>=4.7,<5` and uses the OpenTelemetry-based Langfuse Python SDK v4.
+To trace your application data with Langfuse, install the [Langfuse v4 filter pipeline](https://github.com/open-webui/pipelines/blob/main/examples/filters/langfuse_v4_filter_pipeline.py). It uses the OpenTelemetry-based Langfuse Python SDK v4 and declares `langfuse~=4.7`, the pip-compatible constraint for Langfuse versions `>=4.7,<5`.
 
 The pipeline groups all turns from one chat into a single Langfuse trace. For each turn, it records the user input and the model response as parented observations while propagating the OpenWebUI user, chat session, and tags. Generations include the model, input, output, and token usage when OpenWebUI provides it.
 
