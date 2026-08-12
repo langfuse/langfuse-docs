@@ -285,6 +285,23 @@ const handler = new CallbackHandler();
 </Tab>
 </LangTabs>
 
+## Masking with OpenTelemetry
+
+In a pure OpenTelemetry tracing setup, mask sensitive span attributes before they reach Langfuse. You can apply masking in two places:
+
+- **In the application:** Avoid recording sensitive attributes where possible. Otherwise, use a language-specific or custom span processor or export layer to transform them before OTLP export. Choose this approach when sensitive data must not leave the application.
+- **In an OpenTelemetry Collector:** Route traces through an optional Collector and use processors to delete, filter, redact, or transform attributes centrally. This is useful for applying a consistent policy across multiple services.
+
+```mermaid
+flowchart LR
+  App["Application (OpenTelemetry SDK)"] -->|"OTLP traces"| Collector["OpenTelemetry Collector<br/>(masking processors)"]
+  Collector -->|"OTLP/HTTP"| Langfuse["Langfuse"]
+```
+
+Collector-side masking happens after telemetry leaves the application. Deploy the Collector within the appropriate trust boundary and secure the connection between the application and Collector.
+
+See OpenTelemetry's guide to [handling sensitive data](https://opentelemetry.io/docs/security/handling-sensitive-data/) for common Collector processor patterns, and the [Langfuse OpenTelemetry integration guide](/integrations/native/opentelemetry) for export setup.
+
 ## Related resources
 
 - [Data Retention](/docs/administration/data-retention) - Automatically delete traces, observations, scores, and media assets after a configured retention period.
