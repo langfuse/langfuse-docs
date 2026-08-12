@@ -175,15 +175,16 @@ Langfuse Cloud becomes v4-only on **November 9, 2026**. Complete any migration a
 
 <VersionTimeline deployments={["cloud"]} />
 
-**[Upgrade every Langfuse SDK to the latest version](/faq/all/upgrade-to-langfuse-v4#ingestion).** This is the most important migration step for projects using the Langfuse SDKs and enables real-time ingestion into v4. If you send traces through the legacy ingestion API or OpenTelemetry ingestion, [move that traffic to the v4 OTLP/HTTP endpoint](/integrations/native/opentelemetry/migration-to-v4) instead.
-
 New managed projects already use v4 and need no migration. For existing projects, organization owners can open [**Migration status**](https://cloud.langfuse.com/v4-migration) to see every project. The page marks each project as **Up to date** or shows exactly what needs to change.
 
 <Frame fullWidth>
-  ![The Langfuse v4 migration panel lists the exact SDK, evaluator, API, and integration actions detected for a Cloud project](/images/docs/v4/migration-project-panel.png)
+  ![The Langfuse v4 migration assistant lists the exact SDK, evaluator, API, and integration actions detected for a Cloud project](/images/changelog/2026-08-13-langfuse-v4/v4-migration-assistant.png)
 </Frame>
 
-**You only need to complete the actions shown for your project.** Follow only the rows that apply to your project.
+We will email project owners and admins a summary of the actions detected for their projects. Complete those actions by **November 9, 2026**. **Action required** remains the live source of truth, and the [Cloud upgrade guide](/faq/all/upgrade-to-langfuse-v4) covers every check and its migration steps.
+
+You can find more details in the [upgrade guide](/faq/all/upgrade-to-langfuse-v4).
+
 
 | Check        | Do this                                                                                                                                                                                     |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -193,11 +194,9 @@ New managed projects already use v4 and need no migration. For existing projects
 | Exports      | [Switch blob storage exports](/docs/api-and-data-platform/features/export-to-blob-storage#upgrade-path) to enriched observations.                                                           |
 | Integrations | Switch [PostHog](/integrations/analytics/posthog#migrate-export-source) and [Mixpanel](/integrations/analytics/mixpanel#migrate-export-source) to enriched observations.                    |
 
-Before the cutover, older current-major SDK patches can take up to ten minutes to appear in v4. At cutover, legacy trace ingestion stops, deprecated read endpoints return `404`, and trace-level evaluators stop producing scores. Remaining legacy Cloud exports switch to enriched observations.
 
-We will email project owners and admins a summary of the actions detected for their projects. Complete those actions by **November 9, 2026**. **Action required** remains the live source of truth, and the [Cloud upgrade guide](/faq/all/upgrade-to-langfuse-v4) covers every check and its migration steps.
 
-## Plan a self-hosted upgrade
+## Upgrade self-hosted Langfuse instance
 
 Langfuse v4 is generally available for self-hosted deployments. There is no forced cutover date, and Langfuse v3 will receive security patches through January 2027.
 
