@@ -61,6 +61,15 @@ Each variable accepts a comma-separated list. Hostnames in `_HOST` short-circuit
 
 Webhook deliveries are additionally restricted to ports 80 and 443, and sensitive headers (`Authorization`, `Cookie`, `Proxy-Authorization`, `x-langfuse-signature`) are dropped on cross-origin redirects. Provide webhook credentials via headers configured in the webhook UI rather than in the URL.
 
+## Code evaluators [#code-evaluators]
+
+[Code evaluators](/self-hosting/configuration/code-evaluators) let project members write evaluator code that Langfuse executes. On self-hosted instances they are disabled until you set `LANGFUSE_CODE_EVAL_DISPATCHER`, and the dispatcher you pick determines the isolation boundary:
+
+- `insecure-local` runs evaluator code in-process on the worker via `node:vm`, which is **not a security boundary** — evaluator code can reach everything the worker can, including your databases, queues, and cloud credentials. Only use it when everyone who can create evaluators is fully trusted.
+- `aws-lambda` dispatches evaluator code to Lambda functions you deploy, keeping execution out of the worker process. Langfuse Cloud uses this dispatcher with executor functions running in an isolated network without egress to internal services; apply the same principle when deploying your own — give the functions no network route back into your infrastructure.
+
+See [Code evaluators (self-hosted)](/self-hosting/configuration/code-evaluators) for the full dispatcher setup.
+
 ## Admin API [#admin-api]
 
 The self-hosted-only [Instance Management API](/self-hosting/administration/instance-management-api) is gated by `ADMIN_API_KEY`. When you enable it:
