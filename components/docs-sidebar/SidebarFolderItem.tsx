@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import {
   SidebarFolder,
@@ -20,6 +20,11 @@ export const SIDEBAR_NAV_ROW_CLASS =
 
 export function sidebarNavPaddingInlineStart(depth: number) {
   return `calc(${2 * depth} * var(--spacing) + 6px)`;
+}
+
+function getFolderAnchorId(itemId?: string) {
+  if (!itemId) return undefined;
+  return `sidebar-folder-${itemId.replace(/[^a-zA-Z0-9_-]+/g, "-")}`;
 }
 
 /**
@@ -58,6 +63,42 @@ export function SidebarFolderItem({
   const pathname = usePathname();
   /** Parent depth: folder row aligns with `SidebarItem` at the same tree level. */
   const depth = useFolderDepth();
+  const folderAnchorId = item.index ? undefined : getFolderAnchorId(item.$id);
+
+  useEffect(() => {
+    if (!folderAnchorId) return;
+
+    const folderHash = `#${folderAnchorId}`;
+    const openFolder = () => {
+      const trigger = document.querySelector<HTMLButtonElement>(
+        `[data-sidebar-folder-anchor="${folderAnchorId}"]`,
+      );
+      if (trigger?.getAttribute("aria-expanded") === "false") {
+        trigger.click();
+      }
+      trigger?.scrollIntoView({ block: "nearest" });
+    };
+    const openFolderFromHash = () => {
+      if (window.location.hash === folderHash) openFolder();
+    };
+    const handleFolderLinkClick = (event: MouseEvent) => {
+      if (!(event.target instanceof Element)) return;
+      const link = event.target.closest<HTMLAnchorElement>("a[href]");
+      if (link?.hash !== folderHash) return;
+
+      event.preventDefault();
+      window.history.replaceState(null, "", folderHash);
+      openFolder();
+    };
+
+    openFolderFromHash();
+    window.addEventListener("hashchange", openFolderFromHash);
+    document.addEventListener("click", handleFolderLinkClick, true);
+    return () => {
+      window.removeEventListener("hashchange", openFolderFromHash);
+      document.removeEventListener("click", handleFolderLinkClick, true);
+    };
+  }, [folderAnchorId]);
 
   const rowStyle = { paddingInlineStart: sidebarNavPaddingInlineStart(depth) };
 
@@ -80,6 +121,8 @@ export function SidebarFolderItem({
         </SidebarFolderLink>
       ) : (
         <SidebarFolderTrigger
+          id={folderAnchorId}
+          data-sidebar-folder-anchor={folderAnchorId}
           className={SIDEBAR_NAV_ROW_CLASS}
           style={rowStyle}
         >
