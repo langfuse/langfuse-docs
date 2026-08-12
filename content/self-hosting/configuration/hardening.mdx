@@ -48,18 +48,19 @@ See [RBAC](/docs/administration/rbac) for the full role and scope matrix and [SC
 
 ## Outbound URL allowlists (SSRF defense) [#outbound-url-allowlists]
 
-Several features let project members configure a URL that the Langfuse worker calls on their behalf — LLM API base URLs, webhook targets, image URLs in trace inputs, and blob storage integration endpoints. Langfuse rejects URLs whose resolved IPs fall into private, link-local, loopback, or special-use ranges (including NAT64 and 6to4 IPv6 ranges), strips credentials passed via URL userinfo, and re-validates the IP at request time and on every redirect hop to defend against DNS rebinding.
+Several features let project members configure a URL that Langfuse then calls on their behalf — LLM API base URLs, webhook targets, and blob storage integration endpoints. Langfuse rejects URLs whose resolved IPs fall into private, link-local, loopback, or special-use ranges (including NAT64 and 6to4 IPv6 ranges), rejects URLs with embedded credentials (`user:password@`), and re-validates the IP at request time and on every redirect hop to defend against DNS rebinding.
 
-On Langfuse Cloud this is always strict. On self-hosted instances, the same defaults apply, with explicit allowlists for internal services:
+On Langfuse Cloud this is always strict. Self-hosted instances validate LLM connection and webhook URLs by default too; blob storage endpoint validation only activates once one of its allowlist variables is set (see below). The allowlist variables let user-configured integrations reach internal services:
 
 | Use case                                  | Allowlist variables                                                                                                                                                 |
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | User-configured LLM connections           | `LANGFUSE_LLM_CONNECTION_WHITELISTED_HOST`<br/>`LANGFUSE_LLM_CONNECTION_WHITELISTED_IPS`<br/>`LANGFUSE_LLM_CONNECTION_WHITELISTED_IP_SEGMENTS`                      |
+| User-configured webhooks                  | `LANGFUSE_WEBHOOK_WHITELISTED_HOST`<br/>`LANGFUSE_WEBHOOK_WHITELISTED_IPS`<br/>`LANGFUSE_WEBHOOK_WHITELISTED_IP_SEGMENTS`                                           |
 | User-configured blob storage integrations | `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_HOST`<br/>`LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IPS`<br/>`LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IP_SEGMENTS` |
 
-Each variable accepts a comma-separated list. Hostnames in `_HOST` short-circuit the IP check entirely; `_IPS` / `_IP_SEGMENTS` are matched against every IP a hostname resolves to. Set these only for trusted internal endpoints (your in-cluster MinIO, an internal LLM gateway, …) — values configured here defeat the SSRF protections for those targets. Blob storage validation activates only once one of these vars is set on a self-hosted instance; this default will change to strict in a future major release.
+Each variable accepts a comma-separated list. Hostnames in `_HOST` short-circuit the IP check entirely; `_IPS` / `_IP_SEGMENTS` are matched against every IP a hostname resolves to. Set these only for trusted internal endpoints (your in-cluster MinIO, an internal LLM gateway, …) — values configured here defeat the SSRF protections for those targets. Blob storage validation activates only once one of its variables is set on a self-hosted instance; this default will change to strict in a future major release.
 
-Webhook URLs follow the same rules and additionally drop sensitive headers (`Authorization`, `Cookie`, `Proxy-Authorization`, `x-langfuse-signature`) on cross-origin redirects. Provide credentials via headers configured in the webhook UI rather than via URL userinfo — URLs with embedded `user:password@` are rejected.
+Webhook deliveries are additionally restricted to ports 80 and 443, and sensitive headers (`Authorization`, `Cookie`, `Proxy-Authorization`, `x-langfuse-signature`) are dropped on cross-origin redirects. Provide webhook credentials via headers configured in the webhook UI rather than in the URL.
 
 ## Admin API [#admin-api]
 
