@@ -40,7 +40,7 @@ If every user signs in via SSO, set `AUTH_DISABLE_USERNAME_PASSWORD=true`. Accou
 Langfuse uses two role layers — organization (`OWNER`, `ADMIN`, `MEMBER`, `VIEWER`, `NONE`) and project. The defaults are tight; the items below are worth reviewing.
 
 - **Organization API keys** can only be managed by `OWNER`. `ADMIN` cannot mint org-scoped keys, so an ADMIN cannot self-escalate via the SCIM API.
-- **Last-owner protection** — SCIM `DELETE` / `PUT active:false` / `PATCH active:false` cannot remove the final remaining `OWNER` of an organization. The same invariant has long applied to the tRPC path.
+- **Last-owner protection** — SCIM `DELETE` / `PUT active:false` / `PATCH active:false` cannot remove the final remaining `OWNER` of an organization. The same invariant has long applied to in-app membership management.
 - **LLM connection test endpoints** require `llmApiKeys:create` or `llmApiKeys:update`; lower-privilege roles cannot exercise them.
 
 See [RBAC](/docs/administration/rbac) for the full role and scope matrix and [SCIM & Organization API](/docs/administration/scim-and-org-api) for automated provisioning.
