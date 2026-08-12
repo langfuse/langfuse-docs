@@ -29,13 +29,14 @@ import {
 
 Langfuse v4 is live on Langfuse Cloud and generally available for [self-hosted deployments](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4). It makes it faster to debug, evaluate, and monitor complex LLM applications by letting you work with every LLM call, tool execution, and agent step directly. Initial table loads over large datasets drop from seconds to milliseconds, and dashboards over longer time ranges load at least 10x faster in large projects.
 
-Langfuse Cloud becomes v4-only on **November 15, 2026**. Most projects need no migration. If **Action required** lists checks for your project, complete them before this date.
+Langfuse Cloud becomes v4-only on **November 15, 2026**. Most projects need no migration. If the **v4 Upgrade Check** shows actions for your project, complete them before this date.
 
 <Cards num={3} className="gap-3">
   <Card
     title="New to Langfuse"
     description="There is nothing to migrate. Start tracing with the v4 data model."
     href="/docs/observability/get-started"
+    arrow
     icon={
       <span className="flex size-9 items-center justify-center bg-muted-green/10 text-muted-green">
         <Rocket />
@@ -46,8 +47,11 @@ Langfuse Cloud becomes v4-only on **November 15, 2026**. Most projects need no m
   />
   <Card
     title="Using Langfuse Cloud"
-    description="Open Action required and complete only the checks detected for your project."
+    description="Open the v4 Upgrade Check and complete only the checks detected for your project."
     href="https://cloud.langfuse.com/v4-migration"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
     icon={
       <span className="flex size-9 items-center justify-center bg-muted-blue/10 text-muted-blue">
         <Cloud />
@@ -60,6 +64,7 @@ Langfuse Cloud becomes v4-only on **November 15, 2026**. Most projects need no m
     title="Self-hosting Langfuse"
     description="Plan the upgrade on your schedule and review the infrastructure requirements first."
     href="/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4"
+    arrow
     icon={
       <span className="flex size-9 items-center justify-center bg-surface-2 text-text-secondary">
         <ServerCog />
@@ -72,13 +77,16 @@ Langfuse Cloud becomes v4-only on **November 15, 2026**. Most projects need no m
 
 ## What we shipped in Langfuse v4
 
-Langfuse v4 is much faster and also ships new ways to search, monitor, evaluate, and query your application data.
+Langfuse v4 is much faster and also ships new ways to search, monitor, evaluate, and query your application data. Check them out:
 
 <Cards num={2} className="gap-3">
   <Card
     title="Monitors"
     description="Watch cost, quality, and latency thresholds and notify teams through Slack, webhooks, or GitHub Actions."
     href="/changelog/2026-06-19-monitors"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
     icon={
       <span className="flex size-9 items-center justify-center bg-surface-2 text-text-secondary">
         <Bell />
@@ -91,6 +99,9 @@ Langfuse v4 is much faster and also ships new ways to search, monitor, evaluate,
     title="Code evaluators"
     description="Run deterministic Python or TypeScript checks on live observations and experiments."
     href="/changelog/2026-05-28-code-evaluators"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
     icon={
       <span className="flex size-9 items-center justify-center bg-muted-blue/10 text-muted-blue">
         <Code2 />
@@ -103,6 +114,9 @@ Langfuse v4 is much faster and also ships new ways to search, monitor, evaluate,
     title="Filter search bar"
     description="Combine typed filters, metadata, and scores in one shareable query."
     href="/docs/observability/features/filter-search-bar"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
     icon={
       <span className="flex size-9 items-center justify-center bg-muted-blue/10 text-muted-blue">
         <Search />
@@ -115,6 +129,9 @@ Langfuse v4 is much faster and also ships new ways to search, monitor, evaluate,
     title="Full-text search"
     description="Find words and phrases across observation inputs, outputs, and metadata."
     href="/docs/observability/features/full-text-search"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
     icon={
       <span className="flex size-9 items-center justify-center bg-muted-green/10 text-muted-green">
         <Search />
@@ -127,6 +144,9 @@ Langfuse v4 is much faster and also ships new ways to search, monitor, evaluate,
     title="Pulse"
     description="Plot count, cost, or latency above the Observations table and select a spike to inspect its operations."
     href="/changelog/2026-07-28-langfuse-pulse"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
     icon={
       <span className="flex size-9 items-center justify-center bg-muted-green/10 text-muted-green">
         <ChartLine />
@@ -139,6 +159,9 @@ Langfuse v4 is much faster and also ships new ways to search, monitor, evaluate,
     title="Langfuse Assistant"
     description="Ask questions about traces, observations, sessions, and metrics in plain language."
     href="/changelog/2026-06-19-langfuse-assistant-public-beta"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
     icon={
       <span className="flex size-9 items-center justify-center bg-muted-green/10 text-muted-green">
         <Bot />
@@ -151,6 +174,9 @@ Langfuse v4 is much faster and also ships new ways to search, monitor, evaluate,
     title="Observations API v2"
     description="Retrieve selected observation fields with cursor-based pagination."
     href="/docs/api-and-data-platform/features/observations-api#v2"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
     icon={
       <span className="flex size-9 items-center justify-center bg-surface-2 text-text-secondary">
         <Database />
@@ -163,6 +189,9 @@ Langfuse v4 is much faster and also ships new ways to search, monitor, evaluate,
     title="Metrics API v2"
     description="Aggregate cost, tokens, volume, latency, and scores across observations."
     href="/docs/metrics/features/metrics-api#v2"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
     icon={
       <span className="flex size-9 items-center justify-center bg-muted-blue/10 text-muted-blue">
         <ChartLine />
@@ -179,7 +208,9 @@ Langfuse Cloud deprecates v3 endpoints and features on **November 15, 2026**. Pl
 
 <VersionTimeline deployments={["cloud"]} />
 
-New projects already use v4 and need no migration. For existing projects, organization owners can open the **Migration sidebar** and the [**Migration status page**](https://cloud.langfuse.com/v4-migration) to see if any actions are required:
+New projects already use v4 and need no migration.
+
+For existing projects, organization owners can open the **Migration sidebar** and the [**Migration status page**](https://cloud.langfuse.com/v4-migration) to see if any actions are required:
 
 <Frame fullWidth>
   ![The Langfuse v4 migration assistant lists the exact SDK, evaluator, API, and integration actions detected for a Cloud project](/images/changelog/2026-08-13-langfuse-v4/v4-migration-assistant.png)
@@ -215,30 +246,36 @@ Ask rollout and migration questions via the in-app support form or on the [v4 Gi
 
 You can also join a live Q&A with the Langfuse engineering team. Bring migration questions or your actual setup:
 
-- [Wed, Aug 19 · 9:00 AM CEST](https://lu.ma/vtp4ofae)
-- [Wed, Aug 19 · 6:00 PM CEST](https://lu.ma/iw93peeb)
-- [Tue, Aug 25 · 9:00 AM CEST](https://lu.ma/tqys8cxi)
-- [Tue, Aug 25 · 6:00 PM CEST](https://lu.ma/g1d7jvkr)
+- [Wed, Aug 19 · 12:00 AM PT / 3:00 AM ET / 9:00 AM CEST / 12:30 PM IST / 3:00 PM SGT](https://lu.ma/vtp4ofae)
+- [Wed, Aug 19 · 9:00 AM PT / 12:00 PM ET / 6:00 PM CEST / 9:30 PM IST / Thu 12:00 AM SGT](https://lu.ma/iw93peeb)
+- [Tue, Aug 25 · 12:00 AM PT / 3:00 AM ET / 9:00 AM CEST / 12:30 PM IST / 3:00 PM SGT](https://lu.ma/tqys8cxi)
+- [Tue, Aug 25 · 9:00 AM PT / 12:00 PM ET / 6:00 PM CEST / 9:30 PM IST / Thu 12:00 AM SGT](https://lu.ma/g1d7jvkr)
 
 <Cards num={2}>
   <Card
     title="Step-by-step upgrade guide"
     href="/faq/all/upgrade-to-langfuse-v4"
+    arrow
     icon={<Book />}
   />
   <Card
     title="Versions & Compatibility"
     href="/docs/compatibility"
+    arrow
     icon={<GitCompare />}
   />
   <Card
     title="Working with observations"
     href="/faq/all/explore-observations-in-v4"
+    arrow
     icon={<Table />}
   />
   <Card
     title="Ask questions on Langfuse v4"
     href="https://github.com/orgs/langfuse/discussions/12518"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
     icon={<Github />}
   />
 </Cards>
