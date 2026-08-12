@@ -12,5 +12,5 @@ What an empty file looks like depends on the configured file format:
 Build downstream pipelines to tolerate empty files:
 
 - Treat an empty file as "no data in this window for this table," not as a failure, and don't alert on its presence.
-- Don't assume a file is always present for every window and table. **List the objects in each directory and ingest what's there** rather than relying on a fixed file-per-window pattern.
-- Point pipelines at the directory (for example `observations_v2/` or `scores/`) rather than parsing filenames. The directory prefixes are stable, but the exact filename format within them is not a stable contract.
+- Don't assume every window contains a file for every table.
+- Process the objects listed in the completed run's manifest instead of deriving filenames or listing table directories.

@@ -19,6 +19,7 @@ import khanacademyLogo from "../home/img/khan.svg";
 import magicPatternsLogo from "../home/img/magic.svg";
 import merckLogo from "../home/img/merck.svg";
 import pigmentLogo from "../home/img/pigment.svg";
+import rampLogo from "../home/img/ramp.svg";
 import samsaraLogo from "../home/img/samsara.svg";
 import sumupLogo from "../home/img/sumup.svg";
 import telusLogo from "../home/img/telus.svg";
@@ -69,6 +70,10 @@ const companiesWithoutStories = [
   {
     name: "Intuit",
     logo: intuitLogo,
+  },
+  {
+    name: "Ramp",
+    logo: rampLogo,
   },
   {
     name: "Circleback",
@@ -248,6 +253,7 @@ export function Customers() {
       { type: "logo", name: "Twilio" },
       { type: "logo", name: "Telus" },
       { type: "logo", name: "Pigment" },
+      { type: "logo", name: "Ramp" },
       { type: "logo", name: "freee" },
       { type: "story", name: "Khan Academy" },
       { type: "logo", name: "Circleback" },
