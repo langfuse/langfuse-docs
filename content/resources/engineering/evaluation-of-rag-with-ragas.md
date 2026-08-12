@@ -289,22 +289,53 @@ langfuse.flush()
 Now that the dataset is uploaded to langfuse you can retrieve it as needed with this handy function.
 
 ```python
-def get_traces(name=None, limit=None, user_id=None):
+import json
+
+
+def parse_json_if_needed(value):
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            return value
+    return value
+
+
+def get_traces(name=None, limit=50):
+    # The advanced `filter` parameter takes precedence over the individual query
+    # parameters, so every condition has to be expressed inside the filter array.
     all_data = []
-    page = 1
+    cursor = None
+    filters = [{"type": "boolean", "column": "isRootObservation", "operator": "=", "value": True}]
+
+    if name is not None:
+        filters.append({"type": "string", "column": "traceName", "operator": "=", "value": name})
 
     while True:
-        response = langfuse.api.trace.list(
-            name=name, page=page, user_id=user_id
+        response = langfuse.api.observations.get_many(
+            limit=min(limit, 100),
+            cursor=cursor,
+            fields="core,basic,io,trace_context",
+            filter=json.dumps(filters),
         )
         if not response.data:
             break
-        page += 1
         all_data.extend(response.data)
-        if len(all_data) > limit:
+        if len(all_data) >= limit:
+            break
+        cursor = getattr(response.meta, "cursor", None)
+        if not cursor:
             break
 
     return all_data[:limit]
+
+
+def get_trace_observations(trace_id):
+    return langfuse.api.observations.get_many(
+        trace_id=trace_id,
+        fields="core,basic,io",
+        limit=1000,
+    ).data
 ```
 
 ```python
@@ -333,17 +364,22 @@ evaluation_batch = {
 }
 
 for t in traces_sample:
-    observations = [langfuse.api.observations.get(o) for o in t.observations]
+    question = None
+    contexts = None
+    answer = None
+    observations = get_trace_observations(t.trace_id)
     for o in observations:
+        input_payload = parse_json_if_needed(o.input)
+        output_payload = parse_json_if_needed(o.output)
         if o.name == 'retrieval':
-            question = o.input['question']
-            contexts = o.output['contexts']
+            question = input_payload['question']
+            contexts = output_payload['contexts']
         if o.name=='generation':
-            answer = o.output['answer']
+            answer = output_payload['answer']
     evaluation_batch['question'].append(question)
     evaluation_batch['contexts'].append(contexts)
     evaluation_batch['answer'].append(answer)
-    evaluation_batch['trace_id'].append(t.id)
+    evaluation_batch['trace_id'].append(t.trace_id)
 ```
 
 ```python
