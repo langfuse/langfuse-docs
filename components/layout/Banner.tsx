@@ -4,17 +4,17 @@ import { Banner as FumadocsBanner } from "fumadocs-ui/components/banner";
 export function Banner() {
   return (
     <FumadocsBanner
+      id="fd-top-banner-town-hall-2026-08"
       height="2rem"
-      className="bg-black text-white [&_a]:text-white"
+      className="bg-black text-white [&_a]:text-white [&_button]:text-white"
     >
-      <Link href="/docs/v4">
+      <Link href="https://luma.com/qahlxt9n">
         <span className="sm:hidden">
-          Langfuse v4: up to 165× faster ·{" "}
-          <span className="underline underline-offset-2">Read more</span>
+          [Virtual] Langfuse Town Hall · Aug 12 →
         </span>
         <span className="hidden sm:inline">
-          Langfuse v4 is here: real-time, up to 165× faster ·{" "}
-          <span className="underline underline-offset-2">Read more</span>
+          [Virtual] Langfuse Town Hall · Aug 12, 9am PT: New features and
+          roadmap →
         </span>
       </Link>
     </FumadocsBanner>
