@@ -43,6 +43,31 @@ Langfuse adapts to the logo width, with a maximum aspect ratio of 1:3. Narrower 
 | `LANGFUSE_UI_LOGO_LIGHT_MODE_HREF` | URL to the logo in light mode. | `https://static.langfuse.com/langfuse-dev/example-logo-light-mode.png` |
 | `LANGFUSE_UI_LOGO_DARK_MODE_HREF`  | URL to the logo in dark mode.  | `https://static.langfuse.com/langfuse-dev/example-logo-dark-mode.png`  |
 
+## Instance switcher [#instance-switcher]
+
+Organizations that operate multiple Langfuse deployments (e.g. for development, staging, and production, or per business unit) can configure a list of instances. It is rendered as an instance switcher in the sidebar user menu so users can quickly move between deployments, similar to the region switcher on Langfuse Cloud.
+
+<Frame>
+  ![UI Customization Instance
+  Switcher](/images/docs/ui-customization-instance-switcher.png)
+</Frame>
+
+| Variable                     | Description                                                                                                         |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_UI_INSTANCE_LINKS` | JSON array of objects with a unique `name` and an `http(s)` `url`. See the example below. Unset hides the switcher. |
+
+```bash filename=".env"
+LANGFUSE_UI_INSTANCE_LINKS='[{"name":"Staging","url":"https://langfuse-staging.example.com"},{"name":"Production","url":"https://langfuse.example.com"}]'
+```
+
+Notes:
+
+- The entry whose host matches the URL the user is currently on is marked as the current instance.
+- Links open in a new tab. Sessions are not shared between instances; each deployment authenticates on its own.
+- The list is per-deployment configuration. Set the same value on all deployments so the switcher is consistent everywhere.
+- Names must be unique, and URLs must use `http` or `https`. Names are what users pick from in the menu, and other URL schemes would not open a Langfuse deployment.
+- If the value is not valid JSON in the expected shape, the switcher is hidden and a warning naming the problem is logged; the deployment still starts.
+
 ## LLM API/Gateway Connection defaults
 
 LLM connections are configured in the Langfuse project settings. You can customize the default values via the following environment variables.

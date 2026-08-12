@@ -65,7 +65,7 @@ langfuse_handler = CallbackHandler()
 ### LangChain Example
 
 <Callout type="info" emoji="💡">
-Instrumenting LangGraph follows the same pattern. Simply pass the `langfuse_handler` to the agent invocation. ([Example Notebook](/guides/cookbook/integration_langgraph)).
+Instrumenting LangGraph follows the same pattern. Simply pass the `langfuse_handler` to the agent invocation. ([Example Notebook](/integrations/frameworks/langgraph)).
 </Callout>
 
 ```python /config={"callbacks": [langfuse_handler]}/
@@ -200,18 +200,8 @@ import { FileCode, GitPullRequestArrow } from "lucide-react";
 
 <Cards num={2}>
   <Card
-    title="LangChain (Python)"
-    href="/guides/cookbook/integration_langchain"
-    icon={<FileCode />}
-  />
-  <Card
-    title="LangChain (JS/TS)"
-    href="/guides/cookbook/js_integration_langchain"
-    icon={<FileCode />}
-  />
-  <Card
     title="LangGraph (Python)"
-    href="/guides/cookbook/integration_langgraph"
+    href="/integrations/frameworks/langgraph"
     icon={<FileCode />}
   />
   <Card
@@ -281,8 +271,6 @@ def process_user_query(user_input: str):
 # Usage
 answer = process_user_query("What is the capital of France?")
 ```
-
-See the [Langchain + decorator observability cookbook](/guides/cookbook/example_decorator_openai_langchain) for an example of this in action.
 
 **Using context managers:**
 

@@ -4,10 +4,11 @@ sidebarTitle: OpenAI Assistants API
 description: Use of Langfuse decorator to trace calls made to openai assistants
 category: Integrations
 logo: /images/integrations/openai_icon.svg
-logoAppearance: dark
 ---
 
 # Cookbook: Observability for OpenAI Assistants API with Langfuse
+
+> **Note:** OpenAI has deprecated the Assistants API and will shut it down on August 26, 2026. For new projects, use the [Responses API](https://platform.openai.com/docs/guides/migrate-to-responses) instead.
 
 This cookbook demonstrates how to use the Langfuse [`observe` decorator](https://langfuse.com/docs/observability/sdk/instrumentation#observe-wrapper) to trace calls made to the [OpenAI Assistants API](https://platform.openai.com/docs/assistants/overview). It covers creating an assistant, running it on a thread, and observing the execution with [Langfuse tracing](https://langfuse.com/docs/tracing).
 

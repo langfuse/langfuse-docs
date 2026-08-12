@@ -79,7 +79,7 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 | [Human annotation queues](/docs/evaluation/evaluation-methods/annotation#annotation-queues)         | Yes                         | Yes                                        |
 | **Metrics**                                                                                         |                             |                                            |
 | [Custom dashboards](/docs/metrics/features/custom-dashboards)                                       | Yes                         | Yes                                        |
-| [Monitors and alerts](/docs/metrics/features/monitors)                                              | Langfuse v4+                | Langfuse v4+                               |
+| [Alerts](/docs/metrics/features/alerts)                                                             | Langfuse v4+                | Langfuse v4+                               |
 | **Collaboration**                                                                                   |                             |                                            |
 | Projects                                                                                            | Unlimited                   | Unlimited                                  |
 | Users                                                                                               | Unlimited                   | Unlimited                                  |
