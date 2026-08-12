@@ -198,7 +198,7 @@ Follow the [self-hosted v3 to v4 migration guide](/self-hosting/upgrade/upgrade-
 ## Technical background: V4 does less work for the same query
 
 - **Queries scan less data.** One denormalized observations table replaces read-time joins between traces and observations.
-- **Ingestion writes less data.** Each completed observation is written once, which reduced S3 costs in our ingestion pipeline by roughly 80%.
+- **Ingestion writes less data.** Each completed observation is written once.
 - **Immutable data creates room to optimize.** Append-only observations give us the architectural freedom to introduce optimizations such as materialized views in the future.
 
 <Frame fullWidth>
