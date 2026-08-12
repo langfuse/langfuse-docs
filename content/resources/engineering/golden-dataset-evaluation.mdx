@@ -111,22 +111,35 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-scores = langfuse.api.scores.get_many(
+scores = langfuse.api.scores_v3.get_many_v3(
     name="user-feedback",
     from_timestamp=datetime.now(timezone.utc) - timedelta(days=1),
+    fields="subject",  # what the score is attached to: trace, observation, session, or experiment
     limit=100,
 )
 
 for score in scores.data:
-    if score.value == 0 and score.trace_id:  # thumbs-down
-        trace = langfuse.api.trace.get(score.trace_id)
-        langfuse.create_dataset_item(
-            dataset_name="support-agent/golden",
-            input=trace.input,
-            expected_output=None,  # a reviewer supplies the corrected answer
-            metadata={"source": "production-failure", "added": str(datetime.now(timezone.utc).date())},
-            source_trace_id=score.trace_id,
-        )
+    # keep thumbs-down scores that are attached to a trace
+    if score.value != 0 or not score.subject or score.subject.kind != "trace":
+        continue
+
+    # A trace carries no input of its own; read it from the trace's root observation.
+    root_observations = langfuse.api.observations.get_many(
+        trace_id=score.subject.id,
+        is_root_observation=True,
+        fields="core,basic,io",
+        limit=1,
+    ).data
+    if not root_observations:
+        continue
+
+    langfuse.create_dataset_item(
+        dataset_name="support-agent/golden",
+        input=root_observations[0].input,
+        expected_output=None,  # a reviewer supplies the corrected answer
+        metadata={"source": "production-failure", "added": str(datetime.now(timezone.utc).date())},
+        source_trace_id=score.subject.id,
+    )
 ```
 
 Items arriving this way are candidates, not yet golden: route them through expert review to fill in the corrected expected output before they count in experiments. A broader [LLM evaluation strategy](/resources/engineering/llm-evaluation-strategy) builds on this same loop, connecting production monitoring back to offline testing.

@@ -24,7 +24,6 @@ export interface FeatureTabData {
   subtitle: string;
   body: string;
   docsHref: string;
-  videoHref?: string;
   image: {
     light: StaticImageData;
     dark: StaticImageData;

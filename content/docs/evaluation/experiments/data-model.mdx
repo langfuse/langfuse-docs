@@ -131,6 +131,8 @@ direction LR
 | `traceId`       | string | Yes      | ID of the trace to link to this run        |
 | `observationId` | string | No       | ID of the observation to link to this run  |
 
+Langfuse currently assumes that experiments do not contain repetitions: each dataset item appears once per experiment. Accordingly, reads surface at most one experiment item per dataset item within an experiment. Repetition support is tracked in [#5855](https://github.com/langfuse/langfuse/issues/5855).
+
 <Callout type="info">
 Most of the time, we recommend that DatasetRunItems reference TraceIDs directly. The reference to ObservationID exists for backwards compatibility with older SDK versions.
 </Callout>
