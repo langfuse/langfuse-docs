@@ -33,7 +33,6 @@ export const featureTabsData: FeatureTabData[] = [
     subtitle: "Trace every LLM call with cost and latency.",
     body: "Capture complete traces of your LLM applications/agents. Use traces to inspect failures and build eval datasets. Based on OpenTelemetry with support for all popular LLM/agent libraries.",
     docsHref: "/docs/observability/overview",
-    videoHref: "/watch-demo?tab=observability",
     image: {
       light: observabilityPng,
       dark: observabilityPng,
@@ -150,7 +149,6 @@ const res = await langfuse.api.metrics.metrics({query});`,
     subtitle: "Version and deploy prompts with low latency.",
     body: "Version-control prompts collaboratively, deploy/roll-back instantly to different environments, support for templates, variables, and A/B testing. Cached client-side for 0 latency/availability impact.",
     docsHref: "/docs/prompt-management/overview",
-    videoHref: "/watch-demo?tab=prompt",
     image: {
       light: PromptPng,
       dark: PromptPng,
@@ -214,7 +212,6 @@ async function handleRequest(userInput: string) {
     subtitle: "Collect feedback and run evaluations.",
     body: "Run online/offline evals, via UI (experiment with prompts/models) and via SDKs (experiment with end-to-end application). Build datasets from traces to continuously improve your evals. View results in UI.",
     docsHref: "/docs/evaluation/overview",
-    videoHref: "/watch-demo?tab=evaluation",
     image: {
       light: EvalsPng,
       dark: EvalsPng,

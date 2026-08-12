@@ -163,7 +163,7 @@ function loadFilesystemPages(category: string): IntegrationPage[] {
   try {
     const allParams = integrationsSource.generateParams();
     return allParams
-      .filter(({ slug }) => slug.length >= 2 && slug[0] === category)
+      .filter(({ slug }) => slug.length === 2 && slug[0] === category)
       .map(({ slug }) => {
         const page = integrationsSource.getPage(slug);
         if (!page) return null;

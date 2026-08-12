@@ -3,6 +3,10 @@ import * as z from "zod/v3";
 import { PostHog } from "posthog-node";
 import { waitUntil } from "@vercel/functions";
 import { searchLangfuseDocsWithInkeep } from "@/lib/inkeep-search-backend";
+import {
+  buildDocsMcpFeedbackMessage,
+  sendFeedbackToSlack,
+} from "@/lib/feedback-slack";
 
 const posthog = process.env.NEXT_PUBLIC_POSTHOG_KEY
   ? new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
@@ -38,8 +42,84 @@ const trackMcpToolUsage = async (
   );
 };
 
+const MCP_SERVER_INSTRUCTIONS = [
+  "Use this server for Langfuse documentation, product concepts, SDK/API usage, instrumentation guidance, migration help, and current docs pages.",
+  "For project-scoped Langfuse data or actions such as prompts, datasets, scores, comments, metrics, observations, models, or project-specific feedback, prefer the authenticated Langfuse app MCP server when it is available.",
+  "When Langfuse agent skills are installed, use them for end-to-end workflows, repo-specific guidance, and agent setup patterns; use this docs server to fetch or verify current documentation.",
+  "Inspect the available tools and their schemas dynamically; do not assume a fixed tool list.",
+  "If the user wants to provide feedback about Langfuse docs or something is not working well, ask permission and show the exact payload; if they want a reply, include only an email address they explicitly provide in the feedback text; exclude secrets, customer/project data, trace payloads, and unrelated context, then use submitFeedback.",
+].join("\n");
+
 export const mcpHandler = createMcpHandler(
   (server) => {
+    (server as any).tool(
+      "submitFeedback",
+      [
+        "Submit explicit user-approved feedback to the Langfuse team.",
+        "Before calling, ask permission and show the exact payload.",
+        "If the user wants a reply, ask them to include their email address in the feedback text; only use an address they explicitly provide and show it in the exact payload preview.",
+        "Do not include secrets, credentials, customer/project data, trace payloads, or unrelated context; the only contact detail to include is an explicitly provided reply email.",
+      ].join("\n"),
+      {
+        targetType: z
+          .enum(["skill", "mcp-tool", "cli", "docs", "public-api", "other"])
+          .describe("Category of the thing the feedback is about."),
+        target: z
+          .string()
+          .trim()
+          .min(1)
+          .max(200)
+          .describe(
+            "The specific instance within targetType: the skill name, MCP tool name, CLI command, API endpoint path, or docs page path (e.g. 'queryMetrics', '/docs/mcp'). An identifier, not a sentence.",
+          ),
+        feedback: z.string().trim().min(1).max(3000),
+        goal: z.string().trim().min(1).max(1500).optional(),
+        referenceUrl: z
+          .string()
+          .url()
+          .max(2048)
+          .refine(
+            (url) => ["http:", "https:"].includes(new URL(url).protocol),
+            "referenceUrl must use http or https",
+          )
+          .optional(),
+      },
+      async (input) => {
+        try {
+          const id = crypto.randomUUID();
+          await sendFeedbackToSlack(
+            buildDocsMcpFeedbackMessage({ id, ...input }),
+          );
+
+          trackMcpToolUsage("submitFeedback", "success", {
+            target_type: input.targetType,
+          });
+          return {
+            content: [
+              {
+                type: "text",
+                text: `Feedback submitted to the Langfuse team. Reference ID: ${id}`,
+              },
+            ],
+          };
+        } catch (error) {
+          trackMcpToolUsage("submitFeedback", "error", {
+            error_message:
+              error instanceof Error ? error.message : "Unknown error",
+          });
+          return {
+            content: [
+              {
+                type: "text",
+                text: "Feedback submission failed. Please try again later.",
+              },
+            ],
+            isError: true,
+          };
+        }
+      },
+    );
+
     (server as any).tool(
       "searchLangfuseDocs",
       "Semantic search (RAG) over the Langfuse documentation. Use this whenever the user asks a broader question that cannot be answered by a specific single page. Returns a concise answer synthesized from relevant docs. The raw provider response is included in _meta. Prefer this before guessing. If a specific page is needed call getLangfuseDocsPage first.",
@@ -178,6 +258,6 @@ export const mcpHandler = createMcpHandler(
       },
     );
   },
-  {},
+  { instructions: MCP_SERVER_INSTRUCTIONS },
   { basePath: "/api", maxDuration: 60, verboseLogs: true },
 );

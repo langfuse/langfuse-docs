@@ -129,8 +129,8 @@ export const careersPolaroids: CareersPolaroid[] = [
   },
   {
     src: "/images/careers/langfuse-is-born-march-2023.png",
-    description: "Langfuse is born",
-    location: "Berlin",
+    description: "Langfuse was born",
+    location: "San Francisco",
     year: "March 2023",
     ratio: "3/4",
     rotate: -1.0,

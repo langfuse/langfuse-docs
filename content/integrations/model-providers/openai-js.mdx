@@ -90,18 +90,6 @@ Done!✨ You now have full observability of your OpenAI calls in Langfuse.
 
 </Steps>
 
-Check out the notebook for end-to-end examples of the integration:
-
-import { FileCode } from "lucide-react";
-
-<Cards>
-  <Card
-    title="Example notebook"
-    href="/guides/cookbook/js_integration_openai"
-    icon={<FileCode />}
-  />
-</Cards>
-
 ## Troubleshooting
 
 ### Queuing and batching of events
@@ -159,8 +147,70 @@ const res = await observeOpenAI(new OpenAI(), {
   `observeOpenAI` function and pass the properties as the second
   `langfuseConfig` argument. Since the Langfuse client here is a singleton and
   the same client is used for all calls, you do not need to worry about
-  mistakingly having multiple clients running.
+  mistakenly having multiple clients running.
 </Callout>
+
+### Group multiple generations into a single trace
+
+Use `propagateAttributes` to apply trace attributes (name, tags, metadata) to all observations created inside its callback, and the `startActiveObservation` context manager to group multiple OpenAI generations under a single root span. Input and output are set on the root observation.
+
+```typescript
+import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";
+import OpenAI from "openai";
+import { observeOpenAI } from "@langfuse/openai";
+
+const country = "Germany";
+
+// Propagate trace attributes to all observations created inside the callback
+await propagateAttributes(
+  {
+    traceName: "City poem generator",
+    tags: ["updated"],
+    metadata: { env: "development" },
+  },
+  async () => {
+    await startActiveObservation("user-request", async (span) => {
+      // Generations created inside the callback are automatically nested under the active span
+      const capital = (
+        await observeOpenAI(new OpenAI(), {
+          generationName: "get-capital",
+        }).chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            { role: "system", content: "What is the capital of the country?" },
+            { role: "user", content: country },
+          ],
+        })
+      ).choices[0].message.content;
+
+      const poem = (
+        await observeOpenAI(new OpenAI(), {
+          generationName: "generate-poem",
+        }).chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: "You are a poet. Create a poem about this city.",
+            },
+            { role: "user", content: capital },
+          ],
+        })
+      ).choices[0].message.content;
+
+      // Set input and output on the root observation
+      span.update({
+        input: country,
+        output: poem,
+      });
+    });
+  },
+);
+```
+
+![Langfuse Trace](/images/cookbook/example-js-sdk/js_integration_openai_grouped.png)
+
+[Public trace in the Langfuse UI](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/e0a2f2b374a58cf9b4548240f879fc71?timestamp=2025-08-25T14:39:41.599Z&display=details)
 
 ### Link to Langfuse prompts
 

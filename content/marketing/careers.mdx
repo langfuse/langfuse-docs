@@ -107,13 +107,7 @@ The handbook contains many more resources that define how we do things. These mi
 
 Almost everything we do is public. Get a glimpse of our work here:
 
-import {
-  Github,
-  BookOpen,
-  MonitorPlay,
-  Joystick,
-  ListOrdered,
-} from "lucide-react";
+import { Github, BookOpen, Joystick, ListOrdered } from "lucide-react";
 
 <Cards num={3}>
   <Card
@@ -128,11 +122,6 @@ import {
   />
   <Card title="Documentation" href="/docs" icon={<BookOpen />} />
   <Card title="Roadmap" href="/docs/roadmap" icon={<ListOrdered />} />
-  <Card
-    title="Product walkthroughs"
-    href="/watch-demo"
-    icon={<MonitorPlay />}
-  />
   <Card title="Example project" href="/docs/demo" icon={<Joystick />} />
 </Cards>
 
@@ -141,6 +130,23 @@ import {
 If you prefer watching videos or listening to podcasts to get an impression, here are some suggestions:
 
 <Cards num={2}>
+  <Cards.Card
+    href="https://www.youtube.com/watch?v=1UjJh9a9O1k"
+    title="A Day in the Life of a Technical Support Engineer at Langfuse"
+    arrow
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <div className="relative aspect-video">
+      <Image
+        src="/images/careers/day-in-the-life-support-engineer.jpg"
+        alt="A Day in the Life of a Technical Support Engineer at Langfuse"
+        fill
+        className="object-cover"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+    </div>
+  </Cards.Card>
   <Cards.Card
     href="https://www.youtube.com/watch?v=3TqaDP63Qdk&t=13465s"
     title="Typescript AI Conf: AI Observability Panel"

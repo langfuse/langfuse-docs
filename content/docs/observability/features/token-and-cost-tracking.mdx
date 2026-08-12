@@ -41,7 +41,7 @@ flowchart LR
   B -->|use usage| G
 ```
 
-Via the [Metrics API](/docs/metrics/features/metrics-api), you can retrieve aggregated usage and cost metrics from Langfuse for downstream use in analytics, billing, and rate-limiting. The API allows you to filter by application type, user, or tags.
+Via the [Metrics API](/docs/metrics/features/metrics-api), you can retrieve aggregated usage and cost metrics from Langfuse for downstream use in analytics, billing, and rate-limiting. The API allows you to filter by application type, user, or tags. For a broader playbook on attributing and controlling spend, see our guide to [LLM cost management](/resources/engineering/llm-cost-management).
 
 ## Ingest usage and/or cost [#ingest]
 
@@ -426,6 +426,19 @@ The following tokenizers are currently supported:
 Model definitions include prices per usage type. Usage types must match exactly with the keys in the `usage_details` object of the generation.
 
 Langfuse automatically calculates cost for ingested generations at the time of ingestion if (1) usage is ingested or inferred, (2) and a matching model definition includes prices.
+
+### How Langfuse maintains default model prices [#default-model-price-maintenance]
+
+Langfuse maintains its [default model definitions](https://github.com/langfuse/langfuse/blob/main/worker/src/constants/default-model-prices.json) in the open-source repository. A [daily automated audit](https://github.com/langfuse/langfuse/actions/workflows/model-price-audit.yml) checks official provider sources for changed prices, pricing tiers, usage-key mappings, and newly released major models.
+
+The audit follows an evidence-first workflow:
+
+1. It verifies model IDs, prices, units, usage keys, and pricing tiers against official provider documentation.
+2. It makes focused changes only when the provider evidence can be represented safely in Langfuse. Uncertain findings are reported without changing the defaults.
+3. It validates the pricing data and any changed model-matching patterns.
+4. When changes are needed, a pull request is opened, and the updated prices are deployed shortly after approval.
+
+This process keeps the default definitions current without relying on a third-party pricing aggregator. Because inferred costs are calculated at ingestion time, updated defaults apply only to new generations. If you need support for a model immediately or use private pricing, add a [custom model definition](#custom-model-definitions) or [ingest the cost directly](#ingest).
 
 ### Pricing Tiers [#pricing-tiers]
 
