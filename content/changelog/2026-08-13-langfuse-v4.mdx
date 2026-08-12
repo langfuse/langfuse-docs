@@ -204,3 +204,7 @@ Follow the [self-hosted v3 to v4 migration guide](/self-hosting/upgrade/upgrade-
 Older SDKs sent updates to both traces and observations, which we stored in separate tables. Before ClickHouse could return a result, it had to join those tables and deduplicate the updates. This was slow at scale.
 
 The Langfuse Python SDK 4.7.0 or later and JS/TS SDK 5.4.0 or later add trace-level attributes such as `user_id` and `session_id` to every observation before it is ingested into Langfuse. Each observation is written to a new immutable, append-only table. The same query now needs neither a join nor deduplication, which makes it much faster.
+
+## Questions [#questions]
+
+Ask rollout and migration questions via the in-app support form or on the [v4 GitHub Discussion post](https://github.com/orgs/langfuse/discussions/12518).
