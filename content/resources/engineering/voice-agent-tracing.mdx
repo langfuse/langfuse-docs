@@ -1,0 +1,336 @@
+---
+title: "Trace voice agents: Pipecat, LiveKit, OpenAI Realtime & Gemini Live"
+description: "How to trace voice agents with Langfuse: Pipecat, LiveKit Agents, Vapi, OpenAI Realtime, and Gemini Live. Turn-level latency, audio token costs, and attaching the conversation recording to the trace."
+tags: [guide, agents]
+---
+
+# Trace voice agents in Langfuse
+
+Voice agents are realtime pipelines: audio streams in, speech-to-text, an LLM, and
+text-to-speech (or a single speech-to-speech model) run per turn, and audio streams back out,
+all while the user can interrupt at any moment. Tracing them answers the questions text-based
+tracing can't: **which stage added the latency before the agent spoke**, **what did the
+conversation actually sound like**, and **what did a call cost** once audio tokens are
+counted.
+
+**TL;DR:** Langfuse traces voice agents built with Pipecat and LiveKit Agents through their
+native OpenTelemetry support, giving you one trace per conversation with turn, STT, LLM, and
+TTS spans. Vapi ships a built-in Langfuse integration. Speech-to-speech models (OpenAI
+Realtime, Gemini Live) are covered when they run inside those frameworks, or by
+instrumenting their event stream directly with the Langfuse SDK. The full conversation
+recording can be attached to the trace and replayed from an audio player in the Langfuse UI.
+
+## What a voice-agent trace needs to capture
+
+A useful voice trace goes beyond model inputs and outputs:
+
+1. **Turn structure.** A conversation is a sequence of turns, each with user speech, model
+   work, and agent speech. The trace should mirror this: one trace per conversation, one span
+   per turn, service spans nested inside.
+2. **Latency breakdown.** "The agent felt slow" decomposes into STT finalization, LLM time to
+   first token, and TTS time to first byte. Both Pipecat and LiveKit emit these as span
+   attributes, so the slowest stage of every turn is visible without extra instrumentation.
+3. **Interruptions.** Barge-ins are a defining behavior of voice UX. Turn spans carry
+   interruption flags (`turn.was_interrupted` in Pipecat, `lk.interrupted` in LiveKit), so
+   you can filter for conversations where users cut the agent off.
+4. **Audio token usage and cost.** Speech-to-speech models bill audio tokens at different
+   rates than text tokens. Langfuse stores usage as arbitrary
+   [usage types](/docs/observability/features/token-and-cost-tracking) (e.g.,
+   `input_audio_tokens`, `output_audio_tokens`, `input_cached_tokens`) and applies per-type
+   prices, so realtime-model costs are accounted correctly.
+5. **Transcripts and audio.** Transcripts land on spans as text, which makes them searchable
+   and evaluable. The recording itself can be attached as [media](/docs/observability/features/multi-modality)
+   and replayed next to the trace.
+
+## Supported frameworks and platforms
+
+| Framework / API                                             | Mechanism                                                                                | Notes                                                                           |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| [Pipecat](/integrations/frameworks/pipecat)                 | Native OpenTelemetry tracing exported to Langfuse's OTLP endpoint                        | One trace per conversation: `conversation` → `turn` → `stt`/`llm`/`tts`         |
+| [LiveKit Agents](/integrations/frameworks/livekit)          | Native OpenTelemetry via a shared `TracerProvider` with the Langfuse SDK (Python & Node) | Emits Langfuse-recognized attributes incl. audio token usage                    |
+| [Vapi](/integrations/no-code/vapi)                          | Built-in integration, add Langfuse keys in the Vapi dashboard                            | No code changes                                                                 |
+| [OpenAI Agents SDK](/integrations/frameworks/openai-agents) | OpenInference instrumentation                                                            | Covers agent workflow runs; for `RealtimeAgent` see [below](#realtime)          |
+| [Google ADK](/integrations/frameworks/google-adk)           | OpenInference instrumentation                                                            | Covers turn-based agents; see [below](#realtime) for Gemini Live via `run_live` |
+| OpenAI Realtime API                                         | Framework path (Pipecat/LiveKit) or manual instrumentation                               | See [below](#realtime)                                                          |
+| Gemini Live API                                             | Framework path (Pipecat/LiveKit) or manual instrumentation                               | See [below](#realtime)                                                          |
+
+Both framework integrations produce one trace per conversation. This differs from the
+typical one-trace-per-request pattern in text applications; there is no need to group turns
+into [sessions](/docs/observability/features/sessions), because the whole conversation is
+already a single tree. Sessions remain useful for grouping repeat calls from the same user.
+
+## Anatomy of a voice-agent trace
+
+With Pipecat (v1.6+), the span tree looks like this:
+
+```
+conversation
+├── turn (turn.number, turn.was_interrupted, turn.user_bot_latency_seconds)
+│   ├── stt   (transcript, gen_ai.provider.name, metrics.ttfb)
+│   ├── llm   (messages, gen_ai.usage.input_tokens/output_tokens, metrics.ttfb)
+│   └── tts   (character count, voice_id, metrics.ttfb)
+└── turn
+    └── ...
+```
+
+Speech-to-speech services swap the STT/LLM/TTS triple for `llm_setup`, `llm_response`,
+`llm_tool_call`, and `llm_tool_result` spans, with audio token usage reported via
+`gen_ai.usage.audio.input_tokens` and `gen_ai.usage.audio.output_tokens`.
+
+LiveKit Agents emits a similar tree (`agent_session` → `user_turn`/`agent_turn` →
+`llm_node`, `function_tool`, `tts_node`, `eou_detection`) and sets
+`langfuse.observation.completion_start_time` on LLM spans, so time-to-first-token renders
+natively in Langfuse. For realtime models, LiveKit reports the audio/text/cached token
+breakdown per turn.
+
+Useful queries once this data is in Langfuse:
+
+- Sort turns by `turn.user_bot_latency_seconds` to find the slowest exchanges.
+- Filter traces on interruption flags to review conversations where users barged in.
+- Break down cost per conversation, per model, or per usage type (audio vs. text tokens) in
+  [dashboards](/docs/metrics/features/custom-dashboards).
+
+## Attach the conversation recording to the trace [#attach-audio]
+
+Transcripts tell you what was said; the recording tells you how it sounded — crosstalk, long
+silences, TTS artifacts, mis-transcriptions. Langfuse supports
+[audio attachments](/docs/observability/features/multi-modality) (WAV, MP3, OGG, and more)
+on the input, output, and metadata of any trace or observation, stores them in object
+storage via presigned uploads, and renders them with an audio player in the trace view.
+
+The pattern has two halves: record the audio in your framework, then attach it to the
+conversation's trace at session end.
+
+### Record the audio
+
+**Pipecat** ships an `AudioBufferProcessor` that captures both sides of the conversation.
+Place it after `transport.output()` so it records what the user actually heard, including
+truncated agent speech after interruptions:
+
+```python
+import wave
+
+from pipecat.processors.audio.audio_buffer_processor import AudioBufferProcessor
+
+audiobuffer = AudioBufferProcessor(
+    num_channels=2,  # stereo: user left, agent right
+    auto_start_recording=True,
+)
+
+pipeline = Pipeline(
+    [
+        transport.input(),
+        stt,
+        user_aggregator,
+        llm,
+        tts,
+        transport.output(),
+        audiobuffer,  # after transport.output() to capture both sides
+        assistant_aggregator,
+    ]
+)
+
+
+@audiobuffer.event_handler("on_audio_data")
+async def on_audio_data(buffer, audio, sample_rate, num_channels):
+    with wave.open(f"conversation-{conversation_id}.wav", "wb") as wf:
+        wf.setnchannels(num_channels)
+        wf.setsampwidth(2)
+        wf.setframerate(sample_rate)
+        wf.writeframes(audio)
+```
+
+**LiveKit Agents** records the session for you: start it with `record={"audio": True}` and a
+stereo OGG of the full conversation is written to `ctx.session_directory / "audio.ogg"`,
+available in your `on_session_end` callback. For room-level capture in production, LiveKit's
+room composite egress can write the recording directly to your S3/GCS bucket instead.
+
+### Attach it to the conversation's trace
+
+Because the frameworks own the root span, grab the conversation's trace ID with a small span
+processor on the shared `TracerProvider`:
+
+```python
+from opentelemetry.sdk.trace import SpanProcessor
+
+
+class RootTraceIdCapture(SpanProcessor):
+    """Remembers the trace ID of the conversation's root span."""
+
+    def __init__(self):
+        self.trace_id = None
+
+    def on_start(self, span, parent_context=None):
+        if span.parent is None:
+            self.trace_id = format(span.get_span_context().trace_id, "032x")
+
+
+capture = RootTraceIdCapture()
+trace_provider.add_span_processor(capture)
+```
+
+Then, when the session ends, wrap the file in `LangfuseMedia` and add it to the trace
+metadata from a short-lived span in the same trace:
+
+```python
+from langfuse import get_client
+from langfuse.media import LangfuseMedia
+
+langfuse = get_client()
+
+recording = LangfuseMedia(
+    file_path="conversation-abc.wav",  # or audio.ogg from LiveKit
+    content_type="audio/wav",
+)
+
+with langfuse.start_as_current_span(
+    name="conversation-recording",
+    trace_context={"trace_id": capture.trace_id},
+) as span:
+    span.update_trace(metadata={"recording": recording})
+
+langfuse.flush()  # joins the media upload queue; call before process exit
+```
+
+The SDK computes the file's SHA-256, requests a presigned upload URL, uploads on a
+background thread, and replaces the object with a media reference token in the trace
+metadata. Re-attaching the same file is deduplicated. The recording then renders with an
+audio player on the trace.
+
+If the recording only becomes available later (e.g., LiveKit egress finishing after the
+session, or a telephony provider delivering call recordings asynchronously), use the
+[media API](https://api.reference.langfuse.com/#tag/media) directly: `POST /api/public/media`
+with the trace ID registers and links the file to the trace, followed by a `PUT` of the
+bytes to the returned presigned URL.
+
+If your recordings already live at a stable URL (a public bucket or your telephony
+provider's storage), there is an even lighter option: put the URL into the trace metadata.
+Langfuse renders external media URLs inline from their source without uploading them —
+the trade-off is that playback depends on that URL staying accessible.
+
+## OpenAI Realtime and Gemini Live [#realtime]
+
+Speech-to-speech models replace the STT → LLM → TTS pipeline with a single bidirectional
+stream. There are two ways to trace them with Langfuse:
+
+**Through a framework.** Pipecat and LiveKit both support OpenAI Realtime and Gemini Live as
+speech-to-speech backends, and their OpenTelemetry integrations trace these sessions like
+any other: turn spans, tool calls, interruption flags, and per-turn audio token usage flow
+to Langfuse with the standard setup from the
+[Pipecat](/integrations/frameworks/pipecat) and [LiveKit](/integrations/frameworks/livekit)
+integration guides. If you are building a production voice agent, this is the recommended
+path.
+
+**Direct API instrumentation.** If you talk to the realtime APIs directly, note that the
+SDKs do not emit spans for these sessions today: the OpenAI Agents SDK's tracing does not
+cover `RealtimeAgent` runs, and Google ADK's built-in tracing does not instrument the
+`run_live` path. Instead, instrument the event stream yourself with the Langfuse Python SDK.
+The server events carry everything a trace needs; the essential mapping for OpenAI Realtime:
+
+```python
+from langfuse import get_client
+from openai import AsyncOpenAI
+
+client = AsyncOpenAI()
+langfuse = get_client()
+
+async with client.realtime.connect(model="gpt-realtime") as connection:
+    # ... session.update with input audio transcription enabled ...
+    with langfuse.start_as_current_span(name="realtime-conversation"):
+        user_transcript = None
+        async for event in connection:
+            # skip *.delta events; the *.done events repeat the full payload
+            if event.type == "conversation.item.input_audio_transcription.completed":
+                user_transcript = event.transcript
+            elif event.type == "response.done":
+                usage = event.response.usage
+                langfuse.start_observation(
+                    name="realtime-response",
+                    as_type="generation",
+                    model="gpt-realtime",
+                    input=user_transcript,
+                    output=event.response.output,
+                    usage_details={
+                        "input": usage.input_token_details.text_tokens,
+                        "input_audio_tokens": usage.input_token_details.audio_tokens,
+                        "input_cached_tokens": usage.input_token_details.cached_tokens,
+                        "output": usage.output_token_details.text_tokens,
+                        "output_audio_tokens": usage.output_token_details.audio_tokens,
+                    },
+                ).end()
+
+langfuse.flush()
+```
+
+The same pattern applies to Gemini Live through ADK's `runner.run_live()` loop: enable
+`input_audio_transcription` and `output_audio_transcription` on the `RunConfig`, accumulate
+transcripts from the events, and create a generation per `turn_complete` with the
+text/audio token split from `event.usage_metadata`. Since you own the event loop in both
+APIs, this manual instrumentation composes with turn spans, tool spans, and the
+[audio attachment pattern](#attach-audio) above.
+
+For interruption tracking, open a turn span on `input_audio_buffer.speech_started` and flag
+it as interrupted when speech starts while the agent is still playing audio — the trace then
+mirrors the barge-in behavior users experienced.
+
+## Evaluating voice conversations
+
+Because transcripts are stored as span input/output text, everything in Langfuse's
+[evaluation toolkit](/docs/evaluation/overview) applies to voice: LLM-as-a-judge evaluators
+on turn transcripts (politeness, task completion, correct tool use), user feedback scores
+attached to conversations, and datasets built from production turns for regression testing.
+The attached audio adds the dimension text evals miss — annotators can listen to flagged
+conversations directly in the trace view. For specialized simulation-based voice testing,
+Langfuse integrates with [Coval](/integrations/analytics/coval).
+
+### Voice metrics worth tracking
+
+The metrics that matter for voice agents fall into three buckets, each with a different
+source:
+
+| Metric                                                        | Where it comes from                                                                                                                                                                                            |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Turn latency (user stops speaking → agent responds)           | Span attributes emitted by the framework (`turn.user_bot_latency_seconds` in Pipecat, end-of-utterance spans in LiveKit); aggregate with percentiles in [dashboards](/docs/metrics/features/custom-dashboards) |
+| Time to first token/byte per stage (STT, LLM, TTS)            | `metrics.ttfb` attributes (Pipecat), `completion_start_time` on LLM spans (LiveKit)                                                                                                                            |
+| Interruption rate                                             | Turn-span flags (`turn.was_interrupted`, `lk.interrupted`) — filter traces on them or chart the rate over time                                                                                                 |
+| Cost per call, audio vs. text token split                     | [Usage types and model prices](/docs/observability/features/token-and-cost-tracking)                                                                                                                           |
+| Task completion, unnecessary repetition, verbosity, sentiment | [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) on turn or conversation transcripts                                                                                            |
+| Talk ratio, words per minute, silence gaps, pronunciation     | Computed from the recording by your own audio pipeline or a voice-testing tool, then pushed to the trace as [scores via the SDK/API](/docs/evaluation/evaluation-methods/scores-via-sdk)                       |
+
+The first four are available from the traces alone. The judged metrics run on transcripts
+already stored on spans. Audio-signal metrics are the one category that needs the recording
+itself — another reason to attach it to the trace, where scores, transcript, and audio stay
+on one timeline.
+
+See our guide on [evaluating voice AI agents](/blog/2025-01-22-evaluating-voice-ai-agents)
+for a deeper treatment of voice evaluation workflows.
+
+## FAQ
+
+### Can I listen to conversations in the Langfuse UI?
+
+Yes. Audio attached via the [multi-modality support](/docs/observability/features/multi-modality)
+renders with an audio player on the trace and observation detail views. Supported formats
+include WAV, MP3, OGG, AAC, FLAC, and Opus.
+
+### How are audio tokens priced?
+
+Langfuse tracks usage in arbitrary units per
+[usage type](/docs/observability/features/token-and-cost-tracking). Model definitions can
+assign distinct prices to `input_audio_tokens`, `output_audio_tokens`, and
+`input_cached_tokens`, so speech-to-speech model costs are computed with the correct audio
+rates rather than text-token prices.
+
+### Does this work with self-hosted Langfuse?
+
+Yes. The framework integrations target the standard OTLP endpoint, and media uploads work
+against your configured S3-compatible storage (the maximum upload size defaults to 1 GB via
+`LANGFUSE_S3_MEDIA_MAX_CONTENT_LENGTH`).
+
+### What about privacy and PII in voice traces?
+
+Voice traces carry raw transcripts by default. When spans flow through the Langfuse SDK
+(LiveKit setup), use its [masking](/docs/observability/features/masking) option to redact
+content before it leaves your infrastructure. For direct OTLP export (Pipecat setup), add a
+scrubbing span processor ahead of the exporter. And consider whether to attach recordings at
+all for regulated workloads.
