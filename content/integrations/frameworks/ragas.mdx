@@ -185,7 +185,7 @@ The same metrics run on live traffic. Because Ragas metrics are reference-free, 
 2. **Evaluate the batch with Ragas**, either per sample via `single_turn_ascore` or in bulk via `ragas.evaluate`.
 3. **Write the scores back** with `langfuse.create_score(name=..., value=..., trace_id=...)` so each score appears on the trace that produced the answer.
 
-The [Ragas cookbook](/guides/cookbook/evaluation_of_rag_with_ragas) walks through both variants end to end, including scoring individual traces at request time and batch-scoring a periodic sample.
+The [Ragas cookbook](/resources/engineering/evaluation-of-rag-with-ragas) walks through both variants end to end, including scoring individual traces at request time and batch-scoring a periodic sample.
 
 If you want RAG scoring on production traffic without operating an evaluation job at all, Langfuse's managed [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators run server-side against sampled observations, and the managed evaluator catalog includes evaluators built in partnership with Ragas.
 
@@ -213,7 +213,7 @@ import { FileCode } from "lucide-react";
 <Cards>
   <Card
     title="Cookbook: Evaluation of RAG pipelines with Ragas"
-    href="/guides/cookbook/evaluation_of_rag_with_ragas"
+    href="/resources/engineering/evaluation-of-rag-with-ragas"
     icon={<FileCode />}
   />
 </Cards>

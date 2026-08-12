@@ -227,7 +227,7 @@ The promotion itself can be locked down. [Protected prompt labels](/docs/prompt-
 
 Every gate run against a Langfuse dataset is recorded as a dataset run, so the history accumulates automatically. The experiment comparison view shows runs side by side: aggregate scores per run, per-item outputs, and which specific items regressed between two runs. When the PR comment says `avg_faithfulness` dropped from 0.86 to 0.71, the comparison view answers the follow-up question of which ten items broke and what the outputs looked like. CI metadata attached by the action (commit SHA, branch, actor) makes each run traceable to the change that produced it.
 
-The gate only covers inputs you thought to test, so pair it with an online complement. Sampled LLM-as-a-judge evaluators score a percentage of production traffic, and [monitors](/docs/metrics/features/monitors) (available on Langfuse Cloud) alert on those score metrics with warning and alert thresholds, routing breaches to Slack, webhooks, or a GitHub Actions trigger. The offline gate stops regressions you can reproduce; monitors catch the ones production finds for you.
+The gate only covers inputs you thought to test, so pair it with an online complement. Sampled LLM-as-a-judge evaluators score a percentage of production traffic, and [alerts](/docs/metrics/features/alerts) (available on Langfuse Cloud) fire on those score metrics with warning and alert thresholds, routing breaches to Slack, webhooks, or a GitHub Actions trigger. The offline gate stops regressions you can reproduce; alerts catch the ones production finds for you.
 
 ## Building the golden dataset the gate runs against
 

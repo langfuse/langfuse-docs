@@ -1,7 +1,7 @@
 ---
 title: "Example: Monitoring LLM Security"
 description: Overview of common security problems facing LLM-based applications and how to use Langfuse to trace, prevent, and evaluate security risks.
-category: Security
+category: Examples
 ---
 
 # Example: Monitoring LLM Security

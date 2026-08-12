@@ -72,7 +72,7 @@ The decorator should:
 
 ## Design decisions
 
-1. The decorator reuses the low-level SDK to create traces and asynchronously batch them to the Langfuse API. This implementation was derived from the PostHog SDKs and is [tested](/guides/cookbook/langfuse_sdk_performance_test) to have little to no impact on the performance of your application.
+1. The decorator reuses the low-level SDK to create traces and asynchronously batch them to the Langfuse API. This implementation was derived from the PostHog SDKs and is [tested](/resources/engineering/langfuse-sdk-performance-test) to have little to no impact on the performance of your application.
 2. The decorator maintains a call stack internally that keeps track of nested function calls to reflect the observation hierarchy in the trace.
 3. To be async-safe, the decorator leverages [Python Contextvars](https://docs.python.org/3/library/contextvars.html) for managing its state.
 4. The same `observe()` decorator is used to create a trace (outermost decorated function) and to add spans to the trace (inner decorated functions). This way, functions can be used in multiple traces without needing to be strictly a "trace" or a "span" function.
@@ -213,7 +213,7 @@ If you want to built complex applications while being able to easily switch betw
 - Langfuse OpenAI SDK Wrapper for automatic instrumentation of OpenAI calls
 - LiteLLM Proxy for standardization of 100+ models on the OpenAI API
 
-Have a look at [this cookbook](/guides/cookbook/integration_litellm_proxy) to see an end-to-end example – we really think you'll like this stack and there are lots of teams in the Langfuse Community who built on top of it.
+Have a look at [this cookbook](/integrations/gateways/litellm#openai-sdk-wrapper) to see an end-to-end example – we really think you'll like this stack and there are lots of teams in the Langfuse Community who built on top of it.
 
 ## Thank you
 
@@ -231,10 +231,5 @@ import { FileCode, BookOpen, Video as VideoIcon } from "lucide-react";
     title="Example notebook"
     href="/docs/sdk/python/example"
     icon={<FileCode />}
-  />
-  <Card
-    title="Video introduction"
-    href="/guides/videos/introducing-python-decorator"
-    icon={<VideoIcon />}
   />
 </Cards>

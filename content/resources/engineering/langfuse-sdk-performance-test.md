@@ -1,6 +1,6 @@
 ---
 title: Langfuse SDK Performance Test
-category: SDKs
+description: Benchmark of the latency impact of the Langfuse Python SDK and its OpenAI, Langchain, and LlamaIndex integrations.
 ---
 
 # Langfuse SDK Performance Test
@@ -8,22 +8,22 @@ category: SDKs
 Langfuse shall have a minimal impact on latency. This is achieved by running almost entirely in the background and by batching all requests to the Langfuse API.
 
 Coverage of this performance test:
+
 - Langfuse SDK: start_observation(), start_as_current_observation(), @observe decorator
 - Langchain Integration
 - OpenAI Integration
 - LlamaIndex Integration
 
 Limitations:
+
 - We test integrations using OpenAI's hosted models, making the experiment less controlled but actual latency of the integrations impact more realistic.
 - The timing outputs in this notebook are from an older run on a specific machine and network. Absolute numbers will vary, re-run the notebook to benchmark your own environment.
 
 ## Setup
 
-
 ```python
 %pip install langfuse --upgrade
 ```
-
 
 ```python
 import os
@@ -38,13 +38,11 @@ os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪
 os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...");
 ```
 
-
 ```python
 from langfuse import get_client
 
 langfuse = get_client()
 ```
-
 
 ```python
 import pandas as pd
@@ -67,13 +65,11 @@ def time_func(func, runs=100):
 
 `start_observation()`, manually creating and ending a root span
 
-
 ```python
 time_func(lambda: langfuse.start_observation(name="perf-span").end())
 ```
 
 `start_observation(as_type="generation")`, nested as a child observation
-
 
 ```python
 root_span = langfuse.start_observation(name="perf-root-span")
@@ -85,7 +81,6 @@ root_span.end()
 
 `start_as_current_observation()`, context manager that sets the active observation
 
-
 ```python
 def traced_operation():
     with langfuse.start_as_current_observation(as_type="span", name="perf-span"):
@@ -95,7 +90,6 @@ time_func(traced_operation)
 ```
 
 `@observe` decorator, automatically capturing timings, inputs and outputs
-
 
 ```python
 from langfuse import observe
@@ -111,11 +105,9 @@ time_func(observed_function)
 
 Docs: https://langfuse.com/integrations/frameworks/langchain
 
-
 ```python
 %pip install langchain langchain-openai --upgrade
 ```
-
 
 ```python
 from langchain_openai import ChatOpenAI
@@ -127,7 +119,6 @@ model = ChatOpenAI(max_tokens=10)
 chain = prompt | model | StrOutputParser()
 ```
 
-
 ```python
 from langfuse.langchain import CallbackHandler
 langfuse_handler = CallbackHandler()
@@ -135,14 +126,10 @@ langfuse_handler = CallbackHandler()
 
 ### Benchmark without Langfuse
 
-
 ```python
 langchain_stats_no_langfuse = time_func(lambda: chain.invoke({"person":"Paul Graham"}))
 langchain_stats_no_langfuse
 ```
-
-
-
 
     count         100.000000
     mean (sec)      0.529463
@@ -154,18 +141,12 @@ langchain_stats_no_langfuse
     max (sec)       7.107237
     dtype: float64
 
-
-
 ### With Langfuse Tracing
-
 
 ```python
 langchain_stats_with_langfuse = time_func(lambda: chain.invoke({"person":"Paul Graham"}, {"callbacks":[langfuse_handler]}))
 langchain_stats_with_langfuse
 ```
-
-
-
 
     count         100.000000
     mean (sec)      0.618286
@@ -177,24 +158,19 @@ langchain_stats_with_langfuse
     max (sec)       1.838614
     dtype: float64
 
-
-
 ## OpenAI Integration
 
 Docs: https://langfuse.com/integrations/model-providers/openai-py
 
-
 ```python
 %pip install langfuse openai --upgrade --quiet
 ```
-
 
 ```python
 import openai
 ```
 
 ### Benchmark without Langfuse
-
 
 ```python
 time_func(lambda: openai.chat.completions.create(
@@ -205,9 +181,6 @@ time_func(lambda: openai.chat.completions.create(
   max_tokens=10,
 ))
 ```
-
-
-
 
     count         100.000000
     mean (sec)      0.524097
@@ -219,15 +192,11 @@ time_func(lambda: openai.chat.completions.create(
     max (sec)       1.789671
     dtype: float64
 
-
-
 ### With Langfuse Tracing
-
 
 ```python
 from langfuse.openai import openai
 ```
-
 
 ```python
 time_func(lambda: openai.chat.completions.create(
@@ -239,9 +208,6 @@ time_func(lambda: openai.chat.completions.create(
 ))
 ```
 
-
-
-
     count         100.000000
     mean (sec)      0.515243
     std (sec)       0.286902
@@ -252,19 +218,15 @@ time_func(lambda: openai.chat.completions.create(
     max (sec)       2.613779
     dtype: float64
 
-
-
 ## LlamaIndex Integration
 
 Docs: https://langfuse.com/integrations/frameworks/llamaindex
-
 
 ```python
 %pip install llama-index openinference-instrumentation-llama-index --upgrade --quiet
 ```
 
 Sample documents
-
 
 ```python
 from llama_index.core import Document
@@ -281,16 +243,12 @@ Throughout his career, Silverstein has been celebrated for his diverse range of 
 
 Index
 
-
 ```python
 # Example index construction + LLM query
 from llama_index.core import VectorStoreIndex
 
 time_func(lambda: VectorStoreIndex.from_documents([doc1,doc2]))
 ```
-
-
-
 
     count         100.000000
     mean (sec)      0.171673
@@ -302,18 +260,12 @@ time_func(lambda: VectorStoreIndex.from_documents([doc1,doc2]))
     max (sec)       0.459417
     dtype: float64
 
-
-
 Query
-
 
 ```python
 index = VectorStoreIndex.from_documents([doc1,doc2])
 time_func(lambda: index.as_query_engine().query("What did he do growing up?"))
 ```
-
-
-
 
     count         100.000000
     mean (sec)      0.795817
@@ -325,10 +277,7 @@ time_func(lambda: index.as_query_engine().query("What did he do growing up?"))
     max (sec)       3.495263
     dtype: float64
 
-
-
 ### With Langfuse Tracing
-
 
 ```python
 from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
@@ -339,13 +288,11 @@ LlamaIndexInstrumentor().instrument()
 
 Index
 
-
 ```python
 time_func(lambda: VectorStoreIndex.from_documents([doc1,doc2]))
 ```
 
 Query
-
 
 ```python
 index = VectorStoreIndex.from_documents([doc1,doc2])
