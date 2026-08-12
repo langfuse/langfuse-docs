@@ -73,12 +73,10 @@ The self-hosted-only [Instance Management API](/self-hosting/administration/inst
 
 ## SSO configuration [#sso]
 
-A few SSO-specific knobs worth knowing about:
+A few knobs worth knowing about when configuring SSO providers via environment variables:
 
-- **Multi-tenant SSO config cache TTL** is 10 minutes — changes you make through the self-service flow propagate to all instances within that window. This affects Cloud / multi-tenant deployments only.
-- **DNS-verified domains** — for self-service SSO configuration, the configuring organization must first prove control over the email domain via a TXT record. This prevents cross-tenant hijacking via lookalike email domains.
-- **Issuer validation** is enforced for GitHub OAuth and custom OIDC providers; misconfigured `AUTH_<PROVIDER>_ISSUER` values fail at save / sign-in rather than silently accepting tokens from the wrong issuer.
-- Use the ID token signing algorithm configuration to align the expected algorithm with your IdP if it rejects the default.
+- **Issuer validation** — set `AUTH_<PROVIDER>_ISSUER` to your IdP's exact issuer URL. Tokens are validated against it at sign-in rather than silently accepted from the wrong issuer, and `AUTH_CUSTOM_ISSUER` must additionally be a valid URL and is checked at startup. GitHub's issuer is pinned in code and needs no configuration.
+- **ID token signing algorithm** — set `AUTH_<PROVIDER>_ID_TOKEN_SIGNED_RESPONSE_ALG` to align the expected signing algorithm with your IdP if it rejects the default.
 
 See the full reference in [Authentication and SSO → Additional configuration](/self-hosting/security/authentication-and-sso#additional-configuration).
 
