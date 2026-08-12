@@ -1,11 +1,11 @@
 ---
-title: How do I upgrade to Langfuse v4?
-sidebarTitle: Upgrade to Langfuse v4
+title: How do I make my project ready for the upgrade to Langfuse v4?
+sidebarTitle: Make your project ready for the upgrade to Langfuse v4
 description: Upgrade to Langfuse v4 by updating ingestion, migrating the v3 features you use, and completing the rollout for your deployment.
 tags: [platform]
 ---
 
-# Upgrade to Langfuse v4 [#upgrade-to-langfuse-v4]
+# Make your project ready for the upgrade to Langfuse v4 [#make-your-project-ready-for-the-upgrade-to-langfuse-v4]
 
 Langfuse v4 uses an observations-first data model. The [v4 overview](/docs/v4) explains what changed. New managed projects already use v4 and need no migration.
 
@@ -37,15 +37,19 @@ Only follow the rows that apply to your project.
 
 ## 3. Complete the rollout [#rollout]
 
-### Managed projects [#managed]
+### Langfuse Cloud projects [#managed]
 
-Langfuse Cloud becomes v4-only on **November 9, 2026**. Complete every action detected for your projects before this date. Follow the [v4 timeline](/docs/v4#timeline) for rollout updates.
+Langfuse Cloud deprecates v3 endpoints and features on **November 9, 2026**. Please complete any migration requirements for your projects before this date.
 
-If the sidebar still shows the **Langfuse v4 preview** toggle, enable it. Organization owners can then open [**Migration status**](https://cloud.langfuse.com/v4-migration) to review every project in their organizations. The page flags the specific SDK, evaluator, experiment, API, or export work required for each project.
+Organization owners can open the **Migration sidebar** and the [**Migration status page**](https://cloud.langfuse.com/v4-migration) to see if any actions are required:
 
 <Frame fullWidth>
-  ![The v4 migration status page showing one of two projects migrated and the affected features for the remaining project](/images/docs/v4/migration-status-page.png)
+  ![The Langfuse v4 migration assistant lists the exact SDK, evaluator, API, and integration actions detected for a Cloud project](/images/changelog/2026-08-13-langfuse-v4/v4-migration-assistant.png)
 </Frame>
+
+We will email project owners and admins a summary of the actions required for their projects. Complete those actions by **November 9, 2026**.
+
+Follow the [upgrade guide](/faq/all/upgrade-to-langfuse-v4) for more details.
 
 ### Self-hosted deployments [#self-hosted]
 
@@ -55,4 +59,4 @@ There is no forced cutover date. Langfuse v3 receives security patches through J
 
 ## Questions [#questions]
 
-Ask rollout and migration questions in the [v4 GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518); we use that thread for updates and answers.
+Ask rollout and migration questions via the in-app support form or on the [v4 GitHub Discussion post](https://github.com/orgs/langfuse/discussions/12518).
