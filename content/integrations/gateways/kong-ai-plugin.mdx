@@ -14,43 +14,48 @@ This guide demonstrates how to **integrate Langfuse** into your **Kong API Gatew
 
 > **What is Langfuse?**: [Langfuse](https://langfuse.com/) is an open-source observability platform for AI agents. It helps you visualize and monitor LLM calls, tool usage, cost, latency, and more.
 
+## How it works
+
+Kong AI Gateway emits [Gen AI span attributes](https://developer.konghq.com/ai-gateway/llm-open-telemetry/) for traffic handled by the AI Proxy plugins, and Kong's bundled [OpenTelemetry plugin](https://developer.konghq.com/plugins/opentelemetry/) exports those spans over OTLP/HTTP. Langfuse accepts them directly on its [OpenTelemetry endpoint](/integrations/native/opentelemetry), so no collector or sidecar is required.
+
 ## Features
 
-- **Zero-code instrumentation**: Automatic tracing for AI API calls proxied through Kong
-- **Multi-provider support**: OpenAI-compatible APIs, vLLM, and custom providers
-- **Rich context capture**: User sessions, conversations, and metadata
-- **Performance metrics**: Latency, throughput, and token-level analytics
-- **Non-blocking architecture**: Async operation with minimal overhead
-- **Production-ready**: Error resilience and graceful degradation
+- **Zero-code instrumentation**: LLM traffic proxied through Kong is traced without touching your application code
+- **Multi-provider support**: every provider handled by Kong's AI Proxy plugins, including OpenAI, Azure OpenAI, Anthropic, Cohere, Gemini, Mistral, and OpenAI-compatible upstreams such as vLLM
+- **Token and cost tracking**: model name and input/output token counts land on the Langfuse generation, so [cost is calculated](/docs/observability/features/token-and-cost-tracking) for you
+- **Distributed tracing**: W3C trace context is propagated, so gateway spans join traces from your own services
+- **Non-blocking export**: spans are batched and exported asynchronously by Kong's queueing layer
 
-### Supported AI Providers
-
-| Provider          | Endpoints                                                   | Status |
-| ----------------- | ----------------------------------------------------------- | ------ |
-| OpenAI-Compatible | `/v1/chat/completions`, `/v1/completions`, `/v1/embeddings` | ✅     |
-| vLLM              | `/generate`, `/v1/completions`                              | ✅     |
-| Custom Providers  | Extensible detection framework                              | ✅     |
-
-## 1. Enable Kong's OpenTelemetry plugin
-
-Kong AI Gateway emits GenAI spans through Kong's built-in OpenTelemetry plugin. Use that OTLP export path for Langfuse rather than the older custom Langfuse tracing plugin.
+## 1. Enable tracing in Kong
 
 ### Prerequisites
 
-- Kong Gateway 3.13+ installed and running
-- Langfuse account ([sign up](https://cloud.langfuse.com))
+- Kong Gateway 3.13 or later — Gen AI span attributes were introduced in 3.13
+- The [AI Proxy](https://developer.konghq.com/plugins/ai-proxy/) or AI Proxy Advanced plugin routing your LLM traffic
+- A Langfuse account ([sign up](https://cloud.langfuse.com)) or a [self-hosted Langfuse](/self-hosting) deployment
 - Access to Kong's Admin API
-- Base64-encoded Langfuse credentials (`pk-lf-...:sk-lf-...`)
+
+<Callout type="warning">
+  Kong's OpenTelemetry plugin only emits spans when tracing is enabled at the
+  process level. These settings cannot be applied through plugin configuration —
+  set them wherever Kong reads its configuration (`kong.conf`, `KONG_*`
+  environment variables, or your Helm values) before starting the gateway.
+</Callout>
+
+```bash
+export KONG_TRACING_INSTRUMENTATIONS=all
+export KONG_TRACING_SAMPLING_RATE=1.0
+```
 
 ### Docker Compose
 
 ```yaml
-version: '3.8'
 services:
   kong:
-    image: kong:3.4
+    image: kong/kong-gateway:3.13
     environment:
-      KONG_PLUGINS: bundled,opentelemetry
+      KONG_TRACING_INSTRUMENTATIONS: all
+      KONG_TRACING_SAMPLING_RATE: "1.0"
       KONG_DATABASE: postgres
       KONG_PG_HOST: postgres
       KONG_PG_USER: kong
@@ -60,36 +65,60 @@ services:
       - "8001:8001"
 ```
 
-### Enable the Plugin in Kong
+The OpenTelemetry plugin ships with Kong Gateway, so there is nothing to install and no extra `KONG_PLUGINS` entry to add.
 
-Add the plugin to your Kong configuration:
+## 2. Configure Langfuse credentials
 
-```bash
-# In kong.conf
-plugins = bundled,opentelemetry
-
-# Or via environment variable
-export KONG_PLUGINS=bundled,opentelemetry
-```
-
-Restart Kong Gateway to load the plugin.
-
-## 2. Configure Langfuse Credentials
-
-Next, set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://langfuse.com/cloud) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting).
+Get your API keys from your project settings page by signing up for a free [Langfuse Cloud](https://langfuse.com/cloud) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting). Kong authenticates against Langfuse's OTLP endpoint with Basic Auth, so encode both keys into a single header value:
 
 ```bash
-# Get keys for your project from the project settings page
 export LANGFUSE_PUBLIC_KEY="pk-lf-..."
 export LANGFUSE_SECRET_KEY="sk-lf-..."
 export LANGFUSE_BASE_URL="https://cloud.langfuse.com" # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
-export LANGFUSE_BASIC_AUTH=$(printf "%s:%s" "$LANGFUSE_PUBLIC_KEY" "$LANGFUSE_SECRET_KEY" | base64 | tr -d '\n')
+
+# Print the Basic Auth value to paste into the plugin configuration below
+echo "$(printf "%s:%s" "$LANGFUSE_PUBLIC_KEY" "$LANGFUSE_SECRET_KEY" | base64 | tr -d '\n')"
 ```
 
-## 3. Export Kong spans to Langfuse
+## 3. Record model statistics and payloads
 
-Configure the OpenTelemetry plugin using Kong's Admin API:
+AI Proxy only records model statistics and request payloads when you enable them, and these are what become Gen AI span attributes. Enable both on the plugin that proxies your LLM traffic:
+
+```bash
+curl -X POST http://localhost:8001/plugins \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "ai-proxy",
+    "config": {
+      "route_type": "llm/v1/chat",
+      "auth": { "header_name": "Authorization", "header_value": "Bearer $OPENAI_API_KEY" },
+      "model": {
+        "provider": "openai",
+        "name": "gpt-4o",
+        "options": { "max_tokens": 512, "temperature": 1.0 }
+      },
+      "logging": {
+        "log_statistics": true,
+        "log_payloads": true
+      }
+    }
+  }'
+```
+
+- `log_statistics` captures token usage, latency, and model metadata.
+- `log_payloads` records the full request prompts and model responses.
+
+<Callout type="warning">
+  With `log_payloads` enabled, prompts and completions leave the gateway and are
+  stored in Langfuse. Review your PII and retention requirements first, and
+  consider [data masking](/docs/observability/features/masking) or a
+  [self-hosted deployment](/self-hosting) for sensitive workloads.
+</Callout>
+
+## 4. Export Kong spans to Langfuse
+
+Configure the OpenTelemetry plugin to send spans to Langfuse, substituting the Basic Auth value you printed in step 2:
 
 ```bash
 curl -X POST http://localhost:8001/plugins \
@@ -99,7 +128,7 @@ curl -X POST http://localhost:8001/plugins \
     "config": {
       "traces_endpoint": "https://cloud.langfuse.com/api/public/otel/v1/traces",
       "headers": {
-        "Authorization": "Basic <base64-encoded-pk-sk>",
+        "Authorization": "Basic <LANGFUSE_BASIC_AUTH>",
         "x-langfuse-ingestion-version": "4"
       },
       "sampling_rate": 1,
@@ -110,36 +139,36 @@ curl -X POST http://localhost:8001/plugins \
   }'
 ```
 
-### Configuration Parameters
+### Configuration parameters
 
-| Parameter                              | Type   | Default                                                | Required | Description                                              |
-| -------------------------------------- | ------ | ------------------------------------------------------ | -------- | -------------------------------------------------------- |
-| `traces_endpoint`                      | string | `https://cloud.langfuse.com/api/public/otel/v1/traces` | Yes      | Langfuse OTLP/HTTP traces endpoint                       |
-| `headers.Authorization`                | string | -                                                      | Yes      | Basic auth header built from `pk-lf-...:sk-lf-...`       |
-| `headers.x-langfuse-ingestion-version` | string | `"4"`                                                  | Yes      | Enables real-time ingestion on Langfuse v4               |
-| `sampling_rate`                        | number | `1`                                                    | No       | Fraction of requests to trace                            |
-| `propagation.default_format`           | string | `w3c`                                                  | No       | Preserve distributed trace IDs across Kong pipeline hops |
+| Parameter                              | Type   | Kong default | Description                                                                                                      |
+| -------------------------------------- | ------ | ------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `traces_endpoint`                      | string | -            | Langfuse OTLP/HTTP traces endpoint. Required.                                                                    |
+| `headers.Authorization`                | string | -            | `Basic <base64 of pk-lf-...:sk-lf-...>`. Required.                                                               |
+| `headers.x-langfuse-ingestion-version` | string | -            | Set to `4` for real-time ingestion on Langfuse v4. Without it, data can appear with a delay of up to 10 minutes. |
+| `sampling_rate`                        | number | -            | Fraction of requests to trace. Supersedes the global `tracing_sampling_rate` when set.                           |
+| `propagation.default_format`           | string | `w3c`        | Trace context format used when no tracing header is found on the incoming request.                               |
+
+See Kong's [OpenTelemetry plugin reference](https://developer.konghq.com/plugins/opentelemetry/reference/) for the full schema, including `resource_attributes`, timeouts, and queue tuning.
 
 <Callout type="info">
-For self-hosted Langfuse instances, set `traces_endpoint` to your instance URL
-followed by `/api/public/otel/v1/traces`.
+  For self-hosted Langfuse instances, set `traces_endpoint` to your instance URL
+  followed by `/api/public/otel/v1/traces`. See [real-time
+  ingestion](/integrations/native/opentelemetry#real-time-ingestion) for details
+  on the `x-langfuse-ingestion-version` header.
 </Callout>
 
-## 4. Hello World Example
+## 5. Hello world example
 
-Below we make a simple AI request through Kong Gateway. The plugin automatically captures the request and creates a trace in Langfuse.
+Send an AI request through Kong Gateway. Kong traces it and exports the spans to Langfuse.
 
 ```bash
 curl -X POST http://kong-gateway:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -H "X-User-Id: user-12345" \
   -d '{
-    "model": "gpt-4",
     "messages": [
       {"role": "user", "content": "Explain quantum computing"}
-    ],
-    "temperature": 0.7,
-    "max_tokens": 500
+    ]
   }'
 ```
 
@@ -147,265 +176,174 @@ curl -X POST http://kong-gateway:8000/v1/chat/completions \
 ![Example trace in Langfuse](/images/cookbook/integration_kong/kong-example-trace-01.png)
 </Frame>
 
-Clicking the link above (or your own project link) lets you view all observations, token usage, latencies, etc., for debugging or optimization.
+Open the trace in Langfuse to inspect the model, token usage, latency, and the prompt and response payloads.
 
-## 5. Adding Context with Headers
+## 6. Add user and session context
 
-Enrich your traces with user and session context using HTTP headers. This allows you to filter and analyze traces by user, session, or conversation.
+Kong does not know which end-user a proxied request belongs to, so map your own request headers onto the [Langfuse trace attributes](/integrations/native/opentelemetry#property-mapping) `langfuse.user.id` and `langfuse.session.id`. Kong's tracing PDK lets you set attributes on the root span from a [Post-function plugin](https://developer.konghq.com/plugins/post-function/):
+
+```lua filename="langfuse-context.lua"
+local root_span = kong.tracing.get_root_span()
+
+if root_span then
+  local user_id = kong.request.get_header("X-User-Id")
+  local session_id = kong.request.get_header("X-Session-Id")
+
+  if user_id then
+    root_span:set_attribute("langfuse.user.id", user_id)
+  end
+
+  if session_id then
+    root_span:set_attribute("langfuse.session.id", session_id)
+  end
+end
+```
+
+Apply the file to the same service or route as the OpenTelemetry plugin:
+
+```bash
+curl -X POST http://localhost:8001/plugins \
+  -F "name=post-function" \
+  -F "config.access[1]=@langfuse-context.lua"
+```
+
+Requests then carry their own context into Langfuse:
 
 ```bash
 curl -X POST http://kong-gateway:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "X-User-Id: user-12345" \
   -H "X-Session-Id: session-abc" \
-  -H "X-Chat-Id: chat-789" \
-  -H "X-Organization-Id: org-acme" \
   -d '{
-    "model": "gpt-4",
     "messages": [
       {"role": "user", "content": "What is machine learning?"}
     ]
   }'
 ```
 
-### Supported Context Headers
-
-| Header              | Description            | Example       |
-| ------------------- | ---------------------- | ------------- |
-| `X-User-Id`         | Unique user identifier | `user-12345`  |
-| `X-Session-Id`      | Session identifier     | `session-abc` |
-| `X-Chat-Id`         | Conversation/chat ID   | `chat-789`    |
-| `X-Message-Id`      | Individual message ID  | `msg-54321`   |
-| `X-Organization-Id` | Organization context   | `org-acme`    |
-| `X-Project-Id`      | Project identifier     | `project-xyz` |
-
 <Frame>
 ![Example trace with context](/images/cookbook/integration_kong/kong-example-trace-02.png)
 </Frame>
 
-## 6. Adding Metadata
+Use the same pattern for any other dimension you want to filter on in Langfuse, for example `langfuse.trace.tags` for tenant or feature tags. The full list of supported attributes is in the [OpenTelemetry property mapping](/integrations/native/opentelemetry#property-mapping).
 
-Include additional metadata in your request body for richer traces. This is useful for tracking features, experiments, or user-specific variables.
+## What Kong sends to Langfuse
+
+Kong emits a `kong.gen_ai` span for each AI Proxy request, nested under the gateway's request span. Langfuse maps its attributes onto the generation:
+
+| Kong span attribute                                       | Langfuse field                                                                                                     |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `gen_ai.request.model`, `gen_ai.response.model`           | [`model`](/integrations/native/opentelemetry#model)                                                                |
+| `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens` | [`usage`](/integrations/native/opentelemetry#usage), which drives cost calculation                                 |
+| `gen_ai.request.temperature`, `gen_ai.request.max_tokens` | [`modelParameters`](/integrations/native/opentelemetry#modelParameters)                                            |
+| `gen_ai.input.messages`, `gen_ai.output.messages`         | Prompt and response payloads, present when `log_payloads` is enabled                                               |
+| `langfuse.user.id`, `langfuse.session.id`                 | [`userId`](/integrations/native/opentelemetry#userId), [`sessionId`](/integrations/native/opentelemetry#sessionId) |
+
+Kong also emits `gen_ai.operation.name`, `gen_ai.provider.name`, `gen_ai.response.id`, and `gen_ai.response.finish_reasons`, plus dedicated spans for tool calls. See Kong's [Gen AI attribute reference](https://developer.konghq.com/ai-gateway/llm-open-telemetry/) for the complete list and the Langfuse [property mapping](/integrations/native/opentelemetry#property-mapping) for which attributes are promoted to first-class Langfuse fields; anything not promoted is retained as observation metadata.
+
+## Environment-specific configuration
+
+To keep development and production data in separate Langfuse projects, scope one OpenTelemetry plugin per Kong service and give each its own credentials:
 
 ```bash
-curl -X POST http://kong-gateway:8000/v1/chat/completions \
+# Development
+curl -X POST http://localhost:8001/services/ai-service-dev/plugins \
   -H "Content-Type: application/json" \
-  -H "X-User-Id: user-12345" \
   -d '{
-    "model": "gpt-4",
-    "messages": [
-      {"role": "user", "content": "Recommend a movie"}
-    ],
-    "metadata": {
-      "user_id": "user-12345",
-      "chat_id": "chat-789",
-      "project_id": "project-xyz",
-      "features": {
-        "web_search": true,
-        "image_generation": false
+    "name": "opentelemetry",
+    "config": {
+      "traces_endpoint": "https://cloud.langfuse.com/api/public/otel/v1/traces",
+      "headers": {
+        "Authorization": "Basic <DEV_LANGFUSE_BASIC_AUTH>",
+        "x-langfuse-ingestion-version": "4"
       },
-      "variables": {
-        "user_tier": "premium",
-        "language": "en"
-      }
+      "sampling_rate": 1
+    }
+  }'
+
+# Production, sampling 10% of requests
+curl -X POST http://localhost:8001/services/ai-service-prod/plugins \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "opentelemetry",
+    "config": {
+      "traces_endpoint": "https://cloud.langfuse.com/api/public/otel/v1/traces",
+      "headers": {
+        "Authorization": "Basic <PROD_LANGFUSE_BASIC_AUTH>",
+        "x-langfuse-ingestion-version": "4"
+      },
+      "sampling_rate": 0.1
     }
   }'
 ```
 
-### Python / FastAPI Application
-
-```python
-import httpx
-from fastapi import FastAPI
-
-KONG_URL = "http://kong-gateway:8000"
-
-async def chat_with_ai(user_id: str, session_id: str, message: str):
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            f"{KONG_URL}/v1/chat/completions",
-            json={
-                "model": "gpt-4",
-                "messages": [{"role": "user", "content": message}],
-                "metadata": {
-                    "user_id": user_id,
-                    "session_id": session_id
-                }
-            },
-            headers={
-                "Content-Type": "application/json",
-                "X-User-Id": user_id,
-                "X-Session-Id": session_id
-            }
-        )
-        return response.json()
-
-# Usage
-result = await chat_with_ai("user-123", "session-abc", "Hello!")
-print(result)
-```
-
-## Captured Data
-
-The plugin creates comprehensive traces in Langfuse with the following structure:
-
-```json
-{
-  "trace": {
-    "id": "trace-12345",
-    "name": "/v1/chat/completions",
-    "userId": "user-12345",
-    "sessionId": "session-abc",
-    "metadata": {
-      "provider": "openai_compatible",
-      "model": "gpt-4",
-      "status_code": 200,
-      "environment": "production",
-      "total_duration_ms": 1250,
-      "time_per_token_ms": 12.5,
-      "throughput_tokens_per_second": 80.0
-    }
-  },
-  "observations": [
-    {
-      "type": "generation",
-      "name": "chat_completion",
-      "usage": {
-        "promptTokens": 150,
-        "completionTokens": 25,
-        "totalTokens": 175
-      },
-      "metadata": {
-        "temperature": 0.7,
-        "max_tokens": 500,
-        "finish_reason": "stop"
-      }
-    }
-  ]
-}
-```
-
-### Performance Metrics
-
-- **Total Duration**: End-to-end request processing time
-- **Time per Token**: Average latency per generated token
-- **Throughput**: Tokens processed per second
-
-### Token Analytics
-
-- **Prompt Tokens**: Input token count
-- **Completion Tokens**: Output token count
-- **Total Tokens**: Combined usage
-- **Cost Tracking**: Monitor spending across requests
-
-## Environment-Specific Configuration
-
-You can configure different Langfuse projects for development, staging, and production environments.
-
-### Development Environment
-
-```bash
-curl -X POST http://localhost:8001/services/ai-service-dev/plugins \
-  --data "name=ai-tracing" \
-  --data "config.langfuse_enabled=true" \
-  --data "config.langfuse_public_key=pk-lf-dev-xxx" \
-  --data "config.langfuse_secret_key=sk-lf-dev-xxx" \
-  --data "config.environment=development" \
-  --data "config.log_level=debug"
-```
-
-### Production Environment
-
-```bash
-curl -X POST http://localhost:8001/services/ai-service-prod/plugins \
-  --data "name=ai-tracing" \
-  --data "config.langfuse_enabled=true" \
-  --data "config.langfuse_public_key=pk-lf-prod-xxx" \
-  --data "config.langfuse_secret_key=sk-lf-prod-xxx" \
-  --data "config.environment=production" \
-  --data "config.log_level=warn"
-```
+Alternatively, keep one Langfuse project and separate the data with [environments](/docs/observability/features/environments) by setting the `langfuse.environment` attribute from the Post-function plugin shown above.
 
 ## Troubleshooting
 
-### Data Not Appearing in Langfuse
+### No data appearing in Langfuse
 
-1. **Verify Credentials**: Ensure your Langfuse API keys are correct
-2. **Check Connectivity**: Confirm Kong can reach the Langfuse endpoint
+1. **Confirm tracing is enabled at the process level.** Without `KONG_TRACING_INSTRUMENTATIONS`, Kong emits no spans regardless of plugin configuration.
 
 ```bash
-# View plugin status
-curl http://localhost:8001/services/YOUR_SERVICE/plugins | \
-  jq '.data[] | select(.name=="opentelemetry")'
+# Verify the plugin is attached
+curl http://localhost:8001/plugins | jq '.data[] | select(.name=="opentelemetry")'
 
-# Check Kong logs
-docker-compose logs kong | grep "opentelemetry"
+# Check Kong logs for export errors
+docker compose logs kong | grep -i opentelemetry
 
-# Test Langfuse endpoint
+# Confirm Kong can reach the Langfuse endpoint
 curl -I https://cloud.langfuse.com/api/public/otel/v1/traces
 ```
 
-3. **Review Logs**: Check Kong logs for errors
+2. **Verify credentials.** A `401` in Kong's logs means the Basic Auth value is wrong; regenerate it from step 2.
+3. **Check the data region.** The `traces_endpoint` host must match the region your project lives in.
 
-### Missing User Context
+### Missing prompts and responses
 
-- Ensure HTTP headers are properly set in requests
-- Verify header names match expected format (`X-User-Id`, not `X-UserId`)
-- Check that headers are forwarded through any proxies
+Enable `logging.log_payloads` on the AI Proxy plugin (step 3). Without it, Kong emits model and usage attributes but no message content.
 
-### Performance Issues
+### Missing user or session context
 
-- Monitor Kong metrics during high load
-- Adjust `langfuse_timeout` if experiencing timeouts
-- Check async timer performance in Kong logs
+- Confirm the Post-function plugin is scoped to the same service or route as the OpenTelemetry plugin.
+- Check header names match exactly (`X-User-Id`, not `X-UserId`), and that upstream proxies forward them.
 
-### Enable Debug Logging
+### Export timeouts under load
+
+Tune the plugin's `connect_timeout`, `send_timeout`, and `queue` settings, and lower `sampling_rate` for high-volume services. See Kong's [plugin reference](https://developer.konghq.com/plugins/opentelemetry/reference/).
+
+### Enable debug logging
 
 ```bash
-curl -X PATCH http://localhost:8001/plugins/PLUGIN_ID \
-  --data "config.log_level=debug"
+export KONG_LOG_LEVEL=debug
 ```
-
-## Advanced Usage
-
-### Custom AI Providers
-
-Extend the plugin to support additional AI providers by modifying the detection logic in `handler.lua`:
-
-```lua
-local function detect_ai_provider(path, headers)
-  if path:find("/v1/chat/completions") then
-    return "openai_compatible"
-  elseif path:find("/anthropic") then
-    return "anthropic"
-  elseif path:find("/cohere") then
-    return "cohere"
-  else
-    return "custom_provider"
-  end
-end
-```
-
-### Integration with Other Kong Plugins
-
-The AI tracing plugin works alongside other Kong plugins:
-
-- **Rate Limiting**: Combine with rate limiting for cost control
-- **Authentication**: Use with key-auth or JWT for user identification
-- **Request Transformer**: Modify requests before tracing
 
 <Callout type="warning">
-**Security Best Practices**:
-- Store Langfuse API keys securely (use Kong's vault integration or environment variables)
-- Review exported data for PII compliance
+**Security best practices**:
+
+- Store Langfuse API keys in [Kong's vault](https://developer.konghq.com/gateway/entities/vault/) rather than in plaintext plugin configuration
+- Review exported payloads for PII compliance before enabling `log_payloads`
 - Restrict access to plugin configuration in production
-- Ensure Kong-Langfuse communication uses HTTPS
-- Consider data retention policies for sensitive content
+- Ensure Kong-to-Langfuse communication uses HTTPS
+- Configure [data retention](/docs/administration/data-retention) for sensitive content
+
+</Callout>
+
+## Alternative: community Langfuse tracing plugin
+
+A community-maintained Kong plugin, [kong-langfuse-tracing](https://github.com/Ramtinboreili/kong-langfuse-tracing) by [Ramtin Boreili](https://github.com/Ramtinboreili), writes traces to Langfuse directly instead of going through OpenTelemetry. It adds provider detection for non-AI-Proxy routes and maps request headers to Langfuse fields without custom Lua.
+
+<Callout type="info">
+  The plugin posts to `/api/public/ingestion`, which is
+  [deprecated](/faq/all/deprecated-api-migration#ingestion) in favor of OTLP
+  ingestion. It continues to work, but data ingested this way can appear with a
+  delay of up to 10 minutes on Langfuse v4. Prefer the OpenTelemetry setup above
+  for new deployments.
 </Callout>
 
 ## Resources
 
-- **GitHub Repository**: [kong-langfuse-tracing](https://github.com/Ramtinboreili/kong-langfuse-tracing)
-- **Kong Documentation**: [Kong Gateway Docs](https://docs.konghq.com/)
-- **Report Issues**: [GitHub Issues](https://github.com/Ramtinboreili/kong-langfuse-tracing/issues)
-- **Maintainer**: [Ramtin Boreili](https://github.com/Ramtinboreili) (ramtin.bor7hp@gmail.com)
+- [Kong Gen AI OpenTelemetry attributes](https://developer.konghq.com/ai-gateway/llm-open-telemetry/)
+- [Kong OpenTelemetry plugin](https://developer.konghq.com/plugins/opentelemetry/)
+- [Kong Gateway tracing guide](https://developer.konghq.com/gateway/tracing/)
+- [Langfuse OpenTelemetry integration](/integrations/native/opentelemetry)

@@ -134,9 +134,9 @@ task = PipelineTask(
 
 For more details, please refer to the [OpenTelemetry Python Documentation](https://opentelemetry-python.readthedocs.io/).
 
-### Add observation input and output
+### Add Trace Input and Output
 
-By default, Pipecat traces do not promote the conversation input and output onto a Langfuse observation. You can patch Pipecat's service decorators to set `langfuse.observation.input` and `langfuse.observation.output`, capturing the first LLM call's messages as the observation input and the last LLM response as the observation output:
+Pipecat's service spans already carry each individual LLM call's messages, but the conversation input and output are not set at the trace level. You can patch Pipecat's service decorators to set the `langfuse.trace.input` and `langfuse.trace.output` attributes, capturing the first LLM call's messages as the trace input and the last LLM response as the trace output:
 
 ```python filename="main.py"
 def patch_trace_input_output():
@@ -147,23 +147,40 @@ def patch_trace_input_output():
     def patched(span, *args, **kwargs):
         original(span, *args, **kwargs)
 
-        # Set the input of the first LLM call as the observation input
+        # Set the input of the first LLM call as the trace input
         if first_call[0] and kwargs.get("messages"):
-            span.set_attribute("langfuse.observation.input", kwargs["messages"])
+            span.set_attribute("langfuse.trace.input", kwargs["messages"])
             first_call[0] = False
 
-        # Set the output of each LLM call as the observation output (last one wins)
+        # Set the output of each LLM call as the trace output (last one wins)
         orig_set = span.set_attribute
         def new_set(key, value):
             orig_set(key, value)
             if key == "output":
-                orig_set("langfuse.observation.output", value)
+                orig_set("langfuse.trace.output", value)
         span.set_attribute = new_set
 
     service_decorators.add_llm_span_attributes = patched
 
 # Apply patch before tracing setup
 patch_trace_input_output()
+```
+
+<Callout type="info">
+`langfuse.trace.input` and `langfuse.trace.output` are trace-level attributes, which is why they can be set from a service span. They are deprecated in Langfuse v4 and retained for trace-level views and legacy LLM-as-a-judge evaluators — in the [observations-first data model](/docs/v4), the overall input and output belong on the root observation. Pipecat's conversation span is that root observation, but it is created internally and only accepts static attributes via `additional_span_attributes` on `PipelineTask`, so runtime values such as the first user message still need the trace-level attributes above. See [moving trace input and output](/integrations/native/opentelemetry/migration-to-v4#move-trace-input-and-output) for the background.
+
+</Callout>
+
+To attach context that is known before the pipeline runs, pass it to the conversation span directly instead:
+
+```python filename="main.py"
+task = PipelineTask(
+    pipeline,
+    params=PipelineParams(enable_metrics=True),
+    enable_tracing=True,
+    conversation_id="customer-123",
+    additional_span_attributes={"langfuse.session.id": "session-abc"},
+)
 ```
 
 ### Renaming Traces (Optional) [#renaming-traces]

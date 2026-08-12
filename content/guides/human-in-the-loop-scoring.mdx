@@ -49,21 +49,26 @@ Pull the traces your reviewers should look at, then render their inputs and outp
 
 ```python
 from langfuse import get_client
+from datetime import datetime, timedelta, timezone
 import json
 
 langfuse = get_client()
 
-# List one root observation per trace for review, e.g. all traces of a given name
+now = datetime.now(timezone.utc)
+
+# List one root observation per trace for review, e.g. all traces of a given name.
+# The advanced `filter` parameter takes precedence over the individual query
+# parameters, so the time window is expressed as filter conditions as well.
 filters = json.dumps([
     {"type": "boolean", "column": "isRootObservation", "operator": "=", "value": True},
     {"type": "string", "column": "traceName", "operator": "=", "value": "support-conversation"},
+    {"type": "datetime", "column": "startTime", "operator": ">=", "value": (now - timedelta(days=7)).isoformat()},
+    {"type": "datetime", "column": "startTime", "operator": "<", "value": now.isoformat()},
 ])
 
 response = langfuse.api.observations.get_many(
     filter=filters,
     fields="core,basic,io,trace_context",
-    from_start_time="2026-07-01T00:00:00Z",
-    to_start_time="2026-07-16T00:00:00Z",
     limit=50,
 )
 
@@ -82,17 +87,22 @@ import { LangfuseClient } from "@langfuse/client";
 
 const langfuse = new LangfuseClient();
 
-// List one root observation per trace for review, e.g. all traces of a given name
+const now = new Date();
+const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+// List one root observation per trace for review, e.g. all traces of a given name.
+// The advanced `filter` parameter takes precedence over the individual query
+// parameters, so the time window is expressed as filter conditions as well.
 const filter = JSON.stringify([
   { type: "boolean", column: "isRootObservation", operator: "=", value: true },
   { type: "string", column: "traceName", operator: "=", value: "support-conversation" },
+  { type: "datetime", column: "startTime", operator: ">=", value: sevenDaysAgo.toISOString() },
+  { type: "datetime", column: "startTime", operator: "<", value: now.toISOString() },
 ]);
 
 const response = await langfuse.api.observations.getMany({
   filter,
   fields: "core,basic,io,trace_context",
-  fromStartTime: "2026-07-01T00:00:00Z",
-  toStartTime: "2026-07-16T00:00:00Z",
   limit: 50,
 });
 
@@ -110,14 +120,12 @@ _See the [JS/TS SDK reference](https://js.reference.langfuse.com)._
 ```bash
 curl -G https://cloud.langfuse.com/api/public/v2/observations \
   -u "pk-lf-...":"sk-lf-..." \
-  --data-urlencode 'filter=[{"type":"string","column":"traceName","operator":"=","value":"support-conversation"}]' \
+  --data-urlencode 'filter=[{"type":"boolean","column":"isRootObservation","operator":"=","value":true},{"type":"string","column":"traceName","operator":"=","value":"support-conversation"},{"type":"datetime","column":"startTime","operator":">=","value":"2026-08-01T00:00:00Z"}]' \
   --data-urlencode "fields=core,basic,io" \
-  --data-urlencode "fromStartTime=2026-07-01T00:00:00Z" \
-  --data-urlencode "toStartTime=2026-07-16T00:00:00Z" \
   --data-urlencode "limit=50"
 ```
 
-The v2 API returns observation rows, not trace objects: group rows by `traceId`, and render the input/output of each trace's root observation (the row with `parentObservationId == null`). See [Migration of deprecated APIs](/faq/all/deprecated-api-migration#traces) for details.
+The v2 API returns observation rows, not trace objects. Filtering on `isRootObservation` gives you one row per trace; render each row's input and output, and fetch all observations for a `traceId` when reviewers need the full trace. Because `filter` takes precedence over the individual query parameters, keep every condition — including the time window — inside the filter array. See [Migration of deprecated APIs](/faq/all/deprecated-api-migration#traces) for details.
 
 _See the [API reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations)._
 
@@ -127,8 +135,10 @@ _See the [API reference](https://api.reference.langfuse.com/#tag/observationsv2/
 <Callout type="info">
   All three tabs use the supported observations-first read path. Query logical
   root observations (`isRootObservation = true`) when you need one review row
-  per trace, and group by `traceId` or fetch all observations for a given
-  `traceId` when your reviewers need the full trace activity. See [Migration of
+  per trace, and fetch all observations for a given `traceId` when your
+  reviewers need the full trace activity. If you only need the root filter and a
+  time window, use the first-class `isRootObservation`, `fromStartTime`, and
+  `toStartTime` query parameters instead of `filter`. See [Migration of
   deprecated APIs](/faq/all/deprecated-api-migration#traces) for the mapping
   from older trace reads.
 </Callout>

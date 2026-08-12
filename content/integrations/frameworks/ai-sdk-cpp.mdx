@@ -17,9 +17,9 @@ This guide shows how to use the built-in **Langfuse tracing module** in [AI SDK 
 > **Compatibility note:** the current upstream `ai::langfuse` transport predates
 > Langfuse's OTLP-first v4 data model. For new Langfuse Cloud and self-hosted
 > v4 deployments, prefer standard OpenTelemetry instrumentation exported to
-> Langfuse's OTLP/HTTP endpoint. Use this page only when you explicitly need the
-> current AI SDK C++ Langfuse module and have validated it against your target
-> deployment.
+> Langfuse's [OTLP/HTTP endpoint](/integrations/native/opentelemetry). Use this
+> page only when you explicitly need the current AI SDK C++ Langfuse module and
+> have validated it against your target deployment.
 
 ## Trace shape
 
@@ -179,7 +179,7 @@ trace->end();  // idempotent, synchronous flush
 - The integration ships with AI SDK C++ as an optional CMake target. If you do not link `ai::langfuse`, your binary stays free of the additional HTTP and JSON code paths.
 - For greenfield Langfuse v4 integrations, prefer OpenTelemetry-based C++
   instrumentation so you can export OTLP/HTTP directly to Langfuse's supported
-  ingestion path.
+  [ingestion path](/integrations/native/opentelemetry).
 
 ## Learn more
 

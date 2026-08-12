@@ -130,16 +130,14 @@ def parse_json_if_needed(value):
 def extract_message(observation):
     payload = parse_json_if_needed(observation.input)
     if isinstance(payload, dict):
-        return payload.get("message") or payload.get("input") or payload.get("args", [None])[0]
+        return payload.get("message") or payload.get("input") or (payload.get("args") or [None])[0]
     return payload
 
 
 response = langfuse.api.observations.get_many(
     limit=50,
     fields="core,basic,io,trace_context",
-    filter=json.dumps([
-        {"type": "boolean", "column": "isRootObservation", "operator": "=", "value": True},
-    ]),
+    is_root_observation=True,
 )
 root_observations = response.data
 root_observations[0].dict()
@@ -451,9 +449,7 @@ for _ in range(PAGES_TO_FETCH):
         limit=50,
         cursor=cursor,
         fields="core,basic,io,trace_context",
-        filter=json.dumps([
-            {"type": "boolean", "column": "isRootObservation", "operator": "=", "value": True},
-        ]),
+        is_root_observation=True,
     )
     if not response.data:
         break
