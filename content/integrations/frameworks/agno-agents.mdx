@@ -13,7 +13,7 @@ This notebook demonstrates how to integrate **Langfuse** with **Agno** using Ope
 
 > **What is Agno?** [Agno](https://docs.agno.com/) is a platform for building and managing AI agents.
 
-> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform. It provides tracing and monitoring capabilities for LLM applications, helping developers debug, analyze, and optimize their AI systems. Langfuse integrates with various tools and frameworks via native integrations, OpenTelemetry, and API/SDKs.
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source AI engineering platform. It provides tracing and monitoring capabilities for LLM applications, helping developers debug, analyze, and optimize their AI systems. Langfuse integrates with various tools and frameworks via native integrations, OpenTelemetry, and API/SDKs.
 
 ## Get Started
 
@@ -34,13 +34,13 @@ Get your Langfuse API keys by signing up for [Langfuse Cloud](https://cloud.lang
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # your openai key
-os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...");
 ```
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.

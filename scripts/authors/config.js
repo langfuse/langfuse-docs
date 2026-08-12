@@ -17,6 +17,7 @@ const CONFIG = {
     "faq",
     "handbook",
     "academy",
+    "resources",
   ].map((section) => ({
     name: section.replace("-", ""),
     dirPath: path.join(__dirname, `../../content/${section}`),

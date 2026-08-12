@@ -1,0 +1,154 @@
+---
+title: Langfuse for Agents
+seoTitle: Langfuse for Coding Agents (Claude Code, Codex, Cursor)
+description: Give coding agents like Claude Code, Codex, and Cursor direct access to Langfuse. Instrument tracing, query production data, manage prompts, and run evaluations from the editor or terminal via the Agent Skill, CLI, and MCP server.
+---
+
+# Langfuse for agents
+
+Langfuse gives coding agents like **Claude Code**, **Codex**, and **Cursor** direct access to your LLM application data. Hand your agent the Langfuse skill, and it can instrument an app with tracing, query production traces, manage prompts, and set up evaluations, all from the editor or terminal.
+
+There are three ways to connect an agent to Langfuse. They share the same underlying API, so pick the one that fits how your agent works:
+
+- **[Agent Skill](#skill)** — a playbook your coding agent loads to learn how to use Langfuse correctly.
+- **[CLI](#cli)** — full REST API coverage from the command line, for agents that can run bash.
+- **[MCP server](#mcp)** — the Model Context Protocol, for agents that can't run shell commands.
+
+<Callout type="info">
+This page is also available as markdown. Append `.md` to the URL or send an `Accept: text/markdown` header to get a clean, token-efficient version for your agent: [`langfuse.com/agents.md`](https://langfuse.com/agents.md).
+</Callout>
+
+## Start in 30 seconds [#quickstart]
+
+Install the Langfuse Agent Skill, then describe what you want in plain language. The skill teaches your agent how to instrument code, query traces, manage prompts, and run evaluators.
+
+import AutoInstall from "@/components-mdx/get-started/auto-install.mdx";
+
+<AutoInstall />
+
+Once it's installed, prompt your agent directly:
+
+- _Show me the last 10 traces with a score below 0.5_
+- _Add Langfuse tracing to the OpenAI calls in `src/agent.ts`_
+- _Migrate the system prompt in `src/agent.ts` to Langfuse prompt management_
+- _Create a dataset called "edge-cases" and add these three failing traces to it_
+
+## Agent Skill [#skill]
+
+The [Agent Skill](/docs/api-and-data-platform/features/agent-skill) follows the open [Agent Skills](https://github.com/anthropics/skills) standard and works across Claude Code, Cursor, Codex, Windsurf, and other compatible agents. It is open source on [GitHub](https://github.com/langfuse/skills).
+
+A skill is a self-contained folder with a `SKILL.md` entrypoint plus reference docs for specific workflows. Coding agents produce better results with it installed because they follow Langfuse's documented best practices instead of guessing the API.
+
+Those reference docs include a guide on using the [Langfuse CLI](#cli), so the skill teaches your agent the exact commands to query traces, manage prompts, and run evaluators rather than leaving it to improvise HTTP requests.
+
+The skill uses progressive disclosure: only the frontmatter sits in the agent's context, and the full instructions load on demand when a task is relevant. Context stays small until the agent actually needs the details.
+
+<Cards>
+  <Card title="Set up the Agent Skill" href="/docs/api-and-data-platform/features/agent-skill" />
+  <Card title="Skills repository on GitHub" href="https://github.com/langfuse/skills" />
+</Cards>
+
+## CLI [#cli]
+
+The [`langfuse-cli`](/docs/api-and-data-platform/features/cli) wraps the entire Langfuse REST API. It is generated from the OpenAPI spec, so every endpoint becomes a command with proper flags, validation, and help text. The skill uses it under the hood, and your agent can call it directly when it can run bash.
+
+Run it without installing:
+
+```bash
+npx langfuse-cli api <resource> <action>
+```
+
+Agents discover the surface area through built-in help, which keeps token usage low:
+
+```bash
+npx langfuse-cli api __schema                   # list all resources
+npx langfuse-cli api <resource> --help          # list actions for a resource
+npx langfuse-cli api <resource> <action> --help # show args for an action
+```
+
+Because the CLI is generated from the spec, it stays in sync with the API automatically and covers every endpoint, including [full-text search over observations](#fast).
+
+<Cards>
+  <Card title="CLI reference" href="/docs/api-and-data-platform/features/cli" />
+  <Card title="langfuse-cli on npm" href="https://www.npmjs.com/package/langfuse-cli" />
+</Cards>
+
+## MCP server [#mcp]
+
+For agents that can't run shell commands, Langfuse exposes a [Model Context Protocol server](/docs/api-and-data-platform/features/mcp-server). It authenticates with your Langfuse API keys and covers most of the platform: observations, metrics, scores, score configs, datasets, dataset items, dataset runs, dataset run items, prompts, comments, annotation queues, models, media, and health.
+
+Agents such as Claude Cowork, Linear agents, or custom internal tools can investigate a production issue, pull the relevant observation, query metrics, leave a comment for the team, create a score, or stage a dataset item for regression testing, without leaving the chat.
+
+```json filename="MCP client config"
+{
+  "mcpServers": {
+    "langfuse": {
+      "url": "https://cloud.langfuse.com/api/public/mcp",
+      "transport": "streamableHttp",
+      "headers": {
+        "Authorization": "Basic <base64(LANGFUSE_PUBLIC_KEY:LANGFUSE_SECRET_KEY)>"
+      }
+    }
+  }
+}
+```
+
+To keep an agent read-only, allow-list the lookup tools and leave out the write tools.
+
+<Callout type="info">
+**Skill, CLI, or MCP?** Use the **Skill** to give a coding agent the full Langfuse playbook. Use the **CLI** when the agent can run bash and pre-filter data before it hits the context window. Use the **MCP server** when the agent can't run shell commands.
+</Callout>
+
+<Cards>
+  <Card title="MCP server setup" href="/docs/api-and-data-platform/features/mcp-server" />
+  <Card title="MCP tool reference" href="https://mcp.reference.langfuse.com" />
+</Cards>
+
+## Built to be fast for agents [#fast]
+
+Agents are impatient. They fan out many queries while working through a task, so slow responses waste both wall-clock time and tokens. Langfuse runs on [ClickHouse](/blog/joining-clickhouse), the columnar database built for fast analytical queries, which keeps reads quick even over hundreds of gigabytes of traces.
+
+**Full-text search via API.** The `matches` operator on [Observations API v2](/docs/api-and-data-platform/features/observations-api) gives agents token-based full-text search over trace inputs and outputs. In our benchmarks, a search that previously took 18 seconds and scanned 494 GB now returns in under half a second and reads less than a gigabyte. Your agent can pull the one trace where a refund failed out of millions of observations without scrolling.
+
+**A REST API that covers everything.** Every Langfuse feature has an endpoint, so an agent can read traces, write scores, manage prompts, and run dataset experiments programmatically. The [CLI](#cli) and [MCP server](#mcp) both build on this same API.
+
+## Docs built for agents [#docs]
+
+When an agent integrates Langfuse, it needs to find the right documentation fast and read it without wading through HTML.
+
+- **Markdown endpoints.** Any docs page is available as clean markdown. Append `.md` to the path or send an `Accept: text/markdown` header. Markdown pages are roughly 3 to 5 times smaller in tokens than the HTML equivalent.
+
+  ```bash
+  curl https://langfuse.com/docs/observability/overview.md
+  ```
+
+- **[llms.txt](https://langfuse.com/llms.txt).** A machine-readable index of every docs page, so an agent can orient itself before fetching anything.
+
+  ```bash
+  curl -s https://langfuse.com/llms.txt
+  ```
+
+- **Public docs search.** A RAG endpoint over all docs and indexed GitHub issues and discussions, no authentication required. Useful when the agent doesn't know which page to read.
+
+  ```bash
+  curl -s "https://langfuse.com/api/search-docs?query=How+do+I+trace+LangGraph+agents"
+  ```
+
+- **[Docs MCP server](/docs/docs-mcp).** The same docs search and page retrieval over MCP, for clients that prefer it.
+
+## Wire up evaluation gates [#evaluation]
+
+Once an agent can read and write Langfuse data, it can help you measure quality, not just ship code. A few things worth pointing your agent at:
+
+- **[LLM-as-a-judge calibration](/guides/llm-as-a-judge-calibration-skill).** Have your agent check whether your judge agrees with your human annotators, and report accuracy, F1, precision, and recall.
+- **[Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators).** Deterministic checks like JSON validity, schema conformance, or required tool arguments, written as a small function and scored automatically.
+- **[Experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd).** A [GitHub Action](https://github.com/langfuse/experiment-action) that runs your Langfuse experiments on every pull request and fails the build when scores drop below your threshold.
+
+## Resources [#resources]
+
+- [Will you be my CLI?](/blog/2026-02-13-will-you-be-my-cli) — the full story behind the agent skill, CLI, markdown endpoints, and MCP servers
+- [Building Langfuse's MCP server](/blog/2025-12-09-building-langfuse-mcp-server)
+- [Using agent skills to improve your prompts](/blog/2026-02-16-prompt-improvement-claude-skills)
+- [Evaluating AI agent skills](/blog/2026-02-26-evaluate-ai-agent-skills)
+- [Agent Skill docs](/docs/api-and-data-platform/features/agent-skill) · [CLI docs](/docs/api-and-data-platform/features/cli) · [MCP server docs](/docs/api-and-data-platform/features/mcp-server)
+- [Skills on GitHub](https://github.com/langfuse/skills) · [langfuse-cli on npm](https://www.npmjs.com/package/langfuse-cli) · [MCP reference](https://mcp.reference.langfuse.com)

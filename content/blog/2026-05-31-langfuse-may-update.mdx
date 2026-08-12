@@ -1,0 +1,109 @@
+---
+title: "Langfuse May Update"
+description: "Code Evaluators, full-text search, Langfuse MCP, Experiments in CI/CD and more"
+ogImage: /images/blog/2026-05-31-langfuse-may-update/code-evaluators.png
+tag: update
+date: 2026/05/31
+author: "Marc"
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Langfuse May Update"
+  description="Code Evaluators, full-text search, Langfuse MCP, Experiments in CI/CD and more"
+  authors={["marcklingen"]}
+  date="May 31, 2026"
+/>
+
+May was [Launch Week](/launch-week-5) month. From May 25–29, we shipped one feature a day, live from [ClickHouse OpenHouse](https://clickhouse.com/openhouse/san-francisco). Five drops aimed at the same problem: moving AI applications from prototype to production without the usual guesswork.
+
+Here's everything that landed.
+
+## Code Evaluators
+
+<Frame>
+  ![Code Evaluators](/images/blog/2026-05-31-langfuse-may-update/code-evaluators.png)
+</Frame>
+
+Not every check needs an LLM. You can now write a Python or TypeScript `evaluate` function directly in the Langfuse UI, attach it to live observations or a dataset experiment, and the result lands as a native Langfuse score. JSON parseability, schema validation, exact match, required tool arguments, custom business rules. Deterministic, reproducible, no token cost.
+
+Code evaluators sit alongside LLM-as-a-Judge: code wins for objective checks, the judge wins for semantic quality, together they give a more complete picture than either alone.
+
+→ [Changelog](/changelog/2026-05-28-code-evaluators) · [Docs](/docs/evaluation/evaluation-methods/code-evaluators) · [Self-hosting config](/self-hosting/configuration/code-evaluators)
+
+## New full-text search
+
+<Frame>
+  ![New full-text search](/images/blog/2026-05-31-langfuse-may-update/full-text-search.png)
+</Frame>
+
+Pulling one trace out of hundreds of thousands used to mean scroll-and-hope. Built on top of [ClickHouse's new FTS engine](https://clickhouse.com/blog/full-text-search-ga-release), large input/output searches that took 18 seconds and scanned 494 GB now return in under half a second and read less than a gigabyte.
+
+There's a new `matches` operator on [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) so agents and scripts get the same token-based search programmatically.
+
+→ [Changelog](/changelog/2026-05-27-clickhouse-full-text-search-fast-mode) · [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) · [ClickHouse FTS GA](https://clickhouse.com/blog/full-text-search-ga-release)
+
+## Langfuse MCP
+
+<Frame>
+  ![Langfuse MCP](/images/blog/2026-05-31-langfuse-may-update/mcp.png)
+</Frame>
+
+The hosted Langfuse MCP server used to cover prompt management only. It now covers most of Langfuse: 15 tool categories spanning observations, metrics, scores, score configs, datasets and their items and runs, comments, annotation queues, models, media, and health.
+
+Any agent can now investigate a production issue, pull the relevant observation, query metrics, drop a comment for the team, create a score, or stage a dataset item.
+
+Use the CLI when your agent has a sandbox, the MCP server when it doesn't, and allow-list lookup tools to keep it read-only.
+
+→ [Changelog](/changelog/2026-05-29-mcp-update) · [MCP reference](https://mcp.reference.langfuse.com/)
+
+## Experiments in CI/CD
+
+<Frame>
+  ![Experiments in CI/CD](/images/blog/2026-05-31-langfuse-may-update/experiments-ci-cd.png)
+</Frame>
+
+Run your Langfuse experiments inside GitHub Actions. We released a new action that tests every PR against a Langfuse dataset, fails the workflow when scores drop below the threshold you set, and posts the result back to the PR as a comment. Every run is tracked in Langfuse so you can dig into regressions later.
+
+→ [Changelog](/changelog/2026-05-25-experiment-ci-cd-gates) · [Docs](/docs/evaluation/experiments/experiments-ci-cd) · [GitHub Action](https://github.com/langfuse/experiment-action)
+
+## Agent Skill
+
+<Frame>
+  ![Agent Skill](/images/blog/2026-05-31-langfuse-may-update/agent-skill.png)
+</Frame>
+
+A playbook your AI coding agent can pick up. Drop it into Claude Code, Cursor, or Codex and the agent knows how to instrument an app, query traces, manage prompts, and set up evaluators.
+
+It also ships with an LLM-as-a-Judge calibration skill to produce a full analysis: accuracy, F1, precision, recall, cost, graphed in the Experiments view.
+
+→ [Changelog](/changelog/2026-05-26-langfuse-agent-skill) · [Docs](/docs/api-and-data-platform/features/agent-skill) · [Skills on GitHub](https://github.com/langfuse/skills)
+
+## Other ships
+
+- **Self-service Enterprise SSO setup.** Organization admins on Langfuse Cloud can now verify domains and configure Enterprise SSO directly in settings. → [Changelog](/changelog/2026-05-08-self-service-enterprise-sso-setup)
+- **Langfuse Academy.** An open explanation of the AI engineering lifecycle: tracing, monitoring, datasets, experiments, evaluation, and how the pieces fit together. → [Academy](/academy)
+- **Sign in with ClickHouse Cloud.** Use your ClickHouse Cloud account to sign in to Langfuse Cloud, or link it to an existing Langfuse account. → [Changelog](/changelog/2026-05-18-sign-in-with-clickhouse-cloud)
+- **Trace context on `/api/public/v2/observations`.** Fetch a trace's tags, release, and trace name directly on each observation row. → [Changelog](/changelog/2026-05-15-v2-observations-trace-context)
+- **Column selection and gzip for blob storage exports.** Pick which field groups land in each row, enable gzip compression in scheduled S3, GCS, and Azure exports. Shrink files and drop fields you don't need. → [Changelog](/changelog/2026-05-15-blob-storage-export-field-groups)
+- **Enriched observations by default.** New Cloud projects use enriched observations for blob storage, PostHog, and Mixpanel exports. The legacy traces/observations sources stay available on existing projects and self-hosted deployments. → [Changelog](/changelog/2026-05-20-blob-storage-enriched-default)
+
+## Fixes
+
+- Preserve trace URL filters when opening shared links in a new tab ([#13665](https://github.com/langfuse/langfuse/commit/9c825ad02))
+- Align prompt variable handling in the UI with the SDK/compiler ([#13680](https://github.com/langfuse/langfuse/commit/b207a95c0))
+- Use correct units for dashboard charts ([#13338](https://github.com/langfuse/langfuse/commit/da0e33909))
+- Render latency metrics in scaled units in custom dashboard widgets ([#13242](https://github.com/langfuse/langfuse/commit/c57b68e49))
+- Stop retrying eval context-overflow errors ([#13930](https://github.com/langfuse/langfuse/commit/b0481b4ae))
+- Handle Bedrock reasoning content in LLM completions ([#13527](https://github.com/langfuse/langfuse/commit/10c975805))
+- Recognize OpenInference cache-read/cache-write token counts via OTel ([#13572](https://github.com/langfuse/langfuse/commit/c04849802))
+- Saved views: don't override filters when query params are provided ([#13865](https://github.com/langfuse/langfuse/commit/1594b7cff))
+- Playground: make the tools list scrollable when more than 4 are attached ([#13439](https://github.com/langfuse/langfuse/commit/033616dda))
+- Include today in the Prompts table observation count window ([#13415](https://github.com/langfuse/langfuse/commit/8dd5d0a08))
+- Use the prompt's model config for experiments ([#13565](https://github.com/langfuse/langfuse/commit/eda3dc5c1))
+- Prevent image flicker on trace UI when image validation fails ([#13440](https://github.com/langfuse/langfuse/commit/25a0ec469))
+- Parse AI SDK tool calls that arrive as stringified JSON ([#13550](https://github.com/langfuse/langfuse/commit/c4f50a1e3))
+- and many more!
+
+That's a wrap on May. If you missed a drop, the [Launch Week page](/launch-week-5) has the demos for all five.

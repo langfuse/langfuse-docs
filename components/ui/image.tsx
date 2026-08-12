@@ -14,6 +14,7 @@ const OPTIMIZED_HOSTNAMES = [
   "static.langfuse.com",
   "langfuse.com",
   "github.com",
+  "raw.githubusercontent.com",
 ];
 
 function isOptimizable(src: string): boolean {

@@ -1,0 +1,64 @@
+---
+title: How do I upgrade to Langfuse v4?
+sidebarTitle: Upgrade to Langfuse v4
+description: Upgrade to Langfuse v4 by updating ingestion, migrating the v3 features you use, and completing the rollout for your deployment.
+tags: [platform]
+---
+
+# Upgrade to Langfuse v4
+
+Langfuse v4 uses an observations-first data model. The [v4 overview](/docs/v4) explains what changed. New managed projects already use v4 and need no migration.
+
+For existing projects, complete the applicable steps below.
+
+<a id="cloud-older-sdks"></a>
+<a id="cloud-current-sdks"></a>
+
+## 1. Upgrade trace ingestion [#ingestion]
+
+Move off legacy ingestion before the v4 cutover. Deprecated SDKs can delay data by up to 10 minutes.
+
+| Your setup                                                  | Do this                                                                                                  |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Python SDK below 4.7.0                                      | [Upgrade the Python SDK](/docs/observability/sdk/upgrade-path) to 4.7.0 or later.                        |
+| JS/TS SDK below 5.4.0                                       | [Upgrade the JS/TS SDK](/docs/observability/sdk/upgrade-path) to 5.4.0 or later.                         |
+| <a id="api-otel"></a>Custom REST or OpenTelemetry ingestion | [Migrate custom ingestion](/integrations/native/opentelemetry/migration-to-v4) to the v4 OTLP/HTTP path. |
+
+## 2. Migrate the v3 features you use [#features]
+
+Only follow the rows that apply to your project.
+
+| Check        | Do this                                                                                                                                                                  |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| APIs         | [Migrate deprecated API calls](/faq/all/deprecated-api-migration) to the supported Observations, Metrics, Scores, and Experiments APIs.                                  |
+| Evaluators   | [Move trace-level evaluators](/faq/all/llm-as-a-judge-migration) to observation targets and legacy-dataset evaluators to experiment targets.                             |
+| Exports      | [Switch blob storage exports](/docs/api-and-data-platform/features/export-to-blob-storage#upgrade-path) to enriched observations.                                        |
+| Integrations | Switch [PostHog](/integrations/analytics/posthog#migrate-export-source) and [Mixpanel](/integrations/analytics/mixpanel#migrate-export-source) to enriched observations. |
+
+## 3. Complete the rollout [#rollout]
+
+### Managed projects [#managed]
+
+The managed cutover date has not been announced. Follow the [v4 timeline](/docs/v4#timeline) for updates.
+
+If the sidebar still shows the **Langfuse v4 preview** toggle, enable it. Then open **Action required** to view the project checklist. Each category shows **Up to date**, **Not detected**, or the number of affected items.
+
+<Frame fullWidth>
+  ![The v4 migration panel showing outdated tracing instrumentation, one deprecated evaluator, and up-to-date API and integration checks](/images/docs/v4/migration-project-panel.png)
+</Frame>
+
+Select **Migration Status** to review organization-wide progress. The page shows the migrated-project count and each project's status, SDK, affected evaluators, APIs, exports, and latest trace.
+
+<Frame fullWidth>
+  ![The v4 migration status page showing one of two projects migrated and the affected features for the remaining project](/images/docs/v4/migration-status-page.png)
+</Frame>
+
+### Self-hosted deployments [#self-hosted]
+
+Self-hosted v4 is generally available. Follow the [v3 to v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4) to migrate your deployment; the `legacy` and `dual` write modes let you schedule each migration step independently.
+
+There is no forced cutover date. Langfuse v3 receives security patches through January 2027. The [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) lists supported SDKs and APIs.
+
+## Questions [#questions]
+
+Ask rollout and migration questions in the [v4 GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518); we use that thread for updates and answers.

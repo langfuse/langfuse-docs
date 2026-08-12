@@ -16,17 +16,17 @@ const AGENT_PROMPTS = [
   {
     label: "Tracing:",
     prompt:
-      "Install the Langfuse AI skill from github.com/langfuse/skills and use it to add tracing to this application with Langfuse following best practices.",
+      "Install the Langfuse Agent Skill from github.com/langfuse/skills and use it to add tracing to this application with Langfuse following best practices.",
   },
   {
     label: "Evals:",
     prompt:
-      "Install the Langfuse AI skill from github.com/langfuse/skills and use it to set up evals for this application with Langfuse. Guide me through choosing the right evaluation approach methods.",
+      "Install the Langfuse Agent Skill from github.com/langfuse/skills and use it to set up evals for this application with Langfuse. Guide me through choosing the right evaluation approach methods.",
   },
   {
     label: "Prompt Management:",
     prompt:
-      "Install the Langfuse AI skill from github.com/langfuse/skills and use it to migrate the prompts in this codebase to Langfuse.",
+      "Install the Langfuse Agent Skill from github.com/langfuse/skills and use it to migrate the prompts in this codebase to Langfuse.",
   },
 ];
 

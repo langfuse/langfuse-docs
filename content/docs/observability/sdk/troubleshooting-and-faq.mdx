@@ -26,6 +26,7 @@ If you cannot find your issue below, try [Ask AI](/docs/ask-ai), open a [GitHub 
 - Prefer context managers (`with langfuse.start_as_current_observation(...)`) to maintain OTEL context.
 - If using manual spans (`langfuse.start_observation()`), always call `.end()`.
 - In async code, rely on Langfuse helpers to avoid losing context across `await` boundaries.
+- If an observation references a parent that Langfuse never received, it is shown at the trace root instead of under its intended parent. This can happen when the parent was filtered out, dropped, or never sent, so make sure every referenced parent observation is actually exported.
 
 ## LangChain/OpenAI integration issues
 
@@ -38,4 +39,5 @@ If you cannot find your issue below, try [Ask AI](/docs/ask-ai), open a [GitHub 
 
 ## Missing traces with `@vercel/otel`
 
-- Use the manual OpenTelemetry setup via `NodeSDK` and register the `LangfuseSpanProcessor`. The `@vercel/otel` helper does not yet support the OpenTelemetry JS SDK v2 that Langfuse depends on. See the [TypeScript instrumentation docs](/docs/observability/sdk/instrumentation#framework-third-party-telemetry) for a full example.
+- Make sure you are on `@vercel/otel` v2 or later. Versions before v2 were built on the OpenTelemetry JS SDK v1 and could not pick up the `LangfuseSpanProcessor`, which is built on the OpenTelemetry JS SDK v2 ([vercel/otel#154](https://github.com/vercel/otel/issues/154)). With `@vercel/otel` v2+, `registerOTel({ spanProcessors: [new LangfuseSpanProcessor()] })` exports traces as expected.
+- Alternatively, use the manual OpenTelemetry setup via `NodeSDK` and register the `LangfuseSpanProcessor`. See the [TypeScript instrumentation docs](/docs/observability/sdk/instrumentation#framework-third-party-telemetry) for a full example.

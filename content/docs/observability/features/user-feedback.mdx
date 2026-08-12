@@ -46,7 +46,7 @@ Your backend sends the trace ID so frontend can link feedback to the trace.
 
 ```typescript
 // app/api/chat/route.ts
-import { getActiveTraceId } from "@Langfuse/tracing";
+import { getActiveTraceId } from "@langfuse/tracing";
 
 export const POST = observe(async (req: Request) => {
   const result = streamText({
@@ -61,21 +61,23 @@ export const POST = observe(async (req: Request) => {
 
 ### 2. Collect feedback in frontend
 
-Use Langfuse Web SDK to send feedback as a score.
+Use the Langfuse Browser SDK to send feedback as a score. The browser SDK only requires your public key; never expose a Langfuse secret key in frontend code.
 
 ```typescript
-import { LangfuseWeb } from "langfuse";
+import { LangfuseBrowserClient } from "@langfuse/browser";
 
-const langfuse = new LangfuseWeb({
-  publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY,
-  baseUrl: process.env.NEXT_PUBLIC_LANGFUSE_HOST,
+const langfuse = new LangfuseBrowserClient({
+  publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY!,
+  baseUrl: process.env.NEXT_PUBLIC_LANGFUSE_BASE_URL,
 });
 function FeedbackButtons({ messageId }: { messageId: string }) {
-  const handleFeedback = (value: number, comment?: string) => {
-    langfuse.score({
+  const handleFeedback = async (value: number, comment?: string) => {
+    await langfuse.score({
       traceId: messageId,
+      id: `user-feedback-${messageId}`,
       name: "user-feedback",
       value: value, // 1 for positive, 0 for negative
+      dataType: "BOOLEAN",
       comment: comment,
     });
   };
@@ -135,3 +137,7 @@ The [user-feedback example](https://github.com/langfuse/langfuse-examples/tree/m
 - OpenTelemetry tracing
 - Thumbs up/down with optional comments
 - Session tracking across conversations
+
+## Related
+
+For an end-to-end walkthrough, from choosing signals to acting on them, see the guide on [how to set up a user feedback loop](/guides/user-feedback-loop).

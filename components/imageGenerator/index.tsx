@@ -6,35 +6,22 @@ import { cn } from "@/lib/utils";
 import { Loader } from "@/components/ai-elements/loader";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 import { Image as AiImage } from "@/components/ai-elements/image";
-import { LangfuseWeb } from "langfuse";
 import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId";
+import { scoreDemoFeedback } from "@/components/demoLangfuseBrowserClients";
 import {
   SendIcon,
   DownloadIcon,
   ThumbsUpIcon,
   ThumbsDownIcon,
 } from "lucide-react";
-
-const eulangfuseWebClient = new LangfuseWeb({
-  baseUrl: process.env.NEXT_PUBLIC_EU_LANGFUSE_BASE_URL,
-  publicKey: process.env.NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY,
-});
-
-const usLangfuseWebClient = new LangfuseWeb({
-  publicKey: process.env.NEXT_PUBLIC_US_LANGFUSE_PUBLIC_KEY,
-  baseUrl: process.env.NEXT_PUBLIC_US_LANGFUSE_BASE_URL,
-});
-
-const jpLangfuseWebClient = new LangfuseWeb({
-  publicKey: process.env.NEXT_PUBLIC_JP_LANGFUSE_PUBLIC_KEY,
-  baseUrl: process.env.NEXT_PUBLIC_JP_LANGFUSE_BASE_URL,
-});
+import { DemoTraceLink } from "@/components/demoTraceLink";
 
 type GeneratedImage = {
   base64: string;
   mediaType: string;
   prompt: string;
   traceId: string;
+  traceUrl?: string;
 };
 
 const EXAMPLE_PROMPTS = [
@@ -95,6 +82,7 @@ export const ImageGenerator = ({
         mediaType: data.image.mediaType,
         prompt: textPrompt,
         traceId: data.traceId,
+        traceUrl: data.traceUrl,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -119,18 +107,12 @@ export const ImageGenerator = ({
   const handleFeedback = (value: number) => {
     if (!currentImage) return;
     setFeedback(value);
-    for (const client of [
-      eulangfuseWebClient,
-      usLangfuseWebClient,
-      jpLangfuseWebClient,
-    ]) {
-      client.score({
-        traceId: currentImage.traceId,
-        id: `user-feedback-${currentImage.traceId}`,
-        name: "user-feedback",
-        value,
-      });
-    }
+    scoreDemoFeedback({
+      traceId: currentImage.traceId,
+      id: `user-feedback-${currentImage.traceId}`,
+      name: "user-feedback",
+      value,
+    });
   };
 
   return (
@@ -216,7 +198,14 @@ export const ImageGenerator = ({
                   mediaType={currentImage.mediaType}
                   uint8Array={new Uint8Array()}
                   alt={currentImage.prompt}
-                  className="max-w-md rounded-[2px] border border-line-structure"
+                  className="max-w-xs rounded-[2px] border border-line-structure"
+                />
+              </div>
+
+              <div className="flex justify-center">
+                <DemoTraceLink
+                  traceUrl={currentImage.traceUrl}
+                  source="image_generator"
                 />
               </div>
 

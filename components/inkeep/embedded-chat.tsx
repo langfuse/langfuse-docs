@@ -100,7 +100,14 @@ function useAutoScroll(
 }
 
 function InkeepSharedChat() {
-  const { baseSettings, aiChatSettings } = useInkeepSettings();
+  const settings = useInkeepSettings();
+
+  if (!settings) {
+    return null;
+  }
+
+  const { baseSettings, aiChatSettings } = settings;
+
   return (
     <div className="border border-line-structure overflow-hidden flex flex-col h-[min(600px,70vh)]">
       <InkeepEmbeddedChatLazy

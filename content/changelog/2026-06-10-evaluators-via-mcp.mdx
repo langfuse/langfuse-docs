@@ -1,0 +1,77 @@
+---
+date: 2026-06-10
+title: Manage evaluators via MCP
+description: Set up evaluators and evaluation rules from AI agents through the Langfuse MCP server, and create code evaluators through the unstable public API.
+author: Tobias Wochinger
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, Code, FileCode } from "lucide-react";
+
+<ChangelogHeader />
+
+You can now set up and manage evaluation directly from AI agents: the Langfuse MCP server exposes evaluators and evaluation rules as tools, and the unstable public API now supports [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) in addition to LLM-as-a-Judge.
+
+This lets agents own more of the evaluation loop. For example, an agent can inspect failing traces, write a code evaluator that catches the failure pattern, and wire up an evaluation rule that runs it on live observations — all without leaving the chat.
+
+## New MCP tools
+
+<table className="[&_code]:rounded-full [&_code]:border [&_code]:border-border [&_code]:bg-muted [&_code]:px-2 [&_code]:py-1 [&_code]:text-muted-foreground">
+  <tbody>
+    <tr>
+      <td className="px-3">
+        <strong>Evaluators</strong>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 leading-3">
+          <code>listEvaluators</code>
+          <code>getEvaluator</code>
+          <code>createEvaluator</code>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td className="px-3">
+        <strong>Evaluation rules</strong>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 leading-3">
+          <code>listEvaluationRules</code>
+          <code>getEvaluationRule</code>
+          <code>createEvaluationRule</code>
+          <code>updateEvaluationRule</code>
+          <code>deleteEvaluationRule</code>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+## Code evaluators in the API
+
+The unstable evaluator endpoints now accept `type: "code"` to create deterministic Python or TypeScript evaluators programmatically, alongside the existing `llm_as_judge` type. Evaluation rules can reference code evaluators, and active rules are test-run before creation so broken evaluator code is rejected upfront.
+
+<Callout type="info">
+  These endpoints and MCP tools are **unstable** and may change while the
+  underlying evaluation data model is being redesigned. The UI workflow remains
+  fully supported.
+</Callout>
+
+## Get started
+
+<Cards num={3}>
+  <Card
+    title="MCP server documentation"
+    href="/docs/api-and-data-platform/features/mcp-server"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Code evaluators"
+    href="/docs/evaluation/evaluation-methods/code-evaluators"
+    icon={<FileCode />}
+    arrow
+  />
+  <Card
+    title="Evaluators API reference"
+    href="https://api.reference.langfuse.com/#tag/unstableevaluators"
+    icon={<Code />}
+    arrow
+  />
+</Cards>

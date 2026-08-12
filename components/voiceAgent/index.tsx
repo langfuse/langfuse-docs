@@ -5,6 +5,8 @@ import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 import { Loader } from "@/components/ai-elements/loader";
 import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { MicIcon, MicOffIcon, PhoneOffIcon } from "lucide-react";
 
 type AgentState =
@@ -22,6 +24,7 @@ type VoiceAgentProps = HTMLAttributes<HTMLDivElement>;
 export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
   const [agentState, setAgentState] = useState<AgentState>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [storeAudio, setStoreAudio] = useState(true);
   const [transcripts, setTranscripts] = useState<
     { role: "user" | "assistant"; text: string }[]
   >([]);
@@ -48,7 +51,7 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
       const res = await fetch("/api/voice-agent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({ userId, storeAudio }),
       });
 
       if (!res.ok) {
@@ -263,6 +266,25 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
               {error && agentState === "error" && (
                 <p className="text-xs text-destructive mb-4">{error}</p>
               )}
+
+              {/* Store-audio toggle (applies when the next conversation starts) */}
+              <div className="flex items-center gap-2 mb-4">
+                <Switch
+                  id="voice-agent-store-audio"
+                  checked={storeAudio}
+                  onCheckedChange={setStoreAudio}
+                  disabled={isActive}
+                />
+                <Label
+                  htmlFor="voice-agent-store-audio"
+                  className={cn(
+                    "text-xs font-normal text-muted-foreground cursor-pointer",
+                    isActive && "cursor-not-allowed opacity-70",
+                  )}
+                >
+                  Store audio recording on the trace
+                </Label>
+              </div>
 
               {/* Transcripts */}
               {transcripts.length > 0 && (

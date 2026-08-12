@@ -437,7 +437,7 @@
 /* Sidebar active link */
 #nd-docs-layout #nd-sidebar [data-active="true"],
 #nd-sidebar-mobile [data-active="true"] {
-  color: hsl(var(--text-primary)) !important;
+  color: var(--text-primary) !important;
   font-weight: 580 !important;
   background-color: transparent !important;
 }
@@ -928,6 +928,17 @@ ul[data-gh-discussions-list] {
   background: var(--surface-2);
   color: var(--text-primary);
   font-variant-numeric: ordinal;
+  font-variant-ligatures: none;
+  font-feature-settings:
+    "liga" 0,
+    "calt" 0;
+  padding: 0 0.25rem;
+}
+
+.prose
+  table
+  :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  line-height: 1.5rem;
 }
 
 /* Links whose primary label is inline <code> (e.g. [`api()`](/ref)): underline
@@ -1069,6 +1080,12 @@ svg .edgeLabel {
   counter-increment: step;
   position: relative;
 }
+
+/* .fd-step blocks already increment the step counter via fumadocs' own CSS;
+   only add positioning here to avoid double counting. */
+.fd-steps > .fd-step {
+  position: relative;
+}
 .fd-steps > h2:first-child,
 .fd-steps > h3:first-child,
 .steps > h2:first-child,
@@ -1077,6 +1094,7 @@ svg .edgeLabel {
 }
 .fd-steps > h2::before,
 .fd-steps > h3::before,
+.fd-steps > .fd-step::before,
 .steps > h2::before,
 .steps > h3::before {
   content: counter(step);
@@ -1090,10 +1108,34 @@ svg .edgeLabel {
   width: 1.75rem;
   height: 1.75rem;
   background-color: var(--surface-bg);
-  color: hsl(var(--text-primary));
+  color: var(--text-primary);
   font-size: 0.875rem;
   font-weight: 400;
   border: 1px solid var(--line-structure);
+}
+
+/* Step blocks (non-heading steps): align the numbered square with the first
+   text line instead of the block center, and neutralize fumadocs' default
+   step marker so the square matches the heading-based steps exactly. */
+.fd-steps > .fd-step::before {
+  top: 0.875rem;
+  border-radius: 0;
+}
+.fd-steps > .fd-step {
+  padding-left: 0;
+}
+/* Step title line: a first paragraph containing only bold text renders like
+   the heading-based step titles (see .fd-steps > h3 typography). */
+.fd-steps > .fd-step > p:first-child:has(> strong:only-child) {
+  margin-top: 0;
+  margin-bottom: 0.65625rem;
+}
+.fd-steps > .fd-step > p:first-child > strong:only-child {
+  display: block;
+  font-size: 1.09375rem;
+  font-weight: 500;
+  line-height: 1.75rem;
+  color: var(--text-primary);
 }
 
 /* frame decoration */
@@ -1203,4 +1245,19 @@ inkeep-portal .inkeep-widget-vars {
   --ikp-font-family-heading: var(--font-sans);
   --ikp-font-family-body: var(--font-sans);
   --ikp-font-family-mono: var(--font-mono);
+}
+
+/*
+ * Blockquote callouts: disable the automatic typographic quotation marks.
+ * fumadocs-ui's prose typography (css/dist/style.css) styles `.prose blockquote`
+ * with `quotes: "\201C""\201D""\2018""\2019"` and injects them via
+ * `content: open-quote` / `content: close-quote` on the first/last paragraph.
+ * We use blockquotes as plain callout boxes, so the marks are unwanted.
+ */
+.prose blockquote {
+  quotes: none;
+}
+.prose blockquote p:first-of-type::before,
+.prose blockquote p:last-of-type::after {
+  content: none;
 }

@@ -13,7 +13,7 @@ This cookbook demonstrates how to use [Langfuse](https://langfuse.com) to gain r
 
 > **What is Haystack?** [Haystack](https://haystack.deepset.ai/) is the open-source Python framework developed by deepset. Its modular design allows users to implement custom pipelines to build production-ready LLM applications, like retrieval-augmented generative pipelines and state-of-the-art search systems. It integrates with Hugging Face Transformers, Elasticsearch, OpenSearch, OpenAI, Cohere, Anthropic and others, making it an extremely popular framework for teams of all sizes.
 
-> **What is Langfuse?** [Langfuse](https://langfuse.com) is the open source LLM engineering platform. It helps teams to collaboratively manage prompts, trace applications, debug problems, and evaluate their LLM system in production.
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is the open source AI engineering platform. It helps teams to collaboratively manage prompts, trace applications, debug problems, and evaluate their LLM system in production.
 
 ## Get Started
 
@@ -34,14 +34,14 @@ Configure your Langfuse API keys. You can get them by signing up for [Langfuse C
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your openai and serperdev api key
-os.environ["OPENAI_API_KEY"] = "sk-proj-..."
-os.environ["SERPERDEV_API_KEY"] = "..."
+os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...");
+os.environ.setdefault("SERPERDEV_API_KEY", "...");
 ```
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.

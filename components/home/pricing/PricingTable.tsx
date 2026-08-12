@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/hover-card";
 import { TrustedBy } from "../components/TrustedBy";
 import { trustedByData } from "@/data/trusted-by";
-import Image from "next/image";
+import { isCloudAppHref } from "@/lib/google-ads";
 
 // Reusable graduated pricing text with calculator link
 const GraduatedPricingText = () => {
@@ -160,7 +160,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Data retention management",
         "Unlimited annotation queues",
         "High rate limits",
-        "SOC2 & ISO27001 reports, BAA available (HIPAA)",
+        "SOC2 & ISO27001 reports, HIPAA-ready region",
         "Prioritized in-app support",
       ],
       addOn: {
@@ -178,7 +178,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
     {
       name: "Enterprise",
       id: "tier-enterprise",
-      href: "/talk-to-us",
+      href: "/talk-to-us?deployment=cloud",
       featured: false,
       description:
         "For large scale teams. Enterprise-grade support and security.",
@@ -234,25 +234,10 @@ const tiers: Record<DeploymentOption, Tier[]> = {
     {
       name: "Enterprise",
       id: "tier-self-hosted-enterprise",
-      href: "https://langfuse.app.n8n.cloud/form/edaa0e7f-0244-4b3e-92d6-870179e066f2",
+      href: "/talk-to-us?deployment=self-hosted",
       featured: false,
-      pillClassName: "bg-[#FAFF6A] text-[#1A1A1A]",
       description:
         "Dedicated Langfuse deployment with enterprise capabilities and support.",
-      pill: (
-        <>
-          <span className="inline-flex rounded-sm p-0.5">
-            <Image
-              src="/images/logos/clickhouse_icon.svg"
-              alt=""
-              width={14}
-              height={14}
-              className="size-3.5 rounded-[2px]"
-            />
-          </span>
-          ClickHouse Cloud / BYOC / Private
-        </>
-      ),
       price: "Custom Pricing",
       mainFeatures: [
         "All Open Source features plus management APIs, project-level RBAC, data retention policies, and audit logs",
@@ -472,6 +457,21 @@ const sections: Section[] = [
     ],
   },
   {
+    name: "Langfuse AI",
+    features: [
+      {
+        name: "Langfuse Assistant (in-app agent)",
+        description:
+          "In-product AI assistant to explore your Langfuse project data and take selected actions with your approval. Available on Langfuse Cloud only.",
+        href: "/docs/langfuse-assistant",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": false, Enterprise: false },
+        },
+      },
+    ],
+  },
+  {
     name: "Prompt Management",
     href: "/docs/prompt-management/get-started",
     features: [
@@ -667,6 +667,38 @@ const sections: Section[] = [
     ],
   },
   {
+    name: "Metrics",
+    href: "/docs/metrics/overview",
+    features: [
+      {
+        name: "Custom Dashboards",
+        href: "/docs/metrics/features/custom-dashboards",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
+        },
+      },
+      {
+        name: "Alerts",
+        description:
+          "Threshold-based alerts on your LLM application metrics with notifications via Slack, webhooks, and GitHub Actions. Alert limits per organization on Langfuse Cloud depend on the plan. Self-hosted deployments require Langfuse v4 and have no alert limit.",
+        href: "/docs/metrics/features/alerts",
+        tiers: {
+          cloud: {
+            Hobby: "2 alerts",
+            Core: "20 alerts",
+            Pro: "50 alerts",
+            Enterprise: "100 alerts",
+          },
+          selfHosted: {
+            "Open Source": "Langfuse v4+",
+            Enterprise: "Langfuse v4+",
+          },
+        },
+      },
+    ],
+  },
+  {
     name: "Collaboration",
     features: [
       {
@@ -713,7 +745,19 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Rate limit (general API routes)",
+        name: "Metrics & Observations APIs (v2)",
+        description:
+          "High-performance v2 endpoints for aggregate metrics and row-level observation data. On self-hosted deployments, these APIs require Langfuse v4.",
+        href: "/docs/metrics/features/metrics-api#v2",
+        tiers: {
+          selfHosted: {
+            "Open Source": "Langfuse v4+",
+            Enterprise: "Langfuse v4+",
+          },
+        },
+      },
+      {
+        name: "Rate limit (General API)",
         href: "/faq/all/api-limits",
         tiers: {
           cloud: {
@@ -725,7 +769,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Rate limit (datasets api)",
+        name: "Rate limit (Datasets API)",
         href: "/faq/all/api-limits",
         tiers: {
           cloud: {
@@ -737,13 +781,39 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Rate limit (metrics api)",
+        name: "Rate limit (Metrics API v2)",
         href: "/faq/all/api-limits",
         tiers: {
           cloud: {
             Hobby: "100 requests / day",
-            Core: "200 requests / day",
-            Pro: "2000 requests / day",
+            Core: "100 requests / hour",
+            Pro: "500 requests / hour",
+            Enterprise: "Custom",
+          },
+        },
+      },
+      {
+        name: "Rate limit (Observations API v2)",
+        description:
+          "The v2 Observations API counts toward the general API rate-limit bucket.",
+        href: "/faq/all/api-limits",
+        tiers: {
+          cloud: {
+            Hobby: "30 requests / min",
+            Core: "100 requests / min",
+            Pro: "1,000 requests / min",
+            Enterprise: "Custom",
+          },
+        },
+      },
+      {
+        name: "Rate limit (Legacy Metrics API)",
+        href: "/faq/all/api-limits",
+        tiers: {
+          cloud: {
+            Hobby: "100 requests / day",
+            Core: "2,000 requests / day",
+            Pro: "2,000 requests / day",
             Enterprise: "Custom",
           },
         },
@@ -1015,8 +1085,22 @@ const sections: Section[] = [
           cloud: {
             Hobby: "US, EU, or JP",
             Core: "US, EU, or JP",
-            Pro: "US, EU, or JP",
+            Pro: "US, EU, JP, or HIPAA",
             Enterprise: "US, EU, JP, or HIPAA",
+          },
+        },
+      },
+      {
+        name: "AWS PrivateLink",
+        href: "/security/networking",
+        description:
+          "Available for Enterprise customers with a committed contract; subject to regional availability.",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: true,
           },
         },
       },
@@ -1248,7 +1332,7 @@ const sections: Section[] = [
       },
       {
         name: "Data processing agreement (GDPR)",
-        href: "/security/dpa",
+        href: "/dpa",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
         },
@@ -1267,7 +1351,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "HIPAA compliance",
+        name: "HIPAA-ready region",
         href: "/security/hipaa",
         tiers: {
           cloud: {
@@ -1463,6 +1547,9 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                       variant={tier.featured ? "primary" : "secondary"}
                       size="default"
                       href={tier.href}
+                      {...(isCloudAppHref(tier.href)
+                        ? { "data-launch-app-cta": "" }
+                        : {})}
                       wrapperClassName="flex-1"
                       className={cn(
                         "justify-center!",
@@ -1487,6 +1574,9 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                     variant={tier.featured ? "primary" : "secondary"}
                     size="default"
                     href={tier.href}
+                    {...(isCloudAppHref(tier.href)
+                      ? { "data-launch-app-cta": "" }
+                      : {})}
                     className={cn(
                       "justify-center!",
                       !tier.featured &&

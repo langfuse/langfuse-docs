@@ -3,6 +3,7 @@ source: ⚠️ Jupyter Notebook
 title: Integrate X.ai (Grok) with Langfuse
 sidebarTitle: xAI Grok
 logo: /images/integrations/xai_icon.svg
+logoAppearance: dark
 description: Guide on integrating xAI's Grok models with Langfuse for observability.
 category: Integrations
 ---
@@ -13,7 +14,7 @@ This guide shows you how to integrate Grok with Langfuse using the OpenAI SDK.
 
 > **What is Grok?** Grok is X.ai’s advanced AI platform that streamlines natural language processing for intelligent application integration. Learn more at [Grok Documentation](https://docs.x.ai/docs).
 
-> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source LLM engineering platform that helps teams trace API calls, monitor performance, and debug issues in their AI applications.
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source AI engineering platform that helps teams trace API calls, monitor performance, and debug issues in their LLM applications.
 
 <Steps>
 ## Step 1: Install Dependencies
@@ -32,14 +33,14 @@ import os
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
 
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 
 # Get your Grok API key from your Grok account settings
-os.environ["GROK_API_KEY"] = "xai-..."
+os.environ.setdefault("GROK_API_KEY", "xai-...");
 ```
 
 ## Step 3: Use Grok with the OpenAI SDK
@@ -83,7 +84,7 @@ You can enhance your Grok traces:
 - Use [Langfuse Prompt Management](https://langfuse.com/docs/prompts/get-started) and link prompts to traces
 - Add [score](https://langfuse.com/docs/scores/custom) to traces
 
-Visit the [OpenAI SDK cookbook](https://langfuse.com/guides/cookbook/integration_openai_sdk) to see more examples on passing additional parameters.
+Visit the [OpenAI SDK integration docs](/integrations/model-providers/openai-py#custom-trace-properties) to see more examples on passing additional parameters.
 Find out more about Langfuse Evaluations and Prompt Management in the [Langfuse documentation](https://langfuse.com/docs).
 
 ## Step 6: See Traces in Langfuse

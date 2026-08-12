@@ -1,0 +1,64 @@
+---
+date: 2026-05-26
+badge: Launch Week 5 🚀
+title: Langfuse agent skill
+description: Your agent's playbook for production-ready LLM apps
+author: Lotte, Marlies
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import AutoInstall from "@/components-mdx/get-started/auto-install.mdx";
+
+<ChangelogHeader />
+
+<Video
+  src="https://static.langfuse.com/docs-videos/agent-skills-launch.mp4"
+  aspectRatio={16 / 9}
+/>
+
+We're releasing our [Langfuse skill](/docs/api-and-data-platform/features/agent-skill) to give AI coding agents the expertise to leverage Langfuse for robust observability and evaluation workflows. It follows the open [Agent Skills](https://github.com/anthropics/skills) standard and works with Claude Code, Cursor, Codex, and others.
+
+## What are skills and why do they work?
+
+Skills are focused bundles of instructions, scripts, and resources that agents load only when relevant. They encode proven practices for observability and evaluation while keeping context lean.
+
+## Why use skills?
+
+Skills turn Langfuse into a headless platform you control through natural language. You describe the job, and your agent follows a research-backed playbook in your editor. Ask your agent to:
+
+- Show me the last 10 traces with a score below 0.5. Create a dataset called "edge-cases" and add these traces to it.
+- Migrate the system prompt in src/agent.ts to Langfuse prompt management.
+- My human annotators identified five recurring error cases. Help me set up an evaluator for each.
+
+The skill makes coding agents more effective at working with Langfuse. To illustrate this, here is an example of how an agent instruments the same application without vs. with the skill:
+
+<div className="grid grid-cols-1 md:grid-cols-2 mt-4 gap-4">
+
+<Frame>
+  ![Trace produced without the Langfuse skill](/images/changelog/2026-05-26-langfuse-agent-skill/trace-without-skill.png)
+</Frame>
+
+<Frame>
+  ![Trace produced with the Langfuse skill](/images/changelog/2026-05-26-langfuse-agent-skill/trace-with-skill.png)
+</Frame>
+
+</div>
+
+<ManualGuideCallout
+  href="/guides/llm-as-a-judge-calibration-skill"
+  topic="LLM-as-a-judge calibration"
+  lede="One specific use case we added to the skill is the judge calibration workflow. Given a ground-truth dataset, it will check whether your LLM-as-a-Judge behaves the way you'd expect, and iterate until it does."
+/>
+
+## Installation
+
+<AutoInstall />
+
+The `langfuse/skills` repository is open source, and contributions are welcome.
+
+## Learn more
+
+- [Langfuse CLI](/docs/api-and-data-platform/features/cli) — the CLI the skill uses under the hood
+- [Making agents fall in love with Langfuse](/blog/2026-02-13-will-you-be-my-cli) — the full story behind the skill, CLI, and agent platform
+- [Prompt iteration](/blog/2026-02-16-prompt-improvement-claude-skills) — analyze feedback and iteratively improve prompts
+- [Error analysis](/blog/2025-11-12-evals) — systematically evaluate and debug LLM applications

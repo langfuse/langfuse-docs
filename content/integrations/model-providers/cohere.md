@@ -12,7 +12,7 @@ This guide shows you how to integrate Cohere with Langfuse using the OpenAI SDK 
 
 > **What is Cohere?** [Cohere](https://docs.cohere.com/docs/) is an AI platform that provides state-of-the-art language models via API, allowing developers to build applications with natural language understanding capabilities.
 
-> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source LLM engineering platform for tracing, monitoring, and debugging LLM applications.
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source AI engineering platform for tracing, monitoring, and debugging LLM applications.
 
 ## Step 1: Install Dependencies
 
@@ -30,13 +30,13 @@ import os
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
 
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf..."
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf..."
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf...");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf...");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Set your Cohere API key from your Cohere account settings
-os.environ["COHERE_API_KEY"] = "..."
+os.environ.setdefault("COHERE_API_KEY", "...");
 ```
 
 ## Step 3: Use Cohere with the OpenAI SDK

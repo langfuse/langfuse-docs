@@ -8,17 +8,17 @@ description: Native Model Context Protocol (MCP) server for Langfuse, enabling A
 
 Langfuse includes a native [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server that enables AI assistants and agents to interact with your Langfuse data programmatically.
 
-Currently, the MCP server is available for [Prompt Management](/docs/prompt-management/overview) and will be extended to the rest of the Langfuse data platform in the future. If you have feedback or ideas for new tools, please [share them on GitHub](https://github.com/orgs/langfuse/discussions/10605).
+If you have feedback or ideas for new tools, please [share them on GitHub](https://github.com/orgs/langfuse/discussions/10605).
 
 <Callout type="info">
 
-This is the authenticated MCP server for the Langfuse data platform. There is also a public MCP server for the Langfuse documentation ([docs](/docs/docs-mcp)).
+If you are running AI agents in an environment where you can install CLI tools and run bash commands, we recommend using the [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill) instead of the MCP server.
 
 </Callout>
 
 <Callout type="info">
 
-Alternatively you can also work with the [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill). Many use cases that aren't supported by the MCP server can be achieved using the skill.
+This is the authenticated MCP server for the Langfuse data platform. There is also a public MCP server for the Langfuse documentation ([docs](/docs/docs-mcp)).
 
 </Callout>
 
@@ -65,6 +65,10 @@ The Langfuse MCP server uses a stateless architecture where each API key is scop
 - Endpoint: `https://your-domain.com/api/public/mcp`
 - Transport: `streamableHttp`
 - Authentication: Basic Auth via authorization header
+- For reverse-proxy deployments, make sure the proxy preserves the public `Host`
+  header. If the MCP endpoint receives an internal host instead, set
+  `LANGFUSE_MCP_ALLOWED_HOSTS` to a comma-separated list of exact additional
+  hostnames or origins accepted by the MCP endpoint. Otherwise, you get a `403` error.
 
 </Tab>
 
@@ -81,9 +85,19 @@ The [MCP Reference](https://mcp.reference.langfuse.com) is the canonical source 
 <Callout type="warning">
   **Both read and write tools are available by default.** If you only want to
   use read-only tools, configure your MCP client with an allowlist to restrict
-  access to write operations (`createTextPrompt`, `createChatPrompt`,
-  `updatePromptLabels`).
+  access to write operations. For a full list of tools, see the [MCP Reference](https://mcp.reference.langfuse.com).
 </Callout>
+
+## Filter logical root observations [#logical-root-observations]
+
+The observation tools distinguish logical roots from physical parentage:
+
+- `listObservations` accepts the optional boolean `isRootObservation` filter. Set it to `true` to match observations without a physical parent or observations explicitly marked as application roots by the SDK.
+- Physical-parent filtering remains separate. An application-root observation can match `isRootObservation: true` even when it has a physical parent.
+- `isRootObservation` is included in the default observation fields returned by `listObservations`.
+- `getObservationFilterValues` supports `isRootObservation` as a filter-value column, so you can discover and combine logical-root values with other observation filters.
+
+For the complete tool schemas and request examples, see the [MCP Reference](https://mcp.reference.langfuse.com).
 
 ## Set up [#set-up]
 
@@ -101,7 +115,7 @@ The [MCP Reference](https://mcp.reference.langfuse.com) is the canonical source 
 
 ### Client Setup
 
-<Tabs items={["Claude Code", "Cursor", "Other MCP Clients"]}>
+<Tabs items={["Claude Code", "Codex", "Cursor", "Pi Agent", "Other MCP Clients"]}>
 
 <Tab>
 
@@ -134,6 +148,64 @@ The [MCP Reference](https://mcp.reference.langfuse.com) is the canonical source 
    ```
 
 2. Verify the connection by asking Claude Code to `list all prompts in the project`. Claude Code should use the `listPrompts` tool to return the list of prompts.
+
+</Tab>
+
+<Tab>
+
+1. Add the Langfuse MCP server to `~/.codex/config.toml`, replace `{your-base64-token}` with your encoded credentials:
+
+<Tabs items={["Cloud EU", "Cloud US", "Cloud Japan", "HIPAA US", "Self-Hosted"]}>
+
+<Tab>
+
+```toml filename="~/.codex/config.toml" /{your-base64-token}/
+[mcp_servers.langfuse]
+url = "https://cloud.langfuse.com/api/public/mcp"
+http_headers = { "Authorization" = "Basic {your-base64-token}" }
+```
+
+</Tab>
+<Tab>
+
+```toml filename="~/.codex/config.toml" /{your-base64-token}/
+[mcp_servers.langfuse]
+url = "https://us.cloud.langfuse.com/api/public/mcp"
+http_headers = { "Authorization" = "Basic {your-base64-token}" }
+```
+
+</Tab>
+<Tab>
+
+```toml filename="~/.codex/config.toml" /{your-base64-token}/
+[mcp_servers.langfuse]
+url = "https://jp.cloud.langfuse.com/api/public/mcp"
+http_headers = { "Authorization" = "Basic {your-base64-token}" }
+```
+
+</Tab>
+<Tab>
+
+```toml filename="~/.codex/config.toml" /{your-base64-token}/
+[mcp_servers.langfuse]
+url = "https://hipaa.cloud.langfuse.com/api/public/mcp"
+http_headers = { "Authorization" = "Basic {your-base64-token}" }
+```
+
+</Tab>
+<Tab>
+
+```toml filename="~/.codex/config.toml" /{your-base64-token}/
+[mcp_servers.langfuse]
+url = "https://your-domain.com/api/public/mcp"
+http_headers = { "Authorization" = "Basic {your-base64-token}" }
+```
+
+</Tab>
+</Tabs>
+
+2. Restart Codex and run `codex mcp list` to confirm the server is registered.
+3. Verify the connection by asking Codex to `list all prompts in the project`. Codex should use the `listPrompts` tool to return the list of prompts.
 
 </Tab>
 
@@ -245,6 +317,106 @@ The [MCP Reference](https://mcp.reference.langfuse.com) is the canonical source 
 
 <Tab>
 
+[Pi](https://pi.dev) does not ship with built-in MCP support. Use the community-maintained [`pi-mcp-adapter`](https://github.com/nicobailon/pi-mcp-adapter) extension, which exposes MCP servers to Pi through a single proxy tool.
+
+1. Install the extension and restart Pi:
+
+   ```bash
+   pi install npm:pi-mcp-adapter
+   ```
+
+2. Add the Langfuse MCP server to `~/.pi/agent/mcp.json`, replace `{your-base64-token}` with your encoded credentials:
+
+<Tabs items={["Cloud EU", "Cloud US", "Cloud Japan", "HIPAA US", "Self-Hosted"]}>
+
+<Tab>
+
+```json filename="~/.pi/agent/mcp.json" /{your-base64-token}/
+{
+  "mcpServers": {
+    "langfuse": {
+      "url": "https://cloud.langfuse.com/api/public/mcp",
+      "headers": {
+        "Authorization": "Basic {your-base64-token}"
+      }
+    }
+  }
+}
+```
+
+</Tab>
+<Tab>
+
+```json filename="~/.pi/agent/mcp.json" /{your-base64-token}/
+{
+  "mcpServers": {
+    "langfuse": {
+      "url": "https://us.cloud.langfuse.com/api/public/mcp",
+      "headers": {
+        "Authorization": "Basic {your-base64-token}"
+      }
+    }
+  }
+}
+```
+
+</Tab>
+<Tab>
+
+```json filename="~/.pi/agent/mcp.json" /{your-base64-token}/
+{
+  "mcpServers": {
+    "langfuse": {
+      "url": "https://jp.cloud.langfuse.com/api/public/mcp",
+      "headers": {
+        "Authorization": "Basic {your-base64-token}"
+      }
+    }
+  }
+}
+```
+
+</Tab>
+<Tab>
+
+```json filename="~/.pi/agent/mcp.json" /{your-base64-token}/
+{
+  "mcpServers": {
+    "langfuse": {
+      "url": "https://hipaa.cloud.langfuse.com/api/public/mcp",
+      "headers": {
+        "Authorization": "Basic {your-base64-token}"
+      }
+    }
+  }
+}
+```
+
+</Tab>
+<Tab>
+
+```json filename="~/.pi/agent/mcp.json" /{your-base64-token}/
+{
+  "mcpServers": {
+    "langfuse": {
+      "url": "https://your-domain.com/api/public/mcp",
+      "headers": {
+        "Authorization": "Basic {your-base64-token}"
+      }
+    }
+  }
+}
+```
+
+</Tab>
+</Tabs>
+
+3. Restart Pi and verify the connection by asking Pi to `list all prompts in the project`. Pi should use the `listPrompts` tool via the MCP proxy to return the list of prompts.
+
+</Tab>
+
+<Tab>
+
 - Endpoint: `/api/public/mcp`
   - EU: `https://cloud.langfuse.com/api/public/mcp`
   - US: `https://us.cloud.langfuse.com/api/public/mcp`
@@ -260,15 +432,6 @@ The [MCP Reference](https://mcp.reference.langfuse.com) is the canonical source 
 
 </Steps>
 
-## Use Cases
-
-The MCP server enables powerful workflows for AI-assisted prompt management:
-
-- **Prompt Creation**: "Create a new chat prompt for customer support with system instructions and example messages"
-- **Version Management**: "Update the staging label to point to version 3 of the email-generation prompt"
-- **Prompt Discovery**: "List all prompts tagged with 'production' and show their latest versions"
-- **Iterative Development**: "Create a new version of the code-review prompt with improved instructions"
-
 ## Feedback
 
 We'd love to hear about your experience with the Langfuse MCP server. Share your feedback, ideas, and use cases in our [GitHub Discussion](https://github.com/orgs/langfuse/discussions/10605).
@@ -276,6 +439,8 @@ We'd love to hear about your experience with the Langfuse MCP server. Share your
 ## Related Documentation
 
 - [MCP Reference](https://mcp.reference.langfuse.com) - Reference for MCP servers, setup snippets, tools, schemas, and requests
-- [Prompt Management with MCP](/docs/prompt-management/features/mcp-server) - Prompt-specific workflows and examples
+- [Agentic Prompt Management](/docs/prompt-management/features/agentic-access) - Use agents to retrieve, create, migrate, and update prompts
 - [Prompt Management Overview](/docs/prompt-management/overview) - Learn about Langfuse prompt management
 - [Public API](/docs/api-and-data-platform/features/public-api) - REST API for programmatic access
+- [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill) - Use Langfuse features from your coding agent
+- [Langfuse for Agents](/agents) - Overview of the skill, CLI, and MCP server for coding agents

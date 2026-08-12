@@ -1,0 +1,207 @@
+---
+date: 2026-05-29
+badge: Launch Week 5 🚀
+title: "Langfuse MCP: now with Observations, Metrics, Scores, Comments and more"
+description: "The hosted Langfuse MCP server now includes new tools for working with observations, metrics, scores, datasets, comments, and annotation queues from AI agents."
+author: Ben Bachem
+ogImage: /images/changelog/2026-05-29-mcp-update.png
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+With this update, most Langfuse project data is available in the Langfuse MCP server. For a full tool list, check [MCP Reference](https://mcp.reference.langfuse.com) or see the list of newly added tools below.
+
+This opens up new workflows for using Langfuse in agentic development. For example, an agent can investigate a production issue, pull the relevant observation details, compare metrics, create or update scores, add comments for the team, or prepare dataset items for regression testing.
+
+The goal is to make Langfuse data actionable where teams already work with AI agents outside of coding agents. For example, in custom internal tools, you can directly integrate Langfuse's full capabilities to enrich context for debugging, evaluation, and continuous improvement.
+
+This complements the [Langfuse CLI](/docs/api-and-data-platform/features/cli), which remains the recommended way to access Langfuse project data from CLI agents (or any agent that has access to a sandbox). This is because the CLI allows agents to pre-filter for only relevant data, thus saving context.
+The hosted MCP server is best for tools that cannot use or install CLI tools, such as Claude Desktop, Linear Agents, and so on. If you don't want those tools to have write access to your data, please allow-list only the read tool equivalents. See the [docs here](/docs/api-and-data-platform/features/mcp-server).
+
+The MCP server still accesses the tools via the public API, so every MCP consumer must obtain a valid API key.
+
+<Callout type="info">
+View the full MCP tool list, input schemas, and setup snippets in our [MCP Reference](https://mcp.reference.langfuse.com).
+</Callout>
+
+## Tools
+
+<table className="[&_code]:rounded-full [&_code]:border [&_code]:border-border [&_code]:bg-muted [&_code]:px-2 [&_code]:py-1 [&_code]:text-muted-foreground">
+  <tbody>
+    <tr>
+      <td className="px-3">
+        <strong>Prompts</strong>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 leading-3">
+          <code>getPrompt</code>
+          <code>getPromptUnresolved</code>
+          <code>listPrompts</code>
+          <code>createTextPrompt</code>
+          <code>createChatPrompt</code>
+          <code>updatePromptLabels</code>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td className="px-3">
+        <strong>Observations</strong>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 leading-3">
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ listObservations</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ getObservation</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ getObservationFieldSchema</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ getObservationFilterSchema</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ getObservationFilterValues</code>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td className="px-3">
+        <strong>Metrics</strong>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 leading-3">
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ getMetricsSchema</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ queryMetrics</code>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td className="px-3">
+        <strong>Scores</strong>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 leading-3">
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ listScores</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ getScore</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ createScore</code>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td className="px-3">
+        <strong>Score configs</strong>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 leading-3">
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ listScoreConfigs</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ getScoreConfig</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ createScoreConfig</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ updateScoreConfig</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ deleteScoreConfig</code>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td className="px-3">
+        <strong>Comments</strong>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 leading-3">
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ listComments</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ getComment</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ createComment</code>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td className="px-3">
+        <strong>Datasets</strong>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 leading-3">
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ listDatasets</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ getDataset</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ upsertDataset</code>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td className="px-3">
+        <strong>Dataset items</strong>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 leading-3">
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ listDatasetItems</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ getDatasetItem</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ upsertDatasetItem</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ deleteDatasetItem</code>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td className="px-3">
+        <strong>Dataset runs</strong>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 leading-3">
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ listDatasetRuns</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ getDatasetRun</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ deleteDatasetRun</code>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td className="px-3">
+        <strong>Dataset run items</strong>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 leading-3">
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ listDatasetRunItems</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ createDatasetRunItem</code>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td className="px-3">
+        <strong>Models</strong>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 leading-3">
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ listModels</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ getModel</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ createModel</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ deleteModel</code>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td className="px-3">
+        <strong>Annotation queues</strong>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 leading-3">
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ listAnnotationQueues</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ getAnnotationQueue</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ createAnnotationQueue</code>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td className="px-3">
+        <strong>Annotation queue items</strong>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 leading-3">
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ listAnnotationQueueItems</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ getAnnotationQueueItem</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ createAnnotationQueueItem</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ updateAnnotationQueueItem</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ deleteAnnotationQueueItem</code>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td className="px-3">
+        <strong>Annotation queue assignments</strong>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 leading-3">
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ createAnnotationQueueAssignment</code>
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ deleteAnnotationQueueAssignment</code>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td className="px-3">
+        <strong>Media</strong>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 leading-3">
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ getMedia</code>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td className="px-3">
+        <strong>Health</strong>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 leading-3">
+          <code className="border-green-300! bg-green-100! text-green-900! dark:border-green-900! dark:bg-green-950! dark:text-green-300!">+ getHealth</code>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+## Feedback
+
+We'd love to hear about your experience and learn more about how you are using the MCP server. Please share your use cases, feedback, and ideas in our [GitHub Discussion](https://github.com/orgs/langfuse/discussions/10605).
+
+## Get started
+
+- [MCP Server Documentation](/docs/api-and-data-platform/features/mcp-server) - Complete setup guide
+- [MCP Reference](https://mcp.reference.langfuse.com) - Current tools, setup snippets, schemas, and generated requests

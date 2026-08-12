@@ -22,6 +22,12 @@ type InkeepSearchButtonProps = {
 };
 
 export function InkeepSearchButton({ className }: InkeepSearchButtonProps) {
+  const settings = useInkeepSettings();
+
+  if (!settings) {
+    return null;
+  }
+
   return (
     <Button
       data-inkeep-modal-trigger
@@ -34,8 +40,14 @@ export function InkeepSearchButton({ className }: InkeepSearchButtonProps) {
 }
 
 export default function InkeepSearchBar({ className }: InkeepSearchProps) {
+  const settings = useInkeepSettings();
+
+  if (!settings) {
+    return null;
+  }
+
   const { baseSettings, aiChatSettings, searchSettings, modalSettings } =
-    useInkeepSettings();
+    settings;
 
   const searchBarProps: InkeepSearchBarProps = {
     baseSettings: {

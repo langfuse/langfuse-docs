@@ -11,7 +11,6 @@ import { WrappedSection } from "./components/WrappedSection";
 import { WrappedGrid, WrappedGridItem } from "./components/WrappedGrid";
 import { SectionHeading } from "./components/SectionHeading";
 import { HoverStars } from "./components/HoverStars";
-import adobeLogo from "../home/img/adobe.svg";
 import canvaLogo from "../home/img/canva.svg";
 import circlebackLogo from "../home/img/circleback.svg";
 import freeeLogo from "../home/img/freee.svg";
@@ -20,6 +19,7 @@ import khanacademyLogo from "../home/img/khan.svg";
 import magicPatternsLogo from "../home/img/magic.svg";
 import merckLogo from "../home/img/merck.svg";
 import pigmentLogo from "../home/img/pigment.svg";
+import rampLogo from "../home/img/ramp.svg";
 import samsaraLogo from "../home/img/samsara.svg";
 import sumupLogo from "../home/img/sumup.svg";
 import telusLogo from "../home/img/telus.svg";
@@ -67,10 +67,13 @@ const companiesWithoutStories = [
   { name: "Twilio", logo: twilioLogo },
   { name: "Telus", logo: telusLogo },
   { name: "Pigment", logo: pigmentLogo },
-  { name: "Adobe", logo: adobeLogo },
   {
     name: "Intuit",
     logo: intuitLogo,
+  },
+  {
+    name: "Ramp",
+    logo: rampLogo,
   },
   {
     name: "Circleback",
@@ -249,13 +252,13 @@ export function Customers() {
       { type: "logo", name: "Samsara" },
       { type: "logo", name: "Twilio" },
       { type: "logo", name: "Telus" },
-      { type: "logo", name: "Adobe" },
+      { type: "logo", name: "Pigment" },
+      { type: "logo", name: "Ramp" },
       { type: "logo", name: "freee" },
       { type: "story", name: "Khan Academy" },
       { type: "logo", name: "Circleback" },
       { type: "text", name: "And thousands more..." },
       { type: "story", name: "Merck" },
-      { type: "logo", name: "Pigment" },
       { type: "story", name: "Magic Patterns" },
     ];
 

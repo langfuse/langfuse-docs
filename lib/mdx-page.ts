@@ -110,7 +110,10 @@ export function buildSectionMetadata(
   section: string,
   sectionTitle: string,
   slug: string[],
-  opts?: { canonicalFallback?: string | null },
+  opts?: {
+    canonicalFallback?: string | null;
+    languages?: NonNullable<Metadata["alternates"]>["languages"];
+  },
 ): Metadata {
   const pageData = page.data;
   const pagePath = `/${section}${slug.length > 0 ? `/${slug.join("/")}` : ""}`;
@@ -135,7 +138,10 @@ export function buildSectionMetadata(
   return {
     title: seoTitle,
     description: page.data.description ?? undefined,
-    alternates: { canonical: canonicalUrl },
+    alternates: {
+      canonical: canonicalUrl,
+      ...(opts?.languages ? { languages: opts.languages } : {}),
+    },
     ...(pageData.noindex ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       images: [{ url: ogImage }],

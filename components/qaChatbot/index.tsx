@@ -39,24 +39,12 @@ import {
   ToolOutput,
   ToolInput,
 } from "@/components/ai-elements/tool";
-import { LangfuseWeb } from "langfuse";
+import { scoreDemoFeedback } from "@/components/demoLangfuseBrowserClients";
 import { FeedbackDialog } from "./FeedbackPopover";
 import { cn } from "@/lib/utils";
+import type { UIMessage } from "ai";
 
-const eulangfuseWebClient = new LangfuseWeb({
-  baseUrl: process.env.NEXT_PUBLIC_EU_LANGFUSE_BASE_URL,
-  publicKey: process.env.NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY,
-});
-
-const usLangfuseWebClient = new LangfuseWeb({
-  publicKey: process.env.NEXT_PUBLIC_US_LANGFUSE_PUBLIC_KEY,
-  baseUrl: process.env.NEXT_PUBLIC_US_LANGFUSE_BASE_URL,
-});
-
-const jpLangfuseWebClient = new LangfuseWeb({
-  publicKey: process.env.NEXT_PUBLIC_JP_LANGFUSE_PUBLIC_KEY,
-  baseUrl: process.env.NEXT_PUBLIC_JP_LANGFUSE_BASE_URL,
-});
+type ChatMessage = UIMessage;
 
 type ChatProps = HTMLAttributes<HTMLDivElement>;
 
@@ -94,7 +82,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
     });
   }, []);
 
-  const { messages, sendMessage, status, regenerate } = useChat({
+  const { messages, sendMessage, status, regenerate } = useChat<ChatMessage>({
     messages: [],
     transport: new DefaultChatTransport({
       api: "/api/qa-chatbot",
@@ -125,20 +113,13 @@ export const Chat = ({ className, ...props }: ChatProps) => {
     // Update the local state
     setUserFeedback((prev) => new Map([...prev, [messageId, value]]));
 
-    // Send feedback to Langfuse
-    for (const client of [
-      eulangfuseWebClient,
-      usLangfuseWebClient,
-      jpLangfuseWebClient,
-    ]) {
-      client.score({
-        traceId: messageId,
-        id: `user-feedback-${messageId}`,
-        name: "user-feedback",
-        value: value,
-        comment: comment,
-      });
-    }
+    scoreDemoFeedback({
+      traceId: messageId,
+      id: `user-feedback-${messageId}`,
+      name: "user-feedback",
+      value,
+      comment,
+    });
   };
 
   return (

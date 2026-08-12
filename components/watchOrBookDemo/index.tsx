@@ -1,49 +1,15 @@
 "use client";
 
-import { Suspense } from "react";
-import { Header } from "@/components/Header";
-import { ContactSalesForm } from "@/components/ContactSalesForm";
-import { CheckCircle2, ArrowRight } from "lucide-react";
+import { MarketoContactForm } from "@/components/MarketoContactForm";
+import { CheckCircle2 } from "lucide-react";
 import { getGitHubStars } from "@/lib/github-stars";
-import { Link } from "@/components/ui/link";
 import { SDK_INSTALLS_PER_MONTH, DOCKER_PULLS } from "@/components/home/Usage";
-import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
-import { WatchWalkthroughs } from "@/components/watchOrBookDemo/WatchWalkthroughs";
 import { HomeSection } from "@/components/home/HomeSection";
 import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
-
-function SwitchToggle({
-  checked,
-  page,
-}: {
-  checked: boolean;
-  page: "talk-to-us" | "watch-demo";
-}) {
-  const switchHref = page === "talk-to-us" ? "/watch-demo" : "/talk-to-us";
-
-  return (
-    <div className="flex items-center justify-center md:justify-start gap-3 -mt-2 mb-6 md:mb-0">
-      <Link
-        href="/talk-to-us"
-        className="text-sm font-medium hover:text-primary transition-colors"
-      >
-        Talk to us
-      </Link>
-      <Link href={switchHref} className="mt-1.5">
-        <Switch checked={checked} alwaysOn />
-      </Link>
-      <Link
-        href="/watch-demo"
-        className="text-sm font-medium hover:text-primary transition-colors"
-      >
-        Watch videos
-      </Link>
-    </div>
-  );
-}
+import { TextHighlight } from "@/components/ui/text-highlight";
 
 function TeamMemberCard({
   imageSrc,
@@ -110,7 +76,7 @@ function TalkToUsContent() {
         </ul>
       </div>
       <Text className="text-left not-prose">
-        Langfuse is the most widely adopted LLM Engineering platform with{" "}
+        Langfuse is the most widely adopted AI Engineering platform with{" "}
         <strong className="font-[580]">
           {getGitHubStars().toLocaleString()} GitHub stars
         </strong>
@@ -153,117 +119,36 @@ function TalkToUsContent() {
   );
 }
 
-function DiscoverYourselfContent() {
-  const links = [
-    { href: "/docs", label: "Documentation" },
-    { href: "/self-hosting", label: "Self-hosting docs" },
-    { href: "/demo", label: "Interactive Example Project" },
-    { href: "/pricing", label: "Pricing" },
-    { href: "/enterprise", label: "Enterprise FAQ" },
-    { href: "/security", label: "Security Center" },
-    { href: "/ask-ai", label: "Questions? Ask AI" },
-    { href: "/support", label: "Contact Support" },
-    {
-      href: "/cloud",
-      label: "Create a free account (no credit card required)",
-    },
-  ];
-
-  return (
-    <>
-      <Heading as="h2">Self-serve resources</Heading>
-      <div>
-        <Text className="text-left">Everything you need to get started:</Text>
-        <ul className="flex flex-col gap-2 mt-2">
-          {links.map((link) => (
-            <li key={link.href} className="flex items-start gap-3">
-              <ArrowRight className="h-3 w-3 text-text-tertiary mt-0.75 shrink-0" />
-              <Link href={link.href} variant="text">
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className="mt-2">
-        <p>
-          Questions?{" "}
-          <Link href="/ask-ai" variant="text">
-            Ask AI
-          </Link>{" "}
-          or{" "}
-          <Link href="/support" variant="text">
-            reach out to us
-          </Link>
-          .
-        </p>
-        <div className="flex flex-col gap-6 mt-4">
-          <TeamMemberCard
-            imageSrc="/images/people/jannikmaierhoefer.jpg"
-            name="Jannik Maierhöfer"
-            title="Growth Engineer"
-            alt="Jannik Maierhöfer"
-          />
-          <TeamMemberCard
-            imageSrc="/images/people/marcklingen.jpg"
-            name="Marc Klingen"
-            title="Co-founder & CEO"
-            alt="Marc Klingen"
-          />
-        </div>
-      </div>
-    </>
-  );
-}
-
 function ContactFormSection() {
   return (
-    <div className="relative max-w-md mx-auto p-4 bg-stripe-pattern corner-box-corners border border-line-structure">
-      <ContactSalesForm />
+    <div className="relative w-full max-w-md mx-auto p-4 bg-stripe-pattern corner-box-corners border border-line-structure">
+      <MarketoContactForm />
     </div>
   );
 }
 
-export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
-  const isDiscoverOpen = page === "watch-demo";
-
+export function Demo() {
   return (
     <HomeSection>
-      <Header
-        title={isDiscoverOpen ? "See Langfuse in Action" : "Get a Demo"}
-        h="h1"
-        description={
-          isDiscoverOpen
-            ? "Watch short videos to see how Langfuse helps you build better LLM applications"
-            : "Learn more about Langfuse — talk to us or watch videos"
-        }
-      />
+      <div className="not-prose flex flex-col gap-2 mb-6 items-center text-center text-balance">
+        <Heading as="h1" size="large" className="m-0">
+          <TextHighlight>Get a demo</TextHighlight>
+        </Heading>
+        <Text className="m-0">
+          Learn more about how Langfuse can help your team
+        </Text>
+      </div>
 
       <div className="w-full max-w-6xl px-4 not-prose">
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Left Column: Content based on switch */}
-          <div
-            className={`flex flex-col gap-8 ${
-              isDiscoverOpen ? "flex-1 md:flex-[0.4]" : "flex-1"
-            }`}
-          >
-            <SwitchToggle checked={isDiscoverOpen} page={page} />
-            {!isDiscoverOpen ? (
-              <TalkToUsContent />
-            ) : (
-              <DiscoverYourselfContent />
-            )}
+          {/* Left Column: Value proposition */}
+          <div className="flex flex-1 flex-col gap-8">
+            <TalkToUsContent />
           </div>
 
-          {/* Right Column: Calendar or Walkthroughs */}
-          <div className={isDiscoverOpen ? "flex-1 md:flex-[0.6]" : "flex-1"}>
-            {!isDiscoverOpen ? (
-              <ContactFormSection />
-            ) : (
-              <Suspense>
-                <WatchWalkthroughs />
-              </Suspense>
-            )}
+          {/* Right Column: Contact form */}
+          <div className="flex-1">
+            <ContactFormSection />
           </div>
         </div>
       </div>

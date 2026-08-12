@@ -39,6 +39,7 @@ const menuItems: {
       { name: "Prompt Management", href: "/docs/prompt-management/overview" },
       { name: "Evaluations", href: "/docs/evaluation/overview" },
       { name: "Metrics", href: "/docs/metrics/overview" },
+      { name: "Langfuse for Agents", href: "/agents" },
       {
         name: "Playground",
         href: "/docs/prompt-management/features/playground",
@@ -64,10 +65,12 @@ const menuItems: {
     items: [
       { name: "Blog", href: "/blog" },
       { name: "Changelog", href: "/changelog" },
+      { name: "Events", href: "/events" },
       { name: "Roadmap", href: "/docs/roadmap" },
       { name: "Interactive Demo", href: "/docs/demo" },
       { name: "Customers", href: "/users" },
       { name: "AI Engineering Library", href: "/library" },
+      { name: "Workshop", href: "/workshop" },
       { name: "Guides & Cookbooks", href: "/guides" },
     ],
   },

@@ -2,14 +2,18 @@
 title: Migrating Data Between Langfuse Projects (Python SDK v4)
 sidebarTitle: Data Migration Script
 description: Migrate observations, scores, prompts, datasets, custom models, and score configs between Langfuse projects using the Python SDK v4.
+category: Examples
 ---
 
 # Migrating Data Between Langfuse Projects (Python SDK v4)
+
+This cookbook is also available in [Japanese](/guides/cookbook/example_data_migration-jp).
 
 This notebook migrates data from one Langfuse project to another using the **Langfuse Python SDK v4**.
 
 <Callout type="warning">
 Migrating data into a Langfuse project creates new ingestion events in the destination project. This migration therefore incurs Langfuse ingestion charges based on the number of observations transferred.
+
 </Callout>
 
 Common use cases:
@@ -23,20 +27,21 @@ Common use cases:
 3. **Prompts** (all versions)
 4. **Observations** (traces + nested observations, via the OTLP endpoint so original `start_time` / `end_time` are preserved)
 5. **Scores**
-6. **Datasets** (items + run items, linked to migrated traces/observations)
+6. **Datasets** (definitions + items, linked to migrated traces/observations)
 
 ## What is not migrated
 
-The Langfuse public API does not currently support programmatic creation of: **LLM-as-a-Judge evaluator configurations**, **custom dashboards**, **users / RBAC / SSO**, and **project/organization settings**. These must be recreated manually or copied through UI-level exports.
+The Langfuse public API does not currently support programmatic creation of: **LLM-as-a-Judge evaluator configurations**, **custom dashboards**, **users / RBAC / SSO**, and **project/organization settings**. Historical **dataset run items** are also left behind, see section 6. These must be recreated manually or copied through UI-level exports.
 
 
 ## 0. Setup
 
+This notebook needs Python SDK 4.8.1 or newer — earlier 4.x releases do not include the v3 Scores API client.
+
 
 
 ```python
-%pip install --quiet "langfuse>=4.0.0" "opentelemetry-sdk>=1.25.0" "opentelemetry-exporter-otlp-proto-http>=1.25.0"
-
+%pip install --quiet "langfuse>=4.8.1" "opentelemetry-sdk>=1.25.0" "opentelemetry-exporter-otlp-proto-http>=1.25.0"
 ```
 
 
@@ -44,19 +49,19 @@ The Langfuse public API does not currently support programmatic creation of: **L
 import os
 
 # --- SOURCE project credentials ---
-os.environ["LANGFUSE_SOURCE_PUBLIC_KEY"] = "pk-lf-.."
-os.environ["LANGFUSE_SOURCE_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_SOURCE_HOST"] = "https://cloud.langfuse.com"  # e.g. EU cloud
+os.environ.setdefault("LANGFUSE_SOURCE_PUBLIC_KEY", "pk-lf-..");
+os.environ.setdefault("LANGFUSE_SOURCE_SECRET_KEY", "sk-lf-...");
+os.environ.setdefault("LANGFUSE_SOURCE_HOST", "https://cloud.langfuse.com");  # e.g. EU cloud
 
 # --- DESTINATION project credentials ---
-os.environ["LANGFUSE_DEST_PUBLIC_KEY"] = "pk-lf-.."
-os.environ["LANGFUSE_DEST_SECRET_KEY"] = "sk-lf-..."
-os.environ["LANGFUSE_DEST_HOST"] = "https://hipaa.cloud.langfuse.com"  # e.g. HIPAA cloud
+os.environ.setdefault("LANGFUSE_DEST_PUBLIC_KEY", "pk-lf-..");
+os.environ.setdefault("LANGFUSE_DEST_SECRET_KEY", "sk-lf-...");
+os.environ.setdefault("LANGFUSE_DEST_HOST", "https://hipaa.cloud.langfuse.com");  # e.g. HIPAA cloud
 
 # --- Optional time filter for the observations migration (ISO 8601) ---
 # Leave empty to migrate all traces.
-os.environ["LANGFUSE_MIGRATE_FROM_TIMESTAMP"] = "2026-03-01T00:00:00Z"  # e.g. "2025-01-01T00:00:00Z"
-os.environ["LANGFUSE_MIGRATE_TO_TIMESTAMP"] = "2026-04-20T00:00:00Z"    # e.g. "2025-02-01T00:00:00Z"
+os.environ.setdefault("LANGFUSE_MIGRATE_FROM_TIMESTAMP", "2026-03-01T00:00:00Z");  # e.g. "2025-01-01T00:00:00Z"
+os.environ.setdefault("LANGFUSE_MIGRATE_TO_TIMESTAMP", "2026-04-20T00:00:00Z");    # e.g. "2025-02-01T00:00:00Z"
 
 ```
 
@@ -402,7 +407,9 @@ print(f"Prompts — migrated: {migrated}, failed: {failed}")
 
 This is the core of the migration. We push each source trace (and its nested observations) into the destination's OTLP ingestion endpoint at `/api/public/otel/v1/traces`. The OTLP endpoint is the **only** way to set the authoritative `start_time` / `end_time` of an observation at ingest — the legacy REST ingestion rewrites those fields.
 
-> **Self-hosted deployments:** the v2 Observations API is currently **Cloud-only**. If you are migrating from a self-hosted Langfuse instance, replace the `observations.get_many(...)` calls below with `src.api.trace.get(trace.id).observations` (which hits the v1 endpoint). A Langfuse self-hosted migration path for v2 is on the roadmap.
+> **Self-hosted deployments:** the v2 Observations API requires [Langfuse v4](https://langfuse.com/docs/v4), which is generally available for self-hosted deployments. If your source deployment still runs Langfuse v3, the v2 endpoints are unavailable there: enumerate traces with `src.api.trace.list(page=..., from_timestamp=FROM_TS, to_timestamp=TO_TS)` and fetch each trace's observations with `src.api.legacy.observations_v1.get_many(trace_id=...)`. Both are deprecated on v4, but they are the only option against a v3 source.
+
+> **Which traces are migrated:** the listing below pages through *logical root observations*, so it yields one row per trace. A trace whose root observation never reached Langfuse — for example when only child spans were exported — has no logical root and is skipped. Compare the migrated trace count against the source project's trace count; if they differ, page through observations without the root filter and group the rows by `trace_id` to pick up the remainder.
 
 
 
@@ -468,24 +475,25 @@ def _as_attr_string(value: Any) -> Optional[str]:
 
 
 def _set_trace_attrs(span, trace_obj) -> None:
-    """Set trace-level langfuse.* attributes on the root span."""
-    _set_scalar(span, "langfuse.trace.name", trace_obj.name)
+    """Set trace-level and root-observation langfuse.* attributes on the root span."""
+    trace_name = getattr(trace_obj, "trace_name", None) or trace_obj.name
+    _set_scalar(span, "langfuse.trace.name", trace_name)
     _set_scalar(span, "langfuse.user.id", trace_obj.user_id)
     _set_scalar(span, "langfuse.session.id", trace_obj.session_id)
-    _set_scalar(span, "langfuse.release", trace_obj.release)
+    _set_scalar(span, "langfuse.release", getattr(trace_obj, "release", None))
     _set_scalar(span, "langfuse.version", trace_obj.version)
     _set_scalar(span, "langfuse.environment", trace_obj.environment or "default")
     if trace_obj.public is not None:
         span.set_attribute("langfuse.trace.public", bool(trace_obj.public))
-    if trace_obj.tags:
+    if getattr(trace_obj, "tags", None):
         # Langfuse accepts both a string[] attribute and a JSON string.
         span.set_attribute("langfuse.trace.tags", list(trace_obj.tags))
     input_str = _as_attr_string(trace_obj.input)
     if input_str is not None:
-        span.set_attribute("langfuse.trace.input", input_str)
+        span.set_attribute("langfuse.observation.input", input_str)
     output_str = _as_attr_string(trace_obj.output)
     if output_str is not None:
-        span.set_attribute("langfuse.trace.output", output_str)
+        span.set_attribute("langfuse.observation.output", output_str)
     md = trace_obj.metadata
     if isinstance(md, dict):
         for k, v in md.items():
@@ -579,9 +587,10 @@ OBSERVATIONS_FIELDS = "core,basic,time,io,metadata,model,usage,prompt"
 def _fetch_observations_v2(source_trace_id: str) -> List[Any]:
     """Fetch all observations for a trace via the v2 API with cursor pagination.
 
-    Cloud-only. For self-hosted migrations, replace this helper with:
-
-        return with_retries(lambda: src.api.trace.get(source_trace_id)).observations
+    Requires the v2 Observations API (Langfuse Cloud, or self-hosted Langfuse v4+).
+    On a Langfuse v3 source, swap the call for the deprecated v1 read
+    `src.api.legacy.observations_v1.get_many(trace_id=source_trace_id, page=..., limit=100)`,
+    which pages by number instead of by cursor.
     """
     results: List[Any] = []
     cursor: Optional[str] = None
@@ -602,19 +611,24 @@ def _fetch_observations_v2(source_trace_id: str) -> List[Any]:
 
 def migrate_one_trace(trace_obj) -> int:
     """Migrate one trace + its observations. Returns the number of child observations migrated."""
-    observations = _fetch_observations_v2(trace_obj.id)
-    new_trace_hex = to_otel_trace_id(trace_obj.id)
-    trace_id_map[trace_obj.id] = new_trace_hex
+    source_trace_id = getattr(trace_obj, "trace_id", None) or trace_obj.id
+    observations = _fetch_observations_v2(source_trace_id)
+    new_trace_hex = to_otel_trace_id(source_trace_id)
+    trace_id_map[source_trace_id] = new_trace_hex
 
     # Sort observations: parents before children, earliest first.
     observations.sort(key=lambda o: (o.start_time, o.id))
 
     # Root span carrying trace-level attributes. If the source has no explicit
-    # root observation we synthesize one with the trace's own timestamps.
-    root_span_hex = to_otel_span_id(trace_obj.id)  # deterministic root span id
-    trace_start = min((o.start_time for o in observations), default=trace_obj.timestamp)
+    # root observation we synthesize one with the root observation timestamps.
+    root_span_hex = to_otel_span_id(source_trace_id)  # deterministic root span id
+    trace_start = min(
+        (o.start_time for o in observations),
+        default=getattr(trace_obj, "start_time", None) or getattr(trace_obj, "timestamp", None),
+    )
     trace_end = max(
-        (o.end_time or o.start_time for o in observations), default=trace_obj.timestamp
+        (o.end_time or o.start_time for o in observations),
+        default=getattr(trace_obj, "end_time", None) or trace_start,
     )
 
     # --- Root span ---
@@ -629,7 +643,7 @@ def migrate_one_trace(trace_obj) -> int:
     # *acts* as the root observation. This keeps the code uniform for nesting.
     root_ctx = otel_trace.set_span_in_context(NonRecordingSpan(root_parent_sc))
     root_span = migration_tracer.start_span(
-        name=trace_obj.name or "trace",
+        name=(getattr(trace_obj, "trace_name", None) or trace_obj.name or "trace"),
         start_time=_to_ns(trace_start),
         context=root_ctx,
     )
@@ -665,7 +679,7 @@ def migrate_one_trace(trace_obj) -> int:
 
 
 # --- Drive the migration ---
-page = 1
+cursor: Optional[str] = None
 limit = 50
 total = 0
 total_obs = 0
@@ -673,23 +687,19 @@ failures = 0
 progress_every = 10  # print a progress line every N traces
 t_start = time.time()
 while True:
-    # `fields="core,io"` on trace.list ensures we get input/output/metadata
-    # in the listing response and don't need a second call per trace.
-    listing = with_retries(lambda: src.api.trace.list(
-        page=page,
+    # `is_root_observation` is the first-class parameter for logical roots, so the
+    # listing returns one row per trace. Prefer it over the advanced `filter`
+    # parameter, which takes precedence over every other query parameter.
+    listing = with_retries(lambda: src.api.observations.get_many(
+        fields="core,basic,io,metadata,trace_context",
         limit=limit,
-        order_by="timestamp.asc",
-        from_timestamp=FROM_TS,
-        to_timestamp=TO_TS,
-        fields="core,io",
+        cursor=cursor,
+        from_start_time=FROM_TS,
+        to_start_time=TO_TS,
+        is_root_observation=True,
     ))
     if not listing.data:
         break
-
-    total_items = getattr(listing.meta, "total_items", None)
-    total_pages = getattr(listing.meta, "total_pages", None)
-    if page == 1 and total_items is not None:
-        print(f"Starting migration: {total_items} trace(s) across {total_pages} page(s)")
 
     for t in listing.data:
         try:
@@ -699,24 +709,21 @@ while True:
             if total % progress_every == 0:
                 elapsed = time.time() - t_start
                 rate = total / elapsed if elapsed > 0 else 0
-                progress = (
-                    f"{total}/{total_items}" if total_items is not None else str(total)
-                )
                 print(
-                    f"  [{progress} traces] observations={total_obs} "
+                    f"  [{total} traces] observations={total_obs} "
                     f"failed={failures} rate={rate:.1f} traces/s"
                 )
         except Exception as exc:
-            print(f"  failed trace {t.id}: {exc}")
+            source_trace_id = getattr(t, "trace_id", t.id)
+            print(f"  failed trace {source_trace_id}: {exc}")
             failures += 1
 
+    cursor = getattr(listing.meta, "cursor", None)
     print(
-        f"  page {page}/{total_pages or '?'} done — "
-        f"cumulative: traces={total}, observations={total_obs}, failed={failures}"
+        f"  batch complete — cumulative: traces={total}, observations={total_obs}, failed={failures}"
     )
-    if total_pages is not None and page >= total_pages:
+    if not cursor:
         break
-    page += 1
 
 otlp_provider.force_flush()
 elapsed = time.time() - t_start
@@ -731,7 +738,22 @@ print(f"  obs_id_map entries:   {len(obs_id_map)}")
 
 ## 5. Scores
 
-Scores are fetched from the source via `api.scores.get_many` and re-created on the destination via the native **`create_score`** helper. Original `id` is preserved so re-runs are idempotent. `config_id` is remapped through `config_id_map` from Section 1; `trace_id` / `observation_id` are remapped through `trace_id_map` / `obs_id_map` from Section 4.
+Scores are fetched from the source via the v3 Scores API (`api.scores_v3.get_many_v3`) and re-created on the destination through the `POST /api/public/scores` endpoint (`api.legacy.score_v1.create`). Original `id` is preserved so re-runs are idempotent. `config_id` is remapped through `config_id_map` from Section 1; trace / observation references are remapped through `trace_id_map` / `obs_id_map` from Section 4.
+
+Compared to the older v2 endpoint, the v3 API differs in three ways that matter here:
+
+- **Cursor pagination** — pass the opaque `meta.cursor` back until it is empty, instead of counting pages.
+- **Single `subject`** — each score references its target through one `subject` object (`kind` + `id`) instead of flat `trace_id` / `observation_id` / `session_id` / `dataset_run_id` fields. Dataset runs are called *experiments* in v3. Rare legacy scores carrying two subject links (e.g. both a trace and a session) surface only one of them in v3 — the previous flow failed to re-create those scores entirely, so nothing regresses.
+- **Typed `value`** — `value` follows the score's `data_type` (number for NUMERIC, boolean for BOOLEAN, string for CATEGORICAL and other types) instead of always being numeric alongside a separate `string_value`.
+
+A few behavioral notes:
+
+- v2 silently dropped scores whose trace no longer exists, while v3 returns them. If slightly more scores migrate than the v2 flow used to transfer, these previously hidden scores are now carried over — an improvement, not a loss.
+- Scores attached to dataset runs (`kind="experiment"`) are skipped by this section: the destination assigns new run ids when Section 6 re-creates the runs, so the source run id would be a dangling reference. Migrate these scores after the destination runs exist, matching runs by name.
+- Score creation is asynchronous: a success response means the score was accepted for ingestion, not that it is already durably written. Verify the destination project once ingestion has caught up.
+- The create endpoint does not accept a timestamp, so migrated scores carry the migration time as their timestamp; source score timestamps cannot be preserved through the public API.
+
+> **Self-hosted deployments:** the v3 Scores API is available on Langfuse Cloud and on self-hosted instances from v3.180.0. On older self-hosted instances, use the v2 pattern instead: page-based `src.api.scores.get_many(page=page, limit=100, ...)` with flat `trace_id` / `observation_id` / `session_id` fields and `string_value` for CATEGORICAL scores. The v2 read endpoints are removed on deployments fully migrated to [Langfuse v4](https://langfuse.com/docs/v4).
 
 
 
@@ -740,65 +762,105 @@ trace_id_map = globals().get("trace_id_map", {})
 obs_id_map = globals().get("obs_id_map", {})
 config_id_map = globals().get("config_id_map", {})
 
-page = 1
+# Field groups for the v3 Scores API. `core` (id/name/value/dataType/...) is
+# always included; `details` adds comment/metadata/configId; `subject` adds
+# the subject reference; `annotation` adds authorUserId/queueId.
+SCORES_FIELDS = "details,subject,annotation"
+
+cursor: Optional[str] = None
 migrated = failed = skipped = 0
 while True:
-    resp = with_retries(lambda: src.api.scores.get_many(
-        page=page,
+    resp = with_retries(lambda: src.api.scores_v3.get_many_v3(
         limit=100,
+        cursor=cursor,
+        fields=SCORES_FIELDS,
         from_timestamp=FROM_TS,
         to_timestamp=TO_TS,
     ))
-    if not resp.data:
-        break
     for s in resp.data:
-        # Remap references
-        new_trace_id = trace_id_map.get(s.trace_id, s.trace_id) if s.trace_id else None
-        new_obs_id = obs_id_map.get(s.observation_id, s.observation_id) if s.observation_id else None
-        new_cfg_id = config_id_map.get(s.config_id, s.config_id) if s.config_id else None
-
-        # Determine typed value
-        if s.data_type == "CATEGORICAL":
-            value = getattr(s, "string_value", None) or str(s.value)
-        else:
-            value = s.value
-
-        if value is None:
+        # A null value must be caught before any conversion — the BOOLEAN
+        # branch below would otherwise turn a missing value into false.
+        if s.value is None:
             skipped += 1
             continue
 
+        # Map the v3 subject back to the flat reference fields the create
+        # endpoint expects: exactly one of traceId / sessionId, and
+        # observationId additionally requires traceId.
+        trace_id = observation_id = session_id = None
+        kind = s.subject.kind if s.subject else None
+        if kind == "trace":
+            trace_id = s.subject.id
+        elif kind == "observation":
+            if not s.subject.trace_id:
+                print(f"  skipping score {s.id} ({s.name}): observation subject without a trace")
+                skipped += 1
+                continue
+            observation_id = s.subject.id
+            trace_id = s.subject.trace_id
+        elif kind == "session":
+            session_id = s.subject.id
+        elif kind == "experiment":  # v3 name for dataset runs
+            # The subject id is the source project's run id; the destination
+            # assigns new run ids, so this reference cannot be carried over.
+            print(f"  skipping score {s.id} ({s.name}): dataset-run scores must be migrated after the destination runs exist")
+            skipped += 1
+            continue
+        else:
+            print(f"  skipping score {s.id} ({s.name}): unsupported subject kind {kind!r}")
+            skipped += 1
+            continue
+
+        # Remap references
+        new_trace_id = trace_id_map.get(trace_id, trace_id) if trace_id else None
+        new_obs_id = obs_id_map.get(observation_id, observation_id) if observation_id else None
+        new_cfg_id = config_id_map.get(s.config_id, s.config_id) if s.config_id else None
+
+        # v3 serves a typed `value`; convert it to what the write path expects.
+        if s.data_type == "NUMERIC":
+            value = s.value
+        elif s.data_type == "BOOLEAN":
+            value = 1 if s.value else 0  # write path expects numeric 0/1
+        elif s.data_type == "CATEGORICAL":
+            value = s.value  # already the category string
+        else:
+            # Other data types (e.g. TEXT) carry string values; pass them through.
+            print(f"  passing through {s.data_type} score {s.id} ({s.name}) as-is")
+            value = s.value
+
         try:
-            with_retries(lambda: dst.create_score(
+            # POST /api/public/scores. The endpoint accepts no timestamp, so
+            # the migrated score is stamped with the migration time. Ingestion
+            # is asynchronous: success means queued, not yet visible.
+            with_retries(lambda: dst.api.legacy.score_v1.create(
+                id=s.id,  # preserves ID for idempotent re-runs
                 name=s.name,
                 value=value,
                 data_type=s.data_type,
                 trace_id=new_trace_id,
                 observation_id=new_obs_id,
-                session_id=getattr(s, "session_id", None),
-                dataset_run_id=getattr(s, "dataset_run_id", None),
-                score_id=s.id,  # preserves ID for idempotent re-runs
+                session_id=session_id,
                 comment=s.comment,
                 config_id=new_cfg_id,
                 metadata=s.metadata,
-                timestamp=s.timestamp,
+                environment=s.environment,
             ))
             migrated += 1
         except Exception as exc:
             print(f"  failed score {s.id} ({s.name}): {exc}")
             failed += 1
-    if page >= getattr(resp.meta, "total_pages", page):
+    cursor = getattr(resp.meta, "cursor", None)
+    if not cursor:
         break
-    page += 1
 
-# Flush scores (create_score queues events on the dst client)
-dst.flush()
-print(f"Scores — migrated: {migrated}, skipped (null value): {skipped}, failed: {failed}")
-
+print(f"Scores — migrated: {migrated}, skipped: {skipped}, failed: {failed}")
 ```
 
-## 6. Datasets (items + run items)
+## 6. Datasets and items
 
-We migrate datasets themselves via the native **`create_dataset`** helper, items via **`create_dataset_item`** (preserving source item IDs), and run items via the REST endpoint. Dataset run items reference migrated traces/observations using `trace_id_map` / `obs_id_map`.
+We migrate datasets themselves via the native **`create_dataset`** helper and items via **`create_dataset_item`** (preserving source item IDs).
+
+Historical dataset run items are **not** copied. The legacy `POST /api/public/dataset-run-items` endpoint is deprecated, and both of its replacements create *new* experiment runs rather than backfilling past ones. The cell below lists the runs it finds on the source so that nothing disappears silently. To reproduce a run on the destination, either re-run the experiment with the [Experiments SDK](https://langfuse.com/docs/evaluation/experiments/experiments-via-sdk), or emit the item traces yourself with [experiment attributes over OTLP](https://langfuse.com/integrations/native/opentelemetry/experiments).
 
 
 
@@ -816,7 +878,7 @@ def _enc(name: str) -> str:
 
 ds_migrated = ds_skipped = ds_failed = 0
 items_migrated = items_failed = 0
-runs_created = runs_failed = 0
+runs_found = 0
 
 t_start = time.time()
 ds_seen = 0  # count of source datasets processed (new + existing)
@@ -892,9 +954,9 @@ while True:
         ds_items_fail = items_failed - ds_items_failed_before
         print(f"    items: {ds_items} migrated, {ds_items_fail} failed")
 
-        # Run items. Path params (dataset_name, run_name) need URL-encoding.
-        ds_runs_before = runs_created
-        ds_runs_failed_before = runs_failed
+        # Historical run items are not copied: POST /dataset-run-items is
+        # deprecated, and its replacements create new experiment runs instead of
+        # backfilling old ones. List the source runs so nothing is lost silently.
         run_count = 0
         page_run = 1
         while True:
@@ -905,42 +967,12 @@ while True:
                 break
             for run_meta in rresp.data:
                 run_count += 1
-                try:
-                    run_full = with_retries(lambda: src.api.datasets.get_run(
-                        dataset_name=_enc(ds.name), run_name=_enc(run_meta.name)
-                    ))
-                except Exception as exc:
-                    print(f"      failed run fetch '{run_meta.name}': {exc}")
-                    runs_failed += 1
-                    continue
-                for ri in run_full.dataset_run_items:
-                    new_trace = trace_id_map.get(ri.trace_id, ri.trace_id) if ri.trace_id else None
-                    new_obs = obs_id_map.get(ri.observation_id, ri.observation_id) if ri.observation_id else None
-                    if not new_trace and not new_obs:
-                        runs_failed += 1
-                        continue
-                    try:
-                        with_retries(lambda: dst.api.dataset_run_items.create(
-                            run_name=run_meta.name,
-                            dataset_item_id=ri.dataset_item_id,
-                            trace_id=new_trace,
-                            observation_id=new_obs,
-                            run_description=run_meta.description,
-                            metadata=run_meta.metadata,
-                        ))
-                        runs_created += 1
-                    except Exception as exc:
-                        print(f"      failed run item for run '{run_meta.name}': {exc}")
-                        runs_failed += 1
+                runs_found += 1
+                print(f"      run '{run_meta.name}' not copied — re-run it on the destination")
             if page_run >= getattr(rresp.meta, "total_pages", page_run):
                 break
             page_run += 1
-        ds_runs = runs_created - ds_runs_before
-        ds_runs_fail = runs_failed - ds_runs_failed_before
-        print(
-            f"    runs: {run_count} run(s), {ds_runs} run item(s) linked, "
-            f"{ds_runs_fail} failed"
-        )
+        print(f"    runs: {run_count} run(s) found on source; not copied")
 
     if page_ds >= getattr(dsresp.meta, "total_pages", page_ds):
         break
@@ -950,7 +982,7 @@ elapsed = time.time() - t_start
 print(
     f"\nDatasets — new: {ds_migrated}, existing: {ds_skipped}, failed: {ds_failed}  |  "
     f"items: {items_migrated} migrated / {items_failed} failed  |  "
-    f"run items: {runs_created} linked / {runs_failed} failed  |  "
+    f"runs found on source (not copied): {runs_found}  |  "
     f"elapsed: {elapsed:.1f}s"
 )
 

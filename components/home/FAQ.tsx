@@ -8,12 +8,12 @@ const faqs: FAQItem[] = [
   {
     question: "What is Langfuse?",
     answer:
-      "Langfuse is an [open-source](https://github.com/langfuse/langfuse) LLM engineering platform that helps teams build, monitor, and improve their AI applications. It covers the full development lifecycle with [tracing](/docs/observability/overview), [prompt management](/docs/prompt-management/overview), [evaluations](/docs/evaluation/overview), and [analytics dashboards](/docs/metrics/overview) — all in one place. Langfuse is used by 2,300+ companies and processes billions of observations per month. You can try it instantly with the [public demo project](/docs/demo) or [sign up for free](/cloud)",
+      "Langfuse is an [open-source](https://github.com/langfuse/langfuse) AI engineering platform that helps teams build, monitor, and improve their LLM applications. It covers the full development lifecycle with [tracing](/docs/observability/overview), [prompt management](/docs/prompt-management/overview), [evaluations](/docs/evaluation/overview), and [analytics dashboards](/docs/metrics/overview) — all in one place. Langfuse is used by 2,300+ companies and processes billions of observations per month. You can try it instantly with the [public demo project](/docs/demo) or [sign up for free](/cloud)",
   },
   {
     question: "What does Langfuse help me with?",
     answer:
-      "Langfuse helps you [debug LLM applications](/docs/observability/overview) with detailed traces that capture every step of your AI pipeline, including [agent graphs](/docs/observability/features/agent-graphs). You can [manage and version your prompts](/docs/prompt-management/overview) collaboratively, run [automated evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) (including LLM-as-a-judge and [code-based evaluators](/docs/evaluation/overview)), track [costs and latency](/docs/observability/features/token-and-cost-tracking) across models and providers, and run [experiments on datasets](/docs/evaluation/experiments/overview) to measure improvements before shipping. It also supports [custom dashboards](/docs/metrics/features/custom-dashboards) for team-wide visibility.",
+      "Langfuse helps you [debug LLM applications](/docs/observability/overview) with detailed traces that capture every step of your AI pipeline, including [agent graphs](/docs/observability/features/agent-graphs). You can [manage and version your prompts](/docs/prompt-management/overview) collaboratively, run [automated evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) (including LLM-as-a-judge and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators)), track [costs and latency](/docs/observability/features/token-and-cost-tracking) across models and providers, and run [experiments on datasets](/docs/evaluation/experiments/overview) to measure improvements before shipping. It also supports [custom dashboards](/docs/metrics/features/custom-dashboards) for team-wide visibility.",
   },
   {
     question: "Can I use just tracing without the other features?",
@@ -33,7 +33,7 @@ const faqs: FAQItem[] = [
   {
     question: "What frameworks are supported?",
     answer:
-      "Langfuse supports [80+ integrations](/integrations) including [LangChain](/integrations/frameworks/langchain), [LlamaIndex](/integrations/frameworks/llamaindex), [CrewAI](/integrations/frameworks/crewai), [OpenAI Agents](/integrations/frameworks/openai-agents), [Pydantic AI](/integrations/frameworks/pydantic-ai), [Mastra](/integrations/frameworks/mastra), [Google ADK](/integrations/frameworks/google-adk), [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk), [OpenAI](/integrations/model-providers/openai-py), [Anthropic](/integrations/model-providers/anthropic), and [AWS Bedrock](/integrations/model-providers/amazon-bedrock). Langfuse is [OpenTelemetry native](/integrations/native/opentelemetry), so it works with any OTEL-compatible library or your [existing OTEL setup](/faq/all/existing-otel-setup).",
+      "Langfuse supports [100+ integrations](/integrations) including [LangChain](/integrations/frameworks/langchain), [LlamaIndex](/integrations/frameworks/llamaindex), [CrewAI](/integrations/frameworks/crewai), [OpenAI Agents](/integrations/frameworks/openai-agents), [Pydantic AI](/integrations/frameworks/pydantic-ai), [Mastra](/integrations/frameworks/mastra), [Google ADK](/integrations/frameworks/google-adk), [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk), [OpenAI](/integrations/model-providers/openai-py), [Anthropic](/integrations/model-providers/anthropic), and [AWS Bedrock](/integrations/model-providers/amazon-bedrock). Langfuse is [OpenTelemetry native](/integrations/native/opentelemetry), so it works with any OTEL-compatible library or your [existing OTEL setup](/faq/all/existing-otel-setup).",
   },
   {
     question: "What's the latency impact?",
@@ -43,7 +43,7 @@ const faqs: FAQItem[] = [
   {
     question: "Is Langfuse secure and compliant?",
     answer:
-      "Yes. Langfuse Cloud is [SOC 2 Type II](/security/soc2) certified, [ISO 27001](/security/iso27001) compliant, [GDPR](/security/gdpr) compliant, and [HIPAA eligible](/security/hipaa). Data is [encrypted](/security/encryption) at rest and in transit, and you can choose between [US and EU data regions](/security/data-regions). For full control, you can [self-host](/self-hosting) Langfuse on your own infrastructure with [data masking](/self-hosting/security/data-masking) and your own encryption keys. See our [security overview](/security) for details.",
+      "Yes. Langfuse Cloud is [SOC 2 Type II](/security/soc2) certified, [ISO 27001](/security/iso27001) compliant, [GDPR](/security/gdpr) compliant, and offers a [HIPAA-ready region](/security/hipaa). Data is [encrypted](/security/encryption) at rest and in transit, and you can choose between [US, EU, Japan, and HIPAA data regions](/security/data-regions). For full control, you can [self-host](/self-hosting) Langfuse on your own infrastructure with [data masking](/self-hosting/security/data-masking) and your own encryption keys. See our [security overview](/security) for details.",
   },
   {
     question: "How do I get started?",

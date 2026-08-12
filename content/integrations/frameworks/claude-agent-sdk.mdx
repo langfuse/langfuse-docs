@@ -17,7 +17,7 @@ This notebook demonstrates how to capture detailed traces from the [Claude Agent
 > The [Claude Agent SDK](https://platform.claude.com/docs/en/agent-sdk/overview) is Anthropic's open-source framework for building AI agents. It provides a clean API for creating tool-using agents, including native support for MCP.
 
 > **What is Langfuse?**\
-> [Langfuse](https://langfuse.com) is the open source LLM engineering platform. It provides detailed tracing, monitoring, and analytics for every prompt, model response, and tool call in your agent, making it easy to debug, evaluate, and iterate on LLM applications.
+> [Langfuse](https://langfuse.com) is the open source AI engineering platform. It provides detailed tracing, monitoring, and analytics for every prompt, model response, and tool call in your agent, making it easy to debug, evaluate, and iterate on LLM applications.
 
 <Steps>
 ## Step 1: Install Dependencies
@@ -34,13 +34,13 @@ Set up your **Langfuse** API keys ([Langfuse Cloud](https://cloud.langfuse.com) 
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-***"
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-***"
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-***");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-***");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your Anthropic API key
-os.environ["ANTHROPIC_API_KEY"] = "sk-ant-***"
+os.environ.setdefault("ANTHROPIC_API_KEY", "sk-ant-***");
 ```
 
 With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.

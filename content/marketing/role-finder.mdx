@@ -1,0 +1,57 @@
+---
+title: Find your role at Langfuse
+description: "Answer a few quick questions and we'll point you to the Langfuse role that fits you best."
+contentWidth: docs
+---
+
+import { Heading } from "@/components/ui/heading";
+import { Text } from "@/components/ui/text";
+import { TextHighlight } from "@/components/ui/text-highlight";
+import { Button } from "@/components/ui/button";
+import { Link } from "@/components/ui/link";
+import IconLinkedin from "@/components/icons/linkedin";
+import { RoleFinder } from "@/components/role-finder";
+
+<div className="not-prose flex flex-col gap-4 mb-10 items-center text-center">
+  <Heading as="h1" size="large">
+    <TextHighlight>Which role fits you?</TextHighlight>
+  </Heading>
+  <Text>
+    Answer 2–3 quick questions and we'll point you to the open role that fits
+    you best.
+  </Text>
+</div>
+
+<RoleFinder />
+
+<div className="not-prose mt-10 flex flex-wrap items-center justify-center gap-3">
+  <Button
+    href="https://jobs.ashbyhq.com/langfuse"
+    target="_blank"
+    rel="noopener noreferrer"
+    variant="secondary"
+  >
+    See all open roles
+  </Button>
+  <Button href="/careers" variant="secondary">
+    Read more on the careers page
+  </Button>
+</div>
+
+<div className="not-prose mt-8 flex flex-col items-center gap-3 text-center">
+  <div className="flex flex-wrap items-center justify-center gap-2">
+    <Text>
+      Didn't find a role that fits? Follow us on LinkedIn to not miss any
+      openings.
+    </Text>
+    <Link
+      href="https://www.linkedin.com/company/langfuse/"
+      aria-label="LinkedIn"
+      className="text-text-tertiary transition-colors hover:text-text-primary"
+      target="_blank"
+      rel="nofollow noreferrer"
+    >
+      <IconLinkedin className="size-5" />
+    </Link>
+  </div>
+</div>

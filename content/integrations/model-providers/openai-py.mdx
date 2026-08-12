@@ -4,6 +4,7 @@ sidebarTitle: OpenAI (Python)
 seoTitle: Open Source Observability for OpenAI (Python)
 description: Drop-in replacement of OpenAI SDK (Python) to get full observability in Langfuse by changing only the import.
 logo: /images/integrations/openai_icon.svg
+logoAppearance: dark
 ---
 
 # Observability for OpenAI SDK (Python)
@@ -106,18 +107,6 @@ get_client().auth_check()
 
 _No changes required._
 
-Check out the notebook for end-to-end examples of the integration:
-
-import { FileCode } from "lucide-react";
-
-<Cards>
-  <Card
-    title="Example notebook"
-    href="/guides/cookbook/integration_openai_sdk"
-    icon={<FileCode />}
-  />
-</Cards>
-
 </Steps>
 
 ## Troubleshooting
@@ -199,7 +188,7 @@ export LANGFUSE_TRACING_ENABLED=false
 
 ## Advanced usage
 
-### Custom trace properties
+### Custom trace properties [#custom-trace-properties]
 
 You can add the following properties to the openai method:
 
@@ -379,7 +368,7 @@ get_client().flush()
 
 Since OpenAI beta APIs are changing frequently across versions, we fully support only the stable APIs in the OpenAI SDK. If you are using a beta API, you can still use the Langfuse SDK by wrapping the OpenAI SDK manually with the `@observe()` [decorator](/docs/sdk/python/decorators).
 
-#### Structured Output
+#### Structured Output [#structured-output]
 
 For **structured output parsing**, you have two fully instrumented options depending on your `openai` Python SDK version:
 

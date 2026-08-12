@@ -1,8 +1,14 @@
-![GitHub Banner](https://github.com/langfuse/langfuse-docs/assets/2834609/e403ad73-73fa-43f0-9925-292b05ce58de)
+<img width="2400" height="600" alt="hero-b" src="https://github.com/user-attachments/assets/382a0209-262d-42b0-8107-e0997c568d13" />
 
 # Langfuse Docs
 
 Repo for [langfuse.com](https://langfuse.com). Built with [Fumadocs](https://fumadocs.vercel.app/) and Next.js App Router.
+
+> ### 🧑‍💻 We're hiring
+>
+> Langfuse is growing fast (we doubled the team in the last 6 months) - since January 2026 we're part of ClickHouse, we're hiring engineering hybrid across the EU.
+> We hire engineers who love open source and great developer experiences.
+> **[See open roles →](https://langfuse.com/careers?utm_source=github&utm_medium=readme&utm_campaign=hiring&utm_content=langfuse-docs)**
 
 ## Local Development
 
