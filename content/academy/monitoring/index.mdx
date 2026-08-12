@@ -16,7 +16,7 @@ description: How to make sense of your traces through metrics tracking, signal d
 
 It helps to separate monitoring into two distinct activities, because they answer different questions.
 
-**Aggregate metrics tracking** tells you whether things are getting better or worse over time. Cost, latency, evaluation scores — these become trends you can watch and reason about. Did that prompt change last Tuesday improve anything? Is quality drifting as usage grows?
+**[Aggregate metrics tracking](/docs/metrics/overview)** tells you whether things are getting better or worse over time. Cost, latency, evaluation scores — these become trends you can watch and reason about. Did that prompt change last Tuesday improve anything? Is quality drifting as usage grows?
 
 **Signal detection** tells you where to look right now. It surfaces individual traces that are worth investigating — an error, a cluster of retries, a user abandoning mid-conversation. The signal is only useful because it's attached to the specific trace that triggered it. That trace is your starting point for understanding what went wrong.
 
@@ -28,7 +28,7 @@ Beyond the built-in fields, you add evaluation — user feedback (explicit ratin
 
 ### Explicit and implicit user feedback [#user-feedback]
 
-User feedback is one of the richest sources of signal, but it comes in two forms with different tradeoffs.
+[User feedback](/docs/observability/features/user-feedback) is one of the richest sources of signal, but it comes in two forms with different tradeoffs.
 
 **Explicit feedback** is direct: a thumbs up or down, a star rating, a comment left by the user. The signal is unambiguous, but response rates are low and skewed — dissatisfied users respond more often than satisfied ones.
 
@@ -63,7 +63,7 @@ Implicit:  extracted field manually edited before approval
 </Tab>
 </Tabs>
 
-Both register as scores, so they feed into the same dashboards, trend charts, and signal rules as your other evaluation data. To figure out which feedback signals are worth turning into automated evaluators in the first place, see our deeper dive into [Error analysis](/academy/monitoring/error-analysis).
+Both register as [scores](/docs/evaluation/scores/overview), so they feed into the same [dashboards](/docs/metrics/features/custom-dashboards), trend charts, and signal rules as your other evaluation data. To figure out which feedback signals are worth turning into automated evaluators in the first place, see our deeper dive into [Error analysis](/academy/monitoring/error-analysis).
 
 <ManualGuideCallout
   href="/guides/user-feedback-loop"
@@ -73,7 +73,7 @@ Both register as scores, so they feed into the same dashboards, trend charts, an
 
 <Callout type="info">
 There are two types of automated evaluators to attach scores to traces:
-- LLM-as-a-judge (for quality signals or behavioral patterns like user disagreement)
+- [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) (for quality signals or behavioral patterns like user disagreement)
 - [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) (for precise checks on observations or experiments, not traces, like whether the response contains a certain word or exceeds a length limit).
 
 More on both can be found in the [Evaluate](/academy/evaluate) section.
