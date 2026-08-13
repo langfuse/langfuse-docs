@@ -51,10 +51,10 @@ type ChatProps = HTMLAttributes<HTMLDivElement>;
 export const Chat = ({ className, ...props }: ChatProps) => {
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  // Track user feedback for each message ID (null = no feedback)
-  const [userFeedback, setUserFeedback] = useState<
-    Map<string, "positive" | "negative" | null>
-  >(new Map());
+  // Track negative_user_feedback per message (true/false, null = none)
+  const [userFeedback, setUserFeedback] = useState<Map<string, boolean | null>>(
+    new Map(),
+  );
 
   // Auto-resize and scroll textarea to bottom when content changes
   useEffect(() => {
@@ -107,14 +107,14 @@ export const Chat = ({ className, ...props }: ChatProps) => {
 
   const handleFeedback = (
     messageId: string,
-    feedbackType: "positive" | "negative",
+    value: boolean,
     comment?: string,
   ) => {
-    setUserFeedback((prev) => new Map([...prev, [messageId, feedbackType]]));
+    setUserFeedback((prev) => new Map([...prev, [messageId, value]]));
 
     scoreDemoNegativeUserFeedback({
       traceId: messageId,
-      value: feedbackType === "negative",
+      value,
       comment,
     });
   };

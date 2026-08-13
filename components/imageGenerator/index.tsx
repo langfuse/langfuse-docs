@@ -40,9 +40,7 @@ export const ImageGenerator = ({
   const [loading, setLoading] = useState(false);
   const [currentImage, setCurrentImage] = useState<GeneratedImage | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<"positive" | "negative" | null>(
-    null,
-  );
+  const [feedback, setFeedback] = useState<boolean | null>(null);
 
   const userId = useMemo(() => {
     if (typeof window === "undefined") return null;
@@ -106,12 +104,12 @@ export const ImageGenerator = ({
     link.click();
   };
 
-  const handleFeedback = (feedbackType: "positive" | "negative") => {
+  const handleFeedback = (value: boolean) => {
     if (!currentImage) return;
-    setFeedback(feedbackType);
+    setFeedback(value);
     scoreDemoNegativeUserFeedback({
       traceId: currentImage.traceId,
-      value: feedbackType === "negative",
+      value,
     });
   };
 
@@ -223,10 +221,10 @@ export const ImageGenerator = ({
                   Rate this:
                 </span>
                 <button
-                  onClick={() => handleFeedback("positive")}
+                  onClick={() => handleFeedback(false)}
                   className={cn(
                     "p-1.5 rounded-[2px] transition-colors",
-                    feedback === "positive"
+                    feedback === false
                       ? "text-green-700 dark:text-green-400"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
                   )}
@@ -234,10 +232,10 @@ export const ImageGenerator = ({
                   <ThumbsUpIcon className="size-3.5" />
                 </button>
                 <button
-                  onClick={() => handleFeedback("negative")}
+                  onClick={() => handleFeedback(true)}
                   className={cn(
                     "p-1.5 rounded-[2px] transition-colors",
-                    feedback === "negative"
+                    feedback === true
                       ? "text-red-700 dark:text-red-400"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
                   )}
