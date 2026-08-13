@@ -1,8 +1,11 @@
 ---
 title: Migrate from Arize Phoenix to Langfuse
-description: "Step-by-step guide to migrating from Arize Phoenix to Langfuse: keep your OpenInference instrumentation, repoint one OTLP endpoint, and map datasets, experiments, and prompts."
+description: "Step-by-step guide to migrating from Arize Phoenix to Langfuse: keep OpenInference instrumentation, replace phoenix.otel.register(), and recreate datasets, prompts, and experiments."
 tags: [migration, guide]
 ---
+
+import { Cloud, MessageSquare } from "lucide-react";
+import { Details, Summary } from "@/components/Details";
 
 # Migrate from Arize Phoenix to Langfuse
 
@@ -10,30 +13,47 @@ This guide walks through migrating LLM observability from
 [Arize Phoenix](https://phoenix.arize.com) to [Langfuse](/): tracing first (usually a
 same-day change), then datasets, experiments, and prompts.
 
-**TL;DR:** Phoenix and Langfuse both ingest OpenTelemetry traces, and Langfuse recognizes
-OpenInference instrumentation natively. That means the tracing migration is not a
-re-instrumentation project: you keep your existing OpenInference setup and change the OTLP
-endpoint and auth headers. Datasets, prompts, and evaluators are recreated via the Langfuse
-SDK/API; experiments re-run against the migrated datasets.
+Dynatrace [announced a definitive agreement to acquire Arize](https://www.dynatrace.com/news/press-release/dynatrace-to-acquire-arize/) (August 2026).
+Arize AX and Phoenix continue to operate as they do today. This guide is for teams that have
+already decided to move to Langfuse. For a product comparison, see
+[Langfuse vs. Arize AX / Phoenix](/resources/engineering/best-phoenix-arize-alternatives).
+
+**TL;DR:** Keep your OpenInference instrumentors. Replace `phoenix.otel.register()` with the
+Langfuse client, then call `.instrument()` on the same OpenInference package. Datasets, prompts, and evaluators are
+recreated via the Langfuse SDK/API; experiments re-run against the migrated datasets.
+
+Want help cutting over? [Talk to us](/talk-to-us) about Cloud (EU, US, Japan; [HIPAA](/security/hipaa) on Pro+) or self-host. Core features match Cloud; enterprise governance modules need an [Enterprise license](/pricing-self-host) when self-hosted.
+
+<Cards num={2}>
+  <Card title="Get started free" href="https://cloud.langfuse.com" icon={<Cloud />} />
+  <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
+</Cards>
 
 ## Why teams migrate
 
 Teams tend to evaluate a Phoenix-to-Langfuse move for a few recurring reasons:
 
 - **Hosting and licensing model.** Phoenix is source-available under the Elastic License 2.0
-  with self-hosted images and a hosted offering at app.phoenix.arize.com (as of July 2026).
-  Langfuse's core is MIT-licensed open source, self-hosting is a
-  [first-class deployment mode](/self-hosting) with full tracing/evals/prompt-management
-  parity, and [Langfuse Cloud](https://cloud.langfuse.com) offers managed EU/US regions.
-- **Team and access management.** Growing teams often want org/project separation,
-  [role-based access control](/docs/administration/rbac), and SSO enforcement as the number
-  of people touching LLM data grows.
-- **One platform for the whole loop.** Langfuse combines tracing,
-  [evaluation](/docs/evaluation/overview), [prompt management](/docs/prompt-management), and
-  [dashboards](/docs/metrics/features/custom-dashboards) on one data model, so production
-  traces feed datasets, experiments, and online evaluators without an export step.
+  (as of August 2026). It is free to self-host on SQLite or PostgreSQL. Arize AX is a
+  separate proprietary product; self-hosting AX is an Enterprise option. Langfuse's core is
+  MIT-licensed, and [self-hosting](/self-hosting) runs the same core product as
+  [Langfuse Cloud](https://cloud.langfuse.com) (EU, US, Japan; [HIPAA](/security/hipaa) on Pro+ with a signed BAA). Enterprise
+  governance modules need an [Enterprise license](/pricing-self-host) when self-hosted.
+- **Organizations and tenancy.** A Phoenix instance is one tenant: projects live inside it,
+  with instance-wide [admin / member / viewer](https://arize.com/docs/phoenix/settings/access-control-rbac)
+  roles and OAuth2/LDAP. Langfuse adds [organizations](/docs/administration/rbac) above
+  projects, plus project-level RBAC and [Enterprise SSO](/docs/administration/authentication-and-sso). Phoenix documents org/space multi-tenancy and SAML as
+  [Arize AX](https://arize.com/docs/ax/security-and-settings/sso-and-rbac) features.
+- **One product for the production loop.** Phoenix covers tracing, evals, datasets,
+  experiments, and prompts as a local-first app. Continuous evals on production traffic with
+  alerting are an [Arize AX](https://arize.com/docs/ax/evaluate/online-evals) feature.
+  Langfuse keeps that loop on one MIT codebase: production traces feed
+  [datasets](/docs/evaluation/experiments/datasets) and
+  [experiments](/docs/evaluation/experiments/experiments-via-sdk),
+  [managed evaluators](/docs/evaluation/overview) can run on live traffic, and
+  [custom dashboards](/docs/metrics/features/custom-dashboards) sit on the same data model.
 
-Phoenix remains a capable tool, particularly for notebook-centric experimentation, and if it
+Phoenix remains a capable tool for local, notebook, and self-hosted workflows, and if it
 serves your team well, there is no urgency to move. This guide is for teams that have decided
 to consolidate on Langfuse.
 
@@ -41,108 +61,178 @@ to consolidate on Langfuse.
 
 Phoenix and Langfuse share most concepts, which keeps the mental migration small:
 
-| Phoenix                        | Langfuse                                                                                                                                                   | Notes                                                              |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| Project                        | Project                                                                                                                                                    | Langfuse adds organizations above projects                         |
-| Traces / spans (OpenInference) | [Traces / observations](/docs/observability/data-model)                                                                                                    | Same OTel foundation; spans map to observations                    |
-| Datasets                       | [Datasets](/docs/evaluation/experiments/datasets)                                                                                                          | Versioned example collections in both                              |
-| Experiments                    | [Experiments / dataset runs](/docs/evaluation/experiments)                                                                                                 | Runs linked to dataset items and scores                            |
-| Evals (LLM evals)              | [Evaluators / LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) + [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) | Langfuse evaluators can also run continuously on production traces |
-| Playground                     | [Playground](/docs/prompt-management/features/playground)                                                                                                  | Replay and iterate on traced calls                                 |
-| Prompt Management              | [Prompt Management](/docs/prompt-management)                                                                                                               | Versions, labels, and deployment via SDK                           |
+| Phoenix                        | Langfuse                                                                                                                                                   | Notes                                                                            |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Project                        | Project                                                                                                                                                    | Langfuse project is selected by API keys, not Phoenix `project_name`             |
+| Traces / spans (OpenInference) | [Traces / observations](/docs/observability/data-model)                                                                                                    | Same OTel foundation; spans map to observations                                  |
+| Datasets                       | [Datasets](/docs/evaluation/experiments/datasets)                                                                                                          | Versioned example collections in both                                            |
+| Experiments                    | [Experiments / dataset runs](/docs/evaluation/experiments/experiments-via-sdk)                                                                             | Runs linked to dataset items and scores                                          |
+| Evals (LLM and code)           | [Evaluators / LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) + [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) | Both can score experiments and traces. AX productizes online evals with alerting |
+| Playground                     | [Playground](/docs/prompt-management/features/playground)                                                                                                  | Replay and iterate on traced calls                                               |
+| Prompt Management              | [Prompt Management](/docs/prompt-management)                                                                                                               | Phoenix tags map to Langfuse labels                                              |
 
-## Step 1: Repoint your tracing (no re-instrumentation)
+## Step 1: Keep OpenInference, replace `register()` [#switch-exporter]
 
-If you instrumented with OpenInference, the common case for Phoenix users, your spans
-already speak OpenTelemetry, and Langfuse's [OTLP endpoint](/integrations/native/opentelemetry)
-lists `openinference.*` among its known LLM instrumentation scopes. The change is
-configuration, not code:
+Phoenix apps typically send traces with `phoenix.otel.register()`. Keep your OpenInference
+instrumentor (`pip install langfuse`). Replace `register()` with the Langfuse client, then
+call `.instrument()` on the same package. Application LLM calls stay unchanged.
 
-```bash
-# Before (Phoenix)
-PHOENIX_COLLECTOR_ENDPOINT="http://localhost:6006"
+```python
+# Before
+from phoenix.otel import register
 
-# After (Langfuse): standard OTel exporter variables
-OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel"  # EU region
-OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING},x-langfuse-ingestion-version=4"
+register(project_name="my-llm-app", auto_instrument=True)
+
+# After: your existing OpenInference instrumentor (OpenAI shown)
+from langfuse import get_client
+from openinference.instrumentation.openai import OpenAIInstrumentor  # or AnthropicInstrumentor, LangChainInstrumentor, ...
+
+get_client()
+OpenAIInstrumentor().instrument()
 ```
 
-`AUTH_STRING` is your base64-encoded Langfuse project keys
-(`echo -n "pk-lf-...:sk-lf-..." | base64`). If your exporter requires signal-specific
-configuration, the traces path is `/api/public/otel/v1/traces`. Langfuse accepts OTLP over
-HTTP in both protobuf and JSON encodings (no gRPC).
+Set `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL`
+(`https://cloud.langfuse.com` for EU; see [Get started](/docs/observability/get-started) for
+US, Japan, HIPAA, and self-hosted). Confirm LLM spans show as generations with input, output,
+and token/cost.
 
-Framework auto-instrumentation (LangChain, LlamaIndex, OpenAI SDK, and the other
-OpenInference instrumentations) keeps working unchanged: the spans simply arrive in Langfuse,
-where GenAI/OpenInference attributes map to Langfuse generations, tool observations, token
-usage, and cost tracking.
+Worked example: [Tracing using the OpenInference SDK](/integrations/other/openinference).
 
-Two things to verify in the first hour:
+<Details>
+<Summary>Phoenix tracing notes</Summary>
 
-1. **Trace grouping**: check that multi-span requests arrive as one trace with the expected
-   hierarchy (see [OTel property mapping](/integrations/native/opentelemetry) if attributes
-   land differently than expected).
-2. **User/session attribution**: Langfuse reads `user.id` and `session.id` attributes;
-   populate them where you previously relied on Phoenix-specific metadata.
+Do not rely on a naive OTEL env-var swap while still calling `register()`. That helper prefers
+`PHOENIX_COLLECTOR_ENDPOINT`, Bearer auth, and on Python defaults toward gRPC. Langfuse
+accepts [OTLP over HTTP](/integrations/native/opentelemetry) with Basic auth.
 
-You can also run both backends in parallel during a validation window by configuring an OTel
-collector with two exporters, a common pattern for de-risking the cutover.
+In the **application** process, unset `PHOENIX_COLLECTOR_ENDPOINT` and `PHOENIX_API_KEY`, and
+check for a `.env.phoenix` file (Phoenix SDKs auto-load it). Restart after the change. Langfuse
+routes traces by API key, not Phoenix `project_name`. Call `get_client()` **before**
+`.instrument()`. In scripts and notebooks, call `langfuse.flush()` before exit.
+
+If you already export with a generic `OTLPSpanExporter` or a collector (not `register()`),
+point that exporter at Langfuse:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel"  # EU
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING},x-langfuse-ingestion-version=4"
+OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+```
+
+`AUTH_STRING` is `echo -n "pk-lf-...:sk-lf-..." | base64`. The traces path is
+`/api/public/otel/v1/traces` when the exporter needs a signal-specific URL.
+
+Langfuse maps OpenTelemetry `user.id` / `session.id` (and `langfuse.user.id` /
+`langfuse.session.id`) when those attributes are set. HIPAA Cloud
+(`https://hipaa.cloud.langfuse.com`) is on Pro+ and needs a signed BAA before sending PHI.
+
+</Details>
 
 ## Step 2: Migrate datasets
 
-Export dataset examples from Phoenix (via its API/SDK) and recreate them with the Langfuse
-SDK. The shapes are close: each example's input, expected output, and metadata map directly:
+Export dataset examples with the Phoenix client and recreate them with the Langfuse SDK. The
+shapes are close: each example's input, expected output, and metadata map directly.
 
 ```python
+from phoenix.client import Client as PhoenixClient
 from langfuse import get_client
 
-langfuse = get_client()
+phoenix = PhoenixClient(base_url="http://localhost:6006")  # your Phoenix URL
+source = phoenix.datasets.get_dataset(dataset="my-dataset")
 
-for example in phoenix_examples:  # from Phoenix's dataset export
+langfuse = get_client()
+langfuse.create_dataset(name="my-dataset")  # skip if the dataset already exists
+
+for example in source:
     langfuse.create_dataset_item(
+        id=example["id"],
         dataset_name="my-dataset",
-        input=example.input,
-        expected_output=example.output,
-        metadata=example.metadata,
+        input=example["input"],
+        expected_output=example["output"],
+        metadata=example.get("metadata") or {},
     )
 ```
 
-Fields that have no direct Langfuse column (tags, split labels, provenance) belong in
-`metadata`: keep them, they cost nothing and preserve history.
+<Details>
+<Summary>Dataset import notes</Summary>
+
+This copies the latest snapshot, not the full version history. Pass `base_url` so the Phoenix
+client does not need `PHOENIX_COLLECTOR_ENDPOINT`. Authenticated Phoenix instances still need
+`PHOENIX_API_KEY` (or `api_key=`) in this export process only.
+
+A stable `id` (the Phoenix example id) makes a retry safe. Extra fields (tags, split labels,
+provenance) belong in `metadata`. Confirm item counts match after import.
+
+</Details>
 
 ## Step 3: Recreate prompts and evaluators
 
-- **Prompts:** create prompt versions in
-  [Langfuse Prompt Management](/docs/prompt-management) via SDK, using labels (e.g.
-  `production`, `staging`) where Phoenix used tags. Application code then fetches prompts by
-  name+label instead of embedding them.
+Copy Phoenix chat messages into a Langfuse `type="chat"` prompt. Phoenix tags map to Langfuse
+labels (for example `production`).
+
+```python
+langfuse.create_prompt(
+    name="my-prompt",
+    type="chat",
+    prompt=[{"role": "user", "content": "Answer in one sentence: {{question}}"}],
+    labels=["production"],
+)
+prompt = langfuse.get_prompt("my-prompt", label="production", type="chat")
+prompt.compile(question="Why is the ocean salty?")
+```
+
 - **Evaluators:** recreate LLM evals as [managed or custom LLM-as-a-judge
   evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge), or as
   [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) where they were
   Python functions. Evaluators in Langfuse can target production traces continuously (online
-  evaluation) in addition to experiment runs. This is worth setting up from day one, since it
-  removes the pull-traces-out-to-evaluate loop entirely.
+  evaluation) in addition to experiment runs.
 - **Experiments:** re-run against the migrated datasets via the
-  [experiments SDK](/docs/evaluation/experiments) or from the UI. Historical Phoenix
-  experiment results are best kept as an archived reference rather than imported: scores are
-  cheap to regenerate on the current dataset, and cross-tool score comparability is shaky
-  anyway.
+  [experiments SDK](/docs/evaluation/experiments/experiments-via-sdk) or from the UI.
+
+```python
+dataset = langfuse.get_dataset("my-dataset")
+
+def task(*, item, **kwargs):
+    messages = prompt.compile(**item.input)
+    return run_your_app(messages)  # same path as production
+
+dataset.run_experiment(name="after-migration", task=task)
+```
+
+<Details>
+<Summary>Prompt template notes</Summary>
+
+Use `type="text"` only for a single string. Convert F-string placeholders (`{question}`) to
+Langfuse variables (`{{question}}`). Simple Mustache variables already match; sections and
+conditionals are not handled by Langfuse `compile()`. Put model, tools, and response-format
+settings in prompt `config` if your app will read them; saving config does not apply them
+automatically. Unresolved `{{variables}}` are left as-is. Do not import historical Phoenix
+experiment scores.
+
+</Details>
 
 ## Step 4: Decide what to do with historical traces
 
-Most teams cut over fresh: old traces stay queryable in the old system for its retention
-window, and Langfuse becomes the system of record from cutover day. Bulk-importing historical
-traces is possible via the ingestion API but rarely worth it beyond a few showcase traces:
-volume-based pricing and the low value of stale traces argue against it.
+Most teams cut over fresh: old traces stay queryable in Phoenix, and Langfuse becomes the
+system of record from cutover day. Bulk-importing historical traces is rarely worth it beyond
+a few showcase traces.
+
+<Details>
+<Summary>If you need a few historical traces</Summary>
+
+There is no turn-key history import. Re-run those requests, or send OpenTelemetry via the
+[OTLP endpoint](/integrations/native/opentelemetry) with `x-langfuse-ingestion-version=4`. Do
+not use the deprecated ingestion API.
+
+</Details>
 
 ## Validation checklist
 
-- [ ] Traces arrive in Langfuse with correct hierarchy, timing, and token/cost data
-- [ ] User and session attribution works
-- [ ] Framework auto-instrumentation spans render as generations (not generic spans)
+- [ ] `phoenix.otel.register()` is gone; traces arrive as generations with token/cost data
+- [ ] User and session attribution works if you set `user.id` / `session.id`
 - [ ] Datasets migrated with item counts matching the source
-- [ ] Evaluators produce scores on a sample of new traces
 - [ ] Prompts resolve by name+label from application code
+- [ ] An experiment run exists on the migrated dataset
 - [ ] Team access set up (org/project roles, SSO if applicable)
 - [ ] Old exporter removed (or parallel window scheduled to end)
 
@@ -150,25 +240,49 @@ volume-based pricing and the low value of stale traces argue against it.
 
 ### Do I have to re-instrument my application?
 
-No. If you use OpenInference/OpenTelemetry instrumentation, you change the OTLP endpoint and
-auth headers. Re-instrumenting with the [Langfuse SDKs](/docs/observability/sdk/overview) later is optional
-and adds SDK-native features, but it is not required to migrate.
+No. Keep OpenInference. Replace `phoenix.otel.register()` with
+[Langfuse `get_client()`](/docs/observability/sdk/overview) and the same instrumentor's
+`.instrument()` call. Re-instrumenting with the Langfuse SDKs later is optional.
 
 ### Does Langfuse support the frameworks Phoenix instrumented?
 
 Langfuse has [native integrations](/integrations) for the major frameworks (LangChain,
-LlamaIndex, OpenAI, Vercel AI SDK, and more) and accepts any OpenInference instrumentation
-via OTLP, so framework coverage carries over rather than resetting.
+LlamaIndex, OpenAI, Vercel AI SDK, and more) and accepts OpenInference instrumentation
+via OTLP, so framework coverage carries over rather than resetting. See the
+[OpenInference cookbook](/integrations/other/openinference).
 
 ### Is Langfuse open source where Phoenix is?
 
-Langfuse's core platform is MIT-licensed and self-hostable with feature parity to Cloud;
-Phoenix is licensed under the Elastic License 2.0 (source-available) as of July 2026. Check
+Langfuse's core platform is MIT-licensed and self-hostable. Core features match Cloud; enterprise governance modules need an [Enterprise license](/pricing-self-host) when self-hosted.
+Phoenix is licensed under the Elastic License 2.0 (source-available) as of August 2026. Check
 both licenses against your compliance requirements: ELv2 restricts offering the software as
 a managed service, which matters to some platform teams.
 
 ### Can I evaluate old Phoenix traces in Langfuse?
 
-Evaluators run on data in Langfuse, so historical evaluation requires importing those traces
-first (see Step 4). The pragmatic path: start evaluators on new traffic at cutover and
-backfill only if a specific analysis demands it.
+Evaluators run on data in Langfuse, so historical evaluation requires those traces to exist
+in Langfuse first (see Step 4). The pragmatic path: start evaluators on new traffic at
+cutover and backfill only if a specific analysis demands it.
+
+<Details>
+<Summary>No traces, generic spans, or duplicate dataset items?</Summary>
+
+- **No traces:** confirm keys and `LANGFUSE_BASE_URL` were set before `get_client()`, the
+  instrumentor ran before application calls, `.env.phoenix` is unset in the app process, and
+  short-lived processes call `flush()`.
+- **Generic spans:** check that OpenInference is actually instrumenting the library you call.
+  LLM spans should carry `input.value` / `output.value` and model attributes.
+- **Duplicate dataset items:** pass a stable `id` (the Phoenix example id works) on
+  `create_dataset_item()`.
+
+</Details>
+
+## Get help with the migration [#get-help]
+
+Start on [Langfuse Cloud](https://cloud.langfuse.com) or [self-host](/self-hosting). If you
+want a migration plan, [talk to us](/talk-to-us).
+
+<Cards num={2}>
+  <Card title="Get started free" href="https://cloud.langfuse.com" icon={<Cloud />} />
+  <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
+</Cards>
