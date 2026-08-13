@@ -28,7 +28,7 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
 ## Summary
 
-<div className="not-prose my-8 rounded-2xl border border-muted-blue/20 bg-gradient-to-br from-muted-blue/15 via-muted-blue/5 to-background p-6 shadow-sm md:p-8">
+<div className="not-prose my-8 rounded-lg border border-line-structure bg-surface-beige-accent p-6 md:p-8">
   <div className="space-y-4 text-[15px] leading-7 text-foreground/90 md:text-base">
     <p>Niels Rogge, a Machine Learning Engineer at Hugging Face, built an overnight AI agent that finds open-source models trapped in GitHub repos and Google Drive folders, and opens GitHub issues or pull requests to help authors share them on Hugging Face.</p>
 
@@ -36,12 +36,12 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
     <p>Langfuse gave Niels full visibility into every step of the agent from one place, saving him from debugging half-blind.</p>
 
+    <p>That visibility let him quickly identify and pull the exact levers that improved the agent's performance, running classification five times with a majority vote, and adding the missing README to the prompt.</p>
+
   </div>
 </div>
 
 ## Improving open-source model discovery
-
-That visibility let him quickly identify and pull the exact levers that improved the agent's performance, running classification five times with a majority vote, and adding the missing README to the prompt.
 
 The [Hugging Face Hub](https://huggingface.co/)’s core value is simple: it's where you go to find open-source AI models and datasets, filterable by task, library, license, and more. Currently, the hub supports nearly 3 million public models and 1 million public datasets. Despite this impressive growth, lots of research is still not shared on the hub. Every day, 100 to 350 new AI research papers hit arXiv, and a meaningful share of them describe open-source artifacts that never make it to the Hub. They're stuck in a hidden GitHub repository, or a Google Drive link buried in a paper's footnotes. A big missed opportunity, both for Hugging Face who would love to surface everything available to the open-source community and for the authors who can increase the visibility and discoverability of their work.
 
@@ -79,7 +79,7 @@ He'd seen Langfuse in action at ML6, a Belgium-based AI consultancy where he wor
 
 Wiring Langfuse in was little work. Setup took a few lines of the [Langfuse Python SDK](/docs/observability/sdk/overview), added directly into the agent's existing code, no separate service to stand up (it’s even easier now with the [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill)). Niels' workflow isn't a chat-like interaction, though. His agent has no conversations. It processes one paper at a time, fully on its own, so the usual pattern of sessions grouping the turns of a chat didn't map onto what he was doing.
 
-His approach: use each paper's arXiv ID as the [session identifier](/docs/observability/features/sessions) instead. Rather than a session grouping the back-and-forth of one conversation, it now groups everything that happens for one paper. One paper, one session. Each agent runs on that paper, one trace. The four [LLM-call steps](/docs/observability/data-model#observations-and-traces) inside that run (finding a GitHub URL, checking a project page as fallback, classifying, taking the majority vote) became observations underneath. That let him move between "what happened for this paper" and "what's happening across the whole pipeline," which mattered more than any single feature.
+His approach: use each paper's arXiv ID as the [session identifier](/docs/observability/features/sessions) instead. Rather than a session grouping the back-and-forth of one conversation, it now groups everything that happens for one paper. One paper, one session. Each agent runs on that paper, one trace. The four [LLM-call steps](/docs/observability/data-model#observations-and-traces) inside that run (finding a GitHub URL, checking a project page as fallback, classifying, taking the majority vote) became observations underneath.
 
 <div className="flex justify-center">
   <Frame fullWidth className="w-2/3">
@@ -94,7 +94,7 @@ His approach: use each paper's arXiv ID as the [session identifier](/docs/observ
   company="Hugging Face"
 />
 
-Before [tracing](/docs/observability/overview), Niels only had the agent's final actions to go on: an issue got opened or it didn't, a pull request looked right or it didn't. No way to see the steps in between. Complexity increased as his prompts were assembled dynamically, filled in with paper-specific variables and few-shot examples, so he'd been debugging half-blind. Once instrumented, every LLM-call step in a run left a record he could open: what prompt and context went in, what came back, how it fed the next step.
+Before [tracing](/docs/observability/overview), Niels could only see the agent's final actions, leaving him to debug dynamically assembled prompts without visibility into the steps in between. Once instrumented, every LLM call recorded its prompt and context, output, and how it fed the next step.
 
 <CustomerQuote
   quote="A lot of my prompts are dynamic. I have a prompt but then some variable that needs to dynamically be filled in. And with Langfuse, you can actually see what's getting filled in in that template."
@@ -103,15 +103,13 @@ Before [tracing](/docs/observability/overview), Niels only had the agent's final
   company="Hugging Face"
 />
 
-"Why did it do that?" stopped being a guessing game, which is what made the two fixes below possible.
-
-Niels estimates 50 to 100 issue replies a day from the GitHub side alone, plus a similar volume of merged Hugging Face pull requests, drawn from 100 to 350 new papers a day. Multiply that by four LLM steps per paper, several running in parallel. Having all of that in one place, rather than scattered across logs and guesswork, meant Niels no longer had to reconstruct what happened after the fact, he could just look.
+Niels estimates 50 to 100 issue replies a day from the GitHub side alone, plus a similar volume of merged Hugging Face pull requests, drawn from 100 to 350 new papers a day. Multiply that by four LLM steps per paper, several running in parallel.
 
 ## Why you should be looking at your traces
 
 The clearest value Niels got from Langfuse was simply seeing what the agent's LLM calls actually looked like. Two concrete examples show why.
 
-**Finding the right GitHub link.** One of the agent's first steps is pulling a paper's GitHub URL or project page from a structured JSON output. Using the rendered prompts, Niels could confirm whether the GitHub link was even present in what the model saw. That's the difference between "the model missed it" and "the model never had it."
+**Finding the right GitHub link.** One of the agent's first steps is pulling a paper's GitHub URL or project page from a structured JSON output. Using the rendered prompts, Niels could confirm whether the GitHub link was even present in what the model saw.
 
 **Fixing an unreliable classification step.** The agent's biggest decision is whether a paper is worth reaching out to at all.
 
@@ -121,8 +119,6 @@ The clearest value Niels got from Langfuse was simply seeing what the agent's LL
   role="Machine Learning Engineer"
   company="Hugging Face"
 />
-
-Latency doesn't matter on an overnight job, so the extra calls were cheap. Misclassifications became rare.
 
 ## Doing error analysis the manual way
 
@@ -136,9 +132,9 @@ After those initial fixes were in, Niels wanted to approach improvements more sy
 
 He uncovered a few clear patterns. The agent hallucinated code on a good share of pull requests, and made up GitHub URLs in others.
 
-Digging deeper into the first one: the agent had fabricated code in several pull requests, plausible snippets that didn't come from the actual repo. The cause was simple. The agent didn't have access to the project's GitHub README, so it invented something when it needed to describe the code. Niels fixed the system prompt to include the README, plus a few other issues the same review turned up.
+Digging deeper into the traces in Langfuse, Niels identified the root cause: the agent didn't have access to the project's GitHub README. He added it to the system prompt, along with fixes for a few other issues the review surfaced.
 
-A week later he ran the same review on fresh output. The hallucinations were gone, along with most of the other issues.
+A week after shipping the fixes, he ran the same review on fresh output. The hallucinations were gone, along with most of the other issues.
 
 He hasn't needed to repeat it often since. Out of hundreds to thousands of issues and pull requests, he's gotten scarcely any negative feedback. That's his proxy for how well it's performing, and it's a good illustration of how far a systematic pass through your trace data can take you: two rounds of manual error analysis, and the agent has been running reliably ever since.
 
