@@ -43,7 +43,7 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
 ## Improving open-source model discovery
 
-The [Hugging Face Hub](https://huggingface.co/)’s core value is simple: it's where you go to find open-source AI models and datasets, filterable by task, library, license, and more. Currently, the hub supports nearly 3 million public models and 1 million public datasets. Despite this impressive growth, lots of research is still not shared on the hub. Every day, 100 to 350 new AI research papers hit arXiv, and a meaningful share of them describe open-source artifacts that never make it to the Hub. They're stuck in a hidden GitHub repository, or a Google Drive link buried in a paper's footnotes. A big missed opportunity, both for Hugging Face who would love to surface everything available to the open-source community and for the authors who can increase the visibility and discoverability of their work.
+The [Hugging Face Hub](https://huggingface.co/)'s core value is simple: it's where you go to find open-source AI models and datasets, filterable by task, library, license, and more. Currently, the hub supports nearly 3 million public models and 1 million public datasets. Despite this impressive growth, lots of research is still not shared on the hub. Every day, 100 to 350 new AI research papers hit arXiv, and a meaningful share of them describe open-source artifacts that never make it to the Hub. They're stuck in a hidden GitHub repository, or a Google Drive link buried in a paper's footnotes. A big missed opportunity, both for Hugging Face who would love to surface everything available to the open-source community and for the authors who can increase the visibility and discoverability of their work.
 
 <div className="flex justify-center">
   <Frame fullWidth className="w-2/3">
@@ -51,7 +51,7 @@ The [Hugging Face Hub](https://huggingface.co/)’s core value is simple: it's w
   </Frame>
 </div>
 
-Closing that gap has been Niels Rogge's job. A Machine Learning Engineer at Hugging Face, Niels finds these hidden artifacts and helps authors make them discoverable on the Hub. Reach out is mostly done by opening a GitHub issue if the artifacts are missing entirely, or a pull request on the hub if they are there already but missing the metadata that makes them filterable. He started doing this by hand. Then the volume outgrew him, so he built an AI agent to do it overnight, and turned to Langfuse to make sure he could actually trust it running unsupervised.
+Closing that gap has been Niels Rogge's job. A Machine Learning Engineer at Hugging Face, Niels finds these hidden artifacts and helps authors make them discoverable on the Hub. He usually reaches out by opening a GitHub issue if the artifacts are missing entirely, or a pull request on the hub if they are there already but missing the metadata that makes them filterable. He started doing this by hand. Then the volume outgrew him, so he built an AI agent to do it overnight, and turned to Langfuse to make sure he could actually trust it running unsupervised.
 
 <Frame fullWidth className="w-full">
   ![Workflow from new arXiv papers through classification and Hub checks to GitHub issues or pull requests](/images/customers/hugging-face/workflow.png)
@@ -67,7 +67,7 @@ Niels started by hand: reading papers, finding the corresponding GitHub repos, o
   </Frame>
 </div>
 
-To ensure the highest-quality contributions to the Hugging Face community, Niels wants every message to meet his standards and reflect what he would have written himself. It's important that he trusts the agent to act on his behalf. He writes its messages from the same templates he used doing this by hand, and keeps the tone as if it's him reaching out. It's working: authors send him thank-yous on LinkedIn, follow-up emails and Niels is able to scale his personal follow ups, effectively replacing himself.
+To ensure the highest-quality contributions to the Hugging Face community, Niels wants every message to meet his standards and reflect what he would have written himself. It's important that he trusts the agent to act on his behalf. He writes its messages from the same templates he used doing this by hand, and keeps the tone as if it's him reaching out. It's working: authors send him thank-yous on LinkedIn and follow-up emails, and Niels is able to scale his personal follow-ups, effectively replacing himself.
 
 ## Why Langfuse
 
@@ -75,9 +75,9 @@ Niels didn't reach for an observability and evaluation tool right away. He spent
 
 He'd seen Langfuse in action at ML6, a Belgium-based AI consultancy where he worked alongside his Hugging Face role. The open-source license of Langfuse mattered too, matching the same values Hugging Face itself is built on. Some companies he'd consulted for wouldn't allow a fully managed platform and needed something [self-hostable](/self-hosting). A generous free tier and a low barrier of entry made Langfuse an easy pick.
 
-## The Breakthrough: Tracing the 'Black Box
+## The breakthrough: tracing the black box
 
-Wiring Langfuse in was little work. Setup took a few lines of the [Langfuse Python SDK](/docs/observability/sdk/overview), added directly into the agent's existing code, no separate service to stand up (it’s even easier now with the [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill)). Niels' workflow isn't a chat-like interaction, though. His agent has no conversations. It processes one paper at a time, fully on its own, so the usual pattern of sessions grouping the turns of a chat didn't map onto what he was doing.
+Wiring Langfuse in was little work. Setup took a few lines of the [Langfuse Python SDK](/docs/observability/sdk/overview), added directly into the agent's existing code, no separate service to stand up (it's even easier now with the [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill)). Niels' workflow isn't a chat-like interaction, though. His agent has no conversations. It processes one paper at a time, fully on its own, so the usual pattern of sessions grouping the turns of a chat didn't map onto what he was doing.
 
 His approach: use each paper's arXiv ID as the [session identifier](/docs/observability/features/sessions) instead. Rather than a session grouping the back-and-forth of one conversation, it now groups everything that happens for one paper. One paper, one session. Each agent runs on that paper, one trace. The four [LLM-call steps](/docs/observability/data-model#observations-and-traces) inside that run (finding a GitHub URL, checking a project page as fallback, classifying, taking the majority vote) became observations underneath.
 
@@ -122,7 +122,7 @@ The clearest value Niels got from Langfuse was simply seeing what the agent's LL
 
 ## Doing error analysis the manual way
 
-After those initial fixes were in, Niels wanted to approach improvements more systematically. Inspired by Hamel Husain’s framework for [error analysis](/academy/monitoring/error-analysis), he performed a 'manual stress test' on 50 recent pull requests, comparing what his agent did, to what he would have manually done. Evaluation was done in a simple spreadsheet.
+After those initial fixes were in, Niels wanted to approach improvements more systematically. Inspired by Hamel Husain's framework for [error analysis](/academy/monitoring/error-analysis), he performed a "manual stress test" on 50 recent pull requests, comparing what his agent did, to what he would have manually done. Evaluation was done in a simple spreadsheet.
 
 <div className="flex justify-center">
   <Frame fullWidth className="w-2/3">
