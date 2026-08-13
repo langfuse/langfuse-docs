@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Loader } from "@/components/ai-elements/loader";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId";
-import { scoreDemoFeedback } from "@/components/demoLangfuseBrowserClients";
+import { scoreDemoNegativeUserFeedback } from "@/components/demoLangfuseBrowserClients";
 import { SendIcon, ThumbsUpIcon, ThumbsDownIcon } from "lucide-react";
 
 type SentimentResult = {
@@ -54,7 +54,9 @@ export const SentimentClassifier = ({
     inputText: string;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState<"positive" | "negative" | null>(
+    null,
+  );
 
   const userId = useMemo(() => {
     if (typeof window === "undefined") return null;
@@ -100,14 +102,12 @@ export const SentimentClassifier = ({
     }
   };
 
-  const handleFeedback = (value: number) => {
+  const handleFeedback = (feedbackType: "positive" | "negative") => {
     if (!result) return;
-    setFeedback(value);
-    scoreDemoFeedback({
+    setFeedback(feedbackType);
+    scoreDemoNegativeUserFeedback({
       traceId: result.traceId,
-      id: `user-feedback-${result.traceId}`,
-      name: "user-feedback",
-      value,
+      value: feedbackType === "negative",
     });
   };
 
@@ -249,10 +249,10 @@ export const SentimentClassifier = ({
                   Was this classification accurate?
                 </span>
                 <button
-                  onClick={() => handleFeedback(1)}
+                  onClick={() => handleFeedback("positive")}
                   className={cn(
                     "p-1.5 rounded-[2px] transition-colors",
-                    feedback === 1
+                    feedback === "positive"
                       ? "text-green-700 dark:text-green-400"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
                   )}
@@ -260,10 +260,10 @@ export const SentimentClassifier = ({
                   <ThumbsUpIcon className="size-3.5" />
                 </button>
                 <button
-                  onClick={() => handleFeedback(0)}
+                  onClick={() => handleFeedback("negative")}
                   className={cn(
                     "p-1.5 rounded-[2px] transition-colors",
-                    feedback === 0
+                    feedback === "negative"
                       ? "text-red-700 dark:text-red-400"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
                   )}

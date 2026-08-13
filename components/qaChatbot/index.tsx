@@ -39,7 +39,7 @@ import {
   ToolOutput,
   ToolInput,
 } from "@/components/ai-elements/tool";
-import { scoreDemoFeedback } from "@/components/demoLangfuseBrowserClients";
+import { scoreDemoNegativeUserFeedback } from "@/components/demoLangfuseBrowserClients";
 import { FeedbackDialog } from "./FeedbackPopover";
 import { cn } from "@/lib/utils";
 import type { UIMessage } from "ai";
@@ -51,10 +51,10 @@ type ChatProps = HTMLAttributes<HTMLDivElement>;
 export const Chat = ({ className, ...props }: ChatProps) => {
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  // Track user feedback for each message ID (1 = thumbs up, 0 = thumbs down, null = no feedback)
-  const [userFeedback, setUserFeedback] = useState<Map<string, number | null>>(
-    new Map(),
-  );
+  // Track user feedback for each message ID (null = no feedback)
+  const [userFeedback, setUserFeedback] = useState<
+    Map<string, "positive" | "negative" | null>
+  >(new Map());
 
   // Auto-resize and scroll textarea to bottom when content changes
   useEffect(() => {
@@ -107,17 +107,14 @@ export const Chat = ({ className, ...props }: ChatProps) => {
 
   const handleFeedback = (
     messageId: string,
-    value: number,
+    feedbackType: "positive" | "negative",
     comment?: string,
   ) => {
-    // Update the local state
-    setUserFeedback((prev) => new Map([...prev, [messageId, value]]));
+    setUserFeedback((prev) => new Map([...prev, [messageId, feedbackType]]));
 
-    scoreDemoFeedback({
+    scoreDemoNegativeUserFeedback({
       traceId: messageId,
-      id: `user-feedback-${messageId}`,
-      name: "user-feedback",
-      value,
+      value: feedbackType === "negative",
       comment,
     });
   };

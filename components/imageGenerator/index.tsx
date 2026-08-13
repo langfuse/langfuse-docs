@@ -7,7 +7,7 @@ import { Loader } from "@/components/ai-elements/loader";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 import { Image as AiImage } from "@/components/ai-elements/image";
 import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId";
-import { scoreDemoFeedback } from "@/components/demoLangfuseBrowserClients";
+import { scoreDemoNegativeUserFeedback } from "@/components/demoLangfuseBrowserClients";
 import {
   SendIcon,
   DownloadIcon,
@@ -40,7 +40,9 @@ export const ImageGenerator = ({
   const [loading, setLoading] = useState(false);
   const [currentImage, setCurrentImage] = useState<GeneratedImage | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState<"positive" | "negative" | null>(
+    null,
+  );
 
   const userId = useMemo(() => {
     if (typeof window === "undefined") return null;
@@ -104,14 +106,12 @@ export const ImageGenerator = ({
     link.click();
   };
 
-  const handleFeedback = (value: number) => {
+  const handleFeedback = (feedbackType: "positive" | "negative") => {
     if (!currentImage) return;
-    setFeedback(value);
-    scoreDemoFeedback({
+    setFeedback(feedbackType);
+    scoreDemoNegativeUserFeedback({
       traceId: currentImage.traceId,
-      id: `user-feedback-${currentImage.traceId}`,
-      name: "user-feedback",
-      value,
+      value: feedbackType === "negative",
     });
   };
 
@@ -223,10 +223,10 @@ export const ImageGenerator = ({
                   Rate this:
                 </span>
                 <button
-                  onClick={() => handleFeedback(1)}
+                  onClick={() => handleFeedback("positive")}
                   className={cn(
                     "p-1.5 rounded-[2px] transition-colors",
-                    feedback === 1
+                    feedback === "positive"
                       ? "text-green-700 dark:text-green-400"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
                   )}
@@ -234,10 +234,10 @@ export const ImageGenerator = ({
                   <ThumbsUpIcon className="size-3.5" />
                 </button>
                 <button
-                  onClick={() => handleFeedback(0)}
+                  onClick={() => handleFeedback("negative")}
                   className={cn(
                     "p-1.5 rounded-[2px] transition-colors",
-                    feedback === 0
+                    feedback === "negative"
                       ? "text-red-700 dark:text-red-400"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
                   )}

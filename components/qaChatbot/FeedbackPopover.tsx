@@ -19,8 +19,12 @@ import { Textarea } from "../ui/textarea";
 interface FeedbackDialogProps {
   messageId: string;
   feedbackType: "positive" | "negative";
-  currentFeedback: number | null;
-  onFeedback: (messageId: string, value: number, comment?: string) => void;
+  currentFeedback: "positive" | "negative" | null;
+  onFeedback: (
+    messageId: string,
+    feedbackType: "positive" | "negative",
+    comment?: string,
+  ) => void;
 }
 
 export const FeedbackDialog = ({
@@ -32,12 +36,10 @@ export const FeedbackDialog = ({
   const [comment, setComment] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
-  const feedbackValue = feedbackType === "positive" ? 1 : 0;
-  const isActive = currentFeedback === feedbackValue;
+  const isActive = currentFeedback === feedbackType;
 
   const handleSubmit = () => {
-    // Update feedback with comment
-    onFeedback(messageId, feedbackValue, comment.trim() || undefined);
+    onFeedback(messageId, feedbackType, comment.trim() || undefined);
     setComment("");
     setIsOpen(false);
   };
@@ -45,7 +47,7 @@ export const FeedbackDialog = ({
   const handleOpenChange = (open: boolean) => {
     if (open && !isActive) {
       // Submit feedback when popover opens (only if not already active)
-      onFeedback(messageId, feedbackValue);
+      onFeedback(messageId, feedbackType);
     }
     setIsOpen(open);
   };
