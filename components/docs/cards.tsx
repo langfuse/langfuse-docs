@@ -25,7 +25,7 @@ export type CardProps = Omit<FumadocsCardProps, "title"> & {
   title?: React.ReactNode;
   contentClassName?: string;
   contentWrapperClassName?: string;
-  /** Show a trailing chevron on linked cards to signal they are clickable. */
+  /** Trailing chevron signalling that a linked card is clickable. Defaults to true. */
   arrow?: boolean;
 };
 
@@ -33,7 +33,7 @@ export function Card({
   icon,
   title = "",
   description = "",
-  arrow = false,
+  arrow = true,
   children,
   contentClassName,
   contentWrapperClassName,
