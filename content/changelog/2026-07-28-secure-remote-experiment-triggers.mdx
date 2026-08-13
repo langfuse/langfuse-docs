@@ -13,13 +13,13 @@ import { Book } from "lucide-react";
 
 Remote experiment triggers can now be secured before your evaluation service starts a run.
 
-![Remote experiment trigger setup form](/images/changelog/2026-07-28-secure-remote-experiment-triggers.png)
-
 - Enable the optional `x-langfuse-signature` HMAC header so your service can verify that requests came from Langfuse.
 - Add custom headers for service-specific authentication or routing.
 - Return a fast 2xx response and continue the experiment asynchronously.
 
 Existing remote experiment configurations continue to work without signing or custom headers.
+
+![Remote experiment trigger setup form](/images/changelog/2026-07-28-secure-remote-experiment-triggers.png)
 
 <Cards num={1}>
   <Card
