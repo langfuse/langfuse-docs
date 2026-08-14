@@ -57,6 +57,7 @@ const companies: CompanyLogo[] = [
   {
     name: "Hugging Face",
     logo: huggingfaceLogo,
+    customerStoryPath: "/users/hugging-face",
   },
   {
     name: "Intuit",

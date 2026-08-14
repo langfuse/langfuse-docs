@@ -59,13 +59,13 @@ const companiesWithStories = [
     path: "/users/merckgroup",
     logo: merckLogo,
   },
+  { name: "Hugging Face", path: "/users/hugging-face", logo: huggingfaceLogo },
 ];
 
 // Companies without customer stories (logos only)
 const companiesWithoutStories = [
   { name: "Samsara", logo: samsaraLogo },
   { name: "Twilio", logo: twilioLogo },
-  { name: "Hugging Face", logo: huggingfaceLogo },
   { name: "Pigment", logo: pigmentLogo },
   {
     name: "Intuit",
@@ -251,7 +251,7 @@ export function Customers() {
       // Continue with rest in desired order...
       { type: "logo", name: "Samsara" },
       { type: "logo", name: "Twilio" },
-      { type: "logo", name: "Hugging Face" },
+      { type: "story", name: "Hugging Face" },
       { type: "logo", name: "Pigment" },
       { type: "logo", name: "Ramp" },
       { type: "logo", name: "freee" },
