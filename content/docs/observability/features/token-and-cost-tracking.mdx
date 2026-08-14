@@ -23,7 +23,7 @@ In the UI, Langfuse summarizes all usage types that include the string `input` a
 Both usage details and cost details can be either
 
 - [**ingested**](#ingest) via API, SDKs or integrations
-- or [**inferred**](#infer) based on the `model` parameter of the generation. Langfuse comes with a list of predefined popular models and their tokenizers including OpenAI, Anthropic, and Google models. You can also add your own [custom model definitions](#custom-model-definitions) or request official support for new models via [GitHub](/issue). Inferred cost are calculated at the time of ingestion with the model and price information available at that point in time.
+- or [**inferred**](#infer) based on the `model` parameter of the generation. Langfuse comes with a list of predefined popular models and their tokenizers including OpenAI, Anthropic, and Google models. You can also add your own [custom model definitions](#custom-model-definitions) or request official support for new models via [GitHub](/issue). Inferred cost are calculated at the time of ingestion with the model and price information available at that point in time. Models with context-dependent pricing use [pricing tiers](#pricing-tiers) so the correct rate is applied based on token volume.
 
 Ingested usage and cost are prioritized over inferred usage and cost:
 
@@ -48,6 +48,32 @@ Once usage and cost are tracked, you can put the data to work:
 - **[Create dashboards](/docs/metrics/features/custom-dashboards):** monitor cost across models, tags, or users.
 - **[Set up alerts](/docs/metrics/features/alerts):** get notified automatically when spend crosses a threshold.
 - **[Query with the Metrics API](/docs/metrics/features/metrics-api):** retrieve aggregated usage and cost, filtered by application type, user, or tags, for analytics, billing, and rate-limiting.
+
+## Pricing tiers [#pricing-tiers]
+
+Some model providers charge different rates depending on the number of input tokens used. For example, Anthropic's Claude Sonnet 4.5 and Google's Gemini 2.5 Pro apply higher pricing when more than 200K input tokens are used.
+
+Langfuse supports **pricing tiers** for models, enabling accurate cost calculation for these context-dependent pricing structures.
+
+### How tier matching works
+
+Each model can have multiple pricing tiers, each with:
+
+- **Name**: A descriptive name (e.g., "Standard", "Large Context")
+- **Priority**: Evaluation order (0 is reserved for default tier)
+- **Conditions**: Rules that determine when the tier applies
+- **Prices**: Cost per usage type for this tier
+
+When calculating cost, Langfuse evaluates tiers in priority order (excluding the default tier). The first tier whose conditions are satisfied is used. If no conditional tier matches, the default tier is applied.
+
+**Condition format:**
+
+- `usageDetailPattern`: A regex pattern to match usage detail keys (e.g., `input` matches `input_tokens`, `input_cached_tokens`, etc.)
+- `operator`: Comparison operator (`gt`, `gte`, `lt`, `lte`, `eq`, `neq`)
+- `value`: The threshold value to compare against
+- `caseSensitive`: Whether the pattern matching is case-sensitive (default: false)
+
+For example, the "Large Context" tier for Claude Sonnet 4.5 has a condition: `input > 200000`, meaning it applies when the sum of all usage details matching the pattern "input" exceeds 200,000 tokens.
 
 ## Ingest usage and/or cost [#ingest]
 
@@ -445,32 +471,6 @@ The audit follows an evidence-first workflow:
 4. When changes are needed, a pull request is opened, and the updated prices are deployed shortly after approval.
 
 This process keeps the default definitions current without relying on a third-party pricing aggregator. Because inferred costs are calculated at ingestion time, updated defaults apply only to new generations. If you need support for a model immediately or use private pricing, add a [custom model definition](#custom-model-definitions) or [ingest the cost directly](#ingest).
-
-### Pricing Tiers [#pricing-tiers]
-
-Some model providers charge different rates depending on the number of input tokens used. For example, Anthropic's Claude Sonnet 4.5 and Google's Gemini 2.5 Pro apply higher pricing when more than 200K input tokens are used.
-
-Langfuse supports **pricing tiers** for models, enabling accurate cost calculation for these context-dependent pricing structures.
-
-#### How tier matching works
-
-Each model can have multiple pricing tiers, each with:
-
-- **Name**: A descriptive name (e.g., "Standard", "Large Context")
-- **Priority**: Evaluation order (0 is reserved for default tier)
-- **Conditions**: Rules that determine when the tier applies
-- **Prices**: Cost per usage type for this tier
-
-When calculating cost, Langfuse evaluates tiers in priority order (excluding the default tier). The first tier whose conditions are satisfied is used. If no conditional tier matches, the default tier is applied.
-
-**Condition format:**
-
-- `usageDetailPattern`: A regex pattern to match usage detail keys (e.g., `input` matches `input_tokens`, `input_cached_tokens`, etc.)
-- `operator`: Comparison operator (`gt`, `gte`, `lt`, `lte`, `eq`, `neq`)
-- `value`: The threshold value to compare against
-- `caseSensitive`: Whether the pattern matching is case-sensitive (default: false)
-
-For example, the "Large Context" tier for Claude Sonnet 4.5 has a condition: `input > 200000`, meaning it applies when the sum of all usage details matching the pattern "input" exceeds 200,000 tokens.
 
 ### Custom model definitions [#custom-model-definitions]
 
