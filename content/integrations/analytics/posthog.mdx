@@ -5,6 +5,8 @@ logo: /images/integrations/posthog_icon.svg
 description: Display your Langfuse metrics in Posthog dashboards.
 ---
 
+import { V4CutoverDate } from "@/components/V4CutoverDate";
+
 # PostHog Integration
 
 [PostHog](https://posthog.com) is a popular choice for OSS product analytics. While Langfuse offers [analytics](/docs/analytics) out of the box, many of our users have asked for a way to **integrate their LLM related metrics that they capture with Langfuse into their PostHog dashboards**.
@@ -161,6 +163,15 @@ Available options:
 ### Migrating from the legacy export source [#migrate-export-source]
 
 New integrations default to `Enriched observations (recommended)`; existing integrations continue to use `Traces and observations (legacy)` until changed.
+
+<Callout type="warning">
+  <V4CutoverDate /> is the Langfuse Cloud v4 cutover. If you have not switched
+  by then, remaining legacy exports switch to `Enriched observations`
+  automatically. Migrate on your own schedule beforehand to avoid an
+  unannounced hard cliff in your event stream. If you are self-hosting, the
+  switch happens automatically once you run the v4 server in `events_only`
+  mode.
+</Callout>
 
 PostHog is a schemaless event store, so no setup is needed on the PostHog side — the new event name and properties appear automatically once you switch. All migration effort goes into the assets built on top of the events: insights, dashboards, funnels, cohorts, alerts, and warehouse syncs.
 

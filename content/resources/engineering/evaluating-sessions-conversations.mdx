@@ -4,6 +4,8 @@ tags: [guide]
 description: "How to evaluate entire sessions in Langfuse rather than individual traces: session scores, LLM-as-a-judge on conversations, annotation, and SDK patterns."
 ---
 
+import { V4CutoverDate } from "@/components/V4CutoverDate";
+
 # How to evaluate sessions/conversations?
 
 This guide explains how to evaluate entire [sessions](/docs/observability/features/sessions) (such as conversations, threads, etc.), rather than just individual traces.
@@ -30,4 +32,4 @@ You can either:
 
 In both cases, the score will be assigned to the matched observation.
 
-Trace-level LLM-as-a-Judge evaluators are legacy but continue to work; see the [upgrade guide](/faq/all/llm-as-a-judge-migration) for migrating them to observation-level evaluators.
+Trace-level LLM-as-a-Judge evaluators are legacy: on Langfuse Cloud they stop producing results at the v4 cutover on <V4CutoverDate />. On self-hosted, they will stop producing results once you run the v4 server in `events_only` mode. See the [upgrade guide](/faq/all/llm-as-a-judge-migration) for migrating them to observation-level evaluators.
