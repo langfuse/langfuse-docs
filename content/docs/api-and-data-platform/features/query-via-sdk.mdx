@@ -39,7 +39,7 @@ are the defaults:
 
 The old v2 aliases were removed in Python SDK v4 and JS/TS SDK v5.
 
-The `api.legacy.*` resources call the deprecated endpoints; see
+The `api.legacy.*` resources call the deprecated endpoints. Langfuse Cloud serves these endpoints until **November 16, 2026** (`2026-11-16`). See
 [Migration of deprecated APIs](/faq/all/deprecated-api-migration) for
 replacements and the endpoint reference.
 
@@ -113,7 +113,7 @@ Scores:
 # Scores API v3 (recommended)
 scores = langfuse.api.scores_v3.get_many_v3(id="ScoreId")
 
-# Scores API v2 (deprecated)
+# Scores API v2 (deprecated, sunset date: Nov 16, 2026)
 scores = langfuse.api.scores.get_many(score_ids="ScoreId")
 ```
 
@@ -226,7 +226,7 @@ Scores:
 // Scores API v3 (recommended)
 const scoresV3 = await langfuse.api.scoresV3.getManyV3();
 
-// Scores API v2 (deprecated)
+// Scores API v2 (deprecated, sunset date: Nov 16, 2026)
 const scores = await langfuse.api.scores.getMany();
 ```
 

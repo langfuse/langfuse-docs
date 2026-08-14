@@ -38,7 +38,7 @@ All paths are relative to `/api/public`.
 
 ## Observations [#observations]
 
-**Deprecated:** `GET /observations`, `GET /observations/{observationId}`.
+**Deprecated:** `GET /observations`, `GET /observations/{observationId}`. Langfuse Cloud serves this endpoint until **November 16, 2026**; migrate to v4 before this date.
 
 **Replacement:** [`GET /v2/observations`](/docs/api-and-data-platform/features/observations-api#v2) ([reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations)).
 
@@ -75,7 +75,7 @@ curl \
 
 ## Traces [#traces]
 
-**Deprecated:** `GET /traces`, `GET /traces/{traceId}`.
+**Deprecated:** `GET /traces`, `GET /traces/{traceId}`. Langfuse Cloud serves this endpoint until **November 16, 2026**; migrate to v4 before this date.
 
 **Replacement:** [`GET /v2/observations`](/docs/api-and-data-platform/features/observations-api#v2), grouped by `traceId` on the client side.
 
@@ -123,7 +123,7 @@ curl -G \
 
 ## Sessions [#sessions]
 
-**Deprecated:** `GET /sessions`, `GET /sessions/{sessionId}`. On Langfuse v4, these will return `404`.
+**Deprecated:** `GET /sessions`, `GET /sessions/{sessionId}`. Langfuse Cloud serves this endpoint until **November 16, 2026**; migrate to v4 before this date. On Langfuse v4, these will return `404`.
 
 **Replacement:** [`GET /v2/observations`](/docs/api-and-data-platform/features/observations-api#v2) with a `filter` condition on the `sessionId` column, grouped by `sessionId` on the client side.
 
@@ -162,7 +162,7 @@ curl -G \
 
 ## Metrics [#metrics]
 
-**Deprecated:** `GET /metrics` (v1) and `GET /metrics/daily`.
+**Deprecated:** `GET /metrics` (v1) and `GET /metrics/daily`. Langfuse Cloud serves this endpoint until **November 16, 2026**; migrate to v4 before this date.
 
 **Replacement:** [`GET /v2/metrics`](/docs/metrics/features/metrics-api#v2) ([reference](https://api.reference.langfuse.com/#tag/metricsv2/GET/api/public/v2/metrics)).
 
@@ -213,7 +213,7 @@ The deprecated endpoint's filters map to v2 `filters` entries: `traceName` and `
 
 ## Scores [#scores]
 
-**Deprecated:** `GET /scores` (v1), `GET /scores/{scoreId}`, `GET /v2/scores`, `GET /v2/scores/{scoreId}`. On Langfuse v4, these will return `404`.
+**Deprecated:** `GET /scores` (v1), `GET /scores/{scoreId}`, `GET /v2/scores`, `GET /v2/scores/{scoreId}`. Langfuse Cloud serves these endpoints until **November 16, 2026**; migrate to v4 before this date. On Langfuse v4, these will return `404`.
 
 **Replacement:** [`GET /v3/scores`](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores). See the [Scores API v3 announcement](/changelog/2026-06-10-scores-v3-api) for background.
 
@@ -256,7 +256,7 @@ curl \
 
 ## Dataset runs → Experiments [#dataset-runs]
 
-**Deprecated:**
+**Deprecated:** Langfuse Cloud serves these endpoints until **November 16, 2026**; migrate to v4 before this date.
 
 - `GET /datasets/{datasetName}/runs`
 - `GET /datasets/{datasetName}/runs/{runName}`
@@ -333,7 +333,7 @@ curl \
 
 ## Ingestion [#ingestion]
 
-**Deprecated:** `POST /ingestion` (batched event ingestion) and the older synchronous endpoints `POST /traces`, `POST /spans`, `POST /generations`, `POST /events`.
+**Deprecated:** `POST /ingestion` (batched event ingestion) and the older synchronous endpoints `POST /traces`, `POST /spans`, `POST /generations`, `POST /events`. Langfuse Cloud serves these endpoints until **November 16, 2026**; migrate to v4 before this date.
 
 **Replacement:** the OpenTelemetry endpoint [`POST /otel/v1/traces`](https://api.reference.langfuse.com/#tag/opentelemetry/POST/api/public/otel/v1/traces) (OTLP/HTTP), or an upgraded SDK ([Python v4.7.0+](/docs/observability/sdk/upgrade-path/python-v3-to-v4), [JS/TS v5.4.0+](/docs/observability/sdk/upgrade-path/js-v4-to-v5)). Set the `x-langfuse-ingestion-version: 4` header on your OTEL span exporter and propagate trace attributes to all observations; see the [OpenTelemetry integration guide](/integrations/native/opentelemetry).
 
@@ -341,7 +341,7 @@ Score writes via `POST /scores` are unaffected.
 
 ## Deprecated endpoints [#endpoints]
 
-These endpoints are deprecated and receive security patches only, no other fixes or new functionality.
+These endpoints are deprecated and receive security patches only, no other fixes or new functionality. Langfuse Cloud serves these endpoints until **November 16, 2026**; migrate to v4 before this date.
 All paths are relative to `/api/public`.
 
 | Deprecated endpoint(s)                                         | Parameters                                                                                                | Replacement                                                                                                                                                                                                                              |
@@ -372,6 +372,8 @@ The v1 Metrics API supports querying across different views (traces, observation
 - Filter data based on metadata, timestamps, and other properties
 - Analyze data across time with customizable granularity
 - Order results
+
+Langfuse Cloud serves this endpoint until **November 16, 2026**; migrate to v4 before this date.
 
 **Replacement:** [Metrics API v2](#metrics).
 
