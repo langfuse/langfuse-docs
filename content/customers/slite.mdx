@@ -7,16 +7,17 @@ tag: customer-story
 author: Annabell
 customerLogo: "/images/customers/slite/slite-light.png"
 customerLogoDark: "/images/customers/slite/slite-dark.png"
-customerQuote: "Langfuse allowed us to go from reliable changes every few months to iterating multiple times a week on the performance and cost of our platform. We ship confidently, even if the scope of the platform expands."
-quoteAuthor: "Christophe Pasquier"
-quoteRole: "CEO"
+customerQuote: "Having this data set, having this whole test suite that a developer can run on their machine and quickly get results, it's a game changer for us."
+quoteAuthor: "Charley David"
+quoteRole: "Principal Engineer"
 quoteCompany: "Slite"
-quoteAuthorImage: "/images/customers/slite/christophe-pasquier.jpg"
+quoteAuthorImage: "/images/customers/slite/charley-david.jpg"
 showInCustomerIndex: true
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
 import { CustomerQuote } from "@/components/customers/CustomerQuote";
+import { CustomerScreenshotCarousel } from "@/components/customers/CustomerScreenshotCarousel";
 import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
 <BlogHeader
@@ -59,9 +60,25 @@ and Intercom, and now into something more ambitious: an agent that watches
 signals across a company's other tools and proposes keeping documents current,
 moved, or archived on its own, without a person asking it to.
 
-<Frame fullWidth className="w-full">
-  ![Slite homepage showing The Nice Co. workspace, an outdated Data Retention Policy, and an agent-proposed edit from 90 days to 1 year](/images/customers/slite/slite-self-maintaining-knowledge-base.png)
-</Frame>
+<CustomerScreenshotCarousel
+  slides={[
+    {
+      src: "/images/customers/slite/slite-self-maintaining-knowledge-base.png",
+      alt: "Slite homepage showing The Nice Co. workspace, an outdated Data Retention Policy, and an agent-proposed edit from 90 days to 1 year",
+      label: "Self-maintaining docs",
+    },
+    {
+      src: "/images/customers/slite/slite-agent-enterprise-search.png",
+      alt: "Slite Ask agent searching docs, Slack, Salesforce, and Intercom to answer a refund policy question",
+      label: "Enterprise search",
+    },
+    {
+      src: "/images/customers/slite/slite-agent-triage.png",
+      alt: "Slite agent triage drafting an architecture section update from a Slack signal",
+      label: "Agent triage",
+    },
+  ]}
+/>
 
 "We evolved towards a knowledge base constructed by AI, that can be used with AI
 to ask questions about your content and your knowledge spread in every possible
@@ -233,7 +250,7 @@ trusted enough to act without per-edit approval, once its track record earns
 that trust.
 
 None of that is viable without the evaluation loop scaling alongside it.
-Sustaining quality while scope keeps expanding is the point: "having this test
+Sustaining quality while scope keeps expanding is key: "having this test
 suite running constantly on the CI every time we touch it... makes sure that we
 maintain the quality and we don't break it as we are making big changes." With
 new models shipping monthly and the agent's footprint only growing, Charley
