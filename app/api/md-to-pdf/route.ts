@@ -55,8 +55,11 @@ async function runtimeImport(moduleName: string): Promise<any> {
   return importAtRuntime(moduleName);
 }
 
-function removeAnchorTags(content: string): string {
-  return content.replace(/\s*\[#[\w-]+\]/g, "");
+function renderAnchorTags(content: string): string {
+  return content.replace(
+    /^(#{1,6}\s+)(.*?)(?:\s+\[#([\w-]+)\])\s*$/gm,
+    (_, prefix, title, id) => `${prefix}<span id="${id}"></span>${title}`,
+  );
 }
 
 function processCallouts(content: string): string {
@@ -165,7 +168,7 @@ export async function GET(request: NextRequest) {
     markdownContent = stripMdxForPlainMarkdown(markdownContent, {
       unwrapCalloutsForPlainMd: false,
     });
-    markdownContent = removeAnchorTags(markdownContent);
+    markdownContent = renderAnchorTags(markdownContent);
     let htmlContent = await marked.parse(markdownContent);
     htmlContent = processCallouts(htmlContent);
 

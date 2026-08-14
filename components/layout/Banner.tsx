@@ -4,11 +4,10 @@ import { Banner as FumadocsBanner } from "fumadocs-ui/components/banner";
 export function Banner() {
   return (
     <FumadocsBanner
-      id="fd-top-banner-langfuse-v4"
       height="2rem"
-      className="bg-black text-white [&_a]:text-white [&_button]:text-white"
+      className="bg-black text-white [&_a]:text-white"
     >
-      <Link href="/changelog/2026-08-13-langfuse-v4">
+      <Link href="/docs/v4">
         <span className="sm:hidden">
           Langfuse v4: up to 165× faster ·{" "}
           <span className="underline underline-offset-2">Read more</span>
