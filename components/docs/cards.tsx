@@ -9,7 +9,6 @@ import {
   Cards as FumadocsCards,
   type CardProps as FumadocsCardProps,
 } from "fumadocs-ui/components/card";
-import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Text } from "@/components/ui/text";
 import { CornerBox } from "@/components/ui/corner-box";
@@ -25,7 +24,7 @@ export type CardProps = Omit<FumadocsCardProps, "title"> & {
   title?: React.ReactNode;
   contentClassName?: string;
   contentWrapperClassName?: string;
-  /** Trailing chevron signalling that a linked card is clickable. Defaults to true for titled cards. */
+  /** Legacy prop — ignored, fumadocs renders its own arrow. */
   arrow?: boolean;
 };
 
@@ -33,14 +32,13 @@ export function Card({
   icon,
   title = "",
   description = "",
-  arrow,
+  arrow: _arrow,
   children,
   contentClassName,
   contentWrapperClassName,
   ...props
 }: CardProps) {
   const E = props.href ? Link : "div";
-  const showArrow = arrow ?? Boolean(title);
   return (
     <E
       {...props}
@@ -65,21 +63,13 @@ export function Card({
             contentWrapperClassName,
           )}
         >
-          <div className="flex items-center gap-1">
-            <Text
-              as="h3"
-              size="s"
-              className="not-prose mb-0 min-w-0 flex-1 font-medium text-left text-text-secondary"
-            >
-              {title}
-            </Text>
-            {props.href && showArrow ? (
-              <ChevronRight
-                aria-hidden="true"
-                className="size-4 shrink-0 text-text-secondary"
-              />
-            ) : null}
-          </div>
+          <Text
+            as="h3"
+            size="s"
+            className="not-prose mb-0 font-medium text-left text-text-secondary"
+          >
+            {title}
+          </Text>
           {description ? (
             <Text size="s" className="my-0! text-text-secondary">
               {description}
