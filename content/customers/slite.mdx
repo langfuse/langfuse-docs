@@ -1,0 +1,244 @@
+---
+title: "From a manual spreadsheet to 12x higher experimentation velocity: how Slite observes and evaluates its AI agents with Langfuse"
+date: August 14, 2026
+description: Learn how Slite replaced a CEO-run spreadsheet with a Langfuse dataset and evaluation pipeline, going from quarterly experiments to confident changes once a week.
+ogImage: /images/customers/slite/ogImage.jpg
+tag: customer-story
+author: Annabell
+customerLogo: "/images/customers/slite/slite-light.png"
+customerLogoDark: "/images/customers/slite/slite-dark.png"
+customerQuote: "Langfuse allowed us to go from reliable changes every few months to iterating multiple times a week on the performance and cost of our platform. We ship confidently, even if the scope of the platform expands."
+quoteAuthor: "Christophe Pasquier"
+quoteRole: "CEO"
+quoteCompany: "Slite"
+quoteAuthorImage: "/images/customers/slite/christophe-pasquier.jpg"
+showInCustomerIndex: true
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { CustomerQuote } from "@/components/customers/CustomerQuote";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+
+<BlogHeader
+  title="From a manual spreadsheet to 12x higher experimentation velocity: how Slite observes and evaluates its AI agents with Langfuse"
+  description="Learn how Slite replaced a CEO-run spreadsheet with a Langfuse dataset and evaluation pipeline, going from quarterly experiments to confident changes once a week."
+  customerLogo="/images/customers/slite/slite-light.png"
+  authors={["annabellschafer"]}
+  date="August 14, 2026"
+/>
+
+<div className="corner-box-corners not-prose relative my-8 border border-line-structure bg-surface-1 px-6 py-8 text-text-primary md:px-12 md:py-10">
+  <h2 id="summary" className="m-0 font-mono text-sm font-medium uppercase tracking-widest text-text-secondary">Summary</h2>
+
+  <ol className="m-0 mt-7 list-none space-y-6 p-0">
+    <li className="grid grid-cols-[auto_1fr] items-start gap-4 md:gap-6">
+      <span className="mt-1 inline-flex h-8 min-w-10 items-center justify-center bg-surface-cta-primary px-2 font-mono text-base font-medium leading-none text-text-primary">01</span>
+      <p className="m-0 text-sm leading-6">Slite is turning its AI knowledge base into an agent that keeps a company's docs current on its own, proofreading, moving, and archiving documents without being asked.</p>
+    </li>
+    <li className="grid grid-cols-[auto_1fr] items-start gap-4 md:gap-6">
+      <span className="mt-1 inline-flex h-8 min-w-10 items-center justify-center bg-surface-cta-primary px-2 font-mono text-base font-medium leading-none text-text-primary">02</span>
+      <p className="m-0 text-sm leading-6">Langfuse tracing gives them deep insight into what their agents are doing, which is essential as agentic capabilities get more complex.</p>
+    </li>
+    <li className="grid grid-cols-[auto_1fr] items-start gap-4 md:gap-6">
+      <span className="mt-1 inline-flex h-8 min-w-10 items-center justify-center bg-surface-cta-primary px-2 font-mono text-base font-medium leading-none text-text-primary">03</span>
+      <p className="m-0 text-sm leading-6">A ~100-item Langfuse dataset, graded by an LLM-as-a-judge on expected behavior rather than exact answers, replaced a manually run spreadsheet and took experiments from once a quarter to about once a week.</p>
+    </li>
+    <li className="grid grid-cols-[auto_1fr] items-start gap-4 md:gap-6">
+      <span className="mt-1 inline-flex h-8 min-w-10 items-center justify-center bg-surface-cta-primary px-2 font-mono text-base font-medium leading-none text-text-primary">04</span>
+      <p className="m-0 text-sm leading-6">As the agent gets more autonomy over the workspace, Langfuse gives both developers and a background review agent the visibility to expand scope without breaking what already works.</p>
+    </li>
+  </ol>
+</div>
+
+## A knowledge base that maintains itself
+
+[Slite](https://slite.com/) started as a knowledge base for companies. Ask it a
+question, and it finds the answer somewhere in your team's docs. Over the past
+two years that grew into workflows and assistants wired into tools like Slack
+and Intercom, and now into something more ambitious: an agent that watches
+signals across a company's other tools and proposes keeping documents current,
+moved, or archived on its own, without a person asking it to.
+
+<Frame fullWidth className="w-full">
+  ![Slite homepage showing The Nice Co. workspace, an outdated Data Retention Policy, and an agent-proposed edit from 90 days to 1 year](/images/customers/slite/slite-self-maintaining-knowledge-base.png)
+</Frame>
+
+"We evolved towards a knowledge base constructed by AI, that can be used with AI
+to ask questions about your content and your knowledge spread in every possible
+tool," says Charley David, Principal Engineer at Slite. "The goal is to keep
+your knowledge up to date without having the burden of having to manually go and
+update your document constantly."
+
+Today that's opt-in, document by document. The next release, planned for after
+summer, extends it toward what Charley calls "the complete auto-pilot of the
+whole knowledge base": every document, not just the ones a user has flagged.
+
+The more autonomy Slite hands the agent, the more that can go wrong, and the
+more the team needs to see what the agents are doing.
+
+## Non-deterministic doesn't mean unobservable
+
+Slite adopted Langfuse early because they quickly realized that LLM agents,
+unlike traditional code, are non-deterministic and difficult to debug. Without
+visibility into tool usage, retrieval, and reasoning, the team was essentially
+debugging blindly. [Tracing](/academy/tracing) gave them that insight, so they
+could evaluate changes and build a dataset grounded in real-world behavior.
+
+<CustomerQuote
+  quote="It helped us a ton with the tracing and understanding what was going wrong, understand the timings, understand the steps that were happening inside our agents."
+  name="Charley David"
+  role="Principal Engineer"
+  company="Slite"
+  image="/images/customers/slite/charley-david.jpg"
+/>
+
+That need for visibility ran into a real constraint: Slite's customers store
+proprietary knowledge, and data residency mattered enormously. Early on, tracing
+covered only Slite's own internal usage on Langfuse Cloud. Customer traffic went
+untouched.
+
+"We are also very wary about where the data of our users is ending up. Data
+residency is a key concern for our customers, as we are dealing with all company
+internals," Charley says. "So with Langfuse, at first we were just sending some
+of our traces. Now we send all of them."
+
+That constraint is what eventually pushed Slite to [self-host](/self-hosting).
+Langfuse was quickly up and running in their own infrastructure, and alongside
+the knowledge base itself they were able to trace and evaluate sensitive
+customer data.
+
+## From a CEO's spreadsheet to a real evaluation loop
+
+For a long time, quality control at Slite was a spreadsheet of questions
+maintained by the company's CEO, Christophe Pasquier. Before any meaningful
+change shipped, he'd duplicate the sheet, run every question in the current
+model and harness configuration, and grade the answers himself, by hand. It
+worked, but it didn't scale. As Charley puts it, for a long time nothing like a
+real test suite existed for agents at all: "it was the far west."
+
+The unlock was rethinking what "the right answer" even means for a
+non-deterministic system. Instead of storing one fixed answer per question in a
+Langfuse [dataset](/docs/evaluation/experiments/datasets), Slite defines the
+behavior an answer needs to exhibit, and grades against that with an
+[LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge). "We don't store the expected answer, we store what the answer should contain. If you ask for your VAT number it should have the VAT number, and then the model is better at grading it and we get a more reliable outcome.", says Charley David.
+
+<CustomerQuote
+  quote="Langfuse allowed us to go from reliable changes every few months to iterating multiple times a week on the performance and cost of our platform. We ship confidently, even if the scope of the platform expands."
+  name="Christophe Pasquier"
+  role="CEO"
+  company="Slite"
+  image="/images/customers/slite/christophe-pasquier.jpg"
+/>
+
+This now lives as a managed dataset in Langfuse with roughly 100 questions, first
+assembled from Christophe's original spreadsheet, now growing from real user
+thumbs-up/thumbs-down feedback and manual reviews, running against every change
+to the agent in [CI](/docs/evaluation/experiments/experiments-ci-cd). The runs
+are [evaluated](/docs/evaluation/overview) through an LLM-as-a-judge that
+compares the specified criteria against the AI-generated output.
+
+It's not a hard merge gate. With non-deterministic outputs, and score, latency,
+and cost all trading off against each other, Slite treats it as a fast,
+trustworthy signal rather than a red/green flag. But it's the thing that tells a
+developer, before shipping, whether a reworked engine still performs at least as
+well as what's already in production.
+
+## Weekly experiments, not quarterly ones
+
+Before the dataset existed, trying anything new, a different model, or a change
+to how the agent itself is built, was a multi-month decision, because validating
+it took real, manual effort. Now it's a routine weekly check. From swapping
+models to changing the whole implementation, Slite ships these changes with
+confidence, a clear quality signal from the experiment runs, and, most
+importantly, speed.
+
+<CustomerQuote
+  quote="Back when we had our manual excel sheet, we were trying something new every three, four months maybe... Now, once per week we can try something. We changed a few variables, we run the test suite, and we already know if it's worth it to pursue or not."
+  name="Charley David"
+  role="Principal Engineer"
+  company="Slite"
+  image="/images/customers/slite/charley-david.jpg"
+/>
+
+That's roughly a **12x increase** in how often Slite can afford to test a new
+idea, and, just as importantly, a shift from a gut-feel discussion to one
+grounded in a number everyone trusts.
+
+Slite is closing the [AI Engineering loop](/academy/ai-engineering-loop) with
+this setup, and found an effective way to ship changes frequently.
+
+<CustomerQuote
+  quote="Having this data set, having this whole test suite that a developer can run on their machine and quickly get results, it's a game changer for us."
+  name="Charley David"
+  role="Principal Engineer"
+  company="Slite"
+  image="/images/customers/slite/charley-david.jpg"
+/>
+
+## Watching the agent watch itself
+
+The most forward-looking piece of Slite's setup is a background "retrospective"
+agent that samples a percentage of production traces via the
+[Langfuse API](/docs/api-and-data-platform/overview), reads the full trace, and
+writes up what looked noteworthy, both good and bad. A developer then reviews
+those write-ups in aggregate, not trace by trace.
+
+<CustomerQuote
+  quote="It's also why we need the detailed traces. After a certain percentage of questions we start a retrospective agent that looks at the graph and tells us if there is something noteworthy. We aggregate all those retrospectives into something more condensed... we found some very interesting stuff to fix that way, in volumes we wouldn't see otherwise."
+  name="Charley David"
+  role="Principal Engineer"
+  company="Slite"
+  image="/images/customers/slite/charley-david.jpg"
+/>
+
+<Frame fullWidth className="w-full">
+  ![Diagram of Slite's retrospective review pipeline: traces logged in Langfuse, a retrospective agent sampling via the API, and a developer reading an aggregated digest](/images/customers/slite/slite-retrospective-trace-review.png)
+</Frame>
+
+At Slite's volume, roughly 10,000 questions a day, each generating somewhere
+between 5 and 25 observations, with some running many more tool calls than that,
+there's no realistic way to review that by hand. This is observability being
+consumed by an agent, not just a dashboard.
+
+Langfuse's API-first approach, [CLI](/docs/api-and-data-platform/features/cli),
+[MCP server](/docs/api-and-data-platform/features/mcp-server), and
+[agent skill](/docs/api-and-data-platform/features/agent-skill) compounds the
+effect. "It's super useful to have this available, you could run a suite of
+tests and ask Claude, 'find where my suite of tests performed poorly, can you
+find out why,' and it goes into very tiny details," Charley says. "That's really
+great."
+
+## Why Langfuse
+
+Discovery came through a developer on Charley's team, Jason, who had already
+used Langfuse's Python SDK successfully before joining. From there, Charley
+ranks Slite's requirements in this order:
+
+1. **Data residency and self-hostability.** "A lot of tools we can't use because
+   they are US-based... it's a no-go for us."
+2. **Ease of navigating traces and datasets**, both through the UI, the API, and
+   the MCP. "The goal is to gain time when we want to understand what is
+   happening on the trace or on volumes of traces."
+3. **One place for everything**: traces, datasets, and runs together, rather
+   than scattered across tools.
+
+Asked for three words to describe Langfuse, Charley didn't hesitate: **"Faster
+development cycles."**
+
+## What's next
+
+Slite's roadmap moves in stages: from per-document maintenance (where they are
+today), to proposing changes across an entire workspace, to eventually an agent
+trusted enough to act without per-edit approval, once its track record earns
+that trust.
+
+None of that is viable without the evaluation loop scaling alongside it.
+Sustaining quality while scope keeps expanding is the point: "having this test
+suite running constantly on the CI every time we touch it... makes sure that we
+maintain the quality and we don't break it as we are making big changes." With
+new models shipping monthly and the agent's footprint only growing, Charley
+expects Slite's Langfuse value to keep increasing right alongside it: more
+traces stored, more retrospectives run, and more datasets to constantly evaluate
+whatever comes next.
+
+<CustomerStoryCTA />
