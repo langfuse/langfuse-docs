@@ -49,6 +49,11 @@ import { DatasetFieldsDiagram as DatasetFieldsDiagramJa } from "@/components/aca
 import { ErrorAnalysisProcessDiagram as ErrorAnalysisProcessDiagramJa } from "@/components/academy/japan/ErrorAnalysisProcessDiagram";
 import { AgentPromptCallout as AgentPromptCalloutJa } from "@/components/academy/japan/AgentPromptCallout";
 import { ManualGuideCallout as ManualGuideCalloutJa } from "@/components/academy/japan/ManualGuideCallout";
+import { AnnotatedLoop as AnnotatedLoopJa } from "@/components/academy/japan/AnnotatedLoop";
+import { DatasetBlock as DatasetBlockJa } from "@/components/academy/japan/DatasetBlock";
+import { EvaluatorBlock as EvaluatorBlockJa } from "@/components/academy/japan/EvaluatorBlock";
+import { JudgePromptExample as JudgePromptExampleJa } from "@/components/academy/japan/JudgePromptExample";
+import { TraceViewDiagram as TraceViewDiagramJa } from "@/components/academy/japan/TraceViewDiagram";
 import { Details, Summary } from "@/components/Details";
 
 // Lazy-load Video so @vidstack/react (~800 KB) is NOT bundled on every MDX page.
@@ -141,6 +146,11 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ErrorAnalysisProcessDiagramJa,
     AgentPromptCalloutJa,
     ManualGuideCalloutJa,
+    AnnotatedLoopJa,
+    DatasetBlockJa,
+    EvaluatorBlockJa,
+    JudgePromptExampleJa,
+    TraceViewDiagramJa,
     details: Details,
     summary: Summary,
     ...components,
