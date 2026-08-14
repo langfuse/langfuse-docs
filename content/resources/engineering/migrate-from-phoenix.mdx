@@ -127,6 +127,10 @@ Langfuse maps OpenTelemetry `user.id` / `session.id` (and `langfuse.user.id` /
 `langfuse.session.id`) when those attributes are set. HIPAA Cloud
 (`https://hipaa.cloud.langfuse.com`) is on Pro+ and needs a signed BAA before sending PHI.
 
+If Phoenix showed an agent loop and tools around the LLM call, and Langfuse only shows the
+LLM call, [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) is filtering
+those extra spans.
+
 </Details>
 
 ## Step 2: Migrate datasets

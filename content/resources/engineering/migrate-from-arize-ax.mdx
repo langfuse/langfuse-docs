@@ -129,33 +129,6 @@ Worked example: [Tracing using the OpenInference SDK](/integrations/other/openin
   (`messages.create`). It does not wrap your tool execution or agent loop. Production AX apps
   add a CHAIN span around the loop and TOOL spans around each tool. Keep those attributes
   (`openinference.span.kind`) when you cut over.
-- **Python SDK v4 span filter.** Langfuse [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4)
-  (Python 3.10+) does not export every OpenTelemetry span. OpenInference LLM spans still go
-  through. Manual CHAIN/TOOL spans from your app tracer (`trace.get_tracer("my-app")`) are
-  dropped unless you allowlist that scope:
-
-```python
-from langfuse import Langfuse, get_client
-from langfuse.span_filter import is_default_export_span
-from openinference.instrumentation.anthropic import AnthropicInstrumentor
-
-Langfuse(
-    should_export_span=lambda span: (
-        is_default_export_span(span)
-        or (
-            span.instrumentation_scope is not None
-            and span.instrumentation_scope.name == "my-app"
-        )
-    )
-)
-get_client()
-AnthropicInstrumentor().instrument()
-```
-
-Alternatively, create the agent and tool spans with the Langfuse SDK so they are in the
-`langfuse-sdk` scope. SDK v3 on Python 3.9 will still export those spans by default; do
-not treat that as the v4 cutover.
-
 - **Region.** Match AX to the app hostname you log into (`app.arize.com`,
   `app.eu-west-1a.arize.com`, `app.ca-central-1a.arize.com`). Langfuse region is independent:
   pick EU / US / Japan / HIPAA / self-host with `LANGFUSE_BASE_URL`.
@@ -176,11 +149,43 @@ OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 
 </Details>
 
+<Details>
+<Summary>If Langfuse only shows the LLM call</Summary>
+
+OpenInference LLM spans still arrive. If AX showed an agent loop and tools around that call,
+[Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) drops the extra
+CHAIN/TOOL spans from `trace.get_tracer("my-app")` unless you allowlist that tracer:
+
+```python
+from langfuse import Langfuse, get_client
+from langfuse.span_filter import is_default_export_span
+from openinference.instrumentation.anthropic import AnthropicInstrumentor
+
+Langfuse(
+    should_export_span=lambda span: (
+        is_default_export_span(span)
+        or (
+            span.instrumentation_scope is not None
+            and span.instrumentation_scope.name == "my-app"
+        )
+    )
+)
+get_client()
+AnthropicInstrumentor().instrument()
+```
+
+Alternatively, create the agent and tool spans with the Langfuse SDK so they are in the
+`langfuse-sdk` scope. SDK v3 on Python 3.9 still exports those spans by default; do not treat
+that as the v4 cutover.
+
+</Details>
+
 ## Step 2: Export and recreate datasets [#datasets]
 
 List examples from AX and insert them as Langfuse dataset items. User-defined columns are
-allowed on create; do not send AX `id` / `created_at` / `updated_at` into the create call.
-Those are server-managed on AX and will be rejected.
+allowed on create. Reuse the AX example `id` as the Langfuse item `id` so a retry upserts
+instead of duplicating. Do not put AX `created_at` / `updated_at` on the Langfuse item;
+those are server-managed on AX and Langfuse has no slot for them.
 
 Regional API base: `https://api.arize.com` (US) or `https://api.eu-west-1a.arize.com` (EU).
 Authenticate with `Authorization: Bearer <ARIZE_API_KEY>`.
@@ -196,12 +201,25 @@ AX_KEY = os.environ["ARIZE_API_KEY"]
 DATASET_ID = os.environ["ARIZE_DATASET_ID"]
 DATASET_NAME = "support-golden"
 
-examples = requests.get(
-    f"{AX_BASE}/v2/datasets/{quote(DATASET_ID, safe='')}/examples",
-    headers={"Authorization": f"Bearer {AX_KEY}", "Accept": "application/json"},
-    params={"limit": 500},
-    timeout=30,
-).json()["examples"]
+examples = []
+cursor = None
+while True:
+    params = {"limit": 500}
+    if cursor:
+        params["cursor"] = cursor
+    payload = requests.get(
+        f"{AX_BASE}/v2/datasets/{quote(DATASET_ID, safe='')}/examples",
+        headers={"Authorization": f"Bearer {AX_KEY}", "Accept": "application/json"},
+        params=params,
+        timeout=30,
+    ).json()
+    examples.extend(payload.get("examples") or [])
+    pagination = payload.get("pagination") or {}
+    if not pagination.get("has_more"):
+        break
+    cursor = pagination.get("next_cursor")
+    if not cursor:
+        break
 
 langfuse = get_client()
 langfuse.create_dataset(name=DATASET_NAME)
@@ -222,6 +240,8 @@ for row in examples:
                 "updated_at",
                 "input",
                 "expected_output",
+                "query",
+                "output",
                 "annotations",
             }
         },
@@ -291,7 +311,7 @@ not use the deprecated ingestion API.
 ## Validation checklist [#validation]
 
 - [ ] `arize.otel.register()` is gone in the app process; traces arrive as generations with token/cost
-- [ ] Agent traces still show CHAIN → LLM → TOOL (not LLM-only). On Python SDK v4, confirm manual CHAIN/TOOL spans were not dropped by the default span filter
+- [ ] Agent traces still show CHAIN → LLM → TOOL (not LLM-only)
 - [ ] User and session attribution works if you set `user.id` / `session.id`
 - [ ] Dataset item count matches AX `list_examples`
 - [ ] An experiment run exists on the migrated dataset
