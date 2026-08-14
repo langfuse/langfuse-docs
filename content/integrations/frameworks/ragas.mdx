@@ -181,7 +181,7 @@ Every task execution is traced, and the `faithfulness` and `answer_relevancy` sc
 
 The same metrics run on live traffic. Because Ragas metrics are reference-free, any trace that recorded the question, the retrieved contexts, and the answer can be scored after the fact:
 
-1. **Fetch a sample of traces** from Langfuse via the SDK (`langfuse.api.trace.list`) and read the question, contexts, and answer from their observations.
+1. **Fetch a sample of root observations** from Langfuse via the SDK (`langfuse.api.observations.get_many(..., filter=...)`) and, when needed, hydrate the rest of each trace via `trace_id`.
 2. **Evaluate the batch with Ragas**, either per sample via `single_turn_ascore` or in bulk via `ragas.evaluate`.
 3. **Write the scores back** with `langfuse.create_score(name=..., value=..., trace_id=...)` so each score appears on the trace that produced the answer.
 

@@ -33,6 +33,10 @@ type CompanyLogo = {
 
 const companies: CompanyLogo[] = [
   {
+    name: "Ramp",
+    logo: rampLogo,
+  },
+  {
     name: "Canva",
     logo: canvaLogo,
     customerStoryPath: "/users/canva",
@@ -97,10 +101,6 @@ const companies: CompanyLogo[] = [
   //   logo: expediaGroupLogo,
   // },
   {
-    name: "Ramp",
-    logo: rampLogo,
-  },
-  {
     name: "Rocket Money",
     logo: rocketMoneyLogo,
   },
@@ -141,7 +141,7 @@ const LogoImage = ({
       src={logo}
       alt={`${name} logo`}
       className={cn(
-        "h-[56px] object-cover max-w-full",
+        "h-[56px] max-w-full object-cover",
         hoverable
           ? "hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] transition-[filter] duration-200"
           : "",
