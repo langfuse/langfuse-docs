@@ -49,7 +49,6 @@ On Langfuse Cloud, server versions are managed for you; use the [Langfuse Cloud 
 
 import { MatrixTable, CompatDetail } from "@/components/MatrixTable";
 import { CompatBadge } from "@/components/CompatBadge";
-import { V4CutoverDate } from "@/components/V4CutoverDate";
 import DetailOpenTelemetry from "@/components-mdx/compat/detail-opentelemetry.mdx";
 import DetailLegacyIngestion from "@/components-mdx/compat/detail-legacy-ingestion.mdx";
 import DetailV1ReadApis from "@/components-mdx/compat/detail-v1-read-apis.mdx";
@@ -146,10 +145,10 @@ GA. Requires self-hosted server ≥ [3.63.0](https://github.com/langfuse/langfus
 
 **Limitations:**
 
-| Capability                      | OSS v3                                                                                                                                      | OSS v4                                                                                                                                             |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tracing (OpenTelemetry)         | Supported                                                                                                                                   | Supported (real time with SDK ≥ 5.4.0)                                                                                                             |
-| Public API & querying (`api.*`) | Use the [legacy APIs](/docs/api-and-data-platform/features/public-api#access-via-sdks) `api.legacy.observationsV1` / `api.legacy.metricsV1` | Supported (deprecated read APIs are removed on v4. Langfuse Cloud serves these endpoints until <V4CutoverDate />; migrate to v4 before this date.) |
+| Capability                      | OSS v3                                                                                                                                      | OSS v4                                             |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Tracing (OpenTelemetry)         | Supported                                                                                                                                   | Supported (real time with SDK ≥ 5.4.0)             |
+| Public API & querying (`api.*`) | Use the [legacy APIs](/docs/api-and-data-platform/features/public-api#access-via-sdks) `api.legacy.observationsV1` / `api.legacy.metricsV1` | Supported (deprecated read APIs are removed on v4) |
 
 </CompatDetail>
 <CompatDetail name="JS/TS SDK v4">
@@ -158,11 +157,11 @@ Deprecated. Requires self-hosted server ≥ [3.63.0](https://github.com/langfuse
 
 **Limitations:**
 
-| Capability                      | OSS v3                                           | OSS v4                                                                                                                                       |
-| ------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tracing (OpenTelemetry)         | Supported                                        | Supported (data delayed up to 15 min; JS/TS SDK v5 ≥ 5.4.0 for real time)                                                                    |
-| Datasets & experiments          | Datasets only (experiments require JS/TS SDK v5) | Datasets only (experiments require JS/TS SDK v5)                                                                                             |
-| Public API & querying (`api.*`) | Supported                                        | Unsupported (deprecated read APIs are removed on v4. Langfuse Cloud serves these endpoints until <V4CutoverDate />; upgrade to JS/TS SDK v5) |
+| Capability                      | OSS v3                                           | OSS v4                                                                        |
+| ------------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------- |
+| Tracing (OpenTelemetry)         | Supported                                        | Supported (data delayed up to 10 min; JS/TS SDK v5 ≥ 5.4.0 for real time)     |
+| Datasets & experiments          | Datasets only (experiments require JS/TS SDK v5) | Datasets only (experiments require JS/TS SDK v5)                              |
+| Public API & querying (`api.*`) | Supported                                        | Unsupported (deprecated read APIs are removed on v4; upgrade to JS/TS SDK v5) |
 
 </CompatDetail>
 <CompatDetail name="JS/TS SDK v3 / v2">

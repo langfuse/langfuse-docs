@@ -5,7 +5,6 @@ tags: [evaluation]
 ---
 
 import { Steps, Step } from "@/components/docs";
-import { V4CutoverDate } from "@/components/V4CutoverDate";
 
 # Upgrade trace-level evaluators
 
@@ -22,12 +21,6 @@ import { V4CutoverDate } from "@/components/V4CutoverDate";
 Trace-level evaluators use Langfuse's old trace-centric data model and are deprecated as part of [Langfuse v4](/docs/v4). Existing evaluators continue to run while you upgrade.
 
 Observation-level evaluators run in real time and scale with larger traces and higher evaluation volume. Any future multi-span support will also use the observations-first data model, so upgrading is the foundation for future evaluation capabilities.
-
-<Callout type="warning">
-  On Langfuse Cloud, trace-level evaluators stop producing
-  results at the v4 cutover on <V4CutoverDate />. Upgrade before this date to
-  avoid a gap in evaluation coverage.
-</Callout>
 
 <Callout type="info">
   Only the unstable Evaluation Rules APIs continue to return legacy `trace` and

@@ -4,8 +4,6 @@ sidebarTitle: Query via SDKs
 description: Query Langfuse data via Python and JS/TS SDKs using the high-performance data APIs.
 ---
 
-import { V4CutoverDate } from "@/components/V4CutoverDate";
-
 # Query Data via SDKs
 
 Langfuse is [open-source](/open-source) and data tracked with Langfuse is open. Use the Python and JS/TS SDKs to query the same public APIs without writing raw HTTP requests.
@@ -41,7 +39,7 @@ are the defaults:
 
 The old v2 aliases were removed in Python SDK v4 and JS/TS SDK v5.
 
-The `api.legacy.*` resources call the deprecated endpoints. Langfuse Cloud serves these endpoints until <V4CutoverDate />. See
+The `api.legacy.*` resources call the deprecated endpoints; see
 [Migration of deprecated APIs](/faq/all/deprecated-api-migration) for
 replacements and the endpoint reference.
 
@@ -115,7 +113,7 @@ Scores:
 # Scores API v3 (recommended)
 scores = langfuse.api.scores_v3.get_many_v3(id="ScoreId")
 
-# Scores API v2 (deprecated, sunset date: Nov 16, 2026)
+# Scores API v2 (deprecated)
 scores = langfuse.api.scores.get_many(score_ids="ScoreId")
 ```
 
@@ -228,7 +226,7 @@ Scores:
 // Scores API v3 (recommended)
 const scoresV3 = await langfuse.api.scoresV3.getManyV3();
 
-// Scores API v2 (deprecated, sunset date: Nov 16, 2026)
+// Scores API v2 (deprecated)
 const scores = await langfuse.api.scores.getMany();
 ```
 

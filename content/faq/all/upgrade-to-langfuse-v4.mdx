@@ -5,9 +5,7 @@ description: Upgrade to Langfuse v4 by updating ingestion, migrating the v3 feat
 tags: [platform]
 ---
 
-import { V4CutoverDate } from "@/components/V4CutoverDate";
-
-# Upgrade to Langfuse v4
+# Make your project ready for the upgrade to Langfuse v4 [#make-your-project-ready-for-the-upgrade-to-langfuse-v4]
 
 Langfuse v4 uses an observations-first data model. The [v4 overview](/docs/v4) explains what changed. New managed projects already use v4 and need no migration.
 
@@ -18,7 +16,7 @@ For existing projects, complete the applicable steps below.
 
 ## 1. Upgrade trace ingestion [#ingestion]
 
-Move off legacy ingestion before the v4 cutover on <V4CutoverDate /> (Langfuse Cloud; self-hosted deployments control their own timeline, see [step 3](#rollout)). Deprecated SDKs can delay data by up to 15 minutes.
+Move off legacy ingestion before the v4 cutover. Deprecated SDKs can delay data by up to 10 minutes.
 
 | Your setup                                                  | Do this                                                                                                  |
 | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
@@ -41,7 +39,7 @@ Only follow the rows that apply to your project.
 
 ### Managed projects [#managed]
 
-Langfuse Cloud deprecates v3 endpoints and features on <V4CutoverDate />. Please complete any migration requirements for your projects before this date.
+Langfuse Cloud deprecates v3 endpoints and features on the v4 cutover date (to be announced). Please complete any migration requirements for your projects before this date.
 
 If the sidebar still shows the **Langfuse v4 preview** toggle, enable it. Then open **Action required** to view the project checklist. Each category shows **Up to date**, **Not detected**, or the number of affected items.
 
