@@ -25,7 +25,7 @@ export type CardProps = Omit<FumadocsCardProps, "title"> & {
   title?: React.ReactNode;
   contentClassName?: string;
   contentWrapperClassName?: string;
-  /** Trailing chevron signalling that a linked card is clickable. Defaults to true. */
+  /** Trailing chevron signalling that a linked card is clickable. Defaults to true for titled cards. */
   arrow?: boolean;
 };
 
@@ -33,13 +33,14 @@ export function Card({
   icon,
   title = "",
   description = "",
-  arrow = true,
+  arrow,
   children,
   contentClassName,
   contentWrapperClassName,
   ...props
 }: CardProps) {
   const E = props.href ? Link : "div";
+  const showArrow = arrow ?? Boolean(title);
   return (
     <E
       {...props}
@@ -72,7 +73,7 @@ export function Card({
             >
               {title}
             </Text>
-            {props.href && arrow ? (
+            {props.href && showArrow ? (
               <ChevronRight
                 aria-hidden="true"
                 className="size-4 shrink-0 text-text-secondary"
