@@ -21,10 +21,10 @@ export function TranslationNotice({
   const formatted = formatJapaneseDate(translatedAt);
 
   return (
-    <div className="not-prose mb-8 rounded-md border border-fd-border bg-fd-muted/40 px-4 py-3 text-sm text-fd-muted-foreground">
+    <div className="not-prose mb-4 text-xs text-fd-muted-foreground">
       {formatted
-        ? `この日本語版は ${formatted} 時点の英語版を翻訳したものです。`
-        : "この日本語版は、ある時点の英語版を翻訳したものです。"}
+        ? `英語版 ${formatted} 時点の翻訳です。`
+        : "英語版を翻訳したものです。"}
       {englishHref ? (
         <>
           {" "}
