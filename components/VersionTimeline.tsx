@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { V4_CUTOVER_DATE_LONG } from "@/lib/v4-migration-dates";
+import {
+  V4_CUTOVER_DATE_LONG,
+  V4_CUTOVER_DATE_SHORT,
+} from "@/lib/v4-migration-dates";
 
 /**
  * Release timeline for Langfuse Cloud and self-hosted (OSS), in the style of
@@ -90,7 +93,7 @@ const ROWS: { id: string; name: string; segments: Segment[] }[] = [
 const MARKERS: { at: Month; label: string }[] = [
   {
     at: { year: 2026, month: 11 },
-    label: `Legacy APIs and ingestion will be sunset on ${V4_CUTOVER_DATE_LONG}`,
+    label: `${V4_CUTOVER_DATE_SHORT}: Legacy APIs and ingestion sunset`,
   },
 ];
 
