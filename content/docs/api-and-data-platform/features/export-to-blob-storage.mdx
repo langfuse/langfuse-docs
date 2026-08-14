@@ -4,6 +4,8 @@ description: Export enriched observations, scores, and legacy traces and observa
 sidebarTitle: Export to Blob Storage
 ---
 
+import { V4CutoverDate } from "@/components/V4CutoverDate";
+
 # Export to blob storage
 
 <AvailabilityBanner
@@ -169,9 +171,9 @@ Make manifest processing idempotent. Provider events can be delivered more than 
 <Callout type="warning">
   Complete this upgrade if your integration uses **Traces and observations
   (legacy)** or your bucket receives `traces/` and `observations/` files. On
-  Langfuse Cloud, remaining legacy exports switch at the v4 cutover. On
-  self-hosted v4, the legacy source stops producing data after the server
-  switches to `events_only`.
+  Langfuse Cloud, remaining legacy exports switch at the v4
+  cutover on <V4CutoverDate />. On self-hosted v4, the legacy source stops
+  producing data after the server switches to `events_only`.
 </Callout>
 
 ### Switch to enriched observations [#upgrade-path]
