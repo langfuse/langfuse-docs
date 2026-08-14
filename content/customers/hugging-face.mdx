@@ -26,14 +26,23 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
   date="August 11, 2026"
 />
 
-<div className="not-prose my-8 border-l-4 border-l-surface-cta-primary py-2 pl-6 text-text-primary md:pl-8">
-  <h2 id="summary" className="mb-5 text-2xl font-medium tracking-tight">Summary</h2>
+<div className="corner-box-corners not-prose relative my-8 border border-line-structure bg-surface-1 px-6 py-8 text-text-primary md:px-12 md:py-10">
+  <h2 id="summary" className="m-0 font-mono text-sm font-medium uppercase tracking-widest text-text-secondary">Summary</h2>
 
-  <ul className="m-0 list-disc space-y-3 pl-5 text-[15px] leading-7 marker:text-text-primary md:text-base">
-    <li>Niels Rogge built an overnight agent that finds open-source models outside the Hugging Face Hub and helps authors publish them.</li>
-    <li>Langfuse traces each paper by arXiv ID. Niels can inspect every prompt, output, and LLM step in one place instead of debugging half-blind.</li>
-    <li>That visibility exposed an unreliable classifier and missing GitHub README context. After two rounds of fixes, the agent received just two negative comments across thousands of issues and pull requests.</li>
-  </ul>
+  <ol className="m-0 mt-7 list-none space-y-6 p-0">
+    <li className="grid grid-cols-[auto_1fr] items-start gap-4 md:gap-6">
+      <span className="mt-1 inline-flex h-8 min-w-10 items-center justify-center bg-surface-cta-primary px-2 font-mono text-base font-medium leading-none text-text-primary">01</span>
+      <p className="m-0 text-[15px] leading-7 md:text-lg md:leading-8">Niels Rogge built an overnight agent that finds open-source models outside the Hugging Face Hub and helps authors publish them.</p>
+    </li>
+    <li className="grid grid-cols-[auto_1fr] items-start gap-4 md:gap-6">
+      <span className="mt-1 inline-flex h-8 min-w-10 items-center justify-center bg-surface-cta-primary px-2 font-mono text-base font-medium leading-none text-text-primary">02</span>
+      <p className="m-0 text-[15px] leading-7 md:text-lg md:leading-8">Langfuse traces each agent run grouped by arXiv ID. Niels can inspect every prompt, output, LLM call and extraction step in one place instead of debugging half-blind.</p>
+    </li>
+    <li className="grid grid-cols-[auto_1fr] items-start gap-4 md:gap-6">
+      <span className="mt-1 inline-flex h-8 min-w-10 items-center justify-center bg-surface-cta-primary px-2 font-mono text-base font-medium leading-none text-text-primary">03</span>
+      <p className="m-0 text-[15px] leading-7 md:text-lg md:leading-8">That visibility exposed an unreliable classifier and missing GitHub README context. After two rounds of error analysis and resulting fixes, the agent received just two negative comments across thousands of issues and pull requests.</p>
+    </li>
+  </ol>
 </div>
 
 ## Improving open-source model discovery
@@ -60,11 +69,9 @@ To ensure the highest-quality contributions to the Hugging Face community, Niels
   ![GitHub issue opened by Niels Rogge inviting an author to publish VERA-V artifacts on Hugging Face](/images/customers/hugging-face/github-example.png)
 </Frame>
 
-## From a working agent to a trustworthy one
+## Observing the blackbox
 
-Niels didn't reach for an observability and evaluation tool right away. He spent two or three months just getting the agent to work: could it parse papers properly and open issues at all? Once that loop worked, a different question took over. Why was the agent doing what it was doing on any given paper, and could he trust it enough to leave it running unattended overnight?
-
-He'd seen Langfuse in action at ML6, a Belgium-based AI consultancy where he worked alongside his Hugging Face role. The open-source license of Langfuse mattered too, matching the same values Hugging Face itself is built on. Some companies he'd consulted for wouldn't allow a fully managed platform and needed something [self-hostable](/self-hosting). A generous free tier and a low barrier of entry made Langfuse an easy pick.
+Niels spent two or three months getting the agent to work before turning to observability: he needed to understand its decisions and trust it to run unattended overnight. Having seen Langfuse at ML6, he chose it for an open-source license aligned with Hugging Face's values, a [self-hostable](/self-hosting) option, a generous free tier, and a low barrier to entry.
 
 Wiring Langfuse in was little work. Setup took a few lines of the [Langfuse Python SDK](/docs/observability/sdk/overview), added directly into the agent's existing code, no separate service to stand up (it's even easier now with the [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill)). Niels' workflow isn't a chat-like interaction, though. His agent has no conversations. It processes one paper at a time, fully on its own, so the usual pattern of sessions grouping the turns of a chat didn't map onto what he was doing.
 
@@ -126,8 +133,6 @@ He hasn't needed to repeat it often since. Out of hundreds to thousands of issue
 ## What's next: MCP, annotation queues, and a bigger eval investment
 
 The field moves fast, and Niels wants to explore newer implementation patterns. That means a freer agent running in a minimal loop built around the CLIs and Skills (the Hugging Face CLI Skill in particular), rather than the more scripted, multi-step version he has today. As part of that, he wants to use [Langfuse's MCP server](/docs/api-and-data-platform/features/mcp-server) to point a coding agent like Cursor at his traces and ask it to surface issues directly. The manual error analysis and annotation work he's already put in gives him a foundation for this transition too: he can use it to [evaluate the new implementation's performance against the old one](/docs/evaluation/experiments/experiments-via-sdk) before fully switching over.
-
-He also learned about Langfuse's [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) during this process, a built-in alternative to the spreadsheet he'd been using, and plans to try it next.
 
 Longer term, he wants to invest more in [evaluation](/docs/evaluation/overview). He's running the same agent plus tracing approach on a new website called Papers with Code that categorizes AI research by domain and tracks state-of-the-art (SOTA) by domain, which also needs agents to read papers and extract results correctly.
 
