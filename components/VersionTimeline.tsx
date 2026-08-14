@@ -90,7 +90,7 @@ const ROWS: { id: string; name: string; segments: Segment[] }[] = [
 const MARKERS: { at: Month; label: string }[] = [
   {
     at: { year: 2026, month: 11 },
-    label: `Legacy APIs and ingestion sunset on (${V4_CUTOVER_DATE_LONG})`,
+    label: `Legacy APIs and ingestion sunset on ${V4_CUTOVER_DATE_LONG}`,
   },
 ];
 

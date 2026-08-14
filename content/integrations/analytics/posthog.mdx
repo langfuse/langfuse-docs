@@ -165,10 +165,12 @@ Available options:
 New integrations default to `Enriched observations (recommended)`; existing integrations continue to use `Traces and observations (legacy)` until changed.
 
 <Callout type="warning">
-  If you have not switched by the Langfuse Cloud v4 cutover on{" "}
-  <V4CutoverDate />, remaining legacy exports switch to `Enriched observations`
+  <V4CutoverDate /> is the Langfuse Cloud v4 cutover. If you have not switched
+  by then, remaining legacy exports switch to `Enriched observations`
   automatically. Migrate on your own schedule beforehand to avoid an
-  unannounced hard cliff in your event stream. If you are self-hosting, the switch will happen automatically once you run the v4 server in `events_only` mode.
+  unannounced hard cliff in your event stream. If you are self-hosting, the
+  switch happens automatically once you run the v4 server in `events_only`
+  mode.
 </Callout>
 
 PostHog is a schemaless event store, so no setup is needed on the PostHog side — the new event name and properties appear automatically once you switch. All migration effort goes into the assets built on top of the events: insights, dashboards, funnels, cohorts, alerts, and warehouse syncs.
