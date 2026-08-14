@@ -46,7 +46,7 @@ const ROWS: { id: string; name: string; segments: Segment[] }[] = [
         label: "v3 + v4 preview",
         from: { year: 2026, month: 3 },
         to: { year: 2026, month: 11 },
-        href: "/docs/v4",
+        href: "/changelog/2026-08-13-langfuse-v4",
         title:
           "Since March 10, 2026: Langfuse v3 with all v4 features available in the Langfuse v4 preview",
         className: SEGMENT_STYLES.preview,
@@ -55,7 +55,7 @@ const ROWS: { id: string; name: string; segments: Segment[] }[] = [
         label: "v4",
         from: { year: 2026, month: 11 },
         to: AXIS_END,
-        href: "/docs/v4",
+        href: "/changelog/2026-08-13-langfuse-v4",
         title:
           "On November 16, 2026, Langfuse Cloud switches to v4 as the only experience and legacy APIs, features, and ingestion are removed",
         className: SEGMENT_STYLES.ga,

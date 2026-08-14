@@ -10,7 +10,7 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 <ChangelogHeader />
 
 <Callout type="info">
-  `/api/public/v2/observations` is significantly faster than the v1 endpoint at scale — it uses cursor-based pagination and selective field retrieval so you only pay for the columns you actually need. See the [Langfuse v4 data model](/docs/v4) for the full picture of what changed.
+  `/api/public/v2/observations` is significantly faster than the v1 endpoint at scale — it uses cursor-based pagination and selective field retrieval so you only pay for the columns you actually need. See the [Langfuse v4 data model](/changelog/2026-08-13-langfuse-v4) for the full picture of what changed.
 </Callout>
 
 The API `/api/public/v2/observations` now supports the `trace_context` field group. Add it to your `fields` query parameter and each observation comes back with `tags`, `release`, and `traceName` — denormalized from the parent trace, no extra `/traces/{id}` calls needed.

@@ -7,7 +7,7 @@ tags: [observability, tracing, evaluation]
 
 # Working with the observations table
 
-In [Langfuse v4](/docs/v4#what-changed), every operation your application performs (LLM calls, tool executions, retrievals, agent steps) is one row in a single observations table. A trace is just the set of rows sharing a `trace_id`; the [data model docs](/docs/observability/data-model#observations-and-traces) explain the model.
+In [Langfuse v4](/changelog/2026-08-13-langfuse-v4), every operation your application performs (LLM calls, tool executions, retrievals, agent steps) is one row in a single observations table. A trace is just the set of rows sharing a `trace_id`; the [data model docs](/docs/observability/data-model#observations-and-traces) explain the model.
 
 That means more rows than the old traces table, which is expected. Work with filters and [saved views](/changelog/2025-05-20-save-table-views), not by scrolling: filter by observation name, type, or model, then save the view. The filter sidebar shows available values with counts. Filters depend on trace-level attributes (`user_id`, `session_id`, `tags`) living on every observation; the SDKs propagate them via `propagate_attributes()` / `propagateAttributes()` (see [adding attributes](/docs/observability/sdk/instrumentation#add-attributes)).
 

@@ -167,7 +167,7 @@ patch_trace_input_output()
 ```
 
 <Callout type="info">
-`langfuse.trace.input` and `langfuse.trace.output` are trace-level attributes, which is why they can be set from a service span. They are deprecated in Langfuse v4 and retained for trace-level views and legacy LLM-as-a-judge evaluators — in the [observations-first data model](/docs/v4), the overall input and output belong on the root observation. Pipecat's conversation span is that root observation, but it is created internally and only accepts static attributes via `additional_span_attributes` on `PipelineTask`, so runtime values such as the first user message still need the trace-level attributes above. See [moving trace input and output](/integrations/native/opentelemetry/migration-to-v4#move-trace-input-and-output) for the background.
+`langfuse.trace.input` and `langfuse.trace.output` are trace-level attributes, which is why they can be set from a service span. They are deprecated in Langfuse v4 and retained for trace-level views and legacy LLM-as-a-judge evaluators — in the [observations-first data model](/changelog/2026-08-13-langfuse-v4), the overall input and output belong on the root observation. Pipecat's conversation span is that root observation, but it is created internally and only accepts static attributes via `additional_span_attributes` on `PipelineTask`, so runtime values such as the first user message still need the trace-level attributes above. See [moving trace input and output](/integrations/native/opentelemetry/migration-to-v4#move-trace-input-and-output) for the background.
 
 </Callout>
 

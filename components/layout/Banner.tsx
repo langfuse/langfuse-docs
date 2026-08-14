@@ -7,7 +7,7 @@ export function Banner() {
       height="2rem"
       className="bg-black text-white [&_a]:text-white"
     >
-      <Link href="/docs/v4">
+      <Link href="/changelog/2026-08-13-langfuse-v4">
         <span className="sm:hidden">
           Langfuse v4: up to 165× faster ·{" "}
           <span className="underline underline-offset-2">Read more</span>

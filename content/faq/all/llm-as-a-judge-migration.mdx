@@ -18,7 +18,7 @@ import { Steps, Step } from "@/components/docs";
   }}
 />
 
-Trace-level evaluators use Langfuse's old trace-centric data model and are deprecated as part of [Langfuse v4](/docs/v4). Existing evaluators continue to run while you upgrade.
+Trace-level evaluators use Langfuse's old trace-centric data model and are deprecated as part of [Langfuse v4](/changelog/2026-08-13-langfuse-v4). Existing evaluators continue to run while you upgrade.
 
 Observation-level evaluators run in real time and scale with larger traces and higher evaluation volume. Any future multi-span support will also use the observations-first data model, so upgrading is the foundation for future evaluation capabilities.
 
@@ -53,7 +53,7 @@ Observation-level evaluators run in real time with:
 - **JS/TS SDK:** v5.4.0+ ([upgrade guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5))
 - **Direct OpenTelemetry ingestion:** `x-langfuse-ingestion-version: 4` ([setup guide](/integrations/native/opentelemetry))
 
-In the [v4 data model](/docs/v4), a trace is the logical group of observations that share a trace ID, rather than a separate record. Input and output belong to observations. In most cases, an existing root or workflow observation already carries the same input and output that was previously written to the trace. The evaluator upgrade targets that observation. If no single observation contains all required values, the coding assistant helps update your instrumentation.
+In the [v4 data model](/changelog/2026-08-13-langfuse-v4), a trace is the logical group of observations that share a trace ID, rather than a separate record. Input and output belong to observations. In most cases, an existing root or workflow observation already carries the same input and output that was previously written to the trace. The evaluator upgrade targets that observation. If no single observation contains all required values, the coding assistant helps update your instrumentation.
 
 <Callout type="warning">
   **Keep existing trace-level evaluators running during the transition.** After
