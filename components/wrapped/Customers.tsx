@@ -14,6 +14,7 @@ import { HoverStars } from "./components/HoverStars";
 import canvaLogo from "../home/img/canva.svg";
 import circlebackLogo from "../home/img/circleback.svg";
 import freeeLogo from "../home/img/freee.svg";
+import huggingfaceLogo from "../home/img/huggingface.svg";
 import intuitLogo from "../home/img/intuit.svg";
 import khanacademyLogo from "../home/img/khan.svg";
 import magicPatternsLogo from "../home/img/magic.svg";
@@ -22,7 +23,6 @@ import pigmentLogo from "../home/img/pigment.svg";
 import rampLogo from "../home/img/ramp.svg";
 import samsaraLogo from "../home/img/samsara.svg";
 import sumupLogo from "../home/img/sumup.svg";
-import telusLogo from "../home/img/telus.svg";
 import twilioLogo from "../home/img/twilio.svg";
 
 interface CustomerStory {
@@ -59,13 +59,13 @@ const companiesWithStories = [
     path: "/users/merckgroup",
     logo: merckLogo,
   },
+  { name: "Hugging Face", path: "/users/hugging-face", logo: huggingfaceLogo },
 ];
 
 // Companies without customer stories (logos only)
 const companiesWithoutStories = [
   { name: "Samsara", logo: samsaraLogo },
   { name: "Twilio", logo: twilioLogo },
-  { name: "Telus", logo: telusLogo },
   { name: "Pigment", logo: pigmentLogo },
   {
     name: "Intuit",
@@ -251,7 +251,7 @@ export function Customers() {
       // Continue with rest in desired order...
       { type: "logo", name: "Samsara" },
       { type: "logo", name: "Twilio" },
-      { type: "logo", name: "Telus" },
+      { type: "story", name: "Hugging Face" },
       { type: "logo", name: "Pigment" },
       { type: "logo", name: "Ramp" },
       { type: "logo", name: "freee" },
