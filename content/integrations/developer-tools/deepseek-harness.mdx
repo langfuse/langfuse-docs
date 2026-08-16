@@ -1,0 +1,157 @@
+---
+title: "Trace DeepSeek Harness with Langfuse"
+sidebarTitle: DeepSeek Harness
+logo: /images/integrations/deepseek_icon.svg
+description: "Trace DeepSeek Harness agent turns — reasoning steps, model calls with time to first token, tool executions, and token usage — with Langfuse over OpenTelemetry."
+category: Integrations
+---
+
+# DeepSeek Harness tracing with Langfuse
+
+> **What is DeepSeek Harness?** [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (`dsh`) is DeepSeek's open-source agent harness. It follows an "everything is a plugin" architecture built on [Cordis](https://github.com/cordiverse/cordis), and runs as a terminal agent or a local web UI.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com/) is an open-source AI engineering platform. It helps teams trace agentic applications, debug issues, evaluate quality, and monitor costs in production.
+
+<Callout type="info" title="Community-maintained integration">
+The [`@loongsuite/dsh-plugin`](https://www.npmjs.com/package/@loongsuite/dsh-plugin) plugin is built and maintained by the LoongSuite community, not by the Langfuse team. If you run into issues, please report them on the [plugin's repository](https://github.com/loongsuite/dsh-plugin/issues).
+</Callout>
+
+## What can this integration trace?
+
+The plugin observes DeepSeek Harness's native session, agent-loop, LLM stream, and tool lifecycle, and exports one OpenTelemetry trace per agent turn. You can monitor:
+
+- **Agent turns**: one trace per turn, shaped `ENTRY → AGENT → STEP → LLM / TOOL`, so the reasoning loop is visible as a span tree rather than a flat log.
+- **Model calls**: every real model attempt as its own generation, with request model, provider, finish reason, token usage including cache reads, and time to first token.
+- **Retries**: a step that called the model more than once keeps each attempt as a separate span, so a retry is visible instead of averaged away.
+- **Tool executions**: each tool call correlated with its result by the harness's call id, with error status on the span when a tool fails.
+- **Subagents**: subagent sessions get their own trace, carrying parent-session and delegation attributes.
+- **Sessions**: `gen_ai.session.id` and `gen_ai.turn.id` are attached to every span, so Langfuse's Sessions view groups the turns of one conversation.
+- **Metrics** (optional, to a separate endpoint): `gen_ai.client.operation.duration` and `gen_ai.client.token.usage`.
+
+## How it works
+
+1. The plugin is a native Cordis plugin, installed into a DSH profile with `dsh plugin add`. It runs inside the harness process — no sidecar, no separate collector, no wrapper command.
+2. It subscribes to the harness's `session/created` and `session/event` streams and intercepts the `llm/stream` waterfall, building OpenTelemetry GenAI spans as the turn happens.
+3. Spans are exported over standard OTLP/HTTP protobuf to Langfuse's [OpenTelemetry endpoint](/integrations/native/opentelemetry) at `/api/public/otel`, using Basic auth.
+4. The plugin owns private tracer and meter providers, so it never replaces a global OpenTelemetry provider your own code may have registered. Collection and export failures are isolated: they may warn, but they never change model or tool behaviour.
+
+## Quick start
+
+<Steps>
+
+### Set up Langfuse
+
+1. Sign up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-host Langfuse](/self-hosting).
+2. Create a project and copy your API keys from the project settings.
+
+### Install the plugin
+
+Requires DeepSeek Harness `0.1.0-rc.6` or newer and Node.js 22.19 or newer. Add the plugin to every profile you want to observe:
+
+```bash
+dsh plugin --profile web add @loongsuite/dsh-plugin
+```
+
+### Point it at Langfuse [#set-credentials]
+
+Langfuse authenticates the OTLP endpoint with Basic auth, so encode your key pair first:
+
+```bash
+export AUTH_STRING=$(echo -n "pk-lf-...:sk-lf-..." | base64)
+```
+
+The plugin reads the standard OpenTelemetry variables, so no configuration file is required:
+
+```bash
+export OTEL_SERVICE_NAME="dsh-agent"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel" # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com/api/public/otel, 🇯🇵 Japan: https://jp.cloud.langfuse.com/api/public/otel and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com/api/public/otel
+# Self-hosted: http://localhost:3000/api/public/otel
+export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING},x-langfuse-ingestion-version=4"
+```
+
+Langfuse's OTLP endpoint accepts traces, so turn the plugin's metric export off in the profile's `cordis.patch.yml` (under `$DSH_HOME`, `~/.dsh` by default). Otherwise the metric exporter keeps retrying a path that is not there — harmless, since export failures are isolated from the agent, but noisy:
+
+```yaml
+- id: loongsuite-observability
+  config:
+    exportMetrics: false
+```
+
+Everything above can also live in that config block instead of the environment (`endpoint`, `headers`, `serviceName`, `resourceAttributes`); explicit settings take precedence over the variables.
+
+### Use DeepSeek Harness
+
+Run the profile as usual. The plugin logs its destination on load, so you can confirm it is active:
+
+```bash
+dsh --profile web
+# [loongsuite-observability] loaded; traces=https://cloud.langfuse.com/api/public/otel/v1/traces; metrics=disabled; content=disabled
+```
+
+### View traces in Langfuse
+
+Open your Langfuse project. Each turn arrives as one trace whose shape mirrors how the harness actually worked:
+
+- **Turn trace**: an `ENTRY` root with an `AGENT` span for the whole turn.
+- **Steps**: one `STEP` per reasoning round, holding that round's model call and tool executions.
+- **Generations**: one span per model attempt, with token usage and time to first token.
+- **Tools**: one span per tool call, with error status when it fails.
+
+![Example DeepSeek Harness trace in Langfuse showing four react steps, per-call latency and token counts, a failed web_search followed by bash fallbacks, and the ENTRY span's GenAI attributes](/images/docs/deepseek-harness/deepseek-harness-example-trace.jpg)
+
+In the trace above, `web_search` failed twice and the model fell back to `bash` — the kind of path that is obvious in a span tree and easy to miss in logs.
+
+</Steps>
+
+## Privacy controls
+
+Prompts, responses, tool definitions, tool arguments, and tool results are **not captured by default**. Spans carry structural metadata and token counts only. Two ways to opt in:
+
+```bash
+# for one run, without touching the profile
+export OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=SPAN_ONLY
+```
+
+```yaml
+# or per profile
+- id: loongsuite-observability
+  config:
+    captureContent: true
+    contentMaxChars: 128000
+```
+
+An explicit `captureContent: false` always overrides the environment variable, which is the setting to use for a profile that must stay content-free regardless of how it is launched. With content capture on, source code, credentials, and personal data in prompts and tool output can reach your project — review your retention and access controls before enabling it.
+
+## Troubleshooting
+
+### No traces appearing in Langfuse
+
+1. **Plugin not loaded.** Look for the `[loongsuite-observability] loaded; traces=…` line in the DSH output. If it is missing, the bundle was not enabled for the profile you started.
+2. **Wrong endpoint.** If that line names a different URL than you expected, a `endpoint` or `traceEndpoint` in the profile config is overriding your environment variable.
+3. **Path.** The plugin appends the signal path itself, so the endpoint is the base `…/api/public/otel`, not `…/v1/traces`.
+
+### Authentication errors
+
+Rebuild the Basic auth string with no trailing newline (`echo -n`), and make sure the host matches the region your keys belong to:
+
+- **EU region**: `https://cloud.langfuse.com/api/public/otel`
+- **US region**: `https://us.cloud.langfuse.com/api/public/otel`
+- **Japan region**: `https://jp.cloud.langfuse.com/api/public/otel`
+- **HIPAA region**: `https://hipaa.cloud.langfuse.com/api/public/otel`
+
+### Repeated metric export failures
+
+Langfuse's OTLP endpoint takes traces. Set `exportMetrics: false` as shown above, or point `metricEndpoint` at a metrics backend of your own.
+
+### Token totals look too high on the trace
+
+The `AGENT` span reports the aggregate for the whole turn while its child generations report their own usage, so a view that sums usage across every observation counts that aggregate twice. Read the `AGENT` span, or add up the generations.
+
+## Resources
+
+- [`@loongsuite/dsh-plugin` on npm](https://www.npmjs.com/package/@loongsuite/dsh-plugin)
+- [Plugin repository and configuration reference](https://github.com/loongsuite/dsh-plugin)
+- [Local quickstart with Jaeger](https://github.com/loongsuite/dsh-plugin/blob/main/examples/quickstart/README.md), useful for checking the span tree before sending anything to a hosted project
+- [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)
+- [Langfuse OpenTelemetry endpoint](/integrations/native/opentelemetry)
