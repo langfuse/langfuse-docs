@@ -54,10 +54,10 @@ dsh plugin --profile web add @loongsuite/dsh-plugin
 
 ### Point it at Langfuse [#set-credentials]
 
-Langfuse authenticates the OTLP endpoint with Basic auth, so encode your key pair first:
+Langfuse authenticates the OTLP endpoint with Basic auth, so encode your key pair first. `tr` strips the line wrapping that GNU `base64` adds for keys longer than 57 characters — a wrapped value produces a malformed header and no traces:
 
 ```bash
-export AUTH_STRING=$(echo -n "pk-lf-...:sk-lf-..." | base64)
+export AUTH_STRING=$(echo -n "pk-lf-...:sk-lf-..." | base64 | tr -d '\n')
 ```
 
 The plugin reads the standard OpenTelemetry variables, so no configuration file is required:
