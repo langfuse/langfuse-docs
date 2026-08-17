@@ -5,6 +5,8 @@ description: Upgrade to Langfuse v4 by updating ingestion, migrating the v3 feat
 tags: [platform]
 ---
 
+import { V4CutoverDate } from "@/components/V4CutoverDate";
+
 # Make your project ready for the upgrade to Langfuse v4 [#make-your-project-ready-for-the-upgrade-to-langfuse-v4]
 
 Langfuse v4 uses an observations-first data model. The [v4 overview](/docs/v4) explains what changed. New managed projects already use v4 and need no migration.
@@ -16,7 +18,7 @@ For existing projects, complete the applicable steps below.
 
 ## 1. Upgrade trace ingestion [#ingestion]
 
-Move off legacy ingestion before the v4 cutover. Deprecated SDKs can delay data by up to 10 minutes.
+Move off legacy ingestion before the v4 cutover on <V4CutoverDate /> (Langfuse Cloud; self-hosted deployments control their own timeline, see [step 3](#rollout)). Deprecated SDKs can delay data by up to 15 minutes.
 
 | Your setup                                                  | Do this                                                                                                  |
 | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
@@ -39,7 +41,7 @@ Only follow the rows that apply to your project.
 
 ### Langfuse Cloud projects [#managed]
 
-Langfuse Cloud deprecates v3 endpoints and features on the v4 cutover date (to be announced). Please complete any migration requirements for your projects before this date.
+Langfuse Cloud deprecates v3 endpoints and features on <V4CutoverDate />. Please complete any migration requirements for your projects before this date.
 
 Organization owners can open the **Migration Assistant** sidebar and the [**Migration status page**](https://cloud.langfuse.com/v4-migration) to see if any actions are required:
 
@@ -47,7 +49,7 @@ Organization owners can open the **Migration Assistant** sidebar and the [**Migr
   ![The Langfuse v4 migration assistant lists the exact SDK, evaluator, API, and integration actions detected for a Cloud project](/images/changelog/2026-08-13-langfuse-v4/v4-migration-assistant.png)
 </Frame>
 
-We will email project owners and admins a summary of the actions required for their projects. Complete those actions before the v4 cutover date (to be announced).
+We will email project owners and admins a summary of the actions required for their projects. Complete those actions by <V4CutoverDate />.
 
 Follow the [upgrade guide](/faq/all/upgrade-to-langfuse-v4) for more details.
 

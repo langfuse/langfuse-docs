@@ -8,6 +8,7 @@ author: Abdallah
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
+import { V4CutoverDate } from "@/components/V4CutoverDate";
 
 <BlogHeader
   title="LLM Evaluation: Methods, Best Practices, and a Practical Roadmap"
@@ -286,7 +287,7 @@ Each stage of this roadmap has a dedicated deep dive:
 
 ### How do I evaluate a full agent workflow instead of a single LLM call? [#full-trace-evals]
 
-Target the root observation of the workflow: with current Langfuse SDKs, the root observation records the overall input and output of an application or agent invocation, so an observation-level evaluator on the root sees the end-to-end result. If the judge needs intermediate context (for example, which documents were retrieved), write that context onto the root observation from your application code. Trace-level LLM-as-a-judge evaluators still exist but are legacy; observation-level evaluators complete in seconds instead of minutes, and there is a [migration guide](/faq/all/llm-as-a-judge-migration) for moving over.
+Target the root observation of the workflow: with current Langfuse SDKs, the root observation records the overall input and output of an application or agent invocation, so an observation-level evaluator on the root sees the end-to-end result. If the judge needs intermediate context (for example, which documents were retrieved), write that context onto the root observation from your application code. Trace-level LLM-as-a-judge evaluators continue producing results on Langfuse Cloud until <V4CutoverDate />; on self-hosted, they will stop producing results once you run the v4 server in `events_only` mode. Upgrade to observation-level evaluators before the cut-off to avoid a gap in your evaluation results. Observation-level evaluators complete in seconds instead of minutes, and there is a [migration guide](/faq/all/llm-as-a-judge-migration) for moving over.
 
 ### Can I run evaluations on production traces without re-running the LLM? [#evals-without-rerun]
 
