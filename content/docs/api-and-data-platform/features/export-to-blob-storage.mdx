@@ -27,7 +27,7 @@ Schedule exports to Amazon S3, S3-compatible storage, Google Cloud Storage, or A
 ### Create the integration
 
 1. Open **Project Settings > Integrations > Blob Storage**.
-2. Select your provider and enter its bucket, path, and credentials. See [blob storage deployment](/self-hosting/deployment/infrastructure/blobstorage) for how to obtain credentials for each vendor.
+2. Select your provider and enter its bucket, path, and credentials. Self-hosters can find per-vendor bucket and credential setup on the [blob storage deployment page](/self-hosting/deployment/infrastructure/blobstorage).
 3. Choose the file format, schedule, export mode, and field groups.
 4. Enable the integration and save. The first run starts shortly afterward.
 
@@ -37,12 +37,12 @@ Schedule exports to Amazon S3, S3-compatible storage, Google Cloud Storage, or A
 
 <span id="export-modes" />
 
-| Setting             | Choices and behavior                                                                                                                                                                                                                             |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Provider and access | Amazon S3, S3-compatible storage, Google Cloud Storage, or Azure Blob Storage.                                                                                                                                                                   |
-| Format              | Parquet (default), CSV, JSON, or JSONL. Text formats can be gzip-compressed; Parquet uses its own encoding and compression.                                                                                                                      |
-| Schedule            | Every 20 minutes, hourly, daily, or weekly. Each run exports one time window.                                                                                                                                                                    |
-| Export Mode         | **Full history** starts at the project's earliest data; **From setup date** starts when the integration is enabled; **From custom date** starts at a selected date. Changing this setting resets the sync position and re-scans from that point. |
+| Setting             | Choices and behavior                                                                                                                                                                                                                                        |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Provider and access | **AWS S3**, **S3 Compatible Storage**, or **Azure Blob Storage**. Google Cloud Storage is reached through S3 Compatible Storage: set the endpoint to `https://storage.googleapis.com` and authenticate with an HMAC key pair rather than a service account. |
+| Format              | Parquet (default), CSV, JSON, or JSONL. Text formats can be gzip-compressed; Parquet uses its own encoding and compression.                                                                                                                                 |
+| Schedule            | Every 20 minutes, hourly, daily, or weekly. Each run exports one time window.                                                                                                                                                                               |
+| Export Mode         | **Full history** starts at the project's earliest data; **From setup date** starts when the integration is enabled; **From custom date** starts at a selected date. Changing this setting resets the sync position and re-scans from that point.            |
 
 <span id="file-formats" />
 
