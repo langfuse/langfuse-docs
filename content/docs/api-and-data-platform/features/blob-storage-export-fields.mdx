@@ -100,9 +100,9 @@ Scores are always exported. Their fields are not configurable.
 | `created_at`     | string (timestamp) | Row creation time.                                     |
 | `updated_at`     | string (timestamp) | Last row update time.                                  |
 
-## Legacy export differences [#legacy-export-paths]
+## Legacy exports [#legacy-export-paths]
 
-Legacy exports are deprecated. They split trace context into `traces/` and observation data into `observations/`; consumers join them on `trace_id`.
+Legacy exports are deprecated. They split trace context into `traces/` and observation data into `observations/`; consumers join them on `trace_id`. See [upgrade a legacy export](/docs/api-and-data-platform/features/export-to-blob-storage#legacy-export-sources) before changing a consumer.
 
 ### Traces (`traces/`) [#traces]
 
@@ -136,19 +136,52 @@ The trace file does not include `total_cost`, `latency`, `observations`, `scores
 
 ### Observations (`observations/`) [#observations]
 
-Legacy observations use the same observation field groups, with these differences:
-
 <span id="enriched-vs-legacy-differences" />
 
-| Group           | Difference in the legacy file                                                                      |
-| --------------- | -------------------------------------------------------------------------------------------------- |
-| `basic`         | Does not include `bookmarked`, `is_root_observation`, `public`, `session_id`, or `user_id`.        |
-| `usage`         | Does not include `usage_pricing_tier_id`.                                                          |
-| `trace_context` | Has no effect; `release`, `tags`, and the trace name are available in the separate `traces/` file. |
+Each row represents one observation without its trace context; join `trace_id` to the `traces/` file to add it. Only the [selected field groups](/docs/api-and-data-platform/features/export-to-blob-storage#export-field-groups) appear; `core` is always included.
 
-All other field groups use the same field names as `observations_v2/`. Some nullable values appear as empty strings in enriched JSON/JSONL output.
+| Field                     | Type                       | Description                                                                                                                       |
+| ------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                      | string                     | Unique observation identifier.                                                                                                    |
+| `trace_id`                | string                     | Trace identifier shared by related observations and scores.                                                                       |
+| `project_id`              | string                     | Langfuse project identifier.                                                                                                      |
+| `environment`             | string                     | Environment label.                                                                                                                |
+| `type`                    | string                     | Observation type: `SPAN`, `GENERATION`, `EVENT`, `AGENT`, `TOOL`, `CHAIN`, `RETRIEVER`, `EVALUATOR`, `EMBEDDING`, or `GUARDRAIL`. |
+| `parent_observation_id`   | string or null             | Parent observation identifier; null for a root observation.                                                                       |
+| `start_time`              | string (timestamp)         | When the observation started.                                                                                                     |
+| `end_time`                | string (timestamp) or null | When the observation ended.                                                                                                       |
+| `name`                    | string                     | User-defined observation name.                                                                                                    |
+| `metadata`                | object                     | User-supplied observation metadata.                                                                                               |
+| `level`                   | string                     | `DEBUG`, `DEFAULT`, `WARNING`, or `ERROR`.                                                                                        |
+| `status_message`          | string or null             | Status or error message.                                                                                                          |
+| `version`                 | string or null             | User-defined version.                                                                                                             |
+| `input`                   | string or null             | Observation input; may contain plain text or JSON.                                                                                |
+| `output`                  | string or null             | Observation output; may contain plain text or JSON.                                                                               |
+| `provided_model_name`     | string or null             | Model name supplied by the SDK or user.                                                                                           |
+| `model_parameters`        | string or null             | Model parameters encoded as JSON.                                                                                                 |
+| `usage_details`           | object (string → integer)  | Token usage by category, such as `input`, `output`, and `total`.                                                                  |
+| `cost_details`            | object (string → number)   | Cost in USD by category.                                                                                                          |
+| `completion_start_time`   | string (timestamp) or null | When the first streamed token was generated.                                                                                      |
+| `prompt_name`             | string or null             | Langfuse prompt name.                                                                                                             |
+| `prompt_version`          | integer or null            | Langfuse prompt version.                                                                                                          |
+| `total_cost`              | number or null             | Total observation cost in USD.                                                                                                    |
+| `latency`                 | number or null             | Duration in seconds.                                                                                                              |
+| `time_to_first_token`     | number or null             | Time to first token in seconds.                                                                                                   |
+| `model_id`                | string or null             | Matched Langfuse model definition identifier.                                                                                     |
+| `created_at`              | string (timestamp)         | Row creation time.                                                                                                                |
+| `updated_at`              | string (timestamp)         | Last row update time.                                                                                                             |
+| `prompt_id`               | string or null             | Langfuse prompt identifier.                                                                                                       |
+| `tool_calls`              | array of strings           | Tool calls encoded as JSON strings.                                                                                               |
+| `tool_call_names`         | array of strings           | Names of called tools.                                                                                                            |
+| `tool_definitions`        | object                     | Tool or function schemas supplied to the model.                                                                                   |
+| `usage_pricing_tier_name` | string or null             | Pricing tier name used for cost calculation.                                                                                      |
+| `input_price`             | string or null             | Matched per-unit input price; omitted from Parquet.                                                                               |
+| `output_price`            | string or null             | Matched per-unit output price; omitted from Parquet.                                                                              |
+| `total_price`             | string or null             | Matched flat per-call price; omitted from Parquet.                                                                                |
 
-See [upgrade a legacy export](/docs/api-and-data-platform/features/export-to-blob-storage#legacy-export-sources) before changing a consumer.
+Where a field appears in both observation files it carries the same meaning. Values that are null here are exported as empty strings in `observations_v2/` JSON and JSONL output.
+
+For the field groups that select these columns and how they differ from the enriched export, see [what changes in the exported data](/docs/api-and-data-platform/features/export-to-blob-storage#legacy-field-differences).
 
 ## Parquet differences [#parquet-exports]
 
