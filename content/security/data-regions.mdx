@@ -7,7 +7,7 @@ description: Details on Langfuse Cloud data regions, high availability, and the 
 
 Langfuse Cloud is designed for high availability and offers multiple data regions to meet your needs.
 
-Our database and application run on AWS infrastructure, partly managed by Clickhouse.
+Our database and application run on AWS infrastructure, partly managed by ClickHouse.
 
 ## Langfuse Cloud Regions
 
@@ -66,11 +66,11 @@ To allow recovery from the permanent loss of an AWS region, a subset of data at 
 This is a disaster-recovery control and does not provide active-active failover; on a full regional outage, Langfuse would rebuild the application stack in the secondary region and restore from the replicated backups.
 The expected rebuild time is up to 12 hours.
 
-| Data store                    | Primary region                                                           | Secondary region                                        | Mechanism                                                         | Retention             |
-| ----------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------- | ----------------------------------------------------------------- | --------------------- |
-| **Postgres**                  | EU: `eu-west-1` <br/> US / HIPAA: `us-west-2` <br/> JP: `ap-northeast-1` | `eu-central-1` <br/> `us-east-2` <br/> `ap-northeast-3` | AWS Backup daily snapshot copy, re-encrypted with a dedicated CMK | 7 days in each region |
-| **ClickHouse** (tracing data) | Same as the Cloud region above                                           | Not replicated                                          | —                                                                 | —                     |
-| **S3 media bucket**           | Same as the Cloud region above                                           | Not replicated                                          | —                                                                 | —                     |
+| Data store                    | Primary region                                                           | Secondary region                                                            | Mechanism                                                         | Retention             |
+| ----------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------- | ----------------------------------------------------------------- | --------------------- |
+| **Postgres**                  | EU: `eu-west-1` <br/> US / HIPAA: `us-west-2` <br/> JP: `ap-northeast-1` | EU: `eu-central-1` <br/> US / HIPAA: `us-east-2` <br/> JP: `ap-northeast-3` | AWS Backup daily snapshot copy, re-encrypted with a dedicated CMK | 7 days in each region |
+| **ClickHouse** (tracing data) | Same as the Cloud region above                                           | Not replicated                                                              | —                                                                 | —                     |
+| **S3 media bucket**           | Same as the Cloud region above                                           | Not replicated                                                              | —                                                                 | —                     |
 
 Postgres contains organization, project, user, API key, prompt, dataset, annotation, and score configuration data.
 Replicating it cross-region allows projects, credentials, and prompt management to be restored without customer intervention following a regional outage.
