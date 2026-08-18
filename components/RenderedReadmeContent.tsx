@@ -10,13 +10,8 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * Renders markdown content with doc-style typography (headings, lists, tables, code).
- * Used for fetched READMEs so they display like the second screen: proper structure
- * and styling inside a card, not raw pre/code.
- *
- * When `sourceUrl` is a raw.githubusercontent.com README URL, relative links
- * are rewritten to GitHub blob URLs and relative images to raw GitHub URLs.
- * HTML `<img>` tags are converted to markdown so they render as images.
+ * Presentational markdown renderer used by GitHubReadme after the README
+ * has been fetched. Pages should use GitHubReadme, which owns loading/error.
  */
 export function RenderedReadmeContent({
   content,
