@@ -23,11 +23,12 @@ export const TEAMS: Record<string, { name: string; firstPage: string }> = {
   devrel: { name: "Developer Relations", firstPage: "community-hour" },
   operations: { name: "Operations", firstPage: "finance" },
   "how-we-work": { name: "How we work", firstPage: "principles" },
+  "how-we-ship": { name: "How we ship", firstPage: "how-we-use-linear" },
   "how-we-hire": { name: "How we hire", firstPage: "philosophy" },
   "perks-and-pay": { name: "Perks & Pay", firstPage: "perks-and-pay" },
   "tools-and-processes": {
     name: "Tools & Processes",
-    firstPage: "using-linear",
+    firstPage: "spending-money",
   },
   chapters: { name: "Chapters", firstPage: "mission" },
 };

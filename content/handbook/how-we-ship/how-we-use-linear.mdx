@@ -1,0 +1,203 @@
+---
+title: How we use Linear
+description: The company-wide working agreement for planning, executing, and tracking work in Linear.
+---
+
+# How we use Linear
+
+Linear is the source of truth for executing projects across every Langfuse team, including Engineering, Marketing, Sales, and Operations.
+
+## Purpose
+
+- Add all work, including feature requests, that is likely to be acted on within six months to Linear.
+- Do not maintain parallel status trackers in Slack, Figma, spreadsheets, or other tools.
+- Keep the system lightweight: the core rules are mandatory, while additional structure is optional when useful.
+- Track longer-term ideas in the appropriate roadmap or knowledge base until they are likely to be acted on within six months.
+
+## Core rules
+
+- Every active project and issue has one owner.
+- Owners are responsible for keeping their projects current.
+- Clear the Linear inbox at least twice per working day.
+- Use Linear comments for durable, on-topic discussions and decisions. Link to Slack threads when faster discussion is necessary.
+- Keep project status, priority, scope, and timing current.
+- Close, cancel, or move out work that is no longer likely to happen within six months.
+
+## How we use Linear primitives
+
+### Initiative (optional, use sparingly)
+
+- An initiative represents a broad, multi-quarter outcome that spans several projects, such as making Langfuse more agentic and autonomous.
+- Initiatives are usually unnecessary; projects and issues should be sufficient.
+
+### Project (required for multi-step outcomes)
+
+- A project is the default planning and reporting unit.
+- It represents a completable outcome with one owner.
+- Use a project when work needs multiple issues, coordination, progress reporting, or delivery stages.
+- A project usually has no more than one RFC. If it needs two RFCs, it is usually two projects.
+- The project or its linked RFC must include:
+  - Why the work matters
+  - The intended outcome and definition of done
+  - Scope boundaries
+  - The owner
+  - Important links and dependencies
+  - A timeline, including a target date set in Linear
+- Link the RFC from the project. The RFC can be a Google Doc, the project description, or a Linear document.
+
+### Milestone (optional for larger projects)
+
+- A milestone represents a meaningful delivery phase, not a checklist.
+- Examples include planning complete, minimum viable release, and full scope.
+
+### Issue (required for concrete work)
+
+- An issue represents one concrete deliverable owned by one person.
+- Keep the title precise and brief so anyone scanning a list can understand the work. Descriptions are optional; when needed, keep them concise and specific.
+- Prefer work that can be completed independently.
+- Split issues expected to take more than roughly two working days when they contain independently completable parts.
+- Do not create projects merely to group loosely related issues.
+
+## Project lifecycle
+
+| Status          | Requirements                                                                                                                |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **Backlog**     | Likely within six months; owner, priority, team/function label, short outcome, and a target date once planned.              |
+| **Planned**     | Selected for upcoming work; brief and definition of done ready; dependencies identified; timing set on the project.         |
+| **In progress** | Work started; exact target date, current health, weekly updates, linked issues, and milestones for larger projects.         |
+| **Completed**   | Intended outcome delivered; follow-ups captured; documentation, changelog, and customer follow-up completed where relevant. |
+| **Canceled**    | Intentionally stopped, with a short reason.                                                                                 |
+
+### Dates and prioritization
+
+Planned projects must have:
+
+- An owner
+- A priority
+- A quarter-level target date
+- A team/function label
+
+In-progress projects must have a specific target date. Target dates are internal planning signals, not external commitments. The public roadmap remains directional.
+
+## Bugs and feature requests
+
+These rules apply to product bugs and feature requests:
+
+- Bugs and feature requests enter through integrations or Linear Asks.
+- Use the [feature request workflow](https://app.notion.com/p/Feature-Request-Workflow-37a2bd19f29080d4b09aed0bc9a337e1), adapted to `#lf-user-feedback`.
+- Linear Intelligence routes incoming items to the responsible feature owner.
+- Feature owners clear triage continuously and normally decide within one working day whether to:
+  - Link or merge the item with an existing issue
+  - Accept it as a new issue
+  - Add it to a relevant backlog project
+  - Reroute it to the correct owner
+  - Close it as unsupported, insufficiently actionable, or not planned
+- Handle critical bugs and material deal blockers immediately.
+- Treat customer requests as evidence that links a customer to an issue, not as separate execution issues by default.
+- Preserve customer evidence when multiple requests map to one issue.
+- Create a project only when the team intends to act within six months.
+
+## Definition of done
+
+- Complete a project when its intended outcome is delivered, not merely when its original issue list is empty.
+- Capture necessary follow-up work before marking it done.
+- Include documentation, changelog, and customer follow-up where relevant.
+- For engineering issues, move the issue to **Merged** when its pull request merges. Move it to **Done** after deployment and after necessary follow-up work is captured. Done also means the change has been released as open source, if applicable.
+
+## Labels and views
+
+### Required
+
+- Assign every issue a type label: `bug`, `improvement`, or `feature`.
+- Assign a well-known feature-area label for shared filtering or views.
+- Assign one team/function label per project for shared filtering and views.
+- Reuse an existing label when one fits. If a new shared label is necessary, create it at the workspace level rather than inside one project.
+- Do not recreate owner, status, priority, dates, initiatives, or customer links as labels.
+
+### Optional
+
+- Team- or function-specific views
+- Naming prefixes when they materially improve discoverability
+
+## Setup and integrations
+
+### Required
+
+- Connect Linear to Slack and GitHub.
+- Join the Linear teams relevant to your work and the company-wide workspace.
+- Enable assignment to yourself when creating issues, including through third-party tools.
+- For engineering work, use the branch name suggested by Linear so pull requests link to their issues automatically.
+- Link Pylon threads to the relevant Linear issue. When the issue is done, close the loop with the customer and resolve the Pylon thread.
+- Create issues from internal Slack threads with the Linear app. This preserves the source discussion and notifies participants when the issue changes state.
+
+### Optional
+
+- Connect supported coding agents when they help you delegate well-scoped work.
+
+## Working rhythm
+
+### Weekly project updates
+
+Before Monday planning, every active project owner posts an update that includes:
+
+- Health
+- Progress since the last update
+- The next step
+- Blockers or decisions needed
+- Any target-date change
+
+Meetings focus on decisions, risks, and dependencies, not round-robin status updates.
+
+### Weekly bug overview
+
+Everyone who owns product bugs reviews the shared bug view and triages their assigned issues.
+
+### Cycles (optional)
+
+- Teams or pods may use weekly cycles when they improve commitment visibility.
+- If used, assign the week's issues before Monday planning.
+- Remove work carried over from the previous cycle if it is no longer applicable before Monday planning.
+- There is no company-wide requirement to place every issue in a cycle.
+
+### Monday check-in
+
+- Each pod or function has one sync led by its lead using Linear Pulse.
+- Review all project updates and make decisions along the way.
+- Teams that own product bugs review their bug overview.
+- Review a running Google Doc for topics outside Linear.
+- Review important metrics, such as feature adoption, Datadog SLOs, and infrastructure cost.
+
+### Langfuse all-hands
+
+Share important projects with all of Langfuse in a 10-minute update. For example, explain the high-level RFC, expected timeline, and functionality of a large new project.
+
+### Friday demo
+
+Everyone presents what they have been working on. Keep the presentation to two minutes and make it understandable to everyone: explain why it matters, what was difficult, and what we learned. Focus on insight, not proof of work.
+
+## Ownership and hygiene
+
+- The assignee owns issue accuracy.
+- The project lead owns scope, milestones, updates, health, and dates.
+- The pod or function lead owns the portfolio view and resolves stale or ownerless work.
+- Pod and function leads review their project portfolio at least monthly.
+- At quarter-end, deliberately reprioritize, move to a new quarter, or cancel every remaining backlog project. Nothing silently rolls forward.
+- Assign, close, or move ownerless work out of Linear.
+
+## Adoption
+
+- Archive or cancel obviously stale work.
+- Bring active and upcoming projects into compliance with the mandatory core.
+- Present this agreement at an all-hands.
+- Run the workflow for four weeks, then review it with pod and function leads and simplify anything that creates more maintenance than value.
+- Do not attempt a perfect historical migration.
+
+## Signs that this is working
+
+- No active project is without an owner.
+- Active projects have current updates and credible target dates.
+- Triage items normally receive a decision within one working day.
+- Customer requests can be traced to consolidated issues.
+- There are no parallel status spreadsheets or Figma boards.
+- We need fewer status meetings.
+- The team finds work easier to understand without added bureaucracy.
