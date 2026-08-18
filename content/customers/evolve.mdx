@@ -55,11 +55,9 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
 [Evolve](https://getrest.app/) is a YC-backed company that's been building products for about nine years. It started with [Podcast App](https://podcast.app/), one of the most-downloaded podcast apps on iOS with more than 15 million downloads, and they're continuing to innovate today.
 
-<div className="flex justify-center">
-  <Frame fullWidth className="w-2/3">
-    ![Podcast App and Rest, the two consumer products Evolve builds](/images/customers/evolve/evolve-products.png)
-  </Frame>
-</div>
+<Frame fullWidth className="w-full">
+  ![Podcast App and Rest, the two consumer products Evolve builds](/images/customers/evolve/evolve-products.png)
+</Frame>
 
 The path into sleep came from an unexpected signal in their own product data: usage of Podcast App spiked late at night. Digging into why, the team found that people weren't listening to catch up on episodes. They were using podcasts to fall asleep. That observation sent Evolve down a rabbit hole into sleep science and into a market they hadn't set out to enter.
 
@@ -86,7 +84,7 @@ What they found: roughly 70 million Americans show symptoms of insomnia, with ma
 
 ## Tracing a voice-and-text agent end to end
 
-All of Rest's AI usage is [traced](/docs/observability/overview) in Langfuse. The voice experience runs on [Vapi](/integrations/no-code/vapi) as the orchestration layer, with ElevenLabs for voice synthesis, Deepgram for transcription, and OpenAI as the underlying LLM. Vapi has a native Langfuse integration, so voice conversations are traced automatically. The text-chat experience is built and traced directly on OpenAI LLM APIs in Evolve's own backend. The text experience, and also non-conversational LLM work such as background extractors that process conversations after the fact, are traced through Langfuse as well.
+All of Rest's AI usage is [traced](/docs/observability/overview) in Langfuse. The voice experience runs on [Vapi](/integrations/no-code/vapi) as the orchestration layer, with ElevenLabs for voice synthesis, Deepgram for transcription, and OpenAI as the underlying LLM. Vapi has a native Langfuse integration, so voice conversations are traced automatically at the click of a button. The text-chat experience is built and traced directly on OpenAI LLM APIs in Evolve's own backend. The text experience, and also non-conversational LLM work such as background extractors that process conversations after the fact, are traced through Langfuse as well.
 
 <CustomerQuote
   quote="Everything that has to do with evals and error analysis, we completely rely on the fact that we have Langfuse as a repository for traces and prompts. I don't know what it would have been like if we didn't have it."
