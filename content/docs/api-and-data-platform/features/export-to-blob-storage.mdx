@@ -208,7 +208,7 @@ Most integrations can switch directly once their consumer supports the enriched 
 
 On self-hosted Langfuse v4, first [switch the server to `dual` write mode](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#step-3) with the Langfuse v4 preview enabled and [complete the historic data migration](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#historic-data).
 
-Enriched export sources are unavailable in `legacy` mode or when the Langfuse v4 preview (`LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN`) is disabled. Switch the integration before the server's [`events_only` cutover](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#cutover).
+Enriched export sources are unavailable in `legacy` mode. Switch the integration before the server's [`events_only` cutover](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#cutover).
 
 1. **Prepare the new consumer.** Process `observations_v2/` and `scores/` from each manifest's `files[].key`. Use the [enriched field reference](/docs/api-and-data-platform/features/blob-storage-export-fields#enriched-observations).
 2. **Switch the export.** Select **Enriched observations (recommended)**.
