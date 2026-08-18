@@ -19,6 +19,7 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 import { CustomerQuote } from "@/components/customers/CustomerQuote";
 import { CustomerScreenshotCarousel } from "@/components/customers/CustomerScreenshotCarousel";
 import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+import { ImpactChart } from "@/components/customers/ImpactChart";
 
 <BlogHeader
   title="How Evolve is fixing insomnia problems globally with voice AI, traced and evaluated on Langfuse"
@@ -175,12 +176,29 @@ Ignacio credits responsive support and steady, visible product improvement. Mart
 
 ## Impact
 
-**Full visibility into a voice-and-text agent.** Every Vapi voice trace and direct OpenAI text-chat trace lands in one place, alongside background extractor calls, instead of scattered across two stacks.
-
-**Non-engineers can safely ship prompt changes.** 100+ dynamically composed prompts, including locale variants, are edited and staged in Langfuse without code deploys.
-
-**A systematic fix for the AI's biggest user trust issue.** Trace-driven error analysis identified and helped resolve a memory issue that was actively eroding user trust.
-
-**Automated coverage of known failure modes.** LLM-as-a-judge evaluators now flag voice-quality and memory issues without a human reviewing every conversation manually.
+<ImpactChart
+  items={[
+    {
+      area: "Full visibility into a voice-and-text agent",
+      impact:
+        "Every Vapi voice trace and direct OpenAI text-chat trace lands in one place, alongside background extractor calls, instead of scattered across two stacks.",
+    },
+    {
+      area: "Non-engineers can safely ship prompt changes",
+      impact:
+        "100+ dynamically composed prompts, including locale variants, are edited and staged in Langfuse without code deploys.",
+    },
+    {
+      area: "A systematic fix for the AI's biggest user trust issue",
+      impact:
+        "Trace-driven error analysis identified and helped resolve a memory issue that was actively eroding user trust.",
+    },
+    {
+      area: "Automated coverage of known failure modes",
+      impact:
+        "LLM-as-a-judge evaluators now flag voice-quality and memory issues without a human reviewing every conversation manually.",
+    },
+  ]}
+/>
 
 <CustomerStoryCTA />
