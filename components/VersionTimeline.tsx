@@ -1,4 +1,8 @@
 import Link from "next/link";
+import {
+  V4_CUTOVER_DATE_LONG,
+  V4_CUTOVER_DATE_SHORT,
+} from "@/lib/v4-migration-dates";
 
 /**
  * Release timeline for Langfuse Cloud and self-hosted (OSS), in the style of
@@ -56,8 +60,7 @@ const ROWS: { id: string; name: string; segments: Segment[] }[] = [
         from: { year: 2026, month: 11 },
         to: AXIS_END,
         href: "/docs/v4",
-        title:
-          "Langfuse Cloud switches to v4 as the only experience and legacy APIs are removed; the exact date will follow",
+        title: `On ${V4_CUTOVER_DATE_LONG}, Langfuse Cloud switches to v4 as the only experience and legacy APIs, features, and ingestion are removed`,
         className: SEGMENT_STYLES.ga,
       },
     ],
@@ -90,7 +93,7 @@ const ROWS: { id: string; name: string; segments: Segment[] }[] = [
 const MARKERS: { at: Month; label: string }[] = [
   {
     at: { year: 2026, month: 11 },
-    label: "Legacy APIs and ingestion removed (date will follow)",
+    label: `${V4_CUTOVER_DATE_SHORT}: Legacy APIs, features, and ingestion removed`,
   },
 ];
 

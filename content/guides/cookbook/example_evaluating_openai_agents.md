@@ -1,7 +1,7 @@
 ---
 title: Example - Tracing and Evaluation for the OpenAI-Agents SDK
 description: This guide shows how to evaluate the OpenAI-Agents SDK with Langfuse using online and offline evaluation methods. 
-category: Integrations
+category: Evaluation
 ---
 
 # Evaluation for the OpenAI-Agents SDK
