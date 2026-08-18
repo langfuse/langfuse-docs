@@ -1,0 +1,141 @@
+---
+title: "How Evolve traces guest-support agents that resolve most inquiries on their own"
+date: August 18, 2026
+description: Learn how Evolve uses Langfuse to observe listing-build and guest-support agents, connecting AI work to owner outcomes across tens of thousands of vacation rentals.
+ogImage: /images/customers/evolve/evolve-og.jpg
+tag: customer-story
+author: Annabell
+customerLogo: "/images/customers/evolve/evolve-light.png"
+customerLogoDark: "/images/customers/evolve/evolve-dark.png"
+customerQuote: "Our instrumentation is what lets us connect AI investments directly to customer outcomes, and ultimately to the P&L."
+quoteAuthor: "Arun Nagarajan"
+quoteRole: "Chief Product and Technology Officer"
+quoteCompany: "Evolve"
+showInCustomerIndex: true
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { CustomerQuote } from "@/components/customers/CustomerQuote";
+import { CustomerScreenshotCarousel } from "@/components/customers/CustomerScreenshotCarousel";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+
+<BlogHeader
+  title="How Evolve traces guest-support agents that resolve most inquiries on their own"
+  description="Learn how Evolve uses Langfuse to observe listing-build and guest-support agents, connecting AI work to owner outcomes across tens of thousands of vacation rentals."
+  customerLogo="/images/customers/evolve/evolve-light.png"
+  authors={["annabellschafer"]}
+  date="August 18, 2026"
+/>
+
+<div className="corner-box-corners not-prose relative my-8 border border-line-structure bg-surface-1 px-6 py-8 text-text-primary md:px-12 md:py-10">
+  <h2 id="summary" className="m-0 font-mono text-sm font-medium uppercase tracking-widest text-text-secondary">Summary</h2>
+
+  <ol className="m-0 mt-7 list-none space-y-6 p-0">
+    <li className="grid grid-cols-[auto_1fr] items-start gap-4 md:gap-6">
+      <span className="mt-1 inline-flex h-8 min-w-10 items-center justify-center bg-surface-cta-primary px-2 font-mono text-base font-medium leading-none text-text-primary">01</span>
+      <p className="m-0 text-sm leading-6">Evolve put AI into listing quality and guest support. Routine guest inquiries now resolve without a human handoff more than 60% of the time.</p>
+    </li>
+    <li className="grid grid-cols-[auto_1fr] items-start gap-4 md:gap-6">
+      <span className="mt-1 inline-flex h-8 min-w-10 items-center justify-center bg-surface-cta-primary px-2 font-mono text-base font-medium leading-none text-text-primary">02</span>
+      <p className="m-0 text-sm leading-6">That only works if the agents are inspectable. Langfuse traces listing-build and guest-support runs so the team can see what the models did, which tools they used, and where a conversation should still go to a person.</p>
+    </li>
+    <li className="grid grid-cols-[auto_1fr] items-start gap-4 md:gap-6">
+      <span className="mt-1 inline-flex h-8 min-w-10 items-center justify-center bg-surface-cta-primary px-2 font-mono text-base font-medium leading-none text-text-primary">03</span>
+      <p className="m-0 text-sm leading-6">People stay accountable for audit and evaluation. With that loop in place, Evolve can connect AI work to owner outcomes: 18% more revenue and 9% more booked nights than the market average.</p>
+    </li>
+  </ol>
+</div>
+
+## A hybrid vacation rental company built for AI
+
+[Evolve](https://www.evolve.com/) is a vacation rental management company. It markets, prices, and supports homes for owners, and it hosts guests across Airbnb, Vrbo, Booking.com, and evolve.com, with management fees starting at 10%. The company has delivered over $3 billion in rental income for 30,000+ owners and hosted more than 16 million guests at an average 4.8-star rating.
+
+The model is hybrid on purpose: AI-powered operations plus human hospitality. That structure is what made it possible to put agents on real guest and owner workflows instead of leaving AI in a side experiment.
+
+<CustomerScreenshotCarousel
+  slides={[
+    {
+      src: "/images/customers/evolve/evolve-guest-homepage.jpg",
+      alt: "Evolve homepage inviting travelers to find vacation rentals for every occasion",
+      label: "Guest marketplace",
+    },
+    {
+      src: "/images/customers/evolve/evolve-owner-homepage.jpg",
+      alt: "Evolve owner page describing how the team manages calendars, rates, and listings",
+      label: "Owner services",
+    },
+    {
+      src: "/images/customers/evolve/evolve-owner-services.jpg",
+      alt: "Evolve owner-facing product view for starting, managing, and growing a rental business",
+      label: "Owner tools",
+    },
+  ]}
+/>
+
+<CustomerQuote
+  quote="Fundamentally, AI at Evolve is about scaling impact for our customers, not AI for its own sake."
+  name="Arun Nagarajan"
+  role="Chief Product and Technology Officer"
+  company="Evolve"
+/>
+
+## From listing QA to guest support that actually resolves
+
+Evolve started with work that is easy to measure and expensive to do by hand. In late 2024 the team used LLMs to accelerate listing builds and QA, getting owners to a first booking faster. In late 2025 it deployed AI on routine guest support. Those agents now deflect over 60% of those conversations without human intervention. In 2026 the same approach is spreading into engineering, revenue management, and sales.
+
+A guest still gets a person when the need is complex. The point of the agent is speed and coverage on the questions that used to wait in a queue: access details, house rules, timing, the things that make a stay feel handled.
+
+<CustomerQuote
+  quote="We're now deflecting over 60% of those conversations without human intervention."
+  name="Arun Nagarajan"
+  role="Chief Product and Technology Officer"
+  company="Evolve"
+/>
+
+## Inspectable agents, not a black box
+
+Guest support and listing quality are not single model calls. A listing-build run has to pull property facts, write copy, and catch quality issues before a home goes live. A guest-support run has to retrieve the right stay context, decide whether it can resolve the request, and hand off cleanly when it cannot.
+
+Without a [trace](/docs/observability/overview) of those steps, "the agent answered" is the only signal you get. That is not enough when the answer sits in front of a guest about to check in, or an owner waiting on their first booking.
+
+Langfuse is the inspectability layer for that work. Each agent run becomes a trace: inputs and outputs, retrieval and tool calls, latency, and the point where a human still needs to step in. The same instrumentation that Evolve rebuilt its stack around, so teams can ask basic operating questions and get an answer, is what makes those AI investments visible.
+
+<CustomerQuote
+  quote="Our instrumentation is what lets us connect AI investments directly to customer outcomes, and ultimately to the P&L."
+  name="Arun Nagarajan"
+  role="Chief Product and Technology Officer"
+  company="Evolve"
+/>
+
+Over the last two and a half years Evolve rebuilt its core tech stack so systems could answer questions like: how many owners reached out about a damage claim yesterday, how long did we take to respond, how many new bookings did we generate in a given market, and how does that compare to last year. Tracing listing and support agents in Langfuse is how that inspectability reaches the LLM steps inside those workflows.
+
+## Humans stay accountable
+
+Evolve's operating rule is that people own the outcome, not the model. Highest-judgment operators audit and [evaluate](/docs/evaluation/overview) the agents. They decide what "resolved" means, when a handoff is required, and which failures are worth a closer look in the trace.
+
+That is the same loop [Langfuse Academy](/academy) walks through: ship or update an agent, trace what it does in production, [monitor](/academy/monitoring) the cases that miss, and feed those into the next change. For guest support, a missed deflection or a bad handoff is the review signal. For listings, it is copy that would have failed QA.
+
+<CustomerQuote
+  quote="Humans need to be accountable, not AI. So put your highest-judgment people in charge of AI initiatives and have them own the audit and evaluation process."
+  name="Arun Nagarajan"
+  role="Chief Product and Technology Officer"
+  company="Evolve"
+/>
+
+The business result of that discipline is already on the P&L. Evolve owners earn 18% more revenue and book 9% more nights than the market average. The company treats those numbers as the test of whether AI work is worth doing, not as a side metric on a dashboard.
+
+## Why Langfuse
+
+Evolve needed a place where listing-build and guest-support runs could be inspected the same way the rest of the platform is inspected: step by step, with the context that led to the output.
+
+- **[Tracing](/docs/observability/overview) for multi-step agents.** Guest support and listing QA are pipelines, not chat widgets. A typed trace makes it possible to see retrieval, generation, and handoff in one tree.
+- **Evaluation next to production data.** The people who own audit can attach [scores](/docs/evaluation/evaluation-methods/scores-via-sdk) and review traces instead of reconstructing a conversation from logs.
+- **A loop that can spread.** The same setup that started on listings and guest inquiries can follow AI into revenue management and sales without a new observability stack each time.
+
+## What's next
+
+Arun's public bet for the next stretch is a shift from UX to AX: guests and owners will not only talk to Evolve through apps and websites, but through agents talking to agents. That only works if Evolve can see those interactions with the same clarity it expects from the rest of its stack.
+
+Langfuse is how those agent runs stay inspectable as the surface area grows. The guest-support deflection rate is the proof that the hybrid model can take action. Tracing and evaluation are how the team keeps that action accountable as more of the business moves onto agents.
+
+<CustomerStoryCTA />
