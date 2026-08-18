@@ -108,9 +108,9 @@ This process keeps the default definitions current without relying on a third-pa
 
 ### Pricing Tiers [#pricing-tiers]
 
-Some model providers charge different rates depending on the number of input tokens used. For example, Anthropic's Claude Sonnet 4.5 and Google's Gemini 2.5 Pro apply higher pricing when more than 200K input tokens are used.
+Some model providers charge different rates depending on context length or request attributes. For example, Anthropic's Claude Sonnet 4.5 and Google's Gemini 2.5 Pro apply higher pricing when more than 200K input tokens are used, while [OpenAI Fast mode](https://developers.openai.com/api/docs/guides/fast-mode) charges a premium based on the request's `service_tier`.
 
-Langfuse supports **pricing tiers** for models, enabling accurate cost calculation for these context-dependent pricing structures.
+Langfuse supports **pricing tiers** for models, enabling accurate cost calculation across usage thresholds, model parameters, and metadata.
 
 #### How tier matching works
 
@@ -123,14 +123,17 @@ Each model can have multiple pricing tiers, each with:
 
 When calculating cost, Langfuse evaluates tiers in priority order (excluding the default tier). The first tier whose conditions are satisfied is used. If no conditional tier matches, the default tier is applied.
 
-**Condition format:**
+Each condition selects one of these sources:
 
-- `usageDetailPattern`: A regex pattern to match usage detail keys (e.g., `input` matches `input_tokens`, `input_cached_tokens`, etc.)
-- `operator`: Comparison operator (`gt`, `gte`, `lt`, `lte`, `eq`, `neq`)
-- `value`: The threshold value to compare against
-- `caseSensitive`: Whether the pattern matching is case-sensitive (default: false)
+- **Usage details:** Match usage-detail keys with a regex, sum their values, and compare the result with `gt`, `gte`, `lt`, `lte`, `eq`, or `neq`. You can also control whether the key pattern is case-sensitive.
+- **Model parameters:** Match a top-level model-parameter key against one or more exact values.
+- **Metadata:** Match a top-level metadata key against one or more exact values.
+
+For model parameters and metadata, select the source in the pricing-tier editor, enter the **Top-level key**, and add comma-separated exact values. String, number, and boolean values are compared as strings. Nested paths and non-primitive values are not supported. When a tier has multiple conditions, all of them must match.
 
 For example, the "Large Context" tier for Claude Sonnet 4.5 has a condition: `input > 200000`, meaning it applies when the sum of all usage details matching the pattern "input" exceeds 200,000 tokens.
+
+OpenAI Fast mode tiers match the top-level model parameter `service_tier` against `fast` or `priority`. For GPT-5.6 models, this condition is combined with the input-token threshold to distinguish Standard/Fast and short/long-context prices.
 
 ### Custom model definitions [#custom-model-definitions]
 
