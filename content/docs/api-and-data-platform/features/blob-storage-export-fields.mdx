@@ -48,7 +48,7 @@ Each row represents one observation and includes its trace context. Only the [se
 | `completion_start_time`   | string (timestamp) or null | When the first streamed token was generated.                                                                                      |
 | `prompt_name`             | string                     | Langfuse prompt name.                                                                                                             |
 | `prompt_version`          | integer or null            | Langfuse prompt version.                                                                                                          |
-| `total_cost`              | number                     | Total observation cost in USD.                                                                                                    |
+| `total_cost`              | number                     | Total observation cost in USD; `0` when no cost was recorded.                                                                     |
 | `latency`                 | number or null             | Duration in seconds.                                                                                                              |
 | `time_to_first_token`     | number or null             | Time to first token in seconds.                                                                                                   |
 | `model_id`                | string                     | Matched Langfuse model definition identifier.                                                                                     |
@@ -179,7 +179,15 @@ Each row represents one observation without its trace context; join `trace_id` t
 | `output_price`            | string or null             | Matched per-unit output price; omitted from Parquet.                                                                              |
 | `total_price`             | string or null             | Matched flat per-call price; omitted from Parquet.                                                                                |
 
-Where a field appears in both observation files it carries the same meaning. Values that are null here are exported as empty strings in `observations_v2/` JSON and JSONL output.
+Where a field appears in both observation files it carries the same meaning. Unset values are encoded differently, though: a field that is `null` above maps to one of three values in `observations_v2/` JSON and JSONL output.
+
+| Value in `observations_v2/` | Fields                                                                                                                                                           |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `""` (empty string)         | `input`, `model_id`, `model_parameters`, `output`, `parent_observation_id`, `prompt_id`, `prompt_name`, `provided_model_name`, `status_message`, `version`       |
+| `null`                      | `completion_start_time`, `end_time`, `input_price`, `latency`, `output_price`, `prompt_version`, `time_to_first_token`, `total_price`, `usage_pricing_tier_name` |
+| `0`                         | `total_cost`                                                                                                                                                     |
+
+Empty strings appear where the v4 events table stores the column as non-nullable. `total_cost` reads from `cost_details['total']`, so a `0` there cannot be told apart from a genuine zero cost.
 
 For the field groups that select these columns and how they differ from the enriched export, see [what changes in the exported data](/docs/api-and-data-platform/features/export-to-blob-storage#legacy-field-differences).
 
