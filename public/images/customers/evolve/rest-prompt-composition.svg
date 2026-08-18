@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Rest layered prompt architecture in Langfuse</title>
+  <desc id="desc">A foundational prompt, session agenda items, and embedded locale variants compose into one versioned prompt linked to every trace.</desc>
+  <defs>
+    <style>
+      .sans { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    </style>
+  </defs>
+  <rect width="1600" height="900" fill="#FAFAF9"/>
+  <text class="sans" x="48" y="52" font-size="22" font-weight="700" fill="#1A1A1A">How Rest composes 100+ prompts</text>
+  <text class="sans" x="48" y="82" font-size="15" fill="#5C5C5C">Foundational prompt + agenda items + embedded locale variants, assembled at runtime in Langfuse</text>
+
+  <!-- Layer 1 -->
+  <rect x="48" y="112" width="980" height="150" rx="14" fill="#FFFFFF" stroke="#E4E4E7"/>
+  <rect x="48" y="112" width="8" height="150" rx="4" fill="#4C2FB9"/>
+  <text class="mono" x="76" y="144" font-size="12" font-weight="600" letter-spacing="1.2" fill="#4C2FB9">LAYER 1</text>
+  <text class="sans" x="76" y="176" font-size="22" font-weight="700" fill="#1A1A1A">Foundational prompt</text>
+  <rect x="76" y="194" width="268" height="32" rx="6" fill="#F4F1FF"/>
+  <text class="mono" x="88" y="215" font-size="13" fill="#4C2FB9">rest/base-conversation</text>
+  <text class="sans" x="364" y="216" font-size="14" fill="#5C5C5C">Persona, safety rails, and user memory. Shared across voice and text.</text>
+
+  <!-- Layer 2 -->
+  <rect x="48" y="282" width="980" height="318" rx="14" fill="#FFFFFF" stroke="#E4E4E7"/>
+  <rect x="48" y="282" width="8" height="318" rx="4" fill="#4C2FB9"/>
+  <text class="mono" x="76" y="314" font-size="12" font-weight="600" letter-spacing="1.2" fill="#4C2FB9">LAYER 2</text>
+  <text class="sans" x="76" y="346" font-size="22" font-weight="700" fill="#1A1A1A">Agenda - 2 to 4 items per session</text>
+  <text class="sans" x="76" y="372" font-size="14" fill="#5C5C5C">Each item is its own prompt, appended in order and able to embed further prompts.</text>
+
+  <!-- Agenda cards -->
+  <rect x="76" y="396" width="288" height="172" rx="12" fill="#FAFAF9" stroke="#E4E4E7"/>
+  <text class="mono" x="92" y="424" font-size="12" font-weight="600" fill="#4C2FB9">01</text>
+  <text class="sans" x="118" y="426" font-size="16" font-weight="650" fill="#1A1A1A">Sleep check-in</text>
+  <rect x="92" y="442" width="196" height="26" rx="5" fill="#FFFFFF" stroke="#E4E4E7"/>
+  <text class="mono" x="102" y="460" font-size="12" fill="#3F3F46">agenda/sleep-checkin</text>
+  <rect x="92" y="480" width="176" height="24" rx="12" fill="#F4F1FF"/>
+  <text class="mono" x="104" y="497" font-size="11" fill="#4C2FB9">shared/tone-of-voice</text>
+  <rect x="92" y="512" width="118" height="24" rx="12" fill="#EEF6FF"/>
+  <text class="mono" x="104" y="529" font-size="11" fill="#1D4ED8">locale/es-AR</text>
+
+  <rect x="384" y="396" width="288" height="172" rx="12" fill="#FAFAF9" stroke="#E4E4E7"/>
+  <text class="mono" x="400" y="424" font-size="12" font-weight="600" fill="#4C2FB9">02</text>
+  <text class="sans" x="426" y="426" font-size="16" font-weight="650" fill="#1A1A1A">Habit review</text>
+  <rect x="400" y="442" width="188" height="26" rx="5" fill="#FFFFFF" stroke="#E4E4E7"/>
+  <text class="mono" x="410" y="460" font-size="12" fill="#3F3F46">agenda/habit-review</text>
+  <rect x="400" y="480" width="176" height="24" rx="12" fill="#F4F1FF"/>
+  <text class="mono" x="412" y="497" font-size="11" fill="#4C2FB9">shared/tone-of-voice</text>
+  <rect x="584" y="480" width="72" height="24" rx="12" fill="#EEF6FF"/>
+  <text class="mono" x="596" y="497" font-size="11" fill="#1D4ED8">locale/en</text>
+  <rect x="400" y="512" width="186" height="24" rx="12" fill="#F4F1FF"/>
+  <text class="mono" x="412" y="529" font-size="11" fill="#4C2FB9">shared/metric-readout</text>
+
+  <rect x="692" y="396" width="308" height="172" rx="12" fill="#FAFAF9" stroke="#E4E4E7"/>
+  <text class="mono" x="708" y="424" font-size="12" font-weight="600" fill="#4C2FB9">03</text>
+  <text class="sans" x="734" y="426" font-size="16" font-weight="650" fill="#1A1A1A">Plan adjustment</text>
+  <rect x="708" y="442" width="188" height="26" rx="5" fill="#FFFFFF" stroke="#E4E4E7"/>
+  <text class="mono" x="718" y="460" font-size="12" fill="#3F3F46">agenda/plan-adjust</text>
+  <rect x="708" y="480" width="168" height="24" rx="12" fill="#F4F1FF"/>
+  <text class="mono" x="720" y="497" font-size="11" fill="#4C2FB9">shared/safety-rails</text>
+  <rect x="708" y="512" width="118" height="24" rx="12" fill="#EEF6FF"/>
+  <text class="mono" x="720" y="529" font-size="11" fill="#1D4ED8">locale/es-ES</text>
+
+  <!-- Layer 3 -->
+  <rect x="48" y="620" width="980" height="116" rx="14" fill="#FFFFFF" stroke="#E4E4E7"/>
+  <rect x="48" y="620" width="8" height="116" rx="4" fill="#4C2FB9"/>
+  <text class="mono" x="76" y="652" font-size="12" font-weight="600" letter-spacing="1.2" fill="#4C2FB9">LAYER 3</text>
+  <text class="sans" x="76" y="684" font-size="22" font-weight="700" fill="#1A1A1A">Embedded prompts</text>
+  <text class="sans" x="76" y="710" font-size="14" fill="#5C5C5C">Reused across agenda items, for example shared/tone-of-voice. Locale variants resolve at composition time.</text>
+
+  <!-- Locale sidebar -->
+  <rect x="1052" y="112" width="500" height="288" rx="14" fill="#FFFFFF" stroke="#E4E4E7"/>
+  <text class="sans" x="1076" y="148" font-size="18" font-weight="700" fill="#1A1A1A">Locale variants</text>
+  <text class="sans" x="1076" y="176" font-size="14" fill="#5C5C5C">The same embedded prompt resolves to a locale-specific version at composition time.</text>
+  <rect x="1076" y="200" width="452" height="44" rx="8" fill="#FAFAF9"/>
+  <text class="mono" x="1092" y="227" font-size="13" fill="#4C2FB9">en</text>
+  <text class="sans" x="1148" y="227" font-size="14" fill="#1A1A1A">English - default</text>
+  <rect x="1076" y="252" width="452" height="44" rx="8" fill="#FAFAF9"/>
+  <text class="mono" x="1092" y="279" font-size="13" fill="#4C2FB9">es-AR</text>
+  <text class="sans" x="1168" y="279" font-size="14" fill="#1A1A1A">Spanish - Argentina</text>
+  <rect x="1076" y="304" width="452" height="44" rx="8" fill="#FAFAF9"/>
+  <text class="mono" x="1092" y="331" font-size="13" fill="#4C2FB9">es-CO</text>
+  <text class="sans" x="1168" y="331" font-size="14" fill="#1A1A1A">Spanish - Colombia</text>
+  <rect x="1076" y="356" width="452" height="44" rx="8" fill="#FAFAF9"/>
+  <text class="mono" x="1092" y="383" font-size="13" fill="#4C2FB9">es-ES</text>
+  <text class="sans" x="1168" y="383" font-size="14" fill="#1A1A1A">Spanish - Spain</text>
+
+  <!-- Runtime sidebar -->
+  <rect x="1052" y="420" width="500" height="316" rx="14" fill="#1A1A1A"/>
+  <text class="mono" x="1076" y="456" font-size="12" font-weight="600" letter-spacing="1.6" fill="#C4B5FD">AT RUNTIME</text>
+  <text class="sans" x="1076" y="500" font-size="15" fill="#FAFAF9">01  Foundational prompt is fetched by label.</text>
+  <text class="sans" x="1076" y="540" font-size="15" fill="#FAFAF9">02  Agenda items for the session are appended in order.</text>
+  <text class="sans" x="1076" y="580" font-size="15" fill="#FAFAF9">03  Each item pulls its embedded and locale prompts.</text>
+  <line x1="1076" y1="612" x2="1528" y2="612" stroke="#3F3F46"/>
+  <text class="sans" x="1076" y="652" font-size="16" font-weight="650" fill="#FFFFFF">1 composed prompt</text>
+  <text class="sans" x="1076" y="680" font-size="14" fill="#D4D4D8">Versioned in Langfuse and linked to every trace.</text>
+
+  <text class="sans" x="48" y="864" font-size="13" fill="#737373">Non-engineers edit building blocks in Langfuse. Staging and production labels promote a composed prompt without a code deploy.</text>
+</svg>

@@ -67,6 +67,12 @@ What they found: roughly 70 million Americans show symptoms of insomnia, with ma
 
 [Rest](https://getrest.app/) is Evolve's AI sleep coach that runs people through a CBT-I program. The program, which was built with sleep experts, typically runs over about eight weeks.
 
+<div className="flex justify-center">
+  <Frame fullWidth className="w-2/3">
+    ![Hand holding a phone open to Rest's sleep log, habit score, and voice coach control](/images/customers/evolve/rest-sleep-log.png)
+  </Frame>
+</div>
+
 <CustomerScreenshotCarousel
   slides={[
     {
@@ -85,6 +91,10 @@ What they found: roughly 70 million Americans show symptoms of insomnia, with ma
 ## Tracing a voice-and-text agent end to end
 
 All of Rest's AI usage is [traced](/docs/observability/overview) in Langfuse. The voice experience runs on [Vapi](/integrations/no-code/vapi) as the orchestration layer, with ElevenLabs for voice synthesis, Deepgram for transcription, and OpenAI as the underlying LLM. Vapi has a native Langfuse integration, so voice conversations are traced automatically at the click of a button. The text-chat experience is built and traced directly on OpenAI LLM APIs in Evolve's own backend. The text experience, and also non-conversational LLM work such as background extractors that process conversations after the fact, are traced through Langfuse as well.
+
+<Frame fullWidth className="w-full">
+  ![Vapi orchestrating a Rest voice turn through speech, Deepgram transcription, OpenAI reasoning, and ElevenLabs voice, with spans emitted to Langfuse](/images/customers/evolve/rest-vapi-tracing.png)
+</Frame>
 
 <CustomerQuote
   quote="Everything that has to do with evals and error analysis, we completely rely on the fact that we have Langfuse as a repository for traces and prompts. I don't know what it would have been like if we didn't have it."
@@ -120,6 +130,10 @@ That kind of failure hits trust hard, even when the underlying product is otherw
 ## Prompt management at scale
 
 Beyond tracing, Evolve manages more than 100 prompts in [Langfuse Prompt Management](/docs/prompt-management/overview). These aren't static prompts. They are [composed](/docs/prompt-management/features/composability) on the fly, and Langfuse makes that composition easy to pull off: a foundational prompt sets up the overall conversation, and on top of that sits an agenda of two to four items, each its own prompt that can embed further prompts, including locale-specific variants (English and Spanish, adjusted for users in Argentina, Colombia, and Spain).
+
+<Frame fullWidth className="w-full">
+  ![Layered Rest prompt architecture showing a foundational prompt, agenda items, embedded prompts, and locale variants composed at runtime in Langfuse](/images/customers/evolve/rest-prompt-composition.png)
+</Frame>
 
 <CustomerQuote
   quote="That's why we have many, many building blocks, and we come up with a full prompt using those."
