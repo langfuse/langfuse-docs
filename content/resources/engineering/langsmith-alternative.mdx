@@ -1,157 +1,238 @@
 ---
 title: LangSmith Alternative? Langfuse vs. LangSmith for LLM Observability
-description: Langfuse is the open-source LangSmith alternative. Updated July 2026 comparison of open source, self-hosting, storage architecture, evals, alerting, and pricing.
+description: Langfuse is the open-source LangSmith alternative. August 2026 comparison of MIT self-hosting, ClickHouse vs SmithDB, evals, and unit pricing with no seats.
 tags: [comparison, integration]
 ---
 
+import { Cloud, MessageSquare } from "lucide-react";
+
 # Langfuse vs. LangSmith
 
-This guide outlines the key differences between **[Langfuse](/)** and **[LangSmith](https://www.langchain.com/langsmith)** to help engineering teams choose the right LLM observability platform. All LangSmith facts were checked against public LangChain sources in July 2026.
+This guide outlines the key differences between **[Langfuse](/)** and **[LangSmith](https://www.langchain.com/langsmith)** to help engineering teams choose the right LLM observability platform. All LangSmith facts were checked against public LangChain sources in August 2026.
 
-**TL;DR:**
+## TL;DR
 
-- **Choose Langfuse** if you prioritize open source (MIT), data sovereignty (full self-hosting on an open storage stack), a framework-agnostic approach built on OpenTelemetry, and transparent unit-based pricing.
-- **Choose LangSmith** if you are an all-in LangChain/LangGraph shop that wants a managed SaaS covering observability, evals, and agent deployment infrastructure in one closed platform.
+**Choose Langfuse** if you want:
 
-## Open source and distribution
+**1. Control without rebuilding governance.** MIT-licensed self-hosting on every tier, including free, with SSO and org RBAC in the OSS distribution, and a framework-agnostic approach built on OpenTelemetry.
 
-Langfuse is open source (MIT) and self-hosting is a first-class deployment mode. LangSmith is a proprietary, closed-source platform: its client SDKs are open source, but the backend, UI, and storage layer are not, and self-hosting is an Enterprise-exclusive add-on.
+**2. Data sovereignty.** An open-source ClickHouse data plane you can query, join, and hire for. Cloud and self-hosted share the same engine.
 
-| Feature              | Langfuse                                                                                                                                                                            | LangSmith                                                                                                              |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| **Model**            | **[Open Source](https://github.com/langfuse/langfuse)** (MIT License)                                                                                                               | **Proprietary SaaS**: platform closed source; [client SDKs](https://github.com/langchain-ai/langsmith-sdk) open source |
-| **GitHub Stars**     | [![Langfuse GitHub stars](https://img.shields.io/github/stars/langfuse/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://github.com/langfuse/langfuse) | N/A (platform not on GitHub)                                                                                           |
-| **Self-Hosting**     | **First-class**: full feature parity with Cloud, from Docker Compose to Kubernetes/Helm.                                                                                            | **Enterprise only**: add-on requiring a sales contract; not available on Developer or Plus plans.                      |
-| **Data Sovereignty** | **High**: can run fully air-gapped in your own VPC without vendor contact.                                                                                                          | **Medium**: hybrid/self-hosted deployment for Enterprise; SaaS defaults to LangChain's cloud.                          |
+**3. One usage meter and no seat fees.** Traces, observations, and scores bill as units. Langfuse Core and higher plans include unlimited users.
 
-## Scale and storage architecture [#storage-architecture]
+**Choose LangSmith** if you are an all-in LangChain/LangGraph shop that wants a managed SaaS covering observability, evals, and agent deployment infrastructure in one closed platform.
 
-Both platforms were built for high-volume trace data, and both re-architected their storage layers as agent traces grew into thousands of spans with large payloads. They made different choices: LangChain built a proprietary database, and Langfuse invested in its data model on top of an open-source one.
+---
 
-In May 2026, LangChain announced [SmithDB](https://www.langchain.com/blog/introducing-smithdb), a purpose-built trace database written in Rust on Apache DataFusion and the Vortex file format, with trace data on object storage and stateless ingestion and query services. LangChain reports that SmithDB serves LangSmith's US Cloud ingestion and tracing queries and makes core experiences up to 15x faster. As of the May 2026 announcement, SmithDB for self-hosted LangSmith was in early access, so self-hosted deployments do not yet run the same storage engine as their cloud.
+## Open source and distribution [#open-source-and-distribution]
 
-Langfuse stores traces in [ClickHouse](https://clickhouse.com/), the open-source columnar database (Apache 2.0). Langfuse is [part of ClickHouse](/blog/joining-clickhouse) and works directly with the database's core team. Rather than building a new engine, Langfuse redesigned its data model: since March 2026, every LLM call, tool execution, and agent step is written once to a single wide, immutable observations table, which eliminates joins and read-time deduplication. The engineering details and benchmarks are public in [Simplifying Langfuse for Scale](/blog/2026-03-10-simplify-langfuse-for-scale):
+Langfuse is open source (MIT) and self-hosting is a first-class deployment mode. Tracing, evaluations, prompt management, experiments, annotation, and playground ship in the MIT distribution with no usage limits. LangSmith is a proprietary, closed-source platform: its client SDKs are open source, but the backend, UI, and storage layer are not, and self-hosting is an Enterprise-exclusive add-on.
 
-- **1.** Initial table loads for large data volumes dropped from seconds to tens of milliseconds, and dashboard load times for large projects improved by at least 10x on longer time ranges.
-- **2.** The redesign carried a 19x year-over-year growth in processed data and a migration of petabytes of historic traces, done in collaboration with ClickHouse engineers, including a fix contributed upstream to ClickHouse itself.
-- **3.** Token-based full-text search across observation inputs and outputs runs directly on ClickHouse.
-- **4.** Compute and storage are decoupled: Langfuse's web and worker containers are stateless, and ClickHouse supports [object-storage-backed deployments that separate compute from storage](https://clickhouse.com/docs/guides/separation-storage-compute), the same architectural property SmithDB cites.
+Self-hosting runs the same product codebase and architecture as Langfuse Cloud, so trace handling, tenant boundaries, SSO, and org RBAC do not require rebuilding those controls in-house.
 
-A proprietary purpose-built store is a defensible engineering choice for a closed SaaS. The difference shows up when you operate the platform yourself: with Langfuse, the storage layer is a widely deployed database you can run, inspect, and query with SQL, operational expertise for it is hireable, and the same engine backs Langfuse Cloud and self-hosted deployments today.
+On Langfuse Cloud, Enterprise SSO and project-level RBAC sit behind the Teams add-on or Enterprise. On self-hosted OSS, Enterprise SSO and organization-level RBAC ship in the free distribution.
 
-| Feature                      | Langfuse                                                                                                           | LangSmith                                                                   |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
-| **Storage engine**           | **ClickHouse**: open source (Apache 2.0), operable and queryable by you.                                           | **SmithDB**: proprietary (Rust, DataFusion, Vortex), operated by LangChain. |
-| **Cloud/self-hosted parity** | Same engine and data model in Cloud and self-hosted.                                                               | SmithDB on US Cloud; self-hosted early access as of May 2026.               |
-| **Full-text search**         | [Yes](/docs/observability/features/full-text-search), on ClickHouse.                                               | Yes, via SmithDB.                                                           |
-| **Ingestion**                | Async queue (Redis) with stateless workers; ~60% of Cloud observations arrived via OpenTelemetry as of March 2026. | Stateless ingestion services over object storage.                           |
+|                            | Langfuse                                                             | LangSmith                                                                                      |
+| -------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| License                    | **[MIT](https://github.com/langfuse/langfuse)**                      | Proprietary platform; [client SDKs](https://github.com/langchain-ai/langsmith-sdk) open source |
+| Self-hosting               | **[Every tier, including free](/pricing-self-host)**                 | [Enterprise add-on only](https://www.langchain.com/pricing)                                    |
+| Enterprise SSO (self-host) | **Included in free OSS** ([self-hosted pricing](/pricing-self-host)) | Custom SSO is Enterprise                                                                       |
+| Org-level RBAC (self-host) | **Included in free OSS**                                             | Enterprise                                                                                     |
+| Project-level RBAC         | Self-hosted Enterprise / Cloud Teams or Enterprise                   | Enterprise                                                                                     |
+| Air-gapped operation       | Supported                                                            | Self-hosted Enterprise; some suite features remain beta or access-gated                        |
+| Published Cloud Enterprise | **[$2,499/month](/pricing)**                                         | Custom, sales-gated                                                                            |
 
-## Integrations and framework coverage
+---
 
-Both platforms now accept OpenTelemetry traces and instrument non-LangChain applications. The difference is degree: Langfuse's own SDKs are built on OpenTelemetry, while LangSmith's deepest, zero-setup integration remains LangChain and LangGraph, with OTel ingestion alongside its native SDK.
+## Storage: ClickHouse vs SmithDB [#storage]
 
-| Feature        | Langfuse                                                                                                                         | LangSmith                                                                                                                                                  |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **SDKs**       | [Python SDK v4 and JS/TS SDK v5](/docs/observability/sdk/overview), both built on OpenTelemetry; other languages via plain OTel. | Python and JS/TS SDKs; [OTel ingestion](https://docs.langchain.com/langsmith/trace-with-opentelemetry) supported (OTLP endpoint, OpenLLMetry conventions). |
-| **Frameworks** | Integrations with 100+ frameworks and model providers (OpenAI, Anthropic, Vercel AI SDK, LangChain, LlamaIndex, LiteLLM, etc.).  | Deepest support for LangChain/LangGraph (env-var setup); other frameworks via SDK wrappers and OTel.                                                       |
-| **Lock-in**    | Instrumentation is standard OTel; spans can be exported to any OTel-compatible backend.                                          | Native SDK is LangSmith-specific; OTel path reduces lock-in for ingestion.                                                                                 |
+Both platforms were built for high-volume trace data, and both re-architected their storage layers as agent traces grew into thousands of spans with large payloads. They made different choices:
 
-## Evaluation and experiments
+LangChain built [SmithDB](https://www.langchain.com/blog/introducing-smithdb), a proprietary Rust engine on Apache DataFusion and Vortex (May 2026). On self-hosted LangSmith, SmithDB is a [public beta](https://docs.langchain.com/langsmith/self-hosted-changelog#new-features): LangChain does not recommend operating it yourself and routes access through a waitlist.
 
-Both platforms cover offline and online evaluation. Langfuse runs LLM-as-a-judge and deterministic code evaluators inside the platform and gates CI/CD pipelines on experiment results; LangSmith pairs its evals with dataset tooling and, since May 2026, LangSmith Engine for automated failure clustering.
+Langfuse runs on open-source [ClickHouse](https://clickhouse.com/) and works directly with the database's core team as [part of ClickHouse](/blog/joining-clickhouse). Every LLM call, tool execution, and agent step is written once to a wide, immutable observations table. Cloud and self-hosted share that model. Details are in [Simplifying Langfuse for Scale](/blog/2026-03-10-simplify-langfuse-for-scale).
 
-| Feature              | Langfuse                                                                                                                                                                            | LangSmith                                                                                  |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| **LLM-as-a-judge**   | [Managed judges](/docs/evaluation/evaluation-methods/llm-as-a-judge) on observations, traces, and experiments; numeric, categorical, and boolean scores.                            | Managed and custom judges on runs and datasets.                                            |
-| **Code evaluators**  | [Deterministic Python/TypeScript evaluators](/docs/evaluation/evaluation-methods/code-evaluators) run in-platform, including self-hosted; structured access to recorded tool calls. | Inline Python custom code evaluators run in-platform on sampled runs (no internet access). |
-| **Experiments**      | Versioned dataset experiments with a [CI/CD GitHub Action](/docs/evaluation/experiments/experiments-ci-cd) that fails PRs on score regressions.                                     | Dataset experiments with comparison views; CI via SDK scripting.                           |
-| **Agent evaluation** | Tool-call fields exposed directly to evaluators (check names, arguments, order).                                                                                                    | Trajectory and tool-use evals; LangSmith Engine clusters production failures into issues.  |
+A purpose-built store is a reasonable choice for closed SaaS. If you operate the platform yourself, ClickHouse is a database you can run, inspect, query with SQL, and hire for. High-volume reads go through the Observations and Metrics APIs.
 
-## Monitoring and alerting [#monitoring-alerting]
+|                            | Langfuse                                                                                                                                    | LangSmith                                                                                                                     |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Storage engine             | **ClickHouse** (Apache 2.0): operable and queryable by you.                                                                                 | **SmithDB** (proprietary): Rust, DataFusion, Vortex; operated by LangChain                                                    |
+| Cloud / self-hosted parity | Same engine and observations-first data model ([v4 GA](/docs/v4))                                                                           | SmithDB on Cloud; self-hosted SmithDB is [public beta / waitlist](https://docs.langchain.com/langsmith/self-hosted-changelog) |
+| Full-text search           | [Yes](/docs/observability/features/full-text-search) on ClickHouse                                                                          | Yes via SmithDB                                                                                                               |
+| High-volume reads          | [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2) | SmithDB (Cloud), Managed Bulk Data Export (Enterprise-only)                                                                   |
 
-Both platforms ship threshold-based alerting on production metrics as of July 2026.
+---
 
-Langfuse [Alerts](/docs/metrics/features/alerts) watch metrics over observations and scores (for example average cost per trace, p95 latency, or an evaluation score), support separate warning and alert thresholds plus no-data handling, and route notifications to Slack, webhooks, or GitHub Actions workflows. Alerts are available on Langfuse Cloud.
+## Pricing [#pricing]
 
-LangSmith [Alerts](https://docs.langchain.com/langsmith/alerts) fire on error rate, run latency, feedback score, or cost over 5- or 15-minute aggregation windows and route to PagerDuty, Dynatrace, or any webhook. Alerts are configured per project.
+Langfuse meters traces, observations, and scores as units, with no seat fees. LangSmith meters seats, traces, and a retention upgrade, plus separate lines for Deployment, Engine, Fleet, Sandboxes, and LLM Gateway on [their pricing page](https://www.langchain.com/pricing). The worked example covers observability seats and traces only.
 
-| Feature          | Langfuse Alerts                                                | LangSmith Alerts                                     |
-| ---------------- | -------------------------------------------------------------- | ---------------------------------------------------- |
-| **Metrics**      | Any observation or score metric with filters and aggregations. | Error rate, latency, feedback score, cost.           |
-| **Thresholds**   | Alert plus optional warning severity; no-data handling modes.  | Threshold over a 5- or 15-minute aggregation window. |
-| **Destinations** | Slack, webhooks, GitHub Actions.                               | PagerDuty, Dynatrace, webhooks.                      |
-| **Scope**        | Langfuse Cloud; configured per project.                        | Configured per project.                              |
+Public list prices. Negotiated Enterprise discounts can change outcomes. Edit the inputs yourself:
 
-## Pricing
+**→ [Langfuse vs LangSmith pricing model](https://docs.google.com/spreadsheets/d/1MvMulyu5MFzkj_zjkbh0D-Skw8XEsIx0OL9gsn2HjKg/edit?usp=sharing)**
 
-The economic models differ. Langfuse charges for the depth of ingested data (units), while LangSmith charges per seat plus per root execution (traces), with retention priced into the trace rate. Numbers below are as of July 2026.
+|                                 | Langfuse                                                                       | LangSmith                                                               |
+| ------------------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| Seats                           | **No seat fees.** Unlimited users on Core and above ([pricing](/pricing))      | **$39/seat/month** on Plus                                              |
+| Free tier                       | 50,000 units/month, 2 users                                                    | 5,000 base traces/month, 1 seat                                         |
+| Paid entry                      | **Core $29/month** (100,000 units)                                             | Plus, $39/seat + usage (10,000 base traces included)                    |
+| Usage rate                      | 1 unit = 1 trace, observation, or score. Then $8/100k units (volume discounts) | **$0.005**/base trace + **$0.0025** extended upgrade                    |
+| Retention                       | 30 days Hobby, 90 days Core, **3 years** Pro and Enterprise                    | 14 days base, 400 days extended                                         |
+| Separately priced product lines | Observability, evaluation, prompts, and metrics in one platform price          | Deployment, Engine, Fleet, Sandboxes, and LLM Gateway priced separately |
 
-| Feature         | Langfuse                                                                                                      | LangSmith                                                                                               |
-| --------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| **Model**       | **[Unit-based](/docs/administration/billable-units)**: 1 unit = 1 trace, observation, or score. No seat fees. | **Seat + trace-based**: per-seat subscription plus per-trace charges.                                   |
-| **Free tier**   | 50,000 units/month (Hobby plan, 2 users).                                                                     | 5,000 base traces/month (Developer plan, 1 seat, 14-day retention).                                     |
-| **Paid plans**  | [Core $29/mo, Pro $199/mo, Enterprise](/pricing); 100k units included, then $8/100k units (volume discounts). | [Plus $39/seat/mo](https://www.langchain.com/pricing) with 10k base traces included; Enterprise custom. |
-| **Usage rate**  | $8 per 100k units after included volume, independent of retention plan.                                       | $2.50 per 1k base traces (14-day retention); $5.00 per 1k extended traces (400-day retention).          |
-| **Self-hosted** | Free (MIT, all core features); Enterprise Edition license optional.                                           | Enterprise contract required.                                                                           |
+### Worked example [#worked-example]
 
-## Open platform and extensibility
+500,000 traces/month · 10 spans per trace · 1 score per trace · 12-month retention · 5 users.
 
-Langfuse is API-first, so teams can treat observability data as their own. LangSmith exposes APIs for traces and datasets within its managed platform.
+|                    | Base    | Seats   | Usage     | Retention | **Total/month** |
+| ------------------ | ------- | ------- | --------- | --------- | --------------- |
+| **Langfuse Pro**   | $199.00 | $0.00   | $422.00   | $0.00     | **$621.00**     |
+| **LangSmith Plus** | $0.00   | $195.00 | $2,450.00 | $1,250.00 | **$3,895.00**   |
 
-| Feature         | Langfuse                                                                                                                           | LangSmith                                                |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| **API access**  | **API-first**: full CRUD for traces, observations, scores, prompts, and platform features; v2 high-scale query APIs.               | **Read/write**: API to query traces and manage datasets. |
-| **Data export** | **[Blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage)**: automated dumps to S3/GCS (JSONL/Parquet). | **Bulk export**: available on paid plans.                |
+**1.** LangSmith bills seats on invitations. A ten-person team is $390/month before a single trace.
 
-## Enterprise security
+**2.** LangSmith's included window is 14 days. Keeping traces longer is a per-trace upgrade, and [online evaluators and automation rules can promote traces into the paid tier automatically](https://docs.langchain.com/langsmith/usage-and-billing). Hitting the extended cap also disables run-matching rules, adding feedback, and adding runs to annotation queues.
 
-Both platforms are enterprise-ready with major certifications. Langfuse adds ISO 27001 to SOC 2 Type II and offers a fully air-gapped compliance path through open-source self-hosting.
+**3.** We bill every span; they bill the trace. We are likely cheaper on shallow traces. The gap narrows as traces deepen. The sheet takes spans-per-trace as an input so you can find the crossover for your workload.
 
-| Feature            | Langfuse                                                                                                                   | LangSmith                                                                       |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| **Certifications** | [SOC 2 Type II, ISO 27001](/security), GDPR; dedicated HIPAA-ready region.                                                 | [SOC 2 Type II, GDPR, HIPAA](https://docs.langchain.com/langsmith/regions-faq). |
-| **Data regions**   | EU, US, and Japan cloud regions plus a separate HIPAA region; any region via self-hosting.                                 | US and EU cloud regions; other regions via Enterprise self-hosting.             |
-| **Adoption**       | Trusted by **21 of Fortune 50** and 129 of Fortune 500.                                                                    | Wide adoption among LangChain enterprise users.                                 |
-| **Governance**     | [SSO](/docs/administration/authentication-and-sso), [RBAC](/docs/administration/rbac) available in Teams/Enterprise plans. | SSO, RBAC available in Enterprise plans.                                        |
+[Start on Hobby](https://cloud.langfuse.com) · [See pricing](/pricing) · [Talk to us](/talk-to-us)
 
-## Feature highlights
+---
 
-**Langfuse:**
+## Integrations and framework coverage [#integrations]
 
-- **[Agent graph views](/docs/observability/features/agent-graphs)** render a trace as a graph of steps, with an aggregated overview mode and an expanded as-it-ran mode for multi-agent debugging.
-- **[Prompt management](/docs/prompt-management/overview)** provides versioning, deployment labels, and a playground without tying you to one framework's syntax.
-- **[Evaluations](/docs/evaluation/overview)** combine LLM-as-a-judge, in-platform code evaluators, and human annotation, with experiment gates in CI/CD.
-- **[ClickHouse-native analytics](/blog/2026-03-10-simplify-langfuse-for-scale)** give unrestricted raw SQL access to your data when self-hosting.
+Both platforms now accept OpenTelemetry traces and instrument non-LangChain applications. LangSmith's advantage is integration with LangChain and LangGraph through one environment variable, and the same vendor can host the runtime, gateway, and agent builder. That also means the observability layer is owned by the company that sells the runtime.
 
-**LangSmith:**
+Langfuse has no framework to protect and no runtime to sell. It [integrates with 120+ frameworks](/integrations) and model providers (OpenAI, Anthropic, Vercel AI SDK, LangChain, LlamaIndex, LiteLLM, and others) or your own harness. If you change the vendor later, traces, evaluators, datasets, and prompts stay in a database you can operate.
 
-- **[LangSmith Deployment](https://www.langchain.com/langsmith/deployment)** runs LangGraph agents as managed, durable APIs, complemented by Managed Deep Agents since May 2026.
-- **Zero-setup tracing** instruments LangChain applications through environment variables alone.
-- **Interrupt 2026 additions** include LangSmith Engine (automated failure clustering with proposed fixes), Context Hub (versioned agent instructions), and an LLM Gateway.
+| Feature               | Langfuse                                                                                                                                                      | LangSmith                                                                                                        |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| SDKs                  | [Python and JS/TS SDKs](/docs/observability/sdk/overview) built on OpenTelemetry; other languages via the [OTLP endpoint](/integrations/native/opentelemetry) | Python and JS/TS SDKs; [OTel ingestion](https://docs.langchain.com/langsmith/trace-with-opentelemetry) supported |
+| Frameworks            | [120+ frameworks and providers](/integrations)                                                                                                                | Deepest support for LangChain/LangGraph (env-var setup); other frameworks via SDK wrappers and OTel              |
+| Lock-in               | Standard OTel; spans can be exported to any OTel-compatible backend                                                                                           | Native SDK is LangSmith-specific; OTel path reduces lock-in for ingestion                                        |
+| Managed agent runtime | No (out of scope by design)                                                                                                                                   | Deployment, Managed Deep Agents                                                                                  |
+| LLM gateway           | [Independent gateways](/resources/engineering/llm-gateway)                                                                                                    | Public beta (in-suite)                                                                                           |
 
-## Which should you choose
+---
 
-Choose **Langfuse** if you need to self-host with full feature parity, run a mixed or non-LangChain stack on OpenTelemetry, want your observability data in an open database you can query directly, or prefer usage-based pricing without seat fees.
+## Evaluation and experiments [#evaluation-and-experiments]
 
-Choose **LangSmith** if your team builds primarily on LangChain and LangGraph, wants tracing enabled by environment variables alone, and values a single managed vendor for observability plus agent deployment infrastructure, with self-hosting reserved for Enterprise contracts.
+Both platforms cover offline and online evaluation. Langfuse runs LLM-as-a-judge and deterministic code evaluators inside the platform and gates CI/CD pipelines on experiment results. Online scoring does not auto-promote traces into a paid retention tier the way [LangSmith online evaluators can](https://docs.langchain.com/langsmith/usage-and-billing#data-retention-auto-upgrades). LangSmith pairs its evals with dataset tooling and LangSmith Engine for automated failure clustering.
+
+| Feature                         | Langfuse                                                                                                                             | LangSmith                      |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------ |
+| LLM-as-a-judge                  | [Yes](/docs/evaluation/evaluation-methods/llm-as-a-judge) (observations + experiments)                                               | Yes                            |
+| Deterministic online code evals | [Yes](/docs/evaluation/evaluation-methods/code-evaluators) (GA; [self-host dispatcher](/self-hosting/configuration/code-evaluators)) | Yes                            |
+| Experiments                     | [Yes](/docs/evaluation/experiments/experiments-via-sdk) (UI + SDK, versioned datasets)                                               | Yes                            |
+| Multi-modal datasets            | [Yes](/changelog/2026-06-23-multi-modal-datasets)                                                                                    | Yes                            |
+| Tool-call evaluation            | [Structured `tool_calls`](/changelog/2026-07-10-evaluator-tool-calls)                                                                | Via filters + judge on run I/O |
+| Evaluator sampling              | [Deterministic shared sample](/changelog/2026-08-05-deterministic-evaluator-sampling)                                                | Per-evaluator sampling rates   |
+| CI/CD gates                     | [GitHub Action](/docs/evaluation/experiments/experiments-ci-cd)                                                                      | Via SDK / custom               |
+| Annotation queues               | [UI + API](/docs/evaluation/evaluation-methods/annotation-queues)                                                                    | Yes (plus automation rules)    |
+
+---
+
+## Observability and monitoring [#observability-and-monitoring]
+
+Both platforms cover trace inspection in the UI and threshold-based alerting on production metrics.
+
+Langfuse records [cost](/docs/observability/features/token-and-cost-tracking) on generations, groups conversations into [sessions](/docs/observability/features/sessions), and renders [agent graphs](/docs/observability/features/agent-graphs) from the trace. [Custom dashboards](/docs/metrics/features/custom-dashboards) and [Pulse](/changelog/2026-07-28-langfuse-pulse) sit on the same observations table. [Alerts](/docs/metrics/features/alerts) watch metrics over observations and scores (for example average cost per trace, p95 latency, or an evaluation score), support separate warning and alert thresholds plus no-data handling, and route notifications to Slack, webhooks, or GitHub Actions. Alerts are available on Langfuse Cloud and self-hosted v4+.
+
+LangSmith [Alerts](https://docs.langchain.com/langsmith/alerts) fire on error rate, run latency, feedback score, or cost over 5- or 15-minute aggregation windows and route to PagerDuty, Dynatrace, or any webhook.
+
+| Feature             | Langfuse                                                                                                                                                                   | LangSmith                                                                                     |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Agent graphs        | [Yes](/docs/observability/features/agent-graphs)                                                                                                                           | Yes                                                                                           |
+| Sessions / threads  | [Yes](/docs/observability/features/sessions)                                                                                                                               | Yes                                                                                           |
+| Cost tracking       | [Yes](/docs/observability/features/token-and-cost-tracking)                                                                                                                | Yes                                                                                           |
+| Production insights | [Dashboards](/docs/metrics/features/custom-dashboards), [Pulse](/changelog/2026-07-28-langfuse-pulse), [filter search bar](/docs/observability/features/filter-search-bar) | Trace UI filters; [Insights](https://www.langchain.com/blog/interrupt-2026-overview) / Engine |
+| Alert metrics       | Any observation or score metric with filters and aggregations                                                                                                              | Error rate, latency, feedback score, cost                                                     |
+| Alert thresholds    | Alert plus optional warning severity; no-data handling                                                                                                                     | Threshold over a 5- or 15-minute window                                                       |
+| Alert destinations  | Slack, webhooks, GitHub Actions                                                                                                                                            | PagerDuty, Dynatrace, webhooks                                                                |
+| Alert scope         | Cloud and self-host v4+; configured per project                                                                                                                            | Configured per project                                                                        |
+
+---
+
+## Open platform and extensibility [#open-platform]
+
+Langfuse is API-first, so teams can treat observability data as their own. You can also operate Langfuse from agents and CI via the [CLI](/docs/api-and-data-platform/features/cli), the [agent skill](/changelog/2026-05-26-langfuse-agent-skill), and the in-product [Langfuse Assistant](/docs/langfuse-assistant) (Cloud, when AI features are enabled). LangSmith exposes APIs for traces and datasets within its managed platform.
+
+| Feature           | Langfuse                                                                                                                       | LangSmith                                       |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- |
+| API access        | [Versioned OpenAPI REST](/docs/api-and-data-platform/features/public-api); Observations and Metrics v2 for high-scale reads    | REST + SDKs to query traces and manage datasets |
+| Data export       | [Blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) to S3/GCS (JSONL/Parquet)                   | Managed Bulk Data Export is Enterprise-only     |
+| MCP / agent skill | [MCP server](/docs/api-and-data-platform/features/mcp-server), [agent skill](/docs/api-and-data-platform/features/agent-skill) | Remote MCP hosted by LangSmith                  |
+| Prompt management | [Yes](/docs/prompt-management/overview) (framework-agnostic)                                                                   | Yes                                             |
+
+---
+
+## Enterprise security [#enterprise-security]
+
+Both products publish SOC 2 Type II, ISO 27001, GDPR, and HIPAA. Langfuse is used by [21 of the Fortune 50 and 129 of the Fortune 500](/enterprise). Air-gapped operation and self-hosted SSO/RBAC are in [Open source and distribution](#open-source-and-distribution).
+
+| Feature        | Langfuse                                                                           | LangSmith                             |
+| -------------- | ---------------------------------------------------------------------------------- | ------------------------------------- |
+| Certifications | [SOC 2 Type II, ISO 27001](/security), GDPR, [HIPAA-ready region](/security/hipaa) | SOC 2 Type II, ISO 27001, GDPR, HIPAA |
+| Data regions   | Cloud EU, US, Japan; HIPAA on Pro+; any region via self-hosting                    | US, EU, APAC cloud & BYOC             |
+| Adoption       | **21 of Fortune 50** / 129 of Fortune 500                                          | See LangChain stories                 |
+
+---
+
+## Which should you choose [#which-should-you-choose]
+
+Choose **Langfuse** if you need to self-host with SSO and org RBAC in the OSS distribution, run a mixed or non-LangChain stack on OpenTelemetry, want observability data in an open database you can query directly, or prefer unit pricing with no seat fees.
+
+Choose **LangSmith** if you are committed to LangChain and LangGraph and want **one vendor to host the agent runtime and observe it**: zero-config instrumentation, managed deployment for their frameworks, sandboxes, a no-code agent builder (Fleet), and an LLM gateway in public beta.
+
+---
+
+## Teams running Langfuse in production [#customers]
+
+- **[SumUp](/users/sumup)** saved **30%** of external BPO cost by deflecting **50%** of support conversations to AI (Ana Casado). They started self-hosted for the PoC, then moved to Langfuse Cloud for production.
+- **[Canva](/users/canva)** runs framework-agnostic raw LLM clients: Java via OpenTelemetry, Python via the Langfuse SDK. Non-technical users contribute domain expertise through judges. They self-hosted first, then moved to Cloud.
+- **[Merck](/users/merckgroup)** runs about **80** GenAI use cases on Langfuse with **200+** people building on it. They self-host for data sovereignty, provision via API, and cited the public roadmap and shipping velocity in the selection.
+- **[Khan Academy](/users/khan-academy)** built a custom Go client on the open API. **100+** users across 7 product and 4 infrastructure teams use it.
+
+---
+
+## Start free: Cloud or self-host [#get-started]
+
+Start on [Langfuse Cloud](https://cloud.langfuse.com) (Hobby: 50k units/mo, no credit card) or [self-host](/self-hosting) the MIT-licensed stack.
+
+Already on LangSmith? [Talk to us](/talk-to-us) about migration to Langfuse Cloud or a self-hosted deployment.
+
+<Cards num={2}>
+  <Card title="Get started free" href="https://cloud.langfuse.com" icon={<Cloud />} />
+  <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
+</Cards>
+
+---
 
 ## FAQ [#faq]
 
-### Is LangSmith free? [#is-langsmith-free]
+### Is Langfuse the best LangSmith alternative? [#is-langfuse-the-best-langsmith-alternative]
 
-LangSmith has a free Developer plan with one seat and 5,000 base traces per month at 14-day retention (as of July 2026). Beyond that, base traces cost $2.50 per 1,000, extended 400-day retention traces cost $5.00 per 1,000, and the Plus plan is $39 per seat per month. It is free to start but not free software: the platform is proprietary and self-hosting requires an Enterprise contract. Langfuse's free tier includes 50,000 units per month, and the MIT-licensed open-source version is free to self-host without feature gates.
+Yes. If you want an independent open-source platform to trace, evaluate, and improve agents without adopting LangChain's runtime suite. See [Which should you choose](#which-should-you-choose).
+
+### How does LangSmith pricing compare to Langfuse? [#how-does-langsmith-pricing-compare-to-langfuse]
+
+LangSmith Plus is $39/seat/month with 10,000 base traces included, plus per-trace usage and optional retention upgrades (as of August 2026). Langfuse Cloud Hobby includes 50,000 units/month, Core starts at $29/month, and the MIT distribution is free to self-host. On the rates in our [editable public model](https://docs.google.com/spreadsheets/d/1MvMulyu5MFzkj_zjkbh0D-Skw8XEsIx0OL9gsn2HjKg/edit?usp=sharing), 500k traces / 10 spans / 1 score / 5 users / 12-month retention is **$621** Langfuse Pro vs **$3,895** LangSmith Plus. We bill every span; they bill the trace, so span depth changes the crossover. Details in the [pricing section](#pricing).
 
 ### Is LangSmith open source? [#is-langsmith-open-source]
 
-No. The LangSmith platform (backend, UI, and storage layer, including SmithDB) is closed source. The LangChain and LangGraph frameworks and the LangSmith client SDKs are open source under MIT, which is a common point of confusion. Langfuse is open source end to end: the full platform is MIT-licensed and [self-hostable](/self-hosting).
+No. The LangSmith platform (backend, UI, storage, including SmithDB) is closed source. LangChain, LangGraph, and the LangSmith client SDKs are MIT open source. Langfuse is MIT and [self-hostable](/self-hosting).
 
 ### Does LangSmith require LangChain? [#does-langsmith-require-langchain]
 
-No. LangSmith traces applications built without LangChain through its SDKs and accepts OpenTelemetry traces via an OTLP endpoint (as of July 2026). Its lowest-friction path remains LangChain/LangGraph, where tracing activates via environment variables. Langfuse is likewise framework-agnostic, with SDKs built on OpenTelemetry and integrations for 100+ frameworks and model providers.
+No. LangSmith accepts OpenTelemetry and non-LangChain SDKs ([docs](https://docs.langchain.com/langsmith/trace-with-opentelemetry)). The lowest-friction path is still LangChain and LangGraph. Managed Deep Agents, Fleet, and LangSmith Deployment are scoped to their suite.
+
+### Can I self-host LangSmith? [#can-i-self-host-langsmith]
+
+On the Enterprise plan. As of LangSmith Self-Hosted v0.16, SmithDB, Engine, the LLM Gateway, and Sandboxes are available to self-hosted customers, with SmithDB and the Gateway in public beta and SmithDB access routed through a waitlist ([self-hosted changelog](https://docs.langchain.com/langsmith/self-hosted-changelog)).
 
 ### What is SmithDB? [#what-is-smithdb]
 
-SmithDB is LangSmith's proprietary trace database, announced in May 2026 and written in Rust on Apache DataFusion and the Vortex file format, with trace data on object storage. LangChain reports it makes core LangSmith experiences up to 15x faster; at announcement, self-hosted availability was early access only. Langfuse achieves its scale characteristics on open-source ClickHouse with an observations-first immutable data model, so cloud and self-hosted deployments run the same engine.
+SmithDB is LangSmith's proprietary trace database (May 2026), written in Rust on Apache DataFusion and Vortex, with trace data on object storage. LangChain reports up to 15× faster core experiences. Langfuse runs on open-source ClickHouse with an observations-first data model, so Cloud and self-hosted share the same architecture. See [Storage: ClickHouse vs SmithDB](#storage).
 
 <Callout type="info">
   This comparison is out of date? Please [raise a pull request](https://github.com/langfuse/langfuse-docs/tree/main/content/resources/engineering) with up-to-date information.
