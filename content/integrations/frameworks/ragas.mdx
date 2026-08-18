@@ -31,13 +31,13 @@ pip install langfuse ragas langchain-openai openai
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
-os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
-os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your openai key
-os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...")
+os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...");
 ```
 
 ### 2. Initialize the Ragas metrics
@@ -181,11 +181,11 @@ Every task execution is traced, and the `faithfulness` and `answer_relevancy` sc
 
 The same metrics run on live traffic. Because Ragas metrics are reference-free, any trace that recorded the question, the retrieved contexts, and the answer can be scored after the fact:
 
-1. **Fetch a sample of traces** from Langfuse via the SDK (`langfuse.api.trace.list`) and read the question, contexts, and answer from their observations.
+1. **Fetch a sample of root observations** from Langfuse via the SDK (`langfuse.api.observations.get_many(..., filter=...)`) and, when needed, hydrate the rest of each trace via `trace_id`.
 2. **Evaluate the batch with Ragas**, either per sample via `single_turn_ascore` or in bulk via `ragas.evaluate`.
 3. **Write the scores back** with `langfuse.create_score(name=..., value=..., trace_id=...)` so each score appears on the trace that produced the answer.
 
-The [Ragas cookbook](/guides/cookbook/evaluation_of_rag_with_ragas) walks through both variants end to end, including scoring individual traces at request time and batch-scoring a periodic sample.
+The [Ragas cookbook](/resources/engineering/evaluation-of-rag-with-ragas) walks through both variants end to end, including scoring individual traces at request time and batch-scoring a periodic sample.
 
 If you want RAG scoring on production traffic without operating an evaluation job at all, Langfuse's managed [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators run server-side against sampled observations, and the managed evaluator catalog includes evaluators built in partnership with Ragas.
 
@@ -213,7 +213,7 @@ import { FileCode } from "lucide-react";
 <Cards>
   <Card
     title="Cookbook: Evaluation of RAG pipelines with Ragas"
-    href="/guides/cookbook/evaluation_of_rag_with_ragas"
+    href="/resources/engineering/evaluation-of-rag-with-ragas"
     icon={<FileCode />}
   />
 </Cards>

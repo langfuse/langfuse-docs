@@ -65,6 +65,7 @@ const menuItems: {
     items: [
       { name: "Blog", href: "/blog" },
       { name: "Changelog", href: "/changelog" },
+      { name: "Events", href: "/events" },
       { name: "Roadmap", href: "/docs/roadmap" },
       { name: "Interactive Demo", href: "/docs/demo" },
       { name: "Customers", href: "/users" },

@@ -1,13 +1,20 @@
 import OpenAI from "openai";
-import { propagateAttributes, startActiveObservation } from "@langfuse/tracing";
+import {
+  observe,
+  propagateAttributes,
+  updateActiveObservation,
+  setActiveTraceAsPublic,
+  getActiveTraceId,
+} from "@langfuse/tracing";
 import { LangfuseMedia } from "@langfuse/core";
+import { after } from "next/server";
+import { context, trace } from "@opentelemetry/api";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
 import {
-  createPublicDemoTraceLink,
-  makeDemoTracePublic,
-  publishPublicDemoTraceLink,
-} from "@/lib/demo-project-trace";
+  buildDemoTraceRedirectUrl,
+  DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL,
+} from "@/lib/demo-public-trace";
 
 let _openai: OpenAI | null = null;
 const getOpenAI = () => (_openai ??= new OpenAI());
@@ -34,55 +41,55 @@ const handler = async (req: Request) => {
     });
   }
 
-  return startActiveObservation(
-    "image-generator",
-    async (rootObservation) => {
+  return propagateAttributes(
+    {
+      traceName: "Image-Generator",
+      tags: ["image-generator"],
+      userId,
+    },
+    async () => {
+      const traceId = getActiveTraceId();
+      const activeSpan = trace.getActiveSpan();
+      const rootObservationId = activeSpan?.spanContext().spanId;
+      const runWithActiveSpan = <T>(fn: () => T) =>
+        activeSpan
+          ? context.with(trace.setSpan(context.active(), activeSpan), fn)
+          : fn();
+
+      runWithActiveSpan(() => {
+        updateActiveObservation({ input: prompt });
+      });
+
       try {
-        return await propagateAttributes(
-          {
-            traceName: "Image-Generator",
-            tags: ["image-generator"],
-            userId,
-          },
-          async () => {
-            rootObservation.update({ input: prompt });
-            rootObservation.setTraceIO({ input: prompt });
-            makeDemoTracePublic(rootObservation);
-            await createPublicDemoTraceLink({
-              traceId: rootObservation.traceId,
-              name: "Image-Generator",
-              input: prompt,
-              userId,
-              tags: ["image-generator"],
-            });
+        const result = await getOpenAI().images.generate({
+          model: "gpt-image-1",
+          prompt,
+          size: "1024x1024",
+          quality: "low",
+        });
 
-            const result = await getOpenAI().images.generate({
-              model: "gpt-image-1",
-              prompt,
-              size: "1024x1024",
-              quality: "low",
-            });
+        const imageData = result.data?.[0]?.b64_json;
+        if (!imageData) {
+          throw new Error("No image data returned");
+        }
 
-            const imageData = result.data?.[0]?.b64_json;
-            if (!imageData) {
-              throw new Error("No image data returned");
+        const imageMedia = new LangfuseMedia({
+          contentBytes: Buffer.from(imageData, "base64"),
+          contentType: "image/png",
+          source: "bytes",
+        });
+
+        const usage = (result as any).usage as
+          | {
+              input_tokens?: number;
+              output_tokens?: number;
+              total_tokens?: number;
             }
+          | undefined;
 
-            const imageMedia = new LangfuseMedia({
-              contentBytes: Buffer.from(imageData, "base64"),
-              contentType: "image/png",
-              source: "bytes",
-            });
-
-            const usage = (result as any).usage as
-              | {
-                  input_tokens?: number;
-                  output_tokens?: number;
-                  total_tokens?: number;
-                }
-              | undefined;
-
-            rootObservation.update({
+        runWithActiveSpan(() => {
+          updateActiveObservation(
+            {
               input: prompt,
               output: imageMedia,
               model: "gpt-image-1",
@@ -97,47 +104,33 @@ const handler = async (req: Request) => {
                   total: usage.total_tokens ?? 0,
                 },
               }),
-            });
-            rootObservation.setTraceIO({ output: imageMedia });
-            makeDemoTracePublic(rootObservation);
-            rootObservation.end();
-
-            let traceUrl: string | undefined;
-            try {
-              await flush();
-              const publishedTraceLink = await publishPublicDemoTraceLink({
-                traceId: rootObservation.traceId,
-                name: "Image-Generator",
-                userId,
-                tags: ["image-generator"],
-              });
-              traceUrl = publishedTraceLink.traceUrl;
-            } catch (err) {
-              console.warn("Failed to flush public Langfuse trace", err);
-            }
-
-            return new Response(
-              JSON.stringify({
-                image: { base64: imageData, mediaType: "image/png" },
-                traceId: rootObservation.traceId,
-                traceUrl,
-              }),
-              { status: 200, headers: { "Content-Type": "application/json" } },
-            );
-          },
-        );
-      } catch (err) {
-        rootObservation.update({
-          level: "ERROR",
-          statusMessage: err instanceof Error ? err.message : String(err),
+            },
+            { asType: "generation" },
+          );
+          setActiveTraceAsPublic();
+          activeSpan?.end();
         });
-        rootObservation.end();
-
+        let traceUrl = DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL;
         try {
           await flush();
-        } catch (flushErr) {
-          console.warn("Failed to flush errored Langfuse trace", flushErr);
+          traceUrl = buildDemoTraceRedirectUrl({
+            traceId,
+            observationId: rootObservationId,
+          });
+        } catch (error) {
+          console.warn("Failed to publish demo trace link", error);
         }
+
+        return new Response(
+          JSON.stringify({
+            image: { base64: imageData, mediaType: "image/png" },
+            traceId,
+            traceUrl,
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      } catch (err) {
+        after(async () => await flush());
 
         return new Response(
           JSON.stringify({
@@ -148,13 +141,14 @@ const handler = async (req: Request) => {
         );
       }
     },
-    {
-      asType: "generation",
-      endOnExit: false,
-    },
   );
 };
 
-export const POST = handler;
+export const POST = observe(handler, {
+  name: "image-generator",
+  asType: "generation",
+  captureOutput: false,
+  endOnExit: false,
+});
 
 export const maxDuration = 60;

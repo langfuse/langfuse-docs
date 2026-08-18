@@ -1,7 +1,7 @@
 ---
 title: Data Masking (self-hosted)
 description: Configure data masking in your self-hosted Langfuse deployment to redact sensitive information from tracing events.
-label: "Version: v3"
+label: "Version: v4"
 sidebarTitle: "Data Masking"
 ---
 
@@ -50,13 +50,12 @@ For comprehensive documentation including code examples, advanced patterns, and 
 </Callout>
 
 Server-side ingestion masking allows self-hosted Langfuse administrators to define custom callback logic for masking or redacting sensitive data from tracing events as they are ingested.
-This feature operates at the Langfuse Worker container level, providing centralized data masking across all clients.
+This provides centralized data masking across all clients.
 
 <Callout type="warning">
 
 Server-side masking is a centralized safety net, not a replacement for client-side masking when sensitive data must never leave the application boundary.
-In the self-hosted ingestion pipeline, events are written to the event blob storage bucket before the Worker calls the masking callback.
-The callback masks data before it is processed into ClickHouse and downstream Langfuse views.
+The callback masks data before it is persisted in ClickHouse and downstream Langfuse views.
 
 </Callout>
 
@@ -68,29 +67,30 @@ The callback masks data before it is processed into ClickHouse and downstream La
 
 ### How It Works
 
-1. When a tracing event is processed on the Langfuse Worker container, it checks if a masking callback URL is configured.
+1. When a tracing event is processed, Langfuse checks if a masking callback URL is configured.
 2. If configured, Langfuse sends the OpenTelemetry trace object to your callback endpoint via HTTP POST.
 3. Your callback service processes the data and returns the masked object.
-4. Langfuse continues processing with the masked data.
+4. Langfuse persists the masked data in ClickHouse.
 
 ```mermaid
 sequenceDiagram
     participant SDK as Langfuse SDK
-    participant Web as Langfuse Web
-    participant S3 as S3 Event Bucket
-    participant Worker as Langfuse Worker
+    participant LF as Langfuse
     participant Callback as Masking Callback
+    participant CH as ClickHouse
 
-    SDK->>Web: Send trace event
-    Web->>S3: Store unmasked event in S3
-    Note over S3: Data is stored unmasked in S3.
-    Web->>Worker: Forward S3 reference to worker via Redis
-    Worker->>S3: Fetch data from S3
-    Worker->>Callback: POST (OpenTelemetry object)
+    SDK->>LF: Send trace event
+    LF->>Callback: POST (OpenTelemetry object)
     Note over Callback: Apply masking logic
-    Callback->>Worker: Return masked object
-    Note over Worker: Process masked event
+    Callback->>LF: Return masked object
+    LF->>CH: Persist masked event
 ```
+
+<Callout type="info">
+
+Scrubbing runs asynchronously in a worker. Events land in [blob storage](/self-hosting/deployment/infrastructure/blobstorage) in the interim before they are masked and written to ClickHouse. See the [self-hosting architecture](/self-hosting#architecture) for how web, worker, and storage fit together.
+
+</Callout>
 
 ### Configuration
 

@@ -5,6 +5,8 @@ logo: /images/integrations/mixpanel_icon.svg
 description: Display your Langfuse metrics in Mixpanel dashboards.
 ---
 
+import { V4CutoverDate } from "@/components/V4CutoverDate";
+
 # Mixpanel Integration
 
 [Mixpanel](https://mixpanel.com) is a popular choice for product analytics. While Langfuse offers [metrics](/docs/metrics/overview) out of the box, many of our users have asked for a way to **integrate their LLM related metrics that they capture with Langfuse into their Mixpanel dashboards**.
@@ -161,7 +163,7 @@ One event per score.
 
 ## Legacy export sources [#export-source]
 
-Cloud projects created before 2026-05-20 and self-hosted deployments have an `Export Source` selector in the integration settings (introduced with Langfuse v4, Fast Preview). Cloud projects created on or after 2026-05-20 always use `Enriched observations (recommended)` — the schema documented [above](#events) — and can skip this section.
+Cloud projects created before 2026-05-20 and self-hosted deployments have an `Export Source` selector in the integration settings (introduced with the Langfuse v4 preview). Cloud projects created on or after 2026-05-20 always use `Enriched observations (recommended)` — the schema documented [above](#events) — and can skip this section.
 
 Available options:
 
@@ -178,6 +180,15 @@ Available options:
 ### Migrating from the legacy export source [#migrate-export-source]
 
 New integrations default to `Enriched observations (recommended)`; existing integrations continue to use `Traces and observations (legacy)` until changed.
+
+<Callout type="warning">
+  <V4CutoverDate /> is the Langfuse Cloud v4 cutover. If you have not switched
+  by then, remaining legacy exports switch to `Enriched observations`
+  automatically. Migrate on your own schedule beforehand to avoid an
+  unannounced hard cliff in your event stream. If you are self-hosting, the
+  switch happens automatically once you run the v4 server in `events_only`
+  mode.
+</Callout>
 
 Mixpanel is a schemaless event store, so no setup is needed on the Mixpanel side — the new event name and properties appear automatically once you switch. All migration effort goes into the assets built on top of the events: reports, boards, funnels, cohorts, alerts, and warehouse syncs.
 

@@ -1,16 +1,17 @@
 ---
 title: "Langfuse v4 is live"
-description: Langfuse v4 is live on Cloud, with an observations-first data model that makes tables, dashboards, APIs, and evaluations dramatically faster at scale.
+description: Langfuse v4 is live on Cloud and generally available for self-hosted deployments, with an observations-first data model that makes tables, dashboards, APIs, and evaluations dramatically faster at scale.
 ---
 
 import { Book, Github, Table, GitCompare } from "lucide-react";
 import { Details, Summary } from "@/components/Details";
 import { VersionTimeline } from "@/components/VersionTimeline";
 import { ObservationsTableDiagram } from "@/components/ObservationsTableDiagram";
+import { V4CutoverDate } from "@/components/V4CutoverDate";
 
 # Langfuse v4 is live
 
-Langfuse v4 is live on Langfuse Cloud. It makes tables, dashboards, APIs, and evaluations dramatically faster at scale. Dashboard load times for large projects improve by at least 10x.
+Langfuse v4 is live on Langfuse Cloud and generally available for [self-hosted deployments](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4). It makes tables, dashboards, APIs, and evaluations dramatically faster at scale. Dashboard load times for large projects improve by at least 10x.
 
 At its core is an observations-first data model built for agentic systems. Query any LLM call, tool execution, or agent step directly, without costly joins or read-time deduplication.
 
@@ -32,26 +33,37 @@ Selecting one observation instead of assembling data across an entire trace is m
 
 Observations-first lets you query and evaluate the relevant sub-agent, tool call, or LLM call directly. Immutable observations also avoid repeated trace-output updates and costly read-time deduplication.
 
+The new data model also unlocks a set of new features:
+
+- [Full-text search](/docs/observability/features/full-text-search) across inputs, outputs, and metadata
+- [Filter search bar](/docs/observability/features/filter-search-bar) for fast, keyboard-driven filtering
+- [Alerts](/docs/metrics/features/alerts) on your application metrics
+- The significantly faster [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2)
+
 Learn more in the [data model docs](/docs/observability/data-model#observations-and-traces) and the [observations guide](/faq/all/explore-observations-in-v4).
 
 ## Timeline [#timeline]
 
 <VersionTimeline />
 
-On Langfuse Cloud, review your project's remaining [migration actions in the app](https://cloud.langfuse.com/project/~/v4).
+On Langfuse Cloud, review your project's remaining migration actions in the **Migration Assistant** sidebar panel or on the [**Migration status page**](https://cloud.langfuse.com/v4-migration).
+
+Langfuse Cloud becomes v4-only on <V4CutoverDate />. Complete every action detected for your projects before this date.
 
 <Details>
-<Summary>Cloud rollout details (until the v4 cutover)</Summary>
+<Summary>Cloud rollout details</Summary>
 
 - Organizations created on or after April 14, 2026, 14:00 UTC run v4 by default and do not see a toggle.
-- Organizations created before that date can switch the **Preview** toggle (bottom-left in the UI) on and off until Langfuse Cloud becomes v4-only (date will follow).
+- Organizations created before that date can switch the **Langfuse v4 preview** toggle (bottom-left in the UI) on and off until Langfuse Cloud becomes v4-only on <V4CutoverDate />.
 - Cloud projects created on or after May 20, 2026 are locked to the "enriched observations" export source; new legacy export integrations cannot be created since June 22, 2026.
+
+Please note that you must migrate your projects to v4 before the cutover on <V4CutoverDate />.
 
 </Details>
 
 ## Upgrade [#upgrade]
 
-Follow the [step-by-step upgrade guide](/faq/all/upgrade-to-langfuse-v4). It covers Langfuse Cloud, direct API and OpenTelemetry users, and self-hosted deployments.
+Follow the [step-by-step upgrade guide](/faq/all/upgrade-to-langfuse-v4). It covers Langfuse Cloud, direct API and OpenTelemetry users, and self-hosted deployments. Self-hosted deployments upgrade the server with the [v3 to v4 migration guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4).
 
 Check the [Versions & Compatibility matrix](/docs/compatibility#sdk-server) to see which SDK and server versions work together.
 

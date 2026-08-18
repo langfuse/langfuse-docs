@@ -1,7 +1,7 @@
 ---
 title: Guide - Building an intent classification pipeline
 description: Build an intent classification pipeline to understand how users are using your LLM application and how performance differs by intent.
-category: Classification
+category: Examples
 ---
 
 # LLM Application Intent Classification
@@ -61,9 +61,9 @@ import os
 
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
-os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "")
-os.environ.setdefault("LANGFUSE_SECRET_KEY", "")
-os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 ```
 
@@ -115,8 +115,32 @@ Fetch data from your project
 
 
 ```python
-traces = langfuse.api.trace.list()
-traces.data[0].dict()
+import json
+
+
+def parse_json_if_needed(value):
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            return value
+    return value
+
+
+def extract_message(observation):
+    payload = parse_json_if_needed(observation.input)
+    if isinstance(payload, dict):
+        return payload.get("message") or payload.get("input") or (payload.get("args") or [None])[0]
+    return payload
+
+
+response = langfuse.api.observations.get_many(
+    limit=50,
+    fields="core,basic,io,trace_context",
+    is_root_observation=True,
+)
+root_observations = response.data
+root_observations[0].dict()
 ```
 
 Construct a DataFrame for analysis:
@@ -124,8 +148,8 @@ Construct a DataFrame for analysis:
 
 ```python
 traces_list = []
-for trace in traces.data:
-    trace_info = [trace.id, trace.input["message"]]
+for observation in root_observations:
+    trace_info = [observation.trace_id, extract_message(observation)]
     traces_list.append(trace_info)
 
 import pandas as pd
@@ -395,13 +419,13 @@ import os
 
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
-os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "")
-os.environ.setdefault("LANGFUSE_SECRET_KEY", "")
-os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your openai key
-os.environ.setdefault("OPENAI_API_KEY", "")
+os.environ.setdefault("OPENAI_API_KEY", "");
 ```
 
 
@@ -418,17 +442,29 @@ We will fetch 15,000 messages sent to the demo application to create meaningful 
 ```python
 PAGES_TO_FETCH = 300
 
-traces = []
-for i in range(PAGES_TO_FETCH):
-    traces_page = langfuse.api.trace.list(page=i+1)
-    traces.extend(traces_page.data)
+root_observations = []
+cursor = None
+for _ in range(PAGES_TO_FETCH):
+    response = langfuse.api.observations.get_many(
+        limit=50,
+        cursor=cursor,
+        fields="core,basic,io,trace_context",
+        is_root_observation=True,
+    )
+    if not response.data:
+        break
+
+    root_observations.extend(response.data)
+    cursor = getattr(response.meta, "cursor", None)
+    if not cursor:
+        break
 ```
 
 
 ```python
 traces_list = []
-for trace in traces:
-    trace_info = [trace.id, trace.input]
+for observation in root_observations:
+    trace_info = [observation.trace_id, extract_message(observation)]
     traces_list.append(trace_info)
 ```
 
