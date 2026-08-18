@@ -175,6 +175,22 @@ Make manifest processing idempotent. Provider events can be delivered more than 
   producing data after the server switches to `events_only`.
 </Callout>
 
+### What changes in the exported data [#legacy-field-differences]
+
+The legacy source writes observation data to `observations/` and trace context to a separate `traces/` file, which consumers join on `trace_id`. The enriched source writes a single `observations_v2/` file in which each observation row already carries its trace context.
+
+[Field groups](#export-field-groups) select columns in both observation files. Three groups contain fewer fields in the legacy `observations/` file; the rest are identical:
+
+| Group           | `observations_v2/`                                                                                                                  | `observations/`                                                             |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `basic`         | `bookmarked`, `environment`, `is_root_observation`, `level`, `name`, `public`, `session_id`, `status_message`, `user_id`, `version` | `environment`, `level`, `name`, `status_message`, `version`                 |
+| `usage`         | `cost_details`, `total_cost`, `usage_details`, `usage_pricing_tier_id`, `usage_pricing_tier_name`                                   | Same, without `usage_pricing_tier_id`                                       |
+| `trace_context` | `release`, `tags`, `trace_name`                                                                                                     | No effect; these fields are in the `traces/` file (`name` for `trace_name`) |
+
+The `traces/` file itself has a fixed schema that field groups do not apply to. Its trace-level `input`, `output`, `metadata`, `timestamp`, and `version` have no direct equivalent in `observations_v2/`, where identically named fields hold observation-level data.
+
+For every column in each file, see the [legacy field reference](/docs/api-and-data-platform/features/blob-storage-export-fields#legacy-export-paths).
+
 ### Switch to enriched observations [#upgrade-path]
 
 Most integrations can switch directly once their consumer supports the enriched layout:
