@@ -7,14 +7,15 @@ import { RenderedReadmeContent } from "@/components/RenderedReadmeContent";
  * Fetches and renders the cursor-langfuse README from GitHub at runtime.
  * Renders as formatted markdown (headings, lists, tables) like the integration docs.
  */
+const CURSOR_LANGFUSE_README_URL =
+  "https://raw.githubusercontent.com/naoufalelh/cursor-langfuse/refs/heads/main/README.md";
+
 export function CursorLangfuseReadme() {
   const [content, setContent] = useState<string | null>(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    fetch(
-      "https://raw.githubusercontent.com/naoufalelh/cursor-langfuse/refs/heads/main/README.md",
-    )
+    fetch(CURSOR_LANGFUSE_README_URL)
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.text();
@@ -27,5 +28,10 @@ export function CursorLangfuseReadme() {
   if (!content)
     return <p className="text-sm text-muted-foreground">Loading README…</p>;
 
-  return <RenderedReadmeContent content={content} />;
+  return (
+    <RenderedReadmeContent
+      content={content}
+      sourceUrl={CURSOR_LANGFUSE_README_URL}
+    />
+  );
 }

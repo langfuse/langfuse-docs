@@ -26,5 +26,5 @@ export function GitHubReadme({ url }: { url: string }) {
   if (!content)
     return <p className="text-sm text-muted-foreground">Loading README…</p>;
 
-  return <RenderedReadmeContent content={content} />;
+  return <RenderedReadmeContent content={content} sourceUrl={url} />;
 }

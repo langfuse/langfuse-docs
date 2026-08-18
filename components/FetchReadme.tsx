@@ -20,5 +20,5 @@ export function FetchReadme({ url }: { url: string }) {
 
   if (error) return <p>Error loading content: {error}</p>;
   if (content === null) return <p>Loading…</p>;
-  return <RenderedReadmeContent content={content} />;
+  return <RenderedReadmeContent content={content} sourceUrl={url} />;
 }
