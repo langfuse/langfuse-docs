@@ -7,6 +7,7 @@ import {
   reportLinkedInConversion,
 } from "@/lib/linkedin-ads";
 import { REDDIT_EVENTS, reportRedditConversion } from "@/lib/reddit-ads";
+import { SPOTIFY_LEADS, reportSpotifyLead } from "@/lib/spotify-ads";
 import {
   TWITTER_CONVERSIONS,
   reportTwitterConversion,
@@ -24,6 +25,7 @@ export function reportLaunchAppConversion() {
   });
   reportLinkedInConversion(LINKEDIN_CONVERSIONS.launchApp);
   reportRedditConversion(REDDIT_EVENTS.launchApp);
+  reportSpotifyLead(SPOTIFY_LEADS.launchApp);
   reportTwitterConversion(TWITTER_CONVERSIONS.launchApp, {
     value: 1.0,
     currency: "USD",
@@ -35,5 +37,6 @@ export function reportTalkToUsConversion() {
   reportGoogleAdsConversion(GOOGLE_ADS_CONVERSIONS.talkToUsFormSubmit);
   reportLinkedInConversion(LINKEDIN_CONVERSIONS.talkToUs);
   reportRedditConversion(REDDIT_EVENTS.talkToUs);
+  reportSpotifyLead(SPOTIFY_LEADS.talkToUs);
   reportTwitterConversion(TWITTER_CONVERSIONS.talkToUs);
 }
