@@ -1,7 +1,26 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { useEffect, useRef } from "react";
+import { useServerInsertedHTML } from "next/navigation";
+import { useLayoutEffect, useRef } from "react";
+
+declare global {
+  interface Window {
+    __langfuseThemeBeforeForcedLight?: string;
+  }
+}
+
+const forceLightBeforeHydration = `
+try {
+  if (window.__langfuseThemeBeforeForcedLight === undefined) {
+    window.__langfuseThemeBeforeForcedLight =
+      localStorage.getItem("theme") || "system";
+  }
+  localStorage.setItem("theme", "light");
+} catch {}
+document.documentElement.classList.remove("dark");
+document.documentElement.style.colorScheme = "light";
+`;
 
 /** Keep DOM in sync with forced light (covers html + body class targets). */
 function stripDarkFromDocument() {
@@ -20,7 +39,16 @@ export function ForceLightMode() {
   const { setTheme } = useTheme();
   const previousTheme = useRef<string | undefined>();
 
-  useEffect(() => {
+  // Inserted into <head> during SSR only. Unlike rendering next/script from
+  // PageChrome, this is not reconciled as a client-side <script> child.
+  useServerInsertedHTML(() => (
+    <script
+      id="force-light-before-hydration"
+      dangerouslySetInnerHTML={{ __html: forceLightBeforeHydration }}
+    />
+  ));
+
+  useLayoutEffect(() => {
     // Capture the real preference ONCE, directly from localStorage, before
     // setTheme("light") overwrites it. Reading it here (rather than from
     // useTheme) is important because:
@@ -29,7 +57,11 @@ export function ForceLightMode() {
     //     may already reflect "light" (set during the first run), which would
     //     incorrectly record "light" as the previous theme and prevent restore.
     if (previousTheme.current === undefined) {
-      previousTheme.current = localStorage.getItem("theme") ?? "system";
+      previousTheme.current =
+        window.__langfuseThemeBeforeForcedLight ??
+        localStorage.getItem("theme") ??
+        "system";
+      delete window.__langfuseThemeBeforeForcedLight;
     }
 
     stripDarkFromDocument();

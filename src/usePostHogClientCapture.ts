@@ -5,10 +5,31 @@ import { usePostHog } from "posthog-js/react";
 // This preserves existing PostHog event structure while adding type safety
 interface EventDefinitions {
   copy_page: { type: "copy" | "chatgpt" | "claude" | "mcp" };
+  docs_feedback: { rating: "positive" | "negative"; page: string };
+  docs_feedback_comment: {
+    rating: "positive" | "negative" | "submitted" | null;
+    page: string;
+  };
   copy_agent_prompt: {
     source: "agent_prompt_callout";
     path: string;
     prompt_char_count: number;
+  };
+  "demo:view_trace_in_langfuse_clicked": {
+    source: "qa_chatbot" | "image_generator" | "sentiment_classifier";
+    trace_url: string;
+  };
+  "home:start_free_clicked": {
+    source: "home_hero";
+    path: string;
+  };
+  "home:documentation_clicked": {
+    source: "home_hero";
+    path: string;
+  };
+  "home:onboard_with_ai_clicked": {
+    source: "home_hero";
+    path: string;
   };
 }
 

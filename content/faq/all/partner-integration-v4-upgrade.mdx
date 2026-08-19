@@ -1,0 +1,44 @@
+---
+title: Why is my Vapi project still on the Langfuse v3 experience?
+sidebarTitle: Vapi and the v4 upgrade
+description: Projects ingesting via the Vapi integration stay on the Langfuse v3 experience until the integration is upgraded — what this means for dashboards, tables, and evaluators.
+tags: [observability, integration]
+---
+
+import { V4CutoverDate } from "@/components/V4CutoverDate";
+
+# Vapi and the Langfuse v4 upgrade
+
+Vapi sends data to Langfuse through the [Vapi integration](/integrations/no-code/vapi), which the Vapi team operates. Projects relying on this integration are currently opted into the Langfuse v3 experience because the integration does not yet ingest data on the [Langfuse v4](/docs/v4) data model.
+
+We are working with the Vapi team to upgrade the integration. As soon as the upgrade ships, affected projects see the v4 experience automatically — no action is needed on your side.
+
+## Switching to v4 early [#switch-early]
+
+You can opt into the v4 experience yourself at any time via the **Langfuse v4 preview** toggle (bottom-left in the UI). This gives you the significantly faster dashboards and tables of the v4 experience. You may opt-out again at any time.
+
+<Callout type="warning">
+  Until the Vapi integration is upgraded, data ingested via Vapi appears in the
+  v4 experience with a delay of approximately 15 minutes. If you need real-time
+  data, keep the toggle off and switch after the integration upgrade.
+</Callout>
+
+## Keep managing trace-level evaluators [#trace-level-evaluators]
+
+Trace-level LLM-as-a-Judge evaluators are deprecated as part of Langfuse v4, and most projects should [upgrade them to observation-level evaluators](/faq/all/llm-as-a-judge-migration). Observation-level evaluators require the upgraded ingestion path, so for projects ingesting via Vapi this upgrade is currently blocked until the Vapi integration upgrade ships.
+
+Continue creating and managing trace-level evaluators as before — they keep running while you wait for the Vapi integration upgrade. Once the integration is upgraded, follow the [evaluator upgrade guide](/faq/all/llm-as-a-judge-migration) to move to observation-level evaluators.
+
+<Callout type="warning">
+  Trace-level evaluators stop producing results for **all** projects at the
+  Langfuse Cloud v4 cutover on <V4CutoverDate />. We expect Vapi to complete
+  its integration upgrade before then. Once Vapi has upgraded, you will be
+  informed, and the only action you will have to take is to upgrade your
+  evaluators before <V4CutoverDate />; see the [evaluator upgrade
+  guide](/faq/all/llm-as-a-judge-migration).
+</Callout>
+
+## Getting help
+
+- **Questions on Langfuse v4**: Ask in the dedicated [GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518)
+- **Support**: Contact support@langfuse.com for enterprise customers

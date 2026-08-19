@@ -1,0 +1,145 @@
+---
+title: "How Hugging Face Scales Open-Source Model Discovery with Agents and Langfuse"
+date: August 18, 2026
+description: Learn how Hugging Face uses Langfuse to debug and improve an overnight agent that discovers open-source models and helps authors share them on the Hub.
+ogImage: /images/customers/hugging-face/hugging-face-og.png
+tag: customer-story
+author: Annabell
+customerLogo: "/images/integrations/huggingface_icon.svg"
+customerLogoDark: "/images/integrations/huggingface_icon.svg"
+customerQuote: "In just a few minutes you're up and running, and you're already able to see what's going on."
+quoteAuthor: "Niels Rogge"
+quoteRole: "Machine Learning Engineer"
+quoteCompany: "Hugging Face"
+quoteAuthorImage: "/images/customers/hugging-face/niels-rogge.jpeg"
+showInCustomerIndex: true
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { CustomerQuote } from "@/components/customers/CustomerQuote";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+
+<BlogHeader
+  title="How Hugging Face Scales Open-Source Model Discovery with Agents and Langfuse"
+  description="Learn how Hugging Face uses Langfuse to debug and improve an overnight agent that discovers open-source models and helps authors share them on the Hub."
+  customerLogo="/images/integrations/huggingface_icon.svg"
+  authors={["annabellschafer"]}
+  date="August 18, 2026"
+/>
+
+<div className="corner-box-corners not-prose relative my-8 border border-line-structure bg-surface-1 px-6 py-8 text-text-primary md:px-12 md:py-10">
+  <h2 id="summary" className="m-0 font-mono text-sm font-medium uppercase tracking-widest text-text-secondary">Summary</h2>
+
+  <ol className="m-0 mt-7 list-none space-y-6 p-0">
+    <li className="grid grid-cols-[auto_1fr] items-start gap-4 md:gap-6">
+      <span className="mt-1 inline-flex h-8 min-w-10 items-center justify-center bg-surface-cta-primary px-2 font-mono text-base font-medium leading-none text-text-primary">01</span>
+      <p className="m-0 text-sm leading-6">Niels Rogge built an overnight agent that finds open-source models outside the Hugging Face Hub and helps authors publish them.</p>
+    </li>
+    <li className="grid grid-cols-[auto_1fr] items-start gap-4 md:gap-6">
+      <span className="mt-1 inline-flex h-8 min-w-10 items-center justify-center bg-surface-cta-primary px-2 font-mono text-base font-medium leading-none text-text-primary">02</span>
+      <p className="m-0 text-sm leading-6">Langfuse traces each agent run grouped by arXiv ID. Niels can inspect every prompt, output, LLM call and extraction step in one place instead of debugging half-blind.</p>
+    </li>
+    <li className="grid grid-cols-[auto_1fr] items-start gap-4 md:gap-6">
+      <span className="mt-1 inline-flex h-8 min-w-10 items-center justify-center bg-surface-cta-primary px-2 font-mono text-base font-medium leading-none text-text-primary">03</span>
+      <p className="m-0 text-sm leading-6">That visibility exposed an unreliable classifier and missing GitHub README context. After two rounds of error analysis and resulting fixes, the agent received just two negative comments across thousands of issues and pull requests.</p>
+    </li>
+  </ol>
+</div>
+
+## Improving open-source model discovery
+
+The [Hugging Face Hub](https://huggingface.co/)'s core value is simple: it's where you go to find open-source AI models and datasets, filterable by task, library, license, and more. Currently, the hub supports nearly 3 million public models and 1 million public datasets. Still, a meaningful share of the 100 to 350 AI papers published on arXiv each day describe open-source artifacts that never reach the Hub. Models and datasets remain buried in GitHub repositories or Google Drive links, limiting their visibility for both Hugging Face and their authors.
+
+<Frame fullWidth className="w-full">
+  ![Hugging Face Hub model catalog showing filters and nearly three million public models](/images/customers/hugging-face/open-models.png)
+</Frame>
+
+Closing that gap is Niels Rogge's job. As a Machine Learning Engineer at Hugging Face, he finds hidden artifacts and helps authors make them discoverable on the Hub.
+
+## From manual outreach to an overnight agent
+
+Niels started by reading papers, finding the corresponding GitHub repositories, and contacting authors himself. When the volume outgrew him, he built an agent that runs overnight on Hugging Face Jobs. For each new paper, it looks for released models or datasets and checks whether they are already on the Hub. If an artifact is missing, it opens a GitHub issue; if it is already there but lacks the metadata needed for discovery, it opens a pull request.
+
+<Frame fullWidth className="w-full">
+  ![Workflow from new arXiv papers through classification and Hub checks to GitHub issues or pull requests](/images/customers/hugging-face/workflow.png)
+</Frame>
+
+To ensure the highest-quality contributions to the Hugging Face community, Niels wants every message to meet his standards and reflect what he would have written himself. It's important that he trusts the agent to act on his behalf. He writes its messages from the same templates he used doing this by hand, and keeps the tone as if it's him reaching out. It's working: authors send him thank-yous on LinkedIn and follow-up emails, and Niels is able to scale his personal follow-ups, effectively replacing himself.
+
+<Frame fullWidth className="w-full">
+  ![GitHub issue opened by Niels Rogge inviting an author to publish VERA-V artifacts on Hugging Face](/images/customers/hugging-face/github-example.png)
+</Frame>
+
+## Observing the blackbox
+
+Niels spent two or three months getting the agent to work before turning to observability: he needed to understand its decisions and trust it to run unattended overnight. Having seen Langfuse at ML6, he chose it for an open-source license aligned with Hugging Face's values, a [self-hostable](/self-hosting) option, a generous free tier, and a low barrier to entry.
+
+Wiring Langfuse in was little work. Setup took a few lines of the [Langfuse Python SDK](/docs/observability/sdk/overview), added directly into the agent's existing code, no separate service to stand up (it's even easier now with the [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill)). Niels' workflow isn't a chat-like interaction, though. His agent has no conversations. It processes one paper at a time, fully on its own, so the usual pattern of sessions grouping the turns of a chat didn't map onto what he was doing.
+
+His approach: use each paper's arXiv ID as the [session identifier](/docs/observability/features/sessions) instead. Rather than a session grouping the back-and-forth of one conversation, it now groups everything that happens for one paper. One paper, one session. Each agent runs on that paper, one trace. The four [LLM-call steps](/docs/observability/data-model#observations-and-traces) inside that run (finding a GitHub URL, checking a project page as fallback, classifying, taking the majority vote) became observations underneath.
+
+<Frame fullWidth className="w-full">
+  ![Langfuse tracing view showing the Hugging Face paper-processing pipeline and parse_artifacts input and output](/images/customers/hugging-face/detailed-trace.png)
+</Frame>
+
+<CustomerQuote
+  quote="Setting up Langfuse is easy. You only need to add a few lines of code in Python and then you're already able to trace your agents... In just a few minutes you're up and running, and you're already able to see what's going on."
+  name="Niels Rogge"
+  role="Machine Learning Engineer"
+  company="Hugging Face"
+  image="/images/customers/hugging-face/niels-rogge.jpeg"
+/>
+
+Before [tracing](/docs/observability/overview), Niels could only see the agent's final actions, leaving him to debug dynamically assembled prompts without visibility into the steps in between. Once instrumented, every LLM call recorded its prompt and context, output, and how it fed the next step.
+
+<CustomerQuote
+  quote="A lot of my prompts are dynamic. I have a prompt but then some variable that needs to dynamically be filled in. And with Langfuse, you can actually see what's getting filled in in that template."
+  name="Niels Rogge"
+  role="Machine Learning Engineer"
+  company="Hugging Face"
+  image="/images/customers/hugging-face/niels-rogge.jpeg"
+/>
+
+Niels estimates 50 to 100 issue replies a day from the GitHub side alone, plus a similar volume of merged Hugging Face pull requests, drawn from 100 to 350 new papers a day. Multiply that by four LLM steps per paper, several running in parallel.
+
+## Why you should be looking at your traces
+
+The clearest value Niels got from Langfuse was simply seeing what the agent's LLM calls actually looked like. Two concrete examples show why.
+
+**Finding the right GitHub link.** One of the agent's first steps is pulling a paper's GitHub URL or project page from a structured JSON output. Using the rendered prompts, Niels could confirm whether the GitHub link was even present in what the model saw.
+
+**Fixing an unreliable classification step.** The agent's biggest decision is whether a paper is worth reaching out to at all.
+
+<CustomerQuote
+  quote="Classification was probably the biggest thing it needs to do: is this paper useful to reach out to or not. Looking at the traces in Langfuse, I saw that running a single LLM call wasn't reliable enough. When I ran it once on a paper, it often misclassified it. So what I did to solve that is run it multiple times in parallel, five times, and then the final step is a majority vote."
+  name="Niels Rogge"
+  role="Machine Learning Engineer"
+  company="Hugging Face"
+  image="/images/customers/hugging-face/niels-rogge.jpeg"
+/>
+
+## Doing error analysis the manual way
+
+After those initial fixes were in, Niels wanted to approach improvements more systematically. Inspired by Hamel Husain's framework for [error analysis](/academy/monitoring/error-analysis), he performed a "manual stress test" on 50 recent pull requests, comparing what his agent did, to what he would have manually done. Evaluation was done in a simple spreadsheet.
+
+<Frame fullWidth className="w-full">
+  ![Spreadsheet used to review Hugging Face pull requests and flag hallucinated code and GitHub URLs](/images/customers/hugging-face/error-analysis.png)
+</Frame>
+
+He uncovered a few clear patterns. The agent hallucinated code on a good share of pull requests, and made up GitHub URLs in others.
+
+Digging deeper into the traces in Langfuse, Niels identified the root cause: the agent didn't have access to the project's GitHub README. He added it to the system prompt, along with fixes for a few other issues the review surfaced.
+
+A week after shipping the fixes, he ran the same review on fresh output. The hallucinations were gone, along with most of the other issues.
+
+He hasn't needed to repeat it often since. Out of hundreds to thousands of issues and pull requests, he's gotten scarcely any negative feedback. That's his proxy for how well it's performing, and it's a good illustration of how far a systematic pass through your trace data can take you: two rounds of manual error analysis, and the agent has been running reliably ever since.
+
+## What's next: MCP, annotation queues, and a bigger eval investment
+
+The field moves fast, and Niels wants to explore newer implementation patterns. That means a freer agent running in a minimal loop built around the CLIs and Skills (the Hugging Face CLI Skill in particular), rather than the more scripted, multi-step version he has today. As part of that, he wants to use [Langfuse's MCP server](/docs/api-and-data-platform/features/mcp-server) to point a coding agent like Cursor at his traces and ask it to surface issues directly. The manual error analysis and annotation work he's already put in gives him a foundation for this transition too: he can use it to [evaluate the new implementation's performance against the old one](/docs/evaluation/experiments/experiments-via-sdk) before fully switching over.
+
+Longer term, he wants to invest more in [evaluation](/docs/evaluation/overview). He's running the same agent plus tracing approach on a new website called Papers with Code that categorizes AI research by domain and tracks state-of-the-art (SOTA) by domain, which also needs agents to read papers and extract results correctly.
+
+The biggest lesson from Niels' journey? Observability is an essential building block for debugging the logic and behaviour of your system. By treating agent traces as a data source for improvement, he moved from a brittle prototype to a high-reliability production system.
+
+<CustomerStoryCTA />

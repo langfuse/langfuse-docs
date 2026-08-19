@@ -1,0 +1,284 @@
+---
+title: "Langfuse v4 is live: faster at scale, with more ways to search, monitor, and evaluate"
+date: 2026-08-17
+description: "Query and evaluate every agent step directly, with initial table loads in milliseconds and at least 10x faster dashboards for large projects."
+author: Max
+ogImage: /images/changelog/2026-08-17-langfuse-v4/langfuse-v4-bento.png
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Frame } from "@/components/Frame";
+import { VersionTimeline } from "@/components/VersionTimeline";
+import { V4CutoverDate } from "@/components/V4CutoverDate";
+import {
+  Bell,
+  Book,
+  Bot,
+  ChartLine,
+  Cloud,
+  Code2,
+  Database,
+  GitCompare,
+  Github,
+  Rocket,
+  Search,
+  ServerCog,
+  Table,
+} from "lucide-react";
+
+<ChangelogHeader />
+
+Langfuse v4 is live on Langfuse Cloud and generally available for [self-hosted deployments](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4). It makes it faster to debug, evaluate, and monitor complex LLM applications by letting you work with every LLM call, tool execution, and agent step directly. Initial table loads over large datasets drop from seconds to milliseconds, and dashboards over longer time ranges load at least 10x faster in large projects.
+
+Langfuse Cloud becomes v4-only on <V4CutoverDate />. Most projects need no migration. If the **Migration Assistant** shows actions for your project, complete them before this date.
+
+<Cards num={3} className="gap-3">
+  <Card
+    title="New to Langfuse"
+    description="There is nothing to migrate. Start tracing with the v4 data model."
+    href="/docs/observability/get-started"
+    arrow
+    icon={
+      <span className="flex size-9 items-center justify-center bg-muted-green/10 text-muted-green">
+        <Rocket />
+      </span>
+    }
+    contentClassName="min-h-44 flex-col! items-start! gap-3! p-4"
+    contentWrapperClassName="gap-1.5 [&>p]:text-left!"
+  />
+  <Card
+    title="Using Langfuse Cloud"
+    description="Open the Migration status page and complete only the checks detected for your project."
+    href="https://cloud.langfuse.com/v4-migration"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
+    icon={
+      <span className="flex size-9 items-center justify-center bg-muted-blue/10 text-muted-blue">
+        <Cloud />
+      </span>
+    }
+    contentClassName="min-h-44 flex-col! items-start! gap-3! p-4"
+    contentWrapperClassName="gap-1.5 [&>p]:text-left!"
+  />
+  <Card
+    title="Self-hosting Langfuse"
+    description="Plan the upgrade on your schedule and review the infrastructure requirements first."
+    href="/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4"
+    arrow
+    icon={
+      <span className="flex size-9 items-center justify-center bg-surface-2 text-text-secondary">
+        <ServerCog />
+      </span>
+    }
+    contentClassName="min-h-44 flex-col! items-start! gap-3! p-4"
+    contentWrapperClassName="gap-1.5 [&>p]:text-left!"
+  />
+</Cards>
+
+## What we shipped in Langfuse v4
+
+Langfuse v4 is much faster and also ships new ways to search, monitor, evaluate, and query your application data. Check them out:
+
+<Cards num={2} className="gap-3">
+  <Card
+    title="Monitors"
+    description="Watch cost, quality, and latency thresholds and notify teams through Slack, webhooks, or GitHub Actions."
+    href="/changelog/2026-06-19-monitors"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
+    icon={
+      <span className="flex size-9 items-center justify-center bg-surface-2 text-text-secondary">
+        <Bell />
+      </span>
+    }
+    contentClassName="min-h-36 flex-col! items-start! gap-3! p-4"
+    contentWrapperClassName="gap-1.5 [&>p]:text-left!"
+  />
+  <Card
+    title="Code evaluators"
+    description="Run deterministic Python or TypeScript checks on live observations and experiments."
+    href="/changelog/2026-05-28-code-evaluators"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
+    icon={
+      <span className="flex size-9 items-center justify-center bg-muted-blue/10 text-muted-blue">
+        <Code2 />
+      </span>
+    }
+    contentClassName="min-h-36 flex-col! items-start! gap-3! p-4"
+    contentWrapperClassName="gap-1.5 [&>p]:text-left!"
+  />
+  <Card
+    title="Filter search bar"
+    description="Combine typed filters, metadata, and scores in one shareable query."
+    href="/docs/observability/features/filter-search-bar"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
+    icon={
+      <span className="flex size-9 items-center justify-center bg-muted-blue/10 text-muted-blue">
+        <Search />
+      </span>
+    }
+    contentClassName="min-h-36 flex-col! items-start! gap-3! p-4"
+    contentWrapperClassName="gap-1.5 [&>p]:text-left!"
+  />
+  <Card
+    title="Full-text search"
+    description="Find words and phrases across observation inputs, outputs, and metadata."
+    href="/docs/observability/features/full-text-search"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
+    icon={
+      <span className="flex size-9 items-center justify-center bg-muted-green/10 text-muted-green">
+        <Search />
+      </span>
+    }
+    contentClassName="min-h-36 flex-col! items-start! gap-3! p-4"
+    contentWrapperClassName="gap-1.5 [&>p]:text-left!"
+  />
+  <Card
+    title="Pulse"
+    description="Plot count, cost, or latency above the Observations table and select a spike to inspect its operations."
+    href="/changelog/2026-07-28-langfuse-pulse"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
+    icon={
+      <span className="flex size-9 items-center justify-center bg-muted-green/10 text-muted-green">
+        <ChartLine />
+      </span>
+    }
+    contentClassName="min-h-36 flex-col! items-start! gap-3! p-4"
+    contentWrapperClassName="gap-1.5 [&>p]:text-left!"
+  />
+  <Card
+    title="Langfuse Assistant"
+    description="Ask questions about traces, observations, sessions, and metrics in plain language."
+    href="/changelog/2026-06-19-langfuse-assistant-public-beta"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
+    icon={
+      <span className="flex size-9 items-center justify-center bg-muted-green/10 text-muted-green">
+        <Bot />
+      </span>
+    }
+    contentClassName="min-h-36 flex-col! items-start! gap-3! p-4"
+    contentWrapperClassName="gap-1.5 [&>p]:text-left!"
+  />
+  <Card
+    title="Observations API v2"
+    description="Retrieve selected observation fields with cursor-based pagination."
+    href="/docs/api-and-data-platform/features/observations-api#v2"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
+    icon={
+      <span className="flex size-9 items-center justify-center bg-surface-2 text-text-secondary">
+        <Database />
+      </span>
+    }
+    contentClassName="min-h-36 flex-col! items-start! gap-3! p-4"
+    contentWrapperClassName="gap-1.5 [&>p]:text-left!"
+  />
+  <Card
+    title="Metrics API v2"
+    description="Aggregate cost, tokens, volume, latency, and scores across observations."
+    href="/docs/metrics/features/metrics-api#v2"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
+    icon={
+      <span className="flex size-9 items-center justify-center bg-muted-blue/10 text-muted-blue">
+        <ChartLine />
+      </span>
+    }
+    contentClassName="min-h-36 flex-col! items-start! gap-3! p-4"
+    contentWrapperClassName="gap-1.5 [&>p]:text-left!"
+  />
+</Cards>
+
+## Upgrade Langfuse Cloud projects
+
+Langfuse Cloud deprecates v3 endpoints and features on <V4CutoverDate />. Please complete any migration requirements for your projects before this date.
+
+<VersionTimeline deployments={["cloud"]} />
+
+New projects already use v4 and need no migration.
+
+For existing projects, organization owners can open the **Migration Assistant** sidebar and the [**Migration status page**](https://cloud.langfuse.com/v4-migration) to see if any actions are required:
+
+<Frame fullWidth>
+  ![The Langfuse v4 migration assistant lists the exact SDK, evaluator, API, and integration actions detected for a Cloud project](/images/changelog/2026-08-17-langfuse-v4/v4-migration-assistant.png)
+</Frame>
+
+We will email project owners and admins a summary of the actions required for their projects. Complete those actions by <V4CutoverDate />.
+
+Follow the [upgrade guide](/faq/all/upgrade-to-langfuse-v4) for more details.
+
+## Upgrade self-hosted Langfuse instance
+
+Langfuse v4 is generally available for self-hosted deployments. There is no forced cutover date, and Langfuse v3 will receive security patches through January 2027.
+
+Follow the [self-hosted v3 to v4 migration guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4) to review the infrastructure requirements and plan your upgrade.
+
+## Technical background: V4 does less work for the same query
+
+- **Queries scan less data.** One denormalized observations table replaces read-time joins between traces and observations.
+- **Ingestion writes less data.** Each completed observation is written once.
+- **Immutable data creates room to optimize.** Append-only observations give us the architectural freedom to introduce optimizations such as materialized views in the future.
+
+<Frame fullWidth>
+  ![Langfuse v3 joins and deduplicates mutable traces and observations at query time, while v4 aggregates immutable observations in one pass to produce the same cost-by-user result](/images/changelog/2026-08-17-langfuse-v4/v4-data-model-explainer.png)
+</Frame>
+
+Older SDKs sent updates to both traces and observations, which we stored in separate tables. Before ClickHouse could return a result, it had to join those tables and deduplicate the updates. This was slow at scale.
+
+The Langfuse Python SDK 4.7.0 or later and JS/TS SDK 5.4.0 or later add trace-level attributes such as `user_id` and `session_id` to every observation before it is ingested into Langfuse. Each observation is written to a new immutable, append-only table. The same query now needs neither a join nor deduplication, which makes it much faster.
+
+## Questions [#questions]
+
+Ask rollout and migration questions via the in-app support form or on the [v4 GitHub Discussion post](https://github.com/orgs/langfuse/discussions/12518).
+
+You can also join a live Q&A with the Langfuse engineering team. Bring migration questions or your actual setup:
+
+| Date        | Americas                 | Europe       | Asia                                    | Registration                       |
+| ----------- | ------------------------ | ------------ | --------------------------------------- | ---------------------------------- |
+| Wed, Aug 19 | 12:00 AM PT · 3:00 AM ET | 9:00 AM CEST | 12:30 PM IST · 3:00 PM SGT              | [Register](https://lu.ma/vtp4ofae) |
+| Wed, Aug 19 | 9:00 AM PT · 12:00 PM ET | 6:00 PM CEST | 9:30 PM IST · Thu, Aug 20, 12:00 AM SGT | [Register](https://lu.ma/iw93peeb) |
+| Tue, Aug 25 | 12:00 AM PT · 3:00 AM ET | 9:00 AM CEST | 12:30 PM IST · 3:00 PM SGT              | [Register](https://lu.ma/tqys8cxi) |
+| Tue, Aug 25 | 9:00 AM PT · 12:00 PM ET | 6:00 PM CEST | 9:30 PM IST · Wed, Aug 26, 12:00 AM SGT | [Register](https://lu.ma/g1d7jvkr) |
+
+<Cards num={2}>
+  <Card
+    title="Step-by-step upgrade guide"
+    href="/faq/all/upgrade-to-langfuse-v4"
+    arrow
+    icon={<Book />}
+  />
+  <Card
+    title="Versions & Compatibility"
+    href="/docs/compatibility"
+    arrow
+    icon={<GitCompare />}
+  />
+  <Card
+    title="Working with observations"
+    href="/faq/all/explore-observations-in-v4"
+    arrow
+    icon={<Table />}
+  />
+  <Card
+    title="Ask questions on Langfuse v4"
+    href="https://github.com/orgs/langfuse/discussions/12518"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
+    icon={<Github />}
+  />
+</Cards>
