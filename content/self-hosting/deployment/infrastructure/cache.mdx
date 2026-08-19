@@ -110,7 +110,7 @@ Raising `REDIS_SOCKET_TIMEOUT_MS` only lengthens the watchdog; it does not addre
 
 This section covers different deployment options and provides example environment variables.
 
-### Managed Redis/Valkey by Cloud Providers
+### Managed Redis/Valkey by Cloud Providers [#managed-redis-valkey]
 
 [Amazon ElastiCache](https://aws.amazon.com/de/elasticache/redis/), [Azure Cache for Redis](https://azure.microsoft.com/de-de/products/cache/), and [GCP Memorystore](https://cloud.google.com/memorystore/?hl=en) are fully managed Redis services.
 Langfuse handles failovers between read-replicas and supports Redis cluster mode for horizontal scaling.
@@ -139,30 +139,36 @@ You must set the parameter `maxmemory-policy` to `noeviction` to ensure that the
 
 ### Redis on Kubernetes (Helm)
 
-Bitnami offers Helm Charts for [Redis](https://github.com/bitnami/charts/tree/main/bitnami/redis) and [Valkey](https://github.com/bitnami/charts/tree/main/bitnami/valkey).
-We use the Valkey chart as a dependency for [Langfuse K8s](https://github.com/langfuse/langfuse-k8s).
-See [Langfuse on Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) for more details on how to deploy Langfuse on Kubernetes.
+The [Langfuse Helm chart](/self-hosting/deployment/kubernetes-helm) can deploy a cache for you via `redis.deploy: true`.
+From chart version `v2.0.0` onwards it bundles the [valkey-io/valkey](https://github.com/valkey-io/valkey) chart and wires Langfuse to it automatically, including credentials.
+
+This bundled instance is a single Valkey pod and is intended for smaller deployments.
+For high availability, set `redis.deploy: false` and point Langfuse at an external Redis or Valkey cluster, for example a [managed service](#managed-redis-valkey).
 
 #### Example Configuration
 
-For a minimum production setup, we recommend to use the following values.yaml overwrites when deploying the Valkey Helm chart:
-
 ```yaml
-valkey:
+redis:
   deploy: true
-  architecture: standalone
-  primary:
-    extraFlags:
-      - "--maxmemory-policy noeviction" # Necessary to handle queue jobs correctly
   auth:
+    # Leave the password empty to have the chart generate one, or point
+    # auth.existingSecret at a secret you manage.
     password: changeme
 ```
 
-Set the following environment variables to connect to your Redis instance:
+For an external instance, set `redis.deploy: false` and provide the connection details:
 
 ```yaml
-REDIS_CONNECTION_STRING=redis://default:changeme@<chart-name>-valkey-master:6379/0
+redis:
+  deploy: false
+  host: your-redis-endpoint
+  port: 6379
+  auth:
+    existingSecret: my-redis-secret
+    existingSecretPasswordKey: password
 ```
+
+Whichever option you choose, make sure `maxmemory-policy` is set to `noeviction` on the instance so that queue jobs are not evicted.
 
 ### Docker
 
