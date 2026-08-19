@@ -61,8 +61,6 @@ pi   # then run /login inside the interactive session
 
 Install the Langfuse plugin. This downloads the package and registers it in your Pi settings automatically:
 
-{/* TODO(before merge): @langfuse/pi-observability-plugin is not published to npm yet (v0.0.1, local install only). Publish first, then verify this command. */}
-
 ```bash
 pi install npm:@langfuse/pi-observability-plugin
 ```
@@ -108,8 +106,6 @@ pi "Summarize this repository"
 
 Open your Langfuse project: you will find one trace named `Pi - Turn 1 (...)`. The next sections walk through what you can do with it, from debugging sessions to tracing subagents.
 
-{/* TODO(before merge): screenshot /images/docs/pi-agent/pi-agent-first-trace.png + public example trace link. Generated traces go into the demo ledger. */}
-
 </Steps>
 
 ## Debug a session: find failed tool calls
@@ -125,8 +121,6 @@ When a tool invocation fails, its observation is recorded with level `ERROR`:
 - **Filter by error level** in the trace view to jump straight to the failing `Tool: bash` call, with the exact input and output that caused it.
 - **Open the [session](/docs/observability/features/sessions)** to see every turn of your Pi session in order — including turns from before a Pi restart, since turn numbering continues.
 - **Include an image**: paste a screenshot into the prompt (for example of a broken UI) — it is uploaded as Langfuse media and renders inside the trace, so the full context of the turn stays reviewable.
-
-{/* TODO(before merge): screenshot /images/docs/pi-agent/pi-agent-session-error.png + public example trace link */}
 
 ## Trace Pi subagents across processes
 
@@ -144,8 +138,6 @@ While a turn is active, the plugin exposes the turn's identifiers as environment
 A Pi process that finds these variables nests its trace under the turn that spawned it — the subagent's generations and tool calls appear inside the parent trace. Without them, the child writes a separate trace. The built-in flow needs no configuration.
 
 You can also set these variables yourself to attach a Pi run to a trace created by another tool, for example a CI pipeline that already reports to Langfuse. The IDs must belong to the same Langfuse project the run exports to.
-
-{/* TODO(before merge): screenshot /images/docs/pi-agent/pi-agent-subagent-nesting.png + public example trace link */}
 
 ## Configuration reference
 
@@ -201,6 +193,6 @@ The plugin sends Pi session data to Langfuse, which includes prompts, model outp
 ## Resources
 
 - [`pi-observability-plugin` repository (GitHub)](https://github.com/langfuse/pi-observability-plugin)
-- [`@langfuse/pi-observability-plugin` on npm](https://www.npmjs.com/package/@langfuse/pi-observability-plugin) {/* TODO(before merge): publish to npm */}
+- [`@langfuse/pi-observability-plugin` on npm](https://www.npmjs.com/package/@langfuse/pi-observability-plugin)
 - [Pi documentation](https://pi.dev)
 - [Langfuse TypeScript SDK](/docs/observability/sdk/overview)
