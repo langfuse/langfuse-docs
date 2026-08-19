@@ -12,19 +12,26 @@ Langfuse self-hosted sends a small amount of deployment telemetry to Langfuse.
 For Langfuse Enterprise (self-hosted), this telemetry is used for license compliance and to understand license usage at a high level.
 For Langfuse OSS, the same telemetry helps us understand adoption and prioritize improvements and roadmap items.
 
+This page covers the two places where Langfuse collects data about self-hosted deployments:
+
+- [Application telemetry](#application-telemetry): a periodic usage event sent by the running Langfuse containers.
+- [Container image downloads](#container-image-downloads): pull metadata recorded when you fetch images through `docker.langfuse.com`, the registry hostname used by our deployment templates.
+
 <Callout type="info">
   Langfuse does not send raw traces, prompts, observations, scores, or dataset
   contents from your self-hosted deployment. Only high-level aggregated usage
   metrics are shared.
 </Callout>
 
-## Where telemetry is sent
+## Application telemetry [#application-telemetry]
+
+### Where telemetry is sent
 
 Telemetry is sent to Langfuse's telemetry pipeline via PostHog Cloud.
 
 Implementation reference: [Telemetry job](https://github.com/langfuse/langfuse/blob/main/web/src/features/telemetry/index.ts)
 
-## What is sent
+### What is sent
 
 Langfuse calculates these values locally and sends a single telemetry event.
 All metrics are aggregated across all projects of the instance before they are sent.
@@ -45,13 +52,63 @@ Langfuse does not send raw ClickHouse rows or per-project breakdowns.
 | `datasetRunItems`                 | Total dataset run items created in the reporting window                                                                            | Local ClickHouse aggregate |
 | `startTimeframe` / `endTimeframe` | The reporting window used for the counts above                                                                                     | Application metadata       |
 
-## Can I disable telemetry?
+### Can I disable application telemetry?
 
-### Langfuse OSS
+#### Langfuse OSS
 
 Yes. Set `TELEMETRY_ENABLED=false` on all Langfuse application containers.
 
-### Langfuse Enterprise (self-hosted)
+#### Langfuse Enterprise (self-hosted)
 
 Enterprise self-hosted telemetry is used for license compliance and cannot be disabled.
 If you have procurement, network, or privacy questions, please [contact us](/support).
+
+## Container image downloads [#container-image-downloads]
+
+Our deployment templates — the [`docker-compose.yml`](https://github.com/langfuse/langfuse/blob/main/docker-compose.yml) file and the [`langfuse-k8s`](https://github.com/langfuse/langfuse-k8s) Helm chart — reference the Langfuse application images as `docker.langfuse.com/langfuse/langfuse` and `docker.langfuse.com/langfuse/langfuse-worker`.
+
+`docker.langfuse.com` is a registry endpoint operated by [Reo.dev](https://reo.dev), the analytics provider we use to measure open source adoption. It lets us see how many Langfuse instances are deployed and which organizations self-host, which helps us prioritize our roadmap. Only the pull is observed — no data from your running Langfuse instance is involved, and the endpoint is contacted only when you fetch an image.
+
+### How it works [#how-image-download-telemetry-works]
+
+The endpoint speaks the standard registry API and serves the images published to Docker Hub:
+
+- Manifest requests pass through the endpoint, which records the pull before answering.
+- Layer downloads are answered with an HTTP 307 redirect to Docker Hub's CDN, so the image bytes are transferred directly from Docker Hub and never flow through Reo.
+- The manifest digests are identical to those served by `docker.io`, so you receive the same artifact either way and any digest pinning you already do continues to match.
+
+Reo records the request metadata that any registry sees, including the image and tag requested, the client IP address, and the time of the pull. It then resolves the IP address to identify the organization behind the pull, and reports adoption to us aggregated at the organization level. Individual pulls from personal or residential IP addresses generally cannot be attributed this way. See Reo's [Docker integration docs](https://docs.reo.dev/integrations/input-sources/developer-insights/docker) for their side of the setup.
+
+<Callout type="info">
+  Because manifest requests reach Docker Hub from Reo's infrastructure rather
+  than from your network, they share Docker Hub's anonymous rate limit with
+  other pulls through the same endpoint. If you pull frequently from CI or at
+  scale, pull from Docker Hub directly or mirror the images into your own
+  registry.
+</Callout>
+
+### Opting out [#opting-out-of-image-download-telemetry]
+
+Pull the images directly from Docker Hub. Replace `docker.langfuse.com/langfuse/...` with `langfuse/...` (or the fully qualified `docker.io/langfuse/...`) wherever the image is referenced:
+
+```yaml filename="docker-compose.yml"
+services:
+  langfuse-web:
+    image: langfuse/langfuse:4
+  langfuse-worker:
+    image: langfuse/langfuse-worker:4
+```
+
+For the Helm chart, override the image repositories in your `values.yaml`:
+
+```yaml filename="values.yaml"
+langfuse:
+  web:
+    image:
+      repository: langfuse/langfuse
+  worker:
+    image:
+      repository: langfuse/langfuse-worker
+```
+
+Everything else stays the same — tags, digests, and the upgrade process are unchanged. You can also [build the images from source](/self-hosting/deployment/infrastructure/containers#build-from-source) or mirror them into your own registry, which many self-hosted deployments do anyway for air-gapped or policy reasons.
