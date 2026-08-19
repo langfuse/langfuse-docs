@@ -1,7 +1,7 @@
 ---
 date: 2026-07-28
 title: "Pulse: find the outliers in your traces"
-description: "A compact chart strip above the events table. See cost, latency, and token spikes over time, then click or drag a spike to narrow the table to that window."
+description: "A compact chart strip above the Observations table. See count, cost, and latency spikes over time, then click or drag a spike to narrow the table to that window."
 author: Nikita Kabardin
 ogVideo: https://static.langfuse.com/changelog-videos/2025-07-28-pulse.mp4
 ---
@@ -11,15 +11,17 @@ import { Book, Cloud } from "lucide-react";
 
 <ChangelogHeader />
 
-The events table is where you go when something in your traces looks off. **Pulse** puts a compact chart strip right above it, so the spikes in your data are the first thing you see. Each bar covers a slice of time and shows the worst single event in that slice: the most expensive call, the slowest response, the biggest token burst. The outlier you are hunting for is a tall bar, not a row you have to sort your way down to.
+The Observations table is where you go when something in your traces looks off. **Pulse** puts a compact chart strip right above it, so the spikes in your data are the first thing you see. Each bar covers a slice of time and shows the number of observations by default. You can also use it to see the total cost you spent or how slow events ran at the 95th percentile. The outlier you are hunting for is a tall bar, not a row you have to sort your way down to.
 
 ## Find it, then drill into it
 
 Pulse turns spotting an outlier into navigating to it. Click a tall bar and the table narrows to that time window, showing exactly the events that made the spike. Drag across a range of bars to select a wider span; it applies when you let go. Browser Back returns you to where you started, so poking around costs you nothing.
 
-One dropdown switches what the strip plots. You can view **Cost**, **Latency**, or **Tokens** on their own, or all three at once in **Split** mode. Each metric uses the aggregate that fits it: cost as max or sum, latency as max, p95, or average. The bars are time buckets across your full range, so a quiet stretch reads as a flat baseline rather than empty space.
+One dropdown switches what the strip plots: **Count**, **Cost**, or **Latency**. Count is selected by default and shows the number of observations in each bucket. Cost shows the total spent; latency defaults to p95, with the median (p50) one click away. The bars are time buckets across your full range, so a quiet stretch reads as a flat baseline rather than empty space.
 
-This is how you hunt down expensive or slow outliers on the [Langfuse v4](/docs/v4) data model: one cheap aggregate query over time, rather than a per-row sort across your whole dataset.
+When active filters or search terms cannot be represented accurately in the aggregate data, Pulse disables the chart instead of showing misleading results. The Observations table remains available with the selected filters.
+
+This is how you hunt down volume, cost, or latency outliers on the [Langfuse v4](/docs/v4) data model: one cheap aggregate query over time, rather than a per-row sort across your whole dataset.
 
 ## Learn more
 
@@ -37,7 +39,7 @@ This is how you hunt down expensive or slow outliers on the [Langfuse v4](/docs/
     arrow
   />
   <Card
-    title="Open the events table"
+    title="Open the Observations table"
     href="https://cloud.langfuse.com/project/~/traces"
     icon={<Cloud />}
     arrow

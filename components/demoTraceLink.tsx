@@ -1,13 +1,14 @@
 "use client";
 
 import Image from "next/image";
+import { ArrowUpRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 
 type DemoTraceLinkProps = {
   traceUrl?: string | null;
-  source: "qa_chatbot" | "image_generator" | "sentiment_classifier";
+  source: "image_generator";
   className?: string;
 };
 
@@ -32,19 +33,20 @@ export const DemoTraceLink = ({
         });
       }}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-[2px] border border-line-structure bg-surface-bg px-2 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary",
+        "inline-flex items-center gap-3 whitespace-nowrap rounded-[2px] border border-line-structure bg-surface-cta-primary px-5 py-2 text-sm font-semibold text-text-primary no-underline transition-colors hover:border-line-structure hover:bg-surface-cta-primary/90 hover:text-text-primary",
         className,
       )}
     >
       <Image
         src="/langfuse-icon.svg"
         alt=""
-        width={14}
-        height={14}
+        width={16}
+        height={16}
         aria-hidden="true"
-        className="size-3.5 shrink-0"
+        className="size-4 shrink-0"
       />
       View trace in Langfuse
+      <ArrowUpRight className="size-[18px] shrink-0" aria-hidden="true" />
     </a>
   );
 };

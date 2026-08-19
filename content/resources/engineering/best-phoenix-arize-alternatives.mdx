@@ -1,30 +1,48 @@
 ---
 title: Arize AX Alternative? Langfuse vs. Arize AI and Arize Phoenix for LLM Observability
-description: This article compares Langfuse and Arize AI and Arize Phoenix for LLM observability, analytics, evaluations, testing, and annotation.
+description: August 2026 comparison of Langfuse, Arize AX, and Arize Phoenix for LLM observability, evaluations, self-hosting, and pricing.
 tags: [comparison]
 ---
 
+import { Cloud, MessageSquare } from "lucide-react";
+
 # Langfuse vs. Arize AX / Arize Phoenix
 
-This guide outlines the key differences between **[Langfuse](/)** and **[Arize AX](https://arize.com/llm-observability/)** to help engineering teams choose the right LLM observability platform.
+This guide outlines the key differences between **[Langfuse](/)**, **[Arize AX](https://arize.com/llm-observability/)**, and **[Arize Phoenix](https://phoenix.arize.com)** to help engineering teams choose the right LLM observability platform. Product facts below were checked against public Arize sources on August 13, 2026.
+
+In August 2026, Dynatrace [announced a definitive agreement to acquire Arize](https://www.dynatrace.com/news/press-release/dynatrace-to-acquire-arize/). As of publication, Arize AX and Phoenix remain available. This page compares the current products.
 
 **TL;DR:**
 
-- **Choose Langfuse** if you prioritize open-source flexibility, transparent pricing based on usage, and a developer-first experience with extensive integrations and full self-hosting capabilities.
-- **Choose Arize AX** if you need a managed SaaS solution with specialized support for financial compliance (PCI DSS) and deep integration into existing ML data fabrics.
+- **Choose Langfuse** if you want [MIT-licensed](https://github.com/langfuse/langfuse) tracing and evaluation, [self-hosted](/self-hosting) or on Cloud, with usage-based Cloud pricing and no vendor lock-in. It is the open-source AI engineering platform with the most public adoption.
+- **Choose Phoenix** if you want an Elastic License 2.0, local-first platform for tracing, evaluations, datasets, experiments, and prompt management. It can run as one container (SQLite) or multi-instance deployments (PostgreSQL).
+- **Choose Arize AX** if you want Arize's managed production platform, listed PCI DSS 4.0 status, an Enterprise self-hosted option, and Enterprise Data Fabric access, which is currently waitlisted.
+
+Already on Phoenix or AX? See [Migrate from Arize Phoenix to Langfuse](/resources/engineering/migrate-from-phoenix).
+
+[Talk to us](/talk-to-us) if you want help with the move.
+
+<Cards num={2}>
+  <Card title="Get started free" href="https://cloud.langfuse.com" icon={<Cloud />} />
+  <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
+</Cards>
 
 ## Open Source & Distribution
 
-Langfuse stands out for its open-source model, ensuring feature parity between self-hosted and cloud versions. Arize AX is a proprietary enterprise SaaS, while its open-source counterpart ([Arize Phoenix](https://docs.arize.com/phoenix)) is primarily for local testing and debugging (uses PostgreSQL instead of ClickHouse).
+Langfuse is [MIT-licensed](https://github.com/langfuse/langfuse) across tracing, evaluations, prompt management, and experiments. [OSS self-hosting](/self-hosting) runs the same core product and ClickHouse architecture as Cloud, so you can move between Cloud and self-host, or off Langfuse, without rewriting the application layer. [Enterprise governance modules](/pricing-self-host) (audit logs, project-level RBAC, SCIM, protected labels, retention policies) need an Enterprise license when self-hosted.
+
+Arize ships two products. [Phoenix](https://docs.arize.com/phoenix) is source-available under the Elastic License 2.0 (not an OSI-approved open-source license) and self-hosts on SQLite or PostgreSQL. [Arize AX](https://arize.com/llm-observability/) is proprietary SaaS (self-hosting is an Enterprise option). Phoenix and AX do not share a storage engine: Phoenix uses Postgres/SQLite; AX Cloud uses [adb](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database).
+
+Dynatrace's [acquisition announcement](https://www.dynatrace.com/news/press-release/dynatrace-to-acquire-arize/) is an enterprise AI observability deal. It refers to Arize as "OSS-native" and highlights its open-source developer community, but it does not name Phoenix, and it does not state a license or a commitment that a standalone open-source product continues. For current Phoenix licensing and availability, see the [Phoenix license](https://github.com/Arize-ai/phoenix/blob/main/LICENSE) and [self-hosting documentation](https://docs.arize.com/phoenix/deployment).
 
 | Feature            | Langfuse                                                                                                                                                                                  | Arize AX                                                                                                                                                                                               |
 | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Model**          | **[Open Source](https://github.com/langfuse/langfuse)** (MIT License)                                                                                                                     | **Proprietary SaaS** (Open-source "[Phoenix](https://github.com/arize-ai/phoenix)" is for local dev only)                                                                                              |
+| **Model**          | **[Open Source](https://github.com/langfuse/langfuse)** (MIT License)                                                                                                                     | **AX:** proprietary SaaS. **[Phoenix](https://github.com/arize-ai/phoenix):** Elastic License 2.0 (source-available)                                                                                   |
 | **GitHub Stars**   | [![Langfuse GitHub stars](https://img.shields.io/github/stars/langfuse/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://github.com/langfuse/langfuse)       | [![Phoenix GitHub stars (Phoenix)](https://img.shields.io/github/stars/arize-ai/phoenix?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://github.com/arize-ai/phoenix)               |
 | **PyPI Downloads** | [![Langfuse pypi downloads](https://img.shields.io/pypi/dm/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://pypi.org/project/langfuse/)                     | [![Phoenix pypi downloads (Phoenix)](https://img.shields.io/pypi/dm/arize-phoenix?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://pypi.org/project/arize-phoenix)                  |
-| **npm Downloads**  | [![Langfuse npm downloads](https://img.shields.io/npm/dm/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://www.npmjs.com/package/langfuse)                   | N/A                                                                                                                                                                                                    |
+| **npm Downloads**  | [![Langfuse npm downloads](https://img.shields.io/npm/dm/@langfuse/tracing?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://www.npmjs.com/package/@langfuse/tracing) | [![Phoenix npm downloads](https://img.shields.io/npm/dm/%40arizeai%2Fphoenix-client?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://www.npmjs.com/package/@arizeai/phoenix-client) |
 | **Docker Pulls**   | [![Langfuse Docker Pulls](https://img.shields.io/docker/pulls/langfuse/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://hub.docker.com/r/langfuse/langfuse) | [![Phoenix Docker Pulls (Phoenix)](https://img.shields.io/docker/pulls/arizephoenix/phoenix?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://hub.docker.com/r/arizephoenix/phoenix) |
-| **Self-Hosting**   | **First-Class Citizen**: Full feature parity with Cloud (including ClickHouse). Easy to [deploy via Docker](/self-hosting).                                                               | Limited, [Phoenix only](https://docs.arize.com/phoenix/deployment). No feature parity with Arize AX Cloud.                                                                                             |
+| **Self-Hosting**   | **[Free OSS](/self-hosting)**: same codebase and ClickHouse architecture as Cloud. Enterprise governance needs an [Enterprise license](/pricing-self-host).                               | **Phoenix:** [self-host](https://docs.arize.com/phoenix/deployment) on SQLite/Postgres. **AX:** [self-host on Enterprise](https://arize.com/pricing/).                                                 |
 
 ## Scalability & Performance
 
@@ -36,43 +54,46 @@ Both tools are built for scale, but they use different architectural approaches.
 
 ## Integrations
 
-Langfuse focuses on broad, community-driven compatibility via OpenTelemetry, whereas Arize AX emphasizes auto-instrumentation and deep data warehouse links.
+Both platforms ingest OpenTelemetry. Langfuse [maps OpenInference attributes](/integrations/native/opentelemetry) natively, so existing OpenInference instrumentors can keep running and export to Langfuse.
 
-| Feature        | Langfuse                                                                                                          | Arize AX                                                                                                            |
-| -------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| **Standard**   | **[OpenTelemetry Native](/docs/observability/overview)**: Built on OTel standards.                                | **[OpenTelemetry Native](https://arize.com/docs/ax/integrations/opentelemetry/overview)**: Built on OTel standards. |
-| **Frameworks** | **[100+ Frameworks](/integrations)**: with popular frameworks like LangChain, LlamaIndex, OpenAI, Anthropic, etc. | Maintains integrations via [OpenInference library](https://github.com/Arize-ai/openinference).                      |
+| Feature          | Langfuse                                                                                                        | Arize AX / Phoenix                                                                                                     |
+| ---------------- | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **Standard**     | **[OpenTelemetry Native](/docs/observability/overview)**: Built on OTel standards.                              | **[OpenTelemetry compliant](https://arize.com/docs/ax/integrations/opentelemetry/overview)**: Built on OTel standards. |
+| **Integrations** | **[120+ integrations](/integrations)** plus OpenInference ingest via [OTLP](/integrations/other/openinference). | [OpenInference](https://github.com/Arize-ai/openinference) auto-instrumentation across popular frameworks.             |
 
 ## Pricing
 
-Langfuse offers a transparent, volume-based pricing model that scales predictably. Arize AX charges based on span counts and data volume, which can become costly for data-heavy LLM apps.
+Langfuse Cloud meters one unit (a trace, observation, or score) with no seat fees. Arize AX meters spans and ingested GB, with retention included per plan. Phoenix self-hosted has no platform usage fee; you run the infrastructure. Figures below are from [Arize pricing](https://arize.com/pricing/) and [Langfuse pricing](/pricing) as of August 2026.
 
-| Feature         | Langfuse                                                                                              | Arize AX                                                      |
-| --------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| **Model**       | **Usage-Based**: [Billable unit](/docs/administration/billable-units) = trace, observation, or score. | **Hybrid**: Spans + Data Ingestion Volume (GB).               |
-| **Free Tier**   | 50k traces/mo free to test the full platform.                                                         | 25k spans/mo and 1 GB data.                                   |
-| **Scalability** | Graduated pricing (e.g., $6/100k units at scale). Transparent overages.                               | N/A                                                           |
-| **Plans**       | [Free, Core ($29/mo), Pro ($199/mo), Teams, Enterprise](/pricing).                                    | [Free, Pro ($50/mo), Enterprise](https://arize.com/pricing/). |
+| Feature        | Langfuse                                                                                                         | Arize AX                                                                                           |
+| -------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **Model**      | **Usage-Based**: [Billable unit](/docs/administration/billable-units) = trace, observation, or score.            | **Hybrid**: spans + ingestion volume (GB).                                                         |
+| **Free Tier**  | 50k units/mo, 30-day retention, 2 users.                                                                         | 25k spans/mo, 1 GB, 15-day retention.                                                              |
+| **Paid entry** | Core $29/mo (100k units, 90-day retention).                                                                      | Pro $50/mo (50k spans, 10 GB, 30-day retention).                                                   |
+| **Retention**  | 3 years on Pro and Enterprise.                                                                                   | 15 days Free, 30 days Pro, custom on Enterprise.                                                   |
+| **Self-host**  | Core platform on free OSS; enterprise governance needs an [Enterprise license](/pricing-self-host).              | Phoenix: free to self-host. AX: Enterprise.                                                        |
+| **Plans**      | [Hobby (free), Core ($29/mo), Pro ($199/mo), optional Teams add-on ($300/mo), Enterprise ($2,499/mo)](/pricing). | [Free, Pro ($50/mo), Enterprise](https://arize.com/pricing/). Phoenix is separate and self-hosted. |
 
 ## Open Platform & Extensibility
 
 Langfuse is designed as a core infrastructure component, allowing teams to build custom internal tools on top of its API.
 
-| Feature             | Langfuse                                                                                                                  | Arize AX                                     |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| **API Access**      | [API first](/docs/api-and-data-platform/features/public-api) for all data (traces, evals, prompts) and platform features. | API available, to export to data warehouses. |
-| **Customizability** | Build custom workflows, evaluations, and [dashboards](/docs/metrics/features/custom-dashboards) using the SDK/API.        | Custom evaluations and pipelines via SDK.    |
-| **Data Access**     | Query via API and [blob storage exports](/docs/api-and-data-platform/features/export-to-blob-storage).                    | Query via API and blob storage exports.      |
+| Feature             | Langfuse                                                                                                                                                     | Arize AX                                    |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------- |
+| **API Access**      | [API first](/docs/api-and-data-platform/features/public-api) for all data (traces, evals, prompts) and platform features.                                    | API available, exposes only core resources. |
+| **Customizability** | Build custom workflows, evaluations, and [dashboards](/docs/metrics/features/custom-dashboards) using the SDK/API.                                           | Custom evaluations and pipelines via SDK.   |
+| **Data Access**     | Query via API on all plans. [Scheduled blob exports](/docs/api-and-data-platform/features/export-to-blob-storage): Teams add-on, Enterprise, or self-hosted. | Export via UI, SDK, API, CLI.               |
 
 ## Enterprise Security
 
-Both platforms serve large enterprises, but Arize AX has a slight edge in specific financial certifications (PCI DSS). Langfuse supports [masking](https://langfuse.com/docs/observability/features/masking) to filter out PCI DSS sensitive data.
+Both platforms serve large enterprises. Arize AX lists PCI DSS 4.0 among its certifications. Langfuse lists SOC 2 Type II and ISO 27001, with a [HIPAA-ready region](/security/hipaa) on Pro or higher, and supports [masking](/docs/observability/features/masking) to redact sensitive fields before ingest.
 
-| Feature            | Langfuse                                                                                                                                                                  | Arize AX                                                                                                               |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| **Certifications** | **[SOC 2 Type II, ISO 27001](/security)**, GDPR, HIPAA-ready region.                                                                                                      | [SOC 2 Type II, HIPAA, **PCI DSS 4.0**, CSA Star Level 1](https://arize.com/docs/ax/security-and-settings/compliance). |
-| **Adoption**       | Trusted by **21 of Fortune 50** & 129 of Fortune 500.                                                                                                                     | Strong enterprise adoption, particularly in fintech.                                                                   |
-| **Governance**     | [SSO](/docs/administration/authentication-and-sso), [RBAC](/docs/administration/rbac), [Audit Logs](/docs/administration/audit-logs) available in Teams/Enterprise plans. | SSO, RBAC available in Enterprise plans.                                                                               |
+| Feature            | Langfuse                                                                                                                                                                                                                                                                                            | Arize AX                                                                                                                                                |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Certifications** | **[SOC 2 Type II, ISO 27001](/security)**, GDPR, [HIPAA-ready region](/security/hipaa) (Pro+).                                                                                                                                                                                                      | [SOC 2 Type II, HIPAA, PCI DSS 4.0, CSA Star Level 1](https://arize.com/docs/ax/security-and-settings/compliance).                                      |
+| **Regions**        | Cloud EU, US, Japan; HIPAA on Pro+.                                                                                                                                                                                                                                                                 | Cloud US, EU, or CA ([pricing](https://arize.com/pricing/)).                                                                                            |
+| **Adoption**       | Trusted by **21 of Fortune 50** & 129 of Fortune 500.                                                                                                                                                                                                                                               | Strong enterprise adoption, including teams that already run Arize for classical ML.                                                                    |
+| **Governance**     | Org [RBAC](/docs/administration/rbac), [Enterprise SSO](/docs/administration/authentication-and-sso) and project RBAC: Teams add-on or Enterprise. [Audit logs](/docs/administration/audit-logs): Enterprise. Self-host OSS includes org RBAC and SSO; project RBAC and audit logs need Enterprise. | Organization/space RBAC with plan-specific scope; SSO, fine-grained space-level RBAC, audit logs on Enterprise ([pricing](https://arize.com/pricing/)). |
 
 ## Feature Highlights
 
@@ -85,9 +106,16 @@ Both platforms serve large enterprises, but Arize AX has a slight edge in specif
 
 **Arize AX:**
 
-- **[Agentic Visualization](https://arize.com/docs/ax/observe/tracing/sessions-and-users):** Specialized views for multi-agent conversation flows.
-- **[Data Fabric](https://arize.com/docs/ax/security-and-settings/data-fabric):** Seamless integration with enterprise data lakes (Snowflake/BigQuery).
-- **Evaluation:** Strong focus on session-level evaluation and retrieval diagnosis (RAG).
+- **[Agentic Visualization](https://arize.com/docs/ax/instrument/agent-trajectory):** Specialized views for multi-agent conversation flows.
+- **[Data Fabric](https://arize.com/docs/ax/security-and-settings/data-fabric):** Sync with enterprise data lakes (Enterprise feature, currently waitlisted).
+- **Evaluation:** Session-level evaluation and retrieval diagnosis (RAG). AX also includes Signal and Alyx, with availability depending on plan.
+
+Already instrumented with OpenInference? Keep it and [repoint traces to Langfuse](/resources/engineering/migrate-from-phoenix). For a migration plan on Cloud or self-hosted, [talk to us](/talk-to-us).
+
+<Cards num={2}>
+  <Card title="Get started free" href="https://cloud.langfuse.com" icon={<Cloud />} />
+  <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
+</Cards>
 
 <Callout type="info">
   This comparison is out of date? Please [raise a pull request](https://github.com/langfuse/langfuse-docs/tree/main/content/resources/engineering) with up-to-date information.

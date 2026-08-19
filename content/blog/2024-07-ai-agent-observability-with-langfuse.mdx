@@ -29,7 +29,7 @@ A complete agent observability setup captures:
 - **Sessions and users** group multi-turn conversations so behavior can be analyzed per conversation and per user.
 - **Quality signals** such as [user feedback](/docs/observability/features/user-feedback) and evaluation scores are attached directly to traces.
 
-[Langfuse](/) is an open-source AI engineering platform that implements this end to end: [tracing](/docs/observability/overview) with typed observations, agent graph visualization, tool-call analytics, production monitors, and [evaluation](/docs/evaluation/overview) on top of the captured data. The rest of this post walks through each of these capabilities and how to instrument the most common agent stacks.
+[Langfuse](/) is an open-source AI engineering platform that implements this end to end: [tracing](/docs/observability/overview) with typed observations, agent graph visualization, tool-call analytics, production alerts, and [evaluation](/docs/evaluation/overview) on top of the captured data. The rest of this post walks through each of these capabilities and how to instrument the most common agent stacks.
 
 ## Why agents need dedicated observability
 
@@ -157,7 +157,7 @@ You do not need a specific framework to build AI agents, and Langfuse is deliber
 
 LangGraph ([GitHub](https://github.com/langchain-ai/langgraph)) is an open-source framework by the LangChain team for building complex, stateful, multi-agent applications. LangGraph includes built-in persistence to save and resume state, which enables error recovery and human-in-the-loop workflows.
 
-LangGraph agents can be [monitored with Langfuse](/guides/cookbook/integration_langgraph), and the agent graph view renders the LangGraph structure automatically.
+LangGraph agents can be [monitored with Langfuse](/integrations/frameworks/langgraph), and the agent graph view renders the LangGraph structure automatically.
 
 <Video
   src="https://static.langfuse.com/docs-videos/langgraph-overview.mp4"
@@ -320,8 +320,8 @@ Once an agent is live, observability shifts from inspecting individual traces to
 
 - **Cost and token tracking** aggregates model usage per trace, user, session, and model, so an agent that starts burning budget shows up in [cost dashboards](/docs/observability/features/token-and-cost-tracking) immediately.
 - **Custom dashboards** chart any trace or observation metric over time, including the `toolCalls` and `toolDefinitions` metrics described above, with [dashboards](/docs/metrics/features/custom-dashboards) built from the same filters used in the tables.
-- **Monitors and alerts** watch a metric like average cost per trace, an evaluation score, or p95 latency, and fire through Slack, webhooks, or GitHub Actions when it leaves the expected range. [Monitors](/docs/metrics/features/monitors) are available on Langfuse Cloud.
-- **User feedback**, explicit (ratings) and implicit (retries, abandonment, corrections), lands as [scores on traces](/docs/observability/features/user-feedback), feeding the same dashboards and monitors as evaluator scores.
+- **Alerts** watch a metric like average cost per trace, an evaluation score, or p95 latency, and fire through Slack, webhooks, or GitHub Actions when it leaves the expected range. [Alerts](/docs/metrics/features/alerts) are available on Langfuse Cloud.
+- **User feedback**, explicit (ratings) and implicit (retries, abandonment, corrections), lands as [scores on traces](/docs/observability/features/user-feedback), feeding the same dashboards and alerts as evaluator scores.
 
 For a method to turn this stream of production data into a concrete list of what to fix, the Langfuse Academy [monitoring module](/academy/monitoring) and its deep dive on [error analysis](/academy/monitoring/error-analysis) walk through finding and quantifying recurring failure patterns in traces.
 
@@ -355,7 +355,7 @@ Following the Academy's loop, agent evaluation runs in two places. **Offline**, 
 
 If you want to get started with building AI agents and monitoring them with Langfuse, here are the best places to begin:
 
-- **Build and trace an agent:** Follow our [end-to-end example](/guides/cookbook/integration_langgraph) of building a simple agent with LangGraph and tracking it with Langfuse.
+- **Build and trace an agent:** Follow our [end-to-end example](/integrations/frameworks/langgraph) of building a simple agent with LangGraph and tracking it with Langfuse.
 - **Learn the concepts:** Work through the [Langfuse Academy](/academy) to understand the AI engineering loop from tracing to evaluation.
 - **Evaluate your agents:** Read the [AI agent evaluation guide](/resources/engineering/ai-agent-evaluation) and set up your first dataset and experiment.
 - **Explore all integrations:** Browse the full list of [supported integrations](/integrations) to find the right setup for your stack.
