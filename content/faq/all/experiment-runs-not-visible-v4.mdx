@@ -54,16 +54,24 @@ SDK](/docs/evaluation/experiments/experiments-via-sdk) instead of calling
 
 ## How to recover historic experiments
 
-Historic traces remain available, but they are missing the experiment attributes
-required by the v4 UI.
+Historic traces remain available, but they are missing the experiment
+attributes required by the v4 UI.
 
-To preserve the historic experiment, re-ingest each complete trace through
-[direct OpenTelemetry ingestion with experiment
-attributes](/integrations/native/opentelemetry/experiments). Preserve every
-observation's original ID, parent ID, start time, and end time, and add the
-complete experiment context. Preserve the optional description, experiment
-metadata, item version, expected output, and item metadata when they were
-present in the historic experiment.
+Recover each complete trace through [direct OpenTelemetry ingestion with
+experiment attributes](/integrations/native/opentelemetry/experiments). Add the
+complete experiment context to every observation. Preserve the optional
+description, experiment metadata, item version, expected output, and item
+metadata when they were present in the historic experiment.
+
+Choose one of the following recovery options based on whether preserving
+existing score links or avoiding background replacement is more important.
+
+### Option 1: Preserve existing score links
+
+Re-ingest every observation with its original trace ID, observation ID, parent
+observation ID, and exact original start time. Preserve the original end time
+as well. Existing trace-level and observation-level scores remain linked
+because their target IDs do not change.
 
 ```text
 experimentAttributes = {
@@ -77,7 +85,7 @@ experimentAttributes = {
 for each historic experiment item trace:
   itemAttributes = {
     "langfuse.experiment.item.id": original item ID,
-    "langfuse.experiment.item.root_observation_id": root observation ID,
+    "langfuse.experiment.item.root_observation_id": original root observation ID,
     "langfuse.experiment.item.version": original item version // if present
   }
 
@@ -85,7 +93,7 @@ for each historic experiment item trace:
     traceId: original trace ID
     spanId: original observation ID
     parentSpanId: original parent observation ID
-    startTime and endTime: original timestamps
+    startTime and endTime: exact original timestamps
     attributes: original attributes + experimentAttributes + itemAttributes
 
   additionally on the root observation:
@@ -97,15 +105,47 @@ Use the same `langfuse.experiment.id` and `langfuse.experiment.name` values for
 the entire recovered experiment. Changing either value between item traces
 splits them into different experiments in the v4 UI.
 
-When the trace ID, observation IDs, and start times remain unchanged, Langfuse
-writes newer event versions and ClickHouse eventually replaces the previous
-versions during background merges. This replacement is not immediate.
+<Callout type="warning">
+  The start time must match exactly. Do not add an offset. ClickHouse only
+  considers the new event a replacement when the trace ID, observation ID, and
+  exact observation start time all match. A changed start time creates a
+  separate permanent observation under the same trace and can inflate costs,
+  usage, and observation counts.
 
-If eventual replacement is not sufficient, use a new trace ID when
-re-ingesting. The observations can keep their existing IDs because observation
-IDs are scoped to a trace. This creates a separate corrected trace without
-waiting for replacement; the historic trace remains available under its
-original ID.
+Replacement happens during ClickHouse background merges. Until a merge
+completes, duplicate event versions may affect results. There is no time
+guarantee for these merges.
+
+</Callout>
+
+### Option 2: Avoid waiting for background replacement
+
+Use a new trace ID when re-ingesting each complete trace. Observation IDs and
+parent observation IDs can remain unchanged because they are scoped to the
+trace. Continue to use the exact original start and end times to preserve the
+historic experiment timing.
+
+Scores are stored separately and do not move to the new trace automatically.
+Do not create copies with new score IDs. Instead, reassociate each score by
+resending its complete payload as a `score-create` event through the [Ingestion
+API](https://api.reference.langfuse.com/#tag/ingestion/POST/api/public/ingestion):
+
+- Keep the original score ID, name, value, and other score fields.
+- Set the new trace ID and, for observation-level or experiment-item scores,
+  the corresponding observation ID. For experiment-item scores, use the item
+  root observation.
+- Set the event timestamp later than the original score timestamp, but on the
+  same UTC calendar date.
+
+This is a complete score upsert, not a partial patch. A matching score ID, name,
+and date replaces the previous score after ClickHouse processes the update. The
+regular `POST /api/public/scores` endpoint cannot be used for this recovery
+because it assigns the current timestamp, which may create another score for a
+historic date. Experiment-level scores remain linked when you keep the original
+experiment ID.
+
+This option creates separate corrected traces immediately. The historic traces
+remain available under their original IDs.
 
 Please [contact Langfuse support](mailto:support@langfuse.com) if you need help
 recovering historic experiments.
