@@ -156,24 +156,39 @@ Langfuse supports **pricing tiers** for models, enabling accurate cost calculati
 
 Each model can have multiple pricing tiers, each with:
 
-- **Name**: A descriptive name (e.g., "Standard", "Large Context")
-- **Priority**: Evaluation order (0 is reserved for default tier)
-- **Conditions**: Rules that determine when the tier applies
-- **Prices**: Cost per usage type for this tier
+| Field          | Description                                            |
+| -------------- | ------------------------------------------------------ |
+| **Name**       | A descriptive name (e.g., "Standard", "Large Context") |
+| **Priority**   | Evaluation order (0 is reserved for default tier)      |
+| **Conditions** | Rules that determine when the tier applies             |
+| **Prices**     | Cost per usage type for this tier                      |
 
 When calculating cost, Langfuse evaluates tiers in priority order (excluding the default tier). The first tier whose conditions are satisfied is used. If no conditional tier matches, the default tier is applied.
 
 Each condition selects one of these sources:
 
-- **Usage details:** Match usage-detail keys with a regex, sum their values, and compare the result with `gt`, `gte`, `lt`, `lte`, `eq`, or `neq`. You can also control whether the key pattern is case-sensitive.
-- **Model parameters:** Match a top-level model-parameter key against one or more exact values.
-- **Metadata:** Match a top-level metadata key against one or more exact values.
+| Source               | How it matches                                                                                                                                                                                |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Usage details**    | Match usage-detail keys with a regex, sum their values, and compare the result with `gt`, `gte`, `lt`, `lte`, `eq`, or `neq`. You can also control whether the key pattern is case-sensitive. |
+| **Model parameters** | Match a top-level model-parameter key against one or more exact values.                                                                                                                       |
+| **Metadata**         | Match a top-level metadata key against one or more exact values.                                                                                                                              |
 
 For model parameters and metadata, select the source in the pricing-tier editor, enter the **Top-level key**, and add comma-separated exact values. String, number, and boolean values are compared as strings. Nested paths and non-primitive values are not supported. When a tier has multiple conditions, all of them must match.
 
-For example, the "Large Context" tier for Claude Sonnet 4.5 has a condition: `input > 200000`, meaning it applies when the sum of all usage details matching the pattern "input" exceeds 200,000 tokens.
+Examples:
+
+<Tabs items={["Clause Sonnet Large context tier", "OpenAI Fast mode"]}>
+<Tab>
+
+The "Large Context" tier for Claude Sonnet 4.5 has a condition: `input > 200000`, meaning it applies when the sum of all usage details matching the pattern "input" exceeds 200,000 tokens.
+
+</Tab>
+<Tab>
 
 OpenAI Fast mode tiers match the top-level model parameter `service_tier` against `fast` or `priority`. For GPT-5.6 models, this condition is combined with the input-token threshold to distinguish Standard/Fast and short/long-context prices.
+
+</Tab>
+</Tabs>
 
 ### Frequently asked questions [#faq]
 
