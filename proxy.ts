@@ -18,13 +18,17 @@ const AI_AGENT_UA =
 // (static assets and API routes excluded to limit middleware invocations).
 // `.md` markdown mirrors are page-route lookalikes and covered by the broad
 // pattern since `md` is not in the excluded-extension list.
+// The `md-src/`, `.well-known/`, `api/`, and extension exclusions mirror the
+// markdown content-negotiation rewrite in next.config.mjs so a request is
+// only ever labeled `markdown_negotiation` when that rewrite actually serves
+// markdown — keep the two patterns in sync.
 export const config = {
   matcher: [
     "/llms.txt",
     "/llms-docs.txt",
     "/llms-integrations.txt",
     "/llms-self-hosting.txt",
-    "/((?!_next/|api/|.*\\.(?:png|jpe?g|gif|svg|ico|webp|avif|css|js|mjs|map|woff2?|ttf|otf|eot|mp4|webm|mp3|zip|pdf|xml|txt|json|webmanifest|ipynb)$).*)",
+    "/((?!_next/|api/|md-src/|\\.well-known/|.*\\.(?:png|jpe?g|gif|svg|ico|webp|avif|css|js|mjs|map|woff2?|ttf|otf|eot|mp4|webm|mp3|zip|pdf|xml|txt|json|webmanifest|ipynb)$).*)",
   ],
 };
 
