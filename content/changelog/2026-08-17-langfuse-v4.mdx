@@ -1,14 +1,15 @@
 ---
 title: "Langfuse v4 is live: faster at scale, with more ways to search, monitor, and evaluate"
-date: 2026-08-13
+date: 2026-08-17
 description: "Query and evaluate every agent step directly, with initial table loads in milliseconds and at least 10x faster dashboards for large projects."
 author: Max
-ogImage: /images/changelog/2026-08-13-langfuse-v4/langfuse-v4-bento.png
+ogImage: /images/changelog/2026-08-17-langfuse-v4/langfuse-v4-bento.png
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 import { Frame } from "@/components/Frame";
 import { VersionTimeline } from "@/components/VersionTimeline";
+import { V4CutoverDate } from "@/components/V4CutoverDate";
 import {
   Bell,
   Book,
@@ -29,7 +30,7 @@ import {
 
 Langfuse v4 is live on Langfuse Cloud and generally available for [self-hosted deployments](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4). It makes it faster to debug, evaluate, and monitor complex LLM applications by letting you work with every LLM call, tool execution, and agent step directly. Initial table loads over large datasets drop from seconds to milliseconds, and dashboards over longer time ranges load at least 10x faster in large projects.
 
-Langfuse Cloud becomes v4-only on **November 16, 2026**. Most projects need no migration. If the **Migration Assistant** shows actions for your project, complete them before this date.
+Langfuse Cloud becomes v4-only on <V4CutoverDate />. Most projects need no migration. If the **Migration Assistant** shows actions for your project, complete them before this date.
 
 <Cards num={3} className="gap-3">
   <Card
@@ -204,7 +205,7 @@ Langfuse v4 is much faster and also ships new ways to search, monitor, evaluate,
 
 ## Upgrade Langfuse Cloud projects
 
-Langfuse Cloud deprecates v3 endpoints and features on **November 16, 2026**. Please complete any migration requirements for your projects before this date.
+Langfuse Cloud deprecates v3 endpoints and features on <V4CutoverDate />. Please complete any migration requirements for your projects before this date.
 
 <VersionTimeline deployments={["cloud"]} />
 
@@ -213,10 +214,10 @@ New projects already use v4 and need no migration.
 For existing projects, organization owners can open the **Migration Assistant** sidebar and the [**Migration status page**](https://cloud.langfuse.com/v4-migration) to see if any actions are required:
 
 <Frame fullWidth>
-  ![The Langfuse v4 migration assistant lists the exact SDK, evaluator, API, and integration actions detected for a Cloud project](/images/changelog/2026-08-13-langfuse-v4/v4-migration-assistant.png)
+  ![The Langfuse v4 migration assistant lists the exact SDK, evaluator, API, and integration actions detected for a Cloud project](/images/changelog/2026-08-17-langfuse-v4/v4-migration-assistant.png)
 </Frame>
 
-We will email project owners and admins a summary of the actions required for their projects. Complete those actions by **November 16, 2026**.
+We will email project owners and admins a summary of the actions required for their projects. Complete those actions by <V4CutoverDate />.
 
 Follow the [upgrade guide](/faq/all/upgrade-to-langfuse-v4) for more details.
 
@@ -233,7 +234,7 @@ Follow the [self-hosted v3 to v4 migration guide](/self-hosting/upgrade/upgrade-
 - **Immutable data creates room to optimize.** Append-only observations give us the architectural freedom to introduce optimizations such as materialized views in the future.
 
 <Frame fullWidth>
-  ![Langfuse v3 joins and deduplicates mutable traces and observations at query time, while v4 aggregates immutable observations in one pass to produce the same cost-by-user result](/images/changelog/2026-08-13-langfuse-v4/v4-data-model-explainer.png)
+  ![Langfuse v3 joins and deduplicates mutable traces and observations at query time, while v4 aggregates immutable observations in one pass to produce the same cost-by-user result](/images/changelog/2026-08-17-langfuse-v4/v4-data-model-explainer.png)
 </Frame>
 
 Older SDKs sent updates to both traces and observations, which we stored in separate tables. Before ClickHouse could return a result, it had to join those tables and deduplicate the updates. This was slow at scale.
