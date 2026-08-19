@@ -174,7 +174,10 @@ Upgrade ClickHouse **before** the server upgrade. Langfuse v3 releases are fully
 
 <Callout type="warning">
 
-**Helm chart with built-in ClickHouse:** deployments that run the ClickHouse instance bundled with the [Langfuse Helm chart](https://github.com/langfuse/langfuse-k8s) (`clickhouse.deploy: true`) cannot upgrade to Langfuse v4 yet, as the chart does not provide an upgrade path to a v4-compatible ClickHouse version. [Subscribe to the self-hosting mailing list](/self-hosting#subscribe) to get notified as soon as an upgrade path is available. Deployments that connect to an external ClickHouse are not affected.
+**Helm chart with built-in ClickHouse**: deployments that run the ClickHouse instance bundled with the [Langfuse Helm chart](https://github.com/langfuse/langfuse-k8s) (`clickhouse.deploy: true`) need to take an extra step before upgrading to Langfuse v4, as the v1 version of the chart does not provide an upgrade path to a v4-compatible ClickHouse version.
+Follow our [v1 to v2 chart upgrade guide](https://github.com/langfuse/langfuse-k8s/tree/main/examples/upgrade-v1-to-v2) to move to the new major version of the Langfuse helm chart
+before you proceed with your Langfuse v4 upgrade.
+Deployments that connect to an external ClickHouse are not affected.
 
 </Callout>
 
