@@ -1,38 +1,45 @@
 ---
-title: "Trace Pi Agent with Langfuse"
+title: "Trace the Pi Coding Agent with Langfuse"
 sidebarTitle: Pi Agent
 logo: /images/integrations/pi-agent_icon.svg
-description: "Trace Pi coding agent sessions — prompts, agent turns, model generations, tool calls, token usage, cost, and scores — with Langfuse for comprehensive observability."
+description: "Trace Pi coding agent sessions with Langfuse — agent turns, model generations, token usage with cache and reasoning splits, cost, tool calls, and nested subagents."
 category: Integrations
 ---
 
-# Pi Agent tracing with Langfuse
+# Pi Coding Agent tracing with Langfuse
 
 > **What is Pi?** [Pi](https://pi.dev) is a minimal, extensible AI coding agent that runs in your terminal. It supports 15+ providers and hundreds of models, and adapts to your workflows through extensions, skills, prompt templates, and themes.
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com/) is an open-source AI engineering platform. It helps teams trace agentic applications, debug issues, evaluate quality, and monitor costs in production.
 
-<Callout type="info" title="Community-maintained integration">
-The [`pi-langfuse`](https://www.npmjs.com/package/pi-langfuse) extension is built and maintained by the community, not by the Langfuse team. If you run into issues, please report them on the [extension's repository](https://github.com/gooyoung/pi-langfuse).
+<Callout type="info" title="Official integration">
+The [`@langfuse/pi-observability-plugin`](https://github.com/langfuse/pi-observability-plugin) extension is built and maintained by the Langfuse team. If you run into issues, please open an issue on the repository.
 </Callout>
 
 ## What can this integration trace?
 
-The `pi-langfuse` extension hooks into Pi's lifecycle events and sends each prompt to Langfuse as its own trace, grouped by Pi session. You can monitor:
+The plugin listens to Pi's core lifecycle events and sends every user prompt to Langfuse as its own trace:
 
-- **User prompts**: every prompt you send to Pi, grouped into one trace per prompt.
-- **Agent workflow**: a root agent observation that spans the whole turn.
-- **Model generations**: each model request, with inputs, outputs, token usage, and cost.
-- **Tool calls**: the tools Pi invokes, captured as tool observations with their inputs, outputs, and error status.
-- **Final response**: the assistant's final answer for the prompt.
-- **Scores**: trace-level scores such as tool-call count, tool-success rate, turn count, and whether the session had errors.
+- **Agent turns**: one trace per user prompt, with all turns of a Pi session grouped under one session ID. Turn numbering survives a Pi restart.
+- **Model generations**: every model request with inputs, outputs, cost, time to first token, and token usage including cache-read and reasoning splits.
+- **Tool calls**: each tool Pi invokes, with input, output, and an `ERROR` level when the call fails.
+- **Images**: images you add to a prompt are uploaded as Langfuse media and render inside the trace.
+- **Subagents**: Pi processes spawned by other extensions nest under the turn that started them.
 
-## How it works
+Because the plugin listens to Pi's core events, it also records work added by other extensions — custom tools and subagents included.
 
-1. You install the `pi-langfuse` extension with Pi's package manager, which registers it in your Pi settings.
-2. On each user prompt, the extension opens a Langfuse trace and records a root `agent` observation, a `generation` per model request, and a `tool` observation per tool call.
-3. When the turn ends, the final response, token usage, cost, and trace-level scores are attached and the trace is sent to your project using the [Langfuse SDK](/docs/observability/sdk/overview).
-4. Credentials and capture options are resolved from a config file, environment variables, or an interactive setup command.
+## Trace model
+
+Each user prompt becomes one Langfuse trace. All traces of one Pi session share a session ID:
+
+```
+[trace]  "Pi - Turn 3 (a1b2c3d4)"          ← turn number survives a Pi restart
+└─ span  "Conversational Turn"
+   ├─ generation  "LLM Call 1"             ← tokens with cache and reasoning splits, cost, TTFT
+   ├─ tool        "Tool: bash"             ← input, output, ERROR level on failure
+   ├─ generation  "LLM Call 2"
+   └─ ...
+```
 
 ## Quick start
 
@@ -43,7 +50,7 @@ The `pi-langfuse` extension hooks into Pi's lifecycle events and sends each prom
 1. Sign up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-host Langfuse](/self-hosting).
 2. Create a new project and copy your API keys from the project settings.
 
-### Install Pi and the extension
+### Install Pi and the plugin
 
 Install Pi (requires Node.js 22+) and log in to a model provider so it can run sessions:
 
@@ -52,36 +59,34 @@ npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 pi   # then run /login inside the interactive session
 ```
 
-Install the `pi-langfuse` extension. This downloads the package and registers it in your Pi settings automatically:
+Install the Langfuse plugin. This downloads the package and registers it in your Pi settings automatically:
+
+{/* TODO(before merge): @langfuse/pi-observability-plugin is not published to npm yet (v0.0.1, local install only). Publish first, then verify this command. */}
 
 ```bash
-pi install npm:pi-langfuse
+pi install npm:@langfuse/pi-observability-plugin
 ```
 
 Confirm it is registered with `pi list`.
 
 ### Add your Langfuse credentials [#set-credentials]
 
-The recommended setup is the interactive command. Run it inside Pi and enter your public key, secret key, and host when prompted — the values are saved to `~/.pi/agent/pi-langfuse/config.json`:
-
-```text
-/langfuse-setup    # (re)enter credentials
-/langfuse-status   # show host, masked key, and capture policy
-/langfuse-test     # verify host and keys
-```
-
-Alternatively, create the config file yourself at `~/.pi/agent/pi-langfuse/config.json`:
+Create `~/.pi/agent/langfuse.json` and keep it private (`chmod 600`):
 
 ```json
 {
   "publicKey": "pk-lf-...",
   "secretKey": "sk-lf-...",
-  "host": "https://cloud.langfuse.com",
-  "privacyPreset": "full-debug"
+  "baseUrl": "https://cloud.langfuse.com",
+  "userId": "you",
+  "environment": "dev",
+  "release": "1.2.3"
 }
 ```
 
-Or set your credentials with environment variables. Saved config takes precedence — environment variables are only used when the config file is missing or incomplete:
+`userId`, `environment`, and `release` are optional and let you segment traces by teammate, stage, or version later. The file holds literal values only — it cannot reference environment variables or run commands.
+
+Alternatively, set environment variables. They take precedence over the file:
 
 ```bash
 export LANGFUSE_PUBLIC_KEY="pk-lf-..."
@@ -90,50 +95,89 @@ export LANGFUSE_BASE_URL="https://cloud.langfuse.com" # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 ```
 
-### Use Pi
+### Run your first trace
 
-Run Pi as usual. Sessions are sent to Langfuse as you work, and Pi prints `📊 Langfuse: Tracing enabled` at startup:
+Start Pi in any project. The status line shows `langfuse ✓` when the plugin is active, and `langfuse ✓ (trace sent)` once a turn has been exported:
 
 ```bash
 cd your-project
-pi "Read README.md and summarize what this repository does"
+pi "Summarize this repository"
 ```
 
-### View traces in Langfuse
+### View the trace in Langfuse
 
-Open your Langfuse project to see the captured traces. The structure mirrors how Pi actually works:
+Open your Langfuse project: you will find one trace named `Pi - Turn 1 (...)`. The next sections walk through what you can do with it, from debugging sessions to tracing subagents.
 
-- **Prompt trace**: one trace per user prompt, from your prompt to the final answer.
-- **Agent and generations**: a root agent observation, with one generation per model response, including token usage and cost.
-- **Tool calls**: captured as tool observations with input, output, and error status, so you can spot where a turn went wrong.
-- **Scores**: trace-level scores (tool-call count, tool-success rate, turn count, error flags) for quick filtering and quality monitoring.
-
-![Example Pi Agent trace in Langfuse showing the agent root, model generations, and a read tool call with its input and output](/images/docs/pi-agent/pi-agent-example-trace.png)
-
-_[Example trace in Langfuse](https://cloud.langfuse.com/project/cmpy5u3fb06o5ad0j04xohhmz/traces/cd5b90328ceb3e76fbdd2d74c557e164?observation=b3b84fb6df76b9d7)_
+{/* TODO(before merge): screenshot /images/docs/pi-agent/pi-agent-first-trace.png + public example trace link. Generated traces go into the demo ledger. */}
 
 </Steps>
 
-## Privacy controls
+## Debug a session: find failed tool calls
 
-`pi-langfuse` redacts common secrets (API keys, bearer tokens, passwords, private keys) and hashes local absolute paths before upload. You control what payloads are sent with a privacy preset, set via `privacyPreset` in the config file or the `LANGFUSE_PRIVACY_PRESET` environment variable:
+Real work spans many turns. Give Pi a task where something goes wrong, for example:
 
-| Preset          | Captures                                                                 |
-| --------------- | ------------------------------------------------------------------------ |
-| `metadata-only` | Metadata only; omits inputs, outputs, tool I/O, system prompt, and cwd   |
-| `prompts-only`  | Prompt/provider inputs plus metadata                                     |
-| `conversations` | Inputs and assistant outputs, but omits tool I/O, system prompt, and cwd |
-| `full-debug`    | Full trace detail (the default)                                          |
+```bash
+pi "Run the test suite and fix the first failing test"
+```
 
-Fine-grained flags override the preset: `LANGFUSE_CAPTURE_INPUTS`, `LANGFUSE_CAPTURE_OUTPUTS`, `LANGFUSE_CAPTURE_TOOL_IO`, `LANGFUSE_CAPTURE_SYSTEM_PROMPT`, and `LANGFUSE_CAPTURE_CWD`. Keep `~/.pi/agent/pi-langfuse/config.json` private and never commit your API keys.
+When a tool invocation fails, its observation is recorded with level `ERROR`:
+
+- **Filter by error level** in the trace view to jump straight to the failing `Tool: bash` call, with the exact input and output that caused it.
+- **Open the [session](/docs/observability/features/sessions)** to see every turn of your Pi session in order — including turns from before a Pi restart, since turn numbering continues.
+- **Include an image**: paste a screenshot into the prompt (for example of a broken UI) — it is uploaded as Langfuse media and renders inside the trace, so the full context of the turn stays reviewable.
+
+{/* TODO(before merge): screenshot /images/docs/pi-agent/pi-agent-session-error.png + public example trace link */}
+
+## Trace Pi subagents across processes
+
+A Pi subagent is a second Pi process, spawned by an orchestration extension (for example the subagent example extension from the Pi repository or an orchestration package from the Pi package gallery). Child processes inherit their parent's environment, and the plugin uses that to stitch traces together.
+
+While a turn is active, the plugin exposes the turn's identifiers as environment variables:
+
+| Variable                        | Purpose                    |
+| ------------------------------- | -------------------------- |
+| `LANGFUSE_PI_PARENT_TRACE_ID`   | Trace to nest under        |
+| `LANGFUSE_PI_PARENT_SPAN_ID`    | Observation to nest under  |
+| `LANGFUSE_PI_PARENT_SESSION_ID` | Session the child joins    |
+| `LANGFUSE_PI_PARENT_DEPTH`      | Nesting depth of the child |
+
+A Pi process that finds these variables nests its trace under the turn that spawned it — the subagent's generations and tool calls appear inside the parent trace. Without them, the child writes a separate trace. The built-in flow needs no configuration.
+
+You can also set these variables yourself to attach a Pi run to a trace created by another tool, for example a CI pipeline that already reports to Langfuse. The IDs must belong to the same Langfuse project the run exports to.
+
+{/* TODO(before merge): screenshot /images/docs/pi-agent/pi-agent-subagent-nesting.png + public example trace link */}
+
+## Configuration reference
+
+The plugin resolves its configuration in this order: the kill switch `LANGFUSE_TRACING_ENABLED=false` first, then environment variables, then `~/.pi/agent/langfuse.json`, then defaults.
+
+| Environment variable                     | Purpose                                                   |
+| ---------------------------------------- | --------------------------------------------------------- |
+| `LANGFUSE_PUBLIC_KEY`                    | Project public key (`pk-lf-...`)                          |
+| `LANGFUSE_SECRET_KEY`                    | Project secret key (`sk-lf-...`)                          |
+| `LANGFUSE_BASE_URL` (or `LANGFUSE_HOST`) | Langfuse host, defaults to `https://cloud.langfuse.com`   |
+| `LANGFUSE_TRACING_ENABLED`               | Kill switch — set to `false` to disable tracing entirely  |
+| `PI_LANGFUSE_DEBUG`                      | Set to `true` to log the plugin's steps to standard error |
+
+## Enable and disable tracing
+
+| Scope                   | How                                                         |
+| ----------------------- | ----------------------------------------------------------- |
+| One run                 | `LANGFUSE_TRACING_ENABLED=false pi`                         |
+| The current shell       | `export LANGFUSE_TRACING_ENABLED=false` (undo with `unset`) |
+| Global or project scope | `pi config`, then switch the extension off                  |
+| Remove the plugin       | `pi remove @langfuse/pi-observability-plugin`               |
+
+The kill switch has priority over environment keys and the config file. When tracing is off, the status line shows `langfuse: off (no keys)` and nothing is sent. To remove stored keys, delete `~/.pi/agent/langfuse.json`.
 
 ## Troubleshooting
 
 ### No traces appearing in Langfuse
 
-1. **Extension not loaded.** Run `pi list` and confirm `pi-langfuse` appears, then run `/langfuse-status` inside Pi to check the active configuration.
-2. **Credentials missing or invalid.** Run `/langfuse-test` to verify the host and keys. Make sure the public key starts with `pk-lf-`.
-3. **Region mismatch.** `host` (or `LANGFUSE_BASE_URL`) must match the region your keys belong to.
+1. **Check the status line.** `langfuse: off (no keys)` means credentials were not found — revisit [credentials setup](#set-credentials).
+2. **Plugin not registered.** Run `pi list` and confirm the plugin appears.
+3. **Region mismatch.** `baseUrl` (or `LANGFUSE_BASE_URL`) must match the region your keys belong to.
+4. **Inspect the plugin's steps.** Run with `PI_LANGFUSE_DEBUG=true` to log its activity to standard error.
 
 ### Authentication errors
 
@@ -146,11 +190,17 @@ Verify your API keys are correct and that the host matches the region your keys 
 
 ### Data privacy
 
-When enabled, the extension sends Pi session data to Langfuse, which may include prompts, assistant messages, and tool inputs and outputs depending on your privacy preset. Use a more restrictive preset (such as `metadata-only` or `conversations`) for sessions containing data you don't want stored in Langfuse.
+The plugin sends Pi session data to Langfuse, which includes prompts, model outputs, tool inputs and outputs, and prompt images. Your Langfuse API keys are masked from all captured payloads before upload. Use the kill switch for sessions you do not want stored in Langfuse, and keep `~/.pi/agent/langfuse.json` private.
+
+## Next steps
+
+- **[Sessions](/docs/observability/features/sessions)**: review whole Pi sessions turn by turn.
+- **[Users](/docs/observability/features/users) and [environments](/docs/observability/features/environments)**: segment traces by teammate or by dev/CI stage via `userId` and `environment`.
+- **[Evaluation](/docs/evaluation/overview)**: score captured turns, for example with LLM-as-a-judge, to monitor agent quality over time.
 
 ## Resources
 
-- [pi-langfuse extension (npm)](https://www.npmjs.com/package/pi-langfuse)
-- [pi-langfuse repository (GitHub)](https://github.com/gooyoung/pi-langfuse)
+- [`pi-observability-plugin` repository (GitHub)](https://github.com/langfuse/pi-observability-plugin)
+- [`@langfuse/pi-observability-plugin` on npm](https://www.npmjs.com/package/@langfuse/pi-observability-plugin) {/* TODO(before merge): publish to npm */}
 - [Pi documentation](https://pi.dev)
 - [Langfuse TypeScript SDK](/docs/observability/sdk/overview)
