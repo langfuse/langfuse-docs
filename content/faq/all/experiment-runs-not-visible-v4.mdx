@@ -28,18 +28,14 @@ on the ingested observations, including:
 - `langfuse.experiment.item.id`
 - `langfuse.experiment.item.root_observation_id`
 
-The legacy `item.link()` path creates a dataset run item, but affected JS/TS
-SDK versions do not reliably propagate the corresponding experiment attributes
-to the trace. Langfuse can therefore see the dataset run item and the trace,
-but cannot associate the trace with an experiment in the v4 data model.
+The legacy `item.link()` path did not reliably propagate the corresponding
+experiment attributes to the trace. Historic traces remain available, but are
+missing the experiment attributes required by the v4 data model and are
+therefore not served in the v4 UI.
 
 The JS/TS and Python SDKs did not behave consistently during this transition.
 The legacy method was deprecated in the Python SDK, but we missed deprecating it
 in the new JS/TS major. This was a bug in our SDK upgrade path.
-
-The v4 backfill does not add missing experiment attributes to events that were
-written directly through this legacy path. Waiting for the backfill to finish
-will therefore not make these runs appear.
 
 This affects the following combination:
 
@@ -50,20 +46,28 @@ This affects the following combination:
 ## What to change for new experiments
 
 1. Upgrade to the latest [JS/TS SDK](/docs/observability/sdk/upgrade-path/js-v4-to-v5).
-2. Replace manual `item.link()` calls with the [Experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk).
-3. Run the experiment so the SDK creates the experiment run and propagates
-   the required attributes to the new traces.
+2. Run new experiments with the [Experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk) instead of calling `item.link()`.
 
 ## How to recover historic experiments
 
-The existing dataset run items and traces remain available, but the v4 backfill
-does not add missing experiment attributes to events that were written directly
-through the legacy path. Waiting for the backfill to finish will therefore not
-make these runs appear.
+Historic traces remain available, but they are missing the experiment attributes
+required by the v4 UI.
 
-The recommended recovery path is to run the experiment again with the current
-Experiment runner SDK. This creates a new experiment run and propagates the
-required attributes to the new traces.
+Run the experiment using the current [Experiment runner
+SDK](/docs/evaluation/experiments/experiments-via-sdk), using the same dataset
+and task logic as the historic run:
+
+```ts
+const dataset = await langfuse.dataset.get("my-evaluation-dataset");
+
+await dataset.runExperiment({
+  name: "Recovery run",
+  task: async (item) => runYourApplication(item.input),
+});
+```
+
+The runner creates a new experiment run and new traces when it runs. It does
+not provide a way to preserve the original timestamps of historic traces.
 
 Please [contact Langfuse support](mailto:support@langfuse.com) if you need help
 upgrading or recovering your experiments.
