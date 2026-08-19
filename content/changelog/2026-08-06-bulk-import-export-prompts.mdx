@@ -1,0 +1,18 @@
+---
+date: 2026-08-06
+title: Bulk import and export for prompts
+description: Export prompt versions as JSON and import them in bulk.
+author: Ben
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+You can now move versioned prompts between Langfuse projects using bulk JSON export and import. Use it to promote prompts across environments, create backups, or restore complete prompt histories without recreating versions manually.
+
+To export prompts, open the [Prompts page](https://cloud.langfuse.com/project/~/prompts) and click **Export**. Langfuse downloads a JSON file containing the selected prompts.
+
+To import prompts, click **Import** and upload an exported file or a compatible JSON array. Each imported prompt is created as a new version, including when a prompt with the same name already exists. The `latest` and `production` labels are omitted during import to avoid changing deployments in the destination project. Once the import finishes, the dialog shows the result for each prompt.
+
+Thanks to [@rkdhanda](https://github.com/rkdhanda) for the contribution!

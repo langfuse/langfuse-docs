@@ -1,0 +1,120 @@
+---
+title: "Langfuse July Update"
+description: "Chart any table, dashboards via API, CLI, and MCP, new graph view modes, media previews and more"
+ogImage: /images/blog/2026-07-31-langfuse-july-update/any-table-is-a-chart.png
+tag: update
+date: 2026/07/31
+author: "Marc"
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Langfuse July Update"
+  description="Chart any table, dashboards via API, CLI, and MCP, new graph view modes, media previews and more"
+  authors={["marcklingen"]}
+  date="July 31, 2026"
+/>
+
+Another exciting month in the books. In July, we made your trace data much easier to look at and worked on our upcoming product roadmap (more on each below):
+
+- **Any table is a chart**: chart the observations table on the query you already filtered, and spot count, cost, and latency spikes in a strip above it.
+- **Dashboards via API, CLI, and MCP**: create and manage them end-to-end, ask your agent to build a custom Langfuse dashboard.
+- **Graph view, aggregated and expanded**: read an agent trace as a compact overview, or as the DAG it actually ran.
+- **Media previews in tables and JSON views**: open images, audio, and files inline, broadening our support of multi-modal use cases.
+
+## Q3 roadmap and Langfuse Town Hall
+
+Our [public roadmap](/docs/roadmap) lays out what we're shipping in the coming months. To hear it from me directly: join us on Wednesday, August 12 at 9am PT / 6pm CEST. I'll demo what we shipped over the last three months and walk through the upcoming features.
+
+→ [Sign up for the Town Hall](https://lu.ma/qahlxt9n)
+
+→ [See Roadmap](/docs/roadmap)
+
+## Any table is a chart
+
+<Frame>
+  ![Any table is a chart](/images/blog/2026-07-31-langfuse-july-update/any-table-is-a-chart.png)
+</Frame>
+
+You already filter the observations table down to the exact rows you care about. Now you can see that same slice as a chart. A Table/Chart toggle turns the current view into a time series, and a Visualize panel picks the chart type, metric, aggregation, and breakdown. "p95 latency by model" is a few clicks over rows you already filtered.
+
+Pulse sits directly above the table as a compact chart strip. Each bar is a time bucket showing observation count, total cost, or p95 latency. Click a tall bar and the table narrows to that window. Finding the spike and reading what caused it is now one motion instead of a sort across your whole table.
+
+→ [Read more about Charts](/changelog/2026-07-24-any-table-is-a-chart)
+
+→ [Read more about Pulse](/changelog/2026-07-28-langfuse-pulse)
+
+## Manage dashboards via API, CLI, and MCP
+
+<Frame>
+  ![Manage dashboards via API, CLI, and MCP](/images/blog/2026-07-31-langfuse-july-update/dashboards-api.png)
+</Frame>
+
+Dashboards and widgets are now in the public API, so you can create and manage them end-to-end in code. The Langfuse CLI picks the new endpoints up automatically, and the Langfuse MCP server exposes the same operations as tools. Keep dashboard definitions in version control and roll one monitoring setup out across every project and environment, or hand the job to a coding agent and ask it to chart error traces for a single feature over time.
+
+The Langfuse Assistant in the app runs on the same operations, so you can ask it to build a dashboard without leaving Langfuse.
+
+→ [See how it works](/changelog/2026-07-17-dashboard-and-widget-operations-in-api)
+
+## Graph view: aggregated and expanded modes
+
+<Frame>
+  ![Graph view: aggregated and expanded modes](/images/blog/2026-07-31-langfuse-july-update/graph-view.png)
+</Frame>
+
+The trace graph view now runs on a rebuilt, deterministic renderer and ships with two modes.
+
+Aggregated collapses steps that share a name into a single node with a counter, so `retrieve_docs (3/3)` means it ran three times, and loops draw as cycles. It's the fastest way to see an agent's overall shape.
+
+Expanded gives every call its own node and unrolls loops into a DAG in execution order, for walking through one specific run. The layout draws the same way every time you open a trace, and the viewport stays put as you pan and zoom.
+
+→ [Read more](/changelog/2026-07-13-graph-view-modes)
+
+## Preview media
+
+<Frame>
+  ![Preview media](/images/blog/2026-07-31-langfuse-july-update/media-previews.png)
+</Frame>
+
+Langfuse now renders previewable media as compact tags in JSON and table views. Langfuse media references, data URIs, and URLs with clear media extensions are detected automatically, so you can open the tag and inspect the image, audio, or file without leaving the trace, observation, or dataset item you're looking at.
+
+→ [Read more](/changelog/2026-06-30-media-previews-json-views)
+
+## Also shipped in July
+
+- Integration: Vercel AI SDK 7 support in `@langfuse/vercel-ai-sdk` 5.9.0 ([changelog](/changelog/2026-06-26-vercel-ai-sdk-7))
+- Home is now a dashboard you can customize, with widgets you can copy or export as portable JSON ([changelog](/changelog/2026-07-10-home-is-a-dashboard))
+- Query experiments programmatically with `listExperiments` and `listExperimentItems`, in the API and over MCP ([changelog](/changelog/2026-07-07-experiments-public-api-and-mcp))
+- Parquet exports to blob storage, now the default for new integrations ([changelog](/changelog/2026-07-08-parquet-blob-storage-exports))
+- Evaluate tool calls with a structured `tool_calls` field in code and LLM-as-a-Judge evaluators ([changelog](/changelog/2026-07-10-evaluator-tool-calls))
+- Filter tables by true or false score values ([changelog](/changelog/2026-07-10-boolean-score-filters))
+- Chart true rates and alert on boolean scores in dashboards and monitors ([changelog](/changelog/2026-07-21-boolean-score-dashboards-monitors))
+- Route blob export and evaluator deactivation alerts to Slack or a webhook ([changelog](/changelog/2026-07-10-project-notification-channels))
+- The Observations table now opens on root observations and application entry points ([changelog](/changelog/2026-07-15-root-observations-default))
+- Large observation inputs, outputs, and metadata stay inspectable in the UI ([changelog](/changelog/2026-07-24-large-observation-content))
+- Secure remote experiment triggers with an HMAC signature and custom headers ([changelog](/changelog/2026-07-28-secure-remote-experiment-triggers))
+- and many more!
+
+## Worth reading
+
+- [Yes, you can copy our eval setup](/blog/2026-07-16-steal-our-eval-setup) — Annabell publishes the eval setup for our docs chatbot in full. Custom doesn't mean from scratch.
+- [Building Deployment Gates for LLMs and AI Agents in Financial Services](/blog/2026-07-15-llm-certification-financial-services) — Doneyli on using datasets, experiments, and the public API to build automated pass/fail gates.
+- [Writing good evaluators](/academy/evaluate/writing-evaluators) — new in Langfuse Academy: verifiable checks where you can get them, one binary judge per failure mode, and validating judges against your own labels.
+- [Datasets](/academy/datasets) — how to build and structure test datasets for evaluating changes to your app.
+
+## Upcoming events
+
+- [Langfuse Town Hall](https://lu.ma/qahlxt9n) — Wednesday, August 12, 6 pm CEST
+- Langfuse at Open House, ClickHouse's conference, in seven cities:
+  - [Sydney](https://clickhouse.com/openhouse/sydney-2026) — August 11
+  - [Melbourne](https://clickhouse.com/openhouse/melbourne-2026) — August 13
+  - [Amsterdam](https://clickhouse.com/openhouse/amsterdam-2026) — September 1
+  - [New York](https://clickhouse.com/openhouse/nyc-2026) — September 10
+  - [Bengaluru](https://clickhouse.com/openhouse/bangalore-2026) — September 22
+  - [Singapore](https://clickhouse.com/openhouse/singapore-2026) — September 24
+  - [London](https://clickhouse.com/openhouse/london-2026) — September 30
+- [AI Demo Night Seattle](https://lu.ma/qeg73alr) — Thursday, August 6, 5 pm PDT
+- [AI Demo Night New York](https://lu.ma/c4alsewg) — Tuesday, August 18, 5 pm EDT
+
+→ [See all events](/events)

@@ -4,6 +4,9 @@ sidebarTitle: Public API
 description: All Langfuse data and features are available via the API. Follow this guide to get started.
 ---
 
+import { V4CutoverDate } from "@/components/V4CutoverDate";
+import { V4_CUTOVER_DATE_SHORT } from "@/lib/v4-migration-dates";
+
 # Public API
 
 Langfuse is open and meant to be extended via custom workflows and integrations. All Langfuse data and features are available via the API.
@@ -225,8 +228,7 @@ try {
 
 <Callout type="info">
   The OpenTelemetry endpoint is the supported path for trace ingestion. The
-  legacy Ingestion API is deprecated and is removed on Langfuse Cloud at the v4
-  cutover (date will follow); on self-hosted v4 it is unavailable once you run
+  legacy Ingestion API is deprecated and is sunset on Langfuse Cloud on <V4CutoverDate />; on self-hosted v4 it is unavailable once you run
   the default `events_only` write mode. Switch to the OpenTelemetry endpoint
   now. Follow the [custom ingestion migration
   guide](/integrations/native/opentelemetry/migration-to-v4) to map legacy
@@ -234,7 +236,7 @@ try {
 </Callout>
 
 - [OpenTelemetry Traces Ingestion Endpoint](https://api.reference.langfuse.com/#tag/opentelemetry/POST/api/public/otel/v1/traces) implements the OTLP/HTTP specification for trace ingestion, providing native OpenTelemetry integration for Langfuse Observability.
-- (Deprecated) [Ingestion API](https://api.reference.langfuse.com/#tag/ingestion/POST/api/public/ingestion) allows trace ingestion using an API.
+- (Sunset as of {V4_CUTOVER_DATE_SHORT}) [Ingestion API](https://api.reference.langfuse.com/#tag/ingestion/POST/api/public/ingestion) allows trace ingestion using an API.
 
 ## Retrieve Data via the API
 
