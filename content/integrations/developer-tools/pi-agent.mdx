@@ -160,13 +160,13 @@ The plugin resolves its configuration in this order: the kill switch `LANGFUSE_T
 | Global or project scope | `pi config`, then switch the extension off                  |
 | Remove the plugin       | `pi remove @langfuse/pi-observability-plugin`               |
 
-The kill switch has priority over environment keys and the config file. When tracing is off, the status line shows `langfuse: off (no keys)` and nothing is sent. To remove stored keys, delete `~/.pi/agent/langfuse.json`.
+The kill switch has priority over environment keys and the config file. When tracing is off, the status line shows `langfuse: off (no keys)` and nothing is sent — note that this message reads the same whether the kill switch is set or the keys are genuinely missing. To remove stored keys, delete `~/.pi/agent/langfuse.json`.
 
 ## Troubleshooting
 
 ### No traces appearing in Langfuse
 
-1. **Check the status line.** `langfuse: off (no keys)` means credentials were not found — revisit [credentials setup](#set-credentials).
+1. **Check the status line.** `langfuse: off (no keys)` means the plugin found no usable configuration. Two different causes produce this same message: the kill switch `LANGFUSE_TRACING_ENABLED=false` is set (check your shell profile and any inherited environment), or the credentials were not found — see [credentials setup](#set-credentials).
 2. **Plugin not registered.** Run `pi list` and confirm the plugin appears.
 3. **Region mismatch.** `baseUrl` (or `LANGFUSE_BASE_URL`) must match the region your keys belong to.
 4. **Inspect the plugin's steps.** Run with `PI_LANGFUSE_DEBUG=true` to log its activity to standard error.
