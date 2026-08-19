@@ -45,29 +45,40 @@ This affects the following combination:
 
 ## What to change for new experiments
 
-1. Upgrade to the latest [JS/TS SDK](/docs/observability/sdk/upgrade-path/js-v4-to-v5).
-2. Run new experiments with the [Experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk) instead of calling `item.link()`.
+Run new experiments with the [Experiment runner
+SDK](/docs/evaluation/experiments/experiments-via-sdk) instead of calling
+`item.link()`.
 
 ## How to recover historic experiments
 
 Historic traces remain available, but they are missing the experiment attributes
 required by the v4 UI.
 
-Run the experiment using the current [Experiment runner
-SDK](/docs/evaluation/experiments/experiments-via-sdk), using the same dataset
-and task logic as the historic run:
+To preserve the historic experiment, re-ingest each complete trace through
+[direct OpenTelemetry ingestion with experiment
+attributes](/integrations/native/opentelemetry/experiments). Preserve every
+observation's original ID, parent ID, start time, and end time, and add the
+required `langfuse.experiment.*` attributes.
 
-```ts
-const dataset = await langfuse.dataset.get("my-evaluation-dataset");
-
-await dataset.runExperiment({
-  name: "Recovery run",
-  task: async (item) => runYourApplication(item.input),
-});
+```text
+for each historic trace:
+  re-ingest every observation with:
+    traceId: original trace ID
+    spanId: original observation ID
+    parentSpanId: original parent observation ID
+    startTime and endTime: original timestamps
+    attributes: original attributes + required experiment attributes
 ```
 
-The runner creates a new experiment run and new traces when it runs. It does
-not provide a way to preserve the original timestamps of historic traces.
+When the trace ID, observation IDs, and start times remain unchanged, Langfuse
+writes newer event versions and ClickHouse eventually replaces the previous
+versions during background merges. This replacement is not immediate.
+
+If eventual replacement is not sufficient, use a new trace ID when
+re-ingesting. The observations can keep their existing IDs because observation
+IDs are scoped to a trace. This creates a separate corrected trace without
+waiting for replacement; the historic trace remains available under its
+original ID.
 
 Please [contact Langfuse support](mailto:support@langfuse.com) if you need help
-upgrading or recovering your experiments.
+recovering historic experiments.
