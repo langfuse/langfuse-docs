@@ -128,7 +128,7 @@ Use the **Is Root Observation** filter to target logical roots: observations wit
 
 **Data flow**
 
-At ingest time, each observation is evaluated against your filter criteria. Matching observations are added to an evaluation queue. Evaluation jobs are processed asynchronously, and scores are attached to the specific observation.
+When an incoming observation matches a rule's filters, the rule triggers its attached code evaluators. Scores are attached to the specific observation.
 
 **Example use cases**
 
@@ -170,39 +170,37 @@ Each experiment run generates traces and observations that can be scored by your
 
 ### Create a code evaluator
 
-Go to the Evaluators page and create a new code evaluator.
+Go to the Evaluators page and create a new evaluator. Choose Code evaluator, then select Python or TypeScript.
 
 <Frame fullWidth>
-  ![Select code evaluator in the evaluator setup flow](/images/docs/code-evaluators/create-new-code-evaluator.png)
+  ![Placeholder for the new code evaluator flow screenshot](/images/docs/evaluation/screenshot-placeholder.svg)
 </Frame>
 
-### Write the evaluator code
+### Define and test the evaluator
 
-Choose Python or TypeScript and implement the `evaluate` function. Keep the code deterministic and within the runtime constraints.
+The evaluator definition contains the language and `evaluate` function that Langfuse runs. [Rules](/docs/evaluation/core-concepts#evaluators-and-rules) select the incoming observations on which it runs.
+
+Implement the `evaluate` function. Keep the code deterministic and within the [runtime constraints](#runtime-constraints).
+
+On the right, filter to representative sample observations, select one, and run the evaluator. Use the test result to confirm that the observation and experiment fields passed to `ctx` match what your code expects.
+
+Unlike LLM-as-a-Judge, code evaluators do not have a separate variable-mapping step. Your code reads the data it needs directly from `ctx`.
 
 <Frame fullWidth>
-  ![Write TypeScript or Python evaluator code](/images/docs/code-evaluators/write-code.png)
+  ![Placeholder for the code evaluator and sample test-result screenshot](/images/docs/evaluation/screenshot-placeholder.svg)
 </Frame>
 
-### Configure where it runs
+### Save and run online
 
-Select observations or experiments as the target and configure filters, sampling, and mappings as needed.
+After saving, attach the evaluator to a [rule](/docs/evaluation/core-concepts#evaluators-and-rules) to run it on incoming observations. Configure the rule's filters and sampling rate.
 
 <Frame fullWidth>
-  ![Configure the code evaluator run target and filters](/images/docs/code-evaluators/configure-run-target.png)
+  ![Placeholder for the rule configuration screenshot](/images/docs/evaluation/screenshot-placeholder.svg)
 </Frame>
 
-### Test the evaluator
+### Use the evaluator elsewhere
 
-Run the evaluator against sample observations before enabling it. Use the preview to confirm that the observation fields and experiment fields passed to `ctx` match what your code expects.
-
-<Frame fullWidth>
-  ![Successful code evaluator test run](/images/docs/code-evaluators/test-success.png)
-</Frame>
-
-### Trigger the evaluation
-
-To see your evaluator in action, you need to either [send traces](/docs/observability/get-started) (fastest) or trigger an experiment run (takes longer to set up) via the [UI](/docs/evaluation/experiments/experiments-via-ui) or [SDK](/docs/evaluation/experiments/experiments-via-sdk). Make sure to set the correct target data in the evaluator settings according to how you want to trigger the evaluation.
+Saved code evaluators can also evaluate selected historical observations through [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation) or score runs in [prompt experiments](/docs/evaluation/experiments/experiments-via-ui).
 
 </Steps>
 
@@ -553,7 +551,7 @@ If you want to run deterministic evaluation logic in your own application or CI 
 <Details>
 <Summary>Why can't I find code evaluator execution traces?</Summary>
 
-Code evaluator executions use the internal environment `langfuse-code-eval`. Internal environments are hidden from the default tracing view, so filter the tracing table by `environment = langfuse-code-eval` or open the execution trace from the related score or evaluator log.
+Code evaluator executions use the internal environment `langfuse-code-eval`. Internal environments are hidden from the default tracing view, so filter the tracing table by `environment = langfuse-code-eval` or open the execution trace from the related score.
 
 </Details>
 

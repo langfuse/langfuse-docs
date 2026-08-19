@@ -1,0 +1,50 @@
+---
+title: "A new evaluation experience"
+date: 2026-08-22
+description: "A new workflow for defining evaluators, testing them on real data, and running them online."
+ogImage: /images/changelog/2026-08-22-evaluation-experience-placeholder.svg
+author: Tobias Wochinger
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+We rebuilt the evaluator setup experience to make evaluations easier to create, test, and manage.
+
+- Meet [rules](/docs/evaluation/core-concepts#evaluators-and-rules): Evaluators define how data is scored. Rules define which incoming observations are evaluated. Reuse a rule's filters and sampling across evaluators, or run the same evaluator with different rules.
+- Test your judge: Define and test evaluators side by side using data from real observations. Inspect the result, then refine the model, prompt, score definition, or mappings before saving.
+- Goodbye JSONPath: Map data to judge variables by clicking through real observations. JSONPath remains available for advanced mappings.
+- Stay in control of costs: Before running online evaluations, review the matching volume from the past seven days. For LLM-as-a-Judge evaluators, you can also review the estimated cost and adjust sampling.
+
+Existing evaluators have been upgraded to the new experience. No action required.
+
+## Learn more
+
+<Cards num={4}>
+  <Card
+    title="Evaluation concepts"
+    href="/docs/evaluation/core-concepts"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="LLM-as-a-Judge"
+    href="/docs/evaluation/evaluation-methods/llm-as-a-judge"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Code evaluators"
+    href="/docs/evaluation/evaluation-methods/code-evaluators"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Langfuse Academy: Evaluation"
+    href="/academy/evaluate"
+    icon={<Book />}
+    arrow
+  />
+</Cards>
