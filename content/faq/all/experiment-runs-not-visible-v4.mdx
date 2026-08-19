@@ -21,21 +21,24 @@ in the new JS/TS major, but this was missed on our side.
 ## Why this happens
 
 Langfuse v4 connects experiment runs to traces through experiment attributes
-on the ingested observations, including:
+on the ingested observations. Every observation in an experiment item trace
+must include:
 
 - `langfuse.experiment.id`
+- `langfuse.experiment.name`
 - `langfuse.experiment.dataset.id`
 - `langfuse.experiment.item.id`
 - `langfuse.experiment.item.root_observation_id`
+
+The experiment ID, name, and dataset ID must be identical across every
+observation in every item trace of the experiment. The item ID and root
+observation ID must be identical across every observation within one item
+trace.
 
 The legacy `item.link()` path did not reliably propagate the corresponding
 experiment attributes to the trace. Historic traces remain available, but are
 missing the experiment attributes required by the v4 data model and are
 therefore not served in the v4 UI.
-
-The JS/TS and Python SDKs did not behave consistently during this transition.
-The legacy method was deprecated in the Python SDK, but we missed deprecating it
-in the new JS/TS major. This was a bug in our SDK upgrade path.
 
 This affects the following combination:
 
@@ -58,17 +61,41 @@ To preserve the historic experiment, re-ingest each complete trace through
 [direct OpenTelemetry ingestion with experiment
 attributes](/integrations/native/opentelemetry/experiments). Preserve every
 observation's original ID, parent ID, start time, and end time, and add the
-required `langfuse.experiment.*` attributes.
+complete experiment context. Preserve the optional description, experiment
+metadata, item version, expected output, and item metadata when they were
+present in the historic experiment.
 
 ```text
-for each historic trace:
+experimentAttributes = {
+  "langfuse.experiment.id": original experiment ID,
+  "langfuse.experiment.name": original experiment name,
+  "langfuse.experiment.dataset.id": original dataset ID,
+  "langfuse.experiment.description": original description,       // if present
+  "langfuse.experiment.metadata.*": original experiment metadata // if present
+}
+
+for each historic experiment item trace:
+  itemAttributes = {
+    "langfuse.experiment.item.id": original item ID,
+    "langfuse.experiment.item.root_observation_id": root observation ID,
+    "langfuse.experiment.item.version": original item version // if present
+  }
+
   re-ingest every observation with:
     traceId: original trace ID
     spanId: original observation ID
     parentSpanId: original parent observation ID
     startTime and endTime: original timestamps
-    attributes: original attributes + required experiment attributes
+    attributes: original attributes + experimentAttributes + itemAttributes
+
+  additionally on the root observation:
+    "langfuse.experiment.item.expected_output": original expected output // if present
+    "langfuse.experiment.item.metadata.*": original item metadata        // if present
 ```
+
+Use the same `langfuse.experiment.id` and `langfuse.experiment.name` values for
+the entire recovered experiment. Changing either value between item traces
+splits them into different experiments in the v4 UI.
 
 When the trace ID, observation IDs, and start times remain unchanged, Langfuse
 writes newer event versions and ClickHouse eventually replaces the previous
