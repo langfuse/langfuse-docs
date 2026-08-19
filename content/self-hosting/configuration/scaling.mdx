@@ -9,7 +9,7 @@ sidebarTitle: "Sizing & Scaling"
 
 This guide covers how you can operate your Langfuse deployment at scale and includes best practices and tweaks to get the best performance.
 
-## Minimum Infrastructure Requirements
+## Minimum Infrastructure Requirements [#minimum-infrastructure-requirements]
 
 | Service                                                                         | Minimum Requirements                                         |
 | ------------------------------------------------------------------------------- | ------------------------------------------------------------ |
@@ -191,7 +191,7 @@ Langfuse does not read from these tables, so you can safely reduce them. Two opt
 </clickhouse>
 ```
 
-On the Bitnami ClickHouse Helm chart, you can ship the same block via `clickhouse.extraOverrides`. Keep `query_log`, `part_log`, and `error_log` enabled — they are useful for debugging and remain small.
+On the [Langfuse Helm chart](/self-hosting/deployment/kubernetes-helm) (`v2.x`), you can ship the same block via `clickhouse.cluster.settings`. Keep `query_log`, `part_log`, and `error_log` enabled — they are useful for debugging and remain small.
 
 **Option 2 — Aggressive TTLs.** If you want to keep the tables around for debugging, attach short TTLs and disable the query profiler instead:
 
