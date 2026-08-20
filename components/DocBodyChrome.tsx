@@ -24,7 +24,7 @@ type Props = {
    * Used by self-hosting pages.
    */
   versionLabel?: string | null;
-  };
+};
 
 /**
  * Thin "use client" wrapper that adds interactive chrome (copy button, feedback,
