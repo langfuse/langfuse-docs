@@ -1,0 +1,131 @@
+---
+title: Why are my experiment runs not visible after upgrading to Langfuse v4?
+description: Understand why experiments created with the legacy JavaScript item.link() method may not appear in Langfuse v4 and how to recover.
+tags: [experiments, sdk, v4]
+---
+
+# Why are my experiment runs not visible after upgrading to Langfuse v4?
+
+If you use the JS/TS SDK `>=5.0.0` and still call `item.link()` manually, your
+dataset run items and traces may exist in Langfuse without appearing as an
+experiment run in the v4 UI. This is the result of a divergence between our
+SDKs during the v4 upgrade: the legacy link method should have been deprecated
+in the new JS/TS major, but this was missed on our side.
+
+<Callout type="warning">
+  Do not use `item.link()` for new experiments. Upgrade the JS/TS SDK and
+  run the experiment with the [Experiment runner
+  SDK](/docs/evaluation/experiments/experiments-via-sdk).
+</Callout>
+
+## Why this happens
+
+Langfuse v4 connects experiment runs to traces through experiment attributes
+on the ingested observations. Every observation in an experiment item trace
+must include:
+
+- `langfuse.experiment.id`
+- `langfuse.experiment.name`
+- `langfuse.experiment.dataset.id`
+- `langfuse.experiment.item.id`
+- `langfuse.experiment.item.root_observation_id`
+
+The experiment ID, name, and dataset ID must be identical across every
+observation in every item trace of the experiment. The item ID and root
+observation ID must be identical across every observation within one item
+trace.
+
+The legacy `item.link()` path did not reliably propagate the corresponding
+experiment attributes to the trace. Historic traces remain available, but are
+missing the experiment attributes required by the v4 data model and are
+therefore not served in the v4 UI.
+
+This affects the following combination:
+
+- JS/TS SDK `>=5.0.0`
+- Manual calls to `item.link()`
+- Traces that do not contain `langfuse.experiment.*` attributes
+
+## What to change for new experiments
+
+Run new experiments with the [Experiment runner
+SDK](/docs/evaluation/experiments/experiments-via-sdk) instead of calling
+`item.link()`.
+
+## How to recover historic experiments
+
+Historic traces remain available, but they are missing the experiment
+attributes required by the v4 UI.
+
+Recover each complete trace through [direct OpenTelemetry ingestion with
+experiment attributes](/integrations/native/opentelemetry/experiments). Add the
+complete experiment context to every observation. Preserve the optional
+description, experiment metadata, item version, expected output, and item
+metadata when they were present in the historic experiment.
+
+Choose one of the following options based on whether you need historic
+experiment data to appear in the v4 UI.
+
+### Option 1: Keep historic experiments out of v4
+
+If you only need experiment data within your retention window, you can continue
+using Langfuse v4 without recovering historic experiments. The historic traces
+remain available, but they will not appear as experiment runs in the v4 UI.
+
+This can be a reasonable option when historic experiment data is no longer
+needed or will expire through your normal data retention policy.
+
+### Option 2: Preserve existing score links
+
+Re-ingest every observation with its original trace ID, observation ID, parent
+observation ID, and exact original start time. Preserve the original end time
+as well. Existing trace-level and observation-level scores remain linked
+because their target IDs do not change.
+
+```text
+experimentAttributes = {
+  "langfuse.experiment.id": original experiment ID,
+  "langfuse.experiment.name": original experiment name,
+  "langfuse.experiment.dataset.id": original dataset ID,
+  "langfuse.experiment.description": original description,       // if present
+  "langfuse.experiment.metadata.*": original experiment metadata // if present
+}
+
+for each historic experiment item trace:
+  itemAttributes = {
+    "langfuse.experiment.item.id": original item ID,
+    "langfuse.experiment.item.root_observation_id": original root observation ID,
+    "langfuse.experiment.item.version": original item version // if present
+  }
+
+  re-ingest every observation with:
+    traceId: original trace ID
+    spanId: original observation ID
+    parentSpanId: original parent observation ID
+    startTime and endTime: exact original timestamps
+    attributes: original attributes + experimentAttributes + itemAttributes
+
+  additionally on the root observation:
+    "langfuse.experiment.item.expected_output": original expected output // if present
+    "langfuse.experiment.item.metadata.*": original item metadata        // if present
+```
+
+Use the same `langfuse.experiment.id` and `langfuse.experiment.name` values for
+the entire recovered experiment. Changing either value between item traces
+splits them into different experiments in the v4 UI.
+
+<Callout type="warning">
+  The start time must match exactly. Do not add an offset. ClickHouse only
+  considers the new event a replacement when the trace ID, observation ID, and
+  exact observation start time all match. A changed start time creates a
+  separate permanent observation under the same trace and can inflate costs,
+  usage, and observation counts.
+
+Replacement happens during ClickHouse background merges. Until a merge
+completes, duplicate event versions may affect results. There is no time
+guarantee for these merges.
+
+</Callout>
+
+Please [contact Langfuse support](mailto:support@langfuse.com) if you need help
+recovering historic experiments.
