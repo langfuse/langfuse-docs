@@ -1,0 +1,275 @@
+---
+title: Langfuse Assistant (self-hosted)
+description: Enable the Assistant instance switch, then configure Amazon Bedrock, the worker queue, and the AWS Lambda MicroVM sandbox.
+label: "Version: v4"
+sidebarTitle: "Langfuse Assistant"
+---
+
+# Langfuse Assistant
+
+This page covers self-hosted infrastructure setup. For an introduction to the feature, see [Langfuse Assistant](/docs/langfuse-assistant).
+
+Assistant runs are durable jobs. The web service admits and enqueues them. The worker claims and executes them. Both services must use the same Postgres, Redis, Bedrock model, and Region.
+
+The Assistant stays hidden until you set `LANGFUSE_IN_APP_AGENT_ENABLED=true` on the web and worker services. Then set `LANGFUSE_AWS_BEDROCK_MODEL` and `LANGFUSE_AWS_BEDROCK_REGION` on both services, and `QUEUE_CONSUMER_IN_APP_AGENT_RUN_QUEUE_IS_ENABLED=true` on the worker. An organization owner or admin then enables **AI Features** in organization settings. That switch starts disabled and still controls other AI features. Self-hosted installations use the bundled system prompt.
+
+<Callout type="warning">
+  We strongly recommend AWS Lambda MicroVM for production. File and
+  code-execution tools require it. Lambda MicroVM is the only sandbox provider
+  today. More providers will follow.
+</Callout>
+
+## Enable the Assistant
+
+Set this on **both** the web and worker services. Unset or `false` hides the Assistant, even if **AI Features** is on.
+
+```bash
+# web and worker
+LANGFUSE_IN_APP_AGENT_ENABLED="true"
+```
+
+Leave this unset on instances that should not run the Assistant.
+
+## Available sandboxes
+
+Set `LANGFUSE_IN_APP_AGENT_SANDBOX_PROVIDER` on the worker:
+
+| Sandbox            | Value              | Use for                            | Tools                                     |
+| ------------------ | ------------------ | ---------------------------------- | ----------------------------------------- |
+| AWS Lambda MicroVM | `lambda-microvm`   | Production self-hosted deployments | Langfuse tools, files, and code execution |
+| None               | unset              | Fallback                           | Langfuse tools only                       |
+| Local Docker       | `dangerous-docker` | Local development                  | Langfuse tools, files, and code execution |
+
+<Callout type="warning">
+  If you do not run Langfuse on AWS, you can still run the Assistant with
+  Amazon Bedrock and Langfuse tools. There is no non-AWS sandbox yet. For
+  sandboxed execution on other platforms, let us know what support you need in
+  [GitHub Discussions](https://github.com/orgs/langfuse/discussions).
+</Callout>
+
+## Amazon Bedrock
+
+Set the model on **both** the web and worker services, and enable the queue consumer on the worker:
+
+```bash
+# web and worker
+LANGFUSE_IN_APP_AGENT_ENABLED="true"
+LANGFUSE_AWS_BEDROCK_MODEL="eu.anthropic.claude-sonnet-4-5-20250929-v1:0"
+LANGFUSE_AWS_BEDROCK_REGION="eu-central-1"
+
+# worker only
+QUEUE_CONSUMER_IN_APP_AGENT_RUN_QUEUE_IS_ENABLED="true"
+```
+
+Do not enable the queue consumer on an ingestion-only worker. Run a worker that is provisioned for assistant execution.
+
+Choose a Bedrock model available in the configured Region and enable access to it. If you use an inference profile, use its ID as the model value.
+
+Prefer a workload role or IRSA so both services pick up temporary credentials from the [AWS SDK default credential chain](https://docs.aws.amazon.com/sdkref/latest/guide/standardized-credentials.html). Grant only model invocation:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:InvokeModel",
+        "bedrock:InvokeModelWithResponseStream"
+      ],
+      "Resource": [
+        "arn:aws:bedrock:<region>::foundation-model/*",
+        "arn:aws:bedrock:<region>:<account-id>:inference-profile/*"
+      ]
+    }
+  ]
+}
+```
+
+Scope the resource and Region as narrowly as your selected model allows. For a cross-Region inference profile, IAM and service-control policies must allow invocation in every destination Region. See [Bedrock inference profile permissions](https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles-support.html).
+
+Pass these variables through your usual configuration. On Helm, use `langfuse.additionalEnv` for the model, `langfuse.worker.pod.additionalEnv` for the queue flag, and IRSA via `langfuse.serviceAccount.annotations`. There is no first-class Assistant chart value yet.
+
+```yaml
+langfuse:
+  additionalEnv:
+    - name: LANGFUSE_IN_APP_AGENT_ENABLED
+      value: "true"
+    - name: LANGFUSE_AWS_BEDROCK_MODEL
+      value: eu.anthropic.claude-sonnet-4-5-20250929-v1:0
+    - name: LANGFUSE_AWS_BEDROCK_REGION
+      value: eu-central-1
+  worker:
+    pod:
+      additionalEnv:
+        - name: QUEUE_CONSUMER_IN_APP_AGENT_RUN_QUEUE_IS_ENABLED
+          value: "true"
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::<account-id>:role/<langfuse-role>
+```
+
+## AWS Lambda MicroVM sandbox
+
+Use Lambda MicroVM for production self-hosted deployments:
+
+```bash
+LANGFUSE_IN_APP_AGENT_SANDBOX_PROVIDER="lambda-microvm"
+```
+
+Langfuse does not publish a pullable MicroVM image. AWS builds the image **in your account** from a zip artifact plus an Amazon Linux 2023 base image.
+
+You need:
+
+- Lambda MicroVMs in the Region
+- Docker, pnpm, zip, git, and an AWS CLI with `lambda-microvms` support (2.36.1 is known to work)
+- An authenticated AWS profile that can upload to S3 and create MicroVM images
+- The Langfuse repository, for [`packages/in-app-agent-sandbox-runtime/build-microvm-image.sh`](https://github.com/langfuse/langfuse/blob/main/packages/in-app-agent-sandbox-runtime/build-microvm-image.sh)
+
+### Image build
+
+Create an S3 bucket for the artifact and a MicroVM **build** role. Trust `lambda.amazonaws.com` with `sts:AssumeRole` and `sts:TagSession`. Allow `s3:GetObject` on the artifact object and writes to the build CloudWatch log groups. Do not grant this role Langfuse database, application, or secret access.
+
+From the Langfuse repository root:
+
+```bash
+export AWS_PROFILE="<profile>"
+export AWS_REGION="<region>"
+export S3_BUCKET="<artifact-bucket>"
+export MICROVM_IMAGE_NAME="langfuse-in-app-agent-sandbox"
+export LAMBDA_MICROVM_BUILD_ROLE_ARN="arn:aws:iam::<account-id>:role/<build-role>"
+export BASE_IMAGE_ARN="arn:aws:lambda:<region>:aws:microvm-image:al2023-1"
+export BASE_IMAGE_VERSION="0"
+
+bash packages/in-app-agent-sandbox-runtime/build-microvm-image.sh
+```
+
+You can also put these values in `packages/in-app-agent-sandbox-runtime/.env`.
+
+The script builds the runtime, zips `Dockerfile`, `package.json`, and `dist`, uploads the zip, and creates or updates a Lambda MicroVM image (ARM_64, 512 MiB, hooks on port 5000). On success it prints `IMAGE_ARN`. Use that value as `LANGFUSE_IN_APP_AGENT_SANDBOX_AWS_LAMBDA_MICROVM_IMAGE_IDENTIFIER`.
+
+### IAM permissions
+
+Create an **execution** role for the MicroVM. Trust `lambda.amazonaws.com` with `sts:AssumeRole` and `sts:TagSession`. Keep it empty of Langfuse database, S3, and secret permissions. User-provided sandbox code runs with this role.
+
+Grant the Langfuse worker permission to run that image and pass the execution role:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "lambda:RunMicrovm",
+        "lambda:GetMicrovm",
+        "lambda:CreateMicrovmAuthToken",
+        "lambda:ResumeMicrovm",
+        "lambda:SuspendMicrovm",
+        "lambda:TerminateMicrovm"
+      ],
+      "Resource": "arn:aws:lambda:<region>:<account-id>:microvm-image:<image-name>"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": "arn:aws:iam::<account-id>:role/<execution-role>",
+      "Condition": {
+        "StringEquals": {
+          "iam:PassedToService": "lambda.amazonaws.com"
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": "lambda:PassNetworkConnector",
+      "Resource": [
+        "arn:aws:lambda:<region>:aws:network-connector:aws-network-connector:ALL_INGRESS",
+        "arn:aws:lambda:<region>:<account-id>:network-connector:<egress-connector-name>"
+      ]
+    }
+  ]
+}
+```
+
+Drop the custom connector ARN from `PassNetworkConnector` if you are not using one.
+
+<Callout type="warning">
+  Self-hosters deploying the sandbox are responsible for isolating execution,
+  including egress. MicroVMs have public internet access by default. We
+  recommend a Lambda network connector with private subnets and a deny-all
+  security group. See [Lambda MicroVM
+  networking](https://docs.aws.amazon.com/lambda/latest/dg/microvms-networking.html).
+</Callout>
+
+Set these on the worker:
+
+```bash
+LANGFUSE_IN_APP_AGENT_SANDBOX_PROVIDER="lambda-microvm"
+LANGFUSE_IN_APP_AGENT_SANDBOX_AWS_LAMBDA_MICROVM_IMAGE_IDENTIFIER="arn:aws:lambda:<region>:<account-id>:microvm-image:<image-name>"
+LANGFUSE_IN_APP_AGENT_SANDBOX_AWS_LAMBDA_MICROVM_EXECUTION_ROLE_ARN="arn:aws:iam::<account-id>:role/<execution-role>"
+LANGFUSE_IN_APP_AGENT_SANDBOX_AWS_LAMBDA_MICROVM_REGION="<region>"
+# optional
+# LANGFUSE_IN_APP_AGENT_SANDBOX_AWS_LAMBDA_MICROVM_EGRESS_NETWORK_CONNECTOR_ARN="arn:aws:lambda:<region>:<account-id>:network-connector:<egress-connector-name>"
+```
+
+## Without a sandbox
+
+If `LANGFUSE_IN_APP_AGENT_SANDBOX_PROVIDER` is unset, the Assistant still runs with Langfuse tools. File and code-execution tools are unavailable. That is a fallback, not the intended production setup.
+
+## Local Docker sandbox
+
+For local development you can run the sandbox against a local Docker daemon:
+
+```bash
+LANGFUSE_IN_APP_AGENT_SANDBOX_PROVIDER="dangerous-docker"
+```
+
+`dangerous-docker` is rejected when `NODE_ENV=production`. It is not a sandbox boundary for production workloads.
+
+## Organization opt-in
+
+1. Sign in as an organization owner or administrator.
+2. Open organization **Settings** and enable **AI Features**.
+3. Open the Langfuse Assistant in a project.
+
+## Verify
+
+1. Confirm the worker logs that it registered the in-app assistant queue consumer.
+2. Send a simple request, such as asking it to summarize a recent trace. The run should move from queued to running and then complete.
+3. Ask the Assistant to write a file. That confirms the Lambda MicroVM sandbox. If the sandbox provider is unset, file tools are unavailable by design.
+
+## Queue and runtime knobs
+
+These optional variables tune execution behavior:
+
+| Variable                                                 | Description                                                                   |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `LANGFUSE_AWS_BEDROCK_SMALL_MODEL`                       | Model used for conversation titles. Defaults to `LANGFUSE_AWS_BEDROCK_MODEL`. |
+| `LANGFUSE_IN_APP_AGENT_RUN_QUEUE_PROCESSING_CONCURRENCY` | Concurrent assistant runs on the worker. Defaults to `5`.                     |
+
+## Troubleshooting
+
+### The Assistant is not visible
+
+Confirm `LANGFUSE_IN_APP_AGENT_ENABLED=true` is set on both the web and worker services, then restart them. Organization **AI Features** does not show the Assistant on its own.
+
+### Runs remain queued or time out
+
+Confirm the worker is running, shares Redis with the web service, and has `QUEUE_CONSUMER_IN_APP_AGENT_RUN_QUEUE_IS_ENABLED=true`. A queued run fails with a queue timeout when no worker claims it.
+
+### The UI reports that the assistant model is not configured
+
+Set `LANGFUSE_AWS_BEDROCK_MODEL` and `LANGFUSE_AWS_BEDROCK_REGION` on both services, then restart them together.
+
+### Bedrock returns access denied or model-not-found
+
+Check the Region, Bedrock model access, and `bedrock:InvokeModel` / `bedrock:InvokeModelWithResponseStream` on the workload role. For inference profiles, allow every destination Region.
+
+### Image build failed
+
+Confirm Lambda MicroVMs are available in the Region, the AWS CLI supports `lambda-microvms`, the build role can read the S3 artifact, and `BASE_IMAGE_ARN` is `arn:aws:lambda:<region>:aws:microvm-image:al2023-1` with version `0`.
+
+### Sandbox tools are missing
+
+Expected when the sandbox provider is unset. Set `lambda-microvm` and the image, execution-role, and Region variables. Do not use `dangerous-docker` in production.

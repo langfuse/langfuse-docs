@@ -94,6 +94,23 @@ Langfuse (self-hosted) has extensive configuration options via environment varia
 | `LANGFUSE_CODE_EVAL_EXECUTION_WORKER_CONCURRENCY`     |                                   | Optional worker concurrency for code evaluator execution.                                                                                                                                            |
 | `LANGFUSE_CODE_EVAL_LOCAL_TIMEOUT_MS`                 |                                   | Optional timeout in milliseconds for locally executed code evaluators.                                                                                                                               |
 
+## Langfuse Assistant
+
+The Assistant stays hidden until `LANGFUSE_IN_APP_AGENT_ENABLED=true`. It then uses instance-wide Amazon Bedrock. We strongly recommend an AWS Lambda MicroVM sandbox. See [Langfuse Assistant](/self-hosting/configuration/in-app-agent).
+
+| Variable                                                                        | Required / Default | Description                                                                                   |
+| ------------------------------------------------------------------------------- | ------------------ | --------------------------------------------------------------------------------------------- |
+| `LANGFUSE_IN_APP_AGENT_ENABLED`                                                 |                    | Set to `true` to show and admit Assistant runs. Unset or `false` hides it.                    |
+| `LANGFUSE_AWS_BEDROCK_MODEL`                                                    |                    | Bedrock model ID or inference profile ID. Required on web and worker.                         |
+| `LANGFUSE_AWS_BEDROCK_REGION`                                                   |                    | AWS Region for the model. Required on web and worker.                                         |
+| `QUEUE_CONSUMER_IN_APP_AGENT_RUN_QUEUE_IS_ENABLED`                              | `false`            | Set to `true` on the worker that executes assistant runs.                                     |
+| `LANGFUSE_AWS_BEDROCK_SMALL_MODEL`                                              |                    | Optional model for conversation titles. Defaults to `LANGFUSE_AWS_BEDROCK_MODEL`.             |
+| `LANGFUSE_IN_APP_AGENT_SANDBOX_PROVIDER`                                        |                    | Set to `lambda-microvm` for production. Leave unset only as a fallback (Langfuse tools only). |
+| `LANGFUSE_IN_APP_AGENT_SANDBOX_AWS_LAMBDA_MICROVM_IMAGE_IDENTIFIER`             |                    | Required with `lambda-microvm`. MicroVM image ARN.                                            |
+| `LANGFUSE_IN_APP_AGENT_SANDBOX_AWS_LAMBDA_MICROVM_EXECUTION_ROLE_ARN`           |                    | Required with `lambda-microvm`.                                                               |
+| `LANGFUSE_IN_APP_AGENT_SANDBOX_AWS_LAMBDA_MICROVM_REGION`                       |                    | Required with `lambda-microvm`.                                                               |
+| `LANGFUSE_IN_APP_AGENT_SANDBOX_AWS_LAMBDA_MICROVM_EGRESS_NETWORK_CONNECTOR_ARN` |                    | Optional. Overrides default public internet egress.                                           |
+
 ## Additional Features
 
 There are additional features that can be enabled and configured via environment variables.

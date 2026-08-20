@@ -1,6 +1,6 @@
 ---
 title: Langfuse Assistant
-description: Ask questions about your Langfuse project data in plain language from inside the Langfuse Cloud UI.
+description: Ask questions about your Langfuse project data in plain language from inside the Langfuse UI.
 sidebarTitle: Assistant
 ---
 
@@ -12,9 +12,15 @@ sidebarTitle: Assistant
     core: "public-beta",
     pro: "public-beta",
     enterprise: "public-beta",
-    selfHosted: "not-available",
+    selfHosted: "public-beta",
   }}
 />
+
+<Callout type="info">
+  **Self-hosted:** The Assistant requires instance-wide Amazon Bedrock and a
+  worker queue consumer. We strongly recommend an AWS Lambda MicroVM sandbox.
+  See [self-hosted setup](/self-hosting/configuration/in-app-agent).
+</Callout>
 
 The Langfuse Assistant is an in-product assistant for exploring your Langfuse project data and taking selected actions in Langfuse with your approval. You can ask questions about traces, observations, sessions, metrics, and Langfuse workflows in plain language.
 
@@ -78,6 +84,7 @@ The Assistant is a beta feature. It may misunderstand a question or return incom
 
 ## Related resources [#related-resources]
 
+- [Self-hosted Assistant setup](/self-hosting/configuration/in-app-agent)
 - [AI Feature Security](/security/ai-features)
 - [Langfuse MCP Server](/docs/api-and-data-platform/features/mcp-server)
 - [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill)
