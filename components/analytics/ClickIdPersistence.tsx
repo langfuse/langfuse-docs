@@ -41,29 +41,31 @@ declare global {
 type ConsentState = "granted" | "denied" | "unknown";
 
 function readAdvertisementConsent(): ConsentState {
-  // The persisted CookieYes cookie is the durable record of a decision and
-  // survives reloads; it is written in notice-only regions too, where the
-  // category is granted by default.
+  // The live API wins whenever it can answer: it reflects in-session changes
+  // — most importantly a revoke in the preference center — that the persisted
+  // cookie may not have been rewritten with yet. Withdrawal must never be
+  // masked by a stale grant, so a conclusive `false` here is a denial even if
+  // the cookie still says yes.
+  try {
+    const advertisement = window.getCkyConsent?.()?.categories?.advertisement;
+    if (typeof advertisement === "boolean")
+      return advertisement ? "granted" : "denied";
+  } catch {
+    // an unavailable API is inconclusive, not a denial — fall through
+  }
+
+  // CookieYes has not loaded (or is blocked), so fall back to its persisted
+  // cookie: the durable record of an earlier decision, which survives reloads
+  // and is written in notice-only regions too, where the category is granted
+  // by default. It enumerates every category, so its presence is conclusive.
   const consentCookie = document.cookie
     .split("; ")
     .find((cookie) => cookie.startsWith("cookieyes-consent="));
-  if (consentCookie?.includes("advertisement:yes")) return "granted";
+  if (consentCookie)
+    return consentCookie.includes("advertisement:yes") ? "granted" : "denied";
 
-  // The live API reflects in-session changes the cookie may not have yet.
-  let apiIsConclusive = false;
-  try {
-    const advertisement = window.getCkyConsent?.()?.categories?.advertisement;
-    if (typeof advertisement === "boolean") {
-      if (advertisement) return "granted";
-      apiIsConclusive = true;
-    }
-  } catch {
-    // treat an unavailable API as inconclusive rather than as a denial
-  }
-
-  // Only call it a denial when a source actually said so: an existing consent
-  // cookie enumerates every category, and the API reported a real boolean.
-  return consentCookie || apiIsConclusive ? "denied" : "unknown";
+  // Neither source could answer: leave any stored click ids untouched.
+  return "unknown";
 }
 
 function syncClickIdCookies(clickIds: Partial<Record<string, string>>) {
