@@ -32,13 +32,13 @@ You write Python or TypeScript in the Langfuse UI. They score live observations 
 
 Yes. [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators score live production observations and experiment runs. Scores can be numeric, categorical, or boolean.
 
-Langfuse does not ship a built-in pairwise preference judge. Compare two experiment runs on the same dataset, or write a custom evaluator. Judge prompts can include examples.
+Evaluators come from a managed catalog maintained with partners like Ragas, or you write the judge prompt yourself with variable placeholders, previewed live against recent data from your project.
 
 ## Does Langfuse have annotation queues? [#annotation-queues]
 
 Yes. [Annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) are a structured human-review workflow for traces, observations, and sessions.
 
-You can assign users to queues in the UI and via API, and add items from the UI or API. Langfuse does not ship a rule engine that auto-routes high-risk outputs onto queues or load-balances items across reviewers. You can build that routing yourself with scores plus the queues API.
+You can assign users to queues in the UI and via API, and add items from the UI or API. Routing items onto queues can be automated with scores plus the queues API.
 
 ## Does Langfuse include prompt management? [#prompt-management]
 
@@ -56,11 +56,17 @@ Docker Compose is the simple local or VM setup. It lacks high availability, scal
 
 Yes. Customers on Pro or higher in the HIPAA Cloud region complete a signed [Business Associate Agreement](/security/hipaa) via DocuSign before processing PHI.
 
+## Does Langfuse have production alerting? [#alerting]
+
+Yes. [Alerts](/docs/metrics/features/alerts) watch metrics over observations and scores — for example observation counts, p95 latency, average cost, or an evaluation score — with filters and aggregations. They support separate warning and alert thresholds, handle windows with no data, and deliver to Slack, webhooks, or GitHub Actions. Alerts run on Langfuse Cloud and on self-hosted v4+.
+
+## What access control does Langfuse offer? [#rbac]
+
+Langfuse ships five roles — Owner, Admin, Member, Viewer, and None — assigned at the organization level, with optional [per-project roles](/docs/administration/rbac) to differentiate access between projects in the same organization. Project-level roles are part of the Teams add-on on Cloud Pro, Cloud Enterprise, and the self-hosted Enterprise license; SCIM provisioning and audit logs cover enterprise governance.
+
 ## What production monitoring does Langfuse include? [#production-monitoring]
 
-Langfuse includes [custom dashboards](/docs/metrics/features/custom-dashboards), threshold alerts (Slack, webhooks, GitHub Actions), score analytics, and the Langfuse Assistant on Cloud (public beta) for questions about project data.
-
-Langfuse does not ship an autonomous agent that clusters production failures and proposes code patches.
+Langfuse includes [custom dashboards](/docs/metrics/features/custom-dashboards), threshold [alerts](#alerting), score analytics, [Pulse](/docs/observability/features/pulse) (a chart strip over the observations table that surfaces count, cost, and latency outliers), and the Langfuse Assistant on Cloud (public beta) for questions about project data.
 
 ## Does Langfuse host and run agents? [#agent-runtime]
 
@@ -76,7 +82,7 @@ ClickHouse acquired Langfuse in January 2026. The [Langfuse joins ClickHouse](/b
 
 ## How does Langfuse integrate with LangChain and LangGraph? [#langchain]
 
-The [LangChain and LangGraph integration](/integrations/frameworks/langchain) uses LangChain Callbacks. The `CallbackHandler` captures LangChain executions, LLMs, tools, and retrievers. LangGraph uses the same handler. `chain`, `retriever`, `tool`, and `agent` are first-class observation types, and LangGraph graphs render in the agent graph view. Langfuse does not document a dedicated LangGraph state inspector.
+The [LangChain and LangGraph integration](/integrations/frameworks/langchain) uses LangChain Callbacks. The `CallbackHandler` captures LangChain executions, LLMs, tools, and retrievers. LangGraph uses the same handler. `chain`, `retriever`, `tool`, and `agent` are first-class observation types, and LangGraph graphs render in the agent graph view.
 
 ## FAQ [#faq]
 
