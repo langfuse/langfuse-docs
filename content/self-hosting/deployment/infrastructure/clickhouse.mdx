@@ -90,9 +90,31 @@ GRANT ALTER UPDATE, ALTER DELETE ON default.* TO 'user';
 GRANT ALTER DROP INDEX ON default.* TO 'user';
 GRANT CREATE ON default.* TO 'user';
 GRANT DROP TABLE ON default.* TO 'user';
+
+-- Langfuse v4 additionally reads ClickHouse system tables, see below
+GRANT SELECT ON system.tables TO 'user';
+GRANT SELECT ON system.parts TO 'user';
+GRANT SELECT ON system.processes TO 'user';
+GRANT SELECT ON system.query_log TO 'user';
+GRANT SELECT ON system.replicas TO 'user';
 ```
 
 Replace `'user'` with your actual ClickHouse username and adjust the database name if you're using a different database than `default`.
+
+### Why the `system.*` grants are required [#system-table-grants]
+
+ClickHouse enables `access_control_improvements.select_from_system_db_requires_grant` by default, so a least-privilege user cannot read the `system` database without an explicit grant. Langfuse v4 requires ClickHouse >= 25.12, where this default applies.
+
+Langfuse v4 reads these tables to discover work:
+
+| Table | Used by |
+| --- | --- |
+| `system.parts` | the dual-write propagation job, to find completed `observations_batch_staging` partitions, and every step of the historic backfill |
+| `system.tables` | the historic backfill, to resolve table engines |
+| `system.processes`, `system.query_log` | the historic backfill, which starts long-running queries with an explicit `query_id`, drops the HTTP connection, and polls for completion |
+| `system.replicas` | the historic backfill on `Replicated*` engines only (skipped on SharedMergeTree) |
+
+Without these grants the dual write fails on every run while ingestion keeps returning `207`, so the new `events` tables stay behind without any error surfacing.
 
 ## Direct ClickHouse Access for Custom Tools [#direct-clickhouse-access]
 
