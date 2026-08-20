@@ -232,7 +232,9 @@ try {
   the default `events_only` write mode. Switch to the OpenTelemetry endpoint
   now. Follow the [custom ingestion migration
   guide](/integrations/native/opentelemetry/migration-to-v4) to map legacy
-  events to v4-ready OTEL spans.
+  events to v4-ready OTEL spans. This deprecation applies to trace and
+  observation events. Current SDK score helpers send `score-create` events to
+  the same endpoint; those events remain supported after the cutover.
 </Callout>
 
 - [OpenTelemetry Traces Ingestion Endpoint](https://api.reference.langfuse.com/#tag/opentelemetry/POST/api/public/otel/v1/traces) implements the OTLP/HTTP specification for trace ingestion, providing native OpenTelemetry integration for Langfuse Observability.
