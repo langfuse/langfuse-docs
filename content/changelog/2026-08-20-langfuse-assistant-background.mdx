@@ -1,0 +1,34 @@
+---
+title: Langfuse Assistant, now in the background
+date: 2026-08-20
+description: Kick off longer tasks in Langfuse, keep working in parallel, and get notified when the Assistant is done, fails, or needs your approval.
+author: Lysander
+ogVideo: https://static.langfuse.com/docs-videos/langfuse-assistant-background.mp4
+canonical: /docs/langfuse-assistant
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+The Langfuse Assistant now runs in the background, independently of your browser. Ask it to set up dataset items, fill an annotation queue, or migrate a large dashboard, then keep using Langfuse while it works.
+
+You can start another conversation while the first one is still running. Each conversation has its own run, so several tasks can proceed in parallel.
+
+When a run finishes, fails, or needs your approval to continue, you get a notification. You stay aware and in control without watching the drawer.
+
+For repeating work in one conversation, choose **Always approve** on a tool. That grant lasts for the rest of the conversation, so bigger jobs do not stop on the same confirmation over and over.
+
+Runs are also more resilient: rate limits are retried, tool failures are visible so the Assistant can recover, and a long run that hits a step limit shows a clear notice instead of looking like it succeeded.
+
+## Learn more
+
+<Cards num={1}>
+  <Card
+    title="Langfuse Assistant"
+    href="/docs/langfuse-assistant"
+    icon={<Book />}
+    arrow
+  />
+</Cards>
