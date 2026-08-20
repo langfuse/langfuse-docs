@@ -28,9 +28,17 @@ Alternatively, you can use one of the following cloud-specific deployment guides
 - [AWS (Terraform)](/self-hosting/deployment/aws)
 - [Azure (Terraform)](/self-hosting/deployment/azure)
 - [GCP (Terraform)](/self-hosting/deployment/gcp)
-- [Railway](/self-hosting/deployment/railway)
+- [Render](/self-hosting/deployment/render) (community)
+- [Railway](/self-hosting/deployment/railway) (community)
 
 </Callout>
+
+## Prerequisites [#prerequisites]
+
+- **Kubernetes `v1.28` or newer**, as required by the [ClickHouse Kubernetes Operator](/self-hosting/deployment/infrastructure/clickhouse#clickhouse-kubernetes-operator).
+- **cert-manager and the ClickHouse operator, installed once per cluster.** From chart version `v2.0.0` onwards, `clickhouse.deploy: true` (the default) renders `ClickHouseCluster` and `KeeperCluster` resources, and the operator creates cert-manager resources for its webhooks. Both CRD sets must exist before `helm install`; the chart preflights the ClickHouse CRDs and fails fast if they are missing. The [Readme](#readme) below lists the exact install commands.
+
+Deployments that point every data store at an external service (`*.deploy: false`) do not need the operator.
 
 ## Fetch the Helm chart and customize values
 
@@ -77,7 +85,7 @@ Use `kubectl get services -n langfuse` and search for `langfuse-web` to see the 
 Create a port-forward via `kubectl port-forward svc/langfuse-web -n langfuse <local-port>:<nodeport>` and access the UI via `http://localhost:<local-port>` in your browser.
 Go ahead and register, create a new organization, project, and explore Langfuse.
 
-## Readme
+## Readme [#readme]
 
 Source: [langfuse/langfuse-k8s](https://github.com/langfuse/langfuse-k8s)
 
@@ -107,11 +115,25 @@ kubectl delete namespace langfuse
 
 ## How to Upgrade
 
-Run the following commands to upgrade the Helm chart to the latest version:
+Run the following commands to upgrade the Helm chart within a chart major version:
 
 ```bash
 helm repo update
 helm upgrade langfuse langfuse/langfuse -n langfuse
 ```
 
-For more details on upgrading, please refer to the [upgrade guide](/self-hosting/upgrade).
+For more details on upgrading Langfuse itself, please refer to the [upgrade guide](/self-hosting/upgrade).
+
+### Upgrade the chart from v1 to v2 [#chart-v1-to-v2]
+
+<Callout type="warning">
+
+Chart `v2.0.0` is a major version of the Helm chart: it replaces every bundled Bitnami sub-chart with an OSS-licensed alternative. ClickHouse now runs through the [ClickHouse Kubernetes Operator](/self-hosting/deployment/infrastructure/clickhouse#clickhouse-kubernetes-operator), PostgreSQL through `groundhog2k/postgres`, Valkey through `valkey-io/valkey`, and bundled object storage through SeaweedFS. Because StatefulSet identities and PVC layouts change, a plain `helm upgrade` from a v1 release that deploys any of these stores is blocked by the chart.
+
+Follow the [v1 to v2 chart upgrade guide](https://github.com/langfuse/langfuse-k8s/tree/main/examples/upgrade-v1-to-v2). It covers both paths: releases that point to external stores (`*.deploy: false`) upgrade in place, while releases with bundled stores install a sibling v2 release, copy the data over, and then shift traffic. Your deployment must run at least Langfuse v3.224.1 before you start.
+
+</Callout>
+
+If you run the bundled ClickHouse (`clickhouse.deploy: true`), **complete the chart v1 to v2 upgrade before you upgrade Langfuse to v4**. The v1 chart cannot bring its bundled ClickHouse to the version that [Langfuse v4 requires](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#step-1); the v2 chart can. Deployments that connect to an external ClickHouse are not affected and can upgrade Langfuse to v4 independently of the chart.
+
+Chart `v2.0.0` ships Langfuse v4 as its default `appVersion`. To keep the chart migration and the Langfuse v4 upgrade as two separate steps, pin `langfuse.image.tag` to your current Langfuse v3 image while you move to the v2 chart, then follow the [v3 to v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4). To stay on the v1 chart for now, pass a `1.x` chart version explicitly via `helm upgrade --version`.
