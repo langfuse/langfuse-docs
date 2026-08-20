@@ -62,9 +62,9 @@ You monitor LLM outputs in production by attaching evaluation scores to live tra
 
 **3.** **Dashboards** show how output quality develops over time. [Custom dashboards](/docs/metrics/features/custom-dashboards) chart score averages, cost, and latency from live data, with filters and breakdowns by model, user, environment, or score value.
 
-**4.** **Monitors** alert you when a metric crosses a threshold, so a quality regression does not depend on someone watching a chart. [Monitors](/docs/metrics/features/monitors) evaluate a metric over a time window, support warning and alert thresholds, and send notifications to Slack, trigger GitHub Actions, or call your own webhooks. As of July 2026, monitors also support boolean scores: the average of a boolean score is the share of `true` results, so you can alert when the rate of failed policy checks or detected hallucinations exceeds a limit you set.
+**4.** **Alerts** notify you when a metric crosses a threshold, so a quality regression does not depend on someone watching a chart. [Alerts](/docs/metrics/features/alerts) evaluate a metric over a time window, support warning and alert thresholds, and send notifications to Slack, trigger GitHub Actions, or call your own webhooks. As of July 2026, alerts also support boolean scores: the average of a boolean score is the share of `true` results, so you can alert when the rate of failed policy checks or detected hallucinations exceeds a limit you set.
 
-Together these mechanisms form a loop: evaluators and users score outputs, dashboards reveal trends, and monitors turn those trends into actionable alerts.
+Together these mechanisms form a loop: evaluators and users score outputs, dashboards reveal trends, and alerts turn those trends into actionable notifications.
 
 ## How Langfuse Makes LLM Observability Easy
 

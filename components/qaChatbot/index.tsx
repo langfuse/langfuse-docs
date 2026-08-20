@@ -39,25 +39,20 @@ import {
   ToolOutput,
   ToolInput,
 } from "@/components/ai-elements/tool";
-import { scoreDemoFeedback } from "@/components/demoLangfuseBrowserClients";
+import { scoreDemoNegativeUserFeedback } from "@/components/demoLangfuseBrowserClients";
 import { FeedbackDialog } from "./FeedbackPopover";
 import { cn } from "@/lib/utils";
-import { DemoTraceLink } from "@/components/demoTraceLink";
 import type { UIMessage } from "ai";
 
-type ChatMessageMetadata = {
-  traceUrl?: string;
-};
-
-type ChatMessage = UIMessage<ChatMessageMetadata>;
+type ChatMessage = UIMessage;
 
 type ChatProps = HTMLAttributes<HTMLDivElement>;
 
 export const Chat = ({ className, ...props }: ChatProps) => {
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  // Track user feedback for each message ID (1 = thumbs up, 0 = thumbs down, null = no feedback)
-  const [userFeedback, setUserFeedback] = useState<Map<string, number | null>>(
+  // Track negative_user_feedback per message (true/false, null = none)
+  const [userFeedback, setUserFeedback] = useState<Map<string, boolean | null>>(
     new Map(),
   );
 
@@ -112,16 +107,13 @@ export const Chat = ({ className, ...props }: ChatProps) => {
 
   const handleFeedback = (
     messageId: string,
-    value: number,
+    value: boolean,
     comment?: string,
   ) => {
-    // Update the local state
     setUserFeedback((prev) => new Map([...prev, [messageId, value]]));
 
-    scoreDemoFeedback({
+    scoreDemoNegativeUserFeedback({
       traceId: messageId,
-      id: `user-feedback-${messageId}`,
-      name: "user-feedback",
       value,
       comment,
     });
@@ -234,9 +226,6 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                           status !== "submitted" &&
                           status !== "streaming" &&
                           !hasStreamingParts;
-                        const traceUrl = message.metadata?.traceUrl;
-                        const isTraceLinkReady =
-                          Boolean(traceUrl) && !hasStreamingParts;
                         // Add spacing if next part is a different type (for consistent spacing between different types)
                         const nextPart = message.parts[i + 1];
                         const hasNextPartDifferentType =
@@ -247,16 +236,6 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                             className={hasNextPartDifferentType ? "mb-4" : ""}
                           >
                             <Response>{part.text}</Response>
-                            {message.role === "assistant" &&
-                              isNotFirstMessage &&
-                              isLastTextPart &&
-                              isTraceLinkReady && (
-                                <DemoTraceLink
-                                  traceUrl={traceUrl}
-                                  source="qa_chatbot"
-                                  className="mt-3"
-                                />
-                              )}
                             {message.role === "assistant" &&
                               isLastMessage &&
                               isNotFirstMessage &&

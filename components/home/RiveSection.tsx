@@ -29,7 +29,7 @@ type RiveLabel = {
 };
 
 const OVERVIEW: RiveLabel = {
-  heading: "The full LLM engineering loop",
+  heading: "The full AI engineering loop",
   body: "See how observability, prompts, evals, experiments, and human feedback work together.",
 };
 

@@ -5,6 +5,7 @@ tags: [evaluation]
 ---
 
 import { Steps, Step } from "@/components/docs";
+import { V4CutoverDate } from "@/components/V4CutoverDate";
 
 # Upgrade trace-level evaluators
 
@@ -20,7 +21,13 @@ import { Steps, Step } from "@/components/docs";
 
 Trace-level evaluators use Langfuse's old trace-centric data model and are deprecated as part of [Langfuse v4](/docs/v4). Existing evaluators continue to run while you upgrade.
 
-Observation-level evaluators run in real time and scale with larger traces and higher evaluation volume. Any future multi-span support will also use the observation-centric data model, so upgrading is the foundation for future evaluation capabilities.
+Observation-level evaluators run in real time and scale with larger traces and higher evaluation volume. Any future multi-span support will also use the observations-first data model, so upgrading is the foundation for future evaluation capabilities.
+
+<Callout type="warning">
+  On Langfuse Cloud, trace-level evaluators stop producing
+  results at the v4 cutover on <V4CutoverDate />. Upgrade before this date to
+  avoid a gap in evaluation coverage.
+</Callout>
 
 <Callout type="info">
   Only the unstable Evaluation Rules APIs continue to return legacy `trace` and
@@ -131,7 +138,7 @@ Existing evaluator configurations typically fall into these cases:
 | **`Observation` for every variable, all from one observation** | Target the same span or generation and translate the filters and variable mappings.                                                                                                    |
 | **`Trace` for every variable**                                 | Select the observation holding the equivalent input, output, and metadata. For end-to-end evaluations, this is often a root observation.                                               |
 | **A mix of `Trace` and one `Observation`**                     | Target that observation and make the trace fields available there via [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes) or an instrumentation update. |
-| **More than one `Observation`, with or without `Trace`**       | Write the required values to a root or dedicated evaluation observation, then target it directly. Any future multi-span support will also use the observation-centric model.           |
+| **More than one `Observation`, with or without `Trace`**       | Write the required values to a root or dedicated evaluation observation, then target it directly. Any future multi-span support will also use the observations-first model.            |
 | **`Dataset` target**                                           | Create an `Experiment` successor with the same evaluator configuration. Translate `datasetId` to `experimentDatasetId` and map dataset-item fields to the experiment-item context.     |
 
 Dataset-target evaluators are the simplest v3-to-v4 compatibility migration. A

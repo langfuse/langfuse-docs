@@ -6,9 +6,8 @@ import { cn } from "@/lib/utils";
 import { Loader } from "@/components/ai-elements/loader";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId";
-import { scoreDemoFeedback } from "@/components/demoLangfuseBrowserClients";
+import { scoreDemoNegativeUserFeedback } from "@/components/demoLangfuseBrowserClients";
 import { SendIcon, ThumbsUpIcon, ThumbsDownIcon } from "lucide-react";
-import { DemoTraceLink } from "@/components/demoTraceLink";
 
 type SentimentResult = {
   sentiment: "positive" | "negative" | "neutral";
@@ -52,11 +51,10 @@ export const SentimentClassifier = ({
   const [result, setResult] = useState<{
     result: SentimentResult;
     traceId: string;
-    traceUrl?: string;
     inputText: string;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState<boolean | null>(null);
 
   const userId = useMemo(() => {
     if (typeof window === "undefined") return null;
@@ -102,13 +100,11 @@ export const SentimentClassifier = ({
     }
   };
 
-  const handleFeedback = (value: number) => {
+  const handleFeedback = (value: boolean) => {
     if (!result) return;
     setFeedback(value);
-    scoreDemoFeedback({
+    scoreDemoNegativeUserFeedback({
       traceId: result.traceId,
-      id: `user-feedback-${result.traceId}`,
-      name: "user-feedback",
       value,
     });
   };
@@ -226,11 +222,6 @@ export const SentimentClassifier = ({
                 {result.result.explanation}
               </div>
 
-              <DemoTraceLink
-                traceUrl={result.traceUrl}
-                source="sentiment_classifier"
-              />
-
               {/* Key phrases */}
               {result.result.keyPhrases.length > 0 && (
                 <div className="space-y-1.5">
@@ -256,10 +247,10 @@ export const SentimentClassifier = ({
                   Was this classification accurate?
                 </span>
                 <button
-                  onClick={() => handleFeedback(1)}
+                  onClick={() => handleFeedback(false)}
                   className={cn(
                     "p-1.5 rounded-[2px] transition-colors",
-                    feedback === 1
+                    feedback === false
                       ? "text-green-700 dark:text-green-400"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
                   )}
@@ -267,10 +258,10 @@ export const SentimentClassifier = ({
                   <ThumbsUpIcon className="size-3.5" />
                 </button>
                 <button
-                  onClick={() => handleFeedback(0)}
+                  onClick={() => handleFeedback(true)}
                   className={cn(
                     "p-1.5 rounded-[2px] transition-colors",
-                    feedback === 0
+                    feedback === true
                       ? "text-red-700 dark:text-red-400"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
                   )}
