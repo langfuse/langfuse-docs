@@ -35,15 +35,22 @@ export async function GET(request: NextRequest) {
   }
 
   // Fire PostHog event immediately so it has time to flush
+  const userAgent = request.headers.get("user-agent") ?? undefined;
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
   waitUntil(
     (async () => {
       try {
         posthog?.capture({
-          distinctId: "docs-search-api",
+          // Identify the caller by user agent, like the docs MCP events do, so
+          // searches can be split by agent vs human and classified with
+          // PostHog's $virt_* traffic properties (derived from the raw UA).
+          distinctId: userAgent || "docs-search-api",
           event: "docs_search:query",
           properties: {
             query,
             $process_person_profile: false,
+            $raw_user_agent: userAgent,
+            $ip: ip,
           },
         });
         await posthog?.flush();
