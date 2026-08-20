@@ -49,6 +49,7 @@ The script below is complete and runnable; adjust the trace name and input extra
 application's trace structure.
 
 ```python
+import json
 import os
 from datetime import datetime, timedelta, timezone
 
@@ -88,38 +89,51 @@ def classify_intent(user_message: str) -> str:
     return label if label in INTENTS else "other"
 
 
-# Classify all chatbot traces from the last 24 hours
+# Classify all chatbot traces from the last 24 hours. A trace's input lives on its
+# root observation, so fetch those rows and page through them with a cursor.
 to_ts = datetime.now(timezone.utc)
 from_ts = to_ts - timedelta(days=1)
 
-page = 1
+# The advanced `filter` parameter takes precedence over the individual query
+# parameters, so the time window is expressed as filter conditions as well.
+filters = json.dumps([
+    {"type": "boolean", "column": "isRootObservation", "operator": "=", "value": True},
+    # the trace name your chatbot uses
+    {"type": "string", "column": "traceName", "operator": "=", "value": "chat-turn"},
+    {"type": "datetime", "column": "startTime", "operator": ">=", "value": from_ts.isoformat()},
+    {"type": "datetime", "column": "startTime", "operator": "<", "value": to_ts.isoformat()},
+])
+
+cursor = None
 while True:
-    traces = langfuse.api.trace.list(
-        name="chat-turn",  # the trace name your chatbot uses
-        from_timestamp=from_ts,
-        to_timestamp=to_ts,
-        page=page,
+    response = langfuse.api.observations.get_many(
+        fields="core,basic,io,trace_context",
+        filter=filters,
+        cursor=cursor,
         limit=50,
     )
-    if not traces.data:
+    if not response.data:
         break
-    for trace in traces.data:
-        # Adjust extraction to your trace input structure
+    for observation in response.data:
+        # Adjust extraction to your observation input structure
         message = (
-            trace.input.get("message")
-            if isinstance(trace.input, dict)
-            else str(trace.input or "")
+            observation.input.get("message")
+            if isinstance(observation.input, dict)
+            else str(observation.input or "")
         )
         if not message:
             continue
+        trace_id = observation.trace_id
         langfuse.create_score(
-            trace_id=trace.id,
+            trace_id=trace_id,
             name="intent",
             value=classify_intent(message),
             data_type="CATEGORICAL",
-            score_id=f"intent-{trace.id}",  # idempotency key, same-day reruns overwrite
+            score_id=f"intent-{trace_id}",  # idempotency key, same-day reruns overwrite
         )
-    page += 1
+    cursor = getattr(response.meta, "cursor", None)
+    if not cursor:
+        break
 
 langfuse.flush()
 ```

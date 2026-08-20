@@ -10,11 +10,11 @@ DeepEval and Langfuse work together through the Langfuse Python SDK: DeepEval co
 
 There are three common ways to combine the two:
 
-| You want to                              | Approach                                                | Langfuse API                                   |
-| ---------------------------------------- | ------------------------------------------------------- | ---------------------------------------------- |
-| Score production traffic on a schedule   | Fetch traces, run DeepEval metrics, push scores back    | `langfuse.api.trace.list()` + `create_score()` |
-| Evaluate a change against a test dataset | Wrap DeepEval metrics as experiment evaluator functions | `dataset.run_experiment(evaluators=[...])`     |
-| Build a test dataset from scratch        | Generate items with DeepEval's Synthesizer, then upload | `create_dataset()` + `create_dataset_item()`   |
+| You want to                              | Approach                                                | Langfuse API                                              |
+| ---------------------------------------- | ------------------------------------------------------- | --------------------------------------------------------- |
+| Score production traffic on a schedule   | Fetch traces, run DeepEval metrics, push scores back    | `langfuse.api.observations.get_many()` + `create_score()` |
+| Evaluate a change against a test dataset | Wrap DeepEval metrics as experiment evaluator functions | `dataset.run_experiment(evaluators=[...])`                |
+| Build a test dataset from scratch        | Generate items with DeepEval's Synthesizer, then upload | `create_dataset()` + `create_dataset_item()`              |
 
 ## What is DeepEval? [#what-is-deepeval]
 
@@ -34,9 +34,10 @@ pip install langfuse deepeval
 
 ## Score production traces with DeepEval metrics [#score-production-traces]
 
-To evaluate live traffic, fetch traces from Langfuse, run a DeepEval metric on each one, and write the result back with `create_score`. The example below defines a custom `GEval` metric and scores a batch of traces:
+To evaluate live traffic, fetch the root observation of each trace from Langfuse, run a DeepEval metric on it, and write the result back with `create_score`. The example below defines a custom `GEval` metric and scores a batch of traces:
 
 ```python
+import json
 from langfuse import get_client
 from deepeval.metrics import GEval
 from deepeval.test_case import LLMTestCase, LLMTestCaseParams
@@ -44,23 +45,33 @@ from deepeval.test_case import LLMTestCase, LLMTestCaseParams
 # Uses LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, LANGFUSE_BASE_URL env vars
 langfuse = get_client()
 
-def joyfulness_score(trace):
+def joyfulness_score(observation):
     metric = GEval(
         name="Joyfulness",
         criteria="Determine whether the output is engaging and fun.",
         evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT],
     )
-    # The shape of trace.input depends on your instrumentation
-    test_case = LLMTestCase(input=str(trace.input), actual_output=str(trace.output))
+    # The shape of observation.input depends on your instrumentation
+    test_case = LLMTestCase(
+        input=str(observation.input), actual_output=str(observation.output)
+    )
     metric.measure(test_case)
     return {"score": metric.score, "reason": metric.reason}
 
-traces = langfuse.api.trace.list(tags="my-app", limit=10).data
+# A trace's input/output lives on its root observation, so filter for those rows.
+root_observations = langfuse.api.observations.get_many(
+    fields="core,basic,io,trace_context",
+    filter=json.dumps([
+        {"type": "boolean", "column": "isRootObservation", "operator": "=", "value": True},
+        {"type": "arrayOptions", "column": "tags", "operator": "all of", "value": ["my-app"]},
+    ]),
+    limit=10,
+).data
 
-for trace in traces:
-    result = joyfulness_score(trace)
+for observation in root_observations:
+    result = joyfulness_score(observation)
     langfuse.create_score(
-        trace_id=trace.id,
+        trace_id=observation.trace_id,
         name="joyfulness",
         value=result["score"],
         comment=result["reason"],

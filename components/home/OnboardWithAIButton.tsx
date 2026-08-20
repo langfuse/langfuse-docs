@@ -13,9 +13,8 @@ import {
 } from "@/components/ui";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 
-const AI_ONBOARDING_PROMPT = `Install the Langfuse Agent Skill from github.com/langfuse/skills
-and use it to add tracing to this application with Langfuse
-following best practices.`;
+const AI_ONBOARDING_PROMPT =
+  "Install the Langfuse Agent Skill from github.com/langfuse/skills and use it to add tracing to this application with Langfuse following best practices.";
 
 async function copyPromptToClipboard(sourceElement: HTMLElement) {
   if (typeof navigator !== "undefined" && navigator.clipboard) {
@@ -108,7 +107,7 @@ export function OnboardWithAIButton() {
             </Button>
           </div>
 
-          <pre className="max-h-[220px] overflow-auto whitespace-pre-wrap rounded-[2px] border border-line-structure bg-surface-1 p-3 font-mono text-[12px] leading-[160%] text-text-secondary">
+          <pre className="max-h-[220px] overflow-auto whitespace-pre-wrap text-pretty break-words rounded-[2px] border border-line-structure bg-surface-1 p-3 font-mono text-[12px] leading-[160%] text-text-secondary">
             <code ref={promptRef}>{AI_ONBOARDING_PROMPT}</code>
           </pre>
         </div>

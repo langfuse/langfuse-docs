@@ -19,7 +19,7 @@ Example use cases:
 
 ```mermaid
 graph LR
-    LF["Langfuse<br/><br/>• Traces<br/>• Prompts<br/>• Scores"]
+    LF["Langfuse<br/><br/>• Traces<br/>• Prompts<br/>• Scores<br/>•Experiments<br/>•Evaluators"]
 
     LF --> API["Public API"]
     LF --> Dash["In-app Dashboards"]
@@ -35,6 +35,7 @@ Choose the data access path based on what you want to build:
 | Work with Langfuse from a terminal or coding agent             | [CLI](/docs/api-and-data-platform/features/cli)                                    |
 | Connect an AI tool that cannot run shell commands              | [MCP Server](/docs/api-and-data-platform/features/mcp-server)                      |
 | Query aggregate cost, usage, latency, volume, or score metrics | [Metrics API v2](/docs/metrics/features/metrics-api#v2)                            |
+| Retrieve experiment runs, items, and evaluation scores         | [Experiments API](/docs/api-and-data-platform/features/experiments-api)            |
 | Retrieve row-level spans, generations, or events               | [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2)    |
 | Use the API from Python or JS/TS                               | [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk)               |
 | Export large volumes on a schedule                             | [Blob Storage Export](/docs/api-and-data-platform/features/export-to-blob-storage) |
@@ -55,6 +56,7 @@ import {
   ListTree,
   Bot,
   Terminal,
+  FlaskConical,
 } from "lucide-react";
 
 <Cards num={3}>
@@ -92,6 +94,12 @@ import {
     title="Observations API"
     href="/docs/api-and-data-platform/features/observations-api"
     icon={<ListTree />}
+    arrow
+  />
+  <Card
+    title="Experiments API"
+    href="/docs/api-and-data-platform/features/experiments-api"
+    icon={<FlaskConical />}
     arrow
   />
   <Card
