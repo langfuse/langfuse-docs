@@ -184,6 +184,36 @@ Deployments that connect to an external ClickHouse are not affected.
 
 If you plan to use the [automated backfill](#historic-data) for historic data in step 3, also make sure the ClickHouse disks can handle roughly **3x the current data volume**: data is copied into the `events` tables and, for the `observations` table, additionally into an intermediate format that is cleaned up at the end.
 
+### ClickHouse user permissions [#clickhouse-permissions]
+
+Langfuse v4 requires more ClickHouse grants than v3. Apply them to the `CLICKHOUSE_USER` before you upgrade the server, otherwise the schema migrations or the background jobs fail with `Not enough privileges`:
+
+```sql
+-- Schema migrations: the v4 migrations add columns and indexes, replace views,
+-- and change materialized view queries
+GRANT DROP VIEW ON default.* TO 'user';
+GRANT ALTER ADD COLUMN, ALTER MODIFY COLUMN, ALTER VIEW MODIFY QUERY ON default.* TO 'user';
+GRANT ALTER ADD INDEX, ALTER DROP INDEX, ALTER MATERIALIZE INDEX ON default.* TO 'user';
+
+-- System table reads for event propagation, the historic backfill, and the
+-- v4 transition usage detection
+GRANT SELECT(database, table, name, partition, partition_id, active, rows) ON system.parts TO 'user';
+GRANT SELECT(database, table, is_done) ON system.mutations TO 'user';
+GRANT SELECT(database, name, engine) ON system.tables TO 'user';
+GRANT SELECT ON system.processes TO 'user';
+GRANT SELECT ON system.query_log* TO 'user';
+
+-- Merge control on the intermediate table used by the historic backfill
+GRANT SYSTEM SYNC REPLICA, SYSTEM MERGES, ALTER SETTINGS ON default.observations_pid_tid_sorting TO 'user';
+
+-- Clustered deployments (CLICKHOUSE_CLUSTER_ENABLED=true) only
+GRANT READ ON REMOTE TO 'user';
+GRANT CLUSTER ON *.* TO 'user';
+```
+
+If you enable [lightweight updates](/self-hosting/configuration/scaling#clickhouse-deletion-timeouts) via `CLICKHOUSE_USE_LIGHTWEIGHT_UPDATE=true`, the user also needs the `enable_lightweight_update` setting.
+See [user permissions](/self-hosting/deployment/infrastructure/clickhouse#user-permissions) for the complete list, including the grants that already applied on v3.
+
 ## Step 2: Upgrade the server to Langfuse v4 [#step-2]
 
 Perform a regular [server upgrade](/self-hosting/upgrade) to the latest Langfuse v4 release.
