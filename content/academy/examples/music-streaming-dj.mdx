@@ -210,7 +210,16 @@ In order to learn from users, we will log some [interesting behavior](/academy/m
           the failure counts. <code>correction</code> means the DJ's last
           action missed. <code>repeated_instruction</code> means the DJ failed
           to follow an instruction it already got: a compliance failure rather
-          than a taste miss, and it asks for a different fix.
+          than a taste miss, and it{" "}
+          <a href="/academy/evaluate/choosing-what-to-evaluate#tie-every-metric-to-a-decision">
+            asks for a different fix
+          </a>
+          . It is also the only signal here with LLM costs to run, and voice
+          requests are a small slice of the traffic, so the{" "}
+          <a href="/academy/evaluate/choosing-what-to-evaluate#mind-the-budget">
+            evaluator budget
+          </a>{" "}
+          stays small.
         </>
       ),
     },
@@ -308,6 +317,6 @@ With this in place, the full loop is running:
 
 ## Conclusion
 
-This is an example of a feature that's is low risk and there is no historical data to learn from. The best thing you can do in such cases is getting traces in as soon as possible and start monitoring them to learn from. Everything else, datasets, experiments, A/B tests, can be built on top of that over time.
+This is an example of a feature that is low risk and has no historical data to learn from. The best thing you can do in such cases is get traces in as soon as possible and start monitoring them. Everything else, datasets, experiments, A/B tests, can be built on top of that over time.
 
 Check out the [other examples](/academy/examples) or the [academy](/academy) to learn more.
