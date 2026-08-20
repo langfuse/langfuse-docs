@@ -31,7 +31,7 @@ If you require further support, please contact [support](/support).
 The migration consists of three independent steps. Each step leaves your deployment in a stable state, so you can schedule them separately, pause in between, and retain your current behavior as long as you need it:
 
 1. [Upgrade your infrastructure](#step-1): bring ClickHouse to a v4-compatible version while still on Langfuse v3.
-2. [Upgrade the server to Langfuse v4](#step-2): retain your current ingestion behavior with the `legacy` or `dual` write mode. All schema migrations are applied automatically; check the [prerequisites](#step-2-prerequisites) first.
+2. [Upgrade the server to Langfuse v4](#step-2): retain your current ingestion behavior with the `legacy` or `dual` write mode. All schema migrations are applied automatically.
 3. [Move to the new data model](#step-3): upgrade your SDKs, migrate API consumers, evaluators, and exports, bring historic data into the new data model, and cut over to the v4 defaults.
 
 For historic data, you choose between [two options](#historic-data) in step 3: an **automated backfill** rewrites all existing data into the new tables in the background (plan for roughly 3x disk headroom in ClickHouse), or a **retention-based rollover** skips the backfill entirely by keeping the dual write active until your [data retention](/docs/administration/data-retention) window has rolled over.
@@ -191,7 +191,7 @@ If you plan to use the [automated backfill](#historic-data) for historic data in
 **Upgrade to the latest v3 release and let all background migrations finish.**
 The v4 schema migrations are not purely additive: besides creating the new `events` tables, they drop tables that were superseded during v3 (see [rollback and safety](#rollback) for the full list). The contents of those tables were copied to ClickHouse by [background migrations](/self-hosting/upgrade/background-migrations) that shipped throughout v3. If any of them has not finished — for example because you upgrade from an older v3 release, or because a migration failed and was never retried — the v4 migrations permanently delete the rows that were never copied.
 
-Before upgrading, verify on the latest v3 release that every background migration has finished, either in the UI (**Settings > Background Migrations**, all entries show a finished state) or directly in PostgreSQL:
+Before upgrading, verify on the latest v3 release that every background migration has finished, either in the UI (**Langfuse Version Tag > Background Migrations**, all entries show a finished state) or directly in PostgreSQL:
 
 ```sql
 -- Must return zero rows before upgrading to v4:
@@ -428,7 +428,7 @@ Track progress on the background migrations page in the UI; see [background migr
 
 **What the v4 schema migrations change.** Besides creating the new `events` tables, the v4 migrations drop tables that were superseded during v3 and whose live copies moved to ClickHouse back then: `traces`, `observations`, `scores`, and `dataset_run_items` in PostgreSQL, plus `event_log`, `project_environments`, and the legacy `dataset_run_items` table in ClickHouse. Provided the [prerequisites](#step-2-prerequisites) are met, these drops only remove data that already exists elsewhere. The ClickHouse `traces`, `observations`, and `scores` tables — the tables that serve all v3 reads — are kept, and keep receiving all incoming data while you run the `legacy` or `dual` write mode. The historic backfill never modifies them; it only reads from them.
 
-**Rolling back to v3 is possible before the cutover, but not by re-deploying a v3 image alone.** Once the v4 schema migrations have been applied, a plain image swap does not work: the v3 web container exits on startup because the ClickHouse schema version is newer than the migrations the image ships (`no migration found for version 46`), while the worker container starts normally. Depending on your platform, this failure can be quiet: on a rolling update behind a readiness probe (Kubernetes, Cloud Run), the v3 web revision never becomes ready and traffic keeps being served by the still-running v4 revision, so always verify the actual running versions of **both** containers after a rollback attempt. To return to v3, rewind the ClickHouse schema first (see below) — or restore both databases from the [backup taken before the upgrade](#step-2-prerequisites), losing the data ingested since.
+**Rolling back to v3 is possible before the cutover, but not by re-deploying a v3 image alone.** Once the v4 schema migrations have been applied, a plain image swap does not work: the v3 web container exits on startup because the ClickHouse schema version is newer than the migrations the image ships (`no migration found for version 46`), while the worker container starts normally. To return to v3, rewind the ClickHouse schema first (see below) — or restore both databases from the [backup taken before the upgrade](#step-2-prerequisites), losing the data ingested since.
 
 **Prefer rolling forward.** While you run the `legacy` or `dual` write mode, all incoming data keeps landing in the old ClickHouse tables and every v3 surface (SDKs, APIs, evaluators, exports) keeps working on the v4 release. If you hit issues after the server upgrade, staying on v4 in `legacy` mode while you debug retains the complete v3 behavior without a rollback.
 
@@ -452,13 +452,7 @@ migrate -source file://clickhouse/migrations/clustered \
   goto 37
 ```
 
-Append `&secure=true&skip_verify=true` to the URL if your deployment sets `CLICKHOUSE_MIGRATION_SSL=true`. Version `37` is the schema version of the latest v3 releases. The rewind removes the `events` tables and recreates the tables that v4 dropped (empty — their contents live in their v3 successors, which is also why the empty tables do not bother v3). PostgreSQL needs no changes: the latest v3 releases run against the v4 Postgres schema, and the v4 backfill entries stay dormant on v3 as long as `LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL` is not set to `true`. Afterwards, deploy the **latest** v3 images.
-
-<Callout type="warning">
-
-Only roll back this way **before** the [cutover](#cutover) and rehearse it on a staging environment first. After the cutover to `events_only`, the `events` tables contain data that exists nowhere else, and the rewind deletes them. Two more caveats: if the [historic backfill](#historic-backfill) has already completed, it does not re-run when you upgrade to v4 again (use the [retention-based rollover](#historic-data) or contact [support](/support) to reset it), and data ingested while back on v3 only reaches the new tables through that same backfill or rollover.
-
-</Callout>
+Append `&secure=true&skip_verify=true` to the URL if your deployment sets `CLICKHOUSE_MIGRATION_SSL=true`. Version `37` is the schema version of the latest v3 releases. The rewind removes the `events` tables and recreates the tables that v4 dropped. PostgreSQL needs no changes: the latest v3 releases run against the v4 Postgres schema, and the v4 backfill entries stay dormant on v3 as long as `LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL` is not set to `true`. Afterwards, deploy the **latest** v3 images.
 
 **The cutover is the point of commitment.** Once you complete the [cutover](#cutover) to `events_only`, new data lands only in the new tables. Rolling back to a v3 read path from that point would miss the data written since the switch.
 
