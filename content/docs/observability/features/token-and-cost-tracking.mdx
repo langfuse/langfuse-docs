@@ -177,7 +177,7 @@ For model parameters and metadata, select the source in the pricing-tier editor,
 
 Examples:
 
-<Tabs items={["Clause Sonnet Large context tier", "OpenAI Fast mode"]}>
+<Tabs items={["Claude Sonnet Large context tier", "OpenAI Fast mode"]}>
 <Tab>
 
 The "Large Context" tier for Claude Sonnet 4.5 has a condition: `input > 200000`, meaning it applies when the sum of all usage details matching the pattern "input" exceeds 200,000 tokens.
@@ -223,12 +223,9 @@ For more details, see [the OpenAI guide](https://platform.openai.com/docs/guides
 
 ## Ingest usage and cost manually [#ingest]
 
-While Langfuse infers this data automatically (if it unexpectedly doesn't, open an [issue](/issue) on GitHub), you might want to ingest it yourself in some cases, for example custom or self-hosted models Langfuse cannot price, private pricing, or exact provider counts you want recorded verbatim.
+While Langfuse tracks this data automatically (if it unexpectedly doesn't, open an [issue](/issue) on GitHub), you might want to ingest it yourself in some cases, for example custom or self-hosted models Langfuse cannot price, private pricing, or exact provider counts you want recorded verbatim.
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
-<Tab>
-
-<Tabs items={["Manual generation", "@observe decorator"]}>
 <Tab>
 
 ```python
@@ -270,7 +267,56 @@ with langfuse.start_as_current_observation(
 ```
 
 </Tab>
+<Tab title="JS/TS SDK">
+
+```ts /usageDetails/, /costDetails/
+import { startObservation } from "@langfuse/tracing";
+
+const generation = startObservation(
+  "llm-call",
+  {
+    model: "gpt-4",
+    input: [{ role: "user", content: "What is the capital of France?" }],
+  },
+  { asType: "generation" }
+);
+
+// ... LLM call logic ...
+
+generation.update({
+  usageDetails: {
+    input: 10,
+    output: 5,
+    cache_read_input_tokens: 2,
+    some_other_token_count: 10,
+    total: 27, // optional, it is derived as the sum of all usage types
+  },
+  costDetails: {
+    // Optional. If omitted, cost is inferred from a model definition.
+    input: 1,
+    output: 1,
+    cache_read_input_tokens: 0.5,
+    some_other_token_count: 1,
+    total: 3.5,
+  },
+  output: { content: "The capital of France is Paris." },
+});
+
+generation.end();
+```
+
+</Tab>
+</LangTabs>
+
+<Details>
+<Summary>Other ways to attach usage and cost with the SDK</Summary>
+
+You can set `usage_details` and `cost_details` from any observation style, not just manual generations.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
+
+When using the `@observe()` decorator:
 
 ```python
 from langfuse import observe, get_client
@@ -323,52 +369,9 @@ main()
 ```
 
 </Tab>
-</Tabs>
-
-</Tab>
 <Tab title="JS/TS SDK">
 
-<Tabs items={["Manual observation", "Context manager", "observe wrapper"]}>
-<Tab>
-
-```ts /usageDetails/, /costDetails/
-import { startObservation } from "@langfuse/tracing";
-
-const generation = startObservation(
-  "llm-call",
-  {
-    model: "gpt-4",
-    input: [{ role: "user", content: "What is the capital of France?" }],
-  },
-  { asType: "generation" }
-);
-
-// ... LLM call logic ...
-
-generation.update({
-  usageDetails: {
-    input: 10,
-    output: 5,
-    cache_read_input_tokens: 2,
-    some_other_token_count: 10,
-    total: 27, // optional, it is derived as the sum of all usage types
-  },
-  costDetails: {
-    // Optional. If omitted, cost is inferred from a model definition.
-    input: 1,
-    output: 1,
-    cache_read_input_tokens: 0.5,
-    some_other_token_count: 1,
-    total: 3.5,
-  },
-  output: { content: "The capital of France is Paris." },
-});
-
-generation.end();
-```
-
-</Tab>
-<Tab>
+When using the context manager:
 
 ```ts /usageDetails/, /costDetails/
 import { startActiveObservation, startObservation } from "@langfuse/tracing";
@@ -399,8 +402,7 @@ await startActiveObservation("context-manager", async (span) => {
 });
 ```
 
-</Tab>
-<Tab>
+When using the `observe` wrapper:
 
 ```ts /usageDetails/, /costDetails/
 import { observe, updateActiveObservation } from "@langfuse/tracing";
@@ -427,12 +429,11 @@ const result = await tracedFetchData("API");
 ```
 
 </Tab>
-</Tabs>
-
-</Tab>
 </LangTabs>
 
 You can also update usage and cost later via `generation.update()`.
+
+</Details>
 
 ### Usage types are mutually exclusive buckets [#usage-details-contract]
 
@@ -447,7 +448,7 @@ If buckets overlap, usage and inferred cost will be counted double, and cost sho
 
 <Callout type="info" title="Be careful with inclusive provider counts">
 
-Some provider counts are inclusive. For example, OpenAI input counts include cached tokens; **Inclusive counts must be converted into exclusive buckets before they are stored.**
+Some provider counts are inclusive. For example, OpenAI input counts include cached tokens. **Inclusive counts must be converted into exclusive buckets before they are stored.**
 
 For example, an OpenAI-style response with 17,903 prompt tokens (of which 17,817 were cache hits) and 188 completion tokens:
 
