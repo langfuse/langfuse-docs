@@ -31,22 +31,39 @@ declare global {
 // "advertisement" category — the same category that gates the Google Ads /
 // LinkedIn / Reddit pixels. Unlike those, this is first-party inline code
 // that CookieYes can't script-block, so consent is checked explicitly here.
-// For visitors under opt-in laws (GDPR) this is false until they accept; in
-// notice-only regions CookieYes reports the category as granted by default.
-// If CookieYes is unavailable (e.g. blocked), we conservatively treat that
-// as no consent.
-function hasAdvertisementConsent(): boolean {
-  try {
-    const consent = window.getCkyConsent?.();
-    if (consent) return consent.categories?.advertisement === true;
-  } catch {
-    // fall through to the cookie check
-  }
-  // Fallback: CookieYes persists granted categories in its own cookie
+//
+// Three states, not a boolean: `getCkyConsent()` only returns real data once
+// the CookieYes banner has finished loading, so an early read can look like a
+// denial when the visitor has in fact consented. Treating that as "denied"
+// would expire previously stored click ids (see `syncClickIdCookies`), and a
+// return visit has no click-id params in the URL to rewrite them from.
+// "unknown" therefore means "leave everything as it is".
+type ConsentState = "granted" | "denied" | "unknown";
+
+function readAdvertisementConsent(): ConsentState {
+  // The persisted CookieYes cookie is the durable record of a decision and
+  // survives reloads; it is written in notice-only regions too, where the
+  // category is granted by default.
   const consentCookie = document.cookie
     .split("; ")
     .find((cookie) => cookie.startsWith("cookieyes-consent="));
-  return consentCookie?.includes("advertisement:yes") ?? false;
+  if (consentCookie?.includes("advertisement:yes")) return "granted";
+
+  // The live API reflects in-session changes the cookie may not have yet.
+  let apiIsConclusive = false;
+  try {
+    const advertisement = window.getCkyConsent?.()?.categories?.advertisement;
+    if (typeof advertisement === "boolean") {
+      if (advertisement) return "granted";
+      apiIsConclusive = true;
+    }
+  } catch {
+    // treat an unavailable API as inconclusive rather than as a denial
+  }
+
+  // Only call it a denial when a source actually said so: an existing consent
+  // cookie enumerates every category, and the API reported a real boolean.
+  return consentCookie || apiIsConclusive ? "denied" : "unknown";
 }
 
 function syncClickIdCookies(clickIds: Partial<Record<string, string>>) {
@@ -61,10 +78,14 @@ function syncClickIdCookies(clickIds: Partial<Record<string, string>>) {
     "samesite=lax",
     ...(protocol === "https:" ? ["secure"] : []),
   ];
-  const consented = hasAdvertisementConsent();
+  const consent = readAdvertisementConsent();
+
+  // consent state not established yet (CookieYes still loading, or blocked):
+  // do nothing, so click ids stored on an earlier consented visit survive
+  if (consent === "unknown") return;
 
   for (const param of CLICK_ID_PARAMS) {
-    if (!consented) {
+    if (consent === "denied") {
       // consent absent or revoked: expire any previously stored value —
       // CookieYes can't auto-clear custom cookies it doesn't know about
       document.cookie = [`lf_${param}=`, ...cookieAttributes, "max-age=0"].join(
@@ -90,8 +111,9 @@ function syncClickIdCookies(clickIds: Partial<Record<string, string>>) {
 // `getAdClickIdsFromRequest` in langfuse/langfuse and attached to the
 // `cloud_signup_complete` analytics event). Last ad click wins; the 90-day
 // lifetime matches the ad platforms' click-through conversion windows. Only
-// stored with CookieYes "advertisement" consent — checked on mount and again
-// on every consent change; revoking consent expires the cookies.
+// stored with CookieYes "advertisement" consent — checked on mount, once
+// CookieYes has loaded, and on every later consent change; revoking consent
+// expires the cookies.
 export function ClickIdPersistence() {
   useEffect(() => {
     // capture once at mount: this component lives in the root layout, so the
@@ -104,10 +126,17 @@ export function ClickIdPersistence() {
     const sync = () => syncClickIdCookies(clickIds);
 
     sync();
-    // re-sync when the visitor answers the banner or edits their consent in
-    // the preference center: grants persist the click, revocations clear it
+    // `cookieyes_banner_load` is what makes the consent state readable at all
+    // (getCkyConsent() returns nothing before it) and is the only signal in
+    // notice-only regions, where the visitor never interacts with the banner.
+    // `cookieyes_consent_update` covers answering the banner and later edits
+    // in the preference center: grants persist the click, revocations clear it.
+    document.addEventListener("cookieyes_banner_load", sync);
     document.addEventListener("cookieyes_consent_update", sync);
-    return () => document.removeEventListener("cookieyes_consent_update", sync);
+    return () => {
+      document.removeEventListener("cookieyes_banner_load", sync);
+      document.removeEventListener("cookieyes_consent_update", sync);
+    };
   }, []);
 
   return null;
