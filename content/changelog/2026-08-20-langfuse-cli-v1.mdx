@@ -1,0 +1,37 @@
+---
+date: 2026-08-20
+title: "Langfuse CLI 1.0"
+description: Full rewrite of the CLI for way faster commands, better help for humans and agents as well as better ergonomics.
+ogImage: /images/changelog/2026-02-17-langfuse-cli.jpg
+canonical: /docs/api-and-data-platform/features/cli
+author: Nimar
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+The [Langfuse CLI](/docs/api-and-data-platform/features/cli) hit 1.0 with a rewritten engine, resulting in way faster invocations and better ergonomics.
+
+```bash
+# upgrade
+npm install -g langfuse-cli@latest
+# upgrade via bun
+bun add --global langfuse-cli@latest
+
+# or run directly via npx/bunx
+npx langfuse-cli api <resource> <action>
+bunx langfuse-cli api <resource> <action>
+```
+
+What's new:
+
+* **10x+ faster** startup time for each invocation
+* **Typed flags for union endpoints** allow plain flags with local validation, for example: `langfuse api prompts create --type text --name greeting --prompt 'Hello {{name}}'` instead of having to provide JSON bodies
+* **`--all` pagination** fetches every page of a paginated list, bounded by `--max-items` and a request cap
+- **Consistent flags** with all parameter names in kebab-case (`--object-id`). `--body-json` / `--body-file -` is still recommended for complex bodies.
+* **Zero runtime dependencies**, runs on Node.js 20+ or Bun
+* **Machine-readable exit codes** without parsing stderr make agents understand errors quicker: usage (2), configuration (3), network (4), HTTP failure (5), and local errors (6)
+- **Use with all Langfuse Server versions** (since v3), pin one with `--api-version 3`, or use `--api-version auto` to detect your server and select a compatible snapshot. We default to latest.
+
+Upgrading from 0.x: body-field flags changed from camelCase to kebab-case (`--objectId` → `--object-id`) and HTTP failures now exit 5 instead of 1. `--body-json` inputs are unaffected. Details in the [GitHub repo](https://github.com/langfuse/langfuse-cli).
