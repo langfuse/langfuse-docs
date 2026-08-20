@@ -24,6 +24,12 @@ type Props = {
    * Used by self-hosting pages.
    */
   versionLabel?: string | null;
+  /**
+   * Optional support level (e.g. "Community") shown next to the version label.
+   * Used by self-hosting deployment pages whose tooling is maintained outside
+   * the Langfuse organization.
+   */
+  supportLabel?: string | null;
 };
 
 /**
@@ -37,6 +43,7 @@ export function DocBodyChrome({
   lang,
   withProse = true,
   versionLabel,
+  supportLabel,
 }: Props) {
   const pathname = usePathname();
   const isEnterprisePage = pathname === "/enterprise";
@@ -62,6 +69,11 @@ export function DocBodyChrome({
           {versionLabel != null && versionLabel !== "" && (
             <span className="inline-flex items-center px-2 py-1 text-xs font-medium border bg-stripe-pattern text-text-secondary">
               {versionLabel}
+            </span>
+          )}
+          {supportLabel != null && supportLabel !== "" && (
+            <span className="inline-flex items-center px-2 py-1 text-xs font-medium border bg-stripe-pattern text-text-secondary">
+              {`Support: ${supportLabel}`}
             </span>
           )}
           <CopyMarkdownButton key={pathname} />

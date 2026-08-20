@@ -90,6 +90,10 @@ export const docs = defineDocs({
 
 const selfHostingFrontmatterSchema = sidebarFrontmatterSchema.extend({
   label: z.string().nullish(),
+  // Support level of a deployment option, e.g. "Community" for deployment
+  // paths whose tooling is maintained outside the Langfuse organization.
+  // Rendered as a badge next to `label` by DocBodyChrome.
+  support: z.string().nullish(),
 });
 
 export const selfHosting = defineDocs({

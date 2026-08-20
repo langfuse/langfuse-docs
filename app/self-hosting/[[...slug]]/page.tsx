@@ -13,13 +13,17 @@ export default async function SelfHostingPage({ params }: PageProps) {
   const { slug = [] } = await params;
   const page = selfHostingSource.getPage(slug);
   if (!page) notFound();
-  // Self-hosting pages may carry a `label` frontmatter field (e.g. "Version: v3")
-  // that the docs chrome renders next to the copy button.
-  const versionLabel = (page.data as { label?: string }).label ?? null;
+  // Self-hosting pages may carry `label` (e.g. "Version: v3") and `support`
+  // (e.g. "Community") frontmatter fields that the docs chrome renders next to
+  // the copy button.
+  const { label, support } = page.data as { label?: string; support?: string };
   return (
     <DocsChromePage
       page={page}
-      bodyChromeProps={{ versionLabel }}
+      bodyChromeProps={{
+        versionLabel: label ?? null,
+        supportLabel: support ?? null,
+      }}
       bottomSuffix={<SelfHostHelpFooter />}
     />
   );
