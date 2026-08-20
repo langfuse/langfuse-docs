@@ -126,26 +126,25 @@ trace. Continue to use the exact original start and end times to preserve the
 historic experiment timing.
 
 Scores are stored separately and do not move to the new trace automatically.
-Do not create copies with new score IDs. Instead, reassociate each score by
-resending its complete payload as a `score-create` event through the [Ingestion
-API](https://api.reference.langfuse.com/#tag/ingestion/POST/api/public/ingestion):
+Send each trace-level, observation-level, or experiment-item score again through
+[`POST /api/public/scores`](https://api.reference.langfuse.com/#tag/legacyscorev1/POST/api/public/scores),
+using its original score ID and all supported score fields. Set the new trace ID
+and, for observation-level or experiment-item scores, the corresponding
+observation ID. For experiment-item scores, use the item root observation.
+Experiment-level scores remain linked when you keep the original experiment ID.
 
-- Keep the original score ID, name, value, and other score fields.
-- Set the new trace ID and, for observation-level or experiment-item scores,
-  the corresponding observation ID. For experiment-item scores, use the item
-  root observation.
-- Set the event timestamp later than the original score timestamp, but on the
-  same UTC calendar date.
+The Scores API assigns the current timestamp when it receives the score. Native
+experiment views and charts associate the score with the recovered experiment
+through its new trace and observation IDs. Scores originally created by an
+evaluator are recorded with source `API`, because the public endpoint does not
+accept `EVAL` as a source. Time-based dashboards and exports attribute the score
+to the correction date rather than its historic date. Public Experiments API
+responses that request scores may omit corrected scores because they constrain
+score timestamps to the historic experiment item window.
 
-This is a complete score upsert, not a partial patch. A matching score ID, name,
-and date replaces the previous score after ClickHouse processes the update. The
-regular `POST /api/public/scores` endpoint cannot be used for this recovery
-because it assigns the current timestamp, which may create another score for a
-historic date. Experiment-level scores remain linked when you keep the original
-experiment ID.
-
-This option creates separate corrected traces immediately. The historic traces
-remain available under their original IDs.
+This option creates separate corrected traces without waiting for the historic
+trace versions to be replaced. The historic traces remain available under their
+original IDs.
 
 Please [contact Langfuse support](mailto:support@langfuse.com) if you need help
 recovering historic experiments.
