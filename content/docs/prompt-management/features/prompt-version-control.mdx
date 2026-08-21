@@ -8,17 +8,13 @@ description: Use prompt labels to fetch specific prompt versions in the SDKs.
 
 In Langfuse, version control & deployment of prompts is managed via `versions` and `labels`.
 
-Each prompt version is automatically assigned a `version ID`. Additionally, you can assign `labels` to follow your own versioning scheme.
-
-Labels can be used to assign prompts to environments (staging, production), tenants (tenant-1, tenant-2), or experiments (prod-a, prod-b).
-
-This lets you deploy prompts safely without a code change. Promote a version to an environment by assigning a label, run experiments or [A/B tests](/docs/prompt-management/features/a-b-testing) with dedicated labels, and roll back by moving a label to a previous version. Your application fetches by label, so which version runs is a data change rather than a deploy.
-
 ## Implementation
 
 ### Versions & Labels [#versions--labels]
 
-Use the Langfuse UI or SDKs to assign and update labels on a prompt version.
+Each prompt version is automatically assigned a `version ID`. Additionally, you can assign `labels` to follow your own versioning scheme.
+
+Labels can be used to assign prompts to environments (staging, production), tenants (tenant-1, tenant-2), or experiments (prod-a, prod-b).
 
 <LangTabs items={["Langfuse UI","Python SDK", "JS/TS SDK"]}>
 <Tab>
