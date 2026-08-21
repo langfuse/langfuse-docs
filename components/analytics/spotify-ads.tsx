@@ -1,10 +1,11 @@
 import Script from "next/script";
 import { SPOTIFY_PIXEL_ID, isSpotifyEnabled } from "@/lib/spotify-ads";
 
-// Spotify Ad Analytics (SpAA) base pixel. Tracks the initial page view; because
-// the docs site is a single-page app, subsequent client-side navigations are
-// reported manually via `spotifyPageView` (see PostHogProvider). Conversions are
-// reported via `reportSpotifyLead` (see lib/ad-conversions.ts).
+// Spotify Ad Analytics (SpAA) base pixel. ping.min.js patches the History API
+// and reports client-side route changes on its own, so this must be the only
+// source of `view` events — reporting SPA navigations manually as well doubles
+// every pageview after the first. Conversions are reported via
+// `reportSpotifyLead` (see lib/ad-conversions.ts).
 export function SpotifyPixel() {
   if (!isSpotifyEnabled) return null;
 

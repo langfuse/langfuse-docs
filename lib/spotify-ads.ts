@@ -39,11 +39,3 @@ export function reportSpotifyLead(category: string) {
 
   window.spdt("lead", { category });
 }
-
-// Report a page view to Spotify. The base snippet auto-tracks the initial page
-// load, so this is only needed for SPA route changes.
-export function spotifyPageView() {
-  if (!isSpotifyReady()) return;
-
-  window.spdt("view");
-}

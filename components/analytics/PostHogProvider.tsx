@@ -6,7 +6,6 @@ import posthog from "posthog-js";
 import { PostHogProvider as PHProvider } from "posthog-js/react";
 import { hsPageView } from "@/components/analytics/hubspot";
 import { crPageView } from "@/components/analytics/common-room";
-import { spotifyPageView } from "@/lib/spotify-ads";
 
 const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY?.trim();
 
@@ -39,13 +38,12 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     if (pathname) {
       posthog.capture("$pageview");
       hsPageView(pathname);
-      // The Common Room and Spotify snippets auto-track the first page load, so
-      // only report subsequent client-side navigations to avoid double counting.
+      // Common Room's snippet auto-tracks the first page load, so only report
+      // subsequent client-side navigations to avoid double counting.
       if (isInitialPageView.current) {
         isInitialPageView.current = false;
       } else {
         crPageView();
-        spotifyPageView();
       }
     }
   }, [pathname]);
