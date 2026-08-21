@@ -682,7 +682,7 @@ const sections: Section[] = [
         name: "Alerts",
         description:
           "Threshold-based alerts on your LLM application metrics with notifications via Slack, webhooks, and GitHub Actions. Alert limits per organization on Langfuse Cloud depend on the plan. Self-hosted deployments require Langfuse v4 and have no alert limit.",
-        href: "/docs/metrics/features/alerts",
+        href: "/docs/observability/features/alerts",
         tiers: {
           cloud: {
             Hobby: "2 alerts",

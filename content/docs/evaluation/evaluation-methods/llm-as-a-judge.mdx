@@ -303,27 +303,6 @@ To see your evaluator in action, you need to either [send traces](/docs/observab
   pipeline](/docs/evaluation/evaluation-methods/scores-via-sdk).
 </Callout>
 
-## Debug LLM-as-a-Judge Executions
-
-Every LLM-as-a-Judge evaluator execution creates a full trace, giving you complete visibility into the evaluation process. This allows you to debug prompt issues, inspect model responses, monitor token usage, and trace evaluation history.
-
-You can show the LLM-as-a-Judge execution traces by filtering for the environment `langfuse-llm-as-a-judge` in the tracing table:
-
-<Frame fullWidth>
-  ![Tracing table filtered to langfuse-llm-as-a-judge
-  environment](/images/docs/evaluation/llm-as-a-judge-debug-traces.png)
-</Frame>
-
-<Details>
-<Summary>LLM-as-a-Judge Execution Status</Summary>
-
-- **Completed**: Evaluation finished successfully.
-- **Error**: Evaluation failed (click execution trace ID for details).
-- **Delayed**: Evaluation hit rate limits by the LLM provider and is being retried with exponential backoff.
-- **Pending**: Evaluation is queued and waiting to run.
-
-</Details>
-
 ## Programmatic Setup via API [#api]
 
 Beyond the UI, you can set up and manage LLM-as-a-Judge evaluation programmatically through the public API. This is useful for version-controlling your evaluation setup, replicating it across projects, or automating rollouts from a deployment pipeline.
@@ -358,10 +337,6 @@ Observation evaluation rules support a boolean `isRootObservation` filter with t
 
 If you have existing evaluators running on traces and want to upgrade to running on observations for better performance and reliability, check out our comprehensive [Evaluator Migration Guide](/faq/all/llm-as-a-judge-migration).
 
-### Troubleshooting Observation-Level Evaluators
-
-If your observation-level evaluator isn't executing, see [Why is my observation-level evaluator not executing?](/faq/all/observation-eval-not-executing) for common causes and solutions.
-
 ### Backfill Historical Observation Scores
 
 You can run observation-level LLM-as-a-Judge on historical data from the observations table. This is useful if you have already ingested production data and want to score matching observations retroactively with a new or updated evaluator.
@@ -381,6 +356,31 @@ To backfill scores:
 </Frame>
 
 This backfill flow runs from the traces table, but the resulting scores are attached to the matching observations inside each trace.
+
+## Debug LLM-as-a-Judge Executions
+
+Every LLM-as-a-Judge evaluator execution creates a full trace, giving you complete visibility into the evaluation process. This allows you to debug prompt issues, inspect model responses, monitor token usage, and trace evaluation history.
+
+You can show the LLM-as-a-Judge execution traces by filtering for the environment `langfuse-llm-as-a-judge` in the tracing table:
+
+<Frame fullWidth>
+  ![Tracing table filtered to langfuse-llm-as-a-judge
+  environment](/images/docs/evaluation/llm-as-a-judge-debug-traces.png)
+</Frame>
+
+<Details>
+<Summary>LLM-as-a-Judge Execution Status</Summary>
+
+- **Completed**: Evaluation finished successfully.
+- **Error**: Evaluation failed (click execution trace ID for details).
+- **Delayed**: Evaluation hit rate limits by the LLM provider and is being retried with exponential backoff.
+- **Pending**: Evaluation is queued and waiting to run.
+
+</Details>
+
+### Troubleshooting Observation-Level Evaluators
+
+If your observation-level evaluator isn't executing, see [Why is my observation-level evaluator not executing?](/faq/all/observation-eval-not-executing) for common causes and solutions.
 
 ## FAQ
 
@@ -418,6 +418,13 @@ Cost depends on the judge model and the size of the inputs being evaluated. A ty
 Yes. LLM-as-a-Judge is particularly effective for RAG pipelines. You can evaluate faithfulness (is the answer grounded in the retrieved context?), relevance (does the answer address the question?), and completeness (does the answer cover all relevant information?). Langfuse also integrates with [RAGAS](/resources/engineering/evaluation-of-rag-with-ragas) for specialized RAG evaluation metrics.
 
 </Details>
+
+## Related Resources
+
+- [Langfuse Academy: Evaluation](/academy/evaluate) covers how LLM-as-a-judge fits with manual review and code evaluators.
+- [Writing good evaluators](/academy/evaluate/writing-evaluators) explains how to design judge prompts you can trust.
+- [Choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) helps you decide which quality checks are worth automating.
+- [Calibrate your LLM-as-a-judge](/guides/llm-as-a-judge-calibration-skill) to check whether your judge agrees with how you would label cases.
 
 ## GitHub Discussions
 
