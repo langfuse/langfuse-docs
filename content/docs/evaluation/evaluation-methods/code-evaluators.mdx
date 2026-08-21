@@ -170,10 +170,10 @@ Each experiment run generates traces and observations that can be scored by your
 
 ### Create a code evaluator
 
-Go to the Evaluators page and create a new evaluator. Choose Code evaluator, then select Python or TypeScript.
+Go to the Evaluators page and click **New evaluator**. In the template gallery, choose **Code evaluator**, then select Python or TypeScript.
 
 <Frame fullWidth>
-  ![Placeholder for the new code evaluator flow screenshot](/images/docs/evaluation/screenshot-placeholder.svg)
+  ![Evaluators page with the New evaluator button](/images/docs/evaluation/create-evaluator.png)
 </Frame>
 
 ### Define and test the evaluator
@@ -187,20 +187,15 @@ On the right, filter to representative sample observations, select one, and run 
 Unlike LLM-as-a-Judge, code evaluators do not have a separate variable-mapping step. Your code reads the data it needs directly from `ctx`.
 
 <Frame fullWidth>
-  ![Placeholder for the code evaluator and sample test-result screenshot](/images/docs/evaluation/screenshot-placeholder.svg)
+  ![Testing a code evaluator with sample observations](/images/docs/evaluation/test-code-evaluator.png)
 </Frame>
 
-### Save and run online
+### Save the evaluator
 
-After saving, attach the evaluator to a [rule](/docs/evaluation/core-concepts#evaluators-and-rules) to run it on incoming observations. Configure the rule's filters and sampling rate.
+After saving, you can:
 
-<Frame fullWidth>
-  ![Placeholder for the rule configuration screenshot](/images/docs/evaluation/screenshot-placeholder.svg)
-</Frame>
-
-### Use the evaluator elsewhere
-
-Saved code evaluators can also evaluate selected historical observations through [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation) or score runs in [prompt experiments](/docs/evaluation/experiments/experiments-via-ui).
+- Create a [rule](/docs/evaluation/core-concepts#evaluators-and-rules) from the filters you used to select test samples, or attach the evaluator to an existing rule to run it on incoming observations.
+- Continue without a rule. You can still use the evaluator for [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation) or [prompt experiments](/docs/evaluation/experiments/experiments-via-ui).
 
 </Steps>
 
