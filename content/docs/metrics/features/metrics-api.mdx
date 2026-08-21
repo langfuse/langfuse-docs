@@ -79,6 +79,23 @@ The v2 Metrics API enforces a default `config.row_limit` of 100 rows per query t
 
 Certain dimensions like `id`, `traceId`, `userId`, and `sessionId` cannot be used for grouping in the v2 Metrics API. Grouping by these high cardinality fields is extremely expensive and rarely useful in practice. These dimensions remain available for filtering.
 
+### Semantic-root filtering and grouping
+
+The v2-only `isRootObservation` boolean dimension identifies application entry points. `true` includes both outer roots with no parent and app roots whose OpenTelemetry instrumentation or infrastructure parent was filtered from export by the SDK. Use it to count, filter, or group application entry points without missing the latter case. See [Logical root observations](/docs/api-and-data-platform/features/observations-api#logical-root-observations) for the distinction between physical and logical roots and trace-counting edge cases.
+
+For example, add this condition to a query's `filters` array to count semantic roots:
+
+```json
+[
+  {
+    "column": "isRootObservation",
+    "operator": "=",
+    "value": true,
+    "type": "boolean"
+  }
+]
+```
+
 ### Ordering by metrics
 
 When ordering by an aggregated metric, use the returned metric field name in the format `{aggregation}_{measure}`, for example `sum_totalCost` for `{ "measure": "totalCost", "aggregation": "sum" }`. When ordering by the time dimension, use the returned field name `time_dimension`.

@@ -238,12 +238,14 @@ With your evaluator and model selected, configure which data to run the evaluati
   - [JS/TS v3 → v4 migration guide](/docs/observability/sdk/upgrade-path/js-v3-to-v4)
 - **When filtering by trace attributes**: To filter observations by trace-level attributes (`userId`, `sessionId`, `version`, `tags`, `metadata`, `traceName`), use [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes) in your instrumentation code. Without this, trace attributes will not be available on observations. If you do set up trace-level attribute filtering and are not propagating attributes to observations, your observations will not be matched by the evaluator.
 
+import { V4CutoverDate } from "@/components/V4CutoverDate";
+
 <Callout type="warning">
-**Deprecation of trace-level evaluators:** Trace-level evaluators are built on the old trace-centric data model and are deprecated; the removal deadline will be announced as part of [Langfuse v4](/docs/v4). Existing trace-level evaluators will continue to run until the deprecation timeline. After the deprecation timeline, the evaluators will stop producing results, and go stable. Multi-span evaluations will build on the new observations-first data model. To move existing trace-level evaluators, follow the [upgrade guide](/faq/all/llm-as-a-judge-migration).
+**Deprecation of trace-level evaluators:** Trace-level evaluators are built on the old trace-centric data model and are deprecated as part of [Langfuse v4](/docs/v4). On Langfuse Cloud, existing trace-level evaluators keep running until the v4 cutover on <V4CutoverDate />; after that they stop producing results. On self-hosted Langfuse v4, once running in `events_only` mode, they will no longer produce results. Multi-span evaluations will build on the new observations-first data model. To move existing trace-level evaluators, follow the [upgrade guide](/faq/all/llm-as-a-judge-migration).
 </Callout>
 
 <Callout type="info">
-**Sampling is applied per evaluator.** Each evaluator draws its own random sample, so two evaluators configured with the same sampling percentage will generally score different subsets of your traffic. If several evaluators must score the same items, set their sampling to 100% and use identical filters, for example by making the sampling decision in your application and applying a [tag](/docs/observability/features/tags) that the evaluators filter on.
+**Sampling is deterministic per observation.** Evaluators with the same sampling percentage select the same subset of matching traffic.
 </Callout>
 
 </Tab>
@@ -301,27 +303,6 @@ To see your evaluator in action, you need to either [send traces](/docs/observab
   pipeline](/docs/evaluation/evaluation-methods/scores-via-sdk).
 </Callout>
 
-## Debug LLM-as-a-Judge Executions
-
-Every LLM-as-a-Judge evaluator execution creates a full trace, giving you complete visibility into the evaluation process. This allows you to debug prompt issues, inspect model responses, monitor token usage, and trace evaluation history.
-
-You can show the LLM-as-a-Judge execution traces by filtering for the environment `langfuse-llm-as-a-judge` in the tracing table:
-
-<Frame fullWidth>
-  ![Tracing table filtered to langfuse-llm-as-a-judge
-  environment](/images/docs/evaluation/llm-as-a-judge-debug-traces.png)
-</Frame>
-
-<Details>
-<Summary>LLM-as-a-Judge Execution Status</Summary>
-
-- **Completed**: Evaluation finished successfully.
-- **Error**: Evaluation failed (click execution trace ID for details).
-- **Delayed**: Evaluation hit rate limits by the LLM provider and is being retried with exponential backoff.
-- **Pending**: Evaluation is queued and waiting to run.
-
-</Details>
-
 ## Programmatic Setup via API [#api]
 
 Beyond the UI, you can set up and manage LLM-as-a-Judge evaluation programmatically through the public API. This is useful for version-controlling your evaluation setup, replicating it across projects, or automating rollouts from a deployment pipeline.
@@ -356,10 +337,6 @@ Observation evaluation rules support a boolean `isRootObservation` filter with t
 
 If you have existing evaluators running on traces and want to upgrade to running on observations for better performance and reliability, check out our comprehensive [Evaluator Migration Guide](/faq/all/llm-as-a-judge-migration).
 
-### Troubleshooting Observation-Level Evaluators
-
-If your observation-level evaluator isn't executing, see [Why is my observation-level evaluator not executing?](/faq/all/observation-eval-not-executing) for common causes and solutions.
-
 ### Backfill Historical Observation Scores
 
 You can run observation-level LLM-as-a-Judge on historical data from the observations table. This is useful if you have already ingested production data and want to score matching observations retroactively with a new or updated evaluator.
@@ -379,6 +356,31 @@ To backfill scores:
 </Frame>
 
 This backfill flow runs from the traces table, but the resulting scores are attached to the matching observations inside each trace.
+
+## Debug LLM-as-a-Judge Executions
+
+Every LLM-as-a-Judge evaluator execution creates a full trace, giving you complete visibility into the evaluation process. This allows you to debug prompt issues, inspect model responses, monitor token usage, and trace evaluation history.
+
+You can show the LLM-as-a-Judge execution traces by filtering for the environment `langfuse-llm-as-a-judge` in the tracing table:
+
+<Frame fullWidth>
+  ![Tracing table filtered to langfuse-llm-as-a-judge
+  environment](/images/docs/evaluation/llm-as-a-judge-debug-traces.png)
+</Frame>
+
+<Details>
+<Summary>LLM-as-a-Judge Execution Status</Summary>
+
+- **Completed**: Evaluation finished successfully.
+- **Error**: Evaluation failed (click execution trace ID for details).
+- **Delayed**: Evaluation hit rate limits by the LLM provider and is being retried with exponential backoff.
+- **Pending**: Evaluation is queued and waiting to run.
+
+</Details>
+
+### Troubleshooting Observation-Level Evaluators
+
+If your observation-level evaluator isn't executing, see [Why is my observation-level evaluator not executing?](/faq/all/observation-eval-not-executing) for common causes and solutions.
 
 ## FAQ
 
@@ -413,9 +415,16 @@ Cost depends on the judge model and the size of the inputs being evaluated. A ty
 <Details>
 <Summary>Can I use LLM-as-a-Judge for RAG evaluation?</Summary>
 
-Yes. LLM-as-a-Judge is particularly effective for RAG pipelines. You can evaluate faithfulness (is the answer grounded in the retrieved context?), relevance (does the answer address the question?), and completeness (does the answer cover all relevant information?). Langfuse also integrates with [RAGAS](/guides/cookbook/evaluation_of_rag_with_ragas) for specialized RAG evaluation metrics.
+Yes. LLM-as-a-Judge is particularly effective for RAG pipelines. You can evaluate faithfulness (is the answer grounded in the retrieved context?), relevance (does the answer address the question?), and completeness (does the answer cover all relevant information?). Langfuse also integrates with [RAGAS](/resources/engineering/evaluation-of-rag-with-ragas) for specialized RAG evaluation metrics.
 
 </Details>
+
+## Related Resources
+
+- [Langfuse Academy: Evaluation](/academy/evaluate) covers how LLM-as-a-judge fits with manual review and code evaluators.
+- [Writing good evaluators](/academy/evaluate/writing-evaluators) explains how to design judge prompts you can trust.
+- [Choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) helps you decide which quality checks are worth automating.
+- [Calibrate your LLM-as-a-judge](/guides/llm-as-a-judge-calibration-skill) to check whether your judge agrees with how you would label cases.
 
 ## GitHub Discussions
 

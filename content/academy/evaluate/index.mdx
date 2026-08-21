@@ -21,7 +21,7 @@ Most of the time, you start by **manually reviewing outputs** to build intuition
 The rest of this page covers the different kinds of evaluation in detail. In practice, you'll likely end up combining all of them. But the path to a well-functioning automated evaluation setup almost always starts from manual review.
 
 <Callout type="info">
-Manual evaluation is not a one-and-done step. Good production setups incorporate continuous review by human experts to catch new failure modes and keep automated evaluators calibrated.
+Manual evaluation is not a one-and-done step. Good production setups incorporate continuous review by human experts to catch new failure modes and keep automated evaluators calibrated. [Keeping the set alive](/academy/evaluate/choosing-what-to-evaluate#keeping-the-set-alive) covers this cadence.
 </Callout>
 
 <ManualGuideCallout
@@ -57,7 +57,7 @@ Their limitation is that they cannot assess meaning. A code evaluator can check 
 
 ### LLM-as-a-judge
 
-An LLM-as-a-judge evaluator uses a language model to score outputs. It is required to overcome the core issue that quality of AI Applications/Agents depends on grading the quality of a text output.
+An [LLM-as-a-judge evaluator](/docs/evaluation/evaluation-methods/llm-as-a-judge) uses a language model to score outputs. It is required to overcome the core issue that quality of AI Applications/Agents depends on grading the quality of a text output.
 
 This is the right method for qualities that require understanding language: whether a response is relevant to the question, whether the tone matches the intended audience, whether a summary captures the key points of the source material, etc.
 
@@ -82,23 +82,23 @@ The advantage of reference-free evaluators is that they can be applied to unseen
 
 ## In practice
 
-### When to set up evaluators
+### When to set up evaluators [#when-to-set-up-evaluators]
 
-[As mentioned before](#how-evaluation-typically-evolves), you always start by manually reviewing. Once you have done that, the question then becomes: should you set up an automated evaluator for what you found?
-
-Ask yourself whether the issue is a **one-time fix** or a **generalization problem**. If a simple prompt change resolves it, just make the change, there's no need for an evaluator. But if you can clearly identify a failure mode that you want to test for repeatedly across different inputs, that's when setting up an evaluator makes sense.
+[As mentioned before](#how-evaluation-typically-evolves), you always start by manually reviewing. Once you have done that, not every failure you find needs an evaluator: a **one-time fix** you can resolve with a prompt change doesn't, a **generalization problem** you need to catch repeatedly does. [Choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate#fix-first) covers this further.
 
 ### What should you evaluate?
 
 Generic qualities like "helpfulness" or "quality" are tempting starting points, but they rarely produce useful signal. An evaluator that checks a vague criterion will give vague results. The more precisely you can define what "good" or "bad" looks like for your application, the more useful your evaluators will be.
 
+This page on [choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) explores this further.
+
 <Callout type="info">
-One practical recommendation: prefer binary scores (pass/fail) over graded scales (1-5) when designing evaluators. Binary scores force a clear definition of what separates acceptable from unacceptable. Graded scales introduce ambiguity about what a 3 means versus a 4, which makes scores harder to interpret and less consistent across evaluators and over time.
+When you do design an evaluator, prefer binary (pass/fail) scores over graded scales (1-5). [Writing good evaluators](/academy/evaluate/writing-evaluators#binary-verdicts) explains why.
 </Callout>
 
 ### Combining evaluation methods
 
-Each quality you care about gets its own evaluator.
+Each quality you care about gets [its own evaluator](/academy/evaluate/writing-evaluators#one-evaluator-per-failure-mode).
 
 **Most mature evaluation setups use [all three evaluation methods](#three-kinds-of-evaluation).** Together, they give you a view on overall quality of your application.
 
@@ -165,7 +165,7 @@ If production behavior matches expectations, you can keep scaling with more conf
       lede: "Test whether your judge prompt agrees with how you would label cases, and iterate until it does.",
     },
     {
-      href: "/guides/cookbook/evaluation_of_rag_with_ragas",
+      href: "/resources/engineering/evaluation-of-rag-with-ragas",
       topic: "RAG evaluation with RAGAS",
       lede: "Score retrieval and generation quality for a RAG application.",
     },
