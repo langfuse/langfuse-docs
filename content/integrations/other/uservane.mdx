@@ -1,0 +1,107 @@
+---
+title: Collect End User Satisfaction Scores with UserVane
+sidebarTitle: UserVane
+logo: /images/integrations/uservane_icon.svg
+description: Capture NPS, CSAT, and CES from your real end users in your product and push them back to Langfuse as scores on the session or observation they came from.
+---
+
+# UserVane Integration
+
+[UserVane](https://uservane.com) is an in-product survey tool that collects satisfaction ratings (NPS, CSAT, CES) from your **real end users** and pushes them back to Langfuse as [scores](/docs/evaluation/core-concepts).
+
+Langfuse already documents that [user feedback](/docs/observability/features/user-feedback) is the signal that tells you whether your AI actually helped someone, and that explicit feedback suffers from low response rates and from unhappy users being more likely to respond. UserVane is built around that second problem: every score it reports ships with its margin of error and the sample size it came from, and a sample too thin to report is suppressed rather than printed.
+
+The integration is a round trip. UserVane captures the rating in your product, binds it server side to the session you are already tracing, and an adapter running on **your** server writes it into Langfuse.
+
+<Callout type="info">
+UserVane is not a tracer and does not replace your instrumentation. It sits beside your existing Langfuse tracing and adds one thing to it: what the end user thought.
+</Callout>
+
+## How It Works
+
+1. Your app captures a rating in the conversation using one of the UserVane SDKs. The rating is bound server side to the Langfuse `sessionId` (and, where available, the trace and observation ids) at the moment of capture.
+2. [`@uservane/langfuse-push`](https://www.npmjs.com/package/@uservane/langfuse-push) runs on your server or cron. It polls UserVane for delivered-but-unpushed scores.
+3. For each score it calls the official `langfuse` Node SDK:
+   - an **observation-level** score when both a trace id and an observation id are present,
+   - otherwise a **session-level** score when a session id is present.
+4. Each delivery is acknowledged back to UserVane, so a score is never written twice.
+
+Ratings that arrived without a linked session are never pushed. They stay in UserVane as unlinked rather than being guessed onto a trace.
+
+## Get Started
+
+<Steps>
+
+### Install the adapter
+
+```bash
+npm install @uservane/langfuse-push
+```
+
+This package is server only. It holds your UserVane secret key and your Langfuse write keys, so never import it from a client component or a browser bundle.
+
+### Capture feedback bound to your Langfuse session
+
+Use the UserVane SDK that matches your stack, and pass the same session id you use for Langfuse [sessions](/docs/observability/features/sessions). Framework packages are available for the Vercel AI SDK, the OpenAI Agents SDK, CopilotKit, React, React Native, and plain browser JavaScript.
+
+```bash
+npm install @uservane/vercel-ai   # or @uservane/openai-agents, @uservane/copilotkit, ...
+```
+
+Binding at capture time is what makes the round trip work: the score knows which session it belongs to before it ever reaches Langfuse.
+
+### Run the adapter on your server
+
+```ts
+import { pushPendingScores } from "@uservane/langfuse-push";
+
+const summary = await pushPendingScores({
+  uservane: {
+    secretKey: process.env.USERVANE_SECRET_KEY!, // uv_sk_...
+  },
+  langfuse: {
+    publicKey: process.env.LANGFUSE_PUBLIC_KEY!,
+    secretKey: process.env.LANGFUSE_SECRET_KEY!, // sk-lf-...
+    // baseUrl: "https://cloud.langfuse.com", // or your self-hosted URL
+  },
+});
+
+console.log(summary); // { delivered: number, failed: number }
+```
+
+Run it on whatever schedule suits you. A cron every few minutes is typical.
+
+### View the scores in Langfuse
+
+Scores arrive under the name `uservane.satisfaction` on the session or observation they were bound to. Filter and chart them like any other score.
+
+</Steps>
+
+## Integration Details
+
+#### Score name
+
+Scores are written as `uservane.satisfaction` by default. Pass `scoreName` to change it. The value is the raw rating and the free-text comment, when the user left one, is written as the score comment.
+
+#### Idempotency
+
+Every score is written with a stable id derived from the UserVane score id, so re-running the adapter upserts rather than duplicating. A score is never counted twice in your trace store.
+
+#### Credential handling
+
+The adapter runs in your infrastructure with your credentials. UserVane never receives, stores, or transmits your Langfuse keys, and is never in the write path to your Langfuse project.
+
+#### Failure handling
+
+A score that cannot be delivered is acknowledged as failed rather than silently dropped, and can be re-polled later with `includeFailed: true`. The adapter confirms delivery through the Langfuse SDK's flush callback instead of assuming success.
+
+#### Self-hosted Langfuse
+
+Supported. Pass your own `baseUrl` in the `langfuse` options.
+
+## Learn More
+
+- [UserVane Langfuse integration guide](https://uservane.com/integrations/langfuse)
+- [UserVane documentation](https://docs.uservane.com)
+- [`@uservane/langfuse-push` on npm](https://www.npmjs.com/package/@uservane/langfuse-push)
+- The UserVane SDKs are MIT licensed and open source at [github.com/uservane/uservane-js](https://github.com/uservane/uservane-js)
