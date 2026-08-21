@@ -1,6 +1,6 @@
 ---
 title: Tags
-description: Classify traces and observations with string labels so you can filter and organize by feature, use case, or workflow.
+description: Tags help to filter and organize traces and observations in Langfuse based on use case, functions/apis used, environment and other criteria.
 sidebarTitle: Tags
 ---
 
@@ -8,13 +8,18 @@ import { PropagationRestrictionsCallout } from "@/components/PropagationRestrict
 
 # Tags
 
-Tags classify traces and observations by things you already know at tracing time: which feature handled the request, which API or workflow ran, or which use case it belongs to. They are the right mechanism when you want to filter, organize, and break down metrics across those categories.
+Tags allow you to categorize and filter observations and traces in Langfuse.
 
-Use tags for labels you know up front. If you need to classify or evaluate something after the fact, use a [score](/docs/evaluation/scores/overview#scores-vs-tags). For deployment stage, use [environments](/docs/observability/features/environments). For arbitrary key-value data, use [metadata](/docs/observability/features/metadata).
+Tags are strings (max 200 characters each) and an observation may have multiple tags. If a tag exceeds 200 characters, it will be dropped.
+
+<Callout type="info">
+  The full set of tags applied across all observations in a trace are
+  automatically aggregated and added to the trace object in Langfuse.
+</Callout>
 
 ## In the Langfuse UI [#in-the-ui]
 
-Tags appear as labels on traces and observations. Tags set on any observation in a trace are aggregated onto the trace, so you can filter at either level.
+Tags appear as labels on traces and observations.
 
 Once tags are on your data, you can:
 
@@ -22,22 +27,15 @@ Once tags are on your data, you can:
 - Segment [custom dashboards](/docs/metrics/features/custom-dashboards) and [metrics](/docs/metrics/features/metrics-api) by tag, for example cost or latency of `checkout` versus `support-bot`.
 - Organize traces by feature, endpoint, or workflow without mixing those categories into environment, user, or session.
 
-{/* TODO: add a screenshot of tags displayed as labels on a trace or observation in the Langfuse UI */}
-{/* TODO: add a screenshot or screen recording of filtering traces and observations by tags */}
+<Frame>
+  ![Traces table with a Trace Tags column](/images/docs/tags-traces-table.png)
+</Frame>
 
 ## Tags cannot be changed later [#immutable]
 
-Because Langfuse uses an immutable data model for observations, tags must be set when the observation is created. They cannot be added or edited in the UI afterward.
-
-<Callout type="info">
-  Set tags in your instrumentation before the observation is ingested. If you
-  need to label traces later — for example after an evaluation or a human review
-  — attach a [score](/docs/evaluation/scores/overview#scores-vs-tags) instead.
-</Callout>
+Because Langfuse uses an immutable data model for observations, tags can't be added or edited in the UI after they're created.
 
 ## Implementation [#implementation]
-
-Tags are strings (max 200 characters each) and an observation may have multiple tags. The full set of tags applied across all observations in a trace is automatically aggregated and added to the trace object in Langfuse. If a tag exceeds 200 characters, it is dropped.
 
 Use `propagate_attributes()` to apply tags to a group of observations within a context.
 
