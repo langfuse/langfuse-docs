@@ -95,7 +95,7 @@ The adapter runs in your infrastructure with your credentials. UserVane never re
 
 #### Failure handling
 
-A score that cannot be delivered is acknowledged as failed rather than silently dropped, and can be re-polled later with `includeFailed: true`. The adapter confirms delivery through the Langfuse SDK's flush callback instead of assuming success.
+A score that cannot be delivered is acknowledged as failed rather than silently dropped, and can be re-polled later with `includeFailed: true`. The adapter waits for the SDK to finish processing the queued event before flushing, so an ingestion failure is recorded as failed rather than counted as delivered.
 
 #### Self-hosted Langfuse
 
