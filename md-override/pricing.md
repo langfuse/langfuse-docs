@@ -124,7 +124,7 @@ Optional **Yearly Commitment**:
 | [Human annotation queues](/docs/evaluation/evaluation-methods/annotation#annotation-queues)         | 1 queue             | 3 queues            | Yes                 | Yes                          |
 | **Metrics**                                                                                         |                     |                     |                     |                              |
 | [Custom dashboards](/docs/metrics/features/custom-dashboards)                                       | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Alerts](/docs/metrics/features/alerts)                                                             | 2 alerts            | 20 alerts           | 50 alerts           | 100 alerts                   |
+| [Alerts](/docs/observability/features/alerts)                                                       | 2 alerts            | 20 alerts           | 50 alerts           | 100 alerts                   |
 | **Collaboration**                                                                                   |                     |                     |                     |                              |
 | Projects                                                                                            | Unlimited           | Unlimited           | Unlimited           | Unlimited                    |
 | Users                                                                                               | 2                   | Unlimited           | Unlimited           | Unlimited                    |
