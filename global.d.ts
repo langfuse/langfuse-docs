@@ -2,6 +2,11 @@ interface Window {
   _hsq?: any[];
   dataLayer?: any[];
   gtag?: (...args: any[]) => void;
+  getCkyConsent?: () => {
+    activeLaw: string;
+    categories: Record<string, boolean>;
+    isUserActionCompleted: boolean;
+  };
   lintrk?: (...args: any[]) => void;
   _linkedin_data_partner_ids?: any[];
   rdt?: (...args: any[]) => void;

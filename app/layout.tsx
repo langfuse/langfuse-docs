@@ -18,6 +18,7 @@ import { RedditPixel } from "@/components/analytics/reddit-ads";
 import { SpotifyPixel } from "@/components/analytics/spotify-ads";
 import { TwitterPixel } from "@/components/analytics/twitter-ads";
 import { ConversionTracker } from "@/components/analytics/ConversionTracker";
+import { AdConsentGate } from "@/components/analytics/AdConsentGate";
 import { ClickIdPersistence } from "@/components/analytics/ClickIdPersistence";
 import { CommonRoom } from "@/components/analytics/common-room";
 import { AhrefsAnalytics } from "@/components/analytics/ahrefs";
@@ -99,11 +100,17 @@ export default function RootLayout({
         {process.env.NODE_ENV === "production" && (
           <>
             <GoogleTagManager gtmId="GTM-NGLK4TZX" />
-            <GoogleAds />
-            <LinkedInInsightTag />
-            <RedditPixel />
-            <SpotifyPixel />
-            <TwitterPixel />
+            {/* Ad pixels require prior consent (CookieYes "advertisement"
+                category). The gate keeps them from loading or setting cookies
+                until it is granted; every conversion helper already no-ops
+                when its tag is absent, so nothing else needs gating. */}
+            <AdConsentGate>
+              <GoogleAds />
+              <LinkedInInsightTag />
+              <RedditPixel />
+              <SpotifyPixel />
+              <TwitterPixel />
+            </AdConsentGate>
             <ConversionTracker />
             <ClickIdPersistence />
             <Hubspot />
