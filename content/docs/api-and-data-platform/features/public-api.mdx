@@ -7,9 +7,33 @@ description: All Langfuse data and features are available via the API. Follow th
 import { V4CutoverDate } from "@/components/V4CutoverDate";
 import { V4_CUTOVER_DATE_SHORT } from "@/lib/v4-migration-dates";
 
-# Public API
+# Public API [#public-api]
 
 Langfuse is open and meant to be extended via custom workflows and integrations. All Langfuse data and features are available via the API.
+
+<Callout type="info">
+
+There are 3 different groups of APIs:
+
+- This page -> Project-level APIs: CRUD traces/evals/prompts/configuration within a project
+- [Organization-level APIs](/docs/administration/scim-and-org-api): provision projects, users (SCIM), and permissions
+- [Instance Management API](/self-hosting/administration/instance-management-api): administer organizations on self-hosted installations
+
+</Callout>
+
+## Quickstart [#quickstart]
+
+<Steps>
+
+### Obtain credentials [#authentication]
+
+Authenticate with the API using [Basic Auth](https://en.wikipedia.org/wiki/Basic_access_authentication).
+The API keys are available in the Langfuse project settings.
+
+- Username: Langfuse Public Key
+- Password: Langfuse Secret Key
+
+### Select the regional base URL [#base-urls]
 
 <Tabs items={["Path", "Cloud US", "Cloud EU", "Cloud Japan", "HIPAA US"]}>
 
@@ -50,34 +74,43 @@ https://hipaa.cloud.langfuse.com/api/public
 </Tab>
 </Tabs>
 
-References:
-
-- API Reference: https://api.reference.langfuse.com
-- OpenAPI spec: https://cloud.langfuse.com/generated/api/openapi.yml
-
-<Callout type="info">
-
-There are 3 different groups of APIs:
-
-- This page -> Project-level APIs: CRUD traces/evals/prompts/configuration within a project
-- [Organization-level APIs](/docs/administration/scim-and-org-api): provision projects, users (SCIM), and permissions
-- [Instance Management API](/self-hosting/administration/instance-management-api): administer organizations on self-hosted installations
-
-</Callout>
-
-## Authentication
-
-Authenticate with the API using [Basic Auth](https://en.wikipedia.org/wiki/Basic_access_authentication).
-The API keys are available in the Langfuse project settings.
-
-- Username: Langfuse Public Key
-- Password: Langfuse Secret Key
+### Make an authenticated request
 
 Example:
 
 ```bash
 curl -u public-key:secret-key https://cloud.langfuse.com/api/public/projects
 ```
+
+### Understand the result
+
+A successful response returns the project associated with your API key:
+
+```json
+{
+  "data": [
+    {
+      "id": "clxxxx",
+      "name": "My Project",
+      "organization": {
+        "id": "clyyyy",
+        "name": "My Org"
+      }
+    }
+  ]
+}
+```
+
+Use the same credentials and regional base URL for the rest of the Public API.
+
+</Steps>
+
+## API reference [#api-reference]
+
+References:
+
+- API Reference: https://api.reference.langfuse.com
+- OpenAPI spec: https://cloud.langfuse.com/generated/api/openapi.yml
 
 ## Access via SDKs [#access-via-sdks]
 
@@ -266,6 +299,19 @@ You can also export data via:
 import { FaqPreview } from "@/components/faq/FaqPreview";
 
 <FaqPreview tags={["platform"]} />
+
+## Related API resources [#related-api-resources]
+
+- [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk) — typed Python and JS/TS wrappers for the same endpoints
+- [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) — retrieve row-level spans, generations, and events
+- [Scores API v3](/docs/api-and-data-platform/features/scores-api#v3) — retrieve evaluation and annotation scores
+- [Metrics API v2](/docs/metrics/features/metrics-api#v2) — retrieve aggregated analytics
+- [Experiments API](/docs/api-and-data-platform/features/experiments-api) — retrieve experiment runs and items
+- [CLI](/docs/api-and-data-platform/features/cli) — call the Public API from the terminal
+- [MCP Server](/docs/api-and-data-platform/features/mcp-server) — connect AI assistants to Langfuse data
+- [Organization-level APIs](/docs/administration/scim-and-org-api) — provision projects, users (SCIM), and permissions
+- [Instance Management API](/self-hosting/administration/instance-management-api) — administer organizations on self-hosted installations
+- [Migration of deprecated APIs](/faq/all/deprecated-api-migration) — replacements for sunset read and ingestion endpoints
 
 ## GitHub Discussions
 
