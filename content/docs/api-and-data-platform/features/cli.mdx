@@ -50,7 +50,9 @@ The CLI picks these up automatically — there is no separate `login` step. Keys
 
 The CLI can do anything the [Langfuse API](/docs/api-and-data-platform/features/public-api) can do.
 
-It supports all API endpoints: observations, prompts, datasets, scores, metrics, and more is available. See the full [API Reference](https://api.reference.langfuse.com) for details.
+It is generated from the full OpenAPI spec, so every endpoint (traces, observations, prompts, datasets, scores, sessions, metrics, and more) is available as a CLI command. See the full [API Reference](https://api.reference.langfuse.com) for details.
+
+Failures exit with a machine-readable code, so agents can tell what went wrong without parsing stderr: usage (2), configuration (3), network (4), HTTP failure (5), and local errors (6).
 
 ## Why use it
 
@@ -61,4 +63,3 @@ It supports all API endpoints: observations, prompts, datasets, scores, metrics,
 ## Pairs with Agent Skills
 
 The CLI is designed to work together with [Agent Skills](/docs/api-and-data-platform/features/agent-skill). The skill teaches agents how to discover endpoints, follow common workflows, and access documentation, all through the CLI. See [Langfuse for Agents](/agents) for the full picture of how the skill, CLI, and MCP server fit together, or read [the blog post](/blog/2026-02-13-will-you-be-my-cli).
-With machine-readable exit codes, agents without parsing stderr can understand errors quicker: usage (2), configuration (3), network (4), HTTP failure (5), and local errors (6) to iterate faster.
