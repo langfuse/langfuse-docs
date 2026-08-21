@@ -63,9 +63,10 @@ npx langfuse-cli api <resource> <action>
 Agents discover the surface area through built-in help, which keeps token usage low:
 
 ```bash
-npx langfuse-cli api __schema                   # list all resources
+npx langfuse-cli api help                       # list all resources
 npx langfuse-cli api <resource> --help          # list actions for a resource
 npx langfuse-cli api <resource> <action> --help # show args for an action
+npx langfuse-cli api schema --json              # machine-readable command schema
 ```
 
 Because the CLI is generated from the spec, it stays in sync with the API automatically and covers every endpoint, including [full-text search over observations](#fast).
