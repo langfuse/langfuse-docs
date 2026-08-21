@@ -193,6 +193,19 @@ Choose **LangSmith** if you are committed to LangChain and LangGraph and want **
 
 ---
 
+## Why teams move away from LangSmith [#why-teams-move-away]
+
+The same reasons recur in migration conversations. Cost leads, and it is several distinct problems:
+
+- **Trace-volume pricing.** LangSmith's per-trace usage grows linearly with traffic, so a bill that works in a pilot becomes the blocker at production scale. At 500k traces with 5 users, the [worked example](#worked-example) lands at $3,895/month on LangSmith Plus vs $621 on Langfuse Pro.
+- **Seat fees tax adoption.** LangSmith bills $39/seat on invitation, so giving product managers, reviewers, and domain experts view access has a per-head price. Langfuse [meters usage, not people](#pricing).
+- **Retention is its own meter.** LangSmith's included window is 14 days, keeping traces longer is a per-trace upgrade, and [online evaluators and automation rules promote traces into the paid tier by default](#pricing) — $1,250 of the worked example's monthly LangSmith total is retention.
+- **Compliance routes through sales.** Self-hosting, custom SSO, and role-based access control are [Enterprise-only on LangSmith](https://www.langchain.com/pricing), so teams that must run in their own infrastructure cannot evaluate on the free or Plus tiers. Langfuse self-hosts [MIT-licensed on every tier](#open-source-and-distribution) and signs a [BAA from the Pro plan](#enterprise-security).
+- **Framework coupling.** Platform teams serving heterogeneous stacks don't want the observability layer tied to one agent framework. Off LangChain and LangGraph, LangSmith's zero-setup instrumentation is gone, and [Deployment, Engine, Fleet, and the Gateway](#integrations) are priced separately on top.
+- **Turning trace data into answers.** LangSmith captures the traces, but slicing them into business views or moving them into your own analytics stack hits walls: [bulk export is Enterprise-gated](#storage) and there is no direct database access on LangSmith Cloud. Langfuse pairs [custom dashboards and Pulse](#observability-and-monitoring) with the [Observations and Metrics APIs](#open-platform) for high-volume reads on Cloud, and self-hosters can additionally query the ClickHouse table directly in SQL.
+
+---
+
 ## Why teams choose Langfuse [#customers]
 
 A pattern repeats across production adopters: start where governance requires, often self-hosted, then grow into the platform.
