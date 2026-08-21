@@ -30,18 +30,25 @@ export type CloudRegionSignInSnapshot = {
 
 // A region that accepts the connection but never responds would otherwise keep
 // the first probe unresolved until the browser's own network timeout (minutes),
-// suppressing every conversion in the meantime. An aborted probe counts as
-// signed-out, like any other failure below, so this is deliberately generous:
-// too short a deadline would start reporting slow-but-signed-in visitors as
-// sign ups, which is the miscount this store exists to prevent.
+// suppressing every conversion in the meantime. On a first probe an aborted
+// request counts as signed-out, like any other failure below, so this is
+// deliberately generous: too short a deadline would start reporting
+// slow-but-signed-in visitors as sign ups, which is the miscount this store
+// exists to prevent.
 const PROBE_TIMEOUT_MS = 8_000;
 
 // Sessions are created in the app, in another tab or window, so the answer goes
 // stale while a page sits open. Re-probing is cheap, but it should not run once
-// per component mount, so calls within this window reuse the last probe. Keep
-// this longer than PROBE_TIMEOUT_MS: every request of a probe has then settled
-// one way or another before a refresh can start, so the two never overlap.
+// per component mount, so calls within this window reuse the last probe.
 const PROBE_REUSE_MS = 30_000;
+
+// Returning to the tab is the one moment we know a session may just have been
+// created, so it gets a much shorter window. Signing in through an already
+// authenticated SSO prompt can take only a few seconds, and a refresh skipped
+// here leaves the stale snapshot to report the visitor's next CTA click as a
+// sign up. Short enough to catch that, long enough that flicking between tabs
+// cannot turn into a stream of requests.
+const VISIBILITY_PROBE_REUSE_MS = 5_000;
 
 const regionKeys = Object.keys(cloudRegions) as CloudRegionKey[];
 
@@ -95,7 +102,11 @@ function fetchRegionSignIn(key: CloudRegionKey): Promise<boolean> {
 
 function runProbe() {
   const generation = ++probeGeneration;
+  // A visibility refresh can start while a slow first probe is still waiting on
+  // a region, so answers are tagged with their probe and stale ones dropped.
   let awaitingRegions = regionKeys.length;
+  // Whether this probe is re-checking regions that have already answered once.
+  const isRefresh = snapshot.resolved;
   lastProbeStartedAt = Date.now();
 
   const recordAnswer = (key: CloudRegionKey, signedIn: boolean) => {
@@ -123,10 +134,16 @@ function runProbe() {
     fetchRegionSignIn(key)
       .then((signedIn) => recordAnswer(key, signedIn))
       // A region that is unreachable, blocked, slow enough to hit the deadline
-      // above, or answering with something unparseable counts as
-      // answered-and-signed-out: waiting longer would suppress every decision
-      // that depends on this store.
-      .catch(() => recordAnswer(key, false));
+      // above, or answering with something unparseable has to count as
+      // answered, or waiting would suppress every decision that depends on
+      // this store. What it counts as depends on what we already know: on a
+      // first probe, signed-out, because there is nothing else to go on; on a
+      // refresh, whatever that region last confirmed, because a failed request
+      // is no evidence the session ended. Overwriting a known sign-in with a
+      // guess would report that visitor's next CTA click as a sign up.
+      .catch(() =>
+        recordAnswer(key, isRefresh ? snapshot.signedInRegions[key] : false),
+      );
   });
 }
 
@@ -138,7 +155,7 @@ function watchVisibility() {
   // page's answer stale with no remount to refresh it.
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
-      startCloudRegionSignInProbe(true);
+      startCloudRegionSignInProbe(true, VISIBILITY_PROBE_REUSE_MS);
     }
   });
 }
@@ -147,7 +164,10 @@ function watchVisibility() {
 // probe, later calls refresh it once it has gone stale. When disabled (outside
 // production, where the region session endpoints are not reachable from
 // localhost) the snapshot resolves immediately with no region signed in.
-export function startCloudRegionSignInProbe(enabled: boolean) {
+export function startCloudRegionSignInProbe(
+  enabled: boolean,
+  reuseLastProbeFor = PROBE_REUSE_MS,
+) {
   if (!enabled) {
     if (!snapshot.resolved) publish({ ...snapshot, resolved: true });
     return;
@@ -156,7 +176,7 @@ export function startCloudRegionSignInProbe(enabled: boolean) {
   watchVisibility();
 
   const hasProbed = lastProbeStartedAt !== 0;
-  if (hasProbed && Date.now() - lastProbeStartedAt < PROBE_REUSE_MS) return;
+  if (hasProbed && Date.now() - lastProbeStartedAt < reuseLastProbeFor) return;
 
   runProbe();
 }
