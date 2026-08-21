@@ -22,6 +22,8 @@ See our [API Reference](/docs/api) for details on how to filter by environment o
 
 Environments are created the first time data is ingested with a given `environment` value and are persistent. They cannot currently be deleted or renamed via the UI.
 
+For guidance on how to structure, separate, and work with multiple environments across projects and stages, see the FAQ: [Managing different environments](/faq/all/managing-different-environments).
+
 ## Configure environments [#configure-environments]
 
 You can configure the environment by setting the `LANGFUSE_TRACING_ENVIRONMENT` environment variable (recommended) or by using the `environment` parameter in the client initialization.
@@ -238,8 +240,6 @@ export function register() {
 1. **Consistent Environment Names**: Use consistent environment names across your application to make filtering and analysis easier.
 2. **Environment-Specific Analysis**: Use environments to analyze and compare metrics across different deployment stages.
 3. **Testing**: Use separate environments for testing to avoid polluting production data.
-
-For guidance on how to structure, separate, and work with multiple environments across projects and stages, see the FAQ: [Managing different environments](/faq/all/managing-different-environments).
 
 ## GitHub Discussions
 
