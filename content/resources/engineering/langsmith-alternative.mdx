@@ -261,6 +261,10 @@ No. LangSmith accepts OpenTelemetry and non-LangChain SDKs ([docs](https://docs.
 
 On the Enterprise plan. As of LangSmith Self-Hosted v0.16, SmithDB, Engine, and Sandboxes are available to self-hosted customers, with SmithDB in public beta behind a waitlist. The LLM Gateway is [not in the v0.16 stable release](https://docs.langchain.com/langsmith/llm-gateway); self-hosted access is by request.
 
+### How do I migrate from LangSmith to Langfuse? [#how-do-i-migrate-from-langsmith]
+
+Point your OpenTelemetry exporter at the Langfuse [OTLP endpoint](/integrations/native/opentelemetry), or swap the LangSmith environment variables for the [Langfuse integration](/integrations/frameworks/langchain) in LangChain and LangGraph apps. Import datasets via CSV, SDK, or API, and recreate prompts and evaluators. Most teams see first traces the same day; trace history stays in LangSmith. See [Switching from LangSmith](#switching-from-langsmith).
+
 ### What is SmithDB? [#what-is-smithdb]
 
 SmithDB is LangSmith's proprietary trace database (May 2026), written in Rust on Apache DataFusion and Vortex, with trace data on object storage. LangChain reports up to 15× faster core experiences. Langfuse runs on open-source ClickHouse with an observations-first data model, so Cloud and self-hosted share the same architecture. See [Storage: ClickHouse vs SmithDB](#storage).
