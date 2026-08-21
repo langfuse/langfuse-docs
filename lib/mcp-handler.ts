@@ -34,10 +34,20 @@ export const mcpRequestContextFromRequest = (
   ip: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim(),
 });
 
+// Clients re-run the initialize handshake on every session and reconnect, so it
+// fires roughly 37x more often than a tool actually runs. Sampling keeps the
+// client mix and its trend intact at a fraction of the event volume; multiply
+// counts by 1 / sample_rate (the rate is recorded on each event) to estimate
+// absolute handshakes.
+const MCP_INITIALIZE_SAMPLE_RATE = 0.05;
+
 // The MCP initialize handshake carries clientInfo ({ name, version }) — the
-// most reliable identifier of which agent/IDE is talking to the docs server.
+// most reliable identifier of which agent/IDE is talking to the docs server,
+// since two thirds of tool-call requests arrive without a useful user agent.
 export const trackMcpInitializeFromRequest = (request: Request) => {
   if (!posthog || request.method !== "POST") return;
+  // Sample before parsing the body so skipped requests cost nothing.
+  if (Math.random() >= MCP_INITIALIZE_SAMPLE_RATE) return;
   const clone = request.clone();
   const { userAgent, ip } = mcpRequestContextFromRequest(request);
   waitUntil(
@@ -59,6 +69,7 @@ export const trackMcpInitializeFromRequest = (request: Request) => {
             $ip: ip,
             client_name: clientInfo?.name,
             client_version: clientInfo?.version,
+            sample_rate: MCP_INITIALIZE_SAMPLE_RATE,
           },
         });
         await posthog.flush();
