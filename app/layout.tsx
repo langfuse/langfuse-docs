@@ -15,6 +15,7 @@ import { Hubspot } from "@/components/analytics/hubspot";
 import { GoogleAds } from "@/components/analytics/google-ads";
 import { LinkedInInsightTag } from "@/components/analytics/linkedin-ads";
 import { RedditPixel } from "@/components/analytics/reddit-ads";
+import { SpotifyPixel } from "@/components/analytics/spotify-ads";
 import { TwitterPixel } from "@/components/analytics/twitter-ads";
 import { ConversionTracker } from "@/components/analytics/ConversionTracker";
 import { ClickIdPersistence } from "@/components/analytics/ClickIdPersistence";
@@ -101,6 +102,7 @@ export default function RootLayout({
             <GoogleAds />
             <LinkedInInsightTag />
             <RedditPixel />
+            <SpotifyPixel />
             <TwitterPixel />
             <ConversionTracker />
             <ClickIdPersistence />
