@@ -1,0 +1,130 @@
+---
+title: "Please don't package all your docs into skills"
+date: 2026/07/28
+description: ""
+tag: engineering
+author: Lotte
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Please don't package all your docs into skills"
+  description=""
+  date="July 28, 2026"
+  authors={["lotteverheyden"]}
+/>
+
+_(This should be about how the dynamics are rapidly changing, these new interfaces/frameworks are emerging in response to that, everyone wants to support them all, and often they're just doing things (like packaging docs into skills).)_
+
+## UX, DX, and now AX?
+
+For a long time, devtools had 2 main audiences, which means 2 experiences to optimize for:
+
+- UX: more focused on the user of the UI, often optimized for intuitiveness, wow-factor, etc.
+- DX: for the engineers responsible for the integration of the tool into the company's systems. These users are often in a very different working mode. Optimized for clarity, complete, well-structured information, and flexibility
+
+Over the past year, a clear new player emerged, and quickly took over to the point where engineers are pretty comfortable being out of the loop for (large parts of) the implementation. Agents are a very different kind of "person", with different traits, so different things to optimize for.
+
+## This shifts the dynamics for devtool _Developer Experience_
+
+"Developer" is now not just the engineer, but the engineer + an agent. The agent creates a new layer between the tool and the engineer that abstracts away the code logic and enables the engineer to just communicate in natural language.
+
+This means that, where before, the engineer was responsible and accountable for the implementation, now there's a split:
+
+- the agent becomes responsible for the implementation, but
+- the engineer stays accountable
+
+<Frame fullWidth>
+  ![Then: the developer did the implementation and was accountable for it. Now: the AI agent does the implementation, and the developer stays accountable.](/images/blog/2026-07-28-docs-for-the-day-zero-expert/then-now-implementation-accountability.png)
+</Frame>
+
+This creates an interesting dynamic, where technical docs that describe the "how" in detail become input for the agent, but everything describing the "why", and conceptual workings of the product stay for the human.
+
+Together with this, the speed of implementation increased dramatically, and the focus of the engineer could shift from things like syntax to more high level system design.
+
+### Revisiting the Diataxis framework
+
+[Diátaxis](https://diataxis.fr) is a framework much of devtool documentation follows. It categorizes different kinds of documentation content across two axes: action vs. cognition, and acquisition (studying) vs. application (working).
+
+Now that agents are doing the implementation, documentation types on the application side are now mostly for agents. On the acquisition side, while it can also be useful for agents, its main purpose is to educate humans so that they have the necessary information to review the agent's actions and take accountability.
+
+<Frame fullWidth>
+  ![Diátaxis framework: Tutorials are for humans; How-to guides and Explanation serve humans and agents; Reference serves agents; skills sit outside the grid to provide judgment for agents.](/images/blog/2026-07-28-docs-for-the-day-zero-expert/diataxis-humans-agents-skills.png)
+</Frame>
+
+TODO: remove skill from diagram
+
+### What this means for different devtool interfaces
+
+Because of this split between implementation and accountability, about half of the interfaces get a human user, the other half an agent:
+
+| Interface          | For                                   | Value                                                                                                                                 |
+| ------------------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| UI                 | humans navigating the product by hand | manual interaction, natural discovery of information/features                                                                         |
+| API                | agents and scripts                    | programmatically interacting with the tool                                                                                            |
+| SDK                | agents and scripts                    | programmatically interacting with the tool                                                                                            |
+| CLI                | agents                                | agents interacting with the tool                                                                                                      |
+| MCP                | agents                                | agents interacting with the tool                                                                                                      |
+| Reference docs     | agents                                | understanding exactly all options of API/CLI/..                                                                                       |
+| Feature docs       | humans and agents                     | understanding why a feature exists, seeing an example of how to use it, discovery of tool capabilities                                |
+| Guide/academy docs | humans (mainly)                       | Understanding the high level concepts, the "why" behind implementation decisions, being able to explain why things are best practices |
+| skill              | agents                                | steering the agent on top of the interfaces above                                                                                     |
+
+## How agents are different from engineers [#agents-vs-engineers-traits]
+
+There are a couple of behavioral differences between how agents and human engineers approach getting to know and implementing a devtool.
+
+**Pre-existing knowledge, often outdated**
+
+For a lot of devtools, agents start with baked-in knowledge from their training data, and that training data is often outdated.
+
+→ Where for humans you'd write docs with the assumption they don't know your tool, for agents you'll often have to write with the assumption they know things already, but they might be wrong.
+
+**Nothing sticks between sessions**
+
+The knowledge gained from repeatedly interacting with a tool gets mostly lost: agents start (almost) from scratch every time.
+
+<Callout type="info">
+  The only thing that carries over from session to session is a memory file,
+  but this will not hold every detail.
+</Callout>
+
+→ Where with humans, you can assume that if they are implementing an advanced feature, they have used your product for some time already, with agents you can't. Every feature page/interface should take into account that it will be used by "beginners".
+
+**Bias towards (incorrect) action**
+
+For humans it's often more efficient to invest in understanding fundamentals before executing, because being wrong comes at high time-cost. Agents default to making assumptions and trying things out, since re-trying is fast and cheap: often 1-2 doc fetches, then work with what they've got, often resulting in hallucinated calls/code.
+
+## Adapting agent interfaces: API, SDK, CLI, MCP, reference docs, skill
+
+### API, SDK, CLI, MCP, reference docs
+
+**naming should minimize risk of incorrect hallucinations**
+This means that (give example of agents using deprecated API endpoints because they have "trace" in the name instead of "observation")
+
+- skill should steer the agent to use a good approach or add good judgement, that humans don't need
+  - use progressive disclosure to your advantage: keep main skill file concise, put a lot in reference files
+  - we need to be inclusive of models: people might be using a smaller model and it should still work, so we can't overload their context window
+- if it makes sense to have it in docs, always lean towards putting it in docs
+  - not all coding agents will have the skill installed
+  - you have no control over when people update the skill, but you do have control over up to date docs
+- ..
+
+→ a skill is largely the written-down answers to the questions the agent will never ask
+
+> **Nuance:** Is a skill a doc type, or something else? There's a sharper framing available than "fifth quadrant": Diátaxis assumes the reader brings judgment and needs information. Skills are the inverse: the reader (agent) brings capability and needs judgment. Docs describe the tool; skills prescribe behavior.
+
+> **Nuance:** The docs-over-skills principle is quietly contrarian right now (everyone is shipping skills), and your reasons are good ones: reach and freshness. Contrarian plus defensible is a good place for a blog post to stand.
+
+## Adapting interfaces for both: feature docs
+
+Make it as easy as possible for agents to acquire information about your product (markdown export, skill, llms.txt, ...).
+
+TODO: feature docs adaptations, building on the traits above: every feature page written for "beginners" (nothing sticks between sessions), and each page self-contained (agents won't assemble the full picture across pages).
+
+## Adapting interfaces for humans: UI, academy, tutorials
+
+Do you still need docs for humans? → YES: see accountability => reason we invest into academy and workshop now
+
+TODO: UI + guide/academy docs: what we changed or are investing in (academy, workshops), and why the "why" content stays with the human.
