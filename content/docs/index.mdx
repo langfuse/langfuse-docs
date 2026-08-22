@@ -12,7 +12,9 @@ import {
   TextQuote,
   GitPullRequestArrow,
   ThumbsUp,
-  FlaskConical,
+  Sparkles,
+  Blocks,
+  Bot,
 } from "lucide-react";
 
 <FeatureOverview />
@@ -78,6 +80,43 @@ import EvaluationOverview from "@/components-mdx/evaluation-overview-gifs.mdx";
 <div className="h-6" />
 <EvaluationOverview />
 
+## AI features [#ai-features]
+
+Give coding agents and the in-app Assistant access to Langfuse. Query traces, manage prompts, and run evaluations from your editor, an MCP client, or the Langfuse Cloud UI.
+
+- [Agent Skill](/docs/api-and-data-platform/features/agent-skill): a playbook for Claude Code, Cursor, Codex, and other compatible agents. Install it so your agent follows Langfuse best practices for tracing, prompt management, and evaluations
+- [MCP Server](/docs/api-and-data-platform/features/mcp-server): connect assistants that cannot run shell commands to your project data. There is also a public [Docs MCP server](/docs/docs-mcp) for documentation search
+- [Langfuse Assistant](/docs/langfuse-assistant): the in-app agent in Langfuse Cloud. Ask about traces, observations, sessions, and metrics in plain language; actions that change data pause for your approval
+
+See [Langfuse for agents](/agents) for a comparison of the skill, CLI, and MCP server.
+
+<Cards num={3}>
+  <Card
+    icon={<Sparkles size="24" />}
+    title="Agent Skill"
+    href="/docs/api-and-data-platform/features/agent-skill"
+    arrow
+  />
+  <Card
+    icon={<Blocks size="24" />}
+    title="MCP Server"
+    href="/docs/api-and-data-platform/features/mcp-server"
+    arrow
+  />
+  <Card
+    icon={<Bot size="24" />}
+    title="Langfuse Assistant"
+    href="/docs/langfuse-assistant"
+    arrow
+  />
+</Cards>
+
+<Callout type="info" emoji="🚀">
+
+Want to try it? [**Install the Agent Skill**](/docs/api-and-data-platform/features/agent-skill) in your editor, or [**create a free account**](/cloud) and ask the [Langfuse Assistant](/docs/langfuse-assistant) about the [example project](/docs/demo).
+
+</Callout>
+
 ## Where to start?
 
 Setting up the full process of online tracing, prompt management, production evaluations to identify issues, and offline evaluations on datasets requires some time. This guide is meant to help you figure out what is most important for your use case.
@@ -122,6 +161,12 @@ Get up and running with Langfuse in minutes. Choose the path that best fits your
     icon={<ThumbsUp size="24" />}
     title="Setup Evaluations"
     href="/docs/evaluation/overview"
+    arrow
+  />
+  <Card
+    icon={<Sparkles size="24" />}
+    title="Connect an AI Agent"
+    href="/docs/api-and-data-platform/features/agent-skill"
     arrow
   />
 </Cards>

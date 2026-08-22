@@ -2,6 +2,7 @@ import {
   TextQuote,
   GitPullRequestArrow,
   ThumbsUp,
+  Sparkles,
   Database,
 } from "lucide-react";
 import { CornerBox } from "./ui/corner-box";
@@ -37,15 +38,26 @@ const features = [
   },
 ];
 
-const platformFeature = {
-  icon: Database,
-  title: "Platform",
-  items: [
-    "API-first architecture",
-    "Data exports to blob storage",
-    "Enterprise security and administration",
-  ],
-};
+const wideFeatures = [
+  {
+    icon: Sparkles,
+    title: "AI features",
+    items: [
+      "Agent skill for coding agents",
+      "MCP server for assistants",
+      "In-app Langfuse Assistant",
+    ],
+  },
+  {
+    icon: Database,
+    title: "Platform",
+    items: [
+      "API-first architecture",
+      "Data exports to blob storage",
+      "Enterprise security and administration",
+    ],
+  },
+];
 
 export const FeatureOverview = () => {
   return (
@@ -76,27 +88,29 @@ export const FeatureOverview = () => {
         </div>
       ))}
 
-      <div className="md:col-span-3 -mt-px -ml-px -mr-px">
-        <CornerBox className="flex relative z-0 flex-col p-0 min-h-0 h-full p-4">
-          <div className="flex items-center gap-3 mb-4">
-            <platformFeature.icon className="h-3.5 w-3.5 text-muted-foreground" />
-            <Text as="h3" size="m" className="mt-1 text-text-primary">
-              {platformFeature.title}
-            </Text>
-          </div>
-          <ul className="list-none flex flex-col gap-1.5">
-            {platformFeature.items.map((item, itemIndex) => (
-              <li key={itemIndex} className="flex items-start gap-2">
-                <span
-                  className="w-0.75 h-0.75 shrink-0 bg-text-tertiary"
-                  aria-hidden
-                />
-                <Text size="s">{item}</Text>
-              </li>
-            ))}
-          </ul>
-        </CornerBox>
-      </div>
+      {wideFeatures.map((feature) => (
+        <div key={feature.title} className="md:col-span-3 -mt-px -ml-px -mr-px">
+          <CornerBox className="flex relative z-0 flex-col p-0 min-h-0 h-full p-4">
+            <div className="flex items-center gap-3 mb-4">
+              <feature.icon className="h-3.5 w-3.5 text-muted-foreground" />
+              <Text as="h3" size="m" className="mt-1 text-text-primary">
+                {feature.title}
+              </Text>
+            </div>
+            <ul className="list-none flex flex-col gap-1.5">
+              {feature.items.map((item, itemIndex) => (
+                <li key={itemIndex} className="flex items-start gap-2">
+                  <span
+                    className="w-0.75 h-0.75 shrink-0 bg-text-tertiary"
+                    aria-hidden
+                  />
+                  <Text size="s">{item}</Text>
+                </li>
+              ))}
+            </ul>
+          </CornerBox>
+        </div>
+      ))}
     </div>
   );
 };
