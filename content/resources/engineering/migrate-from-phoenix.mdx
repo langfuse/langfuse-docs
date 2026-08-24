@@ -15,7 +15,8 @@ same-day change), then datasets, experiments, and prompts.
 
 Dynatrace [announced a definitive agreement to acquire Arize](https://www.dynatrace.com/news/press-release/dynatrace-to-acquire-arize/) (August 2026).
 Arize AX and Phoenix continue to operate as they do today. This guide is for teams that have
-already decided to move to Langfuse. For a product comparison, see
+already decided to move to Langfuse from **Phoenix**. If you are on Arize AX (spaces,
+`arize.otel.register()`), use [Migrate from Arize AX](/resources/engineering/migrate-from-arize-ax). For a product comparison, see
 [Langfuse vs. Arize AX / Phoenix](/resources/engineering/best-phoenix-arize-alternatives).
 
 **TL;DR:** Keep your OpenInference instrumentors. Replace `phoenix.otel.register()` with the
@@ -125,6 +126,10 @@ OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 Langfuse maps OpenTelemetry `user.id` / `session.id` (and `langfuse.user.id` /
 `langfuse.session.id`) when those attributes are set. HIPAA Cloud
 (`https://hipaa.cloud.langfuse.com`) is on Pro+ and needs a signed BAA before sending PHI.
+
+If Phoenix showed an agent loop and tools around the LLM call, and Langfuse only shows the
+LLM call, [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) is filtering
+those extra spans.
 
 </Details>
 

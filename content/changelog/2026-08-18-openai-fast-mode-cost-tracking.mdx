@@ -1,0 +1,37 @@
+---
+date: 2026-08-18
+title: Cost tracking support for OpenAI Fast mode
+description: Track OpenAI Fast mode costs automatically, including GPT-5.6 long-context rates.
+author: Hassieb
+canonical: /docs/observability/features/token-and-cost-tracking#pricing-tiers
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, Gauge } from "lucide-react";
+
+<ChangelogHeader />
+
+You can now track OpenAI Fast mode spend accurately in Langfuse without ingesting costs manually. For supported OpenAI models, Langfuse automatically selects Fast mode pricing when a generation's model parameters contain `service_tier: "fast"` or `service_tier: "priority"`.
+
+- See the Fast mode surcharge in each generation's cost breakdown.
+- Keep aggregate cost dashboards accurate when you mix Standard and Fast mode traffic.
+- Apply the correct short- or long-context rate for GPT-5.6 calls.
+
+[OpenAI Fast mode](https://developers.openai.com/api/docs/guides/fast-mode) offers faster inference at a per-token premium. OpenAI accepts both `fast` and the previous `priority` value for `service_tier`; for GPT-5.6 and earlier models, the response reports `priority` for either request value. Langfuse therefore matches both values. For GPT-5.6 models, it combines that service-tier match with input usage to select from the full Standard/Fast and short/long-context pricing matrix.
+
+Pricing tiers are now more flexible for custom model definitions, too. In addition to matching numeric thresholds across usage details, a tier can match one or more exact values from any top-level model-parameter or metadata key. For example, you can price by the `service_tier` model parameter or top-level metadata keys such as `region` and `model_provider`. Configure these conditions under **Project Settings > Models**.
+
+<Cards num={2}>
+  <Card
+    title="Pricing tier documentation"
+    href="/docs/observability/features/token-and-cost-tracking#pricing-tiers"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="OpenAI Fast mode"
+    href="https://developers.openai.com/api/docs/guides/fast-mode"
+    icon={<Gauge />}
+    arrow
+  />
+</Cards>
