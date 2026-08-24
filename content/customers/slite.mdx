@@ -153,27 +153,16 @@ behavior an answer needs to exhibit, and grades against that with an
   image="/images/customers/slite/christophe-pasquier.jpg"
 />
 
-This now lives as a managed dataset in Langfuse with roughly 100 questions, first
+This now lives as a managed [dataset](/docs/evaluation/experiments/datasets) in Langfuse with roughly 100 questions, first
 assembled from Christophe's original spreadsheet, now growing from real user
 thumbs-up/thumbs-down feedback and manual reviews, running against every change
 to the agent in [CI](/docs/evaluation/experiments/experiments-ci-cd). The runs
 are [evaluated](/docs/evaluation/overview) through an LLM-as-a-judge that
-compares the specified criteria against the AI-generated output.
+compares the specified criteria against the AI-generated output. This allowed the team to go from quarterly to weekly experiments.
 
-It's not a hard merge gate. With non-deterministic outputs, and score, latency,
-and cost all trading off against each other, Slite treats it as a fast,
-trustworthy signal rather than a red/green flag. But it's the thing that tells a
-developer, before shipping, whether a reworked engine still performs at least as
-well as what's already in production.
-
-## Weekly experiments, not quarterly ones
-
-Before the dataset existed, trying anything new, a different model, or a change
-to how the agent itself is built, was a multi-month decision, because validating
-it took real, manual effort. Now it's a routine weekly check. From swapping
-models to changing the whole implementation, Slite ships these changes with
-confidence, a clear quality signal from the experiment runs, and, most
-importantly, speed.
+That's roughly a **12x increase** in how often Slite can afford to test a new
+idea, and, just as importantly, a shift from a gut-feel discussion to one
+grounded in a number everyone trusts.
 
 <CustomerQuote
   quote="Back when we had our manual excel sheet, we were trying something new every three, four months maybe... Now, once per week we can try something. We changed a few variables, we run the test suite, and we already know if it's worth it to pursue or not."
@@ -183,9 +172,11 @@ importantly, speed.
   image="/images/customers/slite/charley-david.jpg"
 />
 
-That's roughly a **12x increase** in how often Slite can afford to test a new
-idea, and, just as importantly, a shift from a gut-feel discussion to one
-grounded in a number everyone trusts.
+It's not a hard merge gate. With non-deterministic outputs, and score, latency,
+and cost all trading off against each other, Slite treats it as a fast,
+trustworthy signal rather than a red/green flag. But it's the thing that tells a
+developer, before shipping, whether a reworked engine still performs at least as
+well as what's already in production.
 
 Slite is closing the [AI Engineering loop](/academy/ai-engineering-loop) with
 this setup, and found an effective way to ship changes frequently.
@@ -204,15 +195,9 @@ The most forward-looking piece of Slite's setup is a background "retrospective"
 agent that samples a percentage of production traces via the
 [Langfuse API](/docs/api-and-data-platform/overview), reads the full trace, and
 writes up what looked noteworthy, both good and bad. A developer then reviews
-those write-ups in aggregate, not trace by trace.
-
-<CustomerQuote
-  quote="It's also why we need the detailed traces. After a certain percentage of questions we start a retrospective agent that looks at the graph and tells us if there is something noteworthy. We aggregate all those retrospectives into something more condensed... we found some very interesting stuff to fix that way, in volumes we wouldn't see otherwise."
-  name="Charley David"
-  role="Principal Engineer"
-  company="Slite"
-  image="/images/customers/slite/charley-david.jpg"
-/>
+those write-ups in aggregate, not trace by trace. This already allowed Charley
+and the team to find places where the agent went off, at a volume that would
+not have been possible to handle otherwise.
 
 <Frame fullWidth className="w-full">
   ![Diagram of Slite's retrospective review pipeline: traces logged in Langfuse, a retrospective agent sampling via the API, and a developer reading an aggregated digest](/images/customers/slite/slite-retrospective-trace-review.png)
@@ -220,8 +205,7 @@ those write-ups in aggregate, not trace by trace.
 
 At Slite's volume, roughly 10,000 questions a day, each generating somewhere
 between 5 and 25 observations, with some running many more tool calls than that,
-there's no realistic way to review that by hand. This is observability being
-consumed by an agent, not just a dashboard.
+there's no realistic way to review that by hand.
 
 Langfuse's API-first approach, [CLI](/docs/api-and-data-platform/features/cli),
 [MCP server](/docs/api-and-data-platform/features/mcp-server), and
@@ -255,7 +239,7 @@ today), to proposing changes across an entire workspace, to eventually an agent
 trusted enough to act without per-edit approval, once its track record earns
 that trust.
 
-None of that is viable without the evaluation loop scaling alongside it.
+None of that is viable without the [evaluation loop](/academy/ai-engineering-loop) scaling alongside it.
 Sustaining quality while scope keeps expanding is key. With new models
 shipping monthly and the agent's footprint only growing, Charley expects
 Slite's Langfuse value to keep increasing right alongside it: more traces
