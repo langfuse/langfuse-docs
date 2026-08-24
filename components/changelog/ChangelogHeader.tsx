@@ -17,7 +17,6 @@ export const ChangelogHeader = () => {
     description,
     ogImage,
     ogVideo,
-    ogVideoZoom,
     gif,
     date,
     author,
@@ -84,23 +83,16 @@ export const ChangelogHeader = () => {
               frontMatter.ogImage?.endsWith(".gif")
             }
           />
-          <div
+          <Video
+            src={ogVideo}
+            poster={headerImage}
+            gifStyle
             className={cn(
-              "absolute inset-0 size-full origin-center",
+              "absolute inset-0 size-full bg-transparent shadow-none",
               !videoReady && "invisible",
             )}
-            style={
-              ogVideoZoom ? { transform: `scale(${ogVideoZoom})` } : undefined
-            }
-          >
-            <Video
-              src={ogVideo}
-              poster={headerImage}
-              gifStyle
-              className="size-full bg-transparent shadow-none"
-              onCanPlay={() => setVideoReady(true)}
-            />
-          </div>
+            onCanPlay={() => setVideoReady(true)}
+          />
         </div>
       ) : ogVideo ? (
         <Video src={ogVideo} aspectRatio={16 / 9} gifStyle />

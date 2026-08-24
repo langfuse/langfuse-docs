@@ -13,7 +13,6 @@ export type ChangelogFrontMatter = {
   description?: string;
   ogImage?: string;
   ogVideo?: string;
-  ogVideoZoom?: number;
   gif?: string;
   date?: string;
   author?: string;
