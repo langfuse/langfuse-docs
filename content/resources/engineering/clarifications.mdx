@@ -34,6 +34,14 @@ Yes. [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evalua
 
 Evaluators come from a managed catalog maintained with partners like Ragas, or you write the judge prompt yourself with variable placeholders, previewed live against recent data from your project.
 
+## Can Langfuse create eval datasets from production traces? [#datasets-from-traces]
+
+Yes, in one click. **Add to dataset** on any observation of a production trace turns it into a [dataset](/docs/evaluation/experiments/datasets) item, and the observations table supports batch-adding filtered observations. Datasets also import via CSV in the UI, SDK, or API.
+
+## Does Langfuse run experiments in CI/CD? [#ci-cd]
+
+Yes. The [langfuse/experiment-action](https://github.com/langfuse/experiment-action) GitHub Action runs [experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd) and gates changes on evaluation results — no custom infrastructure. Experiments are plain Python or TypeScript scripts via the SDK, so any CI system can run them.
+
 ## Does Langfuse have annotation queues? [#annotation-queues]
 
 Yes. [Annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) are a structured human-review workflow for traces, observations, and sessions.
@@ -43,6 +51,10 @@ You can assign users to queues in the UI and via API, and add items from the UI 
 ## Does Langfuse include prompt management? [#prompt-management]
 
 Yes. [Prompt management](/docs/prompt-management/overview) stores, versions, labels, and serves prompts from Langfuse, with client-side SDK caching so a fetch after the first hit does not add latency.
+
+## Can non-engineers work in Langfuse? [#non-engineers]
+
+Yes. Product managers and domain experts iterate in the [playground](/docs/prompt-management/features/playground), edit and deploy prompt versions via [labels](/docs/prompt-management/features/prompt-version-control) that applications fetch at runtime — no code change or redeploy — run [experiments from the UI](/docs/evaluation/experiments/experiments-via-ui), and review outputs in [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues).
 
 ## Can you self-host Langfuse without an Enterprise contract? [#self-hosting]
 
@@ -67,6 +79,10 @@ Langfuse ships five roles — Owner, Admin, Member, Viewer, and None — assigne
 ## What production monitoring does Langfuse include? [#production-monitoring]
 
 Langfuse includes [custom dashboards](/docs/metrics/features/custom-dashboards), threshold [alerts](#alerting), score analytics, [Pulse](/docs/observability/features/pulse) (a chart strip over the observations table that surfaces count, cost, and latency outliers), and the Langfuse Assistant on Cloud (public beta) for questions about project data.
+
+## Does Langfuse scale to high trace volumes? [#scale]
+
+Yes. Langfuse runs on [ClickHouse](/blog/joining-clickhouse), and the [v4 data model](/docs/v4) writes every observation once to a wide, immutable table built for analytical queries over high-volume trace data. Cloud and self-hosted run the same engine, and SDK-level [sampling](/docs/observability/features/sampling) controls ingestion volume at the source.
 
 ## Does Langfuse host and run agents? [#agent-runtime]
 
