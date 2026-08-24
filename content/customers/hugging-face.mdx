@@ -17,6 +17,7 @@ showInCustomerIndex: true
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
 import { CustomerQuote } from "@/components/customers/CustomerQuote";
+import { ImpactChart } from "@/components/customers/ImpactChart";
 import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
 <BlogHeader
@@ -27,24 +28,27 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
   date="August 18, 2026"
 />
 
-<div className="corner-box-corners not-prose relative my-8 border border-line-structure bg-surface-1 px-6 py-8 text-text-primary md:px-12 md:py-10">
-  <h2 id="summary" className="m-0 font-mono text-sm font-medium uppercase tracking-widest text-text-secondary">Summary</h2>
+## Summary [#summary]
 
-  <ol className="m-0 mt-7 list-none space-y-6 p-0">
-    <li className="grid grid-cols-[auto_1fr] items-start gap-4 md:gap-6">
-      <span className="mt-1 inline-flex h-8 min-w-10 items-center justify-center bg-surface-cta-primary px-2 font-mono text-base font-medium leading-none text-text-primary">01</span>
-      <p className="m-0 text-sm leading-6">Niels Rogge built an overnight agent that finds open-source models outside the Hugging Face Hub and helps authors publish them.</p>
-    </li>
-    <li className="grid grid-cols-[auto_1fr] items-start gap-4 md:gap-6">
-      <span className="mt-1 inline-flex h-8 min-w-10 items-center justify-center bg-surface-cta-primary px-2 font-mono text-base font-medium leading-none text-text-primary">02</span>
-      <p className="m-0 text-sm leading-6">Langfuse traces each agent run grouped by arXiv ID. Niels can inspect every prompt, output, LLM call and extraction step in one place instead of debugging half-blind.</p>
-    </li>
-    <li className="grid grid-cols-[auto_1fr] items-start gap-4 md:gap-6">
-      <span className="mt-1 inline-flex h-8 min-w-10 items-center justify-center bg-surface-cta-primary px-2 font-mono text-base font-medium leading-none text-text-primary">03</span>
-      <p className="m-0 text-sm leading-6">That visibility exposed an unreliable classifier and missing GitHub README context. After two rounds of error analysis and resulting fixes, the agent received just two negative comments across thousands of issues and pull requests.</p>
-    </li>
-  </ol>
-</div>
+<ImpactChart
+  items={[
+    {
+      area: "Overnight model-discovery agent",
+      impact:
+        "Niels Rogge built an overnight agent that finds open-source models outside the Hugging Face Hub and helps authors publish them.",
+    },
+    {
+      area: "Full visibility per paper",
+      impact:
+        "Langfuse traces each agent run grouped by arXiv ID. Niels can inspect every prompt, output, LLM call and extraction step in one place instead of debugging half-blind.",
+    },
+    {
+      area: "Reliable outreach at scale",
+      impact:
+        "That visibility exposed an unreliable classifier and missing GitHub README context. After two rounds of error analysis and resulting fixes, the agent received just two negative comments across thousands of issues and pull requests.",
+    },
+  ]}
+/>
 
 ## Improving open-source model discovery
 
