@@ -67,7 +67,7 @@ export const ChangelogHeader = () => {
       </div>
 
       {showOgInHeader === false ? null : ogVideo ? (
-        <Video src={ogVideo} gifStyle />
+        <Video src={ogVideo} aspectRatio={16 / 9} gifStyle />
       ) : ogImage ? (
         <Image
           src={(gif ?? ogImage) as string}
