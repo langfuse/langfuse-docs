@@ -26,8 +26,19 @@ Assistant runs are durable jobs. The web service admits and enqueues them. The w
 | Instance switch       | `LANGFUSE_IN_APP_AGENT_ENABLED=true` on web and worker. Unset or `false` hides the Assistant.                                                         |
 | Organization gate     | An organization owner or admin enables **AI Features**. Required for the Assistant and for Ask AI.                                                    |
 | Langfuse AI model     | One instance-wide model: Amazon Bedrock (default) or Anthropic Messages. Set it on web and worker.                                                    |
+| Langfuse MCP          | Worker must reach this instance's MCP server. See [Langfuse MCP](#langfuse-mcp).                                                                      |
 | Worker consumer       | `QUEUE_CONSUMER_IN_APP_AGENT_RUN_QUEUE_IS_ENABLED=true` on the execution worker. The code default is `false`.                                         |
 | Sandbox (recommended) | `LANGFUSE_IN_APP_AGENT_SANDBOX_PROVIDER=lambda-microvm` plus image, execution role, and Region. Leave unset only as a fallback (Langfuse tools only). |
+
+## Langfuse MCP [#langfuse-mcp]
+
+The Assistant uses this instance's native [Langfuse MCP server](/docs/api-and-data-platform/features/mcp-server#set-up) for Langfuse tools. You do not install a separate MCP process. The worker derives the endpoint from `NEXTAUTH_URL` as `{NEXTAUTH_URL}/api/public/mcp`.
+
+Confirm:
+
+1. `NEXTAUTH_URL` is set on web (public URL the browser uses) and the worker can call the MCP endpoint.
+2. In Docker Compose or Kubernetes, `localhost` inside the worker is not the web service. Point the worker at the web service URL, for example `http://langfuse-web:3000`.
+3. If the MCP `Host` header is not the hostname in web's `NEXTAUTH_URL` (Docker service name, Kubernetes service, reverse proxy), set `LANGFUSE_MCP_ALLOWED_HOSTS` on web to that exact hostname. Otherwise the worker logs `Invalid Host header` and `Error initializing agent`. See [self-hosted MCP setup](/docs/api-and-data-platform/features/mcp-server#set-up) and [`LANGFUSE_MCP_ALLOWED_HOSTS`](/self-hosting/configuration).
 
 ## Enable the Assistant [#enable-the-assistant]
 
@@ -265,6 +276,9 @@ langfuse:
     #   value: claude-opus-4-8
     # - name: LANGFUSE_AI_API_KEY
     #   value: sk-ant-...
+    # If the worker reaches web via an internal hostname, also set:
+    # - name: LANGFUSE_MCP_ALLOWED_HOSTS
+    #   value: langfuse-web
   worker:
     pod:
       additionalEnv:
@@ -304,6 +318,10 @@ Confirm `LANGFUSE_IN_APP_AGENT_ENABLED=true` is set on both the web and worker s
 ### Runs remain queued or time out
 
 Confirm the worker is running, shares Redis with the web service, and has `QUEUE_CONSUMER_IN_APP_AGENT_RUN_QUEUE_IS_ENABLED=true`. A queued run fails with a queue timeout when no worker claims it.
+
+### Runs fail with Error initializing agent [#runs-fail-with-error-initializing-agent]
+
+The worker could not connect to this instance's MCP server. Confirm the worker can reach `{NEXTAUTH_URL}/api/public/mcp`. In Docker Compose, `localhost` inside the worker is not the web container. Use the web service URL on the worker and add that hostname to `LANGFUSE_MCP_ALLOWED_HOSTS` on web. A `403` with `Invalid Host header` means the allowlist is missing. See [Langfuse MCP](#langfuse-mcp).
 
 ### The UI reports that the assistant model is not configured
 
