@@ -22,9 +22,11 @@ type CustomerScreenshotSlide = {
 export function CustomerScreenshotCarousel({
   slides,
   className,
+  aspectClassName,
 }: {
   slides: CustomerScreenshotSlide[];
   className?: string;
+  aspectClassName?: string;
 }) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
@@ -62,14 +64,22 @@ export function CustomerScreenshotCarousel({
         <CarouselContent className="-ml-4">
           {slides.map((slide) => (
             <CarouselItem key={slide.src} className="pl-4">
-              <div className="overflow-hidden rounded border border-line-structure bg-surface-bg shadow-sm">
+              <div
+                className={cn(
+                  "overflow-hidden rounded border border-line-structure bg-surface-bg shadow-sm",
+                  aspectClassName,
+                )}
+              >
                 <Image
                   src={slide.src}
                   alt={slide.alt}
                   width={5360}
                   height={3784}
                   sizes="(max-width: 768px) calc(100vw - 4rem), 960px"
-                  className="block h-auto w-full"
+                  className={cn(
+                    "block w-full",
+                    aspectClassName ? "h-full object-cover" : "h-auto",
+                  )}
                   loading="eager"
                   unoptimized
                 />
