@@ -17,6 +17,7 @@ jobs:
         with:
           token: ${{ secrets.UPDATE_DOCS_MAIN_BRANCH_PAT }}
           persist-credentials: false
+          ref: main
 
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -35,4 +36,4 @@ jobs:
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
           git add src/github-stars.ts
-          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update cached GitHub star count" && git push "https://x-access-token:${UPDATE_DOCS_MAIN_BRANCH_PAT}@github.com/${GITHUB_REPOSITORY}.git" "${GITHUB_REF#refs/heads/}")
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update cached GitHub star count" && git push "https://x-access-token:${UPDATE_DOCS_MAIN_BRANCH_PAT}@github.com/${GITHUB_REPOSITORY}.git" main)
