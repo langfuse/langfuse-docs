@@ -3,8 +3,10 @@
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { useState } from "react";
 import { Authors } from "../Authors";
 import { Video } from "../Video";
+import { cn } from "@/lib/utils";
 import { useChangelogFrontMatter } from "./ChangelogFrontMatterContext";
 
 export const ChangelogHeader = () => {
@@ -31,6 +33,8 @@ export const ChangelogHeader = () => {
 
   // Derive slug from current path for the back-link anchor
   const slug = pathname.replace(/^\/changelog\//, "");
+  const [videoReady, setVideoReady] = useState(false);
+  const headerImage = (gif ?? ogImage) as string | undefined;
 
   return (
     <div className="mt-4 md:mt-10 flex flex-col gap-2 md:gap-4">
@@ -66,11 +70,35 @@ export const ChangelogHeader = () => {
         </div>
       </div>
 
-      {showOgInHeader === false ? null : ogVideo ? (
+      {showOgInHeader === false ? null : ogVideo && headerImage ? (
+        <div className="relative aspect-video overflow-hidden rounded border shadow-lg bg-surface-bg">
+          <Image
+            src={headerImage}
+            alt={title ?? ""}
+            fill
+            sizes="(min-width: 768px) 768px, 100vw"
+            className="object-cover"
+            unoptimized={
+              frontMatter.gif !== undefined ||
+              frontMatter.ogImage?.endsWith(".gif")
+            }
+          />
+          <Video
+            src={ogVideo}
+            poster={headerImage}
+            gifStyle
+            className={cn(
+              "absolute inset-0 size-full bg-transparent shadow-none",
+              !videoReady && "invisible",
+            )}
+            onCanPlay={() => setVideoReady(true)}
+          />
+        </div>
+      ) : ogVideo ? (
         <Video src={ogVideo} aspectRatio={16 / 9} gifStyle />
-      ) : ogImage ? (
+      ) : headerImage ? (
         <Image
-          src={(gif ?? ogImage) as string}
+          src={headerImage}
           alt={title ?? ""}
           width={1200}
           height={630}
