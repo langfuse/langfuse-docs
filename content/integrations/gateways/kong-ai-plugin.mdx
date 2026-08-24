@@ -145,7 +145,7 @@ curl -X POST http://localhost:8001/plugins \
 | -------------------------------------- | ------ | ------------ | ---------------------------------------------------------------------------------------------------------------- |
 | `traces_endpoint`                      | string | -            | Langfuse OTLP/HTTP traces endpoint. Required.                                                                    |
 | `headers.Authorization`                | string | -            | `Basic <base64 of pk-lf-...:sk-lf-...>`. Required.                                                               |
-| `headers.x-langfuse-ingestion-version` | string | -            | Set to `4` for real-time ingestion on Langfuse v4. Without it, data can appear with a delay of up to 10 minutes. |
+| `headers.x-langfuse-ingestion-version` | string | -            | Set to `4` for real-time ingestion on Langfuse v4. Without it, data can appear with a delay of up to 15 minutes. |
 | `sampling_rate`                        | number | -            | Fraction of requests to trace. Supersedes the global `tracing_sampling_rate` when set.                           |
 | `propagation.default_format`           | string | `w3c`        | Trace context format used when no tracing header is found on the incoming request.                               |
 
@@ -337,7 +337,7 @@ A community-maintained Kong plugin, [kong-langfuse-tracing](https://github.com/R
   The plugin posts to `/api/public/ingestion`, which is
   [deprecated](/faq/all/deprecated-api-migration#ingestion) in favor of OTLP
   ingestion. It continues to work, but data ingested this way can appear with a
-  delay of up to 10 minutes on Langfuse v4. Prefer the OpenTelemetry setup above
+  delay of up to 15 minutes on Langfuse v4. Prefer the OpenTelemetry setup above
   for new deployments.
 </Callout>
 

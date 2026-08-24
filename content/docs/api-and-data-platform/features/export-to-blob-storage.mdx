@@ -4,6 +4,8 @@ description: Export enriched observations, scores, and legacy traces and observa
 sidebarTitle: Export to Blob Storage
 ---
 
+import { V4CutoverDate } from "@/components/V4CutoverDate";
+
 # Export to blob storage
 
 <AvailabilityBanner
@@ -25,8 +27,8 @@ Schedule exports to Amazon S3, S3-compatible storage, Google Cloud Storage, or A
 ### Create the integration
 
 1. Open **Project Settings > Integrations > Blob Storage**.
-2. Select your provider and enter its bucket, path, and credentials.
-3. Choose the file format, schedule, history, and field groups.
+2. Select your provider and enter its bucket, path, and credentials. Self-hosters can find per-vendor bucket and credential setup on the [blob storage deployment page](/self-hosting/deployment/infrastructure/blobstorage).
+3. Choose the file format, schedule, export mode, and field groups.
 4. Enable the integration and save. The first run starts shortly afterward.
 
 <Frame className="my-10" fullWidth>
@@ -35,12 +37,12 @@ Schedule exports to Amazon S3, S3-compatible storage, Google Cloud Storage, or A
 
 <span id="export-modes" />
 
-| Setting             | Choices and behavior                                                                                                                                                                                                                             |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Provider and access | Amazon S3, S3-compatible storage, Google Cloud Storage, or Azure Blob Storage.                                                                                                                                                                   |
-| Format              | Parquet (default), CSV, JSON, or JSONL. Text formats can be gzip-compressed; Parquet uses its own encoding and compression.                                                                                                                      |
-| Schedule            | Every 20 minutes, hourly, daily, or weekly. Each run exports one time window.                                                                                                                                                                    |
-| History             | **Full history** starts at the project's earliest data; **From setup date** starts when the integration is enabled; **From custom date** starts at a selected date. Changing this setting resets the sync position and re-scans from that point. |
+| Setting             | Choices and behavior                                                                                                                                                                                                                                        |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Provider and access | **AWS S3**, **S3 Compatible Storage**, or **Azure Blob Storage**. Google Cloud Storage is reached through S3 Compatible Storage: set the endpoint to `https://storage.googleapis.com` and authenticate with an HMAC key pair rather than a service account. |
+| Format              | Parquet (default), CSV, JSON, or JSONL. Text formats can be gzip-compressed; Parquet uses its own encoding and compression.                                                                                                                                 |
+| Schedule            | Every 20 minutes, hourly, daily, or weekly. Each run exports one time window.                                                                                                                                                                               |
+| Export Mode         | **Full history** starts at the project's earliest data; **From setup date** starts when the integration is enabled; **From custom date** starts at a selected date. Changing this setting resets the sync position and re-scans from that point.            |
 
 <span id="file-formats" />
 
@@ -160,6 +162,17 @@ Make manifest processing idempotent. Provider events can be delivered more than 
 
 ## Troubleshooting [#monitor-and-reconfigure]
 
+The integration settings page shows a status badge:
+
+| Badge        | Meaning                                                   |
+| ------------ | --------------------------------------------------------- |
+| **Active**   | Enabled and synced; the next run is scheduled.            |
+| **Running**  | A run is in progress.                                     |
+| **Queued**   | A run is due and waiting.                                 |
+| **Pending**  | Enabled but has not run yet.                              |
+| **Disabled** | Turned off.                                               |
+| **Error**    | The last run failed; the message and timestamp are shown. |
+
 - <span id="how-exports-run" />[Export timing, backfills, and retries](/faq/all/blob-storage-export-timing-and-retries) — Understand delays, catch-up bursts, failed runs, and retry behavior.
 - <span id="empty-files" />[Empty export files](/faq/all/blob-storage-empty-files) — Learn why files can be empty and how pipelines should handle them.
 - <span id="export-status" /><span id="re-exporting" />[Configuration changes, errors, and re-exporting](/faq/all/blob-storage-config-changes-and-errors) — Validate changes, clear sticky errors, or export historic data again.
@@ -169,18 +182,33 @@ Make manifest processing idempotent. Provider events can be delivered more than 
 <Callout type="warning">
   Complete this upgrade if your integration uses **Traces and observations
   (legacy)** or your bucket receives `traces/` and `observations/` files. On
-  Langfuse Cloud, remaining legacy exports switch at the v4 cutover. On
-  self-hosted v4, the legacy source stops producing data after the server
-  switches to `events_only`.
+  Langfuse Cloud, remaining legacy exports switch on <V4CutoverDate />. On self-hosted v4, the legacy source stops
+  producing data after the server switches to `events_only`.
 </Callout>
+
+### What changes in the exported data [#legacy-field-differences]
+
+The legacy source writes observation data to `observations/` and trace context to a separate `traces/` file, which consumers join on `trace_id`. The enriched source writes a single `observations_v2/` file in which each observation row already carries its trace context.
+
+[Field groups](#export-field-groups) select columns in both observation files. Three groups contain fewer fields in the legacy `observations/` file; the rest are identical:
+
+| Group           | `observations_v2/`                                                                                                                  | `observations/`                                                             |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `basic`         | `bookmarked`, `environment`, `is_root_observation`, `level`, `name`, `public`, `session_id`, `status_message`, `user_id`, `version` | `environment`, `level`, `name`, `status_message`, `version`                 |
+| `usage`         | `cost_details`, `total_cost`, `usage_details`, `usage_pricing_tier_id`, `usage_pricing_tier_name`                                   | Same, without `usage_pricing_tier_id`                                       |
+| `trace_context` | `release`, `tags`, `trace_name`                                                                                                     | No effect; these fields are in the `traces/` file (`name` for `trace_name`) |
+
+The `traces/` file itself has a fixed schema that field groups do not apply to. Its trace-level `input`, `output`, `metadata`, `timestamp`, and `version` have no direct equivalent in `observations_v2/`, where identically named fields hold observation-level data.
+
+For every column in each file, see the [legacy field reference](/docs/api-and-data-platform/features/blob-storage-export-fields#legacy-export-paths).
 
 ### Switch to enriched observations [#upgrade-path]
 
 Most integrations can switch directly once their consumer supports the enriched layout:
 
-On self-hosted Langfuse v4, first [switch the server to `dual` write mode](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#step-3) with the Langfuse v4 preview enabled and [complete the historic data migration](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#historic-data).
+On self-hosted Langfuse v4, first [switch the server to `dual` write mode](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#step-3) and [complete the historic data migration](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#historic-data).
 
-Enriched export sources are unavailable in `legacy` mode or when the Langfuse v4 preview is disabled. Switch the integration before the server's [`events_only` cutover](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#cutover).
+Enriched export sources require the deployment to write the v4 events table, so they are unavailable only in `legacy` write mode. Legacy export sources are unavailable in `events_only`, which is the default. Switch the integration before the server's [`events_only` cutover](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#cutover).
 
 1. **Prepare the new consumer.** Process `observations_v2/` and `scores/` from each manifest's `files[].key`. Use the [enriched field reference](/docs/api-and-data-platform/features/blob-storage-export-fields#enriched-observations).
 2. **Switch the export.** Select **Enriched observations (recommended)**.
@@ -201,4 +229,4 @@ Do not load both observation layouts into the same production dataset. Check the
 
 - **All deployments:** `traces/` and `observations/` stop receiving files after the switch, including empty files. Use `manifests/` as the run-completion signal.
 - **Langfuse Cloud:** Ignore `DEPRECATION_NOTICE.txt` when processing exports; it is not part of a run.
-- **Self-hosted Langfuse v4:** Optional dual-layout validation is available only during `dual` write mode with the Langfuse v4 preview enabled.
+- **Self-hosted Langfuse v4:** `dual` is the only write mode in which both layouts are selectable, so the optional dual-layout validation above requires it.

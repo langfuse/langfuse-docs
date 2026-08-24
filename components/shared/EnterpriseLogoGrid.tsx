@@ -8,6 +8,7 @@ import circlebackLogo from "../home/img/circleback.svg";
 import ciscoLogo from "../home/img/cisco.svg";
 // import expediaGroupLogo from "../home/img/expedia.svg";
 import freeeLogo from "../home/img/freee.svg";
+import huggingfaceLogo from "../home/img/huggingface.svg";
 import intuitLogo from "../home/img/intuit.svg";
 import khanacademyLogo from "../home/img/khan.svg";
 import magicPatternsLogo from "../home/img/magic.svg";
@@ -17,7 +18,6 @@ import rampLogo from "../home/img/ramp.svg";
 import rocketMoneyLogo from "../home/img/rocket-money.svg";
 import samsaraLogo from "../home/img/samsara.svg";
 import sumupLogo from "../home/img/sumup.svg";
-import telusLogo from "../home/img/telus.svg";
 import twilioLogo from "../home/img/twilio.svg";
 import { cn } from "@/lib/utils";
 import { LinkBox } from "@/components/ui/link-box";
@@ -55,8 +55,9 @@ const companies: CompanyLogo[] = [
     customerStoryPath: "/users/khan-academy",
   },
   {
-    name: "Telus",
-    logo: telusLogo,
+    name: "Hugging Face",
+    logo: huggingfaceLogo,
+    customerStoryPath: "/users/hugging-face",
   },
   {
     name: "Intuit",

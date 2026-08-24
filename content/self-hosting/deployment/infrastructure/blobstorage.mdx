@@ -201,7 +201,7 @@ LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLE
 
 [MinIO](https://min.io/) and its commercial distribution [AIStor](https://www.min.io/product/aistor) are object storage servers that are compatible with the S3 API.
 They are a popular choice for on-premise deployments and local development.
-Langfuse uses MinIO for local development and as a default in our [Docker Compose](/self-hosting/deployment/docker-compose) and [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) deployment options.
+Langfuse uses MinIO for local development and as a default in our [Docker Compose](/self-hosting/deployment/docker-compose) deployment option. The [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) chart bundled MinIO up to chart version `v1.x` and bundles SeaweedFS from chart `v2.0.0` onwards.
 
 #### Example Configuration
 
@@ -463,7 +463,7 @@ Validation behavior:
 - **Connection-time**: the S3 SDK's HTTP handler and the Azure SDK's request policy re-validate the resolved IP just before each request, so a hostname whose DNS answer changes after save is still blocked.
 - **Cloud**: validation is strict and cannot be relaxed.
 - **Self-hosted**: validation activates when at least one of the allowlist environment variables below is configured. This keeps backward compatibility with internal MinIO and Azurite deployments on private networks. The default will become strict in a future major release.
-- **GCS** and **OCI** are not supported as targets for the blob storage _integration_ (the native object storage integrations configured via environment variables are unaffected).
+- The _integration_ offers three providers: **AWS S3**, **S3 Compatible Storage**, and **Azure Blob Storage**. There is no native **GCS** or **OCI** client, so neither can be selected directly. Google Cloud Storage still works as an export target through **S3 Compatible Storage**: create an HMAC key as described under [Compatibility Mode](#google-cloud-storage-compatibility-mode), then set the endpoint to `https://storage.googleapis.com`. That host is validated like any other S3-compatible endpoint. The native object storage integrations configured via environment variables are unaffected.
 
 ### Self-hosted allowlist environment variables
 

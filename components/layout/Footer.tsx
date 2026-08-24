@@ -78,6 +78,7 @@ const menuItems: {
     heading: "Company",
     items: [
       { name: "About Us", href: "/about" },
+      { name: "Partners", href: "/partners" },
       { name: "Careers", href: "/careers" },
       { name: "Handbook", href: "/handbook" },
       { name: "Press", href: "/press" },

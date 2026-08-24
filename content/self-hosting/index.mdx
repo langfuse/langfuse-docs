@@ -31,15 +31,37 @@ This is recommended for testing and low-scale deployments and lacks high-availab
 
 ### Production-scale deployments
 
-For production and high-availability deployments, we recommend one of the following options:
+For production-scale deployments, we recommend one of the following options:
 
 - [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm)
 - [AWS (Terraform)](/self-hosting/deployment/aws)
 - [Azure (Terraform)](/self-hosting/deployment/azure)
 - [GCP (Terraform)](/self-hosting/deployment/gcp)
-- [Railway](/self-hosting/deployment/railway)
+- [Render](/self-hosting/deployment/render) (community)
+- [Railway (v3)](/self-hosting/deployment/railway) (community)
 
-## Architecture
+### Official and Community Support [#support]
+
+Deployment options differ in who maintains and tests the deployment tooling they rely on:
+
+| Option                                                        | Support Level |
+| ------------------------------------------------------------- | ------------- |
+| [Docker Compose](/self-hosting/deployment/docker-compose)     | Official      |
+| [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) | Official      |
+| [AWS (Terraform)](/self-hosting/deployment/aws)               | Official      |
+| [Azure (Terraform)](/self-hosting/deployment/azure)           | Official      |
+| [GCP (Terraform)](/self-hosting/deployment/gcp)               | Official      |
+| [Render](/self-hosting/deployment/render)                     | Community     |
+| [Railway](/self-hosting/deployment/railway)                   | Community     |
+
+Officially supported options are built on deployment tooling that the Langfuse team maintains in the [Langfuse GitHub organization](https://github.com/langfuse): the `docker-compose.yml` in [langfuse/langfuse](https://github.com/langfuse/langfuse), the [langfuse-k8s](https://github.com/langfuse/langfuse-k8s) Helm chart, and the `langfuse-terraform-*` modules.
+The Render Blueprint and the Railway template are maintained in third-party repositories, so they follow the community support level.
+
+import SelfHostSupportLevels from "@/components-mdx/self-host-support-levels.mdx";
+
+<SelfHostSupportLevels />
+
+## Architecture [#architecture]
 
 Langfuse only depends on open source components and can be deployed locally, on cloud infrastructure, or on-premises.
 

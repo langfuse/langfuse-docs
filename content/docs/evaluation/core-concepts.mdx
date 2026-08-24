@@ -58,6 +58,69 @@ Evaluation methods are the functions that score traces, observations, sessions, 
 
 When setting up new evaluation methods, you can use [Score Analytics](/docs/evaluation/scores/score-analytics) to analyze or sense-check the scores you produce.
 
+## Online evaluation [#online-evaluation]
+
+For online evaluation, create a rule to match incoming production observations. The rule triggers its attached evaluators, which score those observations. This helps you catch issues in real traffic.
+
+### Evaluators and rules [#evaluators-and-rules]
+
+Evaluators define how Langfuse scores data. Rules define which incoming observations Langfuse scores.
+
+<table>
+  <thead>
+    <tr>
+      <th>What</th>
+      <th>Used for</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Evaluator</td>
+      <td>
+        <ul>
+          <li>
+            [Batch evaluation](#batch-evaluation): score selected historical observations.
+          </li>
+          <li>
+            [Online evaluation](#online-evaluation): attach it to a rule to score incoming production observations.
+          </li>
+          <li>
+            [Prompt experiments](/docs/evaluation/experiments/experiments-via-ui): score experiment runs.
+          </li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>Rule</td>
+      <td>You want to select incoming observations using filters and a sampling rate, then trigger one or more evaluators on them.</td>
+    </tr>
+  </tbody>
+</table>
+
+You can reuse an evaluator across rules. For LLM-as-a-Judge, Langfuse validates the evaluator's default variable mapping against observations that match the rule. Override the mapping for a specific evaluator-rule assignment when the data has a different shape.
+
+### Monitoring with dashboards
+
+Use [custom dashboards](/docs/metrics/features/custom-dashboards) to monitor scores and application performance over time.
+
+## Batch evaluation [#batch-evaluation]
+
+Use batch evaluation to score a selected set of historical observations after they have been ingested. This is useful when you want to test a new or updated evaluator against existing production data.
+
+To use an LLM-as-a-Judge evaluator for batch evaluation, enable the [Langfuse v4 preview](/docs/v4) toggle for the evaluator. To use the same evaluator on newly ingested data in real time, upgrade to Python SDK ≥ 4.7.0 or JS/TS SDK ≥ 5.4.0. If you ingest directly via OTEL, [set `x-langfuse-ingestion-version: 4` on your OTEL span exporter](/integrations/native/opentelemetry#real-time-ingestion).
+
+1. Open the Traces table.
+2. Filter to the timeframe and trace criteria you want to evaluate.
+3. Select the matching rows.
+4. Click Actions → Evaluate.
+5. Choose an evaluator and run it on the selected traces.
+
+<Frame fullWidth>
+  ![Tracing table with filters applied before batch evaluation](/images/docs/llm-as-a-judge/observation-backfill.png)
+</Frame>
+
+The resulting scores are attached to the matching observations in each selected trace.
+
 ## Experiments [#experiments]
 
 An experiment runs your application against a dataset and evaluates the outputs. This is how you test changes before deploying to production.
@@ -136,13 +199,3 @@ Another way is to **run experiments directly from the Langfuse interface** by se
 </div>
 
 _While it's optional, we recommend managing the underlying [Datasets](/docs/evaluation/experiments/datasets) in Langfuse as it allows for [1] In-UI comparison tables of different experiments on the same data and [2] Iteratively improve dataset based on production/staging traces._
-
-## Online Evaluation [#online-evaluation]
-
-For online evaluation, you can configure evaluation methods to automatically score production traces. This helps you catch issues immediately.
-
-Langfuse supports LLM-as-a-Judge, code evaluators, and human annotation checks for online evaluation.
-
-### Monitoring with dashboards
-
-Langfuse offers dashboards to monitor your application performance in real-time. You can also monitor scores in dashboards. You can find more details on how to use dashboards [here](/docs/metrics/features/custom-dashboards).
