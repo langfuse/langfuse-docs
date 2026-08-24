@@ -53,6 +53,8 @@ const changelogFrontmatterSchema = baseFrontmatterSchema.extend({
   ogVideo: z.string().nullish(),
   gif: z.string().nullish(),
   badge: z.string().nullish(),
+  // Scale the header video to crop letterbox bars (overflow is clipped).
+  ogVideoZoom: z.number().nullish(),
 });
 
 // Extended schema for customer story pages — preserves all default fields and
