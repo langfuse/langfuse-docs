@@ -1,0 +1,50 @@
+---
+date: 2026-08-24
+title: Start from evaluator templates
+description: Use established scoring approaches for chatbots, topic detection, exact matches, and coding agents.
+author: Annabell
+ogVideo: https://static.langfuse.com/docs-videos/2026-08-24-evaluator-template-gallery.mp4
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+You no longer have to write every evaluator from a blank prompt. Open **New evaluator** on the [Evaluators page](https://cloud.langfuse.com/project/~/evals) to browse the template gallery, then pick an approach and adapt it to your data.
+
+- **Chatbots.** Score conversation quality with templates built for assistant replies.
+- **Topic detection.** Classify what users are talking about without standing up a custom classifier.
+- **Exact matches.** Run deterministic checks when the expected output is known.
+- **Coding agents.** Detect what your coding agent is doing, from tool calls to task progress.
+
+Each template prepopulates a new [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) or [code evaluator](/docs/evaluation/evaluation-methods/code-evaluators) you can edit. The original template is unchanged.
+
+## Learn more
+
+<Cards num={4}>
+  <Card
+    title="Evaluation concepts"
+    href="/docs/evaluation/core-concepts"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="LLM-as-a-Judge"
+    href="/docs/evaluation/evaluation-methods/llm-as-a-judge"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Code evaluators"
+    href="/docs/evaluation/evaluation-methods/code-evaluators"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Langfuse Academy: Evaluation"
+    href="/academy/evaluate"
+    icon={<Book />}
+    arrow
+  />
+</Cards>
