@@ -33,13 +33,15 @@ export function CustomerScreenshotCarousel({
   slides,
   className,
   href,
-  uniformImageSize = false,
+  aspectClassName,
+  imageFit = "cover",
   zoomOnMobile = false,
 }: {
   slides: CustomerScreenshotSlide[];
   className?: string;
   href?: string;
-  uniformImageSize?: boolean;
+  aspectClassName?: string;
+  imageFit?: "cover" | "contain";
   zoomOnMobile?: boolean;
 }) {
   const [api, setApi] = useState<CarouselApi>();
@@ -94,7 +96,11 @@ export function CustomerScreenshotCarousel({
                 sizes="(max-width: 768px) calc(100vw - 4rem), 960px"
                 className={cn(
                   "block w-full",
-                  uniformImageSize ? "h-full object-contain" : "h-auto",
+                  aspectClassName
+                    ? imageFit === "contain"
+                      ? "h-full object-contain"
+                      : "h-full object-cover"
+                    : "h-auto",
                   !slideHref && "cursor-zoom-in",
                 )}
                 loading="eager"
@@ -119,7 +125,7 @@ export function CustomerScreenshotCarousel({
                 <div
                   className={cn(
                     "overflow-hidden rounded border border-line-structure bg-surface-bg shadow-sm",
-                    uniformImageSize && "aspect-video",
+                    aspectClassName,
                   )}
                 >
                   {slideHref ? (
@@ -129,7 +135,7 @@ export function CustomerScreenshotCarousel({
                       rel={external ? "noopener noreferrer" : undefined}
                       className={cn(
                         "block no-underline transition-opacity hover:opacity-90",
-                        uniformImageSize && "h-full w-full",
+                        aspectClassName && "h-full w-full",
                       )}
                       aria-label={`Open ${slide.label}`}
                     >

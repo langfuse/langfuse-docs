@@ -67,8 +67,9 @@ Podcast App usage spiked late at night because listeners were using it to fall a
 [Rest](https://getrest.app/) is Evolve's AI sleep coach that runs people through a CBT-I program. The program, which was built with sleep experts, typically runs over about eight weeks.
 
 <CustomerScreenshotCarousel
+  aspectClassName="aspect-video"
   href="https://getrest.app/"
-  uniformImageSize
+  imageFit="contain"
   slides={[
     {
       src: "/images/customers/evolve/rest-sleep-log.png",
@@ -127,7 +128,6 @@ Users were telling Rest's coach things, and the AI would respond in the moment a
 />
 
 That kind of failure hits trust hard, even when the underlying product is otherwise working. Investigating it, the team realized memory has to be tackled from several angles and turned it into a project: a genuinely multi-month engineering effort, only now wrapping up. To work towards the right goal they needed to find the right examples from production data. To continuously broaden their understanding of how these failures happen, the team set up an [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) in Langfuse to catch the moments where users are frustrated specifically because of memory issues. That gives them high-signal input to better understand how to fix it at scale. The efforts paid off: The team was able to get memory issues down from 10% to only 5% of cases over the first iterations already.
-
 
 ## Prompt management at scale
 
