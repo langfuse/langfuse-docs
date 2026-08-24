@@ -4,6 +4,8 @@ sidebarTitle: Query via SDKs
 description: Query Langfuse data via Python and JS/TS SDKs using the high-performance data APIs.
 ---
 
+import { V4CutoverDate } from "@/components/V4CutoverDate";
+
 # Query Data via SDKs
 
 Langfuse is [open-source](/open-source) and data tracked with Langfuse is open. Use the Python and JS/TS SDKs to query the same public APIs without writing raw HTTP requests.
@@ -39,7 +41,7 @@ are the defaults:
 
 The old v2 aliases were removed in Python SDK v4 and JS/TS SDK v5.
 
-The `api.legacy.*` resources call the deprecated endpoints; see
+The `api.legacy.*` resources call the deprecated endpoints. Langfuse Cloud serves these endpoints until <V4CutoverDate />. See
 [Migration of deprecated APIs](/faq/all/deprecated-api-migration) for
 replacements and the endpoint reference.
 
@@ -93,8 +95,18 @@ metrics = langfuse.api.metrics.get(query = query)
 
 Sessions:
 
+Sessions do not have a dedicated endpoint. Fetch the observations that share a `sessionId` and group them client-side ([migration details](/faq/all/deprecated-api-migration#sessions)).
+
 ```python
-sessions = langfuse.api.sessions.list(limit=50)
+import json
+
+session_observations = langfuse.api.observations.get_many(
+    filter=json.dumps([
+        {"type": "string", "column": "sessionId", "operator": "=", "value": "chat-session-42"},
+    ]),
+    fields="core,basic,io",
+    limit=50,
+)
 ```
 
 Scores:
@@ -103,7 +115,7 @@ Scores:
 # Scores API v3 (recommended)
 scores = langfuse.api.scores_v3.get_many_v3(id="ScoreId")
 
-# Scores API v2 (deprecated)
+# Scores API v2 (deprecated, sunset date: Nov 16, 2026)
 scores = langfuse.api.scores.get_many(score_ids="ScoreId")
 ```
 
@@ -193,8 +205,21 @@ const metrics = await langfuse.api.metrics.get({
 
 Sessions:
 
+Sessions do not have a dedicated endpoint. Fetch the observations that share a `sessionId` and group them client-side ([migration details](/faq/all/deprecated-api-migration#sessions)).
+
 ```ts
-const sessions = await langfuse.api.sessions.list({ limit: 50 });
+const sessionObservations = await langfuse.api.observations.getMany({
+  filter: JSON.stringify([
+    {
+      type: "string",
+      column: "sessionId",
+      operator: "=",
+      value: "chat-session-42",
+    },
+  ]),
+  fields: "core,basic,io",
+  limit: 50,
+});
 ```
 
 Scores:
@@ -203,7 +228,7 @@ Scores:
 // Scores API v3 (recommended)
 const scoresV3 = await langfuse.api.scoresV3.getManyV3();
 
-// Scores API v2 (deprecated)
+// Scores API v2 (deprecated, sunset date: Nov 16, 2026)
 const scores = await langfuse.api.scores.getMany();
 ```
 

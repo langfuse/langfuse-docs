@@ -1,7 +1,7 @@
 ---
 title: Scaling Langfuse Deployments
 description: Learn how to scale your self-hosted Langfuse deployment to handle more traffic and data.
-label: "Version: v3"
+label: "Version: v4"
 sidebarTitle: "Sizing & Scaling"
 ---
 
@@ -9,7 +9,7 @@ sidebarTitle: "Sizing & Scaling"
 
 This guide covers how you can operate your Langfuse deployment at scale and includes best practices and tweaks to get the best performance.
 
-## Minimum Infrastructure Requirements
+## Minimum Infrastructure Requirements [#minimum-infrastructure-requirements]
 
 | Service                                                                         | Minimum Requirements                                         |
 | ------------------------------------------------------------------------------- | ------------------------------------------------------------ |
@@ -30,9 +30,24 @@ On very high loads, it may become necessary to apply additional settings that in
 For most environments, we recommend to scale the worker containers by their CPU load as this is a straightforward metric to measure.
 A load above 50% for a 2 CPU container is an indicator that the instance is saturated and that the throughput should increase by adding more containers.
 
-In addition, the Langfuse worker also publishes queue length metrics via statsd that can be used to scale the worker containers.
-`langfuse.queue.ingestion.length` is the main metric that we use to make scaling decisions.
+In addition, the Langfuse worker publishes tagged queue depth metrics via StatsD that can be used to scale the worker containers.
+`langfuse.queue.ingestion.depth` with the tag `type:waiting` is the main metric that we use to make scaling decisions.
 The queue metrics can also be published to AWS CloudWatch by setting `ENABLE_AWS_CLOUDWATCH_METRIC_PUBLISHING=true` to configure auto-scalers based on AWS metrics.
+
+<Callout type="info">
+
+Starting with Langfuse [3.170.0](https://github.com/langfuse/langfuse/releases/tag/v3.170.0), tagged queue metrics ending in `.depth`, `.rate`, or `.dlq_oldest_age` are published in the `Langfuse` CloudWatch namespace with every tag except `unit` flattened into the metric name as a `.tag_value` segment, sorted by tag name, instead of publishing the tags as dimensions. Therefore, the StatsD metric and tag above are published to CloudWatch as `langfuse.queue.ingestion.depth.type_waiting`.
+
+</Callout>
+
+<details>
+<summary>Queue metric compatibility for Langfuse 3.169.0 and earlier</summary>
+
+Langfuse versions before [3.169.0](https://github.com/langfuse/langfuse/releases/tag/v3.169.0) do not emit the tagged queue depth metric. Use the legacy `langfuse.queue.ingestion.length` metric when configuring autoscaling for these versions.
+
+Langfuse 3.169.0 emits the tagged depth metric to StatsD, but its CloudWatch publisher does not flatten the tags and therefore does not provide a distinct waiting-depth series. Upgrade to 3.170.0 or later before using the queue depth metric for CloudWatch autoscaling.
+
+</details>
 
 ### Reducing ClickHouse reads within the ingestion processing
 
@@ -157,6 +172,14 @@ Set `CLICKHOUSE_LIGHTWEIGHT_DELETE_MODE` from its default `alter_update` to `lig
 Additionally, set `CLICKHOUSE_USE_LIGHTWEIGHT_UPDATE=true` to route tracing-table updates through native `UPDATE` statements instead of `ALTER TABLE ... UPDATE` mutations.
 Both reduce the amount of background merge work ClickHouse performs on deletion-heavy workloads.
 
+Native `UPDATE` statements require the `enable_lightweight_update` setting on the ClickHouse side. Enable it for the Langfuse user before setting `CLICKHOUSE_USE_LIGHTWEIGHT_UPDATE=true`, otherwise the updates are rejected:
+
+```sql
+CREATE SETTINGS PROFILE langfuse_lightweight_update SETTINGS enable_lightweight_update = 1 TO 'user';
+```
+
+See [user permissions](/self-hosting/deployment/infrastructure/clickhouse#user-permissions) for the full set of ClickHouse grants Langfuse requires.
+
 #### ClickHouse system log tables [#clickhouse-system-log-tables]
 
 On default ClickHouse configurations, the system log tables (`trace_log`, `text_log`, `opentelemetry_span_log`, `asynchronous_metric_log`, `metric_log`, `latency_log`) can dominate disk usage.
@@ -176,7 +199,7 @@ Langfuse does not read from these tables, so you can safely reduce them. Two opt
 </clickhouse>
 ```
 
-On the Bitnami ClickHouse Helm chart, you can ship the same block via `clickhouse.extraOverrides`. Keep `query_log`, `part_log`, and `error_log` enabled — they are useful for debugging and remain small.
+On the [Langfuse Helm chart](/self-hosting/deployment/kubernetes-helm) (`v2.x`), you can ship the same block via `clickhouse.cluster.settings`. Keep `query_log`, `part_log`, and `error_log` enabled — they are useful for debugging and remain small.
 
 **Option 2 — Aggressive TTLs.** If you want to keep the tables around for debugging, attach short TTLs and disable the query profiler instead:
 

@@ -14,6 +14,8 @@ There are three ways to connect an agent to Langfuse. They share the same underl
 - **[CLI](#cli)** — full REST API coverage from the command line, for agents that can run bash.
 - **[MCP server](#mcp)** — the Model Context Protocol, for agents that can't run shell commands.
 
+And if you don't want to bring your own agent, the **[Langfuse Assistant](#assistant)** is built into Langfuse Cloud and answers questions about your project data right in the UI.
+
 <Callout type="info">
 This page is also available as markdown. Append `.md` to the URL or send an `Accept: text/markdown` header to get a clean, token-efficient version for your agent: [`langfuse.com/agents.md`](https://langfuse.com/agents.md).
 </Callout>
@@ -61,9 +63,10 @@ npx langfuse-cli api <resource> <action>
 Agents discover the surface area through built-in help, which keeps token usage low:
 
 ```bash
-npx langfuse-cli api __schema                   # list all resources
+npx langfuse-cli api help                       # list all resources
 npx langfuse-cli api <resource> --help          # list actions for a resource
 npx langfuse-cli api <resource> <action> --help # show args for an action
+npx langfuse-cli api schema --json              # machine-readable command schema
 ```
 
 Because the CLI is generated from the spec, it stays in sync with the API automatically and covers every endpoint, including [full-text search over observations](#fast).
@@ -102,6 +105,26 @@ To keep an agent read-only, allow-list the lookup tools and leave out the write 
 <Cards>
   <Card title="MCP server setup" href="/docs/api-and-data-platform/features/mcp-server" />
   <Card title="MCP tool reference" href="https://mcp.reference.langfuse.com" />
+</Cards>
+
+## Langfuse Assistant [#assistant]
+
+The [Langfuse Assistant](/docs/langfuse-assistant) is an agent that already lives inside Langfuse Cloud. Ask it about your traces, observations, sessions, and metrics in plain language, and it queries your project through the same [MCP server](#mcp) and answers in context, no setup required.
+
+<Video src="https://static.langfuse.com/docs-videos/in-app-agent.mp4" />
+
+Try questions like:
+
+- _Which traces had the highest latency yesterday?_
+- _Show me failed generations in the last hour._
+- _What's my token spend this week, broken down by model?_
+- _Open the traces table filtered to errors from today._
+
+The Assistant is aware of what you are looking at, so it can pick up the current trace, session, or dashboard without you naming it. It can also propose links to the right Langfuse page and help with actions such as creating a dataset or a score config. Anything that changes data or configuration pauses for your explicit approval, and the Assistant can only do what your own account is already permitted to do in that project.
+
+<Cards>
+  <Card title="Langfuse Assistant docs" href="/docs/langfuse-assistant" />
+  <Card title="Public beta announcement" href="/changelog/2026-06-19-langfuse-assistant-public-beta" />
 </Cards>
 
 ## Built to be fast for agents [#fast]
@@ -150,5 +173,5 @@ Once an agent can read and write Langfuse data, it can help you measure quality,
 - [Building Langfuse's MCP server](/blog/2025-12-09-building-langfuse-mcp-server)
 - [Using agent skills to improve your prompts](/blog/2026-02-16-prompt-improvement-claude-skills)
 - [Evaluating AI agent skills](/blog/2026-02-26-evaluate-ai-agent-skills)
-- [Agent Skill docs](/docs/api-and-data-platform/features/agent-skill) · [CLI docs](/docs/api-and-data-platform/features/cli) · [MCP server docs](/docs/api-and-data-platform/features/mcp-server)
+- [Agent Skill docs](/docs/api-and-data-platform/features/agent-skill) · [CLI docs](/docs/api-and-data-platform/features/cli) · [MCP server docs](/docs/api-and-data-platform/features/mcp-server) · [Langfuse Assistant docs](/docs/langfuse-assistant)
 - [Skills on GitHub](https://github.com/langfuse/skills) · [langfuse-cli on npm](https://www.npmjs.com/package/langfuse-cli) · [MCP reference](https://mcp.reference.langfuse.com)

@@ -241,7 +241,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       price: "Custom Pricing",
       mainFeatures: [
         "All Open Source features plus management APIs, project-level RBAC, data retention policies, and audit logs",
-        "Bundled with ClickHouse Cloud, ClickHouse BYOC, or ClickHouse Private",
+        "Bundled with ClickHouse Cloud or ClickHouse BYOC",
         "Langfuse pricing is additive to your ClickHouse commercial plan",
         "Dedicated support engineer for deployment and hosting guidance",
         "Solutions architect support during evaluation and rollout",
@@ -679,16 +679,16 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Monitors and Alerts",
+        name: "Alerts",
         description:
-          "Threshold-based alerts on your LLM application metrics with notifications via Slack, webhooks, and GitHub Actions. Monitor limits per organization on Langfuse Cloud depend on the plan. Self-hosted deployments require Langfuse v4 and have no monitor limit.",
-        href: "/docs/metrics/features/monitors",
+          "Threshold-based alerts on your LLM application metrics with notifications via Slack, webhooks, and GitHub Actions. Alert limits per organization on Langfuse Cloud depend on the plan. Self-hosted deployments require Langfuse v4 and have no alert limit.",
+        href: "/docs/observability/features/alerts",
         tiers: {
           cloud: {
-            Hobby: "2 monitors",
-            Core: "20 monitors",
-            Pro: "50 monitors",
-            Enterprise: "100 monitors",
+            Hobby: "2 alerts",
+            Core: "20 alerts",
+            Pro: "50 alerts",
+            Enterprise: "100 alerts",
           },
           selfHosted: {
             "Open Source": "Langfuse v4+",
@@ -881,11 +881,11 @@ const sections: Section[] = [
       {
         name: "ClickHouse deployment model",
         description:
-          "Open Source assumes you operate ClickHouse yourself. Enterprise is bundled with ClickHouse Cloud, ClickHouse BYOC, or ClickHouse Private.",
+          "Open Source assumes you operate ClickHouse yourself. Enterprise is bundled with ClickHouse Cloud or ClickHouse BYOC.",
         tiers: {
           selfHosted: {
             "Open Source": "Self-managed ClickHouse OSS",
-            Enterprise: "Bundled: ClickHouse Cloud / BYOC / Private",
+            Enterprise: "Bundled: ClickHouse Cloud / BYOC",
           },
         },
       },

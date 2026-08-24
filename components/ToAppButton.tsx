@@ -19,7 +19,7 @@ import {
 } from "@/lib/cloud-regions";
 import { useCloudRegionSignIn } from "@/lib/use-cloud-region-sign-in";
 import { isCloudAppHref } from "@/lib/google-ads";
-import { reportLaunchAppConversion } from "@/lib/ad-conversions";
+import { reportLaunchAppConversionIfSignedOut } from "@/lib/ad-conversions";
 
 const REGION_SHORTCUTS: Partial<Record<CloudRegionKey, string>> = {
   us: "U",
@@ -163,7 +163,9 @@ function MultiRegionButton({
       );
       if (match) {
         e.preventDefault();
-        reportLaunchAppConversion();
+        // Mirrors the click path: the region links carry
+        // `data-launch-app-cta`, and this shortcut bypasses that listener.
+        reportLaunchAppConversionIfSignedOut();
         window.location.href = match.url;
         setOpen(false);
       }

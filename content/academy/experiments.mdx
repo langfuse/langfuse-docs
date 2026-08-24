@@ -8,7 +8,7 @@ description: How to use experiments to systematically improve your LLM applicati
 
 ## How experiments fit into the loop
 
-To systematically understand and improve how your system behaves, you need a way to isolate cause and effect. That's what experiments give you. You pick a variable or a set of variables, run your dataset through two versions of your system, and compare what comes out. The result tells you whether a change actually helped, and by how much. To understand by how much, you also need to evaluate your experiment outputs ([see Evaluate](/academy/evaluate)). This section covers the systematic experimentation part before evaluation.
+To systematically understand and improve how your system behaves, you need a way to isolate cause and effect. That's what [experiments](/docs/evaluation/core-concepts#experiments) give you. You pick a variable or a set of variables, run your dataset through two versions of your system, and compare what comes out. The result tells you whether a change actually helped, and by how much. To understand by how much, you also need to evaluate your experiment outputs ([see Evaluate](/academy/evaluate)). This section covers the systematic experimentation part before evaluation.
 
 <LoopDiagram highlight="change" />
 
@@ -28,7 +28,7 @@ It often helps to change only one variable at a time. However, variables interac
 ### Variables [#on-variables]
 
 - **Model.** The AI model you are using. There are reasoning-heavy models, cheap models, and fast models, and they all come with different tradeoffs in result quality, speed, and cost.
-- **Prompt.** The most common lever. Before running a prompt experiment, ask: is the failure a specification problem (ambiguous or incomplete prompt) or a generalization problem (model applies clear instructions inconsistently)? The latter is worth measuring.
+- **Prompt.** The most common lever. Before [running a prompt experiment](/docs/evaluation/experiments/experiments-via-ui), ask: is the failure a specification problem (ambiguous or incomplete prompt) or a generalization problem (model applies clear instructions inconsistently)? The latter is worth measuring.
 - **Context.** What information you include in the prompt: retrieved documents, conversation history, user metadata.
 - **Tool access.** Adding or removing tools changes what paths your system can take.
 - **Agent architecture.** Single agent vs. multi-agent, which framework, how tasks are decomposed. The biggest bets, the hardest to isolate.
@@ -47,7 +47,7 @@ Typical attempts can include:
 
 Start qualitative: same input, both conditions, traces side by side. That is how you learn what "better" means for your app; without reading real outputs regularly, metrics are easy to misread.
 
-Scores then make comparison concrete—win rates, whether wins are spread across inputs or concentrated, and cost or latency tradeoffs. Quality, price, and speed rarely move together; experiments show those pulls in your data instead of in the abstract.
+[Scores](/docs/evaluation/scores/overview) then make comparison concrete—win rates, whether wins are spread across inputs or concentrated, and cost or latency tradeoffs. Quality, price, and speed rarely move together; experiments show those pulls in your data instead of in the abstract.
 
 ## Where to start
 
