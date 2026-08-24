@@ -111,10 +111,12 @@ Most fields accept a short alias so you can type less. The canonical field name 
 If you don't know a project's field names yet, click **Ask AI**, describe the filter you want in plain language, and the bar builds the query for you as editable pills.
 
 <Callout type="info">
-  Ask AI is in beta and available on **Langfuse Cloud only**. It is **off by
-  default**; an organization owner or admin enables it in **Organization
-  Settings → General → AI Features**. It runs on models hosted on AWS Bedrock
-  with zero data retention. See [data privacy and security](/security/ai-features).
+  Ask AI is in beta. It is **off by default**; an organization owner or admin
+  enables it in **Organization Settings → General → AI Features**. On Langfuse
+  Cloud it uses Langfuse-managed Amazon Bedrock. On self-hosted deployments it
+  uses the same instance Langfuse AI model as the Assistant. See [self-hosted
+  Assistant setup](/self-hosting/configuration/in-app-agent) and [data privacy
+  and security](/security/ai-features).
 </Callout>
 
 Ask AI is **project-aware**: the request carries a compact, client-side snapshot of the columns, values, and metadata keys already loaded in the table, so natural language maps to your project's real schema rather than a generic guess. "enterprise customers in the membership-support queue", for example, resolves to the actual `metadata.*` keys your traces use.

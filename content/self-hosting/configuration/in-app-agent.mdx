@@ -1,6 +1,6 @@
 ---
 title: Langfuse Assistant (self-hosted)
-description: Enable the Assistant instance switch, then configure Amazon Bedrock, the worker queue, and the AWS Lambda MicroVM sandbox.
+description: Enable the Assistant instance switch, then configure a Langfuse AI model, the worker queue, and the AWS Lambda MicroVM sandbox.
 label: "Version: v4"
 sidebarTitle: "Langfuse Assistant"
 ---
@@ -9,61 +9,61 @@ sidebarTitle: "Langfuse Assistant"
 
 This page covers self-hosted infrastructure setup. For an introduction to the feature, see [Langfuse Assistant](/docs/langfuse-assistant).
 
-Assistant runs are durable jobs. The web service admits and enqueues them. The worker claims and executes them. Both services must use the same Postgres, Redis, Bedrock model, and Region.
+Assistant runs are durable jobs. The web service admits and enqueues them. The worker claims and executes them. Both services must use the same Postgres, Redis, and Langfuse AI model.
 
-The Assistant stays hidden until you set `LANGFUSE_IN_APP_AGENT_ENABLED=true` on the web and worker services. Then set `LANGFUSE_AWS_BEDROCK_MODEL` and `LANGFUSE_AWS_BEDROCK_REGION` on both services, and `QUEUE_CONSUMER_IN_APP_AGENT_RUN_QUEUE_IS_ENABLED=true` on the worker. An organization owner or admin then enables **AI Features** in organization settings. That switch starts disabled and still controls other AI features. Self-hosted installations use the bundled system prompt.
+[Ask AI](/docs/observability/features/filter-search-bar#ask-ai) in the filter search bar uses this same instance-wide Langfuse AI model. It does not use the Assistant instance switch.
 
 <Callout type="warning">
   We strongly recommend AWS Lambda MicroVM for production. File and
-  code-execution tools require it. Lambda MicroVM is the only sandbox provider
-  today. More providers will follow.
+  code-execution tools require it. Running without a sandbox is a fallback, not
+  the default path.
 </Callout>
 
-## Enable the Assistant
+## Requirements
 
-Set this on **both** the web and worker services. Unset or `false` hides the Assistant, even if **AI Features** is on.
+| Requirement           | What to set                                                                                                                                           |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Instance switch       | `LANGFUSE_IN_APP_AGENT_ENABLED=true` on web and worker. Unset or `false` hides the Assistant.                                                         |
+| Organization gate     | An organization owner or admin enables **AI Features**. Required for the Assistant and for Ask AI.                                                    |
+| Langfuse AI model     | One instance-wide model: Amazon Bedrock (default) or Anthropic Messages. Set it on web and worker.                                                    |
+| Worker consumer       | `QUEUE_CONSUMER_IN_APP_AGENT_RUN_QUEUE_IS_ENABLED=true` on the execution worker. The code default is `false`.                                         |
+| Sandbox (recommended) | `LANGFUSE_IN_APP_AGENT_SANDBOX_PROVIDER=lambda-microvm` plus image, execution role, and Region. Leave unset only as a fallback (Langfuse tools only). |
+
+## Enable the Assistant [#enable-the-assistant]
+
+Set this on **both** the web and worker services. Self-hosted instances show the Assistant only when the value is `"true"`. Unset or `"false"` hides it, even if **AI Features** is on.
 
 ```bash
 # web and worker
 LANGFUSE_IN_APP_AGENT_ENABLED="true"
 ```
 
-Leave this unset on instances that should not run the Assistant.
+This switch does not gate Ask AI or natural-language filters.
 
-## Available sandboxes
+## Configure the model [#configure-the-model]
 
-Set `LANGFUSE_IN_APP_AGENT_SANDBOX_PROVIDER` on the worker:
+One instance-wide Langfuse AI model serves the Assistant, Ask AI, and natural-language filters. Set `LANGFUSE_AI_PROVIDER` to `bedrock` or `anthropic`. Unset defaults to `bedrock`.
 
-| Sandbox            | Value              | Use for                            | Tools                                     |
-| ------------------ | ------------------ | ---------------------------------- | ----------------------------------------- |
-| AWS Lambda MicroVM | `lambda-microvm`   | Production self-hosted deployments | Langfuse tools, files, and code execution |
-| None               | unset              | Fallback                           | Langfuse tools only                       |
-| Local Docker       | `dangerous-docker` | Local development                  | Langfuse tools, files, and code execution |
+These `LANGFUSE_AI_*` variables select the model provider. They are not the optional `LANGFUSE_AI_FEATURES_*` project used for Assistant observability.
 
-<Callout type="warning">
-  If you do not run Langfuse on AWS, you can still run the Assistant with
-  Amazon Bedrock and Langfuse tools. There is no non-AWS sandbox yet. For
-  sandboxed execution on other platforms, let us know what support you need in
-  [GitHub Discussions](https://github.com/orgs/langfuse/discussions).
-</Callout>
+If the model is unconfigured, the UI reports that you must set `LANGFUSE_AI_PROVIDER=anthropic` with `LANGFUSE_AI_MODEL` and `LANGFUSE_AI_API_KEY`, or set `LANGFUSE_AWS_BEDROCK_MODEL`.
 
-## Amazon Bedrock
+### Amazon Bedrock [#amazon-bedrock]
 
-Set the model on **both** the web and worker services, and enable the queue consumer on the worker:
+Bedrock is the default when `LANGFUSE_AI_PROVIDER` is unset or `bedrock`. Set the model on **both** the web and worker services. Auth is the instance AWS credential chain or IRSA, not `LANGFUSE_AI_API_KEY`.
 
 ```bash
 # web and worker
-LANGFUSE_IN_APP_AGENT_ENABLED="true"
-LANGFUSE_AWS_BEDROCK_MODEL="eu.anthropic.claude-sonnet-4-5-20250929-v1:0"
-LANGFUSE_AWS_BEDROCK_REGION="eu-central-1"
-
-# worker only
-QUEUE_CONSUMER_IN_APP_AGENT_RUN_QUEUE_IS_ENABLED="true"
+# LANGFUSE_AI_PROVIDER="bedrock"   # optional; unset is bedrock
+LANGFUSE_AWS_BEDROCK_MODEL="eu.anthropic.claude-opus-4-8"
+LANGFUSE_AWS_BEDROCK_SMALL_MODEL="eu.anthropic.claude-haiku-4-5-20251001-v1:0"
+LANGFUSE_AI_AWS_BEDROCK_REGION="eu-west-1"
+# LANGFUSE_AWS_BEDROCK_REGION="eu-west-1"   # deprecated alias
 ```
 
-Do not enable the queue consumer on an ingestion-only worker. Run a worker that is provisioned for assistant execution.
+`LANGFUSE_AI_MODEL` and `LANGFUSE_AI_SMALL_MODEL` are Anthropic-only. If Bedrock is selected and `LANGFUSE_AI_API_KEY` or `LANGFUSE_AI_BASE_URL` are set, the app logs a warning and ignores them.
 
-Choose a Bedrock model available in the configured Region and enable access to it. If you use an inference profile, use its ID as the model value.
+Choose a Bedrock model available in the configured Region and enable access to it. If you use an inference profile, use its ID as the model value. Region is optional when the workload already runs in the Bedrock Region. Prefer `LANGFUSE_AI_AWS_BEDROCK_REGION`; `LANGFUSE_AWS_BEDROCK_REGION` is the fallback.
 
 Prefer a workload role or IRSA so both services pick up temporary credentials from the [AWS SDK default credential chain](https://docs.aws.amazon.com/sdkref/latest/guide/standardized-credentials.html). Grant only model invocation:
 
@@ -88,28 +88,45 @@ Prefer a workload role or IRSA so both services pick up temporary credentials fr
 
 Scope the resource and Region as narrowly as your selected model allows. For a cross-Region inference profile, IAM and service-control policies must allow invocation in every destination Region. See [Bedrock inference profile permissions](https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles-support.html).
 
-Pass these variables through your usual configuration. On Helm, use `langfuse.additionalEnv` for the model, `langfuse.worker.pod.additionalEnv` for the queue flag, and IRSA via `langfuse.serviceAccount.annotations`. There is no first-class Assistant chart value yet.
+### Anthropic Messages [#anthropic-messages]
 
-```yaml
-langfuse:
-  additionalEnv:
-    - name: LANGFUSE_IN_APP_AGENT_ENABLED
-      value: "true"
-    - name: LANGFUSE_AWS_BEDROCK_MODEL
-      value: eu.anthropic.claude-sonnet-4-5-20250929-v1:0
-    - name: LANGFUSE_AWS_BEDROCK_REGION
-      value: eu-central-1
-  worker:
-    pod:
-      additionalEnv:
-        - name: QUEUE_CONSUMER_IN_APP_AGENT_RUN_QUEUE_IS_ENABLED
-          value: "true"
-  serviceAccount:
-    annotations:
-      eks.amazonaws.com/role-arn: arn:aws:iam::<account-id>:role/<langfuse-role>
+Set `LANGFUSE_AI_PROVIDER=anthropic` with a model and API key on **both** the web and worker services. Incomplete config is treated as unconfigured.
+
+```bash
+# web and worker
+LANGFUSE_AI_PROVIDER="anthropic"
+LANGFUSE_AI_MODEL="claude-opus-4-8"
+LANGFUSE_AI_SMALL_MODEL="claude-haiku-4-5"   # titles; falls back to LANGFUSE_AI_MODEL
+LANGFUSE_AI_API_KEY="sk-ant-..."
+LANGFUSE_AI_BASE_URL="https://api.anthropic.com"   # optional origin; app appends /v1
 ```
 
-## AWS Lambda MicroVM sandbox
+`LANGFUSE_AI_BASE_URL` is optional. If unset, the SDK uses its default. Compatible Anthropic-protocol origins are fine. The app appends `/v1` if it is missing, so set an origin only.
+
+## Worker queue [#worker-queue]
+
+Set this on the worker that executes Assistant runs. Do not enable it on an ingestion-only worker.
+
+```bash
+# worker only
+QUEUE_CONSUMER_IN_APP_AGENT_RUN_QUEUE_IS_ENABLED="true"
+```
+
+The worker schema defaults this to `"false"` so ingestion-only workers do not consume Assistant jobs. Docker Compose sets it to `true` for the bundled worker. Without the consumer, background runs die at queue timeout.
+
+## Available sandboxes [#available-sandboxes]
+
+Set `LANGFUSE_IN_APP_AGENT_SANDBOX_PROVIDER` on the worker:
+
+| Sandbox            | Value              | Use for                            | Tools                                     |
+| ------------------ | ------------------ | ---------------------------------- | ----------------------------------------- |
+| AWS Lambda MicroVM | `lambda-microvm`   | Production self-hosted deployments | Langfuse tools, files, and code execution |
+| None               | unset              | Fallback                           | Langfuse tools only                       |
+| Local Docker       | `dangerous-docker` | Local development                  | Langfuse tools, files, and code execution |
+
+If you do not run Langfuse on AWS, you can still run the Assistant with Langfuse tools. There is no non-AWS sandbox yet. For sandboxed execution on other platforms, let us know what support you need in [GitHub Discussions](https://github.com/orgs/langfuse/discussions).
+
+## AWS Lambda MicroVM sandbox [#aws-lambda-microvm-sandbox]
 
 Use Lambda MicroVM for production self-hosted deployments:
 
@@ -213,11 +230,11 @@ LANGFUSE_IN_APP_AGENT_SANDBOX_AWS_LAMBDA_MICROVM_REGION="<region>"
 # LANGFUSE_IN_APP_AGENT_SANDBOX_AWS_LAMBDA_MICROVM_EGRESS_NETWORK_CONNECTOR_ARN="arn:aws:lambda:<region>:<account-id>:network-connector:<egress-connector-name>"
 ```
 
-## Without a sandbox
+## Without a sandbox [#without-a-sandbox]
 
 If `LANGFUSE_IN_APP_AGENT_SANDBOX_PROVIDER` is unset, the Assistant still runs with Langfuse tools. File and code-execution tools are unavailable. That is a fallback, not the intended production setup.
 
-## Local Docker sandbox
+## Local Docker [#local-docker]
 
 For local development you can run the sandbox against a local Docker daemon:
 
@@ -227,28 +244,58 @@ LANGFUSE_IN_APP_AGENT_SANDBOX_PROVIDER="dangerous-docker"
 
 `dangerous-docker` is rejected when `NODE_ENV=production`. It is not a sandbox boundary for production workloads.
 
-## Organization opt-in
+## Helm [#helm]
+
+There is no first-class Assistant chart value yet. Pass these variables through `langfuse.additionalEnv` and `langfuse.worker.pod.additionalEnv`. Use IRSA via `langfuse.serviceAccount.annotations` when the model track is Bedrock.
+
+```yaml
+langfuse:
+  additionalEnv:
+    - name: LANGFUSE_IN_APP_AGENT_ENABLED
+      value: "true"
+    # Pick one model track. Unset LANGFUSE_AI_PROVIDER defaults to Bedrock.
+    - name: LANGFUSE_AWS_BEDROCK_MODEL
+      value: eu.anthropic.claude-opus-4-8
+    - name: LANGFUSE_AI_AWS_BEDROCK_REGION
+      value: eu-west-1
+    # Or Anthropic Messages:
+    # - name: LANGFUSE_AI_PROVIDER
+    #   value: anthropic
+    # - name: LANGFUSE_AI_MODEL
+    #   value: claude-opus-4-8
+    # - name: LANGFUSE_AI_API_KEY
+    #   value: sk-ant-...
+  worker:
+    pod:
+      additionalEnv:
+        - name: QUEUE_CONSUMER_IN_APP_AGENT_RUN_QUEUE_IS_ENABLED
+          value: "true"
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::<account-id>:role/<langfuse-role>
+```
+
+## Organization opt-in [#organization-opt-in]
 
 1. Sign in as an organization owner or administrator.
 2. Open organization **Settings** and enable **AI Features**.
 3. Open the Langfuse Assistant in a project.
 
-## Verify
+## Verify [#verify]
 
 1. Confirm the worker logs that it registered the in-app assistant queue consumer.
 2. Send a simple request, such as asking it to summarize a recent trace. The run should move from queued to running and then complete.
 3. Ask the Assistant to write a file. That confirms the Lambda MicroVM sandbox. If the sandbox provider is unset, file tools are unavailable by design.
 
-## Queue and runtime knobs
+## Queue and runtime knobs [#queue-and-runtime-knobs]
 
 These optional variables tune execution behavior:
 
-| Variable                                                 | Description                                                                   |
-| -------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `LANGFUSE_AWS_BEDROCK_SMALL_MODEL`                       | Model used for conversation titles. Defaults to `LANGFUSE_AWS_BEDROCK_MODEL`. |
-| `LANGFUSE_IN_APP_AGENT_RUN_QUEUE_PROCESSING_CONCURRENCY` | Concurrent assistant runs on the worker. Defaults to `5`.                     |
+| Variable                                                 | Description                                               |
+| -------------------------------------------------------- | --------------------------------------------------------- |
+| `LANGFUSE_IN_APP_AGENT_RUN_QUEUE_PROCESSING_CONCURRENCY` | Concurrent assistant runs on the worker. Defaults to `5`. |
 
-## Troubleshooting
+## Troubleshooting [#troubleshooting]
 
 ### The Assistant is not visible
 
@@ -260,11 +307,15 @@ Confirm the worker is running, shares Redis with the web service, and has `QUEUE
 
 ### The UI reports that the assistant model is not configured
 
-Set `LANGFUSE_AWS_BEDROCK_MODEL` and `LANGFUSE_AWS_BEDROCK_REGION` on both services, then restart them together.
+For Bedrock, set `LANGFUSE_AWS_BEDROCK_MODEL` on both services. For Anthropic, set `LANGFUSE_AI_PROVIDER=anthropic` with `LANGFUSE_AI_MODEL` and `LANGFUSE_AI_API_KEY`. Restart both services together.
 
 ### Bedrock returns access denied or model-not-found
 
 Check the Region, Bedrock model access, and `bedrock:InvokeModel` / `bedrock:InvokeModelWithResponseStream` on the workload role. For inference profiles, allow every destination Region.
+
+### Anthropic returns unauthorized or model-not-found
+
+Confirm `LANGFUSE_AI_PROVIDER=anthropic`, `LANGFUSE_AI_MODEL`, and `LANGFUSE_AI_API_KEY` on both services. If you set `LANGFUSE_AI_BASE_URL`, use an origin only and let the app append `/v1`.
 
 ### Image build failed
 

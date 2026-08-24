@@ -17,9 +17,10 @@ sidebarTitle: Assistant
 />
 
 <Callout type="info">
-  **Self-hosted:** The Assistant requires instance-wide Amazon Bedrock and a
-  worker queue consumer. We strongly recommend an AWS Lambda MicroVM sandbox.
-  See [self-hosted setup](/self-hosting/configuration/in-app-agent).
+  **Self-hosted:** Set `LANGFUSE_IN_APP_AGENT_ENABLED=true`, configure an
+  instance-wide Langfuse AI model (Amazon Bedrock or Anthropic Messages), and
+  enable the worker queue consumer. We strongly recommend an AWS Lambda MicroVM
+  sandbox. See [self-hosted setup](/self-hosting/configuration/in-app-agent).
 </Callout>
 
 The Langfuse Assistant is an in-product assistant for exploring your Langfuse project data and taking selected actions in Langfuse with your approval. You can ask questions about traces, observations, sessions, metrics, and Langfuse workflows in plain language.
@@ -63,7 +64,7 @@ The Assistant follows the same data handling model as other Langfuse AI features
 
 Key points:
 
-- Model requests are handled in the same AWS region as your [Langfuse data region](/security/data-regions).
+- On Langfuse Cloud, model requests use Langfuse-managed Amazon Bedrock in your [Langfuse data region](/security/data-regions). On self-hosted deployments, requests use the instance Langfuse AI model you configure.
 - Assistant access is scoped to the authenticated user and current project.
 - Actions that can change data require explicit approval and remain limited to the permissions of the signed-in user.
 - AI feature tracing for product and service improvement can be enabled or disabled separately by organization admins and owners.
