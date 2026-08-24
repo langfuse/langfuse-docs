@@ -17,14 +17,26 @@ type CustomerScreenshotSlide = {
   src: string;
   alt: string;
   label: string;
+  href?: string;
 };
+
+function isExternalHref(href: string) {
+  return (
+    href.startsWith("http://") ||
+    href.startsWith("https://") ||
+    href.startsWith("mailto:") ||
+    href.startsWith("tel:")
+  );
+}
 
 export function CustomerScreenshotCarousel({
   slides,
   className,
+  href,
 }: {
   slides: CustomerScreenshotSlide[];
   className?: string;
+  href?: string;
 }) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
@@ -60,22 +72,42 @@ export function CustomerScreenshotCarousel({
         className="mx-auto w-full max-w-5xl px-9 md:px-12"
       >
         <CarouselContent className="-ml-4">
-          {slides.map((slide) => (
-            <CarouselItem key={slide.src} className="pl-4">
-              <div className="overflow-hidden rounded border border-line-structure bg-surface-bg shadow-sm">
-                <Image
-                  src={slide.src}
-                  alt={slide.alt}
-                  width={5360}
-                  height={3784}
-                  sizes="(max-width: 768px) calc(100vw - 4rem), 960px"
-                  className="block h-auto w-full"
-                  loading="eager"
-                  unoptimized
-                />
-              </div>
-            </CarouselItem>
-          ))}
+          {slides.map((slide) => {
+            const slideHref = slide.href ?? href;
+            const external = slideHref ? isExternalHref(slideHref) : false;
+            const image = (
+              <Image
+                src={slide.src}
+                alt={slide.alt}
+                width={5360}
+                height={3784}
+                sizes="(max-width: 768px) calc(100vw - 4rem), 960px"
+                className="block h-auto w-full"
+                loading="eager"
+                unoptimized
+              />
+            );
+
+            return (
+              <CarouselItem key={slide.src} className="pl-4">
+                <div className="overflow-hidden rounded border border-line-structure bg-surface-bg shadow-sm">
+                  {slideHref ? (
+                    <a
+                      href={slideHref}
+                      target={external ? "_blank" : undefined}
+                      rel={external ? "noopener noreferrer" : undefined}
+                      className="block no-underline transition-opacity hover:opacity-90"
+                      aria-label={`Open ${slide.label}`}
+                    >
+                      {image}
+                    </a>
+                  ) : (
+                    image
+                  )}
+                </div>
+              </CarouselItem>
+            );
+          })}
         </CarouselContent>
         <CarouselPrevious className="left-0" />
         <CarouselNext className="right-0" />

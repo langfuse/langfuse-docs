@@ -78,11 +78,13 @@ export const Frame = ({
   className,
   fullWidth = false,
   transparent = false,
+  zoom = true,
 }: {
   children: React.ReactNode;
   className?: string;
   fullWidth?: boolean;
   transparent?: boolean;
+  zoom?: boolean;
 }) => {
   const frameRef = useRef<HTMLDivElement>(null);
   const [zoomedImage, setZoomedImage] = useState<{
@@ -92,7 +94,7 @@ export const Frame = ({
 
   useEffect(() => {
     const frame = frameRef.current;
-    if (!frame) return;
+    if (!frame || !zoom) return;
 
     const handleImageClick = (e: Event) => {
       const target = e.target as HTMLImageElement;
@@ -138,7 +140,7 @@ export const Frame = ({
       frame.removeEventListener("click", handleImageClick);
       window.removeEventListener("resize", updateImageCursors);
     };
-  }, []);
+  }, [zoom]);
 
   return (
     <>
