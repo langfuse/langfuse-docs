@@ -21,6 +21,7 @@ type CarouselProps = {
   plugins?: CarouselPlugin;
   orientation?: "horizontal" | "vertical";
   setApi?: (api: CarouselApi) => void;
+  zoomOnMobile?: boolean;
 };
 
 type CarouselContextProps = {
@@ -159,6 +160,7 @@ const Carousel = React.forwardRef<
       plugins,
       className,
       children,
+      zoomOnMobile = false,
       ...props
     },
     ref,
@@ -236,8 +238,11 @@ const Carousel = React.forwardRef<
           target.tagName === "IMG" &&
           carouselContainerRef.current?.contains(target)
         ) {
-          // Only handle clicks on desktop (screens wider than 500px)
-          if (window.innerWidth <= 500) {
+          if (target.closest("a")) {
+            return;
+          }
+
+          if (!zoomOnMobile && window.innerWidth <= 500 && e.detail !== 0) {
             return;
           }
 
@@ -253,7 +258,7 @@ const Carousel = React.forwardRef<
           }
         }
       },
-      [extractImages],
+      [extractImages, zoomOnMobile],
     );
 
     // Navigate zoomed images

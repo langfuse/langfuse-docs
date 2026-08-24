@@ -29,58 +29,51 @@ import { ImpactChart } from "@/components/customers/ImpactChart";
   date="August 18, 2026"
 />
 
-<div className="corner-box-corners not-prose relative my-8 border border-line-structure bg-surface-1 px-6 py-8 text-text-primary md:px-12 md:py-10">
-  <h2 id="summary" className="m-0 font-mono text-sm font-medium uppercase tracking-widest text-text-secondary">Summary</h2>
+## Summary
 
-  <ol className="m-0 mt-7 list-none space-y-6 p-0">
-    <li className="grid grid-cols-[auto_1fr] items-start gap-4 md:gap-6">
-      <span className="mt-1 inline-flex h-8 min-w-10 items-center justify-center bg-surface-cta-primary px-2 font-mono text-base font-medium leading-none text-text-primary">01</span>
-      <p className="m-0 text-sm leading-6">Evolve, a YC-backed company behind one of iOS's most-downloaded podcast apps, discovered a large underserved market in sleep and built Rest, a voice-and-text AI coach that delivers cognitive behavioral therapy for insomnia (CBT-I) to thousands of users.</p>
-    </li>
-    <li className="grid grid-cols-[auto_1fr] items-start gap-4 md:gap-6">
-      <span className="mt-1 inline-flex h-8 min-w-10 items-center justify-center bg-surface-cta-primary px-2 font-mono text-base font-medium leading-none text-text-primary">02</span>
-      <p className="m-0 text-sm leading-6">Rest runs on Vapi for voice and OpenAI for text chat. Langfuse traces every conversation. Evolve manages more than 100 dynamically composed prompts, including locale-specific language variants, in Langfuse Prompt Management.</p>
-    </li>
-    <li className="grid grid-cols-[auto_1fr] items-start gap-4 md:gap-6">
-      <span className="mt-1 inline-flex h-8 min-w-10 items-center justify-center bg-surface-cta-primary px-2 font-mono text-base font-medium leading-none text-text-primary">03</span>
-      <p className="m-0 text-sm leading-6">Structured trace review and error analysis continuously surface failure modes, identify the right evaluators, and improve the system over time.</p>
-    </li>
-    <li className="grid grid-cols-[auto_1fr] items-start gap-4 md:gap-6">
-      <span className="mt-1 inline-flex h-8 min-w-10 items-center justify-center bg-surface-cta-primary px-2 font-mono text-base font-medium leading-none text-text-primary">04</span>
-      <p className="m-0 text-sm leading-6">LLM-as-a-judge evaluators run for conversation quality, memory, and further signals from the interaction, giving Evolve enough confidence in Rest's behavior to serve thousands of users, day after day.</p>
-    </li>
-  </ol>
-</div>
+<ImpactChart
+  items={[
+    {
+      area: "Rest brings CBT-I coaching to thousands of users",
+      impact:
+        "Evolve, a YC-backed company behind one of iOS's most-downloaded podcast apps, discovered a large underserved market in sleep and built Rest, a voice-and-text AI coach that delivers cognitive behavioral therapy for insomnia (CBT-I).",
+    },
+    {
+      area: "Tracing and prompt management in one place",
+      impact:
+        "Rest runs on Vapi for voice and OpenAI for text chat. Langfuse traces every conversation and manages more than 100 dynamically composed prompts, including locale-specific language variants.",
+    },
+    {
+      area: "Error analysis drives product improvement",
+      impact:
+        "Structured trace review and error analysis continuously surface failure modes, identify the right evaluators, and improve the system over time.",
+    },
+    {
+      area: "Automated monitoring for memory issues",
+      impact:
+        "LLM-as-a-judge evaluators identify memory and forgetting issues, helping Evolve build confidence in Rest's behavior at scale.",
+    },
+  ]}
+/>
 
 ## 70 million Americans show symptoms of insomnia
 
 [Evolve](https://getrest.app/) is a YC-backed company that's been building products for about nine years. It started with [Podcast App](https://podcast.app/), one of the most-downloaded podcast apps on iOS with more than 15 million downloads, and they're continuing to innovate today.
 
-The path into sleep came from an unexpected signal in their own product data: usage of Podcast App spiked late at night. Digging into why, the team found that people weren't listening to catch up on episodes. They were using podcasts to fall asleep. That observation sent Evolve down a rabbit hole into sleep science and into a market they hadn't set out to enter.
-
-What they found: roughly 70 million Americans show symptoms of insomnia, with many more worldwide. The clinically recommended first-line treatment, ahead of medication, is cognitive behavioral therapy for insomnia (CBT-I), and it's highly effective. But access to a professional is scarce. Even Evolve's own clinical partner, Ashley Mason, a CBT-I researcher and practicing therapist at UCSF, has an 18-month waitlist, sees patients in groups of around eight, or charges thousands of dollars for individual care. Evolve saw an opening to deliver CBT-I through voice AI, at a scale and cost no human-delivered program could match.
+Podcast App usage spiked late at night because listeners were using it to fall asleep. That led Evolve to investigate sleep care, where roughly 70 million Americans show symptoms of insomnia but access to CBT-I, the clinically recommended first-line treatment, is scarce. Evolve's clinical partner, Ashley Mason, a CBT-I researcher and therapist at UCSF, has an 18-month waitlist and can offer only small-group or costly individual care. Evolve saw an opportunity to deliver CBT-I through voice AI at greater scale and lower cost.
 
 ## Rest: a sleep expert that never sleeps
 
 [Rest](https://getrest.app/) is Evolve's AI sleep coach that runs people through a CBT-I program. The program, which was built with sleep experts, typically runs over about eight weeks.
 
-<div className="flex justify-center">
-  <a
-    href="https://getrest.app/"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="inline-block w-2/3 no-underline transition-opacity hover:opacity-90"
-    aria-label="Open Rest"
-  >
-    <Frame fullWidth className="mt-0 w-full" zoom={false}>
-      ![Hand holding a phone open to Rest's sleep log, habit score, and voice coach control](/images/customers/evolve/rest-sleep-log.png)
-    </Frame>
-  </a>
-</div>
-
 <CustomerScreenshotCarousel
   href="https://getrest.app/"
   slides={[
+    {
+      src: "/images/customers/evolve/rest-sleep-log.png",
+      alt: "Rest sleep coach app showing a sleep log beside the message A Sleep Expert That Never Sleeps",
+      label: "Late-night coaching",
+    },
     {
       src: "/images/customers/evolve/rest-app-screens.jpg",
       alt: "Rest app showing a live Rest AI voice session and a Day 8 sleep program dashboard",
@@ -98,7 +91,7 @@ What they found: roughly 70 million Americans show symptoms of insomnia, with ma
 
 All of Rest's AI usage is [traced](/docs/observability/overview) in Langfuse. The voice experience runs on [Vapi](/integrations/no-code/vapi) as the orchestration layer, with ElevenLabs for voice synthesis, Deepgram for transcription, and OpenAI as the underlying LLM. Vapi has a native Langfuse integration, so voice conversations are traced automatically at the click of a button. The text-chat experience is built and traced directly on OpenAI LLM APIs in Evolve's own backend. The text experience, and also non-conversational LLM work such as background extractors that process conversations after the fact, are traced through Langfuse as well.
 
-<Frame fullWidth className="w-full">
+<Frame fullWidth zoomOnMobile className="w-full">
   ![Vapi orchestrating a Rest voice turn through speech, Deepgram transcription, OpenAI reasoning, and ElevenLabs voice, with spans emitted to Langfuse](/images/customers/evolve/rest-vapi-tracing.png)
 </Frame>
 
@@ -107,6 +100,7 @@ All of Rest's AI usage is [traced](/docs/observability/overview) in Langfuse. Th
   name="Ignacio Perez"
   role="CPO"
   company="Evolve"
+  image="/images/customers/evolve/ignacio-perez.jpg"
 />
 
 ## Error analysis as a product strategy tool
@@ -115,11 +109,11 @@ For both Ignacio and Martin, tracing their agents in Langfuse is the foundation 
 
 Martin was clear that looking into traces himself functions as a product strategy exercise. Reviewing real conversations in [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), based on the traces in Langfuse, surfaces which product gaps are quick fixes and which are "a whole big component we need to build... a multi-week, maybe even a multi-month exercise." Staying close to those real conversations is one of the most important inputs into where the team invests next.
 
-On top of manual review, Evolve runs [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators in Langfuse for specific known issue types, including voice and audio quality problems (noise, cutoffs, echo, largely on the Vapi side) and memory and forgetting issues.
+On top of manual review, Evolve runs [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators in Langfuse to identify memory and forgetting issues.
 
 ## Deep dive: fixing the AI's memory
 
-The clearest example either of them gave of error analysis driving product change was memory.
+The biggest failure mode they discovered through error analysis involved memory issues.
 
 Users were telling Rest's coach things, and the AI would respond in the moment as if it understood and would carry that forward, "sure, I'll take that into account," but then fail to retrieve it in a later conversation. Users noticed. And said so directly. And often.
 
@@ -137,7 +131,7 @@ That kind of failure hits trust hard, even when the underlying product is otherw
 
 Beyond tracing, Evolve manages more than 100 prompts in [Langfuse Prompt Management](/docs/prompt-management/overview). These aren't static prompts. They are [composed](/docs/prompt-management/features/composability) on the fly, and Langfuse makes that composition easy to pull off: a foundational prompt sets up the overall conversation, and on top of that sits an agenda of two to four items, each its own prompt that can embed further prompts, including locale-specific variants (English and Spanish, adjusted for users in Argentina, Colombia, and Spain).
 
-<Frame fullWidth className="w-full">
+<Frame fullWidth zoomOnMobile className="w-full">
   ![Layered Rest prompt architecture showing a foundational prompt, agenda items, embedded prompts, and locale variants composed at runtime in Langfuse](/images/customers/evolve/rest-prompt-composition.png)
 </Frame>
 
@@ -146,6 +140,7 @@ Beyond tracing, Evolve manages more than 100 prompts in [Langfuse Prompt Managem
   name="Ignacio Perez"
   role="CPO"
   company="Evolve"
+  image="/images/customers/evolve/ignacio-perez.jpg"
 />
 
 The main win, per Ignacio, is that this gives non-engineers, people writing and refining prompts who don't have (or want) deploy access, a safe way to edit and ship prompt changes without touching code or GitHub. Staging and production [labels](/docs/prompt-management/features/prompt-version-control) let a prompt be tested before it's promoted live.
@@ -160,14 +155,7 @@ The main win, per Ignacio, is that this gives non-engineers, people writing and 
 
 ## Why Langfuse
 
-Ignacio's team found Langfuse through Evolve's YC network, and it stuck.
-
-<CustomerQuote
-  quote="The centralization of tracing, reliably managed. And the prompt repository was a lucky punch, we jumped to Langfuse for tracing, and eventually we discovered the prompt repository as well, and it turned out to be a game changer for us."
-  name="Ignacio Perez"
-  role="CPO"
-  company="Evolve"
-/>
+Ignacio's team found Langfuse through Evolve's YC network, and it stuck. As Ignacio put it, "The centralization of tracing, reliably managed. And the prompt repository was a lucky punch, we jumped to Langfuse for tracing, and eventually we discovered the prompt repository as well, and it turned out to be a game changer for us."
 
 Ignacio credits responsive support and steady, visible product improvement. Martin, running on Langfuse Cloud, is just as confident handling sleep-related conversations there: "we also know that you have very high standards." [Self-hosting](/self-hosting) isn't a strict compliance requirement for Evolve, but he'd still like it as a future option, for more direct control over personal data.
 
@@ -178,32 +166,5 @@ Ignacio credits responsive support and steady, visible product improvement. Mart
 **More proactive issue detection,** including using the Langfuse [API](/docs/api-and-data-platform/overview), [MCP server](/docs/api-and-data-platform/features/mcp-server), and [CLI](/docs/api-and-data-platform/features/cli) inside Evolve's own internal tools and admin dashboard, to pull trace data into context faster and catch problems earlier.
 
 **Possibly bringing the agent in-house.** Ignacio said Evolve is considering building a custom agent harness for more control over performance and latency of voice interactions. Observability in Langfuse stays on regardless - a key advantage of Langfuse's vendor-agnostic tracing.
-
-## Impact
-
-<ImpactChart
-  items={[
-    {
-      area: "Full visibility into a voice-and-text agent",
-      impact:
-        "Every Vapi voice trace and direct OpenAI text-chat trace lands in one place, alongside background extractor calls, instead of scattered across two stacks.",
-    },
-    {
-      area: "Non-engineers can safely ship prompt changes",
-      impact:
-        "100+ dynamically composed prompts, including locale variants, are edited and staged in Langfuse without code deploys.",
-    },
-    {
-      area: "A systematic fix for the AI's biggest user trust issue",
-      impact:
-        "Trace-driven error analysis identified and helped resolve a memory issue that was actively eroding user trust.",
-    },
-    {
-      area: "Automated coverage of known failure modes",
-      impact:
-        "LLM-as-a-judge evaluators now flag voice-quality and memory issues without a human reviewing every conversation manually.",
-    },
-  ]}
-/>
 
 <CustomerStoryCTA />

@@ -33,10 +33,12 @@ export function CustomerScreenshotCarousel({
   slides,
   className,
   href,
+  zoomOnMobile = false,
 }: {
   slides: CustomerScreenshotSlide[];
   className?: string;
   href?: string;
+  zoomOnMobile?: boolean;
 }) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
@@ -70,6 +72,7 @@ export function CustomerScreenshotCarousel({
         setApi={setApi}
         opts={{ align: "start", loop: true }}
         className="mx-auto w-full max-w-5xl px-9 md:px-12"
+        zoomOnMobile={zoomOnMobile}
       >
         <CarouselContent className="-ml-4">
           {slides.map((slide) => {
@@ -79,12 +82,32 @@ export function CustomerScreenshotCarousel({
               <Image
                 src={slide.src}
                 alt={slide.alt}
+                aria-label={
+                  slideHref
+                    ? undefined
+                    : `Open ${slide.label} image in full size`
+                }
                 width={5360}
                 height={3784}
                 sizes="(max-width: 768px) calc(100vw - 4rem), 960px"
-                className="block h-auto w-full"
+                className={cn(
+                  "block h-auto w-full",
+                  !slideHref && "cursor-zoom-in",
+                )}
                 loading="eager"
                 unoptimized
+                role={slideHref ? undefined : "button"}
+                tabIndex={slideHref ? undefined : 0}
+                onKeyDown={
+                  slideHref
+                    ? undefined
+                    : (event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          event.currentTarget.click();
+                        }
+                      }
+                }
               />
             );
 

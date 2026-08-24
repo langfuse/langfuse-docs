@@ -79,12 +79,14 @@ export const Frame = ({
   fullWidth = false,
   transparent = false,
   zoom = true,
+  zoomOnMobile = false,
 }: {
   children: React.ReactNode;
   className?: string;
   fullWidth?: boolean;
   transparent?: boolean;
   zoom?: boolean;
+  zoomOnMobile?: boolean;
 }) => {
   const frameRef = useRef<HTMLDivElement>(null);
   const [zoomedImage, setZoomedImage] = useState<{
@@ -96,51 +98,67 @@ export const Frame = ({
     const frame = frameRef.current;
     if (!frame || !zoom) return;
 
+    const openImage = (target: HTMLImageElement) => {
+      const src = target.src;
+      const alt = target.alt || "Image";
+      if (src) {
+        setZoomedImage({ src, alt });
+      }
+    };
+
     const handleImageClick = (e: Event) => {
       const target = e.target as HTMLImageElement;
       if (target.tagName === "IMG") {
-        // Only handle clicks on desktop (screens wider than 500px)
-        if (window.innerWidth <= 500) {
+        if (!zoomOnMobile && window.innerWidth <= 500) {
           return;
         }
 
         e.preventDefault();
         e.stopPropagation();
-        const src = target.src;
-        const alt = target.alt || "Image";
-        if (src) {
-          setZoomedImage({ src, alt });
-        }
+        openImage(target);
       }
     };
 
-    const updateImageCursors = () => {
+    const handleImageKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLImageElement;
+      if (target.tagName === "IMG" && (e.key === "Enter" || e.key === " ")) {
+        e.preventDefault();
+        e.stopPropagation();
+        openImage(target);
+      }
+    };
+
+    const updateImageAccessibility = () => {
+      const pointerZoomEnabled = zoomOnMobile || window.innerWidth > 500;
       const images = frame.querySelectorAll("img");
       images.forEach((img) => {
-        if (window.innerWidth > 500) {
-          img.style.cursor = "pointer";
-          img.style.transition = "opacity 0.2s ease";
-        } else {
-          img.style.cursor = "default";
-          img.style.transition = "none";
+        img.style.cursor = pointerZoomEnabled ? "zoom-in" : "default";
+        img.style.transition = pointerZoomEnabled
+          ? "opacity 0.2s ease"
+          : "none";
+        img.tabIndex = 0;
+        img.setAttribute("role", "button");
+        if (!img.getAttribute("aria-label")) {
+          img.setAttribute(
+            "aria-label",
+            `Open ${img.alt || "image"} in full size`,
+          );
         }
       });
     };
 
-    // Add click event listener to the frame
     frame.addEventListener("click", handleImageClick);
+    frame.addEventListener("keydown", handleImageKeyDown);
 
-    // Initial cursor setup
-    updateImageCursors();
-
-    // Add resize listener to update cursors when screen size changes
-    window.addEventListener("resize", updateImageCursors);
+    updateImageAccessibility();
+    window.addEventListener("resize", updateImageAccessibility);
 
     return () => {
       frame.removeEventListener("click", handleImageClick);
-      window.removeEventListener("resize", updateImageCursors);
+      frame.removeEventListener("keydown", handleImageKeyDown);
+      window.removeEventListener("resize", updateImageAccessibility);
     };
-  }, [zoom]);
+  }, [zoom, zoomOnMobile]);
 
   return (
     <>
