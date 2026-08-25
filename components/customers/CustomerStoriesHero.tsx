@@ -178,14 +178,14 @@ export function CustomerStoriesHero({
                     aria-current={isActive ? "true" : undefined}
                     aria-label={`Show ${name} story`}
                   >
-                    <div className="flex h-9 min-w-0 flex-1 items-center">
+                    <div className="flex h-8 min-w-0 flex-1 items-center">
                       {logo ? (
-                        <div className="relative h-9 w-36">
+                        <div className="relative h-7 w-28">
                           <Image
                             src={logo}
                             alt=""
                             fill
-                            sizes="144px"
+                            sizes="112px"
                             className="object-contain object-left"
                             unoptimized
                           />
