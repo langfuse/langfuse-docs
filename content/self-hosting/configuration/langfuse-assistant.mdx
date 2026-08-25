@@ -81,13 +81,6 @@ Langfuse Cloud runs on Bedrock in every Region, so the Bedrock path carries more
 
 </Tabs>
 
-<Callout type="info">
-  `LANGFUSE_AWS_BEDROCK_MODEL`, `LANGFUSE_AWS_BEDROCK_SMALL_MODEL`, and
-  `LANGFUSE_AWS_BEDROCK_REGION` are deprecated aliases of the three
-  `LANGFUSE_AI_*` variables above. They are still read as fallbacks. Prefer the
-  `LANGFUSE_AI_*` names for new deployments.
-</Callout>
-
 For Bedrock, prefer a workload role or IRSA so both services pick up temporary credentials from the [AWS SDK default credential chain](https://docs.aws.amazon.com/sdkref/latest/guide/standardized-credentials.html). Grant invoke-only permissions. A geo inference profile invokes a foundation model in a destination Region while the SDK still calls `bedrock-runtime` in your configured Region, so a single-Region `foundation-model/*` ARN is not sufficient. Langfuse Cloud uses `Resource: "*"`:
 
 ```json
