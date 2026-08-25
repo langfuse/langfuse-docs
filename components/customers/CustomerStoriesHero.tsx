@@ -45,6 +45,7 @@ export function CustomerStoriesHero({
   const quote = story.frontMatter.customerQuote!;
   const quoteAuthor = story.frontMatter.quoteAuthor;
   const quoteRole = story.frontMatter.quoteRole;
+  const logo = story.frontMatter.customerLogo;
 
   return (
     <section
@@ -81,9 +82,24 @@ export function CustomerStoriesHero({
               transition={{ duration: 0.28, ease: "easeOut" }}
               className="flex flex-1 flex-col"
             >
-              <p className="mb-4 font-analog text-[28px] font-medium leading-none tracking-tight text-text-primary sm:text-[34px]">
-                {company}
-              </p>
+              <div className="mb-5 flex h-10 items-center">
+                {logo ? (
+                  <div className="relative h-10 w-40">
+                    <Image
+                      src={logo}
+                      alt={`${company} logo`}
+                      fill
+                      sizes="160px"
+                      className="object-contain object-left"
+                      unoptimized
+                    />
+                  </div>
+                ) : (
+                  <p className="font-analog text-[28px] font-medium leading-none tracking-tight text-text-primary sm:text-[34px]">
+                    {company}
+                  </p>
+                )}
+              </div>
               <blockquote className="m-0 max-w-[38rem] border-0 p-0 font-analog text-[26px] font-medium leading-[1.15] tracking-[-0.02em] text-text-primary sm:text-[34px] lg:text-[40px]">
                 “{quote}”
               </blockquote>
