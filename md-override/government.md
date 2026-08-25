@@ -5,8 +5,13 @@ description: Open-source observability and evaluations for AI agents. Deploy Lan
 
 # Build accountable AI. Keep it under your control.
 
-Langfuse is the open-source platform for observing, evaluating, and improving AI agents and LLM applications. Deploy across **air-gapped, on-premises, and cloud environments**—and keep sensitive prompts, outputs, traces, and evaluation data inside your approved infrastructure.
+Langfuse for Government — observability and evaluations for public-sector AI, inside your security boundary.
 
+Government and public-sector teams use Langfuse to observe, evaluate, and improve AI agents — without sending prompts, traces, or evaluation data outside their security boundary. Deploy **air-gapped, on premises, or in a private cloud**. The core is open source and inspectable; you operate the stack.
+
+- Your environment
+- Inspectable source
+- Audit-ready traces
 - [Talk to a public-sector expert](/talk-to-us)
 - [Explore self-hosting](/self-hosting)
 

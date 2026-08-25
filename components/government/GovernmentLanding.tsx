@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import { GovernmentStyles } from "./styles";
 
 const cornerBoxBase =
@@ -73,21 +73,22 @@ function Hero() {
   return (
     <section className="gov-section pb-5 pt-10">
       <div
-        className={`${cornerBoxBase} no-bl no-br flex flex-wrap items-center justify-center gap-x-[18px] gap-y-2 px-5 py-[10px] text-[13px] text-text-secondary`}
+        className={`${cornerBoxBase} no-bl no-br flex flex-col gap-3 px-5 py-6 sm:flex-row sm:items-end sm:justify-between sm:gap-8 sm:px-7 sm:py-7`}
       >
-        <span className="gov-eyebrow">Langfuse for Government</span>
-        <span className="gov-dot" />
-        <span className="whitespace-nowrap">Air-gapped</span>
-        <span className="gov-dot" />
-        <span className="whitespace-nowrap">On-premises</span>
-        <span className="gov-dot" />
-        <span className="whitespace-nowrap">Cloud &amp; VPC</span>
-        <span className="gov-dot" />
-        <span className="whitespace-nowrap">Internet access optional</span>
+        <div className="flex min-w-0 flex-col gap-2">
+          <div className="gov-eyebrow">Open source · Self-hosted</div>
+          <p className="gov-masthead">
+            Langfuse for <span className="gov-highlight">Government</span>
+          </p>
+        </div>
+        <p className="gov-body-sm m-0 max-w-[38ch] text-pretty sm:text-right">
+          Observability and evaluations for public-sector AI — inside your
+          security boundary.
+        </p>
       </div>
 
       <div
-        className={`${cornerBoxBase} no-tl no-tr no-bl no-br relative -mt-px -mb-px grid items-center gap-14 overflow-hidden px-5 py-16 sm:px-8 md:grid-cols-[1.35fr_1fr] md:py-[88px]`}
+        className={`${cornerBoxBase} no-tl no-tr no-bl no-br relative -mt-px -mb-px grid items-center gap-10 px-5 py-12 sm:px-7 md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] md:gap-8 md:py-[64px]`}
       >
         <div
           aria-hidden
@@ -100,22 +101,29 @@ function Hero() {
           }}
         />
 
-        <div className="relative flex flex-col gap-6">
-          <div className="gov-eyebrow">Open source · Self-hosted</div>
+        <div className="relative flex flex-col gap-5">
+          <div className="gov-eyebrow">
+            Government · Public sector · Internet optional
+          </div>
           <h1 className="gov-h1">
             Build accountable AI.
             <br />
             Keep it <span className="gov-highlight">under your control.</span>
           </h1>
-          <p className="gov-body" style={{ fontSize: 17, maxWidth: "46ch" }}>
-            Langfuse is the open-source platform for observing, evaluating, and
-            improving AI agents and LLM applications. Deploy across{" "}
+          <p className="gov-body" style={{ fontSize: 17, maxWidth: "42ch" }}>
+            Government and public-sector teams use Langfuse to observe,
+            evaluate, and improve AI agents — without sending prompts, traces,
+            or evaluation data outside their security boundary. Deploy{" "}
             <b className="font-medium text-text-primary">
-              air-gapped, on-premises, and cloud environments
+              air-gapped, on premises, or in a private cloud
             </b>
-            — and keep sensitive prompts, outputs, traces, and evaluation data
-            inside your approved infrastructure.
+            . The core is open source and inspectable; you operate the stack.
           </p>
+          <ul className="gov-claim-row">
+            <li>Your environment</li>
+            <li>Inspectable source</li>
+            <li>Audit-ready traces</li>
+          </ul>
           <Ctas />
         </div>
 
@@ -153,106 +161,143 @@ function HeroArt() {
     x: number;
     y: number;
     z: number;
-    icon: "lock" | "server" | "cloud";
+    scale: number;
+    featured?: boolean;
+    icon: "lock" | "server" | "building";
   }[] = [
     {
       title: "Air-gapped",
       caption: "No outbound network",
-      rot: -8,
-      x: 8,
-      y: 28,
+      rot: -9,
+      x: 4,
+      y: 42,
       z: 1,
+      scale: 1,
       icon: "lock",
     },
     {
       title: "On-premises",
       caption: "Your cluster",
-      rot: 7,
+      rot: 8,
       x: 168,
-      y: 8,
-      z: 3,
+      y: 18,
+      z: 2,
+      scale: 1,
       icon: "server",
     },
     {
-      title: "Cloud / VPC",
-      caption: "Your boundary",
-      rot: -5,
-      x: 92,
-      y: 188,
-      z: 2,
-      icon: "cloud",
+      title: "Government",
+      caption: "Public sector",
+      rot: -3.5,
+      x: 62,
+      y: 150,
+      z: 4,
+      scale: 1.04,
+      featured: true,
+      icon: "building",
     },
   ];
 
   return (
-    <div className="relative hidden h-[380px] w-full md:block">
-      <svg
-        viewBox="0 0 400 400"
-        className="pointer-events-none absolute inset-0 opacity-40"
+    <>
+      <div
+        className="gov-hero-art relative mx-auto hidden h-[420px] w-full max-w-[380px] md:block"
+        aria-hidden
       >
-        <circle
-          cx="200"
-          cy="200"
-          r="180"
-          fill="none"
-          stroke="var(--line-structure)"
-          strokeDasharray="2 4"
-        />
-        <circle
-          cx="200"
-          cy="200"
-          r="140"
-          fill="none"
-          stroke="var(--line-structure)"
-          strokeDasharray="2 4"
-        />
-        <circle
-          cx="200"
-          cy="200"
-          r="100"
-          fill="none"
-          stroke="var(--line-structure)"
-          strokeDasharray="2 4"
-        />
-        <text
-          x="200"
-          y="204"
-          textAnchor="middle"
-          fontFamily="var(--font-mono)"
-          fontSize="9"
-          fill="var(--text-tertiary)"
-          letterSpacing="1.4"
+        <svg
+          viewBox="0 0 400 400"
+          className="pointer-events-none absolute inset-0 opacity-45"
         >
-          YOUR ENVIRONMENT
-        </text>
-      </svg>
-      {cards.map((c) => (
-        <div
-          key={c.title}
-          className="gov-card-shadow absolute w-[148px] border border-line-structure bg-surface-bg p-2.5"
-          style={{
-            left: c.x,
-            top: c.y,
-            zIndex: c.z,
-            transform: `rotate(${c.rot}deg)`,
-          }}
-        >
-          <div className="flex aspect-square items-center justify-center bg-surface-1">
-            <EnvIcon kind={c.icon} />
+          <circle
+            cx="200"
+            cy="200"
+            r="180"
+            fill="none"
+            stroke="var(--line-structure)"
+            strokeDasharray="2 4"
+          />
+          <circle
+            cx="200"
+            cy="200"
+            r="140"
+            fill="none"
+            stroke="var(--line-structure)"
+            strokeDasharray="2 4"
+          />
+          <circle
+            cx="200"
+            cy="200"
+            r="100"
+            fill="none"
+            stroke="var(--line-structure)"
+            strokeDasharray="2 4"
+          />
+          <text
+            x="200"
+            y="206"
+            textAnchor="middle"
+            fontFamily="var(--font-mono)"
+            fontSize="11"
+            fill="var(--text-tertiary)"
+            letterSpacing="1.8"
+          >
+            GOVERNMENT
+          </text>
+        </svg>
+        {cards.map((c) => (
+          <div
+            key={c.title}
+            className={`gov-polaroid${c.featured ? " is-featured" : ""}`}
+            style={
+              {
+                "--x": `${c.x}px`,
+                "--y": `${c.y}px`,
+                "--z": c.z,
+                "--rest-rot": `${c.rot}deg`,
+                "--rest-scale": c.scale,
+              } as CSSProperties
+            }
+          >
+            <div className="gov-polaroid-well">
+              <EnvIcon kind={c.icon} />
+            </div>
+            <div className="mt-2 text-center font-mono text-[11px] font-medium uppercase tracking-[.07em] text-text-primary">
+              {c.title}
+            </div>
+            <div className="text-center font-mono text-[10px] text-text-tertiary">
+              {c.caption}
+            </div>
           </div>
-          <div className="mt-2 text-center font-mono text-[10px] uppercase tracking-[.06em] text-text-primary">
-            {c.title}
+        ))}
+      </div>
+      <div
+        className="relative mt-1 flex justify-center gap-2.5 md:hidden"
+        aria-hidden
+      >
+        {cards.map((c) => (
+          <div
+            key={c.title}
+            className={`gov-card-shadow w-[31%] min-w-[96px] max-w-[128px] border border-line-structure bg-surface-bg p-2 ${
+              c.featured ? "relative" : ""
+            }`}
+          >
+            {c.featured ? (
+              <span className="absolute inset-x-0 top-0 h-[3px] bg-surface-cta-primary" />
+            ) : null}
+            <div className="gov-polaroid-well">
+              <EnvIcon kind={c.icon} />
+            </div>
+            <div className="mt-1.5 text-center font-mono text-[9px] font-medium uppercase tracking-[.06em] text-text-primary">
+              {c.title}
+            </div>
           </div>
-          <div className="text-center font-mono text-[10px] text-text-tertiary">
-            {c.caption}
-          </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+    </>
   );
 }
 
-function EnvIcon({ kind }: { kind: "lock" | "server" | "cloud" }) {
+function EnvIcon({ kind }: { kind: "lock" | "server" | "building" }) {
   const common = {
     width: 42,
     height: 42,
@@ -283,7 +328,14 @@ function EnvIcon({ kind }: { kind: "lock" | "server" | "cloud" }) {
   }
   return (
     <svg {...common} aria-hidden>
-      <path d="M7 18h11a4 4 0 0 0 .4-8 6 6 0 0 0-11.2-1.6A4.5 4.5 0 0 0 7 18z" />
+      <path d="M2 10h20L12 3.5z" />
+      <path d="M4 10v10" />
+      <path d="M20 10v10" />
+      <path d="M3 20h18" />
+      <path d="M8 20v-7" />
+      <path d="M12 20v-7" />
+      <path d="M16 20v-7" />
+      <path d="M8 13h8" />
     </svg>
   );
 }
@@ -671,7 +723,7 @@ export function GovernmentLanding() {
   return (
     <div className="gov-page">
       <GovernmentStyles />
-      <div className="mx-auto max-w-[1440px]">
+      <div className="mx-auto max-w-[1120px]">
         <Hero />
         <ProductLoop />
         <Deployment />

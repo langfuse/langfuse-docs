@@ -68,6 +68,133 @@ export function GovernmentStyles() {
           0 8px 24px rgba(0,0,0,0.08);
       }
 
+      .gov-masthead {
+        font-family: var(--font-analog), "Inter", system-ui, sans-serif;
+        font-weight: 500;
+        font-size: clamp(26px, 3.2vw, 40px);
+        line-height: 1.12;
+        letter-spacing: -0.02em;
+        color: var(--text-primary);
+        margin: 0;
+      }
+
+      .gov-claim-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 14px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .gov-claim-row li {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        letter-spacing: 0.02em;
+        color: var(--text-secondary);
+      }
+      .gov-claim-row li::before {
+        content: "";
+        width: 5px;
+        height: 5px;
+        border-radius: 1px;
+        background: var(--surface-cta-primary);
+        box-shadow: 0 0 0 1px var(--line-cta);
+        flex-shrink: 0;
+      }
+
+      .gov-hero-art {
+        isolation: isolate;
+      }
+      .gov-polaroid {
+        position: absolute;
+        width: 156px;
+        padding: 10px;
+        background: var(--surface-bg);
+        border: 1px solid var(--line-structure);
+        left: var(--x);
+        top: var(--y);
+        z-index: var(--z);
+        transform: rotate(var(--rest-rot)) scale(var(--rest-scale, 1));
+        transform-origin: 50% 60%;
+        box-shadow:
+          -15px 33px 14px 0 rgba(0,0,0,0.01),
+          -8px 18px 12px 0 rgba(0,0,0,0.03),
+          -4px 8px 9px 0 rgba(0,0,0,0.04),
+          0 10px 28px rgba(0,0,0,0.10);
+        transition:
+          transform 480ms cubic-bezier(0.22, 1, 0.36, 1),
+          box-shadow 480ms cubic-bezier(0.22, 1, 0.36, 1),
+          opacity 280ms ease,
+          border-color 200ms ease,
+          z-index 0ms linear 280ms;
+        cursor: default;
+      }
+      .gov-polaroid.is-featured {
+        width: 196px;
+        padding: 12px;
+      }
+      .gov-polaroid.is-featured::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--surface-cta-primary);
+      }
+      .gov-polaroid-well {
+        display: flex;
+        aspect-ratio: 1;
+        align-items: center;
+        justify-content: center;
+        background: color-mix(in srgb, var(--surface-cta-primary) 28%, var(--surface-1));
+        transition: background 320ms ease;
+      }
+      @media (hover: hover) and (pointer: fine) {
+        .gov-hero-art:hover .gov-polaroid {
+          opacity: 0.58;
+        }
+        .gov-hero-art .gov-polaroid:hover,
+        .gov-hero-art .gov-polaroid:focus-visible {
+          opacity: 1;
+          z-index: 20;
+          border-color: var(--line-cta);
+          transform: rotate(calc(var(--rest-rot) * 0.18)) translateY(-12px) scale(calc(var(--rest-scale, 1) * 1.06));
+          box-shadow:
+            0 28px 44px rgba(0,0,0,0.12),
+            0 10px 18px rgba(0,0,0,0.06),
+            0 0 0 1px color-mix(in srgb, var(--line-cta) 55%, transparent);
+          transition:
+            transform 480ms cubic-bezier(0.22, 1, 0.36, 1),
+            box-shadow 480ms cubic-bezier(0.22, 1, 0.36, 1),
+            opacity 180ms ease,
+            border-color 200ms ease,
+            z-index 0ms;
+        }
+        .gov-hero-art .gov-polaroid:hover .gov-polaroid-well,
+        .gov-hero-art .gov-polaroid:focus-visible .gov-polaroid-well {
+          background: color-mix(in srgb, var(--surface-cta-primary) 62%, var(--surface-1));
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .gov-polaroid,
+        .gov-hero-art:hover .gov-polaroid,
+        .gov-hero-art .gov-polaroid:hover,
+        .gov-hero-art .gov-polaroid:focus-visible {
+          transition: border-color 160ms ease, opacity 160ms ease, background 160ms ease;
+          transform: rotate(var(--rest-rot)) scale(var(--rest-scale, 1));
+        }
+        .gov-hero-art .gov-polaroid:hover,
+        .gov-hero-art .gov-polaroid:focus-visible {
+          opacity: 1;
+          border-color: var(--line-cta);
+        }
+      }
+
       .gov-grid-bg {
         background-image:
           linear-gradient(to right,  rgba(108,103,96,0.18) 1px, transparent 1px),
@@ -133,7 +260,7 @@ export function GovernmentStyles() {
       .gov-h1 {
         font-family: var(--font-analog), "Inter", system-ui, sans-serif;
         font-weight: 500;
-        font-size: clamp(36px, 5.2vw, 72px);
+        font-size: clamp(32px, 4.2vw, 56px);
         line-height: 1.08;
         letter-spacing: -0.02em;
         margin: 0;
