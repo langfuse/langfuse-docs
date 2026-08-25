@@ -3,6 +3,7 @@ import "server-only";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { AdoptersExplorer, type Adopter } from "./AdoptersExplorer";
+import { AdoptersTicker } from "./AdoptersTicker";
 
 const ADOPTERS_TABLE_PATH = join(
   process.cwd(),
@@ -156,4 +157,13 @@ function parseAdoptersTable(source: string): Adopter[] {
 export function AdoptersExplorerWrapper() {
   const source = readFileSync(ADOPTERS_TABLE_PATH, "utf8");
   return <AdoptersExplorer adopters={parseAdoptersTable(source)} />;
+}
+
+export function AdoptersTickerWrapper() {
+  const source = readFileSync(ADOPTERS_TABLE_PATH, "utf8");
+  return (
+    <AdoptersTicker
+      names={parseAdoptersTable(source).map(({ name }) => name)}
+    />
+  );
 }

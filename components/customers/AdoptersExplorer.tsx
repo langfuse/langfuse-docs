@@ -216,7 +216,7 @@ function AdoptersWall({ adopters }: { adopters: Adopter[] }) {
     setActiveId((current) => (current === id ? null : id));
 
   return (
-    <div className="grid grid-flow-row-dense grid-cols-1 gap-2 bg-surface-2 md:auto-rows-[116px] md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+    <div className="grid grid-flow-row-dense grid-cols-1 gap-2 bg-surface-2 p-2 md:auto-rows-[116px] md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
       {adopters.map((adopter, index) => (
         <AdopterCard
           key={adopter.id}
@@ -369,23 +369,14 @@ export function AdoptersExplorer({ adopters }: { adopters: Adopter[] }) {
             the adopters list.
           </p>
         </div>
-        <div className="flex shrink-0 flex-wrap gap-2">
-          <a
-            href="https://github.com/langfuse/langfuse-docs/edit/main/components-mdx/adopters-table.mdx"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex min-h-9 items-center justify-center border border-surface-bg bg-surface-bg px-4 text-[12px] font-medium text-text-primary no-underline transition-opacity hover:opacity-90"
-          >
-            Add your team
-          </a>
-          <button
-            type="button"
-            onClick={() => setView("table")}
-            className="inline-flex min-h-9 cursor-pointer items-center justify-center border border-surface-bg/40 bg-transparent px-4 text-[12px] font-medium text-surface-bg transition-colors hover:border-surface-bg"
-          >
-            Open table view
-          </button>
-        </div>
+        <a
+          href="https://github.com/langfuse/langfuse-docs/edit/main/components-mdx/adopters-table.mdx"
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex min-h-9 shrink-0 items-center justify-center border border-surface-bg bg-surface-bg px-4 text-[12px] font-medium text-text-primary no-underline transition-opacity hover:opacity-90"
+        >
+          Add your team
+        </a>
       </div>
     </section>
   );
