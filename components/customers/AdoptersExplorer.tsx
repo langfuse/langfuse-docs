@@ -3,6 +3,7 @@
 import { Fan, ListTree, MoveHorizontal } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { TextHighlight } from "@/components/ui/text-highlight";
 import { cn } from "@/lib/utils";
 
 export type Adopter = {
@@ -320,10 +321,17 @@ export function AdoptersExplorer({ adopters }: { adopters: Adopter[] }) {
             <p className="m-0 font-mono text-[11px] uppercase tracking-[0.14em] text-text-tertiary">
               — Adopters
             </p>
-            <h1 className="mt-5 max-w-[19ch] font-analog text-[38px] font-medium leading-[1.02] tracking-tight text-text-primary sm:text-[50px]">
+            <h1
+              aria-label="Langfuse is adopted by 100,000+ developers worldwide"
+              className="mt-5 max-w-[19ch] font-analog text-[38px] font-medium leading-[1.02] tracking-tight text-text-primary sm:text-[50px]"
+            >
               Langfuse is adopted by{" "}
-              <span className="box-decoration-clone bg-[#FBFF7A] px-[0.04em]">
-                100,000+ developers
+              <span className="sm:hidden">
+                <TextHighlight>100,000+</TextHighlight>{" "}
+                <TextHighlight>developers</TextHighlight>
+              </span>
+              <span className="hidden sm:inline">
+                <TextHighlight>100,000+ developers</TextHighlight>
               </span>{" "}
               worldwide
             </h1>
