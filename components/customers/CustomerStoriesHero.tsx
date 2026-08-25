@@ -43,12 +43,8 @@ export function CustomerStoriesHero({
   const story = stories[active];
   const company = companyName(story);
   const quote = story.frontMatter.customerQuote!;
-  const metaBits = [
-    story.frontMatter.quoteRole,
-    story.frontMatter.description
-      ? story.frontMatter.description.split(/[.!?]/)[0]
-      : null,
-  ].filter(Boolean) as string[];
+  const quoteAuthor = story.frontMatter.quoteAuthor;
+  const quoteRole = story.frontMatter.quoteRole;
 
   return (
     <section
@@ -92,14 +88,20 @@ export function CustomerStoriesHero({
                 “{quote}”
               </blockquote>
 
-              <div className="mt-auto flex flex-col gap-5 pt-10 sm:flex-row sm:items-end sm:justify-between">
-                <div className="flex flex-wrap gap-x-6 gap-y-1 text-[13px] text-text-tertiary">
-                  {metaBits.slice(0, 2).map((bit) => (
-                    <span key={bit} className="max-w-[28ch] truncate">
-                      {bit}
+              {(quoteAuthor || quoteRole) && (
+                <div className="mt-5 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px]">
+                  {quoteAuthor && (
+                    <span className="font-medium text-text-primary">
+                      {quoteAuthor}
                     </span>
-                  ))}
+                  )}
+                  {quoteRole && (
+                    <span className="text-text-tertiary">{quoteRole}</span>
+                  )}
                 </div>
+              )}
+
+              <div className="mt-auto flex justify-end pt-10">
                 <Link
                   href={story.route}
                   className="inline-flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.08em] text-text-secondary no-underline transition-colors hover:text-text-primary"
