@@ -50,8 +50,8 @@ export function CustomerIndex({
         </Heading>
         <Text className="max-w-[52ch] text-left">
           Real deployments across support agents, tutoring, design tools, and
-          enterprise AI platforms — how teams instrument, evaluate, and ship
-          with Langfuse.
+          enterprise AI platforms. How teams trace, monitor and improve with
+          Langfuse.
         </Text>
       </div>
 
