@@ -6,9 +6,31 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { CustomerStory } from "./CustomerCarousel";
 import { companyName } from "./customerStoryLabels";
+import { TextHighlight } from "@/components/ui/text-highlight";
 import { cn } from "@/lib/utils";
 
 const ROTATE_MS = 5500;
+
+function HighlightedQuote({
+  quote,
+  highlight,
+}: {
+  quote: string;
+  highlight?: string;
+}) {
+  if (!highlight) return <>“{quote}”</>;
+
+  const start = quote.indexOf(highlight);
+  if (start === -1) return <>“{quote}”</>;
+
+  return (
+    <>
+      “{quote.slice(0, start)}
+      <TextHighlight>{highlight}</TextHighlight>
+      {quote.slice(start + highlight.length)}”
+    </>
+  );
+}
 
 export function CustomerStoriesHero({
   stories: allStories,
@@ -43,6 +65,7 @@ export function CustomerStoriesHero({
   const story = stories[active];
   const company = companyName(story);
   const quote = story.frontMatter.customerQuote!;
+  const quoteHighlight = story.frontMatter.customerQuoteHighlight;
   const quoteAuthor = story.frontMatter.quoteAuthor;
   const quoteRole = story.frontMatter.quoteRole;
   const logo = story.frontMatter.customerLogo;
@@ -101,7 +124,7 @@ export function CustomerStoriesHero({
                 )}
               </div>
               <blockquote className="m-0 max-w-[38rem] border-0 p-0 font-analog text-[26px] font-medium leading-[1.15] tracking-[-0.02em] text-text-primary sm:text-[34px] lg:text-[40px]">
-                “{quote}”
+                <HighlightedQuote quote={quote} highlight={quoteHighlight} />
               </blockquote>
 
               {(quoteAuthor || quoteRole) && (

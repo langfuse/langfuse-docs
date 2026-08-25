@@ -8,6 +8,7 @@ type CustomerPageData = {
   customerLogo?: string | null;
   customerLogoDark?: string | null;
   customerQuote?: string | null;
+  customerQuoteHighlight?: string | null;
   quoteAuthor?: string | null;
   quoteRole?: string | null;
   quoteCompany?: string | null;
@@ -28,6 +29,7 @@ export function getCustomerStories(): CustomerStory[] {
           customerLogo: data.customerLogo ?? undefined,
           customerLogoDark: data.customerLogoDark ?? undefined,
           customerQuote: data.customerQuote ?? undefined,
+          customerQuoteHighlight: data.customerQuoteHighlight ?? undefined,
           quoteAuthor: data.quoteAuthor ?? undefined,
           quoteRole: data.quoteRole ?? undefined,
           quoteCompany: data.quoteCompany ?? undefined,
