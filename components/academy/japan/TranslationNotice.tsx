@@ -27,7 +27,6 @@ export function TranslationNotice({
         : "英語版を翻訳したものです。"}
       {englishHref ? (
         <>
-          {" "}
           最新の内容は{" "}
           <Link
             href={englishHref}
@@ -38,7 +37,7 @@ export function TranslationNotice({
           をご参照ください。
         </>
       ) : (
-        " 最新の内容は英語版をご参照ください。"
+        "最新の内容は英語版をご参照ください。"
       )}
     </div>
   );
