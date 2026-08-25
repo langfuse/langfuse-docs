@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import type { CustomerStory } from "./CustomerCarousel";
 import { companyName } from "./customerStoryLabels";
 
-const INITIAL_VISIBLE = 4;
+const INITIAL_VISIBLE = 10;
 
 export function CustomerIndex({
   stories: allStories = [],
