@@ -252,9 +252,9 @@ function HeroArt() {
               {
                 "--x": `${c.x}px`,
                 "--y": `${c.y}px`,
-                "--z": c.z,
+                "--z": String(c.z),
                 "--rest-rot": `${c.rot}deg`,
-                "--rest-scale": c.scale,
+                "--rest-scale": String(c.scale),
               } as CSSProperties
             }
           >
