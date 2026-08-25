@@ -66,6 +66,7 @@ export function CustomerStoriesHero({
   const company = companyName(story);
   const quote = story.frontMatter.customerQuote!;
   const quoteHighlight = story.frontMatter.customerQuoteHighlight;
+  const quoteTag = story.frontMatter.customerQuoteTag;
   const quoteAuthor = story.frontMatter.quoteAuthor;
   const quoteRole = story.frontMatter.quoteRole;
   const logo = story.frontMatter.customerLogo;
@@ -126,6 +127,11 @@ export function CustomerStoriesHero({
               <blockquote className="m-0 max-w-[38rem] border-0 p-0 font-analog text-[26px] font-medium leading-[1.15] tracking-[-0.02em] text-text-primary sm:text-[34px] lg:text-[40px]">
                 <HighlightedQuote quote={quote} highlight={quoteHighlight} />
               </blockquote>
+              {quoteTag && (
+                <span className="mt-4 inline-flex w-fit bg-[#FBFF7A] px-2 py-1 font-mono text-[11px] uppercase tracking-[0.1em] text-text-primary">
+                  {quoteTag}
+                </span>
+              )}
 
               {(quoteAuthor || quoteRole) && (
                 <div className="mt-5 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px]">

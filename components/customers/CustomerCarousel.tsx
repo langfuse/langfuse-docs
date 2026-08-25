@@ -21,6 +21,7 @@ export interface CustomerStory {
     customerLogoDark?: string;
     customerQuote?: string;
     customerQuoteHighlight?: string;
+    customerQuoteTag?: string;
     quoteAuthor?: string;
     quoteRole?: string;
     quoteCompany?: string;

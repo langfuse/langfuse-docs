@@ -66,6 +66,7 @@ const customerFrontmatterSchema = baseFrontmatterSchema.extend({
   customerLogoDark: z.string().nullish(),
   customerQuote: z.string().nullish(),
   customerQuoteHighlight: z.string().nullish(),
+  customerQuoteTag: z.string().nullish(),
   quoteAuthor: z.string().nullish(),
   quoteRole: z.string().nullish(),
   quoteCompany: z.string().nullish(),
