@@ -78,7 +78,7 @@ export function CustomerStoriesHero({
       aria-roledescription="carousel"
       aria-label="Featured customer stories"
     >
-      <div className="relative grid gap-8 px-6 py-10 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)] lg:gap-10 lg:py-12">
+      <div className="relative grid gap-8 px-6 py-10 sm:px-8 lg:min-h-[580px] lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)] lg:gap-10 lg:py-12">
         <div className="flex min-w-0 flex-col">
           <div className="mb-8 flex items-start justify-between gap-4">
             <h1 className="m-0 font-mono text-[11px] font-normal uppercase tracking-[0.14em] text-text-tertiary">
@@ -99,9 +99,9 @@ export function CustomerStoriesHero({
           <AnimatePresence mode="wait">
             <motion.div
               key={story.route}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.28, ease: "easeOut" }}
               className="flex flex-1 flex-col"
             >
@@ -166,34 +166,30 @@ export function CustomerStoriesHero({
                     onClick={() => setActive(i)}
                     onMouseEnter={() => setActive(i)}
                     className={cn(
-                      "group flex w-full items-center gap-3 rounded-sm px-2 py-2 text-left transition-colors",
+                      "group flex w-full items-center justify-between gap-4 rounded-sm px-3 py-2.5 text-left transition-colors",
                       isActive ? "bg-surface-bg" : "hover:bg-surface-1",
                     )}
                     aria-current={isActive ? "true" : undefined}
                     aria-label={`Show ${name} story`}
                   >
-                    <div className="flex h-10 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[2px] border border-line-structure bg-surface-bg p-1.5">
+                    <div className="flex h-10 min-w-0 flex-1 items-center">
                       {logo ? (
-                        <div className="relative h-6 w-full">
+                        <div className="relative h-10 w-40">
                           <Image
                             src={logo}
                             alt=""
                             fill
-                            sizes="56px"
-                            className="object-contain"
+                            sizes="160px"
+                            className="object-contain object-left"
                             unoptimized
                           />
                         </div>
-                      ) : null}
-                    </div>
-                    <span
-                      className={cn(
-                        "min-w-0 flex-1 truncate text-[13px]",
-                        isActive ? "text-text-primary" : "text-text-tertiary",
+                      ) : (
+                        <span className="font-analog text-[24px] font-medium leading-none text-text-primary">
+                          {name}
+                        </span>
                       )}
-                    >
-                      {name}
-                    </span>
+                    </div>
                     <span
                       className={cn(
                         "h-8 w-0.5 shrink-0 rounded-full transition-colors",
