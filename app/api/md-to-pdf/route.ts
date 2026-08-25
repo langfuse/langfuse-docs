@@ -3,6 +3,7 @@ import { marked } from "marked";
 import puppeteerCore from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
 import { stripMdxForPlainMarkdown } from "@/lib/stripMdxForPlainMarkdown.js";
+import { AGENT_FOOTER_MARKER } from "@/lib/agent-instructions-footer.js";
 
 // Force Node.js runtime (required for Puppeteer/Chromium — not compatible with Edge runtime)
 export const runtime = "nodejs";
@@ -55,8 +56,11 @@ async function runtimeImport(moduleName: string): Promise<any> {
   return importAtRuntime(moduleName);
 }
 
-function removeAnchorTags(content: string): string {
-  return content.replace(/\s*\[#[\w-]+\]/g, "");
+function renderAnchorTags(content: string): string {
+  return content.replace(
+    /^(#{1,6}\s+)(.*?)(?:\s+\[#([\w-]+)\])\s*$/gm,
+    (_, prefix, title, id) => `${prefix}<span id="${id}"></span>${title}`,
+  );
 }
 
 function processCallouts(content: string): string {
@@ -162,10 +166,19 @@ export async function GET(request: NextRequest) {
       /^---\r?\n[\s\S]*?\r?\n---\r?\n/,
       "",
     );
+    // md-src pages end with an agent instructions footer aimed at AI agents
+    // (search endpoints, MCP server, skill install). It is noise in a
+    // human-facing PDF, so drop everything from the marker onwards.
+    const agentFooterIndex = markdownContent.indexOf(AGENT_FOOTER_MARKER);
+    if (agentFooterIndex !== -1) {
+      markdownContent = `${markdownContent
+        .slice(0, agentFooterIndex)
+        .replace(/\s*$/, "")}\n`;
+    }
     markdownContent = stripMdxForPlainMarkdown(markdownContent, {
       unwrapCalloutsForPlainMd: false,
     });
-    markdownContent = removeAnchorTags(markdownContent);
+    markdownContent = renderAnchorTags(markdownContent);
     let htmlContent = await marked.parse(markdownContent);
     htmlContent = processCallouts(htmlContent);
 

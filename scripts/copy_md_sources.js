@@ -12,10 +12,20 @@ const {
   replaceComponentsWithMarkdown,
 } = require("../lib/markdown-component-renderers.js");
 const { CONTENT_DIR_TO_URL_PREFIX } = require("../lib/content-dir-map.js");
+const {
+  buildAgentInstructionsFooter,
+} = require("../lib/agent-instructions-footer.js");
+
+const SITE_URL = "https://langfuse.com";
 
 const SOURCE_DIR = path.join(process.cwd(), "content");
 const OUTPUT_DIR = path.join(process.cwd(), "public", "md-src");
 const OVERRIDE_DIR = path.join(process.cwd(), "md-override");
+const SELF_HOSTING_FOOTER_PATH = path.join(
+  process.cwd(),
+  "components-mdx",
+  "self-host-help-footer.mdx",
+);
 
 // Directories whose .md output is historical changelog content. Agents fetch
 // these pages (via the ".md" route or the docs MCP `getLangfuseDocsPage` tool)
@@ -24,6 +34,19 @@ const OVERRIDE_DIR = path.join(process.cwd(), "md-override");
 // entries only to confirm a feature exists, and follow the canonical docs /
 // API / SDK reference for implementation. See CHANGELOG_AGENT_NOTICE below.
 const CHANGELOG_URL_PREFIX = "changelog";
+
+// Legal and policy pages are human- and compliance-facing artifacts, not part
+// of the agent docs surface. A privacy policy whose last section is curl
+// examples, MCP connection details, and "found an error? open a GitHub issue"
+// reads as a copy-paste error to anyone who scrolls to the end — and these are
+// exactly the pages that expose a "download as PDF" link. The PDF route strips
+// the footer as a second line of defense (app/api/md-to-pdf/route.ts), but
+// these pages should never carry it in the first place.
+const AGENT_FOOTER_EXCLUDED_PAGES = new Set([
+  "privacy.md",
+  "cookie-policy.md",
+  "imprint.md",
+]);
 
 /**
  * Read the `canonical` frontmatter value (a docs path) from raw MDX, if present.
@@ -70,6 +93,22 @@ function injectChangelogAgentNotice(processed, originalContent) {
     return `${frontmatter}\n${notice}\n\n${body}`;
   }
   return `${notice}\n\n${processed.replace(/^\s*\n/, "")}`;
+}
+
+/**
+ * Append the agent instructions footer to a page's markdown. Applied to every
+ * generated page (including md-override/ files) so agents that land on any
+ * single .md page can discover the rest of the agent surface: the ".md"
+ * convention, /api/search-docs, llms.txt, the docs MCP server, and the skill.
+ * Legal/policy pages are exempt, see AGENT_FOOTER_EXCLUDED_PAGES.
+ * @param {string} markdown
+ * @param {string} destRel  path relative to public/md-src, e.g. "docs/foo.md"
+ * @returns {string}
+ */
+function appendAgentInstructionsFooter(markdown, destRel) {
+  if (AGENT_FOOTER_EXCLUDED_PAGES.has(destRel)) return markdown;
+  const footer = buildAgentInstructionsFooter(`${SITE_URL}/${destRel}`);
+  return `${markdown.replace(/\s*$/, "")}\n\n${footer}`;
 }
 
 /**
@@ -151,8 +190,14 @@ function copyAll() {
     const dir = path.dirname(dest);
     ensureDir(dir);
     const originalContent = fs.readFileSync(file, "utf8");
+    const destRel = path.relative(OUTPUT_DIR, dest).split(path.sep).join("/");
+    const isSelfHostingPage =
+      destRel === "self-hosting.md" || destRel.startsWith("self-hosting/");
+    const contentWithSharedFooter = isSelfHostingPage
+      ? `${originalContent}\n\n${fs.readFileSync(SELF_HOSTING_FOOTER_PATH, "utf8")}`
+      : originalContent;
     const inlined = replaceComponentsWithMarkdown(
-      inlineComponentsMdx(originalContent, file),
+      inlineComponentsMdx(contentWithSharedFooter, file),
     );
     let processed = stripMdxForPlainMarkdown(inlined, {
       unwrapCalloutsForPlainMd: true,
@@ -160,13 +205,14 @@ function copyAll() {
 
     // For changelog entries, prepend an AI-agent notice so models use the page
     // to confirm a feature exists rather than copying release-time examples.
-    const destRel = path.relative(OUTPUT_DIR, dest).split(path.sep).join("/");
     const isChangelogEntry =
       destRel.startsWith(`${CHANGELOG_URL_PREFIX}/`) &&
       destRel !== `${CHANGELOG_URL_PREFIX}/index.md`;
     if (isChangelogEntry) {
       processed = injectChangelogAgentNotice(processed, originalContent);
     }
+
+    processed = appendAgentInstructionsFooter(processed, destRel);
 
     fs.writeFileSync(dest, processed, "utf8");
     copied += 1;
@@ -177,6 +223,24 @@ function copyAll() {
 function cleanOutputDir() {
   if (fs.existsSync(OUTPUT_DIR)) {
     fs.rmSync(OUTPUT_DIR, { recursive: true, force: true });
+  }
+}
+
+/**
+ * Fail loudly if an entry in AGENT_FOOTER_EXCLUDED_PAGES no longer matches a
+ * generated page. Without this, renaming or moving a legal page turns its
+ * exclusion into a silent no-op and the agent footer creeps back onto it.
+ */
+function verifyFooterExclusions() {
+  const missing = [...AGENT_FOOTER_EXCLUDED_PAGES].filter(
+    (page) => !fs.existsSync(path.join(OUTPUT_DIR, page)),
+  );
+  if (missing.length > 0) {
+    throw new Error(
+      `copy_md_sources: AGENT_FOOTER_EXCLUDED_PAGES lists page(s) that were not generated: ${missing.join(
+        ", ",
+      )}. Update the set in scripts/copy_md_sources.js to match the current legal page paths, otherwise the agent instructions footer will be appended to them.`,
+    );
   }
 }
 
@@ -193,7 +257,12 @@ function applyOverrides() {
     const rel = path.relative(OVERRIDE_DIR, file);
     const dest = path.join(OUTPUT_DIR, rel);
     ensureDir(path.dirname(dest));
-    fs.copyFileSync(file, dest);
+    const destRel = rel.split(path.sep).join("/");
+    fs.writeFileSync(
+      dest,
+      appendAgentInstructionsFooter(fs.readFileSync(file, "utf8"), destRel),
+      "utf8",
+    );
     overridden += 1;
   }
   if (overridden > 0) {
@@ -204,6 +273,7 @@ function applyOverrides() {
 cleanOutputDir();
 copyAll();
 applyOverrides();
+verifyFooterExclusions();
 
 /**
  * Inline imports of MDX components from the components-mdx directory.

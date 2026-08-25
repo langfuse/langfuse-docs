@@ -39,17 +39,20 @@ import {
   ToolOutput,
   ToolInput,
 } from "@/components/ai-elements/tool";
-import { scoreDemoFeedback } from "@/components/demoLangfuseBrowserClients";
+import { scoreDemoNegativeUserFeedback } from "@/components/demoLangfuseBrowserClients";
 import { FeedbackDialog } from "./FeedbackPopover";
 import { cn } from "@/lib/utils";
+import type { UIMessage } from "ai";
+
+type ChatMessage = UIMessage;
 
 type ChatProps = HTMLAttributes<HTMLDivElement>;
 
 export const Chat = ({ className, ...props }: ChatProps) => {
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  // Track user feedback for each message ID (1 = thumbs up, 0 = thumbs down, null = no feedback)
-  const [userFeedback, setUserFeedback] = useState<Map<string, number | null>>(
+  // Track negative_user_feedback per message (true/false, null = none)
+  const [userFeedback, setUserFeedback] = useState<Map<string, boolean | null>>(
     new Map(),
   );
 
@@ -79,7 +82,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
     });
   }, []);
 
-  const { messages, sendMessage, status, regenerate } = useChat({
+  const { messages, sendMessage, status, regenerate } = useChat<ChatMessage>({
     messages: [],
     transport: new DefaultChatTransport({
       api: "/api/qa-chatbot",
@@ -104,16 +107,13 @@ export const Chat = ({ className, ...props }: ChatProps) => {
 
   const handleFeedback = (
     messageId: string,
-    value: number,
+    value: boolean,
     comment?: string,
   ) => {
-    // Update the local state
     setUserFeedback((prev) => new Map([...prev, [messageId, value]]));
 
-    scoreDemoFeedback({
+    scoreDemoNegativeUserFeedback({
       traceId: messageId,
-      id: `user-feedback-${messageId}`,
-      name: "user-feedback",
       value,
       comment,
     });

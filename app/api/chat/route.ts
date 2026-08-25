@@ -108,6 +108,9 @@ export async function POST(req: Request) {
       },
       messages: modelMessages,
       toolChoice: "auto",
+      // AI SDK 7 emits telemetry by default once an integration is registered;
+      // keep the Inkeep proxy untraced as before.
+      telemetry: { isEnabled: false },
     });
 
     return result.toUIMessageStreamResponse();

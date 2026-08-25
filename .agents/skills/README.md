@@ -11,6 +11,17 @@ verified by `pnpm run agents:sync` and `pnpm run agents:check`.
 
 ## Available Skills
 
+### add-customer-to-user-list
+
+Use for:
+
+- adding or updating a company in the `/users` adopters table
+- choosing the Reference cell: user story, external link, or `Langfuse Customer`
+- summarizing a use case from a user story or a public source link
+
+Open:
+[`add-customer-to-user-list/SKILL.md`](add-customer-to-user-list/SKILL.md)
+
 ### add-yourself-to-team-langfuse
 
 Use for:

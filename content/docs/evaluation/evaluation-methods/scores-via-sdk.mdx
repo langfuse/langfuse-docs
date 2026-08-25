@@ -6,7 +6,7 @@ sidebarTitle: Scores via API/SDK
 
 # Scores via API/SDK
 
-You can use the Langfuse SDKs or API to add [scores](/docs/evaluation/scores/overview) to traces, observations, sessions and dataset runs. This is an evaluation method that allows to set up custom evaluation workflows and extend the scoring capabilities of Langfuse. See the [data model](/docs/evaluation/scores/data-model#scores) for full details on the score object.
+You can use the Langfuse SDKs or API to add [scores](/docs/evaluation/scores/overview) to traces, observations, sessions and dataset runs. This is an evaluation method that allows you to set up custom evaluation workflows and extend the scoring capabilities of Langfuse. See the [data model](/docs/evaluation/scores/data-model#scores) for full details on the score object.
 
 If you want Langfuse to run deterministic Python or TypeScript logic for you, use [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators). Use this page when your application, pipeline, or CI job computes scores and sends them to Langfuse via API or SDK.
 
@@ -138,7 +138,7 @@ with langfuse.start_as_current_observation(as_type="span", name="my-operation"):
 
 </Tab>
 <Tab>
-Boolean scores must be provided as a float, where `1` is true and `0` is false. When read via the [v3 scores API](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores), the value is returned as a boolean. See [API reference](/docs/api) for more details on POST/GET scores endpoints.
+Boolean scores must be provided as a float, where `1` is true and `0` is false. When read via the [v3 scores API](https://api.reference.langfuse.com/#tag/scoresv3/GET/api/public/v3/scores), the value is returned as a boolean. See [API reference](/docs/api) for more details on POST/GET scores endpoints.
 
 ```python
 from langfuse import get_client
@@ -295,7 +295,7 @@ await langfuse.flush();
 
 </Tab>
 <Tab>
-Boolean scores must be provided as a float, where `1` is true and `0` is false. When read via the [v3 scores API](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores), the value is returned as a boolean. See [API reference](/docs/api) for more details on POST/GET scores endpoints.
+Boolean scores must be provided as a float, where `1` is true and `0` is false. When read via the [v3 scores API](https://api.reference.langfuse.com/#tag/scoresv3/GET/api/public/v3/scores), the value is returned as a boolean. See [API reference](/docs/api) for more details on POST/GET scores endpoints.
 
 ```ts
 import { LangfuseClient } from "@langfuse/client";
@@ -385,7 +385,7 @@ curl -X POST https://cloud.langfuse.com/api/public/scores \
 
 </Tab>
 <Tab>
-Boolean scores must be provided as a float, where `1` is true and `0` is false. When read via the [v3 scores API](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores), the value is returned as a boolean.
+Boolean scores must be provided as a float, where `1` is true and `0` is false. When read via the [v3 scores API](https://api.reference.langfuse.com/#tag/scoresv3/GET/api/public/v3/scores), the value is returned as a boolean.
 
 ```bash
 curl -X POST https://cloud.langfuse.com/api/public/scores \
@@ -877,7 +877,7 @@ Certain score properties might be inferred based on your input:
 
 - **If you don't provide a score data type** it will always be inferred. See tables below for details.
 - **For boolean and categorical scores**, we will provide the score value in both numerical and string format where possible. The score value format that is not provided as input, i.e. the translated value is referred to as the inferred value in the tables below.
-- **On read via the [v3 scores API](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores)**, boolean scores are returned as a single boolean `value`.
+- **On read via the [v3 scores API](https://api.reference.langfuse.com/#tag/scoresv3/GET/api/public/v3/scores)**, boolean scores are returned as a single boolean `value`.
 - **For categorical scores**, the string representation is always provided and a numerical mapping of the category will be produced only if a `ScoreConfig` was provided.
 
 Detailed Examples:
@@ -947,9 +947,9 @@ To overwrite a score without fetching existing scores first, set a stable `id` a
 <ManualGuideList
   guides={[
     {
-      href: "/guides/cookbook/user-feedback",
+      href: "/guides/user-feedback-loop",
       topic: "Collecting user feedback",
-      lede: "Collect in-app feedback from your users on application quality or performance, captured in the frontend via our Browser SDK.",
+      lede: "Capture explicit and implicit user feedback as scores on your traces, including in-app ratings sent via our Browser SDK.",
     },
     {
       href: "/guides/cookbook/example_external_evaluation_pipelines",

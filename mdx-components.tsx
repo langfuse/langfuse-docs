@@ -30,6 +30,9 @@ import { ErrorAnalysisProcessDiagram } from "@/components/academy/ErrorAnalysisP
 import { AnnotatedLoop } from "@/components/academy/AnnotatedLoop";
 import { DatasetBlock } from "@/components/academy/DatasetBlock";
 import { EvaluatorBlock } from "@/components/academy/EvaluatorBlock";
+import { FurtherReading } from "@/components/FurtherReading";
+import { JudgePromptExample } from "@/components/academy/JudgePromptExample";
+import { Ref } from "@/components/Ref";
 import { TraceViewDiagram } from "@/components/academy/TraceViewDiagram";
 import { AgentPromptCallout } from "@/components/academy/AgentPromptCallout";
 import { ManualGuideCallout } from "@/components/academy/ManualGuideCallout";
@@ -121,6 +124,9 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     AnnotatedLoop,
     DatasetBlock,
     EvaluatorBlock,
+    FurtherReading,
+    JudgePromptExample,
+    Ref,
     TraceViewDiagram,
     AgentPromptCallout,
     ManualGuideCallout,

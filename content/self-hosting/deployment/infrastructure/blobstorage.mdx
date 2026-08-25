@@ -2,7 +2,7 @@
 title: "S3 / Blob Storage Configuration (Self-Hosted)"
 sidebarTitle: Blob Storage (S3)
 description: "Configure S3 or S3-compatible blob storage for self-hosted Langfuse. Store raw events, multi-modal inputs, and batch exports with AWS S3, MinIO, or compatible services."
-label: "Version: v3"
+label: "Version: v4"
 ---
 
 # S3 / Blob Storage
@@ -18,6 +18,28 @@ In addition, we have dedicated implementations for [Azure Blob Storage](#azure-b
 You can use a managed service on AWS, or CloudFlare, or host it yourself using MinIO.
 We use it as a scalable and durable storage solution for large files with strong read-after-write guarantees.
 This guide covers how to configure S3 within Langfuse and how to connect your own S3-compatible storage.
+
+## Official and Community Support [#support]
+
+Langfuse works with a wide range of blob storage providers.
+We distinguish between officially supported and community-supported options:
+
+| Option                                            | Support Level |
+| ------------------------------------------------- | ------------- |
+| [Amazon S3](#amazon-s3)                           | Official      |
+| [Google Cloud Storage](#google-cloud-storage)     | Official      |
+| [Azure Blob Storage](#azure-blob-storage)         | Official      |
+| [MinIO / AIStor](#minio)                          | Official      |
+| [Cloudflare R2](#cloudflare-r2)                   | Official      |
+| [OCI Object Storage](#oci-object-storage)         | Community     |
+| [Tigris](#tigris)                                 | Community     |
+| [Other S3-compatible providers](#other-providers) | Community     |
+
+For Google Cloud Storage, we recommend the [native integration](#google-cloud-storage); the [S3 interoperability mode](#google-cloud-storage-compatibility-mode) has known limitations.
+
+import SelfHostSupportLevels from "@/components-mdx/self-host-support-levels.mdx";
+
+<SelfHostSupportLevels />
 
 ## Configuration
 
@@ -81,12 +103,20 @@ To configure batch exports in your environment, configure the following environm
 | `BATCH_EXPORT_PAGE_SIZE`                     | `500`              | Optional page size for streaming exports to S3 to avoid memory issues. The page size can be adjusted if needed to optimize performance.                                            |
 | `BATCH_EXPORT_ROW_LIMIT`                     | `1_500_000`        | Maximum amount of rows that can be exported in a single batch export.                                                                                                              |
 
+#### S3 Compatibility
+
+The following settings apply to all S3 use-cases (events, media, batch exports) and help with S3-compatible stores that are not fully compatible with the AWS S3 API.
+
+| Variable                                        | Required / Default | Description                                                                                                                                                                                                                                                                          |
+| ----------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `LANGFUSE_S3_DELETE_OBJECTS_CHECKSUM_ALGORITHM` |                    | Checksum algorithm for S3 DeleteObjects requests: `MD5`, `CRC32`, `CRC32C`, `CRC64NVME`, `SHA1`, or `SHA256`. If unset, the AWS SDK default (`CRC32`) is used. Set to `MD5` if your storage provider rejects deletions with a `MissingContentMD5` error (e.g. older MinIO versions). |
+
 ## Deployment Options
 
 This section covers different deployment options and provides example environment variables.
 We will focus on the EVENT_UPLOAD case, as the other cases are similar.
 
-### Amazon S3
+### Amazon S3 [#amazon-s3]
 
 [Amazon S3](https://aws.amazon.com/s3/) is a globally available object storage.
 Langfuse uses the AWS SDK internally to connect to blob storages, as most providers provide an S3-compatible interface.
@@ -120,7 +150,7 @@ If you use versioned buckets, delete markers and non-current versions need to be
 
 </Callout>
 
-#### Using AWS KMS Encryption
+#### Using AWS KMS Encryption [#using-aws-kms-encryption]
 
 Amazon S3 provides server-side encryption (SSE) options to encrypt your data at rest.
 Langfuse supports AWS KMS encryption for all S3 interactions through the following environment variables:
@@ -167,11 +197,11 @@ LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
 LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 ```
 
-### MinIO
+### MinIO / AIStor [#minio]
 
-[MinIO](https://min.io/) is an open-source object storage server that is compatible with the S3 API.
-It is a popular choice for on-premise deployments and local development.
-Langfuse uses it for local development and as a default in our [Docker Compose](/self-hosting/deployment/docker-compose) and [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) deployment options.
+[MinIO](https://min.io/) and its commercial distribution [AIStor](https://www.min.io/product/aistor) are object storage servers that are compatible with the S3 API.
+They are a popular choice for on-premise deployments and local development.
+Langfuse uses MinIO for local development and as a default in our [Docker Compose](/self-hosting/deployment/docker-compose) deployment option. The [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) chart bundled MinIO up to chart version `v1.x` and bundles SeaweedFS from chart `v2.0.0` onwards.
 
 #### Example Configuration
 
@@ -202,6 +232,13 @@ LANGFUSE_S3_EVENT_UPLOAD_PREFIX=events/
 This example setup uses an ephemeral volume, i.e. on restarts MinIO will discard all event data.
 Please follow the MinIO documentation or use a cloud provider managed blob store for persistent data storage.
 
+<Callout type="info">
+
+MinIO versions before `RELEASE.2025-02-03` reject S3 DeleteObjects requests with a `MissingContentMD5` error, which breaks data retention and deletion jobs.
+If you cannot upgrade MinIO, set `LANGFUSE_S3_DELETE_OBJECTS_CHECKSUM_ALGORITHM=MD5` to send the legacy `Content-MD5` header instead.
+
+</Callout>
+
 #### Configuring Minio for Media Uploads [#minio-media-uploads]
 
 To enable multi-modal tracing and multi-modal datasets, presigned URLs allow SDK clients and browsers outside the Docker network to directly upload and download media assets. Therefore, the `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT` must resolve to the Docker host's address.
@@ -210,7 +247,7 @@ To enable multi-modal tracing and multi-modal datasets, presigned URLs allow SDK
 
 **Production Environment:** In a production environment, configure `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT` with a publicly accessible hostname or IP address that is reachable by your SDK clients and browsers.
 
-### Cloudflare R2
+### Cloudflare R2 [#cloudflare-r2]
 
 [Cloudflare R2](https://www.cloudflare.com/developer-platform/products/r2/) is globally available, S3 compatible object storage by Cloudflare.
 Create a new bucket within the Cloudflare UI and generate an Access Key pair.
@@ -227,30 +264,6 @@ LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID=<access-key-id>
 LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=<secret-access-key>
 LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=https://${ACCOUNT_ID}.r2.cloudflarestorage.com
 ```
-
-### Tigris
-
-[Tigris](https://www.tigrisdata.com/) is S3-compatible object storage with zero egress fees and a free tier (5 GB).
-Create a bucket and access key pair from the [Tigris Dashboard](https://console.tigris.dev/).
-Access keys are prefixed with `tid_` and secrets with `tsec_`.
-
-#### Example Configuration
-
-Set the following environment variables to connect Langfuse with your Tigris bucket:
-
-```yaml
-LANGFUSE_S3_EVENT_UPLOAD_BUCKET=langfuse
-LANGFUSE_S3_EVENT_UPLOAD_REGION=auto
-LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID=tid_YOUR_ACCESS_KEY
-LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=tsec_YOUR_SECRET_KEY
-LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=https://t3.storage.dev
-```
-
-<Callout type="info">
-
-Tigris uses virtual-hosted-style addressing by default. Do not set `LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE` to `true`.
-
-</Callout>
 
 ### Azure Blob Storage [#azure-blob-storage]
 
@@ -302,7 +315,7 @@ The value applies across all authentication methods (JSON credentials, key file,
 
 </Callout>
 
-### Google Cloud Storage (Compatibility Mode)
+### Google Cloud Storage (Compatibility Mode) [#google-cloud-storage-compatibility-mode]
 
 [Google Cloud Storage](https://cloud.google.com/storage) is a globally available object storage by Google Cloud.
 It offers S3-compatibility through its interoperability interface.
@@ -372,7 +385,31 @@ LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=https://objectstorage.us-chicago-1.oraclecloud
 LANGFUSE_S3_EVENT_UPLOAD_PREFIX=events/
 ```
 
-### Other Providers
+### Tigris [#tigris]
+
+[Tigris](https://www.tigrisdata.com/) is S3-compatible object storage with zero egress fees and a free tier (5 GB).
+Create a bucket and access key pair from the [Tigris Dashboard](https://console.tigris.dev/).
+Access keys are prefixed with `tid_` and secrets with `tsec_`.
+
+#### Example Configuration
+
+Set the following environment variables to connect Langfuse with your Tigris bucket:
+
+```yaml
+LANGFUSE_S3_EVENT_UPLOAD_BUCKET=langfuse
+LANGFUSE_S3_EVENT_UPLOAD_REGION=auto
+LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID=tid_YOUR_ACCESS_KEY
+LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=tsec_YOUR_SECRET_KEY
+LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=https://t3.storage.dev
+```
+
+<Callout type="info">
+
+Tigris uses virtual-hosted-style addressing by default. Do not set `LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE` to `true`.
+
+</Callout>
+
+### Other Providers [#other-providers]
 
 Langfuse supports any S3-compatible storage provider.
 Please refer to the provider's documentation on how to create a bucket and generate Access Key pairs.
@@ -413,5 +450,35 @@ ALTER TABLE blob_storage_file_log MODIFY TTL created_at + INTERVAL <DAYS> DAY DE
 ```
 
 Where `<DAYS>` matches the configured bucket lifecycle expiration period.
+
+</Callout>
+
+## Endpoint validation (SSRF defense) [#endpoint-validation]
+
+In addition to the platform-level `LANGFUSE_S3_*` buckets configured via environment variables, project members can configure a blob storage **integration** in the Langfuse UI (Project Settings → Integrations → Blob Storage Export). Because that endpoint is user-supplied, Langfuse validates the host it points at — both when the integration is saved and again every time a connection is opened — to prevent the worker from being pointed at internal services (cloud metadata endpoints, link-local addresses, private RFC1918 / ULA ranges, NAT64/6to4 transition ranges) or being redirected there via DNS rebinding.
+
+Validation behavior:
+
+- **Save-time**: the endpoint hostname is resolved and rejected if any resolved IP falls into a private, link-local, loopback, or special-use range.
+- **Connection-time**: the S3 SDK's HTTP handler and the Azure SDK's request policy re-validate the resolved IP just before each request, so a hostname whose DNS answer changes after save is still blocked.
+- **Cloud**: validation is strict and cannot be relaxed.
+- **Self-hosted**: validation activates when at least one of the allowlist environment variables below is configured. This keeps backward compatibility with internal MinIO and Azurite deployments on private networks. The default will become strict in a future major release.
+- The _integration_ offers three providers: **AWS S3**, **S3 Compatible Storage**, and **Azure Blob Storage**. There is no native **GCS** or **OCI** client, so neither can be selected directly. Google Cloud Storage still works as an export target through **S3 Compatible Storage**: create an HMAC key as described under [Compatibility Mode](#google-cloud-storage-compatibility-mode), then set the endpoint to `https://storage.googleapis.com`. That host is validated like any other S3-compatible endpoint. The native object storage integrations configured via environment variables are unaffected.
+
+### Self-hosted allowlist environment variables
+
+Set these on both the Langfuse Web and Worker containers if your internal blob storage endpoint resolves to a private address.
+
+| Variable                                                 | Required / Default | Description                                                                                                            |
+| -------------------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_HOST`        |                    | Comma-separated list of hostnames that bypass the IP-range check. Example: `minio.internal,storage.svc.cluster.local`. |
+| `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IPS`         |                    | Comma-separated list of individual IPs to allow. Example: `10.0.0.5,fd00::1`.                                          |
+| `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IP_SEGMENTS` |                    | Comma-separated list of CIDR ranges to allow. Example: `10.0.0.0/8,192.168.0.0/16`.                                    |
+
+These mirror the existing `LANGFUSE_LLM_CONNECTION_WHITELISTED_*` variables used for user-configured LLM connections — see [Hardening → Outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists).
+
+<Callout type="info">
+
+Azure container names must be 3–63 characters and contain only lowercase letters, digits, and hyphens. Names that don't meet this constraint are rejected at submission time.
 
 </Callout>

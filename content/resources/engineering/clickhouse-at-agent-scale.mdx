@@ -1,0 +1,91 @@
+---
+title: "How Langfuse runs ClickHouse at agent scale"
+tags: [engineering]
+description: "Why Langfuse stores agent traces in ClickHouse and how we operate it at scale: the data model, the write path, read isolation, and the trade-offs we engineer around."
+---
+
+# How Langfuse runs ClickHouse at agent scale
+
+Langfuse stores every trace, observation, and score in ClickHouse. The same architecture serves Langfuse Cloud, where we hold petabytes of tracing data for thousands of teams, and self-hosted deployments, which run the exact same open-source codebase. Langfuse [joined ClickHouse](/blog/joining-clickhouse) at the beginning of 2026, so the team building the database and the team running one of its larger production workloads now work in the same company. Agent workloads are the reason this architecture looks the way it does: deep traces, high write volume, and analytical read patterns are a poor fit for a row store and a natural fit for a columnar one, provided you design around the trade-offs a columnar database makes.
+
+This post covers what agent traffic does to an observability datastore, how we model trace data in ClickHouse, how the write and read paths are built so that neither can starve the other, and where ClickHouse forces explicit engineering decisions rather than giving you something for free.
+
+## What agent workloads do to an observability datastore [#agent-workloads]
+
+Agent workloads stress a trace store on three axes at once: write volume, trace depth, and read cardinality.
+
+**1.** A single agent trace can contain hundreds or thousands of operations. Every LLM call, tool execution, retrieval, and intermediate step becomes its own observation, and the operation you care about when debugging is rarely at the top level. The datastore has to make "find the one tool call that errored inside 2,000 spans" a fast query, not a scan.
+
+**2.** The rows are heavy. LLM inputs, outputs, and metadata are large strings; individual rows can carry multiple megabytes of text and maps. Storage layout decides whether a filter query reads a few compact columns or drags every payload off disk.
+
+**3.** The traffic is spiky and the reads are analytical. Batch evaluation runs and backfills produce sudden ingestion spikes, while the questions engineers ask are aggregations: total cost per user, latency percentiles per model, error rates per session. These are high-cardinality group-bys over billions of rows, not key-value lookups.
+
+We lived through what this does to a row store. Langfuse v1 and v2 ran on Postgres, which was the right call for shipping quickly, and it carried us to tens of thousands of events per minute. As our largest users grew, ingestion exhausted database IOPS, and dashboard queries that scanned millions of rows with large blobs became painfully slow. The workload had outgrown the storage model, not just the instance size.
+
+## Why we store traces in ClickHouse [#why-clickhouse]
+
+We moved all tracing data from Postgres to ClickHouse in December 2024 with Langfuse v3, because trace observability is an OLAP problem. Three properties made ClickHouse the fit:
+
+- **Columnar storage matches the read pattern.** Filtering observations by model, cost, or error status reads only those columns. The multi-megabyte `input` and `output` payloads stay on disk until a query actually asks for them.
+- **It is built for high-throughput batch inserts.** ClickHouse ingests large batches cheaply and merges them in the background, which pairs well with a queued ingestion pipeline that accumulates events before writing.
+- **Aggregations over billions of rows are the core competency.** Dashboards, metrics APIs, and table filters are group-bys and scans that ClickHouse executes in milliseconds to seconds where a row store took orders of magnitude longer.
+
+It also carries an Apache 2.0 license, which matters to us: Langfuse is open source, and every component of the stack has to be self-hostable without restrictions. The full migration story, including the schema design and the query optimization work, is in our [v3 infrastructure post](/blog/2024-12-langfuse-v3-infrastructure-evolution).
+
+## How we structure trace data in ClickHouse [#data-model]
+
+The ordering key does most of the work: tracing tables are sorted by project and time, partitioned monthly, with skip indexes on frequently filtered columns. Every product query carries a project and time filter, so ClickHouse can prune partitions and parts before reading data. This is also why our v2 observations and metrics APIs require time-based filters and use token-based pagination: the API contract is designed to work with ClickHouse's data pruning instead of against it.
+
+Handling updates was the hard design problem. Our SDKs historically sent multiple events per observation, for example one at LLM invocation and one at response, and row updates in ClickHouse are expensive. In v3 we turned updates into inserts on a `ReplacingMergeTree`, deduplicated rows at read time, and used the fact that 90% of all updates arrive within 10 seconds to merge event state in the ingestion pipeline rather than reading it back from ClickHouse.
+
+That design carried us for a year, and then we simplified it away. With our OpenTelemetry-based SDKs, observations became immutable rows: as of March 2026, roughly 60% of all observations in Langfuse Cloud arrive via the OpenTelemetry endpoint. In early 2026 we moved to an observations-first data model built on a single wide, mostly immutable table, where trace-level attributes like `user_id` and `session_id` are denormalized onto every observation. This eliminated both the join between traces and observations and the read-time deduplication tax. Initial table loads went from seconds to tens of milliseconds, and dashboard load times for large projects improved by at least 10x for longer durations. The full reasoning, including the approaches we rejected, is in [Simplifying Langfuse for Scale](/blog/2026-03-10-simplify-langfuse-for-scale).
+
+One more layer matters at scale: a materialized view maintains a derived table with truncated `input`, `output`, and `metadata` fields. Table and dashboard queries hit the compact representation; only single-record retrieval touches the full payloads. Storage is cheap enough that keeping multiple synchronized representations is a practical tuning tool.
+
+## Operating it at scale [#operating-at-scale]
+
+### Writes go through a queue, not straight to the database [#write-path]
+
+The Langfuse web container accepts ingestion batches, writes the raw events to S3 immediately, and enqueues only a reference in Redis. Worker containers pick events up asynchronously, compute the final row state, and insert into ClickHouse in large batches from an in-memory buffer, with `async_inserts` batching further on the server side. Ingestion spikes therefore translate into queue depth, not database pressure, and because every event is persisted in blob storage before processing, events can be replayed if downstream processing fails.
+
+### Reads are isolated from ingestion [#read-isolation]
+
+On deployments with compute-compute separation, primarily ClickHouse Cloud and BYOC, Langfuse routes UI and public-API read queries to a dedicated read-only compute group via [`CLICKHOUSE_READ_ONLY_URL`](/self-hosting/configuration/scaling#clickhouse-read-only-url), while ingestion inserts and background merges stay on the primary compute. Heavy analytical reads and write throughput stop competing for the same CPU and memory. We use this pattern on Langfuse Cloud ourselves to reduce noisy-neighbor risk between workloads.
+
+### Langfuse Cloud absorbs the operational work [#cloud]
+
+Langfuse Cloud runs this architecture across three data regions (EU, US, and HIPAA) on ClickHouse Cloud, where SharedMergeTree separates storage from compute, so storage growth does not force compute scaling or shard planning. Through 2025, the data we processed grew 19x while our ClickHouse node sizes grew 15x, and closing that gap is exactly the kind of work the data-model changes above came from. Since January 2026, Langfuse is [part of ClickHouse](/blog/joining-clickhouse), which puts the team that builds the database and the team that runs one of its larger production workloads inside the same company.
+
+## The limits, and how we engineer around them [#limits]
+
+ClickHouse gives you its performance by making explicit trade-offs. Pretending they do not exist is how trace stores get slow, so we design around each one:
+
+**1. Row updates are expensive.** Covered above: we converted updates into inserts, then removed most update semantics entirely by moving to immutable, wide observation rows.
+
+**2. Substring search over payloads is a full scan.** Scanning every multi-megabyte payload in a project for a substring does not get faster by adding hardware. Langfuse [full-text search](/docs/observability/features/full-text-search) instead uses ClickHouse text indexes, which let queries skip data that cannot match before reading payloads. The trade-off is explicit: search is token-based, so `error` matches the word `error` but not `errors`, and the v2 API rejects `contains`-style substring operators on `input` and `output` with a 400 rather than silently running a query that scans a project's entire history.
+
+**3. Deletes are mutations.** A delete rewrites affected parts, so retention and deletion run as batched, rate-limited background jobs. Langfuse's data retention feature deletes expired data nightly, and on ClickHouse 25.7+ deployments can opt into lightweight deletes and updates to cut background merge work further.
+
+**4. There are no B-tree indexes for single-row lookups.** The smallest addressable unit is a granule of 8,192 rows, so every point lookup reads at least that much. We batch record retrievals where possible and serve table views from the truncated derived table so that point reads of full payloads stay rare.
+
+**5. Merges need active tuning at scale.** While rolling out the new data model we found partitions with around 1,000 parts where 150 to 200 is typical, index granules capped too small for our row sizes (we raised the maximum granule size from 10 MiB to 64 MiB), and parts stalling near the 150 GiB merge size limit because individual rows were too large. Working directly with ClickHouse engineers, we also traced a part-propagation slowdown to dead parts accumulating in Keeper and got a fix contributed upstream.
+
+## What this means for self-hosters and Cloud users [#self-hosters-vs-cloud]
+
+Self-hosted Langfuse runs the identical codebase and the identical architecture: the queued ingestion path, the S3-first event persistence, the batched inserts, and the read optimizations all ship in the open-source release. A production deployment starts small, with a minimum of 2 CPUs and 8 GiB of memory for ClickHouse, and a single ClickHouse shard can handle multiple terabytes of tracing data before horizontal scaling becomes a question.
+
+For large self-hosted deployments, the operational picture is the main decision. Self-managed OSS ClickHouse means owning disk expansion, replica management, and merge behavior; our [ClickHouse infrastructure guide](/self-hosting/deployment/infrastructure/clickhouse) covers the officially supported options, including the ClickHouse Kubernetes Operator, and the configuration Langfuse expects. For deployments where ClickHouse operations become a bottleneck, we recommend ClickHouse Cloud or BYOC, which add SharedMergeTree storage-compute separation and warehouse-based read isolation that self-managed OSS setups do not have. BYOC keeps the data plane inside your own cloud account for data-residency and VPC-boundary requirements.
+
+Langfuse Cloud is the option where none of this is your problem: same architecture, operated by the team that built it, with the scaling work described above already applied.
+
+## FAQ [#faq]
+
+**Can ClickHouse handle traces from agent workloads?**<br />Yes. Langfuse runs entirely on ClickHouse in production, storing petabytes of tracing data for thousands of teams, including agent traces with thousands of observations each. Deep agent traces are the reason we moved to an observations-first wide-table model in 2026, which made large-project table loads drop from seconds to tens of milliseconds.
+
+**Why did Langfuse move from Postgres to ClickHouse?**<br />Trace observability at scale is an analytical workload: high-throughput ingestion plus aggregations over billions of large rows. Postgres hit IOPS and scan limits as our largest users grew, and ClickHouse's columnar storage and batch-insert design matched the workload. We made the switch in Langfuse v3 in December 2024.
+
+**Do I have to operate ClickHouse myself to use Langfuse?**<br />No. Langfuse Cloud is fully managed. If you self-host, you can bring managed ClickHouse (ClickHouse Cloud or BYOC) or run it yourself via the ClickHouse Kubernetes Operator or Helm; Langfuse supports ClickHouse 24.3 and above.
+
+**Does Langfuse support full-text search across trace content?**<br />Yes. Full-text search covers inputs, outputs, and metadata of traces and observations, backed by ClickHouse text indexes so queries skip non-matching data instead of scanning payloads. Search is token-based: it matches whole words and contiguous phrases rather than arbitrary substrings.
+
+**How much infrastructure does self-hosted Langfuse need to start?**<br />The minimum production footprint is modest: 2 CPU / 4 GiB each for the web and worker containers and Postgres, 1 CPU / 1.5 GiB for Redis, 2 CPU / 8 GiB for ClickHouse, plus S3-compatible blob storage. A single ClickHouse shard scales to multiple terabytes of tracing data.
