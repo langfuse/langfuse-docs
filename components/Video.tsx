@@ -8,15 +8,21 @@ export const Video = ({
   aspectRatio,
   className,
   gifStyle = false,
+  poster,
+  onCanPlay,
 }: {
   src: string;
   aspectRatio?: number;
   gifStyle?: boolean;
   className?: string;
+  poster?: string;
+  onCanPlay?: () => void;
 }) => {
   return (
     <MediaPlayer
       src={src}
+      poster={poster}
+      posterLoad="eager"
       controls={!gifStyle}
       autoPlay={gifStyle}
       muted={gifStyle}
@@ -28,6 +34,7 @@ export const Video = ({
         "overflow-hidden shadow-lg bg-surface-bg object-cover",
         className,
       )}
+      onCanPlay={onCanPlay}
     >
       <MediaProvider />
     </MediaPlayer>
