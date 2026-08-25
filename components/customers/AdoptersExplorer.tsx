@@ -176,7 +176,7 @@ function AdopterCard({
       layout
       transition={{ layout: { duration: 0.32, ease: "easeInOut" } }}
       className={cn(
-        "relative min-h-[116px] overflow-hidden border border-line-structure bg-surface-bg",
+        "corner-box-corners relative min-h-[116px] overflow-hidden border border-line-structure bg-surface-bg",
         active &&
           "z-10 min-h-[240px] border-text-secondary md:col-span-2 md:row-span-2",
       )}
