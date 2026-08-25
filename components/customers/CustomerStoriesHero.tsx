@@ -72,7 +72,7 @@ export function CustomerStoriesHero({
 
   return (
     <section
-      className="relative overflow-hidden border-y border-line-structure bg-surface-2 text-text-primary"
+      className="relative overflow-hidden border-y border-line-structure bg-surface-bg text-text-primary"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       aria-roledescription="carousel"
