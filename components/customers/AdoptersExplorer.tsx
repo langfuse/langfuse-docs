@@ -321,7 +321,11 @@ export function AdoptersExplorer({ adopters }: { adopters: Adopter[] }) {
               — Adopters
             </p>
             <h1 className="mt-5 max-w-[19ch] font-analog text-[38px] font-medium leading-[1.02] tracking-tight text-text-primary sm:text-[50px]">
-              Langfuse is adopted by 100,000+ developers worldwide
+              Langfuse is{" "}
+              <span className="box-decoration-clone bg-[#FBFF7A] px-[0.04em]">
+                adopted by 100,000+ developers
+              </span>{" "}
+              worldwide
             </h1>
           </div>
           <div className="flex flex-col items-start gap-4 lg:items-end">
