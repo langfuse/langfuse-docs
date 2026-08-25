@@ -7,12 +7,3 @@ export function companyName(story: CustomerStory): string {
     "Customer"
   );
 }
-
-/** Short card / hero headline derived from the story title. */
-export function storyHeadline(story: CustomerStory): string {
-  const title = story.frontMatter.title ?? "";
-  if (title.toLowerCase().startsWith("how ")) {
-    return title.replace(/^How\s+/i, "").replace(/\s+using Langfuse$/i, "");
-  }
-  return title;
-}

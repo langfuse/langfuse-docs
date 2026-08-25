@@ -9,7 +9,7 @@ import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
 import type { CustomerStory } from "./CustomerCarousel";
-import { companyName, storyHeadline } from "./customerStoryLabels";
+import { companyName } from "./customerStoryLabels";
 
 const INITIAL_VISIBLE = 4;
 
@@ -58,7 +58,7 @@ export function CustomerIndex({
       <div className="grid grid-cols-1 sm:grid-cols-2">
         {visibleStories.map((story, index) => {
           const company = companyName(story);
-          const headline = storyHeadline(story);
+          const headline = story.frontMatter.title ?? story.route;
           const quote = story.frontMatter.customerQuote;
           const logo = story.frontMatter.customerLogo;
           const withStripes = index % 3 === 1;
