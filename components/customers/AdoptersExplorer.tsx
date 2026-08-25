@@ -130,10 +130,7 @@ function TracePreview({ adopter }: { adopter: Adopter }) {
           </div>
         </div>
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line-structure px-4 py-3 sm:px-5">
-        <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-text-tertiary">
-          Trace · mock data
-        </span>
+      <div className="flex justify-end border-t border-line-structure px-4 py-3 sm:px-5">
         <div className="ml-auto">
           <AdopterReference adopter={adopter} />
         </div>
