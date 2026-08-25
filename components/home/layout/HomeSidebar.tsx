@@ -64,6 +64,12 @@ const communityStats: Array<{
     tooltip: "View contributors",
   },
   {
+    label: "Global adopters",
+    value: "100k+",
+    href: "/users/adopters",
+    tooltip: "View global adopters",
+  },
+  {
     label: "Community Q&A threads",
     value: formatCount(qaCount),
     href: "https://github.com/orgs/langfuse/discussions/categories/support",
