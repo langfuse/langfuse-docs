@@ -40,7 +40,7 @@ Yes, in one click. **Add to dataset** on any observation of a production trace t
 
 ## Does Langfuse run experiments in CI/CD? [#ci-cd]
 
-Yes. The [langfuse/experiment-action](https://github.com/langfuse/experiment-action) GitHub Action runs [experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd) and gates changes on evaluation results. No custom infrastructure. Experiments are plain Python or TypeScript scripts via the SDK, so any CI system can run them.
+Yes. The [langfuse/experiment-action](https://github.com/langfuse/experiment-action) GitHub Action runs [experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd) and gates changes on evaluation results. A failing gate fails the pipeline and blocks the merge. No custom infrastructure. Experiments are plain Python or TypeScript scripts via the SDK, so any CI system can run them.
 
 ## Does Langfuse have annotation queues? [#annotation-queues]
 
@@ -52,9 +52,17 @@ You can assign users to queues in the UI and via API, and add items from the UI 
 
 Yes. [Prompt management](/docs/prompt-management/overview) stores, versions, labels, and serves prompts from Langfuse, with client-side SDK caching so a fetch after the first hit does not add latency.
 
+## What can the Langfuse playground do? [#playground]
+
+The [playground](/docs/prompt-management/features/playground) compares multiple prompt variants side by side, each with its own model settings, variables, and tool definitions. It supports tool calling and structured output schemas, both savable to your project, and you can jump into it directly from a production generation.
+
 ## Can non-engineers work in Langfuse? [#non-engineers]
 
 Yes. Product managers and domain experts iterate in the [playground](/docs/prompt-management/features/playground), edit and deploy prompt versions via [labels](/docs/prompt-management/features/prompt-version-control) that applications fetch at runtime (no code change or redeploy), run [experiments from the UI](/docs/evaluation/experiments/experiments-via-ui), and review outputs in [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues). At [Canva](/users/canva), a marketing manager set up a dedicated LLM-as-a-judge evaluator to monitor tone of voice without engineering help.
+
+## Do you have to run your own infrastructure to use Langfuse? [#managed-cloud]
+
+No. [Langfuse Cloud](/pricing) is a fully managed platform: no database, cache, or storage to operate, a free Hobby tier, and first traces minutes after sign-up. Self-hosting is an option on every tier, not a requirement.
 
 ## Can you self-host Langfuse without an Enterprise contract? [#self-hosting]
 

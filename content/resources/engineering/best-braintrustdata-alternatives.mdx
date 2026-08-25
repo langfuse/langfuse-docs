@@ -89,7 +89,7 @@ Public list prices. Edit the inputs yourself: [Langfuse vs Braintrust pricing mo
 
 **1.** Scores drive the Braintrust usage line: $675 of the $735 is score charges at 1 score per trace, and $60 is processed data. Every score is metered, so scaling online evaluation scales the bill directly. On Langfuse, a score is one unit, same as a trace.
 
-**2.** \*The retention line prices 12 months at Braintrust's published $0.50/GB/month extension rate, recurring monthly on every GB retained. Braintrust Pro caps retention at 180 days, so this configuration is not purchasable on Pro: a full year in practice requires an Enterprise contract. Langfuse retention has no separate meter.
+**2.** \*The retention line is a steady-state estimate: 25 GB/month held for 12 months, billed at the published $0.50/GB/month on every GB older than the included 30 days ([formula in the sheet](/pricing-comparison-sheet)). Braintrust Pro caps retention at 180 days, so a full year in practice requires an Enterprise contract. Langfuse retention has no separate meter.
 
 **3.** Which model is cheaper depends on trace shape. Payload-light, score-light workloads with short retention can be economical on Braintrust; large payloads, high score density, long retention, or simply high request volume favor Langfuse. The sheet takes span size and score density as inputs so you can find the crossover for your workload.
 
