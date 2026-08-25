@@ -6,10 +6,17 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { CustomerStory } from "./CustomerCarousel";
 import { companyName } from "./customerStoryLabels";
+import huggingFaceLogo from "@/components/home/img/huggingface.svg";
 import { TextHighlight } from "@/components/ui/text-highlight";
 import { cn } from "@/lib/utils";
 
 const ROTATE_MS = 5500;
+
+function customerStoryLogo(story: CustomerStory) {
+  return companyName(story) === "Hugging Face"
+    ? huggingFaceLogo
+    : story.frontMatter.customerLogo;
+}
 
 function HighlightedQuote({
   quote,
@@ -45,7 +52,7 @@ export function CustomerStoriesHero({
             s.frontMatter?.showInCustomerIndex !== false &&
             Boolean(s.frontMatter.customerQuote),
         )
-        .slice(0, 5),
+        .slice(0, 6),
     [allStories],
   );
 
@@ -69,7 +76,7 @@ export function CustomerStoriesHero({
   const quoteTag = story.frontMatter.customerQuoteTag;
   const quoteAuthor = story.frontMatter.quoteAuthor;
   const quoteRole = story.frontMatter.quoteRole;
-  const logo = story.frontMatter.customerLogo;
+  const logo = customerStoryLogo(story);
 
   return (
     <section
@@ -114,7 +121,10 @@ export function CustomerStoriesHero({
                       alt={`${company} logo`}
                       fill
                       sizes="160px"
-                      className="object-contain object-left"
+                      className={cn(
+                        "object-contain object-left",
+                        company === "Hugging Face" && "scale-[1.8]",
+                      )}
                       unoptimized
                     />
                   </div>
@@ -164,7 +174,7 @@ export function CustomerStoriesHero({
             {stories.map((s, i) => {
               const isActive = i === active;
               const name = companyName(s);
-              const logo = s.frontMatter.customerLogo;
+              const logo = customerStoryLogo(s);
               return (
                 <li key={s.route}>
                   <button
@@ -172,21 +182,24 @@ export function CustomerStoriesHero({
                     onClick={() => setActive(i)}
                     onMouseEnter={() => setActive(i)}
                     className={cn(
-                      "group flex w-full items-center justify-between gap-4 rounded-sm px-3 py-2.5 text-left transition-colors",
+                      "group flex w-full items-center justify-between gap-4 rounded-sm py-2.5 pr-3 pl-5 text-left transition-colors",
                       isActive ? "bg-surface-bg" : "hover:bg-surface-1",
                     )}
                     aria-current={isActive ? "true" : undefined}
                     aria-label={`Show ${name} story`}
                   >
-                    <div className="flex h-10 min-w-0 flex-1 items-center">
+                    <div className="flex h-9 min-w-0 flex-1 items-center">
                       {logo ? (
-                        <div className="relative h-10 w-40">
+                        <div className="relative h-9 w-36">
                           <Image
                             src={logo}
                             alt=""
                             fill
-                            sizes="160px"
-                            className="object-contain object-left"
+                            sizes="144px"
+                            className={cn(
+                              "object-contain object-left",
+                              name === "Hugging Face" && "scale-[1.6]",
+                            )}
                             unoptimized
                           />
                         </div>
