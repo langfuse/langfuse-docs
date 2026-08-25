@@ -104,7 +104,7 @@ function TracePreview({
 }) {
   return (
     <div className="flex h-full min-h-[240px] flex-col bg-surface-bg p-4">
-      <div className="flex items-start justify-between gap-4 border-b border-dashed border-line-structure pb-4">
+      <div className="border-b border-dashed border-line-structure pb-3">
         <a
           href={adopter.website}
           target="_blank"
@@ -113,12 +113,9 @@ function TracePreview({
         >
           {adopter.name} <span aria-hidden>↗</span>
         </a>
-        <span className="max-w-[20ch] text-right font-mono text-[9px] uppercase tracking-[0.1em] text-text-tertiary">
-          {adopter.companyDescription}
-        </span>
       </div>
 
-      <div className="min-h-0 flex-1 py-4">
+      <div className="min-h-0 flex-1 py-3">
         <p className="m-0 font-mono text-[9px] uppercase tracking-[0.12em] text-text-tertiary">
           Trace
         </p>
@@ -135,7 +132,7 @@ function TracePreview({
               </span>
             </div>
             {adopter.useCase && (
-              <div className="ml-2 mt-2 flex min-w-0 items-start gap-2 border-l border-line-structure pl-4 text-text-tertiary">
+              <div className="ml-2 mt-1.5 flex min-w-0 items-start gap-2 border-l border-line-structure pl-4 text-text-tertiary">
                 <TraceTypeIcon type="GENERATION" />
                 <span className="min-w-0 break-words">{adopter.useCase}</span>
               </div>
