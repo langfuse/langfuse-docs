@@ -1,6 +1,6 @@
 ---
-title: Users
-description: Langfuse users share their experiences with the platform.
+title: Customers
+description: Learn how customers build, evaluate, and improve AI applications with Langfuse.
 showInCustomerIndex: false
 ---
 
@@ -8,7 +8,6 @@ import { CustomerStoriesHeroWrapper } from "@/components/customers/CustomerStori
 import { CustomerStatsBar } from "@/components/customers/CustomerStatsBar";
 import { CustomerIndexWrapper } from "@/components/customers/CustomerIndexWrapper";
 import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
-import AdoptersTable from "@/components-mdx/adopters-table.mdx";
 
 <div className="not-prose">
   <CustomerStoriesHeroWrapper />
@@ -17,11 +16,21 @@ import AdoptersTable from "@/components-mdx/adopters-table.mdx";
   <div className="px-6 py-12 sm:px-8">
     <CustomerIndexWrapper />
 
-    <div className="mt-16 prose prose-sm max-w-none">
-      <h2 id="adopters" className="font-analog text-[18px] text-text-primary mb-2">
-        Adopters
-      </h2>
-      <AdoptersTable />
+    <div className="mt-10 flex flex-col gap-4 border-y border-line-structure py-6 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h2 className="m-0 font-analog text-[20px] font-medium text-text-primary">
+          Explore all Langfuse adopters
+        </h2>
+        <div className="mt-1 text-[14px] text-text-tertiary">
+          Browse the complete list of companies publicly using Langfuse.
+        </div>
+      </div>
+      <a
+        href="/users/adopters"
+        className="shrink-0 font-mono text-[11px] uppercase tracking-[0.1em] text-text-secondary no-underline hover:text-text-primary"
+      >
+        View all adopters →
+      </a>
     </div>
 
     <CustomerStoryCTA />

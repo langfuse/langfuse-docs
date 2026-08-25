@@ -44,7 +44,7 @@ export const resourcesLinks: NavPanelLink[] = [
   { name: "Blog", href: "/blog", icon: Newspaper },
   { name: "Changelog", href: "/changelog", icon: ScrollText },
   { name: "Roadmap", href: "/docs/roadmap", icon: Map },
-  { name: "Users", href: "/users", icon: Users },
+  { name: "Customers", href: "/users", icon: Users },
   { name: "Example Project", href: "/docs/demo", icon: Bookmark },
   { name: "Walkthroughs", href: "/guides", icon: GraduationCap },
   { name: "Support", href: "/support", icon: HelpCircle },

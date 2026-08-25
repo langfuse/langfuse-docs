@@ -34,7 +34,7 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const { slug } = await props.params;
   const page = usersSource.getPage(slug);
   if (!page) return { title: "Not Found" };
-  return buildSectionMetadata(page, "users", "User stories", slug);
+  return buildSectionMetadata(page, "users", "Customers", slug);
 }
 
 export function generateStaticParams() {

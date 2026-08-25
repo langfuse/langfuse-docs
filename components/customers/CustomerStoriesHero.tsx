@@ -17,11 +17,13 @@ export function CustomerStoriesHero({
 }) {
   const stories = useMemo(
     () =>
-      allStories.filter(
-        (s) =>
-          s.frontMatter?.showInCustomerIndex !== false &&
-          Boolean(s.frontMatter.customerQuote),
-      ),
+      allStories
+        .filter(
+          (s) =>
+            s.frontMatter?.showInCustomerIndex !== false &&
+            Boolean(s.frontMatter.customerQuote),
+        )
+        .slice(0, 5),
     [allStories],
   );
 
@@ -50,25 +52,24 @@ export function CustomerStoriesHero({
 
   return (
     <section
-      className="relative overflow-hidden bg-surface-code text-[#F6F6F3]"
+      className="relative overflow-hidden border-y border-line-structure bg-surface-2 text-text-primary"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       aria-roledescription="carousel"
       aria-label="Featured customer stories"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,#2a2a27_0%,#3a3a36_55%,#2f2f2c_100%)]" />
       <div className="relative grid gap-8 px-6 py-10 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)] lg:gap-10 lg:py-12">
         <div className="flex min-w-0 flex-col">
           <div className="mb-8 flex items-start justify-between gap-4">
-            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/45">
+            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-text-tertiary">
               Customer stories
             </p>
-            <div className="flex shrink-0 items-center gap-3 font-mono text-[11px] uppercase tracking-[0.08em] text-white/45">
+            <div className="flex shrink-0 items-center gap-3 font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary">
               <span>
                 {String(active + 1).padStart(2, "0")} /{" "}
                 {String(stories.length).padStart(2, "0")}
               </span>
-              <span className="hidden text-white/30 sm:inline">·</span>
+              <span className="hidden text-text-disabled sm:inline">·</span>
               <span className="hidden sm:inline">
                 {paused ? "paused" : "auto-plays"}
               </span>
@@ -84,15 +85,15 @@ export function CustomerStoriesHero({
               transition={{ duration: 0.28, ease: "easeOut" }}
               className="flex flex-1 flex-col"
             >
-              <p className="mb-4 font-analog text-[28px] font-medium leading-none tracking-tight text-[#FBFF7A] sm:text-[34px]">
+              <p className="mb-4 font-analog text-[28px] font-medium leading-none tracking-tight text-text-primary sm:text-[34px]">
                 {company}
               </p>
-              <blockquote className="m-0 max-w-[38rem] border-0 p-0 font-analog text-[26px] font-medium leading-[1.15] tracking-[-0.02em] text-white sm:text-[34px] lg:text-[40px]">
+              <blockquote className="m-0 max-w-[38rem] border-0 p-0 font-analog text-[26px] font-medium leading-[1.15] tracking-[-0.02em] text-text-primary sm:text-[34px] lg:text-[40px]">
                 “{quote}”
               </blockquote>
 
               <div className="mt-auto flex flex-col gap-5 pt-10 sm:flex-row sm:items-end sm:justify-between">
-                <div className="flex flex-wrap gap-x-6 gap-y-1 text-[13px] text-white/55">
+                <div className="flex flex-wrap gap-x-6 gap-y-1 text-[13px] text-text-tertiary">
                   {metaBits.slice(0, 2).map((bit) => (
                     <span key={bit} className="max-w-[28ch] truncate">
                       {bit}
@@ -101,7 +102,7 @@ export function CustomerStoriesHero({
                 </div>
                 <Link
                   href={story.route}
-                  className="inline-flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.08em] text-[#FBFF7A] no-underline transition-opacity hover:opacity-80"
+                  className="inline-flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.08em] text-text-secondary no-underline transition-colors hover:text-text-primary"
                 >
                   Read the story
                   <span aria-hidden>→</span>
@@ -111,13 +112,12 @@ export function CustomerStoriesHero({
           </AnimatePresence>
         </div>
 
-        <div className="hidden min-w-0 flex-col justify-center border-l border-white/10 pl-6 lg:flex">
+        <div className="hidden min-w-0 flex-col justify-center border-l border-line-structure pl-6 lg:flex">
           <ul className="m-0 flex list-none flex-col gap-1 p-0">
             {stories.map((s, i) => {
               const isActive = i === active;
               const name = companyName(s);
-              const logo =
-                s.frontMatter.customerLogoDark ?? s.frontMatter.customerLogo;
+              const logo = s.frontMatter.customerLogo;
               return (
                 <li key={s.route}>
                   <button
@@ -126,27 +126,29 @@ export function CustomerStoriesHero({
                     onMouseEnter={() => setActive(i)}
                     className={cn(
                       "group flex w-full items-center gap-3 rounded-sm px-2 py-2 text-left transition-colors",
-                      isActive ? "bg-white/10" : "hover:bg-white/5",
+                      isActive ? "bg-surface-bg" : "hover:bg-surface-1",
                     )}
                     aria-current={isActive ? "true" : undefined}
                     aria-label={`Show ${name} story`}
                   >
-                    <div className="flex h-10 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[2px] border border-white/10 bg-white/5 p-1.5">
+                    <div className="flex h-10 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[2px] border border-line-structure bg-surface-bg p-1.5">
                       {logo ? (
-                        <Image
-                          src={logo}
-                          alt=""
-                          width={80}
-                          height={32}
-                          className="h-6 w-auto max-w-full object-contain brightness-0 invert"
-                          unoptimized
-                        />
+                        <div className="relative h-6 w-full">
+                          <Image
+                            src={logo}
+                            alt=""
+                            fill
+                            sizes="56px"
+                            className="object-contain"
+                            unoptimized
+                          />
+                        </div>
                       ) : null}
                     </div>
                     <span
                       className={cn(
                         "min-w-0 flex-1 truncate text-[13px]",
-                        isActive ? "text-white" : "text-white/55",
+                        isActive ? "text-text-primary" : "text-text-tertiary",
                       )}
                     >
                       {name}
@@ -154,7 +156,7 @@ export function CustomerStoriesHero({
                     <span
                       className={cn(
                         "h-8 w-0.5 shrink-0 rounded-full transition-colors",
-                        isActive ? "bg-[#FBFF7A]" : "bg-transparent",
+                        isActive ? "bg-text-primary" : "bg-transparent",
                       )}
                       aria-hidden
                     />
@@ -176,8 +178,8 @@ export function CustomerStoriesHero({
                 className={cn(
                   "shrink-0 rounded-sm border px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] transition-colors",
                   isActive
-                    ? "border-[#FBFF7A]/60 bg-[#FBFF7A]/10 text-[#FBFF7A]"
-                    : "border-white/15 text-white/55 hover:border-white/30 hover:text-white/80",
+                    ? "border-line-cta bg-surface-bg text-text-primary"
+                    : "border-line-structure text-text-tertiary hover:text-text-primary",
                 )}
               >
                 {companyName(s)}

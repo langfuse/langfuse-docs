@@ -22,5 +22,5 @@ export default async function UsersIndexPage() {
 export async function generateMetadata(): Promise<Metadata> {
   const page = usersSource.getPage([]);
   if (!page) return { title: "Not Found" };
-  return buildSectionMetadata(page, "users", "User stories", []);
+  return buildSectionMetadata(page, "users", "Customers", []);
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { CornerBox } from "@/components/ui/corner-box";
@@ -59,6 +60,7 @@ export function CustomerIndex({
           const company = companyName(story);
           const headline = storyHeadline(story);
           const quote = story.frontMatter.customerQuote;
+          const logo = story.frontMatter.customerLogo;
           const withStripes = index % 3 === 1;
 
           return (
@@ -67,29 +69,44 @@ export function CustomerIndex({
               withStripes={withStripes}
               hoverStripes={!withStripes}
               className={cn(
-                "flex min-h-[220px] flex-col p-6 sm:p-8 -mt-px sm:-ml-px",
+                "-mt-px flex min-h-[176px] flex-col p-5 sm:-ml-px sm:p-6",
               )}
             >
               <Link
                 href={story.route}
                 className="group flex h-full flex-col no-underline outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <span className="mb-4 font-mono text-[11px] uppercase tracking-[0.1em] text-text-tertiary">
-                  {company}
-                </span>
-                <h3 className="m-0 font-analog text-[22px] font-medium leading-[1.2] tracking-tight text-text-primary sm:text-[24px]">
+                <div className="mb-4 flex h-8 items-center">
+                  {logo ? (
+                    <div className="relative h-8 w-[120px]">
+                      <Image
+                        src={logo}
+                        alt={`${company} logo`}
+                        fill
+                        sizes="120px"
+                        className="object-contain object-left"
+                        unoptimized
+                      />
+                    </div>
+                  ) : (
+                    <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-text-tertiary">
+                      {company}
+                    </span>
+                  )}
+                </div>
+                <h3 className="m-0 font-analog text-[20px] font-medium leading-[1.2] tracking-tight text-text-primary sm:text-[21px]">
                   {headline}
                 </h3>
                 {quote ? (
-                  <p className="mt-3 mb-0 line-clamp-3 text-[14px] leading-[1.5] text-text-tertiary">
+                  <p className="mt-2 mb-0 line-clamp-2 text-[13px] leading-[1.45] text-text-tertiary">
                     “{quote}”
                   </p>
                 ) : story.frontMatter.description ? (
-                  <p className="mt-3 mb-0 line-clamp-3 text-[14px] leading-[1.5] text-text-tertiary">
+                  <p className="mt-2 mb-0 line-clamp-2 text-[13px] leading-[1.45] text-text-tertiary">
                     {story.frontMatter.description}
                   </p>
                 ) : null}
-                <span className="mt-auto inline-flex items-center gap-1.5 pt-6 font-mono text-[11px] uppercase tracking-[0.1em] text-text-secondary transition-colors group-hover:text-text-primary">
+                <span className="mt-auto inline-flex items-center gap-1.5 pt-4 font-mono text-[11px] uppercase tracking-[0.1em] text-text-secondary transition-colors group-hover:text-text-primary">
                   Read
                   <span aria-hidden>→</span>
                 </span>
