@@ -460,7 +460,7 @@ const sections: Section[] = [
     name: "Langfuse AI",
     features: [
       {
-        name: "Langfuse Assistant",
+        name: "Langfuse Assistant (in-app agent)",
         description:
           "In-product AI assistant to explore your Langfuse project data and take selected actions with your approval. Available on Langfuse Cloud only.",
         href: "/docs/langfuse-assistant",
