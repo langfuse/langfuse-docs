@@ -129,9 +129,9 @@ export function GovernmentStyles() {
           transform 480ms cubic-bezier(0.22, 1, 0.36, 1),
           box-shadow 480ms cubic-bezier(0.22, 1, 0.36, 1),
           opacity 280ms ease,
-          border-color 200ms ease,
-          z-index 0ms linear 280ms;
+          border-color 200ms ease;
         cursor: default;
+        pointer-events: auto;
       }
       .gov-polaroid.is-featured {
         width: 196px;
@@ -154,44 +154,27 @@ export function GovernmentStyles() {
         background: color-mix(in srgb, var(--surface-cta-primary) 28%, var(--surface-1));
         transition: background 320ms ease;
       }
-      @media (hover: hover) and (pointer: fine) {
-        .gov-hero-art:hover .gov-polaroid {
-          opacity: 0.58;
-        }
-        .gov-hero-art .gov-polaroid:hover,
-        .gov-hero-art .gov-polaroid:focus-visible {
-          opacity: 1;
-          z-index: 20;
-          border-color: var(--line-cta);
-          transform: rotate(calc(var(--rest-rot) * 0.18)) translateY(-12px) scale(calc(var(--rest-scale, 1) * 1.06));
-          box-shadow:
-            0 28px 44px rgba(0,0,0,0.12),
-            0 10px 18px rgba(0,0,0,0.06),
-            0 0 0 1px color-mix(in srgb, var(--line-cta) 55%, transparent);
-          transition:
-            transform 480ms cubic-bezier(0.22, 1, 0.36, 1),
-            box-shadow 480ms cubic-bezier(0.22, 1, 0.36, 1),
-            opacity 180ms ease,
-            border-color 200ms ease,
-            z-index 0ms;
-        }
-        .gov-hero-art .gov-polaroid:hover .gov-polaroid-well,
-        .gov-hero-art .gov-polaroid:focus-visible .gov-polaroid-well {
-          background: color-mix(in srgb, var(--surface-cta-primary) 62%, var(--surface-1));
-        }
+      .gov-hero-art.is-engaged .gov-polaroid {
+        opacity: 0.46;
+      }
+      .gov-polaroid.is-lifted {
+        opacity: 1 !important;
+        z-index: 20;
+        border-color: var(--line-cta);
+        transform: rotate(calc(var(--rest-rot) * 0.12)) translateY(-16px) scale(calc(var(--rest-scale, 1) * 1.08));
+        box-shadow:
+          0 32px 48px rgba(0,0,0,0.14),
+          0 12px 20px rgba(0,0,0,0.07),
+          0 0 0 1px color-mix(in srgb, var(--line-cta) 60%, transparent);
+      }
+      .gov-polaroid.is-lifted .gov-polaroid-well {
+        background: color-mix(in srgb, var(--surface-cta-primary) 70%, var(--surface-1));
       }
       @media (prefers-reduced-motion: reduce) {
         .gov-polaroid,
-        .gov-hero-art:hover .gov-polaroid,
-        .gov-hero-art .gov-polaroid:hover,
-        .gov-hero-art .gov-polaroid:focus-visible {
+        .gov-polaroid.is-lifted {
           transition: border-color 160ms ease, opacity 160ms ease, background 160ms ease;
           transform: rotate(var(--rest-rot)) scale(var(--rest-scale, 1));
-        }
-        .gov-hero-art .gov-polaroid:hover,
-        .gov-hero-art .gov-polaroid:focus-visible {
-          opacity: 1;
-          border-color: var(--line-cta);
         }
       }
 

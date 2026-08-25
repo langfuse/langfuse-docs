@@ -115,7 +115,7 @@ function Hero() {
             evaluate, and improve AI agents — without sending prompts, traces,
             or evaluation data outside their security boundary. Deploy{" "}
             <b className="font-medium text-text-primary">
-              air-gapped, on premises, or in a private cloud
+              air-gapped, on-premises, or in a private cloud
             </b>
             . The core is open source and inspectable; you operate the stack.
           </p>
@@ -154,6 +154,7 @@ function Hero() {
 }
 
 function HeroArt() {
+  const [lifted, setLifted] = useState<string | null>(null);
   const cards: {
     title: string;
     caption: string;
@@ -201,8 +202,11 @@ function HeroArt() {
   return (
     <>
       <div
-        className="gov-hero-art relative mx-auto hidden h-[420px] w-full max-w-[380px] md:block"
+        className={`gov-hero-art relative mx-auto hidden h-[420px] w-full max-w-[380px] md:block${
+          lifted ? " is-engaged" : ""
+        }`}
         aria-hidden
+        onMouseLeave={() => setLifted(null)}
       >
         <svg
           viewBox="0 0 400 400"
@@ -247,7 +251,10 @@ function HeroArt() {
         {cards.map((c) => (
           <div
             key={c.title}
-            className={`gov-polaroid${c.featured ? " is-featured" : ""}`}
+            className={`gov-polaroid${c.featured ? " is-featured" : ""}${
+              lifted === c.title ? " is-lifted" : ""
+            }`}
+            onMouseEnter={() => setLifted(c.title)}
             style={
               {
                 "--x": `${c.x}px`,
@@ -723,7 +730,7 @@ export function GovernmentLanding() {
   return (
     <div className="gov-page">
       <GovernmentStyles />
-      <div className="mx-auto max-w-[1120px]">
+      <div className="mx-auto max-w-[1000px]">
         <Hero />
         <ProductLoop />
         <Deployment />
