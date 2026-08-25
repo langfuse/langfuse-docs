@@ -114,18 +114,20 @@ LLM judge agrees with your human annotators on the same conversations.
 ### Langfuse Assistant in the UI [#langfuse-assistant]
 
 The [Langfuse Assistant](/docs/langfuse-assistant) is an in-product assistant that answers
-questions about your project data in plain language, directly in the Langfuse Cloud UI. You
+questions about your project data in plain language, directly in the Langfuse UI. You
 can ask things like "Which traces had the highest latency yesterday?", "What's my token spend
 this week, broken down by model?", or "Open the traces table filtered to errors from today".
 It queries traces, observations, sessions, and metrics, proposes links to the relevant
-Langfuse pages, and asks for explicit approval before any action that changes data. As of
-July 2026 the Assistant is in public beta on Langfuse Cloud and not available on self-hosted
-deployments.
+Langfuse pages, and asks for explicit approval before any action that changes data. It is in
+public beta on Langfuse Cloud and on self-hosted deployments with an [instance Langfuse AI
+model](/self-hosting/configuration/in-app-agent).
 
-On the traces and observations tables, an Ask AI button additionally builds filters from a
-plain-language description ("enterprise customers in the membership-support queue") without
-knowing the field names. It is Cloud-only, off by default, and enabled by an organization
-owner or admin in the organization's AI feature settings.
+On the traces and observations tables, an [Ask AI](/docs/observability/features/filter-search-bar#ask-ai)
+button additionally builds filters from a plain-language description ("enterprise customers
+in the membership-support queue") without knowing the field names. It is off by default, and
+enabled by an organization owner or admin in the organization's AI feature settings. On Cloud
+it uses Langfuse-managed Amazon Bedrock; on self-hosted it uses the same instance model as
+the Assistant.
 
 ### Your own AI tools via the MCP server [#mcp-server]
 
@@ -205,6 +207,7 @@ patterns for this.
 ### Does this work on self-hosted Langfuse? [#self-hosted]
 
 Mostly. Session review, annotation queues, manual scoring, user feedback, custom dashboards,
-and score analytics are available on self-hosted deployments. As of July 2026, the Langfuse
-Assistant is Cloud-only, and the typed filter search bar (including its Ask AI query builder)
-requires the v4 data model on Langfuse Cloud, with open-source support planned to follow.
+and score analytics are available on self-hosted deployments. The [Langfuse Assistant](/docs/langfuse-assistant)
+and [Ask AI](/docs/observability/features/filter-search-bar#ask-ai) in the filter search bar
+are available on self-hosted deployments with an [instance Langfuse AI model](/self-hosting/configuration/in-app-agent).
+The older table natural-language filter builder remains Cloud-only.
