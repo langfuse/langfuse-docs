@@ -6,17 +6,10 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { CustomerStory } from "./CustomerCarousel";
 import { companyName } from "./customerStoryLabels";
-import huggingFaceLogo from "@/components/home/img/huggingface.svg";
 import { TextHighlight } from "@/components/ui/text-highlight";
 import { cn } from "@/lib/utils";
 
 const ROTATE_MS = 5500;
-
-function customerStoryLogo(story: CustomerStory) {
-  return companyName(story) === "Hugging Face"
-    ? huggingFaceLogo
-    : story.frontMatter.customerLogo;
-}
 
 function HighlightedQuote({
   quote,
@@ -76,7 +69,7 @@ export function CustomerStoriesHero({
   const quoteTag = story.frontMatter.customerQuoteTag;
   const quoteAuthor = story.frontMatter.quoteAuthor;
   const quoteRole = story.frontMatter.quoteRole;
-  const logo = customerStoryLogo(story);
+  const logo = story.frontMatter.customerLogo;
 
   return (
     <section
@@ -121,10 +114,7 @@ export function CustomerStoriesHero({
                       alt={`${company} logo`}
                       fill
                       sizes="160px"
-                      className={cn(
-                        "object-contain object-left",
-                        company === "Hugging Face" && "scale-[1.8]",
-                      )}
+                      className="object-contain object-left"
                       unoptimized
                     />
                   </div>
@@ -174,7 +164,7 @@ export function CustomerStoriesHero({
             {stories.map((s, i) => {
               const isActive = i === active;
               const name = companyName(s);
-              const logo = customerStoryLogo(s);
+              const logo = s.frontMatter.customerLogo;
               return (
                 <li key={s.route}>
                   <button
@@ -196,10 +186,7 @@ export function CustomerStoriesHero({
                             alt=""
                             fill
                             sizes="144px"
-                            className={cn(
-                              "object-contain object-left",
-                              name === "Hugging Face" && "scale-[1.6]",
-                            )}
+                            className="object-contain object-left"
                             unoptimized
                           />
                         </div>
