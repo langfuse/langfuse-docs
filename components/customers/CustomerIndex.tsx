@@ -16,12 +16,19 @@ const INITIAL_VISIBLE = 4;
 export function CustomerIndex({
   stories: allStories = [],
   maxItems,
-  initialVisible = INITIAL_VISIBLE,
+  initialVisible,
+  showHeader = true,
 }: {
   stories?: CustomerStory[];
   maxItems?: number;
+  /** Caps the grid before “Show more”. Embeds omit this to show all stories. */
   initialVisible?: number;
+  /** Landing-page intro header. Disable for embeds that already have their own. */
+  showHeader?: boolean;
 }) {
+  const resolvedInitialVisible =
+    initialVisible ?? (showHeader ? INITIAL_VISIBLE : Number.POSITIVE_INFINITY);
+
   const customerStories = useMemo(
     () =>
       allStories
@@ -33,27 +40,29 @@ export function CustomerIndex({
   const [expanded, setExpanded] = useState(false);
   const visibleCount = expanded
     ? customerStories.length
-    : Math.min(initialVisible, customerStories.length);
+    : Math.min(resolvedInitialVisible, customerStories.length);
   const visibleStories = customerStories.slice(0, visibleCount);
-  const hasMore = customerStories.length > initialVisible;
+  const hasMore = customerStories.length > resolvedInitialVisible;
 
   if (customerStories.length === 0) return null;
 
   return (
     <section className="not-prose">
-      <div className="mb-8 flex flex-col gap-3">
-        <p className="m-0 font-mono text-[11px] uppercase tracking-[0.14em] text-text-tertiary">
-          — How companies use Langfuse
-        </p>
-        <Heading as="h2" size="normal" className="max-w-[20ch] text-left">
-          Learn from teams building AI on Langfuse
-        </Heading>
-        <Text className="max-w-[52ch] text-left">
-          Real deployments across support agents, tutoring, design tools, and
-          enterprise AI platforms. How teams trace, monitor and improve with
-          Langfuse.
-        </Text>
-      </div>
+      {showHeader ? (
+        <div className="mb-8 flex flex-col gap-3">
+          <p className="m-0 font-mono text-[11px] uppercase tracking-[0.14em] text-text-tertiary">
+            — How companies use Langfuse
+          </p>
+          <Heading as="h2" size="normal" className="max-w-[20ch] text-left">
+            Learn from teams building AI on Langfuse
+          </Heading>
+          <Text className="max-w-[52ch] text-left">
+            Real deployments across support agents, tutoring, design tools, and
+            enterprise AI platforms. How teams trace, monitor and improve with
+            Langfuse.
+          </Text>
+        </div>
+      ) : null}
 
       <div className="grid grid-cols-1 sm:grid-cols-2">
         {visibleStories.map((story, index) => {
@@ -116,23 +125,25 @@ export function CustomerIndex({
         })}
       </div>
 
-      <div className="mt-6 flex items-center justify-between gap-4">
-        {hasMore ? (
-          <Button
-            variant="secondary"
-            size="default"
-            className="w-auto min-w-[160px]"
-            onClick={() => setExpanded((v) => !v)}
-          >
-            {expanded ? "Show fewer stories" : "Show more stories"}
-          </Button>
-        ) : (
-          <span />
-        )}
-        <p className="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-text-tertiary">
-          {visibleCount} of {customerStories.length}
-        </p>
-      </div>
+      {hasMore || showHeader ? (
+        <div className="mt-6 flex items-center justify-between gap-4">
+          {hasMore ? (
+            <Button
+              variant="secondary"
+              size="default"
+              className="w-auto min-w-[160px]"
+              onClick={() => setExpanded((v) => !v)}
+            >
+              {expanded ? "Show fewer stories" : "Show more stories"}
+            </Button>
+          ) : (
+            <span />
+          )}
+          <p className="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-text-tertiary">
+            {visibleCount} of {customerStories.length}
+          </p>
+        </div>
+      ) : null}
     </section>
   );
 }
