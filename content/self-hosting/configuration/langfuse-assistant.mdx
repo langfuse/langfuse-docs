@@ -14,8 +14,12 @@ Assistant runs are durable jobs. The web service admits and enqueues them, and t
 [Ask AI](/docs/observability/features/filter-search-bar#ask-ai) in the filter search bar uses the same instance-wide model. It is not gated by the Assistant instance switch.
 
 <Callout type="info">
-  The Langfuse Assistant is in beta and available on version `>=v4.19.0`.
-  Configuration may still change between releases.
+  The Langfuse Assistant is in public beta on self-hosted deployments, from
+  version `>=v4.19.0`. It is still moving quickly, so expect the deployment and
+  configuration surface to keep changing: environment variables may be renamed
+  or added, and new capabilities may need infrastructure this page does not
+  describe yet. Upgrades that need action from you are called out in the
+  release notes.
 </Callout>
 
 ## Requirements
@@ -283,6 +287,27 @@ langfuse:
 ```
 
 The chart gives web and worker a single shared ServiceAccount, so on Kubernetes both services assume the same IAM role. Scope that role to Bedrock invoke and, if you run the sandbox, the MicroVM permissions above.
+
+## Trace the Assistant in your own instance
+
+Langfuse Cloud records its own Assistant into a Langfuse project, and self-hosted deployments can do the same. Set `LANGFUSE_AI_FEATURES_PROJECT_ID` on web and worker to the ID of a project on this instance:
+
+```bash
+LANGFUSE_AI_FEATURES_PROJECT_ID=<project-id>
+```
+
+Assistant turns and Ask AI completions then appear as traces in that project, under the environment `langfuse-in-app-agent` and tagged with the project the request came from. Langfuse writes them through the same internal ingestion path as any other data on the instance, so this needs no API keys and makes no outbound requests.
+
+Leave the variable unset to record nothing. On self-hosted deployments it is the only control: the organization-level AI telemetry switch is Cloud-only.
+
+<Callout type="warning">
+  Use a project dedicated to this. Assistant traces contain the prompts, tool
+  calls, and model output of every run, which includes data the Assistant read
+  from your other projects. Anyone with access to the target project can read
+  it.
+</Callout>
+
+`LANGFUSE_AI_FEATURES_PUBLIC_KEY`, `LANGFUSE_AI_FEATURES_SECRET_KEY`, and `LANGFUSE_AI_FEATURES_HOST` are separate and optional. They let Ask AI attach parse-outcome scores to its traces. They have no effect on the Assistant, which always uses its bundled system prompt when self-hosted.
 
 ## Queue and runtime knobs
 
