@@ -103,7 +103,7 @@ function TracePreview({
   onClose: () => void;
 }) {
   return (
-    <div className="flex h-full min-h-[276px] flex-col bg-surface-bg p-4 sm:p-5">
+    <div className="flex h-full min-h-[240px] flex-col bg-surface-bg p-4">
       <div className="flex items-start justify-between gap-4 border-b border-dashed border-line-structure pb-4">
         <a
           href={adopter.website}
@@ -176,9 +176,9 @@ function AdopterCard({
       layout
       transition={{ layout: { duration: 0.32, ease: "easeInOut" } }}
       className={cn(
-        "relative min-h-[132px] overflow-hidden border border-line-structure bg-surface-bg",
+        "relative min-h-[116px] overflow-hidden border border-line-structure bg-surface-bg",
         active &&
-          "z-10 min-h-[276px] border-text-secondary md:col-span-2 md:row-span-2",
+          "z-10 min-h-[240px] border-text-secondary md:col-span-2 md:row-span-2",
       )}
     >
       {active ? (
@@ -189,7 +189,7 @@ function AdopterCard({
           aria-expanded={false}
           aria-label={`Open ${adopter.name} adopter details`}
           onClick={onToggle}
-          className="group relative flex h-full min-h-[132px] w-full cursor-pointer flex-col p-4 text-left transition-colors hover:bg-[#FBFF7A]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+          className="group relative flex h-full min-h-[116px] w-full cursor-pointer flex-col p-3.5 text-left transition-colors hover:bg-[#FBFF7A]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
         >
           <span
             aria-hidden
@@ -198,10 +198,10 @@ function AdopterCard({
           <span className="absolute right-2.5 top-2 font-mono text-[9px] tabular-nums text-text-tertiary">
             {String(index + 1).padStart(2, "0")}
           </span>
-          <span className="pr-10 font-analog text-[21px] font-medium leading-tight text-text-primary">
+          <span className="pr-10 font-analog text-[19px] font-medium leading-tight text-text-primary">
             {adopter.name}
           </span>
-          <span className="mt-auto flex w-full items-center justify-between gap-3 border-t border-dashed border-line-structure pt-3 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+          <span className="mt-auto flex w-full items-center justify-between gap-3 border-t border-dashed border-line-structure pt-2.5 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
             <span className="truncate">{adopter.companyDescription}</span>
             <span className="shrink-0 text-text-primary">
               Trace <span aria-hidden>→</span>
@@ -219,7 +219,7 @@ function AdoptersWall({ adopters }: { adopters: Adopter[] }) {
     setActiveId((current) => (current === id ? null : id));
 
   return (
-    <div className="grid grid-flow-row-dense grid-cols-1 gap-2 bg-surface-2 md:auto-rows-[132px] md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid grid-flow-row-dense grid-cols-1 gap-2 bg-surface-2 md:auto-rows-[116px] md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
       {adopters.map((adopter, index) => (
         <AdopterCard
           key={adopter.id}
