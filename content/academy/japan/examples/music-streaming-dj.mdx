@@ -2,7 +2,7 @@
 title: 音楽ストリーミングの DJ
 sidebarTitle: 音楽 DJ
 description: 音楽ストリーミングアプリの新規かつ低リスクな DJ 機能を、ほぼ即座に本番投入し、リスナーの視聴行動から改善していく例です。
-translatedAt: 2026-08-14
+translatedAt: 2026-08-19
 ---
 
 import { DjProductScreens } from "@/components/academy/japan/DjProductScreens";
@@ -214,7 +214,16 @@ AI エンジニアリングの構成をどう組むかは、2 つの特徴から
           <code>correction</code> は DJ の直前の動作が外したことを意味します。
           <code>repeated_instruction</code>{" "}
           は、すでに受け取った指示に DJ が従えなかったことを意味します。好みの
-          読み違いではなく指示違反であり、必要な手当ても変わってきます。
+          読み違いではなく指示違反であり、
+          <a href="/academy/japan/evaluate/choosing-what-to-evaluate#tie-every-metric-to-a-decision">
+            必要な手当ても変わってきます
+          </a>
+          。またここで唯一 LLM のコストがかかるシグナルでもありますが、音声依頼は
+          トラフィックのごく一部なので、
+          <a href="/academy/japan/evaluate/choosing-what-to-evaluate#mind-the-budget">
+            評価器のコスト
+          </a>{" "}
+          は小さく収まります。
         </>
       ),
     },
@@ -319,7 +328,7 @@ AI エンジニアリングの構成をどう組むかは、2 つの特徴から
 ## まとめ
 
 これは、リスクが低く、学習に使える過去データもない機能の例です。
-こうした場合に取れる最善の手は、できるだけ早くトレースを取り始め、それをモニタリングして学ぶことです。
+こうした場合に取れる最善の手は、できるだけ早くトレースを取り始め、それをモニタリングすることです。
 データセット、実験、A/B テストといった残りは、その上に時間をかけて積み上げていけます。
 
 [他の例](/academy/japan/examples) や [Academy](/academy/japan) も参照してみてください。
