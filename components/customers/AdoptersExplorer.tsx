@@ -1,5 +1,6 @@
 "use client";
 
+import { Fan, ListTree, MoveHorizontal } from "lucide-react";
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +16,35 @@ export type Adopter = {
 };
 
 type View = "wall" | "table";
+type TraceType = "TRACE" | "SPAN" | "GENERATION";
+
+const TRACE_TYPE_ICON = {
+  TRACE: ListTree,
+  SPAN: MoveHorizontal,
+  GENERATION: Fan,
+} as const;
+
+const TRACE_TYPE_COLOR = {
+  TRACE: "text-muted-green",
+  SPAN: "text-muted-blue",
+  GENERATION: "text-muted-magenta",
+} as const;
+
+function TraceTypeIcon({ type }: { type: TraceType }) {
+  const Icon = TRACE_TYPE_ICON[type];
+  const label = type.charAt(0) + type.slice(1).toLowerCase() + " observation";
+
+  return (
+    <span
+      role="img"
+      aria-label={label}
+      title={label}
+      className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-[2px] border-2 border-line-structure bg-surface-bg"
+    >
+      <Icon className={cn("h-3 w-3", TRACE_TYPE_COLOR[type])} />
+    </span>
+  );
+}
 
 function isExternalLink(href: string) {
   return href.startsWith("http://") || href.startsWith("https://");
@@ -67,7 +97,8 @@ function TracePreview({ adopter }: { adopter: Adopter }) {
           Trace
         </span>
         <div className="min-w-0 font-mono text-[11px] leading-[1.5] text-text-secondary">
-          <div className="min-w-0">
+          <div className="flex min-w-0 items-center gap-2">
+            <TraceTypeIcon type="TRACE" />
             <a
               href={adopter.website}
               target="_blank"
@@ -82,6 +113,7 @@ function TracePreview({ adopter }: { adopter: Adopter }) {
               <span aria-hidden className="shrink-0 text-text-tertiary">
                 └─
               </span>
+              <TraceTypeIcon type="SPAN" />
               <span className="min-w-0 break-words">
                 {adopter.companyDescription}
               </span>
@@ -91,6 +123,7 @@ function TracePreview({ adopter }: { adopter: Adopter }) {
                 <span aria-hidden className="shrink-0">
                   └─
                 </span>
+                <TraceTypeIcon type="GENERATION" />
                 <span className="min-w-0 break-words">{adopter.useCase}</span>
               </div>
             )}
