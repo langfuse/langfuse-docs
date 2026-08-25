@@ -81,9 +81,9 @@ export function CustomerStoriesHero({
       <div className="relative grid gap-8 px-6 py-10 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)] lg:gap-10 lg:py-12">
         <div className="flex min-w-0 flex-col">
           <div className="mb-8 flex items-start justify-between gap-4">
-            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-text-tertiary">
+            <h1 className="m-0 font-mono text-[11px] font-normal uppercase tracking-[0.14em] text-text-tertiary">
               Customer stories
-            </p>
+            </h1>
             <div className="flex shrink-0 items-center gap-3 font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary">
               <span>
                 {String(active + 1).padStart(2, "0")} /{" "}
