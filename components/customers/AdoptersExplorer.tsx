@@ -1,7 +1,8 @@
 "use client";
 
 import { Fan, ListTree, MoveHorizontal } from "lucide-react";
-import { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 export type Adopter = {
@@ -89,40 +90,51 @@ function AdopterReference({ adopter }: { adopter: Adopter }) {
   );
 }
 
-function TracePreview({ adopter }: { adopter: Adopter }) {
+function traceName(adopter: Adopter) {
+  return `${adopter.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-trace`;
+}
+
+function TracePreview({
+  adopter,
+  onClose,
+}: {
+  adopter: Adopter;
+  onClose: () => void;
+}) {
   return (
-    <div className="border-t border-line-structure bg-surface-1">
-      <div className="grid gap-4 px-4 py-5 sm:grid-cols-[72px_1fr] sm:px-5">
-        <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-tertiary">
-          Trace
+    <div className="flex h-full min-h-[276px] flex-col bg-surface-bg p-4 sm:p-5">
+      <div className="flex items-start justify-between gap-4 border-b border-dashed border-line-structure pb-4">
+        <a
+          href={adopter.website}
+          target="_blank"
+          rel="noreferrer"
+          className="font-analog text-[24px] font-medium leading-none text-text-primary no-underline hover:underline"
+        >
+          {adopter.name} <span aria-hidden>↗</span>
+        </a>
+        <span className="max-w-[20ch] text-right font-mono text-[9px] uppercase tracking-[0.1em] text-text-tertiary">
+          {adopter.companyDescription}
         </span>
-        <div className="min-w-0 font-mono text-[11px] leading-[1.5] text-text-secondary">
-          <div className="flex min-w-0 items-center gap-2">
+      </div>
+
+      <div className="min-h-0 flex-1 py-4">
+        <p className="m-0 font-mono text-[9px] uppercase tracking-[0.12em] text-text-tertiary">
+          Trace
+        </p>
+        <div className="mt-2 min-w-0 font-mono text-[11px] leading-[1.45] text-text-secondary">
+          <div className="flex min-w-0 items-center gap-2 font-medium text-text-primary">
             <TraceTypeIcon type="TRACE" />
-            <a
-              href={adopter.website}
-              target="_blank"
-              rel="noreferrer"
-              className="font-medium text-text-primary no-underline hover:underline"
-            >
-              {adopter.name} <span aria-hidden>↗</span>
-            </a>
+            <span className="truncate">{traceName(adopter)}</span>
           </div>
-          <div className="ml-2 mt-2 border-l border-line-structure pl-4">
+          <div className="ml-2 border-l border-line-structure pl-4 pt-2">
             <div className="flex min-w-0 items-start gap-2">
-              <span aria-hidden className="shrink-0 text-text-tertiary">
-                └─
-              </span>
               <TraceTypeIcon type="SPAN" />
               <span className="min-w-0 break-words">
                 {adopter.companyDescription}
               </span>
             </div>
             {adopter.useCase && (
-              <div className="ml-4 mt-2 flex min-w-0 items-start gap-2 border-l border-line-structure pl-3 text-text-tertiary">
-                <span aria-hidden className="shrink-0">
-                  └─
-                </span>
+              <div className="ml-2 mt-2 flex min-w-0 items-start gap-2 border-l border-line-structure pl-4 text-text-tertiary">
                 <TraceTypeIcon type="GENERATION" />
                 <span className="min-w-0 break-words">{adopter.useCase}</span>
               </div>
@@ -130,8 +142,16 @@ function TracePreview({ adopter }: { adopter: Adopter }) {
           </div>
         </div>
       </div>
-      <div className="flex justify-end border-t border-line-structure px-4 py-3 sm:px-5">
-        <div className="ml-auto">
+
+      <div className="flex items-center justify-between gap-4 border-t border-dashed border-line-structure pt-3">
+        <button
+          type="button"
+          onClick={onClose}
+          className="cursor-pointer font-mono text-[9px] uppercase tracking-[0.1em] text-text-tertiary transition-colors hover:text-text-primary"
+        >
+          Close <span aria-hidden>×</span>
+        </button>
+        <div className="ml-auto text-right">
           <AdopterReference adopter={adopter} />
         </div>
       </div>
@@ -141,95 +161,74 @@ function TracePreview({ adopter }: { adopter: Adopter }) {
 
 function AdopterCard({
   adopter,
+  index,
   active,
   onToggle,
 }: {
   adopter: Adopter;
+  index: number;
   active: boolean;
   onToggle: () => void;
 }) {
   return (
-    <article className={cn("bg-surface-bg", active && "bg-surface-2")}>
-      <button
-        type="button"
-        aria-expanded={active}
-        onClick={onToggle}
-        className="group relative block w-full cursor-pointer p-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
-      >
-        <span
-          className={cn(
-            "flex min-h-16 items-center justify-center border border-dashed border-line-structure px-12 py-4 text-center font-analog text-[17px] font-medium text-text-secondary transition-colors group-hover:bg-surface-1 group-hover:text-text-primary",
-            active && "bg-surface-1 text-text-primary",
-          )}
+    <motion.article
+      layout
+      transition={{ layout: { duration: 0.32, ease: "easeInOut" } }}
+      className={cn(
+        "relative min-h-[132px] overflow-hidden border border-line-structure bg-surface-bg",
+        active &&
+          "z-10 min-h-[276px] border-text-secondary md:col-span-2 md:row-span-2",
+      )}
+    >
+      {active ? (
+        <TracePreview adopter={adopter} onClose={onToggle} />
+      ) : (
+        <button
+          type="button"
+          aria-expanded={false}
+          aria-label={`Open ${adopter.name} adopter details`}
+          onClick={onToggle}
+          className="group relative flex h-full min-h-[132px] w-full cursor-pointer flex-col p-4 text-left transition-colors hover:bg-[#FBFF7A]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
         >
-          {adopter.name}
-        </span>
-        {active && (
-          <span className="absolute right-5 top-1/2 -translate-y-1/2 font-mono text-[9px] uppercase tracking-[0.1em] text-text-tertiary">
-            Close <span aria-hidden>×</span>
+          <span
+            aria-hidden
+            className="bg-stripe-pattern pointer-events-none absolute right-0 top-0 h-12 w-12 opacity-70 [clip-path:polygon(0_0,100%_0,100%_100%)]"
+          />
+          <span className="absolute right-2.5 top-2 font-mono text-[9px] tabular-nums text-text-tertiary">
+            {String(index + 1).padStart(2, "0")}
           </span>
-        )}
-      </button>
-      {active && <TracePreview adopter={adopter} />}
-    </article>
-  );
-}
-
-function AdopterList({
-  adopters,
-  activeId,
-  onToggle,
-}: {
-  adopters: Adopter[];
-  activeId: string | null;
-  onToggle: (id: string) => void;
-}) {
-  return (
-    <div className="divide-y divide-line-structure">
-      {adopters.map((adopter) => (
-        <AdopterCard
-          key={adopter.id}
-          adopter={adopter}
-          active={activeId === adopter.id}
-          onToggle={() => onToggle(adopter.id)}
-        />
-      ))}
-    </div>
+          <span className="pr-10 font-analog text-[21px] font-medium leading-tight text-text-primary">
+            {adopter.name}
+          </span>
+          <span className="mt-auto flex w-full items-center justify-between gap-3 border-t border-dashed border-line-structure pt-3 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+            <span className="truncate">{adopter.companyDescription}</span>
+            <span className="shrink-0 text-text-primary">
+              Trace <span aria-hidden>→</span>
+            </span>
+          </span>
+        </button>
+      )}
+    </motion.article>
   );
 }
 
 function AdoptersWall({ adopters }: { adopters: Adopter[] }) {
   const [activeId, setActiveId] = useState<string | null>(null);
-  const columns = useMemo(
-    () => [
-      adopters.filter((_, index) => index % 2 === 0),
-      adopters.filter((_, index) => index % 2 === 1),
-    ],
-    [adopters],
-  );
   const toggle = (id: string) =>
     setActiveId((current) => (current === id ? null : id));
 
   return (
-    <>
-      <div className="border border-line-structure bg-surface-bg md:hidden">
-        <AdopterList
-          adopters={adopters}
-          activeId={activeId}
-          onToggle={toggle}
+    <div className="grid grid-flow-row-dense grid-cols-1 gap-2 bg-surface-2 md:auto-rows-[132px] md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {adopters.map((adopter, index) => (
+        <AdopterCard
+          key={adopter.id}
+          adopter={adopter}
+          index={index}
+          active={activeId === adopter.id}
+          onToggle={() => toggle(adopter.id)}
         />
-      </div>
-      <div className="hidden grid-cols-2 divide-x divide-line-structure border border-line-structure bg-surface-bg md:grid">
-        {columns.map((column, index) => (
-          <AdopterList
-            key={index}
-            adopters={column}
-            activeId={activeId}
-            onToggle={toggle}
-          />
-        ))}
-      </div>
-    </>
+      ))}
+    </div>
   );
 }
 
