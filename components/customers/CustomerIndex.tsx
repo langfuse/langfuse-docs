@@ -50,9 +50,6 @@ export function CustomerIndex({
     <section className="not-prose">
       {showHeader ? (
         <div className="mb-8 flex flex-col gap-3">
-          <p className="m-0 font-mono text-[11px] uppercase tracking-[0.14em] text-text-tertiary">
-            — How companies use Langfuse
-          </p>
           <Heading as="h2" size="normal" className="max-w-[20ch] text-left">
             Learn from teams building AI on Langfuse
           </Heading>
