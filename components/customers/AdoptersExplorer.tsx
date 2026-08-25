@@ -356,16 +356,18 @@ export function AdoptersExplorer({ adopters }: { adopters: Adopter[] }) {
             Add your team to the wall
           </h2>
           <p className="mb-0 mt-2 max-w-[58ch] text-[13px] leading-[1.5] text-surface-bg/70">
-            Open a pull request against the adopters list, or reach out to get
-            your story on record.
+            Open a pull request to add your company and a public reference to
+            the adopters list.
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
           <a
-            href="/talk-to-us"
+            href="https://github.com/langfuse/langfuse-docs/edit/main/components-mdx/adopters-table.mdx"
+            target="_blank"
+            rel="noreferrer"
             className="inline-flex min-h-9 items-center justify-center border border-surface-bg bg-surface-bg px-4 text-[12px] font-medium text-text-primary no-underline transition-opacity hover:opacity-90"
           >
-            Share your story
+            Add your team
           </a>
           <button
             type="button"
