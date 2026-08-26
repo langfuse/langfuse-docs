@@ -82,8 +82,8 @@ function Hero() {
           </p>
         </div>
         <p className="gov-body-sm m-0 max-w-[38ch] text-pretty sm:text-right">
-          Observability and evaluations for public-sector AI — inside your
-          security boundary.
+          Observability and evaluations for public-sector AI, in your
+          environment.
         </p>
       </div>
 
@@ -111,18 +111,17 @@ function Hero() {
             Keep it <span className="gov-highlight">under your control.</span>
           </h1>
           <p className="gov-body" style={{ fontSize: 17, maxWidth: "42ch" }}>
-            Government and public-sector teams use Langfuse to observe,
-            evaluate, and improve AI agents — without sending prompts, traces,
-            or evaluation data outside their security boundary. Deploy{" "}
+            Open-source tracing and evaluations for government AI. Run it{" "}
             <b className="font-medium text-text-primary">
               air-gapped, on-premises, or in a private cloud
             </b>
-            . The core is open source and inspectable; you operate the stack.
+            . Prompts, traces, and scores stay in your environment. You run the
+            software.
           </p>
           <ul className="gov-claim-row">
             <li>Your environment</li>
-            <li>Inspectable source</li>
-            <li>Audit-ready traces</li>
+            <li>Open source</li>
+            <li>Your traces</li>
           </ul>
           <Ctas />
         </div>
@@ -369,7 +368,7 @@ function ProductLoop() {
       n: "03",
       eyebrow: "Contain",
       title: "Contain failures early",
-      body: "Monitor quality, security scores, latency, and cost. Set thresholds and route alerts through webhooks, Slack, or GitHub Actions — so teams can act before isolated failures become systemic.",
+      body: "Monitor quality, security scores, latency, and cost. Set thresholds and send alerts to webhooks, Slack, or GitHub Actions so you can respond before a bad run repeats.",
       href: "/docs/observability/features/alerts",
       label: "Alerts docs",
     },
@@ -380,13 +379,13 @@ function ProductLoop() {
       <div className="mb-10 flex flex-col items-start gap-3.5">
         <div className="gov-eyebrow">Observability · Evaluations · Alerts</div>
         <h2 className="gov-h2 max-w-[24ch]">
-          Understand every agent.{" "}
-          <span className="gov-highlight">Improve every outcome.</span>
+          See what happened.{" "}
+          <span className="gov-highlight">Score what works.</span>
         </h2>
         <p className="gov-body">
-          Government AI must do more than work in a demo. Teams need to
-          understand how an agent reached an answer, measure whether it is
-          reliable, and improve it without losing control of sensitive data.
+          You need to see how an agent reached an answer, score whether it is
+          reliable, and change it without moving sensitive data out of your
+          environment.
         </p>
       </div>
 
@@ -447,11 +446,10 @@ function Deployment() {
       title: "Inspect and control the software",
       body: (
         <>
-          The complete Langfuse repository is public. All core product
-          capabilities — tracing, evaluations, prompt management, experiments,
-          and annotation — are MIT-licensed without usage limits. Enterprise
-          extensions live in clearly marked directories and activate only with a
-          license key.
+          The Langfuse repository is public. Tracing, evaluations, prompt
+          management, experiments, and annotation are MIT-licensed, with no
+          usage limits. Enterprise extensions live in marked directories and
+          turn on with a license key.
         </>
       ),
       href: "/handbook/chapters/open-source",
@@ -459,13 +457,13 @@ function Deployment() {
     },
     {
       n: "03",
-      title: "Operate the same architecture proven in the cloud",
+      title: "Same architecture as Langfuse Cloud",
       body: (
         <>
-          Self-hosted Langfuse is not a reduced fork. It uses the same codebase
-          and architecture as Langfuse Cloud. Asynchronous ingestion absorbs
-          traffic spikes, incoming events are persisted before processing, and
-          background migrations reduce disruption during upgrades.
+          Self-hosted Langfuse uses the same codebase and architecture as
+          Langfuse Cloud. Asynchronous ingestion absorbs traffic spikes, events
+          are persisted before processing, and background migrations reduce
+          disruption during upgrades.
         </>
       ),
       href: "/self-hosting#architecture",
@@ -494,13 +492,12 @@ function Deployment() {
       <div className="mb-10 flex flex-col items-start gap-3.5">
         <div className="gov-eyebrow">Self-hosting · Governance</div>
         <h2 className="gov-h2 max-w-[22ch]">
-          Mission-ready deployment,{" "}
-          <span className="gov-highlight">on your terms.</span>
+          Run it where you{" "}
+          <span className="gov-highlight">already operate.</span>
         </h2>
         <p className="gov-body">
-          Langfuse is built to run where government teams already operate —
-          behind a firewall, in a classified network, or in an approved cloud
-          account — without changing the product or the data model.
+          Langfuse runs behind a firewall, on a classified network, or in an
+          approved cloud account. The product and data model stay the same.
         </p>
       </div>
 
@@ -592,12 +589,12 @@ function Security() {
               className="gov-h2 max-w-[16ch]"
               style={{ fontSize: "clamp(28px, 3vw, 40px)" }}
             >
-              Security without giving up developer velocity.
+              Keep data in your environment.
             </h2>
             <p className="gov-body-sm max-w-[40ch]">
-              Self-host Langfuse so application teams can debug and evaluate
-              agents quickly, while security teams keep telemetry, prompts, and
-              evaluation data inside the approved boundary.
+              Application teams can debug and evaluate agents. Security teams
+              keep telemetry, prompts, and evaluation data in the approved
+              boundary.
             </p>
           </div>
           <div
@@ -653,12 +650,11 @@ function GetStarted() {
             style={{ fontSize: "clamp(28px, 3vw, 40px)" }}
           >
             Start locally.{" "}
-            <span className="gov-highlight">Deploy for the mission.</span>
+            <span className="gov-highlight">Deploy in production.</span>
           </h2>
           <p className="gov-body-sm m-0 max-w-[44ch]">
             Run Langfuse locally with Docker Compose in minutes. The repository
-            is public, the core product is MIT-licensed, and the same platform
-            is already used in production at scale. Move to Kubernetes or
+            is public and the core is MIT-licensed. Move to Kubernetes or
             Terraform without changing the product or data model.
           </p>
           <div className="flex flex-wrap gap-1.5">
@@ -712,13 +708,12 @@ function CTABanner() {
       >
         <div className="gov-eyebrow">Langfuse for Government</div>
         <h2 className="gov-h2 max-w-[22ch]">
-          Bring accountable AI into{" "}
+          Run Langfuse in{" "}
           <span className="gov-highlight">your environment.</span>
         </h2>
         <p className="gov-body text-center">
-          See how Langfuse can help your team observe, evaluate, and improve
-          mission-critical AI systems — without moving sensitive data outside
-          your control.
+          Talk through tracing, evaluations, and self-hosting for government AI.
+          Sensitive data stays in infrastructure you control.
         </p>
         <Ctas />
       </div>

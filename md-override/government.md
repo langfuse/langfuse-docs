@@ -1,27 +1,25 @@
 ---
 title: Langfuse for Government
-description: Open-source observability and evaluations for AI agents. Deploy Langfuse in air-gapped, on-premises, and cloud environments — and keep traces, prompts, and evaluation data inside your security boundary.
+description: Open-source observability and evaluations for AI agents. Deploy Langfuse in air-gapped, on-premises, and cloud environments. Keep traces, prompts, and evaluation data in your security boundary.
 ---
 
 # Build accountable AI. Keep it under your control.
 
-Langfuse for Government — observability and evaluations for public-sector AI, inside your security boundary.
+Langfuse for Government. Observability and evaluations for public-sector AI, in your environment.
 
-Government and public-sector teams use Langfuse to observe, evaluate, and improve AI agents — without sending prompts, traces, or evaluation data outside their security boundary. Deploy **air-gapped, on-premises, or in a private cloud**. The core is open source and inspectable; you operate the stack.
+Open-source tracing and evaluations for government AI. Run it **air-gapped, on-premises, or in a private cloud**. Prompts, traces, and scores stay in your environment. You run the software.
 
 - Your environment
-- Inspectable source
-- Audit-ready traces
+- Open source
+- Your traces
 - [Talk to a public-sector expert](/talk-to-us)
 - [Explore self-hosting](/self-hosting)
 
 Open-source core (MIT) · Internet access optional · 100,000+ engineers · 10+ billion observations per month
 
-## Understand every agent. Improve every outcome. [#observe]
+## See what happened. Score what works. [#observe]
 
-Government AI must do more than work in a demo. Teams need to understand how an agent reached an answer, measure whether it is reliable, and improve it without losing control of sensitive data.
-
-Langfuse brings the full improvement loop into one platform:
+You need to see how an agent reached an answer, score whether it is reliable, and change it without moving sensitive data out of your environment.
 
 ### See what happened
 
@@ -37,13 +35,13 @@ Score outputs with LLM-as-a-judge, deterministic checks, human review, and user 
 
 ### Contain failures early
 
-Monitor quality, security scores, latency, and cost. Set thresholds and route alerts through webhooks, Slack, or GitHub Actions — so teams can act before isolated failures become systemic.
+Monitor quality, security scores, latency, and cost. Set thresholds and send alerts to webhooks, Slack, or GitHub Actions so you can respond before a bad run repeats.
 
 [Alerts docs](/docs/observability/features/alerts)
 
-## Mission-ready deployment, on your terms [#deploy]
+## Run it where you already operate [#deploy]
 
-Langfuse is built to run where government teams already operate — behind a firewall, in a classified network, or in an approved cloud account — without changing the product or the data model.
+Langfuse runs behind a firewall, on a classified network, or in an approved cloud account. The product and data model stay the same.
 
 ### Run inside your security boundary
 
@@ -53,13 +51,13 @@ Deploy Langfuse in a VPC, on premises, or in a fully air-gapped Kubernetes envir
 
 ### Inspect and control the software
 
-The complete Langfuse repository is public. All core product capabilities — tracing, evaluations, prompt management, experiments, and annotation — are MIT-licensed without usage limits. Enterprise extensions live in clearly marked directories and activate only with a license key.
+The Langfuse repository is public. Tracing, evaluations, prompt management, experiments, and annotation are MIT-licensed, with no usage limits. Enterprise extensions live in marked directories and turn on with a license key.
 
 [Open-source licensing](/handbook/chapters/open-source)
 
-### Operate the same architecture proven in the cloud
+### Same architecture as Langfuse Cloud
 
-Self-hosted Langfuse is not a reduced fork. It uses the same codebase and architecture as Langfuse Cloud. Asynchronous ingestion absorbs traffic spikes, incoming events are persisted before processing, and background migrations reduce disruption during upgrades.
+Self-hosted Langfuse uses the same codebase and architecture as Langfuse Cloud. Asynchronous ingestion absorbs traffic spikes, events are persisted before processing, and background migrations reduce disruption during upgrades.
 
 [Architecture overview](/self-hosting#architecture)
 
@@ -71,9 +69,9 @@ This governance set is available with Langfuse Enterprise.
 
 [Audit logs](/docs/administration/audit-logs)
 
-## Security without giving up developer velocity [#security]
+## Keep data in your environment [#security]
 
-Self-host Langfuse so application teams can debug and evaluate agents quickly, while security teams keep telemetry, prompts, and evaluation data inside the approved boundary.
+Self-host Langfuse so application teams can debug and evaluate agents. Security teams keep telemetry, prompts, and evaluation data in the approved boundary.
 
 - **Data stays where you put it.** Run the platform and its open-source dependencies in infrastructure you control.
 - **Sensitive data can be masked before storage.** Redact data in the SDK before transmission, or apply [centralized ingestion masking](/self-hosting/security/data-masking) in self-hosted Enterprise deployments.
@@ -86,7 +84,7 @@ For deployments with FIPS requirements, compliant Langfuse Docker images are ava
 
 [Book a meeting](/talk-to-us)
 
-## Start locally. Deploy for the mission. [#get-started]
+## Start locally. Deploy in production. [#get-started]
 
 Run Langfuse locally with Docker Compose in minutes:
 
@@ -96,7 +94,7 @@ cd langfuse
 docker compose up
 ```
 
-Move to production with the official Kubernetes Helm chart or maintained Terraform modules for AWS, Azure, and Google Cloud — without changing the product or data model.
+Move to production with the official Kubernetes Helm chart or maintained Terraform modules for AWS, Azure, and Google Cloud. The product and data model stay the same.
 
 - [Read the deployment guide](/self-hosting)
 - [View the source on GitHub](https://github.com/langfuse/langfuse)
@@ -105,9 +103,9 @@ Move to production with the official Kubernetes Helm chart or maintained Terrafo
 - [Azure Terraform](/self-hosting/deployment/azure)
 - [GCP Terraform](/self-hosting/deployment/gcp)
 
-## Bring accountable AI into your environment.
+## Run Langfuse in your environment.
 
-See how Langfuse can help your team observe, evaluate, and improve mission-critical AI systems — without moving sensitive data outside your control.
+Talk through tracing, evaluations, and self-hosting for government AI. Sensitive data stays in infrastructure you control.
 
 - [Talk to a public-sector expert](/talk-to-us)
 - [Explore self-hosting](/self-hosting)
