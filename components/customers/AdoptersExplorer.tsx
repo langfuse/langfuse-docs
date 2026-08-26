@@ -209,9 +209,11 @@ function AdopterCard({
               />
             </span>
           )}
-          <span className="pr-10 font-analog text-[19px] font-medium leading-tight text-text-primary">
-            {adopter.name}
-          </span>
+          {!adopter.logo && (
+            <span className="pr-10 font-analog text-[19px] font-medium leading-tight text-text-primary">
+              {adopter.name}
+            </span>
+          )}
           <span className="mt-auto flex w-full items-center justify-between gap-3 border-t border-dashed border-line-structure pt-2.5 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
             <span className="truncate">{adopter.companyDescription}</span>
             <span className="shrink-0 text-text-primary">
