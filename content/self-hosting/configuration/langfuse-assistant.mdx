@@ -290,7 +290,7 @@ The chart gives web and worker a single shared ServiceAccount, so on Kubernetes 
 
 ## Trace the Assistant in your own instance [#trace-the-assistant-in-your-own-instance]
 
-Langfuse Cloud records its own Assistant into a Langfuse project, and self-hosted deployments can do the same. Set `LANGFUSE_AI_FEATURES_PROJECT_ID` on web and worker to the ID of a project on this instance:
+Record the Assistant's own runs as traces in a project on this instance, which is useful for debugging it. Set `LANGFUSE_AI_FEATURES_PROJECT_ID` on web and worker to that project's ID:
 
 ```bash
 LANGFUSE_AI_FEATURES_PROJECT_ID=<project-id>
