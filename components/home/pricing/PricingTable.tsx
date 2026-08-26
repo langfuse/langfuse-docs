@@ -469,6 +469,17 @@ const sections: Section[] = [
           selfHosted: { "Open Source": false, Enterprise: false },
         },
       },
+      {
+        name: "Langfuse Assistant usage limits",
+        tiers: {
+          cloud: {
+            Hobby: "Low",
+            Core: "Medium",
+            Pro: "High",
+            Enterprise: "High",
+          },
+        },
+      },
     ],
   },
   {
