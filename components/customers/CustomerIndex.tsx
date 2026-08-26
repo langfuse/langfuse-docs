@@ -67,6 +67,7 @@ export function CustomerIndex({
           const headline = story.frontMatter.title ?? story.route;
           const quote = story.frontMatter.customerQuote;
           const logo = story.frontMatter.customerLogo;
+          const logoDark = story.frontMatter.customerLogoDark;
           const withStripes = index % 3 === 1;
 
           return (
@@ -85,14 +86,35 @@ export function CustomerIndex({
                 <div className="mb-4 flex h-8 items-center">
                   {logo ? (
                     <div className="relative h-8 w-[120px]">
-                      <Image
-                        src={logo}
-                        alt={`${company} logo`}
-                        fill
-                        sizes="120px"
-                        className="object-contain object-left"
-                        unoptimized
-                      />
+                      {logoDark ? (
+                        <>
+                          <Image
+                            src={logo}
+                            alt={`${company} logo`}
+                            fill
+                            sizes="120px"
+                            className="object-contain object-left dark:hidden"
+                            unoptimized
+                          />
+                          <Image
+                            src={logoDark}
+                            alt={`${company} logo`}
+                            fill
+                            sizes="120px"
+                            className="hidden object-contain object-left dark:block"
+                            unoptimized
+                          />
+                        </>
+                      ) : (
+                        <Image
+                          src={logo}
+                          alt={`${company} logo`}
+                          fill
+                          sizes="120px"
+                          className="object-contain object-left dark:invert dark:brightness-0 dark:contrast-200"
+                          unoptimized
+                        />
+                      )}
                     </div>
                   ) : (
                     <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-text-tertiary">

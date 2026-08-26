@@ -32,6 +32,57 @@ function HighlightedQuote({
   );
 }
 
+function CustomerLogo({
+  logo,
+  logoDark,
+  company,
+  sizes,
+  decorative = false,
+}: {
+  logo: string;
+  logoDark?: string | null;
+  company: string;
+  sizes: string;
+  decorative?: boolean;
+}) {
+  const alt = decorative ? "" : `${company} logo`;
+  const className = "object-contain object-left";
+
+  if (!logoDark) {
+    return (
+      <Image
+        src={logo}
+        alt={alt}
+        fill
+        sizes={sizes}
+        className={`${className} dark:invert dark:brightness-0 dark:contrast-200`}
+        unoptimized
+      />
+    );
+  }
+
+  return (
+    <>
+      <Image
+        src={logo}
+        alt={alt}
+        fill
+        sizes={sizes}
+        className={`${className} dark:hidden`}
+        unoptimized
+      />
+      <Image
+        src={logoDark}
+        alt={alt}
+        fill
+        sizes={sizes}
+        className={`hidden ${className} dark:block`}
+        unoptimized
+      />
+    </>
+  );
+}
+
 export function CustomerStoriesHero({
   stories: allStories,
 }: {
@@ -70,6 +121,7 @@ export function CustomerStoriesHero({
   const quoteAuthor = story.frontMatter.quoteAuthor;
   const quoteRole = story.frontMatter.quoteRole;
   const logo = story.frontMatter.customerLogo;
+  const logoDark = story.frontMatter.customerLogoDark;
 
   return (
     <section
@@ -109,13 +161,11 @@ export function CustomerStoriesHero({
               <div className="mb-5 flex h-10 items-center">
                 {logo ? (
                   <div className="relative h-10 w-40">
-                    <Image
-                      src={logo}
-                      alt={`${company} logo`}
-                      fill
+                    <CustomerLogo
+                      logo={logo}
+                      logoDark={logoDark}
+                      company={company}
                       sizes="160px"
-                      className="object-contain object-left"
-                      unoptimized
                     />
                   </div>
                 ) : (
@@ -166,6 +216,7 @@ export function CustomerStoriesHero({
               const isActive = i === active;
               const name = companyName(s);
               const logo = s.frontMatter.customerLogo;
+              const logoDark = s.frontMatter.customerLogoDark;
               return (
                 <li key={s.route}>
                   <button
@@ -182,13 +233,12 @@ export function CustomerStoriesHero({
                     <div className="flex h-8 min-w-0 flex-1 items-center">
                       {logo ? (
                         <div className="relative h-7 w-28">
-                          <Image
-                            src={logo}
-                            alt=""
-                            fill
+                          <CustomerLogo
+                            logo={logo}
+                            logoDark={logoDark}
+                            company={name}
                             sizes="112px"
-                            className="object-contain object-left"
-                            unoptimized
+                            decorative
                           />
                         </div>
                       ) : (
