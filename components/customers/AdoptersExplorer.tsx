@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Fan, ListTree, MoveHorizontal } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -12,6 +13,7 @@ export type Adopter = {
   website: string;
   companyDescription: string;
   useCase?: string;
+  logo?: string;
   tableSummary: string;
   referenceLabel: string;
   referenceHref?: string;
@@ -195,6 +197,18 @@ function AdopterCard({
           <span className="absolute right-2.5 top-2 font-mono text-[9px] tabular-nums text-text-tertiary">
             {String(index + 1).padStart(2, "0")}
           </span>
+          {adopter.logo && (
+            <span className="relative mb-1.5 block h-5 w-28 shrink-0 opacity-80 grayscale contrast-125 transition-opacity group-hover:opacity-100">
+              <Image
+                src={adopter.logo}
+                alt=""
+                fill
+                sizes="112px"
+                className="object-contain object-left"
+                unoptimized
+              />
+            </span>
+          )}
           <span className="pr-10 font-analog text-[19px] font-medium leading-tight text-text-primary">
             {adopter.name}
           </span>

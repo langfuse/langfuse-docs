@@ -11,6 +11,23 @@ const ADOPTERS_TABLE_PATH = join(
   "adopters-table.mdx",
 );
 
+const COMPANY_LOGOS: Record<string, string> = {
+  Canva: "/images/customers/canva/Canva-black.png",
+  Draftbit: "/images/customers/picing-logos/draftbit.png",
+  freee: "/images/japan-logos/freee.svg",
+  "Hugging Face": "/images/customers/hugging-face/hugging-face-logo.svg",
+  Intuit: "/images/japan-logos/intuit.svg",
+  "Khan Academy": "/images/customers/khan-academy/khan-academy-logo.png",
+  Knowunity: "/images/customers/picing-logos/knowunity.png",
+  Kombo: "/images/customers/picing-logos/kombo.png",
+  "Magic Patterns":
+    "/images/customers/magic-patterns-ai-design-tools/magicpatterns-logo.png",
+  "Merck Group": "/images/customers/merck/merck-light.png",
+  Slite: "/images/customers/slite/slite-light.png",
+  SumUp: "/images/customers/sumup/Sumup-Light.png",
+  Twilio: "/images/customers/picing-logos/twilio.png",
+};
+
 const COMPANY_DESCRIPTIONS: Record<string, string> = {
   Accor: "Hospitality group",
   Adobe: "Creative software and digital experience platform",
@@ -142,6 +159,7 @@ function parseAdoptersTable(source: string): Adopter[] {
       name: company.label,
       website: company.href,
       companyDescription: COMPANY_DESCRIPTIONS[company.label] ?? tableSummary,
+      logo: COMPANY_LOGOS[company.label],
       useCase: COMPANIES_WITH_DOCUMENTED_USE_CASES.has(company.label)
         ? (USE_CASE_OVERRIDES[company.label] ?? tableSummary)
         : undefined,
