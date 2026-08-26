@@ -14,7 +14,7 @@ function formatCompact(value: number): string {
 }
 
 const stats = [
-  { value: "300+", label: "Contributors" },
+  { value: "90B+", label: "Observations / month" },
   { value: "21", label: "of the Fortune 50" },
   {
     value: formatCompact(getGitHubStars()),

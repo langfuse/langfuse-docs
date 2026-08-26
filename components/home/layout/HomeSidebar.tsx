@@ -58,10 +58,10 @@ const communityStats: Array<{
     tooltip: "Leave a Star ⭐",
   },
   {
-    label: "Contributors",
-    value: "300+",
-    href: "https://github.com/langfuse/langfuse/graphs/contributors",
-    tooltip: "View contributors",
+    label: "Observations / month",
+    value: "90B+",
+    href: "/docs/observability/overview",
+    tooltip: "Explore observability",
   },
   {
     label: "Global adopters",
