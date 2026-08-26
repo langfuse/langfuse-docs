@@ -25,6 +25,8 @@ Configure the model, the sandbox, and worker MCP access first, then [turn the As
 
 `LANGFUSE_AI_MODEL` sets the model used for the Langfuse Assistant. If `LANGFUSE_AI_SMALL_MODEL` is set, it is used for supplementary calls, such as chat naming, instead. Set both on the web and the worker service.
 
+We recommend Claude Opus 5. The Assistant's system prompt and tool loop are developed against it, and it handles the long multi-step tool use the Assistant depends on. Other models work, and the `openai` provider accepts any OpenAI-compatible endpoint, but expect more variance in tool calling and instruction following.
+
 `LANGFUSE_AI_PROVIDER` selects the backend. An unset provider resolves to `bedrock`. An incomplete configuration counts as unconfigured, and the UI then reports that the model is not configured.
 
 | Variable                         | `bedrock` | `anthropic` | `openai` |
