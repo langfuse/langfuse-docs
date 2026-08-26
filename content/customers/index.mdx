@@ -8,7 +8,7 @@ import { CustomerStoriesHeroWrapper } from "@/components/customers/CustomerStori
 import { CustomerStatsBar } from "@/components/customers/CustomerStatsBar";
 import { CustomerIndexWrapper } from "@/components/customers/CustomerIndexWrapper";
 import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
-import { AdoptersTickerWrapper } from "@/components/customers/AdoptersExplorerWrapper";
+import { AdoptersExplorerWrapper } from "@/components/customers/AdoptersExplorerWrapper";
 
 <div className="not-prose">
   <CustomerStoriesHeroWrapper />
@@ -16,28 +16,11 @@ import { AdoptersTickerWrapper } from "@/components/customers/AdoptersExplorerWr
 
   <div className="px-6 py-12 sm:px-8">
     <CustomerIndexWrapper />
+  </div>
 
-    <div className="mt-10 border-y border-line-structure">
-      <div className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="m-0 font-analog text-[20px] font-medium text-text-primary">
-            Langfuse is adopted Open Source globally
-          </h2>
-          <div className="mt-1 text-[14px] text-text-tertiary">
-            Browse a list of companies and teams publicly using Langfuse, and add yourself!
-          </div>
-        </div>
-        <a
-          href="/users/adopters"
-          className="shrink-0 font-mono text-[11px] uppercase tracking-[0.1em] text-text-secondary no-underline hover:text-text-primary"
-        >
-          View adopters →
-        </a>
-      </div>
-      <AdoptersTickerWrapper />
-    </div>
+  <AdoptersExplorerWrapper embedded />
 
+  <div className="px-6 pb-12 sm:px-8">
     <CustomerStoryCTA />
-
   </div>
 </div>

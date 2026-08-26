@@ -307,8 +307,15 @@ function ViewToggle({
   );
 }
 
-export function AdoptersExplorer({ adopters }: { adopters: Adopter[] }) {
+export function AdoptersExplorer({
+  adopters,
+  embedded = false,
+}: {
+  adopters: Adopter[];
+  embedded?: boolean;
+}) {
   const [view, setView] = useState<View>("wall");
+  const HeadingTag = embedded ? "h2" : "h1";
 
   return (
     <section className="not-prose bg-surface-bg text-text-primary">
@@ -318,7 +325,7 @@ export function AdoptersExplorer({ adopters }: { adopters: Adopter[] }) {
             <p className="m-0 font-mono text-[11px] uppercase tracking-[0.14em] text-text-tertiary">
               — Adopters
             </p>
-            <h1
+            <HeadingTag
               aria-label="Langfuse is adopted by 100,000+ developers worldwide"
               className="mt-5 max-w-[19ch] font-analog text-[38px] font-medium leading-[1.02] tracking-tight text-text-primary sm:text-[50px]"
             >
@@ -331,7 +338,7 @@ export function AdoptersExplorer({ adopters }: { adopters: Adopter[] }) {
                 <TextHighlight>100,000+ developers</TextHighlight>
               </span>{" "}
               worldwide
-            </h1>
+            </HeadingTag>
           </div>
           <div className="flex flex-col items-start gap-4 lg:items-end">
             <p className="m-0 max-w-[28ch] text-[13px] leading-[1.5] text-text-tertiary lg:text-right">

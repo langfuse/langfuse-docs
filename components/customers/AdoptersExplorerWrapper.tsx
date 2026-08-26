@@ -154,9 +154,18 @@ function parseAdoptersTable(source: string): Adopter[] {
   return adopters;
 }
 
-export function AdoptersExplorerWrapper() {
+export function AdoptersExplorerWrapper({
+  embedded = false,
+}: {
+  embedded?: boolean;
+}) {
   const source = readFileSync(ADOPTERS_TABLE_PATH, "utf8");
-  return <AdoptersExplorer adopters={parseAdoptersTable(source)} />;
+  return (
+    <AdoptersExplorer
+      adopters={parseAdoptersTable(source)}
+      embedded={embedded}
+    />
+  );
 }
 
 export function AdoptersTickerWrapper() {
