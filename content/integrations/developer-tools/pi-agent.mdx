@@ -163,13 +163,6 @@ The kill switch has priority over environment keys and the config file. When tra
 
 ## Troubleshooting
 
-### Installation problems
-
-1. **`EACCES` or `permission denied` when installing pi.** Do not retry with `sudo`, because that creates root-owned files in your home directory. Set a prefix you own with `npm config set prefix ~/.npm-global` and put that directory's `bin` subfolder on your `PATH`, or install Node.js through a version manager. See the [pi documentation](https://pi.dev/docs).
-2. **`pi: command not found` after a successful install.** The npm global bin directory is not on your `PATH`. Print it with `npm prefix -g`, then add that directory's `bin` subfolder to your `PATH` in your shell profile and open a new terminal.
-3. **`npm: command not found` during `pi install`.** Pi's package installer shells out to npm, so npm must be on your `PATH` even if you use pnpm or Bun for your own projects. Install Node.js 22+ (npm ships with it). If npm only exists behind a wrapper such as `mise` or `asdf`, point pi at it by setting `npmCommand` in `~/.pi/agent/settings.json`.
-4. **Node.js too old.** Run `node --version`; pi needs 22.0.0 or newer.
-
 ### No traces appearing in Langfuse
 
 1. **Check the status line.** `langfuse: off (no keys)` means the plugin found no usable configuration. Two different causes produce this same message: the kill switch `LANGFUSE_TRACING_ENABLED=false` is set (check your shell profile and any inherited environment), or the credentials were not found — see [credentials setup](#set-credentials).
