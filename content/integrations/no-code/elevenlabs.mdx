@@ -1,0 +1,391 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Trace ElevenLabs Agents with Langfuse
+sidebarTitle: ElevenLabs
+logo: /images/integrations/elevenlabs_icon.png
+description: Forward OpenTelemetry traces from ElevenLabs Agents conversations to Langfuse to monitor transcripts, tool calls, token usage, and cost.
+category: Integrations
+---
+
+# Trace ElevenLabs Agents with Langfuse
+
+This notebook shows how to forward **OpenTelemetry traces** of [ElevenLabs Agents](https://elevenlabs.io/agents) conversations to **Langfuse**. You get each conversation as a full trace next to your other LLM application traces: transcript turns, LLM generations with token usage and cost, and tool calls. The notebook is self-contained: it creates a demo agent, runs a text-only conversation, and forwards the resulting trace.
+
+> **What is ElevenLabs Agents?** [ElevenLabs Agents](https://elevenlabs.io/agents) is a platform for building voice-based conversational AI agents that handle calls, answer questions, and execute tools on behalf of users.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform that helps teams trace, debug, and evaluate their LLM applications.
+
+<Steps>
+## Step 1: Install dependencies
+
+```python
+%pip install elevenlabs requests -U
+```
+
+## Step 2: Set up environment variables
+
+Get your Langfuse keys from the project settings in [Langfuse Cloud](https://langfuse.com/cloud) or set up [self-hosting](https://langfuse.com/self-hosting).
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://langfuse.com/cloud
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU region (API host)
+# os.environ["LANGFUSE_BASE_URL"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region (API host)
+
+os.environ["ELEVENLABS_API_KEY"] = "sk_..."  # ElevenLabs API key with Eleven Agents read + write permissions
+```
+
+## Step 3: Create a demo agent
+
+We create a small banking-style demo agent with a **webhook tool** that looks up currency exchange rates via the free [Frankfurter API](https://frankfurter.dev), so the trace contains a real tool call.
+
+If you already have an agent, keep the client initialization (the next step needs it) and replace the `agents.create(...)` call with `AGENT_ID = "agent_..."`.
+
+```python
+from elevenlabs import ElevenLabs
+
+client = ElevenLabs(api_key=os.environ["ELEVENLABS_API_KEY"])
+
+agent = client.conversational_ai.agents.create(
+    name="Langfuse Cookbook Demo Agent",
+    conversation_config={
+        "conversation": {"text_only": True},  # skip the audio pipeline so full agent text is stored
+        "agent": {
+            "first_message": "Hi! I can help you with currency exchange rates. What would you like to know?",
+            "prompt": {
+                "prompt": (
+                    "You are a helpful banking assistant. Use the get_exchange_rate tool "
+                    "to look up currency exchange rates when users ask about them. Keep answers short."
+                ),
+                "tools": [
+                    {
+                        "type": "webhook",
+                        "name": "get_exchange_rate",
+                        "description": "Get the latest currency exchange rate between two currencies",
+                        "api_schema": {
+                            "url": "https://api.frankfurter.dev/v1/latest",
+                            "method": "GET",
+                            "query_params_schema": {
+                                "properties": {
+                                    "base": {"type": "string", "description": "Base currency code, e.g. USD"},
+                                    "symbols": {"type": "string", "description": "Target currency code, e.g. EUR"},
+                                },
+                                "required": ["base", "symbols"],
+                            },
+                        },
+                    }
+                ],
+            },
+        }
+    },
+)
+AGENT_ID = agent.agent_id
+print(f"Created agent: {AGENT_ID}")
+```
+
+## Step 4: Run a text-only conversation
+
+ElevenLabs agents support [chat mode](https://elevenlabs.io/docs/eleven-agents/guides/chat-mode): with `text_only` enabled on the agent, the SDK's `Conversation` runs without microphone or speakers. This creates a **real conversation** in your call history, exactly like a voice call.
+
+> **Why `text_only` matters here:** ElevenLabs stores what the agent actually _said_, not what the LLM generated. In voice mode, sending the next message while the agent is speaking interrupts the TTS, and the stored transcript (and trace) only contains the spoken part, e.g. `"Hi!..."`. In production voice traces, a trailing `...` on an agent message means the caller interrupted the agent.
+
+```python
+import threading
+
+from elevenlabs.conversational_ai.conversation import Conversation
+
+agent_responded = threading.Event()
+
+
+def on_agent_response(text: str) -> None:
+    print(f"Agent: {text}")
+    agent_responded.set()
+
+
+conversation = Conversation(
+    client=client,
+    agent_id=AGENT_ID,
+    requires_auth=True,
+    callback_agent_response=on_agent_response,
+)
+
+conversation.start_session()
+agent_responded.wait(timeout=15)  # wait for the agent's greeting
+
+for message in [
+    "What is the current exchange rate from US dollars to euros?",
+    "Great, thank you. Goodbye!",
+]:
+    agent_responded.clear()
+    print(f"User: {message}")
+    conversation.send_user_message(message)
+    agent_responded.wait(timeout=45)
+
+conversation.end_session()
+conversation_id = conversation.wait_for_session_end()
+print(f"Conversation ID: {conversation_id}")
+```
+
+## Step 5: Fetch the conversation as an OpenTelemetry trace
+
+ElevenLabs does not push traces to Langfuse. It hands you a complete trace as **OTLP JSON** (a `resourceSpans` object) on three surfaces, and you forward it:
+
+| Surface                                                                                     | When you get data                        | Best for                                    |
+| ------------------------------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------- |
+| [GET conversation API](https://elevenlabs.io/docs/api-reference/conversations/get)          | On demand, after the conversation exists | Backfill, debugging (used in this notebook) |
+| [Post-call webhook](https://elevenlabs.io/docs/eleven-agents/workflows/post-call-webhooks)  | After the conversation ends              | Production pipelines (see Step 8)           |
+| [Monitoring WebSocket](https://elevenlabs.io/docs/eleven-agents/guides/realtime-monitoring) | Live, during the conversation            | Live dashboards (Enterprise feature)        |
+
+All three surfaces share the same trace ID per conversation and the same `elevenlabs.*` span attributes. We poll until ElevenLabs has processed the conversation, then request it in OpenTelemetry format.
+
+```python
+import time
+
+import requests
+
+headers = {"xi-api-key": os.environ["ELEVENLABS_API_KEY"]}
+url = f"https://api.elevenlabs.io/v1/convai/conversations/{conversation_id}"
+
+# Wait until ElevenLabs has finished processing the conversation
+for _ in range(30):
+    if requests.get(url, headers=headers).json().get("status") == "done":
+        break
+    time.sleep(5)
+
+response = requests.get(url, params={"format": "opentelemetry"}, headers=headers)
+response.raise_for_status()
+otlp_traces = response.json()["otlp_traces"]
+
+span_names = [
+    span["name"]
+    for resource_span in otlp_traces["resourceSpans"]
+    for scope_span in resource_span["scopeSpans"]
+    for span in scope_span["spans"]
+]
+print(f"Fetched {len(span_names)} spans:")
+print("\n".join(f"- {name}" for name in span_names))
+```
+
+## Step 6: Enrich the spans with Langfuse attributes
+
+ElevenLabs spans only carry `elevenlabs.*` attributes. Langfuse would ingest them as generic spans with empty input/output and all details buried in metadata. This transformation adds [`langfuse.*` mapped attributes](https://langfuse.com/integrations/native/opentelemetry#property-mapping) so the trace becomes readable and filterable:
+
+- The **root conversation span** becomes an `agent` observation with the first user message as input, the last agent response as output, and the call summary in the trace metadata.
+- The **conversation ID** becomes the Langfuse [session ID](https://langfuse.com/docs/observability/features/sessions), so application-side traces that know the conversation ID group together with the voice trace.
+- **Agent turns backed by an LLM call** (`elevenlabs.producing_llm`) become `generation` observations with the user message they respond to as input, plus model name, token usage, and cost parsed from `elevenlabs.llm_usage.*`. Evaluators see the full exchange, and cost dashboards work out of the box.
+- **Tool call spans** become `tool` observations with parameters as input and results as output.
+- **Transcript turns** get the user/agent text as observation input/output.
+- The **ElevenLabs environment** maps to the Langfuse [environment](https://langfuse.com/docs/observability/features/environments), keeping test and production traces separate.
+- **Empty agent turns** (no text, no LLM call, no children) are dropped as noise.
+- **Turn order is restored**: ElevenLabs exports timestamps with one-second granularity, so spans within the same second would render in arbitrary order. Each span is nudged by its `elevenlabs.turn.index` in milliseconds.
+
+All original `elevenlabs.*` attributes (latency metrics, analysis results, dynamic variables) stay available in each observation's metadata. The mapping follows the [trace best practices](https://langfuse.com/docs/observability/best-practices). If your application knows the end user, also map a user identifier to `langfuse.user.id` (see the commented line in the code).
+
+```python
+import ast
+import json
+
+
+def _get(attributes, key):
+    for attribute in attributes or []:
+        if attribute["key"] == key:
+            return next(iter(attribute["value"].values()), None)
+    return None
+
+
+def _set(attributes, key, value):
+    if value is not None:
+        attributes.append({"key": key, "value": {"stringValue": str(value)}})
+
+
+def _llm_usage(attributes):
+    """Parse elevenlabs.llm_usage.<model>.<kind> attributes into usage/cost dicts."""
+    usage, cost = {}, {}
+    for attribute in attributes:
+        key = attribute["key"]
+        if not key.startswith("elevenlabs.llm_usage."):
+            continue
+        kind = key.rsplit(".", 1)[-1]  # model names contain dots, kind is the last segment
+        kind = {"output_total": "output"}.get(kind, kind)
+        entry = ast.literal_eval(next(iter(attribute["value"].values())))
+        if entry.get("tokens"):
+            usage[kind] = entry["tokens"]
+        if entry.get("price"):
+            cost[kind] = entry["price"]
+    if cost:
+        cost["total"] = round(sum(cost.values()), 10)
+    return usage, cost
+
+
+def enrich_for_langfuse(otlp_traces: dict) -> dict:
+    """Add langfuse.* attributes to ElevenLabs spans so they map to typed,
+    readable observations in Langfuse. Modifies the payload in place."""
+    for resource_span in otlp_traces.get("resourceSpans", []):
+        resource_attributes = resource_span.get("resource", {}).get("attributes", [])
+        conversation_id = _get(resource_attributes, "elevenlabs.conversation_id")
+
+        for scope_span in resource_span.get("scopeSpans", []):
+            spans = scope_span.get("spans", [])
+
+            # ElevenLabs exports timestamps with one-second granularity, so spans of the
+            # same second would render in arbitrary order. Nudge each span by its turn
+            # index in milliseconds to restore the true conversational order.
+            offsets = {
+                span["spanId"]: int(_get(span.get("attributes"), "elevenlabs.turn.index")) * 1_000_000
+                for span in spans
+                if _get(span.get("attributes"), "elevenlabs.turn.index") is not None
+            }
+            for span in spans:
+                offset = offsets.get(span["spanId"], offsets.get(span.get("parentSpanId"), 0))
+                span["startTimeUnixNano"] = str(int(span["startTimeUnixNano"]) + offset)
+                span["endTimeUnixNano"] = str(int(span["endTimeUnixNano"]) + offset)
+
+            spans = sorted(spans, key=lambda span: int(span.get("startTimeUnixNano", 0)))
+            root = next((s for s in spans if s.get("name") == "elevenlabs.conversation"), None)
+            environment = _get(root.get("attributes") if root else [], "elevenlabs.environment")
+            parent_ids = {span.get("parentSpanId") for span in spans}
+
+            user_texts, agent_texts, kept = [], [], []
+            for span in spans:
+                attributes = span.setdefault("attributes", [])
+                name = span.get("name", "")
+                _set(attributes, "langfuse.session.id", conversation_id)
+                _set(attributes, "langfuse.environment", environment)
+
+                if name.startswith("elevenlabs.tool."):
+                    _set(attributes, "langfuse.observation.type", "tool")
+                    _set(attributes, "langfuse.observation.input", _get(attributes, "elevenlabs.tool.params"))
+                    _set(attributes, "langfuse.observation.output", _get(attributes, "elevenlabs.tool.result"))
+                elif name.endswith(".user_transcript"):
+                    text = _get(attributes, "elevenlabs.user.text")
+                    _set(attributes, "langfuse.observation.input", text)
+                    if text:
+                        user_texts.append(text)
+                elif name.endswith(".agent_response"):
+                    text = _get(attributes, "elevenlabs.agent.text")
+                    model = _get(attributes, "elevenlabs.producing_llm")
+                    # Drop empty agent turns (no text, no LLM call, no children)
+                    if not text and not model and span.get("spanId") not in parent_ids:
+                        continue
+                    _set(attributes, "langfuse.observation.output", text)
+                    if text:
+                        agent_texts.append(text)
+                    if model:
+                        usage, cost = _llm_usage(attributes)
+                        _set(attributes, "langfuse.observation.type", "generation")
+                        _set(attributes, "langfuse.observation.model.name", model)
+                        # The user message this turn responds to, so evaluators see the full exchange
+                        if user_texts:
+                            _set(attributes, "langfuse.observation.input", user_texts[-1])
+                        _set(attributes, "langfuse.observation.usage_details", json.dumps(usage) if usage else None)
+                        _set(attributes, "langfuse.observation.cost_details", json.dumps(cost) if cost else None)
+                kept.append(span)
+
+            scope_span["spans"] = kept
+
+            if root is not None:
+                attributes = root["attributes"]
+                _set(attributes, "langfuse.observation.type", "agent")
+                _set(attributes, "langfuse.trace.metadata.elevenlabs_agent_id", _get(attributes, "elevenlabs.agent_id"))
+                _set(attributes, "langfuse.trace.metadata.call_summary", _get(attributes, "elevenlabs.analysis.transcript_summary"))
+                # If you pass a user identifier to your agent (e.g. a `user_id` dynamic
+                # variable), map it so Langfuse can group traces per user:
+                # _set(attributes, "langfuse.user.id", _get(attributes, "elevenlabs.dynamic_variable.user_id"))
+                if user_texts:
+                    _set(attributes, "langfuse.observation.input", user_texts[0])
+                if agent_texts:
+                    _set(attributes, "langfuse.observation.output", agent_texts[-1])
+
+    return otlp_traces
+```
+
+## Step 7: Forward the trace to Langfuse
+
+Langfuse accepts [OTLP over HTTP in JSON format](https://langfuse.com/integrations/native/opentelemetry#opentelemetry-endpoint), so the payload can be sent as-is with a single POST request. No OpenTelemetry SDK or protobuf encoding needed. The `x-langfuse-ingestion-version: 4` header enables real-time ingestion on the v4 data model.
+
+```python
+import base64
+
+LANGFUSE_AUTH = base64.b64encode(
+    f"{os.environ['LANGFUSE_PUBLIC_KEY']}:{os.environ['LANGFUSE_SECRET_KEY']}".encode()
+).decode()
+
+
+def send_to_langfuse(otlp_traces: dict) -> None:
+    response = requests.post(
+        f"{os.environ['LANGFUSE_BASE_URL']}/api/public/otel/v1/traces",
+        headers={
+            "Authorization": f"Basic {LANGFUSE_AUTH}",
+            "Content-Type": "application/json",
+            "x-langfuse-ingestion-version": "4",
+        },
+        data=json.dumps(otlp_traces),
+    )
+    response.raise_for_status()
+
+
+send_to_langfuse(enrich_for_langfuse(otlp_traces))
+print("Forwarded conversation to Langfuse")
+```
+
+## Step 8: Production setup with a post-call webhook
+
+In production, don't poll the GET API. Configure an [ElevenLabs post-call webhook](https://elevenlabs.io/docs/eleven-agents/workflows/post-call-webhooks) with the **Transcript** event and **OpenTelemetry transcript payloads** enabled (in [Agents settings](https://elevenlabs.io/app/agents/settings)). ElevenLabs then POSTs a `post_call_transcription_otel` event with the same `otlp_traces` object after every completed call.
+
+A minimal receiver that verifies the webhook signature and reuses `enrich_for_langfuse` and `send_to_langfuse` from this notebook:
+
+```python
+import hashlib, hmac, json, os
+
+from fastapi import FastAPI, Header, HTTPException, Request
+
+app = FastAPI()
+
+
+@app.post("/elevenlabs/post-call")
+async def post_call(request: Request, elevenlabs_signature: str = Header(...)):
+    body = await request.body()
+
+    # Verify the HMAC signature: "t={unix},v0={hmac}" over "{timestamp}.{body}"
+    parts = dict(part.split("=", 1) for part in elevenlabs_signature.split(","))
+    expected = hmac.new(
+        os.environ["ELEVENLABS_WEBHOOK_SECRET"].encode(),
+        f"{parts['t']}.{body.decode()}".encode(),
+        hashlib.sha256,
+    ).hexdigest()
+    if not hmac.compare_digest(parts["v0"], expected):
+        raise HTTPException(status_code=401, detail="Invalid signature")
+
+    payload = json.loads(body)
+    if payload.get("type") == "post_call_transcription_otel":
+        send_to_langfuse(enrich_for_langfuse(payload["data"]["otlp_traces"]))
+    return {"ok": True}
+```
+
+**Forward each conversation exactly once.** The trace ID is stable per conversation, but ElevenLabs generates fresh span IDs on every export. Re-exporting a conversation via the GET API and forwarding it again duplicates all observations inside the same trace. Re-sending the **same** payload (e.g. your own retry around a failed POST) is idempotent. If you need retries, persist the exported payload and re-send that exact payload.
+
+For live use cases (supervisor dashboards, real-time alerting), the [monitoring WebSocket](https://elevenlabs.io/docs/eleven-agents/guides/realtime-monitoring) streams the same OTLP JSON span batches during the call. Forward each batch with the same `send_to_langfuse` function. Requires an ElevenLabs Enterprise workspace.
+
+### Limitations
+
+- **Not a live push integration**: traces arrive after the call ends (or during the call via the Enterprise-only monitoring WebSocket).
+- **No trace context propagation**: ElevenLabs mints its own trace IDs, so the conversation cannot be nested inside an existing application trace. Use the conversation ID (mapped to the Langfuse session ID above) to correlate application-side traces with the voice conversation.
+- **LLM cost only**: per-turn token usage and cost cover the LLM calls. The total conversation cost including voice (TTS/ASR) is in the `elevenlabs.cost_fiat` attribute in the root observation's metadata.
+- **4 KB truncation**: ElevenLabs truncates long tool parameters and results at 4 KB per span attribute.
+
+## Step 9: View the trace in Langfuse
+
+Open [Langfuse Cloud](https://langfuse.com/cloud) to see the full conversation trace: the conversation as the root `agent` observation, transcript turns, LLM generations with token usage and cost, and the tool call with its parameters and result. The conversation ID is the Langfuse session ID, so all traces of the same conversation group together in the [Sessions view](https://langfuse.com/docs/observability/features/sessions).
+
+![Example ElevenLabs trace in Langfuse](https://langfuse.com/images/cookbook/integration_elevenlabs/elevenlabs-example-trace.png)
+
+[Example trace in Langfuse](https://cloud.langfuse.com/project/cmt9p6v7u0p67ad0gzqrbh7x3/traces/ee0df1d896bf42b7d7dfb5981450e1ea)
+
+</Steps>
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
