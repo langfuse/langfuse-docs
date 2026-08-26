@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import type { StaticImageData } from "next/image";
 import { Fan, ListTree, MoveHorizontal } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -13,7 +14,15 @@ export type Adopter = {
   website: string;
   companyDescription: string;
   useCase?: string;
-  logo?: string;
+  logo?: {
+    src: string | StaticImageData;
+    crop?: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    };
+  };
   tableSummary: string;
   referenceLabel: string;
   referenceHref?: string;
@@ -95,6 +104,48 @@ function AdopterReference({ adopter }: { adopter: Adopter }) {
 
 function traceName(adopter: Adopter) {
   return `${adopter.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-trace`;
+}
+
+function AdopterLogo({ adopter }: { adopter: Adopter }) {
+  if (!adopter.logo) return null;
+
+  const { src, crop } = adopter.logo;
+  if (!crop) {
+    return (
+      <span className="relative mb-1.5 block h-7 w-36 shrink-0 opacity-80 grayscale brightness-0 contrast-125 transition-opacity group-hover:opacity-100 dark:invert">
+        <Image
+          src={src}
+          alt=""
+          fill
+          sizes="144px"
+          className="object-contain object-left"
+          unoptimized
+        />
+      </span>
+    );
+  }
+
+  const frameHeight = 28;
+  const scale = Math.min(132 / crop.width, 24 / crop.height);
+
+  return (
+    <span className="relative mb-1.5 block h-7 w-36 shrink-0 overflow-hidden opacity-80 grayscale brightness-0 contrast-125 transition-opacity group-hover:opacity-100 dark:invert">
+      <Image
+        src={src}
+        alt=""
+        width={140}
+        height={40}
+        className="absolute max-w-none"
+        style={{
+          width: 140 * scale,
+          height: 40 * scale,
+          left: -crop.x * scale,
+          top: (frameHeight - crop.height * scale) / 2 - crop.y * scale,
+        }}
+        unoptimized
+      />
+    </span>
+  );
 }
 
 function TracePreview({
@@ -197,18 +248,7 @@ function AdopterCard({
           <span className="absolute right-2.5 top-2 font-mono text-[9px] tabular-nums text-text-tertiary">
             {String(index + 1).padStart(2, "0")}
           </span>
-          {adopter.logo && (
-            <span className="relative mb-1.5 block h-5 w-28 shrink-0 opacity-80 grayscale contrast-125 transition-opacity group-hover:opacity-100">
-              <Image
-                src={adopter.logo}
-                alt=""
-                fill
-                sizes="112px"
-                className="object-contain object-left"
-                unoptimized
-              />
-            </span>
-          )}
+          <AdopterLogo adopter={adopter} />
           {!adopter.logo && (
             <span className="pr-10 font-analog text-[19px] font-medium leading-tight text-text-primary">
               {adopter.name}
