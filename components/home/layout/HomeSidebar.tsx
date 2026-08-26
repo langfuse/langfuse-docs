@@ -66,7 +66,7 @@ const communityStats: Array<{
   {
     label: "Global adopters",
     value: "100k+",
-    href: "/users/adopters",
+    href: "/users#adopters",
     tooltip: "View global adopters",
   },
   {

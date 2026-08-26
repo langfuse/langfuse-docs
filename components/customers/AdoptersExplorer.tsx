@@ -318,7 +318,10 @@ export function AdoptersExplorer({
   const HeadingTag = embedded ? "h2" : "h1";
 
   return (
-    <section className="not-prose bg-surface-bg text-text-primary">
+    <section
+      id="adopters"
+      className="not-prose scroll-mt-24 bg-surface-bg text-text-primary"
+    >
       <header className="border-b border-line-structure px-4 py-10 sm:px-8 sm:py-14 lg:px-10">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div>

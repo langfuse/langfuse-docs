@@ -23,7 +23,7 @@ export function AdoptersTicker({ names }: { names: string[] }) {
 
   return (
     <a
-      href="/users/adopters"
+      href="/users#adopters"
       aria-label="View Langfuse adopters"
       className="group block overflow-hidden border-t border-line-structure bg-surface-1 no-underline mask-[linear-gradient(to_right,transparent,black_4%,black_96%,transparent)]"
     >
