@@ -80,7 +80,7 @@ export function CustomerStoriesHero({
       aria-label="Featured customer stories"
     >
       <div className="relative grid gap-8 px-6 py-10 sm:px-8 lg:min-h-[580px] lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)] lg:gap-10 lg:py-12">
-        <div className="flex min-w-0 flex-col">
+        <div className="relative flex min-w-0 flex-col">
           <div className="mb-8 flex items-start justify-between gap-4">
             <h1 className="m-0 font-mono text-[11px] font-normal uppercase tracking-[0.14em] text-text-tertiary">
               Customer stories
@@ -149,7 +149,8 @@ export function CustomerStoriesHero({
               <div className="mt-auto flex justify-end pt-10">
                 <Link
                   href={story.route}
-                  className="inline-flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.08em] text-text-secondary no-underline transition-colors hover:text-text-primary"
+                  aria-label={`Read ${company} customer story`}
+                  className="inline-flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.08em] text-text-secondary no-underline transition-colors after:absolute after:inset-0 after:z-10 after:cursor-pointer after:content-[''] hover:text-text-primary focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-ring"
                 >
                   Read the story
                   <span aria-hidden>→</span>
