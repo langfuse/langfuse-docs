@@ -7,13 +7,13 @@ tags: [self-hosting]
 
 # How do I migrate Langfuse from ClickHouse OSS to Cloud or BYOC?
 
-Traces, observations, and scores live in ClickHouse. Moving from self-managed ClickHouse (OSS) to [ClickHouse Cloud or BYOC](/self-hosting/deployment/infrastructure/clickhouse#cloudbyoc) is a ClickHouse deployment-model change, not a Langfuse version upgrade. Keep the Langfuse application version the same throughout, and leave Postgres, Redis, and blob storage in place so media and event payloads continue to resolve.
+Traces, observations, and scores live in ClickHouse. Moving from self-managed ClickHouse (OSS) to [ClickHouse Cloud or BYOC](/self-hosting/deployment/infrastructure/clickhouse#cloudbyoc) is a ClickHouse deployment-model change, not a Langfuse version upgrade. Run the [latest Langfuse OSS release](/self-hosting/upgrade) first so everything works as expected, then keep that version unchanged throughout. Leave Postgres, Redis, and blob storage in place so media and event payloads continue to resolve.
 
 Do not use Langfuse [blob storage exports](/docs/api-and-data-platform/features/export-to-blob-storage) as the restore path. Those exports are for analytics, not for recreating a ClickHouse database.
 
 ## Recommended path [#recommended-path]
 
-1. **Keep Langfuse on the same version.** Provision the target Cloud or BYOC service and confirm it meets the [ClickHouse version requirements](/self-hosting/deployment/infrastructure/clickhouse) for your Langfuse release.
+1. **Run the latest Langfuse OSS release.** Upgrade first if you are not already current, then keep that version unchanged during the ClickHouse move. Provision the target Cloud or BYOC service and confirm it meets the [ClickHouse version requirements](/self-hosting/deployment/infrastructure/clickhouse) for your Langfuse release.
 2. **Pause ingestion.** Scale down the Langfuse web and worker containers, or otherwise stop accepting traces, so no new rows are written during the copy.
 3. **Copy the Langfuse ClickHouse database** (schema and data) with a ClickHouse-supported method:
    - [`remoteSecure`](https://clickhouse.com/docs/get-started/migrate/oss-to-cloud/clickhouse-to-cloud) — pull or push tables directly. Typical for smaller or single-node sources.
