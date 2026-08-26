@@ -43,6 +43,12 @@ Langfuse does not send raw ClickHouse rows or per-project breakdowns.
 | `datasetItems`                    | Total dataset items created in the reporting window                                                                                | Postgres                   |
 | `datasetRuns`                     | Total dataset runs created in the reporting window                                                                                 | Postgres                   |
 | `datasetRunItems`                 | Total dataset run items created in the reporting window                                                                            | Local ClickHouse aggregate |
+| `totalOrganizations`              | Current number of organizations                                                                                                    | Postgres                   |
+| `aiFeaturesEnabledOrganizations`  | Number of organizations with **AI Features** enabled in their settings                                                             | Postgres                   |
+| `assistantInstanceEnabled`        | Whether `LANGFUSE_IN_APP_AGENT_ENABLED` is `true`                                                                                  | Environment variable       |
+| `langfuseAiModelConfigured`       | Whether a usable Langfuse AI model is configured. No model ID is sent                                                              | Environment variables      |
+| `langfuseAiProvider`              | The resolved provider (`bedrock`, `anthropic`, or `openai`), or empty when no usable model is configured                           | Environment variables      |
+| `assistantRuns`                   | Total Langfuse Assistant runs started in the reporting window                                                                      | Postgres                   |
 | `startTimeframe` / `endTimeframe` | The reporting window used for the counts above                                                                                     | Application metadata       |
 
 ## Can I disable telemetry?
