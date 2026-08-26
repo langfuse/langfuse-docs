@@ -71,8 +71,10 @@ while True:
     index = client.conversational_ai.knowledge_base.document.compute_rag_index(
         document.id, model="multilingual_e5_large_instruct"
     )
-    if index.status in ("succeeded", "failed"):
+    if index.status == "succeeded":
         break
+    if index.status == "failed":
+        raise RuntimeError("RAG index computation failed")
     time.sleep(5)
 
 agent = client.conversational_ai.agents.create(
@@ -403,7 +405,10 @@ def attach_rag_chunks(otlp_traces: dict, conversation: dict, client: ElevenLabs)
                 for chunk in info["chunks"]:
                     key = (chunk["document_id"], chunk["chunk_id"])
                     if key not in chunk_texts:
-                        chunk_texts[key] = client.conversational_ai.knowledge_base.documents.chunk.get(*key).content
+                        # Chunks are stored per RAG index, so request the one the query used
+                        chunk_texts[key] = client.conversational_ai.knowledge_base.documents.chunk.get(
+                            *key, embedding_model=info["embedding_model"]
+                        ).content
                     documents.append({**chunk, "content": chunk_texts[key]})
                 _set(span["attributes"], "langfuse.observation.output", json.dumps(documents))
 
@@ -447,7 +452,7 @@ In production, don't poll the GET API. Configure an [ElevenLabs post-call webhoo
 A minimal receiver that verifies the webhook signature and reuses `enrich_for_langfuse` and `send_to_langfuse` from this notebook:
 
 ```python
-import hashlib, hmac, json, os
+import hashlib, hmac, json, os, time
 
 from fastapi import FastAPI, Header, HTTPException, Request
 
@@ -460,6 +465,8 @@ async def post_call(request: Request, elevenlabs_signature: str = Header(...)):
 
     # Verify the HMAC signature: "t={unix},v0={hmac}" over "{timestamp}.{body}"
     parts = dict(part.split("=", 1) for part in elevenlabs_signature.split(","))
+    if int(parts["t"]) < time.time() - 30 * 60:  # reject replayed deliveries
+        raise HTTPException(status_code=403, detail="Request expired")
     expected = hmac.new(
         os.environ["ELEVENLABS_WEBHOOK_SECRET"].encode(),
         f"{parts['t']}.{body.decode()}".encode(),
