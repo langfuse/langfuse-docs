@@ -34,16 +34,24 @@ export function Navbar() {
       style={{ top: "var(--fd-banner-height, 0px)" }}
     >
       <nav className="flex mx-auto h-full border-b max-w-380 border-line-structure">
-        <div className={cn(cornersStyle, "pr-0 lg:max-w-[240px] lg:pr-px")}>
+        <div
+          className={cn(
+            cornersStyle,
+            "pr-0 lg:max-w-[240px] lg:pr-px lg:shrink-0",
+          )}
+        >
           <div className={cn(contentStyle, "rounded-r-none lg:rounded-r-sm")}>
             <Logo showAffiliation />
           </div>
         </div>
-        <div className={cn(cornersStyle, "hidden relative px-0 lg:flex")}>
+        <div
+          className={cn(cornersStyle, "hidden relative px-0 min-w-0 lg:flex")}
+        >
           <div className="absolute bottom-[-6px] left-0 w-[6px] h-[5px] bg-left-corner" />
           <div className="absolute hidden wide:block bottom-[-6px] right-0 w-[6px] h-[5px] bg-right-corner" />
-          <div className="flex flex-1 gap-2 items-center px-2.5 py-3 rounded-sm bg-surface-1">
-            <HiringBadge className="shrink-0" />
+          <div className="flex flex-1 min-w-0 gap-2 items-center px-2.5 py-3 rounded-sm bg-surface-1">
+            {/* Hide on tight desktops so Launch App / Get Demo stay visible; short label until `wide`. */}
+            <HiringBadge className="hidden shrink-0 xl:block" />
             <div className="flex flex-1 justify-center items-center min-w-0 gap-4">
               <InkeepSearchBar className="hidden" />
               <NavLinks sectionNavData={sectionNavData} />
@@ -53,7 +61,7 @@ export function Navbar() {
         <div
           className={cn(
             cornersStyle,
-            "flex-1 justify-end pl-0 lg:justify-center lg:max-w-[240px] lg:pl-px",
+            "flex-1 justify-end pl-0 lg:justify-center lg:max-w-[240px] lg:pl-px lg:shrink-0",
           )}
         >
           <div
