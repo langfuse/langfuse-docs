@@ -26,7 +26,6 @@ This page is also served as plain markdown at `https://langfuse.com/faq/all/depr
 | Deprecated endpoint                                                                                                             | Replacement                                                                | Details                       |
 | ------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ----------------------------- |
 | `GET /observations`, `GET /observations/{id}`                                                                                   | `GET /v2/observations`                                                     | [Observations](#observations) |
-| `GET /spans`, `GET /generations`                                                                                                | `GET /v2/observations`, filtered by `type`                                 | [Observations](#observations) |
 | `GET /traces`, `GET /traces/{id}`                                                                                               | `GET /v2/observations`, filtered by `traceId`                              | [Traces](#traces)             |
 | `GET /sessions`, `GET /sessions/{id}`                                                                                           | `GET /v2/observations`, filtered by `sessionId`                            | [Sessions](#sessions)         |
 | `GET /metrics`, `GET /metrics/daily`                                                                                            | `GET /v2/metrics`                                                          | [Metrics](#metrics)           |
@@ -63,7 +62,7 @@ These mappings cover the latest Python SDK v4 and JS/TS SDK v5 method surfaces. 
 
 ## Observations [#observations]
 
-**Deprecated:** `GET /observations`, `GET /observations/{observationId}`, `GET /spans`, and `GET /generations`. Langfuse Cloud serves these endpoints until <V4CutoverDate />; migrate to v4 before this date.
+**Deprecated:** `GET /observations`, `GET /observations/{observationId}`. Langfuse Cloud serves these endpoints until <V4CutoverDate />; migrate to v4 before this date.
 
 **Replacement:** [`GET /v2/observations`](/docs/api-and-data-platform/features/observations-api#v2) ([reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations)).
 
@@ -79,7 +78,6 @@ These mappings cover the latest Python SDK v4 and JS/TS SDK v5 method surfaces. 
 
 There is no v2 single-observation getter; filter `get_many` / `getMany` by ID and take the matching row. Always bound observation queries with a time range and follow cursor pagination. `client.fetchObservations(...)` is not listed because in JS/TS v5 it already calls Observations API v2.
 
-Python v4 and JS/TS v5 do not expose wrappers for the deprecated `GET /spans` or `GET /generations` endpoints. Calls to those routes come from direct REST usage or an older SDK. Use `get_many(type="SPAN", ...)` / `getMany({ type: "SPAN", ... })`, or the corresponding `GENERATION` type.
 
 ### Parameter mapping
 
@@ -437,7 +435,7 @@ For other languages, send experiment traces to [`POST /otel/v1/traces`](https://
 
 ### Delete experiment data
 
-Langfuse v4 does not provide an endpoint that deletes only an experiment. To delete its tracing data, list every cursor page of `GET /experiment-items?fromStartTime=<timestamp>&experimentId=<id>`, deduplicate the returned `traceId` values, and pass them to [`DELETE /traces`](https://api.reference.langfuse.com/#tag/trace/DELETE/api/public/traces) in batches of at most 1,000. The trace deletion endpoint is not deprecated.
+Langfuse v4 does not provide an endpoint that deletes only an experiment.
 
 This is not semantically equivalent to the deprecated endpoint: deleting the traces also deletes their observations and related scores. See [Data Deletion](/docs/administration/data-deletion) for details.
 
@@ -476,9 +474,7 @@ curl \
 | Python v4 | `client.api.ingestion.batch(...)` with trace or observation events | Python SDK `4.7.0+` tracing and instrumentation, which export through OpenTelemetry |
 | JS/TS v5  | `client.api.ingestion.batch(...)` with trace or observation events | JS/TS SDK `5.4.0+` tracing and instrumentation, which export through OpenTelemetry  |
 
-The low-level `client.api.opentelemetry.export_traces(...)` / `client.api.opentelemetry.exportTraces(...)` methods accept OTLP resource-span payloads and are not drop-in renames for `ingestion.batch(...)`.
 
-Python v4 and JS/TS v5 do not expose wrappers for the synchronous `POST /traces`, `POST /spans`, `POST /generations`, or `POST /events` routes. Calls to those routes come from direct REST usage or an older SDK.
 
 Score writes are unaffected. Direct REST clients can continue using `POST /scores`. Current Python and JS/TS SDKs intentionally batch score writes as `score-create` events through `POST /ingestion`; Langfuse v4 continues to accept that event type after <V4CutoverDate />. No SDK release that reroutes score writes to `POST /scores` is required for compatibility.
 
@@ -491,7 +487,6 @@ All paths are relative to `/api/public`.
 | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GET /traces`, `/traces/{id}`                                  | [API reference](https://api.reference.langfuse.com/#tag/trace/GET/api/public/traces)                      | [Observations API v2, filtered by `traceId`](#traces)                                                                                                                                                                                    |
 | `GET /observations`, `/observations/{id}`                      | [API reference](https://api.reference.langfuse.com/#tag/legacyobservationsv1/GET/api/public/observations) | [Observations API v2](#observations)                                                                                                                                                                                                     |
-| `GET /spans`, `/generations`                                   | Not in the API reference                                                                                  | [Observations API v2, filtered by `type`](#observations)                                                                                                                                                                                 |
 | `GET /sessions`, `/sessions/{id}`                              | [API reference](https://api.reference.langfuse.com/#tag/sessions/GET/api/public/sessions)                 | [Observations API v2, filtered by `sessionId`](#sessions)                                                                                                                                                                                |
 | `GET /scores`, `/v2/scores` (+ `/{id}`)                        | [API reference](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v2/scores)                  | [Scores API v3](#scores)                                                                                                                                                                                                                 |
 | `GET /metrics`                                                 | [Documented below](#metrics-v1)                                                                           | [Metrics API v2](#metrics)                                                                                                                                                                                                               |
