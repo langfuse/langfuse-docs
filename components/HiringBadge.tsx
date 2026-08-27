@@ -100,10 +100,12 @@ export function HiringBadge({ className }: { className?: string }) {
           <span className="text-xs shrink-0" aria-hidden>
             🐐
           </span>
-          <span className="relative min-w-0 flex-1 text-left">
+          <span className="grid justify-items-start" aria-hidden>
             <span
-              className={cn("block truncate", isHovered && "invisible")}
-              aria-hidden
+              className={cn(
+                "col-start-1 row-start-1 whitespace-nowrap",
+                isHovered && "invisible",
+              )}
             >
               <span className="wide:hidden">Hiring</span>
               <span className="hidden wide:inline">
@@ -112,12 +114,12 @@ export function HiringBadge({ className }: { className?: string }) {
             </span>
             <span
               className={cn(
-                "absolute left-0 top-0 whitespace-nowrap",
+                "col-start-1 row-start-1 whitespace-nowrap",
                 !isHovered && "invisible",
               )}
-              aria-hidden
             >
-              Looking for GOATS!
+              <span className="wide:hidden">GOATS!</span>
+              <span className="hidden wide:inline">Looking for GOATS!</span>
             </span>
           </span>
         </NextLink>
