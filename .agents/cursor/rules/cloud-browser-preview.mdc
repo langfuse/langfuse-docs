@@ -1,0 +1,24 @@
+---
+description: End Cloud Agent tasks with an in-app browser preview of the changed pages
+alwaysApply: true
+metadata:
+  environments: cloud
+---
+
+# End with an in-app browser preview
+
+When a Cloud Agent task changes something a reviewer can see in the site, finish by leaving the in-app browser open on that page. This rule applies only to Cursor Cloud Agents.
+
+## When to preview
+
+Open a preview if the change affects a rendered page: docs, blog, changelog, marketing, UI, layout, routing, or MDX components. Skip it for non-visual work (scripts, config, agent instructions) unless a page was still affected.
+
+## How to preview
+
+1. Use the already-running `pnpm dev` server. It is started from `.cursor/environment.json` on port 3333.
+2. Open the affected URL in the in-app browser at `http://127.0.0.1:3333/...` (not `localhost`).
+3. Wait for the first compile. After the server reports ready, the first request can take 20-40 seconds.
+4. Navigate to the changed page with the sidebar or a direct URL. Site search does not return results without Inkeep keys.
+5. Leave the browser on that page. Do not close the tab before ending the task.
+
+If several pages changed, leave the most important one open. Prefer the primary user-facing route over a secondary or admin-only view.
