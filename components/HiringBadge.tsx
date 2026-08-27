@@ -88,7 +88,7 @@ export function HiringBadge({ className }: { className?: string }) {
           href="/careers"
           aria-label="Hiring in Europe and SF"
           className={cn(
-            "inline-flex w-full min-w-0 max-w-full items-center gap-[6px] overflow-hidden",
+            "inline-flex w-max items-center gap-[6px] overflow-hidden",
             "h-[26px] py-0.75 pl-[8px] pr-[8px] rounded-[2px]",
             "border border-line-structure dark:border-line-cta group-hover:border-line-cta",
             "bg-surface-bg text-text-secondary",
@@ -100,7 +100,7 @@ export function HiringBadge({ className }: { className?: string }) {
           <span className="text-xs shrink-0" aria-hidden>
             🐐
           </span>
-          <span className="grid justify-items-start" aria-hidden>
+          <span className="grid w-max justify-items-start" aria-hidden>
             <span
               className={cn(
                 "col-start-1 row-start-1 whitespace-nowrap",
