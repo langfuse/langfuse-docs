@@ -4,7 +4,7 @@ import {
   FORTUNE_50_COMPANIES,
   FORTUNE_500_COMPANIES,
   SDK_INSTALLS_PER_MONTH,
-  COMPANY_COUNT,
+  formatCompanyCount,
 } from "./home/Usage";
 
 export const CredibilitySentence = ({
@@ -25,7 +25,8 @@ export const CredibilitySentence = ({
         <p>Langfuse is the most widely adopted LLM Engineering platform:</p>
         <ul className="mt-2 list-disc list-inside space-y-1">
           <li>
-            Used by <Metric className={metricClassName}>{COMPANY_COUNT}</Metric>{" "}
+            Used by{" "}
+            <Metric className={metricClassName}>{formatCompanyCount()}</Metric>{" "}
             companies
           </li>
           <li>
@@ -58,8 +59,10 @@ export const CredibilitySentence = ({
   return (
     <p className={className}>
       Langfuse is the most widely adopted LLM Engineering platform, used by{" "}
-      <Metric className={metricClassName}>{COMPANY_COUNT} companies</Metric>,
-      with{" "}
+      <Metric className={metricClassName}>
+        {formatCompanyCount()} companies
+      </Metric>
+      , with{" "}
       <Metric className={metricClassName}>
         {getGitHubStars().toLocaleString()} GitHub stars
       </Metric>

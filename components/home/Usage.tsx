@@ -10,11 +10,11 @@ import {
 
 export {
   COMPANIES,
-  COMPANY_COUNT,
   DOCKER_PULLS,
   FORTUNE_50_COMPANIES,
   FORTUNE_500_COMPANIES,
   SDK_INSTALLS_PER_MONTH,
+  formatCompanyCount,
 } from "@/lib/usage-stats";
 
 export const Usage = ({ noPadding = false }: { noPadding?: boolean }) => {
