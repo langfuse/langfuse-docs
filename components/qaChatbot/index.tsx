@@ -82,13 +82,14 @@ export const Chat = ({ className, ...props }: ChatProps) => {
     });
   }, []);
 
-  const { messages, sendMessage, status, regenerate } = useChat<ChatMessage>({
-    messages: [],
-    transport: new DefaultChatTransport({
-      api: "/api/qa-chatbot",
-      body: { chatId, userId },
-    }),
-  });
+  const { messages, sendMessage, status, regenerate, stop } =
+    useChat<ChatMessage>({
+      messages: [],
+      transport: new DefaultChatTransport({
+        api: "/api/qa-chatbot",
+        body: { chatId, userId },
+      }),
+    });
 
   // Check if user has submitted any messages
   const hasUserMessages = messages.some((message) => message.role === "user");
@@ -352,7 +353,11 @@ export const Chat = ({ className, ...props }: ChatProps) => {
               minHeight={32}
               maxHeight={300}
             />
-            <PromptInputSubmit disabled={!input || !userId} status={status} />
+            <PromptInputSubmit
+              disabled={status === "streaming" ? !userId : !input || !userId}
+              status={status}
+              onStop={stop}
+            />
           </div>
         </PromptInput>
         <p className="mt-6 text-xs text-muted-foreground text-center relative z-10 italic">

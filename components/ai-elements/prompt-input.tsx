@@ -146,6 +146,7 @@ export const PromptInputButton = ({
 
 export type PromptInputSubmitProps = ComponentProps<typeof Button> & {
   status?: ChatStatus;
+  onStop?: () => void;
 };
 
 export const PromptInputSubmit = ({
@@ -154,8 +155,12 @@ export const PromptInputSubmit = ({
   size = "small",
   status,
   children,
+  onStop,
+  onClick,
+  type,
   ...props
 }: PromptInputSubmitProps) => {
+  const canStop = status === "streaming" && Boolean(onStop);
   let Icon = <SendIcon className="size-3.5" />;
   let ariaLabel = "Send";
 
@@ -164,7 +169,7 @@ export const PromptInputSubmit = ({
     ariaLabel = "Sending";
   } else if (status === "streaming") {
     Icon = <SquareIcon className="size-3 fill-current" />;
-    ariaLabel = "Stop";
+    ariaLabel = canStop ? "Stop" : "Send";
   } else if (status === "error") {
     Icon = <XIcon className="size-3.5" />;
     ariaLabel = "Error";
@@ -172,13 +177,14 @@ export const PromptInputSubmit = ({
 
   return (
     <Button
+      {...props}
       className={className}
       size={size}
-      type="submit"
+      type={canStop ? "button" : (type ?? "submit")}
       variant={variant}
       icon={children ? undefined : Icon}
       aria-label={children ? undefined : ariaLabel}
-      {...props}
+      onClick={canStop ? onStop : onClick}
     >
       {children}
     </Button>
