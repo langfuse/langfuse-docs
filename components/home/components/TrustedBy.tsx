@@ -3,7 +3,7 @@
  *
  * This displays customer logos for each pricing tier.
  * When customers are available, shows logos with hover tooltips.
- * When no customers are assigned to a tier, falls back to "50,000+ companies" text.
+ * When no customers are assigned to a tier, falls back to the shared company count.
  *
  * getting the logos from data/trusted-by.ts
  * Used by: components/home/components/TrustedBy.tsx
@@ -18,6 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { COMPANIES } from "@/lib/usage-stats";
 
 type Customer = {
   name: string;
@@ -33,7 +34,7 @@ interface TrustedByProps {
 
 export function TrustedBy({
   customers,
-  fallbackText = "50,000+ companies",
+  fallbackText = `${COMPANIES.toLocaleString("en-US")}+ companies`,
   className = "",
 }: TrustedByProps) {
   return (
