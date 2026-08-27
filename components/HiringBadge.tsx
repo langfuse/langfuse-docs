@@ -86,9 +86,8 @@ export function HiringBadge({ className }: { className?: string }) {
         <HoverCorners />
         <NextLink
           href="/careers"
-          aria-label="Hiring in Europe and SF"
           className={cn(
-            "inline-flex w-max items-center gap-[6px] overflow-hidden",
+            "inline-flex w-full min-w-0 max-w-full items-center gap-[6px] overflow-hidden",
             "h-[26px] py-0.75 pl-[8px] pr-[8px] rounded-[2px]",
             "border border-line-structure dark:border-line-cta group-hover:border-line-cta",
             "bg-surface-bg text-text-secondary",
@@ -100,26 +99,17 @@ export function HiringBadge({ className }: { className?: string }) {
           <span className="text-xs shrink-0" aria-hidden>
             🐐
           </span>
-          <span className="grid w-max justify-items-start" aria-hidden>
-            <span
-              className={cn(
-                "col-start-1 row-start-1 whitespace-nowrap",
-                isHovered && "invisible",
-              )}
-            >
-              <span className="wide:hidden">Hiring</span>
-              <span className="hidden wide:inline">
-                Hiring in Europe and SF
-              </span>
+          <span className="relative min-w-0 flex-1 text-left">
+            <span className={cn("block truncate", isHovered && "invisible")}>
+              Hiring in Europe and SF
             </span>
             <span
               className={cn(
-                "col-start-1 row-start-1 whitespace-nowrap",
+                "absolute left-0 top-0 whitespace-nowrap",
                 !isHovered && "invisible",
               )}
             >
-              <span className="wide:hidden">GOATS!</span>
-              <span className="hidden wide:inline">Looking for GOATS!</span>
+              Looking for GOATS!
             </span>
           </span>
         </NextLink>

@@ -50,7 +50,7 @@ export function Navbar() {
           <div className="absolute bottom-[-6px] left-0 w-[6px] h-[5px] bg-left-corner" />
           <div className="absolute hidden wide:block bottom-[-6px] right-0 w-[6px] h-[5px] bg-right-corner" />
           <div className="flex flex-1 min-w-0 gap-2 items-center px-2.5 py-3 rounded-sm bg-surface-1">
-            {/* Hide on tight desktops so Launch App / Get Demo stay visible; short label until `wide`. */}
+            {/* Hide below xl so Launch App / Get Demo stay visible. */}
             <HiringBadge className="hidden shrink-0 xl:block" />
             <div className="flex flex-1 justify-center items-center min-w-0 gap-4">
               <InkeepSearchBar className="hidden" />
