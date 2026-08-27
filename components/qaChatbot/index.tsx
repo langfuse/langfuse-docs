@@ -341,20 +341,18 @@ export const Chat = ({ className, ...props }: ChatProps) => {
           onSubmit={handleSubmit}
           className="mt-4 rounded-[2px] border-line-structure bg-surface-bg shadow-sm relative z-10 focus-within:border-line-cta transition-colors"
         >
-          <div className="flex items-end gap-2">
+          <div className="flex items-end gap-1 p-1">
             <PromptInputTextarea
               ref={textareaRef}
               onChange={(e) => setInput(e.target.value)}
               value={input}
               placeholder="Ask a question about Langfuse..."
-              className="flex-1 pr-2 min-h-[40px] max-h-[300px] leading-5 pt-[10px] pb-[10px] overflow-y-auto text-sm"
+              className="flex-1 min-h-[32px] max-h-[300px] leading-5 py-1.5 px-2 overflow-y-auto text-sm"
               style={{ height: "auto" }}
-              minHeight={40}
+              minHeight={32}
               maxHeight={300}
             />
-            <div className="pr-3 pb-[10px]">
-              <PromptInputSubmit disabled={!input || !userId} status={status} />
-            </div>
+            <PromptInputSubmit disabled={!input || !userId} status={status} />
           </div>
         </PromptInput>
         <p className="mt-6 text-xs text-muted-foreground text-center relative z-10 italic">
