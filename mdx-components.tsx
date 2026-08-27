@@ -6,7 +6,7 @@ import { Mermaid } from "@/components/Mermaid";
 import { Image } from "@/components/ui/image";
 import { Frame } from "@/components/Frame";
 import { LangTab, LangTabs, LangTabsWithTab } from "@/components/LangTabs";
-import { FetchReadme } from "@/components/FetchReadme";
+import { GitHubReadme } from "@/components/GitHubReadme";
 import {
   Cards,
   Card,
@@ -114,7 +114,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     FileTree,
     "FileTree.File": FileTreeFile,
     "FileTree.Folder": FileTreeFolder,
-    FetchReadme,
+    GitHubReadme,
     AvailabilityBanner,
     Mermaid,
     Playground,
