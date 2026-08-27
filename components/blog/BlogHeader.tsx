@@ -1,5 +1,8 @@
 import Image from "next/image";
-import { CustomerStoryBackNav } from "@/components/customers/CustomerStoryBackNav";
+import {
+  CustomerStoryBackNav,
+  companyLabelFromLogo,
+} from "@/components/customers/CustomerStoryBackNav";
 import { Authors, allAuthors } from "../Authors";
 
 export const BlogHeader = ({
@@ -19,7 +22,9 @@ export const BlogHeader = ({
 }) => {
   return (
     <div className="my-4 md:my-6 flex flex-col gap-3">
-      {customerLogo ? <CustomerStoryBackNav /> : null}
+      {customerLogo ? (
+        <CustomerStoryBackNav current={companyLabelFromLogo(customerLogo)} />
+      ) : null}
       <div className="flex flex-col gap-1 items-center text-center">
         {image && (
           <Image
