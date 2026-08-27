@@ -10,9 +10,11 @@ import {
 } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { TabButton } from "./TabButton";
 import { TabContent } from "./TabContent";
 import type { AutoAdvanceConfig, FeatureTabData } from "./types";
 import { CornerBox } from "@/components/ui/corner-box";
+import { cn } from "@/lib/utils";
 
 /** Soft ease-out (Emil Kowalski–style: calm deceleration, no snappy linear segments). */
 const CONTENT_EASE = [0.22, 1, 0.36, 1] as const;
@@ -336,8 +338,13 @@ export const FeatureTabs = ({
       ref={setContainerNode}
       className="overflow-hidden p-0 mt-0 bg-card border-radius-none"
     >
-      {/* Accessibility: Auto-advance status announcement */}
+      {/* Accessibility: Auto-advance status and current product area */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {activeFeature ? (
+          <span>
+            Showing {activeFeature.name}. {activeFeature.subtitle}
+          </span>
+        ) : null}
         {defaultAutoAdvance.enabled && (
           <span>
             Auto-advance is {state.isAutoAdvancePaused ? "paused" : "active"}.
@@ -377,15 +384,16 @@ export const FeatureTabs = ({
         })}
       </CornerBox>
 
-      {/* Title bar with corner box */}
-      <CornerBox
-        role="tablist"
-        aria-label="Feature navigation. Use arrow keys to navigate, Enter or Space to select, Escape to toggle auto-advance."
-        className="px-4 py-2 hidden md:block"
-        onKeyDown={handleKeyDown}
-      >
-        <div ref={tabListScrollRef} className="flex flex-row items-center">
-          {/* Title — left-aligned */}
+      {/* Title bar with product-area name, pills, and caption */}
+      <CornerBox className="px-4 py-3 hidden md:block">
+        <div
+          ref={tabListScrollRef}
+          role="tablist"
+          aria-label="Product area screenshots. Use arrow keys to navigate, Enter or Space to select, Escape to toggle auto-advance."
+          className="flex flex-row items-start gap-4"
+          onKeyDown={handleKeyDown}
+        >
+          {/* Product-area name + one-line description — left-aligned */}
           <div className="relative overflow-hidden min-w-0 flex-1">
             <div aria-hidden className="flex flex-col">
               {features.map((f) => (
@@ -393,28 +401,33 @@ export const FeatureTabs = ({
                   key={f.id}
                   className="whitespace-nowrap text-xl font-analog font-medium invisible h-0 block"
                 >
-                  {f.title}
+                  {f.name}
                 </span>
               ))}
             </div>
             <AnimatePresence mode="wait" initial={false}>
               {activeFeature && (
-                <motion.h3
+                <motion.div
                   key={activeFeature.id}
                   initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -4 }}
                   transition={{ duration: 0.12, ease: "easeOut" }}
-                  className="block whitespace-nowrap text-xl font-analog font-medium text-primary"
+                  className="flex flex-col gap-0.5"
                 >
-                  {activeFeature.title}
-                </motion.h3>
+                  <h3 className="block whitespace-nowrap text-xl font-analog font-medium text-primary">
+                    {activeFeature.name}
+                  </h3>
+                  <p className="text-sm leading-snug text-text-tertiary">
+                    {activeFeature.subtitle}
+                  </p>
+                </motion.div>
               )}
             </AnimatePresence>
           </div>
 
-          {/* Dot indicators — right-aligned */}
-          <div className="flex flex-row items-center gap-1.5 ml-auto shrink-0">
+          {/* Dot indicators — right-aligned, labeled via accessible names */}
+          <div className="flex flex-row items-center gap-1.5 ml-auto shrink-0 pt-1.5">
             {features.map((feature, index) => {
               const isActive = activeTab === feature.id;
 
@@ -426,7 +439,8 @@ export const FeatureTabs = ({
                   }}
                   role="tab"
                   aria-selected={isActive}
-                  aria-label={feature.title}
+                  aria-label={feature.name}
+                  title={feature.name}
                   aria-controls={`tabpanel-${feature.id}`}
                   id={`tab-${feature.id}`}
                   tabIndex={state.focusedIndex === index ? 0 : -1}
@@ -434,17 +448,49 @@ export const FeatureTabs = ({
                   className="group p-1 focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 rounded"
                 >
                   <span
-                    className={`block w-3 h-1.5 rounded-sm transition-colors duration-150 ease-out ${
+                    className={cn(
+                      "block w-3 h-1.5 rounded-sm transition-colors duration-150 ease-out",
                       isActive
                         ? "bg-primary"
-                        : "bg-line-structure group-hover:bg-primary"
-                    }`}
+                        : "bg-line-structure group-hover:bg-primary",
+                    )}
                   />
                 </button>
               );
             })}
           </div>
         </div>
+
+        {/* Caption of all product areas — legend, not a tab bar */}
+        <ul
+          className="mt-2 flex flex-wrap items-center text-xs leading-snug"
+          aria-label="Product areas"
+        >
+          {features.map((feature, index) => {
+            const isActive = activeTab === feature.id;
+
+            return (
+              <li key={feature.id} className="inline-flex items-center">
+                {index > 0 && (
+                  <span aria-hidden className="px-2 text-text-tertiary">
+                    ·
+                  </span>
+                )}
+                <span
+                  className={cn(
+                    "transition-colors duration-150",
+                    isActive
+                      ? "font-medium text-primary"
+                      : "text-text-tertiary",
+                  )}
+                  aria-current={isActive ? "true" : undefined}
+                >
+                  {feature.name}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
       </CornerBox>
 
       {/* Image box - desktop */}
