@@ -10,6 +10,7 @@ import {
 } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { TabButton } from "./TabButton";
 import { TabContent } from "./TabContent";
 import type { AutoAdvanceConfig, FeatureTabData } from "./types";
 import { CornerBox } from "@/components/ui/corner-box";
@@ -331,13 +332,23 @@ export const FeatureTabs = ({
     return new Set([prev, next]);
   }, [n, activeIndex]);
 
+  const mobileScreenshot =
+    activeFeature?.id === "observability"
+      ? mobileFeature.image
+      : activeFeature?.image;
+
   return (
     <div
       ref={setContainerNode}
       className="overflow-hidden p-0 mt-0 bg-card border-radius-none"
     >
-      {/* Accessibility: Auto-advance status announcement */}
+      {/* Accessibility: Auto-advance status and current product area */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {activeFeature ? (
+          <span>
+            Showing {activeFeature.name}. {activeFeature.subtitle}
+          </span>
+        ) : null}
         {defaultAutoAdvance.enabled && (
           <span>
             Auto-advance is {state.isAutoAdvancePaused ? "paused" : "active"}.
@@ -377,78 +388,35 @@ export const FeatureTabs = ({
         })}
       </CornerBox>
 
-      {/* Title bar with corner box */}
+      {/* Named product-area tabs on the screenshot frame */}
       <CornerBox
         role="tablist"
-        aria-label="Feature navigation. Use arrow keys to navigate, Enter or Space to select, Escape to toggle auto-advance."
-        className="px-4 py-2 hidden md:block"
+        aria-label="Product area navigation. Use arrow keys to navigate, Enter or Space to select, Escape to toggle auto-advance."
+        className="px-1 py-1 sm:px-2"
         onKeyDown={handleKeyDown}
       >
-        <div ref={tabListScrollRef} className="flex flex-row items-center">
-          {/* Title — left-aligned */}
-          <div className="relative overflow-hidden min-w-0 flex-1">
-            <div aria-hidden className="flex flex-col">
-              {features.map((f) => (
-                <span
-                  key={f.id}
-                  className="whitespace-nowrap text-xl font-analog font-medium invisible h-0 block"
-                >
-                  {f.title}
-                </span>
-              ))}
-            </div>
-            <AnimatePresence mode="wait" initial={false}>
-              {activeFeature && (
-                <motion.h3
-                  key={activeFeature.id}
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  transition={{ duration: 0.12, ease: "easeOut" }}
-                  className="block whitespace-nowrap text-xl font-analog font-medium text-primary"
-                >
-                  {activeFeature.title}
-                </motion.h3>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Dot indicators — right-aligned */}
-          <div className="flex flex-row items-center gap-1.5 ml-auto shrink-0">
-            {features.map((feature, index) => {
-              const isActive = activeTab === feature.id;
-
-              return (
-                <button
-                  key={feature.id}
-                  ref={(el) => {
-                    tabRefs.current[index] = el;
-                  }}
-                  role="tab"
-                  aria-selected={isActive}
-                  aria-label={feature.title}
-                  aria-controls={`tabpanel-${feature.id}`}
-                  id={`tab-${feature.id}`}
-                  tabIndex={state.focusedIndex === index ? 0 : -1}
-                  onClick={() => handleTabChange(feature.id)}
-                  className="group p-1 focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 rounded"
-                >
-                  <span
-                    className={`block w-3 h-1.5 rounded-sm transition-colors duration-150 ease-out ${
-                      isActive
-                        ? "bg-primary"
-                        : "bg-line-structure group-hover:bg-primary"
-                    }`}
-                  />
-                </button>
-              );
-            })}
-          </div>
+        <div
+          ref={tabListScrollRef}
+          className="flex flex-row flex-nowrap items-stretch overflow-x-auto snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {features.map((feature, index) => (
+            <TabButton
+              key={feature.id}
+              ref={(el) => {
+                tabRefs.current[index] = el;
+              }}
+              feature={feature}
+              isActive={activeTab === feature.id}
+              onClick={() => handleTabChange(feature.id)}
+              tabIndex={state.focusedIndex === index ? 0 : -1}
+              className="snap-center"
+            />
+          ))}
         </div>
       </CornerBox>
 
       {/* Image box - desktop */}
-      <CornerBox className="p-4 md:-mt-px hidden md:block" withStripes>
+      <CornerBox className="p-4 -mt-px hidden md:block" withStripes>
         <div className="relative w-full overflow-hidden aspect-[2205/1291] custom-card-shadow">
           <AnimatePresence mode="sync" initial={false}>
             {activeFeature ? (
@@ -467,18 +435,30 @@ export const FeatureTabs = ({
       </CornerBox>
 
       {/* Image box - mobile */}
-      <CornerBox className="pl-4 pt-4 block md:hidden" withStripes>
+      <CornerBox className="pl-4 pt-4 -mt-px block md:hidden" withStripes>
         <div className="relative w-full overflow-hidden min-h-[410px]">
-          <Image
-            src={mobileFeature?.image.light}
-            alt={mobileFeature?.image.alt}
-            width={1360}
-            height={1640}
-            quality={100}
-            className="absolute left-0 top-0 min-w-full min-h-full object-cover object-top-left"
-            sizes="(min-width: 640px) 1360px"
-            priority
-          />
+          <AnimatePresence mode="sync" initial={false}>
+            {activeFeature && mobileScreenshot ? (
+              <motion.div
+                key={activeFeature.id}
+                variants={tabImageVariants(Boolean(reduceMotion))}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="absolute inset-0"
+              >
+                <Image
+                  src={mobileScreenshot.light}
+                  alt={mobileScreenshot.alt}
+                  fill
+                  quality={100}
+                  className="object-cover object-top-left"
+                  sizes="(min-width: 640px) 1360px"
+                  priority
+                />
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
         </div>
       </CornerBox>
     </div>
