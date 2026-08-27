@@ -130,7 +130,7 @@ function Hero() {
       </div>
 
       <div
-        className={`${cornerBoxBase} gov-callout-strip no-tl no-tr no-bl no-br relative -mt-px flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-7`}
+        className={`${cornerBoxBase} gov-callout-strip no-tl no-tr no-bl no-br relative -mt-px -mb-px flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-7`}
       >
         <div className="flex min-w-0 flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-3">
           <span className="gov-ee-pill w-fit">Coming soon</span>
@@ -144,12 +144,21 @@ function Hero() {
             </p>
           </div>
         </div>
-        <Link
-          href="#government-cloud"
-          className="self-start whitespace-nowrap border-b border-text-primary pb-px font-mono text-[12px] text-text-primary sm:self-center"
-        >
-          See both options ↗
-        </Link>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 self-start sm:self-center">
+          <Link
+            href="/talk-to-us"
+            className="gov-btn gov-btn-primary gov-btn-small !shadow-none"
+          >
+            <span>Contact sales</span>
+            <span className="gov-kbd">↗</span>
+          </Link>
+          <Link
+            href="#government-cloud"
+            className="whitespace-nowrap border-b border-text-primary pb-px font-mono text-[12px] text-text-primary"
+          >
+            See both options
+          </Link>
+        </div>
       </div>
 
       <div
@@ -737,8 +746,9 @@ function GovernmentCloud() {
         </h2>
         <p className="gov-body">
           Most government teams run Langfuse Enterprise on their own
-          infrastructure. Langfuse Cloud for Government is a managed option in
-          progress. Talk to sales to learn more.
+          infrastructure, often with ClickHouse Government. Langfuse Cloud for
+          Government is a managed option in progress, with the same Enterprise
+          controls plus public-sector hardening. Talk to sales to learn more.
         </p>
       </div>
 
@@ -749,7 +759,7 @@ function GovernmentCloud() {
             <span className="gov-now-pill">Available today</span>
           </div>
           <div className="font-analog text-[22px] font-medium leading-[1.3] text-text-primary [text-wrap:balance]">
-            Self-hosted Enterprise
+            Self-hosted, on-premises Enterprise
           </div>
           <p className="gov-body-sm m-0">
             Run Langfuse Enterprise on-premises, in a VPC, or air-gapped. Pair
@@ -757,12 +767,12 @@ function GovernmentCloud() {
             <Link className="gov-link" href="https://clickhouse.com/government">
               ClickHouse Government
             </Link>{" "}
-            when you need a government-ready analytics plane.
+            for a government-ready analytics plane you operate yourself.
           </p>
           <ul className="gov-feature-list">
             <li>Your cluster, your network boundary</li>
             <li>FIPS-compliant Docker images upon request</li>
-            <li>RBAC, SSO, SCIM, and audit logs</li>
+            <li>RBAC, SSO, SCIM, and immutable audit logs</li>
             <li>Data retention and server-side masking</li>
           </ul>
           <div className="flex-1" />
@@ -784,13 +794,15 @@ function GovernmentCloud() {
           </div>
           <p className="gov-body-sm m-0">
             A managed Langfuse Cloud for teams that want Langfuse to operate the
-            control plane. Hardening work is underway.
+            control plane. Public-sector hardening is underway on top of
+            Enterprise access and governance controls.
           </p>
           <ul className="gov-feature-list">
             <li>NIST SP 800-53 Rev. 5 hardening</li>
             <li>NIST SSDF (SP 800-218) hardening</li>
-            <li>FIPS 140-3</li>
-            <li>RBAC, SSO, SCIM, audit logs, retention, and data masking</li>
+            <li>FIPS 140-3 hardening</li>
+            <li>RBAC, SSO, SCIM, and immutable audit logs</li>
+            <li>Data retention and server-side masking</li>
           </ul>
           <div className="flex-1" />
           <Link

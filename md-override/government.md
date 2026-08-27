@@ -15,7 +15,7 @@ Open-source tracing and evaluations for government AI. Run it **air-gapped, on-p
 - [Talk to a public-sector expert](/talk-to-us)
 - [Explore self-hosting](/self-hosting)
 
-Langfuse Cloud for Government is coming soon. Managed cloud option. NIST SP 800-53 Rev. 5, SSDF, and FIPS 140-3 hardening in progress. [See both options](#government-cloud)
+Langfuse Cloud for Government is coming soon. Managed cloud option. NIST SP 800-53 Rev. 5, SSDF, and FIPS 140-3 hardening in progress. [Contact sales](/talk-to-us) to learn more. [See both options](#government-cloud)
 
 Open-source core (MIT) · Internet access optional · 100,000+ engineers · 10+ billion observations per month
 
@@ -107,29 +107,30 @@ Move to production with the official Kubernetes Helm chart or maintained Terrafo
 
 ## Self-host today. Cloud is coming soon. [#government-cloud]
 
-Most government teams run Langfuse Enterprise on their own infrastructure. Langfuse Cloud for Government is a managed option in progress. Talk to sales to learn more.
+Most government teams run Langfuse Enterprise on their own infrastructure, often with ClickHouse Government. Langfuse Cloud for Government is a managed option in progress, with the same Enterprise controls plus public-sector hardening. Talk to sales to learn more.
 
-### Self-hosted Enterprise
+### Self-hosted, on-premises Enterprise
 
-Available today. Run Langfuse Enterprise on-premises, in a VPC, or air-gapped. Pair it with [ClickHouse Government](https://clickhouse.com/government) when you need a government-ready analytics plane.
+Available today. Run Langfuse Enterprise on-premises, in a VPC, or air-gapped. Pair it with [ClickHouse Government](https://clickhouse.com/government) for a government-ready analytics plane you operate yourself.
 
 - Your cluster, your network boundary
 - FIPS-compliant Docker images upon request
-- RBAC, SSO, SCIM, and audit logs
+- RBAC, SSO, SCIM, and immutable audit logs
 - Data retention and server-side masking
 
 [Explore self-hosting](/self-hosting)
 
 ### Langfuse Cloud for Government
 
-Coming soon. A managed Langfuse Cloud for teams that want Langfuse to operate the control plane. Hardening work is underway.
+Coming soon. A managed Langfuse Cloud for teams that want Langfuse to operate the control plane. Public-sector hardening is underway on top of Enterprise access and governance controls.
 
 - NIST SP 800-53 Rev. 5 hardening
 - NIST SSDF (SP 800-218) hardening
-- FIPS 140-3
-- RBAC, SSO, SCIM, audit logs, retention, and data masking
+- FIPS 140-3 hardening
+- RBAC, SSO, SCIM, and immutable audit logs
+- Data retention and server-side masking
 
-[Contact sales](/talk-to-us)
+[Contact sales](/talk-to-us) to learn more.
 
 ## Run Langfuse in your environment.
 
