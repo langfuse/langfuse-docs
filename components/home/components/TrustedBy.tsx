@@ -18,7 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { formatCompanyCount } from "@/lib/usage-stats";
+import { COMPANY_COUNT } from "@/lib/usage-stats";
 
 type Customer = {
   name: string;
@@ -34,7 +34,7 @@ interface TrustedByProps {
 
 export function TrustedBy({
   customers,
-  fallbackText = `${formatCompanyCount()} companies using Langfuse`,
+  fallbackText = `${COMPANY_COUNT} companies using Langfuse`,
   className = "",
 }: TrustedByProps) {
   return (

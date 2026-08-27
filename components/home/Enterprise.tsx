@@ -7,7 +7,7 @@ import { Text } from "@/components/ui/text";
 import { FeaturedCustomers } from "./FeaturedCustomers";
 import { BulletList } from "./BulletList";
 import securityVisual from "./img/visuals/visual-security.svg";
-import { formatCompanyCount } from "@/lib/usage-stats";
+import { COMPANY_COUNT } from "@/lib/usage-stats";
 
 const architecture = [
   {
@@ -32,7 +32,7 @@ const openApis = [
   { label: "50M+ SDK installs/month", href: "/careers#public-metrics" },
   { label: "10+ billion observations processed per month" },
   {
-    label: `${formatCompanyCount()} companies using Langfuse`,
+    label: `${COMPANY_COUNT} companies using Langfuse`,
     href: "/why",
   },
   { label: "99.9% uptime" },
