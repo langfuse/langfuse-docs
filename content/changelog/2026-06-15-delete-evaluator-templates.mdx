@@ -11,6 +11,13 @@ import { Book, Code } from "lucide-react";
 
 <ChangelogHeader />
 
+<Callout type="info">
+  A new [stable API for evaluators and evaluation
+  rules](/changelog/2026-08-27-stable-evaluator-api) is now available under
+  `/api/public/v2`. The unstable API described below remains available until
+  November 16, 2026.
+</Callout>
+
 You can now delete evaluator templates you no longer need — from the Langfuse UI, the unstable public API (`DELETE /unstable/evaluators/{id}`), and MCP. Deleting an evaluator template removes all of its versions in one step.
 
 To prevent accidental breakage, deletion is blocked while running evaluators or evaluation rules still reference the template — the UI surfaces those dependencies upfront in the delete dialog so you know what to detach first. Langfuse-managed evaluator templates cannot be deleted.
