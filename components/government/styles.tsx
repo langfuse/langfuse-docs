@@ -323,7 +323,16 @@ export function GovernmentStyles() {
       }
 
       .gov-callout-strip {
-        background: color-mix(in srgb, var(--surface-cta-primary) 22%, var(--surface-bg));
+        background: var(--surface-bg);
+      }
+      .gov-callout-strip::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--surface-cta-primary);
       }
 
       .gov-feature-list {
