@@ -78,7 +78,6 @@ These mappings cover the latest Python SDK v4 and JS/TS SDK v5 method surfaces. 
 
 There is no v2 single-observation getter; filter `get_many` / `getMany` by ID and take the matching row. Always bound observation queries with a time range and follow cursor pagination. `client.fetchObservations(...)` is not listed because in JS/TS v5 it already calls Observations API v2.
 
-
 ### Parameter mapping
 
 | Deprecated (v1)                                                                                                               | v2 equivalent                                                                        |
@@ -473,8 +472,6 @@ curl \
 | --------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
 | Python v4 | `client.api.ingestion.batch(...)` with trace or observation events | Python SDK `4.7.0+` tracing and instrumentation, which export through OpenTelemetry |
 | JS/TS v5  | `client.api.ingestion.batch(...)` with trace or observation events | JS/TS SDK `5.4.0+` tracing and instrumentation, which export through OpenTelemetry  |
-
-
 
 Score writes are unaffected. Direct REST clients can continue using `POST /scores`. Current Python and JS/TS SDKs intentionally batch score writes as `score-create` events through `POST /ingestion`; Langfuse v4 continues to accept that event type after <V4CutoverDate />. No SDK release that reroutes score writes to `POST /scores` is required for compatibility.
 
