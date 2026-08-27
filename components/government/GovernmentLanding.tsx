@@ -130,6 +130,29 @@ function Hero() {
       </div>
 
       <div
+        className={`${cornerBoxBase} gov-callout-strip no-tl no-tr no-bl no-br relative -mt-px flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-7`}
+      >
+        <div className="flex min-w-0 flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-3">
+          <span className="gov-ee-pill w-fit">Coming soon</span>
+          <div className="min-w-0">
+            <div className="text-[14px] font-medium leading-[1.4] text-text-primary">
+              Langfuse Cloud for Government
+            </div>
+            <p className="gov-body-sm m-0">
+              Managed cloud option. NIST SP 800-53 Rev. 5, SSDF, and FIPS 140-3
+              hardening in progress.
+            </p>
+          </div>
+        </div>
+        <Link
+          href="#government-cloud"
+          className="self-start whitespace-nowrap border-b border-text-primary pb-px font-mono text-[12px] text-text-primary sm:self-center"
+        >
+          See both options ↗
+        </Link>
+      </div>
+
+      <div
         className={`${cornerBoxBase} gov-proof-grid no-tl no-tr grid grid-cols-2 [border-top:none] md:grid-cols-4`}
       >
         {[
@@ -700,6 +723,89 @@ function GetStarted() {
   );
 }
 
+function GovernmentCloud() {
+  return (
+    <section
+      id="government-cloud"
+      className="gov-section scroll-mt-24 pb-10 pt-[100px]"
+    >
+      <div className="mb-10 flex flex-col items-start gap-3.5">
+        <div className="gov-eyebrow">Deployment options</div>
+        <h2 className="gov-h2 max-w-[22ch]">
+          Self-host today.{" "}
+          <span className="gov-highlight">Cloud is coming soon.</span>
+        </h2>
+        <p className="gov-body">
+          Most government teams run Langfuse Enterprise on their own
+          infrastructure. Langfuse Cloud for Government is a managed option in
+          progress. Talk to sales to learn more.
+        </p>
+      </div>
+
+      <div className="grid gap-2 md:grid-cols-2">
+        <div className="gov-chip-card flex flex-col gap-3.5 p-6">
+          <div className="flex items-center justify-between gap-3">
+            <span className="gov-eyebrow">Option 01</span>
+            <span className="gov-now-pill">Available today</span>
+          </div>
+          <div className="font-analog text-[22px] font-medium leading-[1.3] text-text-primary [text-wrap:balance]">
+            Self-hosted Enterprise
+          </div>
+          <p className="gov-body-sm m-0">
+            Run Langfuse Enterprise on-premises, in a VPC, or air-gapped. Pair
+            it with{" "}
+            <Link className="gov-link" href="https://clickhouse.com/government">
+              ClickHouse Government
+            </Link>{" "}
+            when you need a government-ready analytics plane.
+          </p>
+          <ul className="gov-feature-list">
+            <li>Your cluster, your network boundary</li>
+            <li>FIPS-compliant Docker images upon request</li>
+            <li>RBAC, SSO, SCIM, and audit logs</li>
+            <li>Data retention and server-side masking</li>
+          </ul>
+          <div className="flex-1" />
+          <Link
+            href="/self-hosting"
+            className="self-start border-b border-text-primary pb-px font-mono text-[12px] text-text-primary"
+          >
+            Explore self-hosting ↗
+          </Link>
+        </div>
+
+        <div className="gov-chip-card gov-option-card is-soon flex flex-col gap-3.5 p-6">
+          <div className="flex items-center justify-between gap-3">
+            <span className="gov-eyebrow">Option 02</span>
+            <span className="gov-ee-pill">Coming soon</span>
+          </div>
+          <div className="font-analog text-[22px] font-medium leading-[1.3] text-text-primary [text-wrap:balance]">
+            Langfuse Cloud for Government
+          </div>
+          <p className="gov-body-sm m-0">
+            A managed Langfuse Cloud for teams that want Langfuse to operate the
+            control plane. Hardening work is underway.
+          </p>
+          <ul className="gov-feature-list">
+            <li>NIST SP 800-53 Rev. 5 hardening</li>
+            <li>NIST SSDF (SP 800-218) hardening</li>
+            <li>FIPS 140-3</li>
+            <li>RBAC, SSO, SCIM, audit logs, retention, and data masking</li>
+          </ul>
+          <div className="flex-1" />
+          <Link
+            href="/talk-to-us"
+            className="gov-btn gov-btn-primary gov-btn-small !shadow-none self-start"
+          >
+            <span>Contact sales</span>
+            <span className="gov-kbd">↗</span>
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function CTABanner() {
   return (
     <section className="gov-section pb-15 pt-[80px]">
@@ -712,8 +818,8 @@ function CTABanner() {
           <span className="gov-highlight">your environment.</span>
         </h2>
         <p className="gov-body text-center">
-          Talk through tracing, evaluations, and self-hosting for government AI.
-          Sensitive data stays in infrastructure you control.
+          Talk through self-hosted Enterprise today, or Langfuse Cloud for
+          Government. Sensitive data stays in infrastructure you control.
         </p>
         <Ctas />
       </div>
@@ -731,6 +837,7 @@ export function GovernmentLanding() {
         <Deployment />
         <Security />
         <GetStarted />
+        <GovernmentCloud />
         <CTABanner />
       </div>
     </div>

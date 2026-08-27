@@ -312,6 +312,56 @@ export function GovernmentStyles() {
         background: var(--surface-cta-primary);
         border: 1px solid var(--line-cta);
       }
+      .gov-now-pill {
+        display: inline-flex; align-items: center;
+        height: 20px; padding: 0 7px; border-radius: 2px;
+        font-family: var(--font-mono); font-size: 10px;
+        letter-spacing: .08em; text-transform: uppercase;
+        color: var(--text-secondary);
+        background: var(--surface-bg);
+        border: 1px solid var(--line-structure);
+      }
+
+      .gov-callout-strip {
+        background: color-mix(in srgb, var(--surface-cta-primary) 22%, var(--surface-bg));
+      }
+
+      .gov-feature-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .gov-feature-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 13.5px;
+        line-height: 1.55;
+        color: var(--text-secondary);
+      }
+      .gov-feature-list li::before {
+        content: "";
+        width: 5px;
+        height: 5px;
+        margin-top: 7px;
+        border-radius: 1px;
+        background: var(--surface-cta-primary);
+        box-shadow: 0 0 0 1px var(--line-cta);
+        flex-shrink: 0;
+      }
+
+      .gov-option-card.is-soon::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--surface-cta-primary);
+      }
 
       .gov-step-num {
         font-family: var(--font-analog), "Inter", system-ui, sans-serif;

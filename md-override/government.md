@@ -1,6 +1,6 @@
 ---
 title: Langfuse for Government
-description: Open-source observability and evaluations for AI agents. Deploy Langfuse in air-gapped, on-premises, and cloud environments. Keep traces, prompts, and evaluation data in your security boundary.
+description: Open-source observability and evaluations for AI agents. Self-host in air-gapped, on-premises, and cloud environments. Langfuse Cloud for Government coming soon.
 ---
 
 # Build accountable AI. Keep it under your control.
@@ -14,6 +14,8 @@ Open-source tracing and evaluations for government AI. Run it **air-gapped, on-p
 - Your traces
 - [Talk to a public-sector expert](/talk-to-us)
 - [Explore self-hosting](/self-hosting)
+
+Langfuse Cloud for Government is coming soon. Managed cloud option. NIST SP 800-53 Rev. 5, SSDF, and FIPS 140-3 hardening in progress. [See both options](#government-cloud)
 
 Open-source core (MIT) · Internet access optional · 100,000+ engineers · 10+ billion observations per month
 
@@ -103,9 +105,35 @@ Move to production with the official Kubernetes Helm chart or maintained Terrafo
 - [Azure Terraform](/self-hosting/deployment/azure)
 - [GCP Terraform](/self-hosting/deployment/gcp)
 
+## Self-host today. Cloud is coming soon. [#government-cloud]
+
+Most government teams run Langfuse Enterprise on their own infrastructure. Langfuse Cloud for Government is a managed option in progress. Talk to sales to learn more.
+
+### Self-hosted Enterprise
+
+Available today. Run Langfuse Enterprise on-premises, in a VPC, or air-gapped. Pair it with [ClickHouse Government](https://clickhouse.com/government) when you need a government-ready analytics plane.
+
+- Your cluster, your network boundary
+- FIPS-compliant Docker images upon request
+- RBAC, SSO, SCIM, and audit logs
+- Data retention and server-side masking
+
+[Explore self-hosting](/self-hosting)
+
+### Langfuse Cloud for Government
+
+Coming soon. A managed Langfuse Cloud for teams that want Langfuse to operate the control plane. Hardening work is underway.
+
+- NIST SP 800-53 Rev. 5 hardening
+- NIST SSDF (SP 800-218) hardening
+- FIPS 140-3
+- RBAC, SSO, SCIM, audit logs, retention, and data masking
+
+[Contact sales](/talk-to-us)
+
 ## Run Langfuse in your environment.
 
-Talk through tracing, evaluations, and self-hosting for government AI. Sensitive data stays in infrastructure you control.
+Talk through self-hosted Enterprise today, or Langfuse Cloud for Government. Sensitive data stays in infrastructure you control.
 
 - [Talk to a public-sector expert](/talk-to-us)
 - [Explore self-hosting](/self-hosting)
