@@ -1,10 +1,10 @@
 import { getGitHubStars } from "@/lib/github-stars";
 import {
-  COMPANIES,
   DOCKER_PULLS,
   FORTUNE_50_COMPANIES,
   FORTUNE_500_COMPANIES,
   SDK_INSTALLS_PER_MONTH,
+  formatCompanyCount,
 } from "./home/Usage";
 
 export const CredibilitySentence = ({
@@ -26,9 +26,7 @@ export const CredibilitySentence = ({
         <ul className="mt-2 list-disc list-inside space-y-1">
           <li>
             Used by{" "}
-            <Metric className={metricClassName}>
-              {COMPANIES.toLocaleString("en-US")}+
-            </Metric>{" "}
+            <Metric className={metricClassName}>{formatCompanyCount()}</Metric>{" "}
             companies
           </li>
           <li>
@@ -62,7 +60,7 @@ export const CredibilitySentence = ({
     <p className={className}>
       Langfuse is the most widely adopted LLM Engineering platform, used by{" "}
       <Metric className={metricClassName}>
-        {COMPANIES.toLocaleString("en-US")}+ companies
+        {formatCompanyCount()} companies
       </Metric>
       , with{" "}
       <Metric className={metricClassName}>

@@ -3,10 +3,8 @@ import NumberTicker from "@/components/ui/number-ticker";
 import { getGitHubStars } from "@/lib/github-stars";
 import { cn } from "@/lib/utils";
 import {
-  COMPANIES,
   DOCKER_PULLS,
   FORTUNE_50_COMPANIES,
-  FORTUNE_500_COMPANIES,
   SDK_INSTALLS_PER_MONTH,
 } from "@/lib/usage-stats";
 
@@ -16,7 +14,8 @@ export {
   FORTUNE_50_COMPANIES,
   FORTUNE_500_COMPANIES,
   SDK_INSTALLS_PER_MONTH,
-};
+  formatCompanyCount,
+} from "@/lib/usage-stats";
 
 export const Usage = ({ noPadding = false }: { noPadding?: boolean }) => {
   const stats = [
