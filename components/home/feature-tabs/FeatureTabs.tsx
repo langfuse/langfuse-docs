@@ -10,10 +10,10 @@ import {
 } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { TabButton } from "./TabButton";
 import { TabContent } from "./TabContent";
 import type { AutoAdvanceConfig, FeatureTabData } from "./types";
 import { CornerBox } from "@/components/ui/corner-box";
+import { cn } from "@/lib/utils";
 
 /** Soft ease-out (Emil Kowalski–style: calm deceleration, no snappy linear segments). */
 const CONTENT_EASE = [0.22, 1, 0.36, 1] as const;
@@ -261,7 +261,7 @@ export const FeatureTabs = ({
     tabRefs.current[newIndex]?.focus();
   };
 
-  // Scroll active tab into view (for mobile)
+  // Scroll active chip into view (for mobile)
   useEffect(() => {
     if (tabListScrollRef.current && tabRefs.current[state.focusedIndex]) {
       const tabList = tabListScrollRef.current;
@@ -342,13 +342,8 @@ export const FeatureTabs = ({
       ref={setContainerNode}
       className="overflow-hidden p-0 mt-0 bg-card border-radius-none"
     >
-      {/* Accessibility: Auto-advance status and current product area */}
+      {/* Accessibility: Auto-advance status announcement */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
-        {activeFeature ? (
-          <span>
-            Showing {activeFeature.name}. {activeFeature.subtitle}
-          </span>
-        ) : null}
         {defaultAutoAdvance.enabled && (
           <span>
             Auto-advance is {state.isAutoAdvancePaused ? "paused" : "active"}.
@@ -388,30 +383,49 @@ export const FeatureTabs = ({
         })}
       </CornerBox>
 
-      {/* Named product-area tabs on the screenshot frame */}
+      {/* Product-area chips — primary screenshot selector */}
       <CornerBox
         role="tablist"
-        aria-label="Product area navigation. Use arrow keys to navigate, Enter or Space to select, Escape to toggle auto-advance."
-        className="px-1 py-1 sm:px-2"
+        aria-label="Product areas. Use arrow keys to navigate, Enter or Space to select, Escape to toggle auto-advance."
+        className="px-4 py-3"
         onKeyDown={handleKeyDown}
       >
         <div
           ref={tabListScrollRef}
-          className="flex flex-row flex-nowrap items-stretch overflow-x-auto snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex flex-nowrap md:flex-wrap items-center gap-2 overflow-x-auto md:overflow-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
         >
-          {features.map((feature, index) => (
-            <TabButton
-              key={feature.id}
-              ref={(el) => {
-                tabRefs.current[index] = el;
-              }}
-              feature={feature}
-              isActive={activeTab === feature.id}
-              onClick={() => handleTabChange(feature.id)}
-              tabIndex={state.focusedIndex === index ? 0 : -1}
-              className="snap-center"
-            />
-          ))}
+          {features.map((feature, index) => {
+            const isActive = activeTab === feature.id;
+            const Icon = feature.icon;
+
+            return (
+              <button
+                key={feature.id}
+                ref={(el) => {
+                  tabRefs.current[index] = el;
+                }}
+                role="tab"
+                aria-selected={isActive}
+                aria-label={feature.name}
+                aria-controls={`tabpanel-${feature.id}`}
+                id={`tab-${feature.id}`}
+                tabIndex={state.focusedIndex === index ? 0 : -1}
+                onClick={() => handleTabChange(feature.id)}
+                className={cn(
+                  "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5",
+                  "font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px]",
+                  "transition-colors duration-150 ease-out",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                  isActive
+                    ? "border-text-secondary bg-text-primary text-surface-bg"
+                    : "border-line-structure bg-surface-bg text-text-secondary hover:border-line-cta hover:text-text-primary dark:border-line-cta",
+                )}
+              >
+                <Icon className="size-3.5 shrink-0" aria-hidden />
+                {feature.name}
+              </button>
+            );
+          })}
         </div>
       </CornerBox>
 
