@@ -8,6 +8,7 @@ import InkeepSearchBar from "@/components/inkeep/InkeepSearchBar";
 
 export const sectionNavData: SectionNavData[] = [
   { name: "Docs", href: "/docs" },
+  { name: "Customers", href: "/users" },
   { name: "Self Hosting", href: "/self-hosting" },
   { name: "Guides", href: "/guides" },
   { name: "Integrations", href: "/integrations" },
