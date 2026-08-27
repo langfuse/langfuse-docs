@@ -6,6 +6,7 @@ author: Tobias Wochinger
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { V4CutoverDate } from "@/components/V4CutoverDate";
 import { Code } from "lucide-react";
 
 <ChangelogHeader />
@@ -37,7 +38,7 @@ DELETE /api/public/v2/evaluation-rules/{evaluationRuleId}
 
 Evaluator and rule names no longer act as identifiers. Each resource has a stable ID, and rules always use the latest version of their assigned evaluators. List endpoints use cursor pagination, and API errors include structured codes that automation can handle without parsing error messages.
 
-If you use the previous unstable evaluator endpoints, migrate to `/api/public/v2` by November 16, 2026.
+If you use the previous unstable evaluator endpoints, migrate to `/api/public/v2` by <V4CutoverDate />.
 
 <Cards num={2}>
   <Card
