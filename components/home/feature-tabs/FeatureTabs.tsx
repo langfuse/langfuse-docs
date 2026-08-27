@@ -420,7 +420,7 @@ export const FeatureTabs = ({
                     "focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/50",
                     isActive
                       ? "font-medium text-primary"
-                      : "text-text-tertiary hover:text-primary",
+                      : "font-normal text-text-tertiary hover:text-primary",
                   )}
                 >
                   {feature.name}
@@ -430,7 +430,7 @@ export const FeatureTabs = ({
           })}
         </div>
 
-        <div className="relative mt-2 min-h-[1.25rem] overflow-hidden">
+        <div className="relative mt-3 min-h-[1.125rem] overflow-hidden">
           <AnimatePresence mode="wait" initial={false}>
             {activeFeature && (
               <motion.p
@@ -439,7 +439,7 @@ export const FeatureTabs = ({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.12, ease: "easeOut" }}
-                className="text-sm leading-snug text-text-tertiary"
+                className="text-xs leading-relaxed font-normal text-text-tertiary"
               >
                 {activeFeature.subtitle}
               </motion.p>
