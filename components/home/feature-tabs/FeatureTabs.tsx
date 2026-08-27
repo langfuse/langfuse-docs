@@ -336,13 +336,8 @@ export const FeatureTabs = ({
       ref={setContainerNode}
       className="overflow-hidden p-0 mt-0 bg-card border-radius-none"
     >
-      {/* Accessibility: Auto-advance status and current product area */}
+      {/* Accessibility: announce pause/resume only, not every auto-advance */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
-        {activeFeature ? (
-          <span>
-            Showing {activeFeature.name}. {activeFeature.subtitle}
-          </span>
-        ) : null}
         {defaultAutoAdvance.enabled && (
           <span>
             Auto-advance is {state.isAutoAdvancePaused ? "paused" : "active"}.
@@ -388,7 +383,7 @@ export const FeatureTabs = ({
           ref={tabListScrollRef}
           role="tablist"
           aria-label="Product area screenshots. Use arrow keys to navigate, Escape to toggle auto-advance."
-          className="flex flex-nowrap md:flex-wrap items-center overflow-x-auto md:overflow-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-sm leading-snug"
+          className="flex !flex-nowrap md:!flex-wrap items-center overflow-x-auto md:overflow-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-sm leading-snug"
           onKeyDown={handleKeyDown}
         >
           {features.map((feature, index) => {
