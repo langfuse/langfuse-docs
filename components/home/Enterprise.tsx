@@ -7,6 +7,7 @@ import { Text } from "@/components/ui/text";
 import { FeaturedCustomers } from "./FeaturedCustomers";
 import { BulletList } from "./BulletList";
 import securityVisual from "./img/visuals/visual-security.svg";
+import { COMPANIES } from "./Usage";
 
 const architecture = [
   {
@@ -30,7 +31,7 @@ const architecture = [
 const openApis = [
   { label: "50M+ SDK installs/month", href: "/careers#public-metrics" },
   { label: "10+ billion observations processed per month" },
-  { label: "2300+ customers" },
+  { label: `${COMPANIES.toLocaleString("en-US")}+ companies`, href: "/why" },
   { label: "99.9% uptime" },
 ];
 

@@ -1,5 +1,6 @@
 import { getGitHubStars } from "@/lib/github-stars";
 import {
+  COMPANIES,
   DOCKER_PULLS,
   FORTUNE_50_COMPANIES,
   FORTUNE_500_COMPANIES,
@@ -23,6 +24,13 @@ export const CredibilitySentence = ({
       <div className={className}>
         <p>Langfuse is the most widely adopted LLM Engineering platform:</p>
         <ul className="mt-2 list-disc list-inside space-y-1">
+          <li>
+            Used by{" "}
+            <Metric className={metricClassName}>
+              {COMPANIES.toLocaleString("en-US")}+
+            </Metric>{" "}
+            companies
+          </li>
           <li>
             <Metric className={metricClassName}>
               {getGitHubStars().toLocaleString()}
@@ -52,7 +60,11 @@ export const CredibilitySentence = ({
 
   return (
     <p className={className}>
-      Langfuse is the most widely adopted LLM Engineering platform with{" "}
+      Langfuse is the most widely adopted LLM Engineering platform, used by{" "}
+      <Metric className={metricClassName}>
+        {COMPANIES.toLocaleString("en-US")}+ companies
+      </Metric>
+      , with{" "}
       <Metric className={metricClassName}>
         {getGitHubStars().toLocaleString()} GitHub stars
       </Metric>

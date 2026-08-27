@@ -7,6 +7,7 @@ import { HomeSection } from "./HomeSection";
 import { Heading } from "@/components/ui/heading";
 import { TextHighlight } from "@/components/ui/text-highlight";
 import { Text } from "@/components/ui/text";
+import { COMPANIES } from "./Usage";
 
 const reasons = [
   {
@@ -43,7 +44,7 @@ const reasons = [
   },
   {
     title: "Production-proven",
-    body: "Billions of events processed per month. 50M+ SDK installs/month. Fortune 50 deployments.",
+    body: `${COMPANIES.toLocaleString("en-US")}+ companies. Billions of events processed per month. 50M+ SDK installs/month. Fortune 50 deployments.`,
   },
   {
     title: "Shipping velocity",

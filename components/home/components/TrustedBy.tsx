@@ -3,7 +3,7 @@
  *
  * This displays customer logos for each pricing tier.
  * When customers are available, shows logos with hover tooltips.
- * When no customers are assigned to a tier, falls back to "40,000+ builders" text.
+ * When no customers are assigned to a tier, falls back to "50,000+ companies" text.
  *
  * getting the logos from data/trusted-by.ts
  * Used by: components/home/components/TrustedBy.tsx
@@ -33,7 +33,7 @@ interface TrustedByProps {
 
 export function TrustedBy({
   customers,
-  fallbackText = "40,000+ builders",
+  fallbackText = "50,000+ companies",
   className = "",
 }: TrustedByProps) {
   return (
