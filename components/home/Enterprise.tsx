@@ -31,7 +31,10 @@ const architecture = [
 const openApis = [
   { label: "50M+ SDK installs/month", href: "/careers#public-metrics" },
   { label: "10+ billion observations processed per month" },
-  { label: `${COMPANIES.toLocaleString("en-US")}+ companies`, href: "/why" },
+  {
+    label: `${COMPANIES.toLocaleString("en-US")}+ companies using Langfuse`,
+    href: "/why",
+  },
   { label: "99.9% uptime" },
 ];
 

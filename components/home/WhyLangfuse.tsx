@@ -44,7 +44,7 @@ const reasons = [
   },
   {
     title: "Production-proven",
-    body: `${COMPANIES.toLocaleString("en-US")}+ companies. Billions of events processed per month. 50M+ SDK installs/month. Fortune 50 deployments.`,
+    body: `${COMPANIES.toLocaleString("en-US")}+ companies using Langfuse. Billions of events processed per month. 50M+ SDK installs/month. Fortune 50 deployments.`,
   },
   {
     title: "Shipping velocity",

@@ -34,7 +34,7 @@ interface TrustedByProps {
 
 export function TrustedBy({
   customers,
-  fallbackText = `${COMPANIES.toLocaleString("en-US")}+ companies`,
+  fallbackText = `${COMPANIES.toLocaleString("en-US")}+ companies using Langfuse`,
   className = "",
 }: TrustedByProps) {
   return (
