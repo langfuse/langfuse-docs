@@ -58,7 +58,7 @@ interface ToAppButtonProps {
 
 export const ToAppButton = ({
   signedInText = "Launch App",
-  signUpText = "Launch App",
+  signUpText = "Start free",
   dropdownText = "Launch App",
 }: ToAppButtonProps = {}) => {
   const signedInRegions = useCloudRegionSignIn();
