@@ -207,7 +207,7 @@ async function handleRequest(userInput: string) {
     subtitle: "Collect feedback and run evaluations.",
     body: "Run online/offline evals, via UI (experiment with prompts/models) and via SDKs (experiment with end-to-end application). Build datasets from traces to continuously improve your evals. View results in UI.",
     docsHref: "/docs/evaluation/overview",
-    quickstartHref: "/docs/evaluation/get-started",
+    quickstartHref: "/docs/evaluation/get-started/online",
     image: {
       light: EvalsPng,
       dark: EvalsPng,

@@ -1,42 +1,34 @@
 ---
-title: Get Started
-sidebarTitle: Get Started
+title: Online Evaluation
+sidebarTitle: Online Evaluation
 description: Score live production traces in Langfuse. Set up an evaluator and a rule to run LLM-as-a-Judge or code checks on incoming observations.
 ---
 
 # Get Started with Online Evaluation
 
-This guide walks you through scoring live production traces in Langfuse. If you're looking to understand what evaluation is and how online and offline evaluation fit together, check out the [Evaluation Overview](/docs/evaluation/overview) first. For how evaluators, scores, rules, and experiments relate, see [Core Concepts](/docs/evaluation/core-concepts).
-
-Online evaluation scores incoming production observations as they arrive. Use it to catch regressions, unexpected inputs, and quality drift in real traffic. To test a change against a fixed dataset before you ship, use [experiments](/docs/evaluation/core-concepts#experiments) instead.
+This guide walks you through scoring live production traces in Langfuse. If you don't yet know what to evaluate, start with the [Langfuse Academy](/academy/evaluate). For how evaluators, scores, and rules fit together, see [Core Concepts](/docs/evaluation/core-concepts).
 
 import { Details, Summary } from "@/components/Details";
 import { FaqPreview } from "@/components/faq/FaqPreview";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
 
-<Callout type="info">
-
-New to evaluation as a discipline? [Langfuse Academy](/academy/evaluate) explains how manual review, code checks, and LLM-as-a-judge fit together, and how to choose what to measure.
-
-</Callout>
-
 <div className="rounded-lg border bg-muted-blue/5 px-6 pb-6 [&>h2]:mt-6 [&>h2]:mb-4">
 
 ## Agentic installation [#agentic-installation]
 
-Install the [Langfuse Agent Skill](https://github.com/langfuse/skills) to let your coding agent set up evaluators and evaluation rules for you.
+Install the [Langfuse Agent Skill](https://github.com/langfuse/skills) to let your coding agent access all Langfuse features.
 
 <Tabs items={["Ask your coding agent", "Cursor plugin", "Manual installation"]}>
 
 <Tab>
 
-Ask your coding agent to install the skill by pointing to the [GitHub repository](https://github.com/langfuse/skills) and instruct it to set up online evaluation.
+Ask your coding agent to install the skill by pointing to the [GitHub repository](https://github.com/langfuse/skills) and instruct it to get started with online evaluation.
 
 ```txt filename="Agent instruction"
 Install the Langfuse Agent Skill from github.com/langfuse/skills
-and use it to set up online evaluation that scores live production
-traces for this application with Langfuse.
+and use it to set up online evaluation for this application
+with Langfuse.
 ```
 
 </Tab>
@@ -60,8 +52,7 @@ Langfuse has a [Cursor Plugin](https://cursor.com/docs/plugins) that includes th
 Then prompt your agent:
 
 ```txt filename="Agent instruction"
-Set up online evaluation that scores live production traces for this
-application with Langfuse.
+Set up online evaluation for this application with Langfuse.
 ```
 
 </Tab>
@@ -106,8 +97,7 @@ ln -s /path/to/langfuse-skills/skills/langfuse /path/to/<agent-skill-root>/skill
 Then prompt your agent:
 
 ```txt filename="Agent instruction"
-Set up online evaluation that scores live production traces for this
-application with Langfuse.
+Set up online evaluation for this application with Langfuse.
 ```
 
 </Tab>
