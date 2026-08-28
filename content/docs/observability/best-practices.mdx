@@ -62,17 +62,10 @@ A tool call should nest under the `agent` or `span` that orchestrates the step, 
 
 Framework integrations usually get this right automatically. If you're instrumenting manually, see [nesting observations](/docs/observability/sdk/instrumentation#nesting-observations).
 
-### Are LLM calls captured between tool calls? [#llm-calls-between-tool-calls]
+**Beware of aggregating LLM calls.** You should see a <Fan size={16} className="text-muted-magenta inline" /> `generation` for each model invocation in an agent loop, interleaved with the <Wrench size={16} className="text-orange-600 inline" /> `tool` calls it requested. Avoid wrapping the whole loop in one parent generation that only records the final output. This would make it impossible to:
 
-You should see a <Fan size={16} className="text-muted-magenta inline" /> `generation` for each model invocation in an agent loop, interleaved with the <Wrench size={16} className="text-orange-600 inline" /> `tool` calls it requested. Avoid wrapping the whole loop in one parent generation that only records the final output.
-
-Agent loops typically go: the model decides to call tools, the tools run, the model sees the results, and it either calls more tools or answers. Each of those model steps is a real LLM call that's already happening — capture it.
-
-If you collapse them into a single generation, you lose the in-between:
-
-- You can't see what the agent decided after each tool result.
-- Tokens and [cost](/docs/observability/features/token-and-cost-tracking) are aggregated on one span, so you can't tell which step blew up the context window.
-- Evaluators and dashboards that target generations can't score or filter individual model steps.
+- see what the agent decided after each tool result
+- see which tool call has blown up your agent's context window (useful when optimizing cost)
 
 <div className="grid grid-cols-1 md:grid-cols-2 mt-4 gap-4">
 
@@ -93,8 +86,6 @@ If you collapse them into a single generation, you lose the in-between:
 </div>
 
 </div>
-
-Framework integrations usually emit one generation per model call. If you're instrumenting manually, start a new `generation` for every LLM round-trip and nest the tools it requested as siblings under the same `agent` or `span`.
 
 ### Is there noise you don't need?
 
