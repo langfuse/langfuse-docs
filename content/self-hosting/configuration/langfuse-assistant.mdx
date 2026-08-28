@@ -9,48 +9,56 @@ sidebarTitle: "Langfuse Assistant"
 
 This page covers self-hosted infrastructure setup. For an introduction to the feature, see [Langfuse Assistant](/docs/langfuse-assistant).
 
-Assistant runs are durable jobs. The web service admits and enqueues them, and the worker claims and executes them, so both need the same Postgres, Redis, and Langfuse AI model. Web calls the model directly for [Ask AI](/docs/observability/features/filter-search-bar#ask-ai) and conversation titles; the worker runs the Assistant itself. The sandbox is worker-only. The Assistant is available on all self-hosted plans and does not require an Enterprise Edition license key.
-
-Configure the model, the sandbox, and worker MCP access first, then [turn the Assistant on](#turn-on-the-assistant). Every variable on this page is also listed in the [configuration reference](/self-hosting/configuration#langfuse-assistant).
-
 <Callout type="info">
   The Langfuse Assistant is in public beta on self-hosted deployments, from
   version `>=v4.22.0`. The Langfuse Assistant is not covered by SemVer.
   Configuration may change between releases.
 </Callout>
 
+## What runs where [#what-runs-where]
+
+Assistant runs are durable jobs. The web service admits and enqueues them, and the worker claims and executes them, so both need the same Postgres, Redis, and Langfuse AI model. Web calls the model directly for [Ask AI](/docs/observability/features/filter-search-bar#ask-ai) and conversation titles; the worker runs the Assistant itself. The sandbox is worker-only.
+
+| Component                                                    | Status                       | Changes needed                                                                                                                                                          |
+| ------------------------------------------------------------ | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <span className="whitespace-nowrap">Langfuse Web</span>      | Existing                     | [Configure model access](#configure-the-model) and [enable the Assistant](#turn-on-the-assistant). The built-in MCP server runs here.                                   |
+| <span className="whitespace-nowrap">Langfuse Worker</span>   | Existing                     | [Configure model access](#configure-the-model), [MCP access to web](#langfuse-mcp), and [enable the Assistant](#turn-on-the-assistant). This service executes the runs. |
+| <span className="whitespace-nowrap">Langfuse AI model</span> | New, required dependency     | [Configure a supported provider and model](#configure-the-model) for web and worker.                                                                                    |
+| <span className="whitespace-nowrap">Execution sandbox</span> | New, optional infrastructure | Optionally [deploy an AWS Lambda MicroVM](#sandbox) for isolated file and code execution; worker only.                                                                  |
+
+Configure the model and worker MCP access, optionally add a sandbox, then [turn the Assistant on](#turn-on-the-assistant). Every variable on this page is also listed in the [configuration reference](/self-hosting/configuration#langfuse-assistant).
+
 ## Configure the model [#configure-the-model]
 
-`LANGFUSE_AI_MODEL` sets the model used for the Langfuse Assistant. If `LANGFUSE_AI_SMALL_MODEL` is set, it is used for supplementary calls, such as chat naming, instead. Set both on the web and the worker service.
+[AI features](/security/ai-features) support Amazon Bedrock's Converse API, the Anthropic Messages API, and OpenAI-compatible Chat Completions or Responses APIs.
 
-We recommend Claude Opus 5. The Assistant's system prompt and tool loop are developed against it, and it handles the long multi-step tool use the Assistant depends on. Other models work, and the `openai` provider accepts any OpenAI-compatible endpoint, but expect more variance in tool calling and instruction following.
+Set `LANGFUSE_AI_MODEL` and `LANGFUSE_AI_SMALL_MODEL` on both the web and worker services:
 
-`LANGFUSE_AI_PROVIDER` selects the backend. An unset provider resolves to `bedrock`. An incomplete configuration counts as unconfigured, and the UI then reports that the model is not configured.
+- `LANGFUSE_AI_MODEL` sets the primary model used for the Langfuse Assistant.<br />
+  **Recommended model: Claude Opus 5.** The Assistant's system prompt and tool loop are developed against it, and it handles the long multi-step tool use the Assistant depends on. Other models work, but expect more variance in tool calling and instruction following.
+- `LANGFUSE_AI_SMALL_MODEL` sets an optional model for supplementary calls, such as conversation titles. If unset, these calls use `LANGFUSE_AI_MODEL`.
 
-| Variable                         | `bedrock` | `anthropic` | `openai` |
-| -------------------------------- | --------- | ----------- | -------- |
-| `LANGFUSE_AI_MODEL`              | required  | required    | required |
-| `LANGFUSE_AI_SMALL_MODEL`        | optional  | optional    | optional |
-| `LANGFUSE_AI_API_KEY`            | not used  | required    | required |
-| `LANGFUSE_AI_BASE_URL`           | not used  | optional    | optional |
-| `LANGFUSE_AI_EXTRA_HEADERS`      | not used  | optional    | optional |
-| `LANGFUSE_AI_USE_RESPONSES_API`  | not used  | not used    | optional |
-| `LANGFUSE_AI_AWS_BEDROCK_REGION` | optional  | not used    | not used |
-
-Bedrock authenticates through the AWS credential chain rather than an API key. Set `LANGFUSE_AI_BASE_URL` to the full API base including `/v1`, such as `https://gateway.internal/v1`. `LANGFUSE_AI_EXTRA_HEADERS` takes a JSON object of header names and values; invalid JSON fails validation at boot.
+`LANGFUSE_AI_PROVIDER` selects the backend. An incomplete configuration counts as unconfigured, and the UI then reports that the model is not configured.
 
 <Tabs items={["Amazon Bedrock", "Anthropic Messages", "OpenAI-compatible"]}>
 
 <Tab>
 
 ```bash
+# Optional: Bedrock is the default provider
 LANGFUSE_AI_PROVIDER=bedrock
+
+# Required for Amazon Bedrock
 LANGFUSE_AI_MODEL=eu.anthropic.claude-opus-5
+
+# Optional
 LANGFUSE_AI_SMALL_MODEL=eu.anthropic.claude-haiku-4-5-20251001-v1:0
 LANGFUSE_AI_AWS_BEDROCK_REGION=eu-west-1
 ```
 
-Activate model access for these models in the AWS account you point Langfuse at. You can confirm access by running the same model from the Bedrock model catalog in the AWS console before configuring Langfuse.
+Bedrock authenticates through the AWS credential chain rather than `LANGFUSE_AI_API_KEY`.
+
+Before configuring Langfuse, activate both models from the Bedrock model catalog. The first invocation of a third-party model starts an AWS Marketplace subscription, and Anthropic models also require the first-time-use form. Use an administrator identity to complete this once so the Langfuse runtime role can remain invoke-only. See [Request access to models](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html), and confirm each model works in the Bedrock playground before proceeding.
 
 IDs such as `eu.anthropic.claude-opus-5` are geo inference profiles (`eu.*`, `us.*`, `jp.*`) rather than on-demand foundation-model IDs, so use the profile ID as the model value. The Region is optional when the workload already runs in the Bedrock Region.
 
@@ -77,30 +85,44 @@ Langfuse resolves AWS credentials the same way the AWS CLI does, through the [de
 <Tab>
 
 ```bash
+# Required for Anthropic
 LANGFUSE_AI_PROVIDER=anthropic
 LANGFUSE_AI_MODEL=claude-opus-5
-LANGFUSE_AI_SMALL_MODEL=claude-haiku-4-5
 LANGFUSE_AI_API_KEY=sk-ant-...
+
+# Optional
+LANGFUSE_AI_SMALL_MODEL=claude-haiku-4-5
+# Defaults to https://api.anthropic.com/v1; include /v1 for custom endpoints
+# LANGFUSE_AI_BASE_URL=https://gateway.internal/v1
+# LANGFUSE_AI_EXTRA_HEADERS={"X-Gateway-Token":"..."}
 ```
 
-`LANGFUSE_AI_BASE_URL` is optional and accepts any Anthropic-protocol origin.
+When `LANGFUSE_AI_BASE_URL` is unset, Langfuse calls `https://api.anthropic.com/v1`. For a custom Anthropic-compatible endpoint, set the full API base including `/v1`. `LANGFUSE_AI_EXTRA_HEADERS` is optional and must be a valid JSON object; invalid JSON fails validation at boot.
 
 </Tab>
 
 <Tab>
 
-Use this provider for OpenAI and for OpenAI-compatible gateways and proxies:
-
 ```bash
+# Required for OpenAI-compatible providers
 LANGFUSE_AI_PROVIDER=openai
 LANGFUSE_AI_MODEL=gpt-5.6-sol
-LANGFUSE_AI_SMALL_MODEL=gpt-5.6-luna
 LANGFUSE_AI_API_KEY=...
-LANGFUSE_AI_BASE_URL=https://your-gateway.internal/v1
-LANGFUSE_AI_EXTRA_HEADERS={"X-Gateway-Token":"..."}
+
+# Optional
+LANGFUSE_AI_SMALL_MODEL=gpt-5.6-luna
+# Defaults to https://api.openai.com/v1; required for other endpoints
+# LANGFUSE_AI_BASE_URL=https://your-gateway.internal/v1
+# LANGFUSE_AI_EXTRA_HEADERS={"X-Gateway-Token":"..."}
+# Unset uses Responses for api.openai.com and Chat Completions elsewhere
+# LANGFUSE_AI_USE_RESPONSES_API=true
 ```
 
-The model must support OpenAI-style tool calling; the Assistant runs a tool loop and has no fallback for models without it. Set `LANGFUSE_AI_USE_RESPONSES_API=true` to use the Responses API instead of Chat Completions, which requires the endpoint to serve `POST {base}/responses`.
+Use this provider for OpenAI and for OpenAI-compatible gateways and proxies.
+
+When `LANGFUSE_AI_BASE_URL` is unset, Langfuse calls `https://api.openai.com/v1`. Set it, including `/v1`, for any other OpenAI-compatible endpoint. `LANGFUSE_AI_EXTRA_HEADERS` is optional and must be a valid JSON object; invalid JSON fails validation at boot.
+
+The model must support OpenAI-style tool calling; the Assistant runs a tool loop and has no fallback for models without it. When `LANGFUSE_AI_USE_RESPONSES_API` is unset, Langfuse uses Responses for `api.openai.com` and Chat Completions for other endpoints. Set it to `true` or `false` to override that choice. Responses requires the endpoint to serve `POST {base}/responses`.
 
 </Tab>
 
@@ -108,16 +130,40 @@ The model must support OpenAI-style tool calling; the Assistant runs a tool loop
 
 For what leaves your instance and how to enable AI features, see [AI feature security](/security/ai-features).
 
-## Sandbox
+## Worker access to the MCP server [#langfuse-mcp]
 
-The sandbox backs the Assistant's file and code-execution tools. Set `LANGFUSE_IN_APP_AGENT_SANDBOX_PROVIDER` on the worker:
+The Assistant reaches Langfuse data through this instance's native [Langfuse MCP server](/docs/api-and-data-platform/features/mcp-server#set-up). There is no separate MCP process to install. The worker calls `{NEXTAUTH_URL}/api/public/mcp`.
+
+Set the same public `NEXTAUTH_URL` on web and worker when the worker can reach that URL through DNS, TLS, and the load balancer. When it cannot, point the worker at the internal web URL and add that hostname to `LANGFUSE_MCP_ALLOWED_HOSTS` on web. This applies to Docker Compose service names, Kubernetes in-cluster services, and reverse proxies that rewrite `Host`.
+
+If the worker cannot reach the public `NEXTAUTH_URL` in Docker Compose, create an overlay file named `docker-compose.mcp.yml` alongside `docker-compose.yml`:
+
+```yaml filename="docker-compose.mcp.yml"
+services:
+  langfuse-web:
+    environment:
+      LANGFUSE_MCP_ALLOWED_HOSTS: langfuse-web
+  langfuse-worker:
+    environment:
+      NEXTAUTH_URL: http://langfuse-web:3000
+```
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.mcp.yml up -d --force-recreate langfuse-web langfuse-worker
+```
+
+Recreate both services after changing these values. A restart does not re-interpolate environment variables.
+
+## Sandbox [#sandbox]
+
+The sandbox lets the Assistant efficiently analyze thousands of observations by processing them with code instead of loading every observation into the model context. The sandbox isolates this code from your Langfuse worker. Choose one of these worker configurations:
 
 | Sandbox            | Value            | Use for                            | Tools                                     |
 | ------------------ | ---------------- | ---------------------------------- | ----------------------------------------- |
 | AWS Lambda MicroVM | `lambda-microvm` | Production self-hosted deployments | Langfuse tools, files, and code execution |
 | None               | unset            | Deployments that are not on AWS    | Langfuse tools only                       |
 
-With no provider set, the Assistant still runs its Langfuse tools and the file and code-execution tools are unavailable.
+With no sandbox provider configured, the Assistant still runs its Langfuse tools and the file and code-execution tools are unavailable.
 
 <Callout type="warning">
   There is no non-AWS sandbox yet. For sandboxed execution on other platforms,
@@ -125,23 +171,7 @@ With no provider set, the Assistant still runs its Langfuse tools and the file a
   Discussions](https://github.com/orgs/langfuse/discussions).
 </Callout>
 
-`lambda-microvm` is not a single switch. It needs AWS resources you create yourself, an image you build in your own account, and five variables. Provider, image, execution role, and Region are required together, and a partial configuration fails at worker boot:
-
-```bash
-LANGFUSE_IN_APP_AGENT_SANDBOX_PROVIDER=lambda-microvm
-LANGFUSE_IN_APP_AGENT_SANDBOX_AWS_LAMBDA_MICROVM_IMAGE_IDENTIFIER=arn:aws:lambda:<region>:<account-id>:microvm-image:<image-name>
-LANGFUSE_IN_APP_AGENT_SANDBOX_AWS_LAMBDA_MICROVM_EXECUTION_ROLE_ARN=arn:aws:iam::<account-id>:role/<execution-role>
-LANGFUSE_IN_APP_AGENT_SANDBOX_AWS_LAMBDA_MICROVM_REGION=<region>
-LANGFUSE_IN_APP_AGENT_SANDBOX_AWS_LAMBDA_MICROVM_EGRESS_NETWORK_CONNECTOR_ARN=arn:aws:lambda:<region>:<account-id>:network-connector:<egress-connector-name>
-```
-
-<Callout type="warning">
-  Production isolation requires the egress network connector. Langfuse starts
-  without it, but AWS then attaches its default `INTERNET_EGRESS` connector and
-  sandboxed code reaches the public internet. An invalid connector ARN fails the
-  MicroVM launch rather than falling back to internet egress. See [Lambda MicroVM
-  networking](https://docs.aws.amazon.com/lambda/latest/dg/microvms-networking.html).
-</Callout>
+`lambda-microvm` is not a single switch. It needs AWS resources you create yourself, an image you build in your own account, and environment variables.
 
 ### AWS prerequisites
 
@@ -149,7 +179,7 @@ Create these before configuring the worker:
 
 | Resource                   | Purpose                                                         | Notes                                                                                                                                                                                                            |
 | -------------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| S3 bucket                  | Holds the zip artifact that Lambda reads during the image build | Can be deleted after the build                                                                                                                                                                                   |
+| S3 bucket                  | Holds the zip artifact that Lambda reads during the image build | Keep it for image rebuilds during upgrades                                                                                                                                                                       |
 | MicroVM **build** role     | Lambda assumes it during `CreateMicrovmImage`                   | Trust `lambda.amazonaws.com` with `sts:AssumeRole` and `sts:TagSession`; allow `s3:GetObject` on the artifact and writes to the build CloudWatch log groups; no Langfuse database, application, or secret access |
 | MicroVM **execution** role | The identity the MicroVM guest runs as                          | Trust `lambda.amazonaws.com` with `sts:AssumeRole` and `sts:TagSession`, and attach no policies                                                                                                                  |
 | Security group             | Denies all guest traffic                                        | No ingress rules and no egress rules                                                                                                                                                                             |
@@ -220,43 +250,39 @@ Grant the worker permission to run the image, pass the execution role, and pass 
 
 See [Lambda MicroVM networking](https://docs.aws.amazon.com/lambda/latest/dg/microvms-networking.html).
 
-### Upgrading
+### Configure the worker
 
-Rebuild and republish the MicroVM image whenever you upgrade Langfuse, and treat the image as part of the deployment rather than a one-time setup step. Nothing checks that the image matches the worker, so a stale image surfaces as failing file or bash tools at run time rather than as an error at boot.
-
-## Worker access to the MCP server [#langfuse-mcp]
-
-The Assistant reaches Langfuse data through this instance's native [Langfuse MCP server](/docs/api-and-data-platform/features/mcp-server#set-up). There is no separate MCP process to install. The worker calls `{NEXTAUTH_URL}/api/public/mcp`.
-
-Set the same public `NEXTAUTH_URL` on web and worker when the worker can reach that URL through DNS, TLS, and the load balancer. When it cannot, point the worker at the internal web URL and add that hostname to `LANGFUSE_MCP_ALLOWED_HOSTS` on web. This applies to Docker Compose service names, Kubernetes in-cluster services, and reverse proxies that rewrite `Host`.
-
-Docker Compose shares one `NEXTAUTH_URL` between both services, so Compose deployments need an overlay:
-
-```yaml filename="docker-compose.mcp.yml"
-services:
-  langfuse-web:
-    environment:
-      LANGFUSE_MCP_ALLOWED_HOSTS: langfuse-web
-  langfuse-worker:
-    environment:
-      NEXTAUTH_URL: http://langfuse-web:3000
-```
+After creating the AWS resources and building the image, configure all five variables on the worker. Provider, image, execution role, and Region are required together, and a partial configuration fails at worker boot:
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.mcp.yml up -d --force-recreate langfuse-web langfuse-worker
+LANGFUSE_IN_APP_AGENT_SANDBOX_PROVIDER=lambda-microvm
+LANGFUSE_IN_APP_AGENT_SANDBOX_AWS_LAMBDA_MICROVM_IMAGE_IDENTIFIER=arn:aws:lambda:<region>:<account-id>:microvm-image:<image-name>
+LANGFUSE_IN_APP_AGENT_SANDBOX_AWS_LAMBDA_MICROVM_EXECUTION_ROLE_ARN=arn:aws:iam::<account-id>:role/<execution-role>
+LANGFUSE_IN_APP_AGENT_SANDBOX_AWS_LAMBDA_MICROVM_REGION=<region>
+LANGFUSE_IN_APP_AGENT_SANDBOX_AWS_LAMBDA_MICROVM_EGRESS_NETWORK_CONNECTOR_ARN=arn:aws:lambda:<region>:<account-id>:network-connector:<egress-connector-name>
 ```
 
-Recreate both services after changing these values. A restart does not re-interpolate environment variables.
+<Callout type="warning">
+  Production isolation requires the egress network connector. Langfuse starts
+  without it, but AWS then attaches its default `INTERNET_EGRESS` connector and
+  sandboxed code reaches the public internet. An invalid connector ARN fails the
+  MicroVM launch rather than falling back to internet egress. See [Lambda MicroVM
+  networking](https://docs.aws.amazon.com/lambda/latest/dg/microvms-networking.html).
+</Callout>
+
+### Upgrading
+
+Rebuild and republish the MicroVM image whenever you upgrade Langfuse, and treat the image as part of the deployment rather than a one-time setup step. Build the image from the same Langfuse release to keep its available tools aligned with the worker.
 
 ## Turn on the Assistant [#turn-on-the-assistant]
 
-With the model, the sandbox, and MCP access in place, enable the Assistant on both the web and worker services:
+With the model and MCP access in place, and optionally the sandbox, enable the Assistant on both the web and worker services:
 
 ```bash
 LANGFUSE_IN_APP_AGENT_ENABLED=true
 ```
 
-Unset or `false` hides the Assistant even when **AI Features** is enabled for the organization. Workers that have it set consume the Assistant run queue, so set it only on workers you want executing runs. An ingestion-only worker should leave it unset.
+Unset or `false` hides the Assistant even when **AI Features** is enabled for the organization. Workers that have it set consume the Assistant run queue, so set it only on workers you want executing runs. An ingestion-only worker should leave it unset or `false`.
 
 Then enable the feature for your organization:
 
@@ -294,7 +320,7 @@ Record the Assistant's own runs as traces in a project on this instance, which i
 LANGFUSE_AI_FEATURES_PROJECT_ID=<project-id>
 ```
 
-Assistant turns and Ask AI completions then appear as traces in that project, under the environment `langfuse-in-app-agent` and tagged with the project the request came from. Langfuse writes them through the same internal ingestion path as any other data on the instance, so this needs no API keys and makes no outbound requests. Leave the variable unset to record nothing.
+Assistant turns and Ask AI completions then appear as traces in that project, and tagged with the project the request came from. Langfuse writes them through the same internal ingestion path as any other data on the instance, so this needs no API keys and makes no outbound requests. Leave the variable unset to record nothing.
 
 <Callout type="warning">
   Use a project dedicated to this. Assistant traces contain the prompts, tool
@@ -302,16 +328,6 @@ Assistant turns and Ask AI completions then appear as traces in that project, un
   from your other projects. Anyone with access to the target project can read
   it.
 </Callout>
-
-## Queue and runtime knobs
-
-These optional variables tune execution behavior:
-
-| Variable                                                 | Description                                                                     |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `LANGFUSE_IN_APP_AGENT_RUN_QUEUE_PROCESSING_CONCURRENCY` | Concurrent Assistant runs on the worker. Defaults to `5`.                       |
-| `LANGFUSE_IN_APP_AGENT_MAX_ACTIVE_RUNS_PER_USER`         | Concurrent runs admitted per user on the web service. Defaults to `5`.          |
-| `LANGFUSE_IN_APP_AGENT_MAX_ACTIVE_RUNS_PER_ORG`          | Concurrent runs admitted per organization on the web service. Defaults to `20`. |
 
 import {
   Accordion,
@@ -341,9 +357,10 @@ import {
     </AccordionContent>
   </AccordionItem>
   <AccordionItem value="init-agent">
-    <AccordionTrigger>Runs fail with `Error initializing agent`</AccordionTrigger>
+    <AccordionTrigger>Runs fail during agent initialization</AccordionTrigger>
     <AccordionContent>
-      The worker could not connect to the MCP server. Confirm it can reach
+      If the UI shows `Error initializing agent`, the worker could not connect
+      to the MCP server. Confirm it can reach
       `{NEXTAUTH_URL}/api/public/mcp`. On Docker Compose the first symptom is
       `ECONNREFUSED` on loopback, followed by `MCP_CLIENT_CONNECT_FAILED`. A
       `403` with `Invalid Host header` instead means the worker reached web on a
@@ -364,6 +381,8 @@ import {
     <AccordionContent>
       Check the Region, Bedrock model access, and the invoke permissions in
       [Configure the model](#configure-the-model). An `AccessDeniedException`
+      that mentions an AWS Marketplace subscription means an administrator must
+      activate the model for the account first. An `AccessDeniedException`
       naming a `foundation-model` ARN in another Region means the role is scoped
       to the invoke Region only.
     </AccordionContent>
