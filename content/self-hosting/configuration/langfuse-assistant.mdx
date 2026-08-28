@@ -11,7 +11,7 @@ This page covers self-hosted infrastructure setup. For an introduction to the fe
 
 <Callout type="info">
   The Langfuse Assistant is in public beta on self-hosted deployments, from
-  version `>=v4.22.0`. The Langfuse Assistant is not covered by SemVer.
+  version `>=v4.24.0`. The Langfuse Assistant is not covered by SemVer.
   Configuration may change between releases.
 </Callout>
 
@@ -32,23 +32,22 @@ Configure the model and worker MCP access, optionally add a sandbox, then [turn 
 
 [AI features](/security/ai-features) support Amazon Bedrock's Converse API, the Anthropic Messages API, and OpenAI-compatible Chat Completions or Responses APIs.
 
-Set `LANGFUSE_AI_MODEL` and `LANGFUSE_AI_SMALL_MODEL` on both the web and worker services:
+Set `LANGFUSE_AI_PROVIDER` and `LANGFUSE_AI_MODEL` on both the web and worker services. `LANGFUSE_AI_SMALL_MODEL` is optional:
 
+- `LANGFUSE_AI_PROVIDER` selects `bedrock`, `anthropic`, or `openai` and is required to enable Langfuse AI. If unset, Langfuse AI remains unconfigured.
 - `LANGFUSE_AI_MODEL` sets the primary model used for the Langfuse Assistant.<br />
   **Recommended model: Claude Opus 5.** The Assistant's system prompt and tool loop are developed against it, and it handles the long multi-step tool use the Assistant depends on. Other models work, but expect more variance in tool calling and instruction following.
 - `LANGFUSE_AI_SMALL_MODEL` sets an optional model for supplementary calls, such as conversation titles. If unset, these calls use `LANGFUSE_AI_MODEL`.
 
-`LANGFUSE_AI_PROVIDER` selects the backend. An incomplete configuration counts as unconfigured, and the UI then reports that the model is not configured.
+An incomplete provider configuration also counts as unconfigured, and the UI then reports that the model is not configured.
 
 <Tabs items={["Amazon Bedrock", "Anthropic Messages", "OpenAI-compatible"]}>
 
 <Tab>
 
 ```bash
-# Optional: Bedrock is the default provider
-LANGFUSE_AI_PROVIDER=bedrock
-
 # Required for Amazon Bedrock
+LANGFUSE_AI_PROVIDER=bedrock
 LANGFUSE_AI_MODEL=eu.anthropic.claude-opus-5
 
 # Optional
@@ -371,9 +370,10 @@ import {
   <AccordionItem value="model-unconfigured">
     <AccordionTrigger>The UI reports that the model is not configured</AccordionTrigger>
     <AccordionContent>
-      Set `LANGFUSE_AI_MODEL` on both services, plus `LANGFUSE_AI_API_KEY` when
-      the provider is `anthropic` or `openai`, then recreate both services. An
-      incomplete provider configuration counts as unconfigured.
+      Set `LANGFUSE_AI_PROVIDER` and `LANGFUSE_AI_MODEL` on both services, plus
+      `LANGFUSE_AI_API_KEY` when the provider is `anthropic` or `openai`, then
+      recreate both services. An unset provider or incomplete provider
+      configuration counts as unconfigured.
     </AccordionContent>
   </AccordionItem>
   <AccordionItem value="bedrock-denied">
