@@ -1,7 +1,7 @@
 ---
 title: "How Evolve built a voice AI sleep coach, traced and evaluated on Langfuse"
 date: August 18, 2026
-description: Learn how Evolve traces Rest, a voice-and-text sleep coach based on the principles of CBT-I, on Langfuse, managing 100+ composed prompts and bringing down agent memory issues from 10% to 5%
+description: Learn how Evolve traces Rest, a voice-and-text sleep coach based on the principles of CBT-I, on Langfuse, managing 100+ composed prompts and cutting the coach's memory misses in half
 ogImage: /images/customers/evolve/evolve-og.jpg
 tag: customer-story
 author: Annabell
@@ -23,7 +23,7 @@ import { ImpactChart } from "@/components/customers/ImpactChart";
 
 <BlogHeader
   title="How Evolve built a voice AI sleep coach, traced and evaluated on Langfuse"
-  description="Learn how Evolve traces Rest, a voice-and-text sleep coach based on the principles of CBT-I, on Langfuse, managing 100+ composed prompts and bringing down agent memory issues from 10% to 5%."
+  description="Learn how Evolve traces Rest, a voice-and-text sleep coach based on the principles of CBT-I, on Langfuse, managing 100+ composed prompts and cutting the coach's memory misses in half."
   customerLogo="/images/customers/evolve/evolve-light.svg"
   authors={["annabellschafer"]}
   date="August 18, 2026"
@@ -36,12 +36,12 @@ import { ImpactChart } from "@/components/customers/ImpactChart";
     {
       area: "Rest brings sleep coaching to thousands of users",
       impact:
-        "Evolve, a YC-backed company behind one of iOS's most-downloaded podcast apps, discovered a large underserved market in sleep and built Rest, a voice-and-text AI coach built on the principles of cognitive behavioral therapy for insomnia (CBT-I).",
+        "Evolve, a YC-backed company behind one of iOS's most-downloaded podcast apps, discovered a large underserved market in sleep and built Rest, a voice-and-text AI coach built on the principles of cognitive behavioral therapy for insomnia (CBT-I), circadian biology, and neuroscience.",
     },
     {
       area: "Tracing and prompt management in one place",
       impact:
-        "Rest runs on Vapi for voice and OpenAI for text chat. Langfuse traces every conversation and manages more than 100 dynamically composed prompts, including locale-specific language variants.",
+        "Rest runs on Vapi for voice and OpenAI for text chat. Langfuse traces the system end to end and manages more than 100 dynamically composed prompts, including locale-specific language variants.",
     },
     {
       area: "Error analysis drives product improvement",
@@ -51,7 +51,7 @@ import { ImpactChart } from "@/components/customers/ImpactChart";
     {
       area: "Automated monitoring for memory issues",
       impact:
-        "LLM-as-a-judge evaluators identify memory and forgetting issues, helping Evolve build confidence in Rest's behavior at scale.",
+        "LLM-as-a-judge evaluators measure the reliability of the coach's cross-session memory, helping Evolve build confidence in Rest's behavior at scale.",
     },
   ]}
 />
@@ -60,11 +60,11 @@ import { ImpactChart } from "@/components/customers/ImpactChart";
 
 [Evolve](https://getrest.app/) is a YC-backed company that's been building products for about nine years. It started with [Podcast App](https://podcast.app/), one of the most-downloaded podcast apps on iOS with more than 15 million downloads, and they're continuing to innovate today.
 
-Podcast App usage spiked late at night because listeners were using it to fall asleep. That led Evolve to investigate sleep care, where roughly 70 million Americans show symptoms of insomnia but access to CBT-I, which the American College of Physicians recommends as first-line treatment for chronic insomnia, is scarce. Credentialed CBT-I clinicians are few, waitlists can run for up to a year, and the care that is available is often small-group or costly one-to-one. Evolve works with leading sleep researchers and clinicians at institutions like UCSF, and saw an opportunity to bring CBT-I principles to more people through voice AI, at greater scale and lower cost.
+Podcast App usage spiked late at night because listeners were using it to fall asleep. That led Evolve to investigate sleep care, where roughly 70 million Americans show symptoms of insomnia but access to CBT-I, which the American College of Physicians recommends as first-line treatment for insomnia, is scarce. Clinicians trained in it are few, waitlists can run for up to a year, and the care that is available is often small-group or costly one-to-one. Evolve works with leading sleep researchers and clinicians at institutions like UCSF, and saw an opportunity to bring science-backed sleep support to more people through voice AI, at greater scale and lower cost.
 
 ## Rest: a sleep expert that never sleeps
 
-[Rest](https://getrest.app/) is Evolve's AI sleep coach. The program is based on the principles of CBT-I and was built with sleep experts. Its first part runs about eight weeks.
+[Rest](https://getrest.app/) is Evolve's AI sleep coach. The program draws on the principles of CBT-I, circadian biology, and neuroscience, and was built with sleep experts. Its first part runs about eight weeks.
 
 <CustomerScreenshotCarousel
   aspectClassName="aspect-video"
@@ -91,7 +91,7 @@ Podcast App usage spiked late at night because listeners were using it to fall a
 
 ## Tracing a voice-and-text agent end to end
 
-All of Rest's AI usage is [traced](/docs/observability/overview) in Langfuse. The voice experience runs on [Vapi](/integrations/no-code/vapi) as the orchestration layer, with ElevenLabs for voice synthesis, Deepgram for transcription, and OpenAI as the underlying LLM. Vapi has a native Langfuse integration, so voice conversations are traced automatically at the click of a button. The text-chat experience is built and traced directly on OpenAI LLM APIs in Evolve's own backend. The text experience, and also non-conversational LLM work such as background extractors that process conversations after the fact, are traced through Langfuse as well.
+All of Rest's AI usage is [traced](/docs/observability/overview) in Langfuse. The voice experience runs on [Vapi](/integrations/no-code/vapi) as the orchestration layer, with ElevenLabs for voice synthesis, Deepgram for transcription, and OpenAI as the underlying LLM. Vapi has a native Langfuse integration and works out of the box. The text-chat experience is built and traced directly on OpenAI LLM APIs in Evolve's own backend. The text experience, and also non-conversational LLM work such as background extractors that process conversations after the fact, are traced through Langfuse as well.
 
 <Frame fullWidth zoomOnMobile className="w-full">
   ![Vapi orchestrating a Rest voice turn through speech, Deepgram transcription, OpenAI reasoning, and ElevenLabs voice, with spans emitted to Langfuse](/images/customers/evolve/rest-vapi-tracing.png)
@@ -113,21 +113,21 @@ Martin reviews traces himself. Working through flagged conversations in [annotat
 
 On top of manual review, Evolve runs [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators in Langfuse to identify memory and forgetting issues.
 
-## Deep dive: fixing the AI's memory
+## Deep dive: building the coach's cross-session memory
 
-The biggest failure mode they discovered through error analysis involved memory issues.
+The most valuable thing error analysis surfaced was how much cross-session memory matters.
 
-Users were telling Rest's coach things, and the AI would respond in the moment as if it understood and would carry that forward, "sure, I'll take that into account," but then fail to retrieve it in a later conversation. Users noticed. And said so directly. And often.
+Users share context with the coach — routines, preferences, how their days look — and the coach notes it so the program can personalize around it. In a single conversation the coach was solid. The hard part is carrying context into the next conversation, days later — cross-session memory, the thing that makes personalization compound over time. Early on, some context carried forward and some didn't, and the coach wasn't as consistent about it as the team wanted.
 
 <CustomerQuote
-  quote="We found this during error analysis, and then heard the same thing in user research calls and in customer support. Users were telling the coach they'd already shared something days earlier. These patterns, you only find them when you go looking through your data."
+  quote="We found this during error analysis, and then heard the same thing in user research calls and in customer support. Users were telling the coach they'd already shared something days earlier. These patterns, you only find them when you do structured error analysis."
   name="Martín Siniawski"
   role="CEO"
   company="Evolve"
   image="/images/customers/evolve/martin-siniawski.jpg"
 />
 
-That kind of failure hits trust hard, even when the underlying product is otherwise working. Investigating it, the team realized memory has to be tackled from several angles and turned it into a project: a genuinely multi-month engineering effort, only now wrapping up. To work towards the right goal they needed to find the right examples from production data. To continuously broaden their understanding of how these failures happen, the team set up an [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) in Langfuse to catch the moments where users are frustrated specifically because of memory issues. That gives them high-signal input to better understand how to fix it at scale. The efforts paid off: The team was able to get memory issues down from 10% to only 5% of cases over the first iterations already.
+Consistency here is a trust and experience question: remembering what someone told you is a big part of feeling coached. The team decided cross-session memory had to be tackled from several angles and turned it into a project — building a next-generation memory system, a genuinely multi-month engineering effort. The [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) they set up in Langfuse flags conversations where context wasn't carried forward as expected, which meant that for the first time they could measure whether the new system was working. It was: the first iterations alone cut cross-session misses in half.
 
 ## Prompt management at scale
 
@@ -163,7 +163,7 @@ Ignacio credits responsive support and steady, visible product improvement. Mart
 
 ## What's next
 
-**Deeper eval coverage.** The product has grown substantially in complexity over the past year, and Martin wants confidence that core conversation flows are properly regression-tested before shipping changes. For this the team plans to start building out more [datasets](/docs/evaluation/experiments/datasets) in Langfuse.
+**Deeper eval coverage.** The product has grown substantially in complexity and sophistication over the past year, and the team is building out [datasets](/docs/evaluation/experiments/datasets) in Langfuse so that every core conversation flow is regression-tested as a standard part of shipping.
 
 **More proactive issue detection,** including using the Langfuse [API](/docs/api-and-data-platform/overview), [MCP server](/docs/api-and-data-platform/features/mcp-server), and [CLI](/docs/api-and-data-platform/features/cli) inside Evolve's own internal tools and admin dashboard, to pull trace data into context faster and catch problems earlier.
 
