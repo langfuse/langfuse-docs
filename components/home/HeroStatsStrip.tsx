@@ -16,7 +16,7 @@ function StatItems() {
       </Text>
       <Dot />
       <Text size="s" className="whitespace-nowrap shrink-0">
-        <b className="text-primary">10+ billion</b> observations/month
+        <b className="text-primary">90B+</b> observations/month
       </Text>
       <Dot />
       <Text size="s" className="whitespace-nowrap shrink-0">

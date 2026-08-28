@@ -10,25 +10,17 @@ import {
 import type { FeatureTabData } from "./types";
 
 import observabilityPng from "components/home/feature-tabs/img/observability-ui.png";
-import observabilityMobilePng from "components/home/feature-tabs/img/observability-mobile-ui.png";
 import metricsPng from "components/home/feature-tabs/img/cost-ui.png";
 import PromptPng from "components/home/feature-tabs/img/prompts-ui.png";
 import EvalsPng from "components/home/feature-tabs/img/evals-ui.png";
 import PlaygroundPng from "components/home/feature-tabs/img/playground-ui.png";
 import AnnotationPng from "components/home/feature-tabs/img/annotation-ui.png";
 
-export const mobileFeatureTabsData: Pick<FeatureTabData, "image"> = {
-  image: {
-    light: observabilityMobilePng,
-    dark: observabilityMobilePng,
-    alt: "Langfuse observability trace detail view showing nested observations with latency and cost",
-  },
-};
-
 export const featureTabsData: FeatureTabData[] = [
   {
     id: "observability",
     icon: TextQuote,
+    name: "Observability",
     title: "Gain deep visibility into your traces",
     subtitle: "Trace every LLM call with cost and latency.",
     body: "Capture complete traces of your LLM applications/agents. Use traces to inspect failures and build eval datasets. Based on OpenTelemetry with support for all popular LLM/agent libraries.",
@@ -84,6 +76,7 @@ export default observe(handleRequest);`,
   {
     id: "metrics",
     icon: LineChart,
+    name: "Metrics",
     title: "Track model cost and latency",
     subtitle: "Track cost, latency, and quality.",
     body: "Monitor your LLM application's performance with comprehensive metrics dashboards and APIs. Track costs, latencies, token usage, and quality scores across models, users, and time periods.",
@@ -145,6 +138,7 @@ const res = await langfuse.api.metrics.metrics({query});`,
   {
     id: "prompt-management",
     icon: GitPullRequestArrow,
+    name: "Prompt Management",
     title: "Improve your prompts",
     subtitle: "Version and deploy prompts with low latency.",
     body: "Version-control prompts collaboratively, deploy/roll-back instantly to different environments, support for templates, variables, and A/B testing. Cached client-side for 0 latency/availability impact.",
@@ -208,6 +202,7 @@ async function handleRequest(userInput: string) {
   {
     id: "evaluation",
     icon: ThumbsUp,
+    name: "Evaluation",
     title: "Evaluate model outputs automatically",
     subtitle: "Collect feedback and run evaluations.",
     body: "Run online/offline evals, via UI (experiment with prompts/models) and via SDKs (experiment with end-to-end application). Build datasets from traces to continuously improve your evals. View results in UI.",
@@ -276,6 +271,7 @@ const result = await langfuse.experiment.run({
   {
     id: "annotations",
     icon: MessageSquare,
+    name: "Annotations",
     title: "Collaborate on human reviews",
     subtitle: "Add manual feedback and corrections.",
     body: "Create manual annotations to provide feedback, corrections, and improvements to your LLM outputs. Use annotations to build high-quality datasets and set a baseline for automated evals.",
@@ -290,6 +286,7 @@ const result = await langfuse.experiment.run({
   {
     id: "playground",
     icon: FlaskConical,
+    name: "Playground",
     title: "Iterate with structured experiments",
     subtitle: "Test prompts and models interactively.",
     body: "Experiment with different prompts, models, and parameters in an interactive playground. Compare outputs, iterate on prompts, and save successful configurations to prompt management.",
