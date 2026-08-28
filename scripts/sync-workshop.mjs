@@ -440,7 +440,7 @@ function readHtmlImage(markdown, start, sourcePath) {
     end,
     value: tag.replace(
       srcAttribute,
-      `${match[1]}${match[2]}${rewrittenSrc}${match[2]}`,
+      (_match, prefix, quote) => `${prefix}${quote}${rewrittenSrc}${quote}`,
     ),
   };
 }

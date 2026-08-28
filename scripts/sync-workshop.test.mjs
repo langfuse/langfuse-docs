@@ -59,3 +59,16 @@ test("continues to rewrite Markdown image sources", () => {
     `![Map variables.](${RAW_IMAGE_BASE}/mapping.png)`,
   );
 });
+
+test("preserves dollar replacement tokens in HTML image URLs", () => {
+  const absolute =
+    '<img src="https://example.com/image.png?literal=$&$1$$" width="400" />';
+  const relative =
+    '<img src="../images/monitoring/mapping.png?literal=$&$1$$" width="400" />';
+
+  assert.equal(rewrite(absolute), absolute);
+  assert.equal(
+    rewrite(relative),
+    `<img src="${RAW_IMAGE_BASE}/mapping.png?literal=$&$1$$" width="400" />`,
+  );
+});
