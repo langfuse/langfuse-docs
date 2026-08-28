@@ -70,24 +70,23 @@ console.log("Trace URL: ", traceUrl);
 Use the interoperability of the Langfuse SDK with the Langchain integration to get the URL of a trace ([interop docs](/integrations/frameworks/langchain#interoperability)).
 
 ```ts
-// Initialize Langfuse Client
-import { CallbackHandler, Langfuse } from "langfuse-langchain";
-const langfuse = new Langfuse();
+import { CallbackHandler } from "@langfuse/langchain";
+import { startActiveObservation } from "@langfuse/tracing";
+import { LangfuseClient } from "@langfuse/client";
 
-// Create a Langfuse trace for an execution of your application
-const trace = langfuse.trace();
+const langfuse = new LangfuseClient();
+const langfuseHandler = new CallbackHandler();
 
-// Get Langchain handler for this trace
-const langfuseHandler = new CallbackHandler({ root: trace });
+await startActiveObservation("langchain-call", async (span) => {
+  await chain.invoke(
+    { input: "<user_input>" },
+    { callbacks: [langfuseHandler] },
+  );
 
-// Get the trace URL
-langfuseHandler.getTraceUrl();
-```
-
-**Deprecated:** flaky in cases of concurrent requests as it depends on the state of the handler.
-
-```ts
-handler.getTraceUrl();
+  // Get the trace URL
+  const traceUrl = await langfuse.getTraceUrl(span.traceId);
+  console.log("Trace URL: ", traceUrl);
+});
 ```
 
 </Tab>

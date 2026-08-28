@@ -1,0 +1,108 @@
+---
+title: "Tracing coding agents: Claude Code, Codex, Copilot & more"
+description: "How to trace AI coding agents with Langfuse: Claude Code, OpenAI Codex, GitHub Copilot, Cursor, and five more. Setup patterns, cost tracking, and team governance."
+tags: [guide, agents]
+---
+
+# Tracing coding agents with Langfuse
+
+AI coding agents now do real engineering work: they edit files, run terminal commands, call
+MCP tools, and burn meaningful token budgets while doing it. Tracing them answers three
+questions teams keep asking: **what did the agent actually do**, **what does it cost per
+developer or per session**, and **where does it fail or waste work**.
+
+**TL;DR:** Langfuse traces all major coding agents today. GitHub Copilot exports
+OpenTelemetry natively: point it at Langfuse's OTLP endpoint and you're done. Claude Code
+and OpenAI Codex use lifecycle hooks that ship each session to Langfuse. Cursor, Kiro,
+OpenCode, and Augment Code have dedicated integrations as well. Setup is per-developer,
+minutes each, and no proxy or gateway is required.
+
+## Three reasons teams trace coding agents
+
+Three drivers show up consistently:
+
+1. **Visibility into agent behavior.** A coding agent's session is a long chain of model
+   calls and tool executions. When it deletes the wrong file or loops on a failing test, the
+   trace shows the exact sequence: which tool ran, with what arguments, after which model
+   output. That is the same debugging value LLM tracing provides in production apps, applied
+   to your own development workflow.
+2. **Cost and usage accounting.** Coding agents are often a team's single largest LLM spend.
+   Traces carry token usage per turn, so cost per developer, per project, or per model
+   becomes a dashboard query instead of a guess.
+3. **Governance.** Platform teams rolling agents out across an organization want usage
+   grouped by user, an audit trail of what ran on which machine, and a clear policy on
+   whether prompt and code content is captured or only metadata. Tracing gives the
+   infrastructure for all three.
+
+## Supported coding agents
+
+All nine developer-tool integrations, as of July 2026:
+
+| Agent                                                          | Mechanism                                          | Setup shape                                              |
+| -------------------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------------- |
+| [Claude Code](/integrations/developer-tools/claude-code)       | Stop hook script (runs after each response)        | Hook script + Langfuse keys in env                       |
+| [OpenAI Codex](/integrations/developer-tools/codex)            | Plugin hooks (Stop hook per turn)                  | Plugin in `~/.codex/config.toml`; Node 22+, Codex 0.128+ |
+| [GitHub Copilot](/integrations/developer-tools/github-copilot) | Native OpenTelemetry export                        | Point OTLP exporter at Langfuse; no SDK, no code changes |
+| [Cursor](/integrations/developer-tools/cursor)                 | Agent-session tracing                              | See integration page                                     |
+| [Kiro IDE](/integrations/developer-tools/kiro)                 | Agent activity tracing                             | See integration page                                     |
+| [Kiro CLI](/integrations/developer-tools/kiro-cli)             | Terminal session tracing                           | See integration page                                     |
+| [OpenCode](/integrations/developer-tools/opencode)             | Session tracing (turns, tools, retries, reasoning) | See integration page                                     |
+| [Augment Code](/integrations/developer-tools/augment-code)     | Conversation + tool execution tracing              | See integration page                                     |
+| [VS Code (MCP)](/integrations/developer-tools/vscode)          | Langfuse MCP server in Copilot agent mode          | Query prompts/traces/datasets from the editor            |
+
+The VS Code entry is the inverse direction: instead of tracing the agent, it gives the agent
+access to your Langfuse data via MCP. This becomes useful once traces exist and you want to analyze them
+without leaving the editor.
+
+## What the traces let you do
+
+- **Per-developer and per-model cost dashboards.** Hook- and OTel-based integrations attach a
+  user identifier, so [dashboards](/docs/metrics/features/custom-dashboards) can break down
+  token spend by developer, project, or model: the numbers platform teams need for rollout
+  decisions and budget planning.
+- **Tool-usage analysis.** Every tool call is an observation. Which tools dominate, which
+  fail, and which precede session abandonment are all queryable.
+- **Reconstructing failed sessions.** Long agent sessions that went wrong are hard to reconstruct from
+  terminal scrollback. The trace timeline preserves the full sequence, including retries and
+  reasoning summaries where the agent exposes them.
+- **Full-text search across sessions** to find who used a specific API, pattern, or skill,
+  one of the most common asks from teams running Claude Code at scale.
+
+## Limits
+
+- **Session context files are not captured.** What `CLAUDE.md`, skills, or auto-loaded
+  context contributed to the effective system prompt is not part of what the hooks can read
+  today. You see the conversation and tool calls, not the assembled context.
+- **Hooks are per-machine and user-serviceable.** A developer can disable a hook in their
+  local config. If you need guaranteed capture for compliance, treat hook-based tracing as
+  telemetry, not enforcement. Enforcement belongs at a gateway or provider level.
+- **Web-based agents are out of scope.** Tools without hooks or telemetry export (e.g.,
+  purely web-hosted assistants) can't be traced this way.
+
+## FAQ
+
+### Can I track which Claude Code skills or rules are used?
+
+Indirectly. Skill invocations that run as tool calls appear in traces, and full-text search
+over session content finds skill mentions. The assembled context itself (which skills were
+loaded) is not captured, see limits above.
+
+### Does this work with self-hosted Langfuse?
+
+Yes. The integrations target the standard ingestion and OTLP endpoints. Check each
+integration page for minimum version requirements: the Claude Code integration requires a
+current Langfuse version, and older self-hosted deployments (v1/v2) predate the OTLP
+endpoint.
+
+### What does tracing a coding agent cost in Langfuse units?
+
+The same as any trace: sessions produce one trace per turn or per session (integration-
+dependent), with observations for model calls and tool executions. High-volume agent use is
+observable in your [billable units page](/docs/administration/billable-units) before it becomes a billing
+surprise.
+
+### Can developers opt out?
+
+Yes, hooks live in the developer's local config. For team rollouts, make tracing part of the
+standard dotfiles/setup and be explicit about what is captured. The Copilot integration's
+metadata-only default is a good template for a privacy-conservative baseline.

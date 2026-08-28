@@ -259,26 +259,48 @@ See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 </Tab>
 <Tab title="LangChain (JS/TS)">
 
-When using the [CallbackHandler](/integrations/frameworks/langchain), you can pass `mask` to the constructor:
+Masking is configured on the `LangfuseSpanProcessor` — spans created by the LangChain [CallbackHandler](/integrations/frameworks/langchain) flow through it automatically, so no LangChain-specific masking setup is needed:
 
 ```typescript
-import { CallbackHandler } from "langfuse-langchain";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { CallbackHandler } from "@langfuse/langchain";
 
-function maskingFunction(params: { data: any }) {
-  if (typeof params.data === "string" && params.data.startsWith("SECRET_")) {
-    return "REDACTED";
-  }
+const spanProcessor = new LangfuseSpanProcessor({
+  mask: ({ data }) => {
+    if (typeof data === "string" && data.startsWith("SECRET_")) {
+      return "REDACTED";
+    }
 
-  return params.data;
-}
-
-const handler = new CallbackHandler({
-  mask: maskingFunction,
+    return data;
+  },
 });
+
+const sdk = new NodeSDK({ spanProcessors: [spanProcessor] });
+sdk.start();
+
+const handler = new CallbackHandler();
 ```
 
 </Tab>
 </LangTabs>
+
+## Masking with OpenTelemetry
+
+In a pure OpenTelemetry tracing setup, mask sensitive span attributes before they reach Langfuse. You can apply masking in two places:
+
+- **In the application:** Avoid recording sensitive attributes where possible. Otherwise, use a language-specific or custom span processor or export layer to transform them before OTLP export. Choose this approach when sensitive data must not leave the application.
+- **In an OpenTelemetry Collector:** Route traces through an optional Collector and use the attributes, redaction, or transform processors to mask attributes centrally. The filter processor drops entire spans, so use it only when you intentionally want to remove spans. This approach is useful for applying a consistent policy across multiple services.
+
+```mermaid
+flowchart LR
+  App["Application (OpenTelemetry SDK)"] -->|"OTLP traces"| Collector["OpenTelemetry Collector<br/>(masking processors)"]
+  Collector -->|"OTLP/HTTP"| Langfuse["Langfuse"]
+```
+
+Collector-side masking happens after telemetry leaves the application. Deploy the Collector within the appropriate trust boundary and secure the connection between the application and Collector.
+
+See OpenTelemetry's guide to [handling sensitive data](https://opentelemetry.io/docs/security/handling-sensitive-data/) for common Collector processor patterns, and the [Langfuse OpenTelemetry integration guide](/integrations/native/opentelemetry) for export setup.
 
 ## Related resources
 

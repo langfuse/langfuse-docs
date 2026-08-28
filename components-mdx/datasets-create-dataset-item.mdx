@@ -19,6 +19,24 @@ langfuse.create_dataset_item(
 )
 ```
 
+You can also add media to dataset item `input`, `expected_output`, or `metadata`:
+
+```python
+from langfuse.media import LangfuseMedia
+
+langfuse.create_dataset_item(
+    dataset_name="visual-qa",
+    input={
+        "question": "What is shown in this image?",
+        "image": LangfuseMedia(
+            file_path="./example.jpg",
+            content_type="image/jpeg",
+        ),
+    },
+    expected_output={"label": "invoice"},
+)
+```
+
 _See [Python SDK](/docs/sdk/python/sdk-v3) docs for details on how to initialize the Python client._
 
 </Tab>
@@ -29,7 +47,7 @@ import { LangfuseClient } from "@langfuse/client";
 
 const langfuse = new LangfuseClient();
 
-await langfuse.api.datasetItems.create({
+await langfuse.dataset.createItem({
   datasetName: "<dataset_name>",
   // any JS object or value
   input: {
@@ -43,6 +61,28 @@ await langfuse.api.datasetItems.create({
   metadata: {
     model: "llama3",
   },
+});
+```
+
+You can also add media to dataset item `input`, `expectedOutput`, or `metadata`:
+
+```ts
+import { LangfuseClient, LangfuseMedia } from "@langfuse/client";
+import fs from "node:fs";
+
+const langfuse = new LangfuseClient();
+
+await langfuse.dataset.createItem({
+  datasetName: "visual-qa",
+  input: {
+    question: "What is shown in this image?",
+    image: new LangfuseMedia({
+      source: "bytes",
+      contentBytes: fs.readFileSync("./example.jpg"),
+      contentType: "image/jpeg",
+    }),
+  },
+  expectedOutput: { label: "invoice" },
 });
 ```
 

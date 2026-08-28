@@ -83,9 +83,9 @@ langfuse.create_score(
 <Tab>
 
 ```typescript
-import { Langfuse } from "langfuse";
+import { LangfuseClient } from "@langfuse/client";
 
-const langfuse = new Langfuse();
+const langfuse = new LangfuseClient();
 
 // Add correction to a trace
 langfuse.score.create({
@@ -130,17 +130,35 @@ curl -X POST https://cloud.langfuse.com/api/public/scores \
 
 ## Fetching Corrections
 
-Corrections are stored as scores and can be fetched programmatically to build datasets or analyze model performance.
+Corrections are stored as scores and can be fetched programmatically to build datasets or analyze model performance. Filter the [Scores API](/docs/api-and-data-platform/features/scores-api) by `dataType=CORRECTION`. The corrected output is in the `value` field.
 
 <Tabs items={["Python", "TypeScript", "HTTP"]}>
 <Tab>
 
-Coming soon: Fetch corrections via the SDK.
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+corrections = langfuse.api.scores_v3.get_many_v3(
+    data_type="CORRECTION",
+    fields="subject,details",
+)
+```
 
 </Tab>
 <Tab>
 
-Coming soon: Fetch corrections via the SDK.
+```typescript
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+const corrections = await langfuse.api.scoresV3.getManyV3({
+  dataType: "CORRECTION",
+  fields: "subject,details",
+});
+```
 
 </Tab>
 <Tab>

@@ -58,16 +58,30 @@ direction LR
 
 #### DatasetItem object [#datasetitem-object]
 
-| Attribute             | Type          | Required | Description                                                                                                                                                 |
-| --------------------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                  | string        | Yes      | Unique identifier for the dataset item. Dataset items are upserted on their id. Id needs to be unique (project-level) and cannot be reused across datasets. |
-| `datasetId`           | string        | Yes      | ID of the dataset this item belongs to                                                                                                                      |
-| `input`               | object        | No       | Input data for the dataset item                                                                                                                             |
-| `expectedOutput`      | object        | No       | Expected output data for the dataset item                                                                                                                   |
-| `metadata`            | object        | No       | Additional metadata for the dataset item                                                                                                                    |
-| `sourceTraceId`       | string        | No       | ID of the source trace to link this dataset item to                                                                                                         |
-| `sourceObservationId` | string        | No       | ID of the source observation to link this dataset item to                                                                                                   |
-| `status`              | DatasetStatus | No       | Status of the dataset item. Defaults to ACTIVE for newly created items. Possible values: `ACTIVE`, `ARCHIVED`                                               |
+| Attribute             | Type          | Required | Description                                                                                                                                                          |
+| --------------------- | ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                  | string        | Yes      | Unique identifier for the dataset item. Dataset items are upserted on their id. Id needs to be unique (project-level) and cannot be reused across datasets.          |
+| `datasetId`           | string        | Yes      | ID of the dataset this item belongs to                                                                                                                               |
+| `input`               | object        | No       | Input data for the dataset item                                                                                                                                      |
+| `expectedOutput`      | object        | No       | Expected output data for the dataset item                                                                                                                            |
+| `metadata`            | object        | No       | Additional metadata for the dataset item                                                                                                                             |
+| `mediaReferences`     | object[]      | No       | Resolved media references found in `input`, `expectedOutput`, and `metadata`. Included on SDK dataset fetches and API responses that include resolved dataset media. |
+| `sourceTraceId`       | string        | No       | ID of the source trace to link this dataset item to                                                                                                                  |
+| `sourceObservationId` | string        | No       | ID of the source observation to link this dataset item to                                                                                                            |
+| `status`              | DatasetStatus | No       | Status of the dataset item. Defaults to ACTIVE for newly created items. Possible values: `ACTIVE`, `ARCHIVED`                                                        |
+
+#### DatasetItemMediaReference object [#datasetitemmediareference-object]
+
+Dataset item media references point from a stored media token in `input`, `expectedOutput`, or `metadata` to a signed media download URL.
+
+| Attribute         | Type   | Required       | Description                                                                                                                                 |
+| ----------------- | ------ | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `field`           | string | Yes            | Field enum for the dataset item property containing the reference. One of `input`, `expected_output` (for `expectedOutput`), or `metadata`. |
+| `referenceString` | string | Yes            | Original Langfuse media reference string stored in the dataset item.                                                                        |
+| `jsonPath`        | string | Yes            | JSONPath of the string holding the reference inside the field, for example `$['image']`.                                                    |
+| `media`           | object | Yes (nullable) | Resolved media metadata. `null` if the referenced media does not exist or has not been uploaded successfully.                               |
+
+The nested `media` object contains `mediaId`, `contentType`, `contentLength`, `url`, and `urlExpiry`. The `url` is a signed download URL and should be used before its expiration date. To refresh the signed URL, refetch the dataset.
 
 ### DatasetRun (Experiment Run) [#datasetrun-experiment-run]
 
@@ -116,6 +130,8 @@ direction LR
 | `datasetItemId` | string | Yes      | ID of the dataset item to link to this run |
 | `traceId`       | string | Yes      | ID of the trace to link to this run        |
 | `observationId` | string | No       | ID of the observation to link to this run  |
+
+Langfuse currently assumes that experiments do not contain repetitions: each dataset item appears once per experiment. Accordingly, reads surface at most one experiment item per dataset item within an experiment. Repetition support is tracked in [#5855](https://github.com/langfuse/langfuse/issues/5855).
 
 <Callout type="info">
 Most of the time, we recommend that DatasetRunItems reference TraceIDs directly. The reference to ObservationID exists for backwards compatibility with older SDK versions.

@@ -1,0 +1,56 @@
+---
+date: 2026-08-27
+title: Manage evaluators with the stable API
+description: Create, version, and manage evaluators and evaluation rules through stable, ID-based public APIs.
+author: Tobias Wochinger
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { V4CutoverDate } from "@/components/V4CutoverDate";
+import { Code } from "lucide-react";
+
+<ChangelogHeader />
+
+You can now manage LLM-as-a-Judge and code evaluators through stable, ID-based public APIs. Evaluators define how data is scored, while evaluation rules define which incoming observations are evaluated.
+
+A few things you can automate:
+
+- **Keep evaluation setup in version control.** Create evaluators from CI, update their definitions as new versions, and inspect their version history.
+- **Reuse setups across projects.** Replicate evaluators, filters, sampling, variable mappings, and rule assignments between staging and production.
+- **Migrate legacy rules.** Read existing trace and dataset rules through the stable API, then deactivate or delete them after moving to observation-level evaluation.
+
+The new endpoints are available under `/api/public/v2`:
+
+```text
+POST   /api/public/v2/evaluators
+GET    /api/public/v2/evaluators
+GET    /api/public/v2/evaluators/{evaluatorId}
+PATCH  /api/public/v2/evaluators/{evaluatorId}
+DELETE /api/public/v2/evaluators/{evaluatorId}
+GET    /api/public/v2/evaluators/{evaluatorId}/versions
+
+POST   /api/public/v2/evaluation-rules
+GET    /api/public/v2/evaluation-rules
+GET    /api/public/v2/evaluation-rules/{evaluationRuleId}
+PATCH  /api/public/v2/evaluation-rules/{evaluationRuleId}
+DELETE /api/public/v2/evaluation-rules/{evaluationRuleId}
+```
+
+Evaluator and rule names no longer act as identifiers. Each resource has a stable ID, and rules always use the latest version of their assigned evaluators. List endpoints use cursor pagination, and API errors include structured codes that automation can handle without parsing error messages.
+
+If you use the previous unstable evaluator endpoints, migrate to `/api/public/v2` by <V4CutoverDate />.
+
+<Cards num={2}>
+  <Card
+    title="Evaluators API reference"
+    href="https://api.reference.langfuse.com/#tag/evaluators"
+    icon={<Code />}
+    arrow
+  />
+  <Card
+    title="Evaluation Rules API reference"
+    href="https://api.reference.langfuse.com/#tag/evaluationrules"
+    icon={<Code />}
+    arrow
+  />
+</Cards>

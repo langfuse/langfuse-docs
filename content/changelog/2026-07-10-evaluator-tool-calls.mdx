@@ -1,0 +1,58 @@
+---
+date: 2026-07-10
+title: Evaluate tool calls
+description: Access recorded tool calls directly in code and LLM-as-a-Judge evaluators.
+author: Tobias Wochinger
+canonical: /docs/evaluation/evaluation-methods/code-evaluators
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+Code and LLM-as-a-Judge evaluators can now access tool calls through a dedicated structured field - no need to extract them from raw observation input.
+
+For example, check whether an agent called `search`:
+
+<LangTabs items={["Python", "TypeScript"]}>
+<Tab>
+
+```python
+used_search = any(
+    tool_call.name == "search" for tool_call in ctx.observation.tool_calls
+)
+```
+
+</Tab>
+<Tab>
+
+```ts
+const usedSearch = ctx.observation.toolCalls.some(
+  (toolCall) => toolCall.name === "search",
+);
+```
+
+</Tab>
+</LangTabs>
+
+Each call contains `id`, `name`, `arguments`, `type`, and `index`.
+
+For LLM-as-a-Judge, map a variable to **Tool Calls**. Use `$[*].name` to pass only tool names or the full array to include arguments.
+
+## Learn more
+
+<Cards num={2}>
+  <Card
+    title="Code evaluators"
+    href="/docs/evaluation/evaluation-methods/code-evaluators#function-contract"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="LLM-as-a-Judge"
+    href="/docs/evaluation/evaluation-methods/llm-as-a-judge"
+    icon={<Book />}
+    arrow
+  />
+</Cards>

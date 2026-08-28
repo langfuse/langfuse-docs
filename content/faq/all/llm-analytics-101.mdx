@@ -27,15 +27,20 @@ The new logging stack needs to think LLM-native from the ground up. That means g
 
 ```ts
 // Example generation creation
-const generation = trace.generation({
-  name: "chat-completion",
-  model: "gpt-3.5-turbo",
-  modelParameters: {
-    temperature: 0.9,
-    maxTokens: 2000,
+import { startObservation } from "@langfuse/tracing";
+
+const generation = startObservation(
+  "chat-completion",
+  {
+    model: "gpt-3.5-turbo",
+    modelParameters: {
+      temperature: 0.9,
+      max_tokens: 2000,
+    },
+    input: messages,
   },
-  prompt: messages,
-});
+  { asType: "generation" },
+);
 ```
 
 The baseline requirement to improve an LLM-based app is to trace its activity. But what does that mean and what do I want to record? From working with our users at the bleeding edge of LLMs, we've see five metrics emerge to keep track of:

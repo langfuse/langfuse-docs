@@ -748,7 +748,7 @@ function Compliance() {
             </Link>
             <Link
               className="japan-btn japan-btn-secondary japan-btn-small !shadow-none"
-              href="/security/dpa"
+              href="/dpa"
             >
               DPA ↗
             </Link>
@@ -902,8 +902,8 @@ function FAQ() {
         <p>
           主要サブプロセッサー（リージョン内）: <b>AWS</b> と <b>ClickHouse</b>
           。どちらも日本で稼働しています。最新の一覧は{" "}
-          <Link className="japan-link" href="/security/subprocessors">
-            langfuse.com/security/subprocessors
+          <Link className="japan-link" href="/subprocessors">
+            langfuse.com/subprocessors
           </Link>{" "}
           にあります。
         </p>

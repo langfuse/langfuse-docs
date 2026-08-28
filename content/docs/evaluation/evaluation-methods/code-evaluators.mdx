@@ -5,6 +5,22 @@ description: Use Python or TypeScript code in Langfuse to run deterministic eval
 
 # Code evaluators
 
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "full",
+  }}
+/>
+
+<Callout type="info">
+  **Self-hosted:** Code evaluators require a configured [code evaluator
+  dispatcher](/self-hosting/configuration/code-evaluators). They are disabled
+  when no dispatcher is set.
+</Callout>
+
 <Callout type="info">
   Code evaluators require observations ingested with an OpenTelemetry-based SDK:
   Python SDK v3+ or JS/TS SDK v4+. If needed, see the [Python v2 → v3 migration
@@ -19,8 +35,8 @@ Common examples include exact match checks, regex validation, JSON parseability,
 Use [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) instead when the evaluation needs semantic judgment, rubric-based reasoning, or subjective assessment such as helpfulness, tone, or answer quality.
 
 <Video
-  src="https://static.langfuse.com/docs-videos/2026-05-29-code-evaluator-creation-flow.mp4"
-  aspectRatio={1230 / 692}
+  src="https://static.langfuse.com/docs-videos/2026-08-21-evaluator-code-setup.mp4"
+  aspectRatio={16 / 9}
   gifStyle
 />
 
@@ -101,6 +117,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 Run evaluators on individual observations within your traces, such as LLM calls, retrieval operations, embedding generations, or tool calls.
 
+Use the **Is Root Observation** filter to target logical roots: observations without a physical parent or observations explicitly marked as application roots by the SDK. A logical root may still have a physical parent; use a name or type filter when you need a specific operation instead.
+
 **Why target observations**
 
 - **Operation-level precision**: Filter by observation type to evaluate only the operations that matter, not complete traces.
@@ -110,7 +128,7 @@ Run evaluators on individual observations within your traces, such as LLM calls,
 
 **Data flow**
 
-At ingest time, each observation is evaluated against your filter criteria. Matching observations are added to an evaluation queue. Evaluation jobs are processed asynchronously, and scores are attached to the specific observation.
+When an incoming observation matches a rule's filters, the rule triggers its attached code evaluators. Scores are attached to the specific observation.
 
 **Example use cases**
 
@@ -152,43 +170,36 @@ Each experiment run generates traces and observations that can be scored by your
 
 ### Create a code evaluator
 
-Go to the Evaluators page and create a new code evaluator.
+Go to the Evaluators page and click **New evaluator**. In the template gallery, choose **Code evaluator**, then select Python or TypeScript.
 
 <Frame fullWidth>
-  ![Select code evaluator in the evaluator setup flow](/images/docs/code-evaluators/create-new-code-evaluator.png)
+  ![Evaluators page with the New evaluator button](/images/docs/evaluation/create-evaluator.png)
 </Frame>
 
-### Write the evaluator code
+### Define and test the evaluator
 
-Choose Python or TypeScript and implement the `evaluate` function. Keep the code deterministic and within the runtime constraints.
+The evaluator definition contains the language and `evaluate` function that Langfuse runs. [Rules](/docs/evaluation/core-concepts#evaluators-and-rules) select the incoming observations on which it runs.
+
+Implement the `evaluate` function. Keep the code deterministic and within the [runtime constraints](#runtime-constraints).
+
+On the right, filter to representative sample observations, select one, and run the evaluator. Use the test result to confirm that the observation and experiment fields passed to `ctx` match what your code expects.
+
+Unlike LLM-as-a-Judge, code evaluators do not have a separate variable-mapping step. Your code reads the data it needs directly from `ctx`.
 
 <Frame fullWidth>
-  ![Write TypeScript or Python evaluator code](/images/docs/code-evaluators/write-code.png)
+  ![Testing a code evaluator with sample observations](/images/docs/evaluation/test-code-evaluator.png)
 </Frame>
 
-### Configure where it runs
+### Save the evaluator
 
-Select observations or experiments as the target and configure filters, sampling, and mappings as needed.
+After saving, you can:
 
-<Frame fullWidth>
-  ![Configure the code evaluator run target and filters](/images/docs/code-evaluators/configure-run-target.png)
-</Frame>
-
-### Test the evaluator
-
-Run the evaluator against sample observations before enabling it. Use the preview to confirm that the observation fields and experiment fields passed to `ctx` match what your code expects.
-
-<Frame fullWidth>
-  ![Successful code evaluator test run](/images/docs/code-evaluators/test-success.png)
-</Frame>
-
-### Trigger the evaluation
-
-To see your evaluator in action, you need to either [send traces](/docs/observability/get-started) (fastest) or trigger an experiment run (takes longer to set up) via the [UI](/docs/evaluation/experiments/experiments-via-ui) or [SDK](/docs/evaluation/experiments/experiments-via-sdk). Make sure to set the correct target data in the evaluator settings according to how you want to trigger the evaluation.
+- Create a [rule](/docs/evaluation/core-concepts#evaluators-and-rules) from the filters you used to select test samples, or attach the evaluator to an existing rule to run it on incoming observations.
+- Continue without a rule. You can still use the evaluator for [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation) or [prompt experiments](/docs/evaluation/experiments/experiments-via-ui).
 
 </Steps>
 
-## Function contract
+## Function contract [#function-contract]
 
 Each evaluator exposes an `evaluate` function. Langfuse passes an `EvaluationContext` and expects an `EvaluationResult` with one or more scores.
 
@@ -196,8 +207,17 @@ Each evaluator exposes an `evaluate` function. Langfuse passes an `EvaluationCon
 <Tab>
 
 ```python
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
+
+
+@dataclass
+class ToolCall:
+    id: str = ""
+    name: str = ""
+    arguments: Any = None
+    type: str = ""
+    index: int = 0
 
 
 @dataclass
@@ -205,6 +225,7 @@ class ObservationContext:
     input: Any = None
     output: Any = None
     metadata: Any = None
+    tool_calls: list[ToolCall] = field(default_factory=list)
 
 
 @dataclass
@@ -258,11 +279,20 @@ def evaluate(ctx: EvaluationContext) -> EvaluationResult:
 <Tab>
 
 ```ts
+type ToolCall = {
+  id: string;
+  name: string;
+  arguments: unknown;
+  type: string;
+  index: number;
+};
+
 type EvaluationContext = {
   observation: {
     input: any;
     output: any;
     metadata: any;
+    toolCalls: ToolCall[];
   };
   experiment:
     | {
@@ -306,7 +336,7 @@ type EvaluationResult = {
 };
 
 function evaluate({
-  observation: { input, output, metadata },
+  observation: { input, output, metadata, toolCalls },
   experiment,
 }: EvaluationContext): EvaluationResult {
   const itemExpectedOutput = experiment?.itemExpectedOutput;
@@ -326,6 +356,7 @@ function evaluate({
           rule: "output_present",
           hasInput: input != null,
           hasObservationMetadata: metadata != null,
+          toolCallCount: toolCalls.length,
           hasExpectedOutput: itemExpectedOutput != null,
           hasExperimentMetadata: itemMetadata != null,
         },
@@ -340,14 +371,15 @@ function evaluate({
 
 ### Context fields
 
-| Field                                                                                             | Description                                                              |
-| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `ctx.observation.input`                                                                           | The input recorded on the observation selected by the evaluator target.  |
-| `ctx.observation.output`                                                                          | The output recorded on the observation selected by the evaluator target. |
-| `ctx.observation.metadata`                                                                        | The metadata recorded on the observation.                                |
-| `ctx.experiment`                                                                                  | Present only when the evaluator runs on an experiment.                   |
-| `ctx.experiment.item_expected_output` (Python) / `ctx.experiment.itemExpectedOutput` (TypeScript) | Expected output from the experiment item.                                |
-| `ctx.experiment.item_metadata` (Python) / `ctx.experiment.itemMetadata` (TypeScript)              | Metadata from the experiment item.                                       |
+| Field                                                                                             | Description                                                                                         |
+| ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `ctx.observation.input`                                                                           | The input recorded on the observation selected by the evaluator target.                             |
+| `ctx.observation.output`                                                                          | The output recorded on the observation selected by the evaluator target.                            |
+| `ctx.observation.metadata`                                                                        | The metadata recorded on the observation.                                                           |
+| `ctx.observation.tool_calls` (Python) / `ctx.observation.toolCalls` (TypeScript)                  | Ordered calls with `id`, `name`, `arguments`, `type`, and `index`. Valid JSON arguments are parsed. |
+| `ctx.experiment`                                                                                  | Present only when the evaluator runs on an experiment.                                              |
+| `ctx.experiment.item_expected_output` (Python) / `ctx.experiment.itemExpectedOutput` (TypeScript) | Expected output from the experiment item.                                                           |
+| `ctx.experiment.item_metadata` (Python) / `ctx.experiment.itemMetadata` (TypeScript)              | Metadata from the experiment item.                                                                  |
 
 ### Score fields
 
@@ -432,7 +464,7 @@ function evaluate({
 </Tab>
 </LangTabs>
 
-## Debug code evaluator executions
+## Debug code evaluator executions [#debug-code-evaluator-executions]
 
 Every code evaluator execution creates a trace, giving you complete visibility into the evaluation process. This lets you inspect the selected inputs and outputs, experiment context, runtime latency, returned scores, logs, and errors.
 
@@ -454,7 +486,7 @@ You can show code evaluator execution traces by filtering for the environment `l
 
 Use the evaluator test run before enabling a new evaluator. It is the fastest way to validate the selected observation data, experiment context, score names, score values, and score data types.
 
-## Runtime constraints
+## Runtime constraints [#runtime-constraints]
 
 Code evaluators are intended for compact, deterministic checks that can run quickly and safely for many observations.
 
@@ -469,7 +501,7 @@ Code evaluators are intended for compact, deterministic checks that can run quic
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Languages         | Write evaluators in Python or TypeScript. On self-hosted deployments, Python requires the `aws-lambda` dispatcher; `insecure-local` supports TypeScript/JavaScript only.                                                                                   |
 | TypeScript syntax | Use [erasable TypeScript syntax](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-8.html#the---erasablesyntaxonly-option). Type annotations and interfaces are fine; avoid enums, namespaces, decorators, and parameter properties. |
-| Dependencies      | Use the language standard library. Third-party packages are not available in the evaluator runtime.                                                                                                                                                        |
+| Dependencies      | Use the language standard library ([Python](https://docs.python.org/3/library/index.html) & [TS/JS](https://nodejs.org/download/release/latest-v24.x/docs/api/all.html)). Third-party packages are not available in the evaluator runtime.                 |
 | Network access    | Evaluators run without network egress. Keep all required data in the observation or experiment context.                                                                                                                                                    |
 | Runtime limit     | Evaluators must complete within 2 seconds.                                                                                                                                                                                                                 |
 | Result shape      | Return at least one score from `evaluate`.                                                                                                                                                                                                                 |
@@ -505,7 +537,7 @@ No. Code evaluators currently support standard libraries only. If your evaluatio
 <Details>
 <Summary>Can I create code evaluators via API or SDK?</Summary>
 
-Yes. In addition to the Langfuse UI, the unstable public evaluator endpoints accept `type: "code"` to create code evaluators and reference them from evaluation rules. See the [Evaluators API reference](https://api.reference.langfuse.com/#tag/unstableevaluators) — note that these endpoints are unstable and may change.
+Yes. In addition to the Langfuse UI, the stable public evaluator endpoints accept `type: "code"` to create code evaluators and reference them from evaluation rules. See the [Evaluators API reference](https://api.reference.langfuse.com/#tag/evaluators).
 
 If you want to run deterministic evaluation logic in your own application or CI pipeline, use [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk) to ingest the resulting scores into Langfuse.
 
@@ -514,7 +546,7 @@ If you want to run deterministic evaluation logic in your own application or CI 
 <Details>
 <Summary>Why can't I find code evaluator execution traces?</Summary>
 
-Code evaluator executions use the internal environment `langfuse-code-eval`. Internal environments are hidden from the default tracing view, so filter the tracing table by `environment = langfuse-code-eval` or open the execution trace from the related score or evaluator log.
+Code evaluator executions use the internal environment `langfuse-code-eval`. Internal environments are hidden from the default tracing view, so filter the tracing table by `environment = langfuse-code-eval` or open the execution trace from the related score.
 
 </Details>
 

@@ -2,7 +2,7 @@
 title: "ClickHouse (self-hosted)"
 sidebarTitle: Clickhouse
 description: "Configure and host ClickHouse for self-hosted Langfuse. Covers ClickHouse server setup, cloud hosting options, Azure deployment, configuration best practices, and performance tuning."
-label: "Version: v3"
+label: "Version: v4"
 ---
 
 # ClickHouse
@@ -17,7 +17,25 @@ This is a deep dive into ClickHouse configuration. Follow one of the [deployment
 It is optimized for high write throughput and fast analytical queries.
 This guide covers how to configure ClickHouse within Langfuse and what to keep in mind when (optionally) bringing your own ClickHouse.
 
-Langfuse supports ClickHouse versions >= 24.3.
+Langfuse v3 supports ClickHouse versions >= 24.3. Langfuse v4 requires ClickHouse >= 25.12 (26.4 recommended) for lightweight updates, the JSON type, and full-text search — see the [v3 to v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#step-1).
+
+## Official and Community Support [#support]
+
+ClickHouse can be consumed as a managed service or self-managed on your own infrastructure.
+We distinguish between officially supported and community-supported deployment options:
+
+| Option                                                                 | Support Level |
+| ---------------------------------------------------------------------- | ------------- |
+| [ClickHouse Cloud](#cloudbyoc)                                         | Official      |
+| [ClickHouse BYOC (Bring Your Own Cloud)](#cloudbyoc)                   | Official      |
+| [ClickHouse Kubernetes Operator](#clickhouse-kubernetes-operator)      | Official      |
+| [Bundled with the Langfuse Helm chart](#clickhouse-on-kubernetes-helm) | Community     |
+| [Single-container Docker (development only)](#docker)                  | Community     |
+| Other managed ClickHouse offerings                                     | Community     |
+
+import SelfHostSupportLevels from "@/components-mdx/self-host-support-levels.mdx";
+
+<SelfHostSupportLevels />
 
 ## Configuration
 
@@ -29,7 +47,7 @@ They need to be provided for the Langfuse Web and Langfuse Worker containers.
 | `CLICKHOUSE_MIGRATION_URL`                    | Required           | Migration URL (TCP protocol) for the ClickHouse instance. Pattern: `clickhouse://<hostname>:(9000/9440)`                                                                                                                                                                                                                                                                                              |
 | `CLICKHOUSE_MIGRATION_SSL`                    | `false`            | Set to true to establish an SSL connection to ClickHouse for the database migration.                                                                                                                                                                                                                                                                                                                  |
 | `CLICKHOUSE_URL`                              | Required           | Hostname of the ClickHouse instance. Pattern: `http(s)://<hostname>:(8123/8443)`                                                                                                                                                                                                                                                                                                                      |
-| `CLICKHOUSE_USER`                             | Required           | Username of the ClickHouse database. Needs SELECT, ALTER, INSERT, CREATE, DELETE grants.                                                                                                                                                                                                                                                                                                              |
+| `CLICKHOUSE_USER`                             | Required           | Username of the ClickHouse database. Needs the grants listed under [user permissions](/self-hosting/deployment/infrastructure/clickhouse#user-permissions).                                                                                                                                                                                                                                           |
 | `CLICKHOUSE_PASSWORD`                         | Required           | Password of the ClickHouse user.                                                                                                                                                                                                                                                                                                                                                                      |
 | `CLICKHOUSE_DB`                               | `default`          | Name of the ClickHouse database to use.                                                                                                                                                                                                                                                                                                                                                               |
 | `CLICKHOUSE_CLUSTER_ENABLED`                  | `true`             | Whether to run ClickHouse commands `ON CLUSTER`. Set to `false` for single-container setups.                                                                                                                                                                                                                                                                                                          |
@@ -43,7 +61,7 @@ You must set `LANGFUSE_AUTO_CLICKHOUSE_MIGRATION_DISABLED = true` and run ClickH
 Clone the Langfuse repository, adjust the cluster name in `./packages/shared/clickhouse/migrations/clustered/*.sql` and run `cd ./packages/shared && sh ./clickhouse/scripts/up.sh`
 to manually apply the migrations.
 
-### Timezones
+### Timezones [#timezones]
 
 <Callout type="warning">
 
@@ -61,20 +79,90 @@ This should return `UTC`. If it does not, update your ClickHouse server configur
 
 The same requirement applies to [Postgres](/self-hosting/deployment/infrastructure/postgres) — all infrastructure components must use UTC. Please vote on this [GitHub Discussion](https://github.com/orgs/langfuse/discussions/5046) if you would like us to consider supporting other timezones.
 
-## User Permissions
+## User Permissions [#user-permissions]
 
-The ClickHouse user specified in `CLICKHOUSE_USER` must have the following grants to allow Langfuse to operate correctly:
+The ClickHouse user specified in `CLICKHOUSE_USER` must have the following grants to allow Langfuse to operate correctly.
+Replace `'user'` with your actual ClickHouse username and adjust the database name if you're using a different database than `default`.
+
+### Langfuse tables [#user-permissions-tables]
+
+Langfuse applies its ClickHouse schema migrations with the same user that it uses for reads and writes, so the user needs DDL grants in addition to `SELECT` and `INSERT`:
 
 ```sql
-GRANT INSERT ON default.* TO 'user';
-GRANT SELECT ON default.* TO 'user';
+-- Read and write tracing data
+GRANT SELECT, INSERT ON default.* TO 'user';
+
+-- Update and delete rows: data retention, project and trace deletion, event updates
 GRANT ALTER UPDATE, ALTER DELETE ON default.* TO 'user';
-GRANT ALTER DROP INDEX ON default.* TO 'user';
-GRANT CREATE ON default.* TO 'user';
-GRANT DROP TABLE ON default.* TO 'user';
+
+-- Apply schema migrations on startup
+GRANT CREATE, DROP TABLE, DROP VIEW ON default.* TO 'user';
+GRANT ALTER ADD COLUMN, ALTER MODIFY COLUMN, ALTER VIEW MODIFY QUERY ON default.* TO 'user';
+GRANT ALTER ADD INDEX, ALTER DROP INDEX, ALTER MATERIALIZE INDEX ON default.* TO 'user';
 ```
 
-Replace `'user'` with your actual ClickHouse username and adjust the database name if you're using a different database than `default`.
+### System tables [#user-permissions-system-tables]
+
+Langfuse v4 reads a small set of ClickHouse system tables to schedule background work.
+Only the columns that Langfuse actually reads need to be granted:
+
+```sql
+-- Partition and part discovery: event propagation, historic backfill, deleted-mask cleaner
+GRANT SELECT(database, table, name, partition, partition_id, active, rows) ON system.parts TO 'user';
+
+-- Mutation backpressure for the deleted-mask cleaner
+GRANT SELECT(database, table, is_done) ON system.mutations TO 'user';
+
+-- Table engine detection for the historic backfill
+GRANT SELECT(database, name, engine) ON system.tables TO 'user';
+
+-- Progress tracking for long-running migration queries and v4 transition usage detection
+GRANT SELECT ON system.processes TO 'user';
+GRANT SELECT ON system.query_log* TO 'user';
+```
+
+The wildcard in `system.query_log*` also covers the rotated `query_log_N` tables that ClickHouse creates when the log table schema changes between versions.
+
+### Clustered deployments [#user-permissions-cluster]
+
+With `CLICKHOUSE_CLUSTER_ENABLED=true`, Langfuse reads the system tables above through `clusterAllReplicas()` and runs DDL `ON CLUSTER`, which requires two additional grants:
+
+```sql
+-- Read system tables across all replicas through clusterAllReplicas()
+GRANT READ ON REMOTE TO 'user';
+
+-- Run ON CLUSTER queries. Required unless
+-- access_control_improvements.on_cluster_queries_require_cluster_grant is
+-- disabled on the server; it defaults to true.
+GRANT CLUSTER ON *.* TO 'user';
+```
+
+Grants are local to the node they are created on, unless your cluster uses a replicated access storage backend.
+Create every grant on all nodes of the cluster, for example by adding `ON CLUSTER`:
+
+```sql
+GRANT ON CLUSTER default SELECT ON system.query_log* TO 'user';
+```
+
+### Historic backfill scratch table [#user-permissions-backfill]
+
+The [v4 historic backfill](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#historic-backfill) freezes merges on its intermediate table while it copies data:
+
+```sql
+GRANT SYSTEM SYNC REPLICA, SYSTEM MERGES, ALTER SETTINGS ON default.observations_pid_tid_sorting TO 'user';
+```
+
+Which of the three is used depends on the table engine — `SYSTEM MERGES` on self-managed MergeTree, `ALTER SETTINGS` on replicated and SharedMergeTree engines, `SYSTEM SYNC REPLICA` on replicated engines — so granting all three keeps the backfill working on any deployment.
+The grants can be created before the table exists, i.e. before the backfill starts.
+
+### Lightweight updates [#user-permissions-lightweight-updates]
+
+With [`CLICKHOUSE_USE_LIGHTWEIGHT_UPDATE=true`](/self-hosting/configuration/scaling#clickhouse-deletion-timeouts), Langfuse issues native `UPDATE` statements instead of `ALTER TABLE ... UPDATE` mutations.
+ClickHouse rejects those unless `enable_lightweight_update` is enabled for the user:
+
+```sql
+CREATE SETTINGS PROFILE langfuse_lightweight_update SETTINGS enable_lightweight_update = 1 TO 'user';
+```
 
 ## Direct ClickHouse Access for Custom Tools [#direct-clickhouse-access]
 
@@ -96,9 +184,23 @@ If you do query ClickHouse directly:
 
 - Use a dedicated read-only user or a dedicated read-only compute group where available.
 - Keep direct analytical traffic away from the primary ingestion path. On ClickHouse Cloud or BYOC, use separate compute groups and configure `CLICKHOUSE_READ_ONLY_URL` for supported Langfuse read paths, especially Public API and filter/helper reads.
-- Always include project and time filters where possible. Langfuse tracing data is optimized around project and time access patterns including monthly partioning.
+- Always include project and time filters where possible. Langfuse tracing data is optimized around project and time access patterns including monthly partitioning.
 - Do not write directly to Langfuse tables. Use the Public API or SDKs for creating and updating Langfuse data.
 - If a missing API filter or field forces you to query ClickHouse directly, please open a [GitHub issue](https://github.com/langfuse/langfuse/issues) with your use case; APIs are the preferred long-term extension point.
+
+## Custom Schema Changes [#custom-schema-changes]
+
+We recommend running Langfuse on the unmodified ClickHouse schema.
+
+<Callout type="warning">
+
+Langfuse's ClickHouse schema and migrations are designed, tested, and versioned as a unit with each release.
+Customizing the `observations`, `events`, or other table definitions moves that schema outside of what we test against — which means keeping it compatible with future upgrades becomes your responsibility.
+We'll provide best-effort support for issues arising from custom schema changes.
+
+</Callout>
+
+If a missing column, index, or table setting makes you consider a custom schema change, please open a [GitHub issue](https://github.com/langfuse/langfuse/issues) with your use case first; improvements to the standard schema benefit all deployments and are covered by our regular testing and upgrade process.
 
 ## Deployment Options
 
@@ -138,34 +240,59 @@ CLICKHOUSE_MIGRATION_SSL=true
 - **'error: driver: bad connection in line 0' during migration**: If you see the previous error message during startup of your web container, ensure that the `CLICKHOUSE_MIGRATION_SSL` flag is set and that Langfuse Web can access your ClickHouse environment. Review the IP whitelisting if applicable and whether the instance has access to the Private Link.
 - **Code: 80. DB::Exception: It's not initial query. ON CLUSTER is not allowed for Replicated database. (INCORRECT_QUERY)** (on ClickHouse Cloud Azure): ClickHouse Cloud Azure does not seem to handle the ON CLUSTER and Replicated settings well. We recommend to set `CLICKHOUSE_CLUSTER_ENABLED=false` for now. This should not make any difference on performance or high availability.
 
-### ClickHouse on Kubernetes (Helm)
+### ClickHouse Kubernetes Operator [#clickhouse-kubernetes-operator]
 
-The [Bitnami ClickHouse Helm Chart](https://github.com/bitnami/charts/tree/main/bitnami/clickhouse) provides a production ready deployment of ClickHouse using a given Kubernetes cluster.
-We use it as a dependency for [Langfuse K8s](https://github.com/langfuse/langfuse-k8s).
-See [Langfuse on Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) for more details on how to deploy Langfuse on Kubernetes.
+The official [ClickHouse Kubernetes Operator](https://clickhouse.com/docs/clickhouse-operator/overview) ([GitHub](https://github.com/ClickHouse/clickhouse-operator)) automates the deployment, configuration, and management of self-managed ClickHouse and ClickHouse Keeper clusters on Kubernetes, including upgrades, scaling, and high availability.
+It is the officially supported option for running self-managed ClickHouse on Kubernetes.
+
+Follow the [operator documentation](https://clickhouse.com/docs/clickhouse-operator/overview) to provision a cluster, then connect Langfuse to it using the environment variables described above.
+The same [user permissions](#user-permissions) and [timezone](#timezones) requirements apply.
+The [Langfuse Helm chart](/self-hosting/deployment/kubernetes-helm) uses the operator to deploy the bundled ClickHouse from chart version `v2.0.0` onwards.
+
+### Bundled ClickHouse in the Langfuse Helm chart [#clickhouse-on-kubernetes-helm]
+
+The [Langfuse Helm chart](/self-hosting/deployment/kubernetes-helm) can deploy ClickHouse for you via `clickhouse.deploy: true`.
+From chart version `v2.0.0` onwards it does so through the [ClickHouse Kubernetes Operator](#clickhouse-kubernetes-operator), rendering a `ClickHouseCluster` and a `KeeperCluster` resource.
+The operator and cert-manager must be installed in the cluster before you install the chart; see the [deployment guide](/self-hosting/deployment/kubernetes-helm#prerequisites).
+
+This deployment option is community-supported. For an officially supported setup, use [ClickHouse Cloud or BYOC](#cloudbyoc), or manage the cluster with the [operator](#clickhouse-kubernetes-operator) yourself and connect Langfuse to it with `clickhouse.deploy: false`.
+
+<Callout type="warning">
+
+Chart `v1.x` deployed the bundled ClickHouse from a third-party sub-chart that cannot reach the ClickHouse version Langfuse v4 requires. If you still run chart `v1.x` with `clickhouse.deploy: true`, [upgrade the chart to v2](/self-hosting/deployment/kubernetes-helm#chart-v1-to-v2) before you upgrade Langfuse to v4.
+
+</Callout>
 
 #### Example Configuration
 
-For a minimum production setup, we recommend using the following values.yaml overrides when deploying the ClickHouse Helm chart:
+For a minimum production setup, we recommend the following values.yaml overrides:
 
 ```yaml
 clickhouse:
   deploy: true
-  shards: 1 # Fixed: Langfuse does not support multi-shard clusters
-  replicaCount: 3
-  resourcesPreset: large # or more
-  persistence:
-    size: 100Gi # Start with a large volume to prevent early resizing. Alternatively, consider a blob storage-backed disk.
   auth:
     username: default
-    password: changeme
+    password: changeme # or point auth.existingSecret at a secret you manage
+  cluster:
+    replicas: 3
+    storage:
+      size: 100Gi # Start with a large volume to prevent early resizing. Alternatively, consider a blob storage-backed disk.
+    resources:
+      requests:
+        cpu: "2"
+        memory: 8Gi
+      limits:
+        memory: 16Gi
+  keeper:
+    replicas: 3
 ```
 
-- **shards**: Shards are used for horizontally scaling ClickHouse. A single ClickHouse shard can handle multiple Terabytes of data. Today, Langfuse does not support a multi-shard cluster, i.e. this value _must_ be set to 1. Please get in touch with us if you hit scaling limits of a single shard cluster or consider ClickHouse Cloud/BYOC.
-- **replicaCount**: The number of replicas for each shard. ClickHouse counts the all instances towards the number of replicas, i.e. a replica count of 1 means no redundancy at all. We recommend a minimum of 3 replicas for production setups. The number of replicas cannot be increased at runtime without manual intervention or downtime.
-- **resourcesPreset**: ClickHouse is CPU and memory intensive for analytical and highly concurrent requests. We recommend at least the `large` resourcesPreset and more for larger deployments.
-- **auth**: The username and password for the ClickHouse database. Overwrite those values according to your preferences, or mount them from a secret.
-- **disk**: The ClickHouse Helm chart uses the default storage class to create volumes for each replica. Ensure that the storage class has `allowVolumeExpansion = true` as observability workloads tend to be very disk heavy. For cloud providers like AWS, GCP, and Azure this should be the default.
+- **Shards**: Shards are used for horizontally scaling ClickHouse. A single ClickHouse shard can handle multiple Terabytes of data. Today, Langfuse does not support a multi-shard cluster, and the chart always deploys a single shard. Please get in touch with us if you hit scaling limits of a single shard cluster, or consider [ClickHouse Cloud/BYOC](#cloudbyoc).
+- **cluster.replicas**: ClickHouse counts all instances towards the number of replicas, i.e. a replica count of 1 means no redundancy at all. We recommend a minimum of 3 replicas for production setups. The number of replicas cannot be increased at runtime without manual intervention or downtime.
+- **cluster.resources**: ClickHouse is CPU and memory intensive for analytical and highly concurrent requests. The chart defaults are sized for local experimentation; start from the [minimum infrastructure requirements](/self-hosting/configuration/scaling#minimum-infrastructure-requirements) and scale up for larger deployments.
+- **keeper.replicas**: ClickHouse Keeper coordinates replication and requires an odd replica count. Use 3 for production high availability.
+- **auth**: The username and password Langfuse uses to connect. Overwrite these values according to your preferences, or mount them from a secret via `auth.existingSecret`.
+- **Disk**: The chart uses the default storage class unless you set `cluster.storage.className`. Ensure that the storage class has `allowVolumeExpansion = true`, as observability workloads tend to be very disk heavy. For cloud providers like AWS, GCP, and Azure this should be the default.
 
 Langfuse assumes that certain parameters are set in the ClickHouse configurations.
 To perform our database migrations, the following values must be provided:
@@ -188,13 +315,13 @@ To perform our database migrations, the following values must be provided:
 -->
 ```
 
-`macros` and `default_replica_*` configuration should be covered by the Helm chart without any further configuration.
+`macros` and `default_replica_*` configuration is handled by the chart and the operator without any further configuration.
 
-Set the following environment variables to connect to your ClickHouse instance assuming that Langfuse runs within the same Cluster and Namespace:
+When `clickhouse.deploy` is `true`, the chart wires Langfuse to the bundled cluster automatically. For a ClickHouse you run yourself in the same cluster and namespace, set `clickhouse.deploy: false` and the following environment variables:
 
 ```yaml
-CLICKHOUSE_URL=http://<chart-name>-clickhouse:8123
-CLICKHOUSE_MIGRATION_URL=clickhouse://<chart-name>-clickhouse:9000
+CLICKHOUSE_URL=http://<clickhouse-service>:8123
+CLICKHOUSE_MIGRATION_URL=clickhouse://<clickhouse-service>:9000
 CLICKHOUSE_USER=default
 CLICKHOUSE_PASSWORD=changeme
 ```
@@ -206,8 +333,8 @@ CLICKHOUSE_PASSWORD=changeme
   **1. Check current disk usage:**
 
   ```bash
-  # Check PVC status
-  kubectl get pvc -l app.kubernetes.io/name=clickhouse
+  # List the ClickHouse PVCs; their names depend on how ClickHouse was deployed
+  kubectl get pvc
 
   # Check disk usage inside ClickHouse pods
   kubectl exec -it <clickhouse-pod-name> -- df -h /var/lib/clickhouse
@@ -217,12 +344,10 @@ CLICKHOUSE_PASSWORD=changeme
 
   ```bash
   # Edit the PVC directly
-  kubectl edit pvc data-<chart-name>-clickhouse-0
+  kubectl edit pvc <clickhouse-pvc-name>
 
-  # Or patch all ClickHouse PVCs at once
-  kubectl patch pvc data-<chart-name>-clickhouse-0 -p '{"spec":{"resources":{"requests":{"storage":"200Gi"}}}}'
-  kubectl patch pvc data-<chart-name>-clickhouse-1 -p '{"spec":{"resources":{"requests":{"storage":"200Gi"}}}}'
-  kubectl patch pvc data-<chart-name>-clickhouse-2 -p '{"spec":{"resources":{"requests":{"storage":"200Gi"}}}}'
+  # Or patch it in place; repeat for the PVC of every replica
+  kubectl patch pvc <clickhouse-pvc-name> -p '{"spec":{"resources":{"requests":{"storage":"200Gi"}}}}'
   ```
 
   **3. Monitor expansion progress:**
@@ -239,7 +364,7 @@ CLICKHOUSE_PASSWORD=changeme
 
   ```bash
   # Restart all pods individually to make use of the larger volumes
-  kubectl rollout restart statefulset <chart-name>-clickhouse
+  kubectl rollout restart statefulset <clickhouse-statefulset-name>
   ```
 
   **Prevention tips:**
@@ -248,7 +373,7 @@ CLICKHOUSE_PASSWORD=changeme
   - Consider implementing automatic PVC expansion using tools like [volume-autoscaler](https://github.com/DevOps-Nirvana/Kubernetes-Volume-Autoscaler)
   - For high-growth environments, consider using [blob storage as disk](#blob-storage-as-disk) for automatic scaling
 
-### Docker
+### Docker [#docker]
 
 You can run ClickHouse in a single [Docker](https://hub.docker.com/r/clickhouse/clickhouse-server) container for development purposes.
 As there is no redundancy, this is **not recommended for production workloads**.
@@ -279,21 +404,18 @@ CLICKHOUSE_PASSWORD=clickhouse
 CLICKHOUSE_CLUSTER_ENABLED=false
 ```
 
-## Migrating to a New Instance
+## Migrating to a New Instance [#migrating-to-a-new-instance]
 
-You may want to move Langfuse to a different ClickHouse instance, e.g. when switching providers or moving from a single-node to a clustered setup.
-We recommend the following approach:
+You may want to move Langfuse to a different ClickHouse instance, for example when switching from self-managed ClickHouse OSS to [Cloud or BYOC](#cloudbyoc), changing providers, or moving from a single-node to a clustered setup.
 
-1. Point Langfuse to the new ClickHouse instance so that incoming data is captured there.
-2. Create a backup of the existing instance to blob storage and restore it into the new instance.
+The recommended path is: run the latest Langfuse OSS release first and keep that version unchanged, pause ingestion, copy the ClickHouse database with a ClickHouse-supported method, then point Langfuse at the new service. See [How do I migrate Langfuse from ClickHouse OSS to Cloud or BYOC?](/faq/all/self-hosting-migrate-clickhouse-oss-to-cloud) for the Langfuse-side checklist.
 
-A zero-downtime switch where data is written to both instances concurrently is technically possible, but we have not tested it and it is not recommended by ClickHouse.
-Please reach out to Langfuse Support if you want to explore this option.
+Use the ClickHouse documentation for the data copy itself:
 
-Refer to the ClickHouse migration guides for backup and restore instructions:
+- [ClickHouse to ClickHouse via remoteSecure](https://clickhouse.com/docs/get-started/migrate/oss-to-cloud/clickhouse-to-cloud)
+- [ClickHouse to ClickHouse via backup and restore](https://clickhouse.com/docs/get-started/migrate/oss-to-cloud/oss-to-cloud-backup-restore)
 
-- [ClickHouse to ClickHouse via remoteSecure](https://clickhouse.com/docs/cloud/migration/clickhouse-to-cloud)
-- [ClickHouse to ClickHouse via backup and restore](https://clickhouse.com/docs/cloud/migration/oss-to-cloud-backup-restore)
+A zero-downtime switch where data is written to both instances concurrently is technically possible, but we have not tested it and it is not recommended. Contact [support](/support) if you want to explore this option.
 
 ## Encryption
 
@@ -313,57 +435,40 @@ For local disk storage or additional encryption layers, ClickHouse supports conf
 
 #### Kubernetes Configuration
 
-For Kubernetes deployments using the Bitnami ClickHouse Helm chart, you can configure disk encryption by creating a custom configuration file:
+On Kubernetes, mount the following ClickHouse server configuration into `/etc/clickhouse-server/config.d/`:
 
-```yaml
-# values.yaml
-clickhouse:
-  extraConfigmaps:
-    - name: encryption-config
-      mountPath: /etc/clickhouse-server/config.d/encrypted_storage.xml
-      data:
-        encryption.xml: |
-          <clickhouse>
-            <storage_configuration>
-              <disks>
-                <encrypted_disk>
-                  <type>encrypted</type>
-                  <disk>default</disk>
-                  <path>encrypted/</path>
-                  <algorithm>AES_128_CTR</algorithm>
-                  <key_hex id="0" from_env="CLICKHOUSE_ENCRYPTION_KEY"></key_hex>
-                </encrypted_disk>
-              </disks>
-              <policies>
-                <encrypted_policy>
-                  <volumes>
-                    <main>
-                      <disk>encrypted_disk</disk>
-                    </main>
-                  </volumes>
-                </encrypted_policy>
-              </policies>
-            </storage_configuration>
-            <merge_tree>
-              <storage_policy>encrypted_policy</storage_policy>
-            </merge_tree>
-          </clickhouse>
+```xml
+<!-- encrypted_storage.xml -->
+<clickhouse>
+  <storage_configuration>
+    <disks>
+      <encrypted_disk>
+        <type>encrypted</type>
+        <disk>default</disk>
+        <path>encrypted/</path>
+        <algorithm>AES_128_CTR</algorithm>
+        <key_hex id="0" from_env="CLICKHOUSE_ENCRYPTION_KEY"></key_hex>
+      </encrypted_disk>
+    </disks>
+    <policies>
+      <encrypted_policy>
+        <volumes>
+          <main>
+            <disk>encrypted_disk</disk>
+          </main>
+        </volumes>
+      </encrypted_policy>
+    </policies>
+  </storage_configuration>
+  <merge_tree>
+    <storage_policy>encrypted_policy</storage_policy>
+  </merge_tree>
+</clickhouse>
 ```
 
-Set the encryption key as an environment variable:
+With the [ClickHouse Kubernetes Operator](#clickhouse-kubernetes-operator), add the file to the configuration of your cluster resource. With the [Langfuse Helm chart](/self-hosting/deployment/kubernetes-helm), pass the same settings via `clickhouse.cluster.settings`.
 
-```yaml
-# values.yaml
-clickhouse:
-  extraEnvVars:
-    - name: CLICKHOUSE_ENCRYPTION_KEY
-      valueFrom:
-        secretKeyRef:
-          name: clickhouse-encryption-key
-          key: key
-```
-
-Create the encryption key secret:
+Provide the key to the ClickHouse pods through a `CLICKHOUSE_ENCRYPTION_KEY` environment variable that reads from a secret:
 
 ```bash
 kubectl create secret generic clickhouse-encryption-key \
@@ -377,7 +482,7 @@ This is useful for auto-scaling storages that live outside the container orchest
 For a full overview of the feature, see the [ClickHouse External Disks documentation](https://clickhouse.com/docs/en/operations/storing-data).
 
 Below, we give a config.xml example to use S3 and Azure Blob Storage as disks for ClickHouse Docker containers using Docker Compose.
-Keep in mind that metadata is still stored on local disk, i.e. you need to use a persistent volume for the ClickHouse container or risk loosing access to your tables.
+Keep in mind that metadata is still stored on local disk, i.e. you need to use a persistent volume for the ClickHouse container or risk losing access to your tables.
 
 <Callout type="warning">
 
@@ -534,6 +639,10 @@ volumes:
 This will store ClickHouse data within the Azurite bucket.
 
 ## FAQ
+
+### How do I migrate from self-managed ClickHouse to Cloud or BYOC? [#migrate-oss-to-cloud]
+
+See [How do I migrate Langfuse from ClickHouse OSS to Cloud or BYOC?](/faq/all/self-hosting-migrate-clickhouse-oss-to-cloud). Run the latest Langfuse OSS release first, keep that version unchanged, pause ingestion, copy ClickHouse with a ClickHouse-supported method, then point Langfuse at the new service.
 
 ### Is ClickHouse required for self-hosting Langfuse?
 

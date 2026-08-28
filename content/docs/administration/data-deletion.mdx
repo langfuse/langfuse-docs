@@ -100,8 +100,8 @@ Then select `Delete` in the `Actions` dropdown.
 Most deletions in Langfuse happen instantly, but the deletion of tracing data does not.
 Removing those records from our data warehouse is a resource intensive operation and, therefore, we rate limit
 how many deletions we process at any point in time.
-Usually, trace data is deleted from our system within 15 minutes of the delete call and there is no confirmation, i.e.
-To verify that your data got deleted, you will have to query it again.
+Usually, trace data is deleted from our system within 15 minutes of the delete call.
+There is no deletion confirmation or notification; to verify that your data got deleted, query it again.
 
 If you need to regularly clean up old data, consider using [Data Retention](/docs/administration/data-retention) instead, which automatically deletes traces, observations, scores, and media assets older than a configured number of days.
 

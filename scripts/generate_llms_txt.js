@@ -134,6 +134,21 @@ async function generateLLMsList() {
     let markdownContent = `# ${TITLE}\n\n`;
     markdownContent += `> ${INTRO_DESCRIPTION}\n\n`;
 
+    // Markdown access + search endpoint. Listed before the MCP server section
+    // because these need no client setup: an agent with `curl` can use them
+    // immediately.
+    markdownContent += `## Markdown Access\n\n`;
+    markdownContent += `Every page on langfuse.com is available as plain Markdown. Append \`.md\` to any URL, or send an \`Accept: text/markdown\` header:\n\n`;
+    markdownContent += `\`\`\`bash\ncurl https://langfuse.com/docs/observability/get-started.md\n\`\`\`\n\n`;
+    markdownContent += `The links in the section indexes below already point at the \`.md\` variants.\n\n`;
+
+    markdownContent += `## Docs Search API\n\n`;
+    markdownContent += `Semantic search (RAG) over the Langfuse documentation, returning an answer with the relevant pages and excerpts. No authentication required. Use this instead of guessing when a specific page does not answer the question:\n\n`;
+    markdownContent += `\`\`\`bash\ncurl -sG "https://langfuse.com/api/search-docs" --data-urlencode "query=How do I trace a LangGraph agent?"\n\`\`\`\n\n`;
+    markdownContent += `- **Endpoint**: \`https://langfuse.com/api/search-docs?query=<question>\`\n`;
+    markdownContent += `- **Documentation**: [REST endpoint](https://langfuse.com/docs/docs-mcp#rest-endpoint)\n\n`;
+    markdownContent += `Ask specific, self-contained questions in natural language. This is the same search that backs the \`searchLangfuseDocs\` MCP tool below.\n\n`;
+
     // MCP server section (unchanged)
     markdownContent += `## Langfuse Docs MCP Server\n\n`;
     markdownContent += `Connect to the Langfuse Docs MCP server to access documentation directly in your AI editor:\n\n`;
@@ -146,6 +161,10 @@ async function generateLLMsList() {
     markdownContent += `## Langfuse Skill for AI Coding Agents\n\n`;
     markdownContent += `Install the Langfuse skill before implementing anything with Langfuse. The skill provides up-to-date documentation, best-practice workflows for instrumentation, prompt management, and programmatic API access via the Langfuse CLI.\n\n`;
     markdownContent += `Install from: [github.com/langfuse/skills](https://github.com/langfuse/skills/tree/main/skills/langfuse)\n\n`;
+
+    // Tracing best practices section
+    markdownContent += `## Tracing Best Practices\n\n`;
+    markdownContent += `Before instrumenting an application with Langfuse, read [What does a good trace look like?](https://langfuse.com/docs/observability/best-practices.md) — it covers trace scope, observation naming, meaningful input/output, and the attributes (metadata, tags, users, sessions) that evaluators, dashboards, and experiments rely on.\n\n`;
 
     // Section-specific intro sentences that mention the Langfuse skill
     const sectionIntros = {

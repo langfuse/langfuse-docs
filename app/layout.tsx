@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { RootProvider } from "fumadocs-ui/provider/next";
+import { AppRootProvider } from "@/components/AppRootProvider";
 import { GoogleTagManager } from "@next/third-parties/google";
 import localFont from "next/font/local";
 import { Inter } from "next/font/google";
@@ -15,10 +15,13 @@ import { Hubspot } from "@/components/analytics/hubspot";
 import { GoogleAds } from "@/components/analytics/google-ads";
 import { LinkedInInsightTag } from "@/components/analytics/linkedin-ads";
 import { RedditPixel } from "@/components/analytics/reddit-ads";
+import { SpotifyPixel } from "@/components/analytics/spotify-ads";
 import { TwitterPixel } from "@/components/analytics/twitter-ads";
 import { ConversionTracker } from "@/components/analytics/ConversionTracker";
-import { ScarfPixel } from "@/components/analytics/scarf";
+import { AdConsentGate } from "@/components/analytics/AdConsentGate";
+import { ClickIdPersistence } from "@/components/analytics/ClickIdPersistence";
 import { CommonRoom } from "@/components/analytics/common-room";
+import { AhrefsAnalytics } from "@/components/analytics/ahrefs";
 import "../style.css";
 import "@vidstack/react/player/styles/base.css";
 import "../src/overrides.css";
@@ -83,7 +86,7 @@ export default function RootLayout({
           <DevAriaHiddenConsoleFilter />
         )}
         <PostHogProvider>
-          <RootProvider
+          <AppRootProvider
             i18n={{
               locale: "en",
               translations: {
@@ -92,19 +95,27 @@ export default function RootLayout({
             }}
           >
             <AISearch>{children}</AISearch>
-          </RootProvider>
+          </AppRootProvider>
         </PostHogProvider>
         {process.env.NODE_ENV === "production" && (
           <>
             <GoogleTagManager gtmId="GTM-NGLK4TZX" />
-            <GoogleAds />
-            <LinkedInInsightTag />
-            <RedditPixel />
-            <TwitterPixel />
+            {/* Ad pixels require prior consent (CookieYes "advertisement"
+                category). The gate keeps them from loading or setting cookies
+                until it is granted; every conversion helper already no-ops
+                when its tag is absent, so nothing else needs gating. */}
+            <AdConsentGate>
+              <GoogleAds />
+              <LinkedInInsightTag />
+              <RedditPixel />
+              <SpotifyPixel />
+              <TwitterPixel />
+            </AdConsentGate>
             <ConversionTracker />
-            <ScarfPixel />
+            <ClickIdPersistence />
             <Hubspot />
             <CommonRoom />
+            <AhrefsAnalytics />
             <Script
               id="cookieyes"
               type="text/javascript"

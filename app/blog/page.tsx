@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getBlogIndexPages } from "@/lib/blog-index";
 import { ContentColumns } from "@/components/layout";
 import { BlogPageClient } from "@/components/blog/BlogPageClient";
@@ -9,6 +10,16 @@ import { TextHighlight } from "@/components/ui/text-highlight";
 import { Link } from "@/components/ui/link";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
+
+export const metadata: Metadata = {
+  title: "Blog",
+  description:
+    "The latest updates from Langfuse: product announcements, engineering deep dives, and guides for building LLM applications.",
+  // Self-referencing canonical so filtered views (e.g. /blog?tag=...) consolidate to /blog
+  alternates: {
+    canonical: "/blog",
+  },
+};
 
 export default function BlogIndexPage() {
   const pages = getBlogIndexPages();

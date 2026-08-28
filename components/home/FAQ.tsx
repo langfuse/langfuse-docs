@@ -3,12 +3,12 @@
 import { HomeSection } from "./HomeSection";
 import { Heading } from "@/components/ui/heading";
 import { FAQAccordion, type FAQItem } from "@/components/shared/FAQAccordion";
+import { formatCompanyCount } from "@/lib/usage-stats";
 
 const faqs: FAQItem[] = [
   {
     question: "What is Langfuse?",
-    answer:
-      "Langfuse is an [open-source](https://github.com/langfuse/langfuse) AI engineering platform that helps teams build, monitor, and improve their LLM applications. It covers the full development lifecycle with [tracing](/docs/observability/overview), [prompt management](/docs/prompt-management/overview), [evaluations](/docs/evaluation/overview), and [analytics dashboards](/docs/metrics/overview) — all in one place. Langfuse is used by 2,300+ companies and processes billions of observations per month. You can try it instantly with the [public demo project](/docs/demo) or [sign up for free](/cloud)",
+    answer: `Langfuse is an [open-source](https://github.com/langfuse/langfuse) AI engineering platform that helps teams build, monitor, and improve their LLM applications. It covers the full development lifecycle with [tracing](/docs/observability/overview), [prompt management](/docs/prompt-management/overview), [evaluations](/docs/evaluation/overview), and [analytics dashboards](/docs/metrics/overview) — all in one place. Langfuse is used by ${formatCompanyCount()} companies and processes billions of observations per month. You can try it instantly with the [public demo project](/docs/demo) or [sign up for free](/cloud)`,
   },
   {
     question: "What does Langfuse help me with?",
@@ -43,7 +43,7 @@ const faqs: FAQItem[] = [
   {
     question: "Is Langfuse secure and compliant?",
     answer:
-      "Yes. Langfuse Cloud is [SOC 2 Type II](/security/soc2) certified, [ISO 27001](/security/iso27001) compliant, [GDPR](/security/gdpr) compliant, and [HIPAA eligible](/security/hipaa). Data is [encrypted](/security/encryption) at rest and in transit, and you can choose between [US and EU data regions](/security/data-regions). For full control, you can [self-host](/self-hosting) Langfuse on your own infrastructure with [data masking](/self-hosting/security/data-masking) and your own encryption keys. See our [security overview](/security) for details.",
+      "Yes. Langfuse Cloud is [SOC 2 Type II](/security/soc2) certified, [ISO 27001](/security/iso27001) compliant, [GDPR](/security/gdpr) compliant, and offers a [HIPAA-ready region](/security/hipaa). Data is [encrypted](/security/encryption) at rest and in transit, and you can choose between [US, EU, Japan, and HIPAA data regions](/security/data-regions). For full control, you can [self-host](/self-hosting) Langfuse on your own infrastructure with [data masking](/self-hosting/security/data-masking) and your own encryption keys. See our [security overview](/security) for details.",
   },
   {
     question: "How do I get started?",
