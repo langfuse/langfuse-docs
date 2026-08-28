@@ -48,7 +48,7 @@ const faqs: FAQItem[] = [
   {
     question: "How do I get started?",
     answer:
-      "It depends on where you are in your workflow. To **add tracing**, follow the [tracing quickstart](/docs/observability/get-started). To **set up prompt management**, see the [prompt management guide](/docs/prompt-management/get-started). To **build an evaluation strategy**, the [evaluation overview](/docs/evaluation/overview) walks you through the different approaches. [Sign up for Langfuse Cloud](/cloud) (free, no credit card required) or explore the [public demo project](/docs/demo) to see everything in action.",
+      "It depends on where you are in your workflow. To **add tracing**, follow the [tracing quickstart](/docs/observability/get-started). To **set up prompt management**, see the [prompt management guide](/docs/prompt-management/get-started). To **score live production traces**, follow the [online evaluation get started](/docs/evaluation/get-started). [Sign up for Langfuse Cloud](/cloud) (free, no credit card required) or explore the [public demo project](/docs/demo) to see everything in action.",
   },
   {
     question: "How does pricing work?",
