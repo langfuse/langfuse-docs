@@ -101,7 +101,7 @@ export const docSections: Record<string, SectionMeta> = {
   users: {
     source: usersSource,
     collection: "customers",
-    title: "User stories",
+    title: "Customers",
     layout: "post",
     hasOwnRoute: true,
   },

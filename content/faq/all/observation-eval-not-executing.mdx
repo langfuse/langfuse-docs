@@ -6,15 +6,15 @@ tags: [evaluation]
 
 # Why is my observation-level evaluator not executing?
 
-You've set up an observation-level [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluator, but no scores appear. The evaluator log may be empty, or you don't see any executions even though the preview in the setup wizard shows matching data.
+You've attached an [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluator to an observation-level rule, but no scores appear. The rule may not match incoming observations, the evaluator mapping may not fit the rule's data, or the evaluator may be blocked by its LLM connection or model configuration.
 
 There are a couple of things you can check:
 
 1. [Are you on a compatible SDK version or ingestion method?](#incompatible-sdk-version-or-ingestion-method)
 2. [If using trace-level filters: are you propagating attributes to observations?](#trace-level-attributes-not-propagated-to-observations)
-3. [Do your filters match actual observation data?](#filter-configuration-mismatch)
+3. [Do your rule filters match actual observation data?](#filter-configuration-mismatch)
 4. [Do all mapped variables exist on matching observations?](#variable-mapping-references-missing-data)
-5. [Is your evaluator's LLM connection working?](#llm-connection)
+5. [Is your evaluator blocked by its LLM connection or model configuration?](#llm-connection)
 
 ## Incompatible SDK version or ingestion method
 
@@ -108,7 +108,7 @@ Call `propagate_attributes()` early in your trace, before creating the observati
 
 ## Filter configuration mismatch
 
-Your evaluator filters might not match what's actually on the observations. Because there's no error when nothing matches (the evaluator simply doesn't run), this can be hard to spot.
+Your rule filters might not match what's actually on the observations. Because there is no error when nothing matches, this can be hard to spot.
 
 **Common mismatches:**
 
@@ -117,17 +117,13 @@ Your evaluator filters might not match what's actually on the observations. Beca
 - **Tag values**: Tags are matched as exact strings. If your evaluator filters for `my-eval` but your observation has `online_evaluator:my-eval`, they won't match.
 - **Metadata values**: Similar to tags, metadata keys and values must match exactly.
 
-**How to check**: Use the evaluator preview in the setup wizard. It shows observations from the last 24 hours that match your filters. If the preview shows matches but evaluations still don't run, the issue is likely one of the other causes on this page (SDK version, attribute propagation, or ingestion method).
+**How to check**: Open the rule and inspect the matching observations shown with its filters. If it shows matches but evaluations still do not run, check the other causes on this page, such as SDK version, attribute propagation, variable mappings, or the LLM connection.
 
 ## Variable mapping references missing data
 
-All variable mappings in your evaluator are **required**. If an observation matches your filters but a mapped field doesn't exist on it (e.g., you mapped a variable to `observation.metadata.tool_call` and that field isn't present), the evaluator will error instead of producing a score.
+All variable mappings are **required**. An evaluator has default mappings, and a rule assignment can override them. If an observation matches the rule but a mapped field does not exist (for example, you map a variable to `observation.metadata.tool_call` and that field is absent), the evaluator errors instead of producing a score.
 
-**How to check**: Go to the evaluator's log tab. If you see error entries, click into them for details.
-
-<Frame>
-  ![Evaluator logs showing status and results](/images/docs/faq-evaluator-logs.png)
-</Frame>
+**How to check**: Open the evaluator and test it with an observation matched by the rule. Confirm that the prompt variables contain the expected data and correct any mapping errors before saving.
 
 **How to fix:**
 
@@ -137,13 +133,13 @@ All variable mappings in your evaluator are **required**. If an observation matc
 
 ## LLM connection
 
-If observations are matching (you can see entries in the evaluator log) but scores still aren't appearing, the issue may be with the LLM connection used by the evaluator.
+If observations are matching but scores still are not appearing, the evaluator may be blocked by the LLM connection or model configuration.
 
-**How to check**: Go to **Settings → LLM Connections** and verify:
+**How to check**: Open the evaluator and look for a blocked status or banner. Then go to **Settings → LLM Connections** and verify:
 
 - The API key is valid and not expired
 - The model supports structured output (required for parsing evaluation results)
 
-See [LLM Connections](/docs/administration/llm-connection) for configuration details.
+After fixing the connection or model configuration, reactivate the evaluator. See [LLM Connections](/docs/administration/llm-connection) for configuration details.
 
 Still stuck? Reach out to [support](/support).
