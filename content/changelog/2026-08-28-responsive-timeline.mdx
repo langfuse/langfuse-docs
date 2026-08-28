@@ -1,0 +1,44 @@
+---
+date: 2026-08-28
+title: "Responsive Timeline"
+description: "The trace Timeline now fits any trace on one screen — twelve spans or twelve hundred — and zooms like a map. Colour carries the observation type, names come back when there is room."
+author: Nikita Kabardin
+ogVideo: https://static.langfuse.com/docs-videos/2026-08-28-dense-timeline.mp4
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Agent traces only get bigger. A run that was twelve spans last year is six hundred today — a fan-out of tool calls, a queue of embeddings, four retries, and a twenty-minute wait on a human somewhere in the middle. The old Timeline answered that by scrolling: you paged through a trace hoping to recognise the part that mattered.
+
+The new **Responsive Timeline** starts from the other end. It fits the whole trace into the space you have — on both axes — so the first thing you see is the shape of the run, not its first screenful. Then you zoom into the interesting part like you would on a map.
+
+## Geography of your time
+
+Zoomed all the way out, a trace reads as terrain. Rows shrink as far as a single line, and colour carries the observation type, so a fan-out of tool calls, a wall of embeddings and one long generation are all recognisable before you have read a single label.
+
+- **Scroll to pan, pinch or ⌘-scroll to zoom** — both axes together, time and rows.
+- **Double-click any observation** to fly to it at a readable size. Names, the tree gutter and the duration labels come back on the way in.
+- **Drag to select a time range**, or hit **Fit** to go back to the whole trace.
+- **Hover the left edge** to peek at names without moving a single bar.
+
+## Pinpoint the interesting detail
+
+Whatever a bar has room for, it shows: how long it took, what it cost, and — for streaming generations — a mark inside the bar at the first token, so time-to-first-token is something you see rather than something you compute. When a bar is too narrow to say any of that, hovering it does.
+
+Long waits stay honest. Idle time between spans is drawn to scale, which is usually the real answer to "why did this run take four minutes".
+
+## It fits your screen too
+
+The same view runs in the trace panel, in the side peek, and on a phone — the layout adapts to the box it is given rather than assuming a desktop. A 320-pixel peek and a 4K pane are the same renderer at different densities.
+
+<Callout type="info">
+  The Responsive Timeline replaces the previous Timeline view. There is nothing
+  to opt into: it is the Timeline tab for everyone on Langfuse Cloud, and ships
+  to self-hosted deployments with the next release.
+</Callout>
+
+## Feedback
+
+Traces will keep growing, and this view is built to keep up with whatever 2026 ships next. Tell us where it stops keeping up — what you look for in a big trace, and what you still cannot find — in our [feedback discussion](https://github.com/orgs/langfuse/discussions).
