@@ -19,6 +19,8 @@ Get started, no credit card required. Great for hobby projects and POCs.
 - 2 users
 - Community support via GitHub
 
+Trusted by: 50,000+ companies using Langfuse
+
 [Sign up](/cloud)
 
 ### Core ($29/month)

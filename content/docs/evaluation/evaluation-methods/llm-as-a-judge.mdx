@@ -241,10 +241,10 @@ Beyond the UI, you can set up and manage LLM-as-a-Judge evaluation programmatica
 
 The setup is split into two resources:
 
-- **Evaluators** define _how_ to score data: the judge prompt, its `{{variables}}`, default variable mappings, the structured output definition (numeric, boolean, or categorical), and the optional model configuration. Evaluators are versioned—creating one under an existing name produces the next version, and active rules automatically move to it.
+- **Evaluators** define _how_ to score data: the judge prompt, its `{{variables}}`, default variable mappings, the structured output definition (numeric, boolean, or categorical), and the optional model configuration. Each evaluator has a stable ID. Updating its definition creates a new version, and active rules automatically use the latest version.
 - **Evaluation rules** define _which_ live observations are evaluated: filters, sampling rate, and one or more evaluator assignments. An assignment can use the evaluator's default mapping or override it for that rule. The `tool_calls` mapping source is available for observation data.
 
-A typical flow is to create an evaluator, read back its variables and output definition, then create a rule and attach one or more evaluators to it.
+A typical flow is to create an evaluator, read back its stable ID, variables, and output definition, then create a rule and attach one or more evaluators to it.
 
 The endpoints are designed to be explored and consumed by coding agents. The recommended way to set up evaluators programmatically is to point an agent at the API reference and have it create the evaluators and wire up the evaluation rules for you.
 
@@ -259,9 +259,7 @@ Observation evaluation rules support a boolean `isRootObservation` filter with t
 }
 ```
 
-<Callout type="info">
-  These endpoints are currently **unstable** and may change while the underlying evaluation data model is being redesigned. See the [Evaluators](https://api.reference.langfuse.com/#tag/unstableevaluators) and [Evaluation Rules](https://api.reference.langfuse.com/#tag/unstableevaluationrules) API reference for the full request and response schemas.
-</Callout>
+See the stable [Evaluators](https://api.reference.langfuse.com/#tag/evaluators) and [Evaluation Rules](https://api.reference.langfuse.com/#tag/evaluationrules) API reference for the full request and response schemas.
 
 ## Advanced Topics
 

@@ -3,12 +3,12 @@
 import { HomeSection } from "./HomeSection";
 import { Heading } from "@/components/ui/heading";
 import { FAQAccordion, type FAQItem } from "@/components/shared/FAQAccordion";
+import { formatCompanyCount } from "@/lib/usage-stats";
 
 const faqs: FAQItem[] = [
   {
     question: "What is Langfuse?",
-    answer:
-      "Langfuse is an [open-source](https://github.com/langfuse/langfuse) AI engineering platform that helps teams build, monitor, and improve their LLM applications. It covers the full development lifecycle with [tracing](/docs/observability/overview), [prompt management](/docs/prompt-management/overview), [evaluations](/docs/evaluation/overview), and [analytics dashboards](/docs/metrics/overview) — all in one place. Langfuse is used by 2,300+ companies and processes billions of observations per month. You can try it instantly with the [public demo project](/docs/demo) or [sign up for free](/cloud)",
+    answer: `Langfuse is an [open-source](https://github.com/langfuse/langfuse) AI engineering platform that helps teams build, monitor, and improve their LLM applications. It covers the full development lifecycle with [tracing](/docs/observability/overview), [prompt management](/docs/prompt-management/overview), [evaluations](/docs/evaluation/overview), and [analytics dashboards](/docs/metrics/overview) — all in one place. Langfuse is used by ${formatCompanyCount()} companies and processes billions of observations per month. You can try it instantly with the [public demo project](/docs/demo) or [sign up for free](/cloud)`,
   },
   {
     question: "What does Langfuse help me with?",
