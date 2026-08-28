@@ -1,130 +1,135 @@
 ---
-title: "Please don't package all your docs into skills"
-date: 2026/07/28
-description: ""
+title: "What we learned building Langfuse for agents"
+date: 2026/08/20
+description: "Eight lessons from building Langfuse's agent surface."
 tag: engineering
 author: Lotte
+ogImage: /images/blog/2026-07-28-docs-for-the-day-zero-expert/og-v5.png
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
+import { FileTree } from "@/components/docs";
+import { AgentLlmsTxtFlow } from "@/components/blog/AgentLlmsTxtFlow";
+import { EndpointGuessFlow } from "@/components/blog/EndpointGuessFlow";
+import { TruncatedFetch } from "@/components/blog/TruncatedFetch";
+import { AxEnters } from "@/components/blog/AxEnters";
 
 <BlogHeader
-  title="Please don't package all your docs into skills"
-  description=""
-  date="July 28, 2026"
+  title="What we learned building Langfuse for agents"
+  description="Eight lessons from building Langfuse's agent surface."
+  date="August 20, 2026"
   authors={["lotteverheyden"]}
 />
 
-_(This should be about how the dynamics are rapidly changing, these new interfaces/frameworks are emerging in response to that, everyone wants to support them all, and often they're just doing things (like packaging docs into skills).)_
+<AxEnters />
 
-## UX, DX, and now AX?
+The main reader of our docs has changed. "Developer" is now not just the engineer, but the engineer & an agent. This is also confirmed by other parties: [Mintlify's traffic data](https://www.mintlify.com/blog/state-of-ai) shows agents now send about half of all requests to documentation sites, and the share is still growing. Netlify's CEO coined a name for what this new reader experiences: [agent experience](https://biilmann.blog/articles/introducing-ax/), or AX.
 
-For a long time, devtools had 2 main audiences, which means 2 experiences to optimize for:
+Because we saw this shift, we gradually shipped a full agent surface for Langfuse. There isn't a clear set of “best practices” for this category yet, and we love reading about how other teams are approaching this. So we wrote down what we've seen and learned from experimenting with different approaches and observing how it shapes developer and agent behavior.
 
-- UX: more focused on the user of the UI, often optimized for intuitiveness, wow-factor, etc.
-- DX: for the engineers responsible for the integration of the tool into the company's systems. These users are often in a very different working mode. Optimized for clarity, complete, well-structured information, and flexibility
+## 1. Make it as easy as possible for agents to fetch your docs
 
-Over the past year, a clear new player emerged, and quickly took over to the point where engineers are pretty comfortable being out of the loop for (large parts of) the implementation. Agents are a very different kind of "person", with different traits, so different things to optimize for.
+The upper ceiling of a coding agent's implementation quality is determined by the quality of your docs, so make it as easy as possible for agents to retrieve and parse your docs pages. You don't want agents skipping this and working from (possibly outdated) training knowledge.
 
-## This shifts the dynamics for devtool _Developer Experience_
+At Langfuse we decided to do the following things to facilitate docs fetching:
 
-"Developer" is now not just the engineer, but the engineer + an agent. The agent creates a new layer between the tool and the engineer that abstracts away the code logic and enables the engineer to just communicate in natural language.
+- **We make every page available as raw markdown**, by appending `.md` to the URL or sending an `Accept: text/markdown` header: the same content without the HTML around it, so fewer tokens and less noise. This is a common pattern by now; [Cloudflare](https://developers.cloudflare.com/docs-for-agents/), [Stripe](https://docs.stripe.com/building-with-llms), and [Vercel](https://vercel.com/docs/agent-resources/markdown-access) serve their docs the same way, and [Mintlify](https://www.mintlify.com/docs/ai/llmstxt) does it for every site it hosts.
+- **We provide an unauthenticated docs search endpoint**, `GET https://langfuse.com/api/search-docs?query=...`, which returns matching docs pages along with indexed GitHub issues and discussions.
+- **We provide a docs search [MCP server](/docs/docs-mcp)** for the agents that are set up to use one.
 
-This means that, where before, the engineer was responsible and accountable for the implementation, now there's a split:
+## 2. Name things carefully, because agents guess
 
-- the agent becomes responsible for the implementation, but
-- the engineer stays accountable
+Agents regularly guess the name of an endpoint, a command, or a parameter because it sounds right.
 
-<Frame fullWidth>
-  ![Then: the developer did the implementation and was accountable for it. Now: the AI agent does the implementation, and the developer stays accountable.](/images/blog/2026-07-28-docs-for-the-day-zero-expert/then-now-implementation-accountability.png)
-</Frame>
+An example from our own API: the v3 endpoint `GET /api/public/traces` is [deprecated](/faq/all/deprecated-api-migration), and in v4 users now need to call `GET /api/public/v2/observations`. An agent asked to fetch traces (which are sets of observations) often reaches for the endpoint with "traces" in the name, which leads to the deprecated one.
 
-This creates an interesting dynamic, where technical docs that describe the "how" in detail become input for the agent, but everything describing the "why", and conceptual workings of the product stay for the human.
+<EndpointGuessFlow />
 
-Together with this, the speed of implementation increased dramatically, and the focus of the engineer could shift from things like syntax to more high level system design.
+Small things like this also made us switch from an [auto-generated CLI based on the OpenAPI spec to a customizable one](https://github.com/langfuse/langfuse-cli/pull/13).
 
-### Revisiting the Diataxis framework
+## 3. llms.txt: useful when fetched, often skipped
 
-[Diátaxis](https://diataxis.fr) is a framework much of devtool documentation follows. It categorizes different kinds of documentation content across two axes: action vs. cognition, and acquisition (studying) vs. application (working).
-
-Now that agents are doing the implementation, documentation types on the application side are now mostly for agents. On the acquisition side, while it can also be useful for agents, its main purpose is to educate humans so that they have the necessary information to review the agent's actions and take accountability.
-
-<Frame fullWidth>
-  ![Diátaxis framework: Tutorials are for humans; How-to guides and Explanation serve humans and agents; Reference serves agents; skills sit outside the grid to provide judgment for agents.](/images/blog/2026-07-28-docs-for-the-day-zero-expert/diataxis-humans-agents-skills.png)
-</Frame>
-
-TODO: remove skill from diagram
-
-### What this means for different devtool interfaces
-
-Because of this split between implementation and accountability, about half of the interfaces get a human user, the other half an agent:
-
-| Interface          | For                                   | Value                                                                                                                                 |
-| ------------------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| UI                 | humans navigating the product by hand | manual interaction, natural discovery of information/features                                                                         |
-| API                | agents and scripts                    | programmatically interacting with the tool                                                                                            |
-| SDK                | agents and scripts                    | programmatically interacting with the tool                                                                                            |
-| CLI                | agents                                | agents interacting with the tool                                                                                                      |
-| MCP                | agents                                | agents interacting with the tool                                                                                                      |
-| Reference docs     | agents                                | understanding exactly all options of API/CLI/..                                                                                       |
-| Feature docs       | humans and agents                     | understanding why a feature exists, seeing an example of how to use it, discovery of tool capabilities                                |
-| Guide/academy docs | humans (mainly)                       | Understanding the high level concepts, the "why" behind implementation decisions, being able to explain why things are best practices |
-| skill              | agents                                | steering the agent on top of the interfaces above                                                                                     |
-
-## How agents are different from engineers [#agents-vs-engineers-traits]
-
-There are a couple of behavioral differences between how agents and human engineers approach getting to know and implementing a devtool.
-
-**Pre-existing knowledge, often outdated**
-
-For a lot of devtools, agents start with baked-in knowledge from their training data, and that training data is often outdated.
-
-→ Where for humans you'd write docs with the assumption they don't know your tool, for agents you'll often have to write with the assumption they know things already, but they might be wrong.
-
-**Nothing sticks between sessions**
-
-The knowledge gained from repeatedly interacting with a tool gets mostly lost: agents start (almost) from scratch every time.
+We shipped [llms.txt](https://langfuse.com/llms.txt), a plain-text index of every docs page. **But not every agent will fetch this, so don't rely on it exclusively.**
 
 <Callout type="info">
-  The only thing that carries over from session to session is a memory file,
-  but this will not hold every detail.
+  [Ahrefs measured](https://ahrefs.com/blog/llmstxt-study) that 97% of llms.txt
+  files across 137,000 domains got zero requests in a month. On the other hand,
+  [Mintlify's benchmark](https://mintlify.com/blog/llms-txt-agent-benchmark)
+  showed a handed-over llms.txt cutting broken doc fetches from 2.23 to 0.11 per
+  task.
 </Callout>
 
-→ Where with humans, you can assume that if they are implementing an advanced feature, they have used your product for some time already, with agents you can't. Every feature page/interface should take into account that it will be used by "beginners".
+### Beware of summarizing webfetch tools
 
-**Bias towards (incorrect) action**
+In an effort to make the Langfuse skill more discoverable, we added a line to llms.txt to convince agents to install our skill. But when testing on Claude, this didn't work. This is because Claude's webfetch tool has another model summarize the fetched page against the question the agent is currently asking, and since the skill recommendation never answered the specific question, it never surfaced on the main Claude thread.
 
-For humans it's often more efficient to invest in understanding fundamentals before executing, because being wrong comes at high time-cost. Agents default to making assumptions and trying things out, since re-trying is fast and cheap: often 1-2 doc fetches, then work with what they've got, often resulting in hallucinated calls/code.
+<AgentLlmsTxtFlow />
 
-## Adapting agent interfaces: API, SDK, CLI, MCP, reference docs, skill
+### When the llms.txt file gets too long
 
-### API, SDK, CLI, MCP, reference docs
+Some harnesses will only retrieve the first 200 lines of a web page by default, so be careful with making this file too long. An `llms.txt` file that acts as a router to specific docs pages will grow very fast. If we listed every feature docs page, integration page, and self-hosting documentation page with its link and description, this page would already be 292 lines long. This would cut off a portion of the integration links, and for an agent fetching the file, it would look like Langfuse just didn't have some of the integrations that were cut off. Each agent that leaned on the `llms.txt` file to navigate the Langfuse docs would miss the page they needed.
 
-**naming should minimize risk of incorrect hallucinations**
-This means that (give example of agents using deprecated API endpoints because they have "trace" in the name instead of "observation")
+<TruncatedFetch />
 
-- skill should steer the agent to use a good approach or add good judgement, that humans don't need
-  - use progressive disclosure to your advantage: keep main skill file concise, put a lot in reference files
-  - we need to be inclusive of models: people might be using a smaller model and it should still work, so we can't overload their context window
-- if it makes sense to have it in docs, always lean towards putting it in docs
-  - not all coding agents will have the skill installed
-  - you have no control over when people update the skill, but you do have control over up to date docs
-- ..
+We now keep the number of lines contained by only showing a comma-separated list of pages, and linking out to separate .txt pages with the actual links: [llms-docs.txt](https://langfuse.com/llms-docs.txt), [llms-integrations.txt](https://langfuse.com/llms-integrations.txt), and [llms-self-hosting.txt](https://langfuse.com/llms-self-hosting.txt). Every page title stays visible in one short fetch, and the agent follows a link when it needs the detail.
 
-→ a skill is largely the written-down answers to the questions the agent will never ask
+## 4. Docs are the source of truth, skills are for steering agent behavior
 
-> **Nuance:** Is a skill a doc type, or something else? There's a sharper framing available than "fifth quadrant": Diátaxis assumes the reader brings judgment and needs information. Skills are the inverse: the reader (agent) brings capability and needs judgment. Docs describe the tool; skills prescribe behavior.
+Sometimes, skills can be information dense. For devtools, where documentation often updates, you want to keep your skills as thin as possible, and keep all information exclusively in your docs. This is for 2 reasons:
 
-> **Nuance:** The docs-over-skills principle is quietly contrarian right now (everyone is shipping skills), and your reasons are good ones: reach and freshness. Contrarian plus defensible is a good place for a blog post to stand.
+- **Reach:** every agent can fetch docs, but not every agent will have the skill installed.
+- **Freshness:** we can update docs any moment, but we cannot force-push skill updates to users who installed the skill in the past.
 
-## Adapting interfaces for both: feature docs
+The Langfuse skill repo has this rule baked in for agents contributing to the skill:
 
-Make it as easy as possible for agents to acquire information about your product (markdown export, skill, llms.txt, ...).
+<Frame fullWidth>
+  ![The "Adding or Improving a Skill Use Case" section of the Langfuse skills AGENTS.md. It tells contributing agents to follow the instructions religiously and to re-judge their edits against the principles after every change, then gives the first rule: only add a use case if it beats the docs. If an agent can already serve the user by fetching the Langfuse docs, add nothing; reserve new content for where docs fall short and the agent needs extra context, because every addition is maintenance surface and dilutes the skill.](/images/blog/2026-07-28-docs-for-the-day-zero-expert/skill-use-case-rule.png)
+</Frame>
 
-TODO: feature docs adaptations, building on the traits above: every feature page written for "beginners" (nothing sticks between sessions), and each page self-contained (agents won't assemble the full picture across pages).
+## 5. One god skill instead of many smaller ones
 
-## Adapting interfaces for humans: UI, academy, tutorials
+In February we [launched three Langfuse skills](/blog/2026-02-13-will-you-be-my-cli) and expected to add many more, building a big collection for our users. But we quickly reverted to one single Langfuse skill instead. **This is because of convenience for the user:** we don't want the user to have to anticipate what skills they might need in the future. When everything is packaged into one skill, the user installs it once, and the same skill can serve them along their entire Langfuse journey (implementation, debugging, starting with evals, ...).
 
-Do you still need docs for humans? → YES: see accountability => reason we invest into academy and workshop now
+**This pattern is perfectly doable because of the progressive disclosure feature of skills:** the main `SKILL.md` is 150 lines and does little more than state core principles and route to more specific, elaborate _reference files_. At the moment of writing, there are 14 reference files that cover specific workflows like instrumentation, prompt migration, or judge calibration, and are only loaded when relevant to the task at hand.
 
-TODO: UI + guide/academy docs: what we changed or are investing in (academy, workshops), and why the "why" content stays with the human.
+<FileTree>
+  <FileTree.File name="SKILL.md" />
+  <FileTree.Folder name="references" defaultOpen>
+    <FileTree.File name="cli.md" />
+    <FileTree.File name="create-dataset.md" />
+    <FileTree.File name="error-analysis.md" />
+    <FileTree.File name="instrumentation.md" />
+    <FileTree.File name="…" icon={null} />
+    <FileTree.File name="setting-up-evals.md" />
+  </FileTree.Folder>
+</FileTree>
+
+## 6. Test your skills
+
+A skill is easy to generate and hard to get right, especially when it needs to work in many different scenarios with different models. That's why it's important to test the skill. We [evaluate new skill versions](/blog/2026-02-26-evaluate-ai-agent-skills) against a dataset of scenarios we expect the agent to encounter. While we will never be able to predict all scenarios, this gives us a good-enough proxy for us to decide to merge an update.
+
+Next to that, we also set up a GitHub automation to review every skill PR against our main principles in the repo's [AGENTS.md](https://github.com/langfuse/skills/blob/main/AGENTS.md):
+
+<Frame fullWidth>
+  ![The "Reviewing Pull Requests" section of the Langfuse skills AGENTS.md. It tells the reviewing agent to first read each changed file the way its runtime consumer will and flag filler, hedging, restatement, or instructions aimed at a different audience, then work through specific checks: the addition has to beat the docs, a new reference file has to be justified, references have to be ruthlessly concise and at most 100 lines, no committed code, metadata.required_access present, routing in exactly two places, plugin version bumps in lockstep, and CLI path sync.](/images/blog/2026-07-28-docs-for-the-day-zero-expert/skill-pr-review-rules.png)
+</Frame>
+
+## 7. Give agents a way to talk back
+
+The MCP server has a `submitFeedback` tool. This way, the agent can report to us directly when something wasn't clear or they are struggling. The report lands in our Slack, labeled as being about the skill, the CLI, the docs, or the API.
+
+<Frame fullWidth>
+  ![A Slack message from the "Langfuse Feedback Intake" app titled "New Langfuse feedback", with source Langfuse MCP, target sessions-view-trace-navigation, target type other, and region EU. The feedback requests a keyboard shortcut for next and previous navigation to jump from one trace to the next inside a multi-trace session detail view, similar to the J/K peek navigation in the traces table, noting that reviewing a long session today requires scrolling or going back to the session view after opening each trace. The stated goal is to review multi-trace sessions trace-by-trace without leaving the keyboard. The message carries a receipt, org, and project ID, and has 8 replies. Below it are two shorter messages logging docs page ratings, a thumbs down on /docs/observability/features/trace-ids-and-distributed-tracing and a thumbs up on /docs/prompt-management/data-model.](/images/blog/2026-07-28-docs-for-the-day-zero-expert/agent-feedback-slack.png)
+</Frame>
+
+## 8. Docs still serve humans
+
+Every change mentioned above in the end serves the reader doing the implementation. And although engineers might read less documentation now, because the agent executes the how, **engineers still review the agent's work and own the design decisions.**
+
+So next to investing in making our how-to docs more agent-serving, we're investing in human-facing content too. We're adding more concept pages and introduced the [Langfuse Academy](/academy) to guide users through the whole process, so they are equipped to defend design decisions to their team, make well-informed trade-offs, and generally feel confident in the setup they're building.
+
+<Frame fullWidth>
+  ![Then, the developer handled both implementation and accountability. Now, the AI agent handles implementation while the developer remains accountable.](/images/blog/2026-07-28-docs-for-the-day-zero-expert/developer-agent-accountability.png)
+</Frame>
+
+While the focus on this type of content is partially because of increased capacity of the team, it's also becoming increasingly important for humans to have something to hold onto while their agents implement tools at record speed.
