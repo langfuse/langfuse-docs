@@ -40,8 +40,9 @@ const pathsWithoutFooterWidgets = [
   "/brand",
   "/careers",
   "/press",
-  "/watch-demo",
+  "/partners",
   "/enterprise",
+  "/events",
   "/changelog",
   "/cn",
   "/community",
@@ -66,6 +67,7 @@ const pathsWithCopyAsMarkdownButton = [
   "/library",
   "/enterprise",
   "/resources",
+  "/academy",
 ];
 const isCustomerStory = (pathname: string) => pathname.startsWith("/users/");
 
@@ -385,6 +387,7 @@ export const DocsSupport = () => {
 
 export const DocsFeedback = ({ showLabel = true }: { showLabel?: boolean }) => {
   const pathname = usePathname();
+  const capture = usePostHogClientCapture();
   const [selected, setSelected] = useState<
     "positive" | "negative" | "submitted" | null
   >(null);
@@ -401,6 +404,11 @@ export const DocsFeedback = ({ showLabel = true }: { showLabel?: boolean }) => {
     setDialogOpen(true);
     setFeedbackComment("");
     setSubmitting(true);
+
+    capture("docs_feedback", {
+      rating: newSelection,
+      page: pathname ?? "",
+    });
 
     fetch("/api/feedback", {
       method: "POST",
@@ -421,6 +429,11 @@ export const DocsFeedback = ({ showLabel = true }: { showLabel?: boolean }) => {
 
   const handleFeedbackCommentSubmit = () => {
     setCommentSubmitting(true);
+
+    capture("docs_feedback_comment", {
+      rating: selected,
+      page: pathname ?? "",
+    });
 
     fetch("/api/feedback", {
       method: "POST",

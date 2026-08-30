@@ -101,7 +101,7 @@ export const docSections: Record<string, SectionMeta> = {
   users: {
     source: usersSource,
     collection: "customers",
-    title: "User stories",
+    title: "Customers",
     layout: "post",
     hasOwnRoute: true,
   },
@@ -172,6 +172,7 @@ export const DEDICATED_MARKETING_SLUGS = new Set<string>([
   "pricing",
   "pricing-self-host",
   "japan",
+  "events",
 ]);
 
 export const DEDICATED_APP_SECTIONS = new Set<string>([

@@ -22,6 +22,11 @@ export function sidebarNavPaddingInlineStart(depth: number) {
   return `calc(${2 * depth} * var(--spacing) + 6px)`;
 }
 
+function getFolderAnchorId(itemId?: string) {
+  if (!itemId) return undefined;
+  return `sidebar-folder-${itemId.replace(/[^a-zA-Z0-9_-]+/g, "-")}`;
+}
+
 /**
  * Depth is read inside `SidebarFolder`’s `FolderContext` (same as fumadocs-ui docs `SidebarFolderContent`).
  */
@@ -58,6 +63,7 @@ export function SidebarFolderItem({
   const pathname = usePathname();
   /** Parent depth: folder row aligns with `SidebarItem` at the same tree level. */
   const depth = useFolderDepth();
+  const folderAnchorId = item.index ? undefined : getFolderAnchorId(item.$id);
 
   const rowStyle = { paddingInlineStart: sidebarNavPaddingInlineStart(depth) };
 
@@ -80,6 +86,7 @@ export function SidebarFolderItem({
         </SidebarFolderLink>
       ) : (
         <SidebarFolderTrigger
+          data-sidebar-folder-anchor={folderAnchorId}
           className={SIDEBAR_NAV_ROW_CLASS}
           style={rowStyle}
         >

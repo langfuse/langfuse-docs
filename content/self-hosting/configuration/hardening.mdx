@@ -1,0 +1,131 @@
+---
+title: Hardening self-hosted Langfuse
+description: Operator-facing security knobs for self-hosted Langfuse — restrict sign-ups, enforce SSO, limit outbound URLs, and tighten admin access.
+label: "Version: v4"
+sidebarTitle: "Hardening"
+---
+
+# Hardening
+
+Langfuse ships with safe defaults and is penetration-tested for the same configuration that runs on [Langfuse Cloud](/security). This guide collects the additional operator-facing knobs that self-hosters typically want to turn on for production: locking down sign-ups, enforcing SSO, restricting which destinations user-configured integrations may reach, and tightening admin surfaces.
+
+For related operational guides, see [Authentication and SSO](/self-hosting/security/authentication-and-sso), [Networking](/self-hosting/security/networking), [Encryption](/self-hosting/configuration/encryption), and [Deployment Strategies](/self-hosting/security/deployment-strategies).
+
+## Restrict who can sign in [#access]
+
+By default, anyone who can reach the Langfuse web container can sign up with email and password. Pick one of the following profiles before exposing the instance.
+
+### Disable open sign-up [#disable-signup]
+
+`AUTH_DISABLE_SIGNUP=true` blocks any new account creation, including users who have an open project invite but no account yet. Combine with [headless initialization](/self-hosting/administration/headless-initialization) or invite existing users from inside the app.
+
+### Force SSO for specific email domains [#sso-enforcement]
+
+`AUTH_DOMAINS_WITH_SSO_ENFORCEMENT=acme.com,corp.example` rejects email/password sign-in (including the password-reset OTP path) for the listed domains and directs those users to sign in through your configured SSO provider instead. Use this when only part of your user base is on SSO.
+
+### Require email verification on signup [#email-verification]
+
+`AUTH_EMAIL_VERIFICATION_REQUIRED=true` adds a one-time-password step before a new email/password user can set their password. SSO sign-in is unaffected. Requires [transactional emails](/self-hosting/configuration/transactional-emails) to be configured. See [Email verification on signup](/self-hosting/security/authentication-and-sso#email-verification-on-signup) for the full flow.
+
+### Session lifetime [#session-lifetime]
+
+`AUTH_SESSION_MAX_AGE` controls how long a signed-in session (JWT) stays valid, in minutes. Default is `43200` (30 days); the value must be greater than 5 minutes because the front-end refreshes its session every 5 minutes. Lower this for shared or kiosk environments.
+
+### Disable email/password entirely [#disable-password]
+
+If every user signs in via SSO, set `AUTH_DISABLE_USERNAME_PASSWORD=true`. Account linking can be enabled per-provider with `AUTH_<PROVIDER>_ALLOW_ACCOUNT_LINKING=true` — only enable it when your IdP guarantees verified emails.
+
+## Outbound URL allowlists (SSRF defense) [#outbound-url-allowlists]
+
+Several features let project members configure a URL that Langfuse then calls on their behalf — LLM API base URLs, webhook targets, and blob storage integration endpoints. Langfuse rejects URLs whose resolved IPs fall into private, link-local, loopback, or special-use ranges (including NAT64 and 6to4 IPv6 ranges), rejects URLs with embedded credentials (`user:password@`), and re-validates the IP at request time and on every redirect hop to defend against DNS rebinding.
+
+On Langfuse Cloud this is always strict. Self-hosted instances validate LLM connection and webhook URLs by default too; blob storage endpoint validation only activates once one of its allowlist variables is set (see below). The allowlist variables let user-configured integrations reach internal services:
+
+| Use case                                  | Allowlist variables                                                                                                                                                 |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| User-configured LLM connections           | `LANGFUSE_LLM_CONNECTION_WHITELISTED_HOST`<br/>`LANGFUSE_LLM_CONNECTION_WHITELISTED_IPS`<br/>`LANGFUSE_LLM_CONNECTION_WHITELISTED_IP_SEGMENTS`                      |
+| User-configured webhooks                  | `LANGFUSE_WEBHOOK_WHITELISTED_HOST`<br/>`LANGFUSE_WEBHOOK_WHITELISTED_IPS`<br/>`LANGFUSE_WEBHOOK_WHITELISTED_IP_SEGMENTS`                                           |
+| User-configured blob storage integrations | `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_HOST`<br/>`LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IPS`<br/>`LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IP_SEGMENTS` |
+
+Each variable accepts a comma-separated list. Hostnames in `_HOST` short-circuit the IP check entirely; `_IPS` / `_IP_SEGMENTS` are matched against every IP a hostname resolves to. Set these only for trusted internal endpoints (your in-cluster MinIO, an internal LLM gateway, …) — values configured here defeat the SSRF protections for those targets. Blob storage validation activates only once one of its variables is set on a self-hosted instance; this default will change to strict in a future major release.
+
+Webhook deliveries are additionally restricted to ports 80 and 443, and sensitive headers (`Authorization`, `Cookie`, `Proxy-Authorization`, `x-langfuse-signature`) are dropped on cross-origin redirects. Provide webhook credentials via headers configured in the webhook UI rather than in the URL.
+
+## Code evaluators [#code-evaluators]
+
+[Code evaluators](/self-hosting/configuration/code-evaluators) let project members write evaluator code that Langfuse executes. On self-hosted instances they are disabled until you set `LANGFUSE_CODE_EVAL_DISPATCHER`, and the dispatcher you pick determines the isolation boundary:
+
+- `insecure-local` runs evaluator code in-process on the worker via `node:vm`, which is **not a security boundary** — evaluator code can reach everything the worker can, including your databases, queues, and cloud credentials. Only use it when everyone who can create evaluators is fully trusted.
+- `aws-lambda` dispatches evaluator code to Lambda functions you deploy, keeping execution out of the worker process. Langfuse Cloud uses this dispatcher with executor functions running in an isolated network without egress to internal services; apply the same principle when deploying your own — give the functions no network route back into your infrastructure.
+
+See [Code evaluators (self-hosted)](/self-hosting/configuration/code-evaluators) for the full dispatcher setup.
+
+## Admin API [#admin-api]
+
+The self-hosted-only [Instance Management API](/self-hosting/administration/instance-management-api) is gated by `ADMIN_API_KEY`. When you enable it:
+
+- Pick a high-entropy random value (≥ 32 bytes) — short keys are trivially brute-forceable.
+- Treat the key as you would a root credential — restrict it to a small set of operators, rotate it on personnel changes, and never expose it to the browser or to less-privileged services.
+- Do not expose admin endpoints to the public internet. Bind them to an internal load balancer or restrict them with a reverse proxy.
+- Langfuse Cloud blocks the admin API; nothing in this section applies there.
+
+## SSO configuration [#sso]
+
+A few knobs worth knowing about when configuring SSO providers via environment variables:
+
+- **Issuer validation** — set `AUTH_<PROVIDER>_ISSUER` to your IdP's exact issuer URL. Tokens are validated against it at sign-in rather than silently accepted from the wrong issuer, and `AUTH_CUSTOM_ISSUER` must additionally be a valid URL and is checked at startup. GitHub's issuer is pinned in code and needs no configuration.
+- **ID token signing algorithm** — set `AUTH_<PROVIDER>_ID_TOKEN_SIGNED_RESPONSE_ALG` to align the expected signing algorithm with your IdP if it rejects the default.
+
+See the full reference in [Authentication and SSO → Additional configuration](/self-hosting/security/authentication-and-sso#additional-configuration).
+
+## Network exposure [#network-exposure]
+
+Only the `langfuse/langfuse` (web) container needs to be reachable by users, the SDKs, and your application code. Langfuse is designed to be exposed publicly, but for high-security environments you can:
+
+- Terminate TLS at a load balancer in front of the web container (see [Encryption](/self-hosting/configuration/encryption)).
+- Put the web container behind a VPN, internal load balancer, or zero-trust proxy.
+- Peer your application VPCs with the Langfuse VPC for private SDK ingestion traffic. Worker, Postgres, ClickHouse, Redis, and blob storage should never be reachable from the public internet.
+
+See [Networking](/self-hosting/security/networking) for the full architecture diagram and per-component exposure recommendations.
+
+## Data protection [#data]
+
+- **Encryption at rest** — Postgres and ClickHouse should run with disk encryption. Configure [server-side encryption](/self-hosting/deployment/infrastructure/blobstorage#using-aws-kms-encryption) on the event-upload and media buckets.
+- **Sensitive integration secrets** (LLM API keys, blob storage credentials, SSO client secrets, webhook secrets) are encrypted at the application layer using `ENCRYPTION_KEY`. Rotate the key per the [Encryption](/self-hosting/configuration/encryption) guide.
+- **Data masking** — see [Data masking](/self-hosting/security/data-masking) to redact sensitive content from ingested traces before it lands in storage.
+
+### Data retention [#data-retention]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "ee",
+  }}
+/>
+
+Configure project-level [data retention](/docs/administration/data-retention) policies to delete traces, observations, and media after N days.
+
+### Audit logs [#audit-logs]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "not-available",
+    enterprise: "full",
+    selfHosted: "ee",
+  }}
+/>
+
+Administrative actions, including blob storage integration validate/run-now and public blob-storage deletion, are recorded in the `audit_logs` Postgres table regardless of plan. The in-app [audit log viewer](/docs/administration/audit-logs) requires the plans above; OSS deployments can query the table directly.
+
+## Telemetry [#telemetry]
+
+Langfuse self-hosted reports anonymized usage telemetry by default. Set `TELEMETRY_ENABLED=false` to opt out; note that instances running with an Enterprise Edition license key always report telemetry. See [Telemetry](/self-hosting/security/telemetry) for the exact fields collected.
+
+## Reporting security issues [#disclosure]
+
+If you discover a vulnerability, please report it via our [responsible disclosure program](/security/responsible-disclosure) rather than opening a public GitHub issue.

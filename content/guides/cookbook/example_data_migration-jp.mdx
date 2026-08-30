@@ -2,9 +2,12 @@
 title: Langfuseプロジェクト間のデータ移行 (Python SDK v4)
 sidebarTitle: データ移行スクリプト
 description: Python SDK v4を使って、Langfuseプロジェクト間でオブザベーション、スコア、プロンプト、データセット、カスタムモデル、スコア設定を移行します。
+category: Examples
 ---
 
 # Langfuseプロジェクト間のデータ移行 (Python SDK v4)
+
+このクックブックは[英語](/guides/cookbook/example_data_migration)でも利用できます。
 
 このノートブックでは、**Langfuse Python SDK v4** を使って、あるLangfuseプロジェクトから別のLangfuseプロジェクトへデータを移行します。
 
@@ -24,17 +27,20 @@ description: Python SDK v4を使って、Langfuseプロジェクト間でオブ�
 3. **プロンプト** (全バージョン)
 4. **オブザベーション** (トレース + ネストされたオブザベーション。OTLPエンドポイント経由で送るため、元の `start_time` / `end_time` がそのまま保持されます)
 5. **スコア**
-6. **データセット** (アイテム + 実行アイテム。移行後のトレース/オブザベーションに紐付けられます)
+6. **データセット** (定義 + アイテム。移行後のトレース/オブザベーションに紐付けられます)
 
 ## 移行されないもの
 
-Langfuse の公開APIでは現在、次のリソースをプログラムから作成することはできません: **LLM-as-a-Judge の評価設定**、**カスタムダッシュボード**、**ユーザー / RBAC / SSO**、**プロジェクトや組織の設定**。これらは手動で作り直すか、UI上のエクスポート機能を使って移してください。
+Langfuse の公開APIでは現在、次のリソースをプログラムから作成することはできません: **LLM-as-a-Judge の評価設定**、**カスタムダッシュボード**、**ユーザー / RBAC / SSO**、**プロジェクトや組織の設定**。これらは手動で作り直すか、UI上のエクスポート機能を使って移してください。過去の **dataset run items** も移行対象外です (セクション6を参照)。
 
 ## 0. セットアップ
 
+このノートブックには Python SDK 4.8.1 以降が必要です。それより前の 4.x リリースには v3 Scores API クライアントが含まれていません。
+
+
 
 ```python
-%pip install --quiet "langfuse>=4.0.0" "opentelemetry-sdk>=1.25.0" "opentelemetry-exporter-otlp-proto-http>=1.25.0"
+%pip install --quiet "langfuse>=4.8.1" "opentelemetry-sdk>=1.25.0" "opentelemetry-exporter-otlp-proto-http>=1.25.0"
 ```
 
 
@@ -42,19 +48,19 @@ Langfuse の公開APIでは現在、次のリソースをプログラムから�
 import os
 
 # --- 移行元 (SOURCE) プロジェクトの認証情報 ---
-os.environ.setdefault("LANGFUSE_SOURCE_PUBLIC_KEY", "pk-lf-...")
-os.environ.setdefault("LANGFUSE_SOURCE_SECRET_KEY", "sk-lf-...")
-os.environ.setdefault("LANGFUSE_SOURCE_HOST", "https://cloud.langfuse.com")  # 例: EU クラウド
+os.environ.setdefault("LANGFUSE_SOURCE_PUBLIC_KEY", "pk-lf-...");
+os.environ.setdefault("LANGFUSE_SOURCE_SECRET_KEY", "sk-lf-...");
+os.environ.setdefault("LANGFUSE_SOURCE_HOST", "https://cloud.langfuse.com");  # 例: EU クラウド
 
 # --- 移行先 (DESTINATION) プロジェクトの認証情報 ---
-os.environ.setdefault("LANGFUSE_DEST_PUBLIC_KEY", "pk-lf-...")
-os.environ.setdefault("LANGFUSE_DEST_SECRET_KEY", "sk-lf-...")
-os.environ.setdefault("LANGFUSE_DEST_HOST", "https://jp.cloud.langfuse.com")  # 例: JP クラウド
+os.environ.setdefault("LANGFUSE_DEST_PUBLIC_KEY", "pk-lf-...");
+os.environ.setdefault("LANGFUSE_DEST_SECRET_KEY", "sk-lf-...");
+os.environ.setdefault("LANGFUSE_DEST_HOST", "https://jp.cloud.langfuse.com");  # 例: JP クラウド
 
 # --- オブザベーション移行の時間フィルタ (任意, ISO 8601) ---
 # 空にすると全トレースが対象になります。
-os.environ.setdefault("LANGFUSE_MIGRATE_FROM_TIMESTAMP", "2026-03-01T00:00:00Z")  # 例: "2025-01-01T00:00:00Z"
-os.environ.setdefault("LANGFUSE_MIGRATE_TO_TIMESTAMP", "2026-04-20T00:00:00Z")    # 例: "2025-02-01T00:00:00Z"
+os.environ.setdefault("LANGFUSE_MIGRATE_FROM_TIMESTAMP", "2026-03-01T00:00:00Z");  # 例: "2025-01-01T00:00:00Z"
+os.environ.setdefault("LANGFUSE_MIGRATE_TO_TIMESTAMP", "2026-04-20T00:00:00Z");    # 例: "2025-02-01T00:00:00Z"
 ```
 
 
@@ -392,7 +398,9 @@ print(f"プロンプト — 移行: {migrated}, 失敗: {failed}")
 
 ここがデータ移行のメインパートです。移行元の各トレース (とネストされたオブザベーション) を、移行先の OTLP インジェストエンドポイント `/api/public/otel/v1/traces` に送ります。オブザベーションの `start_time` / `end_time` を取り込み時点で正しくセットできるのは OTLP エンドポイント **だけ** です。従来のREST経由のインジェストだと、これらのフィールドは上書きされてしまいます。
 
-> **セルフホスト環境の場合:** Observations API v2 には [Langfuse v4](https://langfuse.com/docs/v4) が必要です。セルフホスト向けの v4 対応は現在準備中です。セルフホストの Langfuse から移行する場合は、下の `observations.get_many(...)` の呼び出しを `src.api.trace.get(trace.id).observations` (v1 エンドポイント) に置き換えてください。
+> **セルフホスト環境の場合:** Observations API v2 には [Langfuse v4](https://langfuse.com/docs/v4) が必要です。セルフホスト向けにも v4 は一般提供されています。移行元がまだ Langfuse v3 の場合、v2 のエンドポイントは利用できません。その場合は `src.api.trace.list(page=..., from_timestamp=FROM_TS, to_timestamp=TO_TS)` でトレースを列挙し、各トレースのオブザベーションを `src.api.legacy.observations_v1.get_many(trace_id=...)` で取得してください。どちらも v4 では非推奨ですが、v3 の移行元に対してはこれしか方法がありません。
+
+> **移行対象になるトレース:** 以下のリストは *論理ルートオブザベーション* をページングするため、1トレースにつき1行が返ります。ルートオブザベーションが Langfuse に届いていないトレース (子スパンだけをエクスポートした場合など) には論理ルートが存在せず、スキップされます。移行できたトレース数と移行元プロジェクトのトレース数を比べ、差がある場合はルートフィルタなしでオブザベーションをページングし、`trace_id` でグルーピングして残りを補完してください。
 
 
 ```python
@@ -457,24 +465,25 @@ def _as_attr_string(value: Any) -> Optional[str]:
 
 
 def _set_trace_attrs(span, trace_obj) -> None:
-    """ルートスパンに trace レベルの langfuse.* 属性をセットします。"""
-    _set_scalar(span, "langfuse.trace.name", trace_obj.name)
+    """ルートスパンに trace レベルおよびルートオブザベーションの langfuse.* 属性をセットします。"""
+    trace_name = getattr(trace_obj, "trace_name", None) or trace_obj.name
+    _set_scalar(span, "langfuse.trace.name", trace_name)
     _set_scalar(span, "langfuse.user.id", trace_obj.user_id)
     _set_scalar(span, "langfuse.session.id", trace_obj.session_id)
-    _set_scalar(span, "langfuse.release", trace_obj.release)
+    _set_scalar(span, "langfuse.release", getattr(trace_obj, "release", None))
     _set_scalar(span, "langfuse.version", trace_obj.version)
     _set_scalar(span, "langfuse.environment", trace_obj.environment or "default")
     if trace_obj.public is not None:
         span.set_attribute("langfuse.trace.public", bool(trace_obj.public))
-    if trace_obj.tags:
+    if getattr(trace_obj, "tags", None):
         # Langfuse は string[] 属性としても JSON 文字列としても受け付けます。
         span.set_attribute("langfuse.trace.tags", list(trace_obj.tags))
     input_str = _as_attr_string(trace_obj.input)
     if input_str is not None:
-        span.set_attribute("langfuse.trace.input", input_str)
+        span.set_attribute("langfuse.observation.input", input_str)
     output_str = _as_attr_string(trace_obj.output)
     if output_str is not None:
-        span.set_attribute("langfuse.trace.output", output_str)
+        span.set_attribute("langfuse.observation.output", output_str)
     md = trace_obj.metadata
     if isinstance(md, dict):
         for k, v in md.items():
@@ -568,9 +577,9 @@ def _fetch_observations_v2(source_trace_id: str) -> List[Any]:
     """指定したトレースの全オブザベーションを v2 API からカーソルページングで取得します。
 
     Observations API v2 (Langfuse Cloud、またはセルフホスト Langfuse v4+) が必要です。
-    それ以前のセルフホスト環境から移行する場合は、このヘルパーを次の実装に置き換えてください:
-
-        return with_retries(lambda: src.api.trace.get(source_trace_id)).observations
+    移行元が Langfuse v3 の場合は、非推奨の v1 読み取り
+    `src.api.legacy.observations_v1.get_many(trace_id=source_trace_id, page=..., limit=100)`
+    に置き換えてください (カーソルではなくページ番号でのページングになります)。
     """
     results: List[Any] = []
     cursor: Optional[str] = None
@@ -591,19 +600,24 @@ def _fetch_observations_v2(source_trace_id: str) -> List[Any]:
 
 def migrate_one_trace(trace_obj) -> int:
     """1つのトレースとそのオブザベーションを移行します。戻り値は子オブザベーションの件数です。"""
-    observations = _fetch_observations_v2(trace_obj.id)
-    new_trace_hex = to_otel_trace_id(trace_obj.id)
-    trace_id_map[trace_obj.id] = new_trace_hex
+    source_trace_id = getattr(trace_obj, "trace_id", None) or trace_obj.id
+    observations = _fetch_observations_v2(source_trace_id)
+    new_trace_hex = to_otel_trace_id(source_trace_id)
+    trace_id_map[source_trace_id] = new_trace_hex
 
     # オブザベーションをソート: 親が子より先、開始時刻の早い順。
     observations.sort(key=lambda o: (o.start_time, o.id))
 
     # トレースレベルの属性を載せるルートスパン。移行元に明示的なルートオブザベーションが
-    # ない場合は、トレース自身のタイムスタンプで合成します。
-    root_span_hex = to_otel_span_id(trace_obj.id)  # ルートスパン ID を決定論的に生成
-    trace_start = min((o.start_time for o in observations), default=trace_obj.timestamp)
+    # ない場合は、ルートオブザベーションのタイムスタンプで合成します。
+    root_span_hex = to_otel_span_id(source_trace_id)  # ルートスパン ID を決定論的に生成
+    trace_start = min(
+        (o.start_time for o in observations),
+        default=getattr(trace_obj, "start_time", None) or getattr(trace_obj, "timestamp", None),
+    )
     trace_end = max(
-        (o.end_time or o.start_time for o in observations), default=trace_obj.timestamp
+        (o.end_time or o.start_time for o in observations),
+        default=getattr(trace_obj, "end_time", None) or trace_start,
     )
 
     # --- ルートスパン ---
@@ -618,7 +632,7 @@ def migrate_one_trace(trace_obj) -> int:
     # 子スパンを作ります。こうしておくとネストのコードが一貫した書き方になります。
     root_ctx = otel_trace.set_span_in_context(NonRecordingSpan(root_parent_sc))
     root_span = migration_tracer.start_span(
-        name=trace_obj.name or "trace",
+        name=(getattr(trace_obj, "trace_name", None) or trace_obj.name or "trace"),
         start_time=_to_ns(trace_start),
         context=root_ctx,
     )
@@ -654,7 +668,7 @@ def migrate_one_trace(trace_obj) -> int:
 
 
 # --- 移行ループを実行 ---
-page = 1
+cursor: Optional[str] = None
 limit = 50
 total = 0
 total_obs = 0
@@ -662,23 +676,19 @@ failures = 0
 progress_every = 10  # このトレース数ごとに進捗ログを出します
 t_start = time.time()
 while True:
-    # trace.list に `fields="core,io"` を指定すると、一覧レスポンスに
-    # input / output / metadata が含まれるので、トレースごとの追加リクエストが不要になります。
-    listing = with_retries(lambda: src.api.trace.list(
-        page=page,
+    # `is_root_observation` は論理ルートを取得するための専用パラメータで、
+    # 1トレースにつき1行が返ります。高度な `filter` パラメータは他のすべての
+    # クエリパラメータより優先されるため、こちらを使います。
+    listing = with_retries(lambda: src.api.observations.get_many(
+        fields="core,basic,io,metadata,trace_context",
         limit=limit,
-        order_by="timestamp.asc",
-        from_timestamp=FROM_TS,
-        to_timestamp=TO_TS,
-        fields="core,io",
+        cursor=cursor,
+        from_start_time=FROM_TS,
+        to_start_time=TO_TS,
+        is_root_observation=True,
     ))
     if not listing.data:
         break
-
-    total_items = getattr(listing.meta, "total_items", None)
-    total_pages = getattr(listing.meta, "total_pages", None)
-    if page == 1 and total_items is not None:
-        print(f"移行を開始します: {total_items} 件のトレース / {total_pages} ページ")
 
     for t in listing.data:
         try:
@@ -688,24 +698,21 @@ while True:
             if total % progress_every == 0:
                 elapsed = time.time() - t_start
                 rate = total / elapsed if elapsed > 0 else 0
-                progress = (
-                    f"{total}/{total_items}" if total_items is not None else str(total)
-                )
                 print(
-                    f"  [{progress} traces] observations={total_obs} "
+                    f"  [{total} traces] observations={total_obs} "
                     f"failed={failures} rate={rate:.1f} traces/s"
                 )
         except Exception as exc:
-            print(f"  トレース {t.id} の移行に失敗: {exc}")
+            source_trace_id = getattr(t, "trace_id", t.id)
+            print(f"  トレース {source_trace_id} の移行に失敗: {exc}")
             failures += 1
 
+    cursor = getattr(listing.meta, "cursor", None)
     print(
-        f"  ページ {page}/{total_pages or '?'} 完了 — "
-        f"累計: traces={total}, observations={total_obs}, failed={failures}"
+        f"  バッチ完了 — 累計: traces={total}, observations={total_obs}, failed={failures}"
     )
-    if total_pages is not None and page >= total_pages:
+    if not cursor:
         break
-    page += 1
 
 otlp_provider.force_flush()
 elapsed = time.time() - t_start
@@ -719,7 +726,23 @@ print(f"  obs_id_map エントリ数:   {len(obs_id_map)}")
 
 ## 5. スコア
 
-スコアは移行元から `api.scores.get_many` で取得し、移行先ではネイティブの **`create_score`** ヘルパーで再作成します。元の `id` をそのまま保持するので、スクリプトを再実行しても冪等に動きます。`config_id` はセクション1の `config_id_map` で、`trace_id` / `observation_id` はセクション4の `trace_id_map` / `obs_id_map` でそれぞれマッピングし直します。
+スコアは移行元から v3 Scores API (`api.scores_v3.get_many_v3`) で取得し、移行先では `POST /api/public/scores` エンドポイント (`api.legacy.score_v1.create`) で再作成します。元の `id` をそのまま保持するので、スクリプトを再実行しても冪等に動きます。`config_id` はセクション1の `config_id_map` で、トレース / オブザベーションへの参照はセクション4の `trace_id_map` / `obs_id_map` でそれぞれマッピングし直します。
+
+旧 v2 エンドポイントとの違いのうち、ここで重要になるのは次の3点です。
+
+- **カーソルページネーション** — ページ番号を数える代わりに、`meta.cursor` の不透明なカーソルを空になるまで渡し続けます。
+- **単一の `subject`** — 各スコアは、フラットな `trace_id` / `observation_id` / `session_id` / `dataset_run_id` フィールドの代わりに、1つの `subject` オブジェクト (`kind` + `id`) で対象を参照します。データセット実行は v3 では *experiment* と呼ばれます。ごくまれに2つの参照 (例: トレースとセッションの両方) を持つ古いスコアが存在しますが、v3 ではそのうち1つだけが返されます。従来のフローではそうしたスコアの再作成自体が失敗していたので、悪化することはありません。
+- **型付きの `value`** — `value` は常に数値 + 別フィールドの `string_value` という形ではなく、スコアの `data_type` に応じた型になります (NUMERIC は数値、BOOLEAN は真偽値、CATEGORICAL などは文字列)。
+
+挙動については次の点に注意してください。
+
+- v2 はトレースが存在しないスコアを黙って除外していましたが、v3 はそれらも返します。v2 のフローより移行されるスコアがやや多くなる場合は、これまで見えていなかったスコアが移行されるようになったためで、改善であって問題ではありません。
+- データセット実行に紐づくスコア (`kind="experiment"`) はこのセクションではスキップされます。セクション6で実行を再作成する際に移行先では新しい実行IDが割り当てられるため、移行元の実行IDへの参照は無効になってしまうからです。こうしたスコアは、移行先に実行が作成されたあとに、実行名で対応づけて移行してください。
+- スコアの作成は非同期です。成功レスポンスは取り込みキューに入ったことを意味するだけで、その時点で書き込みが完了しているわけではありません。取り込みが追いついてから移行先プロジェクトを確認してください。
+- 作成エンドポイントはタイムスタンプを受け付けないため、移行されたスコアのタイムスタンプは移行時刻になります。元のスコアのタイムスタンプは公開APIでは引き継げません。
+
+> **セルフホスト環境の場合:** Scores API v3 は Langfuse Cloud と、セルフホストでは v3.180.0 以降で利用できます。それより古いセルフホスト環境では v2 のパターンを使ってください: ページベースの `src.api.scores.get_many(page=page, limit=100, ...)` で取得し、フラットな `trace_id` / `observation_id` / `session_id` フィールドと、CATEGORICAL スコアには `string_value` を使います。なお、[Langfuse v4](https://langfuse.com/docs/v4) への移行が完了したデプロイメントでは v2 の読み取りエンドポイントは削除されています。
+
 
 
 ```python
@@ -727,64 +750,105 @@ trace_id_map = globals().get("trace_id_map", {})
 obs_id_map = globals().get("obs_id_map", {})
 config_id_map = globals().get("config_id_map", {})
 
-page = 1
+# v3 Scores API のフィールドグループ。`core` (id/name/value/dataType/...) は常に
+# 含まれます。`details` は comment/metadata/configId を、`subject` は subject
+# 参照を、`annotation` は authorUserId/queueId を追加します。
+SCORES_FIELDS = "details,subject,annotation"
+
+cursor: Optional[str] = None
 migrated = failed = skipped = 0
 while True:
-    resp = with_retries(lambda: src.api.scores.get_many(
-        page=page,
+    resp = with_retries(lambda: src.api.scores_v3.get_many_v3(
         limit=100,
+        cursor=cursor,
+        fields=SCORES_FIELDS,
         from_timestamp=FROM_TS,
         to_timestamp=TO_TS,
     ))
-    if not resp.data:
-        break
     for s in resp.data:
-        # 参照をマッピングし直す
-        new_trace_id = trace_id_map.get(s.trace_id, s.trace_id) if s.trace_id else None
-        new_obs_id = obs_id_map.get(s.observation_id, s.observation_id) if s.observation_id else None
-        new_cfg_id = config_id_map.get(s.config_id, s.config_id) if s.config_id else None
-
-        # 型に応じた値を決める
-        if s.data_type == "CATEGORICAL":
-            value = getattr(s, "string_value", None) or str(s.value)
-        else:
-            value = s.value
-
-        if value is None:
+        # 値が null のスコアは、変換より前に弾く必要があります。後続の BOOLEAN
+        # の分岐が、値なしを false に変換してしまうためです。
+        if s.value is None:
             skipped += 1
             continue
 
+        # v3 の subject を、作成エンドポイントが期待するフラットな参照フィールドに
+        # 変換する: traceId / sessionId のうちちょうど1つ。observationId には
+        # traceId が必須。
+        trace_id = observation_id = session_id = None
+        kind = s.subject.kind if s.subject else None
+        if kind == "trace":
+            trace_id = s.subject.id
+        elif kind == "observation":
+            if not s.subject.trace_id:
+                print(f"  スコア {s.id} ({s.name}) をスキップ: トレースを持たない observation subject")
+                skipped += 1
+                continue
+            observation_id = s.subject.id
+            trace_id = s.subject.trace_id
+        elif kind == "session":
+            session_id = s.subject.id
+        elif kind == "experiment":  # v3 におけるデータセット実行の呼び名
+            # subject の id は移行元プロジェクトの実行ID。移行先では新しい実行IDが
+            # 割り当てられるため、この参照は引き継げません。
+            print(f"  スコア {s.id} ({s.name}) をスキップ: データセット実行のスコアは移行先に実行が作成されたあとに移行してください")
+            skipped += 1
+            continue
+        else:
+            print(f"  スコア {s.id} ({s.name}) をスキップ: 未対応の subject kind {kind!r}")
+            skipped += 1
+            continue
+
+        # 参照をマッピングし直す
+        new_trace_id = trace_id_map.get(trace_id, trace_id) if trace_id else None
+        new_obs_id = obs_id_map.get(observation_id, observation_id) if observation_id else None
+        new_cfg_id = config_id_map.get(s.config_id, s.config_id) if s.config_id else None
+
+        # v3 の `value` は型付きなので、書き込み側が期待する形に変換する
+        if s.data_type == "NUMERIC":
+            value = s.value
+        elif s.data_type == "BOOLEAN":
+            value = 1 if s.value else 0  # 書き込み側は数値の 0/1 を期待する
+        elif s.data_type == "CATEGORICAL":
+            value = s.value  # すでにカテゴリの文字列
+        else:
+            # その他のデータ型 (例: TEXT) は文字列値なので、そのまま渡す
+            print(f"  {s.data_type} スコア {s.id} ({s.name}) をそのまま移行します")
+            value = s.value
+
         try:
-            with_retries(lambda: dst.create_score(
+            # POST /api/public/scores。このエンドポイントはタイムスタンプを受け付けない
+            # ため、移行されたスコアには移行時刻が記録されます。取り込みは非同期で、
+            # 成功レスポンスはキュー投入を意味します (即時反映ではない)。
+            with_retries(lambda: dst.api.legacy.score_v1.create(
+                id=s.id,  # ID を保持するので、再実行しても重複なく冪等に処理されます
                 name=s.name,
                 value=value,
                 data_type=s.data_type,
                 trace_id=new_trace_id,
                 observation_id=new_obs_id,
-                session_id=getattr(s, "session_id", None),
-                dataset_run_id=getattr(s, "dataset_run_id", None),
-                score_id=s.id,  # ID を保持するので、再実行しても重複なく冪等に処理されます
+                session_id=session_id,
                 comment=s.comment,
                 config_id=new_cfg_id,
                 metadata=s.metadata,
-                timestamp=s.timestamp,
+                environment=s.environment,
             ))
             migrated += 1
         except Exception as exc:
             print(f"  スコア {s.id} ({s.name}) の移行に失敗: {exc}")
             failed += 1
-    if page >= getattr(resp.meta, "total_pages", page):
+    cursor = getattr(resp.meta, "cursor", None)
+    if not cursor:
         break
-    page += 1
 
-# スコアをフラッシュする (create_score は dst クライアントのキューにイベントを積むので)
-dst.flush()
-print(f"スコア — 移行: {migrated}, スキップ (値が null): {skipped}, 失敗: {failed}")
+print(f"スコア — 移行: {migrated}, スキップ: {skipped}, 失敗: {failed}")
 ```
 
-## 6. データセット (アイテム + 実行アイテム)
+## 6. データセットとアイテム
 
-データセット本体はネイティブの **`create_dataset`** ヘルパーで、アイテムは **`create_dataset_item`** (移行元のアイテムIDを維持) で、実行アイテム (run items) は REST エンドポイント経由で移行します。実行アイテムからは、`trace_id_map` / `obs_id_map` を使って移行済みのトレース/オブザベーションを参照します。
+データセット本体はネイティブの **`create_dataset`** ヘルパーで、アイテムは **`create_dataset_item`** (移行元のアイテムIDを維持) で移行します。
+
+過去の dataset run items は移行**されません**。従来の `POST /api/public/dataset-run-items` エンドポイントは非推奨で、その代替手段はいずれも過去の実行を埋め戻すのではなく *新しい* experiment run を作成するものです。以下のセルでは、移行元で見つかった実行を一覧表示して、何が残されるのかがわかるようにしています。移行先で同じ実行を再現したい場合は、[Experiments SDK](https://langfuse.com/docs/evaluation/experiments/experiments-via-sdk) で実験を再実行するか、[OTLP の experiment 属性](https://langfuse.com/integrations/native/opentelemetry/experiments) を付けてアイテムのトレースを自分で送信してください。
 
 
 ```python
@@ -801,7 +865,7 @@ def _enc(name: str) -> str:
 
 ds_migrated = ds_skipped = ds_failed = 0
 items_migrated = items_failed = 0
-runs_created = runs_failed = 0
+runs_found = 0
 
 t_start = time.time()
 ds_seen = 0  # 処理した移行元データセット数 (新規 + 既存)
@@ -877,9 +941,9 @@ while True:
         ds_items_fail = items_failed - ds_items_failed_before
         print(f"    アイテム: 移行 {ds_items} 件, 失敗 {ds_items_fail} 件")
 
-        # 実行アイテム。パスパラメータ (dataset_name, run_name) は URL エンコードが必要です。
-        ds_runs_before = runs_created
-        ds_runs_failed_before = runs_failed
+        # 過去の run items は移行しません。POST /dataset-run-items は非推奨で、
+        # 代替手段は過去の実行を埋め戻すのではなく新しい experiment run を作成する
+        # ためです。何が残されるかがわかるように、移行元の実行を一覧表示します。
         run_count = 0
         page_run = 1
         while True:
@@ -890,42 +954,12 @@ while True:
                 break
             for run_meta in rresp.data:
                 run_count += 1
-                try:
-                    run_full = with_retries(lambda: src.api.datasets.get_run(
-                        dataset_name=_enc(ds.name), run_name=_enc(run_meta.name)
-                    ))
-                except Exception as exc:
-                    print(f"      実行 '{run_meta.name}' の取得に失敗: {exc}")
-                    runs_failed += 1
-                    continue
-                for ri in run_full.dataset_run_items:
-                    new_trace = trace_id_map.get(ri.trace_id, ri.trace_id) if ri.trace_id else None
-                    new_obs = obs_id_map.get(ri.observation_id, ri.observation_id) if ri.observation_id else None
-                    if not new_trace and not new_obs:
-                        runs_failed += 1
-                        continue
-                    try:
-                        with_retries(lambda: dst.api.dataset_run_items.create(
-                            run_name=run_meta.name,
-                            dataset_item_id=ri.dataset_item_id,
-                            trace_id=new_trace,
-                            observation_id=new_obs,
-                            run_description=run_meta.description,
-                            metadata=run_meta.metadata,
-                        ))
-                        runs_created += 1
-                    except Exception as exc:
-                        print(f"      実行 '{run_meta.name}' の実行アイテム作成に失敗: {exc}")
-                        runs_failed += 1
+                runs_found += 1
+                print(f"      実行 '{run_meta.name}' は移行しません — 移行先で再実行してください")
             if page_run >= getattr(rresp.meta, "total_pages", page_run):
                 break
             page_run += 1
-        ds_runs = runs_created - ds_runs_before
-        ds_runs_fail = runs_failed - ds_runs_failed_before
-        print(
-            f"    実行: {run_count} 件, 実行アイテムリンク {ds_runs} 件, "
-            f"失敗 {ds_runs_fail} 件"
-        )
+        print(f"    実行: {run_count} 件を移行元で検出。移行はしません")
 
     if page_ds >= getattr(dsresp.meta, "total_pages", page_ds):
         break
@@ -935,7 +969,7 @@ elapsed = time.time() - t_start
 print(
     f"\nデータセット — 新規: {ds_migrated}, 既存: {ds_skipped}, 失敗: {ds_failed}  |  "
     f"アイテム: 移行 {items_migrated} 件 / 失敗 {items_failed} 件  |  "
-    f"実行アイテム: リンク {runs_created} 件 / 失敗 {runs_failed} 件  |  "
+    f"移行元で検出した実行 (移行対象外): {runs_found}  |  "
     f"経過時間: {elapsed:.1f}s"
 )
 ```

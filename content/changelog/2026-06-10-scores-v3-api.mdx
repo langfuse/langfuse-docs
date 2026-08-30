@@ -45,4 +45,4 @@ GET /api/public/v3/scores?fields=details,subject,annotation
 
 **Migrating from v2.** v3 queries scores directly instead of joining traces, which keeps response times predictable at any volume. Filters therefore target score properties: for trace-level questions like "scores for traces of user X", the [Metrics API](/docs/metrics/features/metrics-api) replaces the v2 `userId` and `traceTags` filters and the `trace` field group. Every filter is now an explicit, typed parameter, replacing v2's JSON-stringified `filter` argument, and fetching a single score works through the `id` filter, replacing the get-by-id endpoint. Invalid filter combinations are rejected with HTTP 400.
 
-The full parameter reference is in the [API docs](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores).
+For a step-by-step upgrade path, see [Migration of deprecated APIs](/faq/all/deprecated-api-migration#scores). The full parameter reference is in the [API docs](https://api.reference.langfuse.com/#tag/scoresv3/GET/api/public/v3/scores).

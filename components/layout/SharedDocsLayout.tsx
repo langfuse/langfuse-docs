@@ -11,6 +11,7 @@ import {
   FloatingAskAI,
 } from "@/components/inkeep/search";
 import { SidebarFolderItem } from "@/components/docs-sidebar/SidebarFolderItem";
+import { SidebarFolderDeepLinkHandler } from "@/components/docs-sidebar/SidebarFolderDeepLinkHandler";
 import { SidebarItem } from "@/components/docs-sidebar/SidebarItem";
 import { SidebarSeparatorItem } from "@/components/docs-sidebar/SidebarSeparatorItem";
 import { Banner } from "./Banner";
@@ -57,6 +58,7 @@ export function SharedDocsLayout({
             : undefined
         }
       >
+        <SidebarFolderDeepLinkHandler />
         <DocsPatternTracker />
         <Banner />
         <NavbarDocs sectionLabel={sectionLabel} />
