@@ -30,7 +30,6 @@ export async function generateMetadata({
   );
   const currentPage = parseChangelogPageParam(sp.page, totalPages);
   const canonical = changelogPageHref(currentPage, totalPages) ?? "/changelog";
-
   return {
     alternates: {
       canonical,
@@ -59,7 +58,6 @@ export default async function ChangelogIndexPage({ searchParams }: PageProps) {
     sliceStart,
     sliceStart + CHANGELOG_ITEMS_PER_PAGE,
   );
-
   return (
     <ContentColumns footerClassName="md:max-w-none xl:max-w-none px-6 sm:px-6 md:px-6">
       <div className="mx-auto w-full px-6 py-8">
@@ -75,10 +73,15 @@ export default async function ChangelogIndexPage({ searchParams }: PageProps) {
             to see what&apos;s next.
           </Text>
           <div>
-            <Button asChild variant="outline" size="lg" className="flex items-center gap-2">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="inline-flex w-auto items-center gap-2"
+            >
               <Link href="/api/changelog-rss.xml" target="_blank">
                 <Rss className="w-4 h-4" />
-                <span>OpenRSS</span>
+                <span>RSS Feed</span>
               </Link>
             </Button>
           </div>
