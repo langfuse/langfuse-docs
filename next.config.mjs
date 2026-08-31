@@ -209,6 +209,20 @@ const nextConfig = {
           { key: "Cache-Control", value: "public, max-age=3600" },
         ],
       },
+      // Advertise the markdown representation over HTTP as well as in the
+      // HTML head, per the llms.txt v2 link relations. Agents that fetch
+      // headers only, or that never parse the HTML, can still discover it.
+      // Keep this source in sync with the negotiation rewrites below.
+      {
+        source:
+          "/:path((?!api|_next|md-src|\\.well-known)(?!.*\\.md$)(?!.*\\.txt$)(?!.*\\.json$).*)",
+        headers: [
+          {
+            key: "Link",
+            value: '</:path.md>; rel="alternate"; type="text/markdown"',
+          },
+        ],
+      },
       // Mark markdown endpoints as noindex and ensure correct content type
       {
         source: "/:path*.md",

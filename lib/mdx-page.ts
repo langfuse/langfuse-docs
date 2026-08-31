@@ -140,6 +140,12 @@ export function buildSectionMetadata(
     description: page.data.description ?? undefined,
     alternates: {
       canonical: canonicalUrl,
+      // Advertise the markdown representation of this page, per the llms.txt
+      // v2 link relations. Agents that look for it (Codex CLI today) can fetch
+      // markdown without guessing a URL scheme; everything else ignores the
+      // tag. Built from pagePath rather than canonicalUrl so a page with a
+      // `canonical` override still points at its own mirror.
+      types: { "text/markdown": buildPageUrl(`${pagePath}.md`) },
       ...(opts?.languages ? { languages: opts.languages } : {}),
     },
     ...(pageData.noindex ? { robots: { index: false, follow: true } } : {}),
