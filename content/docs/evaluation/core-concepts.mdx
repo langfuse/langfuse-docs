@@ -156,11 +156,13 @@ You can compare experiment runs to see if a new prompt version improves scores, 
 
 You can find more details on how these objects link together under the hood on the [data model page](/docs/evaluation/experiments/data-model).
 
-### Two ways to run experiments
+### Ways to run experiments
 
 You can **run experiments programmatically using the Langfuse SDK**. This gives you full control over the task, evaluation logic, and more. [Learn more about running experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk).
 
-Another way is to **run experiments directly from the Langfuse interface** by selecting a dataset and prompt version. This is useful for quick iterations on prompts without writing code. [Learn more about running experiments via UI](/docs/evaluation/experiments/experiments-via-ui).
+You can **run experiments directly from the Langfuse interface** by selecting a dataset and prompt version. This is useful for quick iterations on prompts without writing code. [Learn more about running experiments via UI](/docs/evaluation/experiments/experiments-via-ui).
+
+If you already emit traces through OpenTelemetry and are not using the Python or JS/TS SDK, **attach experiment attributes to those spans** so Langfuse groups them as an experiment run. [Learn more about experiments via OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry).
 
 <div className="my-6">
   <div className="grid grid-cols-3 gap-2">
@@ -181,7 +183,8 @@ Another way is to **run experiments directly from the Langfuse interface** by se
       [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui)
     </div>
     <div className="p-3 border dark:border-gray-700 rounded text-center bg-blue-50 dark:bg-blue-900/30">
-      [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)
+      [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) or
+      [OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry)
     </div>
 
     {/* Local Data row */}
@@ -192,7 +195,8 @@ Another way is to **run experiments directly from the Langfuse interface** by se
       Not supported
     </div>
     <div className="p-3 border dark:border-gray-700 rounded text-center bg-blue-50 dark:bg-blue-900/30">
-      [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)
+      [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) or
+      [OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry)
     </div>
 
   </div>

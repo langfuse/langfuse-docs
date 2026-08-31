@@ -1,0 +1,76 @@
+---
+title: Experiments via OpenTelemetry
+description: Group OpenTelemetry traces as Langfuse experiments by attaching experiment and item attributes.
+---
+
+# Experiments via OpenTelemetry
+
+If your application already sends traces to Langfuse through [OpenTelemetry](/integrations/native/opentelemetry), you can attach experiment metadata to those spans so Langfuse groups them as an experiment run.
+
+This is the ingest path when you are **not** using the Python or JS/TS [Experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk). Typical cases:
+
+- You instrument in a language without a Langfuse SDK.
+- You already emit OTLP from a collector, gateway, or custom pipeline.
+- You need to re-ingest traces with experiment attributes (for example after a v4 upgrade).
+
+<Callout type="info">
+  **Using Python or TypeScript?** Use [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk).
+  The Langfuse SDKs set these attributes automatically. Follow the OpenTelemetry
+  guide only for direct OTEL ingestion.
+</Callout>
+
+## Choose how to run experiments [#choose-how-to-run-experiments]
+
+| If you want to...                                                         | Use                                                                                                            |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Test prompt versions or models from the Langfuse UI                       | [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui)                                          |
+| Loop Python or JS/TS application code over a dataset                      | [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)                                        |
+| Ingest experiment runs from OpenTelemetry (any language or OTLP pipeline) | This page, then the [OpenTelemetry experiment ingestion guide](/integrations/native/opentelemetry/experiments) |
+| Read experiment runs, items, and scores programmatically                  | [Experiments API](/docs/api-and-data-platform/features/experiments-api)                                        |
+
+Langfuse does not create experiments through a dedicated REST write endpoint. The legacy `POST /api/public/dataset-run-items` path is deprecated. New experiment runs are created by the Experiment runner SDK, Experiments via UI, or OpenTelemetry spans that carry experiment attributes.
+
+## How this maps to the data model [#how-this-maps-to-the-data-model]
+
+An [experiment](/docs/evaluation/core-concepts#experiments) is a run of your application against test data. Each dataset item becomes one trace: the item input in, the actual output out, with child spans for model calls, tool calls, and other work.
+
+To synthesize those traces as one experiment in Langfuse, every span must carry:
+
+1. **Experiment context** — identity shared by every item in the run (`experiment.id`, `experiment.name`, `dataset.id`).
+2. **Experiment item root** — one root span per item, with the item input, actual output, and optional expected output.
+3. **Item context** — identity shared by the root and its child spans (`item.id`, `item.root_observation_id`).
+
+See the [Experiments data model](/docs/evaluation/experiments/data-model) for how datasets, experiment runs, traces, and scores relate.
+
+## Ingest experiment spans [#ingest-experiment-spans]
+
+The full attribute list, baggage propagation pattern, and per-item loop live in the OpenTelemetry integration docs:
+
+import { Radio } from "lucide-react";
+
+<Cards num={1}>
+  <Card
+    icon={<Radio size="24" />}
+    title="Ingest experiment spans with OpenTelemetry"
+    href="/integrations/native/opentelemetry/experiments"
+    arrow
+  />
+</Cards>
+
+That guide covers:
+
+- Experiment and item attributes to set on baggage and on the item root span
+- Linking items to a [Langfuse-managed dataset](/docs/evaluation/experiments/datasets)
+- Using local correlation IDs when the dataset is not stored in Langfuse
+- Choosing an `experiment` [environment](/docs/observability/features/environments) so runs do not mix with production traffic
+
+## Retrieve experiment results [#retrieve-experiment-results]
+
+After traces land with experiment attributes, use the [Experiments API](/docs/api-and-data-platform/features/experiments-api) to list runs, fetch items (inputs, outputs, expected outputs, scores), or pull the full observation tree via the [Observations API](/docs/api-and-data-platform/features/observations-api).
+
+## Related resources
+
+- [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) — recommended for Python and JS/TS
+- [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui) — prompt and model experiments from the dataset page
+- [OpenTelemetry overview](/integrations/native/opentelemetry) — OTLP endpoint, headers, and baggage
+- [Experiments API](/docs/api-and-data-platform/features/experiments-api) — read experiment runs and items
