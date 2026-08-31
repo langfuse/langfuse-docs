@@ -467,19 +467,28 @@ Run the script again. Both runs use the same stored dataset, so you can compare 
 
 </Steps>
 
-## Troubleshooting [#troubleshooting]
+## FAQ [#faq]
 
-### The dataset already exists
+<Details>
+<Summary>What if the dataset already exists?</Summary>
 
 The setup script creates the dataset and is intended to run once. If `san-francisco-sites` already exists, skip the dataset creation call and keep the item-creation loop. Stable item IDs make those calls safe to repeat.
 
-### The experiment is missing traces
+</Details>
+
+<Details>
+<Summary>Why is the experiment missing traces?</Summary>
 
 Check your Langfuse environment variables. For Python, keep `langfuse.flush()` at the end of the script. For JS/TS, keep `otelSdk.shutdown()` so the short-lived process exports all buffered spans before it exits.
 
-### Some exact-match scores are zero
+</Details>
+
+<Details>
+<Summary>Why are some exact-match scores zero?</Summary>
 
 Open the affected item and compare the model output with the expected output. Capitalization, extra words, and punctuation all cause exact match to fail. This is useful for deterministic output contracts; use [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) when correctness requires semantic judgment.
+
+</Details>
 
 ## Next steps
 
