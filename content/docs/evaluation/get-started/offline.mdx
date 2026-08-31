@@ -18,9 +18,6 @@ Every experiment in this guide has three parts:
   This guide uses the current Langfuse SDKs: **Python SDK v4** and **JS/TS SDK v5**. Both use Langfuse's OpenTelemetry-based tracing and the current experiment runner. If you use an older SDK, see the [Python v3 → v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS v4 → v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5) migration guide.
 </Callout>
 
-<Tabs items={["SDK", "Langfuse UI"]}>
-<Tab>
-
 <Steps>
 
 ### Create a project and get API keys [#sdk-create-project]
@@ -370,78 +367,6 @@ Answer the question about a site in San Francisco. Return only the site's offici
 Run the script again. Both runs use the same stored dataset, so you can compare aggregate scores and individual outputs side by side in the Experiments view.
 
 </Steps>
-
-</Tab>
-<Tab>
-
-<Steps>
-
-### Create a project and configure an LLM connection [#ui-create-project]
-
-1. [Create a Langfuse account](/cloud) or [self-host Langfuse](/self-hosting).
-2. Create a project.
-3. Add an OpenAI API key under **Settings → LLM Connections**. See [LLM Connections](/docs/administration/llm-connection) for configuration details.
-
-### Create a prompt [#ui-create-prompt]
-
-Open [**Prompt Management**](https://cloud.langfuse.com/project/~/prompts) and create a chat prompt named `san-francisco-site-answer`.
-
-Add this system message:
-
-```text
-Answer the question about a site in San Francisco.
-```
-
-Add this user message:
-
-```text
-{{question}}
-```
-
-The `question` variable matches the key in each dataset item's input object.
-
-### Create the dataset [#ui-create-dataset]
-
-1. Download the [San Francisco sites sample dataset](/files/san-francisco-sites.csv).
-2. Open [**Datasets**](https://cloud.langfuse.com/project/~/datasets).
-3. Create a dataset named `san-francisco-sites`.
-4. Import the CSV. Map `input` to the dataset input and `expectedOutput` to the expected output.
-5. Confirm that each input is a JSON object with a `question` field.
-
-### Add the Exact Match evaluator [#ui-create-evaluator]
-
-1. Open [**Evaluators**](https://cloud.langfuse.com/project/~/evals) and select **New evaluator**.
-2. In the evaluator gallery, select the Langfuse-maintained **Check if Output Is an Exact Match** template.
-3. Keep the template definition unchanged and save the evaluator.
-4. Continue without creating a production rule. You will select the evaluator directly when configuring the experiment.
-
-The template compares the model output with the dataset item's expected output. Because this dataset stores each expected site name as a plain string, no mapping or code changes are required.
-
-### Run the experiment [#ui-run-experiment]
-
-1. Open the `san-francisco-sites` dataset.
-2. Select **Start Experiment** and create a prompt experiment.
-3. Name it `San Francisco sites v1`.
-4. Select the `san-francisco-site-answer` prompt and your OpenAI connection.
-5. Select the Exact Match evaluator you created from the gallery.
-6. Run the experiment.
-
-Langfuse runs the prompt against every dataset item, stores the output and trace, applies the evaluator, and opens the completed experiment.
-
-### Improve the prompt and compare [#ui-iterate]
-
-Create a new version of `san-francisco-site-answer` with this system message:
-
-```text
-Answer the question about a site in San Francisco. Return only the site's official name, with no additional text or punctuation.
-```
-
-Run a second experiment named `San Francisco sites v2`. Open [**Experiments**](https://cloud.langfuse.com/project/~/experiments) to compare both runs and inspect which dataset items improved or regressed.
-
-</Steps>
-
-</Tab>
-</Tabs>
 
 ## Troubleshooting [#troubleshooting]
 
