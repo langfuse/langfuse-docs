@@ -1,0 +1,147 @@
+---
+title: "How DKB uses Langfuse to keep its AI banking assistant accurate, compliant, and trustworthy at scale"
+date: August 31, 2026
+description: Learn how DKB uses Langfuse to observe, screen, and improve its in-app AI assistant.
+ogImage:
+tag: customer-story
+author: Annabell
+customerLogo: "/images/customers/dkb/dkb-light.svg"
+customerLogoDark: "/images/customers/dkb/dkb-dark.svg"
+customerQuote: "Langfuse is indispensable to us. It enables insightfulness and is a great tool for tracing what's going on inside your agent."
+customerQuoteHighlight: "indispensable"
+quoteAuthor: "David Hinrichs"
+quoteRole: "Senior Machine Learning Scientist"
+quoteCompany: "DKB"
+showInCustomerIndex: true
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { CustomerQuote } from "@/components/customers/CustomerQuote";
+import { ImpactChart } from "@/components/customers/ImpactChart";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+
+<BlogHeader
+  title="How DKB uses Langfuse to keep its AI banking assistant accurate, compliant, and trustworthy at scale"
+  description="Learn how DKB uses Langfuse to observe, screen, and improve its in-app AI assistant."
+  customerLogo="/images/customers/dkb/dkb-light.svg"
+  authors={["annabellschafer"]}
+  date="August 31, 2026"
+/>
+
+## About DKB
+
+[DKB](https://www.dkb.de/) (Deutsche Kreditbank) is one of Germany's largest direct banks. For the roughly 6 million customers who rely on DKB, the first point of contact is increasingly the bank's AI assistant, which is available 24/7 through the DKB app.
+
+First introduced in 2023, it has evolved from a simple question-answering tool into a fully agentic assistant handling 10,000 to 20,000 conversations a day. It can access a customer's account to help resolve complex requests (for example, set up a standing order, retrieve a tax certificate, or block a lost card), always leaving the final action to the customer and staying within strict compliance rules, like never giving investment advice.
+
+<div className="flex justify-center">
+  <Frame fullWidth className="w-2/3">
+    ![Placeholder for a product screenshot of the DKB in-app AI assistant](/images/customers/dkb/dkb-assistant-placeholder.png)
+  </Frame>
+</div>
+
+As David Hinrichs, a Senior Machine Learning Scientist at DKB, notes, the more an agent can do, especially in a regulated industry like banking, the more important it is to know exactly what it is doing. "In scaling a solution like this," he says, "you want to make sure you maintain observability into what's actually going on in your chatbot."
+
+We caught up with David to learn how DKB uses Langfuse to keep its agentic assistant observable and compliant, and how Langfuse became the shared platform where the bank's engineers and customer service experts work together to keep it accurate and improving.
+
+<CustomerQuote
+  quote="In scaling a solution like this, you want to make sure you maintain observability into what's actually going on in your chatbot."
+  name="David Hinrichs"
+  role="Senior Machine Learning Scientist"
+  company="DKB"
+/>
+
+## The need for a better LLM observability solution
+
+When David joined DKB in 2025, the AI assistant was already live, but there was no real LLM observability tooling in place. Customer service and banking experts looked at data, but it was reporting-focused and "quite painful," he says, with interactions living in a Postgres database and reaching the team as static CSV and Excel exports.
+
+The real business-critical need, in David's telling, was less about convenience than needing visibility into patterns. With tens of thousands of messages exchanged every day, spotting a single bad answer told you little. "You ask yourself, is this a one-time thing, or is it a thing that keeps happening? We don't want to rely on human intuition, we want to consistently deliver a great customer experience," he recalls.
+
+David had come across Langfuse at a startup he worked at previously, so when he set out to build a real [observability](/docs/observability/overview) solution, he already had a candidate in mind. As a German bank, however, DKB had non-negotiables before anything could touch production data. First and foremost, the tool had to be open-source and [self-hostable](/self-hosting). "There would have been no way to send an unknown company all the data from our customers," he says.
+
+At the same time, it couldn't be built for engineers alone. The people who would live in it day to day were customer service experts, not developers. David looked at the alternatives. Arize AX was closed-source, which ruled it out for a bank that needed to self-host. At the time, Comet's Opik lacked key features like [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), and was read as a tool for engineers. "Langfuse was definitely the most ready in terms of 'can I show this to non-technical people and not have them run away,'" David says.
+
+To make the case, he ran Langfuse on a test system with synthetic data. The reaction from his colleagues sealed the decision. "I showed it to some people," he recalls, "and they were like, 'I need this for the production system, because I want to go explore what is going on there.'"
+
+## One workspace for two kinds of expertise
+
+David describes Langfuse as a kind of "shared space" between DKB's technical and customer service teams. "We have the AI expertise, but we don't necessarily have the banking customer service expertise," he says. "There's a lot of regulation, a lot of very specific things you need to get right. Langfuse really is a place where we bring the two halves together."
+
+<CustomerQuote
+  quote="We have the AI expertise, but we don't necessarily have the banking customer service expertise. There's a lot of regulation, a lot of very specific things you need to get right. Langfuse really is a place where we bring the two halves together."
+  name="David Hinrichs"
+  role="Senior Machine Learning Scientist"
+  company="DKB"
+/>
+
+It starts with [tracing](/docs/observability/overview). Every interaction flows in, and during fresh rollouts the team watches traces arrive live. DKB's architecture includes an unusual wrinkle, since some of its customers are also employees, and the bank isn't permitted to auto-review colleagues' conversations. To work around this, the team runs two production Langfuse instances, with one acting as an ingress, and the other, where the automated screening runs, excluding them.
+
+<div className="flex justify-center">
+  <Frame fullWidth className="w-2/3">
+    ![Placeholder for a Langfuse trace screenshot with mock or anonymized data](/images/customers/dkb/dkb-trace-placeholder.png)
+  </Frame>
+</div>
+
+That screening applies an [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) to every answer, writing the results back into Langfuse as [tags](/docs/observability/features/tags) and [scores](/docs/evaluation/evaluation-methods/scores-via-sdk). Some checks are compliance-driven; if the assistant tries to give investment advice, for example, that response is flagged. Others gauge whether an answer is factually grounded in the knowledge base, and whether the customer seems satisfied. The same tags double as a live read on what customers are actually asking about.
+
+Anything flagged goes to customer service experts working directly in Langfuse. David's team maintains [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) by service area (for example, brokerage or credit), and the specialists reviewing them rank each case by severity, escalating the most serious ones. "They can quickly get a bird's-eye view," David says. "So if we have 50 sessions flagged in the brokerage center, for instance, but only two are rated critical, we take care of those first."
+
+<div className="flex justify-center">
+  <Frame fullWidth className="w-2/3">
+    ![Placeholder for a Langfuse annotation queues screenshot with mock or anonymized data](/images/customers/dkb/dkb-annotation-queues-placeholder.png)
+  </Frame>
+</div>
+
+Those experts are also proactive about finding new areas for improvement. "They send me links to traces and say, 'I noticed a lot of people asking this kind of question. Can we teach the chatbot to guide them that way?'" David says. When they find an archetypical example, they add it to a [dataset](/docs/evaluation/experiments/datasets) he can pull to confirm a pattern and adjust a system prompt. Those [datasets](/docs/evaluation/experiments/datasets) feed the behavioral [evaluations](/docs/evaluation/overview) DKB runs in its deployment pipeline, alongside broader checks that answers stay concise, factual, and free of "AI slop smell." "There's a lot of discovery of future potential that wouldn't be possible without this common ground," he says.
+
+## Deeper insights, deeper collaboration
+
+In David's eyes, the value of Langfuse isn't really captured in hours saved; that, he says, is "almost a byproduct" of the bigger goal. What Langfuse really changed for DKB is the ceiling on the quality of insights it can derive, and the quality of conversations between its teams.
+
+Getting an assistant right most of the time doesn't take much: "80/20 is quite easy, and 90/10 you can get with a couple of low-tech solutions," David says. "But if you want to go from 90/10 to 95/5, or even 98/2, you definitely need a tool that can handle that complexity." DKB couldn't get the granular, example-level feedback on the chatbot's behavior it needed with the old setup. "You need a tool like Langfuse to even attempt to go the last mile."
+
+Shared evidence also changes how teams work together. When the banking experts can point to dozens of concrete examples, it's far easier for engineering to accept that a problem is real and act on it. As David says, the specialists "feel like they can get us to do things in a more timely manner, with less pushback, because you can show people data."
+
+And there's a harder-edged reason why all of this matters. As a regulated bank, DKB has stringent compliance expectations and regulations to maintain detailed, traceable audit histories for AI systems, including autonomous or semi-autonomous AI agents. "If I disabled the screening tomorrow," David says, "we would have to stop all our agent activity." Observability, in that sense, is part of DKB's license to operate, and Langfuse is what makes it possible at scale.
+
+## What's next for DKB and Langfuse
+
+DKB continues to push the assistant further into agentic territory, and David sees room to lean on Langfuse more as it does. That includes replacing bespoke dashboards with visualizations from the team's topic tags, and keeping a close eye on latency and model behavior.
+
+A year in, Langfuse has become the place where DKB turns a high-volume AI assistant into something its banking and customer service experts can see into, trust, and improve.
+
+<CustomerQuote
+  quote="Langfuse is indispensable to us. It enables insightfulness and is a great tool for tracing what's going on inside your agent. I definitely recommend it."
+  name="David Hinrichs"
+  role="Senior Machine Learning Scientist"
+  company="DKB"
+/>
+
+## Business impact
+
+<ImpactChart
+  items={[
+    {
+      area: "Observability at banking scale",
+      impact:
+        "Every interaction of an assistant that handles 10,000 to 20,000 conversations a day is traced, so DKB can tell a one-off miss from a pattern.",
+    },
+    {
+      area: "Automated compliance screening",
+      impact:
+        "An LLM-as-a-judge scores every answer for compliance, grounding, and customer satisfaction, and writes the results back as tags and scores.",
+    },
+    {
+      area: "Shared workspace for two kinds of expertise",
+      impact:
+        "Engineers and customer service specialists work in the same traces, annotation queues, and datasets, so domain experts can steer what the assistant learns next.",
+    },
+    {
+      area: "License to operate",
+      impact:
+        "Traceable screening is part of how DKB meets audit requirements for agentic systems. Without it, the bank would have to stop agent activity.",
+    },
+  ]}
+/>
+
+<CustomerStoryCTA />
