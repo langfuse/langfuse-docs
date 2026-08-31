@@ -16,24 +16,29 @@ const INTRO_DESCRIPTION =
 // sitemap but missing from this map are reported by warnUnlistedSections()
 // instead of being dropped without a trace.
 //
-// `inlineTitles: false` omits the comma-separated page list from the main
-// llms.txt for sections large enough to drown out everything else; the
-// sub-file still lists every page.
+// `inlineTitles: true` lists every page title inline in the main llms.txt.
+// Reserved for the sections an agent most often needs to navigate directly.
+// Every other section still gets its own sub-file and is announced in
+// llms.txt as a heading plus a link to that sub-file, without its page
+// titles, so the main index stays small enough to be cheap context.
 const SECTION_CONFIG = {
   docs: {
     file: "llms-docs.txt",
     heading: "Docs",
     subFileHeading: "Langfuse Docs",
+    inlineTitles: true,
   },
   integrations: {
     file: "llms-integrations.txt",
     heading: "Integrations",
     subFileHeading: "Langfuse Integrations",
+    inlineTitles: true,
   },
   "self-hosting": {
     file: "llms-self-hosting.txt",
     heading: "Optional: Self-Hosting",
     subFileHeading: "Langfuse Self-Hosting",
+    inlineTitles: true,
   },
   guides: {
     file: "llms-guides.txt",
@@ -44,6 +49,7 @@ const SECTION_CONFIG = {
     file: "llms-academy.txt",
     heading: "Academy",
     subFileHeading: "Langfuse Academy",
+    inlineTitles: true,
   },
   faq: {
     file: "llms-faq.txt",
@@ -89,7 +95,6 @@ const SECTION_CONFIG = {
     file: "llms-changelog.txt",
     heading: "Changelog",
     subFileHeading: "Langfuse Changelog",
-    inlineTitles: false,
   },
 };
 
@@ -292,18 +297,19 @@ async function generateLLMsList() {
       integrations: `For the best results, install the [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) before implementing any integration.`,
     };
 
-    // Add each section with sub-file link and comma-separated titles
+    // Add each section as a heading plus a link to its sub-file, and inline the
+    // page titles only for the sections that opt in via `inlineTitles`.
     for (const [sectionKey, entries] of Object.entries(sectionEntries)) {
       if (entries.length > 0) {
         const config = SECTION_CONFIG[sectionKey];
-        const titles = entries.map((e) => e.title).join(", ");
 
         markdownContent += `## ${config.heading}\n\n`;
         if (sectionIntros[sectionKey]) {
           markdownContent += `${sectionIntros[sectionKey]}\n\n`;
         }
         markdownContent += `For the full list with links to each page, see: https://langfuse.com/${config.file}\n\n`;
-        if (config.inlineTitles !== false) {
+        if (config.inlineTitles === true) {
+          const titles = entries.map((e) => e.title).join(", ");
           markdownContent += `Pages: ${titles}\n\n`;
         }
       }
