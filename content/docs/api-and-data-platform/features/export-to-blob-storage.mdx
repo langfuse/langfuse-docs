@@ -27,7 +27,7 @@ Schedule exports to Amazon S3, S3-compatible storage, Google Cloud Storage, or A
 ### Create the integration
 
 1. Open **Project Settings > Integrations > Blob Storage**.
-2. Select your provider and enter its bucket, path, and credentials. Self-hosters can find per-vendor bucket and credential setup on the [blob storage deployment page](/self-hosting/deployment/infrastructure/blobstorage).
+2. Select your provider and enter its bucket, path, and credentials. Self-hosters can find per-vendor bucket and credential setup on the [blob storage deployment page](/self-hosting/deployment/infrastructure/blobstorage). For self-hosted AWS S3, you can leave **Access Key ID** and **Secret Access Key** blank to authenticate with the host's [IAM role](/self-hosting/deployment/infrastructure/blobstorage#amazon-s3) (EC2 instance profile, ECS task role, or IRSA) instead of static credentials. This fallback is not available on Langfuse Cloud or for other providers.
 3. Choose the file format, schedule, export mode, and field groups.
 4. Enable the integration and save. The first run starts shortly afterward.
 
