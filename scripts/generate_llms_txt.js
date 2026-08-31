@@ -11,10 +11,14 @@ const ALL_PAGES_PATH = path.join(repoRoot, ".sitemap-all-pages.json");
 const TITLE = "Langfuse";
 const INTRO_DESCRIPTION =
   "Langfuse is an **open-source AI engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow.";
-const MAIN_SECTIONS = ["docs", "integrations"];
-const OPTIONAL_SECTIONS = ["self-hosting"];
-
-// Map section keys to sub-file names and display names
+// Every content section that should appear in llms.txt, in output order.
+// Each entry gets its own llms-<section>.txt sub-file. Sections present in the
+// sitemap but missing from this map are reported by warnUnlistedSections()
+// instead of being dropped without a trace.
+//
+// `inlineTitles: false` omits the comma-separated page list from the main
+// llms.txt for sections large enough to drown out everything else; the
+// sub-file still lists every page.
 const SECTION_CONFIG = {
   docs: {
     file: "llms-docs.txt",
@@ -31,7 +35,126 @@ const SECTION_CONFIG = {
     heading: "Optional: Self-Hosting",
     subFileHeading: "Langfuse Self-Hosting",
   },
+  guides: {
+    file: "llms-guides.txt",
+    heading: "Guides and cookbooks",
+    subFileHeading: "Langfuse Guides",
+  },
+  academy: {
+    file: "llms-academy.txt",
+    heading: "Academy",
+    subFileHeading: "Langfuse Academy",
+  },
+  faq: {
+    file: "llms-faq.txt",
+    heading: "FAQ",
+    subFileHeading: "Langfuse FAQ",
+  },
+  resources: {
+    file: "llms-resources.txt",
+    heading: "Resources",
+    subFileHeading: "Langfuse Resources",
+  },
+  security: {
+    file: "llms-security.txt",
+    heading: "Security and compliance",
+    subFileHeading: "Langfuse Security",
+  },
+  handbook: {
+    file: "llms-handbook.txt",
+    heading: "Handbook",
+    subFileHeading: "Langfuse Handbook",
+  },
+  workshop: {
+    file: "llms-workshop.txt",
+    heading: "Workshop",
+    subFileHeading: "Langfuse Workshop",
+  },
+  library: {
+    file: "llms-library.txt",
+    heading: "Library",
+    subFileHeading: "Langfuse Library",
+  },
+  users: {
+    file: "llms-users.txt",
+    heading: "Customer stories",
+    subFileHeading: "Langfuse Customer Stories",
+  },
+  blog: {
+    file: "llms-blog.txt",
+    heading: "Blog",
+    subFileHeading: "Langfuse Blog",
+  },
+  changelog: {
+    file: "llms-changelog.txt",
+    heading: "Changelog",
+    subFileHeading: "Langfuse Changelog",
+    inlineTitles: false,
+  },
 };
+
+const SECTION_KEYS = Object.keys(SECTION_CONFIG);
+
+// Top-level sitemap paths that are single marketing/legal pages rather than
+// content sections. They are intentionally absent from llms.txt, so they must
+// not trigger the unlisted-section warning.
+const IGNORED_SECTION_PATHS = new Set([
+  "",
+  "pricing",
+  "pricing-self-host",
+  "enterprise",
+  "startups",
+  "non-profit",
+  "talk-to-us",
+  "demo",
+  "careers",
+  "about",
+  "imprint",
+  "terms",
+  "privacy",
+  "brand",
+  "press",
+  "research",
+  "events",
+  "agents",
+  "cloud",
+  "status",
+  "support",
+  "why-langfuse",
+  "cn",
+  "japan",
+  "kr",
+  "launch-week-5",
+  "customers",
+  "community",
+  "cookie-policy",
+  "oss-friends",
+  "partners",
+  "role-finder",
+  "wrapped",
+]);
+
+/**
+ * Sections that exist in the sitemap but have no SECTION_CONFIG entry are
+ * missing from llms.txt. This used to happen silently: unmatched URLs were
+ * collected into an `other` bucket that was never written to any file, so
+ * whole sections (academy, faq, guides, resources, ...) were absent from
+ * llms.txt without any signal. Warn loudly instead.
+ */
+function warnUnlistedSections(entriesByUnlistedSection) {
+  const sections = Object.keys(entriesByUnlistedSection).sort();
+  if (sections.length === 0) return;
+  console.warn(
+    "[llms.txt] These sitemap sections are not in SECTION_CONFIG and are " +
+      "absent from llms.txt. Add them to SECTION_CONFIG, or to " +
+      "IGNORED_SECTION_PATHS if that is intentional:",
+  );
+  sections.forEach((section) => {
+    console.warn(
+      `  - /${section} (${entriesByUnlistedSection[section].length} pages)`,
+    );
+  });
+}
 
 function generateTitle(url) {
   return url
@@ -81,13 +204,12 @@ async function generateLLMsList() {
     const result = await parser.parseStringPromise(sitemapContent);
 
     // Create a map to store URLs by section
-    const urlsBySection = {
-      other: [],
-      optional: [],
-    };
-    MAIN_SECTIONS.forEach((section) => {
+    const urlsBySection = {};
+    SECTION_KEYS.forEach((section) => {
       urlsBySection[section] = [];
     });
+    // section path -> entries, for sections with no SECTION_CONFIG entry
+    const unlistedSections = {};
 
     // Per-page metadata (real frontmatter title/description) keyed by pathname.
     const pageMeta = loadPageMeta();
@@ -104,23 +226,21 @@ async function generateLLMsList() {
         url,
       };
 
-      if (MAIN_SECTIONS.includes(urlPath)) {
+      if (urlsBySection[urlPath]) {
         urlsBySection[urlPath].push(entry);
-      } else if (OPTIONAL_SECTIONS.includes(urlPath)) {
-        urlsBySection.optional.push(entry);
-      } else {
-        urlsBySection.other.push(entry);
+      } else if (!IGNORED_SECTION_PATHS.has(urlPath)) {
+        unlistedSections[urlPath] = unlistedSections[urlPath] || [];
+        unlistedSections[urlPath].push(entry);
       }
     });
 
     const publicDir = path.join(repoRoot, "public");
 
     // Write sub-files for each section
-    const sectionEntries = {
-      docs: urlsBySection.docs || [],
-      integrations: urlsBySection.integrations || [],
-      "self-hosting": urlsBySection.optional || [],
-    };
+    const sectionEntries = {};
+    SECTION_KEYS.forEach((section) => {
+      sectionEntries[section] = urlsBySection[section] || [];
+    });
 
     for (const [sectionKey, entries] of Object.entries(sectionEntries)) {
       if (entries.length > 0) {
@@ -183,13 +303,21 @@ async function generateLLMsList() {
           markdownContent += `${sectionIntros[sectionKey]}\n\n`;
         }
         markdownContent += `For the full list with links to each page, see: https://langfuse.com/${config.file}\n\n`;
-        markdownContent += `Pages: ${titles}\n\n`;
+        if (config.inlineTitles !== false) {
+          markdownContent += `Pages: ${titles}\n\n`;
+        }
       }
     }
 
     fs.writeFileSync(path.join(publicDir, "llms.txt"), markdownContent);
 
-    console.log("Successfully generated llms.txt and sub-files");
+    warnUnlistedSections(unlistedSections);
+
+    const generated = Object.entries(sectionEntries)
+      .filter(([, entries]) => entries.length > 0)
+      .map(([section, entries]) => `${section} (${entries.length})`)
+      .join(", ");
+    console.log(`Successfully generated llms.txt and sub-files: ${generated}`);
   } catch (error) {
     console.error("Error generating llms.txt:", error);
   }
