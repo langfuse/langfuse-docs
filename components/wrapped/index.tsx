@@ -9,8 +9,11 @@ import { Outro } from "./Outro";
 // Lazy-load recharts-heavy components so D3/recharts (~1.5 MB) is NOT bundled
 // into the catch-all [section]/[[...slug]] route that serves all docs pages.
 // These components only render on the /wrapped page.
-const Metrics = dynamic(() =>
-  import("./Metrics").then((m) => ({ default: m.Metrics })),
+// Real `import()` so Turbopack keeps recharts out of the `/` and `/docs`
+// initial graph. The webpack cacheGroups split in next.config.mjs is webpack-only.
+const Metrics = dynamic(
+  () => import("./Metrics").then((m) => ({ default: m.Metrics })),
+  { ssr: false },
 );
 
 export function Wrapped() {
