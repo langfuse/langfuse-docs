@@ -1,6 +1,6 @@
 ---
 title: Langfuse Assistant
-description: Ask questions about your Langfuse project data in plain language from inside the Langfuse Cloud UI.
+description: Explore your Langfuse project data and take actions in Langfuse from inside the UI.
 sidebarTitle: Assistant
 ---
 
@@ -16,21 +16,31 @@ sidebarTitle: Assistant
   }}
 />
 
-The Langfuse Assistant is an in-product assistant for exploring your Langfuse project data and taking selected actions in Langfuse with your approval. You can ask questions about traces, observations, sessions, metrics, and Langfuse workflows in plain language.
+The Langfuse Assistant is an in-product assistant for exploring your Langfuse project data and taking actions in Langfuse with your approval. You can ask about traces, observations, sessions, and metrics, or ask it to create datasets, dashboards, and other resources. Longer jobs run in the background.
 
 <Video src="https://static.langfuse.com/docs-videos/in-app-agent.mp4" />
 
-## What you can ask [#what-you-can-ask]
+## What you can do [#what-you-can-do]
 
-Ask the Assistant questions such as:
+<a id="what-you-can-ask" />
+
+Ask the Assistant to analyze your data or take action in Langfuse.
+
+Analyze:
 
 - "Which traces had the highest latency yesterday?"
 - "Show me failed generations in the last hour."
 - "What's my token spend this week, broken down by model?"
-- "How do I set up an evaluator?"
-- "Open the traces table filtered to errors from today."
-- "Create a dataset for regression examples."
+- "Fetch a few hundred failed observations from the last 7 days and cluster the main errors with code."
+
+Take action:
+
+- "Create a dataset from failed generations last week."
+- "Build a dashboard of error rate and p95 latency for the last 7 days."
+- "Review this prompt against current best practices and propose a tighter version."
 - "Set up a numeric score config for friendliness."
+- "Open the traces table filtered to errors from today."
+- "How do I set up an evaluator?"
 
 ## How it works [#how-it-works]
 
@@ -39,15 +49,18 @@ The Assistant uses the Langfuse MCP server and additional tools to answer questi
 The Assistant can:
 
 - Query traces, observations, sessions, and metrics through Langfuse tools
+- Fetch large observation sets and process them with code in a sandbox, instead of loading every payload into the model
 - Search Langfuse documentation
 - Propose links to Langfuse pages such as traces, sessions, dashboards, prompts, datasets, experiments, evals, alerts, and project settings
-- Help with selected actions such as creating or updating Langfuse resources
+- Create or update Langfuse resources such as datasets, dashboards, widgets, prompts, and score configs
 
 The Assistant is designed to be safe by default:
 
 - If a request would change data or configuration, the Assistant pauses and asks you to explicitly approve that specific action first.
 
 The Assistant can only use actions that your account already has access to in the current project. Approval adds a second safety check, but it does not grant any extra permissions.
+
+Longer jobs run in the background, independently of your browser. You can start another conversation while the first one is still working. You get a notification when a run finishes, fails, or needs your approval. For repeating work in one conversation, choose **Always approve** on a tool you are comfortable leaving unattended.
 
 The Assistant is also aware of your current context in the Langfuse UI, such as the current trace, observation, session, or dashboard, as well as user metadata such as your name, browser language, and timezone. This context is used to provide more relevant answers and propose actions.
 
