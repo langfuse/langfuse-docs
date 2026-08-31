@@ -21,7 +21,9 @@ Every experiment in this guide has three parts:
 <Tabs items={["SDK", "Langfuse UI"]}>
 <Tab>
 
-## 1. Create a project and get API keys [#sdk-create-project]
+<Steps>
+
+### Create a project and get API keys [#sdk-create-project]
 
 1. [Create a Langfuse account](/cloud) or [self-host Langfuse](/self-hosting).
 2. Create a project and open **Settings → API Keys**.
@@ -38,7 +40,7 @@ export OPENAI_API_KEY="sk-..."
 
 Use the base URL for your [Langfuse Cloud data region](/security/data-regions) or self-hosted deployment.
 
-## 2. Install the SDKs [#sdk-install]
+### Install the SDKs [#sdk-install]
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
@@ -61,7 +63,7 @@ npm install @langfuse/client @langfuse/openai @langfuse/otel @opentelemetry/sdk-
 </Tab>
 </LangTabs>
 
-## 3. Create the dataset [#sdk-create-dataset]
+### Create the dataset [#sdk-create-dataset]
 
 Create a Langfuse dataset and add five questions with their expected answers. Run this setup script once; the experiment script in the next step reuses the stored dataset.
 
@@ -213,7 +215,7 @@ npx tsx seed-dataset.ts
 
 Dataset item IDs are stable, so adding an item with the same ID updates it instead of creating a duplicate. You can also [create datasets in the UI or import a CSV](/docs/evaluation/experiments/datasets).
 
-## 4. Run an experiment [#sdk-run-experiment]
+### Run an experiment [#sdk-run-experiment]
 
 The task sends each question to the model. The evaluator returns `1` when the model output exactly matches the expected site name and `0` otherwise.
 
@@ -344,7 +346,7 @@ npx tsx sf-sites.ts
 
 The experiment runner handles concurrent execution, traces each task, attaches evaluator scores, and creates a dataset run that you can inspect and compare in Langfuse.
 
-## 5. View the results [#sdk-view-results]
+### View the results [#sdk-view-results]
 
 The formatted terminal output includes the experiment summary and a link to the dataset run. You can also open [**Experiments**](https://cloud.langfuse.com/project/~/experiments) in Langfuse.
 
@@ -355,7 +357,7 @@ For each item, you can inspect:
 - The exact-match score
 - The traced OpenAI call, including latency, token usage, and cost
 
-## 6. Improve the prompt and compare [#sdk-iterate]
+### Improve the prompt and compare [#sdk-iterate]
 
 Exact match is intentionally strict. An answer such as `The answer is Coit Tower.` receives `0` because it does not exactly equal `Coit Tower`.
 
@@ -367,30 +369,20 @@ Answer the question about a site in San Francisco. Return only the site's offici
 
 Run the script again. Both runs use the same stored dataset, so you can compare aggregate scores and individual outputs side by side in the Experiments view.
 
-## Troubleshooting [#sdk-troubleshooting]
-
-### The dataset already exists
-
-The setup script creates the dataset and is intended to run once. If `san-francisco-sites` already exists, skip the dataset creation call and keep the item-creation loop. Stable item IDs make those calls safe to repeat.
-
-### The experiment is missing traces
-
-Check your Langfuse environment variables. For Python, keep `langfuse.flush()` at the end of the script. For JS/TS, keep `otelSdk.shutdown()` so the short-lived process exports all buffered spans before it exits.
-
-### Some exact-match scores are zero
-
-Open the affected item and compare the model output with the expected output. Capitalization, extra words, and punctuation all cause exact match to fail. This is useful for deterministic output contracts; use [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) when correctness requires semantic judgment.
+</Steps>
 
 </Tab>
 <Tab>
 
-## 1. Create a project and configure an LLM connection [#ui-create-project]
+<Steps>
+
+### Create a project and configure an LLM connection [#ui-create-project]
 
 1. [Create a Langfuse account](/cloud) or [self-host Langfuse](/self-hosting).
 2. Create a project.
 3. Add an OpenAI API key under **Settings → LLM Connections**. See [LLM Connections](/docs/administration/llm-connection) for configuration details.
 
-## 2. Create a prompt [#ui-create-prompt]
+### Create a prompt [#ui-create-prompt]
 
 Open [**Prompt Management**](https://cloud.langfuse.com/project/~/prompts) and create a chat prompt named `san-francisco-site-answer`.
 
@@ -408,7 +400,7 @@ Add this user message:
 
 The `question` variable matches the key in each dataset item's input object.
 
-## 3. Create the dataset [#ui-create-dataset]
+### Create the dataset [#ui-create-dataset]
 
 1. Download the [San Francisco sites sample dataset](/files/san-francisco-sites.csv).
 2. Open [**Datasets**](https://cloud.langfuse.com/project/~/datasets).
@@ -416,7 +408,7 @@ The `question` variable matches the key in each dataset item's input object.
 4. Import the CSV. Map `input` to the dataset input and `expectedOutput` to the expected output.
 5. Confirm that each input is a JSON object with a `question` field.
 
-## 4. Add the Exact Match evaluator [#ui-create-evaluator]
+### Add the Exact Match evaluator [#ui-create-evaluator]
 
 1. Open [**Evaluators**](https://cloud.langfuse.com/project/~/evals) and select **New evaluator**.
 2. In the evaluator gallery, select the Langfuse-maintained **Check if Output Is an Exact Match** template.
@@ -425,7 +417,7 @@ The `question` variable matches the key in each dataset item's input object.
 
 The template compares the model output with the dataset item's expected output. Because this dataset stores each expected site name as a plain string, no mapping or code changes are required.
 
-## 5. Run the experiment [#ui-run-experiment]
+### Run the experiment [#ui-run-experiment]
 
 1. Open the `san-francisco-sites` dataset.
 2. Select **Start Experiment** and create a prompt experiment.
@@ -436,7 +428,7 @@ The template compares the model output with the dataset item's expected output. 
 
 Langfuse runs the prompt against every dataset item, stores the output and trace, applies the evaluator, and opens the completed experiment.
 
-## 6. Improve the prompt and compare [#ui-iterate]
+### Improve the prompt and compare [#ui-iterate]
 
 Create a new version of `san-francisco-site-answer` with this system message:
 
@@ -446,8 +438,24 @@ Answer the question about a site in San Francisco. Return only the site's offici
 
 Run a second experiment named `San Francisco sites v2`. Open [**Experiments**](https://cloud.langfuse.com/project/~/experiments) to compare both runs and inspect which dataset items improved or regressed.
 
+</Steps>
+
 </Tab>
 </Tabs>
+
+## Troubleshooting [#troubleshooting]
+
+### The dataset already exists
+
+The setup script creates the dataset and is intended to run once. If `san-francisco-sites` already exists, skip the dataset creation call and keep the item-creation loop. Stable item IDs make those calls safe to repeat.
+
+### The experiment is missing traces
+
+Check your Langfuse environment variables. For Python, keep `langfuse.flush()` at the end of the script. For JS/TS, keep `otelSdk.shutdown()` so the short-lived process exports all buffered spans before it exits.
+
+### Some exact-match scores are zero
+
+Open the affected item and compare the model output with the expected output. Capitalization, extra words, and punctuation all cause exact match to fail. This is useful for deterministic output contracts; use [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) when correctness requires semantic judgment.
 
 ## Next steps
 
