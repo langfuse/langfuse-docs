@@ -36,9 +36,9 @@ An [experiment](/docs/evaluation/core-concepts#experiments) is a run of your app
 
 To synthesize those traces as one experiment in Langfuse, every span must carry:
 
-1. **Experiment context** — identity shared by every item in the run (`experiment.id`, `experiment.name`, `dataset.id`).
+1. **Experiment context** — identity shared by every item in the run (`langfuse.experiment.id`, `langfuse.experiment.name`, `langfuse.experiment.dataset.id`).
 2. **Experiment item root** — one root span per item, with the item input, actual output, and optional expected output.
-3. **Item context** — identity shared by the root and its child spans (`item.id`, `item.root_observation_id`).
+3. **Item context** — identity shared by the root and its child spans (`langfuse.experiment.item.id`, `langfuse.experiment.item.root_observation_id`).
 
 See the [Experiments data model](/docs/evaluation/experiments/data-model) for how datasets, experiment runs, traces, and scores relate.
 
