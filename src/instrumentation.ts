@@ -1,7 +1,9 @@
 import { registerTelemetry } from "ai";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
 import { LangfuseVercelAiSdkIntegration } from "@langfuse/vercel-ai-sdk";
+import { trace } from "@opentelemetry/api";
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
+import { createGenAiSpanRenamingTracer } from "./rename-gen-ai-spans";
 
 const realtimeIngestionHeaders = {
   "x-langfuse-ingestion-version": "4",
@@ -58,4 +60,8 @@ const tracerProvider = new NodeTracerProvider({
 
 tracerProvider.register();
 
-registerTelemetry(new LangfuseVercelAiSdkIntegration());
+registerTelemetry(
+  new LangfuseVercelAiSdkIntegration({
+    tracer: createGenAiSpanRenamingTracer(trace.getTracer("gen_ai")),
+  }),
+);
