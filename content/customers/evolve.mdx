@@ -19,7 +19,6 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 import { CustomerQuote } from "@/components/customers/CustomerQuote";
 import { CustomerScreenshotCarousel } from "@/components/customers/CustomerScreenshotCarousel";
 import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
-import { ImpactChart } from "@/components/customers/ImpactChart";
 
 <BlogHeader
   title="How Evolve built a voice AI sleep coach, traced and evaluated on Langfuse"
@@ -29,32 +28,21 @@ import { ImpactChart } from "@/components/customers/ImpactChart";
   date="August 18, 2026"
 />
 
-## Summary
+<div className="corner-box-corners not-prose relative my-8 border border-line-structure bg-surface-1 px-6 py-8 text-text-primary md:px-12 md:py-10">
+  <h2 id="summary" className="m-0 font-mono text-sm font-medium uppercase tracking-widest text-text-secondary">Summary</h2>
 
-<ImpactChart
-  items={[
-    {
-      area: "Rest brings sleep coaching to thousands of users",
-      impact:
-        "Evolve, a YC-backed company behind one of iOS's most-downloaded podcast apps, discovered a large underserved market in sleep and built Rest, a voice-and-text AI coach built on the principles of cognitive behavioral therapy for insomnia (CBT-I), circadian biology, and neuroscience.",
-    },
-    {
-      area: "Tracing and prompt management in one place",
-      impact:
-        "Rest runs on Vapi for voice and OpenAI for text chat. Langfuse traces the system end to end and manages more than 100 dynamically composed prompts, including locale-specific language variants.",
-    },
-    {
-      area: "Error analysis drives product improvement",
-      impact:
-        "Structured trace review and error analysis continuously surface failure modes, identify the right evaluators, and improve the system over time.",
-    },
-    {
-      area: "Automated monitoring for memory issues",
-      impact:
-        "LLM-as-a-judge evaluators measure the reliability of the coach's cross-session memory, helping Evolve build confidence in Rest's behavior at scale.",
-    },
-  ]}
-/>
+  <ul className="m-0 mt-7 list-disc space-y-4 p-0 pl-5 text-sm leading-6">
+    <li>
+      Evolve built Rest, a voice-and-text sleep coach based on CBT-I, circadian biology, and neuroscience, now used by thousands of people.
+    </li>
+    <li>
+      Langfuse traces the Vapi voice and OpenAI text system end to end and manages 100+ dynamically composed prompts, including locale variants.
+    </li>
+    <li>
+      Error analysis and LLM-as-a-judge evaluators measure cross-session memory, and the first iterations cut misses in half.
+    </li>
+  </ul>
+</div>
 
 ## 70 million Americans show symptoms of insomnia
 
@@ -117,7 +105,7 @@ On top of manual review, Evolve runs [LLM-as-a-judge](/docs/evaluation/evaluatio
 
 The most valuable thing error analysis surfaced was how much cross-session memory matters.
 
-Users share context with the coach — routines, preferences, how their days look — and the coach notes it so the program can personalize around it. In a single conversation the coach was solid. The hard part is carrying context into the next conversation, days later — cross-session memory, the thing that makes personalization compound over time. Early on, some context carried forward and some didn't, and the coach wasn't as consistent about it as the team wanted.
+Users share context with the coach, like routines, preferences, and how their days look, and the coach notes it so the program can personalize around it. In a single conversation the coach was solid. The hard part is carrying context into the next conversation days later: cross-session memory, the thing that makes personalization compound over time. Early on, some context carried forward and some didn't, and the coach wasn't as consistent about it as the team wanted.
 
 <CustomerQuote
   quote="We found this during error analysis, and then heard the same thing in user research calls and in customer support. Users were telling the coach they'd already shared something days earlier. These patterns, you only find them when you do structured error analysis."
@@ -127,7 +115,7 @@ Users share context with the coach — routines, preferences, how their days loo
   image="/images/customers/evolve/martin-siniawski.jpg"
 />
 
-Consistency here is a trust and experience question: remembering what someone told you is a big part of feeling coached. The team decided cross-session memory had to be tackled from several angles and turned it into a project — building a next-generation memory system, a genuinely multi-month engineering effort. The [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) they set up in Langfuse flags conversations where context wasn't carried forward as expected, which meant that for the first time they could measure whether the new system was working. It was: the first iterations alone cut cross-session misses in half.
+Consistency here is a trust and experience question: remembering what someone told you is a big part of feeling coached. The team decided cross-session memory had to be tackled from several angles and turned it into a project: building a next-generation memory system, a genuinely multi-month engineering effort. The [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) they set up in Langfuse flags conversations where context wasn't carried forward as expected, which meant that for the first time they could measure whether the new system was working. It was: the first iterations alone cut cross-session misses in half.
 
 ## Prompt management at scale
 
