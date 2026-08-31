@@ -11,7 +11,7 @@ This page covers self-hosted infrastructure setup. For an introduction to the fe
 
 <Callout type="info">
   The Langfuse Assistant is in public beta on self-hosted deployments, from
-  version `>=v4.24.0`. The Langfuse Assistant is not covered by SemVer.
+  version `>=v4.25.0`. The Langfuse Assistant is not covered by SemVer.
   Configuration may change between releases.
 </Callout>
 
@@ -34,7 +34,7 @@ Configure the model and worker MCP access, optionally add a sandbox, then [turn 
 
 Set `LANGFUSE_AI_PROVIDER` and `LANGFUSE_AI_MODEL` on both the web and worker services. `LANGFUSE_AI_SMALL_MODEL` is optional:
 
-- `LANGFUSE_AI_PROVIDER` selects `bedrock`, `anthropic`, or `openai` and is required to enable Langfuse AI. If unset, Langfuse AI remains unconfigured.
+- `LANGFUSE_AI_PROVIDER` selects `bedrock`, `anthropic`, or `openai` and is required to enable the Langfuse Assistant and other AI features.
 - `LANGFUSE_AI_MODEL` sets the primary model used for the Langfuse Assistant.<br />
   **Recommended model: Claude Opus 5.** The Assistant's system prompt and tool loop are developed against it, and it handles the long multi-step tool use the Assistant depends on. Other models work, but expect more variance in tool calling and instruction following.
 - `LANGFUSE_AI_SMALL_MODEL` sets an optional model for supplementary calls, such as conversation titles. If unset, these calls use `LANGFUSE_AI_MODEL`.
@@ -131,24 +131,17 @@ For what leaves your instance and how to enable AI features, see [AI feature sec
 
 ## Worker access to the MCP server [#langfuse-mcp]
 
-The Assistant reaches Langfuse data through this instance's native [Langfuse MCP server](/docs/api-and-data-platform/features/mcp-server#set-up). There is no separate MCP process to install. The worker calls `{NEXTAUTH_URL}/api/public/mcp`.
+The Assistant reaches Langfuse data through this instance's native [Langfuse MCP server](/docs/api-and-data-platform/features/mcp-server#set-up). There is no separate MCP process to install. The worker derives the MCP endpoint from `LANGFUSE_MCP_BASE_URL` when set, otherwise from `NEXTAUTH_URL`, and appends `/api/public/mcp`. If `LANGFUSE_MCP_BASE_URL` uses a different hostname than `NEXTAUTH_URL`, add that hostname to `LANGFUSE_MCP_ALLOWED_HOSTS` on web.
 
-Set the same public `NEXTAUTH_URL` on web and worker when the worker can reach that URL through DNS, TLS, and the load balancer. When it cannot, point the worker at the internal web URL and add that hostname to `LANGFUSE_MCP_ALLOWED_HOSTS` on web. This applies to Docker Compose service names, Kubernetes in-cluster services, and reverse proxies that rewrite `Host`.
+Keep `NEXTAUTH_URL` set to the public Langfuse URL. The worker also uses it to create user-facing links in emails, Slack notifications, and integration settings. Setting it to an internal address makes those links unreachable.
 
-If the worker cannot reach the public `NEXTAUTH_URL` in Docker Compose, create an overlay file named `docker-compose.mcp.yml` alongside `docker-compose.yml`:
+On `>=v4.25.0`, set `LANGFUSE_MCP_BASE_URL` on the worker when it cannot reach the public URL. If its hostname differs from `NEXTAUTH_URL`, add it to `LANGFUSE_MCP_ALLOWED_HOSTS` on web. Earlier supported releases must keep `NEXTAUTH_URL` public and reachable from the worker; upgrade before using a separate internal URL.
 
-```yaml filename="docker-compose.mcp.yml"
-services:
-  langfuse-web:
-    environment:
-      LANGFUSE_MCP_ALLOWED_HOSTS: langfuse-web
-  langfuse-worker:
-    environment:
-      NEXTAUTH_URL: http://langfuse-web:3000
-```
+For Docker Compose on `>=v4.25.0`, set both values in `.env`. The shipped Compose file forwards each value to the correct service:
 
-```bash
-docker compose -f docker-compose.yml -f docker-compose.mcp.yml up -d --force-recreate langfuse-web langfuse-worker
+```bash filename=".env"
+LANGFUSE_MCP_BASE_URL=http://langfuse-web:3000
+LANGFUSE_MCP_ALLOWED_HOSTS=langfuse-web
 ```
 
 Recreate both services after changing these values. A restart does not re-interpolate environment variables.
@@ -300,6 +293,8 @@ langfuse:
   additionalEnv:
     - name: LANGFUSE_IN_APP_AGENT_ENABLED
       value: "true"
+    - name: LANGFUSE_AI_PROVIDER
+      value: bedrock
     - name: LANGFUSE_AI_MODEL
       value: eu.anthropic.claude-opus-5
     - name: LANGFUSE_AI_AWS_BEDROCK_REGION
@@ -359,12 +354,14 @@ import {
     <AccordionTrigger>Runs fail during agent initialization</AccordionTrigger>
     <AccordionContent>
       If the UI shows `Error initializing agent`, the worker could not connect
-      to the MCP server. Confirm it can reach
-      `{NEXTAUTH_URL}/api/public/mcp`. On Docker Compose the first symptom is
-      `ECONNREFUSED` on loopback, followed by `MCP_CLIENT_CONNECT_FAILED`. A
-      `403` with `Invalid Host header` instead means the worker reached web on a
-      hostname that is not in `LANGFUSE_MCP_ALLOWED_HOSTS`. See [Worker access to
-      the MCP server](#langfuse-mcp).
+      to the MCP server. Confirm it can reach `/api/public/mcp` at
+      `LANGFUSE_MCP_BASE_URL` when set, otherwise at `NEXTAUTH_URL`. If the MCP
+      base URL uses a different hostname than `NEXTAUTH_URL`, add it to
+      `LANGFUSE_MCP_ALLOWED_HOSTS` on web. On Docker Compose the first symptom
+      is `ECONNREFUSED` on loopback, followed by
+      `MCP_CLIENT_CONNECT_FAILED`. A `403` with `Invalid Host header` means the
+      hostname is not allowed. See [Worker access to the MCP
+      server](#langfuse-mcp).
     </AccordionContent>
   </AccordionItem>
   <AccordionItem value="model-unconfigured">
