@@ -209,6 +209,22 @@ const nextConfig = {
           { key: "Cache-Control", value: "public, max-age=3600" },
         ],
       },
+      // Content negotiation: these paths return markdown instead of HTML when
+      // the request carries `Accept: text/markdown` (see the rewrites in
+      // `beforeFiles`). `Vary: Accept` tells caches and intermediaries that
+      // Accept is part of the cache key, so a cached HTML response is never
+      // served to a markdown request or vice versa.
+      //
+      // Keep these sources in sync with the negotiation rewrites below.
+      {
+        source: "/",
+        headers: [{ key: "Vary", value: "Accept" }],
+      },
+      {
+        source:
+          "/:path((?!api|_next|md-src|\\.well-known)(?!.*\\.md$)(?!.*\\.txt$)(?!.*\\.json$).*)",
+        headers: [{ key: "Vary", value: "Accept" }],
+      },
       // Mark markdown endpoints as noindex and ensure correct content type
       {
         source: "/:path*.md",
