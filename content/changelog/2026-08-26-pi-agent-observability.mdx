@@ -1,0 +1,37 @@
+---
+date: 2026-08-26
+title: Trace the Pi coding agent
+description: Install the first-party Langfuse extension for Pi and get one trace per prompt, with model calls, tool calls, and nested subagents in a single tree.
+author: Milana
+canonical: /integrations/developer-tools/pi-agent
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+[Pi](https://pi.dev) is an extensible AI coding agent that runs in your terminal. The Langfuse team now maintains a first-party observability extension for it, so every prompt you type into Pi lands in Langfuse as a trace:
+
+```bash
+pi install npm:@langfuse/pi-observability-plugin
+```
+
+A few things this makes easy:
+
+- **Replay a session turn by turn.** Every prompt is its own trace, and all turns of a Pi session share one session ID. Turn numbering continues across a Pi restart.
+- **See where a run spent its tokens.** Each model request is captured with input, output, cost, time to first token, and token usage split by cache read and reasoning.
+- **Read a multi-agent run as one tree.** Pi processes spawned by other extensions nest under the turn that started them, and every tool call gets its own span, with an `ERROR` level when the call fails.
+
+Images you attach to a prompt are uploaded as Langfuse media and render inside the trace. Traces are labeled with the configured `userId` and `environment`, so you can filter your own sessions or keep dev separate from CI.
+
+The extension works with Langfuse Cloud (EU, US, Japan, and HIPAA regions) and with self-hosted deployments. This is an experimental release, so the setup and the trace structure can still change.
+
+<Cards num={1}>
+  <Card
+    title="Pi integration documentation"
+    href="/integrations/developer-tools/pi-agent"
+    icon={<Book />}
+    arrow
+  />
+</Cards>
