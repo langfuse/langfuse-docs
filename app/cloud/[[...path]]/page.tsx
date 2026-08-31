@@ -93,7 +93,7 @@ const getCloudHost = (url: string) => new URL(url).host;
 
 export default function CloudRegionSelectorPage() {
   const pathname = usePathname();
-  const signedInRegions = useCloudRegionSignIn();
+  const { signedInRegions } = useCloudRegionSignIn();
 
   const { cloudSubpath } = useMemo(
     () => getCloudRedirectPartsFromPathname(pathname || ""),
