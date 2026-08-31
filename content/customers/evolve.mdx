@@ -19,6 +19,7 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 import { CustomerQuote } from "@/components/customers/CustomerQuote";
 import { CustomerScreenshotCarousel } from "@/components/customers/CustomerScreenshotCarousel";
 import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+import { ImpactChart } from "@/components/customers/ImpactChart";
 
 <BlogHeader
   title="How Evolve built a voice AI sleep coach, traced and evaluated on Langfuse"
@@ -28,21 +29,32 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
   date="August 18, 2026"
 />
 
-<div className="corner-box-corners not-prose relative my-8 border border-line-structure bg-surface-1 px-6 py-8 text-text-primary md:px-12 md:py-10">
-  <h2 id="summary" className="m-0 font-mono text-sm font-medium uppercase tracking-widest text-text-secondary">Summary</h2>
+## Summary [#summary]
 
-  <ul className="m-0 mt-7 list-disc space-y-4 p-0 pl-5 text-sm leading-6">
-    <li>
-      Evolve built Rest, a voice-and-text sleep coach based on CBT-I, circadian biology, and neuroscience, now used by thousands of people.
-    </li>
-    <li>
-      Langfuse traces the Vapi voice and OpenAI text system end to end and manages 100+ dynamically composed prompts, including locale variants.
-    </li>
-    <li>
-      Error analysis and LLM-as-a-judge evaluators measure cross-session memory, and the first iterations cut misses in half.
-    </li>
-  </ul>
-</div>
+<ImpactChart
+  items={[
+    {
+      area: "Rest brings sleep coaching to thousands of users",
+      impact:
+        "Evolve built Rest, a voice-and-text sleep coach based on CBT-I, circadian biology, and neuroscience.",
+    },
+    {
+      area: "Tracing and prompt management in one place",
+      impact:
+        "Langfuse traces the Vapi and OpenAI system end to end and manages 100+ dynamically composed prompts, including locale variants.",
+    },
+    {
+      area: "Error analysis drives product improvement",
+      impact:
+        "Structured error analysis surfaces failure modes and the right evaluators to improve the system over time.",
+    },
+    {
+      area: "Automated monitoring for memory issues",
+      impact:
+        "LLM-as-a-judge evaluators measure cross-session memory, and the first iterations cut misses in half.",
+    },
+  ]}
+/>
 
 ## 70 million Americans show symptoms of insomnia
 
