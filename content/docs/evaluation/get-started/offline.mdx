@@ -6,7 +6,7 @@ description: Run your first offline evaluation on a Langfuse dataset and compare
 
 # Get started with offline evaluation
 
-Offline evaluations give you a repeatable way to measure the quality of your LLM application before shipping a change. In this quickstart, you will build a dataset of questions about sites in San Francisco, run an experiment, score each answer, and compare an improved prompt with the first run.
+This guide walks you through a repeatable way to measure the quality of your LLM application. You can use this to catch regressions before shipping a new version, to optimize output quality, or to reduce the cost of your system. A more conceptual introduction to experiments can be found [here](/academy/experiments).
 
 import { Details, Summary } from "@/components/Details";
 import { Button } from "@/components/ui/button";
@@ -110,7 +110,7 @@ Set up offline evaluation for this application with Langfuse.
 Every experiment in this guide has three parts:
 
 - **Dataset**: Test cases with inputs and expected outputs
-- **Task**: The application or model call you want to test
+- **Experiment condition**: The application variation or model call you want to test
 - **Evaluators**: Functions that score the task output
 
 <Callout type="info">
@@ -313,7 +313,7 @@ Dataset item IDs are stable, so adding an item with the same ID updates it inste
 
 ### Run an experiment [#sdk-run-experiment]
 
-The task sends each question to the model. The evaluator returns `1` when the model output exactly matches the expected site name and `0` otherwise.
+The experiment run sends each question to the model. The evaluator returns `1` when the model output exactly matches the expected site name and `0` otherwise.
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
@@ -486,4 +486,5 @@ Open the affected item and compare the model output with the expected output. Ca
 - Learn how [datasets and dataset versions](/docs/evaluation/experiments/datasets) support reproducible tests.
 - Explore the full [experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk), including async evaluators, concurrency, and run-level metrics.
 - Add [experiments to CI/CD](/docs/evaluation/experiments/experiments-ci-cd) to catch regressions before deployment.
+- Learn how you can choose what to evaluate
 - Choose between [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators), [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), and human review for your application.
