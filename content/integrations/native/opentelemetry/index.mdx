@@ -483,13 +483,14 @@ with tracer.start_as_current_span("Langfuse Attributes") as span:
 ### Ingestion transformations [#ingestion-transformations]
 
 <Callout type="warning">
-  Langfuse accepts incomplete or non-standard OTLP spans instead of rejecting them. The request still succeeds; the span is rewritten.
+  Langfuse accepts incomplete or non-standard OTLP spans instead of rejecting
+  them. The request still succeeds; the span is rewritten.
+</Callout>
 
 1. **Accepted `langfuse.observation.type` values** are `span`, `generation`, `event`, `embedding`, `agent`, `tool`, `chain`, `retriever`, `guardrail`, and `evaluator`.
 2. **An unrecognized explicit type is not rejected.** A typo or a vendor-specific string such as `llm` falls through to other mapped conventions (for example `gen_ai.operation.name`), then to the model fallback, then to `span`.
 3. **A model attribute infers `generation` only as a fallback** — when no recognized `langfuse.observation.type` and no higher-priority convention applied. A valid explicit type always wins, even if the span also has a model name (`langfuse.observation.model.name`, `gen_ai.request.model`, `gen_ai.response.model`, `llm.model_name`, or `model`).
 4. **Missing timestamps are filled in.** If `startTimeUnixNano` or `endTimeUnixNano` is missing or unparseable, Langfuse copies the remaining edge so both start and end are set (the observation has zero duration). If both are missing, both become the ingest time. Send both fields on every span.
-   </Callout>
 
 ## Next steps
 
