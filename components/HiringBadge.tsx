@@ -87,11 +87,21 @@ export function HiringBadge({
         )
       : null;
 
+  const idleLabel = adaptive ? (
+    <>
+      <span className="hidden @[13rem]/hiring:inline">{FULL_LABEL}</span>
+      <span className="inline @[13rem]/hiring:hidden">{COMPACT_LABEL}</span>
+    </>
+  ) : (
+    FULL_LABEL
+  );
+
   const badge = (
     <div
       ref={containerRef}
       className={cn(
-        adaptive && "hidden w-fit max-w-full min-w-0 @[6.5rem]/hiring:block",
+        adaptive &&
+          "hidden w-fit max-w-full min-w-0 @[6.5rem]/hiring:block hover:max-w-none",
         !adaptive && className,
       )}
       onMouseMove={handleMouseMove}
@@ -107,7 +117,8 @@ export function HiringBadge({
           href="/careers"
           aria-label={FULL_LABEL}
           className={cn(
-            "inline-flex w-full min-w-0 max-w-full items-center gap-[6px] overflow-hidden",
+            "inline-flex w-full min-w-0 max-w-full items-center gap-[6px]",
+            "overflow-hidden group-hover:overflow-visible",
             "h-[26px] py-0.75 pl-[8px] pr-[8px] rounded-[2px]",
             "border border-line-structure dark:border-line-cta group-hover:border-line-cta",
             "bg-surface-bg text-text-secondary",
@@ -119,33 +130,9 @@ export function HiringBadge({
           <span className="text-xs shrink-0" aria-hidden>
             🐐
           </span>
-          <span className="relative min-w-0 flex-1 text-left">
-            <span
-              className={cn(
-                "block whitespace-nowrap",
-                isHovered && "invisible",
-              )}
-            >
-              {adaptive ? (
-                <>
-                  <span className="hidden @[13rem]/hiring:inline">
-                    {FULL_LABEL}
-                  </span>
-                  <span className="inline @[13rem]/hiring:hidden">
-                    {COMPACT_LABEL}
-                  </span>
-                </>
-              ) : (
-                FULL_LABEL
-              )}
-            </span>
-            <span
-              className={cn(
-                "absolute left-0 top-0 whitespace-nowrap",
-                !isHovered && "invisible",
-              )}
-            >
-              {HOVER_LABEL}
+          <span className="text-left">
+            <span className="block whitespace-nowrap">
+              {isHovered ? HOVER_LABEL : idleLabel}
             </span>
           </span>
         </NextLink>
@@ -160,7 +147,9 @@ export function HiringBadge({
   }
 
   return (
-    <div className={cn("@container/hiring w-full min-w-0", className)}>
+    <div
+      className={cn("@container/hiring w-full min-w-0 hover:z-10", className)}
+    >
       {badge}
     </div>
   );
