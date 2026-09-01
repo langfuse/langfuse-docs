@@ -76,7 +76,8 @@ Langfuse uses the credentials to generate short-lived, pre-signed URLs that allo
 | `LANGFUSE_S3_MEDIA_UPLOAD_BUCKET`               | Required           | Name of the bucket in which media files should be uploaded.                                                          |
 | `LANGFUSE_S3_MEDIA_UPLOAD_PREFIX`               | `""`               | Prefix to store media within a subpath of the bucket. Defaults to the bucket root. If provided, must end with a `/`. |
 | `LANGFUSE_S3_MEDIA_UPLOAD_REGION`               |                    | Region in which the bucket resides.                                                                                  |
-| `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT`             |                    | Endpoint to use to upload media files.                                                                               |
+| `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT`             |                    | Browser- and SDK-reachable endpoint used to upload and download media files.                                         |
+| `LANGFUSE_S3_MEDIA_UPLOAD_INTERNAL_ENDPOINT`    |                    | Optional endpoint that the Langfuse server can use to read media from object storage.                                |
 | `LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID`        |                    | Access key for the bucket. Must have List, Get, and Put permissions.                                                 |
 | `LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY`    |                    | Secret access key for the bucket.                                                                                    |
 | `LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE`     |                    | Whether to force path style on requests. Required for MinIO.                                                         |
@@ -246,6 +247,20 @@ To enable multi-modal tracing and multi-modal datasets, presigned URLs allow SDK
 **Development Environment:** When running `docker compose` locally, set `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT` to `http://localhost:9090` to ensure presigned URLs correctly loop back to the local instance.
 
 **Production Environment:** In a production environment, configure `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT` with a publicly accessible hostname or IP address that is reachable by your SDK clients and browsers.
+
+If the Langfuse web and worker containers cannot reach this public endpoint, set `LANGFUSE_S3_MEDIA_UPLOAD_INTERNAL_ENDPOINT` to a server-reachable object storage address. The default Docker Compose setup uses `http://minio:9000` internally while clients use `http://localhost:9090`.
+
+#### Multi-modal LLM-as-a-Judge
+
+Self-hosted Langfuse sends media used by [LLM-as-a-Judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge#multi-modal-evaluation) inline by default. Each attachment is limited to 20 MB by default.
+
+Set `LANGFUSE_EVALUATOR_MEDIA_TRANSPORT` on both the web and worker containers to change this behavior:
+
+- `inline`: The Langfuse worker downloads each attachment from object storage and sends its bytes with the model request. This is the default for self-hosted deployments.
+- `url`: The Langfuse worker creates a short-lived signed URL without downloading the attachment. The model provider downloads the attachment and must be able to reach `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT`.
+- `disabled`: Leave Langfuse media references as text instead of sending attachments.
+
+Use `LANGFUSE_EVALUATOR_MEDIA_INLINE_MAX_BYTES` to change the per-attachment inline size limit in bytes. See the [environment variable reference](/self-hosting/configuration#llm-as-a-judge-media) for details.
 
 ### Cloudflare R2 [#cloudflare-r2]
 
