@@ -9,9 +9,9 @@
  *     - style.css        — Tailwind v4 `@theme` block (fonts, radius, color
  *                          token aliases) and the `:root` / `:root[class~="dark"]`
  *                          custom properties (the raw light/dark token values).
- *     - app/layout.tsx   — the `next/font` definitions that back the
- *                          `--font-*` variables (resolves Inter / Geist Mono /
- *                          F37 Analog and their weights).
+ *     - components/RootDocument.tsx — the `next/font` definitions that back
+ *                          the `--font-*` variables (resolves Inter / Geist
+ *                          Mono / F37 Analog and their weights).
  *
  *   Output:
  *     - public/design.md — the combined "live" page, served at
@@ -27,7 +27,7 @@ const path = require("path");
 
 const repoRoot = path.join(__dirname, "..");
 const styleCssPath = path.join(repoRoot, "style.css");
-const layoutPath = path.join(repoRoot, "app", "layout.tsx");
+const layoutPath = path.join(repoRoot, "components", "RootDocument.tsx");
 const templatePath = path.join(repoRoot, "public", "design.template.md");
 const outPath = path.join(repoRoot, "public", "design.md");
 
@@ -66,7 +66,7 @@ function parseDecls(blockBody) {
   return decls;
 }
 
-/** Resolve `--font-*` backing fonts (family + weight) from app/layout.tsx. */
+/** Resolve `--font-*` backing fonts (family + weight) from RootDocument.tsx. */
 function parseFonts(layoutSrc) {
   const byVar = {};
   // Google fonts: e.g. `Inter({ ... variable: "--font-inter" ... })`
@@ -176,7 +176,7 @@ for (const name of order) {
     semantic.push([`\`${name}\``, `\`${light}\``, dark ? `\`${dark}\`` : "—"]);
 }
 
-// Typography rows from @theme `--font-*`, resolved through app/layout.tsx.
+// Typography rows from @theme `--font-*`, resolved through RootDocument.tsx.
 const fontRows = themeDecls
   .filter((d) => /^--font-/.test(d.name))
   .map((d) => {

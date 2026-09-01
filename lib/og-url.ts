@@ -10,7 +10,7 @@ function getStaticOgImageBaseUrl(): string {
   return previewUrl ? `https://${previewUrl}` : BASE_URL;
 }
 
-/** Default site description; keep in sync with `app/layout.tsx` metadata.description. */
+/** Default site description; keep in sync with `lib/site-metadata.ts` description. */
 export const SITE_DEFAULT_OG_DESCRIPTION =
   "Trace, evaluate, and improve AI agents with one open platform. Use production data to understand behavior, collaborate on fixes, and ship better quality at lower cost and latency.";
 

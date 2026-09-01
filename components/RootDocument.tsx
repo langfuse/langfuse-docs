@@ -1,14 +1,9 @@
-import type { Metadata } from "next";
 import Script from "next/script";
 import { AppRootProvider } from "@/components/AppRootProvider";
 import { GoogleTagManager } from "@next/third-parties/google";
 import localFont from "next/font/local";
 import { Inter } from "next/font/google";
 import { DevAriaHiddenConsoleFilter } from "@/components/DevAriaHiddenConsoleFilter";
-import {
-  buildDefaultSiteOgImageUrl,
-  SITE_DEFAULT_OG_DESCRIPTION,
-} from "@/lib/og-url";
 import { PostHogProvider } from "@/components/analytics/PostHogProvider";
 import { AISearch } from "@/components/inkeep/search";
 import { Hubspot } from "@/components/analytics/hubspot";
@@ -47,37 +42,25 @@ const f37Analog = localFont({
   weight: "500",
 });
 
-const defaultOgImageUrl = buildDefaultSiteOgImageUrl();
-
-export const metadata: Metadata = {
-  metadataBase: new URL("https://langfuse.com"),
-  title: { default: "Langfuse", template: "%s - Langfuse" },
-  description: SITE_DEFAULT_OG_DESCRIPTION,
-  icons: {
-    icon: [
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/favicon.ico", sizes: "any" },
-    ],
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
-    shortcut: ["/favicon.ico"],
-  },
-  openGraph: {
-    images: [{ url: defaultOgImageUrl }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    site: "langfuse.com",
-    images: [{ url: defaultOgImageUrl }],
-  },
-};
-
-export default function RootLayout({
+/**
+ * The `<html>`/`<body>` shell shared by every root layout.
+ *
+ * Next.js only lets the root layout render `<html>`, and its attributes are
+ * serialized before any child renders — so a single root layout cannot vary
+ * `lang` by route. The app therefore has one root layout per document
+ * language (`app/(en)` and `app/(ja)`), and both render this component so the
+ * providers, fonts, and analytics stay in exactly one place.
+ *
+ * `lang` must agree with the self-referencing hreflang the pages under it
+ * declare, otherwise crawlers report an hreflang/html-lang mismatch.
+ */
+export function RootDocument({
+  lang,
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+}: Readonly<{ lang: "en" | "ja"; children: React.ReactNode }>) {
   return (
     <html
-      lang="en"
+      lang={lang}
       dir="ltr"
       suppressHydrationWarning
       className={`${interVariable.variable} ${geistMono.variable} ${f37Analog.variable}`}
@@ -88,6 +71,9 @@ export default function RootLayout({
         )}
         <PostHogProvider>
           <AppRootProvider
+            // Fumadocs UI locale stays "en": the app registers no Japanese
+            // translation bundle, and switching it here would change search and
+            // UI-string resolution. Only the document language varies by tree.
             i18n={{
               locale: "en",
               translations: {
