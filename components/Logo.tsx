@@ -52,6 +52,7 @@ export function Logo({
         width={wordmark.width}
         height={wordmark.height}
         className={`hidden dark:block ${wordmark.className}`}
+        priority={variant === "byClickHouse"}
       />
       <Image
         src={wordmark.light}
@@ -59,6 +60,7 @@ export function Logo({
         width={wordmark.width}
         height={wordmark.height}
         className={`block dark:hidden ${wordmark.className}`}
+        priority={variant === "byClickHouse"}
       />
       <style jsx>{`
       .logo-images {
