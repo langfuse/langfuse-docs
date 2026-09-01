@@ -1,10 +1,10 @@
 ---
-title: Offline Evaluation
-sidebarTitle: Offline Evaluation
+title: Evaluate AI Systems
+sidebarTitle: Evaluate AI Systems
 description: Run your first offline evaluation on a Langfuse dataset and compare prompt changes.
 ---
 
-# Get started with offline evaluation
+# Get started with evaluating your application
 
 This guide walks you through a repeatable way to measure the quality of your LLM application. You can use this to catch regressions before shipping a new version, to optimize output quality, or to reduce the cost of your system. A more conceptual introduction to experiments can be found [here](/academy/experiments).
 
@@ -26,7 +26,7 @@ Ask your coding agent to install the skill by pointing to the [GitHub repository
 
 ```txt filename="Agent instruction"
 Install the Langfuse Agent Skill from github.com/langfuse/skills
-and use it to set up offline evaluation for this application
+and use it to create a first dataset for this application
 with Langfuse.
 ```
 
@@ -107,11 +107,11 @@ Set up offline evaluation for this application with Langfuse.
 
 ## Manual setup [#manual-setup]
 
-Every experiment in this guide has three parts:
+Running experiments to test the performance of your system has three aspects:
 
 - **Dataset**: Test cases with inputs and expected outputs
 - **Experiment condition**: The application variation or model call you want to test
-- **Evaluators**: Functions that score the task output
+- **Evaluators**: Functions that score the output
 
 <Callout type="info">
   This guide uses the current Langfuse SDKs: **Python SDK v4** and **JS/TS SDK v5**. Both use Langfuse's OpenTelemetry-based tracing and the current experiment runner. If you use an older SDK, see the [Python v3 → v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS v4 → v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5) migration guide.
