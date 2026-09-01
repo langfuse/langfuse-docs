@@ -133,11 +133,13 @@ export default function CloudRegionSelectorPage() {
     >
       <div className="flex w-full max-w-[480px] flex-col items-center gap-8">
         <div className="flex flex-col items-center gap-5">
-          <Logo variant="byClickHouse" />
+          <div className="flex flex-col items-center gap-2">
+            <Logo variant="byClickHouse" />
+            <Text>Agent Observability and Evals</Text>
+          </div>
           <Heading as="h1" size="normal" className="text-center">
-            Select your region
+            Select a region
           </Heading>
-          <Text className="max-w-xs">Choose a cloud region to continue.</Text>
         </div>
 
         <CornerBox className="w-full">
