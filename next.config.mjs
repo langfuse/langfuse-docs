@@ -223,6 +223,26 @@ const nextConfig = {
           { key: "Cache-Control", value: "public, max-age=3600" },
         ],
       },
+      // Content negotiation: these paths return markdown instead of HTML when
+      // the request carries `Accept: text/markdown` (see the rewrites in
+      // `beforeFiles`). `Vary: Accept` tells caches and intermediaries that
+      // Accept is part of the cache key, so a cached HTML response is never
+      // served to a markdown request or vice versa.
+      //
+      // Static assets are excluded: they never negotiate, and declaring a Vary
+      // they do not honour would fragment CDN cache entries per Accept string
+      // for every asset on the site. The extension list mirrors the matcher in
+      // proxy.ts, plus `.md` — a `.md` URL is always markdown, so it does not
+      // vary on Accept either.
+      {
+        source: "/",
+        headers: [{ key: "Vary", value: "Accept" }],
+      },
+      {
+        source:
+          "/:path((?!api|_next|md-src|\\.well-known)(?!.*\\.(?:md|txt|json|png|jpe?g|gif|svg|ico|webp|avif|css|js|mjs|map|woff2?|ttf|otf|eot|mp4|webm|mp3|zip|pdf|xml|webmanifest|ipynb)$).*)",
+        headers: [{ key: "Vary", value: "Accept" }],
+      },
       // Advertise the markdown representation over HTTP as well as in the HTML
       // head, per the llms.txt v2 link relations, so agents that read headers
       // only can discover it.
