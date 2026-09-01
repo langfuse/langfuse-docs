@@ -143,6 +143,8 @@ Ensure that both entities have the necessary permissions to access the bucket:
 }
 ```
 
+The same IAM role or user also works for the project-level [Blob Storage Export integration](/docs/api-and-data-platform/features/export-to-blob-storage#set-up-an-export). On self-hosted deployments, leave **Access Key ID** and **Secret Access Key** blank in that integration's AWS S3 settings to use the IAM role instead of static credentials. This fallback only applies to the AWS S3 provider; it is not available on Langfuse Cloud or for Azure Blob Storage / S3 Compatible Storage.
+
 <Callout type="info">
 
 To use the [Data Retention](/docs/data-retention) feature in a self-hosted environment, you need to grant `s3:DeleteObject` to the Langfuse IAM role on all buckets.
