@@ -4,8 +4,22 @@ import { createMDX } from "fumadocs-mdx/next";
 import NextBundleAnalyzer from "@next/bundle-analyzer";
 
 import * as redirects from "./lib/redirects.js";
+import contentDirMap from "./lib/content-dir-map.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// URL prefixes whose pages are mirrored as markdown by copy_md_sources.js,
+// derived from the same map the copy script uses so a new content section is
+// picked up automatically. The empty prefix (marketing pages, served from the
+// site root) is dropped: those sit alongside app-only routes such as /cloud
+// and /events that have no mirror, and a root-level matcher cannot tell them
+// apart. Marketing pages still advertise their mirror through the <link> tag
+// in buildSectionMetadata(), which is only emitted when the page exists.
+const MIRRORED_URL_PREFIXES = Array.from(
+  new Set(
+    Object.values(contentDirMap.CONTENT_DIR_TO_URL_PREFIX).filter(Boolean),
+  ),
+).sort();
 
 const withBundleAnalyzer = NextBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
@@ -209,6 +223,46 @@ const nextConfig = {
           { key: "Cache-Control", value: "public, max-age=3600" },
         ],
       },
+      // Content negotiation: these paths return markdown instead of HTML when
+      // the request carries `Accept: text/markdown` (see the rewrites in
+      // `beforeFiles`). `Vary: Accept` tells caches and intermediaries that
+      // Accept is part of the cache key, so a cached HTML response is never
+      // served to a markdown request or vice versa.
+      //
+      // Static assets are excluded: they never negotiate, and declaring a Vary
+      // they do not honour would fragment CDN cache entries per Accept string
+      // for every asset on the site. The extension list mirrors the matcher in
+      // proxy.ts, plus `.md` — a `.md` URL is always markdown, so it does not
+      // vary on Accept either.
+      {
+        source: "/",
+        headers: [{ key: "Vary", value: "Accept" }],
+      },
+      {
+        source:
+          "/:path((?!api|_next|md-src|\\.well-known)(?!.*\\.(?:md|txt|json|png|jpe?g|gif|svg|ico|webp|avif|css|js|mjs|map|woff2?|ttf|otf|eot|mp4|webm|mp3|zip|pdf|xml|webmanifest|ipynb)$).*)",
+        headers: [{ key: "Vary", value: "Accept" }],
+      },
+      // Advertise the markdown representation over HTTP as well as in the HTML
+      // head, per the llms.txt v2 link relations, so agents that read headers
+      // only can discover it.
+      //
+      // Scoped to a mirrored section prefix plus at least one path segment.
+      // Section roots are excluded because some of them (/blog, /changelog,
+      // /resources) are listing routes with no markdown mirror, and anything
+      // outside these prefixes is excluded because app routes such as /cloud
+      // and /events have no mirror either. Advertising a Link that 404s is
+      // worse than advertising nothing.
+      {
+        source: `/:section(${MIRRORED_URL_PREFIXES.join("|")})/:path((?!.*\\.md$).+)`,
+        headers: [
+          {
+            key: "Link",
+            value:
+              '</:section/:path.md>; rel="alternate"; type="text/markdown"',
+          },
+        ],
+      },
       // Mark markdown endpoints as noindex and ensure correct content type
       {
         source: "/:path*.md",
@@ -272,6 +326,7 @@ const nextConfig = {
 
         // Content negotiation: /docs or /docs/observability/overview -> /md-src/... .md
         // Excludes /api, /_next, md-src, .md files, and .txt files (served directly from public/).
+        // The agent-traffic matcher in proxy.ts mirrors these exclusions — keep in sync.
         {
           source:
             "/:path((?!api|_next|md-src|\\.well-known)(?!.*\\.md$)(?!.*\\.txt$)(?!.*\\.json$).*)",

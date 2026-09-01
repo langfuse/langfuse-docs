@@ -208,8 +208,8 @@ aliases were removed.
 | `langfuse.api.score` (legacy v1)        | `langfuse.api.legacy.score_v1`        |
 | `langfuse.api.metrics` (legacy v1)      | `langfuse.api.legacy.metrics_v1`      |
 
-If you still need legacy v1 behavior, switch to the corresponding
-`langfuse.api.legacy.<resource>_v1` namespace.
+If your Python SDK v4 client must temporarily query a self-hosted Langfuse v3
+server, use the corresponding `langfuse.api.legacy.<resource>_v1` namespace.
 
 <Callout type="warning">
   The new default `langfuse.api.observations` and `langfuse.api.metrics`
@@ -218,6 +218,16 @@ If you still need legacy v1 behavior, switch to the corresponding
   self-hosted Langfuse v3, use `langfuse.api.legacy.observations_v1` and
   `langfuse.api.legacy.metrics_v1` instead. See the [self-hosted
   compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
+</Callout>
+
+<Callout type="info">
+  **Public API endpoint deprecations are separate from the v4 breaking
+  changes.** Some API methods remain callable in Python v4 but call server
+  endpoints that are deprecated for Langfuse v4. After upgrading, use the
+  [Python SDK method mappings in the deprecated API migration
+  guide](/faq/all/deprecated-api-migration#sdk-method-quick-reference) to audit
+  methods such as `langfuse.api.trace.list()`,
+  `langfuse.api.sessions.list()`, and `langfuse.api.scores.get_many()`.
 </Callout>
 
 ### `start_span()` / `start_generation()` → `start_observation()`

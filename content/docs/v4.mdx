@@ -1,12 +1,14 @@
 ---
 title: "Langfuse v4 is live"
 description: Langfuse v4 is live on Cloud and generally available for self-hosted deployments, with an observations-first data model that makes tables, dashboards, APIs, and evaluations dramatically faster at scale.
+noindex: true
 ---
 
 import { Book, Github, Table, GitCompare } from "lucide-react";
 import { Details, Summary } from "@/components/Details";
 import { VersionTimeline } from "@/components/VersionTimeline";
 import { ObservationsTableDiagram } from "@/components/ObservationsTableDiagram";
+import { V4CutoverDate } from "@/components/V4CutoverDate";
 
 # Langfuse v4 is live
 
@@ -36,7 +38,7 @@ The new data model also unlocks a set of new features:
 
 - [Full-text search](/docs/observability/features/full-text-search) across inputs, outputs, and metadata
 - [Filter search bar](/docs/observability/features/filter-search-bar) for fast, keyboard-driven filtering
-- [Alerts](/docs/metrics/features/alerts) on your application metrics
+- [Alerts](/docs/observability/features/alerts) on your application metrics
 - The significantly faster [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2)
 
 Learn more in the [data model docs](/docs/observability/data-model#observations-and-traces) and the [observations guide](/faq/all/explore-observations-in-v4).
@@ -45,14 +47,18 @@ Learn more in the [data model docs](/docs/observability/data-model#observations-
 
 <VersionTimeline />
 
-On Langfuse Cloud, review your project's remaining migration actions in the app's sidebar panel after clicking the 'Action Required' button.
+On Langfuse Cloud, review your project's remaining migration actions in the **Migration Assistant** sidebar panel or on the [**Migration status page**](https://cloud.langfuse.com/v4-migration).
+
+Langfuse Cloud becomes v4-only on <V4CutoverDate />. Complete every action detected for your projects before this date.
 
 <Details>
-<Summary>Cloud rollout details (until the v4 cutover)</Summary>
+<Summary>Cloud rollout details</Summary>
 
 - Organizations created on or after April 14, 2026, 14:00 UTC run v4 by default and do not see a toggle.
-- Organizations created before that date can switch the **Langfuse v4 preview** toggle (bottom-left in the UI) on and off until Langfuse Cloud becomes v4-only.
+- Organizations created before that date can switch the **Langfuse v4 preview** toggle (bottom-left in the UI) on and off until Langfuse Cloud becomes v4-only on <V4CutoverDate />.
 - Cloud projects created on or after May 20, 2026 are locked to the "enriched observations" export source; new legacy export integrations cannot be created since June 22, 2026.
+
+Please note that you must migrate your projects to v4 before the cutover on <V4CutoverDate />.
 
 </Details>
 

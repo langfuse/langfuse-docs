@@ -4,6 +4,8 @@ sidebarTitle: Query via SDKs
 description: Query Langfuse data via Python and JS/TS SDKs using the high-performance data APIs.
 ---
 
+import { V4CutoverDate } from "@/components/V4CutoverDate";
+
 # Query Data via SDKs
 
 Langfuse is [open-source](/open-source) and data tracked with Langfuse is open. Use the Python and JS/TS SDKs to query the same public APIs without writing raw HTTP requests.
@@ -30,16 +32,19 @@ The `api` namespace is auto-generated from the Public API (OpenAPI). Method name
 
 <Callout type="warning">
 
-From Python SDK v4 and JS/TS SDK v5 onward, the high-performance data APIs
-are the defaults:
+From Python SDK v4 and JS/TS SDK v5 onward, the high-performance observations
+and metrics APIs are the defaults:
 
 - `api.observations` (formerly `api.observations_v_2` / `api.observationsV2`)
-- `api.scores_v3` / `api.scoresV3` — the v3 scores reads; `api.scores` (v2 reads) is deprecated, see [Migration of deprecated APIs](/faq/all/deprecated-api-migration#scores)
 - `api.metrics` (formerly `api.metrics_v_2` / `api.metricsV2`)
+
+Scores API v3 is available as `api.scores_v3` in Python SDK `4.8.1+` and
+`api.scoresV3` in JS/TS SDK `5.5.0+`. The `api.scores` v2 reads are deprecated;
+see [Migration of deprecated APIs](/faq/all/deprecated-api-migration#scores).
 
 The old v2 aliases were removed in Python SDK v4 and JS/TS SDK v5.
 
-The `api.legacy.*` resources call the deprecated endpoints; see
+The `api.legacy.*` resources call the deprecated endpoints. Langfuse Cloud serves these endpoints until <V4CutoverDate />. See
 [Migration of deprecated APIs](/faq/all/deprecated-api-migration) for
 replacements and the endpoint reference.
 
@@ -86,7 +91,7 @@ query = """
 }
 """
 
-metrics = langfuse.api.metrics.get(query = query)
+metrics = langfuse.api.metrics.metrics(query = query)
 ```
 
 ### Other resources
@@ -110,10 +115,10 @@ session_observations = langfuse.api.observations.get_many(
 Scores:
 
 ```python
-# Scores API v3 (recommended)
+# Scores API v3 (Python SDK 4.8.1+; recommended)
 scores = langfuse.api.scores_v3.get_many_v3(id="ScoreId")
 
-# Scores API v2 (deprecated)
+# Scores API v2 (deprecated, sunset date: Nov 16, 2026)
 scores = langfuse.api.scores.get_many(score_ids="ScoreId")
 ```
 
@@ -129,7 +134,7 @@ Datasets:
 # Namespaces:
 # - langfuse.api.datasets.*
 # - langfuse.api.dataset_items.*
-# - langfuse.api.experiments.*
+# - langfuse.api.experiments.* (Python SDK 4.13.1+)
 ```
 
 #### Async equivalents
@@ -141,7 +146,7 @@ observations = await langfuse.async_api.observations.get_many(
     limit=100,
     fields="core,basic,usage",
 )
-metrics = await langfuse.async_api.metrics.get(query = query)
+metrics = await langfuse.async_api.metrics.metrics(query = query)
 ```
 
 For row-level observation filters, field selection, and cursor pagination, see the [Observations API v2 documentation](/docs/api-and-data-platform/features/observations-api#v2).
@@ -194,7 +199,7 @@ const query = {
   toTimestamp: "2025-05-13T00:00:00Z",
 };
 
-const metrics = await langfuse.api.metrics.get({
+const metrics = await langfuse.api.metrics.metrics({
   query: JSON.stringify(query),
 });
 ```
@@ -223,10 +228,10 @@ const sessionObservations = await langfuse.api.observations.getMany({
 Scores:
 
 ```ts
-// Scores API v3 (recommended)
+// Scores API v3 (JS/TS SDK 5.5.0+; recommended)
 const scoresV3 = await langfuse.api.scoresV3.getManyV3();
 
-// Scores API v2 (deprecated)
+// Scores API v2 (deprecated, sunset date: Nov 16, 2026)
 const scores = await langfuse.api.scores.getMany();
 ```
 
@@ -242,7 +247,7 @@ Datasets:
 // Namespaces:
 // - langfuse.api.datasets.*
 // - langfuse.api.datasetItems.*
-// - langfuse.api.experiments.*
+// - langfuse.api.experiments.* (JS/TS SDK 5.10.0+)
 ```
 
 Explore more entities via Intellisense on `langfuse.api`.

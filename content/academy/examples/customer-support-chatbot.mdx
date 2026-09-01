@@ -125,7 +125,27 @@ We now iterate on the prompt, [running each version against these datasets](/aca
           evaluator: the expected output gives it the sources and
           recommendation from the human reply to compare against. It has to be an LLM-as-a-judge
           rather than a code check because two replies can recommend the same
-          thing in completely different words.
+          thing in completely different words. It needs the expected output to
+          run, so it can grade experiment runs on these datasets but never
+          live traffic.
+        </>
+      ),
+    },
+    {
+      name: "links_valid",
+      type: "Code",
+      check: "Every help article linked in the draft exists in the help center",
+      returns: "binary, per dataset item",
+      details: (
+        <>
+          Added after manual review turned up drafts linking help articles
+          that don't exist. Whether an article exists is a lookup in the
+          help-article index, so a{" "}
+          <a href="/academy/evaluate/writing-evaluators#make-it-verifiable">
+            code evaluator settles it exactly
+          </a>
+          , in milliseconds and for free. It also needs no expected output, so
+          the same check can keep running on live replies in the later phases.
         </>
       ),
     },
@@ -232,7 +252,12 @@ Both signals are captured as [scores](/docs/evaluation/scores/overview) on every
           that something wrong was removed or fixed, <code>added</code> that
           the draft was kept but missing information was added. It has to be a
           judge because telling a rewording apart from a content change
-          requires reading both texts.
+          requires reading both texts. Like any judge, it starts out untested:
+          hand-label a sample of drafts and their sent replies, and{" "}
+          <a href="/academy/evaluate/writing-evaluators#validate-the-judge">
+            check that the judge classifies them the way you would
+          </a>
+          .
         </>
       ),
     },
@@ -254,7 +279,7 @@ Both signals are captured as [scores](/docs/evaluation/scores/overview) on every
 
 Traces with a bad score can then be looked at, improved, and added to the datasets if they weren't covered before. One way to do this is using the [error analysis](/academy/monitoring/error-analysis) process.
 
-One iteration through the loop then looks like this: [monitoring](/academy/monitoring#metrics-and-signals) shows a spike of `corrected` drafts in the `troubleshooting` category. The traces reveal the agent keeps citing an outdated export dialog, because the help-article index is stale. The index gets refreshed, the `troubleshooting` dataset is rerun to confirm the fix, and the share of `corrected` drafts drops.
+One iteration through the loop then looks like this: [monitoring](/academy/monitoring#metrics-and-signals) shows a spike of `corrected` drafts in the `troubleshooting` category. The traces reveal the agent keeps citing an outdated export dialog, because the help-article index is stale. The index gets refreshed, the `troubleshooting` dataset is rerun to confirm the fix, and the share of `corrected` drafts drops. No new evaluator comes out of this: a stale index is a [one-time fix](/academy/evaluate/choosing-what-to-evaluate#fix-first), not a failure mode to keep tracking.
 
 The share of edited drafts should go down over time. Once drafts go out mostly unchanged across all ticket categories, the agent is ready to face customers.
 
@@ -318,17 +343,22 @@ Customers rarely rate their support chat, so the main focus is on gathering impl
         <>
           Runs when the conversation closes and classifies it as{" "}
           <code>resolved</code>, <code>abandoned</code>, or{" "}
-          <code>handed_off</code>. Categorical because the three endings each
-          mean something different for the bot's performance. Scored on the
-          session rather than the trace, since the outcome belongs to the
-          conversation as a whole.
+          <code>handed_off</code>. The three endings each mean something
+          different for the bot's performance and are mutually exclusive, so
+          this is{" "}
+          <a href="/academy/evaluate/writing-evaluators#binary-verdicts">
+            one categorical evaluator rather than several overlapping binary
+            ones
+          </a>
+          . Scored on the session rather than the trace, since the outcome
+          belongs to the conversation as a whole.
         </>
       ),
     },
   ]}
 />
 
-With no human in the loop anymore, we monitor every reply for reputation-damaging behavior. These evaluators don't block anything: they flag sent replies so the team can follow up with the customer quickly.
+With no human in the loop anymore, we monitor every reply for reputation-damaging behavior. These two evaluators come from [hard constraints](/academy/evaluate/choosing-what-to-evaluate#goals-and-hard-constraints) rather than observed failures: they exist from day one, even though neither has ever fired. They don't block anything: they flag sent replies so the team can follow up with the customer quickly.
 
 <EvaluatorBlock
   evaluators={[

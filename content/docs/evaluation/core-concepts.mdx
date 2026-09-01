@@ -7,6 +7,8 @@ description: Learn the fundamental concepts behind LLM evaluation in Langfuse - 
 
 This page digs into the different concepts of evaluations, and what's available in Langfuse.
 
+If you are still deciding _what_ to measure, [Choosing what to evaluate in the Langfuse Academy](/academy/evaluate/choosing-what-to-evaluate) works through how to turn observed failures into a small set of metrics, and [Writing good evaluators](/academy/evaluate/writing-evaluators) covers how to make those checks trustworthy.
+
 Ready to start?
 
 - [Create a dataset](/docs/evaluation/experiments/datasets) to measure your LLM application's performance consistently
@@ -16,11 +18,11 @@ Ready to start?
 
 ## The Evaluation Loop
 
-LLM applications often have a constant loop of testing and monitoring.
+LLM applications often have a constant [loop of testing and monitoring](/academy/ai-engineering-loop).
 
-**Offline evaluation** lets you test your application against a fixed dataset before you deploy. You run your new prompt or model against test cases, review the [scores](#scores), iterate until the results look good, then deploy your changes. In Langfuse, you can do that by running [Experiments](/docs/evaluation/core-concepts#experiments).
+**[Offline evaluation](/academy/evaluate)** lets you test your application against a fixed dataset before you deploy. You run your new prompt or model against test cases, review the [scores](#scores), iterate until the results look good, then deploy your changes. In Langfuse, you can do that by running [Experiments](/docs/evaluation/core-concepts#experiments).
 
-**Online evaluation** scores live traces to catch issues in real traffic. When you find edge cases your dataset didn't cover, you add them back to your dataset so future experiments will catch them.
+**[Online evaluation](/academy/monitoring)** scores live traces to catch issues in real traffic. When you find edge cases your dataset didn't cover, you add them back to your dataset so future experiments will catch them.
 
 <LoopDiagram />
 
@@ -58,6 +60,69 @@ Evaluation methods are the functions that score traces, observations, sessions, 
 
 When setting up new evaluation methods, you can use [Score Analytics](/docs/evaluation/scores/score-analytics) to analyze or sense-check the scores you produce.
 
+## Online evaluation [#online-evaluation]
+
+For online evaluation, create a rule to match incoming production observations. The rule triggers its attached evaluators, which score those observations. This helps you catch issues in real traffic.
+
+### Evaluators and rules [#evaluators-and-rules]
+
+Evaluators define how Langfuse scores data. Rules define which incoming observations Langfuse scores.
+
+<table>
+  <thead>
+    <tr>
+      <th>What</th>
+      <th>Used for</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Evaluator</td>
+      <td>
+        <ul>
+          <li>
+            [Batch evaluation](#batch-evaluation): score selected historical observations.
+          </li>
+          <li>
+            [Online evaluation](#online-evaluation): attach it to a rule to score incoming production observations.
+          </li>
+          <li>
+            [Prompt experiments](/docs/evaluation/experiments/experiments-via-ui): score experiment runs.
+          </li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>Rule</td>
+      <td>You want to select incoming observations using filters and a sampling rate, then trigger one or more evaluators on them.</td>
+    </tr>
+  </tbody>
+</table>
+
+You can reuse an evaluator across rules. For LLM-as-a-Judge, Langfuse validates the evaluator's default variable mapping against observations that match the rule. Override the mapping for a specific evaluator-rule assignment when the data has a different shape.
+
+### Monitoring with dashboards
+
+Use [custom dashboards](/docs/metrics/features/custom-dashboards) to monitor scores and application performance over time.
+
+## Batch evaluation [#batch-evaluation]
+
+Use batch evaluation to score a selected set of historical observations after they have been ingested. This is useful when you want to test a new or updated evaluator against existing production data.
+
+To use an LLM-as-a-Judge evaluator for batch evaluation, enable the [Langfuse v4 preview](/docs/v4) toggle for the evaluator. To use the same evaluator on newly ingested data in real time, upgrade to Python SDK ≥ 4.7.0 or JS/TS SDK ≥ 5.4.0. If you ingest directly via OTEL, [set `x-langfuse-ingestion-version: 4` on your OTEL span exporter](/integrations/native/opentelemetry#real-time-ingestion).
+
+1. Open the Traces table.
+2. Filter to the timeframe and trace criteria you want to evaluate.
+3. Select the matching rows.
+4. Click Actions → Evaluate.
+5. Choose an evaluator and run it on the selected traces.
+
+<Frame fullWidth>
+  ![Tracing table with filters applied before batch evaluation](/images/docs/llm-as-a-judge/observation-backfill.png)
+</Frame>
+
+The resulting scores are attached to the matching observations in each selected trace.
+
 ## Experiments [#experiments]
 
 An experiment runs your application against a dataset and evaluates the outputs. This is how you test changes before deploying to production.
@@ -93,11 +158,13 @@ You can compare experiment runs to see if a new prompt version improves scores, 
 
 You can find more details on how these objects link together under the hood on the [data model page](/docs/evaluation/experiments/data-model).
 
-### Two ways to run experiments
+### Ways to run experiments
 
 You can **run experiments programmatically using the Langfuse SDK**. This gives you full control over the task, evaluation logic, and more. [Learn more about running experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk).
 
-Another way is to **run experiments directly from the Langfuse interface** by selecting a dataset and prompt version. This is useful for quick iterations on prompts without writing code. [Learn more about running experiments via UI](/docs/evaluation/experiments/experiments-via-ui).
+You can **run experiments directly from the Langfuse interface** by selecting a dataset and prompt version. This is useful for quick iterations on prompts without writing code. [Learn more about running experiments via UI](/docs/evaluation/experiments/experiments-via-ui).
+
+If you already emit traces through OpenTelemetry and are not using the Python or JS/TS SDK, **attach experiment attributes to those spans** so Langfuse groups them as an experiment run. [Learn more about experiments via OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry).
 
 <div className="my-6">
   <div className="grid grid-cols-3 gap-2">
@@ -118,7 +185,8 @@ Another way is to **run experiments directly from the Langfuse interface** by se
       [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui)
     </div>
     <div className="p-3 border dark:border-gray-700 rounded text-center bg-blue-50 dark:bg-blue-900/30">
-      [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)
+      [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) or
+      [OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry)
     </div>
 
     {/* Local Data row */}
@@ -129,20 +197,11 @@ Another way is to **run experiments directly from the Langfuse interface** by se
       Not supported
     </div>
     <div className="p-3 border dark:border-gray-700 rounded text-center bg-blue-50 dark:bg-blue-900/30">
-      [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)
+      [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) or
+      [OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry)
     </div>
 
   </div>
 </div>
 
 _While it's optional, we recommend managing the underlying [Datasets](/docs/evaluation/experiments/datasets) in Langfuse as it allows for [1] In-UI comparison tables of different experiments on the same data and [2] Iteratively improve dataset based on production/staging traces._
-
-## Online Evaluation [#online-evaluation]
-
-For online evaluation, you can configure evaluation methods to automatically score production traces. This helps you catch issues immediately.
-
-Langfuse supports LLM-as-a-Judge, code evaluators, and human annotation checks for online evaluation.
-
-### Monitoring with dashboards
-
-Langfuse offers dashboards to monitor your application performance in real-time. You can also monitor scores in dashboards. You can find more details on how to use dashboards [here](/docs/metrics/features/custom-dashboards).
