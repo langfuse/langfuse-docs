@@ -24,23 +24,21 @@ The Langfuse Assistant is an in-product assistant for exploring your Langfuse pr
 
 <a id="what-you-can-ask" />
 
-Ask the Assistant to analyze your data or take action in Langfuse.
-
-Analyze:
+Ask the Assistant about your data and about Langfuse itself:
 
 - "Which traces had the highest latency yesterday?"
 - "Show me failed generations in the last hour."
 - "What's my token spend this week, broken down by model?"
-- "Fetch a few hundred failed observations from the last 7 days and cluster the main errors with code."
+- "How do I set up an evaluator?"
 
-Take action:
+Or ask it to do the work:
 
-- "Create a dataset from failed generations last week."
+- "Create a dataset from the failed generations of last week."
 - "Build a dashboard of error rate and p95 latency for the last 7 days."
 - "Review this prompt against current best practices and propose a tighter version."
+- "Fetch a few hundred failed observations from the last 7 days and cluster the main errors with code."
 - "Set up a numeric score config for friendliness."
 - "Open the traces table filtered to errors from today."
-- "How do I set up an evaluator?"
 
 ## How it works [#how-it-works]
 
@@ -56,7 +54,8 @@ The Assistant can:
 
 The Assistant is designed to be safe by default:
 
-- If a request would change data or configuration, the Assistant pauses and asks you to explicitly approve that specific action first.
+- If a request would change data or configuration, the Assistant pauses and asks you to approve that specific action first.
+- If you choose **Always approve** for a tool, the Assistant reuses that tool without asking again. The choice applies to that conversation only.
 
 The Assistant can only use actions that your account already has access to in the current project. Approval adds a second safety check, but it does not grant any extra permissions.
 
@@ -66,7 +65,7 @@ The Assistant is also aware of your current context in the Langfuse UI, such as 
 
 Every Assistant run happens in the background, independently of your browser. Keep using Langfuse, or start another conversation, while a run is still working. You get a notification when it finishes, fails, or needs your input or approval.
 
-For repeating work in one conversation, choose **Always approve** on a tool you are comfortable leaving unattended.
+For repeating work in one conversation, choose **Always approve** on a tool you are comfortable leaving unattended. The Assistant then uses that tool for the rest of that conversation without asking again.
 
 ## Data privacy and security [#data-privacy-and-security]
 
@@ -76,7 +75,7 @@ Key points:
 
 - Model requests are handled in the same AWS region as your [Langfuse data region](/security/data-regions).
 - Assistant access is scoped to the authenticated user and current project.
-- Actions that can change data require explicit approval and remain limited to the permissions of the signed-in user.
+- Actions that can change data require your approval and remain limited to the permissions of the signed-in user.
 - AI feature tracing for product and service improvement can be enabled or disabled separately by organization admins and owners.
 
 ## Conversation history [#conversation-history]

@@ -1,7 +1,7 @@
 ---
-title: Langfuse Assistant, now at work in the background
 date: 2026-09-01
-description: Create datasets, dashboards, and run code over your traces. Runs keep going in the background.
+title: Put the Assistant to work in the background
+description: Ask the Langfuse Assistant to build a dataset or a dashboard, or to run code over thousands of observations. Runs continue in the background while you keep working.
 author: Lysander
 ogVideo: https://static.langfuse.com/changelog-videos/2026-09-01-langfuse-assistant.mp4
 canonical: /docs/langfuse-assistant
@@ -12,13 +12,19 @@ import { Book } from "lucide-react";
 
 <ChangelogHeader />
 
-The Langfuse Assistant can now get real work done in Langfuse, not only answer questions. Ask it to create a dataset from failed generations, build a dashboard of error rate and latency, or review a prompt against current best practices.
+The [Langfuse Assistant](/docs/langfuse-assistant) can now take on whole tasks in Langfuse. Describe what you want and it creates the resource, runs the code, and reports back:
 
-It can also work through hundreds or thousands of observations by fetching them and running code over the results, instead of loading every payload into the model. Find a failure pattern, extract a field, or cluster similar outputs, then keep using Langfuse while it runs.
+- "Create a dataset from the failed generations of last week."
+- "Build a dashboard of error rate and p95 latency for the last 7 days."
+- "Review this prompt against current best practices and propose a tighter version."
 
-Those jobs run in the background, independently of your browser. Start another conversation while the first one is still working. You get a notification when a run finishes, fails, or needs your input or approval.
+It can also work through hundreds or thousands of observations at once. The Assistant fetches them and runs code over the results in a sandbox, rather than loading every payload into the model, so you can ask it to find a failure pattern, extract a field from every response, or cluster similar outputs.
 
-For repeating work in one conversation, choose **Always approve** on a tool you are comfortable leaving unattended. The Assistant then uses that tool for the rest of the conversation without asking again.
+Every run happens in the background, independently of your browser. Keep exploring Langfuse or start a second conversation while the first one is still working. You get a notification when a run finishes, fails, or needs your input.
+
+Anything that changes data or configuration still waits for your approval. For repeating work in one conversation, choose **Always approve** on a tool you are comfortable leaving unattended, and the Assistant uses that tool for the rest of that conversation without asking again.
+
+The Assistant is available on Langfuse Cloud when AI features are enabled for your organization. Organization admins can enable them in the organization settings.
 
 ## Learn more
 
