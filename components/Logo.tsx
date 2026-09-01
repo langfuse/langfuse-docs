@@ -9,31 +9,56 @@ const ContextMenu = dynamic(() => import("./LogoContextMenu"), {
   ssr: false,
 });
 
+const WORDMARKS = {
+  langfuse: {
+    light: "/langfuse-wordart.svg",
+    dark: "/langfuse-wordart-white.svg",
+    alt: "Langfuse Logo",
+    width: 120,
+    height: 20,
+    className: "h-auto max-w-28 sm:max-w-none",
+  },
+  byClickHouse: {
+    light:
+      "/brand-assets/wordmark/Langfuse%20by%20ClickHouse/light/langfuse-by-clickhouse.svg",
+    dark: "/brand-assets/wordmark/Langfuse%20by%20ClickHouse/dark/langfuse-by-clickhouse-white.svg",
+    alt: "Langfuse by ClickHouse",
+    // Lockup is taller (includes "by ClickHouse"); size it as a page hero mark.
+    width: 220,
+    height: 59,
+    className: "h-auto max-w-[200px] sm:max-w-[220px]",
+  },
+} as const;
+
 export function Logo({
   wrapInLink = true,
   showAffiliation = false,
+  variant = "langfuse",
 }: {
   /** When false, render only the image block (use when already inside a link, e.g. NavbarLogo). */
   wrapInLink?: boolean;
   /** When true, show the "by ClickHouse" affiliation link next to the logo. */
   showAffiliation?: boolean;
+  /** Use the co-branded "Langfuse by ClickHouse" wordmark lockup. */
+  variant?: keyof typeof WORDMARKS;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const wordmark = WORDMARKS[variant];
   const images = (
     <div className="logo-images flex gap-2 items-center cursor-pointer shrink-0">
       <Image
-        src="/langfuse-wordart-white.svg"
-        alt="Langfuse Logo"
-        width={120}
-        height={20}
-        className="hidden h-auto dark:block max-w-28 sm:max-w-none"
+        src={wordmark.dark}
+        alt={wordmark.alt}
+        width={wordmark.width}
+        height={wordmark.height}
+        className={`hidden dark:block ${wordmark.className}`}
       />
       <Image
-        src="/langfuse-wordart.svg"
-        alt="Langfuse Logo"
-        width={120}
-        height={20}
-        className="block h-auto dark:hidden max-w-28 sm:max-w-none"
+        src={wordmark.light}
+        alt={wordmark.alt}
+        width={wordmark.width}
+        height={wordmark.height}
+        className={`block dark:hidden ${wordmark.className}`}
       />
       <style jsx>{`
       .logo-images {
@@ -91,7 +116,7 @@ export function Logo({
             {images}
           </div>
         )}
-        {showAffiliation && byClickHouse}
+        {showAffiliation && variant !== "byClickHouse" && byClickHouse}
       </div>
       {menuOpen && <ContextMenu open={menuOpen} setOpen={setMenuOpen} />}
     </>

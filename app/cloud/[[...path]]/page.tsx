@@ -133,7 +133,7 @@ export default function CloudRegionSelectorPage() {
     >
       <div className="flex w-full max-w-[480px] flex-col items-center gap-8">
         <div className="flex flex-col items-center gap-5">
-          <Logo />
+          <Logo variant="byClickHouse" />
           <Heading as="h1" size="normal" className="text-center">
             Select your region
           </Heading>
