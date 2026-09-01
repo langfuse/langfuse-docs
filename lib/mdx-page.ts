@@ -113,6 +113,16 @@ export function buildSectionMetadata(
   opts?: {
     canonicalFallback?: string | null;
     languages?: NonNullable<Metadata["alternates"]>["languages"];
+    /**
+     * The page's real public path, when it differs from the derived
+     * `pagePath`. Marketing pages route as `/${section}` but pass `[section]`
+     * as their slug, so `pagePath` would double the segment
+     * (`/careers/careers`). Used for the markdown alternate only — unlike
+     * `canonicalFallback`, which may deliberately point at a *different* page
+     * (a cookbook canonicalizing to its docs equivalent) and therefore must
+     * not be used to locate this page's own mirror.
+     */
+    publicPath?: string;
   },
 ): Metadata {
   const pageData = page.data;
@@ -140,6 +150,14 @@ export function buildSectionMetadata(
     description: page.data.description ?? undefined,
     alternates: {
       canonical: canonicalUrl,
+      // Advertise the markdown representation of this page, per the llms.txt
+      // v2 link relations. Agents that look for it (Codex CLI today) can fetch
+      // markdown without guessing a URL scheme; everything else ignores the
+      // tag. Built from the page's own public path, never from canonicalUrl,
+      // so a page with a `canonical` override still points at its own mirror.
+      types: {
+        "text/markdown": buildPageUrl(`${opts?.publicPath ?? pagePath}.md`),
+      },
       ...(opts?.languages ? { languages: opts.languages } : {}),
     },
     ...(pageData.noindex ? { robots: { index: false, follow: true } } : {}),

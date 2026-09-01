@@ -22,6 +22,7 @@ import { AdConsentGate } from "@/components/analytics/AdConsentGate";
 import { ClickIdPersistence } from "@/components/analytics/ClickIdPersistence";
 import { CommonRoom } from "@/components/analytics/common-room";
 import { AhrefsAnalytics } from "@/components/analytics/ahrefs";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "../style.css";
 import "@vidstack/react/player/styles/base.css";
 import "../src/overrides.css";
@@ -124,6 +125,7 @@ export default function RootLayout({
             />
           </>
         )}
+        <SpeedInsights />
       </body>
     </html>
   );

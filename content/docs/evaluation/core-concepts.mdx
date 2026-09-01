@@ -7,6 +7,8 @@ description: Learn the fundamental concepts behind LLM evaluation in Langfuse - 
 
 This page digs into the different concepts of evaluations, and what's available in Langfuse.
 
+If you are still deciding _what_ to measure, [Choosing what to evaluate in the Langfuse Academy](/academy/evaluate/choosing-what-to-evaluate) works through how to turn observed failures into a small set of metrics, and [Writing good evaluators](/academy/evaluate/writing-evaluators) covers how to make those checks trustworthy.
+
 Ready to start?
 
 - [Create a dataset](/docs/evaluation/experiments/datasets) to measure your LLM application's performance consistently
@@ -16,11 +18,11 @@ Ready to start?
 
 ## The Evaluation Loop
 
-LLM applications often have a constant loop of testing and monitoring.
+LLM applications often have a constant [loop of testing and monitoring](/academy/ai-engineering-loop).
 
-**Offline evaluation** lets you test your application against a fixed dataset before you deploy. You run your new prompt or model against test cases, review the [scores](#scores), iterate until the results look good, then deploy your changes. In Langfuse, you can do that by running [Experiments](/docs/evaluation/core-concepts#experiments).
+**[Offline evaluation](/academy/evaluate)** lets you test your application against a fixed dataset before you deploy. You run your new prompt or model against test cases, review the [scores](#scores), iterate until the results look good, then deploy your changes. In Langfuse, you can do that by running [Experiments](/docs/evaluation/core-concepts#experiments).
 
-**Online evaluation** scores live traces to catch issues in real traffic. When you find edge cases your dataset didn't cover, you add them back to your dataset so future experiments will catch them.
+**[Online evaluation](/academy/monitoring)** scores live traces to catch issues in real traffic. When you find edge cases your dataset didn't cover, you add them back to your dataset so future experiments will catch them.
 
 <LoopDiagram />
 
