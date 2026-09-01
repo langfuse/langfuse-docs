@@ -7,8 +7,6 @@ description: Information on AI-powered features within Langfuse and their data i
 
 Langfuse offers AI-powered features within the product to simplify and speed up your workflows. These features are currently in beta.
 
-Self-hosted deployments use one instance-wide Langfuse AI model for the [Langfuse Assistant](/docs/langfuse-assistant) and [Ask AI](/docs/observability/features/filter-search-bar#ask-ai) in the filter search bar. See [self-hosted Assistant setup](/self-hosting/configuration/langfuse-assistant).
-
 ## Opt-in
 
 All AI-powered features require an opt-in; they are not enabled by default. The opt-in is managed at the organization level and can be changed by an [admin or owner](/docs/administration/rbac).
@@ -20,7 +18,7 @@ The setting applies to all users and projects within the organization.
 
 Non-exhaustive list of available AI features in Langfuse:
 
-- [Langfuse Assistant](/docs/langfuse-assistant) for asking questions about traces, observations, and metrics in plain language. Available on Cloud and on self-hosted deployments with an [instance Langfuse AI model](/self-hosting/configuration/langfuse-assistant).
+- [Langfuse Assistant](/docs/langfuse-assistant) for asking questions about traces, observations, and metrics in plain language. Available on Cloud and on self-hosted deployments with an [instance-wide Langfuse AI model](/self-hosting/configuration/langfuse-assistant).
 - [Ask AI](/docs/observability/features/filter-search-bar#ask-ai) in the filter search bar. Available on Cloud and on self-hosted deployments with the same Langfuse AI model.
 - AI-powered generation of evaluator names and descriptions. Available on Langfuse Cloud only.
 
@@ -34,4 +32,11 @@ On Langfuse Cloud, AI features use models hosted on AWS Bedrock in your [data re
 
 On self-hosted deployments, AI features use the Langfuse AI model you configure. You are responsible for that provider's data handling. See [self-hosted Assistant setup](/self-hosting/configuration/langfuse-assistant).
 
-Self-hosted deployments can also record Assistant turns and Ask AI completions as traces in a project on the same instance, by setting `LANGFUSE_AI_FEATURES_PROJECT_ID`. Nothing is recorded while it is unset, and nothing leaves the instance when it is set. Use a project dedicated to this, because those traces contain the prompts, tool calls, and model output of every run. See [Trace the Assistant in your own instance](/self-hosting/configuration/langfuse-assistant#trace-the-assistant-in-your-own-instance).
+Self-hosted deployments can also record Assistant turns and Ask AI completions as traces by setting `LANGFUSE_AI_FEATURES_PROJECT_ID`.
+
+<Callout type="info">
+  `LANGFUSE_AI_FEATURES_PROJECT_ID` must reference a project on the same Langfuse
+  deployment.
+</Callout>
+
+Nothing is recorded while the variable is unset. When set, traces are written through Langfuse's internal ingestion path and add no outbound requests. Use a dedicated project because these traces contain the prompts, tool calls, and model output of every run. See [Trace the Assistant in your own instance](/self-hosting/configuration/langfuse-assistant#trace-the-assistant-in-your-own-instance).
