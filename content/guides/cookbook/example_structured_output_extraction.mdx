@@ -1,46 +1,58 @@
 ---
 source: ⚠️ Jupyter Notebook
-title: Measure and optimize document extraction with Langfuse Experiments
-sidebarTitle: Structured Output Extraction
-description: Extract nested insurance claims with OpenAI structured outputs, then iterate with the Langfuse Experiments SDK using layered metrics and small-n significance tests.
+title: Evaluate and improve document extraction
+sidebarTitle: Document extraction
+description: Build a labeled dataset, score nested extraction per field, and iterate on a non-agent claims pipeline with Langfuse experiments.
 category: Evaluation
 ---
 
-# Measure and optimize document extraction with Langfuse Experiments
+# Evaluate and improve document extraction
 
-Structured extraction returns a nested, typed object: strings, dates, numbers, enums, and lists of sub-objects. Correctness is not one number. A single accuracy score hides which fields failed, and "the output looks right" is not something you can optimize.
+Most production extraction is not an agent. An invoice, insurance claim, KYC packet, or bank statement goes in. A nested object comes out. You have labels, you need accuracy per field, and you will run this loop many times. The same eval applies when extraction is a step inside an agent.
 
-This guide extracts insurance claims with [OpenAI structured outputs](https://platform.openai.com/docs/guides/structured-outputs) and iterates with the [Langfuse Experiments SDK](https://langfuse.com/docs/evaluation/experiments/experiments-via-sdk). Each round changes one lever (schema, prompt, few-shot, architecture, or model), scores the same 30 claims, and checks whether the move is real before you keep it.
+This cookbook runs that loop on insurance claims:
 
-You will also see a change that introduces a regression, and a variant that looks better until you replicate it.
+1. Upload a dataset of claim text plus the expected nested object
+2. Score every output field, plus overall accuracy
+3. Change one lever, remeasure, and catch a regression the pooled score hid
 
-**Stack:** OpenAI structured outputs, Langfuse Tracing, Experiments, and Prompt Management. The scorer reports valid-JSON %, field accuracy by type, object F1, latency, and USD/doc. At n=30 we use a paired McNemar test and Wilson confidence intervals.
+**Stack:** OpenAI structured outputs, Langfuse Tracing, [Experiments](https://langfuse.com/docs/evaluation/experiments/experiments-via-sdk), and Prompt Management.
 
-> **Credits.** Dataset, schema, and baseline comparison are adapted from Cleanlab's structured-output [benchmark](https://cleanlab.ai/blog/structured-output-benchmark/) ([repo](https://github.com/cleanlab/structured-output-benchmark/tree/main/insurance_claims), [dataset](https://huggingface.co/datasets/Cleanlab/insurance-claims-extraction)). Their `schema.py` is our `descriptive` schema. We extend their `utils.py` comparison with type-aware matching, object F1, and cost/latency.
+> **Credits.** Dataset, schema, and baseline comparison are adapted from Cleanlab's structured-output [benchmark](https://cleanlab.ai/blog/structured-output-benchmark/) ([repo](https://github.com/cleanlab/structured-output-benchmark/tree/main/insurance_claims), [dataset](https://huggingface.co/datasets/Cleanlab/insurance-claims-extraction)). Their `schema.py` is our descriptive schema. The scorer extends their `utils.py` comparison with typed date/number matching and object pairing.
 
 
 ## 1. Setup
 
-Install the dependencies and set environment variables. Create API keys in [Langfuse Cloud](https://cloud.langfuse.com) or your [self-hosted](https://langfuse.com/self-hosting) project.
+Install the dependencies. Then set Langfuse and OpenAI keys in the next cell, or put the same names in a `.env` at the repo root.
 
 
 
 ```python
-%pip install -q "langfuse>=4.14" "openai>=3" pydantic pandas
+%pip install -q "langfuse>=4.14" "openai>=3" pydantic pandas python-dotenv
+
 ```
 
 
 ```python
+from pathlib import Path
 import os
 
-# Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...");
-os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...");
-os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path("..") / ".env")  # repo root when the kernel cwd is cookbook/
+    load_dotenv()
+except ImportError:
+    pass
+
+# Langfuse: project Settings → API Keys → https://cloud.langfuse.com
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")  # 🇪🇺 EU region
 # 🇺🇸 US region: https://us.cloud.langfuse.com
 
-# OpenAI API key
-os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...");
+# OpenAI: https://platform.openai.com/api-keys
+os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...")
+
 ```
 
 
@@ -48,18 +60,22 @@ os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...");
 from langfuse import get_client
 
 langfuse = get_client()
-assert langfuse.auth_check(), "Langfuse auth failed — check your keys / host"
+assert langfuse.auth_check(), "Langfuse auth failed. Check your keys and host."
 print("Langfuse auth OK")
+
 ```
+
+You should see `Langfuse auth OK`. Next you define the schema the model must fill.
+
 
 ## 2. Schema as the extraction contract
 
-The schema is half the spec. We keep the same nested structure in two variants:
+The schema is part of the pipeline. Each claim has `header`, optional `policy_details`, optional `insured_objects[]`, and `incident_description`.
 
-- **bare**: types and constraints only. No field descriptions.
-- **descriptive**: the same structure, plus `description=` text for ID formats and standardized values.
+Two variants, same fields, so the first improvement round can change one thing:
 
-That lets us test one question later: do schema descriptions change what the model emits? Each claim has `header`, optional `policy_details`, optional `insured_objects[]` (a list of sub-objects, the hard part), and `incident_description`.
+- **bare:** types and constraints only. The V1 floor.
+- **descriptive:** the same fields plus `description=` text for ID formats. This is the contract you would ship.
 
 
 
@@ -83,6 +99,7 @@ LocationType = Literal[
     "residence_interior", "residence_exterior", "commercial_property", "public_property",
 ]
 _STRICT = ConfigDict(extra="forbid")
+
 ```
 
 
@@ -126,6 +143,7 @@ class InsuranceClaimBare(BaseModel):
     policy_details: Optional[PolicyDetailsBare] = None
     insured_objects: Optional[List[InsuredObjectBare]] = None
     incident_description: IncidentDescriptionBare
+
 ```
 
 
@@ -176,6 +194,7 @@ class InsuranceClaim(BaseModel):
     incident_description: IncidentDescription = Field(..., description="Structured incident details")
 
 SCHEMAS = {"bare": InsuranceClaimBare, "descriptive": InsuranceClaim}
+
 ```
 
 
@@ -185,11 +204,15 @@ from openai.lib._pydantic import to_strict_json_schema
 strict = to_strict_json_schema(InsuranceClaim)
 print("sections:", list(strict["properties"].keys()))
 print("incident_type enum:", len(IncidentType.__args__), "values | location_type:", len(LocationType.__args__))
+
 ```
 
-## 3. Load the data and upload a Langfuse dataset
+You should see four sections. `insured_objects` is a list. That is why the scorer pairs objects before it scores their fields.
 
-The dataset is 30 synthetic claims from the [Cleanlab structured-output benchmark](https://cleanlab.ai/blog/structured-output-benchmark/): free-text narratives plus nested ground-truth dicts. The `claim_text` is LLM-generated, so treat this as a demo set, not production data. We attach metadata (`has_policy`, `n_objects`) so you can filter later.
+
+## 3. Upload a labeled dataset
+
+30 synthetic claims from the [Cleanlab structured-output benchmark](https://cleanlab.ai/blog/structured-output-benchmark/). Each item is claim text in `input`, the nested label in `expected_output`, and slices in `metadata` (`has_policy`, `n_objects`). The text is LLM-generated. Treat this as a demo set.
 
 
 
@@ -202,7 +225,13 @@ df = pd.read_csv(DATA_URL)
 print("rows:", len(df), "| columns:", list(df.columns))
 example_gt = ast.literal_eval(df["ground_truth"].iloc[0])   # ground_truth is a stringified dict
 print("ground-truth sections:", list(example_gt.keys()))
+
 ```
+
+You should see 30 rows and the four ground-truth sections. Next you attach metadata slices and upload.
+
+
+The next cell derives `has_policy` and `n_objects` for each item. Expand if you want the helpers.
 
 <details>
 <summary>Dataset slice helpers</summary>
@@ -245,39 +274,42 @@ print("n_objects:", dict(sorted(collections.Counter(it["metadata"]["n_objects"] 
 
 ```python
 DATASET_NAME = "insurance-claims"
-langfuse.create_dataset(
-    name=DATASET_NAME,
-    description="Nested insurance-claim extraction (Cleanlab). 30 synthetic claims; verify before production.",
-    metadata={"source": "Cleanlab/insurance-claims-extraction", "n_items": len(items)})
-for it in items:
-    langfuse.create_dataset_item(
-        dataset_name=DATASET_NAME, id=f"{DATASET_NAME}:{it['id']}",
-        input=it["input"], expected_output=it["expected_output"], metadata=it["metadata"])
-langfuse.flush()
-dataset = langfuse.get_dataset(DATASET_NAME)
-dataset_items = sorted(dataset.items, key=lambda x: x.id)
-print("uploaded & fetched:", len(dataset_items), "items")
+try:
+    dataset = langfuse.get_dataset(DATASET_NAME)
+    if dataset.items:
+        print("using existing dataset:", len(dataset.items), "items")
+    else:
+        raise ValueError("dataset exists but is empty")
+except Exception:
+    langfuse.create_dataset(
+        name=DATASET_NAME,
+        description="Nested insurance-claim extraction (Cleanlab). 30 synthetic claims; verify before production.",
+        metadata={"source": "Cleanlab/insurance-claims-extraction", "n_items": len(items)})
+    for it in items:
+        langfuse.create_dataset_item(
+            dataset_name=DATASET_NAME, id=f"{DATASET_NAME}:{it['id']}",
+            input=it["input"], expected_output=it["expected_output"], metadata=it["metadata"])
+    langfuse.flush()
+    dataset = langfuse.get_dataset(DATASET_NAME)
+    print("uploaded & fetched:", len(dataset.items), "items")
+
 ```
 
-![The insurance-claims dataset in Langfuse with inputs, expected outputs, and metadata slices](/images/cookbook/example-structured-output-extraction/dataset-items.png)
+![Insurance-claims dataset in Langfuse](/images/cookbook/example-structured-output-extraction/dataset-items.png)
+
+Open [Datasets](https://cloud.langfuse.com/project/~/datasets) and confirm 30 items. Five claims have no policy and no objects. 11 of 27 labeled objects have a null `object_id`. One claim has a null `claim_id`. The labels are not schema-valid. That is the point of the later ID-format scores.
 
 
-## 4. Layered extraction metrics
+## 4. Score every field, then overall
 
-Do not collapse a nested, typed object into one accuracy number. The scorer uses this model:
+The scorer walks each leaf and emits a boolean per path (`field.header.claim_id`, `field.policy_details.policyholder_name`, ...) plus `field_accuracy_overall`.
 
-1. **Valid JSON is a gate, not a score.** Structured outputs usually hit 100%. Parsing is not correctness.
-2. **Pooled `field_acc` hides the work.** Easy copied fields drown out reasoned ones. Break scores out by section and field type.
-3. **Compare by type.** Parse dates, tolerate numbers, normalize enums and names. Do not use `==` on everything.
-4. **Lists of objects need precision, recall, and F1.** Match predicted objects to ground truth, then score fields inside matches. If the truth has zero objects and the model emits one, F1 is 0.
-5. **Presence and content are different failures.** Missing `policy_details` is not the same as extracting the wrong policy number.
-6. **Null rules.** A required field that is `None` in the truth is a data gap: skip it. An optional field that is `None` is gradable: the model must emit `null`. Inventing a value is wrong.
-7. **Cost and latency are first-class.** Use p50/p95 for latency. Read USD/doc from Langfuse `trace.total_cost` (cache-aware) instead of a static price table.
-8. **At n=20–50, prove the delta.** A 3-point move can be one document. Use a per-item binary, a paired McNemar test, a Wilson CI, and a replication before you ship.
-9. **Aggregates find the smoke. Traces find the fire.** Open failing items in Langfuse. Every fix in this guide came from a trace.
+Dates parse. Numbers tolerate small drift. Object lists are paired before their fields are scored. A required field that is null in the labels is skipped. An optional null is gradable: inventing a value is wrong.
 
-> The scorer adapts Cleanlab's [`utils.py`](https://github.com/cleanlab/structured-output-benchmark/blob/main/insurance_claims/utils.py) comparison (per-section matching, normalized strings, object pairing) and adds typed date/number matching, object F1, ID-format checks, presence, latency, and cost.
+> The scorer adapts Cleanlab's [`utils.py`](https://github.com/cleanlab/structured-output-benchmark/blob/main/insurance_claims/utils.py) comparison (per-section matching, normalized strings, object pairing) and adds typed date/number matching.
 
+
+Run the evaluator wrapper after this block. Expand only if you want `compare_claim` and object pairing.
 
 <details>
 <summary>Scorer implementation</summary>
@@ -285,8 +317,8 @@ Do not collapse a nested, typed object into one accuracy number. The scorer uses
 
 
 ```python
-import re, math, statistics
-from datetime import datetime
+import re
+from datetime import date, datetime
 from itertools import combinations, permutations
 
 OPTIONAL_LEAVES = {"header": set(), "policy_details": set(),
@@ -302,6 +334,8 @@ ID_REGEX = {"header.claim_id": r"^CLM-\d{6}$", "policy_details.policy_number": r
 OBJECT_ID_REGEX = {"Vehicle": r"^VIN[A-Z0-9]{17}$", "Building": r"^PROP-\d{6}$",
                    "Person": r"^(LIAB|OBJ)-\d{6}$", "Other": r"^(LIAB|OBJ)-\d{6}$"}
 NUMERIC_ABS_TOL, NUMERIC_REL_TOL, OBJECT_MATCH_THRESHOLD = 1.0, 0.01, 0.5
+_EMPTY_SECTION = dict(correct=0, total=0, enum_c=0, enum_t=0, date_c=0, date_t=0,
+                      num_c=0, num_t=0, leaf_results=[])
 
 def norm_str(v):
     s = re.sub(r"[^\w\s]", "", str(v).strip().lower())
@@ -342,23 +376,30 @@ def match_value(path, gt, pred):
 def is_optional(section, field):
     return field in OPTIONAL_LEAVES.get(section, set())
 
-def compare_section(section, gt, pred):
+def compare_section(section, gt, pred, path_prefix=None):
     pred = pred or {}
     correct = total = enum_c = enum_t = date_c = date_t = num_c = num_t = 0
+    leaf_results = []
+    prefix = path_prefix or section
     for field, gt_val in gt.items():
         path = f"{section}.{field}"
+        leaf_path = f"{prefix}.{field}"
         if gt_val is None:
             if not is_optional(section, field):
                 continue                       # required + null => not gradable (data gap)
-            total += 1; correct += int(pred.get(field) is None)
+            ok = pred.get(field) is None
+            total += 1; correct += int(ok)
+            leaf_results.append((leaf_path, bool(ok)))
             continue
         ok = (pred.get(field) is not None) and match_value(path, gt_val, pred.get(field))
         total += 1; correct += int(ok)
+        leaf_results.append((leaf_path, bool(ok)))
         if path in ENUM_FIELDS:   enum_t += 1; enum_c += int(ok)
         elif path in DATE_FIELDS: date_t += 1; date_c += int(ok)
         elif path in NUMERIC_FIELDS: num_t += 1; num_c += int(ok)
     return dict(correct=correct, total=total, enum_c=enum_c, enum_t=enum_t,
-                date_c=date_c, date_t=date_t, num_c=num_c, num_t=num_t)
+                date_c=date_c, date_t=date_t, num_c=num_c, num_t=num_t,
+                leaf_results=leaf_results)
 
 def object_similarity(gt_obj, pred_obj):
     r = compare_section("insured_objects", gt_obj, pred_obj)
@@ -398,21 +439,27 @@ def optimal_pairing(gt_objs, pred_objs):
 def score_objects(gt_objs, pred_objs):
     gt_objs, pred_objs = gt_objs or [], pred_objs or []
     n_gt, n_pred = len(gt_objs), len(pred_objs)
+    leaf_results = [("insured_objects.count", n_gt == n_pred)]
     if n_gt == 0 and n_pred == 0:
-        return dict(precision=1.0, recall=1.0, f1=1.0, tp=0, field_correct=0, field_total=0, count_correct=True)
+        return dict(precision=1.0, recall=1.0, f1=1.0, tp=0, field_correct=0, field_total=0,
+                    count_correct=True, leaf_results=leaf_results)
     pairing = optimal_pairing(gt_objs, pred_objs)
     tp = field_correct = field_total = 0
-    for gi, pj in enumerate(pairing):
+    for gi, gobj in enumerate(gt_objs):
+        pj = pairing[gi] if gi < len(pairing) else None
+        pred_obj = pred_objs[pj] if pj is not None else {}
+        r = compare_section("insured_objects", gobj, pred_obj, path_prefix=f"insured_objects.{gi}")
+        leaf_results.extend(r["leaf_results"])
         if pj is None:
             continue
-        r = compare_section("insured_objects", gt_objs[gi], pred_objs[pj])
         if (r["correct"] / r["total"] if r["total"] else 0.0) >= OBJECT_MATCH_THRESHOLD:
             tp += 1; field_correct += r["correct"]; field_total += r["total"]
     precision = tp / n_pred if n_pred else (1.0 if n_gt == 0 else 0.0)
     recall = tp / n_gt if n_gt else (1.0 if n_pred == 0 else 0.0)
     f1 = (2 * precision * recall / (precision + recall)) if (precision + recall) else 0.0
     return dict(precision=precision, recall=recall, f1=f1, tp=tp,
-                field_correct=field_correct, field_total=field_total, count_correct=(n_gt == n_pred))
+                field_correct=field_correct, field_total=field_total, count_correct=(n_gt == n_pred),
+                leaf_results=leaf_results)
 
 def score_id_formats(pred):
     ok = total = 0
@@ -432,13 +479,18 @@ def score_id_formats(pred):
 
 def compare_claim(pred, gt):
     if pred is None:
-        return dict(valid_json=False)
+        return dict(valid_json=False, leaf_results=[])
     header = compare_section("header", gt.get("header", {}), pred.get("header"))
     incident = compare_section("incident_description", gt.get("incident_description", {}), pred.get("incident_description"))
     gt_policy, pred_policy = gt.get("policy_details"), pred.get("policy_details")
-    policy = compare_section("policy_details", gt_policy, pred_policy) if gt_policy \
-        else dict(correct=0, total=0, enum_c=0, enum_t=0, date_c=0, date_t=0, num_c=0, num_t=0)
+    policy = compare_section("policy_details", gt_policy, pred_policy) if gt_policy else dict(_EMPTY_SECTION)
     objs = score_objects(gt.get("insured_objects"), pred.get("insured_objects"))
+    leaf_results = list(header["leaf_results"]) + list(incident["leaf_results"])
+    if gt_policy:
+        leaf_results.extend(policy["leaf_results"])
+    else:
+        leaf_results.append(("policy_details.present", pred_policy is None))
+    leaf_results.extend(objs["leaf_results"])
     f_correct = header["correct"] + incident["correct"] + policy["correct"] + objs["field_correct"]
     f_total = header["total"] + incident["total"] + policy["total"] + objs["field_total"]
     for gobj in (gt.get("insured_objects") or [])[objs["tp"]:]:
@@ -455,7 +507,7 @@ def compare_claim(pred, gt):
     ids = score_id_formats(pred)
     presence = [bool(gt_policy) == bool(pred_policy), bool(gt.get("insured_objects")) == bool(pred.get("insured_objects"))]
     ratio = lambda c, t: (c / t) if t else None
-    return dict(valid_json=True,
+    return dict(valid_json=True, leaf_results=leaf_results,
         field_accuracy_overall=ratio(f_correct, f_total), header_accuracy=ratio(header["correct"], header["total"]),
         policy_accuracy=ratio(policy["correct"], policy["total"]), incident_accuracy=ratio(incident["correct"], incident["total"]),
         enum_accuracy=ratio(enum_c, enum_t), date_accuracy=ratio(date_c, date_t),
@@ -473,34 +525,26 @@ def compare_claim(pred, gt):
 ```python
 from langfuse import Evaluation
 
-_NUMERIC_METRICS = ["field_accuracy_overall", "header_accuracy", "policy_accuracy", "incident_accuracy",
-                    "enum_accuracy", "date_accuracy", "numeric_accuracy", "id_format_ok",
-                    "objects_precision", "objects_recall", "objects_f1", "object_field_accuracy",
-                    "section_presence_correct"]
-
-def extraction_evaluator(*, input, output, expected_output, metadata=None, **kwargs):
+def extraction_evaluator(*, output, expected_output, **kwargs):
     if not isinstance(output, dict):
         return [Evaluation(name="valid_json", value=False, data_type="BOOLEAN")]
-    b = compare_claim(output.get("prediction"), expected_output)
-    evals = [Evaluation(name="valid_json", value=bool(b.get("valid_json")), data_type="BOOLEAN")]
-    if not b.get("valid_json"):
-        evals.append(Evaluation(name="field_accuracy_overall", value=0.0, data_type="NUMERIC"))
-    else:
-        for m in _NUMERIC_METRICS:
-            if b.get(m) is not None:
-                evals.append(Evaluation(name=m, value=float(b[m]), data_type="NUMERIC"))
-        evals.append(Evaluation(name="objects_count_correct", value=bool(b["objects_count_correct"]), data_type="BOOLEAN"))
-    if output.get("latency_ms") is not None:   # cost is NOT scored — Langfuse tracks it natively
-        evals.append(Evaluation(name="latency_ms", value=float(output["latency_ms"]), data_type="NUMERIC"))
-    return evals
 
-def wilson_ci(k, n, z=1.96):
-    if n == 0:
-        return (0.0, 0.0, 0.0)
-    p = k / n; denom = 1 + z*z/n
-    center = (p + z*z/(2*n)) / denom
-    half = (z * math.sqrt(p*(1-p)/n + z*z/(4*n*n))) / denom
-    return (p, max(0.0, center - half), min(1.0, center + half))
+    breakdown = compare_claim(output.get("prediction"), expected_output)
+    evals = [Evaluation(name="valid_json", value=bool(breakdown.get("valid_json")), data_type="BOOLEAN")]
+
+    for path, ok in breakdown.get("leaf_results") or []:
+        evals.append(Evaluation(name=f"field.{path}", value=bool(ok), data_type="BOOLEAN"))
+
+    if breakdown.get("valid_json"):
+        overall = breakdown.get("field_accuracy_overall")
+        evals.append(Evaluation(
+            name="field_accuracy_overall",
+            value=float(overall) if overall is not None else 0.0,
+            data_type="NUMERIC",
+        ))
+        if breakdown.get("objects_f1") is not None:
+            evals.append(Evaluation(name="objects_f1", value=float(breakdown["objects_f1"]), data_type="NUMERIC"))
+    return evals
 
 def run_aggregates(*, item_results, **kwargs):
     from collections import defaultdict
@@ -511,26 +555,21 @@ def run_aggregates(*, item_results, **kwargs):
             value = ev.get("value") if isinstance(ev, dict) else getattr(ev, "value", None)
             if name is not None and isinstance(value, (int, float, bool)):
                 vals[name].append(float(value))
-    out = []
-    for name, xs in vals.items():
-        if not xs or name == "latency_ms":          # latency -> p50, not mean
-            continue
-        out.append(Evaluation(name=f"mean_{name}", value=sum(xs)/len(xs), data_type="NUMERIC"))
-    if vals.get("latency_ms"):
-        out.append(Evaluation(name="p50_latency_ms", value=statistics.median(vals["latency_ms"]), data_type="NUMERIC"))
-    if "valid_json" in vals:
-        p, lo, hi = wilson_ci(int(sum(vals["valid_json"])), len(vals["valid_json"]))
-        out.append(Evaluation(name="valid_json_ci95", value=p, data_type="NUMERIC",
-                              comment=f"Wilson 95% CI [{lo:.3f}, {hi:.3f}] (n={len(vals['valid_json'])})"))
-    return out
+    return [Evaluation(name=f"mean_{name}", value=sum(xs) / len(xs), data_type="NUMERIC")
+            for name, xs in vals.items() if xs]
+
 ```
 
-## 5. Experiment harness
+Each experiment item in Langfuse gets those `field.*` scores. Sort failing items by a field path, not by overall accuracy.
 
-`run_round(...)` runs one variant with `dataset.run_experiment`, attaches the evaluators, and adds a row to a comparison table.
 
-- **Cost** comes from each trace's `total_cost` in Langfuse, not a price table. `native_cost_mean` retries briefly because cost is computed at ingestion.
-- **Prompts** live in Langfuse as `extraction-system`. Each run links to the prompt version it used. We seed v1 (terse) first.
+## 5. Run experiments from the dataset
+
+`run_round` calls `dataset.run_experiment` and appends a row: overall field accuracy, `object_id`, `policyholder_name`, and `objects_F1`. If an experiment with that name already exists, it reuses the scores and does not call the model again. Pass `force=True` only when you intend a new run.
+
+After a kernel restart, re-run setup through this section (schemas, scorer, harness). Then `dataset = langfuse.get_dataset("insurance-claims")`. Skip the CSV and upload cells. Skip any `run_round` you already have in Langfuse, or re-run it and let it reuse.
+
+Prompts live in Langfuse as `extraction-system`. The next cell seeds v1.
 
 
 
@@ -559,237 +598,202 @@ def seed_prompt(version, text, labels, commit_message):
 
 # Seed v1 (terse baseline). Later we'll add v2/v3 when the results tell us to.
 seed_prompt(1, TERSE_V1, ["baseline"], "v1: terse baseline")
+
 ```
 
 
 ```python
-# Message builder — used by every round (few-shot example is added later, when its round comes).
-def build_messages(system_text, claim_text, few_shot):
-    msgs = [{"role": "system", "content": system_text}]
-    if few_shot:
-        msgs += [{"role": "user", "content": FEW_SHOT_USER}, {"role": "assistant", "content": FEW_SHOT_ASSISTANT}]
-    msgs.append({"role": "user", "content": claim_text})
-    return msgs
-```
+def build_messages(system_text, claim_text):
+    return [{"role": "system", "content": system_text},
+            {"role": "user", "content": claim_text}]
 
-
-```python
-# The task: one extraction. Single-pass by default; the decomposition idea splits it
-# into one call per section. Either way it returns the dict our evaluator reads.
 def extract(cfg, claim_text, name):
     system_text = TERSE_V1 if cfg["prompt_version"] is None else get_system_prompt(cfg["prompt_version"]).compile()
     prompt_obj = None if cfg["prompt_version"] is None else get_system_prompt(cfg["prompt_version"])
-    if not cfg["decompose"]:
-        t0 = time.perf_counter()
-        c = openai.chat.completions.parse(model=cfg["model"],
-            messages=build_messages(system_text, claim_text, cfg["few_shot"]),
-            response_format=SCHEMAS[cfg["schema"]], name=name, langfuse_prompt=prompt_obj, temperature=0)
-        parsed = c.choices[0].message.parsed
-        return {"prediction": parsed.model_dump(mode="json") if parsed else None,
-                "valid_json": parsed is not None, "latency_ms": (time.perf_counter()-t0)*1000,
-                "model": cfg["model"], "n_calls": 1}
-    sections = [("header", ClaimHeader), ("incident_description", IncidentDescription),
-                ("policy", _PolicyWrapper), ("objects", _ObjectsWrapper)]
-    parts, valid, t0 = {}, True, time.perf_counter()
-    for sec, cls in sections:
-        c = openai.chat.completions.parse(model=cfg["model"],
-            messages=build_messages(system_text, claim_text, False),
-            response_format=cls, name=f"{name}:{sec}", langfuse_prompt=prompt_obj, temperature=0)
-        p = c.choices[0].message.parsed
-        valid = valid and p is not None
-        parts[sec] = p.model_dump(mode="json") if p else None
-    pred = None
-    if valid:
-        pred = {"header": parts["header"], "policy_details": (parts["policy"] or {}).get("policy_details"),
-                "insured_objects": (parts["objects"] or {}).get("insured_objects"),
-                "incident_description": parts["incident_description"]}
-    return {"prediction": pred, "valid_json": valid, "latency_ms": (time.perf_counter()-t0)*1000,
-            "model": cfg["model"], "n_calls": len(sections)}
+    t0 = time.perf_counter()
+    c = openai.chat.completions.parse(
+        model=cfg["model"],
+        messages=build_messages(system_text, claim_text),
+        response_format=SCHEMAS[cfg["schema"]],
+        name=name, langfuse_prompt=prompt_obj, temperature=0)
+    parsed = c.choices[0].message.parsed
+    return {"prediction": parsed.model_dump(mode="json") if parsed else None,
+            "valid_json": parsed is not None, "latency_ms": (time.perf_counter() - t0) * 1000,
+            "model": cfg["model"]}
+
 ```
-
-<details>
-<summary>Aggregation helpers</summary>
-
 
 
 ```python
-# Aggregation helpers for the growing comparison table (native cost from Langfuse).
+import pandas as pd
+from datetime import datetime, timezone
+
 def ev_dict(evs):
     return {getattr(e, "name", None): getattr(e, "value", None) for e in (evs or [])}
 
-def native_cost_mean(item_results, wait=3.0, rounds=2):
-    """Mean per-doc USD from Langfuse's native trace.total_cost (cache-aware).
-    Cost is computed at ingestion, so we re-poll only the traces still missing it.
-    Worst case ~6s; never blocks the metrics table."""
-    langfuse.flush()
-    pending = {ir.trace_id: None for ir in item_results if getattr(ir, "trace_id", None)}
-    for r in range(rounds + 1):
-        for tid in [t for t, c in pending.items() if c is None]:
-            try:
-                pending[tid] = langfuse.api.trace.get(tid).total_cost
-            except Exception:
-                pass
-        if all(c is not None for c in pending.values()):
-            break
-        if r < rounds:
-            time.sleep(wait)
-    costs = [c for c in pending.values() if c is not None]
-    return sum(costs) / len(costs) if costs else float("nan")
+def _mean(rows, name):
+    xs = [float(r[name]) for r in rows if isinstance(r.get(name), (int, float, bool))]
+    return sum(xs) / len(xs) if xs else None
 
-```
+def _mean_field_suffix(rows, suffix):
+    xs = []
+    for r in rows:
+        for name, value in r.items():
+            if not (isinstance(name, str) and name.startswith("field.")):
+                continue
+            path = name[len("field."):]
+            if path == suffix or path.endswith("." + suffix):
+                if isinstance(value, (int, float, bool)):
+                    xs.append(float(value))
+    return sum(xs) / len(xs) if xs else None
 
-</details>
+def worst_fields(run, top=10):
+    if run is None or not getattr(run, "item_results", None):
+        print("No local item results for this variant. Sort the experiment by a field in Langfuse.")
+        return
+    from collections import defaultdict
+    hits = defaultdict(lambda: [0, 0])
+    for ir in run.item_results:
+        for ev in (getattr(ir, "evaluations", None) or []):
+            name = ev.get("name") if isinstance(ev, dict) else getattr(ev, "name", None)
+            value = ev.get("value") if isinstance(ev, dict) else getattr(ev, "value", None)
+            if name and name.startswith("field.") and isinstance(value, (int, float, bool)):
+                hits[name][1] += 1
+                hits[name][0] += int(bool(value))
+    ranked = sorted(hits.items(), key=lambda kv: (kv[1][0] / kv[1][1] if kv[1][1] else 1.0, kv[0]))
+    print("lowest field accuracies:")
+    for name, (ok, n) in ranked[:top]:
+        print(f"  {name}: {ok}/{n} ({ok / n:.2f})")
 
+def find_experiment(name):
+    exps = langfuse.api.experiments.list(
+        from_start_time=datetime(2020, 1, 1, tzinfo=timezone.utc),
+        limit=50, fields="core,scores", score_limit=100)
+    matches = [e for e in (exps.data or []) if e.name == name or e.name.startswith(name + " - ")]
+    matches.sort(key=lambda e: e.name, reverse=True)
+    return matches[0] if matches else None
 
+def _summary_from_experiment(exp):
+    scores = {s.name: s.value for s in (exp.scores or [])}
 
-```python
-HEADLINE = [("valid_json", "valid_json%"), ("field_accuracy_overall", "field_acc"),
-            ("objects_f1", "objects_F1"), ("id_format_ok", "id_format%"),
-            ("date_accuracy", "date_acc"), ("enum_accuracy", "enum_acc")]
+    def g(*keys):
+        for k in keys:
+            v = scores.get(k)
+            if isinstance(v, (int, float, bool)):
+                return round(float(v), 3)
+        return None
 
-results, summaries = {}, []   # accumulate across rounds
+    return {
+        "variant": exp.name.split(" - ")[0],
+        "valid_json%": g("mean_valid_json"),
+        "field_acc": g("mean_field_accuracy_overall"),
+        "object_id": g("mean_field.insured_objects.0.object_id"),
+        "policyholder": g("mean_field.policy_details.policyholder_name"),
+        "objects_F1": g("mean_objects_f1"),
+    }
 
-def run_round(name, *, model="gpt-4o-mini", schema="descriptive", prompt_version=None,
-              few_shot=False, decompose=False, sample=None):
-    cfg = dict(model=model, schema=schema, prompt_version=prompt_version, few_shot=few_shot, decompose=decompose)
+def _append_summary(s):
+    if any(row.get("variant") == s["variant"] for row in summaries):
+        return
+    summaries.append(s)
+
+results, summaries = {}, []
+
+def run_round(name, *, model="gpt-4o-mini", schema="descriptive", prompt_version=None, force=False):
+    if name in results and not force:
+        print(f"already in this session: {name}")
+        return comparison_table()
+    existing = None if force else find_experiment(name)
+    if existing:
+        print(f"reusing {existing.name} (pass force=True to rerun)")
+        results[name] = None
+        _append_summary(_summary_from_experiment(existing))
+        return comparison_table()
+    cfg = dict(model=model, schema=schema, prompt_version=prompt_version)
     def task(*, item, **kwargs):
-        text = item.input if hasattr(item, "input") else item["input"]
-        return extract(cfg, text, name)
-    data = None
-    if sample:
-        sub = dataset_items[:sample]
-        data = [{"input": it.input, "expected_output": it.expected_output, "metadata": it.metadata} for it in sub]
-    kw = dict(name=name, task=task, evaluators=[extraction_evaluator],
-              run_evaluators=[run_aggregates], max_concurrency=8)
-    res = langfuse.run_experiment(data=data, **kw) if data else dataset.run_experiment(**kw)
+        return extract(cfg, item.input, name)
+    res = dataset.run_experiment(
+        name=name, task=task, evaluators=[extraction_evaluator],
+        run_evaluators=[run_aggregates], max_concurrency=8)
     langfuse.flush()
     results[name] = res
     rows = [ev_dict(ir.evaluations) for ir in res.item_results]
-    outs = [ir.output if isinstance(ir.output, dict) else {} for ir in res.item_results]
-    mean = lambda m: (sum(float(r[m]) for r in rows if isinstance(r.get(m), (int, float, bool)))
-                      / max(1, sum(isinstance(r.get(m), (int, float, bool)) for r in rows)))
-    lat = [o["latency_ms"] for o in outs if o.get("latency_ms") is not None]
-    s = {"variant": name}
-    for m, lbl in HEADLINE:
-        s[lbl] = round(mean(m), 3)
-    s["p50_lat_ms"] = round(statistics.median(lat)) if lat else None
-    s["usd/1k"] = round(native_cost_mean(res.item_results) * 1000, 3)
-    s["_id_perfect"] = [1 if r.get("id_format_ok") == 1.0 else 0 for r in rows]
-    s["_keys"] = [getattr(ir.item, "id", None) or getattr(ir.item, "input", None) for ir in res.item_results]
-    summaries.append(s)
+    _append_summary({
+        "variant": name,
+        "valid_json%": None if _mean(rows, "valid_json") is None else round(_mean(rows, "valid_json"), 3),
+        "field_acc": None if _mean(rows, "field_accuracy_overall") is None else round(_mean(rows, "field_accuracy_overall"), 3),
+        "object_id": None if _mean_field_suffix(rows, "object_id") is None else round(_mean_field_suffix(rows, "object_id"), 3),
+        "policyholder": None if _mean_field_suffix(rows, "policyholder_name") is None else round(_mean_field_suffix(rows, "policyholder_name"), 3),
+        "objects_F1": None if _mean(rows, "objects_f1") is None else round(_mean(rows, "objects_f1"), 3),
+    })
     return comparison_table()
 
 def comparison_table():
-    cols = ["variant"] + [lbl for _, lbl in HEADLINE] + ["p50_lat_ms", "usd/1k"]
+    cols = ["variant", "valid_json%", "field_acc", "object_id", "policyholder", "objects_F1"]
     return pd.DataFrame([{k: s[k] for k in cols} for s in summaries])
 
-SAMPLE = None   # set to a small int to dry-run on fewer items while developing
 ```
 
-## 6. Round 1: baseline
+You should see `created prompt v1` or `prompt v1 already exists`. Open Prompts in Langfuse if you want to read the terse baseline.
 
-Bare schema, terse prompt v1, `gpt-4o-mini`. This is the floor.
+
+## 6. Baseline: bare schema, terse prompt
+
+Run `gpt-4o-mini` with the bare schema and prompt v1. After it finishes, read the table and `worst_fields`. `field_acc` will look high. The field list is the point.
 
 
 
 ```python
-run_round("V1_baseline", model="gpt-4o-mini", schema="bare", prompt_version=1, sample=SAMPLE)
+run_round("V1_baseline", model="gpt-4o-mini", schema="bare", prompt_version=1)
+
 ```
 
-Read `field_acc` (~0.9) as a pool of every leaf, not as "almost done."
 
-The main miss is `id_format%`, almost entirely `object_id`. Open the traces: the model numbers objects `"1"`, `"2"`, and so on. The bare schema gives a type but no format, and the text rarely has an id, so the model invents the obvious default. It also invents objects on claims that have none (`objects_F1 = 0`) and mangles a few non-ISO dates.
+```python
+worst_fields(results["V1_baseline"])
 
-The next cheaper lever is the schema descriptions.
+```
+
+Open the experiment in Langfuse and sort a failing item by a low field, not by overall.
+
+`worst_fields` usually ranks `make_model` first, then dates and `object_id`. On this dataset the `object_id` misses are often dropped prefixes (`PROP-656048` becomes `656048`), not invented `1` / `2`. The next cell only changes the schema, which can teach those prefixes. `make_model` may move as a side effect. That is not the lever you are testing.
+
+At n=30, a 3-point move can be one document. Use the field list, not the pool, to pick the next change.
 
 
-## 7. Round 2: schema descriptions
+## 7. Add schema descriptions
 
-Same terse prompt and `gpt-4o-mini`. Only the schema changes (bare to descriptive).
+Same prompt, same model. Only the schema changes (bare to descriptive). Watch `object_id`.
 
 
 
 ```python
-run_round("V2_schema_spec", model="gpt-4o-mini", schema="descriptive", prompt_version=1, sample=SAMPLE)
+run_round("V2_schema_spec", model="gpt-4o-mini", schema="descriptive", prompt_version=1)
+
 ```
-
-![Compare runs view in Langfuse: V1 baseline vs V2 schema-spec side by side](/images/cookbook/example-structured-output-extraction/compare-runs-v1-v2.png)
-
-
-### Is the difference real at n=30?
-
-A few points can be one document. Before treating V2 as a win, we score a per-claim binary: did every ID in this claim have a valid format? Then we run a paired McNemar test (only claims where the variants disagree) plus a Wilson CI. We reuse this after later rounds.
-
-
-<details>
-<summary>Significance-test helpers</summary>
-
 
 
 ```python
-def mcnemar_exact(a, b):
-    bb = sum(1 for x, y in zip(a, b) if x == 0 and y == 1)
-    cc = sum(1 for x, y in zip(a, b) if x == 1 and y == 0)
-    n = bb + cc
-    if n == 0:
-        return {"b": bb, "c": cc, "p_value": 1.0}
-    k = min(bb, cc)
-    return {"b": bb, "c": cc, "p_value": min(1.0, 2*sum(math.comb(n, i) for i in range(k+1))*(0.5**n))}
-
-def align(a_name, b_name):
-    A = next(s for s in summaries if s["variant"] == a_name)
-    B = next(s for s in summaries if s["variant"] == b_name)
-    ad, bd = dict(zip(A["_keys"], A["_id_perfect"])), dict(zip(B["_keys"], B["_id_perfect"]))
-    common = [k for k in ad if k in bd]
-    return [ad[k] for k in common], [bd[k] for k in common]
-
-def compare_id_format(a_name, b_name):
-    a, b = align(a_name, b_name); mc = mcnemar_exact(a, b)
-    _, lo, hi = wilson_ci(sum(b), len(b))
-    print(f"{a_name} -> {b_name}: id-perfect {sum(a)/len(a):.2f} -> {sum(b)/len(b):.2f} "
-          f"[Wilson {lo:.2f},{hi:.2f}]  discordant b={mc['b']} c={mc['c']}  p={mc['p_value']:.4f}"
-          + ("  ** significant" if mc['p_value'] < 0.05 else f"  (not significant, n={len(b)})"))
+worst_fields(results["V2_schema_spec"])
 
 ```
 
-</details>
+Compare the new `object_id` column to V1. Then open [Compare](https://cloud.langfuse.com/project/~/datasets) for the two runs: select both experiments on the dataset's Experiments tab and click **Compare**. Each row is a claim; each run gets a column with its output and the per-field scores next to it.
+
+![V1 and V2 side by side in the Langfuse compare view, with per-field boolean scores for each item](/images/cookbook/example-structured-output-extraction/compare-v1-v2.png)
 
 
+In your table, check whether `object_id` improved. Separate two cases in the traces: a real ID that gained a prefix, and a well-formatted ID invented because the schema requires `object_id` while 11 labels are null.
 
-```python
-compare_id_format("V1_baseline", "V2_schema_spec")
-```
-
-**Finding.** Descriptions move `id_format%` a lot, and the wins are one-sided: about 10–12 claims go wrong to right and about 0 the other way. That is a real effect.
-
-Do not take the full jump at face value. Part of the gain is well-formatted IDs the model was forced to invent. `enum_acc` is flat, the same claims still hallucinate objects, and the richer schema costs a little more. A description can teach a format. It cannot teach a judgment, or invent a value that is not in the text.
+Open one of each if you can. The later schema fix is to make `object_id` optional.
 
 
-![Experiment item in Langfuse where the model was forced to invent an object_id](/images/cookbook/example-structured-output-extraction/forced-object-id-trace.png)
+If an item has a null label and a `VIN`/`PROP` id in the output, that is the schema forcing a value, not a correct extraction.
 
 
-### What `id_format%` is actually scoring
+## 8. Add prompt rules
 
-The schema (taken from the Cleanlab benchmark) makes `object_id` a required string. Of the 27 ground-truth objects across 30 claims, 11 have `object_id = null`. The model cannot be correct on those: the schema forbids `null`, so it has to invent an ID.
-
-What that does to the scores:
-
-- **Accuracy and F1 stay honest.** The scorer skips a required-but-null field as not gradable. An invented `object_id` does not count against `field_acc`, `object_field_accuracy`, or `objects_F1`.
-- **`id_format%` does not.** It regex-checks every emitted ID. Split the 27 objects by whether a real ID exists:
-
-| object_id with valid format | real GT id (16) | null GT id, forced (11) |
-|---|---|---|
-| **V1 (bare schema)** | 11 / 16 | 0 / 11 |
-| **V2 (descriptive schema)** | 15 / 16 | 6 / 11 |
-
-Valid formats went 11 to 21. Of that gain of 10: +4 is real (true IDs getting a `VIN`/`PROP` prefix, for example claim-017), and +6 is the model going from `"1"` to a well-formatted `PROP-000001` for an ID that should not exist. Six of the ten object-id gains are formatting hallucinations. The V1 to V2 `id_format%` jump is real, but inflated.
-
-The schema fix is to make `object_id` `Optional[str] = None` so the model can return `null`. The broader point: evals score the model, and they also surface bugs in the schema and the metric. Reading the table without the traces would have shipped the wrong conclusion.
-
-
-## 8. Round 3: prompt rules
-
-Add an explicit instruction set as prompt v2 (`rules`). Same descriptive schema. The only change versus V2 is the prompt.
+Same descriptive schema. The only change is prompt v2. Watch `objects_F1` and `policyholder`.
 
 
 
@@ -807,35 +811,36 @@ Extract the insurance claim into the structured schema. Follow these rules:
 
 
 seed_prompt(2, RULES_V2, ["production"], "v2: explicit rules")
+
 ```
 
 
 ```python
-run_round("V3_prompt_rules", model="gpt-4o-mini", schema="descriptive", prompt_version=2, sample=SAMPLE)
+run_round("V3_prompt_rules", model="gpt-4o-mini", schema="descriptive", prompt_version=2)
+
 ```
 
 
 ```python
-compare_id_format("V2_schema_spec", "V3_prompt_rules")
+worst_fields(results["V3_prompt_rules"])
+
 ```
 
-**Finding.** Rules barely beat V2 on IDs, and the ID test is not significant. Schema descriptions already did that work. The cumulative gain versus V1 is still large.
-
-The real move is object judgment: `objects_F1` jumps and several phantom-object claims drop. "Do not invent objects" is a decision a description cannot encode.
-
-Watch `policy_acc`. It can drop because "don't invent / extract verbatim" gets applied to a field that is present. The model writes a placeholder such as `policyholder_name = "/null"` for a name it extracted correctly in V2. That is a regression to fix, not a ranking detail.
+Watch `objects_F1` if "do not invent objects" landed. Then check `policyholder`. A verbatim / don't-invent rule can replace a present name with `/null`. That is the regression pooled `field_acc` will hide.
 
 
-![V2 trace in Langfuse: policyholder_name extracted correctly](/images/cookbook/example-structured-output-extraction/policyholder-name-v2.png)
+In Langfuse, open the same claim on V2 and V3 and compare `field.policy_details.policyholder_name`.
 
 
-![V3 trace in Langfuse: the same claim now returns a '/null' placeholder for policyholder_name](/images/cookbook/example-structured-output-extraction/policyholder-name-v3-regression.png)
+If V3 shows `/null` or a truncated name where V2 had the full name, you caught it because you scored the field, not the pool.
 
 
-## 9. Audit what V3 broke
+## 9. Inspect the V3 failures
 
-Check three things the scores pointed at: `location_type` enum confusion, remaining `object_id` format misses, and the `policyholder_name` placeholders.
+`drill_into` prints `location_type` confusions, remaining bad `object_id`s, and placeholder names. Use that list to write the next prompt version.
 
+
+The next cell lists enum confusions, bad `object_id`s, and placeholder names. Expand for the helper.
 
 <details>
 <summary>Drill-down audit</summary>
@@ -849,7 +854,7 @@ def enum_confusion(run, field_path):
     section, field = field_path.split(".", 1)
     conf = Counter()
     for ir in run.item_results:
-        gt = ir.item.expected_output if hasattr(ir.item, "expected_output") else ir.item.get("expected_output")
+        gt = ir.item.expected_output
         pred = ir.output.get("prediction") if isinstance(ir.output, dict) else None
         g = (gt.get(section) or {}).get(field) if gt else None
         p = (pred.get(section) or {}).get(field) if pred else None
@@ -885,11 +890,15 @@ def drill_into(run, label):
 
 ```python
 drill_into(results["V3_prompt_rules"], "V3")
+
 ```
 
-## 10. Prompt v3: fix the regression
+If you see placeholder names, that is the V3 regression. The next cell is a new prompt version, not an edit of v2.
 
-Append two rules: copy `policyholder_name` exactly, and only emit an insured object that is actually described. Save as `extraction-system` v3 and rerun. Prompt versions are immutable. A change is a new version, and the run links to it.
+
+## 10. New prompt version, same dataset
+
+Prompt versions are immutable. Add two rules: copy `policyholder_name` exactly, and only emit objects that are actually described. Save as v3 and rerun.
 
 
 
@@ -903,128 +912,46 @@ RULES_V3 = RULES_V2 + """
 
 
 seed_prompt(3, RULES_V3, ["candidate"], "v3: copy name verbatim; stop re-inventing objects")
+
 ```
 
 
 ```python
-run_round("V3_fixed", model="gpt-4o-mini", schema="descriptive", prompt_version=3, sample=SAMPLE)
+run_round("V3_fixed", model="gpt-4o-mini", schema="descriptive", prompt_version=3)
+
 ```
 
 
 ```python
-compare_id_format("V3_prompt_rules", "V3_fixed")
+worst_fields(results["V3_fixed"])
+
 ```
 
-![The extraction-system prompt with versions v1-v3 in Langfuse Prompt Management](/images/cookbook/example-structured-output-extraction/prompt-versions.png)
+The run should link to `extraction-system` v3 in [Prompt Management](https://cloud.langfuse.com/project/~/prompts). All three versions stay in the history, so every experiment stays attributable to the exact prompt text it ran with.
+
+![The extraction-system prompt in Langfuse with three versions; v3 adds the verbatim-name and no-invented-objects rules](/images/cookbook/example-structured-output-extraction/prompt-versions.png)
 
 
-**Finding.** The placeholder names come back as full names and `policy_acc` goes up. That is the metric this change targeted.
+Read `policyholder`, not the headline `field_acc`. The field you fixed is the one that matters.
 
-Headline numbers barely move, and `id_format%` / `field_acc` can wobble down run to run. The ID test above is a guardrail, not the proof. Read `policy_acc`.
+To verify the fix in Langfuse, compare V3 and V3_fixed and filter **Scores (boolean)** to `field.policy_details.policyholder_name = false` on the V3 baseline. Only the regressed claims remain, and the V3_fixed column shows the restored names next to them.
 
+![Compare view filtered to items where V3 got policyholder_name wrong, with V3_fixed side by side](/images/cookbook/example-structured-output-extraction/compare-v3-regression.png)
 
-## 11. Round 4: few-shot, then replicate
+The dataset's Experiments tab now shows the whole arc in one table: four runs with cost, latency, and mean field accuracy. Note that V3_fixed's headline mean (0.93) is *below* V3's (0.95) even though the field you targeted recovered — single-number readers would call the fix a regression. That is the whole argument for per-field scores.
 
-Add one worked example to the v2 rules prompt. Then run the same example on v3. The second run is the replication check.
-
-
-
-```python
-FEW_SHOT_USER = """\
-[Phone call logged 2024-01-15]
-Caller Tom Reyes reports a rear-end collision on the highway on 2024-01-14. Policy POL-100200300
-(Auto, holder Tom Reyes), effective 2023-06-01 through 2024-06-01. Vehicle involved:
-VIN1HGCM82633A004352, a 2019 Honda Accord, value about $18,000. Estimated damage $4,200.
-Police report PR-2024-0114-77. Claim id CLM-553311."""
-FEW_SHOT_ASSISTANT = """\
-{"header": {"claim_id": "CLM-553311", "report_date": "2024-01-15", "incident_date": "2024-01-14",
-"reported_by": "Tom Reyes", "channel": "Phone"},
-"policy_details": {"policy_number": "POL-100200300", "policyholder_name": "Tom Reyes",
-"coverage_type": "Auto", "effective_date": "2023-06-01", "expiration_date": "2024-06-01"},
-"insured_objects": [{"object_id": "VIN1HGCM82633A004352", "object_type": "Vehicle",
-"make_model": "Honda Accord", "year": 2019, "location_address": null, "estimated_value": 18000}],
-"incident_description": {"incident_type": "rear_end_collision", "location_type": "highway",
-"estimated_damage_amount": 4200, "police_report_number": "PR-2024-0114-77"}}"""
-```
+![Four experiment runs on the insurance-claims dataset with mean field accuracy per run](/images/cookbook/example-structured-output-extraction/experiment-runs.png)
 
 
-```python
-run_round("V4_few_shot",       model="gpt-4o-mini", schema="descriptive", prompt_version=2, few_shot=True, sample=SAMPLE)
-run_round("V4b_fewshot_on_fix", model="gpt-4o-mini", schema="descriptive", prompt_version=3, few_shot=True, sample=SAMPLE)
-comparison_table()
-```
+## 11. Grow the set, freeze a holdout, run in CI
 
-**Finding.** One few-shot run can look like a breakthrough if `objects_F1` jumps. Replicate on the other prompt. If the same claims flip, it is n=30 noise, not an effect of the example.
+n=30 is enough to learn the loop, not enough to ship on. Once you have a real labeled set:
 
-The reproducible effect to watch is a regression: `date_acc` can drop on both prompts, and each call costs more.
+1. Add production traces as dataset items, and [synthetic items](https://langfuse.com/guides/cookbook/example_synthetic_datasets) for rare slices.
+2. Freeze a holdout dataset and stop tuning against it.
+3. Put `run_round` in [CI](https://langfuse.com/docs/evaluation/experiments/experiments-ci-cd) so a prompt edit cannot silently regress `field.policy_details.policyholder_name`.
 
+This notebook uses text claims. The same dataset and experiment loop works for [multi-modal items](https://langfuse.com/docs/evaluation/experiments/datasets#multi-modal-dataset-items) when you have those labels.
 
-## 12. Round 5: one call per section
-
-Extract each section with its own sub-schema and stitch the parts. Same v2 rules prompt. Four calls instead of one.
-
-
-
-```python
-class _PolicyWrapper(BaseModel):
-    model_config = _STRICT
-    policy_details: Optional[PolicyDetails] = Field(None, description="Policy info if present, else null")
-class _ObjectsWrapper(BaseModel):
-    model_config = _STRICT
-    insured_objects: Optional[List[InsuredObject]] = Field(None, description="Objects if present, else null")
-```
-
-
-```python
-run_round("V5_decomposition", model="gpt-4o-mini", schema="descriptive", prompt_version=2, decompose=True, sample=SAMPLE)
-```
-
-**Finding.** Quality drops on most axes, at about 2× cost and latency. The isolated object call loses cross-section context and over-emits objects. An experiment can reject a modular design in one run.
-
-
-## 13. Round 6: a larger model
-
-Same v3 prompt. Swap `gpt-4o-mini` for `gpt-4o`.
-
-
-
-```python
-run_round("V6_gpt4o", model="gpt-4o", schema="descriptive", prompt_version=3, sample=SAMPLE)
-comparison_table()
-```
-
-**Finding.** `gpt-4o` is better and often faster, at roughly 17–20× the price. At n=30 the per-metric deltas versus the tuned mini sit in the noise (McNemar not significant). It does separate on the hardest object-boundary claims.
-
-The cheap tuned setup matches `gpt-4o` on almost everything. Pay for the larger model only if those edge cases matter.
-
-
-## 14. Read the runs back (optional)
-
-The Experiments SDK stores every score in Langfuse. This cell lists each run id from the API, which is useful for dashboards or CI.
-
-
-
-```python
-for s in summaries:
-    run = langfuse.api.datasets.get_run(dataset_name=DATASET_NAME, run_name=results[s["variant"]].run_name)
-    # run-level scores live on the dataset run; per-item scores live on each trace
-    print(s["variant"], "→ run id", run.id)
-print("\nOpen Datasets → Compare in the UI for the side-by-side view (quality + cost + latency).")
-```
-
-## What this loop showed
-
-| variant | lever | what happened |
-|---|---|---|
-| V1 baseline | terse prompt, bare schema | floor; `object_id` comes out as `"1"`, `"2"` |
-| V2 schema-spec | field descriptions | ID formats improve; the win is significant and cheap |
-| V3 prompt-rules | explicit rules | better object judgment; `policyholder_name` regresses |
-| V3_fixed | new prompt version | names recover; prove it on `policy_acc` |
-| V4 few-shot (×2) | one example | apparent win does not replicate; extra cost does |
-| V5 decomposition | four calls | worse quality, ~2× cost |
-| V6 gpt-4o | larger model | better on hard objects; most gains within noise at ~20× cost |
-
-Define correctness for a nested object before you optimize. Score in layers: parse gate, typed fields, object F1, presence, cost, latency. At small n, prove the delta with a paired test and a replication. Use traces to decide the next change.
-
-After you pick a variant, grow the dataset from production traces. n=30 cannot separate close calls. Put `run_round` in CI so prompt edits cannot regress silently.
+Cost and latency already live on the experiment run in Langfuse. Read them there.
 
