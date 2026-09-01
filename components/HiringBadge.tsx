@@ -9,6 +9,7 @@ import { HoverCorners } from "@/components/ui/corner-box";
 const FULL_LABEL = "Hiring in Europe and SF";
 const COMPACT_LABEL = "Hiring";
 const HOVER_LABEL = "Looking for GOATS!";
+const COMPACT_HOVER_LABEL = "GOATS!";
 
 export function HiringBadge({
   className,
@@ -96,12 +97,22 @@ export function HiringBadge({
     FULL_LABEL
   );
 
+  const hoverLabel = adaptive ? (
+    <>
+      <span className="hidden @[13rem]/hiring:inline">{HOVER_LABEL}</span>
+      <span className="inline @[13rem]/hiring:hidden">
+        {COMPACT_HOVER_LABEL}
+      </span>
+    </>
+  ) : (
+    HOVER_LABEL
+  );
+
   const badge = (
     <div
       ref={containerRef}
       className={cn(
-        adaptive &&
-          "hidden w-fit max-w-full min-w-0 @[6.5rem]/hiring:block hover:max-w-none",
+        adaptive && "hidden w-fit max-w-full min-w-0 @[6.5rem]/hiring:block",
         !adaptive && className,
       )}
       onMouseMove={handleMouseMove}
@@ -117,8 +128,7 @@ export function HiringBadge({
           href="/careers"
           aria-label={FULL_LABEL}
           className={cn(
-            "inline-flex w-full min-w-0 max-w-full items-center gap-[6px]",
-            "overflow-hidden group-hover:overflow-visible",
+            "inline-flex w-full min-w-0 max-w-full items-center gap-[6px] overflow-hidden",
             "h-[26px] py-0.75 pl-[8px] pr-[8px] rounded-[2px]",
             "border border-line-structure dark:border-line-cta group-hover:border-line-cta",
             "bg-surface-bg text-text-secondary",
@@ -132,7 +142,7 @@ export function HiringBadge({
           </span>
           <span className="text-left">
             <span className="block whitespace-nowrap">
-              {isHovered ? HOVER_LABEL : idleLabel}
+              {isHovered ? hoverLabel : idleLabel}
             </span>
           </span>
         </NextLink>
@@ -147,9 +157,7 @@ export function HiringBadge({
   }
 
   return (
-    <div
-      className={cn("@container/hiring w-full min-w-0 hover:z-10", className)}
-    >
+    <div className={cn("@container/hiring w-full min-w-0", className)}>
       {badge}
     </div>
   );
