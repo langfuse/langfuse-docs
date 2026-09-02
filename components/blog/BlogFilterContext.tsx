@@ -11,15 +11,12 @@ import {
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import type { BlogPageItem } from "./BlogIndex";
 import { computeTagCounts, normalizeTags, type TagWithCount } from "./utils";
-import { DEFAULT_BLOG_VIEW, parseBlogView, type BlogView } from "./blog-view";
 
 type BlogFilterState = {
   selectedTag: string | null;
   searchQuery: string;
   setSelectedTag: (tag: string | null) => void;
   setSearchQuery: (q: string) => void;
-  view: BlogView;
-  setView: (view: BlogView) => void;
   tags: TagWithCount[];
   allPosts: BlogPageItem[];
   filteredPosts: BlogPageItem[];
@@ -39,17 +36,6 @@ export function useBlogFilter() {
 
 const HIGHLIGHT_COUNT = 3;
 
-function replaceQuery(
-  pathname: string,
-  searchParams: URLSearchParams,
-  mutate: (params: URLSearchParams) => void,
-) {
-  const params = new URLSearchParams(searchParams.toString());
-  mutate(params);
-  const query = params.toString();
-  return query ? `${pathname}?${query}` : pathname;
-}
-
 export function BlogFilterProvider({
   pages,
   children,
@@ -62,13 +48,16 @@ export function BlogFilterProvider({
   const pathname = usePathname();
   const [selectedTag, setSelectedTagLocal] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [view, setViewLocal] = useState<BlogView>(DEFAULT_BLOG_VIEW);
 
   useEffect(() => {
     const tag = searchParams.get("tag") ?? null;
     setSelectedTagLocal(tag || null);
-    setViewLocal(parseBlogView(searchParams.get("view")));
-  }, [searchParams]);
+    if (!searchParams.has("view")) return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("view");
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname);
+  }, [searchParams, pathname, router]);
 
   const allPosts = useMemo(() => {
     return pages
@@ -124,22 +113,15 @@ export function BlogFilterProvider({
 
   const setSelectedTag = (tag: string | null) => {
     setSelectedTagLocal(tag);
-    router.replace(
-      replaceQuery(pathname, searchParams, (params) => {
-        if (tag) params.set("tag", tag);
-        else params.delete("tag");
-      }),
-    );
-  };
-
-  const setView = (next: BlogView) => {
-    setViewLocal(next);
-    router.replace(
-      replaceQuery(pathname, searchParams, (params) => {
-        if (next === DEFAULT_BLOG_VIEW) params.delete("view");
-        else params.set("view", next);
-      }),
-    );
+    const params = new URLSearchParams(searchParams.toString());
+    if (tag) {
+      params.set("tag", tag);
+    } else {
+      params.delete("tag");
+    }
+    params.delete("view");
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname);
   };
 
   return (
@@ -149,8 +131,6 @@ export function BlogFilterProvider({
         searchQuery,
         setSelectedTag,
         setSearchQuery,
-        view,
-        setView,
         tags,
         allPosts,
         filteredPosts,

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { BlogViewSwitcher } from "./BlogViewSwitcher";
 import { cn } from "@/lib/utils";
 
 export function BlogIndexBar({
@@ -29,10 +28,6 @@ export function BlogIndexBar({
         >
           Changelog
         </Link>
-        <span className="hidden text-text-disabled sm:inline" aria-hidden>
-          ·
-        </span>
-        <BlogViewSwitcher />
       </div>
     </div>
   );
