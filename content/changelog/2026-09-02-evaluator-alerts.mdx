@@ -1,0 +1,35 @@
+---
+date: 2026-09-02
+title: Create alerts for evaluators
+description: Create score and cost alerts directly from evaluator pages and review every alert linked to an evaluator.
+author: Tobias Wochinger
+ogImage: /images/changelog/2026-09-02-evaluator-alerts.png
+ogVideo: https://static.langfuse.com/changelog-videos/2026-09-02-evaluator-alerts.mp4
+canonical: /docs/observability/features/alerts#evaluator-alerts
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Bell, Book } from "lucide-react";
+
+<ChangelogHeader />
+
+You can now create and manage alerts directly from the evaluator workflow. Langfuse prefills the metric and filters, so you only need to set the threshold and choose how your team should be notified.
+
+- Get notified when an evaluator's average numeric or Boolean score drops below your quality target.
+- Watch categorical score counts for changes in topics, failures, or policy outcomes.
+- Set a cost threshold for one LLM-as-a-Judge evaluator or for all evaluators combined.
+
+<Cards num={2}>
+  <Card
+    title="Evaluator concepts"
+    href="/docs/evaluation/core-concepts#monitor-evaluator-results"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Alerts docs"
+    href="/docs/observability/features/alerts"
+    icon={<Bell />}
+    arrow
+  />
+</Cards>

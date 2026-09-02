@@ -101,9 +101,18 @@ Evaluators define how Langfuse scores data. Rules define which incoming observat
 
 You can reuse an evaluator across rules. For LLM-as-a-Judge, Langfuse validates the evaluator's default variable mapping against observations that match the rule. Override the mapping for a specific evaluator-rule assignment when the data has a different shape.
 
-### Monitoring with dashboards
+### Monitor evaluator results [#monitor-evaluator-results]
 
-Use [custom dashboards](/docs/metrics/features/custom-dashboards) to monitor scores and application performance over time.
+Use [custom dashboards](/docs/metrics/features/custom-dashboards) to track scores and application performance over time. To get notified when an evaluator's score or cost crosses a threshold, open the evaluator and click **Add alert**.
+
+You can create these prefilled alerts:
+
+- **Score threshold:** Numeric and Boolean outputs use the average score over one day by default. Categorical outputs use the score count over one day. For code evaluators, Langfuse uses the first declared numeric, Boolean, or categorical score output. The shortcut is unavailable when the first output is a text score.
+- **Cost threshold:** Available for individual LLM-as-a-Judge evaluators. On the **Evaluators** page, click **Add alert** to create an alert for the combined cost of all evaluators.
+
+Langfuse prefills the metric, evaluator filters, and tags and excludes evaluator test runs. Review the threshold, time window, notifications, and other settings before saving.
+
+The **Add alert** menu also lists alerts connected to the evaluator with their current severity, trigger condition, and last-fired time. It shows up to 20 alerts. Select an alert to open it, or click **See all alerts** to open the alerts table filtered to that evaluator. See the [alerts guide](/docs/observability/features/alerts#alert-setup) for the full setup flow.
 
 ## Batch evaluation [#batch-evaluation]
 
