@@ -70,7 +70,7 @@ For large-scale teams. Enterprise-grade support and security.
 - Custom rate limits
 - Uptime SLA
 - Support SLA
-- Dedicated support engineer
+- Named lead support engineer
 
 Optional **Yearly Commitment**:
 
@@ -148,7 +148,7 @@ Optional **Yearly Commitment**:
 | [Community (GitHub)](/support#community)                                                            | Yes                 | Yes                 | Yes                 | Yes                          |
 | [In-app support](/support#in-app)                                                                   | --                  | Yes                 | Yes                 | Yes                          |
 | [Private Slack channel](/support#slack)                                                             | --                  | --                  | Teams add-on        | Yes                          |
-| [Dedicated support engineer](/support#onboarding)                                                   | --                  | --                  | --                  | Yes                          |
+| [Named lead support engineer](/support#onboarding)                                                  | --                  | --                  | --                  | Yes                          |
 | [Onboarding & architectural guidance](/support#onboarding)                                          | --                  | --                  | --                  | Yes                          |
 | Response time SLO                                                                                   | n/a                 | 48h                 | 48h (Teams: 24h)    | Custom                       |
 | [Support SLA](/enterprise#faq)                                                                      | --                  | --                  | --                  | Yes                          |

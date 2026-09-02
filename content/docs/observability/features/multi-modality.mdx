@@ -167,6 +167,12 @@ Supported formats:
 </Tab>
 </Tabs>
 
+### Use media in LLM-as-a-Judge [#llm-as-a-judge]
+
+[LLM-as-a-Judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge#multi-modal-evaluation) can score media stored in observations. Map a prompt variable to an observation input, output, or metadata field that contains Langfuse media. Langfuse resolves the media reference and sends the attachment to the selected LLM-as-a-Judge model together with the prompt text.
+
+The LLM-as-a-Judge model and provider must support the media type. Self-hosted deployments can [configure how evaluator media is sent to model providers](/self-hosting/configuration#llm-as-a-judge-media).
+
 ### Custom attachments
 
 If you want to have more control or your media is not base64 encoded, you can upload arbitrary media attachments to Langfuse via the SDKs using the new `LangfuseMedia` class. Wrap media with LangfuseMedia before including it in trace inputs, outputs, metadata, or dataset items. See the multi-modal documentation for examples.

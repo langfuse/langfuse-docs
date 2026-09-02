@@ -197,7 +197,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Custom rate limits",
         "Uptime SLA",
         "Support SLA",
-        "Dedicated support engineer",
+        "Named lead support engineer",
       ],
       addOn: {
         name: "Yearly Commitment",
@@ -241,9 +241,9 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       price: "Custom Pricing",
       mainFeatures: [
         "All Open Source features plus management APIs, project-level RBAC, data retention policies, and audit logs",
-        "Bundled with ClickHouse Cloud or ClickHouse BYOC",
+        "Bundled with ClickHouse Cloud, ClickHouse BYOC, or ClickHouse Private",
         "Langfuse pricing is additive to your ClickHouse commercial plan",
-        "Dedicated support engineer for deployment and hosting guidance",
+        "Named lead support engineer for deployment and hosting guidance",
         "Solutions architect support during evaluation and rollout",
         "Direct access to the product team for feedback",
         "SOC 2 Type II and ISO 27001 reports",
@@ -881,11 +881,11 @@ const sections: Section[] = [
       {
         name: "ClickHouse deployment model",
         description:
-          "Open Source assumes you operate ClickHouse yourself. Enterprise is bundled with ClickHouse Cloud or ClickHouse BYOC.",
+          "Open Source assumes you operate ClickHouse yourself. Enterprise is bundled with ClickHouse Cloud, ClickHouse BYOC, or ClickHouse Private.",
         tiers: {
           selfHosted: {
             "Open Source": "Self-managed ClickHouse OSS",
-            Enterprise: "Bundled: ClickHouse Cloud / BYOC",
+            Enterprise: "Bundled: ClickHouse Cloud / BYOC / Private",
           },
         },
       },
@@ -995,7 +995,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Dedicated Support Engineer",
+        name: "Named Lead Support Engineer",
         href: "/support#onboarding",
         description:
           "Includes deployment and hosting guidance for your dedicated Langfuse environment.",

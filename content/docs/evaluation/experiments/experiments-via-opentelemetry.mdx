@@ -1,0 +1,32 @@
+---
+title: Experiments via OpenTelemetry
+description: Group OpenTelemetry traces as Langfuse experiments by attaching experiment and item attributes.
+---
+
+# Experiments via OpenTelemetry
+
+Attach experiment metadata to [OpenTelemetry](/integrations/native/opentelemetry) spans so Langfuse groups those traces as an experiment run.
+
+<Callout type="info">
+  **Using Python or TypeScript?** Use [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk).
+  The Langfuse SDKs set these attributes automatically.
+</Callout>
+
+See the [Experiments data model](/docs/evaluation/experiments/data-model) for how datasets, experiment runs, items, traces, and scores relate.
+
+## Ingest experiment spans [#ingest-experiment-spans]
+
+Set experiment and item attributes on your OTEL spans so Langfuse can synthesize them as one experiment. The attribute list, baggage propagation pattern, and per-item loop live in the OpenTelemetry integration docs:
+
+import { Radio } from "lucide-react";
+
+<Cards num={1}>
+  <Card
+    icon={<Radio size="24" />}
+    title="Ingest experiment spans with OpenTelemetry"
+    href="/integrations/native/opentelemetry/experiments"
+    arrow
+  />
+</Cards>
+
+After traces land, use the [Experiments API](/docs/api-and-data-platform/features/experiments-api) to list runs and fetch items.

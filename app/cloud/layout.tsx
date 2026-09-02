@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Select Cloud Region",
-  description:
-    "Select the Langfuse Cloud region and continue to your destination.",
+  title: "Select a region",
+  description: "Select a Langfuse Cloud region to continue.",
 };
 
 export default function CloudLayout({
