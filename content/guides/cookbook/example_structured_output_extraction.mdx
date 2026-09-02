@@ -1,14 +1,14 @@
 ---
 source: ⚠️ Jupyter Notebook
-title: Evaluate and improve document extraction
-sidebarTitle: Document extraction
-description: Build a labeled dataset, score nested extraction per field, and iterate on a non-agent claims pipeline with Langfuse experiments.
+title: Evaluate and Improve Structured Extraction
+sidebarTitle: Evaluate and Improve Structured Extraction
+description: Evaluate structured extraction with Langfuse. Build a labeled dataset, score document extraction per field, catch LLM output parsing errors, and improve structured generation with experiments.
 category: Evaluation
 ---
 
-# Evaluate and improve document extraction
+# Evaluate and Improve Structured Extraction
 
-Most production extraction is not an agent. An invoice, insurance claim, KYC packet, or bank statement goes in. A nested object comes out. You have labels, you need accuracy per field, and you will run this loop many times. The same eval applies when extraction is a step inside an agent.
+Most production extraction is not an agent. An invoice, insurance claim, KYC packet, or bank statement goes in. A nested object comes out. You have labels, you need accuracy per field, and you will run this loop many times. The same eval applies to any document or content extraction pipeline, including when extraction is a step inside an agent.
 
 This cookbook runs that loop on insurance claims:
 
@@ -23,26 +23,18 @@ This cookbook runs that loop on insurance claims:
 
 ## 1. Setup
 
-Install the dependencies. Then set Langfuse and OpenAI keys in the next cell, or put the same names in a `.env` at the repo root.
+Install the dependencies, then set your Langfuse and OpenAI keys in the next cell.
 
 
 
 ```python
-%pip install -q "langfuse>=4.14" "openai>=3" pydantic pandas python-dotenv
+%pip install -q "langfuse>=4.14" "openai>=3" pydantic pandas
 
 ```
 
 
 ```python
-from pathlib import Path
 import os
-
-try:
-    from dotenv import load_dotenv
-    load_dotenv(Path("..") / ".env")  # repo root when the kernel cwd is cookbook/
-    load_dotenv()
-except ImportError:
-    pass
 
 # Langfuse: project Settings → API Keys → https://cloud.langfuse.com
 os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
@@ -70,7 +62,7 @@ You should see `Langfuse auth OK`. Next you define the schema the model must fil
 
 ## 2. Schema as the extraction contract
 
-The schema is part of the pipeline. Each claim has `header`, optional `policy_details`, optional `insured_objects[]`, and `incident_description`.
+The schema is part of the pipeline. It constrains structured generation through OpenAI structured outputs and defines what the scorer checks. Each claim has `header`, optional `policy_details`, optional `insured_objects[]`, and `incident_description`.
 
 Two variants, same fields, so the first improvement round can change one thing:
 
@@ -212,7 +204,7 @@ You should see four sections. `insured_objects` is a list. That is why the score
 
 ## 3. Upload a labeled dataset
 
-30 synthetic claims from the [Cleanlab structured-output benchmark](https://cleanlab.ai/blog/structured-output-benchmark/). Each item is claim text in `input`, the nested label in `expected_output`, and slices in `metadata` (`has_policy`, `n_objects`). The text is LLM-generated. Treat this as a demo set.
+30 synthetic claims from the [Cleanlab structured-output benchmark](https://cleanlab.ai/blog/structured-output-benchmark/), uploaded as a [Langfuse dataset](https://langfuse.com/docs/evaluation/experiments/datasets). Each item is claim text in `input`, the nested label in `expected_output`, and slices in `metadata` (`has_policy`, `n_objects`). The text is LLM-generated. Treat this as a demo set.
 
 
 
@@ -295,16 +287,16 @@ except Exception:
 
 ```
 
-![Insurance-claims dataset in Langfuse](/images/cookbook/example-structured-output-extraction/dataset-items.png)
+![Insurance-claims dataset in Langfuse](https://langfuse.com/images/cookbook/example-structured-output-extraction/dataset-items.png)
 
-Open [Datasets](https://cloud.langfuse.com/project/~/datasets) and confirm 30 items. Five claims have no policy and no objects. 11 of 27 labeled objects have a null `object_id`. One claim has a null `claim_id`. The labels are not schema-valid. That is the point of the later ID-format scores.
+Open Datasets in Langfuse and confirm 30 items. Five claims have no policy and no objects. 11 of 27 labeled objects have a null `object_id`. One claim has a null `claim_id`. The labels are not schema-valid. That is the point of the later ID-format scores.
 
 
 ## 4. Score every field, then overall
 
-The scorer walks each leaf and emits a boolean per path (`field.header.claim_id`, `field.policy_details.policyholder_name`, ...) plus `field_accuracy_overall`.
+The scorer walks each leaf and emits a boolean per path (`field.header.claim_id`, `field.policy_details.policyholder_name`, ...) plus `field_accuracy_overall`. A separate `valid_json` score catches LLM output parsing failures. A response that does not parse gets no field scores at all.
 
-Dates parse. Numbers tolerate small drift. Object lists are paired before their fields are scored. A required field that is null in the labels is skipped. An optional null is gradable: inventing a value is wrong.
+The comparison is type-aware. Dates match on the parsed value, so `2025-09-23` and `September 23, 2025` are the same answer. Numbers match within a small tolerance (1.0 absolute or 1%). Because `insured_objects` is a list, the scorer first pairs labeled objects with predicted objects by field similarity, then scores fields inside each pair, so ordering differences cost nothing. Nulls are handled two ways. When a required field is null in the labels, that is a labeling gap and the leaf is skipped. When an optional field is null in the labels, the document genuinely omits the value, so the model must also output null, and inventing one counts as wrong.
 
 > The scorer adapts Cleanlab's [`utils.py`](https://github.com/cleanlab/structured-output-benchmark/blob/main/insurance_claims/utils.py) comparison (per-section matching, normalized strings, object pairing) and adds typed date/number matching.
 
@@ -560,16 +552,16 @@ def run_aggregates(*, item_results, **kwargs):
 
 ```
 
-Each experiment item in Langfuse gets those `field.*` scores. Sort failing items by a field path, not by overall accuracy.
+Each experiment item in Langfuse gets those `field.*` scores. Sort failing items by a field path rather than by overall accuracy.
 
 
 ## 5. Run experiments from the dataset
 
-`run_round` calls `dataset.run_experiment` and appends a row: overall field accuracy, `object_id`, `policyholder_name`, and `objects_F1`. If an experiment with that name already exists, it reuses the scores and does not call the model again. Pass `force=True` only when you intend a new run.
+`run_round` calls `dataset.run_experiment` and appends a row to a comparison table: overall field accuracy, `object_id`, `policyholder_name`, and `objects_F1`. If an experiment with that name already exists in Langfuse, it reuses those scores instead of calling the model again. Pass `force=True` when you want a fresh run.
 
-After a kernel restart, re-run setup through this section (schemas, scorer, harness). Then `dataset = langfuse.get_dataset("insurance-claims")`. Skip the CSV and upload cells. Skip any `run_round` you already have in Langfuse, or re-run it and let it reuse.
+This makes the whole notebook safe to re-run. The dataset, prompt versions, and experiments are all created only if they don't already exist, so restarting the kernel or re-executing cells never duplicates anything in Langfuse or spends tokens twice.
 
-Prompts live in Langfuse as `extraction-system`. The next cell seeds v1.
+Prompts live in Langfuse as `extraction-system`. The next cell creates v1.
 
 
 
@@ -754,11 +746,11 @@ worst_fields(results["V1_baseline"])
 
 ```
 
-Open the experiment in Langfuse and sort a failing item by a low field, not by overall.
+Open the experiment in Langfuse and sort failing items by a low-scoring field rather than by the overall score.
 
-`worst_fields` usually ranks `make_model` first, then dates and `object_id`. On this dataset the `object_id` misses are often dropped prefixes (`PROP-656048` becomes `656048`), not invented `1` / `2`. The next cell only changes the schema, which can teach those prefixes. `make_model` may move as a side effect. That is not the lever you are testing.
+`worst_fields` usually ranks `make_model` first, then dates and `object_id` (each field is defined in the schema in section 2). On this dataset the `object_id` misses are often dropped prefixes (`PROP-656048` becomes `656048`) rather than invented `1` / `2`. The next cell only changes the schema, which can teach those prefixes. `make_model` may move as a side effect. That is not the lever you are testing.
 
-At n=30, a 3-point move can be one document. Use the field list, not the pool, to pick the next change.
+At n=30, a 3-point move can be one document. Pick the next change from the field list instead of the pooled average.
 
 
 ## 7. Add schema descriptions
@@ -778,17 +770,17 @@ worst_fields(results["V2_schema_spec"])
 
 ```
 
-Compare the new `object_id` column to V1. Then open [Compare](https://cloud.langfuse.com/project/~/datasets) for the two runs: select both experiments on the dataset's Experiments tab and click **Compare**. Each row is a claim; each run gets a column with its output and the per-field scores next to it.
+Compare the new `object_id` column to V1. Then open Compare for the two runs: select both experiments on the dataset's Experiments tab and click **Compare** (see [Experiments via UI](https://langfuse.com/docs/evaluation/experiments/experiments-via-ui)). Each row is a claim; each run gets a column with its output and the per-field scores next to it.
 
-![V1 and V2 side by side in the Langfuse compare view, with per-field boolean scores for each item](/images/cookbook/example-structured-output-extraction/compare-v1-v2.png)
+![V1 and V2 side by side in the Langfuse compare view, with per-field boolean scores for each item](https://langfuse.com/images/cookbook/example-structured-output-extraction/compare-v1-v2.png)
 
 
-In your table, check whether `object_id` improved. Separate two cases in the traces: a real ID that gained a prefix, and a well-formatted ID invented because the schema requires `object_id` while 11 labels are null.
+In your table, check whether `object_id` improved. In the traces, separate a real ID that gained a prefix from a well-formatted ID that was invented because the schema requires `object_id` while 11 labels are null.
 
 Open one of each if you can. The later schema fix is to make `object_id` optional.
 
 
-If an item has a null label and a `VIN`/`PROP` id in the output, that is the schema forcing a value, not a correct extraction.
+If an item has a null label and a `VIN`/`PROP` id in the output, that value came from the schema forcing a string rather than from the document.
 
 
 ## 8. Add prompt rules
@@ -832,7 +824,7 @@ Watch `objects_F1` if "do not invent objects" landed. Then check `policyholder`.
 In Langfuse, open the same claim on V2 and V3 and compare `field.policy_details.policyholder_name`.
 
 
-If V3 shows `/null` or a truncated name where V2 had the full name, you caught it because you scored the field, not the pool.
+If V3 shows `/null` or a truncated name where V2 had the full name, per-field scoring is what caught it. The pooled average would have hidden it.
 
 
 ## 9. Inspect the V3 failures
@@ -893,12 +885,12 @@ drill_into(results["V3_prompt_rules"], "V3")
 
 ```
 
-If you see placeholder names, that is the V3 regression. The next cell is a new prompt version, not an edit of v2.
+If you see placeholder names, that is the V3 regression. The next cell saves a new prompt version instead of editing v2.
 
 
 ## 10. New prompt version, same dataset
 
-Prompt versions are immutable. Add two rules: copy `policyholder_name` exactly, and only emit objects that are actually described. Save as v3 and rerun.
+[Prompt versions](https://langfuse.com/docs/prompt-management/features/prompt-version-control) are immutable. Add two rules: copy `policyholder_name` exactly, and only emit objects that are actually described. Save as v3 and rerun.
 
 
 
@@ -927,28 +919,28 @@ worst_fields(results["V3_fixed"])
 
 ```
 
-The run should link to `extraction-system` v3 in [Prompt Management](https://cloud.langfuse.com/project/~/prompts). All three versions stay in the history, so every experiment stays attributable to the exact prompt text it ran with.
+The run should link to `extraction-system` v3 in Prompt Management. All three versions stay in the history, so every experiment stays attributable to the exact prompt text it ran with.
 
-![The extraction-system prompt in Langfuse with three versions; v3 adds the verbatim-name and no-invented-objects rules](/images/cookbook/example-structured-output-extraction/prompt-versions.png)
+![The extraction-system prompt in Langfuse with three versions; v3 adds the verbatim-name and no-invented-objects rules](https://langfuse.com/images/cookbook/example-structured-output-extraction/prompt-versions.png)
 
 
-Read `policyholder`, not the headline `field_acc`. The field you fixed is the one that matters.
+Read the `policyholder` column rather than the headline `field_acc`. The field you fixed is the one that matters.
 
 To verify the fix in Langfuse, compare V3 and V3_fixed and filter **Scores (boolean)** to `field.policy_details.policyholder_name = false` on the V3 baseline. Only the regressed claims remain, and the V3_fixed column shows the restored names next to them.
 
-![Compare view filtered to items where V3 got policyholder_name wrong, with V3_fixed side by side](/images/cookbook/example-structured-output-extraction/compare-v3-regression.png)
+![Compare view filtered to items where V3 got policyholder_name wrong, with V3_fixed side by side](https://langfuse.com/images/cookbook/example-structured-output-extraction/compare-v3-regression.png)
 
-The dataset's Experiments tab now shows the whole arc in one table: four runs with cost, latency, and mean field accuracy. Note that V3_fixed's headline mean (0.93) is *below* V3's (0.95) even though the field you targeted recovered — single-number readers would call the fix a regression. That is the whole argument for per-field scores.
+The dataset's Experiments tab now shows all four runs in one table with cost, latency, and mean field accuracy. Note that V3_fixed's headline mean (0.93) is *below* V3's (0.95) even though the field you targeted recovered. Anyone reading only the single number would call the fix a regression. That is the whole argument for per-field scores.
 
-![Four experiment runs on the insurance-claims dataset with mean field accuracy per run](/images/cookbook/example-structured-output-extraction/experiment-runs.png)
+![Four experiment runs on the insurance-claims dataset with mean field accuracy per run](https://langfuse.com/images/cookbook/example-structured-output-extraction/experiment-runs.png)
 
 
 ## 11. Grow the set, freeze a holdout, run in CI
 
-n=30 is enough to learn the loop, not enough to ship on. Once you have a real labeled set:
+n=30 is enough to learn the loop but not enough to ship on. Once you have a real labeled set:
 
 1. Add production traces as dataset items, and [synthetic items](https://langfuse.com/guides/cookbook/example_synthetic_datasets) for rare slices.
-2. Freeze a holdout dataset and stop tuning against it.
+2. Freeze a holdout dataset and stop tuning against it. Every rule in this notebook came from staring at failures in these 30 items. That is how the loop should work, but if you keep going long enough, the prompt gradually adapts to the quirks of these specific claims. Scores on the tuning set keep improving while production accuracy stays flat. To catch this, set aside items that you never inspect while tuning and score them only to check whether an improvement holds up. If a change helps on the tuning set but does nothing on the holdout, it has overfit.
 3. Put `run_round` in [CI](https://langfuse.com/docs/evaluation/experiments/experiments-ci-cd) so a prompt edit cannot silently regress `field.policy_details.policyholder_name`.
 
 This notebook uses text claims. The same dataset and experiment loop works for [multi-modal items](https://langfuse.com/docs/evaluation/experiments/datasets#multi-modal-dataset-items) when you have those labels.
