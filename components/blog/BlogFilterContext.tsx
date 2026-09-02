@@ -102,11 +102,17 @@ export function BlogFilterProvider({
   }, [allPosts, selectedTag, searchQuery]);
 
   const highlightPosts = useMemo(() => {
+    const hasImage = (p: BlogPageItem) => Boolean(p.frontMatter?.ogImage);
     const marked = allPosts.filter((p) => p.frontMatter?.highlight === true);
-    if (marked.length >= HIGHLIGHT_COUNT)
-      return marked.slice(0, HIGHLIGHT_COUNT);
-    const remaining = allPosts.filter((p) => !marked.includes(p));
-    return [...marked, ...remaining].slice(0, HIGHLIGHT_COUNT);
+    const markedWithImage = marked.filter(hasImage);
+    const othersWithImage = allPosts.filter(
+      (p) => hasImage(p) && !marked.includes(p),
+    );
+    const visual = [...markedWithImage, ...othersWithImage];
+    if (visual.length >= HIGHLIGHT_COUNT)
+      return visual.slice(0, HIGHLIGHT_COUNT);
+    const remaining = allPosts.filter((p) => !visual.includes(p));
+    return [...visual, ...remaining].slice(0, HIGHLIGHT_COUNT);
   }, [allPosts]);
 
   const listPosts = useMemo(() => {

@@ -42,7 +42,7 @@ export function BlogHero({ posts }: { posts: BlogPageItem[] }) {
       aria-roledescription="carousel"
       aria-label="Featured posts"
     >
-      <div className="relative grid lg:min-h-[560px] lg:grid-cols-[minmax(0,1.15fr)_minmax(240px,0.85fr)]">
+      <div className="relative grid lg:min-h-[560px] lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)]">
         <div className="relative flex min-w-0 flex-col px-6 py-10 sm:px-8 lg:py-12">
           <BlogIndexBar
             className="relative z-20 mb-8"
@@ -104,49 +104,60 @@ export function BlogHero({ posts }: { posts: BlogPageItem[] }) {
           </AnimatePresence>
         </div>
 
-        <div className="relative min-h-[220px] border-t border-line-structure lg:min-h-full lg:border-t-0 lg:border-l">
-          <Link
-            href={post.route}
-            tabIndex={-1}
-            aria-hidden
-            className="absolute inset-0 z-0"
-          >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={post.route}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.28, ease: "easeOut" }}
-                className="absolute inset-0"
-              >
-                {image ? (
-                  <BlogPostCover
-                    src={image}
-                    alt=""
-                    priority={active === 0}
-                    crop
-                    className="h-full w-full"
-                    sizes="(max-width: 1024px) 100vw, 40vw"
-                  />
-                ) : (
-                  <div className="absolute inset-0 bg-stripe-pattern">
+        <div className="relative hidden min-w-0 flex-col justify-center border-l border-line-structure py-10 pr-4 pl-4 lg:flex">
+          {image ? (
+            <div className="relative mb-6 aspect-[16/10] overflow-hidden">
+              <BlogPostCover
+                src={image}
+                alt=""
+                crop
+                priority={active === 0}
+                className="h-full w-full"
+                sizes="280px"
+              />
+            </div>
+          ) : null}
+          <ul className="relative z-20 m-0 flex list-none flex-col gap-1 p-0">
+            {posts.map((item, i) => {
+              const isActive = i === active;
+              return (
+                <li key={item.route}>
+                  <button
+                    type="button"
+                    onClick={() => setActive(i)}
+                    onMouseEnter={() => setActive(i)}
+                    className={cn(
+                      "group flex w-full items-center justify-between gap-3 rounded-sm py-2.5 pr-2 pl-3 text-left transition-colors",
+                      isActive ? "bg-surface-bg" : "hover:bg-surface-1",
+                    )}
+                    aria-current={isActive ? "true" : undefined}
+                    aria-label={`Show ${postTitle(item)}`}
+                  >
                     <span
-                      aria-hidden
-                      className="absolute right-6 bottom-6 font-analog text-[72px] leading-none tracking-tight text-text-primary/15 sm:text-[96px]"
+                      className={cn(
+                        "min-w-0 font-analog text-[15px] font-medium leading-[1.2] tracking-tight",
+                        isActive ? "text-text-primary" : "text-text-tertiary",
+                      )}
                     >
-                      {String(active + 1).padStart(2, "0")}
+                      {postTitle(item)}
                     </span>
-                  </div>
-                )}
-              </motion.div>
-            </AnimatePresence>
-          </Link>
+                    <span
+                      className={cn(
+                        "h-8 w-0.5 shrink-0 rounded-full transition-colors",
+                        isActive ? "bg-text-primary" : "bg-transparent",
+                      )}
+                      aria-hidden
+                    />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       </div>
 
       {posts.length > 1 ? (
-        <div className="flex gap-2 overflow-x-auto border-t border-line-structure px-6 py-3 sm:px-8 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="relative z-20 flex gap-2 overflow-x-auto border-t border-line-structure px-6 py-3 sm:px-8 lg:hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {posts.map((item, i) => {
             const isActive = i === active;
             return (
@@ -154,7 +165,6 @@ export function BlogHero({ posts }: { posts: BlogPageItem[] }) {
                 key={item.route}
                 type="button"
                 onClick={() => setActive(i)}
-                onMouseEnter={() => setActive(i)}
                 className={cn(
                   "max-w-[18rem] shrink-0 truncate rounded-sm border px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] transition-colors",
                   isActive
