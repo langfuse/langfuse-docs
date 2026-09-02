@@ -167,11 +167,11 @@ print(f"Conversation ID: {conversation_id}")
 
 ElevenLabs does not push traces to Langfuse. It hands you a complete trace as **OTLP JSON** (a `resourceSpans` object) on three surfaces, and you forward it:
 
-| Surface                                                                                     | When you get data                        | Best for                                    |
-| ------------------------------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------- |
-| [GET conversation API](https://elevenlabs.io/docs/api-reference/conversations/get)          | On demand, after the conversation exists | Backfill, debugging (used in this notebook) |
-| [Post-call webhook](https://elevenlabs.io/docs/eleven-agents/workflows/post-call-webhooks)  | After the conversation ends              | Production pipelines (see the production setup step below)           |
-| [Monitoring WebSocket](https://elevenlabs.io/docs/eleven-agents/guides/realtime-monitoring) | Live, during the conversation            | Live dashboards (Enterprise feature)        |
+| Surface                                                                                     | When you get data                        | Best for                                                   |
+| ------------------------------------------------------------------------------------------- | ---------------------------------------- | ---------------------------------------------------------- |
+| [GET conversation API](https://elevenlabs.io/docs/api-reference/conversations/get)          | On demand, after the conversation exists | Backfill, debugging (used in this notebook)                |
+| [Post-call webhook](https://elevenlabs.io/docs/eleven-agents/workflows/post-call-webhooks)  | After the conversation ends              | Production pipelines (see the production setup step below) |
+| [Monitoring WebSocket](https://elevenlabs.io/docs/eleven-agents/guides/realtime-monitoring) | Live, during the conversation            | Live dashboards (Enterprise feature)                       |
 
 All three surfaces share the same trace ID per conversation and the same `elevenlabs.*` span attributes. We poll until ElevenLabs has processed the conversation, then request it in OpenTelemetry format.
 
