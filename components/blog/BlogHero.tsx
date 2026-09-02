@@ -15,14 +15,23 @@ const ROTATE_MS = 5500;
 export function BlogHero({ posts }: { posts: BlogPageItem[] }) {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
 
   useEffect(() => {
-    if (paused || posts.length < 2) return;
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setReduceMotion(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    if (paused || reduceMotion || posts.length < 2) return;
     const id = window.setInterval(() => {
       setActive((prev) => (prev + 1) % posts.length);
     }, ROTATE_MS);
     return () => window.clearInterval(id);
-  }, [paused, posts.length]);
+  }, [paused, reduceMotion, posts.length]);
 
   if (posts.length === 0) return null;
 
@@ -33,12 +42,19 @@ export function BlogHero({ posts }: { posts: BlogPageItem[] }) {
   const tag = primaryTag(post.frontMatter?.tag);
   const author = post.frontMatter?.author;
   const date = formatDate(post.frontMatter?.date);
+  const motionSafe = !reduceMotion;
 
   return (
     <section
       className="relative overflow-hidden border-y border-line-structure bg-surface-bg text-text-primary"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+          setPaused(false);
+        }
+      }}
       aria-roledescription="carousel"
       aria-label="Featured posts"
     >
@@ -55,7 +71,7 @@ export function BlogHero({ posts }: { posts: BlogPageItem[] }) {
                   </span>
                   <span className="hidden text-text-disabled sm:inline">·</span>
                   <span className="hidden sm:inline">
-                    {paused ? "paused" : "auto-plays"}
+                    {reduceMotion ? "manual" : paused ? "paused" : "auto-plays"}
                   </span>
                 </div>
               ) : null
@@ -65,10 +81,14 @@ export function BlogHero({ posts }: { posts: BlogPageItem[] }) {
           <AnimatePresence mode="wait">
             <motion.div
               key={post.route}
-              initial={{ opacity: 0 }}
+              initial={motionSafe ? { opacity: 0 } : false}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.28, ease: "easeOut" }}
+              exit={motionSafe ? { opacity: 0 } : undefined}
+              transition={
+                motionSafe
+                  ? { duration: 0.28, ease: "easeOut" }
+                  : { duration: 0 }
+              }
               className="relative flex flex-1 flex-col"
             >
               <BlogTagChip tag={tag} className="mb-5" />
@@ -90,6 +110,18 @@ export function BlogHero({ posts }: { posts: BlogPageItem[] }) {
                   <span className="text-text-tertiary">{date}</span>
                 ) : null}
               </div>
+              {image ? (
+                <div className="relative z-0 mt-6 aspect-[16/10] overflow-hidden lg:hidden">
+                  <BlogPostCover
+                    src={image}
+                    alt=""
+                    crop
+                    priority={active === 0}
+                    className="h-full w-full"
+                    sizes="(max-width: 1024px) 100vw, 280px"
+                  />
+                </div>
+              ) : null}
               <div className="mt-auto flex justify-end pt-10">
                 <Link
                   href={post.route}
