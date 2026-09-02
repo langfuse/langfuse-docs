@@ -165,9 +165,9 @@ npm install @langfuse/client @langfuse/openai @langfuse/otel @opentelemetry/sdk-
 
 ### Create the dataset [#sdk-create-dataset]
 
-A dataset is a collection of test cases. Each item has an **input** and, optionally, an **expected output** that evaluators can compare against. How many items you add — and whether they are questions, tickets, tool traces, or something else — depends on your use case. A first dataset might have a handful of representative cases; later you can grow it to 10, 50, or more as you learn what fails.
+A dataset is a collection of test cases. Each item has an input and, optionally, an expected output that evaluators can compare against. A first dataset might have a handful of representative cases; later you can grow it as you learn what fails.
 
-The rest of this step is an **example** so you can run the walkthrough end to end: five questions about San Francisco tourist sites. You do not need five items, and they do not need to be questions.
+In the example below we add five questions about San Francisco tourist sites.
 
 <LangTabs items={["Python SDK", "JS/TS SDK", "Langfuse UI"]}>
 <Tab>
@@ -360,11 +360,13 @@ When you create items via the SDK, dataset item IDs are stable, so adding an ite
 
 ### Run an experiment [#sdk-run-experiment]
 
-Use the **SDK** when the experiment should execute your own application or agent code — any task you cannot express as a prompt and model in Langfuse. Use [prompt experiments in the UI](/docs/evaluation/experiments/experiments-via-ui) when you only want to compare prompt versions or models on a dataset.
+The example uses the SDK to run an experiment. This lets you run your agent in its own harness and access to tools outside of Langfuse. If you only need to test a prompt + model combination, you can also run [prompt experiments in the UI](/docs/evaluation/experiments/experiments-via-ui).
 
-You can still start an SDK experiment from the UI: configure a [webhook](/docs/evaluation/experiments/experiments-via-sdk#configure-webhook) that runs your experiment code, then trigger it with **Run → Custom Experiment** on the dataset.
+<Callout type="info">
+  You can still start an SDK experiment from the UI by [configuring a webhook](/docs/evaluation/experiments/experiments-via-sdk#configure-webhook) to trigger external execution.
+</Callout>
 
-This walkthrough runs the experiment in the SDK. In the example below, each dataset item is sent to the model. The evaluator returns `1` when the output exactly matches the expected site name and `0` otherwise.
+In the example below, each dataset item is sent to the model. The evaluator returns `1` when the output exactly matches the expected site name and `0` otherwise.
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
