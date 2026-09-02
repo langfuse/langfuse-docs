@@ -43,7 +43,7 @@ os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")  # 🇪
 # 🇺🇸 US region: https://us.cloud.langfuse.com
 
 # OpenAI: https://platform.openai.com/api-keys
-os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...")
+os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...");
 
 ```
 
@@ -266,24 +266,18 @@ print("n_objects:", dict(sorted(collections.Counter(it["metadata"]["n_objects"] 
 
 ```python
 DATASET_NAME = "insurance-claims"
-try:
-    dataset = langfuse.get_dataset(DATASET_NAME)
-    if dataset.items:
-        print("using existing dataset:", len(dataset.items), "items")
-    else:
-        raise ValueError("dataset exists but is empty")
-except Exception:
-    langfuse.create_dataset(
-        name=DATASET_NAME,
-        description="Nested insurance-claim extraction (Cleanlab). 30 synthetic claims; verify before production.",
-        metadata={"source": "Cleanlab/insurance-claims-extraction", "n_items": len(items)})
-    for it in items:
-        langfuse.create_dataset_item(
-            dataset_name=DATASET_NAME, id=f"{DATASET_NAME}:{it['id']}",
-            input=it["input"], expected_output=it["expected_output"], metadata=it["metadata"])
-    langfuse.flush()
-    dataset = langfuse.get_dataset(DATASET_NAME)
-    print("uploaded & fetched:", len(dataset.items), "items")
+
+langfuse.create_dataset(
+    name=DATASET_NAME,
+    description="Nested insurance-claim extraction (Cleanlab). 30 synthetic claims; verify before production.",
+    metadata={"source": "Cleanlab/insurance-claims-extraction", "n_items": len(items)})
+for it in items:
+    langfuse.create_dataset_item(
+        dataset_name=DATASET_NAME, id=f"{DATASET_NAME}:{it['id']}",
+        input=it["input"], expected_output=it["expected_output"], metadata=it["metadata"])
+langfuse.flush()
+dataset = langfuse.get_dataset(DATASET_NAME)
+print("uploaded & fetched:", len(dataset.items), "items")
 
 ```
 
@@ -434,9 +428,10 @@ def score_objects(gt_objs, pred_objs):
     leaf_results = [("insured_objects.count", n_gt == n_pred)]
     if n_gt == 0 and n_pred == 0:
         return dict(precision=1.0, recall=1.0, f1=1.0, tp=0, field_correct=0, field_total=0,
-                    count_correct=True, leaf_results=leaf_results)
+                    count_correct=True, counted_gt=set(), leaf_results=leaf_results)
     pairing = optimal_pairing(gt_objs, pred_objs)
     tp = field_correct = field_total = 0
+    counted_gt = set()   # gt indices whose fields entered field_correct/field_total
     for gi, gobj in enumerate(gt_objs):
         pj = pairing[gi] if gi < len(pairing) else None
         pred_obj = pred_objs[pj] if pj is not None else {}
@@ -446,12 +441,13 @@ def score_objects(gt_objs, pred_objs):
             continue
         if (r["correct"] / r["total"] if r["total"] else 0.0) >= OBJECT_MATCH_THRESHOLD:
             tp += 1; field_correct += r["correct"]; field_total += r["total"]
+            counted_gt.add(gi)
     precision = tp / n_pred if n_pred else (1.0 if n_gt == 0 else 0.0)
     recall = tp / n_gt if n_gt else (1.0 if n_pred == 0 else 0.0)
     f1 = (2 * precision * recall / (precision + recall)) if (precision + recall) else 0.0
     return dict(precision=precision, recall=recall, f1=f1, tp=tp,
                 field_correct=field_correct, field_total=field_total, count_correct=(n_gt == n_pred),
-                leaf_results=leaf_results)
+                counted_gt=counted_gt, leaf_results=leaf_results)
 
 def score_id_formats(pred):
     ok = total = 0
@@ -485,8 +481,10 @@ def compare_claim(pred, gt):
     leaf_results.extend(objs["leaf_results"])
     f_correct = header["correct"] + incident["correct"] + policy["correct"] + objs["field_correct"]
     f_total = header["total"] + incident["total"] + policy["total"] + objs["field_total"]
-    for gobj in (gt.get("insured_objects") or [])[objs["tp"]:]:
-        f_total += compare_section("insured_objects", gobj, {})["total"]
+    # Objects that never entered field_total still count toward the denominator.
+    for gi, gobj in enumerate(gt.get("insured_objects") or []):
+        if gi not in objs["counted_gt"]:
+            f_total += compare_section("insured_objects", gobj, {})["total"]
     enum_c = header["enum_c"] + incident["enum_c"] + policy["enum_c"]; enum_t = header["enum_t"] + incident["enum_t"] + policy["enum_t"]
     date_c = header["date_c"] + incident["date_c"] + policy["date_c"]; date_t = header["date_t"] + incident["date_t"] + policy["date_t"]
     num_c = header["num_c"] + incident["num_c"] + policy["num_c"]; num_t = header["num_t"] + incident["num_t"] + policy["num_t"]
@@ -557,9 +555,7 @@ Each experiment item in Langfuse gets those `field.*` scores. Sort failing items
 
 ## 5. Run experiments from the dataset
 
-`run_round` calls `dataset.run_experiment` and appends a row to a comparison table: overall field accuracy, `object_id`, `policyholder_name`, and `objects_F1`. If an experiment with that name already exists in Langfuse, it reuses those scores instead of calling the model again. Pass `force=True` when you want a fresh run.
-
-This makes the whole notebook safe to re-run. The dataset, prompt versions, and experiments are all created only if they don't already exist, so restarting the kernel or re-executing cells never duplicates anything in Langfuse or spends tokens twice.
+`run_round` calls `dataset.run_experiment` and appends a row to a comparison table: overall field accuracy, `object_id`, `policyholder_name`, and `objects_F1`. Re-running a cell starts a new experiment run; Langfuse keeps every run on the Experiments tab as history.
 
 Prompts live in Langfuse as `extraction-system`. The next cell creates v1.
 
@@ -581,6 +577,11 @@ def seed_prompt(version, text, labels, commit_message):
     # Idempotent: prompt versions are immutable, so only create what doesn't exist yet.
     metas = langfuse.api.prompts.list(name=PROMPT_NAME).data
     if any(version in (m.versions or []) for m in metas):
+        existing = langfuse.get_prompt(PROMPT_NAME, version=version)
+        if existing.prompt.strip() != text.strip():
+            raise RuntimeError(
+                f"'{PROMPT_NAME}' v{version} already exists with different text. This project "
+                f"has an unrelated prompt under that name; change PROMPT_NAME or use a fresh project.")
         print(f"prompt v{version} already exists")
         return
     langfuse.create_prompt(name=PROMPT_NAME, prompt=text, type="text",
@@ -618,7 +619,6 @@ def extract(cfg, claim_text, name):
 
 ```python
 import pandas as pd
-from datetime import datetime, timezone
 
 def ev_dict(evs):
     return {getattr(e, "name", None): getattr(e, "value", None) for e in (evs or [])}
@@ -640,9 +640,6 @@ def _mean_field_suffix(rows, suffix):
     return sum(xs) / len(xs) if xs else None
 
 def worst_fields(run, top=10):
-    if run is None or not getattr(run, "item_results", None):
-        print("No local item results for this variant. Sort the experiment by a field in Langfuse.")
-        return
     from collections import defaultdict
     hits = defaultdict(lambda: [0, 0])
     for ir in run.item_results:
@@ -657,50 +654,12 @@ def worst_fields(run, top=10):
     for name, (ok, n) in ranked[:top]:
         print(f"  {name}: {ok}/{n} ({ok / n:.2f})")
 
-def find_experiment(name):
-    exps = langfuse.api.experiments.list(
-        from_start_time=datetime(2020, 1, 1, tzinfo=timezone.utc),
-        limit=50, fields="core,scores", score_limit=100)
-    matches = [e for e in (exps.data or []) if e.name == name or e.name.startswith(name + " - ")]
-    matches.sort(key=lambda e: e.name, reverse=True)
-    return matches[0] if matches else None
-
-def _summary_from_experiment(exp):
-    scores = {s.name: s.value for s in (exp.scores or [])}
-
-    def g(*keys):
-        for k in keys:
-            v = scores.get(k)
-            if isinstance(v, (int, float, bool)):
-                return round(float(v), 3)
-        return None
-
-    return {
-        "variant": exp.name.split(" - ")[0],
-        "valid_json%": g("mean_valid_json"),
-        "field_acc": g("mean_field_accuracy_overall"),
-        "object_id": g("mean_field.insured_objects.0.object_id"),
-        "policyholder": g("mean_field.policy_details.policyholder_name"),
-        "objects_F1": g("mean_objects_f1"),
-    }
-
-def _append_summary(s):
-    if any(row.get("variant") == s["variant"] for row in summaries):
-        return
-    summaries.append(s)
-
 results, summaries = {}, []
 
-def run_round(name, *, model="gpt-4o-mini", schema="descriptive", prompt_version=None, force=False):
-    if name in results and not force:
-        print(f"already in this session: {name}")
-        return comparison_table()
-    existing = None if force else find_experiment(name)
-    if existing:
-        print(f"reusing {existing.name} (pass force=True to rerun)")
-        results[name] = None
-        _append_summary(_summary_from_experiment(existing))
-        return comparison_table()
+def _round(x):
+    return None if x is None else round(x, 3)
+
+def run_round(name, *, model="gpt-4o-mini", schema="descriptive", prompt_version=None):
     cfg = dict(model=model, schema=schema, prompt_version=prompt_version)
     def task(*, item, **kwargs):
         return extract(cfg, item.input, name)
@@ -710,14 +669,20 @@ def run_round(name, *, model="gpt-4o-mini", schema="descriptive", prompt_version
     langfuse.flush()
     results[name] = res
     rows = [ev_dict(ir.evaluations) for ir in res.item_results]
-    _append_summary({
+    summary = {
         "variant": name,
-        "valid_json%": None if _mean(rows, "valid_json") is None else round(_mean(rows, "valid_json"), 3),
-        "field_acc": None if _mean(rows, "field_accuracy_overall") is None else round(_mean(rows, "field_accuracy_overall"), 3),
-        "object_id": None if _mean_field_suffix(rows, "object_id") is None else round(_mean_field_suffix(rows, "object_id"), 3),
-        "policyholder": None if _mean_field_suffix(rows, "policyholder_name") is None else round(_mean_field_suffix(rows, "policyholder_name"), 3),
-        "objects_F1": None if _mean(rows, "objects_f1") is None else round(_mean(rows, "objects_f1"), 3),
-    })
+        "valid_json%": _round(_mean(rows, "valid_json")),
+        "field_acc": _round(_mean(rows, "field_accuracy_overall")),
+        "object_id": _round(_mean_field_suffix(rows, "object_id")),
+        "policyholder": _round(_mean_field_suffix(rows, "policyholder_name")),
+        "objects_F1": _round(_mean(rows, "objects_f1")),
+    }
+    for i, s in enumerate(summaries):
+        if s["variant"] == name:
+            summaries[i] = summary
+            break
+    else:
+        summaries.append(summary)
     return comparison_table()
 
 def comparison_table():
@@ -930,7 +895,7 @@ To verify the fix in Langfuse, compare V3 and V3_fixed and filter **Scores (bool
 
 ![Compare view filtered to items where V3 got policyholder_name wrong, with V3_fixed side by side](https://langfuse.com/images/cookbook/example-structured-output-extraction/compare-v3-regression.png)
 
-The dataset's Experiments tab now shows all four runs in one table with cost, latency, and mean field accuracy. Note that V3_fixed's headline mean (0.93) is *below* V3's (0.95) even though the field you targeted recovered. Anyone reading only the single number would call the fix a regression. That is the whole argument for per-field scores.
+The dataset's Experiments tab now shows all four runs in one table with cost, latency, and mean field accuracy. In the run pictured, V3_fixed's headline mean (0.93) is *below* V3's (0.95) even though the field you targeted recovered. Your exact numbers will vary, but the same inversion is common. Anyone reading only the single number would call the fix a regression. That is the whole argument for per-field scores.
 
 ![Four experiment runs on the insurance-claims dataset with mean field accuracy per run](https://langfuse.com/images/cookbook/example-structured-output-extraction/experiment-runs.png)
 
