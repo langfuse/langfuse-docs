@@ -1,7 +1,7 @@
 ---
 title: How do I migrate off the deprecated Langfuse APIs?
 sidebarTitle: Deprecated API migration
-description: Per-endpoint mapping from Langfuse's deprecated REST endpoints to their supported replacements, with parameter mappings, semantic differences, before/after examples, and the reference for the deprecated endpoints.
+description: Per-endpoint mapping from Langfuse's deprecated REST endpoints and SDK methods to their supported replacements, with parameter mappings, semantic differences, examples, and endpoint references.
 tags: [platform]
 ---
 
@@ -9,9 +9,9 @@ import { V4CutoverDate } from "@/components/V4CutoverDate";
 
 # Migration of deprecated APIs
 
-This page maps every deprecated Langfuse REST endpoint to its replacement, with parameter mappings, semantic differences, and before/after examples. Many of these changes follow from the [observations-first data model](/docs/v4): traces and observations are no longer separate entities, and reads are consolidated onto fewer, faster endpoints.
+This page maps every deprecated Langfuse REST endpoint and the Python and JS/TS SDK methods that call it to their supported replacements. It includes parameter mappings, semantic differences, and before/after examples. Many of these changes follow from the [observations-first data model](/docs/v4): traces and observations are no longer separate entities, and reads are consolidated onto fewer, faster endpoints.
 
-If you access the API through the Langfuse SDKs, use the SDK upgrade guides instead: [Python v3 to v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) and [JS/TS v4 to v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5). This page covers direct REST usage only.
+If you access these endpoints through a Langfuse SDK, each section includes the methods in Python SDK v4 and JS/TS SDK v5 that call them. Deprecated Public API methods remain callable in these SDK majors, so replacing them is separate from upgrading the SDK itself. If you still need to upgrade, first follow [Python v3 to v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS v4 to v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5), then return here to replace deprecated API methods.
 
 Still need the deprecated endpoints? They are documented in the [reference section below](#endpoints).
 
@@ -40,11 +40,42 @@ All paths are relative to `/api/public`.
 
 `score-create` events sent to `POST /ingestion` by the current SDKs are not deprecated. They remain supported after the v4 cutover.
 
+If you access the public API from shell scripts or coding agents, the [Langfuse CLI](/docs/api-and-data-platform/features/cli) provides commands for all supported endpoints.
+Use at least langfuse-cli version `v1.1.0` to benefit from the new endpoints.
+
+### SDK method quick reference [#sdk-method-quick-reference]
+
+These mappings cover the latest Python SDK v4 and JS/TS SDK v5 method surfaces. The examples use `client` for a Langfuse client instance and `context` for an experiment-action `RunnerContext`. Python exposes the same generated methods asynchronously under `client.async_api`; use the same replacement with `await`. Upgrade within the current major if a replacement is missing: Scores v3 requires Python `4.8.1+` or JS/TS `5.5.0+`, and experiment reads require Python `4.13.1+` or JS/TS `5.10.0+`.
+
+| Area                                            | Python SDK v4                                                                                                                                                                                                                                                                 | JS/TS SDK v5                                                                                                                                                                                                                                                                                          |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Observations](#observations-sdk-methods)       | `client.api.legacy.observations_v1.get_many(...)` / `.get(...)` → `client.api.observations.get_many(...)`                                                                                                                                                                     | `client.api.legacy.observationsV1.getMany(...)` / `.get(...)` and `client.fetchObservation(...)` → `client.api.observations.getMany(...)`                                                                                                                                                             |
+| [Traces](#traces-sdk-methods)                   | `client.api.trace.list(...)` / `.get(...)` → `client.api.observations.get_many(...)`                                                                                                                                                                                          | `client.api.trace.list(...)` / `.get(...)` and `client.fetchTraces(...)` / `.fetchTrace(...)` → `client.api.observations.getMany(...)`                                                                                                                                                                |
+| [Sessions](#sessions-sdk-methods)               | `client.api.sessions.list(...)` / `.get(...)` → `client.api.observations.get_many(...)`                                                                                                                                                                                       | `client.api.sessions.list(...)` / `.get(...)` and `client.fetchSessions(...)` → `client.api.observations.getMany(...)`                                                                                                                                                                                |
+| [Metrics](#metrics-sdk-methods)                 | `client.api.legacy.metrics_v1.metrics(...)` → `client.api.metrics.metrics(...)`. No Python v4 method calls `GET /metrics/daily`.                                                                                                                                              | `client.api.legacy.metricsV1.metrics(...)` → `client.api.metrics.metrics(...)`. No JS/TS v5 method calls `GET /metrics/daily`.                                                                                                                                                                        |
+| [Scores](#scores-sdk-methods)                   | `client.api.scores.get_many(...)` / `.get_by_id(...)` → `client.api.scores_v3.get_many_v3(...)`. No Python v4 method reads Scores API v1.                                                                                                                                     | `client.api.scores.getMany(...)` / `.getById(...)` → `client.api.scoresV3.getManyV3(...)`. No JS/TS v5 method reads Scores API v1.                                                                                                                                                                    |
+| [Dataset reads](#dataset-read-sdk-methods)      | `client.api.dataset_run_items.list(...)`, `client.api.datasets.get_runs(...)` / `.get_run(...)`, and `client.get_dataset_runs(...)` / `.get_dataset_run(...)` → `client.api.experiments.list(...)` / `.list_items(...)`                                                       | `client.api.datasetRunItems.list(...)`, `client.api.datasets.getRuns(...)` / `.getRun(...)`, and `client.getDatasetRuns(...)` / `.getDatasetRun(...)` → `client.api.experiments.list(...)` / `.listItems(...)`                                                                                        |
+| [Dataset writes](#dataset-write-sdk-methods)    | Direct `client.api.dataset_run_items.create(...)` callers should use the experiment runner. Dataset-backed `client.run_experiment(...)`, `dataset.run_experiment(...)`, and `context.run_experiment(...)` currently originate this call inside the SDK; keep the SDK updated. | Direct `client.api.datasetRunItems.create(...)` and `datasetItem.link(...)` callers should use the experiment runner. Dataset-backed `client.experiment.run(...)`, `dataset.runExperiment(...)`, and `context.runExperiment(...)` currently originate this call inside the SDK; keep the SDK updated. |
+| [Dataset deletion](#dataset-delete-sdk-methods) | `client.api.datasets.delete_run(...)` and `client.delete_dataset_run(...)` → list experiment items with `client.api.experiments.list_items(...)`, then delete their traces with `client.api.trace.delete_multiple(...)`.                                                      | `client.api.datasets.deleteRun(...)` → list experiment items with `client.api.experiments.listItems(...)`, then delete their traces with `client.api.trace.deleteMultiple(...)`.                                                                                                                      |
+| [Ingestion](#ingestion-sdk-methods)             | `client.api.ingestion.batch(...)` for trace and observation events → current SDK tracing, which exports via OpenTelemetry.                                                                                                                                                    | `client.api.ingestion.batch(...)` for trace and observation events → current SDK tracing, which exports via OpenTelemetry.                                                                                                                                                                            |
+
 ## Observations [#observations]
 
-**Deprecated:** `GET /observations`, `GET /observations/{observationId}`. Langfuse Cloud serves this endpoint until <V4CutoverDate />; migrate to v4 before this date.
+**Deprecated:** `GET /observations`, `GET /observations/{observationId}`. Langfuse Cloud serves these endpoints until <V4CutoverDate />; migrate to v4 before this date.
 
 **Replacement:** [`GET /v2/observations`](/docs/api-and-data-platform/features/observations-api#v2) ([reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations)).
+
+### SDK methods [#observations-sdk-methods]
+
+| SDK       | Deprecated caller                                       | Use instead                                                                                                  |
+| --------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Python v4 | `client.api.legacy.observations_v1.get_many(...)`       | `client.api.observations.get_many(from_start_time=..., to_start_time=...)`                                   |
+| Python v4 | `client.api.legacy.observations_v1.get(observation_id)` | `client.api.observations.get_many(filter="<observation ID filter>", from_start_time=..., to_start_time=...)` |
+| JS/TS v5  | `client.api.legacy.observationsV1.getMany(...)`         | `client.api.observations.getMany({ fromStartTime, toStartTime })`                                            |
+| JS/TS v5  | `client.api.legacy.observationsV1.get(observationId)`   | `client.api.observations.getMany({ filter: "<observation ID filter>", fromStartTime, toStartTime })`         |
+| JS/TS v5  | `client.fetchObservation(observationId)`                | `client.api.observations.getMany({ filter: "<observation ID filter>", fromStartTime, toStartTime })`         |
+
+There is no v2 single-observation getter; filter `get_many` / `getMany` by ID and take the matching row. Always bound observation queries with a time range and follow cursor pagination. `client.fetchObservations(...)` is not listed because in JS/TS v5 it already calls Observations API v2.
 
 ### Parameter mapping
 
@@ -82,6 +113,19 @@ curl \
 **Deprecated:** `GET /traces`, `GET /traces/{traceId}`. Langfuse Cloud serves this endpoint until <V4CutoverDate />; migrate to v4 before this date.
 
 **Replacement:** [`GET /v2/observations`](/docs/api-and-data-platform/features/observations-api#v2), grouped by `traceId` on the client side.
+
+### SDK methods [#traces-sdk-methods]
+
+| SDK       | Deprecated caller                | Use instead                                                                                   |
+| --------- | -------------------------------- | --------------------------------------------------------------------------------------------- |
+| Python v4 | `client.api.trace.list(...)`     | `client.api.observations.get_many(from_start_time=..., to_start_time=...)`                    |
+| Python v4 | `client.api.trace.get(trace_id)` | `client.api.observations.get_many(trace_id=trace_id, from_start_time=..., to_start_time=...)` |
+| JS/TS v5  | `client.api.trace.list(...)`     | `client.api.observations.getMany({ fromStartTime, toStartTime })`                             |
+| JS/TS v5  | `client.fetchTraces(...)`        | `client.api.observations.getMany({ fromStartTime, toStartTime })`                             |
+| JS/TS v5  | `client.api.trace.get(traceId)`  | `client.api.observations.getMany({ traceId, fromStartTime, toStartTime })`                    |
+| JS/TS v5  | `client.fetchTrace(traceId)`     | `client.api.observations.getMany({ traceId, fromStartTime, toStartTime })`                    |
+
+These replacements return observation rows, not the legacy trace response shape. Group them by `traceId` and reconstruct trace-level fields as described below.
 
 ### Parameter mapping
 
@@ -131,6 +175,18 @@ curl -G \
 
 **Replacement:** [`GET /v2/observations`](/docs/api-and-data-platform/features/observations-api#v2) with a `filter` condition on the `sessionId` column, grouped by `sessionId` on the client side.
 
+### SDK methods [#sessions-sdk-methods]
+
+| SDK       | Deprecated caller                     | Use instead                                                                                            |
+| --------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Python v4 | `client.api.sessions.list(...)`       | `client.api.observations.get_many(from_start_time=..., to_start_time=...)`, then group by `session_id` |
+| Python v4 | `client.api.sessions.get(session_id)` | `client.api.observations.get_many(session_id=session_id, from_start_time=..., to_start_time=...)`      |
+| JS/TS v5  | `client.api.sessions.list(...)`       | `client.api.observations.getMany({ fromStartTime, toStartTime })`, then group by `sessionId`           |
+| JS/TS v5  | `client.api.sessions.get(sessionId)`  | `client.api.observations.getMany({ sessionId, fromStartTime, toStartTime })`                           |
+| JS/TS v5  | `client.fetchSessions(sessionId)`     | `client.api.observations.getMany({ sessionId, fromStartTime, toStartTime })`                           |
+
+Despite its plural name, `fetchSessions(sessionId)` calls the deprecated single-session endpoint. None of these replacements return the legacy session object shape.
+
 ### Parameter mapping
 
 | Deprecated (`GET /sessions`)   | v2 equivalent                                |
@@ -170,6 +226,15 @@ curl -G \
 
 **Replacement:** [`GET /v2/metrics`](/docs/metrics/features/metrics-api#v2) ([reference](https://api.reference.langfuse.com/#tag/metricsv2/GET/api/public/v2/metrics)).
 
+### SDK methods [#metrics-sdk-methods]
+
+| SDK       | Deprecated caller                                 | Use instead                             |
+| --------- | ------------------------------------------------- | --------------------------------------- |
+| Python v4 | `client.api.legacy.metrics_v1.metrics(query=...)` | `client.api.metrics.metrics(query=...)` |
+| JS/TS v5  | `client.api.legacy.metricsV1.metrics({ query })`  | `client.api.metrics.metrics({ query })` |
+
+This is not only a method rename: adapt the query as described below. In particular, the removed `traces` view has no drop-in replacement.
+
 ### Parameter mapping
 
 The query object structure carries over; the key changes are inside the query:
@@ -204,6 +269,10 @@ curl -G \
 
 ### Daily metrics [#daily-metrics-migration]
 
+#### SDK methods [#daily-metrics-sdk-methods]
+
+Python v4 and JS/TS v5 do not expose wrappers for `GET /metrics/daily`. Calls to this route come from direct REST usage or an older SDK. Recreate the query with `client.api.metrics.metrics(...)` as shown below.
+
 `GET /metrics/daily` returned daily cost and usage timeseries broken down by model. Reproduce it with a v2 query using a daily time dimension:
 
 ```bash
@@ -222,6 +291,19 @@ The deprecated endpoint's filters map to v2 `filters` entries: `traceName` and `
 **Replacement:** [`GET /v3/scores`](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores). See the [Scores API v3 announcement](/changelog/2026-06-10-scores-v3-api) for background.
 
 This migration applies only to score reads. Score writes remain supported through `POST /scores` and the current SDK score helpers. The SDKs batch score writes as `score-create` events through `POST /ingestion`; Langfuse v4 continues to accept those events after the cutover. This also covers evaluations created by the experiment runner and third-party integrations that use the current SDK score helpers. No client update or direct REST workaround is required for these score writes.
+
+### SDK methods [#scores-sdk-methods]
+
+| SDK       | Deprecated caller                       | Use instead                                      |
+| --------- | --------------------------------------- | ------------------------------------------------ |
+| Python v4 | `client.api.scores.get_many(...)`       | `client.api.scores_v3.get_many_v3(...)`          |
+| Python v4 | `client.api.scores.get_by_id(score_id)` | `client.api.scores_v3.get_many_v3(id=score_id)`  |
+| JS/TS v5  | `client.api.scores.getMany(...)`        | `client.api.scoresV3.getManyV3(...)`             |
+| JS/TS v5  | `client.api.scores.getById(scoreId)`    | `client.api.scoresV3.getManyV3({ id: scoreId })` |
+
+Scores v3 requires Python SDK `4.8.1+` or JS/TS SDK `5.5.0+`. It always returns a list response, including when filtering by ID.
+
+Python v4 and JS/TS v5 do not expose read wrappers for the v1 `GET /scores` or `GET /scores/{id}` endpoints. Calls to those routes come from direct REST usage or an older SDK. Do not migrate current score-creation helpers merely because they send supported `score-create` events through `/ingestion`.
 
 ### Parameter mapping
 
@@ -243,7 +325,7 @@ This migration applies only to score reads. Score writes remain supported throug
 - **Field groups.** Core fields are always returned; request more via `fields=details,subject,annotation`. The `subject` group replaces the flat `traceId`/`observationId`/`sessionId`/`datasetRunId` response fields with one object describing what the score is attached to (`kind`: `trace`, `observation`, `session`, or `experiment`).
 - Use at most one of the `traceId`, `sessionId`, and `experimentId` filters; they cannot be combined. `observationId` requires `traceId` alongside it (observation IDs are scoped to a trace).
 - `fromTimestamp` is inclusive; `toTimestamp` is exclusive.
-- **No trace joins.** v3 queries scores directly and does not return trace fields (the v2 `trace` field group is gone). For row-level filtering by trace properties, query the [traces API](https://api.reference.langfuse.com/#tag/trace/GET/api/public/traces) with `userId`/`tags` filters first to collect the matching trace IDs, then pass them to v3's comma-separated `traceId` filter.
+- **No trace joins.** v3 queries scores directly and does not return trace fields (the v2 `trace` field group is gone). For row-level filtering by trace properties, query [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) with the corresponding filters and `fields=core,trace_context`, collect the distinct trace IDs, then pass them to v3's comma-separated `traceId` filter.
 - **Row counts can differ.** v2 silently dropped scores whose referenced trace could not be found (e.g., deleted or never ingested); v3 returns every matching score, so the same query can return more rows on v3.
 
 ### Example
@@ -283,6 +365,44 @@ curl \
   remain current.
 </Callout>
 
+### SDK methods [#dataset-sdk-methods]
+
+Experiment reads require Python SDK `4.13.1+` or JS/TS SDK `5.10.0+`. Both APIs require `fromStartTime` / `from_start_time`; use a timestamp that includes the experiments you need.
+
+#### Read methods [#dataset-read-sdk-methods]
+
+| SDK       | Deprecated caller                                                   | Use instead                                                                                                               |
+| --------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Python v4 | `client.api.dataset_run_items.list(...)`                            | `client.api.experiments.list_items(dataset_id=dataset_id, experiment_name=run_name, from_start_time=...)`                 |
+| JS/TS v5  | `client.api.datasetRunItems.list(...)`                              | `client.api.experiments.listItems({ datasetId, experimentName: runName, fromStartTime })`                                 |
+| Python v4 | `client.api.datasets.get_runs(...)`; `client.get_dataset_runs(...)` | Resolve the dataset ID, then use `client.api.experiments.list(dataset_id=dataset_id, from_start_time=...)`                |
+| JS/TS v5  | `client.api.datasets.getRuns(...)`; `client.getDatasetRuns(...)`    | Resolve the dataset ID, then use `client.api.experiments.list({ datasetId, fromStartTime })`                              |
+| Python v4 | `client.api.datasets.get_run(...)`; `client.get_dataset_run(...)`   | Use `client.api.experiments.list(...)` for experiment metadata and `client.api.experiments.list_items(...)` for its items |
+| JS/TS v5  | `client.api.datasets.getRun(...)`; `client.getDatasetRun(...)`      | Use `client.api.experiments.list(...)` for experiment metadata and `client.api.experiments.listItems(...)` for its items  |
+
+If you already know both the dataset ID and experiment name, `list_items` / `listItems` can retrieve the items directly with those filters. Experiment APIs do not return the legacy combined dataset-run response shape. Follow `meta.cursor` until it is empty: both APIs return 50 rows by default and at most 100 rows per request.
+
+#### Write methods [#dataset-write-sdk-methods]
+
+| SDK       | Deprecated caller                                                                                            | Use instead                                                                                                                                       |
+| --------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Python v4 | `client.api.dataset_run_items.create(...)`                                                                   | Use `client.run_experiment(...)` or `dataset.run_experiment(...)`                                                                                 |
+| Python v4 | Dataset-backed `client.run_experiment(...)`, `dataset.run_experiment(...)`, or `context.run_experiment(...)` | No user-side code change currently removes this call; the SDK creates the legacy link internally. Keep using the runner and keep the SDK updated. |
+| JS/TS v5  | `client.api.datasetRunItems.create(...)`                                                                     | Use `client.experiment.run(...)` or `dataset.runExperiment(...)`                                                                                  |
+| JS/TS v5  | `datasetItem.link(...)`                                                                                      | Use `client.experiment.run(...)` or `dataset.runExperiment(...)`                                                                                  |
+| JS/TS v5  | Dataset-backed `client.experiment.run(...)`, `dataset.runExperiment(...)`, or `context.runExperiment(...)`   | No user-side code change currently removes this call; the SDK creates the legacy link internally. Keep using the runner and keep the SDK updated. |
+
+The experiment runner is the supported abstraction for creating experiment data. Current runners still call `POST /dataset-run-items` internally for Langfuse dataset items; moving direct callers to the runner makes the application inherit the SDK-side migration when it becomes available.
+
+#### Delete methods [#dataset-delete-sdk-methods]
+
+| SDK       | Deprecated caller                                                       | Use instead                                                                                                       |
+| --------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Python v4 | `client.api.datasets.delete_run(...)`; `client.delete_dataset_run(...)` | List experiment items, collect their trace IDs, then call `client.api.trace.delete_multiple(trace_ids=trace_ids)` |
+| JS/TS v5  | `client.api.datasets.deleteRun(...)`                                    | List experiment items, collect their trace IDs, then call `client.api.trace.deleteMultiple({ traceIds })`         |
+
+There is no experiment-delete API. Follow cursor pagination through every experiment-item page, deduplicate the trace IDs, then delete them in batches of at most 1,000 per `delete_multiple` / `deleteMultiple` request. Deleting the underlying traces also deletes their observations and related scores, so confirm that this broader deletion matches your intent.
+
 ### Read experiment data
 
 Use [`GET /experiments`](https://api.reference.langfuse.com/#tag/experiments) to list experiments or find one by its dataset ID and name. Use `GET /experiment-items?experimentId=<id>` to retrieve the items belonging to an experiment.
@@ -313,7 +433,7 @@ For other languages, send experiment traces to [`POST /otel/v1/traces`](https://
 
 ### Delete experiment data
 
-Langfuse v4 does not provide an endpoint that deletes only an experiment. To delete its tracing data, list the experiment items with `GET /experiment-items?fromStartTime=<timestamp>&experimentId=<id>`, collect their `traceId` values, and pass them to [`DELETE /traces`](https://api.reference.langfuse.com/#tag/trace/DELETE/api/public/traces). The trace deletion endpoint is not deprecated.
+Langfuse v4 does not provide an endpoint that deletes only an experiment.
 
 This is not semantically equivalent to the deprecated endpoint: deleting the traces also deletes their observations and related scores. See [Data Deletion](/docs/administration/data-deletion) for details.
 
@@ -344,6 +464,13 @@ curl \
 **Deprecated for trace and observation ingestion:** trace and observation event types sent to `POST /ingestion`, and the older synchronous endpoints `POST /traces`, `POST /spans`, `POST /generations`, `POST /events`. Langfuse Cloud serves these trace-ingestion paths until <V4CutoverDate />; migrate to v4 before this date.
 
 **Replacement:** the OpenTelemetry endpoint [`POST /otel/v1/traces`](https://api.reference.langfuse.com/#tag/opentelemetry/POST/api/public/otel/v1/traces) (OTLP/HTTP), or an upgraded SDK ([Python v4.7.0+](/docs/observability/sdk/upgrade-path/python-v3-to-v4), [JS/TS v5.4.0+](/docs/observability/sdk/upgrade-path/js-v4-to-v5)). Set the `x-langfuse-ingestion-version: 4` header on your OTEL span exporter and propagate trace attributes to all observations; see the [OpenTelemetry integration guide](/integrations/native/opentelemetry).
+
+### SDK methods [#ingestion-sdk-methods]
+
+| SDK       | Deprecated caller                                                  | Use instead                                                                         |
+| --------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| Python v4 | `client.api.ingestion.batch(...)` with trace or observation events | Python SDK `4.7.0+` tracing and instrumentation, which export through OpenTelemetry |
+| JS/TS v5  | `client.api.ingestion.batch(...)` with trace or observation events | JS/TS SDK `5.4.0+` tracing and instrumentation, which export through OpenTelemetry  |
 
 Score writes are unaffected. Direct REST clients can continue using `POST /scores`. Current Python and JS/TS SDKs intentionally batch score writes as `score-create` events through `POST /ingestion`; Langfuse v4 continues to accept that event type after <V4CutoverDate />. No SDK release that reroutes score writes to `POST /scores` is required for compatibility.
 

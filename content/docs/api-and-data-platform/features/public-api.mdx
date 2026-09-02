@@ -116,10 +116,11 @@ You can use your editor's Intellisense to explore the API methods and their para
 
 <Callout type="info">
 
-In Python SDK v4 and JS/TS SDK v5, the high-performance resources are the
-defaults: `api.observations`, `api.metrics`, and — for score reads —
-`api.scores_v3` / `api.scoresV3` (`api.scores`, the v2 reads, is
-deprecated; see [Migration of deprecated APIs](/faq/all/deprecated-api-migration#scores)). Deprecated v1
+In Python SDK v4 and JS/TS SDK v5, the high-performance observations and
+metrics resources are the defaults: `api.observations` and `api.metrics`.
+Scores API v3 is available as `api.scores_v3` in Python SDK `4.8.1+` and
+`api.scoresV3` in JS/TS SDK `5.5.0+`; the `api.scores` v2 reads are deprecated
+([migration guide](/faq/all/deprecated-api-migration#scores)). Deprecated v1
 resources moved under `api.legacy.*` (Python: `*_v1`, JS/TS: `*V1`). See
 [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk) for SDK examples.
 
@@ -153,7 +154,7 @@ observations = langfuse.api.observations.get_many(
 )
 
 # Retrieve aggregates via Metrics API v2
-metrics = langfuse.api.metrics.get(query="""
+metrics = langfuse.api.metrics.metrics(query="""
 {
   "view": "observations",
   "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
@@ -186,7 +187,7 @@ const observations = await langfuse.api.observations.getMany({
 });
 
 // Retrieve aggregates via Metrics API v2
-const metrics = await langfuse.api.metrics.get({
+const metrics = await langfuse.api.metrics.metrics({
   query: JSON.stringify({
     view: "observations",
     metrics: [{ measure: "totalCost", aggregation: "sum" }],

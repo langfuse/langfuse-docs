@@ -13,6 +13,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { TabContent } from "./TabContent";
 import type { AutoAdvanceConfig, FeatureTabData } from "./types";
 import { CornerBox } from "@/components/ui/corner-box";
+import { cn } from "@/lib/utils";
 
 /** Soft ease-out (Emil Kowalski–style: calm deceleration, no snappy linear segments). */
 const CONTENT_EASE = [0.22, 1, 0.36, 1] as const;
@@ -47,7 +48,6 @@ const tabImageVariants = (reduceMotion: boolean) =>
 
 export interface FeatureTabsProps {
   features: FeatureTabData[];
-  mobileFeature: Pick<FeatureTabData, "image">;
   defaultTab?: string;
   autoAdvance?: AutoAdvanceConfig;
 }
@@ -96,7 +96,6 @@ const DEFAULT_AUTO_ADVANCE: AutoAdvanceConfig = {
 
 export const FeatureTabs = ({
   features,
-  mobileFeature,
   defaultTab = "observability",
   autoAdvance,
 }: FeatureTabsProps) => {
@@ -258,6 +257,7 @@ export const FeatureTabs = ({
 
     dispatch({ type: "SET_FOCUSED_INDEX", payload: newIndex });
     tabRefs.current[newIndex]?.focus();
+    handleTabChange(features[newIndex]!.id);
   };
 
   // Scroll active tab into view (for mobile)
@@ -336,7 +336,7 @@ export const FeatureTabs = ({
       ref={setContainerNode}
       className="overflow-hidden p-0 mt-0 bg-card border-radius-none"
     >
-      {/* Accessibility: Auto-advance status announcement */}
+      {/* Accessibility: announce pause/resume only, not every auto-advance */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {defaultAutoAdvance.enabled && (
           <span>
@@ -377,78 +377,79 @@ export const FeatureTabs = ({
         })}
       </CornerBox>
 
-      {/* Title bar with corner box */}
-      <CornerBox
-        role="tablist"
-        aria-label="Feature navigation. Use arrow keys to navigate, Enter or Space to select, Escape to toggle auto-advance."
-        className="px-4 py-2 hidden md:block"
-        onKeyDown={handleKeyDown}
-      >
-        <div ref={tabListScrollRef} className="flex flex-row items-center">
-          {/* Title — left-aligned */}
-          <div className="relative overflow-hidden min-w-0 flex-1">
-            <div aria-hidden className="flex flex-col">
-              {features.map((f) => (
-                <span
-                  key={f.id}
-                  className="whitespace-nowrap text-xl font-analog font-medium invisible h-0 block"
-                >
-                  {f.title}
-                </span>
-              ))}
-            </div>
-            <AnimatePresence mode="wait" initial={false}>
-              {activeFeature && (
-                <motion.h3
-                  key={activeFeature.id}
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  transition={{ duration: 0.12, ease: "easeOut" }}
-                  className="block whitespace-nowrap text-xl font-analog font-medium text-primary"
-                >
-                  {activeFeature.title}
-                </motion.h3>
-              )}
-            </AnimatePresence>
-          </div>
+      {/* Clickable product-area names, then animated subtitle */}
+      <CornerBox className="px-4 py-3">
+        <div
+          ref={tabListScrollRef}
+          role="tablist"
+          aria-label="Product area screenshots. Use arrow keys to navigate, Escape to toggle auto-advance."
+          className="flex !flex-nowrap md:!flex-wrap items-center overflow-x-auto md:overflow-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-sm leading-snug"
+          onKeyDown={handleKeyDown}
+        >
+          {features.map((feature, index) => {
+            const isActive = activeTab === feature.id;
 
-          {/* Dot indicators — right-aligned */}
-          <div className="flex flex-row items-center gap-1.5 ml-auto shrink-0">
-            {features.map((feature, index) => {
-              const isActive = activeTab === feature.id;
-
-              return (
+            return (
+              <span
+                key={feature.id}
+                className="inline-flex items-center shrink-0"
+              >
+                {index > 0 && (
+                  <span aria-hidden className="px-2 text-text-tertiary">
+                    ·
+                  </span>
+                )}
                 <button
-                  key={feature.id}
                   ref={(el) => {
                     tabRefs.current[index] = el;
                   }}
+                  type="button"
                   role="tab"
                   aria-selected={isActive}
-                  aria-label={feature.title}
-                  aria-controls={`tabpanel-${feature.id}`}
+                  aria-controls="tabpanel-product-area"
                   id={`tab-${feature.id}`}
                   tabIndex={state.focusedIndex === index ? 0 : -1}
                   onClick={() => handleTabChange(feature.id)}
-                  className="group p-1 focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 rounded"
+                  className={cn(
+                    "cursor-pointer whitespace-nowrap rounded-sm py-0.5 transition-colors duration-150",
+                    "focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/50",
+                    isActive
+                      ? "font-medium text-primary"
+                      : "font-normal text-text-tertiary hover:text-primary",
+                  )}
                 >
-                  <span
-                    className={`block w-3 h-1.5 rounded-sm transition-colors duration-150 ease-out ${
-                      isActive
-                        ? "bg-primary"
-                        : "bg-line-structure group-hover:bg-primary"
-                    }`}
-                  />
+                  {feature.name}
                 </button>
-              );
-            })}
-          </div>
+              </span>
+            );
+          })}
+        </div>
+
+        <div className="relative mt-3 min-h-[1.125rem] overflow-hidden">
+          <AnimatePresence mode="wait" initial={false}>
+            {activeFeature && (
+              <motion.p
+                key={activeFeature.id}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.12, ease: "easeOut" }}
+                className="text-xs leading-relaxed font-normal text-text-tertiary"
+              >
+                {activeFeature.subtitle}
+              </motion.p>
+            )}
+          </AnimatePresence>
         </div>
       </CornerBox>
 
-      {/* Image box - desktop */}
-      <CornerBox className="p-4 md:-mt-px hidden md:block" withStripes>
+      <CornerBox
+        className="p-4 -mt-px"
+        withStripes
+        role="tabpanel"
+        id="tabpanel-product-area"
+        aria-labelledby={activeFeature ? `tab-${activeFeature.id}` : undefined}
+      >
         <div className="relative w-full overflow-hidden aspect-[2205/1291] custom-card-shadow">
           <AnimatePresence mode="sync" initial={false}>
             {activeFeature ? (
@@ -463,22 +464,6 @@ export const FeatureTabs = ({
               </motion.div>
             ) : null}
           </AnimatePresence>
-        </div>
-      </CornerBox>
-
-      {/* Image box - mobile */}
-      <CornerBox className="pl-4 pt-4 block md:hidden" withStripes>
-        <div className="relative w-full overflow-hidden min-h-[410px]">
-          <Image
-            src={mobileFeature?.image.light}
-            alt={mobileFeature?.image.alt}
-            width={1360}
-            height={1640}
-            quality={100}
-            className="absolute left-0 top-0 min-w-full min-h-full object-cover object-top-left"
-            sizes="(min-width: 640px) 1360px"
-            priority
-          />
         </div>
       </CornerBox>
     </div>
