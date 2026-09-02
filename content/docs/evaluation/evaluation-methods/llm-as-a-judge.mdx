@@ -229,6 +229,28 @@ After saving, you can:
 **Deprecation of trace-level evaluators:** Trace-level evaluators are built on the old trace-centric data model and are deprecated as part of [Langfuse v4](/docs/v4). On Langfuse Cloud, existing trace-level evaluators keep running until the v4 cutover on <V4CutoverDate />; after that they stop producing results. On self-hosted Langfuse v4, once running in `events_only` mode, they will no longer produce results. Multi-span evaluations will build on the new observations-first data model. To move existing trace-level evaluators, follow the [upgrade guide](/faq/all/llm-as-a-judge-migration).
 </Callout>
 
+## Choose prompt message roles [#prompt-message-roles]
+
+Messages are sent to the LLM-as-a-Judge model in order. You do not need every role; a single **User** message is enough for a simple evaluator.
+
+| Role          | When to use it                                                                                                                                                          | Example                                                                 |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| **System**    | Set stable evaluator instructions, its rubric, and constraints that apply to every case. A system message must be the first message.                                    | `You are a strict evaluator. Check whether the answer is grounded.`     |
+| **User**      | Provide the evaluation task and changing data through mapped variables.                                                                                                 | `Evaluate {{output}} against {{ground_truth}}.`                         |
+| **Assistant** | Add a few-shot example of how the LLM-as-a-Judge evaluator should respond, or represent an assistant turn before a follow-up user message in a multi-turn conversation. | `The answer is not grounded because it contradicts the reference text.` |
+
+## Multi-modal evaluation [#multi-modal-evaluation]
+
+LLM-as-a-Judge evaluators can score observations that contain images, audio, documents, and other media. Add a variable such as `{{input}}` or `{{output}}` to the evaluator prompt, then map it to an observation field that contains [Langfuse media](/docs/observability/features/multi-modality). Langfuse resolves the media reference and sends the attachment to the LLM-as-a-Judge model together with the surrounding text.
+
+For example, use multi-modal evaluators to:
+
+- Compare an image description with the source image.
+- Evaluate a voice agent response against the original audio.
+- Check whether an answer is grounded in an attached PDF.
+
+The selected LLM-as-a-Judge model and provider must support the media type. Langfuse returns an evaluator error if the media cannot be sent to that model. Self-hosters can configure media delivery and attachment size limits with the [`LANGFUSE_EVALUATOR_MEDIA_*` environment variables](/self-hosting/configuration#llm-as-a-judge-media).
+
 ## Project default model [#project-default-model]
 
 A project default model is used for evaluators unless you select a dedicated model for an evaluator. It lets you use one model configuration across your project instead of setting a model for every evaluator individually.
