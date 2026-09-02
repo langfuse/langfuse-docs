@@ -1,12 +1,16 @@
 ---
 title: Evaluate AI Systems
-sidebarTitle: Evaluation Quick Start
+sidebarTitle: Evaluation
 description: Run your first offline evaluation on a Langfuse dataset and compare prompt changes.
 ---
 
 # Get Started with Evaluating your Application
 
-This guide walks you through a repeatable way to measure the quality of your LLM application. You can use this to catch regressions before shipping a new version, to optimize output quality, or to reduce the cost of your system. A more conceptual introduction to experiments can be found [here](/academy/experiments).
+This walkthrough is for [experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk): a dataset of test cases, your application or agent code as the task, and evaluators that score every run. Use it to catch regressions before shipping, optimize output quality, or reduce cost.
+
+You can also [run prompt experiments in the UI](/docs/evaluation/experiments/experiments-via-ui) when you only need to compare prompts or models on a dataset, [score traces in the UI](/docs/evaluation/evaluation-methods/scores-via-ui), or [review items in an annotation queue](/docs/evaluation/evaluation-methods/annotation-queues).
+
+If you don't yet know what to evaluate, start with [Choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate). For how datasets and experiments fit together, see [Datasets](/academy/datasets) and [Experiments](/academy/experiments).
 
 import { Details, Summary } from "@/components/Details";
 import { Button } from "@/components/ui/button";
@@ -161,10 +165,14 @@ npm install @langfuse/client @langfuse/openai @langfuse/otel @opentelemetry/sdk-
 
 ### Create the dataset [#sdk-create-dataset]
 
-Create a Langfuse dataset and add five questions with their expected answers. Run this setup script once; the experiment script in the next step reuses the stored dataset.
+A dataset is a collection of test cases. Each item has an **input** and, optionally, an **expected output** that evaluators can compare against. How many items you add — and whether they are questions, tickets, tool traces, or something else — depends on your use case. A first dataset might have a handful of representative cases; later you can grow it to 10, 50, or more as you learn what fails.
 
-<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+The rest of this step is an **example** so you can run the walkthrough end to end: five questions about San Francisco tourist sites. You do not need five items, and they do not need to be questions.
+
+<LangTabs items={["Python SDK", "JS/TS SDK", "Langfuse UI"]}>
 <Tab>
+
+Run this setup script once; the experiment script in the next step reuses the stored dataset.
 
 ```python filename="seed_dataset.py"
 from langfuse import get_client
@@ -229,6 +237,8 @@ python seed_dataset.py
 
 </Tab>
 <Tab>
+
+Run this setup script once; the experiment script in the next step reuses the stored dataset.
 
 ```typescript filename="seed-dataset.ts"
 import { LangfuseClient } from "@langfuse/client";
@@ -307,13 +317,54 @@ npx tsx seed-dataset.ts
 ```
 
 </Tab>
+<Tab>
+
+In the Langfuse UI, go to [**Datasets**](https://cloud.langfuse.com/project/~/datasets) and click `+ New dataset`. Name it `san-francisco-sites` if you want to run the example experiment in the next step without changing the script.
+
+<Frame className="my-10" fullWidth>
+  ![New dataset button](/images/docs/create_dataset.png)
+</Frame>
+
+Add items one by one, import a CSV, or add cases from existing traces. For the San Francisco example, each item's `input` is a question and the `expected output` is the site name. Use any number of items — and any input shape — that matches your own use case.
+
+<Tabs items={["Add item", "Import CSV", "Add from trace"]}>
+<Tab>
+  <Video
+    src="https://static.langfuse.com/docs-videos/dataset-item-create.mp4"
+    aspectRatio={16 / 9}
+    gifStyle
+  />
+</Tab>
+<Tab>
+  <Video
+    src="https://static.langfuse.com/docs-videos/dataset-item-upload.mp4"
+    aspectRatio={16 / 9}
+    gifStyle
+  />
+</Tab>
+<Tab>
+  <Video
+    src="https://static.langfuse.com/docs-videos/datasets-add-from-trace.mp4"
+    aspectRatio={16 / 9}
+    gifStyle
+  />
+</Tab>
+</Tabs>
+
+See [Datasets](/docs/evaluation/experiments/datasets) for CSV import, adding items from traces, and dataset versions.
+
+</Tab>
 </LangTabs>
 
-Dataset item IDs are stable, so adding an item with the same ID updates it instead of creating a duplicate. You can also [create datasets in the UI or import a CSV](/docs/evaluation/experiments/datasets).
+When you create items via the SDK, dataset item IDs are stable, so adding an item with the same ID updates it instead of creating a duplicate.
 
 ### Run an experiment [#sdk-run-experiment]
 
-The experiment run sends each question to the model. The evaluator returns `1` when the model output exactly matches the expected site name and `0` otherwise.
+Use the **SDK** when the experiment should execute your own application or agent code — any task you cannot express as a prompt and model in Langfuse. Use [prompt experiments in the UI](/docs/evaluation/experiments/experiments-via-ui) when you only want to compare prompt versions or models on a dataset.
+
+You can still start an SDK experiment from the UI: configure a [webhook](/docs/evaluation/experiments/experiments-via-sdk#configure-webhook) that runs your experiment code, then trigger it with **Run → Custom Experiment** on the dataset.
+
+This walkthrough runs the experiment in the SDK. In the example below, each dataset item is sent to the model. The evaluator returns `1` when the output exactly matches the expected site name and `0` otherwise.
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
@@ -493,7 +544,8 @@ Open the affected item and compare the model output with the expected output. Ca
 ## Next steps
 
 - Learn how [datasets and dataset versions](/docs/evaluation/experiments/datasets) support reproducible tests.
+- Compare prompts and models without writing a task function using [experiments via UI](/docs/evaluation/experiments/experiments-via-ui).
 - Explore the full [experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk), including async evaluators, concurrency, and run-level metrics.
 - Add [experiments to CI/CD](/docs/evaluation/experiments/experiments-ci-cd) to catch regressions before deployment.
-- Learn how you can [choose](/academy/evaluate/choosing-what-to-evaluate) what to evaluate
+- [Write evaluators you can trust](/academy/evaluate/writing-evaluators).
 - Choose between [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators), [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), and human review for your application.
