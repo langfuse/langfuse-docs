@@ -27,13 +27,13 @@ For the complete request and response contract, see the
 
 ## Choose the right API
 
-| If you want to...                                                                           | Use                                                                                                                                                           |
-| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Run experiments and ingest experiment data                                                  | [Experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk) or [direct OpenTelemetry ingestion](/integrations/native/opentelemetry/experiments) |
-| List experiment runs and their summaries                                                    | `GET /api/public/experiments?fromStartTime=2026-01-01T00:00:00Z`                                                                                              |
-| Retrieve experiment items and their inputs, outputs, expected outputs, metadata, and scores | `GET /api/public/experiment-items?fromStartTime=2026-01-01T00:00:00Z`                                                                                         |
-| Retrieve the complete trace and observation tree for an item                                | [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2), using the item's `traceId`                                                   |
-| Query evaluation scores independently                                                       | [Scores API v3](/docs/api-and-data-platform/features/scores-api#v3)                                                                                           |
+| If you want to...                                                                           | Use                                                                                                                                                                      |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Run experiments and ingest experiment data                                                  | [Experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk) or [Experiments via OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry) |
+| List experiment runs and their summaries                                                    | `GET /api/public/experiments?fromStartTime=2026-01-01T00:00:00Z`                                                                                                         |
+| Retrieve experiment items and their inputs, outputs, expected outputs, metadata, and scores | `GET /api/public/experiment-items?fromStartTime=2026-01-01T00:00:00Z`                                                                                                    |
+| Retrieve the complete trace and observation tree for an item                                | [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2), using the item's `traceId`                                                              |
+| Query evaluation scores independently                                                       | [Scores API v3](/docs/api-and-data-platform/features/scores-api#v3)                                                                                                      |
 
 The experiment endpoints support filtering, cursor-based pagination, and
 optional response fields. Refer to the [Experiments API reference](https://api.reference.langfuse.com/#tag/experiments)
@@ -49,7 +49,7 @@ is useful when scores are the primary data you want to query.
 ## Related resources
 
 - [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) — run experiments with the Python or JS/TS SDK.
-- [OpenTelemetry experiment ingestion](/integrations/native/opentelemetry/experiments) — ingest experiment spans directly with OpenTelemetry.
+- [Experiments via OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry) — ingest experiment spans from OpenTelemetry, then follow the [attribute guide](/integrations/native/opentelemetry/experiments).
 - [Experiments data model](/docs/evaluation/experiments/data-model) — understand how datasets, experiments, items, traces, observations, and scores relate.
 - [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) — retrieve row-level trace and observation data.
 - [Scores API v3](/docs/api-and-data-platform/features/scores-api#v3) — retrieve evaluation and annotation scores.
