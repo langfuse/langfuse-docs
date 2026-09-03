@@ -34,7 +34,7 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 - Solutions architect support during evaluation and rollout
 - Direct access to the product team for feedback
 - SOC 2 Type II and ISO 27001 reports
-- [Hardening for Government (in development)](/self-hosting/configuration/hardening#hardening-for-government)
+- Hardening for Government (in development)
 - Support SLA
 - Billing via AWS Marketplace or invoice
 
