@@ -1,0 +1,171 @@
+---
+title: "How to organize, version, and test hundreds of prompts"
+description: "We manage hundreds of prompts across several LLM features. How should we organize, version, and test them? Folders, labels, prompt experiments, and UI edits."
+tags: [guide]
+---
+
+# How to organize, version, and test hundreds of prompts
+
+Ten prompts fit in a config file. A few hundred, spread across several LLM features and edited by engineers, product managers, and domain experts, do not. At that size the problems are organizational: nobody knows which prompt serves which feature, a "small wording fix" ships to every user at once, and the person who knows how the prompt should read cannot change it without an engineer and a deploy. This guide is the operating model for that scale, built on Langfuse Prompt Management.
+
+**TL;DR:** Treat each prompt as a versioned object with a name, a folder, its model configuration, and a set of labels. Organize by feature with `/` folders, keep model and parameters in the prompt's config so they version together, and factor shared instructions into referenced prompts. Every save is an immutable version; labels such as `production` and `staging` are pointers that your application fetches by, so deploying and rolling back are label moves rather than code changes. Product managers edit in the UI, test in the playground and in prompt experiments against a dataset, and promote by moving a label; running applications pick the change up within the SDK cache TTL, 60 seconds by default. Protected labels restrict who can move `production`.
+
+## Organize prompts by feature
+
+The unit of organization is one prompt per LLM call site, named for the feature and the step rather than the model or the author: `support/triage/classify-intent`, not `gpt4-v3-final`.
+
+**Folders.** Langfuse creates [prompt folders](/docs/prompt-management/features/folders) from slashes in the prompt name: `support/triage/classify-intent` and `support/triage/draft-reply` appear inside a `support/triage/` folder in the UI, with no folder object to manage. Reading prompts in folders from the Python SDK requires `langfuse >= 3.0.2`.
+
+**Model configuration next to the text.** Each prompt version carries an optional JSON `config` for the model name, temperature, `max_tokens`, `response_format` schemas, and `tools` definitions. Because the config is versioned with the prompt, a model swap or schema change is a prompt version like any other, and your code reads it back with `prompt.config`.
+
+**Shared instructions.** When the same compliance paragraph appears in many prompts, put it in one text prompt and reference it with `@@@langfusePrompt:name=shared/compliance-footer|label=production@@@`. Referencing by label means dependent prompts pick up the change when the referenced prompt's `production` label moves; `version=` pins them. Only text prompts can be referenced this way.
+
+**Dynamic content.** Three mechanisms cover what changes at request time:
+
+| Mechanism            | Syntax                                                                | Use it for                                                          |
+| -------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Variables            | `{{customer_name}}`                                                   | Strings your code fills in with `prompt.compile(customer_name=...)` |
+| Prompt references    | `@@@langfusePrompt:name=...\|label=...@@@`                            | Instruction blocks shared across prompts                            |
+| Message placeholders | A `{"type": "placeholder", "name": "history"}` entry in a chat prompt | Whole message arrays such as chat history, filled at compile time   |
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+langfuse.create_prompt(
+    name="support/triage/classify-intent",
+    type="chat",
+    prompt=[
+        {
+            "role": "system",
+            "content": "Classify the customer's message for {{product}} into one intent.",
+        },
+        {"type": "placeholder", "name": "history"},
+    ],
+    config={"model": "gpt-4o", "temperature": 0},
+    labels=["staging"],
+)
+```
+
+## Version prompts with immutable versions and labels
+
+Every save of a prompt, from the UI, the SDK, or the API, creates a new immutable version; versions are never edited in place. Labels are pointers to versions, and each label points to exactly one version of a prompt. The `latest` label is maintained automatically and follows the newest version, a fetch without a label returns the version carrying `production`, and every other label is yours to define. Moving a label is the deployment, and rollback is moving it back. The [version control docs](/docs/prompt-management/features/prompt-version-control) describe the model in full.
+
+| Label         | Who moves it                   | What fetches it                                                    |
+| ------------- | ------------------------------ | ------------------------------------------------------------------ |
+| `latest`      | Langfuse, on every save        | Development and playground sessions, `cache_ttl_seconds=0` fetches |
+| `staging`     | Whoever authored the change    | Staging environments and CI validation runs                        |
+| `production`  | Approvers only, when protected | Production applications, by default when no label is given         |
+| `prod-b`      | Whoever runs the experiment    | The fraction of production traffic in an A/B test                  |
+| `tenant-acme` | The team owning the tenant     | One customer's variant of an otherwise shared prompt               |
+
+The diff view shows what changed between any two versions. Moving a label from code is one call:
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Promote version 7 to production, or point production back at 6 to roll back
+langfuse.update_prompt(
+    name="support/triage/classify-intent",
+    version=7,
+    new_labels=["production"],
+)
+```
+
+**Protected labels.** Project admins and owners can mark a label such as `production` as protected. Once protected, `viewer` and `member` roles cannot move or delete it (and cannot delete the prompt), while `admin` and `owner` roles still can. As of September 2026, protected labels are available on the Pro plan with the Teams add-on, on Enterprise, and in the self-hosted Enterprise Edition.
+
+**Audit trail.** On Enterprise plans and the self-hosted Enterprise Edition, audit logs record prompt actions (create, update, delete, promote, set label, update tags) and protected-label creation, with the acting user or API key and the complete before and after state.
+
+## Let product managers edit and deploy prompts without a code deploy
+
+Your application references labels, never versions and never prompt text. A product manager who edits a prompt in the Langfuse UI creates a new version, which carries the `latest` label and changes nothing in production. When they, or an approver, move the `production` label to that version, the application serves it on its next fetch. The [product teams guide](/resources/engineering/langfuse-for-product-teams) covers what else non-engineers do in Langfuse.
+
+"Without a code deploy" has a concrete meaning. The SDKs [cache prompts client-side](/docs/prompt-management/features/caching) with a default TTL of 60 seconds. A cache hit returns immediately; after the TTL expires the stale prompt is still served immediately while the SDK revalidates in the background. A label move therefore reaches running instances within roughly one TTL, on their next fetch. The TTL is configurable per fetch, and `cache_ttl_seconds=0` disables caching in development.
+
+The application side of the contract is a fetch by name, a compile with the request's variables, the config values passed into the model call, and a link between the generation and the prompt version:
+
+```python
+from langfuse import get_client
+from langfuse.openai import OpenAI
+
+langfuse = get_client()
+client = OpenAI()
+
+# Resolves the version carrying the "production" label; cached client-side
+prompt = langfuse.get_prompt("support/triage/classify-intent", type="chat")
+
+messages = prompt.compile(
+    product="Acme Billing",
+    history=[{"role": "user", "content": "I was charged twice this month."}],
+)
+
+response = client.chat.completions.create(
+    model=prompt.config["model"],
+    temperature=prompt.config["temperature"],
+    messages=messages,
+    langfuse_prompt=prompt,  # attributes this generation to the exact prompt version
+)
+```
+
+The `langfuse_prompt` argument closes the loop for the product manager. With [prompts linked to traces](/docs/prompt-management/features/link-to-traces), a generation shows which prompt version produced it, and the prompt's Metrics tab aggregates per version: median latency, median input and output tokens, median cost, generation count, median evaluation score, and first and last generation timestamps. For LangChain applications, pass the prompt as `metadata={"langfuse_prompt": langfuse_prompt}` on the `PromptTemplate` instead. Fallback prompts create no link.
+
+A product manager's loop, entirely in the UI:
+
+1. Open the prompt, edit the text or the config, and save it as a new version with a commit message.
+2. Open the version in the playground with realistic variable values and compare it side by side with the current production version.
+3. Run a prompt experiment against the feature's dataset and compare the scores with the production version's run.
+4. Move the `staging` label to the version, or ask an approver to move `production` if that label is protected.
+5. Watch the version's row in the Metrics tab.
+
+## Test prompts before and after they ship
+
+Three methods answer different questions.
+
+| Method               | Answers                                                  | Where it runs                                                  |
+| -------------------- | -------------------------------------------------------- | -------------------------------------------------------------- |
+| Playground           | Does this edit do what I meant on a few examples?        | The Langfuse UI, on demand, with your project's LLM connection |
+| Prompt experiments   | Does this version beat the current one across a dataset? | The Langfuse UI or SDK, scored by evaluators                   |
+| A/B test with labels | Does it hold up on real traffic?                         | Your application, measured in the prompt's Metrics tab         |
+
+**Playground.** The playground opens any prompt version, runs it against a model from your project's LLM connection, and supports variables, message placeholders, tool definitions with mocked tool responses, and structured output schemas. Side-by-side variants each keep their own model settings, and a variant can be saved back as a new version. A production generation can be opened from its trace in the playground to reproduce a bad answer with its exact inputs.
+
+**Prompt experiments.** [Experiments via the UI](/docs/evaluation/experiments/experiments-via-ui) run a selected prompt version against every item of a dataset and optionally score each output with an LLM-as-a-judge or code evaluator. The prompt's variables must match the dataset items' input keys (`{{question}}` maps to `"question"`), and chat placeholders map to keys holding message arrays. Runs are compared side by side with aggregate scores. Experiments run on the latest dataset version at experiment time.
+
+**A/B tests.** Label two versions `prod-a` and `prod-b`, fetch both in your application, and alternate between them. Langfuse does not split traffic for you, but because each generation is linked to its version, latency, tokens, cost, and evaluation scores separate per variant in the Metrics tab. Run it after dataset testing has passed, on applications that tolerate some variance.
+
+For the automated version of the middle row, a CI gate that fails when a candidate's scores drop and blocks promotion until an approver moves a protected label, follow the [prompt CI/CD guide](/resources/engineering/prompt-cicd#ci-gate).
+
+## Operate a prompt library at scale
+
+**Move prompts between projects.** Prompts are scoped to a project. If you use separate projects for staging and production to restrict access, the Prompts page has Export and Import buttons: export selected prompts as JSON, import the file into the destination project, and each imported prompt is created as a new version, including when a prompt with the same name already exists. The `latest` and `production` labels are omitted on import, so a migration never changes what the destination serves.
+
+**Announce every change.** [Webhooks](/docs/prompt-management/features/webhooks-slack-integrations) fire on prompt version `created`, `updated`, and `deleted` events, optionally filtered to specific prompts. A label move is an `updated` event and fires twice, once for the version gaining the label and once for the version losing it. The payload carries the prompt name, version, labels, config, tags, and commit message, signed with an HMAC SHA-256 signature in `x-langfuse-signature`. The Slack integration posts the same events to a channel you choose, with a dry run to confirm delivery.
+
+**Mirror to Git.** A repository dispatch automation sends a `repository_dispatch` event to your repository on prompt changes, with the prompt in `client_payload`, which starts a GitHub Actions workflow with no extra infrastructure. Alternatively, a webhook receiver (the docs include a FastAPI reference implementation) commits each prompt version as JSON to a repository, optionally only for versions carrying a required label such as `production`. Langfuse remains the deployment source of truth.
+
+**Guarantee availability.** Because of client-side caching, `get_prompt` only raises when no cached copy exists (fresh or stale) and the network request fails after retries, which in practice means a brand-new instance starting during an outage. If a feature cannot tolerate that, prefetch its prompts on startup and exit if they fail to load, or pass `fallback=` with a hardcoded prompt to `get_prompt`; `prompt.is_fallback` tells you when the fallback was used. Most teams do neither, because the SDK cache and the API's Redis cache already cover brief disruptions.
+
+## FAQ
+
+### How should we name and organize hundreds of prompts? [#organize-hundreds-of-prompts]
+
+Name each prompt for its feature and step, and use slashes to create folders: `support/triage/classify-intent`, `support/triage/draft-reply`, `onboarding/welcome/summarize-account`. Keep one prompt per LLM call site, store model and parameters in the prompt's config so they version with the text, and move shared instruction blocks into referenced prompts so a policy change is one edit.
+
+### What happens when a product manager edits a prompt in the UI? [#pm-edit-flow]
+
+Saving creates a new immutable version that receives the `latest` label. Production is unaffected until someone moves the `production` label to the new version, in the UI or with `update_prompt`. Once moved, running application instances serve the new version on their next fetch after the cache TTL expires, 60 seconds by default, with no redeploy; rolling back is moving the label back.
+
+### Can we restrict who is allowed to deploy prompts to production? [#restrict-production-deploys]
+
+Yes. Project admins and owners can mark the `production` label as protected, after which `member` and `viewer` roles cannot move or delete it while still being able to create versions and label them `staging`. As of September 2026, protected labels are included in the Pro plan with the Teams add-on, in Enterprise, and in the self-hosted Enterprise Edition; audit logs on Enterprise and self-hosted EE record every label change with user attribution.
+
+### How do we move prompts between staging and production projects? [#move-prompts-between-projects]
+
+Use bulk export and import on the Prompts page: export the prompts as JSON from the source project and import the file into the destination, where each prompt is created as a new version. The `latest` and `production` labels are omitted on import, so you relabel deliberately after checking the result. Alternatively, sync through the GitHub integration or the API, or keep one project and separate staging from production traffic with tracing environments, which prompts are shared across, when your team can share access.
+
+### What happens to our application if Langfuse is unreachable? [#langfuse-unreachable]
+
+Running instances keep serving their cached prompts; stale entries are returned immediately while revalidation fails quietly in the background, so requests are not affected. Only a new instance with an empty cache is exposed, and `get_prompt` raises there after retries. Cover that case with a `fallback=` prompt or by prefetching prompts on startup, as described in the guaranteed availability docs.
