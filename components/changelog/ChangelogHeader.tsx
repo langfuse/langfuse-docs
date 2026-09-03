@@ -66,7 +66,7 @@ export const ChangelogHeader = () => {
               {title}
             </h1>
           </div>
-          <Authors authors={authors} className="justify-start" />
+          <Authors authors={authors} className="md:justify-start" />
         </div>
       </div>
 
