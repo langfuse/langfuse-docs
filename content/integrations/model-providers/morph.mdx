@@ -1,18 +1,78 @@
 ---
-title: Realtime Classification with Morph Reflex Evaluators
+title: Monitor Morph with Langfuse
 sidebarTitle: Morph
 logo: /images/integrations/morph_icon.svg
-description: Use Morph Reflex classifiers as LLM-as-a-judge evaluators in Langfuse to label your traces with a category in realtime.
+description: Trace Morph model calls and use Morph Reflex classifiers as LLM-as-a-judge evaluators in Langfuse.
 category: Integrations
 ---
 
-# Realtime Classification with Morph Reflex Evaluators
+# Monitor Morph with Langfuse
 
-This guide shows you how to use [Morph](https://morphllm.com) Reflex models as LLM-as-a-judge evaluators in Langfuse. Morph's API is OpenAI-compatible, so a Reflex plugs into Langfuse as a **categorical** evaluator — Langfuse runs it over each trace and attaches the predicted category as a score, with no extra inference code in your application.
+This guide shows you how to trace Morph model calls and use Morph Reflex models as LLM-as-a-judge evaluators in Langfuse. Morph's APIs are OpenAI-compatible, so you can use the Langfuse OpenAI integration for both workflows.
 
-> **What is Morph?** [Morph](https://morphllm.com) trains and serves Reflexes: small, fast classifier models for realtime classification of LLM inputs and outputs — for example jailbreak detection, guardrails, user frustration, or your own custom-trained categories.
+> **What is Morph?** [Morph](https://morphllm.com) serves open-weight language models through shared and [dedicated inference](https://www.morphllm.com/dedicated-inference) endpoints. Morph also trains and serves Reflexes: small, fast classifier models for realtime classification of LLM inputs and outputs, such as jailbreak detection, guardrails, user frustration, or your own custom-trained categories.
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source AI engineering platform that helps teams trace API calls, monitor performance, and debug issues in their LLM applications.
+
+## Trace Morph inference
+
+Morph exposes an OpenAI-compatible API at `https://api.morphllm.com/v1`. Use the Langfuse OpenAI drop-in replacement to capture prompts, responses, token usage, latency, and model metadata without changing the request format.
+
+### Install the dependencies
+
+```bash
+pip install openai langfuse
+```
+
+### Configure your credentials
+
+Create a Morph API key in the [Morph dashboard](https://morphllm.com/dashboard/api-keys), then set it alongside your Langfuse project keys:
+
+```bash
+export MORPH_API_KEY="sk-..."
+export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+export LANGFUSE_BASE_URL="https://cloud.langfuse.com"
+```
+
+### Call Morph through the traced client
+
+Replace the standard OpenAI import with `langfuse.openai`. The client keeps the OpenAI request and response types while automatically sending a generation trace to Langfuse.
+
+```python
+import os
+
+from langfuse.openai import openai
+
+client = openai.OpenAI(
+    api_key=os.environ["MORPH_API_KEY"],
+    base_url="https://api.morphllm.com/v1",
+)
+
+response = client.chat.completions.create(
+    model="morph-glm53flash",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Explain prefix caching in two sentences."},
+    ],
+    name="morph-inference",
+)
+
+print(response.choices[0].message.content)
+```
+
+Current recommended model IDs include `morph-kimik3`, `morph-glm53-744b`, `morph-glm53flash`, and `morph-dsv4flash`. To discover every model available to your key, call the OpenAI-compatible model listing:
+
+```python
+for model in client.models.list():
+    print(model.id)
+```
+
+The resulting generation appears in Langfuse with its input, output, token usage, latency, and model name. The same tracing setup works when your Morph account uses reserved dedicated capacity because the client interface remains OpenAI-compatible.
+
+## Use Morph Reflex evaluators
+
+Morph Reflexes plug into Langfuse as **categorical** evaluators. Langfuse runs a Reflex over each trace and attaches the predicted category as a score, with no extra inference code in your application.
 
 Since Reflexes are classifiers, they return exactly one category per evaluation (the top prediction) and no rationale — the returned reasoning is always `NA-Reflex`.
 
