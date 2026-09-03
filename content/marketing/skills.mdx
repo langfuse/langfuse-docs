@@ -1,0 +1,47 @@
+---
+title: Langfuse Agent Skill
+seoTitle: Langfuse Agent Skill — a playbook your coding agent can read
+description: Install the Langfuse skill so Claude Code, Cursor, Codex, and other coding agents can instrument apps, query traces, manage prompts, and set up evals from the editor.
+contentWidth: full
+---
+
+import { SkillHero } from "@/components/skills/SkillHero";
+import { SkillBrowser } from "@/components/skills/SkillBrowser";
+import AutoInstall from "@/components-mdx/get-started/auto-install.mdx";
+
+<div className="mx-auto w-full max-w-5xl">
+
+<SkillHero />
+
+## Point your agent at a skill [#point-your-agent-at-a-skill]
+
+Ask it to do what the skill describes, like adding tracing to an app, calibrating a judge against human labels, or finding hidden failure modes. Select a playbook to preview the `SKILL.md` your agent reads.
+
+<SkillBrowser />
+
+Once the skill is installed, prompt your agent directly:
+
+- _Show me the last 10 traces with a score below 0.5_
+- _Add Langfuse tracing to the OpenAI calls in `src/agent.ts`_
+- _Migrate the system prompt in `src/agent.ts` to Langfuse prompt management_
+- _Create a dataset called "edge-cases" and add these three failing traces to it_
+- _Calibrate my LLM-as-a-judge against the human labels in this dataset_
+
+## Install [#install]
+
+<AutoInstall />
+
+The skill follows the open [Agent Skills](https://github.com/anthropics/skills) standard. It is a self-contained folder with a `SKILL.md` entrypoint plus reference playbooks for specific workflows. Only the frontmatter sits in the agent's context; the full instructions load on demand.
+
+## Resources [#resources]
+
+- [Agent Skill docs](/docs/api-and-data-platform/features/agent-skill) — setup details and how the skill is structured
+- [Langfuse for Agents](/agents) — how the skill, CLI, and MCP server fit together
+- [Langfuse CLI](/docs/api-and-data-platform/features/cli) — the CLI the skill uses under the hood
+- [MCP Server](/docs/api-and-data-platform/features/mcp-server) — protocol-based access for agents that cannot run shell commands
+- [Skills on GitHub](https://github.com/langfuse/skills)
+- [Calibrate an LLM-as-a-judge](/guides/llm-as-a-judge-calibration-skill)
+- [Making agents fall in love with Langfuse](/blog/2026-02-13-will-you-be-my-cli)
+- [Evaluating AI agent skills](/blog/2026-02-26-evaluate-ai-agent-skills)
+
+</div>
