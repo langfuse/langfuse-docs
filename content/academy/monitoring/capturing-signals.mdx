@@ -1,0 +1,338 @@
+---
+title: Capturing signals
+sidebarTitle: Capturing signals
+description: "Instrument your application so production usage produces quality judgments: explicit ratings, behavioral events, conversation signals, and task outcomes captured as scores on traces."
+---
+
+import { Details, Summary } from "@/components/Details";
+import { FeedbackCaptureDiagram } from "@/components/academy/FeedbackCaptureDiagram";
+
+export const references = [
+  {
+    id: "shankar-validators",
+    title: "Who validates the validators? (Shankar et al.)",
+    url: "https://arxiv.org/abs/2404.12272",
+  },
+  {
+    id: "huyen-pitfalls",
+    title:
+      "Common pitfalls when building generative AI applications (Chip Huyen)",
+    url: "https://huyenchip.com/2025/01/16/ai-engineering-pitfalls.html",
+  },
+  {
+    id: "feedback-rates",
+    title:
+      "LLM alignment using implicit feedback from users (Patwari et al.)",
+    url: "https://arxiv.org/abs/2606.20482",
+  },
+  {
+    id: "ziegler-copilot",
+    title:
+      "Productivity assessment of neural code completion (Ziegler et al., GitHub Copilot)",
+    url: "https://arxiv.org/abs/2205.06537",
+  },
+  {
+    id: "yan-patterns",
+    title: "Patterns for building LLM-based systems and products (Eugene Yan)",
+    url: "https://eugeneyan.com/writing/llm-patterns/",
+  },
+  {
+    id: "park-alexa",
+    title:
+      "A scalable framework for learning from implicit user feedback (Park et al., Amazon Alexa)",
+    url: "https://arxiv.org/abs/2010.12251",
+  },
+  {
+    id: "spur",
+    title:
+      "Interpretable user satisfaction estimation for conversational systems with LLMs (Lin et al., Microsoft)",
+    url: "https://arxiv.org/abs/2403.12388",
+  },
+  {
+    id: "snover-hter",
+    title:
+      "A study of translation edit rate with targeted human annotation (Snover et al.)",
+    url: "https://aclanthology.org/2006.amta-papers.25/",
+  },
+  {
+    id: "huyen-aie",
+    title:
+      "AI Engineering, chapter 10: architecture and user feedback (Chip Huyen)",
+    url: "https://www.oreilly.com/library/view/ai-engineering/9781098166298/ch10.html",
+  },
+  {
+    id: "covington-youtube",
+    title:
+      "Deep neural networks for YouTube recommendations (Covington et al.)",
+    url: "https://dl.acm.org/doi/10.1145/2959100.2959190",
+  },
+  {
+    id: "fox-implicit",
+    title:
+      "Evaluating implicit measures to improve web search (Fox et al., Microsoft)",
+    url: "https://www.microsoft.com/en-us/research/publication/evaluating-implicit-measures-improve-web-search/",
+  },
+  {
+    id: "huyen-dmls",
+    title: "Data distribution shifts and monitoring (Chip Huyen)",
+    url: "https://huyenchip.com/2022/02/07/data-distribution-shifts-and-monitoring.html",
+  },
+  {
+    id: "habib-mistakes",
+    title:
+      "5 common mistakes teams make when building with LLMs (Raza Habib)",
+    url: "https://www.ycombinator.com/blog/raza-habib-building-better-ai-products-with-llms",
+  },
+  {
+    id: "cursor-tab",
+    title: "Improving Cursor Tab with online RL (Cursor)",
+    url: "https://cursor.com/blog/tab-rl",
+  },
+  {
+    id: "hu-koren-volinsky",
+    title:
+      "Collaborative filtering for implicit feedback datasets (Hu, Koren & Volinsky)",
+    url: "http://yifanhu.net/PUB/cf.pdf",
+  },
+  {
+    id: "j-shape",
+    title:
+      "Overcoming the J-shaped distribution of product reviews (Hu, Pavlou & Zhang)",
+    url: "https://doi.org/10.1145/1562764.1562800",
+  },
+  {
+    id: "joachims-clicks",
+    title:
+      "Accurately interpreting clickthrough data as implicit feedback (Joachims et al.)",
+    url: "https://www.cs.cornell.edu/~tj/publications/joachims_etal_05a.pdf",
+  },
+  {
+    id: "mozannar-cdhf",
+    title:
+      "When to show a suggestion? Integrating human feedback in AI-assisted programming (Mozannar et al.)",
+    url: "https://arxiv.org/abs/2306.04930",
+  },
+  {
+    id: "hohnhold-longterm",
+    title:
+      "Focusing on the long-term: it's good for users and business (Hohnhold, O'Brien & Tang, Google)",
+    url: "https://research.google/pubs/focus-on-the-long-term-its-better-for-users-and-business/",
+  },
+  {
+    id: "evals-faq-surfacing",
+    title:
+      "How do I surface problematic traces beyond user feedback? (Husain & Shankar)",
+    url: "https://hamel.dev/blog/posts/evals-faq/how-do-i-surface-problematic-traces-for-review-beyond-user-feedback.html",
+  },
+];
+
+# Capturing signals
+
+[Monitoring](/academy/monitoring) runs on quality information attached to individual traces, and a [trace](/academy/tracing) records what your system did, not whether the result was good. Signals close that gap. A signal is a judgment about one specific output, captured as a [score](/docs/evaluation/scores/overview) on the trace that produced it. Capturing signals means instrumenting your application so that ordinary usage produces these judgments.
+
+Most quality judgments cost something: human annotation costs expert time, and an [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) costs a model call per trace plus the work of calibrating and maintaining it. One judgment is free. Your users judge every output through what they do next: they accept it, edit it, retry it, escalate past it, or walk away. That judgment happens whether you capture it or not. The only cost is instrumentation, paid once. Skipping it means discarding labels you already own, then paying a judge to approximate them.
+
+User signals are also closer to reality than criteria you define yourself. Judge criteria encode what you believe matters, and grading real outputs is what teaches you your criteria, so early criteria are partly guesses.<Ref refs={references} id="shankar-validators" /> They can also miss the point entirely: LinkedIn's skill-fit assistant gave correct verdicts while users wanted guidance on closing the gap, so correctness was the wrong bar.<Ref refs={references} id="huyen-pitfalls" /> A user rephrasing their question needs no rubric.
+
+Signals measure perceived quality at the moment of use, not specified quality. A user can approve a confident hallucination they could not verify, and no user signal fires on a data leak. Evaluators and guardrails still have their place: signals are the ground truth you calibrate them against.
+
+## The four kinds of signals [#four-kinds]
+
+Every signal falls into one of four kinds, ordered here from the most deliberate to the most grounded in real outcomes.
+
+| Kind                 | The judgment appears as                 | Examples                                      |
+| -------------------- | --------------------------------------- | --------------------------------------------- |
+| Explicit ratings     | A rating the user gives on purpose      | A thumbs down, a CSAT score                   |
+| Behavioral signals   | An action taken on the output           | A suggestion accepted, a response regenerated |
+| Conversation signals | Language in the user's next messages    | "No, I meant...", a request for a human       |
+| Outcome signals      | What happens to the output in the world | A draft sent unedited, a ticket reopened      |
+
+{/* TODO: diagram showing the four signal kinds attaching to one trace */}
+
+### Explicit ratings [#explicit-ratings]
+
+Explicit ratings are the only signals where the user knowingly grades the output, which makes them unambiguous and rare: reported rates in production applications hover around 1 to 3% of interactions,<Ref refs={references} id="feedback-rates" /> skewed toward users with strong reactions ([more on that below](#biases)). Friction drives the rate: an inline control next to each response collects more than a survey at the end. The strongest explicit form is comparative: when a user regenerates and then picks one of two answers, you get a preference between outputs instead of a verdict on one.
+
+<Details>
+<Summary>Examples of explicit ratings</Summary>
+
+| Signal                                                                                                          | What it tells you                                            |
+| --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| A thumbs up or down on a single response                                                                        | A direct verdict on that output                              |
+| A star rating or CSAT question when the conversation ends                                                       | A verdict on the session as a whole                          |
+| A written comment attached to a rating                                                                          | The reason behind the verdict, in the user's words           |
+| A reason picker on thumbs down (wrong, unsafe, ignored instructions)                                            | Which failure mode the user believes they saw                |
+| A choice between two regenerated answers                                                                        | A pairwise preference, more reliable than an absolute rating |
+| A report or flag button                                                                                         | A safety or policy violation worth immediate review          |
+| A label from internal reviewers in an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues) | An expert judgment, slower but trustworthy                   |
+
+</Details>
+
+### Behavioral signals [#behavioral-signals]
+
+Behavioral signals are actions users take on the output: accepting, copying, editing, regenerating, skipping, abandoning. They occur inside the normal workflow, so coverage is high; on a copilot-style product, every suggestion produces one. They are also the best-studied kind. GitHub matched 2,631 developer surveys to Copilot telemetry and found that the acceptance rate of shown suggestions predicted self-reported productivity better than any other measure they tested, including whether the accepted code later persisted in the file.<Ref refs={references} id="ziegler-copilot" /> The same study sets expectations: the best correlation was about 0.24. Behavioral signals carry real information and real noise.
+
+An action proves intent, not correctness. A copied answer is one the user wanted to use, not one that works.<Ref refs={references} id="yan-patterns" />
+
+<Details>
+<Summary>Examples of behavioral signals</Summary>
+
+| Where           | Signal                                               | What it tells you                                                |
+| --------------- | ---------------------------------------------------- | ---------------------------------------------------------------- |
+| Chat assistant  | The user regenerates a response                      | The answer did not land; a high-precision negative               |
+| Chat assistant  | The user stops generation mid-stream                 | The answer was visibly off before it finished                    |
+| Chat assistant  | The user copies the response                         | The output was worth taking elsewhere                            |
+| Chat assistant  | The user edits the response in place                 | What was wrong, with the fix included                            |
+| Chat assistant  | The user abandons the session right after an answer  | Ambiguous on its own, meaningful as a trend                      |
+| Chat assistant  | The user clicks a cited source                       | The citation was worth opening                                   |
+| Chat assistant  | The user switches model and retries                  | The default was not trusted for this task                        |
+| Suggestions     | A suggestion is accepted                             | The output fit the context                                       |
+| Suggestions     | A suggestion is accepted, then undone within seconds | A sharper negative than a plain rejection                        |
+| Suggestions     | A suggestion is dismissed by continuing to type      | A low-friction rejection                                         |
+| Drafting tools  | A draft is inserted into the document                | The draft cleared the bar for use                                |
+| Drafting tools  | A draft is discarded                                 | The draft missed entirely                                        |
+| Recommendations | An item is skipped shortly after it starts           | The pick missed the user's taste                                 |
+| Recommendations | The AI feature is turned off while usage continues   | The user chose the product without the AI, a deliberate negative |
+| Search and RAG  | The query is reformulated without any result click   | The results missed the intent                                    |
+| Voice agents    | The user interrupts the agent mid-sentence           | The response was not worth hearing out                           |
+
+</Details>
+
+### Conversation signals [#conversation-signals]
+
+In a conversational product, the user's next message is often the judgment: a rephrased question, a correction, a request for a human, a thank-you. No event fires in your UI, so extraction is a job for an LLM-as-a-judge that reads the trace and writes the score. Build and calibrate it like any judge ([writing good evaluators](/academy/evaluate/writing-evaluators) covers how).
+
+This kind works at production scale. Amazon used rephrase and follow-up patterns to curate training data for Alexa's language understanding from live traffic, week over week, with no human annotation.<Ref refs={references} id="park-alexa" /> Microsoft's SPUR goes a step further: an LLM learns satisfaction and dissatisfaction patterns from the small slice of thumbs-labeled conversations, condenses them into a rubric, and scores the unlabeled majority with it.<Ref refs={references} id="spur" /> Both directions count: gratitude and confirmation are signals, not just complaints.
+
+Separate steering from correction. In the [music DJ example](/academy/examples/music-streaming-dj), "play something calmer" is normal use of the feature and "I said calmer" is a compliance failure; only the second belongs in failure counts.
+
+<Details>
+<Summary>Examples of conversation signals</Summary>
+
+| Signal                                                                   | What it tells you                                                     |
+| ------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| The user rephrases the same question                                     | The previous answer did not land                                      |
+| The user corrects the agent ("no, I meant the March invoice")            | A specific failure, with the missing information included             |
+| The user asks for a human                                                | Trust in the agent ran out on that exact turn                         |
+| The user repeats an instruction the agent already received               | A compliance failure, which needs a different fix than a wrong answer |
+| The user quotes an error back ("you said X, but...")                     | A factual failure caught by the user                                  |
+| The user expresses frustration                                           | Dissatisfaction worth flagging regardless of cause                    |
+| The user confirms success or thanks the agent                            | A positive worth counting, not just the absence of a complaint        |
+| The closed conversation classifies as resolved, abandoned, or handed off | The outcome of the session as a whole, one categorical score          |
+
+</Details>
+
+### Outcome signals [#outcome-signals]
+
+Outcome signals are what happened to the output in the world: the draft was sent unedited, the extracted field survived the approval step, the ticket stayed closed. They are the strongest kind because they are grounded in the environment rather than in anyone's opinion, the monitoring counterpart of the evaluator rule to [grade the outcome, not the claim](/academy/evaluate/writing-evaluators#outcome-not-claim).
+
+Machine translation formalized the canonical one decades ago: HTER counts the edits a professional makes to fix machine output, and it correlated with human quality judgments as well as a second human judge does.<Ref refs={references} id="snover-hter" /> Treat a correction as evidence that the edited version is better, not as a perfect answer. Outcomes arrive late, minutes to days after the trace, so write them back to the original trace by ID.
+
+<Details>
+<Summary>Examples of outcome signals</Summary>
+
+| Signal                                                        | What it tells you                                                                                                                                 |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The diff between a drafted reply and what was actually sent   | Exactly what the human changed; classify it like the [support example](/academy/examples/customer-support-chatbot) (none, tone, corrected, added) |
+| An extracted field is corrected in a downstream approval step | Which field failed, on which document type                                                                                                        |
+| A support ticket stays closed, or reopens within days         | Whether the resolution held                                                                                                                       |
+| An escalated conversation is resolved quickly by a human      | What the human did differently is the lesson                                                                                                      |
+| A booking, order, or refund exists in the system of record    | The task completed in the environment, not just in the transcript                                                                                 |
+| Accepted code is still present at commit time                 | The suggestion survived contact with reality                                                                                                      |
+| An agent's pull request is merged, closed, or reverted        | The verdict of review and of production                                                                                                           |
+| The user does not contact support again about the same issue  | A resolution that held, slow to arrive but strong                                                                                                 |
+
+</Details>
+
+## What makes a signal good [#what-makes-a-signal-good]
+
+You will find more candidate signals than you should implement. Judge each candidate on four properties.
+
+| Property      | Question it answers                                                       |
+| ------------- | ------------------------------------------------------------------------- |
+| Volume        | What share of traces receives this signal?                                |
+| Fidelity      | How reliably does the event mean what you think it means?                 |
+| Latency       | How long after the trace does the signal arrive?                          |
+| Attachability | Can the signal reach the exact trace or session that produced the output? |
+
+Fidelity is application-specific. Conversation length signals engagement in a companion app and friction in a support bot.<Ref refs={references} id="huyen-aie" /> The meaning of a behavior comes from your product, not from a universal table.
+
+Pick the signal that matches what you want, not the one that is easiest to move. YouTube ranked recommendations by clicks and got clickbait; ranking by expected watch time fixed it, because watch time is closer to what the product is for.<Ref refs={references} id="covington-youtube" />
+
+Read signals together. In the study that validated implicit measures for web search, no single behavior predicted satisfaction well; the combination of clicks, time on page, and how the session ended did.<Ref refs={references} id="fox-implicit" /> Several small signals beat the search for one perfect signal.
+
+Latency splits roles: fast signals like skips steer day-to-day iteration, and slow signals like ticket reopens verify it. Attachability is the practical gate. The trace ID has to travel to wherever the event fires, whether that is your frontend, your ticketing system, or a media player, and come back with the score.
+
+## Signals are designed, not found [#designed-not-found]
+
+The applications with the best signals were built so that signals fall out of normal use. Plan the signals a feature will produce while designing the feature, not after launch.<Ref refs={references} id="habib-mistakes" />
+
+Some tasks grade themselves once you shape the workflow toward it: machine learning calls these natural labels.<Ref refs={references} id="huyen-dmls" /> The [support chatbot example](/academy/examples/customer-support-chatbot) runs its agent as a draft-first tool partly for this reason: while the support team edits drafts, every edit is a label, and the diff between draft and sent reply grades the agent on every single ticket.
+
+The general pattern is suggest, then let the user validate. When the product proposes and the user accepts, edits, or dismisses, each path writes a signal without asking anyone for feedback.<Ref refs={references} id="yan-patterns" /> Cursor's Tab model shows how far this carries: accept and reject events on 400 million requests per day became training data, producing a model that shows 21% fewer suggestions with a 28% higher accept rate.<Ref refs={references} id="cursor-tab" />
+
+Signals also die when the product changes shape. In the support example, the edit diff disappears the day the bot answers customers directly, and handoff and repeated-question signals take its place. Plan the replacement signal with each rollout phase.
+
+## Positive, negative, and unlabeled [#positive-negative-unlabeled]
+
+Captured signals split your traces into three groups: labeled positive, labeled negative, and unlabeled. The unlabeled group is always the overwhelming majority, and reading the three honestly is most of the craft.
+
+**Silence is unlabeled, not positive.** Recommender systems established this early: implicit datasets contain no reliable evidence of dislike, so the absence of a signal is missing data, not a quiet pass.<Ref refs={references} id="hu-koren-volinsky" /> The unlabeled pool is also not a random sample of your traffic, because willingness to give feedback varies by user and situation. Chart the share of positives among labeled traces, and keep the labeled fraction visible next to it.
+
+**Positive and negative signals differ in precision.** Users rarely retry an answer they liked, so negative behavioral events are high precision, and each one is worth opening: they are natural entry points for [error analysis](/academy/monitoring/error-analysis). Positive events are high volume and low precision, and mean something in aggregate.
+
+### Biases to watch for [#biases]
+
+Every signal stream carries biases. None of them make signals unusable; all of them change how to read the numbers.
+
+| Bias           | What it does                                                                                                                                                                                                                                                                                            | How it shows up                                                                                                  |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Self-selection | Users with extreme experiences rate far more often. On Amazon, 72 to 78% of ratings are four stars or more with a second spike at one star; when reviewing is mandatory, the distribution turns roughly normal.<Ref refs={references} id="j-shape" />                                                   | The thumbs stream is angry and delighted users; the average rating is a biased quality estimate.                 |
+| Survivorship   | Only users who stayed produce signals.                                                                                                                                                                                                                                                                  | The worst failures belong to users who churned silently, and are the least labeled.                              |
+| Interface bias | The UI shapes behavior independent of quality. Search users keep clicking top-ranked results even when the ranking is deliberately manipulated.<Ref refs={references} id="joachims-clicks" />                                                                                                           | Inline suggestions get accepted more than ones behind a click; the first regeneration variant wins by default.   |
+| Cohort effects | Signal rates vary across users, languages, and time without quality changing. Copilot acceptance varied significantly across developers and across the day.<Ref refs={references} id="ziegler-copilot" />                                                                                               | A wave of new users moves handoff rates on its own; compare cohorts or A/B groups, not week-over-week absolutes. |
+| Feedback loops | The system's own behavior determines which signals can occur.<Ref refs={references} id="huyen-dmls" />                                                                                                                                                                                                  | An option the agent never proposes collects no signal, so the data keeps confirming yesterday's behavior.        |
+| Goodhart's law | A signal degrades once it becomes the target. Optimizing Copilot's suggestion display for acceptance produced worse suggestions,<Ref refs={references} id="mozannar-cdhf" /> and optimizing ads for short-term clicks concealed long-term ad blindness.<Ref refs={references} id="hohnhold-longterm" /> | Prompts tuned to maximize accept rates or minimize handoffs eventually optimize the measure, not the quality.    |
+
+Four practices correct for most of this:
+
+- Read implicit signals as comparisons between variants, cohorts, or time windows rather than as absolute quality, the way the [DJ example](/academy/examples/music-streaming-dj) compares skip rates between A/B groups.
+- Calibrate dense, noisy signals against sparse, trusted ones; the next section covers how.
+- Log the exposure denominator with every signal, so rates survive shifts in traffic volume and mix.
+- Keep a floor of random-sample review, because signals miss what users do not report.<Ref refs={references} id="evals-faq-surfacing" />
+
+## From event to score [#from-event-to-score]
+
+Every signal ends up as a [score](/docs/evaluation/scores/data-model): a name, a typed value, and an optional comment, attached to the trace that produced the output, or to the [session](/academy/tracing#traces-vs-sessions) when the judgment belongs to the conversation as a whole. Put free text where it exists (the edit diff, the skipped track, the user's comment) into the score comment; later review, and agents doing that review, work from it.
+
+<FeedbackCaptureDiagram />
+
+The capture route follows the signal's origin:
+
+- Ratings and UI events are sent from the frontend at the moment the user acts.
+- Workflow outcomes are written from your backend when the event happens, using the stored trace ID.
+- Conversation signals are extracted by an LLM-as-a-judge running on production traces, with no change to your application.
+
+<ManualGuideCallout
+  href="/guides/user-feedback-loop"
+  topic="User feedback loop"
+  lede="The implementation walkthrough: capture each signal type as a score, surface what it flags, and act on it."
+/>
+
+Close the trust gap between kinds deliberately: the sparse, trusted signals validate the dense, noisy ones. SPUR learns its satisfaction rubric from thumbs-labeled conversations before scoring the rest,<Ref refs={references} id="spur" /> and Alexa's satisfaction system trusts explicit feedback first and model predictions after.<Ref refs={references} id="park-alexa" /> Do the same at your scale: hand-label a sample of traces, then [calibrate](/guides/llm-as-a-judge-calibration-skill) the judge or event mapping against it before trusting the trend.
+
+## Where to start
+
+1. Pick one explicit signal and two implicit ones from the [inventories above](#four-kinds), based on how your specific application shows failure.
+2. Wire the trace ID end to end, so every signal can land on the trace that produced the output.
+3. Capture free text wherever it appears: comments, edit diffs, and corrections go into score comments.
+4. Hand-label 20 traces and check your highest-volume implicit signal against them before trusting its trend.
+5. Revisit the signal set whenever the product changes shape: rollout phases retire signals and create new ones.
+
+## What comes next
+
+Signals point; the rest of the loop acts. Negative signals feed [error analysis](/academy/monitoring/error-analysis), confirmed failures become [dataset](/academy/datasets) items, recurring failure modes get standing [evaluators](/academy/evaluate), and aggregated signal scores become the trends on your [dashboards](/docs/metrics/features/custom-dashboards).
+
+## References
+
+<FurtherReading numbered resources={references} />
