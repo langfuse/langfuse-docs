@@ -1,6 +1,6 @@
 ---
 title: Langfuse Assistant
-description: Ask questions about your Langfuse project data in plain language from inside the Langfuse Cloud UI.
+description: Ask questions about your Langfuse project data in plain language from inside the Langfuse UI.
 sidebarTitle: Assistant
 ---
 
@@ -8,13 +8,19 @@ sidebarTitle: Assistant
 
 <AvailabilityBanner
   availability={{
-    hobby: "public-beta",
-    core: "public-beta",
-    pro: "public-beta",
-    enterprise: "public-beta",
-    selfHosted: "not-available",
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "public-beta",
   }}
 />
+
+<Callout type="info">
+  **Self-hosted:** the Assistant is in public beta from version `>=v4.25.0` and
+  needs an instance-wide Langfuse AI model and a worker queue consumer. See
+  [self-hosted setup](/self-hosting/configuration/langfuse-assistant).
+</Callout>
 
 The Langfuse Assistant is an in-product assistant for exploring your Langfuse project data and taking selected actions in Langfuse with your approval. You can ask questions about traces, observations, sessions, metrics, and Langfuse workflows in plain language.
 
@@ -57,7 +63,7 @@ The Assistant follows the same data handling model as other Langfuse AI features
 
 Key points:
 
-- Model requests are handled in the same AWS region as your [Langfuse data region](/security/data-regions).
+- On Langfuse Cloud, model requests use Langfuse-managed Amazon Bedrock in your [Langfuse data region](/security/data-regions). On self-hosted deployments, requests use the instance Langfuse AI model you configure.
 - Assistant access is scoped to the authenticated user and current project.
 - Actions that can change data require explicit approval and remain limited to the permissions of the signed-in user.
 - AI feature tracing for product and service improvement can be enabled or disabled separately by organization admins and owners.
@@ -74,10 +80,11 @@ You can also share your thoughts in our [feedback discussion](https://github.com
 
 ## Limitations [#limitations]
 
-The Assistant is a beta feature. It may misunderstand a question or return incomplete results. Verify important answers and review action details carefully before acting on them.
+The Assistant may misunderstand a question or return incomplete results. Verify important answers and review action details carefully before acting on them.
 
 ## Related resources [#related-resources]
 
+- [Self-hosted Assistant setup](/self-hosting/configuration/langfuse-assistant)
 - [AI Feature Security](/security/ai-features)
 - [Langfuse MCP Server](/docs/api-and-data-platform/features/mcp-server)
 - [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill)
