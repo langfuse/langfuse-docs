@@ -1,0 +1,159 @@
+---
+title: "Human annotation workflows for reviewing LLM outputs"
+description: "How teams set up human annotation workflows for reviewing LLM outputs: score configs as rubrics, sampling, annotation queues, corrections, judge calibration."
+tags: [guide, evaluation]
+---
+
+# Human annotation workflows for reviewing LLM outputs
+
+Human review is where every LLM evaluation program starts and what every automated evaluator is eventually measured against. The hard part is making it systematic: the same criteria applied by every reviewer, a defensible choice of what gets reviewed, a queue reviewers can clear without friction, and labels that end up somewhere useful. This guide describes how teams set that up in Langfuse.
+
+**TL;DR:** Define the review criteria as score configs, one dimension per config, with the description field as the rubric. Decide what gets reviewed with score filters (negative user feedback, low judge scores, a random baseline) at the right level: observation, trace, or session. Create an annotation queue with those configs, assign reviewers, and bulk-add items from filtered tables. Reviewers process the queue with keyboard shortcuts, leave comments, and record corrected outputs. Then use the labels: compare them against an LLM-as-a-judge in Score Analytics, seed datasets from corrected items, and automate intake through the API.
+
+## Decide what reviewers judge
+
+Reviewers judge whatever the project's score configs define, so the workflow starts in project settings, not in a queue. A [score config](/faq/all/manage-score-configs) fixes a score's name, data type, and allowed values, and every reviewer who applies it produces data of the same shape. Annotation in the UI requires at least one config; scores sent via the SDK reference a config optionally.
+
+### One dimension per config
+
+A config should ask one question. "Quality" as a single 1 to 5 rating hides whether the problem was correctness, tone, or completeness; three configs (`factually_correct`, `tone_appropriate`, `answered_fully`) take about the same review time and produce labels you can act on separately. Aim for three to five dimensions per queue.
+
+### Categorical, numeric, or boolean
+
+The data type decides how the label can be used later, so choose it for the downstream consumer:
+
+| Type          | Use when                                                       | Example config                                               |
+| ------------- | -------------------------------------------------------------- | ------------------------------------------------------------ |
+| `BOOLEAN`     | The question has a yes or no answer that a rubric can pin down | `contains_hallucination`: true or false                      |
+| `CATEGORICAL` | The answer is one of a fixed set of labels                     | `failure_mode`: `wrong_answer`, `refused`, `off_topic`, `ok` |
+| `NUMERIC`     | Degree matters and reviewers can anchor the scale              | `helpfulness`: 1 to 5, with min and max set in the config    |
+| `TEXT`        | Open-ended notes before you know what the categories are       | `reviewer_notes`: free text up to 500 characters             |
+
+Boolean and categorical labels feed agreement metrics such as Cohen's Kappa directly and are the easiest to compare with an LLM judge; numeric scales drift across reviewers unless each point is defined. Text scores are for the first pass over a new problem, before you cluster the notes into a categorical config. They cannot be aggregated, so they are unavailable in experiments, LLM-as-a-judge outputs, and Score Analytics.
+
+### The description is the rubric
+
+Every config has a `description` field. Write the rubric there: what each category means, what a 4 versus a 5 looks like, how edge cases resolve. The rubric traveling with the config keeps the fifth reviewer consistent with the first, and it is the first draft of the criteria when you later write an LLM-as-a-judge prompt for the same dimension. Configs are created under **Project Settings** then **Scores / Evaluation**, and can be archived (hidden from annotation) and restored; existing scores are unaffected when a config changes.
+
+## Decide what gets reviewed
+
+Reviewer time is the scarce resource, so what enters a queue should be chosen deliberately. The traces, observations, and sessions tables filter on any score by name and value, which turns a sampling strategy into saved filters:
+
+| Sample                  | Filter                                                  | What it catches                                    |
+| ----------------------- | ------------------------------------------------------- | -------------------------------------------------- |
+| Negative user feedback  | User rating score equal to false or below a threshold   | Failures users noticed                             |
+| Low judge score         | LLM-as-a-judge score below your threshold               | Failures the automated layer flagged               |
+| Judge and user disagree | Judge positive and user rating negative, or the reverse | Calibration cases for the judge                    |
+| Random baseline         | A time window and a trace name, no score filter         | Failures nobody flagged, and a prevalence estimate |
+
+The random baseline is the one teams skip and the one that matters most: feedback and judge filters only surface failures the existing signals can see, and a fixed weekly sample of unfiltered traffic is how you learn the base rate and find failure modes no signal covers yet.
+
+### Observation, trace, or session
+
+Annotation queues accept all three, and the right level is the one where the reviewer can answer the config's question without scrolling elsewhere. Score an observation when the dimension is about one step, such as whether a retrieval returned relevant documents; the trace when it is about one complete request and response; the session when it is about a conversation, such as whether the issue was resolved. Sessions group all traces that share a `sessionId`, replay top to bottom, and carry their own scores, so a `resolution` label lives on the conversation itself.
+
+## Build the queue
+
+An annotation queue bundles score configs, items, and optionally assigned reviewers into one workflow with a dedicated processing view. Setup in the [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) UI takes four steps.
+
+1. Click **New Queue**, give it a name and an optional description, and select the score configs reviewers will fill in. Use one queue per review purpose (weekly baseline, escalation review, judge calibration).
+2. Assign reviewers. Multiple project members can be assigned, and assigned queues appear highlighted at the top of the queue table for those users. Assignment is a focusing aid, not an access restriction.
+3. Add items in bulk. On the traces, observations, or sessions table, apply the sampling filter, select rows with the checkboxes, and choose **Actions** then **Add to queue**. Single items are added from the **Annotate** dropdown on any item page.
+4. Save the filter as a view so the queue is refilled with the same sampling rule next week.
+
+Roles matter here. In the Langfuse [RBAC](/docs/administration/rbac) model, the `Member` role can view all data and create scores but cannot change project configuration, which fits domain experts who review but should not edit evaluators or settings. `Viewer` is read-only and cannot score; `Admin` and `Owner` manage project settings. Project-level role overrides are available on Pro with the Teams add-on, Enterprise, and self-hosted Enterprise Edition. Everything in this section is point-and-click; the [Langfuse for product teams](/resources/engineering/langfuse-for-product-teams) guide covers the non-engineer persona.
+
+## Run the review loop
+
+Processing a queue means working through one annotation task per item: read it, fill in each score field, optionally comment or correct, and complete.
+
+### Keyboard-driven processing
+
+The queue is fully operable from the keyboard: `→` and `←` move between items, `↑` and `↓` move between score fields, `1` through `9` select the Nth option on a categorical or boolean field, `Enter` commits a value, `Esc` leaves a text field, and `Cmd` or `Ctrl` plus `Enter` completes the item and advances. Press `?` for the cheatsheet. Shortcuts are suppressed while typing in a text field or while a dialog is open.
+
+### Comments for the reasoning, corrections for the answer
+
+Comments on traces, observations, and sessions hold the reviewer's reasoning and can @mention a teammate to pull an engineer into a case. Every score also accepts a comment for a one-line justification of the label.
+
+[Corrections](/docs/observability/features/corrections) hold the answer the model should have given. The **Corrected Output** field on any trace or observation accepts an improved version, with JSON or plain text mode and a diff view against the original; one corrected output is stored per trace or observation. A correction is a score with `dataType: "CORRECTION"` and `name: "output"`, so it can also be written through the SDK:
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+
+# Add correction to a trace
+langfuse.create_score(
+    trace_id="trace-123",
+    name="output",
+    value="The corrected output text here",
+    data_type="CORRECTION"
+)
+```
+
+Ask reviewers to write a correction whenever a label is negative and a better answer is knowable; it turns a label ("wrong") into a test case ("this is right").
+
+## Put the labels to work
+
+Human labels are expensive, and the return comes from three uses: checking the automated evaluators, seeding datasets, and measuring whether reviewers agree with each other.
+
+### Calibrate the LLM judge against human labels
+
+An [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluator scales review to every sampled trace, but only if it labels the way your reviewers would. Give the judge the same output type as the human config and run it on the annotated items: an active evaluation rule covers new traffic, and batch evaluation covers historical items by selecting them in the traces table and choosing **Actions** then **Evaluate** (as of September 2026 this requires the v4 preview toggle on the evaluator).
+
+Then open [Score Analytics](/docs/evaluation/scores/score-analytics), select the human score and the judge score, and read the matched view: only items carrying both scores count, and for boolean and categorical scores it reports Cohen's Kappa, F1, and overall agreement alongside a confusion matrix. A strong diagonal means the judge can take over routine screening; an off-diagonal cell is a disagreement pattern to fix in the judge rubric. Score Analytics compares two scores of the same data type at a time.
+
+### Seed datasets from reviewed items
+
+Every item with a negative label and a corrected output is a ready-made dataset item: the trace input is the input, the correction is the expected output, and `+ Add to dataset` on the observation links the item to its source trace. Positively labeled items make good regression anchors too. Corrections can be fetched in bulk from the scores API by filtering on `dataType=CORRECTION`, so a pipeline can rebuild the dataset from the review record.
+
+### Measure agreement between reviewers
+
+Langfuse records who created each annotation score: the scores API exposes an `annotation` field group with `authorUserId` and `queueId`, and multiple scores with the same name can coexist on one trace, so two reviewers can label the same item independently. What Langfuse does not provide as of September 2026 is a built-in inter-reviewer agreement report. Score Analytics compares scores by name, so to compare two reviewers there, give each reviewer's queue a distinctly named config (`helpful_reviewer_a`, `helpful_reviewer_b`), or fetch the scores with `fields=annotation,subject` and compute agreement yourself. A double-labeled sample of twenty to fifty items per quarter catches rubric drift.
+
+## Automate at scale
+
+Once the queue design is stable, intake and reporting move to code. The public API manages annotation queues programmatically: list queues, read a queue, list and add items, and read, update, or remove a single item, so a nightly job can apply the sampling filters above and fill the right queue. Teams whose reviewers work inside an existing internal tool use the same primitives in reverse, pulling items through the API and writing judgments back as scores with a `configId`; the [human-in-the-loop scoring guide](/guides/human-in-the-loop-scoring) walks through that integration.
+
+On the reading side, the v3 scores endpoint filters by `source=ANNOTATION`, `queueId`, `authorUserId`, and config, and returns the subject each score is attached to:
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Human labels with reviewer and subject information
+labels = langfuse.api.scores_v3.get_many_v3(
+    source="ANNOTATION",
+    fields="details,subject,annotation",
+    limit=100,
+)
+```
+
+The same endpoint feeds throughput dashboards (labels per reviewer per week) and coverage checks (the share of traffic that received a human label).
+
+## FAQ
+
+### What is an annotation queue in Langfuse? [#what-is-annotation-queue]
+
+An annotation queue is a review workflow that bundles score configs (the dimensions to rate), items (traces, observations, or sessions), and optionally assigned reviewers. Reviewers work through the items in a dedicated view, score each on the configured dimensions, and mark it complete. Items are added in bulk from filtered tables or one at a time from any item page, in the UI or via the public API.
+
+### How do I define what reviewers should score? [#define-review-criteria]
+
+Create one score config per dimension under **Project Settings** then **Scores / Evaluation**: boolean for yes or no questions, categorical for a fixed label set, numeric for anchored scales, text for open-ended notes. Write the rubric in the config's description so every reviewer sees the same definitions.
+
+### How should I sample which LLM outputs get human review? [#sampling-strategy]
+
+Combine targeted and random sampling. Targeted filters on the traces or observations table pull items with negative user feedback, low LLM-as-a-judge scores, or disagreement between the two. A random sample with no score filter establishes the base rate and surfaces failure modes no existing signal detects.
+
+### Which Langfuse role should reviewers have? [#reviewer-role]
+
+`Member` is the usual fit: it can view all project data and create scores but cannot change project configuration. `Viewer` is read-only and cannot score, and `Admin` or `Owner` is only needed for people who manage project settings. Assigning a reviewer to a queue highlights it for them without restricting other members.
+
+### How do I check whether my LLM-as-a-judge agrees with human reviewers? [#judge-agreement]
+
+Run the judge on the same items the humans labeled, with a matching output type, and compare the two scores in Score Analytics. The matched view counts only items that carry both scores and reports Cohen's Kappa, F1, and overall agreement, with a confusion matrix that shows where they diverge. Fix the judge rubric on the off-diagonal cases and re-run.
+
+### Does Langfuse measure agreement between two human reviewers? [#inter-reviewer-agreement]
+
+Not as a dedicated report, as of September 2026. Each annotation score records its `authorUserId` and `queueId`, and the same item can carry same-named scores from different reviewers. To measure agreement inside Langfuse, use distinctly named configs per reviewer and compare them in Score Analytics; otherwise fetch the scores via the API with the `annotation` field group and compute agreement yourself.
