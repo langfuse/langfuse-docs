@@ -12,6 +12,8 @@ import { TextHighlight } from "@/components/ui/text-highlight";
 import { Link } from "@/components/ui/link";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
+import { Rss } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type PageProps = {
   searchParams: Promise<{ page?: string }>;
@@ -28,7 +30,6 @@ export async function generateMetadata({
   );
   const currentPage = parseChangelogPageParam(sp.page, totalPages);
   const canonical = changelogPageHref(currentPage, totalPages) ?? "/changelog";
-
   return {
     alternates: {
       canonical,
@@ -57,7 +58,6 @@ export default async function ChangelogIndexPage({ searchParams }: PageProps) {
     sliceStart,
     sliceStart + CHANGELOG_ITEMS_PER_PAGE,
   );
-
   return (
     <ContentColumns footerClassName="md:max-w-none xl:max-w-none px-6 sm:px-6 md:px-6">
       <div className="mx-auto w-full px-6 py-8">
@@ -72,6 +72,19 @@ export default async function ChangelogIndexPage({ searchParams }: PageProps) {
             </Link>{" "}
             to see what&apos;s next.
           </Text>
+          <div>
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="inline-flex w-auto items-center gap-2"
+            >
+              <Link href="/api/changelog-rss.xml" target="_blank">
+                <Rss className="w-4 h-4" />
+                <span>RSS Feed</span>
+              </Link>
+            </Button>
+          </div>
         </div>
         <div className="mb-8">
           <ProductUpdateSignup source="changelog" />
