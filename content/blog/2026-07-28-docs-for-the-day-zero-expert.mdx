@@ -25,7 +25,7 @@ import { AxEnters } from "@/components/blog/AxEnters";
 
 The main reader of our docs has changed. "Developer" is now not just the engineer, but the engineer & an agent. This is also confirmed by other parties: [Mintlify's traffic data](https://www.mintlify.com/blog/state-of-ai) shows agents now send about half of all requests to documentation sites, and the share is still growing. Netlify's CEO coined a name for what this new reader experiences: [agent experience](https://biilmann.blog/articles/introducing-ax/), or AX.
 
-Because we saw this shift, we gradually shipped a full agent surface for Langfuse. There isn't a clear set of “best practices” for this category yet, and we love reading about how other teams are approaching this. So we wrote down what we've seen and learned from experimenting with different approaches and observing how it shapes developer and agent behavior.
+Seeing this shift, we invested in a full agent surface for Langfuse. There isn't a clear set of “best practices” for this category yet, and we love reading about how other teams are approaching this. So we wrote down what we've seen and learned from experimenting with different approaches and observing how it shapes developer and agent behavior.
 
 ## 1. Make it as easy as possible for agents to fetch your docs
 
@@ -85,6 +85,8 @@ The Langfuse skill repo has this rule baked in for agents contributing to the sk
 <Frame fullWidth>
   ![The "Adding or Improving a Skill Use Case" section of the Langfuse skills AGENTS.md. It tells contributing agents to follow the instructions religiously and to re-judge their edits against the principles after every change, then gives the first rule: only add a use case if it beats the docs. If an agent can already serve the user by fetching the Langfuse docs, add nothing; reserve new content for where docs fall short and the agent needs extra context, because every addition is maintenance surface and dilutes the skill.](/images/blog/2026-07-28-docs-for-the-day-zero-expert/skill-use-case-rule.png)
 </Frame>
+
+What does stay in the skill is the judgment an agent doesn't get from reading a docs page: which approach fits the task at hand, which context to pull in before it starts building, and when to involve the human instead of deciding alone.
 
 ## 5. One god skill instead of many smaller ones
 
