@@ -72,7 +72,6 @@ from langchain_core.tools import tool
 
 langfuse = get_client()
 langfuse_handler = CallbackHandler()
-shared_trace_id = Langfuse.create_trace_id()
 
 
 @tool
@@ -81,7 +80,7 @@ def research(question: str) -> str:
     with langfuse.start_as_current_observation(
         as_type="span",
         name="call-research-sub-agent",
-        trace_context={"trace_id": shared_trace_id},
+        trace_context={"trace_id": langfuse.get_current_trace_id()},
     ) as span:
         span.update(input=question)
         response = research_graph.invoke(
@@ -93,21 +92,24 @@ def research(question: str) -> str:
     return answer
 
 
-with langfuse.start_as_current_observation(
-    as_type="span",
-    name="run-main-agent",
-    trace_context={"trace_id": shared_trace_id},
-) as span:
-    with propagate_attributes(trace_name="research-assistant", session_id="thread-abc"):
-        span.update(input=user_question)
-        response = main_agent.invoke(
-            {"messages": [{"role": "user", "content": user_question}]},
-            config={"callbacks": [langfuse_handler], "run_name": "main-agent"},
-        )
-        span.update(output=response["messages"][-1].content)
+def handle_request(user_question: str) -> tuple[str, str]:
+    trace_id = Langfuse.create_trace_id()
+    with langfuse.start_as_current_observation(
+        as_type="span",
+        name="run-main-agent",
+        trace_context={"trace_id": trace_id},
+    ) as span:
+        with propagate_attributes(trace_name="research-assistant", session_id="thread-abc"):
+            span.update(input=user_question)
+            response = main_agent.invoke(
+                {"messages": [{"role": "user", "content": user_question}]},
+                config={"callbacks": [langfuse_handler], "run_name": "main-agent"},
+            )
+            span.update(output=response["messages"][-1].content)
+    return response["messages"][-1].content, trace_id
 ```
 
-The handler nests its observations under the active Langfuse observation, and the shared trace ID makes the grouping explicit. The wrapping spans also record the question handed to the sub-agent and the answer it returned, which is where a "sub-agent answered correctly but the parent ignored it" bug becomes visible: compare the span's output with the input of the parent's next generation. A known trace ID also lets you attach feedback later with `langfuse.create_score(trace_id=shared_trace_id, name="user-feedback", value=1, data_type="NUMERIC")`.
+Generating the trace ID inside `handle_request` keeps it scoped to one invocation; a module-level ID would be reused by every request in a long-lived server or worker, merging unrelated conversations into a single trace. The `research` tool picks up the same ID through `get_current_trace_id()` because it runs nested inside this span's context. The wrapping span also records the question handed to the sub-agent and the answer it returned, which is where a "sub-agent answered correctly but the parent ignored it" bug becomes visible: compare the span's output with the input of the parent's next generation. The returned trace ID lets you attach feedback after the request completes, with `langfuse.create_score(trace_id=trace_id, name="user-feedback", value=1, data_type="NUMERIC")`.
 
 ## Read the trace
 

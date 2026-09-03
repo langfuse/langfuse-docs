@@ -52,13 +52,13 @@ langfuse.create_prompt(
 
 Every save of a prompt, from the UI, the SDK, or the API, creates a new immutable version; versions are never edited in place. Labels are pointers to versions, and each label points to exactly one version of a prompt. The `latest` label is maintained automatically and follows the newest version, a fetch without a label returns the version carrying `production`, and every other label is yours to define. Moving a label is the deployment, and rollback is moving it back. The [version control docs](/docs/prompt-management/features/prompt-version-control) describe the model in full.
 
-| Label         | Who moves it                   | What fetches it                                                    |
-| ------------- | ------------------------------ | ------------------------------------------------------------------ |
-| `latest`      | Langfuse, on every save        | Development and playground sessions, `cache_ttl_seconds=0` fetches |
-| `staging`     | Whoever authored the change    | Staging environments and CI validation runs                        |
-| `production`  | Approvers only, when protected | Production applications, by default when no label is given         |
-| `prod-b`      | Whoever runs the experiment    | The fraction of production traffic in an A/B test                  |
-| `tenant-acme` | The team owning the tenant     | One customer's variant of an otherwise shared prompt               |
+| Label         | Who moves it                   | What fetches it                                                |
+| ------------- | ------------------------------ | -------------------------------------------------------------- |
+| `latest`      | Langfuse, on every save        | Development and playground sessions that pass `label="latest"` |
+| `staging`     | Whoever authored the change    | Staging environments and CI validation runs                    |
+| `production`  | Approvers only, when protected | Production applications, by default when no label is given     |
+| `prod-b`      | Whoever runs the experiment    | The fraction of production traffic in an A/B test              |
+| `tenant-acme` | The team owning the tenant     | One customer's variant of an otherwise shared prompt           |
 
 The diff view shows what changed between any two versions. Moving a label from code is one call:
 

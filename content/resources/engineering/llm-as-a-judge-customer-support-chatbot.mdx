@@ -40,22 +40,24 @@ langfuse = get_client()
 
 
 def handle_turn(session_id: str, history: list[dict], user_message: str) -> str:
-    with langfuse.start_as_current_observation(
-        as_type="span", name="support-turn"
-    ) as root_span:
-        # Tags and session ID must live on the observation itself for rule filters to match.
-        with propagate_attributes(
-            session_id=session_id,
-            tags=["customer-support"],
-        ):
+    # Enter propagate_attributes before creating the span: it only attaches to
+    # observations created after the context manager starts, and tags/session ID
+    # must live on root_span itself for rule filters to match.
+    with propagate_attributes(
+        session_id=session_id,
+        tags=["customer-support"],
+    ):
+        with langfuse.start_as_current_observation(
+            as_type="span", name="support-turn"
+        ) as root_span:
             reply = generate_reply(history, user_message)  # your LLM call, traced as a child
 
-        # The judge only sees this observation, so write what it needs onto it.
-        root_span.update(
-            input={"history": history, "user_message": user_message},
-            output={"assistant_reply": reply},
-        )
-        return reply
+            # The judge only sees this observation, so write what it needs onto it.
+            root_span.update(
+                input={"history": history, "user_message": user_message},
+                output={"assistant_reply": reply},
+            )
+            return reply
 ```
 
 Observation-level evaluators need an OpenTelemetry-based SDK (Python v3+ or JS/TS v4+). Rule filters such as tags and session ID are checked on the observation, not looked up from the trace, which is why the example uses `propagate_attributes`. If the bot retrieves knowledge base articles, put the retrieved text on the observation the groundedness judge targets, because the judge cannot read a sibling retrieval span.
