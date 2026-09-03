@@ -247,6 +247,12 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Solutions architect support during evaluation and rollout",
         "Direct access to the product team for feedback",
         "SOC 2 Type II and ISO 27001 reports",
+        <Link
+          href="/self-hosting/configuration/hardening#hardening-for-government"
+          className="underline underline-offset-2 hover:text-primary"
+        >
+          Hardening for Government (in development)
+        </Link>,
         "Support SLA",
         "Billing via AWS Marketplace or invoice",
       ],
@@ -1114,6 +1120,13 @@ const sections: Section[] = [
             Enterprise: true,
           },
           selfHosted: { "Open Source": true, Enterprise: true },
+        },
+      },
+      {
+        name: "Hardening for Government (in development)",
+        href: "/self-hosting/configuration/hardening#hardening-for-government",
+        tiers: {
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
