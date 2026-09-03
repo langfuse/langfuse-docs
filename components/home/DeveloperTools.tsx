@@ -22,7 +22,7 @@ const TOOL_ITEMS: ToolItem[] = [
     title: "SKILL.md",
     description:
       "A ready-made skill for managing prompts, traces, and evals through natural language.",
-    href: "/docs/api-and-data-platform/features/agent-skill",
+    href: "/skills",
     action: "Install the skill",
     eyebrow: "Coding agents",
   },

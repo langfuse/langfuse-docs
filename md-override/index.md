@@ -54,7 +54,7 @@ Langfuse is built on open standards and data portability, and will not lock in y
 Work in the app or from your IDE. The Assistant investigates production and takes approved actions, and `SKILL.md`, the CLI, and MCP connect coding agents to Langfuse.
 
 - **[Langfuse Assistant](/docs/langfuse-assistant)** (in-app) — automate the AI engineering loop: investigate production data, understand what happened, and turn findings into approved actions without leaving Langfuse. Debug traces, optimize spend, and build evals.
-- **[SKILL.md](https://github.com/langfuse/skills)** (coding agents) — a ready-made skill for managing prompts, traces, and evals through natural language.
+- **[SKILL.md](/skills)** (coding agents) — a ready-made skill for managing prompts, traces, and evals through natural language.
 - **[Langfuse CLI](/docs/api-and-data-platform/features/cli)** (terminal) — full API access for agent workflows, scripts, and CI/CD.
 - **[Platform MCP server](/docs/api-and-data-platform/features/mcp-server)** (IDE agents) — structured access for IDE agents to manage prompts, query traces, and use Langfuse data.
 - **[Docs MCP server](/docs/docs-mcp)** — search the Langfuse documentation directly from your AI editor.

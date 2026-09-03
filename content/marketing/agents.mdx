@@ -4,6 +4,8 @@ seoTitle: Langfuse for Coding Agents (Claude Code, Codex, Cursor)
 description: Give coding agents like Claude Code, Codex, and Cursor direct access to Langfuse. Instrument tracing, query production data, manage prompts, and run evaluations from the editor or terminal via the Agent Skill, CLI, and MCP server.
 ---
 
+import { SkillBrowser } from "@/components/skills/SkillBrowser";
+
 # Langfuse for agents
 
 Langfuse gives coding agents like **Claude Code**, **Codex**, and **Cursor** direct access to your LLM application data. Hand your agent the Langfuse skill, and it can instrument an app with tracing, query production traces, manage prompts, and set up evaluations, all from the editor or terminal.
@@ -37,7 +39,7 @@ Once it's installed, prompt your agent directly:
 
 ## Agent Skill [#skill]
 
-The [Agent Skill](/docs/api-and-data-platform/features/agent-skill) follows the open [Agent Skills](https://github.com/anthropics/skills) standard and works across Claude Code, Cursor, Codex, Windsurf, and other compatible agents. It is open source on [GitHub](https://github.com/langfuse/skills).
+The [Agent Skill](/skills) follows the open [Agent Skills](https://github.com/anthropics/skills) standard and works across Claude Code, Cursor, Codex, Windsurf, and other compatible agents. It is open source on [GitHub](https://github.com/langfuse/skills).
 
 A skill is a self-contained folder with a `SKILL.md` entrypoint plus reference docs for specific workflows. Coding agents produce better results with it installed because they follow Langfuse's documented best practices instead of guessing the API.
 
@@ -45,7 +47,10 @@ Those reference docs include a guide on using the [Langfuse CLI](#cli), so the s
 
 The skill uses progressive disclosure: only the frontmatter sits in the agent's context, and the full instructions load on demand when a task is relevant. Context stays small until the agent actually needs the details.
 
+<SkillBrowser />
+
 <Cards>
+  <Card title="Browse the skill landing page" href="/skills" />
   <Card title="Set up the Agent Skill" href="/docs/api-and-data-platform/features/agent-skill" />
   <Card title="Skills repository on GitHub" href="https://github.com/langfuse/skills" />
 </Cards>
@@ -173,5 +178,5 @@ Once an agent can read and write Langfuse data, it can help you measure quality,
 - [Building Langfuse's MCP server](/blog/2025-12-09-building-langfuse-mcp-server)
 - [Using agent skills to improve your prompts](/blog/2026-02-16-prompt-improvement-claude-skills)
 - [Evaluating AI agent skills](/blog/2026-02-26-evaluate-ai-agent-skills)
-- [Agent Skill docs](/docs/api-and-data-platform/features/agent-skill) · [CLI docs](/docs/api-and-data-platform/features/cli) · [MCP server docs](/docs/api-and-data-platform/features/mcp-server) · [Langfuse Assistant docs](/docs/langfuse-assistant)
+- [Skill landing page](/skills) · [Agent Skill docs](/docs/api-and-data-platform/features/agent-skill) · [CLI docs](/docs/api-and-data-platform/features/cli) · [MCP server docs](/docs/api-and-data-platform/features/mcp-server) · [Langfuse Assistant docs](/docs/langfuse-assistant)
 - [Skills on GitHub](https://github.com/langfuse/skills) · [langfuse-cli on npm](https://www.npmjs.com/package/langfuse-cli) · [MCP reference](https://mcp.reference.langfuse.com)

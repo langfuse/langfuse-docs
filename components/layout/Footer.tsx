@@ -40,6 +40,7 @@ const menuItems: {
       { name: "Evaluations", href: "/docs/evaluation/overview" },
       { name: "Metrics", href: "/docs/metrics/overview" },
       { name: "Langfuse for Agents", href: "/agents" },
+      { name: "Agent Skill", href: "/skills" },
       {
         name: "Playground",
         href: "/docs/prompt-management/features/playground",
