@@ -1,0 +1,154 @@
+---
+title: "Set up LLM-as-a-judge evaluations for a customer support chatbot"
+description: "How do I set up LLM-as-a-judge evaluations for a customer support chatbot? Choose what to judge, write the prompt, add a rule, and alert on drops in Langfuse."
+tags: [guide, evaluation]
+---
+
+# Set up LLM-as-a-judge evaluations for a customer support chatbot
+
+A customer support chatbot fails quietly. A wrong refund policy or a reply that ignores the question does not throw an exception, and the user who got it usually just leaves. LLM-as-a-judge evaluation closes that gap: a second model reads each assistant reply against a rubric and writes a score onto the trace, so quality becomes a metric you can filter, chart, and alert on. This guide covers the setup for a support bot in Langfuse, from choosing what to judge to calibrating the judge against human review.
+
+**TL;DR:** Judge four things on a support bot: whether the reply resolved the request (categorical), whether it followed policy and tone (boolean), whether the user needs escalation (boolean), and whether the answer is grounded in your knowledge base (numeric). Set up an LLM connection, instrument the bot so each turn's request and reply land on one identifiable observation, then create an evaluator from the Conversational template or a blank prompt, map its variables by clicking real observation data, and test it on production samples. Attach a rule with filters and a sampling rate, alert on the score average, and use session scores plus human review to judge whole conversations and keep the judge calibrated.
+
+## What to judge on a support chatbot
+
+Pick dimensions from failures you have seen in real conversations, not from a generic quality checklist. Four dimensions cover most support-bot failures, and each has a natural score type.
+
+| Dimension                  | Question the judge answers                                                 | Score type                                                  | Why this type                                                                          |
+| -------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Resolution                 | Did this reply fully answer the request or complete the action?            | Categorical: `resolved`, `partially_resolved`, `unresolved` | Support replies are often half right, and a boolean hides the partial case.            |
+| Policy and tone adherence  | Did the reply stay inside policy and use the required tone?                | Boolean                                                     | The average of a boolean score is the pass rate, which alerts can use directly.        |
+| Needs escalation           | Did the user ask for a human, or did the bot fail in a way that needs one? | Boolean                                                     | It is an event tied to an action (route the trace to a person), so it fires yes or no. |
+| Grounded in knowledge base | Is every claim supported by the retrieved articles or account data?        | Numeric from `0` to `1`                                     | Partially grounded answers are common, and a continuous score shows drift early.       |
+
+A complementary approach detects high-signal user events instead of grading the assistant: the user cursed, disagreed, asked for more, or asked for something out of scope. Those are narrow boolean judges with prompts you can copy from [LLM-as-a-judge for production monitoring](/blog/2026-04-01-llm-as-a-judge-production-monitoring).
+
+## Prerequisites
+
+### An LLM connection
+
+In **Project Settings > LLM Connections**, click **Add new LLM API key** and enter a name and the provider key. As of September 2026, Langfuse supports OpenAI, Azure OpenAI, Anthropic, Google AI Studio, Google Vertex AI, and Amazon Bedrock, plus any OpenAI-compatible gateway if you set its base URL and custom model names. Gateways must support tool calling in the OpenAI format, because Langfuse extracts the score and reasoning through a structured tool call. See the [LLM connection docs](/docs/administration/llm-connection) for provider options such as reasoning effort. A project default model applies to every evaluator that does not select a dedicated one, and changing it switches all of those evaluators at once.
+
+### Instrumentation that exposes the final assistant turn
+
+Evaluators run on observations (trace-level evaluators are deprecated), and an evaluator sees only the observation it targets: not siblings, not children, not the trace. The observation you judge must therefore carry both the conversation context and the reply. The cleanest pattern is a root span per turn with a stable name, the history and user message as input, and the reply as output.
+
+```python title="One traced support turn, ready for observation-level judging"
+from langfuse import get_client, propagate_attributes
+
+langfuse = get_client()
+
+
+def handle_turn(session_id: str, history: list[dict], user_message: str) -> str:
+    with langfuse.start_as_current_observation(
+        as_type="span", name="support-turn"
+    ) as root_span:
+        # Tags and session ID must live on the observation itself for rule filters to match.
+        with propagate_attributes(
+            session_id=session_id,
+            tags=["customer-support"],
+        ):
+            reply = generate_reply(history, user_message)  # your LLM call, traced as a child
+
+        # The judge only sees this observation, so write what it needs onto it.
+        root_span.update(
+            input={"history": history, "user_message": user_message},
+            output={"assistant_reply": reply},
+        )
+        return reply
+```
+
+Observation-level evaluators need an OpenTelemetry-based SDK (Python v3+ or JS/TS v4+). Rule filters such as tags and session ID are checked on the observation, not looked up from the trace, which is why the example uses `propagate_attributes`. If the bot retrieves knowledge base articles, put the retrieved text on the observation the groundedness judge targets, because the judge cannot read a sibling retrieval span.
+
+## Create the evaluator
+
+On the Evaluators page, click **New evaluator**. The template gallery includes a **Conversational** template built to catch where interactions between users and agents went wrong, a reasonable starting point for a support bot; choose **LLM-as-a-Judge** for a blank prompt. A template prepopulates a new evaluator you can edit freely.
+
+An evaluator bundles the judge prompt, the model, the score definition, and default variable mappings. Prompts can have several messages: a System message must come first and holds the stable rubric, a User message carries the task and the mapped variables, and an optional Assistant message shows a few-shot example. Here is a complete resolution judge.
+
+```text title="System message"
+You are a strict evaluator of a customer support assistant. You judge one assistant reply in the context of the conversation so far. You do not know the product; judge only what is in the conversation. When the outcome is unclear, prefer partially_resolved over resolved.
+```
+
+```text title="User message"
+Conversation so far, including the latest user message:
+{{input}}
+
+Assistant reply to evaluate:
+{{output}}
+
+Decide whether this reply resolves the user's request.
+
+- resolved: the reply fully answers the request or completes the action, and the user needs no follow-up.
+- partially_resolved: the reply addresses the request but leaves a required step, detail, or confirmation open.
+- unresolved: the reply does not address the request, asks the user to repeat information they already gave, or hands off without a reason.
+
+Return the category and one sentence of reasoning that quotes the decisive part of the reply.
+```
+
+Then pick the score type: **Categorical** with the three categories above for this judge, **Boolean** for the policy and escalation judges, **Numeric** for groundedness. In the Advanced section, the score description and reasoning fields tell the model what the structured output should contain, which improves parse reliability.
+
+## Map variables and test on real observations
+
+Map each `{{variable}}` by clicking the data you want in a real observation: input, output, metadata, or tool calls. JSONPath remains available for advanced mappings but is no longer required. If you also plan to use the evaluator in prompt experiments, map **Expected Output** and **Experiment Item Metadata** too. All mappings are required, so map to fields the instrumentation always populates, such as `observation.input` and `observation.output`.
+
+Before saving, filter the test panel to representative production observations (observation name `support-turn`, last 24 hours), select one, and run the evaluator. Read the category and the reasoning, then iterate on prompt, model, score definition, or mappings until a handful of samples come back the way you would label them. Every run creates a full trace in the `langfuse-llm-as-a-judge` environment, so you can inspect exactly what the judge received.
+
+## Create the rule
+
+Saving the evaluator does not run it on anything. Rules decide which incoming observations get scored; evaluators decide how. After saving, create a [rule](/docs/evaluation/core-concepts#evaluators-and-rules) from the filters you used while testing, or attach the evaluator to an existing rule. For a support bot, a rule typically combines:
+
+- An observation filter such as name `support-turn`, or **Is Root Observation** to target the logical root of each turn regardless of name.
+- Propagated trace attributes such as the `customer-support` tag, so internal test traffic stays out.
+- A sampling rate, because judging every turn of a high-volume bot is rarely worth the cost.
+
+Before activation, Langfuse shows the matching volume from the past seven days and, for LLM-as-a-judge evaluators, the estimated cost at the chosen sampling rate. Sampling is deterministic across evaluators as of August 2026: two evaluators at 10 percent on the same filters score the same observations, so resolution and policy scores on the same turns stay comparable.
+
+To score conversations from before the rule existed, use batch evaluation: filter the Traces table, select rows, and choose **Actions > Evaluate**. If no scores appear, the [troubleshooting FAQ](/faq/all/observation-eval-not-executing) covers the usual causes: legacy SDK ingestion, tags set on the trace but not propagated, filter mismatches, missing mapped fields, and a blocked LLM connection.
+
+## Read the results
+
+Scores appear on the scored observation with the judge's reasoning as the comment, so a reviewer opening a trace sees why it was marked `unresolved`. Filter traces by score to pull every unresolved or policy-failing turn from the last week and read them for patterns such as a knowledge base gap. Score analytics shows each evaluator's trend, and a custom dashboard can put resolution rate, policy pass rate, and groundedness next to latency and cost, so a prompt change that improves tone but hurts resolution is visible the same day.
+
+## Alert on drops
+
+Open the evaluator and click **Add alert**. Langfuse prefills a score threshold alert: numeric and boolean outputs use the average over one day by default, categorical outputs use the score count, and evaluator test runs are excluded. For the boolean policy judge the average is the pass rate, so "alert when below 0.95 over one day" reads naturally. Add an optional warning threshold, pick a window, and route the alert through an automation to Slack, an HMAC-signed webhook, or a GitHub Actions `workflow_dispatch` event. The same menu offers a cost threshold alert for the judge itself. As of September 2026, [alerts](/docs/observability/features/alerts) are available on all Langfuse Cloud plans with per-organization limits and on self-hosted Langfuse v4.
+
+## Judge whole conversations
+
+Observation-level judges score one turn. Whether a conversation was resolved is a session-level question, and because Langfuse does not know when a session ends, evaluators cannot target sessions directly. Two patterns work:
+
+1. Target the observation that holds the full history. If the root span records the entire conversation as input on every turn, the judge already sees the whole thread. To cut cost and stabilize the metric, tag the final trace of a session (for example `conversation_end`), propagate the tag to observations, and filter the rule to it so only the last turn is judged.
+2. Write a session-level score from your own pipeline when the conversation ends: run a judge over the transcript and create a score with only a session ID, for example `langfuse.create_score(name="conversation_resolved", value=1, session_id=session_id, data_type="BOOLEAN")`. Session scores appear in the session view and are filterable.
+
+Reviewers can also score sessions in the UI or through annotation queues that accept sessions. The trade-offs are covered in [how to evaluate sessions and conversations](/resources/engineering/evaluating-sessions-conversations).
+
+## Calibrate against human review
+
+The judge is a prompt you wrote, and it drifts from your intent in ways aggregate numbers do not reveal. Before trusting thresholds, have a person label 30 to 50 sampled turns with the same categories, compare against the judge, and fix disagreements by editing the rubric. Annotators and evaluators write to the same score configs, so both label sets sit on one timeline. If you use a coding agent, the [judge calibration guide](/guides/llm-as-a-judge-calibration-skill) automates the comparison from a dataset of labeled conversations and reports agreement or a full confusion matrix. Recalibrate whenever you change the judge model.
+
+## FAQ
+
+### Which score type should a customer support judge return? [#which-score-type]
+
+Use categorical for outcomes with more than two meaningful states, such as `resolved`, `partially_resolved`, and `unresolved`. Use boolean for pass/fail checks and event detectors such as policy adherence or needs-escalation, because the average of a boolean score is a rate you can alert on directly. Reserve numeric for genuinely continuous judgments such as groundedness from 0 to 1.
+
+### Should the judge see the whole conversation or only the last reply? [#whole-conversation-or-last-turn]
+
+The judge sees only the observation it targets, so this is an instrumentation decision. Record the history and latest user message as the observation's input and the reply as its output, and the judge evaluates the reply in context. For a conversation-level verdict, tag the final turn of a session and filter the rule to it, or write a session score from your pipeline when the conversation ends.
+
+### How do I keep judge cost under control on high-volume support traffic? [#judge-cost]
+
+Set a sampling rate on the rule; Langfuse shows the matching volume from the past seven days and the estimated judge cost before you activate it. Filter the rule to the single observation that matters rather than every generation in the trace, and use a cheaper model for narrow boolean detectors. Add a cost threshold alert on the evaluator so a traffic spike pages you instead of surprising you on the invoice.
+
+### Why does my evaluator produce no scores? [#no-scores]
+
+The usual causes are data ingested through a legacy SDK or the legacy ingestion endpoint, tags or user IDs set on the trace but not propagated to observations, a filter value that does not exactly match the observation name or tag, a mapped variable pointing at a field missing on some matched observations, or a blocked LLM connection. Test the evaluator on an observation the rule matches and check the execution trace in the `langfuse-llm-as-a-judge` environment for the error.
+
+### Can I run the judge on conversations from before I set it up? [#backfill]
+
+Yes. Batch evaluation lets you filter the Traces table to a time range, select rows, and run an evaluator through **Actions > Evaluate**; the scores attach to the matching observations. As of September 2026, batch evaluation with an LLM-as-a-judge evaluator requires the Langfuse v4 preview toggle on the evaluator, and real-time evaluation of new data with that evaluator requires Python SDK 4.7.0 or newer or JS/TS SDK 5.4.0 or newer.
+
+### Can the judge evaluate screenshots or files a customer attached? [#multimodal]
+
+Yes, as of September 2026. Map a prompt variable to an observation field that contains Langfuse media such as an image, PDF, or audio file, and Langfuse sends the attachment to the judge model with the surrounding text. The selected model and provider must support that media type; self-hosters configure delivery and size limits with the `LANGFUSE_EVALUATOR_MEDIA_*` environment variables.

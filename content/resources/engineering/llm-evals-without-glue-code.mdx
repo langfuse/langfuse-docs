@@ -1,0 +1,236 @@
+---
+title: "LLM evals without glue code: from trace to dataset to CI gate"
+description: "How do you run LLM evals without glue code? Turn a production trace into a dataset item, score experiments in the UI, and gate changes in CI with Langfuse."
+tags: [guide, evaluation]
+---
+
+# LLM evals without glue code: from trace to dataset to CI gate
+
+Most evaluation setups are held together by scripts nobody wants to own: one exports traces, one reshapes them into a dataset format, one runs a judge and parses its output, one posts a number to CI. Each one breaks when a field name changes. This guide walks the managed path in Langfuse, where turning a production failure into a regression test, scoring it, and watching for it in production are UI actions, and shows where a short piece of code is still the right tool.
+
+**TL;DR:** The loop has five moves, and none needs a transformation script. Add a production observation to a dataset with one click or in bulk from the observations table. Run a prompt version against that dataset from the dataset page and compare runs side by side. Score outputs with an evaluator created from a template and tested on real data, or with a short code evaluator for deterministic checks. Put the same evaluator on live traffic with a rule that shows matching volume and cost before you enable it. Alert when the score average drops. Code enters at two optional points: a CI experiment script that raises `RegressionError` to fail a pull request, and a task function when the experiment must exercise your full application rather than a prompt alone.
+
+## The loop in five moves
+
+One data model removes the glue: a dataset item created from a trace, an experiment output, and a live observation all receive the same kind of score from the same evaluator.
+
+### 1. Turn a production trace into a dataset item
+
+Open any observation in a production trace and click **+ Add to dataset**. Its input and output become the item's input and expected output, linked back to the source trace, and a reviewer can edit the expected output into the answer the bot should have given. For volume, filter the observations table to the failures you care about, select the rows, and choose **Actions > Add to dataset**. The field mapping step passes a field through as is, extracts part of it with a JSON path, or builds an object from several fields. Batch adds run in the background and report in **Settings > Batch Actions**.
+
+Slashes in a dataset name create virtual folders, every add, update, delete, or archive creates a new dataset version, and optional JSON Schema validation rejects malformed items at creation time. The [datasets docs](/docs/evaluation/experiments/datasets) cover CSV import, multi-modal items, and the SDK equivalents, including `source_trace_id` and `source_observation_id` for items created in code.
+
+### 2. Run the dataset through an experiment without code
+
+Prompt experiments run a prompt version from prompt management against a dataset entirely from the UI. On the dataset page, click **Start Experiment**, then **Create** under prompt experiment. Name the run, choose the prompt and version, pick an LLM connection, select the dataset, optionally enforce a JSON schema on the output, optionally attach evaluators, and click **Create**. Langfuse executes the prompt for every item and records the run.
+
+The one requirement is that prompt variables match dataset item keys: a prompt with `{{question}}` needs items whose input has a `question` key, and a chat prompt placeholder such as `message_history` maps to an item key holding an array of messages. Items created from traces satisfy this when your instrumentation records input as a JSON object with stable keys.
+
+After the run, the Experiments table shows aggregate scores per run, and the comparison view puts two runs next to each other item by item. The [experiments via UI docs](/docs/evaluation/experiments/experiments-via-ui) walk through the setup.
+
+Prompt experiments test the prompt in isolation. When the change under test is retrieval, tool definitions, or orchestration, you need the SDK task function described later, but the run can stay a click away: configure a webhook under **Custom Experiment** on the dataset page once, and team members trigger it from the UI with a **Run** button.
+
+### 3. Score from templates
+
+On the Evaluators page, **New evaluator** opens a gallery of LLM-as-a-judge and code evaluator templates, including a conversational template for user-agent interactions, topic detection, exact matches, and coding-agent checks. Pick one and Langfuse prepopulates an evaluator you can edit.
+
+For an [LLM-as-a-judge evaluator](/docs/evaluation/evaluation-methods/llm-as-a-judge), map prompt variables such as `{{input}}` and `{{output}}` by clicking fields in a real observation, with JSONPath available but not required. To use the evaluator on experiments, also map **Expected Output** and **Experiment Item Metadata**, which exist only there. Before saving, filter the test panel to representative observations, run the evaluator on one, and read the score and reasoning; iterate until the verdicts match yours.
+
+For deterministic checks, a [code evaluator](/docs/evaluation/evaluation-methods/code-evaluators) is a single `evaluate` function in Python or TypeScript that Langfuse runs for you. It reads the observation and, on experiments, the item's expected output, and returns one or more scores.
+
+```python title="Code evaluator: exact match against the dataset item"
+def evaluate(ctx: EvaluationContext) -> EvaluationResult:
+    expected = ctx.experiment.item_expected_output if ctx.experiment is not None else None
+    matches = expected is not None and ctx.observation.output == expected
+
+    return EvaluationResult(
+        scores=[
+            Score(
+                name="exact_match",
+                value=matches,
+                data_type="BOOLEAN",
+                comment="Output matches the expected output." if matches else "Output differs from the expected output.",
+            )
+        ]
+    )
+```
+
+Code evaluators run with the language standard library only, without network access, and must finish within 2 seconds. Ten paste-ready examples, from structured output validation to PII screens, are on the [code evaluator examples](/resources/engineering/code-evaluator-examples) page.
+
+### 4. Put the evaluator on production traffic with a rule
+
+The evaluator you tested on experiments runs unchanged on live traffic. Rules decide which incoming observations are scored: filters (observation name or type, **Is Root Observation**, tags, user ID, metadata), a sampling rate, and one or more evaluator assignments. Create a rule from the filters you used while testing, or attach the evaluator to an existing rule.
+
+Before you activate, Langfuse shows the matching volume from the past seven days and, for LLM-as-a-judge evaluators, the estimated cost at the chosen sampling rate. Sampling is deterministic across evaluators, so two evaluators at 10 percent on the same filters score the same observations. To score history, select traces in the Traces table and run **Actions > Evaluate**.
+
+### 5. Alert on score drops
+
+Open the evaluator and click **Add alert**. Langfuse prefills a score threshold alert (average over one day for numeric and boolean scores, count for categorical) with the evaluator's filters and test runs excluded. Set the threshold, an optional warning threshold, and a window, then link an automation that posts to Slack, calls an HMAC-signed webhook, or fires a GitHub Actions `workflow_dispatch` event. A second prefilled option alerts on the judge's own cost. As of September 2026, alerts are available on all Langfuse Cloud plans with per-organization limits and on self-hosted Langfuse v4.
+
+## What needs code and what does not
+
+| Step                            | Without code                                                                       | With code (optional)                                                     |
+| ------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Build a dataset from production | **+ Add to dataset** on an observation, or bulk add from the observations table    | `create_dataset_item` with `source_trace_id` and `source_observation_id` |
+| Run an experiment               | Prompt experiment from the dataset page against a prompt version                   | SDK task function run with `dataset.run_experiment`                      |
+| Trigger an experiment           | **Create** in the run dialog, or **Run** on a configured custom experiment webhook | A CI job or your own webhook receiver that calls the SDK                 |
+| Score outputs                   | LLM-as-a-judge evaluator from a template, tested on real observations              | A code evaluator's `evaluate` function, or SDK evaluators in a script    |
+| Compare runs                    | Experiments table and side-by-side comparison view                                 | Read run-level evaluations from the experiment result                    |
+| Gate a change                   | Not available in the UI; a person reads the comparison and decides                 | `langfuse/experiment-action` plus a script that raises `RegressionError` |
+| Monitor production              | Rule with filters and sampling, cost preview, batch evaluation for history         | Evaluators and rules created through the stable API                      |
+| Alert                           | **Add alert** from the evaluator, routed to Slack, webhook, or GitHub Actions      | Consume the signed webhook payload in your own tooling                   |
+
+## When you do want code
+
+Three situations justify a script, and each stays small.
+
+### A CI gate that fails the pull request
+
+The [experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd) integration uses `langfuse/experiment-action`: the action installs the SDK, loads the dataset named in the workflow (optionally pinned with `dataset_version`), runs your experiment script, posts a pull request comment with run-level scores and a link to the comparison view, and fails the job when the script raises `RegressionError`. It requires Python SDK v4.6.0 or newer or JS SDK v5.3.0 or newer.
+
+```yaml title=".github/workflows/langfuse-experiment.yml"
+name: Langfuse experiment gate
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  experiment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+      # Pin to a release from github.com/langfuse/experiment-action/releases
+      - uses: langfuse/experiment-action@<release tag>
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        with:
+          langfuse_public_key: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+          langfuse_secret_key: ${{ secrets.LANGFUSE_SECRET_KEY }}
+          langfuse_base_url: https://cloud.langfuse.com
+          experiment_path: experiments/support-bot-gate.py
+          dataset_name: support/regressions
+          github_token: ${{ github.token }}
+```
+
+The script defines an `experiment(context)` function. The action-provided context already carries the SDK client, the dataset items, and metadata such as commit SHA and branch, so the script only declares the task, the evaluators, and the threshold.
+
+```python title="experiments/support-bot-gate.py"
+from langfuse import Evaluation, RegressionError, RunnerContext
+
+THRESHOLD = 0.9
+
+
+def answer_support_question(item, **kwargs):
+    # Replace with a call into your application.
+    return support_bot(item.input["question"])
+
+
+def exact_match(*, output, expected_output, **kwargs):
+    passed = output.strip() == (expected_output or "").strip()
+    return Evaluation(name="exact_match", value=1.0 if passed else 0.0)
+
+
+def avg_accuracy(*, item_results, **kwargs):
+    scores = [
+        e.value
+        for r in item_results
+        for e in r.evaluations
+        if e.name == "exact_match" and isinstance(e.value, (int, float))
+    ]
+    return Evaluation(name="avg_accuracy", value=sum(scores) / len(scores) if scores else 0.0)
+
+
+def experiment(context: RunnerContext):
+    result = context.run_experiment(
+        name="PR gate: support bot",
+        task=answer_support_question,
+        evaluators=[exact_match],
+        run_evaluators=[avg_accuracy],
+    )
+    accuracy = next(
+        (e.value for e in result.run_evaluations if e.name == "avg_accuracy"),
+        None,
+    )
+    if not isinstance(accuracy, (int, float)) or accuracy < THRESHOLD:
+        raise RegressionError(
+            result=result,
+            metric="avg_accuracy",
+            value=float(accuracy) if isinstance(accuracy, (int, float)) else 0.0,
+            threshold=THRESHOLD,
+        )
+    return result
+```
+
+On other CI systems, the same experiment runner works inside Pytest or Vitest with a threshold assertion. Keep the gate dataset small enough to run on every pull request and reserve the full regression set for release branches.
+
+### A task function for full-application experiments
+
+When the prompt is not the whole system, the SDK experiment runner executes your real code against the dataset and still records a dataset run you can compare in the UI.
+
+```python title="Run the real application against a Langfuse dataset"
+from langfuse import get_client
+
+langfuse = get_client()
+
+
+def support_bot_task(*, item, **kwargs):
+    # item.input is the dataset item input, for example one created from a production trace.
+    return support_bot(item.input["question"])
+
+
+dataset = langfuse.get_dataset("support/regressions")
+
+result = dataset.run_experiment(
+    name="Candidate: retrieval rerank v2",
+    task=support_bot_task,
+)
+
+print(result.format())
+```
+
+Item-level `evaluators` and run-level `run_evaluators` are optional arguments, and code evaluators authored in Langfuse can execute on the run's observations as well. Agent-specific patterns, such as scoring tool calls and trajectories, are in the [AI agent evaluation guide](/resources/engineering/ai-agent-evaluation).
+
+### Checks the evaluator runtime cannot do
+
+Code evaluators run without third-party packages or network access. A similarity check that needs an embedding model, or a check that calls an internal service, belongs in your own pipeline, which writes the result back as a score through the SDK onto the same traces.
+
+## Evaluation setup as configuration
+
+As of September 2026, evaluators and rules are versioned configuration behind a stable, ID-based public API under `/api/public/v2`. An evaluator resource holds the judge prompt or code, its variables, default mappings, output definition, and model; a rule resource holds filters, sampling rate, and evaluator assignments. Updating an evaluator creates a new version, and active rules use the latest version automatically. Code evaluators use the same endpoints with `type: "code"`.
+
+This turns three chores into API calls: keeping the evaluation setup in version control next to the application, replicating evaluators and rules from a staging project to production, and reading legacy trace-level rules before deactivating them. A rule that should score only the root observation of each request includes the filter `{"type": "boolean", "column": "isRootObservation", "operator": "=", "value": true}`. The recommended way to bootstrap a setup is to point a coding agent at the [evaluators API reference](https://api.reference.langfuse.com/#tag/evaluators).
+
+Deciding which dimensions to measure, which method fits each, and what threshold blocks a release is a separate question from the mechanics above; the [LLM evaluation strategy guide](/resources/engineering/llm-evaluation-strategy) covers that layer.
+
+## FAQ
+
+### Do I need to write code to run LLM evals in Langfuse? [#need-code]
+
+No, for the core loop. Adding production observations to a dataset, running a prompt version against it, scoring the run with a template evaluator, running the same evaluator on live traffic with a rule, and alerting on a score drop are all UI actions. Code becomes necessary when the experiment must exercise your full application, when a pull request should fail automatically, or when a deterministic check needs libraries the evaluator runtime does not provide.
+
+### How do I turn a production trace into a test case? [#trace-to-test-case]
+
+Open the observation and click **+ Add to dataset**, or select several observations in the observations table and use **Actions > Add to dataset** with a field mapping. The item keeps a link to its source trace, and a reviewer can edit the expected output into the correct answer. Every change creates a new dataset version, so the regression set you gate against is reproducible.
+
+### What still requires code? [#what-requires-code]
+
+Three things, as of September 2026: an experiment script with a task function when the change under test is not just a prompt; the `RegressionError` check that fails a CI job, since the UI has no automated gate; and evaluation logic that needs third-party packages or network calls, which runs in your own pipeline and writes scores through the SDK. Each is a short file, not a transformation pipeline.
+
+### How do I gate a pull request on evaluation scores? [#gate-pull-request]
+
+Add the `langfuse/experiment-action` step to a workflow triggered on `pull_request`, point `experiment_path` at a script that defines `experiment(context)`, and name the dataset in `dataset_name`. In the script, compute a run-level metric and raise `RegressionError` when it misses your threshold; the action fails the job and posts the scores as a pull request comment. Pin `dataset_version` for reproducible runs and pin the action to a release tag.
+
+### Can the same evaluator run on experiments and on production traffic? [#same-evaluator]
+
+Yes. An evaluator defines how to score; where it runs is decided separately, by selecting it in an experiment run dialog, attaching it to a rule for incoming observations, or running batch evaluation over selected historical traces. Expected output and experiment item metadata exist only on experiments, so write evaluator code and prompts that handle their absence on live observations.
+
+### How do I keep the evaluation setup in version control? [#version-control]
+
+Use the stable `/api/public/v2/evaluators` and `/api/public/v2/evaluation-rules` endpoints. Each resource has a stable ID, evaluator updates create versions you can list, and rules always run the latest evaluator version. Store the definitions in your repository, apply them from CI, and use the same definitions to replicate a staging setup into production.
