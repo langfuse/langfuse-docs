@@ -15,10 +15,6 @@ const availabilities: {
     label: "Enterprise Edition",
   },
   {
-    id: "ee-development",
-    label: "Enterprise Edition, in development",
-  },
-  {
     id: "team-add-on",
     label: "Teams Add-on required",
   },
