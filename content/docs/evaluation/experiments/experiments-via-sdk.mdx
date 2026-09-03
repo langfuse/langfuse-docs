@@ -9,6 +9,12 @@ Experiments via SDK are used to programmatically loop your applications or promp
 
 See also the [JS/TS SDK reference](https://js.reference.langfuse.com/classes/_langfuse_client.ExperimentManager.html) and the [Python SDK reference](https://python.reference.langfuse.com/langfuse#Langfuse.run_experiment) for more details on running experiments via the SDK.
 
+<Callout type="info">
+  **Not using Python or JS/TS?** Ingest experiment traces directly with
+  [OpenTelemetry experiment attributes](/docs/evaluation/experiments/experiments-via-opentelemetry).
+  The Experiment runner SDK sets those attributes for you.
+</Callout>
+
 ## Why use Experiments via SDK?
 
 - Full flexibility to use your own application logic
@@ -211,90 +217,6 @@ When using Langfuse datasets, dataset runs are automatically created in Langfuse
 
 Experiments always run on the latest dataset version at experiment time. Support for running experiments on specific dataset versions will be added to the SDK shortly.
 
-### Multi-modal experiments [#multimodal-experiments]
-
-SDK-based experiments can run on datasets that include media attachments in `input`, `expectedOutput`, or `metadata`. When you fetch the dataset via the SDK, each media token is hydrated into a signed `LangfuseMediaReference` by default.
-
-<Callout type="info">
-  Multi-modal datasets are supported for SDK-based experiments with Python SDK
-  `>= 4.10.0` and JS/TS SDK `@langfuse/client >= 5.6.0`. UI-based
-  experiments do not yet support dataset items with media attachments.
-</Callout>
-
-<LangTabs items={["Python SDK", "JS/TS SDK"]}>
-<Tab>
-{/* PYTHON SDK */}
-
-```python
-from langfuse import get_client
-from langfuse.media import LangfuseMediaReference
-
-langfuse = get_client()
-
-dataset = langfuse.get_dataset("visual-qa")
-
-def my_multi_modal_task(*, item, **kwargs):
-    image = item.input["image"]
-    assert isinstance(image, LangfuseMediaReference)
-
-    # Use the format expected by your model provider.
-    image_data_uri = image.fetch_data_uri()
-
-    # Call your multi-modal application here.
-    return run_visual_qa(
-        question=item.input["question"],
-        image=image_data_uri,
-    )
-
-result = dataset.run_experiment(
-    name="Visual QA",
-    task=my_multi_modal_task,
-)
-```
-
-</Tab>
-<Tab>
-{/* JS/TS SDK */}
-
-```typescript
-import {
-  LangfuseClient,
-  LangfuseMediaReference,
-} from "@langfuse/client";
-
-const langfuse = new LangfuseClient();
-
-const dataset = await langfuse.dataset.get("visual-qa");
-
-const result = await dataset.runExperiment({
-  name: "Visual QA",
-  task: async (item) => {
-    const image = item.input.image as LangfuseMediaReference;
-
-    // Use the format expected by your model provider.
-    const imageDataUri = await image.fetchDataUri();
-
-    // Call your multi-modal application here.
-    return runVisualQa({
-      question: item.input.question,
-      image: imageDataUri,
-    });
-  },
-});
-```
-
-</Tab>
-</LangTabs>
-
-`LangfuseMediaReference` exposes helpers to fetch the media as raw bytes, raw base64, or a data URI:
-
-| SDK    | Bytes           | Base64           | Data URI           |
-| ------ | --------------- | ---------------- | ------------------ |
-| Python | `fetch_bytes()` | `fetch_base64()` | `fetch_data_uri()` |
-| JS/TS  | `fetchBytes()`  | `fetchBase64()`  | `fetchDataUri()`   |
-
-The resolved URLs are signed and expire. If a URL expires before your experiment uses it, fetch the dataset again to receive fresh media references.
-
 ### Advanced Features
 
 Enhance your experiments with evaluators and advanced configuration options.
@@ -454,6 +376,90 @@ console.log(await result.format());
 
 </Tab>
 </LangTabs>
+
+#### Multi-modal experiments [#multimodal-experiments]
+
+SDK-based experiments can run on datasets that include media attachments in `input`, `expectedOutput`, or `metadata`. When you fetch the dataset via the SDK, each media token is hydrated into a signed `LangfuseMediaReference` by default.
+
+<Callout type="info">
+  Multi-modal datasets are supported for SDK-based experiments with Python SDK
+  `>= 4.10.0` and JS/TS SDK `@langfuse/client >= 5.6.0`. UI-based
+  experiments do not yet support dataset items with media attachments.
+</Callout>
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+{/* PYTHON SDK */}
+
+```python
+from langfuse import get_client
+from langfuse.media import LangfuseMediaReference
+
+langfuse = get_client()
+
+dataset = langfuse.get_dataset("visual-qa")
+
+def my_multi_modal_task(*, item, **kwargs):
+    image = item.input["image"]
+    assert isinstance(image, LangfuseMediaReference)
+
+    # Use the format expected by your model provider.
+    image_data_uri = image.fetch_data_uri()
+
+    # Call your multi-modal application here.
+    return run_visual_qa(
+        question=item.input["question"],
+        image=image_data_uri,
+    )
+
+result = dataset.run_experiment(
+    name="Visual QA",
+    task=my_multi_modal_task,
+)
+```
+
+</Tab>
+<Tab>
+{/* JS/TS SDK */}
+
+```typescript
+import {
+  LangfuseClient,
+  LangfuseMediaReference,
+} from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+const dataset = await langfuse.dataset.get("visual-qa");
+
+const result = await dataset.runExperiment({
+  name: "Visual QA",
+  task: async (item) => {
+    const image = item.input.image as LangfuseMediaReference;
+
+    // Use the format expected by your model provider.
+    const imageDataUri = await image.fetchDataUri();
+
+    // Call your multi-modal application here.
+    return runVisualQa({
+      question: item.input.question,
+      image: imageDataUri,
+    });
+  },
+});
+```
+
+</Tab>
+</LangTabs>
+
+`LangfuseMediaReference` exposes helpers to fetch the media as raw bytes, raw base64, or a data URI:
+
+| SDK    | Bytes           | Base64           | Data URI           |
+| ------ | --------------- | ---------------- | ------------------ |
+| Python | `fetch_bytes()` | `fetch_base64()` | `fetch_data_uri()` |
+| JS/TS  | `fetchBytes()`  | `fetchBase64()`  | `fetchDataUri()`   |
+
+The resolved URLs are signed and expire. If a URL expires before your experiment uses it, fetch the dataset again to receive fresh media references.
 
 #### Async Tasks and Evaluators
 
@@ -674,7 +680,7 @@ You need to set up an HTTP endpoint to receive the trigger request from Langfuse
 Remote experiment trigger requests can optionally include the same HMAC-signed `x-langfuse-signature` header used by [prompt webhooks](/docs/prompt-management/features/webhooks-slack-integrations). Enable request signing in the setup form and configure additional custom headers in **Advanced Options**. Existing triggers without signing or custom headers continue to work. Your endpoint should return a 2xx response quickly and run the experiment asynchronously.
 
 <Frame className="max-w-lg">
-  ![New Experiment Button](/images/docs/trigger-remote-experiment-2.png)
+  ![Remote experiment trigger setup form with request signing and custom headers](/images/docs/trigger-remote-experiment-2.png)
 </Frame>
 
 ### Trigger experiments

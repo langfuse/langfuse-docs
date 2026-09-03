@@ -30,7 +30,7 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 - All Open Source features plus management APIs, project-level RBAC, data retention policies, and audit logs
 - Bundled with ClickHouse Cloud, ClickHouse BYOC, or ClickHouse Private
 - Langfuse pricing is additive to your ClickHouse commercial plan
-- Dedicated support engineer for deployment and hosting guidance
+- Named lead support engineer for deployment and hosting guidance
 - Solutions architect support during evaluation and rollout
 - Direct access to the product team for feedback
 - SOC 2 Type II and ISO 27001 reports
@@ -79,7 +79,7 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 | [Human annotation queues](/docs/evaluation/evaluation-methods/annotation#annotation-queues)         | Yes                         | Yes                                        |
 | **Metrics**                                                                                         |                             |                                            |
 | [Custom dashboards](/docs/metrics/features/custom-dashboards)                                       | Yes                         | Yes                                        |
-| [Monitors and alerts](/docs/metrics/features/monitors)                                              | Langfuse v4+                | Langfuse v4+                               |
+| [Alerts](/docs/observability/features/alerts)                                                       | Langfuse v4+                | Langfuse v4+                               |
 | **Collaboration**                                                                                   |                             |                                            |
 | Projects                                                                                            | Unlimited                   | Unlimited                                  |
 | Users                                                                                               | Unlimited                   | Unlimited                                  |
@@ -104,7 +104,7 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 | [Community (GitHub)](/support#community)                                                            | Yes                         | Yes                                        |
 | [In-app support](/support#in-app)                                                                   | --                          | Yes                                        |
 | [Private Slack channel](/support#slack)                                                             | --                          | Yes                                        |
-| [Dedicated support engineer](/support#onboarding)                                                   | --                          | Yes                                        |
+| [Named lead support engineer](/support#onboarding)                                                  | --                          | Yes                                        |
 | [Onboarding & architectural guidance](/support#onboarding)                                          | --                          | Yes                                        |
 | Solutions architect support                                                                         | --                          | Yes                                        |
 | Product team feedback channel                                                                       | --                          | Yes                                        |

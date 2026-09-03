@@ -19,7 +19,7 @@ import {
 } from "@/lib/cloud-regions";
 import { useCloudRegionSignIn } from "@/lib/use-cloud-region-sign-in";
 import { isCloudAppHref } from "@/lib/google-ads";
-import { reportLaunchAppConversion } from "@/lib/ad-conversions";
+import { reportLaunchAppConversionIfSignedOut } from "@/lib/ad-conversions";
 
 const REGION_SHORTCUTS: Partial<Record<CloudRegionKey, string>> = {
   us: "U",
@@ -58,10 +58,10 @@ interface ToAppButtonProps {
 
 export const ToAppButton = ({
   signedInText = "Launch App",
-  signUpText = "Launch App",
+  signUpText = "Start free",
   dropdownText = "Launch App",
 }: ToAppButtonProps = {}) => {
-  const signedInRegions = useCloudRegionSignIn();
+  const { signedInRegions, resolved } = useCloudRegionSignIn();
 
   const signedInCount = Object.values(signedInRegions).filter(Boolean).length;
 
@@ -84,7 +84,15 @@ export const ToAppButton = ({
       <NavigatingButton href={signedInRegion[1].url} label={signedInText} />
     );
   } else {
-    return <NavigatingButton href="/cloud" label={signUpText} />;
+    // Regions start unsigned-in until the probe finishes. Treat that as
+    // unknown, not signed-out, so an already-signed-in visitor never flashes
+    // the signup label.
+    return (
+      <NavigatingButton
+        href="/cloud"
+        label={resolved ? signUpText : signedInText}
+      />
+    );
   }
 };
 
@@ -163,7 +171,9 @@ function MultiRegionButton({
       );
       if (match) {
         e.preventDefault();
-        reportLaunchAppConversion();
+        // Mirrors the click path: the region links carry
+        // `data-launch-app-cta`, and this shortcut bypasses that listener.
+        reportLaunchAppConversionIfSignedOut();
         window.location.href = match.url;
         setOpen(false);
       }

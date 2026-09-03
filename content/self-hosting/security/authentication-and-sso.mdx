@@ -1,7 +1,7 @@
 ---
 title: Authentication and SSO (self-hosted)
 description: "Configure SSO (SAML, OIDC) and authentication for self-hosted Langfuse. Supports Google, GitHub, Azure AD, Okta, and custom OIDC/SAML providers."
-label: "Version: v3"
+label: "Version: v4"
 sidebarTitle: "Authentication and SSO"
 ---
 
@@ -210,7 +210,8 @@ Provider: `JUMPCLOUD`
 
 Provider: `OKTA`
 
-Please find a video guide on setting up Okta authentication and user provisioning with Langfuse [here](/docs/administration/scim-and-org-api#okta-setup-guide).
+For automated user provisioning, Okta requires a **second application** for SCIM in addition to the OIDC app used for SSO.
+See the [Okta SCIM Setup Guide](/docs/administration/scim-and-org-api#okta).
 
 Notes:
 
@@ -261,13 +262,27 @@ Provider: `WORDPRESS`
 
 [NextAuth Custom OAuth Provider Docs](https://next-auth.js.org/configuration/providers/oauth#using-a-custom-provider) ([source](https://github.com/langfuse/langfuse/blob/main/web/src/server/auth.ts))
 
-| Configuration      | Value                                                                                                                                                                                                                                                                                                                                                    |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Required Variables | `AUTH_CUSTOM_CLIENT_ID`<br/>`AUTH_CUSTOM_CLIENT_SECRET`<br/>`AUTH_CUSTOM_ISSUER`<br/>`AUTH_CUSTOM_NAME` (any, used only in UI)                                                                                                                                                                                                                           |
-| Optional Variables | `AUTH_CUSTOM_SCOPE` (defaults to `"openid email profile"`)<br/>`AUTH_CUSTOM_ID_TOKEN` (Defaults to `true`, set to `false` if you want to make a request to the `userinfo` endpoint instead of extracting user information from the `id_token` claims)<br/><br/>See [additional configuration](#additional-configuration) section below for more options. |
-| OAuth Redirect URL | `/api/auth/callback/custom`                                                                                                                                                                                                                                                                                                                              |
+| Configuration      | Value                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Required Variables | `AUTH_CUSTOM_CLIENT_ID`<br/>`AUTH_CUSTOM_CLIENT_SECRET`<br/>`AUTH_CUSTOM_ISSUER`<br/>`AUTH_CUSTOM_NAME` (any, used only in UI)                                                                                                                                                                                                                                                                                                       |
+| Optional Variables | `AUTH_CUSTOM_SCOPE` (defaults to `"openid email profile"`)<br/>`AUTH_CUSTOM_FETCH_USERINFO` (defaults to `false`, see [reading the profile from the `userinfo` endpoint](#custom-oauth-userinfo))<br/>`AUTH_CUSTOM_ID_TOKEN` (defaults to `true`, see [reading the profile from the `userinfo` endpoint](#custom-oauth-userinfo))<br/><br/>See [additional configuration](#additional-configuration) section below for more options. |
+| OAuth Redirect URL | `/api/auth/callback/custom`                                                                                                                                                                                                                                                                                                                                                                                                          |
 
 Provider: `CUSTOM`
+
+#### Reading the profile from the `userinfo` endpoint [#custom-oauth-userinfo]
+
+By default, Langfuse builds the user profile from the `id_token` claims. Some providers (for example Oracle IAM) do not include `email` or `name` in the ID token and only serve them from the `userinfo` endpoint. Set `AUTH_CUSTOM_FETCH_USERINFO=true` to read the profile from `userinfo` instead:
+
+```bash
+AUTH_CUSTOM_FETCH_USERINFO=true
+```
+
+Claims from both sources are merged with `userinfo` taking precedence, so claims that only the ID token carries (such as `sub`) are preserved. The OIDC callback and ID token signature validation are unchanged.
+
+Keep `AUTH_CUSTOM_ID_TOKEN` at its default of `true` in this case. Setting it to `false` is not an alternative: it switches the token exchange to the plain OAuth2 callback, which fails whenever the token response contains an `id_token` — as it does for any request that includes the `openid` scope. Sign-in then fails with a generic `OAuthCallback` error.
+
+`AUTH_CUSTOM_FETCH_USERINFO` is available on version `>=v4.21.0` of Langfuse.
 
 ## HTTP Proxy for SSO
 
@@ -298,7 +313,7 @@ https://<YOUR_LANGFUSE_URL>/auth/sso-initiate?provider=<PROVIDER>
 - Use the `Redirect to app to initiate login (OIDC Compliant)` option in your identity provider's settings.
 - IdP-initiated SSO is available on version `>=v3.126.0` of Langfuse.
 
-## Additional configuration
+## Additional configuration [#additional-configuration]
 
 These are additional configuration variables. Replace `<PROVIDER>` with the provider name (e.g., `GOOGLE`, `GITHUB`, `AZURE_AD`, etc., see other variables of provider above).
 
@@ -319,6 +334,7 @@ These are additional configuration variables. Replace `<PROVIDER>` with the prov
 - Error: _"Please sign in with the same provider that you used to create this account"._ This error occurs when you try to sign in with a different provider than the one you used to create your account. To fix this, you need to sign in with the same provider that you used to create your account or allow for account linking/takeover by setting `AUTH_<PROVIDER>_ALLOW_ACCOUNT_LINKING=true` (env depends on the provider, see above).
 - For password reset, see the [Password Reset](#password-reset) section.
 - Langfuse authentication relies on email addresses. When using SSO, ensure that the user's email address is included in their IDP profile.
+- Error: _"OAuthCallback"_ when signing in with a custom OIDC provider. If your provider does not include `email` or `name` in the `id_token`, set `AUTH_CUSTOM_FETCH_USERINFO=true` to source the profile from the `userinfo` endpoint. See [reading the profile from the `userinfo` endpoint](#custom-oauth-userinfo).
 - If authentication with your provider fails, please try different applicable combinations of the `CLIENT_AUTH_METHOD` and `CHECKS` as outlined above.
 
 ## Related Resources

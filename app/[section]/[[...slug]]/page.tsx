@@ -114,7 +114,10 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
     // Fumadocs slug, so the default `pagePath` would double the segment
     // (e.g. `/careers/careers`). Pin the canonical to the real public path.
     isMarketing
-      ? { canonicalFallback: buildPageUrl(`/${section}`) }
+      ? {
+          canonicalFallback: buildPageUrl(`/${section}`),
+          publicPath: `/${section}`,
+        }
       : undefined,
   );
 }

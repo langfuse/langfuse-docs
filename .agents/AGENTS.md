@@ -114,6 +114,7 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
 - Use sentence case for user-facing headlines, section headings, and hero copy by default. Keep title case for short standalone navigation/UI labels where it reads more naturally (for example, paired nouns like "Questions & Answers" or conventional labels like "Get Started"). Always preserve proper nouns, acronyms, and official product names.
 - Route sales and Enterprise inquiries to the [sales form](/talk-to-us) instead of directing readers to `enterprise@langfuse.com`.
 - Add an `<AvailabilityBanner />` to a feature's docs page when the feature is not available on every Langfuse plan or deployment type. Place it directly below the relevant heading: usually the H1, or an H2/H3 when availability applies only to that section.
+- Never reference internal ticket ids (`LFE-1234`, `LFINT-1234`) or Linear URLs in page content, commit messages, or PR descriptions. They mean nothing to readers of the public site or repo. Describe the change on its own terms; a ticket-prefixed branch name is the one place the identifier belongs.
 
 ### Changelog entries
 
@@ -149,4 +150,6 @@ Please check the following:
 - **First page load is slow**: After `pnpm dev` starts ("Ready in ~1s"), the first HTTP request compiles on-demand and can take 20-40 seconds. Subsequent pages are much faster.
 - **Langfuse SDK warnings are expected**: The dev server logs `[Langfuse SDK] [WARN] No exporter configured…` on startup. These are harmless — the SDK keys are only needed for optional demo API routes and are not required for the docs site itself.
 - **No env file needed**: All external integrations (OpenAI, Supabase, PostHog, etc.) degrade gracefully when keys are absent. You do not need a `.env` file for routine development.
+- **Site search is inert locally**: The `Ctrl/Cmd+K` search dialog (powered by Inkeep) opens but returns no results without Inkeep keys. This is expected; use sidebar/link navigation to reach pages when testing docs locally.
+- **Preview visual changes on desktop and mobile**: When a change affects a rendered page, open it in the in-app browser at `http://127.0.0.1:3333`. Check a desktop viewport (1280×800 or wider) and a mobile viewport (375×812) before finishing. Confirm layout, wrapping, overflow, and navigation still work at both widths. Leave the browser open on the changed page.
 - **postinstall runs agent shim sync**: `pnpm install` triggers `scripts/postinstall.sh`, which syncs agent config shims. This is expected and idempotent.

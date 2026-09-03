@@ -1,0 +1,52 @@
+---
+date: 2026-08-21
+title: "Langfuse CLI 1.0"
+description: The CLI is rewritten from the ground up. Invocations start 10x+ faster, union endpoints take plain flags, and failures exit with a code agents can read.
+ogImage: /images/changelog/2026-08-21-langfuse-cli-v1.png
+canonical: /docs/api-and-data-platform/features/cli
+author: Nimar
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+The [Langfuse CLI](/docs/api-and-data-platform/features/cli) is at 1.0 with a rewritten engine. Every invocation starts 10x+ faster, union endpoints take plain flags instead of hand-written JSON, and agents can tell what went wrong from the exit code alone.
+
+A few things that get easier:
+
+```bash
+# Create a prompt in one line, no JSON body to assemble
+langfuse api prompts create --type text --name greeting --prompt 'Hello {{name}}'
+
+# Export a full result set instead of one page at a time
+langfuse api observations list --limit 100 --all --max-items 5000
+
+# Point a script at an older self-hosted deployment
+langfuse --api-version auto api prompts list
+```
+
+Install or upgrade:
+
+```bash
+# upgrade
+npm install -g langfuse-cli@latest
+# upgrade via bun
+bun add --global langfuse-cli@latest
+
+# or run directly via npx/bunx
+npx langfuse-cli api <resource> <action>
+bunx langfuse-cli api <resource> <action>
+```
+
+What's new:
+
+- **10x+ faster startup time** on every invocation.
+- **Typed flags for union endpoints** (prompts, evaluators, placements) with local validation, so the discriminator flag selects the variant and that variant's own required fields apply.
+- **`--all` pagination** walks every page of a list, page-based or cursor-based, bounded by `--max-items` and a request cap.
+- **Consistent flags**, with every parameter name in kebab-case (`--object-id`). `--body-json` and `--body-file -` remain the lossless path for complex nested bodies.
+- **Zero runtime dependencies**, running on Node.js 20+ or Bun.
+- **Machine-readable exit codes** so agents classify failures without parsing stderr: usage (2), configuration (3), network (4), HTTP failure (5), and local errors (6).
+- **Works with every Langfuse Server since v3.** Pin an API snapshot with `--api-version 3`, or let `--api-version auto` detect your server and select a compatible one. Defaults to the latest.
+
+Upgrading from 0.x: body-field flags changed from camelCase to kebab-case (`--objectId` becomes `--object-id`) and HTTP failures now exit 5 instead of 1. `--body-json` inputs are unaffected. Details in the [GitHub repo](https://github.com/langfuse/langfuse-cli).

@@ -1,0 +1,38 @@
+---
+date: 2026-08-11
+title: Instance switcher for self-hosted deployments
+description: Switch between your Langfuse deployments from the sidebar user menu instead of keeping a list of URLs somewhere else.
+author: Steffen
+canonical: /self-hosting/administration/ui-customization#instance-switcher
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+This feature is available in the [Enterprise Edition](/open-source) (self-host).
+
+If you run more than one Langfuse deployment — development, staging, and production, or one per business unit — you can now configure them as a list and switch between them from the sidebar user menu. This mirrors the region switcher on Langfuse Cloud, so nobody has to keep deployment URLs in a spreadsheet.
+
+<Frame fullWidth className="w-full">
+  ![Instance switcher in the Langfuse sidebar user
+  menu](/images/docs/ui-customization-instance-switcher.png)
+</Frame>
+
+```bash filename=".env"
+LANGFUSE_UI_INSTANCE_LINKS='[{"name":"Staging","url":"https://langfuse-staging.example.com"},{"name":"Production","url":"https://langfuse.example.com"}]'
+```
+
+- The deployment you are currently on is marked in the menu, so you always know where you are.
+- Entries open in a new tab. Sessions are not shared between deployments; each one authenticates on its own.
+- The list is per-deployment configuration, so set the same value on every deployment to keep the switcher consistent.
+
+<Cards num={1}>
+  <Card
+    title="UI Customization documentation"
+    href="/self-hosting/administration/ui-customization#instance-switcher"
+    icon={<Book />}
+    arrow
+  />
+</Cards>

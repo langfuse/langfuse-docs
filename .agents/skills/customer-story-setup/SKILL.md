@@ -130,6 +130,11 @@ available-internal-links** rule so links resolve.
 3. **Assets**
    - Logos and story images under **`public/images/customers/<slug>/`**.
 
+4. **Users / adopters list**
+   - After the story exists, add or update the company in the adopters table
+     with [`add-customer-to-user-list`](../add-customer-to-user-list/SKILL.md)
+     so the Reference cell is `[User Story](/users/<slug>)`.
+
 ---
 
 ## Checklist before finishing

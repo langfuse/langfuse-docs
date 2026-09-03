@@ -1,0 +1,169 @@
+---
+title: Evaluate Production Traffic
+sidebarTitle: Evaluate Production Traffic
+description: Score live production traces in Langfuse. Set up an evaluator and a rule to run LLM-as-a-Judge or code checks on incoming observations.
+---
+
+# Evaluate Production Traffic
+
+This guide walks you through scoring live production traces in Langfuse. If you don't yet know what to evaluate, start with [Choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate). For how evaluators, scores, and rules fit together, see [Core Concepts](/docs/evaluation/core-concepts).
+
+import { Details, Summary } from "@/components/Details";
+import { Button } from "@/components/ui/button";
+import { Link } from "@/components/ui/link";
+
+<div className="rounded-lg border bg-muted-blue/5 px-6 pb-6 [&>h2]:mt-6 [&>h2]:mb-4">
+
+## Agentic installation [#agentic-installation]
+
+Install the [Langfuse Agent Skill](https://github.com/langfuse/skills) to let your coding agent access all Langfuse features.
+
+<Tabs items={["Ask your coding agent", "Cursor plugin", "Manual installation"]}>
+
+<Tab>
+
+Ask your coding agent to install the skill by pointing to the [GitHub repository](https://github.com/langfuse/skills) and instruct it to get started with online evaluation.
+
+```txt filename="Agent instruction"
+Install the Langfuse Agent Skill from github.com/langfuse/skills
+and use it to set up online evaluation for this application
+with Langfuse.
+```
+
+</Tab>
+
+<Tab>
+
+Langfuse has a [Cursor Plugin](https://cursor.com/docs/plugins) that includes the skill automatically.
+
+<div className="flex gap-2 mt-3 mb-6">
+  <Button asChild>
+    <Link
+      href="https://cursor.com/marketplace/langfuse"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Install Plugin in Cursor
+    </Link>
+  </Button>
+</div>
+
+Then prompt your agent:
+
+```txt filename="Agent instruction"
+Set up online evaluation for this application with Langfuse.
+```
+
+</Tab>
+
+<Tab>
+
+Install via npm ([skills CLI](https://www.npmjs.com/package/skills)):
+
+```bash
+npx skills add langfuse/skills --skill "langfuse"
+```
+
+If you want to target a specific agent directly:
+
+```bash
+npx skills add langfuse/skills --skill "langfuse" --agent "<agent-id>"
+```
+
+<Details>
+<Summary>Alternatively you can manually clone the skill</Summary>
+
+1. Clone repo somewhere stable
+
+```bash
+git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
+```
+
+2. Make sure your agent's skills dir exists
+
+```bash
+mkdir -p /path/to/<agent-skill-root>/skills
+```
+
+3. Symlink the skill folder
+
+```bash
+ln -s /path/to/langfuse-skills/skills/langfuse /path/to/<agent-skill-root>/skills/langfuse
+```
+
+</Details>
+
+Then prompt your agent:
+
+```txt filename="Agent instruction"
+Set up online evaluation for this application with Langfuse.
+```
+
+</Tab>
+
+</Tabs>
+
+</div>
+
+## Manual setup [#manual-setup]
+
+This path sets up online evaluation in the Langfuse UI. You create an evaluator (how to score), test it on real observations, then attach a [rule](/docs/evaluation/core-concepts#evaluators-and-rules) (which incoming observations to score).
+
+<Video
+  src="https://static.langfuse.com/docs-videos/2026-08-22-new-eval-experience.mp4"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+<Steps>
+
+### Create an evaluator
+
+Open the [Evaluators page](https://cloud.langfuse.com/project/~/evals) and click **New evaluator**. Choose a template or create an evaluator from scratch.
+
+<Frame fullWidth>
+  ![Evaluators page with the New evaluator button and template starting points](/images/docs/evaluation/create-evaluator.png)
+</Frame>
+
+- **[LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) uses an LLM to score.** Use this for qualities that need language understanding, such as relevance, tone, or whether a request is out of scope. You need an [LLM connection](/docs/administration/llm-connection) first.
+- **[Code evaluator](/docs/evaluation/evaluation-methods/code-evaluators) is a Python or TypeScript `evaluate` function.** Use this for deterministic checks such as JSON validity, required fields, or keyword rules.
+
+### Test on sample observations
+
+On the right, filter to representative production observations, select one, and run the evaluator to test and iterate until the result matches what you would expect.
+
+<Frame fullWidth>
+  ![Testing an LLM-as-a-Judge evaluator with sample observations](/images/docs/evaluation/test-llm-evaluator.png)
+</Frame>
+
+### Attach a rule to incoming traces
+
+After you save the evaluator, create a [rule](/docs/evaluation/core-concepts#evaluators-and-rules) from the filters you used while testing, or attach the evaluator to an existing rule.
+
+A rule defines **which** incoming observations are scored: filters, sampling rate, and one or more evaluators. Review the matching volume from the past seven days. For LLM-as-a-Judge, also review the estimated cost and lower the sampling rate if needed.
+
+### See scores on production traces
+
+New matching observations receive scores as they arrive. Open a scored observation to inspect the value and the judge's reasoning, then use [score analytics](/docs/evaluation/scores/score-analytics) or a [custom dashboard](/docs/metrics/features/custom-dashboards) to watch the metric over time.
+
+You can also run the same evaluator on selected historical observations with [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation).
+
+_[Why is my observation-level evaluator not executing?](/faq/all/observation-eval-not-executing)_
+
+</Steps>
+
+## Other ways to score live traffic [#other-ways-to-score-live-traffic]
+
+Automated evaluators are the fastest way to score production continuously. These other methods also attach [scores](/docs/evaluation/scores/overview) to live data:
+
+| If you want to...                                           | Use                                                                                                                                            |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Review a sample of traces manually                          | [Scores via UI](/docs/evaluation/evaluation-methods/scores-via-ui), [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) |
+| Capture thumbs-up/down or other feedback signals from users | [User feedback](/docs/observability/features/user-feedback)                                                                                    |
+| Push scores from your own pipeline or agent                 | [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk)                                                                       |
+
+## Next steps
+
+- [Read the Langfuse Academy evaluation module](/academy/evaluate) to decide what to measure and how to write evaluators you can trust
+- [Set an alert](/docs/observability/features/alerts) when a score drops below a threshold
+- [Analyze quality in custom dashboards](/docs/metrics/features/custom-dashboards)

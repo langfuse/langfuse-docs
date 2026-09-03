@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import { createMcpHandler } from "@vercel/mcp-adapter";
 import * as z from "zod/v3";
 import { PostHog } from "posthog-node";
@@ -16,21 +17,76 @@ const posthog = process.env.NEXT_PUBLIC_POSTHOG_KEY
     })
   : undefined;
 
+export type McpRequestContext = {
+  userAgent?: string;
+  ip?: string;
+};
+
+// Populated per-request in app/api/mcp/route.ts so tool-call events can be
+// segmented by MCP client (Claude Code, Cursor, ...) instead of a fixed id.
+export const mcpRequestContextStorage =
+  new AsyncLocalStorage<McpRequestContext>();
+
+export const mcpRequestContextFromRequest = (
+  request: Request,
+): McpRequestContext => ({
+  userAgent: request.headers.get("user-agent") ?? undefined,
+  ip: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim(),
+});
+
+// The MCP initialize handshake carries clientInfo ({ name, version }) — the
+// most reliable identifier of which agent/IDE is talking to the docs server.
+export const trackMcpInitializeFromRequest = (request: Request) => {
+  if (!posthog || request.method !== "POST") return;
+  const clone = request.clone();
+  const { userAgent, ip } = mcpRequestContextFromRequest(request);
+  waitUntil(
+    (async () => {
+      try {
+        const body = await clone.json();
+        const messages = Array.isArray(body) ? body : [body];
+        const init = messages.find(
+          (message) => message && message.method === "initialize",
+        );
+        if (!init) return;
+        const clientInfo = init.params?.clientInfo;
+        posthog.capture({
+          distinctId: userAgent || "docs-mcp-server",
+          event: "docs_mcp:initialize",
+          properties: {
+            $process_person_profile: false,
+            $raw_user_agent: userAgent,
+            $ip: ip,
+            client_name: clientInfo?.name,
+            client_version: clientInfo?.version,
+          },
+        });
+        await posthog.flush();
+      } catch {
+        // Body may not be JSON (e.g. SSE re-connects); ignore.
+      }
+    })(),
+  );
+};
+
 const trackMcpToolUsage = async (
   toolName: string,
   status: "success" | "error",
   properties: Record<string, unknown> = {},
 ) => {
+  const context = mcpRequestContextStorage.getStore();
   return waitUntil(
     (async () => {
       try {
         posthog?.capture({
-          distinctId: "docs-mcp-server",
+          distinctId: context?.userAgent || "docs-mcp-server",
           event: "docs_mcp:execute_tool",
           properties: {
             tool_name: toolName,
             status,
             $process_person_profile: false,
+            $raw_user_agent: context?.userAgent,
+            $ip: context?.ip,
             ...properties,
           },
         });
@@ -47,7 +103,7 @@ const MCP_SERVER_INSTRUCTIONS = [
   "For project-scoped Langfuse data or actions such as prompts, datasets, scores, comments, metrics, observations, models, or project-specific feedback, prefer the authenticated Langfuse app MCP server when it is available.",
   "When Langfuse agent skills are installed, use them for end-to-end workflows, repo-specific guidance, and agent setup patterns; use this docs server to fetch or verify current documentation.",
   "Inspect the available tools and their schemas dynamically; do not assume a fixed tool list.",
-  "If the user wants to provide feedback about Langfuse docs or something is not working well, ask permission, show the exact payload, avoid secrets/customer data/trace payloads, then use submitFeedback.",
+  "If the user wants to provide feedback about Langfuse docs or something is not working well, ask permission and show the exact payload; if they want a reply, include only an email address they explicitly provide in the feedback text; exclude secrets, customer/project data, trace payloads, and unrelated context, then use submitFeedback.",
 ].join("\n");
 
 export const mcpHandler = createMcpHandler(
@@ -57,7 +113,8 @@ export const mcpHandler = createMcpHandler(
       [
         "Submit explicit user-approved feedback to the Langfuse team.",
         "Before calling, ask permission and show the exact payload.",
-        "Do not include secrets, credentials, customer data, trace payloads, or unrelated context.",
+        "If the user wants a reply, ask them to include their email address in the feedback text; only use an address they explicitly provide and show it in the exact payload preview.",
+        "Do not include secrets, credentials, customer/project data, trace payloads, or unrelated context; the only contact detail to include is an explicitly provided reply email.",
       ].join("\n"),
       {
         targetType: z
@@ -187,7 +244,12 @@ export const mcpHandler = createMcpHandler(
           const mdUrl = `${base}${mdPath}`;
 
           const res = await fetch(mdUrl, {
-            headers: { Accept: "text/markdown" },
+            // Self-identify so these fetches are distinguishable from external
+            // agents in the agent_content_fetch events fired by proxy.ts.
+            headers: {
+              Accept: "text/markdown",
+              "User-Agent": "langfuse-docs-mcp-server",
+            },
           });
           if (!res.ok) {
             throw new Error(`Failed to fetch ${mdUrl}: ${res.status}`);
@@ -228,7 +290,9 @@ export const mcpHandler = createMcpHandler(
       {},
       async () => {
         try {
-          const llmsTxtRes = await fetch("https://langfuse.com/llms.txt");
+          const llmsTxtRes = await fetch("https://langfuse.com/llms.txt", {
+            headers: { "User-Agent": "langfuse-docs-mcp-server" },
+          });
           if (!llmsTxtRes.ok) {
             throw new Error(`Failed to fetch llms.txt: ${llmsTxtRes.status}`);
           }

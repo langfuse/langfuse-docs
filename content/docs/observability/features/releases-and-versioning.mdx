@@ -15,10 +15,19 @@ You can track the effect of changes to your LLM app on metrics in Langfuse. This
 - **Explain changes to metrics** over time.
   - _Example:_ "Why did latency in this chain increase?"
 
-## Releases
+## Releases vs versions [#releases-vs-versions]
+
+A `release` tracks the overall version of your application. Commonly it is set to the _semantic version_ or _git commit hash_ of your application.
+
+The `version` parameter can be added to all observation types (e.g., `span`, `generation`, `event`, and [other observation types](/docs/observability/features/observation-types)). Thereby, you can track the effect of a new `version` on the metrics of an object with a specific `name` using [Langfuse analytics](/docs/analytics).
+
+|               | Release                              | Version                                             |
+| ------------- | ------------------------------------ | --------------------------------------------------- |
+| Scope         | Entire application                   | Individual observations with a given `name`         |
+| Typical value | Semantic version or git commit hash  | Component version, for example `1.0`                |
+| When to use   | You deployed a new application build | You changed a specific prompt, chain, or generation |
 
 ```mermaid
-
 flowchart LR
 
     A1[LLM application<br/>release:v2.1.23]
@@ -27,7 +36,33 @@ flowchart LR
     A1 --> A2
 ```
 
-A `release` tracks the overall version of your application. Commonly it is set to the _semantic version_ or _git commit hash_ of your application.
+```mermaid
+flowchart LR
+
+    A1[Generation<br/>name:guess-countries<br/>version:1.0]
+    A2[Generation<br/>name:guess-countries<br/>version:1.1]
+
+    A1 --> A2
+```
+
+## In Langfuse [#in-langfuse]
+
+Both values appear on traces and observations in Langfuse. Filter by them to isolate a deployment or a component change, compare costs, latencies, and quality across them in [analytics](/docs/analytics), or use them to explain why a metric shifted after a change.
+
+_Release in Langfuse interface_
+
+<Frame>
+  ![Picture release in traces
+  table](/images/blog/update-august-2023/release.jpg)
+</Frame>
+
+_Version parameter in Langfuse interface_
+
+<Frame>
+  ![Version on single generation](/images/blog/update-august-2023/version.jpg)
+</Frame>
+
+## Set a release [#set-a-release]
 
 The SDKs look for a `release` in the following order:
 
@@ -78,19 +113,7 @@ If no other `release` is set, the Langfuse SDKs default to a set of known releas
 
 Supported platforms include: Vercel, Heroku, Netlify. See the full list of support environment variables for [JS/TS](https://github.com/langfuse/langfuse-js/blob/v3-stable/langfuse-core/src/release-env.ts) and [Python](https://github.com/langfuse/langfuse-python/blob/main/langfuse/_utils/environment.py).
 
-## Versions
-
-```mermaid
-
-flowchart LR
-
-    A1[Generation<br/>name:guess-countries<br/>version:1.0]
-    A2[Generation<br/>name:guess-countries<br/>version:1.1]
-
-    A1 --> A2
-```
-
-The `version` parameter can be added to all observation types (e.g., `span`, `generation`, `event`, and [other observation types](/docs/observability/features/observation-types)). Thereby, you can track the effect of a new `version` on the metrics of an object with a specific `name` using [Langfuse analytics](/docs/analytics).
+## Set a version [#set-a-version]
 
 <LangTabs items={["Python SDK", "JS/TS SDK", "Langchain (Python)","Langchain (JS)"]}>
 <Tab>
@@ -213,8 +236,8 @@ const handler = new CallbackHandler({
 
 <PropagationRestrictionsCallout attributes={["version"]} />
 
-_Version parameter in Langfuse interface_
+## Related resources [#related-resources]
 
-<Frame>
-  ![Version on single generation](/images/blog/update-august-2023/version.jpg)
-</Frame>
+- To A/B test prompt versions in production, see [A/B Testing](/docs/prompt-management/features/a-b-testing).
+- To benchmark application changes on datasets, see [Datasets](/docs/evaluation/experiments/datasets) and [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui).
+- To compare costs, latencies, and quality by release or version, see [Metrics](/docs/metrics/overview) and [Custom Dashboards](/docs/metrics/features/custom-dashboards).

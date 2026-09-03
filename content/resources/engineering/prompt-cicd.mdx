@@ -173,7 +173,7 @@ Because your application fetches by label, it picks up the promoted version on i
 
 Offline validation only covers inputs you thought to test; production observation catches the rest. When generations are linked to prompt versions, Langfuse aggregates metrics per version in the prompt's Metrics tab: median latency, median input and output tokens, median cost, generation count, and median evaluation score. During a canary, this is the 90/10 scorecard, with each variant's quality and cost side by side on real traffic.
 
-To close the loop from observation back to action, [monitors](/docs/metrics/features/monitors) alert on metric thresholds: a monitor on a score metric with warning and alert thresholds can notify Slack, call a webhook, or trigger a GitHub Actions workflow when quality degrades, turning a slow-burn prompt regression into a page instead of a support ticket.
+To close the loop from observation back to action, [alerts](/docs/observability/features/alerts) fire on metric thresholds: an alert on a score metric with warning and alert thresholds can notify Slack, call a webhook, or trigger a GitHub Actions workflow when quality degrades, turning a slow-burn prompt regression into a page instead of a support ticket.
 
 ## Stage 6: roll back in one step [#roll-back]
 
@@ -197,7 +197,7 @@ Langfuse provides the storage, evaluation, and measurement layers of prompt CI/C
 | Weighted traffic split (e.g. 90/10)    | Composed            | Two labels + a random split in application code                       |
 | One-click winner promotion             | Composed            | Read the per-version metrics, then one label move                     |
 | Per-version production metrics         | Native              | Prompt Metrics tab via trace linking                                  |
-| Alerting on quality regressions        | Native              | Monitors on score metrics                                             |
+| Alerting on quality regressions        | Native              | Alerts on score metrics                                               |
 | One-step rollback                      | Native              | Repoint the `production` label                                        |
 | Audit trail of label changes           | Native (plan-gated) | Audit logs on Enterprise and self-hosted EE                           |
 

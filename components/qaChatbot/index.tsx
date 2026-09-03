@@ -39,25 +39,20 @@ import {
   ToolOutput,
   ToolInput,
 } from "@/components/ai-elements/tool";
-import { scoreDemoFeedback } from "@/components/demoLangfuseBrowserClients";
+import { scoreDemoNegativeUserFeedback } from "@/components/demoLangfuseBrowserClients";
 import { FeedbackDialog } from "./FeedbackPopover";
 import { cn } from "@/lib/utils";
-import { DemoTraceLink } from "@/components/demoTraceLink";
 import type { UIMessage } from "ai";
 
-type ChatMessageMetadata = {
-  traceUrl?: string;
-};
-
-type ChatMessage = UIMessage<ChatMessageMetadata>;
+type ChatMessage = UIMessage;
 
 type ChatProps = HTMLAttributes<HTMLDivElement>;
 
 export const Chat = ({ className, ...props }: ChatProps) => {
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  // Track user feedback for each message ID (1 = thumbs up, 0 = thumbs down, null = no feedback)
-  const [userFeedback, setUserFeedback] = useState<Map<string, number | null>>(
+  // Track negative_user_feedback per message (true/false, null = none)
+  const [userFeedback, setUserFeedback] = useState<Map<string, boolean | null>>(
     new Map(),
   );
 
@@ -87,13 +82,14 @@ export const Chat = ({ className, ...props }: ChatProps) => {
     });
   }, []);
 
-  const { messages, sendMessage, status, regenerate } = useChat<ChatMessage>({
-    messages: [],
-    transport: new DefaultChatTransport({
-      api: "/api/qa-chatbot",
-      body: { chatId, userId },
-    }),
-  });
+  const { messages, sendMessage, status, regenerate, stop } =
+    useChat<ChatMessage>({
+      messages: [],
+      transport: new DefaultChatTransport({
+        api: "/api/qa-chatbot",
+        body: { chatId, userId },
+      }),
+    });
 
   // Check if user has submitted any messages
   const hasUserMessages = messages.some((message) => message.role === "user");
@@ -112,16 +108,13 @@ export const Chat = ({ className, ...props }: ChatProps) => {
 
   const handleFeedback = (
     messageId: string,
-    value: number,
+    value: boolean,
     comment?: string,
   ) => {
-    // Update the local state
     setUserFeedback((prev) => new Map([...prev, [messageId, value]]));
 
-    scoreDemoFeedback({
+    scoreDemoNegativeUserFeedback({
       traceId: messageId,
-      id: `user-feedback-${messageId}`,
-      name: "user-feedback",
       value,
       comment,
     });
@@ -234,9 +227,6 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                           status !== "submitted" &&
                           status !== "streaming" &&
                           !hasStreamingParts;
-                        const traceUrl = message.metadata?.traceUrl;
-                        const isTraceLinkReady =
-                          Boolean(traceUrl) && !hasStreamingParts;
                         // Add spacing if next part is a different type (for consistent spacing between different types)
                         const nextPart = message.parts[i + 1];
                         const hasNextPartDifferentType =
@@ -247,16 +237,6 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                             className={hasNextPartDifferentType ? "mb-4" : ""}
                           >
                             <Response>{part.text}</Response>
-                            {message.role === "assistant" &&
-                              isNotFirstMessage &&
-                              isLastTextPart &&
-                              isTraceLinkReady && (
-                                <DemoTraceLink
-                                  traceUrl={traceUrl}
-                                  source="qa_chatbot"
-                                  className="mt-3"
-                                />
-                              )}
                             {message.role === "assistant" &&
                               isLastMessage &&
                               isNotFirstMessage &&
@@ -362,20 +342,22 @@ export const Chat = ({ className, ...props }: ChatProps) => {
           onSubmit={handleSubmit}
           className="mt-4 rounded-[2px] border-line-structure bg-surface-bg shadow-sm relative z-10 focus-within:border-line-cta transition-colors"
         >
-          <div className="flex items-end gap-2">
+          <div className="flex items-end gap-1 p-1">
             <PromptInputTextarea
               ref={textareaRef}
               onChange={(e) => setInput(e.target.value)}
               value={input}
               placeholder="Ask a question about Langfuse..."
-              className="flex-1 pr-2 min-h-[40px] max-h-[300px] leading-5 pt-[10px] pb-[10px] overflow-y-auto text-sm"
+              className="flex-1 min-h-[32px] max-h-[300px] leading-5 py-1.5 px-2 overflow-y-auto text-sm"
               style={{ height: "auto" }}
-              minHeight={40}
+              minHeight={32}
               maxHeight={300}
             />
-            <div className="pr-3 pb-[10px]">
-              <PromptInputSubmit disabled={!input || !userId} status={status} />
-            </div>
+            <PromptInputSubmit
+              disabled={status === "streaming" ? !userId : !input || !userId}
+              status={status}
+              onStop={stop}
+            />
           </div>
         </PromptInput>
         <p className="mt-6 text-xs text-muted-foreground text-center relative z-10 italic">

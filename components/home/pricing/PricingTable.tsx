@@ -197,7 +197,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Custom rate limits",
         "Uptime SLA",
         "Support SLA",
-        "Dedicated support engineer",
+        "Named lead support engineer",
       ],
       addOn: {
         name: "Yearly Commitment",
@@ -243,7 +243,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "All Open Source features plus management APIs, project-level RBAC, data retention policies, and audit logs",
         "Bundled with ClickHouse Cloud, ClickHouse BYOC, or ClickHouse Private",
         "Langfuse pricing is additive to your ClickHouse commercial plan",
-        "Dedicated support engineer for deployment and hosting guidance",
+        "Named lead support engineer for deployment and hosting guidance",
         "Solutions architect support during evaluation and rollout",
         "Direct access to the product team for feedback",
         "SOC 2 Type II and ISO 27001 reports",
@@ -679,16 +679,16 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Monitors and Alerts",
+        name: "Alerts",
         description:
-          "Threshold-based alerts on your LLM application metrics with notifications via Slack, webhooks, and GitHub Actions. Monitor limits per organization on Langfuse Cloud depend on the plan. Self-hosted deployments require Langfuse v4 and have no monitor limit.",
-        href: "/docs/metrics/features/monitors",
+          "Threshold-based alerts on your LLM application metrics with notifications via Slack, webhooks, and GitHub Actions. Alert limits per organization on Langfuse Cloud depend on the plan. Self-hosted deployments require Langfuse v4 and have no alert limit.",
+        href: "/docs/observability/features/alerts",
         tiers: {
           cloud: {
-            Hobby: "2 monitors",
-            Core: "20 monitors",
-            Pro: "50 monitors",
-            Enterprise: "100 monitors",
+            Hobby: "2 alerts",
+            Core: "20 alerts",
+            Pro: "50 alerts",
+            Enterprise: "100 alerts",
           },
           selfHosted: {
             "Open Source": "Langfuse v4+",
@@ -995,7 +995,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Dedicated Support Engineer",
+        name: "Named Lead Support Engineer",
         href: "/support#onboarding",
         description:
           "Includes deployment and hosting guidance for your dedicated Langfuse environment.",
