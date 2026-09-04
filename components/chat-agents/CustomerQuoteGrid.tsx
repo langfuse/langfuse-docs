@@ -1,5 +1,4 @@
-import Image from "next/image";
-import Link from "next/link";
+import { CustomerQuoteCard } from "@/components/chat-agents/CustomerQuoteCard";
 import { getCustomerStories } from "@/lib/getCustomerStories";
 
 const QUOTE_ROUTES = [
@@ -25,43 +24,20 @@ export function CustomerQuoteGrid() {
     <div className="mt-8 grid gap-2 lg:grid-cols-3">
       {selected.map((story) => {
         const frontMatter = story.frontMatter ?? {};
-        const quote = frontMatter.customerQuote ?? "";
-        const quoteAuthor = frontMatter.quoteAuthor ?? "";
-        const quoteRole = frontMatter.quoteRole ?? "";
-        const quoteCompany = frontMatter.quoteCompany ?? "";
-        const customerLogo = frontMatter.customerLogo;
-        const customerLogoDark = frontMatter.customerLogoDark;
-        const logoSrc = customerLogoDark ?? customerLogo;
+        const quote = frontMatter.customerQuote;
+        if (!quote) return null;
 
         return (
-          <blockquote
+          <CustomerQuoteCard
             key={story.route}
-            className="border border-line-structure bg-surface-bg p-5 text-[14px] leading-[1.45] text-text-primary"
-          >
-            <p>“{quote}”</p>
-            <footer className="mt-4 border-t border-line-structure pt-3">
-              <Link href={story.route} className="inline-flex items-center">
-                {logoSrc ? (
-                  <Image
-                    src={logoSrc}
-                    alt={quoteCompany}
-                    width={110}
-                    height={28}
-                    className="h-5 w-auto object-contain opacity-90"
-                  />
-                ) : (
-                  <span className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-                    {quoteCompany}
-                  </span>
-                )}
-              </Link>
-              <p className="mt-2 text-[11px] text-text-tertiary">
-                {quoteAuthor}
-                {quoteRole ? `, ${quoteRole}` : ""}
-                {quoteCompany ? ` · ${quoteCompany}` : ""}
-              </p>
-            </footer>
-          </blockquote>
+            route={story.route}
+            quote={quote}
+            quoteAuthor={frontMatter.quoteAuthor}
+            quoteRole={frontMatter.quoteRole}
+            quoteCompany={frontMatter.quoteCompany}
+            customerLogo={frontMatter.customerLogo}
+            customerLogoDark={frontMatter.customerLogoDark}
+          />
         );
       })}
     </div>
