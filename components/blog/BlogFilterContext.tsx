@@ -22,6 +22,7 @@ type BlogFilterState = {
   filteredPosts: BlogPageItem[];
   highlightPosts: BlogPageItem[];
   listPosts: BlogPageItem[];
+  isFiltered: boolean;
 };
 
 const BlogFilterContext = createContext<BlogFilterState | null>(null);
@@ -51,7 +52,12 @@ export function BlogFilterProvider({
   useEffect(() => {
     const tag = searchParams.get("tag") ?? null;
     setSelectedTagLocal(tag || null);
-  }, [searchParams]);
+    if (!searchParams.has("view")) return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("view");
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname);
+  }, [searchParams, pathname, router]);
 
   const allPosts = useMemo(() => {
     return pages
@@ -85,17 +91,25 @@ export function BlogFilterProvider({
   }, [allPosts, selectedTag, searchQuery]);
 
   const highlightPosts = useMemo(() => {
+    const hasImage = (p: BlogPageItem) => Boolean(p.frontMatter?.ogImage);
     const marked = allPosts.filter((p) => p.frontMatter?.highlight === true);
-    if (marked.length >= HIGHLIGHT_COUNT)
-      return marked.slice(0, HIGHLIGHT_COUNT);
-    const remaining = allPosts.filter((p) => !marked.includes(p));
-    return [...marked, ...remaining].slice(0, HIGHLIGHT_COUNT);
+    const markedWithImage = marked.filter(hasImage);
+    const othersWithImage = allPosts.filter(
+      (p) => hasImage(p) && !marked.includes(p),
+    );
+    const visual = [...markedWithImage, ...othersWithImage];
+    if (visual.length >= HIGHLIGHT_COUNT)
+      return visual.slice(0, HIGHLIGHT_COUNT);
+    const remaining = allPosts.filter((p) => !visual.includes(p));
+    return [...visual, ...remaining].slice(0, HIGHLIGHT_COUNT);
   }, [allPosts]);
 
   const listPosts = useMemo(() => {
     const highlightRoutes = new Set(highlightPosts.map((p) => p.route));
     return filteredPosts.filter((p) => !highlightRoutes.has(p.route));
   }, [filteredPosts, highlightPosts]);
+
+  const isFiltered = Boolean(selectedTag) || Boolean(searchQuery.trim());
 
   const setSelectedTag = (tag: string | null) => {
     setSelectedTagLocal(tag);
@@ -105,6 +119,7 @@ export function BlogFilterProvider({
     } else {
       params.delete("tag");
     }
+    params.delete("view");
     const query = params.toString();
     router.replace(query ? `${pathname}?${query}` : pathname);
   };
@@ -121,6 +136,7 @@ export function BlogFilterProvider({
         filteredPosts,
         highlightPosts,
         listPosts,
+        isFiltered,
       }}
     >
       {children}
