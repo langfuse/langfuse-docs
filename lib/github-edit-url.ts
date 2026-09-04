@@ -53,9 +53,35 @@ const FOLDER_INDEX_PATHS = new Set<string>([
 ]);
 
 /**
+ * Routed pages whose source is `.md`, not `.mdx`. Mixed into folders that
+ * also have MDX pages, so this cannot be a directory convention.
+ */
+const MARKDOWN_PAGE_PATHS = new Set<string>([
+  "/guides/cookbook/example_evaluating_openai_agents",
+  "/guides/cookbook/example_intent_classification_pipeline",
+  "/guides/cookbook/example_llm_security_monitoring",
+  "/guides/cookbook/example_multi_modal_traces",
+  "/guides/cookbook/prompt_management_openai_functions",
+  "/integrations/model-providers/amazon-bedrock",
+  "/integrations/model-providers/cleanlab",
+  "/integrations/model-providers/cohere",
+  "/integrations/model-providers/ollama",
+  "/integrations/model-providers/openai-assistants-api",
+  "/integrations/other/gradio",
+  "/integrations/other/mlflow",
+  "/integrations/other/openinference",
+  "/integrations/other/openlit",
+  "/integrations/other/openllmetry",
+  "/resources/engineering/evaluation-of-rag-with-ragas",
+  "/resources/engineering/langfuse-sdk-performance-test",
+  "/resources/engineering/prompt-management-performance-benchmark",
+]);
+
+/**
  * GitHub "edit this file" URL for a docs-chrome pathname.
  * Folder landings such as /docs/observability resolve to
  * content/docs/observability/index.mdx instead of a missing observability.mdx.
+ * Routed `.md` pages keep their extension so Edit this page opens a real file.
  */
 export function getGithubEditUrl(urlPath: string): string | null {
   const cleanPath = urlPath.split("#")[0].split("?")[0];
@@ -65,11 +91,12 @@ export function getGithubEditUrl(urlPath: string): string | null {
   if (!contentDir) return null;
 
   const slugPath = cleanPath.slice(section.length + 2);
+  const ext = MARKDOWN_PAGE_PATHS.has(cleanPath) ? "md" : "mdx";
   const filePath = FOLDER_INDEX_PATHS.has(cleanPath)
     ? slugPath === ""
       ? `${contentDir}/index.mdx`
       : `${contentDir}/${slugPath}/index.mdx`
-    : `${contentDir}/${slugPath}.mdx`;
+    : `${contentDir}/${slugPath}.${ext}`;
 
   return `https://github.com/langfuse/langfuse-docs/edit/main/${filePath}`;
 }
