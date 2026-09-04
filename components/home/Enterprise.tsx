@@ -7,6 +7,7 @@ import { Text } from "@/components/ui/text";
 import { FeaturedCustomers } from "./FeaturedCustomers";
 import { BulletList } from "./BulletList";
 import securityVisual from "./img/visuals/visual-security.svg";
+import { formatCompanyCount } from "@/lib/usage-stats";
 
 const architecture = [
   {
@@ -28,18 +29,24 @@ const architecture = [
 ];
 
 const openApis = [
-  { label: "50M+ SDK installs/month", href: "/careers#public-metrics" },
-  { label: "10+ billion observations processed per month" },
-  { label: "2300+ customers" },
+  { label: "130M+ SDK installs/month", href: "/careers#public-metrics" },
+  { label: "90B+ observations processed per month" },
+  {
+    label: `${formatCompanyCount()} companies using Langfuse`,
+    href: "/why",
+  },
   { label: "99.9% uptime" },
 ];
 
 const security = [
-  { label: "SOC 2 Type II", href: "/security/soc2" },
-  { label: "ISO 27001", href: "/security/iso27001" },
-  { label: "GDPR", href: "/security/gdpr" },
+  { label: "SOC 2 Type II & ISO 27001", href: "/security" },
   { label: "EU & US Data Regions", href: "/security/data-regions" },
   { label: "HIPAA-ready region", href: "/security/hipaa" },
+  {
+    label: "Hardening for Gov (soon)",
+    href: "/self-hosting/configuration/hardening#hardening-for-government",
+  },
+  { label: "GDPR", href: "/security/gdpr" },
 ];
 
 export const Enterprise = () => {

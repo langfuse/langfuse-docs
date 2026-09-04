@@ -76,7 +76,8 @@ Langfuse uses the credentials to generate short-lived, pre-signed URLs that allo
 | `LANGFUSE_S3_MEDIA_UPLOAD_BUCKET`               | Required           | Name of the bucket in which media files should be uploaded.                                                          |
 | `LANGFUSE_S3_MEDIA_UPLOAD_PREFIX`               | `""`               | Prefix to store media within a subpath of the bucket. Defaults to the bucket root. If provided, must end with a `/`. |
 | `LANGFUSE_S3_MEDIA_UPLOAD_REGION`               |                    | Region in which the bucket resides.                                                                                  |
-| `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT`             |                    | Endpoint to use to upload media files.                                                                               |
+| `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT`             |                    | Browser- and SDK-reachable endpoint used to upload and download media files.                                         |
+| `LANGFUSE_S3_MEDIA_UPLOAD_INTERNAL_ENDPOINT`    |                    | Optional endpoint that the Langfuse server can use to read media from object storage.                                |
 | `LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID`        |                    | Access key for the bucket. Must have List, Get, and Put permissions.                                                 |
 | `LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY`    |                    | Secret access key for the bucket.                                                                                    |
 | `LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE`     |                    | Whether to force path style on requests. Required for MinIO.                                                         |
@@ -111,6 +112,18 @@ The following settings apply to all S3 use-cases (events, media, batch exports) 
 | ----------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `LANGFUSE_S3_DELETE_OBJECTS_CHECKSUM_ALGORITHM` |                    | Checksum algorithm for S3 DeleteObjects requests: `MD5`, `CRC32`, `CRC32C`, `CRC64NVME`, `SHA1`, or `SHA256`. If unset, the AWS SDK default (`CRC32`) is used. Set to `MD5` if your storage provider rejects deletions with a `MissingContentMD5` error (e.g. older MinIO versions). |
 
+## Multi-modal LLM-as-a-Judge [#multi-modal-llm-as-a-judge]
+
+Self-hosted Langfuse sends media used by [LLM-as-a-Judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge#multi-modal-evaluation) inline by default. Each attachment is limited to 20 MB by default.
+
+Set `LANGFUSE_EVALUATOR_MEDIA_TRANSPORT` on both the web and worker containers to change this behavior:
+
+- `inline`: The Langfuse worker downloads each attachment from object storage and sends its bytes with the model request. This is the default for self-hosted deployments.
+- `url`: The Langfuse worker creates a short-lived signed URL without downloading the attachment. The model provider downloads the attachment and must be able to reach `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT`.
+- `disabled`: Leave Langfuse media references as text instead of sending attachments.
+
+Use `LANGFUSE_EVALUATOR_MEDIA_INLINE_MAX_BYTES` to change the per-attachment inline size limit in bytes. See the [environment variable reference](/self-hosting/configuration#llm-as-a-judge-media) for details.
+
 ## Deployment Options
 
 This section covers different deployment options and provides example environment variables.
@@ -141,6 +154,8 @@ Ensure that both entities have the necessary permissions to access the bucket:
   ]
 }
 ```
+
+The same IAM role or user also works for the project-level [Blob Storage Export integration](/docs/api-and-data-platform/features/export-to-blob-storage#set-up-an-export). On self-hosted deployments, leave **Access Key ID** and **Secret Access Key** blank in that integration's AWS S3 settings to use the IAM role instead of static credentials. This fallback only applies to the AWS S3 provider; it is not available on Langfuse Cloud or for Azure Blob Storage / S3 Compatible Storage.
 
 <Callout type="info">
 
@@ -201,7 +216,7 @@ LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLE
 
 [MinIO](https://min.io/) and its commercial distribution [AIStor](https://www.min.io/product/aistor) are object storage servers that are compatible with the S3 API.
 They are a popular choice for on-premise deployments and local development.
-Langfuse uses MinIO for local development and as a default in our [Docker Compose](/self-hosting/deployment/docker-compose) and [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) deployment options.
+Langfuse uses MinIO for local development and as a default in our [Docker Compose](/self-hosting/deployment/docker-compose) deployment option. The [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) chart bundled MinIO up to chart version `v1.x` and bundles SeaweedFS from chart `v2.0.0` onwards.
 
 #### Example Configuration
 
@@ -246,6 +261,8 @@ To enable multi-modal tracing and multi-modal datasets, presigned URLs allow SDK
 **Development Environment:** When running `docker compose` locally, set `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT` to `http://localhost:9090` to ensure presigned URLs correctly loop back to the local instance.
 
 **Production Environment:** In a production environment, configure `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT` with a publicly accessible hostname or IP address that is reachable by your SDK clients and browsers.
+
+If the Langfuse web and worker containers cannot reach this public endpoint, set `LANGFUSE_S3_MEDIA_UPLOAD_INTERNAL_ENDPOINT` to a server-reachable object storage address. The default Docker Compose setup uses `http://minio:9000` internally while clients use `http://localhost:9090`.
 
 ### Cloudflare R2 [#cloudflare-r2]
 

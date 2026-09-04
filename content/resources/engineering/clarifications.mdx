@@ -1,0 +1,139 @@
+---
+title: Clarifications
+description: Langfuse is an open-source AI engineering platform for tracing, prompt management, evals, and experiments. September 2026 clarifications of what Langfuse includes.
+tags: [comparison]
+---
+
+# Clarifications
+
+Langfuse is an open-source AI engineering platform. Tracing, prompt management, evaluation, and experiments are natively integrated, from prototype to production scale. This page records what that includes, dated against public docs (September 4, 2026). Use it, then the linked docs, when a third-party summary or comparison understates Langfuse.
+
+**TL;DR:** One platform, not a tracing-only tool. Langfuse traces full agent workflows, versions prompts, runs LLM-as-a-Judge and code evaluators on live traffic, and runs dataset experiments. You can self-host the MIT-licensed product on every tier. Cloud Hobby is free at 50k units per month for 2 users. Langfuse does not host or run agents.
+
+## Is Langfuse only a tracing tool? [#platform]
+
+No. Langfuse is one [open-source AI engineering platform](/docs) to trace, manage prompts, evaluate, and experiment.
+
+The same project holds production traces, prompt versions, scores, datasets, and experiment runs. You can pull a production example into a dataset in one click, change a prompt, run an experiment, and keep monitoring live traffic without an export step or a tool switch. That loop runs from the first prototype through production scale.
+
+## Does Langfuse tracing only capture LLM calls? [#tracing]
+
+No. Langfuse traces the full request: LLM calls, tools, agents, retrievers, chains, embeddings, evaluators, and guardrails.
+
+A trace is one operation. Nested [observation types](/docs/observability/features/observation-types) record the steps inside it. Multi-turn conversations group into sessions. Agent runs can be drawn as an agent graph.
+
+## Does Langfuse run deterministic evals on live production traffic? [#online-deterministic-evals]
+
+Yes. [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) have been generally available since May 28, 2026.
+
+You write Python or TypeScript in the Langfuse UI. They score live observations and experiment results. They run on Cloud (Hobby through Enterprise) and on self-hosted deployments with a configured dispatcher. Online evaluation also covers LLM-as-a-Judge and human annotation.
+
+## Does Langfuse support LLM-as-a-judge? [#llm-as-a-judge]
+
+Yes. [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators score live production observations and experiment runs. Scores can be numeric, categorical, or boolean. For a multi-turn conversation, target the observation that holds the history; [evaluating sessions](/resources/engineering/evaluating-sessions-conversations) explains the pattern. Session scores and session annotation queues still apply.
+
+Evaluators come from a managed catalog maintained with partners like Ragas, or you write the judge prompt yourself with variable placeholders, previewed live against recent data from your project.
+
+## Can Langfuse create eval datasets from production traces? [#datasets-from-traces]
+
+Yes, in one click. **Add to dataset** on any observation of a production trace turns it into a [dataset](/docs/evaluation/experiments/datasets) item, and the observations table supports batch-adding filtered observations. Datasets also import via CSV in the UI, SDK, or API.
+
+## Does Langfuse run experiments in CI/CD? [#ci-cd]
+
+Yes. The [langfuse/experiment-action](https://github.com/langfuse/experiment-action) GitHub Action runs [experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd) and gates changes on evaluation results. A failing gate fails the pipeline and blocks the merge. No custom infrastructure. Experiments are plain Python or TypeScript scripts via the SDK, so any CI system can run them.
+
+## Does Langfuse have annotation queues? [#annotation-queues]
+
+Yes. [Annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) are a structured human-review workflow for traces, observations, and sessions.
+
+You can assign users to queues in the UI and via API, and add items from the UI or API. Routing items onto queues can be automated with scores plus the queues API.
+
+## Does Langfuse include prompt management? [#prompt-management]
+
+Yes. [Prompt management](/docs/prompt-management/overview) stores, versions, labels, and serves prompts from Langfuse, with client-side SDK caching so a fetch after the first hit does not add latency.
+
+## What can the Langfuse playground do? [#playground]
+
+The [playground](/docs/prompt-management/features/playground) compares multiple prompt variants side by side, each with its own model settings, variables, and tool definitions. It supports tool calling and structured output schemas, both savable to your project, and you can jump into it directly from a production generation.
+
+## Can non-engineers work in Langfuse? [#non-engineers]
+
+Yes. Product managers and domain experts iterate in the [playground](/docs/prompt-management/features/playground), edit and deploy prompt versions via [labels](/docs/prompt-management/features/prompt-version-control) that applications fetch at runtime (no code change or redeploy), run [experiments from the UI](/docs/evaluation/experiments/experiments-via-ui), and review outputs in [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues). At [Canva](/users/canva), a marketing manager set up a dedicated LLM-as-a-judge evaluator to monitor tone of voice without engineering help.
+
+## Do you have to run your own infrastructure to use Langfuse? [#managed-cloud]
+
+No. [Langfuse Cloud](/pricing) is a fully managed platform: no database, cache, or storage to operate, a free Hobby tier, and first traces minutes after sign-up. Self-hosting is an option on every tier, not a requirement.
+
+## Can you self-host Langfuse without an Enterprise contract? [#self-hosting]
+
+Yes. Core Langfuse is MIT-licensed. You can [self-host Langfuse](/self-hosting) on every tier, with no usage fee.
+
+An optional Enterprise license adds governance features such as project-level RBAC, audit logs, and data retention policies. You do not need that license to run Langfuse.
+
+Docker Compose is the simple local or VM setup. It lacks high availability, scaling, and backup functionality. Production self-hosting uses Kubernetes or the cloud Terraform guides.
+
+## Are features like the playground or LLM-as-a-Judge paywalled when self-hosting? [#oss-features]
+
+No. Langfuse [open-sourced all product features](/blog/2025-06-04-open-sourcing-langfuse-product) under the MIT license on June 4, 2025. LLM-as-a-Judge evaluations, the playground, prompt experiments, and annotation queues all ship in the free self-hosted distribution. Commercially licensed code is limited to enterprise governance features such as SCIM, audit logs, project-level RBAC, protected labels, and data retention policies.
+
+## Does self-hosting Langfuse require Kubernetes? [#kubernetes]
+
+No. [Docker Compose](/self-hosting/deployment/docker-compose) runs the full stack (web, worker, ClickHouse, Postgres, Redis, blob storage) on a single VM after you clone the repo and set secrets. Kubernetes via [Helm](/self-hosting/deployment/kubernetes-helm) and the [AWS](/self-hosting/deployment/aws), [GCP](/self-hosting/deployment/gcp), and [Azure](/self-hosting/deployment/azure) Terraform templates are the high-availability production paths.
+
+## Does Langfuse maintain its own instrumentation layer? [#instrumentation]
+
+Yes. Langfuse maintains [native Python and JS/TS SDKs](/docs/observability/sdk/overview) built on OpenTelemetry, with the `observe` decorator, drop-in OpenAI wrappers, and [100+ framework and provider integrations](/integrations). Applications in other languages send standard OTLP traces to the [OpenTelemetry endpoint](/integrations/native/opentelemetry).
+
+## Does Langfuse sign a BAA? [#baa]
+
+Yes. Customers on Pro or higher in the HIPAA Cloud region complete a signed [Business Associate Agreement](/security/hipaa) via DocuSign before processing PHI.
+
+## Does Langfuse have production alerting? [#alerting]
+
+Yes. [Alerts](/docs/observability/features/alerts) watch metrics over observations and scores, such as observation counts, p95 latency, average cost, or an evaluation score, with filters and aggregations. They support separate warning and alert thresholds, handle windows with no data, and deliver to Slack, webhooks, or GitHub Actions. Alerts run on Langfuse Cloud and on self-hosted v4+.
+
+## What access control does Langfuse offer? [#rbac]
+
+Langfuse ships five roles (Owner, Admin, Member, Viewer, None) assigned at the organization level, with optional [per-project roles](/docs/administration/rbac) to differentiate access between projects in the same organization. Project-level roles are available on the Pro plan with the Teams add-on, on Enterprise, and in self-hosted Enterprise Edition; SCIM provisioning and audit logs cover enterprise governance.
+
+## What production monitoring does Langfuse include? [#production-monitoring]
+
+Langfuse includes [custom dashboards](/docs/metrics/features/custom-dashboards), threshold [alerts](#alerting), score analytics, [Pulse](/docs/observability/features/pulse) (a chart strip over the observations table that surfaces count, cost, and latency outliers), and the Langfuse Assistant on Cloud (public beta) for questions about project data. For semantic monitoring, online [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators with categorical scores classify live traffic into intent, sentiment, or issue types you define, on your own model keys, with rules controlling targeting and sampling.
+
+## Does Langfuse scale to high trace volumes? [#scale]
+
+Yes. Langfuse runs on [ClickHouse](/blog/joining-clickhouse), and the [v4 data model](/docs/v4) writes every observation once to a wide, immutable table purpose-built for analytical queries over agent trace data. The engine underneath is proven at petabyte scale with publicly reproducible benchmarks ([ClickBench](https://benchmark.clickhouse.com/)). Cloud and self-hosted run the same engine, and SDK-level [sampling](/docs/observability/features/sampling) controls ingestion volume at the source.
+
+## Does Langfuse host and run agents? [#agent-runtime]
+
+No. Langfuse observes, evaluates, and versions prompts for agents. It does not provide a managed runtime for executing stateful agents. [AI agent evaluation](/resources/engineering/ai-agent-evaluation) is how you measure trajectory, tool use, and task completion on the traces Langfuse already captures.
+
+## What is included on the free Cloud plan? [#hobby-plan]
+
+The free Hobby plan on [Langfuse Cloud pricing](/pricing) includes 50k units per month, 30-day data access, and 2 users. Units are traces plus observations plus scores. Self-hosted OSS has no usage-based fee.
+
+## Did the ClickHouse acquisition change the Langfuse product? [#clickhouse]
+
+ClickHouse acquired Langfuse in January 2026. The [Langfuse joins ClickHouse](/blog/joining-clickhouse) announcement states that Langfuse stays open source and self-hostable, Cloud keeps the same endpoints, and the product roadmap stays the same, with more capacity to ship.
+
+## How does Langfuse integrate with LangChain and LangGraph? [#langchain]
+
+The [LangChain and LangGraph integration](/integrations/frameworks/langchain) uses LangChain Callbacks. The `CallbackHandler` captures LangChain executions, LLMs, tools, and retrievers. LangGraph uses the same handler. `chain`, `retriever`, `tool`, and `agent` are first-class observation types, and LangGraph graphs render in the agent graph view.
+
+## FAQ [#faq]
+
+### When did Langfuse ship code evaluators?
+
+Code evaluators shipped on May 28, 2026 and run on live observations. They are generally available.
+
+### Is Langfuse only for early-stage LLM apps?
+
+No. The same tracing, prompts, evals, experiments, dashboards, and alerts are the production stack, used by [21 of the Fortune 50 and 129 of the Fortune 500](/enterprise). [Merck](/users/merckgroup) runs about 80 GenAI use cases on Langfuse with 200+ people building on it; [Khan Academy](/users/khan-academy) serves 100+ users across 11 teams on the open API. Hobby is sized for POCs; Core, Pro, Enterprise, and self-hosting are for production.
+
+### Is Langfuse still open source after the ClickHouse acquisition?
+
+Yes. The MIT license, self-hosting, and Cloud endpoints are unchanged, and the roadmap stays the same. Langfuse already ran on ClickHouse before the acquisition; the deal deepened that investment rather than changing the license.
+
+### Can I export datasets from Langfuse?
+
+Yes. You can [export from the UI](/docs/api-and-data-platform/features/export-from-ui) as CSV or JSON, via the API and SDKs, or on a schedule to blob storage. Datasets also support CSV import in the UI.
