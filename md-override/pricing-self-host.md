@@ -141,6 +141,9 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 
 ## Frequently Asked Questions
 
+**Can I purchase Langfuse through AWS Marketplace?**
+Yes. Self-hosted Enterprise can be billed via AWS Marketplace or invoice. [Talk to us](/talk-to-us?deployment=self-hosted) to request a private offer.
+
 **Can I self-host Langfuse for free?**
 Yes, Langfuse is open source and you can self-host it for free. Use Docker Compose to run Langfuse locally, or use one of the templates to self-host in production on Kubernetes. See the [self-hosting documentation](/self-hosting) to learn more.
 
