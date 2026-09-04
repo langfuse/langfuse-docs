@@ -12,6 +12,10 @@ export function formatCompanyCount(): string {
   return `${COMPANIES.toLocaleString("en-US")}+`;
 }
 
+export function formatDockerPulls(): string {
+  return `${(DOCKER_PULLS / 1_000_000).toFixed(0)}M+`;
+}
+
 export function formatObservationsPerMonth(): string {
   return `${(OBSERVATIONS_PER_MONTH / 1_000_000_000).toFixed(0)}B+`;
 }
