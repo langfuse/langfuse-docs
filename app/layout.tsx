@@ -125,7 +125,7 @@ export default function RootLayout({
             />
           </>
         )}
-        <SpeedInsights />
+        <SpeedInsights sampleRate={0.1} />
       </body>
     </html>
   );
