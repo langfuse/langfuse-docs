@@ -40,13 +40,13 @@ const openApis = [
 
 const security = [
   { label: "SOC 2 Type II & ISO 27001", href: "/security" },
-  { label: "GDPR", href: "/security/gdpr" },
   { label: "EU & US Data Regions", href: "/security/data-regions" },
   { label: "HIPAA-ready region", href: "/security/hipaa" },
   {
     label: "Hardening for Gov (soon)",
     href: "/self-hosting/configuration/hardening#hardening-for-government",
   },
+  { label: "GDPR", href: "/security/gdpr" },
 ];
 
 export const Enterprise = () => {
