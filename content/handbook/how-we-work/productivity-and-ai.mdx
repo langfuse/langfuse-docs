@@ -92,7 +92,7 @@ Several non-AI tools are critical to our workflow:
 
 ## 2. Team productivity
 
-- AI vendors: We generally prefer to use external vendors as this is usually more cost-effective than maintaining the process ourselves. Examples: [Ask AI](/ask-ai) on langfuse.com is powered by Inkeep; pull requests get automated review from Claude, Greptile and Codex.
+- AI vendors: We generally prefer to use external vendors as this is usually more cost-effective than maintaining the process ourselves. Examples: [Ask AI](/ask-ai) on langfuse.com is powered by Inkeep; pull requests get automated review from Claude and Greptile.
 - Internally built tools:
   - Code: You can use our company OpenAI/Anthropic accounts
   - Dogfood Langfuse
@@ -103,6 +103,6 @@ Several non-AI tools are critical to our workflow:
 - **Where to use it**: Use Codex in terminal/IDE for direct implementation work, and **Codex Web** when you want server-side sessions that can keep running while you focus on other work.
 - **Connectors**: Connect **Linear** and **Slack** so agents can pick up context from tickets/threads and propose scoped code/documentation updates faster.
 - **Context quality**: Keep `AGENTS.md` files up to date (especially in active repos) so coding agents reliably follow current conventions, workflows, and documentation standards.
-- **Skills live in the repo**: `langfuse/langfuse` carries its own agent skills under `.agents/skills/`, and `pnpm install` wires them into whichever tool you use. They cover our conventions rather than general ones — how to slice a large change into reviewable pull requests, what a green check actually proves, and what an agent may write to Linear. Start with `langfuse-onboarding`, which works out who you are and points you at the rest.
+- **Skills live in the repo**: `langfuse/langfuse` carries its own agent skills under `.agents/skills/`, and `pnpm install` wires them into whichever tool you use. They cover our conventions rather than general ones — how to slice a large change into reviewable pull requests, which CI checks can pass without having run, and what an agent may write to Linear. Start with `langfuse-onboarding`, which works out who you are and points you at the rest.
 
 You can find some examples in this blog post: [How we use LLMs to scale Langfuse](/blog/2025-04-24-how-we-use-llms-to-scale-langfuse)
