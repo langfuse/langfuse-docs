@@ -25,7 +25,7 @@ One integrated platform to trace, manage prompts, evaluate, and experiment from 
 - **[Evaluation](/docs/evaluation)** — LLM-as-a-judge, heuristic functions, or human review. Run evaluators on production data or during experiments.
 - **[Prompt management](/docs/prompt-management)** — separate prompts from code with one-click deployments and rollbacks.
 - **[Playground](/docs/prompt-management/features/playground)** — test prompts on real production inputs and compare models side by side.
-- **[Experiments](/docs/evaluation/experiments/overview)** — define test cases, run experiments, and compare results side by side.
+- **[Experiments](/docs/evaluation/experiments/datasets)** — define test cases, run experiments, and compare results side by side.
 - **[Human annotation](/docs/evaluation/evaluation-methods/annotation-queues)** — collaborative human-in-the-loop workflows to review traces and create golden datasets.
 - **[Cost and latency](/docs/observability/features/token-and-cost-tracking)** — monitor cost, latency, and quality with [dashboards](/docs/metrics/features/custom-dashboards) and [automated alerts](/docs/observability/features/alerts).
 
@@ -108,7 +108,7 @@ Langfuse is an [open-source](https://github.com/langfuse/langfuse) AI engineerin
 
 ### What does Langfuse help me with?
 
-Langfuse helps you [debug LLM applications](/docs/observability) with detailed traces that capture every step of your AI pipeline, including [agent graphs](/docs/observability/features/agent-graphs). You can [manage and version your prompts](/docs/prompt-management) collaboratively, run [automated evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) (including LLM-as-a-judge and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators)), track [costs and latency](/docs/observability/features/token-and-cost-tracking) across models and providers, and run [experiments on datasets](/docs/evaluation/experiments/overview) to measure improvements before shipping. It also supports [custom dashboards](/docs/metrics/features/custom-dashboards) for team-wide visibility.
+Langfuse helps you [debug LLM applications](/docs/observability) with detailed traces that capture every step of your AI pipeline, including [agent graphs](/docs/observability/features/agent-graphs). You can [manage and version your prompts](/docs/prompt-management) collaboratively, run [automated evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) (including LLM-as-a-judge and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators)), track [costs and latency](/docs/observability/features/token-and-cost-tracking) across models and providers, and run [experiments on datasets](/docs/evaluation/experiments/datasets) to measure improvements before shipping. It also supports [custom dashboards](/docs/metrics/features/custom-dashboards) for team-wide visibility.
 
 ### Can I use just tracing without the other features?
 

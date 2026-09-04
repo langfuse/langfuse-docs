@@ -80,17 +80,21 @@ export function DocsBreadcrumb() {
     for (let i = 0; i < path.length; i++) {
       const node = path[i];
       if (node.type === "page") {
+        const prev = i > 0 ? path[i - 1] : undefined;
+        const isFolderIndex =
+          prev?.type === "folder" &&
+          (prev.index === node || prev.index?.url === node.url);
+        // Folder index pages use the folder name (Observability), not the
+        // page sidebar title (Overview). The section root is the leading crumb.
+        if (isFolderIndex || node.url === resolveSectionUrl(root)) continue;
         result.push({ name: node.name, url: node.url });
       } else if (node.type === "folder") {
         // The active root folder is rendered as the leading crumb below.
         if (node.root) continue;
-        // Fumadocs collapses a folder and its index page into a single crumb.
-        if (i === path.length - 1 || node.index !== path[i + 1]) {
-          result.push({
-            name: node.name,
-            url: node.index?.url ?? resolveFirstUrl(node),
-          });
-        }
+        result.push({
+          name: node.name,
+          url: node.index?.url ?? resolveFirstUrl(node),
+        });
       }
     }
 
