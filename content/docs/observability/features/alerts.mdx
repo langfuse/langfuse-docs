@@ -91,7 +91,7 @@ See [Automations](#automations) to set up actions before linking them here.
 
 ### Name and save
 
-Give the alert a descriptive name (max 200 characters) and optional tags, then click **Save**. The alert becomes **ACTIVE** immediately and schedules its first evaluation.
+Give the alert a descriptive name (max 200 characters) and optional tags, then click **Save**. You can also leave the title blank to generate one from the alert configuration. The alert becomes **ACTIVE** immediately and schedules its first evaluation.
 
 </Steps>
 
@@ -115,9 +115,11 @@ Each alert carries a **severity** that updates after every evaluation.
 - No data (`NO_DATA ↔ WARNING | ALERT | OK | UNKNOWN`): only notifies when no-data mode is **Notify after sustained `NO_DATA`**.
 - Sustained severity (`WARNING → WARNING`, `ALERT → ALERT`): notifies only when **Renotify** is enabled.
 
-## Pause and resume [#pause]
+## Pause, resume, or delete an alert [#pause]
 
 From the alert list or detail page, use the row actions menu to **Pause** or **Resume** an alert. A paused alert skips all evaluations; its severity is frozen at `PAUSED`. Resuming sets it back to `ACTIVE` and schedules the next evaluation.
+
+To permanently remove an alert, open its detail page, click the trash icon, and confirm **Delete alert**. This action cannot be undone.
 
 ## Automations [#automations]
 
@@ -191,6 +193,12 @@ Your endpoint receives a signed JSON body:
 </Callout>
 
 Signature verification works identically to prompt webhooks — see [Webhooks](/docs/prompt-management/features/webhooks-slack-integrations) for the HMAC validation code.
+
+## Create alerts from evaluators [#evaluator-alerts]
+
+Create score and cost alerts directly from evaluator pages. Langfuse prefills the metric and filters, excludes evaluator test runs, and shows alerts already connected to the evaluator.
+
+See [Monitor evaluator results](/docs/evaluation/core-concepts#monitor-evaluator-results) for supported alert types, defaults, and the evaluator workflow.
 
 ## GitHub Discussions [#gh-discussion]
 
