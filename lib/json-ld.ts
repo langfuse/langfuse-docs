@@ -118,7 +118,7 @@ export function softwareApplicationJsonLd(): JsonLdObject {
     operatingSystem: "Web",
     url: `${BASE_URL}/docs`,
     description:
-      "Open-source AI engineering platform for tracing, prompt management, evaluation, and metrics of LLM applications.",
+      "Open-source AI engineering platform for agent observability, prompt management, evals, and analytics.",
     offers: {
       "@type": "Offer",
       price: "0",

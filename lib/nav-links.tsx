@@ -24,7 +24,7 @@ export type NavPanelLink = {
 export const productLinks: NavPanelLink[] = [
   { name: "Overview", href: "/docs", icon: LayoutGrid },
   {
-    name: "LLM Observability",
+    name: "Agent Observability",
     href: "/docs/observability",
     icon: Activity,
   },
@@ -33,8 +33,8 @@ export const productLinks: NavPanelLink[] = [
     href: "/docs/prompt-management",
     icon: MessageSquare,
   },
-  { name: "Evaluation", href: "/docs/evaluation", icon: FlaskConical },
-  { name: "Metrics", href: "/docs/metrics", icon: BarChart2 },
+  { name: "Agent Evals", href: "/docs/evaluation", icon: FlaskConical },
+  { name: "Agent Analytics", href: "/docs/metrics", icon: BarChart2 },
 ];
 
 export const resourcesLinks: NavPanelLink[] = [
