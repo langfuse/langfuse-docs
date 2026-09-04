@@ -1,11 +1,7 @@
 import { CustomerQuoteCard } from "@/components/chat-agents/CustomerQuoteCard";
 import { getCustomerStories } from "@/lib/getCustomerStories";
 
-const QUOTE_ROUTES = [
-  "/users/sumup",
-  "/users/cresta",
-  "/users/magic-patterns-ai-design-tools",
-] as const;
+const QUOTE_ROUTES = ["/users/canva", "/users/sumup", "/users/cresta"] as const;
 
 type Story = ReturnType<typeof getCustomerStories>[number];
 
