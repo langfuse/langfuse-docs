@@ -1,4 +1,4 @@
-name: Update GitHub Discussions JSON
+name: Update GitHub data
 
 on:
   schedule:
@@ -6,6 +6,7 @@ on:
   workflow_dispatch: # Allows manual triggering
 
 permissions:
+  contents: read
   discussions: read
 
 jobs:
@@ -18,6 +19,17 @@ jobs:
         with:
           token: ${{ secrets.UPDATE_DOCS_MAIN_BRANCH_PAT }}
           persist-credentials: false
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+
+      - name: Generate contributors
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/authors/generate-contributors.js
 
       - name: Install uv
         uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
@@ -33,7 +45,7 @@ jobs:
         run: |
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
-          git add src/langfuse_github_discussions.json public/github-discussions-sitemap.xml
-          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update GitHub discussions JSON and sitemap" && git push "https://x-access-token:${UPDATE_DOCS_MAIN_BRANCH_PAT}@github.com/${GITHUB_REPOSITORY}.git" "${GITHUB_REF#refs/heads/}")
+          git add data/generated/contributors.json src/langfuse_github_discussions.json public/github-discussions-sitemap.xml
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update GitHub data and sitemap" && git push "https://x-access-token:${UPDATE_DOCS_MAIN_BRANCH_PAT}@github.com/${GITHUB_REPOSITORY}.git" "${GITHUB_REF#refs/heads/}")
         env:
           UPDATE_DOCS_MAIN_BRANCH_PAT: ${{ secrets.UPDATE_DOCS_MAIN_BRANCH_PAT }}
