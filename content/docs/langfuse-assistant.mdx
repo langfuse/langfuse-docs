@@ -1,32 +1,42 @@
 ---
 title: Langfuse Assistant
-description: Ask questions about your Langfuse project data in plain language from inside the Langfuse Cloud UI.
+description: Explore your Langfuse project data and take actions in Langfuse from inside the UI.
 sidebarTitle: Assistant
 ---
 
 # Langfuse Assistant
 
-The Langfuse Assistant is an in-product assistant for exploring your Langfuse project data and taking selected actions in Langfuse with your approval. You can ask questions about traces, observations, sessions, metrics, and Langfuse workflows in plain language.
+<AvailabilityBanner
+  availability={{
+    hobby: "public-beta",
+    core: "public-beta",
+    pro: "public-beta",
+    enterprise: "public-beta",
+    selfHosted: "not-available",
+  }}
+/>
 
-<Callout type="info">
-
-The Langfuse Assistant is currently in beta and only available on Langfuse Cloud.
-
-</Callout>
+The Langfuse Assistant is an in-product assistant for exploring your Langfuse project data and taking actions in Langfuse with your approval. You can ask about traces, observations, sessions, and metrics, or ask it to create datasets, dashboards, and other resources. Every run happens in the background. You get a notification when the Assistant is done or needs your input or approval.
 
 <Video src="https://static.langfuse.com/docs-videos/in-app-agent.mp4" />
 
-## What you can ask [#what-you-can-ask]
+## What you can do [#what-you-can-do]
 
-Ask the Assistant questions such as:
+Ask the Assistant about your data and about Langfuse itself:
 
 - "Which traces had the highest latency yesterday?"
 - "Show me failed generations in the last hour."
 - "What's my token spend this week, broken down by model?"
 - "How do I set up an evaluator?"
-- "Open the traces table filtered to errors from today."
-- "Create a dataset for regression examples."
+
+Or ask it to do the work:
+
+- "Create a dataset from the failed generations of last week."
+- "Build a dashboard of error rate and p95 latency for the last 7 days."
+- "Review this prompt against current best practices and propose a tighter version."
+- "Fetch a few hundred failed observations from the last 7 days and cluster the main errors with code."
 - "Set up a numeric score config for friendliness."
+- "Open the traces table filtered to errors from today."
 
 ## How it works [#how-it-works]
 
@@ -35,21 +45,25 @@ The Assistant uses the Langfuse MCP server and additional tools to answer questi
 The Assistant can:
 
 - Query traces, observations, sessions, and metrics through Langfuse tools
+- Fetch large observation sets and process them with code in a sandbox, instead of loading every payload into the model context
 - Search Langfuse documentation
-- Propose links to Langfuse pages such as traces, sessions, dashboards, prompts, datasets, experiments, evals, monitors, and project settings
-- Help with selected actions such as creating or updating Langfuse resources
+- Propose links to Langfuse pages such as traces, sessions, dashboards, prompts, datasets, experiments, evals, alerts, and project settings
+- Create or update Langfuse resources such as datasets, dashboards, widgets, prompts, and score configs
 
 The Assistant is designed to be safe by default:
 
-- If a request would change data or configuration, the Assistant pauses and asks you to explicitly approve that specific action first.
+- If a request would change data or configuration, the Assistant pauses and asks you to approve that specific action first.
+- If you choose **Always approve** for a tool, the Assistant reuses that tool without asking again. The choice applies to that conversation only.
 
 The Assistant can only use actions that your account already has access to in the current project. Approval adds a second safety check, but it does not grant any extra permissions.
 
 The Assistant is also aware of your current context in the Langfuse UI, such as the current trace, observation, session, or dashboard, as well as user metadata such as your name, browser language, and timezone. This context is used to provide more relevant answers and propose actions.
 
-## Access and availability [#access-and-availability]
+## Background runs [#background-runs]
 
-It is currently available on Langfuse Cloud and not yet available for self-hosted deployments.
+Every Assistant run happens in the background, independently of your browser. Keep using Langfuse, or start another conversation, while a run is still working. You get a notification when it finishes, fails, or needs your input or approval.
+
+For repeating work in one conversation, choose **Always approve** on a tool you are comfortable leaving unattended. The Assistant then uses that tool for the rest of that conversation without asking again.
 
 ## Data privacy and security [#data-privacy-and-security]
 
@@ -59,7 +73,7 @@ Key points:
 
 - Model requests are handled in the same AWS region as your [Langfuse data region](/security/data-regions).
 - Assistant access is scoped to the authenticated user and current project.
-- Actions that can change data require explicit approval and remain limited to the permissions of the signed-in user.
+- Actions that can change data require your approval and remain limited to the permissions of the signed-in user.
 - AI feature tracing for product and service improvement can be enabled or disabled separately by organization admins and owners.
 
 ## Conversation history [#conversation-history]

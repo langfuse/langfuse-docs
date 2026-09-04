@@ -1,0 +1,567 @@
+---
+title: Migrate from Arize AX to Langfuse
+description: "Migrate from Arize AX to Langfuse: keep OpenInference, switch the exporter, export datasets, and re-run experiments without importing old scores."
+tags: [migration, guide]
+---
+
+import { Cloud, MessageSquare } from "lucide-react";
+import { Details, Summary } from "@/components/Details";
+
+# Migrate from Arize AX to Langfuse
+
+This guide walks through migrating LLM observability from
+[Arize AX](https://arize.com/llm-observability/) to [Langfuse](/): live tracing first (usually a same-day change),
+then datasets, experiments, and evaluators.
+
+Dynatrace [announced a definitive agreement to acquire Arize](https://www.dynatrace.com/news/press-release/dynatrace-to-acquire-arize/) (August 2026).
+Arize AX and Phoenix continue to operate as they do today. This guide is for teams on
+**Arize AX**. If you self-host Phoenix, use [Migrate from Arize Phoenix](/resources/engineering/migrate-from-phoenix)
+instead. For a product comparison, see
+[Langfuse vs. Arize AX / Phoenix](/resources/engineering/best-phoenix-arize-alternatives).
+
+**TL;DR:**
+
+- Keep your OpenInference instrumentors.
+- Switch the AX exporter to Langfuse.
+- Copy datasets via the AX API into Langfuse dataset items.
+- Recreate judges and re-run experiments; do not import historical traces or old experiment scores.
+
+Want help cutting over? [Talk to us](/talk-to-us) about Cloud (EU, US, Japan; [HIPAA](/security/hipaa) on Pro+) or self-host.
+
+<Cards num={2}>
+  <Card title="Get started free" href="https://cloud.langfuse.com" icon={<Cloud />} />
+  <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
+</Cards>
+
+## Why teams migrate [#why-teams-migrate]
+
+Teams tend to evaluate an AX-to-Langfuse move for a few recurring reasons:
+
+- **Hosting and licensing model.** Arize AX is proprietary SaaS; [self-hosting AX](https://arize.com/pricing/) is an
+  Enterprise option. Langfuse's core is [MIT-licensed](https://github.com/langfuse/langfuse), and
+  [self-hosting](/self-hosting) runs the same core product as
+  [Langfuse Cloud](https://cloud.langfuse.com) (EU, US, Japan; [HIPAA](/security/hipaa) on Pro+ with a signed BAA).
+  Enterprise governance modules need an [Enterprise license](/pricing-self-host) when self-hosted.
+- **Data plane and portability.** AX Cloud stores telemetry in [adb](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database),
+  a proprietary OLAP engine. Lakehouse sync via [Data Fabric](https://arize.com/docs/ax/security-and-settings/data-fabric)
+  is an Enterprise feature and, as of August 2026, waitlisted. Langfuse is [API-first](/docs/api-and-data-platform/features/public-api)
+  on every plan, runs on [ClickHouse](/self-hosting), and can [export to blob storage](/docs/api-and-data-platform/features/export-to-blob-storage).
+- **One product for the production loop.** AX covers tracing, datasets, experiments, prompt hub, and
+  online evals. Adjacent capabilities such as Signal, Alyx, and
+  Data Fabric sit on separate product surfaces and plans. Langfuse keeps that loop on one MIT codebase: production
+  traces feed [datasets](/docs/evaluation/experiments/datasets) and
+  [experiments](/docs/evaluation/experiments/experiments-via-sdk),
+  [managed evaluators](/docs/evaluation/overview) can run on live traffic, and
+  [custom dashboards](/docs/metrics/features/custom-dashboards) and [alerts](/docs/observability/features/alerts) sit on the
+  same data model.
+
+Arize AX remains a capable production platform, and if it serves your team well, there is no urgency to move. This
+guide is for teams that have decided to consolidate on Langfuse.
+
+## Concept mapping
+
+| Arize AX                       | Langfuse                                                                       | Notes                                                                                    |
+| ------------------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| Space                          | [Organization](/docs/administration/rbac)                                      | AX space is the tenant; copy Space ID only for the export script                         |
+| Tracing project                | [Project](/docs/observability/data-model)                                      | Created on first spans in AX. In Langfuse, the project is the tenant; API keys select it |
+| Traces / spans (OpenInference) | [Traces / observations](/docs/observability/data-model)                        | Keep CHAIN / LLM / TOOL kinds                                                            |
+| Datasets + examples            | [Datasets](/docs/evaluation/experiments/datasets)                              | Custom columns become `metadata`                                                         |
+| Experiments                    | [Experiments / dataset runs](/docs/evaluation/experiments/experiments-via-sdk) | Re-run; do not import AX run JSON as scores                                              |
+| Evaluator Hub / online evals   | [LLM-as-a-judge](/docs/evaluation/evaluation-methods)                          | Recreate rubrics; attach to traces or experiments                                        |
+| Playground                     | [Playground](/docs/prompt-management/features/playground)                      | Replay traced generations                                                                |
+| Prompt hub                     | [Prompt management](/docs/prompt-management)                                   | Labels instead of AX environments                                                        |
+
+## Supported data types [#supported-data-types]
+
+| Data                                | Move?      | Path                                                                               |
+| ----------------------------------- | ---------- | ---------------------------------------------------------------------------------- |
+| Live OpenInference / OTel traces    | Yes        | Switch the AX exporter to Langfuse; keep instrumentors and manual CHAIN/TOOL spans |
+| Dataset examples                    | Yes        | AX dataset examples API → Langfuse dataset items                                   |
+| Experiment _code_                   | Yes        | Point the experiment runner at the copied dataset                                  |
+| LLM-as-a-judge rubrics              | Recreate   | New Langfuse evaluators                                                            |
+| Prompts in AX prompt hub            | Recreate   | Fetch from AX, create Langfuse prompts with labels                                 |
+| Historical spans (export / parquet) | Usually no | No turn-key bulk import; re-run showcase requests if you need a few                |
+| AX experiment scores / extra fields | No         | Re-run judges in Langfuse                                                          |
+
+## Step 1: Keep OpenInference, switch the exporter [#switch-exporter]
+
+Keep the OpenInference instrumentor. Change the exporter from AX to Langfuse.
+
+Set `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL`
+(`https://cloud.langfuse.com` for EU; see [Get started](/docs/observability/get-started) for
+US, Japan, HIPAA, and self-hosted). Confirm LLM spans show as generations with input, output,
+and token/cost. Do not point leftover `ARIZE_*` env vars at Langfuse. Langfuse routes by API
+key, not AX project name.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+AX apps send traces with `arize.otel.register()` from package `arize-otel` (not `arize`).
+Call `get_client()` **before** `.instrument()`. The AX Get started page shows
+`ARIZE_OTLP_ENDPOINT` as HTTPS (for example `https://otlp.eu-west-1a.arize.com/v1` on EU).
+`arize-otel` still exports **gRPC** to that host by default. Langfuse accepts
+[OTLP over HTTP](/integrations/native/opentelemetry) with Basic auth.
+
+```python
+# Before
+import os
+from arize.otel import register
+from openinference.instrumentation.anthropic import AnthropicInstrumentor  # or OpenAIInstrumentor, ...
+
+tracer_provider = register(
+    space_id=os.environ["ARIZE_SPACE_ID"],
+    api_key=os.environ["ARIZE_API_KEY"],
+    project_name=os.environ["ARIZE_PROJECT_NAME"],
+    endpoint=os.environ["ARIZE_OTLP_ENDPOINT"],  # copy from the AX Get started page
+)
+AnthropicInstrumentor().instrument(tracer_provider=tracer_provider)
+
+# After
+from langfuse import get_client
+from openinference.instrumentation.anthropic import AnthropicInstrumentor
+
+get_client()
+AnthropicInstrumentor().instrument()
+```
+
+`arize-otel` is tracing (`0.x`). `arize` is datasets and experiments (v8 needs Python 3.10+).
+Installing `arize` alone does not send traces.
+
+</Tab>
+<Tab>
+
+AX JS/TS apps send OpenInference spans over OTLP. There is no `register()` helper.
+[`@arizeai/ax-client`](https://arize.com/docs/api-clients/typescript/version-1/overview) is the
+platform API (datasets, experiments), not a tracer.
+
+The AX Get started value is `ARIZE_OTLP_ENDPOINT` ending in `/v1`. The JS exporter needs
+`/v1/traces`. Use HTTP/OTLP with headers `arize-space-id` and `arize-api-key`.
+`LangfuseSpanProcessor` reads the Langfuse env vars. JS OpenInference scopes look like
+`@arizeai/openinference-instrumentation-anthropic`; the default Langfuse filter matches
+Python-style `openinference.*` names, so allowlist the `@arizeai/openinference` prefix.
+
+```typescript
+// Before
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
+import { resourceFromAttributes } from "@opentelemetry/resources";
+import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-base";
+import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
+import { SEMRESATTRS_PROJECT_NAME } from "@arizeai/openinference-semantic-conventions";
+import { AnthropicInstrumentation } from "@arizeai/openinference-instrumentation-anthropic";
+import Anthropic from "@anthropic-ai/sdk";
+
+const instrumentation = new AnthropicInstrumentation();
+instrumentation.manuallyInstrument(Anthropic);
+
+const provider = new NodeTracerProvider({
+  resource: resourceFromAttributes({
+    [SEMRESATTRS_PROJECT_NAME]: process.env.ARIZE_PROJECT_NAME!,
+  }),
+  spanProcessors: [
+    new SimpleSpanProcessor(
+      new OTLPTraceExporter({
+        // Get started value is .../v1; the JS exporter needs .../v1/traces
+        url: `${process.env.ARIZE_OTLP_ENDPOINT}/traces`,
+        headers: {
+          "arize-space-id": process.env.ARIZE_SPACE_ID!,
+          "arize-api-key": process.env.ARIZE_API_KEY!,
+        },
+      }),
+    ),
+  ],
+});
+provider.register();
+
+// After
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import {
+  LangfuseSpanProcessor,
+  isDefaultExportSpan,
+  type ShouldExportSpan,
+} from "@langfuse/otel";
+import { AnthropicInstrumentation } from "@arizeai/openinference-instrumentation-anthropic";
+import Anthropic from "@anthropic-ai/sdk";
+
+const afterInstrumentation = new AnthropicInstrumentation();
+afterInstrumentation.manuallyInstrument(Anthropic);
+
+const shouldExportSpan: ShouldExportSpan = ({ otelSpan }) =>
+  isDefaultExportSpan(otelSpan) ||
+  otelSpan.instrumentationScope.name.startsWith("@arizeai/openinference");
+
+const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor({ shouldExportSpan })],
+  instrumentations: [afterInstrumentation],
+});
+sdk.start();
+```
+
+</Tab>
+</LangTabs>
+
+Worked example: [Tracing using the OpenInference SDK](/integrations/other/openinference).
+
+<Details>
+<Summary>AX tracing notes</Summary>
+
+- **Manual CHAIN and TOOL spans stay.** OpenInference captures the provider HTTP call.
+  It does not wrap your tool execution or agent loop. Production AX apps add a CHAIN span
+  around the loop and TOOL spans around each tool. Keep those attributes
+  (`openinference.span.kind`) when you cut over.
+- **Region.** Match AX to the app hostname you log into (`app.arize.com`,
+  `app.eu-west-1a.arize.com`, `app.ca-central-1a.arize.com`). Langfuse region is independent:
+  pick EU / US / Japan / HIPAA / self-host with `LANGFUSE_BASE_URL`.
+- In the application process, unset `ARIZE_SPACE_ID`, `ARIZE_API_KEY`, and
+  `ARIZE_OTLP_ENDPOINT` after cutover.
+- If you already export with a generic OTLP span exporter, point it at Langfuse:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel"  # EU
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING},x-langfuse-ingestion-version=4"
+OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
+```
+
+`AUTH_STRING` is `echo -n "pk-lf-...:sk-lf-..." | base64`.
+
+</Details>
+
+<Details>
+<Summary>If Langfuse is missing LLM, chain, or tool spans</Summary>
+
+The default Langfuse span filter is LLM-focused. Custom CHAIN/TOOL tracers, and some
+OpenInference scopes, need an allowlist. If AX showed an agent loop and tools around the
+LLM call, add that tracer.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+[Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) drops extra CHAIN/TOOL
+spans from a custom tracer unless you allowlist it. OpenInference LLM spans still arrive
+without this. SDK v3 on Python 3.9 still exports those spans by default; do not treat that
+as the v4 cutover.
+
+```python
+from langfuse import Langfuse, get_client
+from langfuse.span_filter import is_default_export_span
+from openinference.instrumentation.anthropic import AnthropicInstrumentor
+
+Langfuse(
+    should_export_span=lambda span: (
+        is_default_export_span(span)
+        or (
+            span.instrumentation_scope is not None
+            and span.instrumentation_scope.name == "my-app"
+        )
+    )
+)
+get_client()
+AnthropicInstrumentor().instrument()
+```
+
+Alternatively, create the agent and tool spans with the Langfuse SDK so they are in the
+`langfuse-sdk` scope.
+
+</Tab>
+<Tab>
+
+[JS/TS SDK v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5) drops extra CHAIN/TOOL spans
+from a custom tracer unless you allowlist it. Also allowlist `@arizeai/openinference` or
+generations from the JS OpenInference instrumentors will not appear.
+
+```typescript
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import {
+  LangfuseSpanProcessor,
+  isDefaultExportSpan,
+  type ShouldExportSpan,
+} from "@langfuse/otel";
+
+const shouldExportSpan: ShouldExportSpan = ({ otelSpan }) =>
+  isDefaultExportSpan(otelSpan) ||
+  otelSpan.instrumentationScope.name === "my-app" ||
+  otelSpan.instrumentationScope.name.startsWith("@arizeai/openinference");
+
+const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor({ shouldExportSpan })],
+});
+sdk.start();
+```
+
+Alternatively, create the agent and tool spans with the Langfuse SDK so they are in the
+`langfuse-sdk` scope.
+
+</Tab>
+</LangTabs>
+
+</Details>
+
+## Step 2: Export and recreate datasets [#datasets]
+
+List examples from AX and insert them as Langfuse dataset items. User-defined columns are
+allowed on create. Reuse the AX example `id` as the Langfuse item `id` so a retry upserts
+instead of duplicating. Do not put AX `created_at` / `updated_at` on the Langfuse item;
+those are server-managed on AX and Langfuse has no slot for them.
+
+Regional API base: `https://api.arize.com` (US) or `https://api.eu-west-1a.arize.com` (EU).
+Authenticate with `Authorization: Bearer <ARIZE_API_KEY>`. This copies the latest version's
+examples, not full AX version history. Extra columns (`scenario`, tags, split) belong in
+`metadata`. Confirm item counts match after import.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+Paginate with `pagination.next_cursor` while `has_more` is true. On Python 3.10+ you can
+use SDK v8 (`from arize import ArizeClient`) with
+`client.datasets.list_examples(dataset=..., space=..., all=True)`. Use REST when
+`pip install arize` is not v8 (common on Python 3.9).
+
+```python
+import os
+import requests
+from urllib.parse import quote
+from langfuse import get_client
+
+AX_BASE = os.environ["ARIZE_API_BASE"]  # e.g. https://api.eu-west-1a.arize.com
+AX_KEY = os.environ["ARIZE_API_KEY"]
+DATASET_ID = os.environ["ARIZE_DATASET_ID"]
+DATASET_NAME = "support-golden"
+
+examples = []
+cursor = None
+while True:
+    params = {"limit": 500}
+    if cursor:
+        params["cursor"] = cursor
+    payload = requests.get(
+        f"{AX_BASE}/v2/datasets/{quote(DATASET_ID, safe='')}/examples",
+        headers={"Authorization": f"Bearer {AX_KEY}", "Accept": "application/json"},
+        params=params,
+        timeout=30,
+    ).json()
+    examples.extend(payload.get("examples") or [])
+    pagination = payload.get("pagination") or {}
+    if not pagination.get("has_more"):
+        break
+    cursor = pagination.get("next_cursor")
+    if not cursor:
+        break
+
+langfuse = get_client()
+langfuse.create_dataset(name=DATASET_NAME)
+
+for row in examples:
+    langfuse.create_dataset_item(
+        id=row["id"],  # stable retry key in Langfuse; this is the AX example id
+        dataset_name=DATASET_NAME,
+        input=row.get("input") or row.get("query") or row.get("question") or row,
+        expected_output=row.get("expected_output")
+        or row.get("output")
+        or row.get("answer"),
+        metadata={
+            k: v
+            for k, v in row.items()
+            if k
+            not in {
+                "id",
+                "created_at",
+                "updated_at",
+                "input",
+                "expected_output",
+                "query",
+                "question",
+                "output",
+                "answer",
+                "annotations",
+            }
+        },
+    )
+```
+
+</Tab>
+<Tab>
+
+[`@arizeai/ax-client`](https://arize.com/docs/api-clients/typescript/version-1/overview)
+wraps the same REST API (`listDatasetExamples`); the package is beta. Set `ARIZE_BASE_URL`
+for your region (EU: `https://api.eu-west-1a.arize.com`). Pagination is camelCase
+(`hasMore`, `nextCursor`). Create the Langfuse dataset with `api.datasets.create`, then
+insert items with `dataset.createItem`.
+
+```typescript
+import { listDatasetExamples } from "@arizeai/ax-client";
+import { LangfuseClient } from "@langfuse/client";
+
+// Reads ARIZE_API_KEY and ARIZE_BASE_URL (EU: https://api.eu-west-1a.arize.com)
+const DATASET = process.env.ARIZE_DATASET_ID!; // dataset name or ID
+const SPACE = process.env.ARIZE_SPACE_ID; // required when DATASET is a name
+const DATASET_NAME = "support-golden";
+const SKIP = new Set([
+  "id",
+  "createdAt",
+  "updatedAt",
+  "annotations",
+  "input",
+  "query",
+  "question",
+  "expected_output",
+  "expectedOutput",
+  "output",
+  "answer",
+]);
+
+const examples: Record<string, unknown>[] = [];
+let cursor: string | undefined;
+while (true) {
+  const { data, pagination } = await listDatasetExamples({
+    dataset: DATASET,
+    space: SPACE,
+    limit: 500,
+    cursor,
+  });
+  examples.push(...data);
+  if (!pagination.hasMore) break;
+  cursor = pagination.nextCursor;
+  if (!cursor) break;
+}
+
+const langfuse = new LangfuseClient();
+await langfuse.api.datasets.create({ name: DATASET_NAME });
+
+for (const row of examples) {
+  await langfuse.dataset.createItem({
+    id: String(row.id), // stable retry key in Langfuse; this is the AX example id
+    datasetName: DATASET_NAME,
+    input: row.input ?? row.query ?? row.question ?? row,
+    expectedOutput:
+      row.expected_output ?? row.expectedOutput ?? row.output ?? row.answer,
+    metadata: Object.fromEntries(
+      Object.entries(row).filter(([key]) => !SKIP.has(key)),
+    ),
+  });
+}
+```
+
+</Tab>
+</LangTabs>
+
+## Step 3: Recreate judges and re-run experiments [#experiments]
+
+Do not import AX experiment runs as Langfuse scores. AX's experiment UI stores **outputs**
+on the run. Scores from a homegrown judge (or extra JSON fields on `POST /v2/experiments`)
+often **do not** appear in the dataset **Evaluations** column. That column is tied to
+Evaluator Hub / published evals. Re-run a baseline in Langfuse so future experiments have
+an anchor.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+dataset = langfuse.get_dataset("support-golden")
+
+
+def task(*, item, **kwargs):
+    return run_your_app(item.input)  # same path as production
+
+
+dataset.run_experiment(name="after-migration", task=task)
+```
+
+</Tab>
+<Tab>
+
+Set up OpenTelemetry with `LangfuseSpanProcessor` first, or experiment traces will be thin.
+See [tracing setup](/docs/observability/sdk/overview#initialize-tracing).
+
+```typescript
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+const dataset = await langfuse.dataset.get("support-golden");
+
+await dataset.runExperiment({
+  name: "after-migration",
+  task: async (item) => runYourApp(item.input), // same path as production
+});
+```
+
+</Tab>
+</LangTabs>
+
+- **Evaluators:** recreate LLM judges as [managed or custom LLM-as-a-judge
+  evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge), or as
+  [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators). If you previously
+  called a model yourself to grade outputs, that grading call showed up in AX as its **own**
+  LLM trace. In Langfuse, attach an evaluator to the experiment or to production traces
+  instead of a second ad-hoc provider call.
+- **Online evals:** AX **+ Add Online Evaluator** maps to Langfuse evaluators on live
+  traffic, with their own sampling.
+
+## Step 4: Decide what to do with historical traces [#historical-traces]
+
+Most teams cut over fresh: old traces stay in AX for the retention window, and Langfuse is
+the system of record from cutover day. Bulk-importing AX span exports or parquet is rarely
+worth it beyond a few showcase traces.
+
+<Details>
+<Summary>If you need a few historical traces</Summary>
+
+There is no turn-key history import. Re-run those requests, or send OpenTelemetry via the
+[OTLP endpoint](/integrations/native/opentelemetry) with `x-langfuse-ingestion-version=4`. Do
+not use the deprecated ingestion API.
+
+</Details>
+
+## Validation checklist [#validation]
+
+- [ ] The AX exporter is gone from the app process; traces arrive as generations with token/cost
+- [ ] Agent traces still show CHAIN → LLM → TOOL (not LLM-only)
+- [ ] User and session attribution works if you set `user.id` / `session.id`
+- [ ] Dataset item count matches the AX export
+- [ ] An experiment run exists on the migrated dataset
+- [ ] Judges score that run (or a sample of production traces)
+- [ ] Prompts resolve by name+label if you migrated prompt hub
+- [ ] Team access set up (org/project roles, SSO if applicable)
+- [ ] AX exporter removed, or the parallel-run window has an end date
+
+## Limitations and gaps [#limitations]
+
+- **AX ≠ Phoenix.** Phoenix uses a self-hosted collector helper and `phoenix.client`. AX uses
+  spaces, regional API hosts (`api.{region}.arize.com`), and a separate tracing exporter. Do
+  not follow the Phoenix dataset snippet against AX.
+- **Evals export is weak.** Dataset **Evaluations** and experiment **Evals** stay empty unless
+  scores were published through Evaluator Hub. REST extra fields on `POST /v2/experiments`
+  (for example `correctness_score`, `judge_label`) do not fill those columns. A homegrown
+  judge that calls the model itself shows up as a **separate LLM trace**, not as an eval on
+  the experiment. Experiment-level cost / tokens / latency can also stay blank for
+  standalone REST experiments even when the agent traces in the tracing project have those
+  metrics. Treat experiment **output** as the portable artifact; recreate judges in Langfuse.
+- **Online evals / alerts** recreate as Langfuse evaluators and [alerts](/docs/observability/features/alerts).
+- AX dataset and experiment REST APIs are documented as **beta**.
+
+## FAQ
+
+### Do I have to re-instrument my application?
+
+No. Keep OpenInference and switch the exporter. Keep manual CHAIN/TOOL spans. See
+[Step 1](#switch-exporter) for the before/after in your SDK.
+
+### I am on Phoenix, not AX. Is this the right page?
+
+No. Use [Migrate from Arize Phoenix](/resources/engineering/migrate-from-phoenix).
+
+### Can I evaluate old AX traces in Langfuse?
+
+Evaluators run on data in Langfuse, so historical evaluation requires those traces to exist
+in Langfuse first. Start judges on new traffic at cutover.
+
+## Get help with the migration [#get-help]
+
+Start on [Langfuse Cloud](https://cloud.langfuse.com) or [self-host](/self-hosting). If you
+want a migration plan, [talk to us](/talk-to-us).
+
+<Cards num={2}>
+  <Card title="Get started free" href="https://cloud.langfuse.com" icon={<Cloud />} />
+  <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
+</Cards>

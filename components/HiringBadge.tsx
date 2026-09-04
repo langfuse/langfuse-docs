@@ -6,7 +6,24 @@ import NextLink from "next/link";
 import { cn } from "@/lib/utils";
 import { HoverCorners } from "@/components/ui/corner-box";
 
-export function HiringBadge({ className }: { className?: string }) {
+const FULL_LABEL = "Hiring in Europe and SF";
+const COMPACT_LABEL = "Hiring";
+const HOVER_LABEL = "Looking for GOATS!";
+const COMPACT_HOVER_LABEL = "GOATS!";
+
+export function HiringBadge({
+  className,
+  adaptive = false,
+}: {
+  className?: string;
+  /**
+   * Size the badge to leftover space left of a centered nav: full label when
+   * there is room, "Hiring" when space is tight, hidden when even that would
+   * collide. The parent must be a shrinking width constraint (e.g. a `1fr`
+   * grid column), not sized by this badge's content.
+   */
+  adaptive?: boolean;
+}) {
   const [isHovered, setIsHovered] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [goats, setGoats] = useState<
@@ -71,8 +88,33 @@ export function HiringBadge({ className }: { className?: string }) {
         )
       : null;
 
-  return (
-    <div className={className}>
+  const idleLabel = adaptive ? (
+    <>
+      <span className="hidden @[13rem]/hiring:inline">{FULL_LABEL}</span>
+      <span className="inline @[13rem]/hiring:hidden">{COMPACT_LABEL}</span>
+    </>
+  ) : (
+    FULL_LABEL
+  );
+
+  const hoverLabel = adaptive ? (
+    <>
+      <span className="hidden @[13rem]/hiring:inline">{HOVER_LABEL}</span>
+      <span className="inline @[13rem]/hiring:hidden">
+        {COMPACT_HOVER_LABEL}
+      </span>
+    </>
+  ) : (
+    HOVER_LABEL
+  );
+
+  const badge = (
+    <div
+      className={cn(
+        adaptive && "hidden w-fit max-w-full min-w-0 @[6.5rem]/hiring:block",
+        !adaptive && className,
+      )}
+    >
       <div
         ref={containerRef}
         className="relative flex items-center p-1 group button-wrapper max-h-[34px]"
@@ -86,6 +128,7 @@ export function HiringBadge({ className }: { className?: string }) {
         <HoverCorners />
         <NextLink
           href="/careers"
+          aria-label={FULL_LABEL}
           className={cn(
             "inline-flex w-full min-w-0 max-w-full items-center gap-[6px] overflow-hidden",
             "h-[26px] py-0.75 pl-[8px] pr-[8px] rounded-[2px]",
@@ -99,23 +142,25 @@ export function HiringBadge({ className }: { className?: string }) {
           <span className="text-xs shrink-0" aria-hidden>
             🐐
           </span>
-          <span className="relative min-w-0 flex-1 text-left">
-            <span className={cn("block truncate", isHovered && "invisible")}>
-              Hiring in Europe and SF
-            </span>
-            <span
-              className={cn(
-                "absolute left-0 top-0 whitespace-nowrap",
-                !isHovered && "invisible",
-              )}
-            >
-              Looking for GOATS!
+          <span className="text-left">
+            <span className="block whitespace-nowrap">
+              {isHovered ? hoverLabel : idleLabel}
             </span>
           </span>
         </NextLink>
       </div>
 
       {goatOverlay}
+    </div>
+  );
+
+  if (!adaptive) {
+    return badge;
+  }
+
+  return (
+    <div className={cn("@container/hiring w-full min-w-0", className)}>
+      {badge}
     </div>
   );
 }

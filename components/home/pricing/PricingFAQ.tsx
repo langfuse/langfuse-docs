@@ -1,6 +1,21 @@
 import { Heading } from "@/components/ui/heading";
 import { FAQAccordion, type FAQItem } from "@/components/shared/FAQAccordion";
 
+const MARKETPLACE_QUESTION = "Can I purchase Langfuse through AWS Marketplace?";
+
+const marketplaceFaqByVariant: Record<"cloud" | "selfHosted", FAQItem> = {
+  cloud: {
+    question: MARKETPLACE_QUESTION,
+    answer:
+      "Yes. Enterprise customers with a yearly commitment can bill via AWS Marketplace. [Talk to us](/talk-to-us?deployment=cloud) to request a private offer. Invoice billing is also available.",
+  },
+  selfHosted: {
+    question: MARKETPLACE_QUESTION,
+    answer:
+      "Yes. Self-hosted Enterprise can be billed via AWS Marketplace or invoice. [Talk to us](/talk-to-us?deployment=self-hosted) to request a private offer.",
+  },
+};
+
 const faqs: FAQItem[] = [
   {
     question: "What is the easiest way to try Langfuse?",
@@ -47,10 +62,11 @@ const faqs: FAQItem[] = [
     answer:
       "You can manage your subscription through the organization settings in Langfuse Cloud or by using this [Customer Portal](/billing-portal).",
   },
+  marketplaceFaqByVariant.cloud,
   {
     question: "Can I redline the contracts?",
     answer:
-      "Yes, we offer customized contracts for Langfuse Enterprise customers with a yearly commitment. Please contact us at enterprise@langfuse.com for more details. The default plans are affordable as they are designed to be self-serve on our standard terms.",
+      "Yes, we offer customized contracts for Langfuse Enterprise customers with a yearly commitment. Please [contact sales](/talk-to-us) for more details. The default plans are affordable as they are designed to be self-serve on our standard terms.",
   },
   {
     question: "Where is the data stored?",
@@ -64,7 +80,17 @@ const faqs: FAQItem[] = [
   },
 ];
 
-export function PricingFAQ() {
+export function PricingFAQ({
+  variant = "cloud",
+}: {
+  variant?: "cloud" | "selfHosted";
+}) {
+  const faqsForVariant = faqs.map((faq) =>
+    faq.question === MARKETPLACE_QUESTION
+      ? marketplaceFaqByVariant[variant]
+      : faq,
+  );
+
   return (
     <div id="faq">
       <div className="pt-16">
@@ -72,7 +98,7 @@ export function PricingFAQ() {
           <Heading as="h2" size="normal" className="text-left">
             FAQ
           </Heading>
-          <FAQAccordion faqs={faqs} />
+          <FAQAccordion faqs={faqsForVariant} />
         </div>
       </div>
     </div>

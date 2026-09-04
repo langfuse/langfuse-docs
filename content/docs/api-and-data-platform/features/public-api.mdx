@@ -4,9 +4,39 @@ sidebarTitle: Public API
 description: All Langfuse data and features are available via the API. Follow this guide to get started.
 ---
 
-# Public API
+import { V4CutoverDate } from "@/components/V4CutoverDate";
+import { V4_CUTOVER_DATE_SHORT } from "@/lib/v4-migration-dates";
+
+# Public API [#public-api]
 
 Langfuse is open and meant to be extended via custom workflows and integrations. All Langfuse data and features are available via the API.
+
+<Callout type="info">
+
+There are 3 different groups of APIs:
+
+- This page -> Project-level APIs: CRUD traces/evals/prompts/configuration within a project
+- [Organization-level APIs](/docs/administration/scim-and-org-api): provision projects, users (SCIM), and permissions
+- [Instance Management API](/self-hosting/administration/instance-management-api): administer organizations on self-hosted installations
+
+</Callout>
+
+## API reference [#api-reference]
+
+References:
+
+- API Reference: https://api.reference.langfuse.com
+- OpenAPI spec: https://cloud.langfuse.com/generated/api/openapi.yml
+
+## Quickstart [#quickstart]
+
+<Steps>
+
+### Obtain credentials [#authentication]
+
+The public and secret keys are available in the Langfuse project settings.
+
+### Select the regional base URL [#base-urls]
 
 <Tabs items={["Path", "Cloud US", "Cloud EU", "Cloud Japan", "HIPAA US"]}>
 
@@ -47,28 +77,7 @@ https://hipaa.cloud.langfuse.com/api/public
 </Tab>
 </Tabs>
 
-References:
-
-- API Reference: https://api.reference.langfuse.com
-- OpenAPI spec: https://cloud.langfuse.com/generated/api/openapi.yml
-
-<Callout type="info">
-
-There are 3 different groups of APIs:
-
-- This page -> Project-level APIs: CRUD traces/evals/prompts/configuration within a project
-- [Organization-level APIs](/docs/administration/scim-and-org-api): provision projects, users (SCIM), and permissions
-- [Instance Management API](/self-hosting/administration/instance-management-api): administer organizations on self-hosted installations
-
-</Callout>
-
-## Authentication
-
-Authenticate with the API using [Basic Auth](https://en.wikipedia.org/wiki/Basic_access_authentication).
-The API keys are available in the Langfuse project settings.
-
-- Username: Langfuse Public Key
-- Password: Langfuse Secret Key
+### Make an authenticated request
 
 Example:
 
@@ -76,21 +85,48 @@ Example:
 curl -u public-key:secret-key https://cloud.langfuse.com/api/public/projects
 ```
 
-## Access via SDKs
+### Understand the result
 
-Both the Langfuse [Python SDK](/docs/sdk/python/sdk-v3) and the [JS/TS SDK](/docs/sdk/typescript/guide) provide a strongly-typed wrapper around our public REST API for your convenience. The API methods are accessible via the `api` property on the Langfuse client instance in both SDKs.
+A successful response returns the project associated with your API key:
+
+```json
+{
+  "data": [
+    {
+      "id": "clxxxx",
+      "name": "My Project",
+      "organization": {
+        "id": "clyyyy",
+        "name": "My Org"
+      }
+    }
+  ]
+}
+```
+
+Use the same credentials and regional base URL for the rest of the Public API.
+
+</Steps>
+
+## Access via SDKs [#access-via-sdks]
+
+Both the Langfuse [Python SDK](/docs/observability/sdk/overview) and the [JS/TS SDK](/docs/observability/sdk/overview) provide a strongly-typed wrapper around our public REST API for your convenience. The API methods are accessible via the `api` property on the Langfuse client instance in both SDKs.
 
 You can use your editor's Intellisense to explore the API methods and their parameters.
 
 <Callout type="info">
 
-In Python SDK v4 and JS/TS SDK v5, the high-performance resources are the
-defaults: `api.observations`, `api.scores`, and `api.metrics`. Legacy v1
+In Python SDK v4 and JS/TS SDK v5, the high-performance observations and
+metrics resources are the defaults: `api.observations` and `api.metrics`.
+Scores API v3 is available as `api.scores_v3` in Python SDK `4.8.1+` and
+`api.scoresV3` in JS/TS SDK `5.5.0+`; the `api.scores` v2 reads are deprecated
+([migration guide](/faq/all/deprecated-api-migration#scores)). Deprecated v1
 resources moved under `api.legacy.*` (Python: `*_v1`, JS/TS: `*V1`). See
 [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk) for SDK examples.
 
-Observations API v2 and Metrics API v2 are currently Cloud-only. For self-hosted
-deployments, use the endpoints available in your Langfuse version.
+Observations API v2 and Metrics API v2 are available on Langfuse Cloud and
+self-hosted Langfuse v4. On self-hosted Langfuse v3, use the `api.legacy.*`
+resources. See [Versions & Compatibility](/docs/compatibility#sdk-server).
 
 </Callout>
 
@@ -103,7 +139,7 @@ When fetching [prompts](/docs/prompts/get-started#use-prompt), please use the `g
 <LangTabs items={["Python SDK", "JS/TS SDK", "Java SDK"]}>
 <Tab>
 
-When using the [Python SDK](/docs/sdk/python/sdk-v3):
+When using the [Python SDK](/docs/observability/sdk/overview):
 
 ```python
 from langfuse import get_client
@@ -118,7 +154,7 @@ observations = langfuse.api.observations.get_many(
 )
 
 # Retrieve aggregates via Metrics API v2
-metrics = langfuse.api.metrics.get(query="""
+metrics = langfuse.api.metrics.metrics(query="""
 {
   "view": "observations",
   "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
@@ -151,7 +187,7 @@ const observations = await langfuse.api.observations.getMany({
 });
 
 // Retrieve aggregates via Metrics API v2
-const metrics = await langfuse.api.metrics.get({
+const metrics = await langfuse.api.metrics.metrics({
   query: JSON.stringify({
     view: "observations",
     metrics: [{ measure: "totalCost", aggregation: "sum" }],
@@ -221,25 +257,30 @@ try {
 ## Ingest Traces via the API
 
 <Callout type="info">
-  The OpenTelemetry Endpoint will replace the Ingestion API in the future.
-  Therefore, it is strongly recommended to switch to the OpenTelemetry Endpoint
-  for trace ingestion. Please refer to the [OpenTelemetry
-  docs](/integrations/native/opentelemetry) for more information.
+  The OpenTelemetry endpoint is the supported path for trace ingestion. The
+  legacy Ingestion API is deprecated and is sunset on Langfuse Cloud on <V4CutoverDate />; on self-hosted v4 it is unavailable once you run
+  the default `events_only` write mode. Switch to the OpenTelemetry endpoint
+  now. Follow the [custom ingestion migration
+  guide](/integrations/native/opentelemetry/migration-to-v4) to map legacy
+  events to v4-ready OTEL spans. This deprecation applies to trace and
+  observation events. Current SDK score helpers send `score-create` events to
+  the same endpoint; those events remain supported after the cutover.
 </Callout>
 
 - [OpenTelemetry Traces Ingestion Endpoint](https://api.reference.langfuse.com/#tag/opentelemetry/POST/api/public/otel/v1/traces) implements the OTLP/HTTP specification for trace ingestion, providing native OpenTelemetry integration for Langfuse Observability.
-- (Legacy) [Ingestion API](https://api.reference.langfuse.com/#tag/ingestion/POST/api/public/ingestion) allows trace ingestion using an API.
+- (Sunset as of {V4_CUTOVER_DATE_SHORT}) [Ingestion API](https://api.reference.langfuse.com/#tag/ingestion/POST/api/public/ingestion) allows trace ingestion using an API.
 
 ## Retrieve Data via the API
 
-For new data extraction workflows, use the v2 data APIs:
+For new data extraction workflows, use the high-performance data APIs:
 
 - [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) - Retrieve observation data (spans, generations, events) from Langfuse for custom workflows, evaluation pipelines, and analytics.
+- [Scores API v3](/docs/api-and-data-platform/features/scores-api#v3) - Retrieve score data (evaluations, annotations, and API-ingested scores) with a typed value field and cursor-based pagination.
 - [Metrics API v2](/docs/metrics/features/metrics-api#v2) - Retrieve aggregated analytics and metrics from your Langfuse data.
 
 <Callout type="info">
 
-Older trace, observation, and metrics read APIs remain available, but are not recommended as the default for new extraction workflows because they are less performant at scale. See [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) for row-level data and [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregates.
+The deprecated trace, observation, score, and metrics read APIs are documented, with migration steps, in [Migration of deprecated APIs](/faq/all/deprecated-api-migration).
 
 </Callout>
 
@@ -254,7 +295,20 @@ You can also export data via:
 
 import { FaqPreview } from "@/components/faq/FaqPreview";
 
-<FaqPreview tags={["platform"]} />
+<FaqPreview tags={["public-api"]} />
+
+## Related API resources [#related-api-resources]
+
+- [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk) — typed Python and JS/TS wrappers for the same endpoints
+- [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) — retrieve row-level spans, generations, and events
+- [Scores API v3](/docs/api-and-data-platform/features/scores-api#v3) — retrieve evaluation and annotation scores
+- [Metrics API v2](/docs/metrics/features/metrics-api#v2) — retrieve aggregated analytics
+- [Experiments API](/docs/api-and-data-platform/features/experiments-api) — retrieve experiment runs and items
+- [CLI](/docs/api-and-data-platform/features/cli) — call the Public API from the terminal
+- [MCP Server](/docs/api-and-data-platform/features/mcp-server) — connect AI assistants to Langfuse data
+- [Organization-level APIs](/docs/administration/scim-and-org-api) — provision projects, users (SCIM), and permissions
+- [Instance Management API](/self-hosting/administration/instance-management-api) — administer organizations on self-hosted installations
+- [Migration of deprecated APIs](/faq/all/deprecated-api-migration) — replacements for sunset read and ingestion endpoints
 
 ## GitHub Discussions
 

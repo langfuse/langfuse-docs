@@ -12,6 +12,29 @@ Please make sure that all relative links match to what is available.
 
 > Langfuse is an **open-source AI engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow.
 
+## Markdown Access
+
+Every page on langfuse.com is available as plain Markdown. Append `.md` to any URL, or send an `Accept: text/markdown` header:
+
+```bash
+curl /docs/observability/get-started.md
+```
+
+The links in the section indexes below already point at the `.md` variants.
+
+## Docs Search API
+
+Semantic search (RAG) over the Langfuse documentation, returning an answer with the relevant pages and excerpts. No authentication required. Use this instead of guessing when a specific page does not answer the question:
+
+```bash
+curl -sG "/api/search-docs" --data-urlencode "query=How do I trace a LangGraph agent?"
+```
+
+- **Endpoint**: `/api/search-docs?query=<question>`
+- **Documentation**: [REST endpoint](/docs/docs-mcp#rest-endpoint)
+
+Ask specific, self-contained questions in natural language. This is the same search that backs the `searchLangfuseDocs` MCP tool below.
+
 ## Langfuse Docs MCP Server
 
 Connect to the Langfuse Docs MCP server to access documentation directly in your AI editor:
@@ -28,13 +51,17 @@ Install the Langfuse skill before implementing anything with Langfuse. The skill
 
 Install from: [github.com/langfuse/skills](https://github.com/langfuse/skills/tree/main/skills/langfuse)
 
+## Tracing Best Practices
+
+Before instrumenting an application with Langfuse, read [What does a good trace look like?](/docs/observability/best-practices.md) — it covers trace scope, observation naming, meaningful input/output, and the attributes (metadata, tags, users, sessions) that evaluators, dashboards, and experiments rely on.
+
 ## Docs
 
 For the best results, install the [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) before using these docs.
 
 For the full list with links to each page, see: /llms-docs.txt
 
-Pages: Overview, Audit Logs, Authentication & SSO, Billable Units, Data Deletion, Data Retention, LLM Connections, Access Control (RBAC), SCIM and Org API, Spend Alerts, Troubleshooting and FAQ, Agent Skill, Blob Storage Export Field Reference, CLI, Export from UI, Export to Blob Storage, MCP Server, Observations API, Public API, Query via SDKs, Overview, Ask AI, Example Project, Docs MCP Server, Concepts, Annotation Queues, Code evaluators, LLM-as-a-Judge, Scores via API/SDK, Scores via UI, Experiments Data Model, Datasets, Experiments in CI/CD, Experiments via SDK, Experiments via UI, Overview, Data Model, Overview, Analytics, Troubleshooting and FAQ, Glossary, Langfuse Assistant, Custom Dashboards, Metrics API, Monitors and Alerts, Overview, Concepts, Agent Graphs, Comments, Corrections, Environments, Filter Search Bar, Full-Text Search, Log Levels, Masking, MCP Tracing, Metadata, Multi-Modality, Observation Types, Event queuing/batching, Releases & Versioning, Sampling, Sessions, Tags, Token & Cost Tracking, Trace IDs & Distributed Tracing, Trace URLs, User Feedback, User Tracking, Web Callouts, Get Started, Overview, Advanced Features, Instrumentation, Overview, Troubleshooting & FAQ, Upgrade path, JS/TS v3 → v4, JS/TS v4 → v5, Python v2 → v3, Python v3 → v4, Troubleshooting & FAQ, Concepts, A/B Testing, Caching, Prompt Composability, Config, Folders, GitHub Integration, Guaranteed Availability, Link to Traces, Managing prompts via MCP, Message Placeholders, n8n Node, Playground, Version Control, Variables, Webhooks, Get Started, Overview, Troubleshooting and FAQ, Roadmap, Security & Guardrails, Langfuse Fast Preview: Faster and Observations-First
+Pages: Overview, Audit Logs, Authentication & SSO, Billable Units, Data Deletion, Data Retention, LLM Connections, Access Control (RBAC), SCIM and Org API, Spend Alerts, Troubleshooting and FAQ, Agent Skill, Blob storage export field reference, CLI, Experiments API, Export from UI, Export to blob storage, MCP Server, Observations API, Public API, Query via SDKs, Scores API, Overview, Ask AI, Versions & Compatibility, Example Project, Docs MCP Server, Agentic access, Concepts, Annotation Queues, Code evaluators, LLM-as-a-Judge, Scores via API/SDK, Scores via UI, Experiments Data Model, Datasets, Experiments in CI/CD, Experiments via OpenTelemetry, Experiments via SDK, Experiments via UI, Evaluate with Datasets, Evaluate Production Traffic, Overview, Data Model, Overview, Analytics, Troubleshooting and FAQ, Glossary, Langfuse Assistant, Custom Dashboards, Metrics API, Overview, What does a good trace look like?, Concepts, Agent Graphs, Agentic access, Alerts, Comments, Corrections, Environments, Chart any table, Filter search bar, Full-Text Search, Log Levels, Masking, MCP Tracing, Metadata, Multi-Modality, Observation Types, Pulse, Event queuing/batching, Releases & Versioning, Sampling, Sessions, Tags, Token & Cost Tracking, Trace IDs & Distributed Tracing, Trace URLs, User Feedback, User Tracking, Web Callouts, Get Started, Overview, Advanced Features, Instrumentation, Overview, Troubleshooting & FAQ, Upgrade path, JS/TS v3 → v4, JS/TS v4 → v5, Python v2 → v3, Python v3 → v4, Troubleshooting & FAQ, Concepts, A/B Testing, Agentic Prompt Management, Caching, Prompt Composability, Config, Folders, GitHub Integration, Guaranteed Availability, Link to Traces, Message Placeholders, n8n Node, Playground, Version Control, Variables, Webhooks, Get Started, Overview, Troubleshooting and FAQ, Roadmap, Security & Guardrails
 
 ## Integrations
 
@@ -42,17 +69,63 @@ For the best results, install the [Langfuse skill](https://github.com/langfuse/s
 
 For the full list with links to each page, see: /llms-integrations.txt
 
-Pages: Overview, Coval Integration, Mixpanel for LLM Apps with Langfuse, PostHog for LLM Apps with Langfuse (open source), Trubrics Integration, Trace Augment Code with Langfuse, Trace Claude Code with Langfuse, Trace OpenAI Codex with Langfuse, Trace Cursor Agents with Langfuse, Trace GitHub Copilot with Langfuse, Trace Kiro IDE with Langfuse, Trace Kiro CLI with Langfuse, Trace OpenCode with Langfuse, Use Langfuse in VS Code via MCP, Observability for Agno with Langfuse, Trace AI SDK C++ with Langfuse, Integration - Amazon Bedrock AgentCore, Observability for AutoGen with Langfuse Integration, Observability for BeeAI Agents with Langfuse, Observability for Claude Agent SDK with Langfuse, Observability for Claude Agent SDK JS/TS with Langfuse, Observability for CrewAI with Langfuse Integration, DSPy - Observability & Tracing, Integrating Langfuse with Embabel Agents Using OpenTelemetry, Observability for eve with Langfuse, Observability for Flue with Langfuse, Observability for Google Agent Development Kit with Langfuse, Observability for Haystack with Langfuse, Observability & Tracing for Instructor, Observability for Koog with Langfuse, LangChain Tracing & LangGraph Integration, Observability for LangChain DeepAgents with Langfuse, Langserve Integration, LiteLLM SDK Integration, Observability for LiveKit Agents with Langfuse, Observability for LlamaIndex with Langfuse Integration, Observability for LlamaIndex with Langfuse Integration, Observability for Mastra with Langfuse, Trace the Microsoft Agent Framework with Langfuse, Open Source Observability & Monitoring for Mirascope, Trace the OpenAI Agents SDK with Langfuse, Open Source Observability for Pipecat, Observability for Pydantic AI with Langfuse Integration, Integrating Langfuse with Quarkus LangChain4j Using OpenTelemetry, Langfuse Integration with Ragas, Trace Restate Agents with Langfuse, Observability for Semantic Kernel with Langfuse Integration, Observability for smolagents with Langfuse, Integrating Langfuse with Spring AI Using OpenTelemetry, Observability for Strands Agents with Langfuse, Trace Swiftide with Langfuse, Observability for TanStack AI with Langfuse, Trace Temporal Workflows with Langfuse, Observability and Tracing for the Vercel AI SDK, Observability for VoltAgent with Langfuse, Observability for IBM watsonx Orchestrate ADK with Langfuse, Anannas AI Integration, Helicone Integration, Kong API Gateway Integration, LiteLLM Proxy Integration, Trace OpenRouter with Langfuse, Integrate Portkey LLM Gateway with Langfuse, TrueFoundry AI Gateway Integration, Vercel AI Gateway Integration, Amazon Bedrock Integration, Integration - Amazon Bedrock Agents, Observability for Anthropic with Langfuse Integration, Observability for Anthropic JS/TS with Langfuse, Monitor Baseten with Langfuse, Monitor BytePlus model inference with Langfuse, Monitor Cerebras with Langfuse, Langfuse Integration with Cleanlab, Integrate Cohere with Langfuse, Monitor CometAPI with Langfuse, Databricks and Langfuse Overview, Example cookbook on how to monitor DeepSeek models with Langfuse using the OpenAI SDK, Integrate Fireworks AI with Langfuse, Observability for Google Gemini Models with Langfuse Integration, Observability for Google Vertex AI with Langfuse, Observability for Groq models with Langfuse Integration, Observability for Hugging Face Models with Langfuse Integration, Trace Mistral models with Langfuse, Realtime Classification with Morph Reflex Evaluators, Monitor Novita AI with Langfuse, Ollama Observability and Tracing for local LLMs using Langfuse, OSS Observability for OpenAI Assistants API, OpenAI (JS/TS), OpenAI (Python), Observability for Qwen with Langfuse, Monitor Together AI with Langfuse, Tracing vLLM with Langfuse via OpenTelemetry, Integrate X.ai (Grok) with Langfuse, Observability for Z.ai with Langfuse, OpenTelemetry (OTEL) for LLM Observability, Observability and tracing for Dify, Observability and Tracing for Flowise, Integrating Goose with Langfuse, Observability and Tracing for Langdock Assistants, Observability and Tracing for Langflow, Observability and Tracing for LobeChat, n8n Integration, Langfuse Integration with OpenWebUI, Observability and Tracing for Ragflow, Open Source Observability for Vapi (Voice AI), Agentic Data Stack: LibreChat + ClickHouse + Langfuse, Langfuse Integration with Cognee, Monitor Exa AI Search with Langfuse, Monitor Firecrawl Scraper with Langfuse, Open Source LLM Observability for Gradio, Hermes Agent tracing with Langfuse, Observability & Tracing for Inferable (open source), LibreChat Observability with Langfuse Tracing, Observability for mcp-use with Langfuse, Langfuse Integration with Milvus, Trace OpenClaw with Langfuse, Monitor Parallel Tasks with Langfuse, Promptfoo Integration with Langfuse Prompt Management, Slack Integration with Langfuse, Human Evaluation for LLM Apps with Testable Minds, Automate Code Optimization with Weco and Langfuse, Zapier Integration with Langfuse
+Pages: Overview, Coval Integration, Mixpanel for LLM Apps with Langfuse, PostHog for LLM Apps with Langfuse (open source), Trubrics Integration, Trace Augment Code with Langfuse, Trace Claude Code with Langfuse, Trace OpenAI Codex with Langfuse, Trace Cursor Agents with Langfuse, Trace GitHub Copilot with Langfuse, Trace Kiro IDE with Langfuse, Trace Kiro CLI with Langfuse, Trace OpenCode with Langfuse, Trace the Pi Coding Agent with Langfuse, Use Langfuse in VS Code via MCP, Observability for Agno with Langfuse, Trace AI SDK C++ with Langfuse, Integration - Amazon Bedrock AgentCore, Observability for AutoGen with Langfuse Integration, Observability for BeeAI Agents with Langfuse, Observability for Claude Agent SDK with Langfuse, Observability for Claude Agent SDK JS/TS with Langfuse, Observability for CrewAI with Langfuse Integration, DSPy - Observability & Tracing, Integrating Langfuse with Embabel Agents Using OpenTelemetry, Observability for eve with Langfuse, Observability for Flue with Langfuse, Observability for Google Agent Development Kit with Langfuse, Observability for Haystack with Langfuse, Observability & Tracing for Instructor, Observability for Koog with Langfuse, LangChain Tracing & LangGraph Integration, Observability for LangChain DeepAgents with Langfuse, Open Source Observability for LangGraph, LiteLLM SDK Integration, Observability for LiveKit Agents with Langfuse, Observability for LlamaIndex with Langfuse Integration, Observability for LlamaIndex with Langfuse Integration, Observability for Mastra with Langfuse, Trace the Microsoft Agent Framework with Langfuse, Open Source Observability & Monitoring for Mirascope, Trace the OpenAI Agents SDK with Langfuse, Open Source Observability for Pipecat, Observability for Pydantic AI with Langfuse Integration, Integrating Langfuse with Quarkus LangChain4j Using OpenTelemetry, Run Ragas evaluations on Langfuse experiments and traces, Trace Restate Agents with Langfuse, Observability for Semantic Kernel with Langfuse Integration, Observability for smolagents with Langfuse, Integrating Langfuse with Spring AI Using OpenTelemetry, Observability for Strands Agents with Langfuse, Trace Swiftide with Langfuse, Observability for TanStack AI with Langfuse, Trace Temporal Workflows with Langfuse, Observability and Tracing for the Vercel AI SDK, Observability for VoltAgent with Langfuse, Observability for IBM watsonx Orchestrate ADK with Langfuse, Anannas AI Integration, Route OpenTelemetry to Langfuse through Azure API Management, Helicone Integration, Kong API Gateway Integration, LiteLLM Proxy Integration, Trace OpenRouter with Langfuse, Integrate Portkey LLM Gateway with Langfuse, TrueFoundry AI Gateway Integration, Vercel AI Gateway Integration, Amazon Bedrock Integration, Integration - Amazon Bedrock Agents, Observability for Anthropic with Langfuse Integration, Observability for Anthropic JS/TS with Langfuse, Monitor Baseten with Langfuse, Monitor BytePlus model inference with Langfuse, Monitor Cerebras with Langfuse, Langfuse Integration with Cleanlab, Integrate Cohere with Langfuse, Monitor CometAPI with Langfuse, Databricks and Langfuse Overview, Example cookbook on how to monitor DeepSeek models with Langfuse using the OpenAI SDK, Integrate Fireworks AI with Langfuse, Observability for Google Gemini Models with Langfuse Integration, Observability for Google Vertex AI with Langfuse, Observability for Groq models with Langfuse Integration, Observability for Hugging Face Models with Langfuse Integration, Trace Mistral models with Langfuse, Realtime Classification with Morph Reflex Evaluators, Monitor Novita AI with Langfuse, Ollama Observability and Tracing for local LLMs using Langfuse, OSS Observability for OpenAI Assistants API, OpenAI (JS/TS), OpenAI (Python), Observability for Qwen with Langfuse, Monitor Together AI with Langfuse, Tracing vLLM with Langfuse via OpenTelemetry, Integrate X.ai (Grok) with Langfuse, Observability for Z.ai with Langfuse, OpenTelemetry (OTEL) for LLM Observability, Ingest experiment spans with OpenTelemetry, Migrate custom ingestion to Langfuse v4, Observability and tracing for Dify, Trace ElevenLabs Agents with Langfuse, Observability and Tracing for Flowise, Integrating Goose with Langfuse, Observability and Tracing for Langdock Agents, Observability and Tracing for Langflow, Observability and Tracing for LobeChat, n8n Integration, Langfuse Integration with OpenWebUI, Observability and Tracing for Ragflow, Open Source Observability for Vapi (Voice AI), Agentic Data Stack: LibreChat + ClickHouse + Langfuse, Langfuse Integration with Cognee, Langfuse Integration with EverOS, Monitor Exa AI Search with Langfuse, Monitor Firecrawl Scraper with Langfuse, Open Source LLM Observability for Gradio, Hermes Agent tracing with Langfuse, Observability & Tracing for Inferable (open source), LibreChat Observability with Langfuse Tracing, Observability for mcp-use with Langfuse, Langfuse Integration with Milvus, MLflow Integration via OpenTelemetry, Trace OpenClaw with Langfuse, Tracing using the OpenInference SDK, OpenLIT Integration via OpenTelemetry, OpenLLMetry Integration via OpenTelemetry, Monitor Parallel Tasks with Langfuse, Promptfoo Integration with Langfuse Prompt Management, Slack Integration with Langfuse, Trace Tavily workflows with Langfuse, Human Evaluation for LLM Apps with Testable Minds, Automate Code Optimization with Weco and Langfuse, Zapier Integration with Langfuse
 
 ## Optional: Self-Hosting
 
 For the full list with links to each page, see: /llms-self-hosting.txt
 
-Pages: Self-host Langfuse (Open Source LLM Observability), Administration Overview (self-hosted), Automated Access Provisioning (self-hosted), Headless Initialization (self-hosted), Manage Organizations via API, Allowlist of organization creators (self-hosted), UI Customization (self-hosted), Configuration via Environment Variables (self-hosted), Backup Strategies for Langfuse, Caching (self-hosted), Code evaluators (self-hosted), Custom Base Path (self-hosted), Encryption (self-hosted), Health and Readiness Check Endpoints, Observability via OpenTelemetry, Scaling Langfuse Deployments, Transactional Emails (self-hosted), Deploy Langfuse on AWS with Terraform, Deploy Langfuse on Azure with Terraform, Docker Compose Deployment (Self-Hosted), Deploy Langfuse on GCP with Terraform, S3 / Blob Storage Configuration (Self-Hosted), Cache (Redis/Valkey) Configuration (Self-Hosted), ClickHouse (self-hosted), Application Containers (self-hosted), LLM API / Gateway (self-hosted), Postgres Database (self-hosted), Kubernetes (Helm) (self-hosted), Deploy Langfuse v3 on Railway, Enterprise License Key (self-hosted), Authentication and SSO (self-hosted), Data Masking (self-hosted), Deployment Strategies (self-hosted), Networking (self-hosted), Telemetry (self-hosted), Troubleshooting & FAQ for a self-hosted Langfuse deployment, How to upgrade a self-hosted Langfuse deployment, Background Migrations (self-hosted), Migrate Langfuse v1 to v2 (self-hosted), Migrate Langfuse v2 to v3 (self-hosted), Versioning, Self-host Langfuse v2, Self-hosting Langfuse v2, Local Deployment (v2, docker compose)
+Pages: Self-host Langfuse (Open Source LLM Observability), Administration Overview (self-hosted), Automated Access Provisioning (self-hosted), Headless Initialization (self-hosted), Manage Organizations via API, Allowlist of organization creators (self-hosted), UI Customization (self-hosted), Configuration via Environment Variables (self-hosted), Backup Strategies for Langfuse, Caching (self-hosted), Code evaluators (self-hosted), Custom Base Path (self-hosted), Encryption (self-hosted), Hardening self-hosted Langfuse, Health and Readiness Check Endpoints, Observability via OpenTelemetry, Scaling Langfuse Deployments, Transactional Emails (self-hosted), Deploy Langfuse on AWS with Terraform, Deploy Langfuse on Azure with Terraform, Docker Compose Deployment (Self-Hosted), Deploy Langfuse on GCP with Terraform, S3 / Blob Storage Configuration (Self-Hosted), Cache (Redis/Valkey) Configuration (Self-Hosted), ClickHouse (self-hosted), Application Containers (self-hosted), LLM API / Gateway (self-hosted), Postgres Database (self-hosted), Kubernetes (Helm) (self-hosted), Deploy Langfuse v3 on Railway, Deploy Langfuse v4 on Render, Enterprise License Key (self-hosted), Langfuse OSS newsletter (self-hosting updates), Authentication and SSO (self-hosted), Data Masking (self-hosted), Deployment Strategies (self-hosted), Networking (self-hosted), Telemetry (self-hosted), Troubleshooting & FAQ for a self-hosted Langfuse deployment, How to upgrade a self-hosted Langfuse deployment, Background Migrations (self-hosted), Migrate Langfuse v1 to v2 (self-hosted), Migrate Langfuse v2 to v3 (self-hosted), Migrate Langfuse v3 to v4 (self-hosted), Versions & Compatibility, Self-host Langfuse v2, Self-hosting Langfuse v2, Local Deployment (v2, docker compose)
+
+## Guides and cookbooks
+
+For the full list with links to each page, see: /llms-guides.txt
+
+## Academy
+
+For the full list with links to each page, see: /llms-academy.txt
+
+Pages: Langfuse Academy, AI Engineering Loop, Datasets, Designing datasets, Evaluation, Choosing what to evaluate, Writing good evaluators, Examples, Customer support chatbot, Music streaming DJ, Experiments, Monitoring, Error analysis, Tracing, Langfuse Academy, AI エンジニアリング・ループ, データセット, データセットの設計, 評価, 何を評価するかを選ぶ, 良い評価器の書き方, 例, カスタマーサポートチャットボット, 音楽ストリーミングの DJ, 実験, モニタリング, エラー分析, トレーシング
+
+## FAQ
+
+For the full list with links to each page, see: /llms-faq.txt
+
+## Resources
+
+For the full list with links to each page, see: /llms-resources.txt
+
+## Security and compliance
+
+For the full list with links to each page, see: /llms-security.txt
+
+## Handbook
+
+For the full list with links to each page, see: /llms-handbook.txt
+
+## Workshop
+
+For the full list with links to each page, see: /llms-workshop.txt
+
+## Library
+
+For the full list with links to each page, see: /llms-library.txt
+
+## Customer stories
+
+For the full list with links to each page, see: /llms-users.txt
+
+## Blog
+
+For the full list with links to each page, see: /llms-blog.txt
+
+## Changelog
+
+For the full list with links to each page, see: /llms-changelog.txt
 
 # Langfuse Docs
 
-- [Overview](/docs.md): Langfuse is an open-source AI engineering platform (GitHub) that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow.
+- [Overview](/docs.md): Langfuse is an open-source AI engineering platform (GitHub) that helps teams collaboratively debug, analyze, and iterate on their AI agent applications. All platform features are natively integrated to accelerate the development workflow.
 - [Audit Logs](/docs/administration/audit-logs.md): Comprehensive audit logging in Langfuse tracks all system activities with detailed state capture and user attribution for enterprise security and compliance requirements.
 - [Authentication & SSO](/docs/administration/authentication-and-sso.md): Overview of Single Sign-On (SSO) methods in Langfuse
 - [Billable Units](/docs/administration/billable-units.md): Learn how billable units are calculated in Langfuse.
@@ -64,18 +137,22 @@ Pages: Self-host Langfuse (Open Source LLM Observability), Administration Overvi
 - [Spend Alerts](/docs/administration/spend-alerts.md): Get notified when your organization's spend exceeds predefined monetary thresholds to better manage your Langfuse Cloud costs.
 - [Troubleshooting and FAQ](/docs/administration/troubleshooting-and-faq.md): Troubleshooting and FAQ for administering Langfuse.
 - [Agent Skill](/docs/api-and-data-platform/features/agent-skill.md): Install the Langfuse agent skill to give your coding agent access to Langfuse tracing, prompt management, datasets, and documentation — right from the editor.
-- [Blob Storage Export Field Reference](/docs/api-and-data-platform/features/blob-storage-export-fields.md): Complete reference of all fields exported by the Langfuse blob storage integration, organized by export table (enriched observations, scores, legacy traces, legacy observations).
+- [Blob storage export field reference](/docs/api-and-data-platform/features/blob-storage-export-fields.md): Field names and types for enriched observations, scores, and deprecated legacy blob storage exports.
 - [CLI](/docs/api-and-data-platform/features/cli.md): Interact with the full Langfuse API from the command line. Built for AI agents and power users.
+- [Experiments API](/docs/api-and-data-platform/features/experiments-api.md): Retrieve experiment runs, items, outputs, and evaluation scores from Langfuse.
 - [Export from UI](/docs/api-and-data-platform/features/export-from-ui.md): Export your Langfuse observability data from the UI for analysis, fine-tuning, and integration with external tools.
-- [Export to Blob Storage](/docs/api-and-data-platform/features/export-to-blob-storage.md): Export traces, observations, enriched observations, and scores to Blob Storage, e.g. S3, GCS, or Azure Blob Storage.
+- [Export to blob storage](/docs/api-and-data-platform/features/export-to-blob-storage.md): Export enriched observations, scores, and legacy traces and observations to Blob Storage, e.g. S3, GCS, or Azure Blob Storage.
 - [MCP Server](/docs/api-and-data-platform/features/mcp-server.md): Native Model Context Protocol (MCP) server for Langfuse, enabling AI assistants to interact with your Langfuse data programmatically.
 - [Observations API](/docs/api-and-data-platform/features/observations-api.md): Retrieve observations from Langfuse with high-performance v2 endpoints featuring cursor-based pagination and selective field retrieval.
 - [Public API](/docs/api-and-data-platform/features/public-api.md): All Langfuse data and features are available via the API. Follow this guide to get started.
-- [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk.md): Query Langfuse data via Python and JS/TS SDKs using the high-performance v2 data APIs.
+- [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk.md): Query Langfuse data via Python and JS/TS SDKs using the high-performance data APIs.
+- [Scores API](/docs/api-and-data-platform/features/scores-api.md): Retrieve scores from Langfuse with the v3 endpoint featuring a typed value field, cursor-based pagination, and selective field retrieval.
 - [Overview](/docs/api-and-data-platform/overview.md): Langfuse is designed to be extensible and flexible. People using Langfuse are building all kinds of workflows and customizations on top of it. This is powered by our open data platform.
 - [Ask AI](/docs/ask-ai.md): Ask AI questions about Langfuse features, integrations, SDK usage, and best practices. Get instant answers from our AI assistant trained on documentation, GitHub discussions, and API references.
+- [Versions & Compatibility](/docs/compatibility.md): How Langfuse server, SDK, and API versions relate across Langfuse Cloud and self-hosted deployments, including the SDK ↔ server compatibility matrix.
 - [Example Project](/docs/demo.md): Try Langfuse in action with a live example project for free. Interact with the chatbot to see new traces and user feedback (👍/👎) in Langfuse. No credit card required.
 - [Docs MCP Server](/docs/docs-mcp.md)
+- [Agentic access](/docs/evaluation/agentic-access.md): Let AI agents work with scores, datasets, experiments, evaluators, and annotation queues through the Agent Skill, CLI, or MCP server.
 - [Concepts](/docs/evaluation/core-concepts.md): Learn the fundamental concepts behind LLM evaluation in Langfuse - Scores, Evaluation Methods, Datasets, and Experiments.
 - [Annotation Queues](/docs/evaluation/evaluation-methods/annotation-queues.md): Manage your annotation tasks with ease using our new workflow tooling. Create queues, add traces to them, and get a simple UI to review and label LLM application traces in Langfuse.
 - [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators.md): Use Python or TypeScript code in Langfuse to run deterministic evaluations on observations and experiments.
@@ -85,8 +162,11 @@ Pages: Self-host Langfuse (Open Source LLM Observability), Administration Overvi
 - [Experiments Data Model](/docs/evaluation/experiments/data-model.md): Data model for Datasets, DatasetItems, DatasetRuns, DatasetRunItems, and function definitions for Tasks and Evaluators.
 - [Datasets](/docs/evaluation/experiments/datasets.md): Use Langfuse Datasets to create structured experiments to test and benchmark LLM applications.
 - [Experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd.md): Run Langfuse experiments in CI and gate changes before production.
+- [Experiments via OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry.md): Group OpenTelemetry traces as Langfuse experiments by attaching experiment and item attributes.
 - [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk.md): Start experiments via the Langfuse SDK to programmatically test your application
 - [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui.md): Experiment with different prompt versions and models on a dataset and compare the results side-by-side directly from the Langfuse UI.
+- [Evaluate with Datasets](/docs/evaluation/get-started/offline.md): Run your first offline evaluation on a Langfuse dataset and compare prompt changes.
+- [Evaluate Production Traffic](/docs/evaluation/get-started/online.md): Score live production traces in Langfuse. Set up an evaluator and a rule to run LLM-as-a-Judge or code checks on incoming observations.
 - [Overview](/docs/evaluation/overview.md): With Langfuse you can capture all your LLM evaluations in one place. You can combine a variety of different evaluation metrics like model-based evaluations (LLM-as-a-Judge), human annotations or fully custom evaluation workflows via API/SDKs. This allows you to measure quality, tonality, factual accuracy, completeness, and other dimensions of your LLM application.
 - [Data Model](/docs/evaluation/scores/data-model.md): Data model for Score and ScoreConfig objects in Langfuse.
 - [Overview](/docs/evaluation/scores/overview.md): Scores are Langfuse's universal data object for storing evaluation results. Learn about score types, how to create scores, and when to use them.
@@ -96,14 +176,17 @@ Pages: Self-host Langfuse (Open Source LLM Observability), Administration Overvi
 - [Langfuse Assistant](/docs/langfuse-assistant.md): Ask questions about your Langfuse project data in plain language from inside the Langfuse Cloud UI.
 - [Custom Dashboards](/docs/metrics/features/custom-dashboards.md): Create powerful, customizable dashboards to visualize, monitor, and share insights from your LLM application data with flexible metrics, rich filtering, and dynamic layouts.
 - [Metrics API](/docs/metrics/features/metrics-api.md): Retrieve custom metrics from Langfuse for flexible analytics and reporting.
-- [Monitors and Alerts](/docs/metrics/features/monitors.md): Set threshold-based alerts on your LLM application metrics and route notifications through automations when thresholds are breached.
 - [Overview](/docs/metrics/overview.md): Improve your LLM application with open source metrics tracking latency, cost, and quality across various dimensions.
+- [What does a good trace look like?](/docs/observability/best-practices.md): Best practices for structuring Langfuse traces — scope, nesting, naming, input/output, and attributes — so that debugging, evaluation, and cost tracking work well.
 - [Concepts](/docs/observability/data-model.md): Langfuse (open source) helps you trace and analyze LLM applications. Learn how traces and observations are structured in Langfuse.
-- [Agent Graphs](/docs/observability/features/agent-graphs.md): Visualize and analyze complex agent workflows with Langfuse's agent graph view.
+- [Agent Graphs](/docs/observability/features/agent-graphs.md): Visualize and analyze complex agent workflows with Langfuse's agent graph view — as an aggregated overview or an expanded, as-it-ran DAG.
+- [Agentic access](/docs/observability/features/agentic-access.md): Let AI agents investigate observations, query metrics, and work with your Langfuse observability data through the Agent Skill, CLI, or MCP server.
+- [Alerts](/docs/observability/features/alerts.md): Set threshold-based alerts on your LLM application metrics and route notifications through automations when thresholds are breached.
 - [Comments](/docs/observability/features/comments.md): Add contextual comments to traces, observations, sessions, and prompts in Langfuse for team collaboration.
 - [Corrections](/docs/observability/features/corrections.md): Capture improved versions of LLM outputs directly in traces and observations to build better datasets and drive continuous improvement.
 - [Environments](/docs/observability/features/environments.md): Configure environments to organize your traces, observations, and scores.
-- [Filter Search Bar](/docs/observability/features/filter-search-bar.md): Filter and search traces and observations by typing — fields, operators, wildcards, aliases, and full-text search in one query bar with autocomplete.
+- [Chart any table](/docs/observability/features/events-table-charts.md): Toggle the Observations table into a chart over the same query. Pick a chart type, metric, aggregation, and breakdown, then add the chart to a dashboard.
+- [Filter search bar](/docs/observability/features/filter-search-bar.md): Filter and search traces and observations by typing — fields, operators, wildcards, aliases, and full-text search in one query bar with autocomplete.
 - [Full-Text Search](/docs/observability/features/full-text-search.md): Find content across the inputs, outputs, and metadata of your traces and observations with full-text search in Langfuse.
 - [Log Levels](/docs/observability/features/log-levels.md): Use Log Levels to control the verbosity of your logs and highlight errors and warnings.
 - [Masking](/docs/observability/features/masking.md): Configure masking to redact sensitive information from Langfuse SDK data and OpenTelemetry span attributes before they are sent to Langfuse.
@@ -111,6 +194,7 @@ Pages: Self-host Langfuse (Open Source LLM Observability), Administration Overvi
 - [Metadata](/docs/observability/features/metadata.md): Add custom metadata to your observations to better understand and correlate your observations
 - [Multi-Modality](/docs/observability/features/multi-modality.md): Langfuse fully supports multi-modal LLM traces, including text, images, audio, and attachments.
 - [Observation Types](/docs/observability/features/observation-types.md): Structured tracing with observation types in Langfuse
+- [Pulse](/docs/observability/features/pulse.md): A compact outlier chart strip above the Observations table. See count, cost, and latency spikes over time, then click or drag a spike to narrow the table to that window.
 - [Event queuing/batching](/docs/observability/features/queuing-batching.md): Queuing/batching configuration for Langfuse Tracing.
 - [Releases & Versioning](/docs/observability/features/releases-and-versioning.md): Langfuse allows for rapid iteration on LLM applications by providing insights into the effect of experiments such as A/B tests on LLM costs, latencies and quality.
 - [Sampling](/docs/observability/features/sampling.md): Configure sampling to control the volume of traces collected by the Langfuse server.
@@ -136,6 +220,7 @@ Pages: Self-host Langfuse (Open Source LLM Observability), Administration Overvi
 - [Troubleshooting & FAQ](/docs/observability/troubleshooting-and-faq.md): Troubleshooting and FAQ for Langfuse Tracing.
 - [Concepts](/docs/prompt-management/data-model.md): Core concepts of Langfuse Prompt Management including prompt types, versioning, labels, and configuration.
 - [A/B Testing](/docs/prompt-management/features/a-b-testing.md): Use Open Source Prompt Management in Langfuse to systematically test and improve your LLM prompts with A/B testing.
+- [Agentic Prompt Management](/docs/prompt-management/features/agentic-access.md): Let AI agents retrieve, create, migrate, and update Langfuse prompts through the Agent Skill, CLI, or MCP server.
 - [Caching](/docs/prompt-management/features/caching.md): Langfuse prompts are cached client-side in the SDKs, so there's no latency impact after the first use.
 - [Prompt Composability](/docs/prompt-management/features/composability.md): Reference other prompts in your prompts using a simple tag format.
 - [Config](/docs/prompt-management/features/config.md): The prompt config in Langfuse is an optional JSON object attached to each prompt that stores structured data such as model parameters (like model name, temperature), function/tool parameters, or JSON schemas.
@@ -143,7 +228,6 @@ Pages: Self-host Langfuse (Open Source LLM Observability), Administration Overvi
 - [GitHub Integration](/docs/prompt-management/features/github-integration.md): Integrate Langfuse prompts with GitHub using webhooks for version control, CI/CD workflows, and automated synchronization
 - [Guaranteed Availability](/docs/prompt-management/features/guaranteed-availability.md): Ensure 100% availability of prompts by pre-fetching them on application startup and providing a fallback prompt.
 - [Link to Traces](/docs/prompt-management/features/link-to-traces.md): Link Langfuse Prompts to Traces.
-- [Managing prompts via MCP](/docs/prompt-management/features/mcp-server.md): Access and manage Langfuse prompts through the Model Context Protocol (MCP), enabling AI agents to work with your prompt library programmatically.
 - [Message Placeholders](/docs/prompt-management/features/message-placeholders.md): Use message placeholders in chat prompts to insert a list of chat messages at specific positions within a chat prompt.
 - [n8n Node](/docs/prompt-management/features/n8n-node.md): Community-maintained n8n node that enables seamless integration of Langfuse prompt management capabilities into n8n workflows.
 - [Playground](/docs/prompt-management/features/playground.md): Test, iterate, and compare different prompts and models within the LLM Playground.
@@ -153,9 +237,8 @@ Pages: Self-host Langfuse (Open Source LLM Observability), Administration Overvi
 - [Get Started](/docs/prompt-management/get-started.md): Get started with Langfuse Prompt Management.
 - [Overview](/docs/prompt-management/overview.md): Manage and version your prompts in Langfuse (open source). When retrieved, they are cached by the Langfuse SDKs for low latency.
 - [Troubleshooting and FAQ](/docs/prompt-management/troubleshooting-and-faq.md): Troubleshooting and FAQ for Langfuse Prompt Management.
-- [Roadmap](/docs/roadmap.md): Sneak peek into upcoming new features and changes in Langfuse. This page is updated regularly.
+- [Roadmap](/docs/roadmap.md): Explore the current product focus areas for Langfuse.
 - [Security & Guardrails](/docs/security-and-guardrails.md): Comprehensive guide to LLM security guardrails — protect against prompt injection, PII leakage, and harmful content. Learn how to use LLM Guard, NeMo Guardrails, and Langfuse to monitor and evaluate LLM safety.
-- [Langfuse Fast Preview: Faster and Observations-First](/docs/v4.md): Langfuse "Fast Preview" delivers faster performance and introduces an observations-first data model. Enable the preview and upgrade SDKs to get started.
 # Langfuse Integrations
 
 - [Overview](/integrations.md)
@@ -171,6 +254,7 @@ Pages: Self-host Langfuse (Open Source LLM Observability), Administration Overvi
 - [Trace Kiro IDE with Langfuse](/integrations/developer-tools/kiro.md): Trace Kiro IDE AI agent activity during coding sessions with Langfuse for comprehensive observability of prompts, tool use, file operations, and task execution.
 - [Trace Kiro CLI with Langfuse](/integrations/developer-tools/kiro-cli.md): Trace Kiro CLI AI agent activity — prompts, tool use, and completions — with Langfuse for comprehensive observability of your terminal coding sessions.
 - [Trace OpenCode with Langfuse](/integrations/developer-tools/opencode.md): Trace OpenCode coding sessions — user turns, assistant generations, tool calls, retries, and reasoning — with Langfuse for comprehensive observability.
+- [Trace the Pi Coding Agent with Langfuse](/integrations/developer-tools/pi-agent.md): Trace Pi coding agent sessions with Langfuse — agent turns, model generations, token usage with cache and reasoning splits, cost, tool calls, and nested subagents.
 - [Use Langfuse in VS Code via MCP](/integrations/developer-tools/vscode.md): Connect the Langfuse MCP server to VS Code to query and manage your prompts, traces, and datasets from GitHub Copilot agent mode.
 - [Observability for Agno with Langfuse](/integrations/frameworks/agno-agents.md): Learn how to integrate Langfuse with Agno via OpenTelemetry
 - [Trace AI SDK C++ with Langfuse](/integrations/frameworks/ai-sdk-cpp.md): Learn how to instrument AI SDK C++ applications with Langfuse to trace LLM calls, tool invocations, and multi-step agent runs.
@@ -190,7 +274,7 @@ Pages: Self-host Langfuse (Open Source LLM Observability), Administration Overvi
 - [Observability for Koog with Langfuse](/integrations/frameworks/koog.md): Learn how to instrument Koog agents with Langfuse via OpenTelemetry
 - [LangChain Tracing & LangGraph Integration](/integrations/frameworks/langchain.md): Open source LangChain tracing and monitoring. Automatically capture traces of your LangChain callbacks, LLM calls, tools, and retrievers with Langfuse. Python and JS/TS.
 - [Observability for LangChain DeepAgents with Langfuse](/integrations/frameworks/langchain-deepagents.md): Learn how to integrate Langfuse with LangChain DeepAgents for enhanced observability and tracing
-- [Langserve Integration](/integrations/frameworks/langserve.md): This guide shows how to natively integrate Langfuse with LangChain's Langserve for observability, metrics, evals, prompt management, playground, datasets.
+- [Open Source Observability for LangGraph](/integrations/frameworks/langgraph.md): Learn how to use Langfuse for open source observability/tracing in your LangGraph application (Python).
 - [LiteLLM SDK Integration](/integrations/frameworks/litellm-sdk.md): In this guide, we will show you how to use the LiteLLM SDK to capture LLM calls and log them to Langfuse.
 - [Observability for LiveKit Agents with Langfuse](/integrations/frameworks/livekit.md): Trace real-time voice AI agents and multimodal conversations built with LiveKit Agents using Langfuse.
 - [Observability for LlamaIndex with Langfuse Integration](/integrations/frameworks/llamaindex.md): Discover how to integrate Langfuse with LlamaIndex for enhanced LLM application monitoring, debugging, and tracing. Improve your AI development workflow today.
@@ -202,7 +286,7 @@ Pages: Self-host Langfuse (Open Source LLM Observability), Administration Overvi
 - [Open Source Observability for Pipecat](/integrations/frameworks/pipecat.md): Trace real-time voice and multimodal conversations built with Pipecat using Langfuse.
 - [Observability for Pydantic AI with Langfuse Integration](/integrations/frameworks/pydantic-ai.md): Discover how to integrate Langfuse with Pydantic AI for enhanced LLM application monitoring, debugging, and tracing. Improve your AI development workflow today.
 - [Integrating Langfuse with Quarkus LangChain4j Using OpenTelemetry](/integrations/frameworks/quarkus-langchain4j.md): Learn how to integrate Langfuse with Quarkus LangChain4j using OpenTelemetry for enhanced observability and performance monitoring in your AI applications.
-- [Langfuse Integration with Ragas](/integrations/frameworks/ragas.md): Optimize your RAG pipelines with Langfuse and Ragas integration for efficient evaluation, monitoring, and performance enhancement.
+- [Run Ragas evaluations on Langfuse experiments and traces](/integrations/frameworks/ragas.md): Use Ragas metrics as evaluators in Langfuse experiments: run faithfulness and answer relevancy with run_experiment, and score production RAG traces.
 - [Trace Restate Agents with Langfuse](/integrations/frameworks/restate.md): Learn how to use Langfuse to monitor and evaluate resilient Restate agents and workflows via OpenTelemetry
 - [Observability for Semantic Kernel with Langfuse Integration](/integrations/frameworks/semantic-kernel.md): Discover how to integrate Langfuse with Semantic Kernel for enhanced LLM application monitoring, debugging, and tracing. Improve your AI development workflow today.
 - [Observability for smolagents with Langfuse](/integrations/frameworks/smolagents.md): Learn how to integrate Langfuse with Hugging Face smolagents using OpenTelemetry. This lets you trace and debug your AI agents.
@@ -215,6 +299,7 @@ Pages: Self-host Langfuse (Open Source LLM Observability), Administration Overvi
 - [Observability for VoltAgent with Langfuse](/integrations/frameworks/voltagent.md): Learn how to integrate Langfuse with VoltAgent, a TypeScript agent framework, to monitor, debug, and analyze your AI applications.
 - [Observability for IBM watsonx Orchestrate ADK with Langfuse](/integrations/frameworks/watsonx-orchestrate.md): Learn how to integrate Langfuse with IBM watsonx Orchestrate Agent development kit, to monitor, debug, and analyze your AI Agents.
 - [Anannas AI Integration](/integrations/gateways/anannas.md): Learn how to integrate Langfuse with Anannas AI using the OpenAI SDK.
+- [Route OpenTelemetry to Langfuse through Azure API Management](/integrations/gateways/azure-api-management.md): Expose an OpenTelemetry endpoint through Azure API Management (APIM) and forward OTLP traces to Langfuse, keeping telemetry egress under gateway governance.
 - [Helicone Integration](/integrations/gateways/helicone.md): Learn how to integrate Langfuse with Helicone AI Gateway to access 100+ LLM providers with observability and tracing.
 - [Kong API Gateway Integration](/integrations/gateways/kong-ai-plugin.md): Learn how to integrate Langfuse with Kong API Gateway for comprehensive AI observability and distributed tracing of LLM applications
 - [LiteLLM Proxy Integration](/integrations/gateways/litellm.md): Open source observability and tracing for LiteLLM Proxy. Log every LLM call routed through LiteLLM to Langfuse for tracing, cost tracking, and debugging.
@@ -252,10 +337,13 @@ Pages: Self-host Langfuse (Open Source LLM Observability), Administration Overvi
 - [Integrate X.ai (Grok) with Langfuse](/integrations/model-providers/xai-grok.md): Guide on integrating xAI's Grok models with Langfuse for observability.
 - [Observability for Z.ai with Langfuse](/integrations/model-providers/z-ai.md): Guide on using Z.ai's GLM models with Langfuse via the OpenAI SDK to trace, debug, and evaluate your LLM applications.
 - [OpenTelemetry (OTEL) for LLM Observability](/integrations/native/opentelemetry.md): Connect Langfuse to OpenTelemetry (OTEL) and send OTLP traces from your application or collector to Langfuse.
+- [Ingest experiment spans with OpenTelemetry](/integrations/native/opentelemetry/experiments.md): Send experiment traces directly to Langfuse with OpenTelemetry experiment and item attributes.
+- [Migrate custom ingestion to Langfuse v4](/integrations/native/opentelemetry/migration-to-v4.md): Move custom Langfuse tracing from the legacy ingestion API or an existing OpenTelemetry pipeline to the observations-first v4 format.
 - [Observability and tracing for Dify](/integrations/no-code/dify.md): Open source observability and prompt management for Dify applications. Automatically capture detailed traces and metrics for every request.
+- [Trace ElevenLabs Agents with Langfuse](/integrations/no-code/elevenlabs.md): Forward OpenTelemetry traces from ElevenLabs Agents conversations to Langfuse to monitor transcripts, tool calls, RAG retrievals, token usage, and cost.
 - [Observability and Tracing for Flowise](/integrations/no-code/flowise.md): Monitor and trace your Flowise LLM applications with Langfuse. Automatically capture detailed traces, costs, and metrics for every request in your no-code AI workflows.
 - [Integrating Goose with Langfuse](/integrations/no-code/goose.md): Learn how to integrate Goose, an open-source AI agent, with Langfuse for enhanced monitoring and automation of engineering tasks.
-- [Observability and Tracing for Langdock Assistants](/integrations/no-code/langdock.md): Langdock is an enterprise-ready AI platform for creating private assistants in minutes—no code required. Deploy via secure chat, Slack, or API. When connected to Langfuse, every assistant execution is automatically traced and visualized.
+- [Observability and Tracing for Langdock Agents](/integrations/no-code/langdock.md): Langdock is an enterprise-ready AI platform for creating private agents in minutes—no code required. Deploy via secure chat, Slack, or API. When connected to Langfuse, every agent execution is automatically traced and visualized.
 - [Observability and Tracing for Langflow](/integrations/no-code/langflow.md): Enhance your Langflow applications with open-source observability and tracing using Langfuse. Automatically capture detailed traces and metrics for every request to optimize and debug your Langchain application flows.
 - [Observability and Tracing for LobeChat](/integrations/no-code/lobechat.md): Monitor and trace your LobeChat conversations with Langfuse. Capture detailed traces, costs, and usage patterns for your open-source LLM chat platform.
 - [n8n Integration](/integrations/no-code/n8n.md)
@@ -264,6 +352,7 @@ Pages: Self-host Langfuse (Open Source LLM Observability), Administration Overvi
 - [Open Source Observability for Vapi (Voice AI)](/integrations/no-code/vapi.md): Discover how to integrate Vapi with Langfuse for enhanced voice AI telemetry monitoring, enabling improved performance and reliability of your AI applications.
 - [Agentic Data Stack: LibreChat + ClickHouse + Langfuse](/integrations/other/agentic-data-stack.md): Deploy the open-source Agentic Data Stack with ClickHouse, LibreChat, and Langfuse. Full LLM observability for agentic analytics — self-hosted with Docker Compose.
 - [Langfuse Integration with Cognee](/integrations/other/cognee.md): Monitor Cognee pipelines and AI memory with Langfuse for comprehensive observability in your AI agents.
+- [Langfuse Integration with EverOS](/integrations/other/everos.md): Observe your AI agent's memory layer — writes, LLM extraction, recall with quality scores, and reflection — in Langfuse over OpenTelemetry.
 - [Monitor Exa AI Search with Langfuse](/integrations/other/exa.md): Learn how to trace Exa AI search operations using Langfuse to capture detailed observability data for your search queries and API calls.
 - [Monitor Firecrawl Scraper with Langfuse](/integrations/other/firecrawl.md): Learn how to trace Firecrawl operations using Langfuse to capture detailed observability data for your web scraping tasks.
 - [Open Source LLM Observability for Gradio](/integrations/other/gradio.md): Build an LLM Chat UI with 🤗 Gradio and trace it with 🪢 Langfuse.
@@ -272,10 +361,15 @@ Pages: Self-host Langfuse (Open Source LLM Observability), Administration Overvi
 - [LibreChat Observability with Langfuse Tracing](/integrations/other/librechat.md): Add LLM observability to LibreChat with Langfuse tracing to monitor conversations, debug issues, and analyze model performance
 - [Observability for mcp-use with Langfuse](/integrations/other/mcp-use.md): Monitor and trace your mcp-use agents and tool executions with Langfuse for comprehensive observability and debugging capabilities.
 - [Langfuse Integration with Milvus](/integrations/other/milvus.md): Integrate Langfuse with Milvus for efficient AI monitoring and vector storage using the LlamaIndex integration.
+- [MLflow Integration via OpenTelemetry](/integrations/other/mlflow.md): Example cookbook for the MLflow Langfuse integration using OpenTelemetry.
 - [Trace OpenClaw with Langfuse](/integrations/other/openclaw.md): Trace your OpenClaw AI agent with Langfuse using the OpenClaw x Langfuse plugin for full visibility into prompts, reasoning, tool calls, and costs.
+- [Tracing using the OpenInference SDK](/integrations/other/openinference.md): Example cookbook on using the OpenInference SDK by Arize to trace your application to Langfuse.
+- [OpenLIT Integration via OpenTelemetry](/integrations/other/openlit.md): Example cookbook for the OpenLIT Langfuse integration using OpenTelemetry.
+- [OpenLLMetry Integration via OpenTelemetry](/integrations/other/openllmetry.md): Example cookbook for the OpenLLMetry Langfuse integration using OpenTelemetry.
 - [Monitor Parallel Tasks with Langfuse](/integrations/other/parallel-ai.md): Learn how to trace Parallel task execution using Langfuse to capture detailed observability data for your AI workflow operations.
 - [Promptfoo Integration with Langfuse Prompt Management](/integrations/other/promptfoo.md): Integrate Promptfoo with Langfuse for LLM testing, red teaming, and prompt management. Use Promptfoo evaluations with Langfuse-managed prompts.
-- [Slack Integration with Langfuse](/integrations/other/slack.md): Send Langfuse prompt update and monitor alert notifications to Slack channels.
+- [Slack Integration with Langfuse](/integrations/other/slack.md): Send Langfuse prompt update and alert notifications to Slack channels.
+- [Trace Tavily workflows with Langfuse](/integrations/other/tavily.md): Learn how to trace Tavily search and extraction tools in an OpenAI agent with Langfuse.
 - [Human Evaluation for LLM Apps with Testable Minds](/integrations/other/testable-minds.md): Collect human evaluations on your Langfuse traces at scale using Testable Minds' diverse participant pool.
 - [Automate Code Optimization with Weco and Langfuse](/integrations/other/weco.md): Learn how to integrate Weco with Langfuse to automatically optimize LLM application code using Langfuse datasets and evaluators. Iteratively improve prompts, logic, and performance.
 - [Zapier Integration with Langfuse](/integrations/other/zapier.md): Automate your LLM engineering workflows by integrating Langfuse with Zapier. Use the Langfuse Public API to administer projects and fetch prompts.
@@ -294,6 +388,7 @@ Pages: Self-host Langfuse (Open Source LLM Observability), Administration Overvi
 - [Code evaluators (self-hosted)](/self-hosting/configuration/code-evaluators.md): Configure dispatchers and workers for self-hosted code evaluator execution.
 - [Custom Base Path (self-hosted)](/self-hosting/configuration/custom-base-path.md): Follow this guide to deploy Langfuse on a custom base path, e.g. https://yourdomain.com/langfuse.
 - [Encryption (self-hosted)](/self-hosting/configuration/encryption.md): Learn how to encrypt your self-hosted Langfuse deployment. This guide covers encryption in transit (HTTPS), at rest (database) and application-level encryption.
+- [Hardening self-hosted Langfuse](/self-hosting/configuration/hardening.md): Operator-facing security knobs for self-hosted Langfuse — restrict sign-ups, enforce SSO, limit outbound URLs, and tighten admin access.
 - [Health and Readiness Check Endpoints](/self-hosting/configuration/health-readiness-endpoints.md): Monitor the health and readiness of your Langfuse self-hosted deployment
 - [Observability via OpenTelemetry](/self-hosting/configuration/observability.md): You can use OpenTelemetry for observability into the Langfuse application.
 - [Scaling Langfuse Deployments](/self-hosting/configuration/scaling.md): Learn how to scale your self-hosted Langfuse deployment to handle more traffic and data.
@@ -310,7 +405,9 @@ Pages: Self-host Langfuse (Open Source LLM Observability), Administration Overvi
 - [Postgres Database (self-hosted)](/self-hosting/deployment/infrastructure/postgres.md): Langfuse requires a persistent Postgres database to store its state.
 - [Kubernetes (Helm) (self-hosted)](/self-hosting/deployment/kubernetes-helm.md): Step-by-step guide to run Langfuse on Kubernetes via Helm.
 - [Deploy Langfuse v3 on Railway](/self-hosting/deployment/railway.md): Use this guide to deploy Langfuse v3 on Railway via the prebuilt template.
+- [Deploy Langfuse v4 on Render](/self-hosting/deployment/render.md): Use this guide to deploy Langfuse v4 at production scale on Render with a prebuilt Blueprint.
 - [Enterprise License Key (self-hosted)](/self-hosting/license-key.md): Learn how to activate a license key for your self-hosted Langfuse deployment.
+- [Langfuse OSS newsletter (self-hosting updates)](/self-hosting/oss-newsletter.md): Subscribe to the Langfuse OSS newsletter to get an email when we ship new releases, breaking changes, and upgrade guides for self-hosted Langfuse.
 - [Authentication and SSO (self-hosted)](/self-hosting/security/authentication-and-sso.md): Configure SSO (SAML, OIDC) and authentication for self-hosted Langfuse. Supports Google, GitHub, Azure AD, Okta, and custom OIDC/SAML providers.
 - [Data Masking (self-hosted)](/self-hosting/security/data-masking.md): Configure data masking in your self-hosted Langfuse deployment to redact sensitive information from tracing events.
 - [Deployment Strategies (self-hosted)](/self-hosting/security/deployment-strategies.md): Learn how to manage Langfuse effectively. It covers strategies for handling multiple projects and environments.
@@ -321,7 +418,8 @@ Pages: Self-host Langfuse (Open Source LLM Observability), Administration Overvi
 - [Background Migrations (self-hosted)](/self-hosting/upgrade/background-migrations.md): Langfuse uses background migrations to perform long-running changes within the storage components when upgrading the application.
 - [Migrate Langfuse v1 to v2 (self-hosted)](/self-hosting/upgrade/upgrade-guides/upgrade-v1-to-v2.md): A guide to upgrade a Langfuse v1 setup to v2.
 - [Migrate Langfuse v2 to v3 (self-hosted)](/self-hosting/upgrade/upgrade-guides/upgrade-v2-to-v3.md): A guide to upgrade a Langfuse v2 setup to v3.
-- [Versioning](/self-hosting/upgrade/versioning.md)
+- [Migrate Langfuse v3 to v4 (self-hosted)](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4.md): A guide to upgrade a Langfuse v3 setup to v4.
+- [Versions & Compatibility](/self-hosting/upgrade/versioning.md)
 - [Self-host Langfuse v2](/self-hosting/v2.md): Langfuse is open source and can be self-hosted using Docker. This section contains guides for different deployment scenarios.
 - [Self-hosting Langfuse v2](/self-hosting/v2/deployment-guide.md): Self-host Langfuse in your infrastructure using Docker.
 - [Local Deployment (v2, docker compose)](/self-hosting/v2/docker-compose.md): Step-by-step guide to run Langfuse on your local machine using docker compose.

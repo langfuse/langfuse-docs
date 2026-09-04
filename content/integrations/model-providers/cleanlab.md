@@ -3,6 +3,7 @@ title: "Langfuse Integration with Cleanlab"
 sidebarTitle: Cleanlab
 description: "Automatically evaluate LLMs in real time with Cleanlab's trustworthy Language Model (TLM)"
 logo: /images/integrations/cleanlab_icon.png
+logoAppearance: dark
 ---
 
 # Automated Evaluations with Cleanlab
@@ -51,14 +52,14 @@ This guide requires four API keys:
 ```python
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
 
-os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
-os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
-os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
-os.environ.setdefault("OPENAI_API_KEY", "<openai_api_key>")
+os.environ.setdefault("OPENAI_API_KEY", "<openai_api_key>");
 
-os.environ.setdefault("CLEANLAB_TLM_API_KEY", "<cleanlab_tlm_api_key>")
+os.environ.setdefault("CLEANLAB_TLM_API_KEY", "<cleanlab_tlm_api_key>");
 ```
 
 ### Prepare trace dataset and load into Langfuse
@@ -137,22 +138,29 @@ For the rest of the notebook, we'll have one goal:
 
 ### Download trace dataset from Langfuse
 
-Fetching traces from Langfuse is straightforward. Just set up the Langfuse client and use the public API wrapper to fetch the data. We'll fetch the traces and evaluate them. After that, we'll add our scores back into Langfuse.
+Fetching recent root observations from Langfuse is straightforward. We'll use the Observations API v2 via the SDK, filter to logical root observations, and then evaluate that sample. After that, we'll add our scores back into Langfuse.
 
-The `langfuse.api.trace.list()` method has arguments to filter the traces by tags, timestamps, and beyond. You can find more about other methods to [query traces](https://langfuse.com/docs/api-and-data-platform/features/query-via-sdk) in our docs.
+The `langfuse.api.observations.get_many()` method supports timestamp filters, field selection, and structured filters for trace tags. You can find more querying patterns in our [query-via-sdk docs](https://langfuse.com/docs/api-and-data-platform/features/query-via-sdk).
 
 ```python
 from langfuse import get_client
 from datetime import datetime, timedelta
+import json
 
 langfuse = get_client()
 now = datetime.now()
 one_day_ago = now - timedelta(hours=24)
 
-traces = langfuse.api.trace.list(
-    tags="TLM_eval_pipeline",
-    from_timestamp=one_day_ago,
-    to_timestamp=now,
+# The advanced `filter` parameter takes precedence over the individual query
+# parameters, so the time window is expressed as filter conditions as well.
+traces = langfuse.api.observations.get_many(
+    fields="core,basic,io,metadata,trace_context",
+    filter=json.dumps([
+        {"type": "boolean", "column": "isRootObservation", "operator": "=", "value": True},
+        {"type": "arrayOptions", "column": "tags", "operator": "all of", "value": ["TLM_eval_pipeline"]},
+        {"type": "datetime", "column": "startTime", "operator": ">=", "value": one_day_ago.isoformat()},
+        {"type": "datetime", "column": "startTime", "operator": "<", "value": now.isoformat()},
+    ]),
 ).data
 ```
 
@@ -169,16 +177,28 @@ tlm = TLM(options={"log": ["explanation"]})
 ```
 
 ```python
-# This helper method will extract the prompt and response from each trace and return three lists: trace ID's, prompts, and responses.
+# This helper extracts prompts and responses from the root observations.
+def parse_json_if_needed(value):
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            return value
+    return value
+
+
 def get_prompt_response_pairs(traces):
     prompts = []
     responses = []
     for trace in traces:
-        prompts.append(trace.metadata["system_prompt"] + "\n" + trace.input["args"][0])
-        responses.append(trace.output)
+        metadata = parse_json_if_needed(trace.metadata)
+        trace_input = parse_json_if_needed(trace.input)
+        prompt = trace_input["args"][0] if isinstance(trace_input, dict) else trace_input
+        prompts.append(metadata["system_prompt"] + "\n" + prompt)
+        responses.append(parse_json_if_needed(trace.output))
     return prompts, responses
 
-trace_ids = [trace.id for trace in traces]
+trace_ids = [trace.trace_id for trace in traces]
 prompts, responses = get_prompt_response_pairs(traces)
 ```
 

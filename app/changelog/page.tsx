@@ -30,6 +30,9 @@ export async function generateMetadata({
   const canonical = changelogPageHref(currentPage, totalPages) ?? "/changelog";
 
   return {
+    title: currentPage > 1 ? `Changelog (page ${currentPage})` : "Changelog",
+    description:
+      "Latest product updates from the Langfuse team: new features, improvements, and release notes.",
     alternates: {
       canonical,
     },

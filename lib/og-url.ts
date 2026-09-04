@@ -1,13 +1,23 @@
 const BASE_URL = "https://langfuse.com";
 
+function getStaticOgImageBaseUrl(): string {
+  if (process.env.NEXT_PUBLIC_VERCEL_ENV !== "preview") return BASE_URL;
+
+  const previewUrl =
+    process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ??
+    process.env.NEXT_PUBLIC_VERCEL_URL;
+
+  return previewUrl ? `https://${previewUrl}` : BASE_URL;
+}
+
 /** Default site description; keep in sync with `app/layout.tsx` metadata.description. */
 export const SITE_DEFAULT_OG_DESCRIPTION =
-  "Traces, evals, prompt management and metrics to debug and improve your LLM application.";
+  "Trace, evaluate, and improve AI agents with one open platform. Use production data to understand behavior, collaborate on fixes, and ship better quality at lower cost and latency.";
 
 /** Root layout default Open Graph / Twitter image (dynamic wordmark card). */
 export function buildDefaultSiteOgImageUrl(): string {
   return `${BASE_URL}/api/og?${new URLSearchParams({
-    title: "Langfuse – Open Source AI Engineering Platform",
+    title: "Langfuse – Open Source Agent Evals & Observability",
     description: SITE_DEFAULT_OG_DESCRIPTION,
   }).toString()}`;
 }
@@ -29,7 +39,7 @@ export function buildOgImageUrl({
   staticOgImage?: string | null;
 }): string {
   if (staticOgImage) {
-    return BASE_URL + staticOgImage;
+    return getStaticOgImageBaseUrl() + staticOgImage;
   }
   const params = new URLSearchParams({ title });
   if (description) params.set("description", description);

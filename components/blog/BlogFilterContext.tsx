@@ -6,6 +6,8 @@ import {
   useState,
   useEffect,
   useMemo,
+  useCallback,
+  Suspense,
   type ReactNode,
 } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
@@ -35,6 +37,31 @@ export function useBlogFilter() {
 
 const HIGHLIGHT_COUNT = 3;
 
+function tagFromSearchParams(searchParams: {
+  get: (key: string) => string | null;
+}): string | null {
+  return searchParams.get("tag") || null;
+}
+
+/**
+ * Reads `?tag=` without blocking the blog index HTML.
+ * Must stay in its own Suspense boundary — `useSearchParams()` would
+ * otherwise replace the whole page with a fallback during static render.
+ */
+function BlogUrlTagSync({
+  onTagFromUrl,
+}: {
+  onTagFromUrl: (tag: string | null) => void;
+}) {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    onTagFromUrl(tagFromSearchParams(searchParams));
+  }, [searchParams, onTagFromUrl]);
+
+  return null;
+}
+
 export function BlogFilterProvider({
   pages,
   children,
@@ -42,16 +69,14 @@ export function BlogFilterProvider({
   pages: BlogPageItem[];
   children: ReactNode;
 }) {
-  const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const [selectedTag, setSelectedTagLocal] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    const tag = searchParams.get("tag") ?? null;
-    setSelectedTagLocal(tag || null);
-  }, [searchParams]);
+  const syncTagFromUrl = useCallback((tag: string | null) => {
+    setSelectedTagLocal((current) => (current === tag ? current : tag));
+  }, []);
 
   const allPosts = useMemo(() => {
     return pages
@@ -99,14 +124,18 @@ export function BlogFilterProvider({
 
   const setSelectedTag = (tag: string | null) => {
     setSelectedTagLocal(tag);
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(
+      typeof window !== "undefined" ? window.location.search : "",
+    );
     if (tag) {
       params.set("tag", tag);
     } else {
       params.delete("tag");
     }
     const query = params.toString();
-    router.replace(query ? `${pathname}?${query}` : pathname);
+    router.replace(query ? `${pathname}?${query}` : pathname, {
+      scroll: false,
+    });
   };
 
   return (
@@ -123,6 +152,9 @@ export function BlogFilterProvider({
         listPosts,
       }}
     >
+      <Suspense fallback={null}>
+        <BlogUrlTagSync onTagFromUrl={syncTagFromUrl} />
+      </Suspense>
       {children}
     </BlogFilterContext.Provider>
   );

@@ -63,7 +63,11 @@ export async function generateMetadata({
       title,
       description,
       alternates: { canonical: canonicalUrl },
-      openGraph: { images: [{ url: ogImage }], url: canonicalUrl },
+      openGraph: {
+        type: "website",
+        images: [{ url: ogImage }],
+        url: canonicalUrl,
+      },
       twitter: { images: [{ url: ogImage }] },
     };
   }

@@ -8,6 +8,8 @@ logo: /images/integrations/openai_icon.svg
 
 # Cookbook: Observability for OpenAI Assistants API with Langfuse
 
+> **Note:** OpenAI has deprecated the Assistants API and will shut it down on August 26, 2026. For new projects, use the [Responses API](https://platform.openai.com/docs/guides/migrate-to-responses) instead.
+
 This cookbook demonstrates how to use the Langfuse [`observe` decorator](https://langfuse.com/docs/observability/sdk/instrumentation#observe-wrapper) to trace calls made to the [OpenAI Assistants API](https://platform.openai.com/docs/assistants/overview). It covers creating an assistant, running it on a thread, and observing the execution with [Langfuse tracing](https://langfuse.com/docs/tracing).
 
 Note: The native [OpenAI SDK wrapper](https://langfuse.com/integrations/model-providers/openai-py) does not support tracing of the OpenAI assistants API, you need to instrument it via the decorator as shown in this notebook.
@@ -35,13 +37,13 @@ import os
 
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
-os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "")
-os.environ.setdefault("LANGFUSE_SECRET_KEY", "")
-os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your openai key
-os.environ.setdefault("OPENAI_API_KEY", "")
+os.environ.setdefault("OPENAI_API_KEY", "");
 ```
 
 ## Step by step
