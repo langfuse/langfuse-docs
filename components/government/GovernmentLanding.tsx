@@ -803,6 +803,8 @@ function GovernmentCloud() {
             <li>FIPS 140-3 hardening</li>
             <li>RBAC, SSO, SCIM, and immutable audit logs</li>
             <li>Data retention and server-side masking</li>
+            <li>Run in AWS GovCloud</li>
+            <li>FEDRAMP Moderate (in-process)</li>
           </ul>
           <div className="flex-1" />
           <Link

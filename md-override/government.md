@@ -129,6 +129,8 @@ Coming soon. A managed Langfuse Cloud for teams that want Langfuse to operate th
 - FIPS 140-3 hardening
 - RBAC, SSO, SCIM, and immutable audit logs
 - Data retention and server-side masking
+- Run in AWS GovCloud
+- FEDRAMP Moderate (in-process)
 
 [Contact sales](/talk-to-us) to learn more.
 
