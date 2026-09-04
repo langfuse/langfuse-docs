@@ -29,7 +29,7 @@ const architecture = [
 ];
 
 const openApis = [
-  { label: "50M+ SDK installs/month", href: "/careers#public-metrics" },
+  { label: "130M+ SDK installs/month", href: "/careers#public-metrics" },
   { label: "90B+ observations processed per month" },
   {
     label: `${formatCompanyCount()} companies using Langfuse`,
