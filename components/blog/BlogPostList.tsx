@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import type { BlogPageItem } from "./BlogIndex";
 import { BlogCategoryDropdown } from "./BlogCategoryDropdown";
 import { useBlogFilter } from "./BlogFilterContext";
-import { formatDate, normalizeTags } from "./utils";
+import { formatAbsoluteDate, normalizeTags } from "./utils";
 import { HoverPostRow } from "@/components/lists/HoverPostRow";
 
 const PAGE_SIZE = 15;
@@ -64,9 +64,9 @@ export function BlogPostList({ posts }: { posts: BlogPageItem[] }) {
                   <>
                     <Text
                       size="s"
-                      className="text-left md:text-right text-[12px] text-text-tertiary whitespace-nowrap"
+                      className="text-left md:text-right text-[12px] text-text-tertiary whitespace-nowrap tabular-nums md:min-w-[7.5rem]"
                     >
-                      {formatDate(post.frontMatter?.date)}
+                      {formatAbsoluteDate(post.frontMatter?.date)}
                     </Text>
                     {post.frontMatter?.author && (
                       <>
