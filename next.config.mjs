@@ -53,6 +53,9 @@ const cspHeader =
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Next 16.3 writes a second H1 into AGENTS.md on `next dev`; that fails CI's
+  // check_h1 job. This repo already maintains its own agent instructions.
+  agentRules: false,
   // Enable static export when STATIC_EXPORT env var is set
   ...(process.env.STATIC_EXPORT === "true" && {
     output: "export",
