@@ -1,20 +1,13 @@
 "use client";
 
-import {
-  Suspense,
-  useCallback,
-  useMemo,
-  type MouseEvent,
-  type ReactNode,
-} from "react";
+import { useCallback, useMemo, type MouseEvent, type ReactNode } from "react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import { CornerBox } from "@/components/ui/corner-box";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { Logo } from "@/components/Logo";
-import { cn } from "@/lib/utils";
 import {
   cloudRegionSelectorOrder,
   cloudRegions,
@@ -53,51 +46,6 @@ const regionCards: Record<
 };
 
 const CLOUD_ROUTE_PREFIX = "/cloud";
-
-/**
- * Spacing previews for /cloud. Append `?opt=a|b|c` to compare.
- * Default is B (title-led). Remove the switcher once a direction is chosen.
- */
-const SPACING_OPTIONS = {
-  a: {
-    stack: "gap-10",
-    header: "gap-6",
-    brand: "gap-3",
-    listBlock: "gap-10",
-    headingInHeader: true,
-    taglineSize: "m" as const,
-    taglineClassName: undefined as string | undefined,
-    regionRow: "px-4 py-4 sm:px-5",
-    regionText: "gap-1",
-  },
-  b: {
-    stack: "gap-10",
-    header: "gap-8",
-    brand: "gap-1",
-    listBlock: "gap-10",
-    headingInHeader: true,
-    taglineSize: "s" as const,
-    taglineClassName: "tracking-[0.01em]",
-    regionRow: "px-4 py-4 sm:px-5",
-    regionText: "gap-1",
-  },
-  c: {
-    stack: "gap-10",
-    header: "gap-0",
-    brand: "gap-2.5",
-    listBlock: "gap-3",
-    headingInHeader: false,
-    taglineSize: "s" as const,
-    taglineClassName: undefined as string | undefined,
-    regionRow: "px-4 py-5 sm:px-5",
-    regionText: "gap-1.5",
-  },
-} as const;
-
-type SpacingOptionKey = keyof typeof SPACING_OPTIONS;
-
-const isSpacingOptionKey = (value: string | null): value is SpacingOptionKey =>
-  value === "a" || value === "b" || value === "c";
 
 const stripControlChars = (value: string) =>
   value.replace(/[\u0000-\u001F\u007F]/g, "");
@@ -143,14 +91,9 @@ const SignedInBadge = () => (
 
 const getCloudHost = (url: string) => new URL(url).host;
 
-function CloudRegionSelectorPage() {
+export default function CloudRegionSelectorPage() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { signedInRegions } = useCloudRegionSignIn();
-  const spacingKey = isSpacingOptionKey(searchParams.get("opt"))
-    ? searchParams.get("opt")
-    : "b";
-  const s = SPACING_OPTIONS[spacingKey as SpacingOptionKey];
 
   const { cloudSubpath } = useMemo(
     () => getCloudRedirectPartsFromPathname(pathname || ""),
@@ -183,93 +126,76 @@ function CloudRegionSelectorPage() {
     [cloudSubpath],
   );
 
-  const heading = (
-    <Heading as="h1" size="normal" className="text-center">
-      Select a region
-    </Heading>
-  );
-
-  const regionList = (
-    <CornerBox className="w-full">
-      <div className="divide-y divide-line-structure">
-        {cloudRegionSelectorOrder.map((regionKey) => {
-          const region = cloudRegions[regionKey];
-          const card = regionCards[regionKey];
-          const host = getCloudHost(region.url);
-          const href = buildCloudRedirectUrl({
-            region: regionKey,
-            cloudSubpath,
-            search: "",
-            hash: "",
-          });
-          const isSignedIn = signedInRegions[regionKey];
-
-          return (
-            <a
-              key={regionKey}
-              href={href}
-              data-launch-app-cta=""
-              onClick={(event) => handleRegionSelect(regionKey, event)}
-              className={cn(
-                "group flex items-center gap-4 transition-colors hover:bg-surface-1",
-                s.regionRow,
-              )}
-            >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[2px] border border-line-structure bg-surface-1">
-                {card.icon}
-              </span>
-
-              <div className={cn("min-w-0 flex-1 flex flex-col", s.regionText)}>
-                <div className="flex items-center gap-2">
-                  <span className="font-analog text-[15px] font-medium leading-none text-text-primary">
-                    {card.title}
-                  </span>
-                  {isSignedIn && <SignedInBadge />}
-                </div>
-                <Text
-                  size="s"
-                  as="span"
-                  className="block text-left leading-[150%] text-text-tertiary lg:leading-[150%]"
-                >
-                  {host}
-                  <span className="mx-1.5 text-text-disabled">&middot;</span>
-                  AWS {card.awsRegion}
-                </Text>
-              </div>
-
-              <ArrowRight className="h-4 w-4 shrink-0 text-text-tertiary transition-[transform,color] group-hover:translate-x-0.5 group-hover:text-text-secondary" />
-            </a>
-          );
-        })}
-      </div>
-    </CornerBox>
-  );
-
   return (
     <main
       translate="no"
       className="flex min-h-screen flex-col items-center justify-center bg-surface-bg px-4 py-10 sm:px-6 lg:px-8 notranslate"
     >
-      <div
-        className={cn(
-          "flex w-full max-w-[480px] flex-col items-center",
-          s.stack,
-        )}
-      >
-        <div className={cn("flex flex-col items-center", s.header)}>
-          <div className={cn("flex flex-col items-center", s.brand)}>
+      <div className="flex w-full max-w-[480px] flex-col items-center gap-10">
+        <div className="flex flex-col items-center gap-8">
+          <div className="flex flex-col items-center gap-1">
             <Logo variant="byClickHouse" />
-            <Text size={s.taglineSize} className={s.taglineClassName}>
+            <Text size="s" className="tracking-[0.01em]">
               Agent Observability and Evals
             </Text>
           </div>
-          {s.headingInHeader && heading}
+          <Heading as="h1" size="normal" className="text-center">
+            Select a region
+          </Heading>
         </div>
 
-        <div className={cn("flex w-full flex-col items-center", s.listBlock)}>
-          {!s.headingInHeader && heading}
-          {regionList}
-        </div>
+        <CornerBox className="w-full">
+          <div className="divide-y divide-line-structure">
+            {cloudRegionSelectorOrder.map((regionKey) => {
+              const region = cloudRegions[regionKey];
+              const card = regionCards[regionKey];
+              const host = getCloudHost(region.url);
+              const href = buildCloudRedirectUrl({
+                region: regionKey,
+                cloudSubpath,
+                search: "",
+                hash: "",
+              });
+              const isSignedIn = signedInRegions[regionKey];
+
+              return (
+                <a
+                  key={regionKey}
+                  href={href}
+                  data-launch-app-cta=""
+                  onClick={(event) => handleRegionSelect(regionKey, event)}
+                  className="group flex items-center gap-4 px-4 py-4 transition-colors hover:bg-surface-1 sm:px-5"
+                >
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[2px] border border-line-structure bg-surface-1">
+                    {card.icon}
+                  </span>
+
+                  <div className="flex min-w-0 flex-1 flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-analog text-[15px] font-medium leading-none text-text-primary">
+                        {card.title}
+                      </span>
+                      {isSignedIn && <SignedInBadge />}
+                    </div>
+                    <Text
+                      size="s"
+                      as="span"
+                      className="block text-left leading-[150%] text-text-tertiary lg:leading-[150%]"
+                    >
+                      {host}
+                      <span className="mx-1.5 text-text-disabled">
+                        &middot;
+                      </span>
+                      AWS {card.awsRegion}
+                    </Text>
+                  </div>
+
+                  <ArrowRight className="h-4 w-4 shrink-0 text-text-tertiary transition-[transform,color] group-hover:translate-x-0.5 group-hover:text-text-secondary" />
+                </a>
+              );
+            })}
+          </div>
+        </CornerBox>
 
         <Text size="s">
           <Link
@@ -281,13 +207,5 @@ function CloudRegionSelectorPage() {
         </Text>
       </div>
     </main>
-  );
-}
-
-export default function CloudRegionSelectorPageWithSearchParams() {
-  return (
-    <Suspense>
-      <CloudRegionSelectorPage />
-    </Suspense>
   );
 }
