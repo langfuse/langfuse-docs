@@ -4,6 +4,10 @@ description: Build and improve production chat agents with full-session tracing,
 contentWidth: full
 ---
 
+import { Cloud, MessageSquare } from "lucide-react";
+import { CustomerQuoteGrid } from "@/components/chat-agents/CustomerQuoteGrid";
+import { RelevantIntegrations } from "@/components/chat-agents/RelevantIntegrations";
+
 # <span className="sr-only">Langfuse for chat agents</span>
 
 <div className="not-prose mt-6 overflow-hidden border border-line-structure bg-surface-bg">
@@ -224,44 +228,7 @@ contentWidth: full
     <h2 className="mt-2 text-center text-[44px] leading-[1] text-text-primary">
       Teams running chat in production
     </h2>
-
-    <div className="mt-8 grid gap-2 lg:grid-cols-3">
-      <blockquote className="border border-line-structure bg-surface-bg p-5 text-[14px] leading-[1.45] text-text-primary">
-        “We went from guessing which conversations failed to seeing the exact
-        turn, the retrieved context and the cost in one view.”
-        <footer className="mt-4">
-          <span className="inline-block border border-line-structure px-5 py-1 font-mono text-[8px] uppercase tracking-[0.08em] text-text-tertiary">
-            Logo
-          </span>
-          <p className="mt-2 text-[11px] text-text-tertiary">
-            Engineering Lead, AI Platform
-          </p>
-        </footer>
-      </blockquote>
-      <blockquote className="border border-line-structure bg-surface-bg p-5 text-[14px] leading-[1.45] text-text-primary">
-        “Self-hosted, OpenTelemetry-native and auditable. Langfuse cleared our
-        review and still gave the team same-day debugging.”
-        <footer className="mt-4">
-          <span className="inline-block border border-line-structure px-5 py-1 font-mono text-[8px] uppercase tracking-[0.08em] text-text-tertiary">
-            Logo
-          </span>
-          <p className="mt-2 text-[11px] text-text-tertiary">Lead ML Engineer</p>
-        </footer>
-      </blockquote>
-      <blockquote className="border border-line-structure bg-surface-bg p-5 text-[14px] leading-[1.45] text-text-primary">
-        “Evals on live traffic are how we ship prompt changes weekly without
-        waiting on a manual review round.”
-        <footer className="mt-4">
-          <span className="inline-block border border-line-structure px-5 py-1 font-mono text-[8px] uppercase tracking-[0.08em] text-text-tertiary">
-            Logo
-          </span>
-          <p className="mt-2 text-[11px] text-text-tertiary">
-            Staff Engineer, AI Products
-          </p>
-        </footer>
-      </blockquote>
-    </div>
-
+    <CustomerQuoteGrid />
   </section>
 
   <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-18">
@@ -274,33 +241,43 @@ contentWidth: full
     <p className="mx-auto mt-2 max-w-[56ch] text-center text-[13px] text-text-tertiary">
       Based on OpenTelemetry. Drop in the SDK, keep your stack.
     </p>
+    <RelevantIntegrations />
+  </section>
 
-    <div className="mt-8 border border-line-structure bg-surface-bg">
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
-        {[
-          "OpenAI",
-          "Anthropic",
-          "LangChain",
-          "LangGraph",
-          "LlamaIndex",
-          "Vercel AI SDK",
-          "OpenAI Agents",
-          "Pydantic AI",
-          "CrewAI",
-          "Python",
-          "TypeScript",
-          "OpenTelemetry",
-        ].map((item) => (
-          <span
-            key={item}
-            className="border-r border-t border-line-structure px-3 py-2 text-center text-[11px] text-text-secondary first:border-t-0 sm:[&:nth-child(-n+3)]:border-t-0 lg:[&:nth-child(-n+6)]:border-t-0 [&:nth-child(2n)]:border-r-0 sm:[&:nth-child(2n)]:border-r [&:nth-child(3n)]:sm:border-r-0 lg:[&:nth-child(3n)]:lg:border-r lg:[&:nth-child(6n)]:border-r-0"
-          >
-            {item}
-          </span>
-        ))}
-      </div>
+  <section className="border-t border-line-structure bg-surface-1 px-5 py-12 sm:px-10">
+    <p className="text-center font-mono text-[9px] uppercase tracking-[0.1em] text-text-tertiary">
+      Get help
+    </p>
+    <p className="mx-auto mt-2 max-w-[56ch] text-center text-[13px] text-text-secondary">
+      Need support rolling this out in production? We can help with setup,
+      instrumentation, and eval workflows.
+    </p>
+    <div className="mx-auto mt-6 max-w-3xl">
+      <Cards num={2}>
+        <Card title="Get started free" href="https://cloud.langfuse.com" icon={<Cloud />} />
+        <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
+      </Cards>
     </div>
+  </section>
 
+  <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-16">
+    <p className="text-center font-mono text-[9px] uppercase tracking-[0.1em] text-text-tertiary">
+      Recommended resources
+    </p>
+    <h2 className="mt-2 text-center text-[40px] leading-[1] text-text-primary">
+      Learn from real chat-agent examples
+    </h2>
+    <p className="mx-auto mt-2 max-w-[60ch] text-center text-[13px] text-text-tertiary">
+      See the demo, study the academy walkthrough, and use production
+      monitoring patterns that catch rage-click equivalents in chat sessions.
+    </p>
+    <div className="mx-auto mt-8 max-w-4xl">
+      <Cards num={3}>
+        <Card title="Explore the live demo project" href="/docs/demo" />
+        <Card title="Academy: customer support chatbot example" href="/academy/examples/customer-support-chatbot" />
+        <Card title="The rage clicks of LLM apps (blog)" href="/blog/2026-04-01-llm-as-a-judge-production-monitoring" />
+      </Cards>
+    </div>
   </section>
 
   <section className="border-t border-line-structure bg-surface-cta-primary px-5 py-14 text-center sm:px-10 sm:py-18">
