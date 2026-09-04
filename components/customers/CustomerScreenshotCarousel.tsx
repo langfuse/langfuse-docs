@@ -81,7 +81,6 @@ export function CustomerScreenshotCarousel({
                     aspectClassName ? "h-full object-cover" : "h-auto",
                   )}
                   loading="eager"
-                  unoptimized
                 />
               </div>
             </CarouselItem>
