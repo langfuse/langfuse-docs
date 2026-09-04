@@ -9,6 +9,14 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+
+const itemClassName = cn(
+  "px-3 py-1.5 capitalize data-[state=checked]:text-text-primary",
+  // RadioItem draws an absolute indicator in a pl-8 gutter; compact px-3
+  // would otherwise let that circle overlap the label.
+  "[&>span.absolute]:hidden",
+);
 
 export function BlogCategoryDropdown() {
   const { selectedTag, setSelectedTag, tags, allPosts } = useBlogFilter();
@@ -33,7 +41,7 @@ export function BlogCategoryDropdown() {
           value={selectedTag ?? ""}
           onValueChange={(v) => setSelectedTag(v || null)}
         >
-          <DropdownMenuRadioItem value="" className="px-3 py-1.5 capitalize">
+          <DropdownMenuRadioItem value="" className={itemClassName}>
             <span className="flex-1">All</span>
             <span className="tabular-nums ml-3 text-text-tertiary">
               {allPosts.length}
@@ -43,7 +51,7 @@ export function BlogCategoryDropdown() {
             <DropdownMenuRadioItem
               key={tag.name}
               value={tag.name}
-              className="px-3 py-1.5 capitalize"
+              className={itemClassName}
             >
               <span className="flex-1">{tag.name}</span>
               <span className="tabular-nums ml-3 text-text-tertiary">
