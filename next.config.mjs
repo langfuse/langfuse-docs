@@ -69,7 +69,9 @@ const nextConfig = {
     // incremental builds can reuse work. Opt-in on Next 16.2 (default in 16.3).
     // `next build` already preserves `.next/cache` when cleaning the dist dir;
     // do not delete that directory in postbuild or the cache never survives.
-    turbopackFileSystemCacheForBuild: true,
+    // Off for `pnpm build:static`: STATIC_EXPORT sets distDir to `out`, so the
+    // cache would land in `out/cache` and ship with the Cloudflare Pages artifact.
+    turbopackFileSystemCacheForBuild: process.env.STATIC_EXPORT !== "true",
   },
   // Reduce memory usage during build
   productionBrowserSourceMaps: false,
