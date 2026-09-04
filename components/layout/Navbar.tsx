@@ -49,12 +49,12 @@ export function Navbar() {
         >
           <div className="absolute bottom-[-6px] left-0 w-[6px] h-[5px] bg-left-corner" />
           <div className="absolute hidden wide:block bottom-[-6px] right-0 w-[6px] h-[5px] bg-right-corner" />
-          <div className="flex flex-1 min-w-0 gap-2 items-center px-2.5 py-3 rounded-sm bg-surface-1">
-            {/* Hide below xl so the header CTAs stay visible. */}
-            <HiringBadge className="hidden shrink-0 xl:block" />
-            <div className="flex flex-1 justify-center items-center min-w-0 gap-4">
+          <div className="grid flex-1 min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-2 items-center px-2.5 py-3 rounded-sm bg-surface-1">
+            {/* Left 1fr column: hiring sits in leftover space and must not shift the centered menu. */}
+            <HiringBadge adaptive />
+            <NavLinks sectionNavData={sectionNavData} />
+            <div className="min-w-0" aria-hidden="true">
               <InkeepSearchBar className="hidden" />
-              <NavLinks sectionNavData={sectionNavData} />
             </div>
           </div>
         </div>
