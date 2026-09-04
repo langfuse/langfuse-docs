@@ -22,7 +22,7 @@ export function CustomerQuoteCard({
 }: CustomerQuoteCardProps) {
   return (
     <article className="flex h-full flex-col border border-line-structure bg-surface-bg p-5">
-      <p className="m-0 min-h-[126px] text-[14px] leading-[1.45] text-text-primary">
+      <p className="m-0 min-h-[126px] break-words text-[14px] leading-[1.45] text-text-primary">
         “{quote}”
       </p>
       <footer className="mt-4 border-t border-line-structure pt-4">
@@ -66,7 +66,7 @@ export function CustomerQuoteCard({
           )}
         </Link>
         {(quoteAuthor || quoteRole || quoteCompany) && (
-          <p className="mt-3 text-[13px] leading-[1.45] text-text-tertiary">
+          <p className="mt-3 break-words text-[13px] leading-[1.45] text-text-tertiary">
             {quoteAuthor}
             {quoteRole ? `, ${quoteRole}` : ""}
             {quoteCompany ? ` · ${quoteCompany}` : ""}
