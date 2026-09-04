@@ -7,6 +7,6 @@ export const FORTUNE_50_COMPANIES = 21;
 /** Companies using Langfuse (Cloud + self-hosted), not paying customers. */
 export const COMPANIES = 50_000;
 
-export function formatCompanyCount(): string {
+export function formatCompanyCount() {
   return `${COMPANIES.toLocaleString("en-US")}+`;
 }
