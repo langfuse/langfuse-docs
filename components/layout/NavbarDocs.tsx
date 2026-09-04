@@ -20,7 +20,7 @@ export function NavbarDocs({
 }) {
   return (
     <header
-      className="sticky z-50 h-[var(--lf-nav-primary-height)] bg-surface-1"
+      className="sticky z-50 isolate h-[var(--lf-nav-primary-height)] bg-surface-1"
       style={{ top: "var(--fd-banner-height, 0px)" }}
     >
       <nav className="flex mx-auto h-full border-b max-w-380 border-line-structure">
