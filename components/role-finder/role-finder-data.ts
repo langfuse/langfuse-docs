@@ -105,7 +105,7 @@ export const ROLES: Record<RoleKey, Role> = {
     title: "Senior Software Engineer (SDK)",
     url: "https://jobs.ashbyhq.com/langfuse/891eda0a-a9f6-45e6-8750-71874db8cc11",
     pitch:
-      "Build SDKs downloaded 26M+ times/month. Performance, versioning, and DX in code that runs in other people's production.",
+      "Build SDKs downloaded 130M+ times/month. Performance, versioning, and DX in code that runs in other people's production.",
     youll: [
       "Profile & minimize overhead in hot paths",
       "Think about versioning & backwards compatibility",

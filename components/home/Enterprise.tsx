@@ -29,7 +29,7 @@ const architecture = [
 ];
 
 const openApis = [
-  { label: "50M+ SDK installs/month", href: "/careers#public-metrics" },
+  { label: "130M+ SDK installs/month", href: "/careers#public-metrics" },
   { label: "90B+ observations processed per month" },
   {
     label: `${formatCompanyCount()} companies using Langfuse`,
@@ -39,11 +39,14 @@ const openApis = [
 ];
 
 const security = [
-  { label: "SOC 2 Type II", href: "/security/soc2" },
-  { label: "ISO 27001", href: "/security/iso27001" },
-  { label: "GDPR", href: "/security/gdpr" },
+  { label: "SOC 2 Type II & ISO 27001", href: "/security" },
   { label: "EU & US Data Regions", href: "/security/data-regions" },
   { label: "HIPAA-ready region", href: "/security/hipaa" },
+  {
+    label: "Hardening for Gov (soon)",
+    href: "/self-hosting/configuration/hardening#hardening-for-government",
+  },
+  { label: "GDPR", href: "/security/gdpr" },
 ];
 
 export const Enterprise = () => {
