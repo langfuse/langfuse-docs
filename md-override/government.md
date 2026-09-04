@@ -1,13 +1,13 @@
 ---
 title: Langfuse for Government
-description: Open-source observability and evaluations for AI agents. Self-host in air-gapped, on-premises, and cloud environments. Langfuse Cloud for Government coming soon.
+description: Open-source observability and evaluations for AI agents. Self-host in air-gapped, on-premises, and government cloud environments. Langfuse Cloud for Government coming soon.
 ---
 
 # Build accountable AI. Keep it under your control.
 
 Langfuse for Government. Observability and evaluations for public-sector AI, in your environment.
 
-Open-source tracing and evaluations for government AI. Run it **air-gapped, on-premises, or in a private cloud**. Prompts, traces, and scores stay in your environment. You run the software.
+Open-source tracing and evaluations for government AI. Run it **air-gapped, on-premises, or in a government cloud**. Prompts, traces, and scores stay in your environment. You run the software.
 
 - Your environment
 - Open source

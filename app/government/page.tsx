@@ -4,7 +4,7 @@ import { buildOgImageUrl } from "@/lib/og-url";
 
 const title = "Langfuse for Government";
 const description =
-  "Open-source observability and evaluations for AI agents. Self-host in air-gapped, on-premises, and cloud environments. Langfuse Cloud for Government coming soon.";
+  "Open-source observability and evaluations for AI agents. Self-host in air-gapped, on-premises, and government cloud environments. Langfuse Cloud for Government coming soon.";
 
 const ogImageUrl = buildOgImageUrl({ title, description });
 

@@ -113,7 +113,7 @@ function Hero() {
           <p className="gov-body" style={{ fontSize: 17, maxWidth: "42ch" }}>
             Open-source tracing and evaluations for government AI. Run it{" "}
             <b className="font-medium text-text-primary">
-              air-gapped, on-premises, or in a private cloud
+              air-gapped, on-premises, or in a government cloud
             </b>
             . Prompts, traces, and scores stay in your environment. You run the
             software.
@@ -218,8 +218,8 @@ function HeroArt() {
       icon: "server",
     },
     {
-      title: "Government",
-      caption: "Public sector",
+      title: "Government cloud",
+      caption: "Coming soon",
       rot: -3.5,
       x: 62,
       y: 150,
@@ -299,7 +299,7 @@ function HeroArt() {
             <div className="gov-polaroid-well">
               <EnvIcon kind={c.icon} />
             </div>
-            <div className="mt-2 text-center font-mono text-[11px] font-medium uppercase tracking-[.07em] text-text-primary">
+            <div className="mt-2 text-center font-mono text-[11px] font-medium uppercase leading-tight tracking-[.07em] text-text-primary">
               {c.title}
             </div>
             <div className="text-center font-mono text-[10px] text-text-tertiary">
@@ -325,7 +325,7 @@ function HeroArt() {
             <div className="gov-polaroid-well">
               <EnvIcon kind={c.icon} />
             </div>
-            <div className="mt-1.5 text-center font-mono text-[9px] font-medium uppercase tracking-[.06em] text-text-primary">
+            <div className="mt-1.5 text-center font-mono text-[9px] font-medium uppercase leading-tight tracking-[.06em] text-text-primary">
               {c.title}
             </div>
           </div>
