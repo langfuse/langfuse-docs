@@ -72,17 +72,17 @@ export function HiringBadge({ className }: { className?: string }) {
       : null;
 
   return (
-    <div
-      ref={containerRef}
-      className={className}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => {
-        setIsHovered(false);
-        setGoats([]);
-      }}
-    >
-      <div className="relative flex items-center p-1 group button-wrapper max-h-[34px]">
+    <div className={className}>
+      <div
+        ref={containerRef}
+        className="relative flex items-center p-1 group button-wrapper max-h-[34px]"
+        onMouseMove={handleMouseMove}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => {
+          setIsHovered(false);
+          setGoats([]);
+        }}
+      >
         <HoverCorners />
         <NextLink
           href="/careers"
