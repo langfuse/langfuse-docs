@@ -2,12 +2,20 @@ import { HomeSection } from "./HomeSection";
 import NumberTicker from "@/components/ui/number-ticker";
 import { getGitHubStars } from "@/lib/github-stars";
 import { cn } from "@/lib/utils";
+import {
+  DOCKER_PULLS,
+  FORTUNE_50_COMPANIES,
+  SDK_INSTALLS_PER_MONTH,
+} from "@/lib/usage-stats";
 
-// Export usage stats constants
-export const SDK_INSTALLS_PER_MONTH = 50_000_000;
-export const DOCKER_PULLS = 6_000_000;
-export const FORTUNE_500_COMPANIES = 63;
-export const FORTUNE_50_COMPANIES = 19;
+export {
+  COMPANIES,
+  DOCKER_PULLS,
+  FORTUNE_50_COMPANIES,
+  FORTUNE_500_COMPANIES,
+  SDK_INSTALLS_PER_MONTH,
+  formatCompanyCount,
+} from "@/lib/usage-stats";
 
 export const Usage = ({ noPadding = false }: { noPadding?: boolean }) => {
   const stats = [

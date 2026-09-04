@@ -2,7 +2,7 @@
 title: Self-host Langfuse (Open Source LLM Observability)
 sidebarTitle: Overview
 description: Self-host Langfuse - This guide shows you how to deploy open-source LLM observability with Docker, Kubernetes, or VMs on your own infrastructure.
-label: "Version: v3"
+label: "Version: v4"
 ---
 
 # Self-host Langfuse
@@ -31,15 +31,18 @@ This is recommended for testing and low-scale deployments and lacks high-availab
 
 ### Production-scale deployments
 
-For production and high-availability deployments, we recommend one of the following options:
+For production-scale deployments, we recommend one of the following options:
 
 - [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm)
 - [AWS (Terraform)](/self-hosting/deployment/aws)
 - [Azure (Terraform)](/self-hosting/deployment/azure)
 - [GCP (Terraform)](/self-hosting/deployment/gcp)
-- [Railway](/self-hosting/deployment/railway)
+- [Render](/self-hosting/deployment/render) (community)
+- [Railway (v3)](/self-hosting/deployment/railway) (community)
 
-## Architecture
+Unless marked as community-supported, these deployment options are maintained and tested by the Langfuse team. Community-supported options are maintained in third-party repositories and supported on a best-effort basis. Report problems via [GitHub issues](/issues).
+
+## Architecture [#architecture]
 
 Langfuse only depends on open source components and can be deployed locally, on cloud infrastructure, or on-premises.
 
@@ -94,5 +97,3 @@ You can also watch the GitHub releases to get notified about new releases:
   ![Langfuse
   releases](https://static.langfuse.com/docs-legacy-gifs/github-watch-changelog.gif)
 </Frame>
-
-> **To move data between a self-hosted instance and Langfuse Cloud** (or between two instances), see the [data migration cookbook](/guides/cookbook/example_data_migration) for Python scripts to transfer traces, prompts, and datasets.

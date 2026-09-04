@@ -6,7 +6,7 @@ category: SDKs
 
 # JS/TS v4 → v5
 
-The JS/TS SDK v5 introduces the **[observation-centric data model](/docs/observability/data-model)**. In this model, correlating attributes (`userId`, `sessionId`, `metadata`, `tags`) propagate to every observation rather than living only on the trace. This enables single-table queries without expensive joins, significantly improving query performance at scale.
+The JS/TS SDK v5 introduces the **[observations-first data model](/docs/observability/data-model)**. In this model, correlating attributes (`userId`, `sessionId`, `metadata`, `tags`) propagate to every observation rather than living only on the trace. This enables single-table queries without expensive joins, significantly improving query performance at scale.
 
 This changes how you set trace attributes: instead of imperatively updating the trace with `updateActiveTrace()`, you use `propagateAttributes()` — a function that wraps a callback, automatically applying attributes to all child observations created within its scope.
 
@@ -204,8 +204,8 @@ aliases were removed.
 | `langfuse.api.score` (legacy v1)        | `langfuse.api.legacy.scoreV1`        |
 | `langfuse.api.metrics` (legacy v1)      | `langfuse.api.legacy.metricsV1`      |
 
-If you still need legacy v1 behavior, switch to the corresponding
-`langfuse.api.legacy.*V1` namespace.
+If your JS/TS SDK v5 client must temporarily query a self-hosted Langfuse v3
+server, use the corresponding `langfuse.api.legacy.*V1` namespace.
 
 <Callout type="warning">
   The new default `langfuse.api.observations` and `langfuse.api.metrics`
@@ -214,6 +214,16 @@ If you still need legacy v1 behavior, switch to the corresponding
   self-hosted Langfuse v3, use `langfuse.api.legacy.observationsV1` and
   `langfuse.api.legacy.metricsV1` instead. See the [self-hosted
   compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
+</Callout>
+
+<Callout type="info">
+  **Public API endpoint deprecations are separate from the v5 breaking
+  changes.** Some API methods remain callable in JS/TS v5 but call server
+  endpoints that are deprecated for Langfuse v4. After upgrading, use the
+  [JS/TS SDK method mappings in the deprecated API migration
+  guide](/faq/all/deprecated-api-migration#sdk-method-quick-reference) to audit
+  methods such as `langfuse.api.trace.list()`,
+  `langfuse.api.sessions.list()`, and `langfuse.api.scores.getMany()`.
 </Callout>
 
 ### [`@langfuse/langchain`](/integrations/frameworks/langchain) internal changes

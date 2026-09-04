@@ -5,52 +5,77 @@ description: Try Langfuse in action with a live example project for free. Intera
 
 # Example Project
 
-import { Button } from "@/components/ui/button";
-import { ToAppButton } from "@/components/ToAppButton";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 
-The Langfuse example project is a **live, shared project** that lets you explore Langfuse's features with real data before setting up your own account. Think of it as a hands-on walkthrough where you can see how teams use Langfuse for LLM observability, prompt management, and evaluation.
+The Langfuse example project is a **live, shared project** that lets you explore Langfuse's features with real data before setting up your own account.
 
-The example project provides **view-only access**.
+<div className="not-prose my-7 grid grid-cols-1 items-stretch gap-3 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)]">
+  <a
+    href="#generate-your-first-demo-trace"
+    className="group flex min-h-[128px] flex-col justify-between rounded-[2px] border border-line-structure bg-surface-bg p-4 transition-colors hover:border-line-cta hover:bg-surface-1"
+  >
+    <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary">
+      Step 01
+    </div>
+    <div className="mt-4">
+      <div className="text-base font-semibold leading-tight text-text-primary transition-colors group-hover:text-text-primary">
+        Generate your first demo trace
+      </div>
+      <div className="mt-3 text-xs leading-5 text-text-tertiary">
+        Run a demo interaction below to generate real data.
+      </div>
+    </div>
+  </a>
 
-<Callout type="info" emoji="🎥">
+  <div className="hidden items-center text-text-disabled lg:flex">
+    <ArrowRight className="size-5" />
+  </div>
 
-Prefer videos? [**Watch end-to-end walkthroughs**](/watch-demo) of all Langfuse features.
+  <a
+    href="https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces/c6dd4487746b4e155f9395da828a2752?observation=300576dc5b33a15e&timestamp=2026-07-27T09:30:37.092Z&traceId=c6dd4487746b4e155f9395da828a2752"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="group flex min-h-[128px] flex-col justify-between rounded-[2px] border border-line-structure bg-surface-bg p-4 transition-colors hover:border-line-cta hover:bg-surface-1"
+  >
+    <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary">
+      Step 02
+    </div>
+    <div className="mt-4">
+      <div className="text-base font-semibold leading-tight text-text-primary transition-colors group-hover:text-text-primary">
+        Explore your trace in Langfuse
+      </div>
+      <div className="mt-3 text-xs leading-5 text-text-tertiary">
+        Each interaction creates a trace you can inspect.
+      </div>
+    </div>
+  </a>
 
-</Callout>
+  <div className="hidden items-center text-text-disabled lg:flex">
+    <ArrowRight className="size-5" />
+  </div>
 
-## Getting Started with the Example Project
-
-### Step 1: Access the Example Project
-
-Create a free account (no credit card required) to access the example project.
-
-<div className="mt-3 not-prose flex">
-  <ToAppButton
-    signedInText="View Example project"
-    signUpText="Create Example account"
-    dropdownText="View Example project"
-  />
+  <a
+    href="https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="group flex min-h-[128px] flex-col justify-center rounded-[2px] border border-line-structure bg-surface-bg p-4 transition-colors hover:border-line-cta hover:bg-surface-1"
+  >
+    <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary">
+      Step 03
+    </div>
+    <div className="mt-4 flex items-center justify-between gap-3">
+      <div className="text-base font-semibold leading-tight text-text-primary transition-colors group-hover:text-text-primary">
+        Explore the whole demo project
+      </div>
+      <ArrowUpRight className="size-4 shrink-0 text-text-tertiary transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-text-secondary" />
+    </div>
+    <div className="mt-3 text-xs leading-5 text-text-tertiary">
+      Open the live shared project in Langfuse.
+    </div>
+  </a>
 </div>
 
-### Step 2: Understand What You're Seeing
-
-When you first open the example project, you'll land on the **Traces** page. Here's what you're looking at:
-
-- Each row represents one interaction with the example chatbot
-- You'll see traces from all users (not just yours). This is intentional so you can explore diverse examples
-- The traces show: timing, costs, input/output, and any scores assigned by evaluations
-
-**Try this:**
-
-1. Click on any trace to see detailed execution steps
-2. Notice the graph view showing how the chatbot's components work together
-3. Look for traces with scores to see how evaluation works
-
-**Explore all features:** Browse the left navigation to explore [Tracing](/docs/observability/overview), [Sessions](/docs/observability/features/sessions), [Prompts](/docs/prompt-management/overview), [Scores](/docs/evaluation/overview), and [Datasets](/docs/evaluation/experiments/datasets). Each area shows how Langfuse works in a complete LLM application.
-
-## Interactive Demos
-
-The demos below generate all the traces you see in the example project. Each interaction creates a new trace that you can inspect in Langfuse.
+## Generate your first demo trace [#generate-your-first-demo-trace]
 
 import { DemoTabs } from "@/components/demoTabs";
 
@@ -58,10 +83,12 @@ import { DemoTabs } from "@/components/demoTabs";
 
 _Interested in implementation details? All demo apps are fully open source. Check out the [blog post about how the Q&A chatbot was built](/blog/qa-chatbot-for-langfuse-docs)._
 
+_Interested in copying the eval setup of our sample project? Check out our [writeup on how we use Langfuse for the docs chatbot](/blog/2026-07-16-steal-our-eval-setup)._
+
 ## Next Steps
 
 Ready to set up your own project?
 
 1. **[Get Started with Tracing](/docs/observability/get-started)**: Add observability to your LLM application
 2. **[Set Up Prompt Management](/docs/prompt-management/get-started)**: Move prompts out of your code
-3. **[Create Your First Evaluation](/docs/evaluation/overview)**: Start measuring quality systematically
+3. **[Evaluate Production Traffic](/docs/evaluation/get-started/online)**: Start scoring live production traces

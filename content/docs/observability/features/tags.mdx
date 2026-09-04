@@ -10,15 +10,34 @@ import { PropagationRestrictionsCallout } from "@/components/PropagationRestrict
 
 Tags allow you to categorize and filter observations and traces in Langfuse.
 
-Tags are strings (max 200 characters each) and an observation may have multiple tags. The full set of tags applied across all observations in a trace are automatically aggregated and added to the trace object in Langfuse. If a tag exceeds 200 characters, it will be dropped.
+Tags are strings (max 200 characters each) and an observation may have multiple tags. If a tag exceeds 200 characters, it will be dropped.
+
+<Callout type="info">
+  The full set of tags applied across all observations in a trace are
+  automatically aggregated and added to the trace object in Langfuse.
+</Callout>
+
+## In the Langfuse UI [#in-the-ui]
+
+Once observations have tags assigned, you can:
+
+- Filter the traces and observations tables by one or more tags, including from the [filter search bar](/docs/observability/features/filter-search-bar) (`tags:(billing AND urgent)`).
+- Segment [custom dashboards](/docs/metrics/features/custom-dashboards) and [metrics](/docs/metrics/features/metrics-api) by tag, for example cost or latency of `checkout` versus `support-bot`.
+- Organize traces by feature, endpoint, or workflow without mixing those categories into environment, user, or session.
+
+<Frame>
+  ![Traces table with a Trace Tags column](/images/docs/tags-traces-table.png)
+</Frame>
+
+## Tags cannot be changed later [#immutable]
 
 Because Langfuse uses an immutable data model for observations, tags can't be added or edited in the UI after they're created.
 
-## Propagating Tags to Observations
+## Implementation [#implementation]
 
 Use `propagate_attributes()` to apply tags to a group of observations within a context.
 
-<LangTabs items={["Python SDK", "JS/TS SDK", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
+<LangTabs items={["Python SDK", "JS/TS SDK", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)"]}>
 <Tab>
 When using the `@observe()` decorator:
 
@@ -256,6 +275,16 @@ await chain.invoke({ input: "<user_input>" }, { callbacks: [langfuseHandler], ta
 </LangTabs>
 
 <PropagationRestrictionsCallout attributes={["tags"]} />
+
+## Related resources [#related-resources]
+
+- [Filter search bar](/docs/observability/features/filter-search-bar) — filter observations and traces by tags with typed queries such as `tags:(billing AND urgent)`
+- [Metadata](/docs/observability/features/metadata) — attach key-value pairs when a string label is not enough
+- [Environments](/docs/observability/features/environments) — separate production, staging, and development data
+- [Custom dashboards](/docs/metrics/features/custom-dashboards) — break down metrics by tag
+- [Metrics API](/docs/metrics/features/metrics-api) — query aggregated usage and cost filtered by tags
+- [Scores vs tags](/docs/evaluation/scores/overview#scores-vs-tags) — choose scores when you need to classify or evaluate after tracing
+- [What does a good trace look like?](/docs/observability/best-practices) — when to use tags for business-level dimensions
 
 ## GitHub Discussions
 

@@ -14,6 +14,18 @@ For detailed reference please refer to
 - the [JS/TS SDK reference](https://js.reference.langfuse.com)
 - the [API reference](https://api.reference.langfuse.com)
 
+## How experiments are created [#how-experiments-are-created]
+
+You create experiment runs in Langfuse through one of these paths:
+
+| Path                                                                                        | Use when                                                                                         |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)                     | Python or JS/TS Experiment runner                                                                |
+| [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui)                       | Prompt or model experiments from the dataset page                                                |
+| [Experiments via OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry) | Direct OTEL ingestion: other languages, custom OTLP pipelines, or re-ingesting experiment traces |
+
+To **read** experiment runs, items, and scores after they exist, use the [Experiments API](/docs/api-and-data-platform/features/experiments-api). There is no public REST endpoint for creating new experiment runs; the legacy `POST /api/public/dataset-run-items` path is deprecated.
+
 ## Objects
 
 ### Datasets [#datasets]
@@ -131,6 +143,8 @@ direction LR
 | `traceId`       | string | Yes      | ID of the trace to link to this run        |
 | `observationId` | string | No       | ID of the observation to link to this run  |
 
+Langfuse currently assumes that experiments do not contain repetitions: each dataset item appears once per experiment. Accordingly, reads surface at most one experiment item per dataset item within an experiment. Repetition support is tracked in [#5855](https://github.com/langfuse/langfuse/issues/5855).
+
 <Callout type="info">
 Most of the time, we recommend that DatasetRunItems reference TraceIDs directly. The reference to ObservationID exists for backwards compatibility with older SDK versions.
 </Callout>
@@ -247,7 +261,7 @@ See SDK references for function signatures and parameters:
 - [JS/TS SDK: `RunEvaluator`](https://js.reference.langfuse.com/types/_langfuse_client.RunEvaluator.html)
 
 <Callout type="info">
-For detailed usage examples of tasks and evaluators, see [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk).
+For detailed usage examples of tasks and evaluators, see [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk). For ingesting experiment traces without the SDK, see [Experiments via OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry).
 </Callout>
 
 ## Local Datasets [#local-datasets]

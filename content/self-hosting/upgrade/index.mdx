@@ -1,7 +1,7 @@
 ---
 title: How to upgrade a self-hosted Langfuse deployment
 description: Use this guide to keep your Langfuse deployment up to date. Updates between minor/patch versions can be applied automatically. For major versions, please refer to the migration guides.
-label: "Version: v3"
+label: "Version: v4"
 sidebarTitle: "How to Upgrade"
 ---
 
@@ -23,7 +23,7 @@ It is recommended to be familiar with our [versioning](/self-hosting/upgrade/ver
 
 Updates within a major version are designed to be non-disruptive and are automatically applied. On start of the application, all migrations are automatically applied to the databases.
 
-You can automatically use the latest version of a major release by using `langfuse/langfuse:3` and `langfuse/langfuse-worker:3` as the image tags in your deployment.
+You can automatically use the latest version of a major release by using `langfuse/langfuse:4` and `langfuse/langfuse-worker:4` as the image tags in your deployment.
 
 To update deployments, follow the update section in our deployment guides:
 
@@ -39,6 +39,12 @@ If you upgrade between major versions, please follow our migration guides:
 - [v3.x.x to v4.x.x](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4)
 - [v2.x.x to v3.x.x](/self-hosting/upgrade/upgrade-guides/upgrade-v2-to-v3)
 - [v1.x.x to v2.x.x](/self-hosting/upgrade/upgrade-guides/upgrade-v1-to-v2)
+
+<Callout type="info">
+
+The [Langfuse Helm chart](/self-hosting/deployment/kubernetes-helm) is versioned independently of the Langfuse server and has its own major versions. If you run the chart with bundled data stores, [upgrade the chart from v1 to v2](/self-hosting/deployment/kubernetes-helm#chart-v1-to-v2) before you upgrade Langfuse to v4: the v1 chart cannot bring its bundled ClickHouse to a v4-compatible version.
+
+</Callout>
 
 ## Release Notes
 

@@ -50,7 +50,18 @@ The v2 Observations API is a redesigned endpoint optimized for high-performance 
 
 The [migration guide](/faq/all/deprecated-api-migration) maps every deprecated read endpoint (`/api/public/traces`, `/api/public/observations`, `/api/public/sessions`, ...) to its v2 replacement, with parameter mappings and before/after examples. Always include `fromStartTime` and `toStartTime` to keep each request bounded.
 
-The v2 Observations API returns observation rows, not full trace objects. Group rows by `traceId` when you need to reconstruct trace activity, and use [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregate reporting with trace-level dimensions such as `traceName`, `traceRelease`, or `traceVersion`. For single-observation lookups, pass a URL-encoded `filter` condition on the `id` column; see the [v2 Observations API Reference](https://api.reference.langfuse.com/#tag/observations/GET/api/public/v2/observations) for the filter schema.
+The v2 Observations API returns observation rows, not full trace objects. Group rows by `traceId` when you need to reconstruct trace activity, and use [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregate reporting with trace-level dimensions such as `traceName`, `traceRelease`, or `traceVersion`. There is no get-by-id route on v2; for single-observation lookups, pass a URL-encoded `filter` condition on the `id` column instead. See the [v2 Observations API Reference](https://api.reference.langfuse.com/#tag/observations/GET/api/public/v2/observations) for the filter schema.
+
+### Logical root observations [#logical-root-observations]
+
+The v2 API distinguishes physical parentage from logical root status:
+
+- `parentObservationId` identifies the physical parent observation. An empty value matches observations without a physical parent.
+- `isRootObservation` is `true` when an observation has no physical parent or the SDK explicitly marked it as an application root.
+
+An application-root observation can therefore have `isRootObservation: true` and a non-null `parentObservationId`. Use `isRootObservation` when you want application roots, and `parentObservationId` when you need to query the physical observation tree.
+
+The logical-root filter assumes one exported application root per trace. If a trace has no exported root in this project — for example, its root lives in another service — `isRootObservation = true` will not match it; group by `traceId` when you need complete trace counts. Multiple matching roots indicate an integration issue.
 
 ### Key Improvements
 
@@ -67,11 +78,11 @@ The v1 API returns complete rows with all fields (input/output, usage, metadata,
 | Group           | Fields                                                                                                                 |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `core`          | Always included: id, traceId, startTime, endTime, projectId, parentObservationId, type                                 |
-| `basic`         | name, level, statusMessage, version, environment, bookmarked, public, userId, sessionId                                |
+| `basic`         | name, level, statusMessage, version, environment, bookmarked, public, userId, sessionId, isRootObservation             |
 | `time`          | completionStartTime, createdAt, updatedAt                                                                              |
 | `io`            | input, output                                                                                                          |
 | `metadata`      | metadata                                                                                                               |
-| `model`         | providedModelName, internalModelId, modelParameters                                                                    |
+| `model`         | model, internalModelId, modelParameters                                                                                |
 | `usage`         | usageDetails, inputUsage, outputUsage, totalUsage, costDetails, inputCost, outputCost, totalCost, usagePricingTierName |
 | `prompt`        | promptId, promptName, promptVersion                                                                                    |
 | `metrics`       | latency, timeToFirstToken                                                                                              |
@@ -157,23 +168,47 @@ curl \
 
 ### Parameters
 
-| Parameter             | Type     | Description                                                               |
-| --------------------- | -------- | ------------------------------------------------------------------------- |
-| `fields`              | string   | Comma-separated list of field groups to include. Defaults to `core,basic` |
-| `limit`               | integer  | Number of items per page. Defaults to 50, max 1,000                       |
-| `cursor`              | string   | Base64-encoded cursor for pagination (from previous response)             |
-| `fromStartTime`       | datetime | Retrieve observations with startTime on or after this datetime            |
-| `toStartTime`         | datetime | Retrieve observations with startTime before this datetime                 |
-| `traceId`             | string   | Filter by trace ID                                                        |
-| `name`                | string   | Filter by observation name                                                |
-| `type`                | string   | Filter by observation type (GENERATION, SPAN, EVENT)                      |
-| `userId`              | string   | Filter by user ID                                                         |
-| `level`               | string   | Filter by log level (DEBUG, DEFAULT, WARNING, ERROR)                      |
-| `parentObservationId` | string   | Filter by parent observation ID                                           |
-| `environment`         | string   | Filter by environment                                                     |
-| `version`             | string   | Filter by version tag                                                     |
-| `parseIoAsJson`       | boolean  | Deprecated: omit or set to `false`; `true` returns a `400` error          |
-| `filter`              | string   | JSON array of filter conditions (takes precedence over query params)      |
+| Parameter             | Type     | Description                                                                                                     |
+| --------------------- | -------- | --------------------------------------------------------------------------------------------------------------- |
+| `fields`              | string   | Comma-separated list of field groups to include. Defaults to `core,basic`                                       |
+| `limit`               | integer  | Number of items per page. Defaults to 50, max 1,000                                                             |
+| `cursor`              | string   | Base64-encoded cursor for pagination (from previous response)                                                   |
+| `fromStartTime`       | datetime | Retrieve observations with startTime on or after this datetime                                                  |
+| `toStartTime`         | datetime | Retrieve observations with startTime before this datetime                                                       |
+| `traceId`             | string   | Filter by trace ID                                                                                              |
+| `name`                | string   | Filter by observation name                                                                                      |
+| `type`                | string   | Filter by observation type (GENERATION, SPAN, EVENT)                                                            |
+| `userId`              | string   | Filter by user ID                                                                                               |
+| `level`               | string   | Filter by log level (DEBUG, DEFAULT, WARNING, ERROR)                                                            |
+| `parentObservationId` | string   | Filter by physical parent observation ID. An empty value matches observations without a physical parent.        |
+| `isRootObservation`   | boolean  | Filter by logical root status. Matches observations without a physical parent and SDK-marked application roots. |
+| `environment`         | string   | Filter by environment                                                                                           |
+| `version`             | string   | Filter by version tag                                                                                           |
+| `parseIoAsJson`       | boolean  | Deprecated: omit or set to `false`; `true` returns a `400` error                                                |
+| `filter`              | string   | JSON array of filter conditions (takes precedence over query params)                                            |
+
+#### Filter logical roots
+
+Use the first-class query parameter when you want all logical roots:
+
+```bash
+curl \
+  -H "Authorization: Basic <BASIC AUTH HEADER>" \
+  "https://cloud.langfuse.com/api/public/v2/observations?isRootObservation=true&fromStartTime=2025-12-15T00:00:00Z&toStartTime=2025-12-16T00:00:00Z"
+```
+
+The advanced `filter` parameter supports the same field with boolean `=` and `<>` operators. For example, the decoded JSON value for `filter` can be:
+
+```json
+[
+  {
+    "type": "boolean",
+    "column": "isRootObservation",
+    "operator": "=",
+    "value": true
+  }
+]
+```
 
 ### Sample Response
 
@@ -188,6 +223,7 @@ With all fields included
       "startTime": "2025-12-17T16:09:00.875Z",
       "projectId": "7a88fb47-b4e2-43b8-a06c-a5ce950dc53a",
       "parentObservationId": null,
+      "isRootObservation": true,
       "type": "GENERATION",
       "endTime": "2025-12-17T16:09:01.456Z",
       "name": "llm-generation",
@@ -203,7 +239,7 @@ With all fields included
       "input": "{\"messages\":[{\"role\":\"user\",\"content\":\"Perfect.\"}]}",
       "output": "{\"role\":\"assistant\",\"content\":\"You're all set. Have a great day!\"}",
       "metadata": {},
-      "providedModelName": "gpt-4o",
+      "model": "gpt-4o",
       "internalModelId": "clm1a2b3c4d5e6f7g8h9i0j1",
       "modelParameters": {
         "temperature": 0.2

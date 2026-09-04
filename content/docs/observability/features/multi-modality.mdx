@@ -111,6 +111,13 @@ If you require support for additional file types, please let us know in our [Git
 
 If you use base64 encoded images, audio, or other files in your LLM applications, upgrade to the latest version of the Langfuse SDKs. The Langfuse SDKs automatically detect and handle base64 encoded media by extracting it, uploading it separately as a Langfuse Media file, and including a reference in the trace.
 
+<Callout type="warning" title="Handle media in the client or SDK">
+  If large base64-encoded media reaches Langfuse without client-side processing,
+  Langfuse processes it server-side to keep it intact and available for
+  inspection in the UI. This is a fallback. We strongly recommend handling
+  media in the client or Langfuse SDK.
+</Callout>
+
 This works with standard Data URI ([MDN](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data#syntax)) formatted media (like those used by OpenAI and other LLMs).
 
 This [notebook](/guides/cookbook/example_multi_modal_traces) includes a couple of examples using the OpenAI SDK and LangChain.
@@ -159,6 +166,12 @@ Supported formats:
 
 </Tab>
 </Tabs>
+
+### Use media in LLM-as-a-Judge [#llm-as-a-judge]
+
+[LLM-as-a-Judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge#multi-modal-evaluation) can score media stored in observations. Map a prompt variable to an observation input, output, or metadata field that contains Langfuse media. Langfuse resolves the media reference and sends the attachment to the selected LLM-as-a-Judge model together with the prompt text.
+
+The LLM-as-a-Judge model and provider must support the media type. Self-hosted deployments can [configure how evaluator media is sent to model providers](/self-hosting/configuration#llm-as-a-judge-media).
 
 ### Custom attachments
 
