@@ -22,9 +22,9 @@ export function CustomerQuoteCard({
 }: CustomerQuoteCardProps) {
   return (
     <article className="flex h-full flex-col border border-line-structure bg-surface-bg p-5">
-      <blockquote className="m-0 min-h-[126px] text-[14px] leading-[1.45] text-text-primary">
+      <p className="m-0 min-h-[126px] text-[14px] leading-[1.45] text-text-primary">
         “{quote}”
-      </blockquote>
+      </p>
       <footer className="mt-4 border-t border-line-structure pt-4">
         <Link href={route} className="inline-flex items-center no-underline">
           {customerLogo ? (
