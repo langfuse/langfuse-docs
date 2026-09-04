@@ -9,6 +9,7 @@ import { DocsAndPageFooter } from "@/components/DocsAndPageFooter";
 import { DocsBreadcrumb } from "@/components/DocsBreadcrumb";
 import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbListJsonLd, softwareApplicationJsonLd } from "@/lib/json-ld";
+import { getGithubEditUrl } from "@/lib/github-edit-url";
 import { getMDXComponents } from "@/mdx-components";
 
 type BodyChromeProps = Omit<ComponentProps<typeof DocBodyChrome>, "children">;
@@ -67,7 +68,11 @@ export async function DocsChromePage({
       breadcrumb={{ component: <DocsBreadcrumb /> }}
       tableOfContent={{
         footer: (
-          <DocsTocFooter pageTitle={data.title} lastModified={lastModified} />
+          <DocsTocFooter
+            pageTitle={data.title}
+            lastModified={lastModified}
+            editUrl={pageUrl ? getGithubEditUrl(pageUrl) : null}
+          />
         ),
       }}
       footer={{ component: <DocsAndPageFooter /> }}
