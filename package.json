@@ -10,7 +10,7 @@
     "format": "prettier --experimental-cli --write .",
     "format:check": "prettier --experimental-cli --check .",
     "postinstall": "bash scripts/postinstall.sh",
-    "prebuild": "node scripts/sync-wordmark-png-for-og.mjs && node scripts/generate_brand_assets_zip.js && node scripts/generate-default-og-png.mjs && node scripts/authors/generate-contributors.js && pnpm workshop:sync && node scripts/copy_md_sources.js && node scripts/generate-sitemap-excludes.js && node scripts/sync-design-tokens.js",
+    "prebuild": "node scripts/sync-wordmark-png-for-og.mjs && node scripts/generate_brand_assets_zip.js && node scripts/generate-default-og-png.mjs && node scripts/authors/validate-contributors.js && pnpm workshop:sync && node scripts/copy_md_sources.js && node scripts/generate-sitemap-excludes.js && node scripts/sync-design-tokens.js",
     "build": "next build",
     "postbuild": "pnpm run postbuild:sitemap && pnpm run postbuild:cleanup && pnpm run postbuild:llms-txt",
     "build:static": "cross-env STATIC_EXPORT=true pnpm run prebuild && cross-env STATIC_EXPORT=true next build && pnpm run postbuild:static",
