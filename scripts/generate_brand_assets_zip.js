@@ -19,10 +19,10 @@ if (fs.existsSync(zipPath)) {
 
 const result = spawnSync(
   "zip",
-  ["-r", "brand-assets.zip", "brand-assets", "-x", "*/.DS_Store"],
+  ["-q", "-r", "brand-assets.zip", "brand-assets", "-x", "*/.DS_Store"],
   {
     cwd: publicDir,
-    stdio: "inherit",
+    encoding: "utf8",
   },
 );
 
@@ -35,10 +35,14 @@ if (result.error) {
 }
 
 if (result.status !== 0) {
+  const detail = (result.stderr || result.stdout || "").trim();
   console.error(
-    `[generate_brand_assets_zip] zip command failed with status ${result.status}.`,
+    `[generate_brand_assets_zip] zip command failed with status ${result.status}.${detail ? ` ${detail}` : ""}`,
   );
   process.exit(result.status || 1);
 }
 
-console.log("[generate_brand_assets_zip] Created public/brand-assets.zip");
+const sizeMb = (fs.statSync(zipPath).size / (1024 * 1024)).toFixed(1);
+console.log(
+  `[generate_brand_assets_zip] Created public/brand-assets.zip (${sizeMb} MB)`,
+);
