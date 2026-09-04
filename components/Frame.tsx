@@ -98,6 +98,14 @@ export const Frame = ({
     const frame = frameRef.current;
     if (!frame || !zoom) return;
 
+    const isLinkedImage = (img: HTMLImageElement) =>
+      Boolean(img.closest("a[href]"));
+
+    const isPointerZoomEnabled = () => zoomOnMobile || window.innerWidth > 500;
+
+    const canZoomImage = (img: HTMLImageElement) =>
+      !isLinkedImage(img) && isPointerZoomEnabled();
+
     const openImage = (target: HTMLImageElement) => {
       const src = target.src;
       const alt = target.alt || "Image";
@@ -106,45 +114,68 @@ export const Frame = ({
       }
     };
 
+    const clearZoomChrome = (img: HTMLImageElement) => {
+      img.style.cursor = "";
+      img.style.transition = "";
+      if (img.dataset.frameZoomInteractive === "true") {
+        img.removeAttribute("tabindex");
+        img.removeAttribute("role");
+        delete img.dataset.frameZoomInteractive;
+      }
+      if (img.dataset.frameZoomAria === "true") {
+        img.removeAttribute("aria-label");
+        delete img.dataset.frameZoomAria;
+      }
+    };
+
+    const applyZoomChrome = (img: HTMLImageElement) => {
+      if (!canZoomImage(img)) {
+        clearZoomChrome(img);
+        return;
+      }
+
+      img.style.cursor = "zoom-in";
+      img.style.transition = "opacity 0.2s ease";
+      img.tabIndex = 0;
+      img.setAttribute("role", "button");
+      img.dataset.frameZoomInteractive = "true";
+      if (!img.getAttribute("aria-label")) {
+        img.setAttribute(
+          "aria-label",
+          `Open ${img.alt || "image"} in full size`,
+        );
+        img.dataset.frameZoomAria = "true";
+      }
+    };
+
     const handleImageClick = (e: Event) => {
       const target = e.target as HTMLImageElement;
-      if (target.tagName === "IMG") {
-        if (!zoomOnMobile && window.innerWidth <= 500) {
-          return;
-        }
-
-        e.preventDefault();
-        e.stopPropagation();
-        openImage(target);
+      if (target.tagName !== "IMG" || !canZoomImage(target)) {
+        return;
       }
+
+      e.preventDefault();
+      e.stopPropagation();
+      openImage(target);
     };
 
     const handleImageKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLImageElement;
-      if (target.tagName === "IMG" && (e.key === "Enter" || e.key === " ")) {
-        e.preventDefault();
-        e.stopPropagation();
-        openImage(target);
+      if (
+        target.tagName !== "IMG" ||
+        (e.key !== "Enter" && e.key !== " ") ||
+        !canZoomImage(target)
+      ) {
+        return;
       }
+
+      e.preventDefault();
+      e.stopPropagation();
+      openImage(target);
     };
 
     const updateImageAccessibility = () => {
-      const pointerZoomEnabled = zoomOnMobile || window.innerWidth > 500;
-      const images = frame.querySelectorAll("img");
-      images.forEach((img) => {
-        img.style.cursor = pointerZoomEnabled ? "zoom-in" : "default";
-        img.style.transition = pointerZoomEnabled
-          ? "opacity 0.2s ease"
-          : "none";
-        img.tabIndex = 0;
-        img.setAttribute("role", "button");
-        if (!img.getAttribute("aria-label")) {
-          img.setAttribute(
-            "aria-label",
-            `Open ${img.alt || "image"} in full size`,
-          );
-        }
-      });
+      frame.querySelectorAll("img").forEach((img) => applyZoomChrome(img));
     };
 
     frame.addEventListener("click", handleImageClick);
@@ -157,6 +188,7 @@ export const Frame = ({
       frame.removeEventListener("click", handleImageClick);
       frame.removeEventListener("keydown", handleImageKeyDown);
       window.removeEventListener("resize", updateImageAccessibility);
+      frame.querySelectorAll("img").forEach((img) => clearZoomChrome(img));
     };
   }, [zoom, zoomOnMobile]);
 
