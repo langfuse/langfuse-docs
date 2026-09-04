@@ -1,6 +1,6 @@
 /** Marketing usage stats. Update these when public metrics change. */
 
-export const SDK_INSTALLS_PER_MONTH = 130_000_000;
+export const SDK_INSTALLS_PER_MONTH = 65_000_000;
 export const DOCKER_PULLS = 38_000_000;
 export const OBSERVATIONS_PER_MONTH = 90_000_000_000;
 export const FORTUNE_500_COMPANIES = 129;
@@ -10,6 +10,10 @@ export const COMPANIES = 50_000;
 
 export function formatCompanyCount(): string {
   return `${COMPANIES.toLocaleString("en-US")}+`;
+}
+
+export function formatSdkInstallsPerMonth(): string {
+  return `${(SDK_INSTALLS_PER_MONTH / 1_000_000).toFixed(0)}M+`;
 }
 
 export function formatDockerPulls(): string {

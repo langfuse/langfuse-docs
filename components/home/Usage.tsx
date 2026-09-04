@@ -15,6 +15,7 @@ export {
   FORTUNE_500_COMPANIES,
   SDK_INSTALLS_PER_MONTH,
   formatCompanyCount,
+  formatSdkInstallsPerMonth,
 } from "@/lib/usage-stats";
 
 export const Usage = ({ noPadding = false }: { noPadding?: boolean }) => {
