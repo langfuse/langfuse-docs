@@ -93,7 +93,7 @@ His approach: use each paper's arXiv ID as the [session identifier](/docs/observ
   image="/images/customers/hugging-face/niels-rogge.jpeg"
 />
 
-Before [tracing](/docs/observability/overview), Niels could only see the agent's final actions, leaving him to debug dynamically assembled prompts without visibility into the steps in between. Once instrumented, every LLM call recorded its prompt and context, output, and how it fed the next step.
+Before [tracing](/docs/observability), Niels could only see the agent's final actions, leaving him to debug dynamically assembled prompts without visibility into the steps in between. Once instrumented, every LLM call recorded its prompt and context, output, and how it fed the next step.
 
 <CustomerQuote
   quote="A lot of my prompts are dynamic. I have a prompt but then some variable that needs to dynamically be filled in. And with Langfuse, you can actually see what's getting filled in in that template."
@@ -141,7 +141,7 @@ He hasn't needed to repeat it often since. Out of hundreds to thousands of issue
 
 The field moves fast, and Niels wants to explore newer implementation patterns. That means a freer agent running in a minimal loop built around the CLIs and Skills (the Hugging Face CLI Skill in particular), rather than the more scripted, multi-step version he has today. As part of that, he wants to use [Langfuse's MCP server](/docs/api-and-data-platform/features/mcp-server) to point a coding agent like Cursor at his traces and ask it to surface issues directly. The manual error analysis and annotation work he's already put in gives him a foundation for this transition too: he can use it to [evaluate the new implementation's performance against the old one](/docs/evaluation/experiments/experiments-via-sdk) before fully switching over.
 
-Longer term, he wants to invest more in [evaluation](/docs/evaluation/overview). He's running the same agent plus tracing approach on a new website called Papers with Code that categorizes AI research by domain and tracks state-of-the-art (SOTA) by domain, which also needs agents to read papers and extract results correctly.
+Longer term, he wants to invest more in [evaluation](/docs/evaluation). He's running the same agent plus tracing approach on a new website called Papers with Code that categorizes AI research by domain and tracks state-of-the-art (SOTA) by domain, which also needs agents to read papers and extract results correctly.
 
 The biggest lesson from Niels' journey? Observability is an essential building block for debugging the logic and behaviour of your system. By treating agent traces as a data source for improvement, he moved from a brittle prototype to a high-reliability production system.
 

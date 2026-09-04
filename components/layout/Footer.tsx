@@ -35,10 +35,10 @@ const menuItems: {
   {
     heading: "Product",
     items: [
-      { name: "Observability", href: "/docs/observability/overview" },
-      { name: "Prompt Management", href: "/docs/prompt-management/overview" },
-      { name: "Evaluations", href: "/docs/evaluation/overview" },
-      { name: "Metrics", href: "/docs/metrics/overview" },
+      { name: "Observability", href: "/docs/observability" },
+      { name: "Prompt Management", href: "/docs/prompt-management" },
+      { name: "Evaluations", href: "/docs/evaluation" },
+      { name: "Metrics", href: "/docs/metrics" },
       { name: "Langfuse for Agents", href: "/agents" },
       {
         name: "Playground",

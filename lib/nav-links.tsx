@@ -25,16 +25,16 @@ export const productLinks: NavPanelLink[] = [
   { name: "Overview", href: "/docs", icon: LayoutGrid },
   {
     name: "LLM Observability",
-    href: "/docs/observability/overview",
+    href: "/docs/observability",
     icon: Activity,
   },
   {
     name: "Prompt Management",
-    href: "/docs/prompt-management/overview",
+    href: "/docs/prompt-management",
     icon: MessageSquare,
   },
-  { name: "Evaluation", href: "/docs/evaluation/overview", icon: FlaskConical },
-  { name: "Metrics", href: "/docs/metrics/overview", icon: BarChart2 },
+  { name: "Evaluation", href: "/docs/evaluation", icon: FlaskConical },
+  { name: "Metrics", href: "/docs/metrics", icon: BarChart2 },
 ];
 
 export const resourcesLinks: NavPanelLink[] = [

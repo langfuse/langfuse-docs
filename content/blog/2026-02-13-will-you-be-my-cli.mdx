@@ -116,8 +116,8 @@ Alternatively, you can start on `https://langfuse.com/docs` and explore the site
 Any page listed in llms.txt can be fetched as markdown by appending `.md` to its path or by using Accept: text/markdown in the request headers. Use this when you know which page contains the information needed. Returns clean markdown with code examples and configuration details.
 
 ```bash
-curl -s "https://langfuse.com/docs/observability/overview.md"
-curl -s "https://langfuse.com/docs/observability/overview" -H "Accept: text/markdown"
+curl -s "https://langfuse.com/docs/observability.md"
+curl -s "https://langfuse.com/docs/observability" -H "Accept: text/markdown"
 ```
 
 ### 2c. Search Documentation
@@ -273,10 +273,10 @@ We support two methods for fetching any Langfuse documentation or website page a
 
 ```shell
 # Option 1: URL extension
-curl https://langfuse.com/docs/observability/overview.md
+curl https://langfuse.com/docs/observability.md
 
 # Option 2: Content negotiation
-curl -H "Accept: text/markdown" https://langfuse.com/docs/observability/overview
+curl -H "Accept: text/markdown" https://langfuse.com/docs/observability
 ```
 
 <Frame fullWidth>
@@ -377,9 +377,9 @@ Connect to the Langfuse Docs MCP server to access documentation...
 
 ## Docs
 
-- [Observability Overview](/docs/observability/overview)
-- [Prompt Management](/docs/prompt-management/overview)
-- [Evaluation](/docs/evaluation/overview)
+- [Observability Overview](/docs/observability)
+- [Prompt Management](/docs/prompt-management)
+- [Evaluation](/docs/evaluation)
   ...
 ```
 

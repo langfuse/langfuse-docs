@@ -1,0 +1,60 @@
+---
+title: Overview
+sidebarTitle: Overview
+seoTitle: LLM prompt management
+description: Open-source LLM prompt management. Version, deploy, and retrieve prompts in Langfuse. SDKs cache prompts client-side so fetching them adds no latency.
+---
+
+import { promptManagementFaqs } from "@/lib/product-faqs";
+
+# LLM prompt management
+
+LLM prompt management is how you store, version, and retrieve prompts outside application code. In Langfuse, a prompt is the text or chat messages plus optional [config](/docs/prompt-management/features/config) such as model name and temperature. Your app fetches the version it needs; product and domain experts can update wording in the UI without a deploy.
+
+This page is for teams that iterate on prompts faster than they ship code. If you want to create and fetch your first prompt, start with the [prompt management quickstart](/docs/prompt-management/get-started).
+
+<Frame fullWidth>
+  <Image
+    src="/images/docs/prompt-management.png"
+    alt="Prompt management in Langfuse showing version control, playground, and deployment labels"
+    priority
+    quality={85}
+  />
+</Frame>
+
+<Callout type="info" emoji="🚀">
+
+Want to see it in action? [**Create a free account**](/cloud) and explore Langfuse Prompt Management in the [interactive example project](/docs/demo).
+
+</Callout>
+
+## What you can do with managed prompts
+
+Teams use Langfuse prompt management to:
+
+- Let non-engineers change prompt text without waiting on a release
+- [Label versions](/docs/prompt-management/features/prompt-version-control) such as `production` and `staging`, and roll back instantly
+- [Link a prompt version to traces](/docs/prompt-management/features/link-to-traces) and compare cost, latency, and quality
+- Try edits on real inputs in the [playground](/docs/prompt-management/features/playground) before promoting a version
+
+## Decouple prompt updates from code deployment
+
+In most LLM applications, **prompt iteration and code deployment** are owned by **different people**. Product managers and domain experts iterate on prompts; engineers manage releases.
+
+When prompts live in code, a wording change needs a review and a deploy. When they live in Langfuse, the application fetches the labeled version automatically. Prompt updates can go live without an engineering cycle.
+
+## No latency, no availability risk
+
+**Langfuse Prompt Management adds no latency to your application.** Prompts are [cached client-side](/docs/prompt-management/features/caching) by the SDK, so a cache hit is a memory read. [Pre-fetch prompts on startup](/docs/prompt-management/features/guaranteed-availability) and keep a fallback so the app keeps working if Langfuse is unreachable.
+
+## Getting started
+
+[Add your first prompt](/docs/prompt-management/get-started) in the UI or import it from your codebase, then wire the SDK fetch into your application.
+
+Read [prompt types, versioning, labels, and configuration](/docs/prompt-management/data-model) before you design a folder structure or labeling scheme.
+
+Looking for something specific? Browse _Features_ in the sidebar for playground, variables, composability, webhooks, and GitHub sync.
+
+## FAQ [#faq]
+
+<ProductFaq items={promptManagementFaqs} />

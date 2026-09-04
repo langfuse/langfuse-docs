@@ -169,7 +169,7 @@ The differences are depth and availability. The Langfuse skill follows the open 
 | MCP server              | [Native](/docs/api-and-data-platform/features/mcp-server); Cloud and any self-hosted instance, including free OSS           | Remote MCP on Cloud, BYOC, and self-hosted v0.16+ (Enterprise) |
 | Agent skill             | [Open Agent Skills standard](/docs/api-and-data-platform/features/agent-skill) with packaged workflows                      | No equivalent published                                        |
 | In-product AI assistant | [Langfuse Assistant](/docs/langfuse-assistant) (Cloud)                                                                      | Insights / Engine for failure clustering                       |
-| Prompt management       | [Yes](/docs/prompt-management/overview) (framework-agnostic)                                                                | Yes                                                            |
+| Prompt management       | [Yes](/docs/prompt-management) (framework-agnostic)                                                                         | Yes                                                            |
 
 ---
 
@@ -222,7 +222,7 @@ A pattern repeats across production adopters: start where governance requires, o
 Teams that switch rarely migrate everything. They move live instrumentation and the durable assets, not their trace history. Most see their first traces in Langfuse the **same day**.
 
 - **Instrumentation:** point your OpenTelemetry exporter at the [OTLP endpoint](/integrations/native/opentelemetry), or swap the LangSmith environment variables for the [Langfuse integration](/integrations/frameworks/langchain) in LangChain and LangGraph apps. Both platforms can trace the same app side by side during the transition.
-- **Datasets, prompts, and evaluators:** import datasets via [CSV, SDK, or API](/docs/evaluation/experiments/datasets) and recreate prompts and judges in [prompt management](/docs/prompt-management/get-started) and [evaluators](/docs/evaluation/overview). A coding agent with the [agent skill](/docs/api-and-data-platform/features/agent-skill) can do this for you.
+- **Datasets, prompts, and evaluators:** import datasets via [CSV, SDK, or API](/docs/evaluation/experiments/datasets) and recreate prompts and judges in [prompt management](/docs/prompt-management/get-started) and [evaluators](/docs/evaluation). A coding agent with the [agent skill](/docs/api-and-data-platform/features/agent-skill) can do this for you.
 - **Trace history:** stays readable in LangSmith for its retention window while live data builds up in Langfuse from day one.
 
 [Talk to us](/talk-to-us) if you want help planning a migration.
@@ -248,7 +248,7 @@ Yes, if you want an independent open-source platform to trace, evaluate, and imp
 
 ### Does Langfuse cover the same product areas as LangSmith? [#does-langfuse-cover-the-same-product-areas]
 
-For the AI engineering workflow, yes. [Tracing](/docs/observability/overview), [prompt management](/docs/prompt-management/overview), [evaluation](/docs/evaluation/overview), and [experiments](/docs/evaluation/experiments/datasets) are natively integrated in one Langfuse project, from prototype to production scale. What Langfuse deliberately does not do is host or run your agents; it works with [any runtime you choose](#integrations) instead.
+For the AI engineering workflow, yes. [Tracing](/docs/observability), [prompt management](/docs/prompt-management), [evaluation](/docs/evaluation), and [experiments](/docs/evaluation/experiments/datasets) are natively integrated in one Langfuse project, from prototype to production scale. What Langfuse deliberately does not do is host or run your agents; it works with [any runtime you choose](#integrations) instead.
 
 ### How does LangSmith pricing compare to Langfuse? [#how-does-langsmith-pricing-compare-to-langfuse]
 

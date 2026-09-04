@@ -18,8 +18,9 @@ type Crumb = { name: ReactNode; url?: string };
  * - otherwise we fall back to the first linkable descendant page.
  *
  * The fallback is what makes section/folder crumbs clickable even when the
- * folder has no dedicated index page (e.g. "Observability", whose landing
- * page is `overview` rather than `index`).
+ * folder has no dedicated index page. Product sections use `index.mdx`, so
+ * those folder crumbs resolve to `/docs/observability` (and the same pattern
+ * for prompt management, evaluation, and metrics).
  */
 function resolveFirstUrl(node: AnyNode): string | undefined {
   if ("type" in node && node.type === "page") {

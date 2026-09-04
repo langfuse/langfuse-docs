@@ -107,7 +107,7 @@ Langfuse records a [trace](/docs/observability/data-model) per request, with typ
 
 ## Evaluation and experiments [#evaluation-and-experiments]
 
-[Langfuse evaluations](/docs/evaluation/overview) include [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge), [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) on live observations and experiments, custom scores via SDK/API, [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), and dataset experiments on Cloud and self-hosted. [CI/CD gates](/docs/evaluation/experiments/experiments-ci-cd) fail a pipeline on experiment results.
+[Langfuse evaluations](/docs/evaluation) include [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge), [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) on live observations and experiments, custom scores via SDK/API, [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), and dataset experiments on Cloud and self-hosted. [CI/CD gates](/docs/evaluation/experiments/experiments-ci-cd) fail a pipeline on experiment results.
 
 Datadog provides [LLM-as-a-judge evaluators](https://docs.datadoghq.com/llm_observability/investigate/evaluations/) from a template or your own prompt, annotation queues, end-user feedback, and external evaluations via API. [Experiments](https://docs.datadoghq.com/llm_observability/improve/experiments/setup/) are started from the Python SDK with function- or class-based evaluators; datasets and run comparison live in the UI. Eval LLM calls bill as LLM spans.
 
@@ -178,7 +178,7 @@ To keep Langfuse spans out of Datadog, pass an [isolated TracerProvider](/docs/o
 Move live instrumentation and durable assets. Trace history usually stays in Datadog. Most teams see first traces in Langfuse the **same day**.
 
 - **Instrumentation:** initialize the [Langfuse SDK](/docs/observability/sdk/overview) or send OpenTelemetry to the [OTLP endpoint](/integrations/native/opentelemetry).
-- **Datasets, prompts, and evaluators:** import datasets via [CSV, SDK, or API](/docs/evaluation/experiments/datasets). Recreate prompts and judges in [prompt management](/docs/prompt-management/get-started) and [evaluators](/docs/evaluation/overview).
+- **Datasets, prompts, and evaluators:** import datasets via [CSV, SDK, or API](/docs/evaluation/experiments/datasets). Recreate prompts and judges in [prompt management](/docs/prompt-management/get-started) and [evaluators](/docs/evaluation).
 - **Trace history:** stays in Datadog for its retention window.
 
 [Talk to us](/talk-to-us) if you want help planning a migration.

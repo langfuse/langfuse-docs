@@ -20,6 +20,14 @@ try {
 
 const BASE_URL = process.env.CF_PAGES_URL ?? "https://langfuse.com";
 
+const PRODUCT_OVERVIEW_PATHS = new Set([
+  "/docs",
+  "/docs/observability",
+  "/docs/prompt-management",
+  "/docs/evaluation",
+  "/docs/metrics",
+]);
+
 // Tolerate the legacy string[] shape in case a stale cache is present.
 const pageEntries = allPages.map((p) =>
   typeof p === "string" ? { loc: p } : p,
@@ -63,6 +71,7 @@ module.exports = {
       entries.push({
         loc: page.loc,
         changefreq: "daily",
+        ...(PRODUCT_OVERVIEW_PATHS.has(page.loc) ? { priority: 0.9 } : {}),
         ...(page.lastmod ? { lastmod: page.lastmod } : {}),
       });
     }

@@ -96,7 +96,7 @@ There was no "we tried building internal tools first" phase. Langfuse was chosen
 
 ### Tracing is everything
 
-Every AI interaction in Ravenna links directly to a Langfuse [trace](/docs/observability/overview). The team built deep links into both the web app and Slack messages: one click from any agent response takes you straight to the full trace inside Langfuse.
+Every AI interaction in Ravenna links directly to a Langfuse [trace](/docs/observability). The team built deep links into both the web app and Slack messages: one click from any agent response takes you straight to the full trace inside Langfuse.
 
 A typical trace spans multiple systems: a TypeScript API service makes requests to a Python AI stack, which interacts with Slack or the webapp. Langfuse ties together the full trajectory of an agentic request: reasoning steps, tool calls, prompt and response pairs, and [metadata](/docs/observability/features/metadata) about the user and context.
 
@@ -114,7 +114,7 @@ Langfuse is used by all of Ravenna's AI engineers as well as the forward-deploye
 
 The team runs the kind of tight loop [Langfuse Academy](/academy) walks through: ship or update an agent, trace all its actions in Langfuse, and then [monitor](/academy/monitoring) how their agents behave in production. One of the key indicators for them is resolution of requests and customer feedback. If a human has to intervene unplanned, this is a clear signal that this execution is worth a closer look.
 
-By [evaluating](/docs/evaluation/overview) for behavior like this, both the engineering team as well as CS know when to look where. The CS team can triage and diagnose issues independently. They do not need to pull engineers in for every customer report. They spot the problem in the trace, document it, and hand it off with full context.
+By [evaluating](/docs/evaluation) for behavior like this, both the engineering team as well as CS know when to look where. The CS team can triage and diagnose issues independently. They do not need to pull engineers in for every customer report. They spot the problem in the trace, document it, and hand it off with full context.
 
 The engineering team can then systematically work on these problems, to continuously improve agent performance for Ravenna's customers.
 

@@ -60,7 +60,7 @@ const communityStats: Array<{
   {
     label: "Observations / month",
     value: "90B+",
-    href: "/docs/observability/overview",
+    href: "/docs/observability",
     tooltip: "Explore observability",
   },
   {

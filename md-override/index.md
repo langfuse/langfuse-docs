@@ -21,9 +21,9 @@ The [Langfuse Academy](/academy) walks through how observability, prompts, evals
 
 One integrated platform to trace, manage prompts, evaluate, and experiment from prototype to production scale. Every component works standalone, and they excel when used together.
 
-- **[Observability](/docs/observability/overview)** — hierarchical traces capture every LLM call, tool invocation, and retrieval step. Filter by user, session, cost, latency, or custom metadata.
-- **[Evaluation](/docs/evaluation/overview)** — LLM-as-a-judge, heuristic functions, or human review. Run evaluators on production data or during experiments.
-- **[Prompt management](/docs/prompt-management/overview)** — separate prompts from code with one-click deployments and rollbacks.
+- **[Observability](/docs/observability)** — hierarchical traces capture every LLM call, tool invocation, and retrieval step. Filter by user, session, cost, latency, or custom metadata.
+- **[Evaluation](/docs/evaluation)** — LLM-as-a-judge, heuristic functions, or human review. Run evaluators on production data or during experiments.
+- **[Prompt management](/docs/prompt-management)** — separate prompts from code with one-click deployments and rollbacks.
 - **[Playground](/docs/prompt-management/features/playground)** — test prompts on real production inputs and compare models side by side.
 - **[Experiments](/docs/evaluation/experiments/overview)** — define test cases, run experiments, and compare results side by side.
 - **[Human annotation](/docs/evaluation/evaluation-methods/annotation-queues)** — collaborative human-in-the-loop workflows to review traces and create golden datasets.
@@ -93,7 +93,7 @@ The free tier includes 50k observations per month, with no credit card required.
 - [Sign up for Langfuse Cloud](/cloud) or [self-host](/self-hosting)
 - [Tracing quickstart](/docs/observability/get-started)
 - [Prompt management guide](/docs/prompt-management/get-started)
-- [Evaluation overview](/docs/evaluation/overview)
+- [Evaluation overview](/docs/evaluation)
 - [Public demo project](/docs/demo)
 
 To set Langfuse up with a coding agent, install the [Langfuse Agent Skill](https://github.com/langfuse/skills) and ask it to add tracing, set up evals, or migrate your prompts.
@@ -104,15 +104,15 @@ Need help? [Talk to sales](/talk-to-us) or [reach out to support](/support).
 
 ### What is Langfuse?
 
-Langfuse is an [open-source](https://github.com/langfuse/langfuse) AI engineering platform that helps teams build, monitor, and improve their LLM applications. It covers the full development lifecycle with [tracing](/docs/observability/overview), [prompt management](/docs/prompt-management/overview), [evaluations](/docs/evaluation/overview), and [analytics dashboards](/docs/metrics/overview) — all in one place. Langfuse is used by 50,000+ companies and processes billions of observations per month. You can try it instantly with the [public demo project](/docs/demo) or [sign up for free](/cloud).
+Langfuse is an [open-source](https://github.com/langfuse/langfuse) AI engineering platform that helps teams build, monitor, and improve their LLM applications. It covers the full development lifecycle with [tracing](/docs/observability), [prompt management](/docs/prompt-management), [evaluations](/docs/evaluation), and [analytics dashboards](/docs/metrics) — all in one place. Langfuse is used by 50,000+ companies and processes billions of observations per month. You can try it instantly with the [public demo project](/docs/demo) or [sign up for free](/cloud).
 
 ### What does Langfuse help me with?
 
-Langfuse helps you [debug LLM applications](/docs/observability/overview) with detailed traces that capture every step of your AI pipeline, including [agent graphs](/docs/observability/features/agent-graphs). You can [manage and version your prompts](/docs/prompt-management/overview) collaboratively, run [automated evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) (including LLM-as-a-judge and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators)), track [costs and latency](/docs/observability/features/token-and-cost-tracking) across models and providers, and run [experiments on datasets](/docs/evaluation/experiments/overview) to measure improvements before shipping. It also supports [custom dashboards](/docs/metrics/features/custom-dashboards) for team-wide visibility.
+Langfuse helps you [debug LLM applications](/docs/observability) with detailed traces that capture every step of your AI pipeline, including [agent graphs](/docs/observability/features/agent-graphs). You can [manage and version your prompts](/docs/prompt-management) collaboratively, run [automated evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) (including LLM-as-a-judge and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators)), track [costs and latency](/docs/observability/features/token-and-cost-tracking) across models and providers, and run [experiments on datasets](/docs/evaluation/experiments/overview) to measure improvements before shipping. It also supports [custom dashboards](/docs/metrics/features/custom-dashboards) for team-wide visibility.
 
 ### Can I use just tracing without the other features?
 
-Yes, you can use Langfuse purely for [tracing](/docs/observability/overview). The [SDKs](/docs/observability/sdk/overview) are modular — you instrument your app with a few lines of code and can integrate only what you need. Tracing works independently of [prompt management](/docs/prompt-management/overview), [evaluations](/docs/evaluation/overview), or any other feature. Many teams start with tracing alone and adopt additional capabilities as their needs grow.
+Yes, you can use Langfuse purely for [tracing](/docs/observability). The [SDKs](/docs/observability/sdk/overview) are modular — you instrument your app with a few lines of code and can integrate only what you need. Tracing works independently of [prompt management](/docs/prompt-management), [evaluations](/docs/evaluation), or any other feature. Many teams start with tracing alone and adopt additional capabilities as their needs grow.
 
 ### What deployment options do exist?
 
@@ -136,7 +136,7 @@ Yes. Langfuse Cloud is [SOC 2 Type II](/security/soc2) certified, [ISO 27001](/s
 
 ### How do I get started?
 
-It depends on where you are in your workflow. To **add tracing**, follow the [tracing quickstart](/docs/observability/get-started). To **set up prompt management**, see the [prompt management guide](/docs/prompt-management/get-started). To **build an evaluation strategy**, the [evaluation overview](/docs/evaluation/overview) walks you through the different approaches. [Sign up for Langfuse Cloud](/cloud) (free, no credit card required) or explore the [public demo project](/docs/demo) to see everything in action.
+It depends on where you are in your workflow. To **add tracing**, follow the [tracing quickstart](/docs/observability/get-started). To **set up prompt management**, see the [prompt management guide](/docs/prompt-management/get-started). To **build an evaluation strategy**, the [evaluation overview](/docs/evaluation) walks you through the different approaches. [Sign up for Langfuse Cloud](/cloud) (free, no credit card required) or explore the [public demo project](/docs/demo) to see everything in action.
 
 ### How does pricing work?
 

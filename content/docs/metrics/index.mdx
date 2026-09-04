@@ -1,0 +1,99 @@
+---
+title: Overview
+sidebarTitle: Overview
+seoTitle: LLM metrics and analytics
+description: Open-source LLM metrics and analytics. Track cost, latency, volume, and quality from Langfuse traces, then slice them in custom dashboards or the Metrics API.
+---
+
+import { LayoutDashboard, Activity } from "lucide-react";
+import { metricsFaqs } from "@/lib/product-faqs";
+
+# LLM metrics and analytics
+
+Langfuse metrics are aggregations over [observability](/docs/observability) traces and [evaluation](/docs/evaluation) scores. You use them to see whether cost, latency, volume, or quality is getting better or worse — and for which users, models, prompts, or releases.
+
+This page is for teams that already have traces (and optionally scores) and need to monitor the system, not a single request. To decide which metrics are worth tracking, read [Monitoring in the Langfuse Academy](/academy/monitoring) and [error analysis](/academy/monitoring/error-analysis).
+
+<Frame fullWidth>
+  <Image
+    src="/images/docs/llm-analytics.png"
+    alt="Langfuse analytics dashboard showing LLM cost, latency, and usage over time"
+    priority
+    quality={85}
+  />
+</Frame>
+
+## What you can do with metrics
+
+Teams use Langfuse metrics to:
+
+- Watch model spend and latency by user, feature, or [release](/docs/observability/features/releases-and-versioning)
+- Compare quality scores after a prompt or model change
+- [Alert](/docs/observability/features/alerts) when cost, latency, or a quality score crosses a threshold
+- Pull the same aggregations into a warehouse or BI tool via the [Metrics API](/docs/metrics/features/metrics-api)
+
+## Metrics and dimensions
+
+Metrics:
+
+- **Quality** — user feedback, model-based scoring, human-in-the-loop samples, or custom scores via SDKs and API (see [scores](/docs/evaluation)). Quality is assessed over time and across prompt versions, LLMs, and users.
+- **Cost and latency** — measured from traces and broken down by user, session, geography, feature, model, and prompt version.
+- **Volume** — ingested traces and tokens used.
+
+Dimensions:
+
+- Trace name — differentiate use cases and features by adding a `name` field to your traces.
+- User — add a `userId` to traces ([user tracking](/docs/observability/features/users)).
+- Tags — filter use cases and features with [tags](/docs/observability/features/tags).
+- Release and version — see how a change affected the metrics.
+
+For the exact query model, see the [Metrics API](/docs/metrics/features/metrics-api). You do not need evaluation set up for cost, latency, and volume; quality charts appear once you attach scores.
+
+## Features
+
+<Cards num={2}>
+  <Card
+    title="Custom Dashboards"
+    href="/docs/metrics/features/custom-dashboards"
+    icon={<LayoutDashboard />}
+    arrow
+  />
+  <Card
+    title="Metrics API"
+    href="/docs/metrics/features/metrics-api"
+    icon={<Activity />}
+    arrow
+  />
+  <Card
+    title="Export to PostHog"
+    href="/integrations/analytics/posthog"
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-1 flex items-center justify-center">
+        <img
+          src="/images/integrations/posthog_icon.svg"
+          alt="PostHog icon"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    arrow
+  />
+  <Card
+    title="Export to Mixpanel"
+    href="/integrations/analytics/mixpanel"
+    icon={
+      <div className="w-6 h-6 dark:bg-white rounded-sm p-1 flex items-center justify-center">
+        <img
+          src="/images/integrations/mixpanel_icon.svg"
+          alt="Mixpanel icon"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    }
+    arrow
+  />
+</Cards>
+
+## FAQ [#faq]
+
+<ProductFaq items={metricsFaqs} />

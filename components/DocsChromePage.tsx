@@ -7,11 +7,13 @@ import { DocsTocFooter } from "@/components/DocsTocFooter";
 import { DocBodyChrome } from "@/components/DocBodyChrome";
 import { DocsAndPageFooter } from "@/components/DocsAndPageFooter";
 import { DocsBreadcrumb } from "@/components/DocsBreadcrumb";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbListJsonLd, softwareApplicationJsonLd } from "@/lib/json-ld";
 import { getMDXComponents } from "@/mdx-components";
 
 type BodyChromeProps = Omit<ComponentProps<typeof DocBodyChrome>, "children">;
 
-type LoadedPage = { data: any };
+type LoadedPage = { data: any; url?: string };
 
 const getIsoDate = (value: unknown): string | undefined => {
   if (value == null) return undefined;
@@ -55,6 +57,8 @@ export async function DocsChromePage({
   const MDX = loaded.body as ComponentType<{
     components?: Record<string, ComponentType>;
   }>;
+  const pageUrl = typeof page.url === "string" ? page.url : undefined;
+  const breadcrumbJsonLd = pageUrl ? breadcrumbListJsonLd(pageUrl) : null;
 
   return (
     <DocsPage
@@ -69,6 +73,10 @@ export async function DocsChromePage({
       footer={{ component: <DocsAndPageFooter /> }}
     >
       <DocBodyChrome {...bodyChromeProps}>
+        {breadcrumbJsonLd ? <JsonLd data={breadcrumbJsonLd} /> : null}
+        {pageUrl === "/docs" ? (
+          <JsonLd data={softwareApplicationJsonLd()} />
+        ) : null}
         {topPrefix}
         <MDX components={getMDXComponents()} />
         {bottomSuffix}
