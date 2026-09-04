@@ -173,6 +173,7 @@ export const DEDICATED_MARKETING_SLUGS = new Set<string>([
   "pricing-self-host",
   "japan",
   "events",
+  "government",
 ]);
 
 export const DEDICATED_APP_SECTIONS = new Set<string>([

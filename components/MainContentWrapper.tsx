@@ -49,6 +49,7 @@ const pathsWithoutFooterWidgets = [
   "/cookie-policy",
   "/find-us",
   "/japan",
+  "/government",
   "/kr",
   "/oss-friends",
   "/privacy",
