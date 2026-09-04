@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { formatAbsoluteDate, parseCalendarDate } from "./utils.ts";
+import { formatAbsoluteDate, parseCalendarDate } from "./utils";
 
 test("parseCalendarDate treats YYYY/MM/DD as a UTC calendar day", () => {
   const parsed = parseCalendarDate("2026/04/24");

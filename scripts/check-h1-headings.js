@@ -10,6 +10,10 @@ const EXCLUDE_DIRS = new Set([
   "dist",
 ]);
 
+// Next.js 16.3 appends a managed `<!-- BEGIN:nextjs-agent-rules -->` H1 to
+// AGENTS.md on `next dev`. That file is agent instructions, not site content.
+const EXCLUDE_FILES = new Set(["AGENTS.md"]);
+
 async function findMarkdownFiles(dir) {
   let results = [];
   try {
@@ -20,7 +24,8 @@ async function findMarkdownFiles(dir) {
         results = results.concat(await findMarkdownFiles(fullPath));
       } else if (
         dirent.isFile() &&
-        (dirent.name.endsWith(".md") || dirent.name.endsWith(".mdx"))
+        (dirent.name.endsWith(".md") || dirent.name.endsWith(".mdx")) &&
+        !EXCLUDE_FILES.has(dirent.name)
       ) {
         results.push(fullPath);
       }
