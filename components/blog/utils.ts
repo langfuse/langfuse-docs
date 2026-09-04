@@ -27,6 +27,19 @@ export function computeTagCounts(
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
+/** Stable UTC date for list rows. Avoids hydration/CLS from relative labels. */
+export function formatAbsoluteDate(dateStr?: string): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 export function formatDate(dateStr?: string): string {
   if (!dateStr) return "";
   const d = new Date(dateStr);
@@ -39,10 +52,5 @@ export function formatDate(dateStr?: string): string {
   if (diffDays === 1) return "1 Day Ago";
   if (diffDays < 14) return `${diffDays} Days Ago`;
   if (diffDays < 30) return `${Math.round(diffDays / 7)} Weeks Ago`;
-  return d.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  });
+  return formatAbsoluteDate(dateStr);
 }
