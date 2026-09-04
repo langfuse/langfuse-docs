@@ -18,13 +18,6 @@ Langfuse uses Docker to containerize the application. The application is split i
 - **Langfuse Web**: The web server that serves the Langfuse Console and API.
 - **Langfuse Worker**: The worker that handles background tasks such as sending emails or processing events.
 
-## Container images [#container-images]
-
-The images are published to Docker Hub as `langfuse/langfuse` and `langfuse/langfuse-worker`.
-Our deployment templates and the examples below pull them through `docker.langfuse.com`, a registry endpoint run by [Reo.dev](https://reo.dev), our analytics provider, which records the pull so that we can measure open source adoption and then serves the image from Docker Hub.
-The tags and digests are identical either way, and you can pull from Docker Hub directly by dropping the `docker.langfuse.com/` prefix.
-See [Telemetry](/self-hosting/security/telemetry#container-image-downloads) for what is recorded and how to opt out.
-
 ## Recommended sizing
 
 For production environments, we recommend to use at least 2 CPUs and 4 GB of RAM for all containers.
@@ -112,3 +105,9 @@ docker run --name langfuse-worker \
   -a STDOUT \
 docker.langfuse.com/langfuse/langfuse-worker:4
 ```
+
+## Container images [#container-images]
+
+The images are published to Docker Hub as `langfuse/langfuse` and `langfuse/langfuse-worker`.
+Our deployment templates and the examples below pull them through `docker.langfuse.com`, a registry endpoint run by [Reo.dev](https://reo.dev), our analytics provider, which records the pull so that we can measure open source adoption and then serves the image from Docker Hub.
+The tags and digests are identical either way, and you can pull from Docker Hub directly by dropping the `docker.langfuse.com/` prefix.
