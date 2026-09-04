@@ -48,6 +48,11 @@ const faqs: FAQItem[] = [
       "You can manage your subscription through the organization settings in Langfuse Cloud or by using this [Customer Portal](/billing-portal).",
   },
   {
+    question: "Can I purchase Langfuse through AWS Marketplace?",
+    answer:
+      "Yes. Enterprise customers with a yearly commitment can bill via AWS Marketplace. [Talk to us](/talk-to-us) to request a private offer. Invoice billing is also available.",
+  },
+  {
     question: "Can I redline the contracts?",
     answer:
       "Yes, we offer customized contracts for Langfuse Enterprise customers with a yearly commitment. Please [contact sales](/talk-to-us) for more details. The default plans are affordable as they are designed to be self-serve on our standard terms.",
