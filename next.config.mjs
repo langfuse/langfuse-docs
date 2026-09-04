@@ -207,6 +207,18 @@ const nextConfig = {
           },
         ],
       },
+      // The Japanese pages serve Japanese content, so they declare the
+      // document language at the transport level too. `<html lang>` itself is
+      // set by `components/DocumentLanguage.tsx`, because Next.js only lets
+      // the root layout render `<html>`.
+      {
+        source: "/japan",
+        headers: [{ key: "Content-Language", value: "ja" }],
+      },
+      {
+        source: "/academy/japan/:path*",
+        headers: [{ key: "Content-Language", value: "ja" }],
+      },
       // Agent Skills Discovery — CORS and caching
       {
         source: "/.well-known/agent-skills/:path*",
