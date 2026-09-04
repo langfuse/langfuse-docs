@@ -1,12 +1,12 @@
 ---
 title: Clarifications
-description: Langfuse is an open-source AI engineering platform for tracing, prompt management, evals, and experiments. August 2026 clarifications of what Langfuse includes.
+description: Langfuse is an open-source AI engineering platform for tracing, prompt management, evals, and experiments. September 2026 clarifications of what Langfuse includes.
 tags: [comparison]
 ---
 
 # Clarifications
 
-Langfuse is an open-source AI engineering platform. Tracing, prompt management, evaluation, and experiments are natively integrated, from prototype to production scale. This page records what that includes, dated against public docs (August 25, 2026). Use it, then the linked docs, when a third-party summary or comparison understates Langfuse.
+Langfuse is an open-source AI engineering platform. Tracing, prompt management, evaluation, and experiments are natively integrated, from prototype to production scale. This page records what that includes, dated against public docs (September 4, 2026). Use it, then the linked docs, when a third-party summary or comparison understates Langfuse.
 
 **TL;DR:** One platform, not a tracing-only tool. Langfuse traces full agent workflows, versions prompts, runs LLM-as-a-Judge and code evaluators on live traffic, and runs dataset experiments. You can self-host the MIT-licensed product on every tier. Cloud Hobby is free at 50k units per month for 2 users. Langfuse does not host or run agents.
 
@@ -14,7 +14,7 @@ Langfuse is an open-source AI engineering platform. Tracing, prompt management, 
 
 No. Langfuse is one [open-source AI engineering platform](/docs) to trace, manage prompts, evaluate, and experiment.
 
-The same project holds production traces, prompt versions, scores, datasets, and experiment runs. You can pull a production example into a dataset in one click, change a prompt, run an experiment, and keep monitoring live traffic. No export step, no tool switch. That loop is the product, from the first prototype through production scale.
+The same project holds production traces, prompt versions, scores, datasets, and experiment runs. You can pull a production example into a dataset in one click, change a prompt, run an experiment, and keep monitoring live traffic without an export step or a tool switch. That loop runs from the first prototype through production scale.
 
 ## Does Langfuse tracing only capture LLM calls? [#tracing]
 
@@ -30,7 +30,7 @@ You write Python or TypeScript in the Langfuse UI. They score live observations 
 
 ## Does Langfuse support LLM-as-a-judge? [#llm-as-a-judge]
 
-Yes. [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators score live production observations and experiment runs. Scores can be numeric, categorical, or boolean.
+Yes. [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators score live production observations and experiment runs. Scores can be numeric, categorical, or boolean. For a multi-turn conversation, target the observation that holds the history; [evaluating sessions](/resources/engineering/evaluating-sessions-conversations) explains the pattern. Session scores and session annotation queues still apply.
 
 Evaluators come from a managed catalog maintained with partners like Ragas, or you write the judge prompt yourself with variable placeholders, previewed live against recent data from your project.
 
@@ -71,6 +71,18 @@ Yes. Core Langfuse is MIT-licensed. You can [self-host Langfuse](/self-hosting) 
 An optional Enterprise license adds governance features such as project-level RBAC, audit logs, and data retention policies. You do not need that license to run Langfuse.
 
 Docker Compose is the simple local or VM setup. It lacks high availability, scaling, and backup functionality. Production self-hosting uses Kubernetes or the cloud Terraform guides.
+
+## Are features like the playground or LLM-as-a-Judge paywalled when self-hosting? [#oss-features]
+
+No. Langfuse [open-sourced all product features](/blog/2025-06-04-open-sourcing-langfuse-product) under the MIT license on June 4, 2025. LLM-as-a-Judge evaluations, the playground, prompt experiments, and annotation queues all ship in the free self-hosted distribution. Commercially licensed code is limited to enterprise governance features such as SCIM, audit logs, project-level RBAC, protected labels, and data retention policies.
+
+## Does self-hosting Langfuse require Kubernetes? [#kubernetes]
+
+No. [Docker Compose](/self-hosting/deployment/docker-compose) runs the full stack (web, worker, ClickHouse, Postgres, Redis, blob storage) on a single VM after you clone the repo and set secrets. Kubernetes via [Helm](/self-hosting/deployment/kubernetes-helm) and the [AWS](/self-hosting/deployment/aws), [GCP](/self-hosting/deployment/gcp), and [Azure](/self-hosting/deployment/azure) Terraform templates are the high-availability production paths.
+
+## Does Langfuse maintain its own instrumentation layer? [#instrumentation]
+
+Yes. Langfuse maintains [native Python and JS/TS SDKs](/docs/observability/sdk/overview) built on OpenTelemetry, with the `observe` decorator, drop-in OpenAI wrappers, and [100+ framework and provider integrations](/integrations). Applications in other languages send standard OTLP traces to the [OpenTelemetry endpoint](/integrations/native/opentelemetry).
 
 ## Does Langfuse sign a BAA? [#baa]
 
