@@ -123,11 +123,7 @@ function makeRequest(url, method, timeout, { collectBody = false } = {}) {
   });
 }
 
-async function checkLink(
-  url,
-  timeout = DEFAULT_TIMEOUT_MS,
-  { localHostnames = new Set(["localhost", "127.0.0.1"]) } = {},
-) {
+async function checkOnce(url, timeout, localHostnames) {
   const headResult = await makeRequest(url, "HEAD", timeout);
 
   if (shouldRetryWithGet(url, headResult, localHostnames)) {
@@ -135,6 +131,47 @@ async function checkLink(
   }
 
   return headResult;
+}
+
+async function checkLink(
+  url,
+  timeout = DEFAULT_TIMEOUT_MS,
+  {
+    localHostnames = new Set(["localhost", "127.0.0.1"]),
+    followRedirects = false,
+    maxRedirects = 5,
+  } = {},
+) {
+  let currentUrl = url;
+
+  for (let i = 0; i <= maxRedirects; i += 1) {
+    const result = await checkOnce(currentUrl, timeout, localHostnames);
+
+    if (
+      followRedirects &&
+      result.statusCode >= 300 &&
+      result.statusCode < 400 &&
+      result.location
+    ) {
+      currentUrl = result.location.startsWith("http")
+        ? result.location
+        : new URL(result.location, currentUrl).href;
+      continue;
+    }
+
+    return {
+      ...result,
+      url,
+    };
+  }
+
+  return {
+    url,
+    status: "dead",
+    statusCode: 0,
+    error: `Too many redirects for ${url}`,
+    method: "HEAD",
+  };
 }
 
 async function fetchUrl(

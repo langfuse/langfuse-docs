@@ -98,6 +98,37 @@ test("passes when every sitemap URL is served locally", async () => {
   }
 });
 
+test("fails when a sitemap URL redirects to a 404", async () => {
+  const { server, baseUrl } = await listen((req, res) => {
+    if (req.url === "/sitemap-0.xml") {
+      res.writeHead(200, { "Content-Type": "application/xml" });
+      res.end(sitemapXml(["https://langfuse.com/old-docs"]));
+      return;
+    }
+    if (req.url === "/old-docs") {
+      res.writeHead(301, { Location: "/deleted-page" });
+      res.end();
+      return;
+    }
+    res.writeHead(req.url === "/deleted-page" ? 404 : 200);
+    res.end();
+  });
+
+  try {
+    const result = await runSitemapCheck({
+      sitemapUrl: `${baseUrl}/sitemap-0.xml`,
+      baseUrl,
+      silent: true,
+    });
+
+    assert.equal(result.ok, false);
+    assert.equal(result.failures.length, 1);
+    assert.equal(result.failures[0].statusCode, 404);
+  } finally {
+    server.close();
+  }
+});
+
 test("fails when a sitemap URL 404s on the local server", async () => {
   const { server, baseUrl } = await listen((req, res) => {
     if (req.url === "/sitemap-0.xml") {

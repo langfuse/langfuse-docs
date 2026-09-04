@@ -55,7 +55,10 @@ function localHostnamesFromBase(baseUrl) {
 }
 
 async function checkUrl(url, { localHostnames, checkLinkFn = checkLink } = {}) {
-  const response = await checkLinkFn(url, REQUEST_TIMEOUT, { localHostnames });
+  const response = await checkLinkFn(url, REQUEST_TIMEOUT, {
+    localHostnames,
+    followRedirects: true,
+  });
   const isError = response.status === "dead";
 
   return {
