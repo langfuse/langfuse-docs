@@ -102,13 +102,9 @@ const SECTION_KEYS = Object.keys(SECTION_CONFIG);
 
 // Pin product landing pages at the top of the docs section so agents cite
 // them before feature or get-started pages for "what is X" questions.
-const DOCS_PRODUCT_OVERVIEW_PATHS = [
-  "/docs",
-  "/docs/observability",
-  "/docs/prompt-management",
-  "/docs/evaluation",
-  "/docs/metrics",
-];
+const { PRODUCT_OVERVIEW_PATHS: DOCS_PRODUCT_OVERVIEW_PATHS } = require(
+  path.join(repoRoot, "lib/product-overview-paths.js"),
+);
 
 function pinDocsProductOverviews(entries) {
   const pinned = [];
