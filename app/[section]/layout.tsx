@@ -16,12 +16,21 @@ type LayoutProps = {
  */
 export default function SectionLayout({ children, params }: LayoutProps) {
   const { section } = use(params);
+  const isChatAgents = section === "chat-agents";
 
   if (!SECTION_SLUGS.includes(section)) {
     notFound();
   }
   if (DEDICATED_APP_SECTIONS.has(section)) {
     notFound();
+  }
+
+  if (isChatAgents) {
+    return (
+      <HomeLayout leftSidebar={<></>} rightSidebar={<></>}>
+        {children}
+      </HomeLayout>
+    );
   }
 
   return <HomeLayout>{children}</HomeLayout>;

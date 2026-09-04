@@ -4,249 +4,328 @@ description: Build and improve production chat agents with full-session tracing,
 contentWidth: full
 ---
 
-import { Button } from "@/components/ui/button";
-
 # <span className="sr-only">Langfuse for chat agents</span>
 
-<div className="not-prose mt-6 overflow-hidden rounded border border-border bg-card">
-  <section className="grid border-b border-border lg:grid-cols-2">
-    <div className="border-b border-border p-6 sm:p-10 lg:border-b-0 lg:border-r">
-      <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+<div className="not-prose mt-6 overflow-hidden border border-line-structure bg-surface-bg">
+  <section className="grid border-b border-line-structure lg:grid-cols-2">
+    <div className="border-b border-line-structure px-6 py-8 sm:px-10 sm:py-10 lg:border-b-0 lg:border-r">
+      <p className="font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
         Use case / chat agents
       </p>
-      <h2 className="mt-3 text-balance text-4xl font-semibold leading-tight text-foreground sm:text-5xl">
-        Ship chat agents your users{" "}
-        <span className="bg-primary/25 px-1">keep talking to</span>
+      <h2 className="mt-3 text-[44px] leading-[0.95] text-text-primary sm:text-[62px]">
+        <span className="block">Ship chat agents</span>
+        <span className="block">your users</span>
+        <span className="mt-1 inline-block bg-surface-cta-primary px-1.5">
+          keep talking to
+        </span>
       </h2>
-      <p className="mt-5 max-w-xl text-base text-muted-foreground">
+      <p className="mt-5 max-w-[56ch] text-[14px] leading-[1.45] text-text-secondary">
         Chat-like agents are multi-turn, stateful, and stubbornly hard to debug.
-        Langfuse traces every session end-to-end so you can see where a
-        conversation went sideways, what each turn cost, and whether users are
-        satisfied.
+        Langfuse traces every session end to end. See where a conversation went
+        sideways, what each turn cost, and whether users are satisfied.
       </p>
-      <div className="mt-8 flex flex-wrap gap-2">
-        <Button href="https://cloud.langfuse.com" target="_blank" rel="noopener noreferrer">
+      <div className="mt-7 flex flex-wrap gap-2">
+        <a
+          href="https://cloud.langfuse.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="border border-line-cta bg-text-primary px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-surface-bg transition-opacity hover:opacity-90"
+        >
           Start free
-        </Button>
-        <Button href="/talk-to-us" variant="secondary">
+        </a>
+        <a
+          href="/talk-to-us"
+          className="border border-line-structure bg-surface-bg px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary"
+        >
           Talk to sales
-        </Button>
-        <Button href="/docs/observability/get-started" variant="secondary">
-          Chat agent quickstart
-        </Button>
+        </a>
+        <a
+          href="/docs/observability/get-started"
+          className="border border-line-structure bg-surface-bg px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary"
+        >
+          Chat agent quickstart →
+        </a>
       </div>
     </div>
 
-    <div className="bg-muted/40 p-6 sm:p-10">
-      <div className="space-y-3 rounded border border-border bg-background p-4 shadow-sm">
-        <p className="text-xs uppercase tracking-wide text-muted-foreground">
-          Session · cs-agent-prod · #2104
-        </p>
-        <div className="flex justify-end">
-          <div className="max-w-[90%] rounded border border-border bg-muted/60 px-3 py-2 text-sm">
-            Where is my payout for last week?
+    <div className="bg-surface-1 px-4 py-4 sm:px-6 sm:py-6">
+      <div className="border border-line-structure bg-surface-bg">
+        <div className="grid grid-cols-2 border-b border-line-structure px-3 py-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+          <span>Session · cs-agent-prod · #2104</span>
+          <span className="text-right">7 turns · 08:04</span>
+        </div>
+
+        <div className="space-y-2 p-3 text-[11px] text-text-secondary">
+          <div className="flex justify-end">
+            <p className="max-w-[88%] border border-line-structure bg-surface-1 px-2.5 py-1.5 text-text-primary">
+              Where is my payout for last week?
+            </p>
           </div>
-        </div>
-        <div className="rounded border border-border bg-card p-3 text-sm">
-          I can help with that. Your last payout was on 12 May for €248.10.
-        </div>
-        <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
-          Agent · retrieve_payout · 26 ms · €0.04
-        </div>
-        <div className="flex justify-end">
-          <div className="max-w-[90%] rounded border border-border bg-muted/60 px-3 py-2 text-sm">
-            That&apos;s not what I asked. Last week.
+          <p className="border border-line-structure bg-surface-bg px-2.5 py-1.5 text-text-primary">
+            I can help with that. Your last payout was on 12 May for €248.10.
+          </p>
+          <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+            Agent · retrieve_payout · 26 ms · €0.04
+          </p>
+          <div className="flex justify-end">
+            <p className="max-w-[88%] border border-line-structure bg-surface-1 px-2.5 py-1.5 text-text-primary">
+              That&apos;s not what I asked. Last week.
+            </p>
           </div>
+          <p className="border border-line-structure bg-surface-bg px-2.5 py-1.5 text-text-primary">
+            Sorry — checking 20-26 May now. Payout of €412.60 settles tomorrow.
+          </p>
+          <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+            Agent · retry_payout · 2.1 s · confidence 0.92
+          </p>
         </div>
-        <div className="rounded border border-border bg-card p-3 text-sm">
-          Sorry — checking 20–26 May now. Payout of €412.60 settles tomorrow.
-        </div>
-        <div className="grid gap-2 border-t border-border pt-3 text-xs text-muted-foreground sm:grid-cols-3">
-          <p>
-            Frustrated turns
-            <br />
-            <span className="text-base font-semibold text-foreground">3 of 7</span>
-          </p>
-          <p>
-            Cost / turn
-            <br />
-            <span className="text-base font-semibold text-foreground">$0.026</span>
-          </p>
-          <p>
-            Resolved
-            <br />
-            <span className="text-base font-semibold text-foreground">Yes</span>
-          </p>
+
+        <div className="grid grid-cols-3 border-t border-line-structure">
+          <div className="border-r border-line-structure px-3 py-2">
+            <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+              Frustrated
+            </p>
+            <p className="text-[16px] leading-none text-text-primary">3 of 7</p>
+          </div>
+          <div className="border-r border-line-structure px-3 py-2">
+            <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+              Cost / turn
+            </p>
+            <p className="text-[16px] leading-none text-text-primary">$0.026</p>
+          </div>
+          <div className="px-3 py-2">
+            <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+              Resolved
+            </p>
+            <p className="text-[16px] leading-none text-text-primary">Yes</p>
+          </div>
         </div>
       </div>
     </div>
 
   </section>
 
-  <section className="grid gap-0 border-b border-border text-center sm:grid-cols-2 lg:grid-cols-4">
-    <div className="border-b border-border p-6 sm:border-r lg:border-b-0">
-      <p className="text-3xl font-semibold text-foreground">1.4B+</p>
-      <p className="mt-1 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+  <section className="grid sm:grid-cols-2 lg:grid-cols-4">
+    <div className="border-b border-r border-line-structure px-5 py-4 sm:border-b lg:border-b-0">
+      <p className="text-[33px] leading-none text-text-primary">1.4B+</p>
+      <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
         Chat sessions traced
       </p>
     </div>
-    <div className="border-b border-border p-6 lg:border-b-0 lg:border-r">
-      <p className="text-3xl font-semibold text-foreground">38M</p>
-      <p className="mt-1 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+    <div className="border-b border-line-structure px-5 py-4 sm:border-b sm:border-r lg:border-b-0">
+      <p className="text-[33px] leading-none text-text-primary">38M</p>
+      <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
         Turns scored / month
       </p>
     </div>
-    <div className="border-b border-border p-6 sm:border-r sm:border-b-0">
-      <p className="text-3xl font-semibold text-foreground">2,300+</p>
-      <p className="mt-1 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+    <div className="border-b border-r border-line-structure px-5 py-4 sm:border-b-0 lg:border-b-0">
+      <p className="text-[33px] leading-none text-text-primary">2,300+</p>
+      <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
         Companies in production
       </p>
     </div>
-    <div className="p-6">
-      <p className="text-3xl font-semibold text-foreground">80+</p>
-      <p className="mt-1 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+    <div className="px-5 py-4">
+      <p className="text-[33px] leading-none text-text-primary">80+</p>
+      <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
         Agent framework integrations
       </p>
     </div>
   </section>
 
-  <section className="border-b border-border px-6 py-14 sm:px-10">
-    <p className="text-center text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+  <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
+    <p className="text-center font-mono text-[9px] uppercase tracking-[0.1em] text-text-tertiary">
       Value
     </p>
-    <h2 className="mt-3 text-center text-3xl font-semibold text-foreground sm:text-4xl">
+    <h2 className="mt-2 text-center text-[48px] leading-[1] text-text-primary">
       Trace the full session, not one call
     </h2>
-    <p className="mx-auto mt-3 max-w-3xl text-center text-muted-foreground">
-      One session is dozens of LLM calls, tool calls, and retries. Group every
-      turn by session and user, then read the conversation exactly the way your
-      users lived it.
+    <p className="mx-auto mt-3 max-w-[64ch] text-center text-[13px] text-text-tertiary">
+      One session is dozens of LLM calls, tool calls and retries. Group by
+      session and user, then read the conversation the way your user lived it.
     </p>
-    <div className="mt-10 grid gap-4 lg:grid-cols-3">
-      <article className="rounded border border-border bg-background p-5">
-        <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+
+    <div className="mt-8 grid gap-2 lg:grid-cols-3">
+      <article className="border border-line-structure bg-surface-bg p-5">
+        <span className="inline-flex h-4 w-4 items-center justify-center border border-line-structure font-mono text-[9px] text-text-tertiary">
+          □
+        </span>
+        <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
           Sessions
         </p>
-        <h3 className="mt-2 text-lg font-semibold text-foreground">
+        <h3 className="mt-2 text-[30px] leading-[1.05] text-text-primary">
           Identify turns with unhappy users
         </h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Thumbs-down signals and repeated re-asks surface where context or tool
-          output was wrong. Open the trace and inspect every turn to debug
-          faster.
+        <p className="mt-3 text-[13px] leading-[1.5] text-text-secondary">
+          Thumbs-down, retries and repeated re-asks surface where context failed
+          or tool output broke. Open the trace and read the prompt, retrieval
+          context and tool call output.
         </p>
-        <a className="mt-4 inline-block text-sm font-medium text-foreground underline" href="/docs/observability/features/sessions">
+        <a
+          href="/docs/observability/features/sessions"
+          className="mt-5 inline-block text-[12px] text-text-secondary underline underline-offset-4 hover:text-text-primary"
+        >
           Session tracing →
         </a>
       </article>
-      <article className="rounded border border-border bg-background p-5">
-        <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+
+      <article className="border border-line-structure with-stripes p-5">
+        <span className="inline-flex h-4 w-4 items-center justify-center border border-line-structure font-mono text-[9px] text-text-tertiary">
+          ∣
+        </span>
+        <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
           Cost
         </p>
-        <h3 className="mt-2 text-lg font-semibold text-foreground">
+        <h3 className="mt-2 text-[30px] leading-[1.05] text-text-primary">
           Get full cost transparency
         </h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Context grows with every turn and so do bills. Break cost and tokens
-          down by turn, session, user, model, and release so finance can report
-          with confidence.
+        <p className="mt-3 text-[13px] leading-[1.5] text-text-secondary">
+          Context grows with every turn and so does your bill. Break cost and
+          token usage down by turn, session, model and release, then report to
+          finance with confidence.
         </p>
-        <a className="mt-4 inline-block text-sm font-medium text-foreground underline" href="/docs/observability/features/token-and-cost-tracking">
+        <a
+          href="/docs/observability/features/token-and-cost-tracking"
+          className="mt-5 inline-block text-[12px] text-text-secondary underline underline-offset-4 hover:text-text-primary"
+        >
           Cost tracking →
         </a>
       </article>
-      <article className="rounded border border-border bg-background p-5">
-        <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+
+      <article className="border border-line-structure bg-surface-bg p-5">
+        <span className="inline-flex h-4 w-4 items-center justify-center border border-line-structure font-mono text-[9px] text-text-tertiary">
+          ✓
+        </span>
+        <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
           Evals
         </p>
-        <h3 className="mt-2 text-lg font-semibold text-foreground">
+        <h3 className="mt-2 text-[30px] leading-[1.05] text-text-primary">
           Ensure quality for chat interactions
         </h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Run LLM-as-a-judge checks in live traffic to detect frustration, tone,
-          and instruction-following. Promote strong conversations into datasets
-          and test next changes before release.
+        <p className="mt-3 text-[13px] leading-[1.5] text-text-secondary">
+          Run LLM-as-a-judge in live turns for frustration, tone and
+          instruction-following. Promote strong sessions into datasets and test
+          your next prompt before release.
         </p>
-        <a className="mt-4 inline-block text-sm font-medium text-foreground underline" href="/docs/evaluation/overview">
+        <a
+          href="/docs/evaluation/overview"
+          className="mt-5 inline-block text-[12px] text-text-secondary underline underline-offset-4 hover:text-text-primary"
+        >
           Evaluations →
         </a>
       </article>
     </div>
+
   </section>
 
-  <section className="border-b border-border bg-muted/30 px-6 py-14 sm:px-10">
-    <p className="text-center text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+  <section className="border-t border-line-structure bg-surface-1 px-5 py-14 sm:px-10 sm:py-18">
+    <p className="text-center font-mono text-[9px] uppercase tracking-[0.1em] text-text-tertiary">
       Customers
     </p>
-    <h2 className="mt-3 text-center text-3xl font-semibold text-foreground sm:text-4xl">
+    <h2 className="mt-2 text-center text-[44px] leading-[1] text-text-primary">
       Teams running chat in production
     </h2>
-    <div className="mt-10 grid gap-4 lg:grid-cols-3">
-      <blockquote className="rounded border border-border bg-background p-5 text-sm text-foreground">
+
+    <div className="mt-8 grid gap-2 lg:grid-cols-3">
+      <blockquote className="border border-line-structure bg-surface-bg p-5 text-[14px] leading-[1.45] text-text-primary">
         “We went from guessing which conversations failed to seeing the exact
-        turn, the retrieved context, and the cost in one view.”
-        <footer className="mt-4 text-xs uppercase tracking-[0.12em] text-muted-foreground">
-          Engineering lead, AI platform
+        turn, the retrieved context and the cost in one view.”
+        <footer className="mt-4">
+          <span className="inline-block border border-line-structure px-5 py-1 font-mono text-[8px] uppercase tracking-[0.08em] text-text-tertiary">
+            Logo
+          </span>
+          <p className="mt-2 text-[11px] text-text-tertiary">
+            Engineering Lead, AI Platform
+          </p>
         </footer>
       </blockquote>
-      <blockquote className="rounded border border-border bg-background p-5 text-sm text-foreground">
-        “Self-hosted, OpenTelemetry-native, and auditable. Langfuse cleared our
+      <blockquote className="border border-line-structure bg-surface-bg p-5 text-[14px] leading-[1.45] text-text-primary">
+        “Self-hosted, OpenTelemetry-native and auditable. Langfuse cleared our
         review and still gave the team same-day debugging.”
-        <footer className="mt-4 text-xs uppercase tracking-[0.12em] text-muted-foreground">
-          Lead ML engineer
+        <footer className="mt-4">
+          <span className="inline-block border border-line-structure px-5 py-1 font-mono text-[8px] uppercase tracking-[0.08em] text-text-tertiary">
+            Logo
+          </span>
+          <p className="mt-2 text-[11px] text-text-tertiary">Lead ML Engineer</p>
         </footer>
       </blockquote>
-      <blockquote className="rounded border border-border bg-background p-5 text-sm text-foreground">
+      <blockquote className="border border-line-structure bg-surface-bg p-5 text-[14px] leading-[1.45] text-text-primary">
         “Evals on live traffic are how we ship prompt changes weekly without
         waiting on a manual review round.”
-        <footer className="mt-4 text-xs uppercase tracking-[0.12em] text-muted-foreground">
-          Staff engineer, AI products
+        <footer className="mt-4">
+          <span className="inline-block border border-line-structure px-5 py-1 font-mono text-[8px] uppercase tracking-[0.08em] text-text-tertiary">
+            Logo
+          </span>
+          <p className="mt-2 text-[11px] text-text-tertiary">
+            Staff Engineer, AI Products
+          </p>
         </footer>
       </blockquote>
     </div>
+
   </section>
 
-  <section className="border-b border-border px-6 py-14 sm:px-10">
-    <p className="text-center text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+  <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-18">
+    <p className="text-center font-mono text-[9px] uppercase tracking-[0.1em] text-text-tertiary">
       Integrations
     </p>
-    <h2 className="mt-3 text-center text-3xl font-semibold text-foreground sm:text-4xl">
+    <h2 className="mt-2 text-center text-[44px] leading-[1] text-text-primary">
       Any model, any framework
     </h2>
-    <p className="mx-auto mt-3 max-w-2xl text-center text-muted-foreground">
-      Based on OpenTelemetry. Drop in the SDK and keep your current stack.
+    <p className="mx-auto mt-2 max-w-[56ch] text-center text-[13px] text-text-tertiary">
+      Based on OpenTelemetry. Drop in the SDK, keep your stack.
     </p>
-    <div className="mt-8 grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
-      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">OpenAI</span>
-      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">Anthropic</span>
-      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">LangChain</span>
-      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">LangGraph</span>
-      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">LlamaIndex</span>
-      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">Vercel AI SDK</span>
-      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">OpenAI Agents</span>
-      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">Pydantic AI</span>
-      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">CrewAI</span>
-      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">Python</span>
-      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">TypeScript</span>
-      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">OpenTelemetry</span>
+
+    <div className="mt-8 border border-line-structure bg-surface-bg">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+        {[
+          "OpenAI",
+          "Anthropic",
+          "LangChain",
+          "LangGraph",
+          "LlamaIndex",
+          "Vercel AI SDK",
+          "OpenAI Agents",
+          "Pydantic AI",
+          "CrewAI",
+          "Python",
+          "TypeScript",
+          "OpenTelemetry",
+        ].map((item) => (
+          <span
+            key={item}
+            className="border-r border-t border-line-structure px-3 py-2 text-center text-[11px] text-text-secondary first:border-t-0 sm:[&:nth-child(-n+3)]:border-t-0 lg:[&:nth-child(-n+6)]:border-t-0 [&:nth-child(2n)]:border-r-0 sm:[&:nth-child(2n)]:border-r [&:nth-child(3n)]:sm:border-r-0 lg:[&:nth-child(3n)]:lg:border-r lg:[&:nth-child(6n)]:border-r-0"
+          >
+            {item}
+          </span>
+        ))}
+      </div>
     </div>
+
   </section>
 
-  <section className="bg-primary/20 px-6 py-14 text-center sm:px-10">
-    <h2 className="text-3xl font-semibold text-foreground sm:text-4xl">
+  <section className="border-t border-line-structure bg-surface-cta-primary px-5 py-14 text-center sm:px-10 sm:py-18">
+    <h2 className="text-[52px] leading-[0.96] text-text-primary">
       Instrument your chat agent today
     </h2>
-    <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-      Start on the free tier with no credit card, then scale to production with
-      cloud or self-hosted deployment options.
+    <p className="mx-auto mt-3 max-w-[56ch] text-[13px] leading-[1.45] text-text-secondary">
+      Free tier, no credit card. Bring your compliance questions to a call with
+      an engineer.
     </p>
-    <div className="mt-8 flex flex-wrap justify-center gap-2">
-      <Button href="https://cloud.langfuse.com" target="_blank" rel="noopener noreferrer">
+    <div className="mt-6 flex flex-wrap justify-center gap-2">
+      <a
+        href="https://cloud.langfuse.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="border border-line-cta bg-text-primary px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-surface-bg transition-opacity hover:opacity-90"
+      >
         Get started for free
-      </Button>
-      <Button href="/talk-to-us" variant="secondary">
+      </a>
+      <a
+        href="/talk-to-us"
+        className="border border-line-cta bg-transparent px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-text-primary transition-colors hover:bg-surface-bg/50"
+      >
         Talk to sales
-      </Button>
+      </a>
     </div>
   </section>
 </div>
