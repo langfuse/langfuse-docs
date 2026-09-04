@@ -40,7 +40,12 @@ import ArchitectureDescription from "@/components-mdx/architecture-description-v
 
 ## Optimized for performance, reliability, and uptime
 
-Langfuse self-hosted is optimized for production environments. It is the exact same codebase as Langfuse Cloud, just deployed on your own infrastructure. The Langfuse team serves thousands of teams with Langfuse Cloud with high availability ([status page](https://status.langfuse.com)) and performance.
+import { SelfHostScaleMetrics } from "@/components/SelfHostScaleMetrics";
+
+<SelfHostScaleMetrics />
+
+<details>
+<summary>How Langfuse is optimized for scale and reliability</summary>
 
 Some of the optimizations include:
 
@@ -52,7 +57,7 @@ Some of the optimizations include:
 - **Recoverability of events**: All incoming tracing and evaluation events are persisted in S3/Blob Storage first. Only after successful processing, the events are written to the database. This ensures that even if the database is temporarily unavailable, the events are not lost and can be processed later.
 - **Background migrations**: Long-running migrations that are required by an upgrade but not blocking for regular operations are offloaded to a background job. This massively reduces the downtime during an upgrade. Learn more [here](/self-hosting/upgrade/background-migrations).
 
-If you have any feedback or questions regarding the architecture, please reach out to us.
+</details>
 
 ## Features
 
