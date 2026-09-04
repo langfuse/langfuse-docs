@@ -39,8 +39,7 @@ const openApis = [
 ];
 
 const security = [
-  { label: "SOC 2 Type II", href: "/security/soc2" },
-  { label: "ISO 27001", href: "/security/iso27001" },
+  { label: "SOC 2 Type II & ISO 27001", href: "/security" },
   { label: "GDPR", href: "/security/gdpr" },
   { label: "EU & US Data Regions", href: "/security/data-regions" },
   { label: "HIPAA-ready region", href: "/security/hipaa" },
