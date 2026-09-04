@@ -142,9 +142,22 @@ export function HiringBadge({
           <span className="text-xs shrink-0" aria-hidden>
             🐐
           </span>
-          <span className="text-left">
-            <span className="block whitespace-nowrap">
-              {isHovered ? hoverLabel : idleLabel}
+          <span className="grid text-left">
+            <span
+              className={cn(
+                "col-start-1 row-start-1 whitespace-nowrap",
+                isHovered && "invisible",
+              )}
+            >
+              {idleLabel}
+            </span>
+            <span
+              className={cn(
+                "col-start-1 row-start-1 whitespace-nowrap",
+                !isHovered && "invisible",
+              )}
+            >
+              {hoverLabel}
             </span>
           </span>
         </NextLink>
