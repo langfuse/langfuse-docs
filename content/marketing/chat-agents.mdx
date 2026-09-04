@@ -4,9 +4,9 @@ description: Build and improve production chat agents with full-session tracing,
 contentWidth: full
 ---
 
-import { Cloud, MessageSquare } from "lucide-react";
 import { CustomerQuoteGrid } from "@/components/chat-agents/CustomerQuoteGrid";
 import { RelevantIntegrations } from "@/components/chat-agents/RelevantIntegrations";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
 # <span className="sr-only">Langfuse for chat agents</span>
 
@@ -244,19 +244,9 @@ import { RelevantIntegrations } from "@/components/chat-agents/RelevantIntegrati
     <RelevantIntegrations />
   </section>
 
-  <section className="border-t border-line-structure bg-surface-1 px-5 py-12 sm:px-10">
-    <p className="text-center font-mono text-[9px] uppercase tracking-[0.1em] text-text-tertiary">
-      Get help
-    </p>
-    <p className="mx-auto mt-2 max-w-[56ch] text-center text-[13px] text-text-secondary">
-      Need support rolling this out in production? We can help with setup,
-      instrumentation, and eval workflows.
-    </p>
-    <div className="mx-auto mt-6 max-w-3xl">
-      <Cards num={2}>
-        <Card title="Get started free" href="https://cloud.langfuse.com" icon={<Cloud />} />
-        <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
-      </Cards>
+  <section className="border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
+    <div className="mx-auto max-w-5xl">
+      <CustomerStoryCTA />
     </div>
   </section>
 
