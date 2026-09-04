@@ -26,6 +26,11 @@ jobs:
         with:
           node-version: 22
 
+      - name: Update cached GitHub star count
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/update-github-stars.js
+
       - name: Generate contributors
         env:
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -45,7 +50,7 @@ jobs:
         run: |
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
-          git add data/generated/contributors.json src/langfuse_github_discussions.json public/github-discussions-sitemap.xml
+          git add data/generated/contributors.json src/github-stars.ts src/langfuse_github_discussions.json public/github-discussions-sitemap.xml
           git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update GitHub data and sitemap" && git push "https://x-access-token:${UPDATE_DOCS_MAIN_BRANCH_PAT}@github.com/${GITHUB_REPOSITORY}.git" "${GITHUB_REF#refs/heads/}")
         env:
           UPDATE_DOCS_MAIN_BRANCH_PAT: ${{ secrets.UPDATE_DOCS_MAIN_BRANCH_PAT }}
