@@ -131,11 +131,13 @@ export default function CloudRegionSelectorPage() {
       translate="no"
       className="flex min-h-screen flex-col items-center justify-center bg-surface-bg px-4 py-10 sm:px-6 lg:px-8 notranslate"
     >
-      <div className="flex w-full max-w-[480px] flex-col items-center gap-8">
-        <div className="flex flex-col items-center gap-5">
-          <div className="flex flex-col items-center gap-2">
+      <div className="flex w-full max-w-[480px] flex-col items-center gap-10">
+        <div className="flex flex-col items-center gap-8">
+          <div className="flex flex-col items-center gap-1">
             <Logo variant="byClickHouse" />
-            <Text>Agent Observability and Evals</Text>
+            <Text size="s" className="tracking-[0.01em]">
+              Agent Observability and Evals
+            </Text>
           </div>
           <Heading as="h1" size="normal" className="text-center">
             Select a region
@@ -168,9 +170,9 @@ export default function CloudRegionSelectorPage() {
                     {card.icon}
                   </span>
 
-                  <div className="min-w-0 flex-1">
+                  <div className="flex min-w-0 flex-1 flex-col gap-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-analog text-[15px] font-medium text-text-primary">
+                      <span className="font-analog text-[15px] font-medium leading-none text-text-primary">
                         {card.title}
                       </span>
                       {isSignedIn && <SignedInBadge />}
@@ -178,7 +180,7 @@ export default function CloudRegionSelectorPage() {
                     <Text
                       size="s"
                       as="span"
-                      className="mt-0.5 block text-left text-text-tertiary"
+                      className="block text-left leading-[150%] text-text-tertiary lg:leading-[150%]"
                     >
                       {host}
                       <span className="mx-1.5 text-text-disabled">
