@@ -44,6 +44,10 @@ const security = [
   { label: "GDPR", href: "/security/gdpr" },
   { label: "EU & US Data Regions", href: "/security/data-regions" },
   { label: "HIPAA-ready region", href: "/security/hipaa" },
+  {
+    label: "Hardening for Gov",
+    href: "/self-hosting/configuration/hardening#hardening-for-government",
+  },
 ];
 
 export const Enterprise = () => {
