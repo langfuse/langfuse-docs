@@ -1,6 +1,7 @@
 import {
   Activity,
   BarChart2,
+  Bot,
   BookOpen,
   Bookmark,
   FlaskConical,
@@ -46,6 +47,10 @@ export const resourcesLinks: NavPanelLink[] = [
   { name: "Example Project", href: "/docs/demo", icon: Bookmark },
   { name: "Walkthroughs", href: "/guides", icon: GraduationCap },
   { name: "Support", href: "/support", icon: HelpCircle },
+];
+
+export const useCaseLinks: NavPanelLink[] = [
+  { name: "Chat agents", href: "/chat-agents", icon: Bot },
 ];
 
 export const simpleLinks = [

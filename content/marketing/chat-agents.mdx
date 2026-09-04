@@ -1,0 +1,295 @@
+---
+title: Langfuse for chat agents
+description: Build and improve production chat agents with full-session tracing, quality evaluation, and cost visibility in one platform.
+contentWidth: full
+---
+
+import { CustomerQuoteGrid } from "@/components/chat-agents/CustomerQuoteGrid";
+import { RelevantIntegrations } from "@/components/chat-agents/RelevantIntegrations";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+import { Activity, BookOpen, Rocket } from "lucide-react";
+
+<h1 className="sr-only">Langfuse for chat agents</h1>
+
+<div className="not-prose mt-6 overflow-hidden border border-line-structure bg-surface-bg">
+  <section className="grid border-b border-line-structure lg:grid-cols-[1.2fr_0.8fr]">
+    <div className="min-w-0 border-b border-line-structure px-6 py-7 sm:px-10 sm:py-8 lg:border-b-0 lg:border-r">
+      <p className="font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
+        Use case / chat agents
+      </p>
+      <h2 className="mt-2 text-[38px] leading-[0.95] text-text-primary sm:text-[48px]">
+        <span className="block">Ship chat agents</span>
+        <span className="block">your users</span>
+        <span className="mt-1 inline-block bg-surface-cta-primary px-1.5 whitespace-nowrap">
+          keep talking to
+        </span>
+      </h2>
+      <p className="mt-4 max-w-[56ch] text-[14px] leading-[1.45] text-text-secondary">
+        Chat-like agents are multi-turn, stateful, and stubbornly hard to debug.
+        Langfuse traces every session end to end. See where a conversation went
+        sideways, what each turn cost, and whether users are satisfied.
+      </p>
+      <div className="mt-6 flex flex-wrap gap-2">
+        <a
+          href="https://cloud.langfuse.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="border border-line-cta bg-text-primary px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-surface-bg transition-opacity hover:opacity-90"
+        >
+          Start free
+        </a>
+        <a
+          href="/talk-to-us"
+          className="border border-line-structure bg-surface-bg px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary"
+        >
+          Talk to sales
+        </a>
+        <a
+          href="/docs/observability/get-started"
+          className="border border-line-structure bg-surface-bg px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary"
+        >
+          Chat agent quickstart →
+        </a>
+      </div>
+    </div>
+
+    <div className="min-w-0 bg-surface-1 px-4 py-4 sm:px-6 sm:py-5">
+      <div className="border border-line-structure bg-surface-bg">
+        <div className="grid grid-cols-2 border-b border-line-structure px-3 py-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+          <span>Session · cs-agent-prod · #2104</span>
+          <span className="text-right">7 turns · 08:04</span>
+        </div>
+
+        <div className="space-y-2 p-3 text-[11px] text-text-secondary">
+          <div className="flex justify-end">
+            <p className="max-w-[88%] border border-line-structure bg-surface-1 px-2.5 py-1.5 text-text-primary">
+              Where is my payout for last week?
+            </p>
+          </div>
+          <p className="border border-line-structure bg-surface-bg px-2.5 py-1.5 text-text-primary">
+            I can help with that. Your last payout was on 12 May for €248.10.
+          </p>
+          <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+            Agent · retrieve_payout · 26 ms · €0.04
+          </p>
+          <div className="flex justify-end">
+            <p className="max-w-[88%] border border-line-structure bg-surface-1 px-2.5 py-1.5 text-text-primary">
+              That&apos;s not what I asked. Last week.
+            </p>
+          </div>
+          <p className="border border-line-structure bg-surface-bg px-2.5 py-1.5 text-text-primary">
+            Sorry — checking 20-26 May now. Payout of €412.60 settles tomorrow.
+          </p>
+          <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+            Agent · retry_payout · 2.1 s · confidence 0.92
+          </p>
+        </div>
+
+        <div className="grid grid-cols-3 border-t border-line-structure">
+          <div className="border-r border-line-structure px-3 py-2">
+            <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+              Frustrated
+            </p>
+            <p className="text-[16px] leading-none text-text-primary">3 of 7</p>
+          </div>
+          <div className="border-r border-line-structure px-3 py-2">
+            <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+              Cost / turn
+            </p>
+            <p className="text-[16px] leading-none text-text-primary">$0.026</p>
+          </div>
+          <div className="px-3 py-2">
+            <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+              Resolved
+            </p>
+            <p className="text-[16px] leading-none text-text-primary">Yes</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <section className="grid sm:grid-cols-2 lg:grid-cols-4">
+    <div className="border-b border-r border-line-structure px-5 py-4 sm:border-b lg:border-b-0">
+      <p className="text-[33px] leading-none text-text-primary">1.4B+</p>
+      <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+        Chat sessions traced
+      </p>
+    </div>
+    <div className="border-b border-line-structure px-5 py-4 sm:border-b sm:border-r lg:border-b-0">
+      <p className="text-[33px] leading-none text-text-primary">38M</p>
+      <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+        Turns scored / month
+      </p>
+    </div>
+    <div className="border-b border-r border-line-structure px-5 py-4 sm:border-b-0 lg:border-b-0">
+      <p className="text-[33px] leading-none text-text-primary">2,300+</p>
+      <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+        Companies in production
+      </p>
+    </div>
+    <div className="px-5 py-4">
+      <p className="text-[33px] leading-none text-text-primary">80+</p>
+      <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+        Agent framework integrations
+      </p>
+    </div>
+  </section>
+
+  <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
+    <p className="text-center font-mono text-[9px] uppercase tracking-[0.1em] text-text-tertiary">
+      Value
+    </p>
+    <h2 className="mt-2 text-center text-[48px] leading-[1] text-text-primary">
+      Trace the full session, not one call
+    </h2>
+    <p className="mx-auto mt-3 max-w-[64ch] text-center text-[13px] text-text-tertiary">
+      One session is dozens of LLM calls, tool calls and retries. Group by
+      session and user, then read the conversation the way your user lived it.
+    </p>
+
+    <div className="mt-8 grid gap-2 lg:grid-cols-3">
+      <article className="border border-line-structure bg-surface-bg p-5">
+        <span className="inline-flex h-4 w-4 items-center justify-center border border-line-structure font-mono text-[9px] text-text-tertiary">
+          □
+        </span>
+        <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+          Sessions
+        </p>
+        <h3 className="mt-2 text-[30px] leading-[1.05] text-text-primary">
+          Identify turns with unhappy users
+        </h3>
+        <p className="mt-3 text-[13px] leading-[1.5] text-text-secondary">
+          Thumbs-down, retries and repeated re-asks surface where context failed
+          or tool output broke. Open the trace and read the prompt, retrieval
+          context and tool call output.
+        </p>
+        <a
+          href="/docs/observability/features/sessions"
+          className="mt-5 inline-block text-[12px] text-text-secondary underline underline-offset-4 hover:text-text-primary"
+        >
+          Session tracing →
+        </a>
+      </article>
+
+      <article className="border border-line-structure with-stripes p-5">
+        <span className="inline-flex h-4 w-4 items-center justify-center border border-line-structure font-mono text-[9px] text-text-tertiary">
+          ∣
+        </span>
+        <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+          Cost
+        </p>
+        <h3 className="mt-2 text-[30px] leading-[1.05] text-text-primary">
+          Get full cost transparency
+        </h3>
+        <p className="mt-3 text-[13px] leading-[1.5] text-text-secondary">
+          Context grows with every turn and so does your bill. Break cost and
+          token usage down by turn, session, model and release, then report to
+          finance with confidence.
+        </p>
+        <a
+          href="/docs/observability/features/token-and-cost-tracking"
+          className="mt-5 inline-block text-[12px] text-text-secondary underline underline-offset-4 hover:text-text-primary"
+        >
+          Cost tracking →
+        </a>
+      </article>
+
+      <article className="border border-line-structure bg-surface-bg p-5">
+        <span className="inline-flex h-4 w-4 items-center justify-center border border-line-structure font-mono text-[9px] text-text-tertiary">
+          ✓
+        </span>
+        <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+          Evals
+        </p>
+        <h3 className="mt-2 text-[30px] leading-[1.05] text-text-primary">
+          Ensure quality for chat interactions
+        </h3>
+        <p className="mt-3 text-[13px] leading-[1.5] text-text-secondary">
+          Run LLM-as-a-judge in live turns for frustration, tone and
+          instruction-following. Promote strong sessions into datasets and test
+          your next prompt before release.
+        </p>
+        <a
+          href="/docs/evaluation/overview"
+          className="mt-5 inline-block text-[12px] text-text-secondary underline underline-offset-4 hover:text-text-primary"
+        >
+          Evaluations →
+        </a>
+      </article>
+    </div>
+
+  </section>
+
+  <section className="border-t border-line-structure bg-surface-1 px-5 py-14 sm:px-10 sm:py-18">
+    <p className="text-center font-mono text-[9px] uppercase tracking-[0.1em] text-text-tertiary">
+      Customers
+    </p>
+    <h2 className="mt-2 text-center text-[44px] leading-[1] text-text-primary">
+      Teams running chat in production
+    </h2>
+    <CustomerQuoteGrid />
+  </section>
+
+  <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-18">
+    <p className="text-center font-mono text-[9px] uppercase tracking-[0.1em] text-text-tertiary">
+      Integrations
+    </p>
+    <h2 className="mt-2 text-center text-[44px] leading-[1] text-text-primary">
+      Any model, any framework
+    </h2>
+    <p className="mx-auto mt-2 max-w-[56ch] text-center text-[13px] text-text-tertiary">
+      Based on OpenTelemetry. Drop in the SDK, keep your stack.
+    </p>
+    <RelevantIntegrations />
+  </section>
+
+  <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-16">
+    <p className="text-center font-mono text-[9px] uppercase tracking-[0.1em] text-text-tertiary">
+      Recommended resources
+    </p>
+    <h2 className="mt-2 text-center text-[40px] leading-[1] text-text-primary">
+      Learn from real chat-agent examples
+    </h2>
+    <p className="mx-auto mt-2 max-w-[60ch] text-center text-[13px] text-text-tertiary">
+      See the demo, study the academy walkthrough, and use production
+      monitoring patterns that catch rage-click equivalents in chat sessions.
+    </p>
+    <div className="mx-auto mt-8 max-w-4xl">
+      <Cards num={2} className="sm:grid-cols-1 lg:grid-cols-2">
+        <Card
+          title="Explore the live demo project"
+          href="/docs/demo"
+          icon={<Rocket />}
+          description="Run a production-like support chat and inspect real traces, turn-level costs, and user feedback."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
+        <Card
+          title="Academy: customer support chatbot example"
+          href="/academy/examples/customer-support-chatbot"
+          icon={<BookOpen />}
+          description="Learn a step-by-step workflow for building, evaluating, and iterating on customer-support chat agents."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
+        <Card
+          title="The rage clicks of LLM apps (blog)"
+          href="/blog/2026-04-01-llm-as-a-judge-production-monitoring"
+          icon={<Activity />}
+          description="See concrete monitoring patterns to detect repeated re-asks, frustration loops, and quality regressions."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
+      </Cards>
+    </div>
+  </section>
+
+  <section className="border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
+    <div className="mx-auto max-w-5xl">
+      <CustomerStoryCTA />
+    </div>
+  </section>
+
+</div>

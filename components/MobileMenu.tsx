@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { productLinks, resourcesLinks } from "@/lib/nav-links";
+import { productLinks, resourcesLinks, useCaseLinks } from "@/lib/nav-links";
 import type { SectionNavData } from "@/lib/nav-tree";
 
 export function MobileMenu({
@@ -17,6 +17,7 @@ export function MobileMenu({
   const [open, setOpen] = useState(false);
   const [productOpen, setProductOpen] = useState(false);
   const [resourcesOpen, setResourcesOpen] = useState(false);
+  const [useCasesOpen, setUseCasesOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -127,6 +128,24 @@ export function MobileMenu({
                     onToggle={() => setResourcesOpen((v) => !v)}
                   >
                     {resourcesLinks.map((link) => (
+                      <Link
+                        key={link.name}
+                        href={link.href}
+                        onClick={close}
+                        className="block px-0 py-2.5 text-sm text-text-secondary hover:text-text-primary transition-colors"
+                      >
+                        {link.name}
+                      </Link>
+                    ))}
+                  </CollapsibleRow>
+
+                  {/* Use cases */}
+                  <CollapsibleRow
+                    label="Use cases"
+                    open={useCasesOpen}
+                    onToggle={() => setUseCasesOpen((v) => !v)}
+                  >
+                    {useCaseLinks.map((link) => (
                       <Link
                         key={link.name}
                         href={link.href}
