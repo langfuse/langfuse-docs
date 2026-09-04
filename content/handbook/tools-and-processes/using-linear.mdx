@@ -9,25 +9,108 @@ We use Linear for all internal ticketing / task management.
 
 Linear is the backbone of our [product ops](/handbook/product-engineering/how-we-work/product-ops) that allows us to move fast as a small team while working with a large community of customers and OSS users.
 
+Our workspace is `clickhouse`, shared with the wider ClickHouse organisation. Langfuse work lives in the Langfuse teams within it.
+
 ## Principles
 
+- Linear is the source of truth for executing work. Do not keep a parallel status tracker in Slack, spreadsheets, or Figma — the one exception is the long-term [roadmap](/handbook/product-engineering/how-we-work/roadmapping), which stays in Figma.
 - Everyone maintains their own issues and projects
   - We do not have someone on the team that manages the backlog centrally → There should be no issues that are not assigned to someone.
-- Create Linear issues for tasks that are likely to happen within the next 6 months. Everything beyond that can be tracked on the [roadmap](/docs/roadmap) and [GitHub ideas](/ideas).
+- Every active project and issue has one lead, for its whole lifecycle.
+- Create Linear issues for tasks that are likely to happen within the next 6 months. Everything beyond that can be tracked on the [roadmap](/docs/roadmap) and [GitHub ideas](/ideas). Close, cancel, or backlog anything that is no longer likely within six months.
 
 ## How to use Linear
 
-- SLA: Clear out Linear Inbox multiple times a day. This is the main on-topic discussion channel.
+- SLA: Clear out the Linear Inbox at least twice per working day. This is the main on-topic discussion channel. Triage for importance, and reply immediately when the reply takes less than two minutes. Use `H` to snooze anything you want to come back to.
+- Use Linear comments for durable, on-topic discussion and decisions. Link a Slack thread when you need a faster turnaround.
 - Git:
   - When making a change, copy the branch name from Linear issue, which leads to automatic linking of PR to Linear issue.
-  - Once PR is merged, issue is moved to the `merged` state. Move to `done` once the change is deployed to production and all potential follow-up work is tracked/done.
+  - Once PR is merged, issue is moved to the `merged` state. See [definition of done](#definition-of-done) for what happens next.
+
+## Projects and issues [#projects-and-issues]
+
+Use the smallest primitive that fits the work.
+
+| Primitive      | When to use it                                                                                                                                                     |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Issue**      | One concrete deliverable with one owner. The default. Small improvements and fixes stay issues and never need a project.                                           |
+| **Project**    | Multi-step work that needs several issues, coordination, progress reporting, or delivery stages. Projects need project management, so only open one for real work. |
+| **Milestone**  | Optional, for larger projects: a meaningful delivery phase such as "planning complete" or "minimum viable release" — not a checklist.                              |
+| **Initiative** | Rare. A broad, multi-quarter outcome spanning several projects. Projects and issues are usually enough.                                                            |
+
+Do not create a project just to group loosely related issues — use a label and a saved view for that. A project normally has zero or one RFC; if it needs two, it is probably two projects. Where there is an RFC, it belongs in the project description.
+
+### Project lifecycle
+
+| Status          | What it needs                                                                                                                                                |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Backlog**     | Likely within six months. Owner, priority, pod/function label, a short outcome.                                                                              |
+| **Planned**     | Owner, priority, a quarter-level target date, pod/function label, a brief and a definition of done, and known dependencies.                                  |
+| **In Progress** | A specific target date, current health, weekly updates, linked issues — plus milestones if the project is large.                                             |
+| **Completed**   | The intended outcome is delivered, not merely that the issue list is empty. Follow-ups captured; docs, changelog and customer follow-up done where relevant. |
+| **Canceled**    | Intentionally stopped, with a short reason.                                                                                                                  |
+
+Target dates are internal planning signals, not external commitments. The public roadmap stays directional.
+
+At quarter-end every remaining backlog project is deliberately re-prioritised, moved to a new quarter, or cancelled. Nothing rolls forward silently.
+
+### Weekly project updates
+
+If you lead an active project, post an update before Monday planning. Nothing reminds you, so make it part of your Friday or Monday morning:
+
+- Health
+- Progress since the last update
+- Next step
+- Blockers, or decisions you need from someone else
+- Any change to the target date
+
+Monday meetings then spend their time on decisions, risks and dependencies rather than round-robin status.
+
+Separately, look through your own open bugs once a week to catch anything slipping.
+
+## Definition of done [#definition-of-done]
+
+An engineering issue moves to `merged` automatically when its pull request merges. It does **not** go straight to `done`.
+
+`merged` is deliberately a staging step: it is your chance to capture what you do not want to forget before the issue leaves your view. Before moving it to `done` by hand, check whether the change needs
+
+- a documentation page or edit,
+- a changelog entry,
+- a word to any customer whose request is linked to it.
+
+Complete a **project** when its intended outcome is delivered — including docs, changelog and customer follow-up where relevant.
+
+## Labels
+
+- Every issue carries a type label: `bug`, `improvement`, or `feature`.
+- On top of that, use a well-known label for the product area, so filters and shared views work. See the [conventions in how we ship](/handbook/product-engineering/how-we-work/how-we-ship#linear-conventions).
+- Do not recreate owner, status, priority, dates, initiatives, or customer links as labels — Linear already has fields for those.
+
+## Bugs and feature requests
+
+Bugs and feature requests arrive through integrations rather than being typed in by hand: GitHub Issues from `langfuse/langfuse` land in the engineering team automatically, and internal requests come in through Linear Asks. Customer requests are evidence linking a customer to an issue, not a separate execution issue — when several map to one issue, preserve all of the evidence on it.
+
+Feature owners clear triage continuously and normally decide within one working day: link or merge with an existing issue, accept it as a new issue, add it to a relevant backlog project, re-route it to the right owner, or close it as not planned.
+
+## Agents may write to Linear [#agents]
+
+Agents are allowed to write to Linear directly — there is no longer a rule that one must stop and ask a human first. They comment, append their reasoning to an issue description, and create issues.
+
+They do have to follow rules, and **the rules are not repeated here.** They live as agent skills in the `langfuse/langfuse` repository, under `.agents/skills/`, together with the tooling that implements them:
+
+- `linear-agent-writes` — what an agent may write and how each write must be marked. Read this one before your first agentic write.
+- `linear-planning` — planning a feature as issues that map onto a stack of pull requests.
+- `linear-context-handover` — recovering the history behind a piece of work, and leaving your reasoning on the issue when you finish.
+
+Keeping them in the repo means an agent loads them where the work happens, and there is one copy to keep correct. The short version: every agent write is labelled and says in its own text that an agent wrote it, so you can always tell at a glance which words on an issue are a person's. Changing state — assigning, moving, closing, prioritising — stays with a human.
 
 ## Setup Linear
 
 ### Mandatory
 
 - Connect to Slack and GitHub
-- Join Engineering, Langfuse, GTM teams
+- Join the Langfuse teams you need: `Engineering (LF)`, `Langfuse`, and whichever of `Marketing (LF)`, `Sales (LF)`, `Ops (LF)` and `General (LF)` apply to your work
+- Set "assign to self on creation" so issues you create are owned from the start
 
 ### Optional
 
