@@ -280,7 +280,7 @@ Yes, you can configure [spend alerts](/docs/administration/spend-alerts) to rece
 Through the organization settings in Langfuse Cloud or the [Customer Portal](/billing-portal).
 
 **Can I purchase Langfuse through AWS Marketplace?**
-Yes. Enterprise customers with a yearly commitment can bill via AWS Marketplace. [Talk to us](/talk-to-us) to request a private offer. Invoice billing is also available.
+Yes. Enterprise customers with a yearly commitment can bill via AWS Marketplace. [Talk to us](/talk-to-us?deployment=cloud) to request a private offer. Invoice billing is also available.
 
 **Can I redline the contracts?**
 Yes, customized contracts are available for Enterprise customers with a yearly commitment. [Contact sales](/talk-to-us) to discuss your requirements. Default plans are self-serve on standard terms.
