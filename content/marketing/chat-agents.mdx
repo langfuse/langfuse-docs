@@ -1,0 +1,252 @@
+---
+title: Langfuse for chat agents
+description: Build and improve production chat agents with full-session tracing, quality evaluation, and cost visibility in one platform.
+contentWidth: full
+---
+
+import { Button } from "@/components/ui/button";
+
+# <span className="sr-only">Langfuse for chat agents</span>
+
+<div className="not-prose mt-6 overflow-hidden rounded border border-border bg-card">
+  <section className="grid border-b border-border lg:grid-cols-2">
+    <div className="border-b border-border p-6 sm:p-10 lg:border-b-0 lg:border-r">
+      <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+        Use case / chat agents
+      </p>
+      <h2 className="mt-3 text-balance text-4xl font-semibold leading-tight text-foreground sm:text-5xl">
+        Ship chat agents your users{" "}
+        <span className="bg-primary/25 px-1">keep talking to</span>
+      </h2>
+      <p className="mt-5 max-w-xl text-base text-muted-foreground">
+        Chat-like agents are multi-turn, stateful, and stubbornly hard to debug.
+        Langfuse traces every session end-to-end so you can see where a
+        conversation went sideways, what each turn cost, and whether users are
+        satisfied.
+      </p>
+      <div className="mt-8 flex flex-wrap gap-2">
+        <Button href="https://cloud.langfuse.com" target="_blank" rel="noopener noreferrer">
+          Start free
+        </Button>
+        <Button href="/talk-to-us" variant="secondary">
+          Talk to sales
+        </Button>
+        <Button href="/docs/observability/get-started" variant="secondary">
+          Chat agent quickstart
+        </Button>
+      </div>
+    </div>
+
+    <div className="bg-muted/40 p-6 sm:p-10">
+      <div className="space-y-3 rounded border border-border bg-background p-4 shadow-sm">
+        <p className="text-xs uppercase tracking-wide text-muted-foreground">
+          Session · cs-agent-prod · #2104
+        </p>
+        <div className="flex justify-end">
+          <div className="max-w-[90%] rounded border border-border bg-muted/60 px-3 py-2 text-sm">
+            Where is my payout for last week?
+          </div>
+        </div>
+        <div className="rounded border border-border bg-card p-3 text-sm">
+          I can help with that. Your last payout was on 12 May for €248.10.
+        </div>
+        <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
+          Agent · retrieve_payout · 26 ms · €0.04
+        </div>
+        <div className="flex justify-end">
+          <div className="max-w-[90%] rounded border border-border bg-muted/60 px-3 py-2 text-sm">
+            That&apos;s not what I asked. Last week.
+          </div>
+        </div>
+        <div className="rounded border border-border bg-card p-3 text-sm">
+          Sorry — checking 20–26 May now. Payout of €412.60 settles tomorrow.
+        </div>
+        <div className="grid gap-2 border-t border-border pt-3 text-xs text-muted-foreground sm:grid-cols-3">
+          <p>
+            Frustrated turns
+            <br />
+            <span className="text-base font-semibold text-foreground">3 of 7</span>
+          </p>
+          <p>
+            Cost / turn
+            <br />
+            <span className="text-base font-semibold text-foreground">$0.026</span>
+          </p>
+          <p>
+            Resolved
+            <br />
+            <span className="text-base font-semibold text-foreground">Yes</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <section className="grid gap-0 border-b border-border text-center sm:grid-cols-2 lg:grid-cols-4">
+    <div className="border-b border-border p-6 sm:border-r lg:border-b-0">
+      <p className="text-3xl font-semibold text-foreground">1.4B+</p>
+      <p className="mt-1 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+        Chat sessions traced
+      </p>
+    </div>
+    <div className="border-b border-border p-6 lg:border-b-0 lg:border-r">
+      <p className="text-3xl font-semibold text-foreground">38M</p>
+      <p className="mt-1 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+        Turns scored / month
+      </p>
+    </div>
+    <div className="border-b border-border p-6 sm:border-r sm:border-b-0">
+      <p className="text-3xl font-semibold text-foreground">2,300+</p>
+      <p className="mt-1 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+        Companies in production
+      </p>
+    </div>
+    <div className="p-6">
+      <p className="text-3xl font-semibold text-foreground">80+</p>
+      <p className="mt-1 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+        Agent framework integrations
+      </p>
+    </div>
+  </section>
+
+  <section className="border-b border-border px-6 py-14 sm:px-10">
+    <p className="text-center text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+      Value
+    </p>
+    <h2 className="mt-3 text-center text-3xl font-semibold text-foreground sm:text-4xl">
+      Trace the full session, not one call
+    </h2>
+    <p className="mx-auto mt-3 max-w-3xl text-center text-muted-foreground">
+      One session is dozens of LLM calls, tool calls, and retries. Group every
+      turn by session and user, then read the conversation exactly the way your
+      users lived it.
+    </p>
+    <div className="mt-10 grid gap-4 lg:grid-cols-3">
+      <article className="rounded border border-border bg-background p-5">
+        <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+          Sessions
+        </p>
+        <h3 className="mt-2 text-lg font-semibold text-foreground">
+          Identify turns with unhappy users
+        </h3>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Thumbs-down signals and repeated re-asks surface where context or tool
+          output was wrong. Open the trace and inspect every turn to debug
+          faster.
+        </p>
+        <a className="mt-4 inline-block text-sm font-medium text-foreground underline" href="/docs/observability/features/sessions">
+          Session tracing →
+        </a>
+      </article>
+      <article className="rounded border border-border bg-background p-5">
+        <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+          Cost
+        </p>
+        <h3 className="mt-2 text-lg font-semibold text-foreground">
+          Get full cost transparency
+        </h3>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Context grows with every turn and so do bills. Break cost and tokens
+          down by turn, session, user, model, and release so finance can report
+          with confidence.
+        </p>
+        <a className="mt-4 inline-block text-sm font-medium text-foreground underline" href="/docs/observability/features/token-and-cost-tracking">
+          Cost tracking →
+        </a>
+      </article>
+      <article className="rounded border border-border bg-background p-5">
+        <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+          Evals
+        </p>
+        <h3 className="mt-2 text-lg font-semibold text-foreground">
+          Ensure quality for chat interactions
+        </h3>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Run LLM-as-a-judge checks in live traffic to detect frustration, tone,
+          and instruction-following. Promote strong conversations into datasets
+          and test next changes before release.
+        </p>
+        <a className="mt-4 inline-block text-sm font-medium text-foreground underline" href="/docs/evaluation/overview">
+          Evaluations →
+        </a>
+      </article>
+    </div>
+  </section>
+
+  <section className="border-b border-border bg-muted/30 px-6 py-14 sm:px-10">
+    <p className="text-center text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+      Customers
+    </p>
+    <h2 className="mt-3 text-center text-3xl font-semibold text-foreground sm:text-4xl">
+      Teams running chat in production
+    </h2>
+    <div className="mt-10 grid gap-4 lg:grid-cols-3">
+      <blockquote className="rounded border border-border bg-background p-5 text-sm text-foreground">
+        “We went from guessing which conversations failed to seeing the exact
+        turn, the retrieved context, and the cost in one view.”
+        <footer className="mt-4 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+          Engineering lead, AI platform
+        </footer>
+      </blockquote>
+      <blockquote className="rounded border border-border bg-background p-5 text-sm text-foreground">
+        “Self-hosted, OpenTelemetry-native, and auditable. Langfuse cleared our
+        review and still gave the team same-day debugging.”
+        <footer className="mt-4 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+          Lead ML engineer
+        </footer>
+      </blockquote>
+      <blockquote className="rounded border border-border bg-background p-5 text-sm text-foreground">
+        “Evals on live traffic are how we ship prompt changes weekly without
+        waiting on a manual review round.”
+        <footer className="mt-4 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+          Staff engineer, AI products
+        </footer>
+      </blockquote>
+    </div>
+  </section>
+
+  <section className="border-b border-border px-6 py-14 sm:px-10">
+    <p className="text-center text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+      Integrations
+    </p>
+    <h2 className="mt-3 text-center text-3xl font-semibold text-foreground sm:text-4xl">
+      Any model, any framework
+    </h2>
+    <p className="mx-auto mt-3 max-w-2xl text-center text-muted-foreground">
+      Based on OpenTelemetry. Drop in the SDK and keep your current stack.
+    </p>
+    <div className="mt-8 grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
+      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">OpenAI</span>
+      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">Anthropic</span>
+      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">LangChain</span>
+      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">LangGraph</span>
+      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">LlamaIndex</span>
+      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">Vercel AI SDK</span>
+      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">OpenAI Agents</span>
+      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">Pydantic AI</span>
+      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">CrewAI</span>
+      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">Python</span>
+      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">TypeScript</span>
+      <span className="rounded border border-border bg-background px-3 py-2 text-center text-sm text-foreground">OpenTelemetry</span>
+    </div>
+  </section>
+
+  <section className="bg-primary/20 px-6 py-14 text-center sm:px-10">
+    <h2 className="text-3xl font-semibold text-foreground sm:text-4xl">
+      Instrument your chat agent today
+    </h2>
+    <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
+      Start on the free tier with no credit card, then scale to production with
+      cloud or self-hosted deployment options.
+    </p>
+    <div className="mt-8 flex flex-wrap justify-center gap-2">
+      <Button href="https://cloud.langfuse.com" target="_blank" rel="noopener noreferrer">
+        Get started for free
+      </Button>
+      <Button href="/talk-to-us" variant="secondary">
+        Talk to sales
+      </Button>
+    </div>
+  </section>
+</div>
