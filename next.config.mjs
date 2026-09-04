@@ -65,6 +65,11 @@ const nextConfig = {
     // Reduce peak memory during production build (helps avoid OOM on Vercel)
     webpackMemoryOptimizations: true,
     serverSourceMaps: false,
+    // Persist Turbopack compile cache under .next/cache so Vercel/CI
+    // incremental builds can reuse work. Opt-in on Next 16.2 (default in 16.3).
+    // `next build` already preserves `.next/cache` when cleaning the dist dir;
+    // do not delete that directory in postbuild or the cache never survives.
+    turbopackFileSystemCacheForBuild: true,
   },
   // Reduce memory usage during build
   productionBrowserSourceMaps: false,
