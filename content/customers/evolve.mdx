@@ -36,7 +36,7 @@ import { ImpactChart } from "@/components/customers/ImpactChart";
     {
       area: "Rest brings sleep coaching to thousands of users",
       impact:
-        "Evolve built Rest, a voice-and-text sleep coach based on CBT-I, circadian biology, and neuroscience.",
+        "Evolve built Rest, a voice-and-text sleep coach based on the principles of CBT-I, circadian biology, and neuroscience.",
     },
     {
       area: "Tracing and prompt management in one place",
@@ -111,7 +111,7 @@ For both Ignacio and Martin, tracing their agents in Langfuse is the foundation 
 
 Martin reviews traces himself. Working through flagged conversations in [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) surfaces which failure modes are quick fixes and which are "a whole big component we need to build... a multi-week, maybe even a multi-month exercise."
 
-On top of manual review, Evolve runs [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators in Langfuse to identify memory and forgetting issues.
+On top of manual review, Evolve runs [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators in Langfuse to measure how consistently the coach carries context forward.
 
 ## Deep dive: building the coach's cross-session memory
 
@@ -131,7 +131,7 @@ Consistency here is a trust and experience question: remembering what someone to
 
 ## Prompt management at scale
 
-Beyond tracing, Evolve manages more than 100 prompts in [Langfuse Prompt Management](/docs/prompt-management/overview). These aren't static prompts. They are [composed](/docs/prompt-management/features/composability) on the fly, and Langfuse makes that composition easy to pull off: a foundational prompt sets up the overall conversation, and on top of that sits an agenda of two to four items, each its own prompt that can embed further prompts, including locale-specific variants (English and Spanish, adjusted for users in Argentina, Colombia, and Spain).
+Beyond tracing, Evolve manages more than 100 prompts in [Langfuse Prompt Management](/docs/prompt-management/overview). These aren't static prompts. They are [composed](/docs/prompt-management/features/composability) on the fly, and Langfuse makes that composition easy to pull off: a foundational prompt sets up the overall conversation, and on top of that sits an agenda of two to four items, each its own prompt that can embed further prompts, including locale-specific variants (English and Spanish, adjusted for users in Argentina, Colombia, and Mexico).
 
 <Frame fullWidth zoomOnMobile className="w-full">
   ![Layered Rest prompt architecture showing a foundational prompt, agenda items, embedded prompts, and locale variants composed at runtime in Langfuse](/images/customers/evolve/rest-prompt-composition.png)
