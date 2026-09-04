@@ -152,6 +152,7 @@ Please check the following:
 - **No env file needed**: All external integrations (OpenAI, Supabase, PostHog, etc.) degrade gracefully when keys are absent. You do not need a `.env` file for routine development.
 - **Site search is inert locally**: The `Ctrl/Cmd+K` search dialog (powered by Inkeep) opens but returns no results without Inkeep keys. This is expected; use sidebar/link navigation to reach pages when testing docs locally.
 - **postinstall runs agent shim sync**: `pnpm install` triggers `scripts/postinstall.sh`, which syncs agent config shims. This is expected and idempotent.
+- **Walkthrough screenshots and demo videos**: Create these only for complex visual changes that cannot be understood from the diff alone — for example multi-step UI interactions, layout or responsive changes, or new interactive components. Do not create screenshots or demo videos for small edits such as copy changes, docs or markdown updates, simple style tweaks, or other changes that are clear from the code diff. In those cases, the diff is sufficient evidence.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
