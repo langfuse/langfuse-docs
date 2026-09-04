@@ -67,7 +67,7 @@ Traditional observability handles many small spans. LLM systems run differently:
 
 - **Architecture** — ClickHouse OLAP database, async ingestion via Redis queue, S3/blob storage for large payloads, and edge-cached prompts.
 - **Reliability at scale** — 50M+ SDK installs per month, 90B+ observations processed per month, 50,000+ companies using Langfuse, 99.9% uptime.
-- **Security and compliance** — [SOC 2 Type II & ISO 27001](/security), [GDPR](/security/gdpr), [EU and US data regions](/security/data-regions), a [HIPAA-ready region](/security/hipaa), and [Hardening for Gov](/self-hosting/configuration/hardening#hardening-for-government). See the [security overview](/security).
+- **Security and compliance** — [SOC 2 Type II & ISO 27001](/security), [GDPR](/security/gdpr), [EU and US data regions](/security/data-regions), a [HIPAA-ready region](/security/hipaa), and [Hardening for Gov (soon)](/self-hosting/configuration/hardening#hardening-for-government). See the [security overview](/security).
 
 [Enterprise](/enterprise) · [Talk to us](/talk-to-us)
 

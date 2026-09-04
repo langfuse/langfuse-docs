@@ -44,7 +44,7 @@ const security = [
   { label: "EU & US Data Regions", href: "/security/data-regions" },
   { label: "HIPAA-ready region", href: "/security/hipaa" },
   {
-    label: "Hardening for Gov",
+    label: "Hardening for Gov (soon)",
     href: "/self-hosting/configuration/hardening#hardening-for-government",
   },
 ];
