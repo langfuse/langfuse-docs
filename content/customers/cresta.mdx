@@ -46,7 +46,7 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
 On Cresta’s platform, AI agents in production are not single model calls. An end customer might only see a generated response, but behind the scenes the agent runs intent detection, knowledge retrieval, tool execution, and safety validation-often many times-each with its own model, latency profile, and failure mode. A 200 OK from the agent endpoint says little about whether retrieval returned irrelevant documents or a guardrail silently rewrote the output.
 
-To run and improve those systems, teams need a trace of each step: inputs and outputs, latency, and cost. That visibility - [observability](/docs/observability/overview) in practice - is what makes it possible to evaluate, improve, and scale agents over time.
+To run and improve those systems, teams need a trace of each step: inputs and outputs, latency, and cost. That visibility - [observability](/docs/observability) in practice - is what makes it possible to evaluate, improve, and scale agents over time.
 
 ```text
 Infrastructure:  request → service → response → metric
@@ -118,7 +118,7 @@ In an agentic pipeline, the root cause of a wrong final response is often a misl
 
 The typed trace tree makes the causal chain explicit. Each generation node records the full prompt and completion, so Cresta’s engineers can walk from root to leaf and pinpoint exactly where the output went wrong - for example, intent detection returning “billing inquiry” when the customer was asking about a cancellation, with every downstream step following that incorrect signal.
 
-The [Playground](/docs/prompt-management/features/playground) goes further: engineers can replay the chain from the failing step with a modified [prompt](/docs/prompt-management/overview), keeping prior context fixed, and see the fix propagate in seconds rather than waiting for similar production traffic.
+The [Playground](/docs/prompt-management/features/playground) goes further: engineers can replay the chain from the failing step with a modified [prompt](/docs/prompt-management), keeping prior context fixed, and see the fix propagate in seconds rather than waiting for similar production traffic.
 
 ## What comes next
 

@@ -1,25 +1,29 @@
 ---
 title: Overview
-seoTitle: "Evaluation of LLM Applications"
-description: With Langfuse you can capture all your LLM evaluations in one place. You can combine a variety of different evaluation metrics like model-based evaluations (LLM-as-a-Judge), human annotations or fully custom evaluation workflows via API/SDKs. This allows you to measure quality, tonality, factual accuracy, completeness, and other dimensions of your LLM application.
+sidebarTitle: Overview
+seoTitle: Agent evals and experiments
+description: Evaluate agents in Langfuse. Combine LLM-as-a-Judge, code evaluators, human annotation, and experiments to measure quality on production traces and datasets.
 ---
 
 import { LoopDiagram } from "@/components/academy/LoopDiagram";
+import { evaluationFaqs } from "@/lib/product-faqs";
 
-# Evaluation Overview
+# Agent evals and experiments
 
-Evals give you a repeatable check of your LLM application's behavior. You replace guesswork with data, and catch regressions before you ship a change.
+Agent evals are a repeatable check of application behavior. You replace guesswork with [scores](/docs/evaluation/scores/overview) — numeric, categorical, boolean, or text — on live traces and on dataset experiments, so you can catch regressions before you ship.
+
+This page is for teams that need to measure quality in production and compare prompt, model, or code changes before release. If you want to score traffic today, start with [Evaluate Production Traffic](/docs/evaluation/get-started/online). To test a change on a fixed set of cases, start with [Evaluate with Datasets](/docs/evaluation/get-started/offline).
 
 <Frame fullWidth>
   <Image
     src="/images/docs/score-analytics-full-dashboard.png"
     alt="Score Analytics dashboard in Langfuse showing evaluation scores trended over time across multiple evaluators."
-    loading="lazy"
+    priority
     quality={85}
   />
 </Frame>
 
-Evaluation runs across most of the [AI engineering loop](/academy/ai-engineering-loop): you score live traces in production, turn interesting examples into datasets, run experiments to compare changes, and judge the results with manual or automated evaluators. It happens both **online**, on live production traces, and **offline**, before you ship a change.
+Evaluation runs across most of the [AI engineering loop](/academy/ai-engineering-loop): you score live traces, turn interesting examples into datasets, run experiments, and judge the results with manual or automated evaluators. It happens both **online**, on live production traces, and **offline**, before you ship a change.
 
 <LoopDiagram />
 
@@ -29,14 +33,23 @@ Want to see it in action? [**Create a free account**](/cloud) and explore Langfu
 
 </Callout>
 
-## Getting Started
+## What you can do with evals
+
+Teams use Langfuse evals to:
+
+- Score live production traces with [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) or [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators)
+- Review edge cases in [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) and collect [user feedback](/docs/observability/features/user-feedback)
+- Compare prompt, model, or code changes with [experiments](/docs/evaluation/experiments/experiments-via-ui) on a [dataset](/docs/evaluation/experiments/datasets)
+- Block a deploy when an experiment regresses in [CI](/docs/evaluation/experiments/experiments-ci-cd)
+
+## Getting started
 
 You can evaluate both:
 
 - [live incoming traces](/docs/evaluation/get-started/online) to measure quality on production data and track trends over time.
 - [results from running tests on a pre-defined dataset](/docs/evaluation/get-started/offline), to make sure your changes are ready for production.
 
-For more information on how evaluators, scores, datasets, and experiments fit together, read [Core Concepts](/docs/evaluation/core-concepts).
+For how evaluators, scores, datasets, and experiments fit together, read [Core Concepts](/docs/evaluation/core-concepts).
 
 If you're looking for another specific workflow, use the table below to find the right feature page:
 
@@ -53,6 +66,10 @@ If you're looking for another specific workflow, use the table below to find the
 | See how scores trend over time                      | [Score Analytics](/docs/evaluation/scores/score-analytics), [custom dashboards](/docs/metrics/features/custom-dashboards)                                                                                                                   |
 
 Already know what you're looking for? Browse _Evaluation Methods_ and _Experiments_ in the sidebar.
+
+## FAQ [#faq]
+
+<ProductFaq items={evaluationFaqs} />
 
 ## GitHub Discussions
 

@@ -100,6 +100,43 @@ const SECTION_CONFIG = {
 
 const SECTION_KEYS = Object.keys(SECTION_CONFIG);
 
+// Pin product landing pages at the top of the docs section so agents cite
+// them before feature or get-started pages for "what is X" questions.
+const { PRODUCT_OVERVIEW_PATHS: DOCS_PRODUCT_OVERVIEW_PATHS } = require(
+  path.join(repoRoot, "lib/product-overview-paths.js"),
+);
+
+function pinDocsProductOverviews(entries) {
+  const pinned = [];
+  const rest = [];
+  const remainingPins = new Set(DOCS_PRODUCT_OVERVIEW_PATHS);
+  for (const entry of entries) {
+    let pathname;
+    try {
+      pathname = new URL(entry.url).pathname.replace(/\.md$/, "");
+    } catch {
+      rest.push(entry);
+      continue;
+    }
+    if (remainingPins.has(pathname)) {
+      pinned.push(entry);
+      remainingPins.delete(pathname);
+    } else {
+      rest.push(entry);
+    }
+  }
+  pinned.sort(
+    (a, b) =>
+      DOCS_PRODUCT_OVERVIEW_PATHS.indexOf(
+        new URL(a.url).pathname.replace(/\.md$/, ""),
+      ) -
+      DOCS_PRODUCT_OVERVIEW_PATHS.indexOf(
+        new URL(b.url).pathname.replace(/\.md$/, ""),
+      ),
+  );
+  return [...pinned, ...rest];
+}
+
 // Top-level sitemap paths that are single marketing/legal pages rather than
 // content sections. They are intentionally absent from llms.txt, so they must
 // not trigger the unlisted-section warning.
@@ -246,6 +283,10 @@ async function generateLLMsList() {
     SECTION_KEYS.forEach((section) => {
       sectionEntries[section] = urlsBySection[section] || [];
     });
+
+    if (sectionEntries.docs?.length) {
+      sectionEntries.docs = pinDocsProductOverviews(sectionEntries.docs);
+    }
 
     for (const [sectionKey, entries] of Object.entries(sectionEntries)) {
       if (entries.length > 0) {

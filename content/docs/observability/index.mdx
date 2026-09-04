@@ -1,0 +1,56 @@
+---
+title: Overview
+sidebarTitle: Overview
+seoTitle: Agent observability and tracing
+description: Open-source agent observability and application tracing. Capture traces, monitor latency and cost, and debug agents built with OpenAI, LangChain, LlamaIndex, and other frameworks.
+---
+
+import { observabilityFaqs } from "@/lib/product-faqs";
+
+# Agent observability and tracing
+
+Agent observability is how you see what an agent actually did: every model call, retrieval, and tool step, with the prompt, response, latency, and cost attached. Langfuse records that as **application tracing** — structured logs of each request — so you can debug non-deterministic behavior instead of guessing.
+
+This page is for engineers and platform teams who need to inspect production agent traffic, attribute cost, and feed traces into evaluation. If you want the steps to send your first trace, start with the [tracing quickstart](/docs/observability/get-started).
+
+<Frame fullWidth>
+  <Image
+    src="/images/docs/tracing-overview.png"
+    alt="Example of a trace in the Langfuse UI showing nested observations, timing, inputs, outputs, and metadata across a multi-step agent workflow."
+    priority
+    quality={85}
+  />
+</Frame>
+
+<Callout type="info" emoji="🚀">
+
+Want to see it in action? [**Create a free account**](/cloud) and explore Langfuse Observability in the [interactive example project](/docs/demo).
+
+</Callout>
+
+## What you can do with traces
+
+Teams use Langfuse observability to:
+
+- Debug a failed or low-quality agent run by inspecting the exact prompt, retrieved context, and tool calls
+- Attribute [token usage and cost](/docs/observability/features/token-and-cost-tracking) to a user, feature, or release
+- Build evaluation datasets from real production traces and score quality with [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)
+- Watch cost, latency, and quality in [custom dashboards](/docs/metrics/features/custom-dashboards) and get [alerts](/docs/observability/features/alerts) when a metric crosses a threshold
+
+## How Langfuse traces an application
+
+A [trace](/docs/observability/data-model) is one request. Nested [observations](/docs/observability/data-model#observations-traces-and-sessions) record LLM generations, retrieval, tools, and your own spans. You can group related traces into [sessions](/docs/observability/features/sessions), tag them by [user](/docs/observability/features/users), [environment](/docs/observability/features/environments), or [release](/docs/observability/features/releases-and-versioning), and follow a request across services with [custom trace IDs](/docs/observability/features/trace-ids-and-distributed-tracing).
+
+Ingest traces with the [Python and JS/TS SDKs](/docs/observability/sdk/overview), [100+ integrations](/integrations), [OpenTelemetry](/integrations/native/opentelemetry), or an LLM gateway such as LiteLLM. SDKs send data [asynchronously](/docs/observability/features/queuing-batching), so tracing does not add request latency.
+
+Read [What does a good trace look like?](/docs/observability/best-practices) before you instrument a new app, and [core concepts](/docs/observability/data-model) for the data model.
+
+## Getting started
+
+[Set up your first trace](/docs/observability/get-started), then compare it against the [best practices guide](/docs/observability/best-practices). If you are new to AI observability, start with [core concepts](/docs/observability/data-model) and the [Monitoring chapter in the Langfuse Academy](/academy/monitoring).
+
+Browse Features in the sidebar for the full list of observability features.
+
+## FAQ [#faq]
+
+<ProductFaq items={observabilityFaqs} />
