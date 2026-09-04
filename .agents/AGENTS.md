@@ -76,9 +76,9 @@ CI runs `pnpm run format:check`. To fix locally, run `pnpm run format` and commi
 
 CI runs `node scripts/check-h1-headings.js`. It fails if any `.md`/`.mdx` file contains more than one top-level `# ` heading (code-fenced examples are ignored). Use exactly one H1 per markdown file; deeper sections use `##`, `###`, etc.
 
-### 3. Build + link/sitemap checks (`build-and-check-links` job)
+### 3. Build + link/sitemap checks (`build-and-check-links`, `check-sitemap-links` jobs)
 
-This job runs `pnpm test:link-check`, then `pnpm build`, then `pnpm link-check` and `pnpm sitemap-check` against one production server. The full build is ~10 minutes locally — don't run it for routine edits. Instead, before pushing:
+These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The full build is ~10 minutes locally — don't run it for routine edits. Instead, before pushing:
 
 - Check internal links you added/changed point to real pages or anchors.
 - For anchor links (`...#some-id`), make sure the target page defines the anchor explicitly with `[#some-id]` at the end of the heading line.
