@@ -11,7 +11,7 @@ export interface TabContentProps {
   priority?: boolean;
 }
 
-export const TabContent = ({ feature, priority = true }: TabContentProps) => {
+export const TabContent = ({ feature, priority = false }: TabContentProps) => {
   const handleImageError = useCallback(
     (e: SyntheticEvent<HTMLImageElement>) => {
       const img = e.currentTarget;
@@ -31,7 +31,8 @@ export const TabContent = ({ feature, priority = true }: TabContentProps) => {
     [],
   );
 
-  const sizes = "(min-width: 1280px) 2205px";
+  // Displayed slot is the center column (~806px on desktop), not the 2205px source.
+  const sizes = "(max-width: 767px) 100vw, 806px";
 
   return (
     <div className="relative w-full aspect-[2205/1291]">

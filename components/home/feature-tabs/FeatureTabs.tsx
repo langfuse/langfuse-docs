@@ -14,6 +14,7 @@ import { TabContent } from "./TabContent";
 import type { AutoAdvanceConfig, FeatureTabData } from "./types";
 import { CornerBox } from "@/components/ui/corner-box";
 import { cn } from "@/lib/utils";
+import { MD_MIN_WIDTH_QUERY, useMinWidth } from "@/lib/use-min-width";
 
 /** Soft ease-out (Emil Kowalski–style: calm deceleration, no snappy linear segments). */
 const CONTENT_EASE = [0.22, 1, 0.36, 1] as const;
@@ -111,6 +112,7 @@ export const FeatureTabs = ({
   );
   const containerRef = useRef<HTMLDivElement | null>(null);
   const reduceMotion = useReducedMotion();
+  const isMd = useMinWidth(MD_MIN_WIDTH_QUERY);
   const [observeRoot, setObserveRoot] = useState<HTMLDivElement | null>(null);
   const isMountedRef = useRef(true);
 
@@ -347,35 +349,37 @@ export const FeatureTabs = ({
         )}
       </div>
 
-      {/* Preload light images for previous/next tab only (current is in TabContent) */}
-      <CornerBox
-        aria-hidden="true"
-        className="overflow-hidden absolute pointer-events-none"
-        style={{ width: 1, height: 1, opacity: 0.01 }}
-      >
-        {features.map((feature, index) => {
-          if (!preloadNeighborIndices.has(index)) {
-            return null;
-          }
-          const isNext = index === (activeIndex + 1 + n) % n;
-          return (
-            <div
-              key={`preload-${feature.id}`}
-              className="relative"
-              style={{ width: 806, height: 410 }}
-            >
-              <Image
-                src={feature.image.light}
-                alt=""
-                fill
-                quality={100}
-                sizes="806px"
-                loading={isNext ? "eager" : "lazy"}
-              />
-            </div>
-          );
-        })}
-      </CornerBox>
+      {/* Preload neighbor tab images on md+ only — on mobile this competed with LCP. */}
+      {isMd ? (
+        <CornerBox
+          aria-hidden="true"
+          className="overflow-hidden absolute pointer-events-none"
+          style={{ width: 1, height: 1, opacity: 0.01 }}
+        >
+          {features.map((feature, index) => {
+            if (!preloadNeighborIndices.has(index)) {
+              return null;
+            }
+            const isNext = index === (activeIndex + 1 + n) % n;
+            return (
+              <div
+                key={`preload-${feature.id}`}
+                className="relative"
+                style={{ width: 806, height: 410 }}
+              >
+                <Image
+                  src={feature.image.light}
+                  alt=""
+                  fill
+                  quality={100}
+                  sizes="806px"
+                  loading={isNext ? "eager" : "lazy"}
+                />
+              </div>
+            );
+          })}
+        </CornerBox>
+      ) : null}
 
       {/* Clickable product-area names, then animated subtitle */}
       <CornerBox className="px-4 py-3">
@@ -460,7 +464,7 @@ export const FeatureTabs = ({
                 animate="animate"
                 exit="exit"
               >
-                <TabContent feature={activeFeature} priority />
+                <TabContent feature={activeFeature} />
               </motion.div>
             ) : null}
           </AnimatePresence>
