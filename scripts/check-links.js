@@ -3,9 +3,8 @@
 const fs = require("fs");
 const path = require("path");
 const { promisify } = require("util");
-const https = require("https");
-const http = require("http");
 const { URL } = require("url");
+const { checkLink, mapPool } = require("./lib/check-http");
 
 const readFileAsync = promisify(fs.readFile);
 const EXCLUDED_HOSTNAMES = new Set([
@@ -16,141 +15,58 @@ const EXCLUDED_HOSTNAMES = new Set([
   "hipaa.cloud.langfuse.com",
 ]);
 
-// Configuration options
-const CONFIG = {
-  // The migrated App Router site is less tolerant of request bursts than the old setup.
-  maxFileConcurrency: 5,
-  fileBatchDelay: 25,
-  maxLinkConcurrency: 8,
-  linkBatchDelay: 25,
+const DEFAULT_SCAN_DIRS = [
+  "app",
+  "components",
+  "components-mdx",
+  "content",
+  "lib",
+  "scripts",
+];
 
-  // Link checking timeouts
+const DEFAULT_BASE_URL = "http://localhost:3333";
+
+const CONFIG = {
+  maxLinkConcurrency: 16,
   linkTimeout: 10000,
   externalLinkTimeout: 10000,
-
-  // Progress reporting
-  progressInterval: 20,
+  progressInterval: 200,
   debugLogging: false,
 };
 
-function shouldRetryWithGet(url, result) {
-  if (
-    result.statusCode === 405 || // Method Not Allowed
-    result.statusCode === 501 || // Not Implemented
-    result.statusCode === 400
-  ) {
-    // Bad Request (some servers reject HEAD)
-    return true;
-  }
-
-  if (
-    !url.includes("localhost:3333") ||
-    result.statusCode !== 0 ||
-    !result.error
-  ) {
-    return false;
-  }
-
-  return (
-    result.error === "Timeout" ||
-    result.error.includes("ECONNRESET") ||
-    result.error.includes("socket hang up")
-  );
+function getBaseUrl(baseUrl = process.env.LINK_CHECK_BASE) {
+  return (baseUrl || DEFAULT_BASE_URL).replace(/\/$/, "");
 }
 
-async function checkLink(url, timeout = CONFIG.linkTimeout) {
-  // Prefer HEAD so static assets do not need to be downloaded, but fall back to GET
-  // for localhost when HEAD is rejected or hangs.
-  const headResult = await makeRequest(url, "HEAD", timeout);
-
-  if (shouldRetryWithGet(url, headResult)) {
-    return await makeRequest(url, "GET", timeout);
+function getScanDirs(scanDirs = process.env.LINK_CHECK_DIRS) {
+  if (Array.isArray(scanDirs) && scanDirs.length > 0) {
+    return scanDirs;
   }
-
-  return headResult;
+  if (typeof scanDirs === "string" && scanDirs.trim()) {
+    return scanDirs
+      .split(",")
+      .map((dir) => dir.trim())
+      .filter(Boolean);
+  }
+  return DEFAULT_SCAN_DIRS;
 }
 
-// Make HTTP request with specified method
-async function makeRequest(url, method, timeout) {
-  return new Promise((resolve) => {
-    try {
-      const urlObj = new URL(url);
-      const isHttps = urlObj.protocol === "https:";
-      const client = isHttps ? https : http;
-
-      const options = {
-        hostname: urlObj.hostname,
-        port: urlObj.port || (isHttps ? 443 : 80),
-        path: urlObj.pathname + urlObj.search,
-        method: method,
-        timeout: timeout,
-        headers: {
-          "User-Agent": "link-checker",
-          Connection: "keep-alive", // Reuse connections for better performance
-        },
-      };
-
-      const req = client.request(options, (res) => {
-        // Consider 2xx and 3xx as successful
-        const success = res.statusCode >= 200 && res.statusCode < 400;
-
-        // Always consume the response so keep-alive sockets can be reused.
-        res.resume();
-
-        resolve({
-          url: url,
-          status: success ? "alive" : "dead",
-          statusCode: res.statusCode,
-          method: method,
-        });
-      });
-
-      req.on("error", (err) => {
-        resolve({
-          url: url,
-          status: "dead",
-          statusCode: 0,
-          error: err.message,
-          method: method,
-        });
-      });
-
-      req.on("timeout", () => {
-        req.destroy();
-        resolve({
-          url: url,
-          status: "dead",
-          statusCode: 0,
-          error: "Timeout",
-          method: method,
-        });
-      });
-
-      req.end();
-    } catch (error) {
-      resolve({
-        url: url,
-        status: "dead",
-        statusCode: 0,
-        error: error.message,
-        method: method,
-      });
-    }
-  });
+function localHostnamesFromBase(baseUrl) {
+  try {
+    return new Set([new URL(baseUrl).hostname, "localhost", "127.0.0.1"]);
+  } catch {
+    return new Set(["localhost", "127.0.0.1"]);
+  }
 }
 
-// Extract markdown links: [text](url)
 function extractMarkdownLinks(content) {
   const links = [];
-
-  // Standard markdown links: [text](url)
   const markdownRegex = /\[([^\]]*)\]\(([^)]+)\)/g;
   let match;
 
   while ((match = markdownRegex.exec(content)) !== null) {
     const url = match[2].trim();
     if (url && !url.startsWith("#")) {
-      // Skip anchors
       links.push(url);
     }
   }
@@ -158,27 +74,19 @@ function extractMarkdownLinks(content) {
   return links;
 }
 
-// Extract href links from HTML/JSX attributes
 function extractHrefLinks(content) {
   const links = [];
-
-  // Match various href patterns:
-  // href="url", href='url', href={`url`}, href={"url"}
   const patterns = [
-    // Standard href with quotes
     /href=["']([^"']+)["']/g,
-    // Template literals in JSX: href={`/path`}
     /href=\{`([^`]+)`\}/g,
-    // String literals in JSX: href={"/path"}
     /href=\{"([^"]+)"\}/g,
     /href=\{'([^']+)'\}/g,
-    // Without braces but with template literals (less common)
     /href=`([^`]+)`/g,
   ];
 
   for (const regex of patterns) {
     let match;
-    regex.lastIndex = 0; // Reset regex state
+    regex.lastIndex = 0;
     while ((match = regex.exec(content)) !== null) {
       const href = match[1].trim();
       if (href && !href.startsWith("#") && !href.includes("${")) {
@@ -190,24 +98,18 @@ function extractHrefLinks(content) {
   return links;
 }
 
-// Extract Next.js Link component hrefs
 function extractNextJsLinks(content) {
   const links = [];
-
-  // Match Next.js Link components: <Link href="...">
   const patterns = [
-    // <Link href="/path">
     /<Link\s+href=["']([^"']+)["'][^>]*>/g,
-    // <Link href={"/path"}>
     /<Link\s+href=\{"([^"]+)"\}[^>]*>/g,
     /<Link\s+href=\{'([^']+)'\}[^>]*>/g,
-    // <Link href={`/path`}>
     /<Link\s+href=\{`([^`]+)`\}[^>]*>/g,
   ];
 
   for (const regex of patterns) {
     let match;
-    regex.lastIndex = 0; // Reset regex state
+    regex.lastIndex = 0;
     while ((match = regex.exec(content)) !== null) {
       const href = match[1].trim();
       if (href && !href.startsWith("#") && !href.includes("${")) {
@@ -219,25 +121,9 @@ function extractNextJsLinks(content) {
   return links;
 }
 
-// Extract object/property-style links in TS/TSX, e.g.
-//   { href: "/docs/...", url: "https://..." }
-// These are commonly used for data-driven link lists (cards, nav items, tools)
-// and are invisible to the href="..." / <Link href="..."> regexes above.
 function extractObjectPropertyLinks(content) {
   const links = [];
-
-  // Strip fenced code blocks first. In MDX, authors frequently include
-  // illustrative JSON/TS snippets containing object literals like
-  //   { "url": "https://langfuse.com/docs/integrations/langgraph" }
-  // or
-  //   input: { path: "/api/process" }
-  // which are example content, not real links. Skipping them avoids noisy
-  // false positives. This strip is safe for .tsx/.ts sources (which don't
-  // use triple-backtick fences).
   const scanContent = content.replace(/```[\s\S]*?```/g, "");
-
-  // Keys that conventionally hold a URL/path in our codebase.
-  // Keep this conservative so we don't pick up unrelated string properties.
   const patterns = [
     /\b(?:href|url|link|to|path|pathname)\s*:\s*["']([^"']+)["']/g,
     /\b(?:href|url|link|to|path|pathname)\s*:\s*`([^`]+)`/g,
@@ -251,9 +137,6 @@ function extractObjectPropertyLinks(content) {
       if (!value || value.startsWith("#") || value.includes("${")) {
         continue;
       }
-      // Only include relative paths and langfuse.com absolute URLs to
-      // avoid false positives on arbitrary string props. processLinks()
-      // filters further, but keeping this tight reduces noise.
       if (
         value.startsWith("/") ||
         value.startsWith("https://langfuse.com") ||
@@ -267,14 +150,9 @@ function extractObjectPropertyLinks(content) {
   return links;
 }
 
-// Extract all types of links from content
 function extractAllLinks(content, filePath) {
-  let allLinks = [];
+  let allLinks = extractMarkdownLinks(content);
 
-  // Always extract markdown links (works in .md, .mdx, and even in JSX comments)
-  allLinks = allLinks.concat(extractMarkdownLinks(content));
-
-  // Extract href attributes for HTML/JSX files
   if (
     filePath.endsWith(".mdx") ||
     filePath.endsWith(".tsx") ||
@@ -282,27 +160,17 @@ function extractAllLinks(content, filePath) {
   ) {
     allLinks = allLinks.concat(extractHrefLinks(content));
     allLinks = allLinks.concat(extractNextJsLinks(content));
-  }
-
-  // Extract object-property style links (e.g. `href: "/docs/..."`) in TS/TSX.
-  // MDX can contain similar object literals in export blocks, so include it too.
-  if (
-    filePath.endsWith(".mdx") ||
-    filePath.endsWith(".tsx") ||
-    filePath.endsWith(".ts")
-  ) {
     allLinks = allLinks.concat(extractObjectPropertyLinks(content));
   }
 
   return allLinks;
 }
 
-// Process and normalize links
-function processLinks(links) {
+function processLinks(links, baseUrl = getBaseUrl()) {
   const processedLinks = [];
+  const localHost = new URL(baseUrl).host;
 
   for (const link of links) {
-    // Skip empty or invalid links
     if (!link || typeof link !== "string") {
       continue;
     }
@@ -312,7 +180,6 @@ function processLinks(links) {
       continue;
     }
 
-    // Skip template literals, variables, and dynamic content
     if (
       trimmedLink.includes("${") ||
       trimmedLink.includes("{{") ||
@@ -327,9 +194,8 @@ function processLinks(links) {
       continue;
     }
 
-    // Skip obvious non-URL patterns
     if (
-      trimmedLink.match(/^[a-zA-Z0-9_-]+$/) || // Just a word/identifier
+      trimmedLink.match(/^[a-zA-Z0-9_-]+$/) ||
       trimmedLink.startsWith("javascript:") ||
       trimmedLink.startsWith("vbscript:") ||
       trimmedLink.startsWith("mailto:") ||
@@ -341,12 +207,10 @@ function processLinks(links) {
       continue;
     }
 
-    // Skip specific paths that redirect to external sites
     if (trimmedLink === "/ph") {
       continue;
     }
 
-    // Skip absolute URLs that are intentionally excluded from link checks
     if (
       trimmedLink.startsWith("http://") ||
       trimmedLink.startsWith("https://")
@@ -356,244 +220,220 @@ function processLinks(links) {
         if (EXCLUDED_HOSTNAMES.has(parsedUrl.hostname)) {
           continue;
         }
-      } catch (error) {
+      } catch {
         continue;
       }
     }
 
     let processedLink = trimmedLink;
 
-    // Convert relative paths to localhost URLs
     if (trimmedLink.startsWith("/")) {
-      processedLink = `http://localhost:3333${trimmedLink}`;
+      processedLink = `${baseUrl}${trimmedLink}`;
     } else if (trimmedLink.startsWith("https://langfuse.com")) {
-      processedLink = trimmedLink.replace(
-        "https://langfuse.com",
-        "http://localhost:3333",
-      );
+      processedLink = trimmedLink.replace("https://langfuse.com", baseUrl);
     } else if (trimmedLink.startsWith("http://langfuse.com")) {
-      processedLink = trimmedLink.replace(
-        "http://langfuse.com",
-        "http://localhost:3333",
-      );
+      processedLink = trimmedLink.replace("http://langfuse.com", baseUrl);
     } else if (
       !trimmedLink.startsWith("http://") &&
       !trimmedLink.startsWith("https://")
     ) {
-      // Skip non-HTTP links that aren't relative paths
       continue;
     } else if (
-      !trimmedLink.includes("localhost:3333") &&
+      !trimmedLink.includes(localHost) &&
       !trimmedLink.includes("langfuse.com")
     ) {
-      // Skip external links (not langfuse.com or localhost)
       continue;
     }
 
-    // Do not validate pdf download links
-    if (processedLink.startsWith("http://localhost:3333/api/md-to-pdf"))
+    if (processedLink.startsWith(`${baseUrl}/api/md-to-pdf`)) {
       continue;
+    }
 
-    // Final validation - make sure it's a valid URL format
     try {
       new URL(processedLink);
       processedLinks.push(processedLink);
-    } catch (error) {
-      // Skip invalid URLs
+    } catch {
       continue;
     }
   }
 
-  return [...new Set(processedLinks)]; // Remove duplicates
+  return [...new Set(processedLinks)];
 }
 
-async function checkFileLinks(filePath) {
-  try {
-    const content = await readFileAsync(filePath, "utf8");
+function findFiles(dir) {
+  let results = [];
+  if (!fs.existsSync(dir)) return results;
+  const files = fs.readdirSync(dir);
 
-    // Extract all types of links using the unified function
-    const allLinks = extractAllLinks(content, filePath);
-    const processedLinks = processLinks(allLinks);
+  for (const file of files) {
+    const filePath = path.join(dir, file);
+    const stat = fs.statSync(filePath);
 
-    if (processedLinks.length === 0) {
-      return { hasErrors: false, results: [] };
+    if (stat.isDirectory()) {
+      results = results.concat(findFiles(filePath));
+    } else if (
+      file.endsWith(".md") ||
+      file.endsWith(".mdx") ||
+      file.endsWith(".tsx") ||
+      file.endsWith(".ts")
+    ) {
+      results.push(filePath);
     }
-
-    // Check all links with configured concurrency
-    const results = [];
-    const maxConcurrent = CONFIG.maxLinkConcurrency;
-
-    for (let i = 0; i < processedLinks.length; i += maxConcurrent) {
-      const batch = processedLinks.slice(i, i + maxConcurrent);
-      const batchResults = await Promise.all(
-        batch.map((link) => {
-          // Use longer timeout for external links (non-localhost)
-          const timeout = link.includes("localhost:3333")
-            ? CONFIG.linkTimeout
-            : CONFIG.externalLinkTimeout;
-          return checkLink(link, timeout);
-        }),
-      );
-      results.push(...batchResults);
-
-      // Skip delay for local dev server (CONFIG.linkBatchDelay = 0)
-      if (
-        CONFIG.linkBatchDelay > 0 &&
-        i + maxConcurrent < processedLinks.length
-      ) {
-        await new Promise((resolve) =>
-          setTimeout(resolve, CONFIG.linkBatchDelay),
-        );
-      }
-    }
-
-    const hasErrors = results.some((result) => result.status === "dead");
-
-    // Don't print errors here - they will be collected and reported at the end
-    return { hasErrors, results };
-  } catch (error) {
-    const relativePath = path.relative(process.cwd(), filePath);
-    console.warn(`Warning: Error processing ${relativePath}: ${error.message}`);
-    return { hasErrors: false, results: [] };
   }
+
+  return results;
 }
 
-async function main() {
-  const scanDirs = [
-    "app",
-    "components",
-    "components-mdx",
-    "content",
-    "lib",
-    "scripts",
-  ].map((d) => path.join(process.cwd(), d));
-  let hasErrors = false;
-  const allBrokenLinks = []; // Collect all broken links for final report
+function reportBrokenLinks(brokenLinks) {
+  console.error("\n=== LINK CHECK FAILED ===");
+  console.error(`Found ${brokenLinks.length} broken link(s):\n`);
 
-  try {
-    // Find all files to check
-    const findFiles = (dir) => {
-      let results = [];
-      if (!fs.existsSync(dir)) return results;
-      const files = fs.readdirSync(dir);
+  const linksByFile = {};
+  brokenLinks.forEach((link) => {
+    if (!linksByFile[link.file]) {
+      linksByFile[link.file] = [];
+    }
+    linksByFile[link.file].push(link);
+  });
 
-      for (const file of files) {
-        const filePath = path.join(dir, file);
-        const stat = fs.statSync(filePath);
-
-        if (stat.isDirectory()) {
-          results = results.concat(findFiles(filePath));
-        } else if (
-          file.endsWith(".md") ||
-          file.endsWith(".mdx") ||
-          file.endsWith(".tsx") ||
-          file.endsWith(".ts")
-        ) {
-          results.push(filePath);
-        }
+  Object.keys(linksByFile).forEach((file) => {
+    console.error(`📄 ${file}:`);
+    linksByFile[file].forEach((link) => {
+      const methodInfo = link.method ? ` (${link.method})` : "";
+      console.error(`  ❌ [${link.statusCode}] ${link.url}${methodInfo}`);
+      if (link.error) {
+        console.error(`     Error: ${link.error}`);
       }
+    });
+    console.error("");
+  });
+}
 
-      return results;
-    };
+async function collectFileLinks(files, baseUrl) {
+  const fileLinks = new Map();
 
-    const files = scanDirs.flatMap((dir) => findFiles(dir));
+  for (const filePath of files) {
+    try {
+      const content = await readFileAsync(filePath, "utf8");
+      const processedLinks = processLinks(
+        extractAllLinks(content, filePath),
+        baseUrl,
+      );
+      if (processedLinks.length > 0) {
+        fileLinks.set(filePath, processedLinks);
+      }
+    } catch (error) {
+      const relativePath = path.relative(process.cwd(), filePath);
+      console.warn(
+        `Warning: Error processing ${relativePath}: ${error.message}`,
+      );
+    }
+  }
+
+  return fileLinks;
+}
+
+async function runLinkCheck(options = {}) {
+  const baseUrl = getBaseUrl(options.baseUrl);
+  const scanDirs = getScanDirs(options.scanDirs).map((dir) =>
+    path.isAbsolute(dir) ? dir : path.join(process.cwd(), dir),
+  );
+  const checkLinkFn = options.checkLink || checkLink;
+  const localHostnames = localHostnamesFromBase(baseUrl);
+
+  const files = scanDirs.flatMap((dir) => findFiles(dir));
+  const fileLinks = await collectFileLinks(files, baseUrl);
+  const uniqueUrls = [
+    ...new Set([...fileLinks.values()].flatMap((links) => links)),
+  ];
+
+  if (options.silent !== true) {
     console.log(
       `Found ${files.length} files to check (.md, .mdx, .tsx, .ts)\n`,
     );
     console.log(
-      `Using ${CONFIG.maxFileConcurrency} files x ${CONFIG.maxLinkConcurrency} links, ` +
-        `${CONFIG.linkTimeout}ms localhost timeout`,
+      `Checking ${uniqueUrls.length} unique URLs ` +
+        `(${CONFIG.maxLinkConcurrency} concurrent, ${CONFIG.linkTimeout}ms localhost timeout)`,
     );
+  }
 
-    // Process files with configured concurrency
-    const maxConcurrent = CONFIG.maxFileConcurrency;
-    let completed = 0;
+  const urlResults = new Map();
+  let completed = 0;
 
-    for (let i = 0; i < files.length; i += maxConcurrent) {
-      const batch = files.slice(i, i + maxConcurrent);
-
-      const batchPromises = batch.map(async (file) => {
-        if (CONFIG.debugLogging) {
-          console.log(`Processing ${file}`);
-        }
-        try {
-          const result = await checkFileLinks(file);
-          if (result.hasErrors && result.results) {
-            // Collect broken links for final report
-            const relativePath = path.relative(process.cwd(), file);
-            const brokenLinks = result.results.filter(
-              (r) => r.status === "dead",
-            );
-            brokenLinks.forEach((link) => {
-              allBrokenLinks.push({
-                file: relativePath,
-                url: link.url,
-                statusCode: link.statusCode,
-                error: link.error,
-                method: link.method,
-              });
-            });
-          }
-          return result.hasErrors;
-        } catch (error) {
-          console.warn(`Warning: Error processing ${file}: ${error.message}`);
-          return false;
-        }
-      });
-
-      const batchResults = await Promise.all(batchPromises);
-      hasErrors = hasErrors || batchResults.some((result) => result);
-
-      completed += batch.length;
-      if (
-        completed % CONFIG.progressInterval === 0 ||
-        completed === files.length
-      ) {
-        console.log(`Processed ${completed}/${files.length} files`);
-      }
-
-      // Skip delay for local dev server (CONFIG.fileBatchDelay = 0)
-      if (CONFIG.fileBatchDelay > 0 && i + maxConcurrent < files.length) {
-        await new Promise((resolve) =>
-          setTimeout(resolve, CONFIG.fileBatchDelay),
-        );
-      }
+  await mapPool(uniqueUrls, CONFIG.maxLinkConcurrency, async (url) => {
+    const timeout = url.startsWith(baseUrl)
+      ? CONFIG.linkTimeout
+      : CONFIG.externalLinkTimeout;
+    const result = await checkLinkFn(url, timeout, { localHostnames });
+    urlResults.set(url, result);
+    completed += 1;
+    if (
+      options.silent !== true &&
+      (completed % CONFIG.progressInterval === 0 ||
+        completed === uniqueUrls.length)
+    ) {
+      console.log(`Checked ${completed}/${uniqueUrls.length} unique URLs`);
     }
+    return result;
+  });
 
-    if (hasErrors) {
-      console.error("\n=== LINK CHECK FAILED ===");
-      console.error(`Found ${allBrokenLinks.length} broken link(s):\n`);
-
-      // Group broken links by file for better readability
-      const linksByFile = {};
-      allBrokenLinks.forEach((link) => {
-        if (!linksByFile[link.file]) {
-          linksByFile[link.file] = [];
-        }
-        linksByFile[link.file].push(link);
-      });
-
-      // Report broken links grouped by file
-      Object.keys(linksByFile).forEach((file) => {
-        console.error(`📄 ${file}:`);
-        linksByFile[file].forEach((link) => {
-          const methodInfo = link.method ? ` (${link.method})` : "";
-          console.error(`  ❌ [${link.statusCode}] ${link.url}${methodInfo}`);
-          if (link.error) {
-            console.error(`     Error: ${link.error}`);
-          }
+  const brokenLinks = [];
+  for (const [filePath, urls] of fileLinks.entries()) {
+    const relativePath = path.relative(process.cwd(), filePath);
+    for (const url of urls) {
+      const result = urlResults.get(url);
+      if (result && result.status === "dead") {
+        brokenLinks.push({
+          file: relativePath,
+          url: result.url,
+          statusCode: result.statusCode,
+          error: result.error,
+          method: result.method,
         });
-        console.error("");
-      });
-
-      process.exit(1);
-    } else {
-      console.log("\n✅ Link check passed: All valid links are working");
+      }
     }
+  }
+
+  return {
+    ok: brokenLinks.length === 0,
+    brokenLinks,
+    filesChecked: files.length,
+    uniqueUrls: uniqueUrls.length,
+  };
+}
+
+async function main() {
+  try {
+    const result = await runLinkCheck();
+
+    if (!result.ok) {
+      reportBrokenLinks(result.brokenLinks);
+      process.exit(1);
+    }
+
+    console.log("\n✅ Link check passed: All valid links are working");
   } catch (error) {
     console.error("Error:", error);
     process.exit(1);
   }
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  CONFIG,
+  collectFileLinks,
+  extractAllLinks,
+  extractHrefLinks,
+  extractMarkdownLinks,
+  extractNextJsLinks,
+  extractObjectPropertyLinks,
+  findFiles,
+  getBaseUrl,
+  getScanDirs,
+  processLinks,
+  reportBrokenLinks,
+  runLinkCheck,
+};

@@ -9,20 +9,20 @@ category: Integrations
 
 # Trace ElevenLabs Agents with Langfuse
 
-This notebook shows how to forward **OpenTelemetry traces** of [ElevenLabs Agents](https://elevenlabs.io/agents) conversations to **Langfuse**. You get each conversation as a full trace next to your other LLM application traces: transcript turns, LLM generations with token usage and cost, tool calls, and RAG retrievals. The notebook is self-contained: it creates a demo agent with a tool and a knowledge base, runs a text-only conversation, and forwards the resulting trace.
+This notebook shows how to forward **OpenTelemetry traces** of [ElevenLabs Agents](https://elevenlabs.io/agents) conversations to **Langfuse**. You get each conversation as a full trace next to your other LLM application traces, including transcript turns, LLM generations with token usage and cost, tool calls, and RAG retrievals. The notebook is self-contained. It creates a demo agent with a tool and a knowledge base, runs a text-only conversation, and forwards the resulting trace.
 
 > **What is ElevenLabs Agents?** [ElevenLabs Agents](https://elevenlabs.io/agents) is a platform for building voice-based conversational AI agents that handle calls, answer questions, and execute tools on behalf of users.
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source AI engineering platform that helps teams trace, debug, and evaluate their LLM applications.
 
 <Steps>
-## Step 1: Install dependencies
+## Install dependencies
 
 ```python
 %pip install elevenlabs requests -U
 ```
 
-## Step 2: Set up environment variables
+## Set up environment variables
 
 Get your Langfuse keys from the project settings in [Langfuse Cloud](https://langfuse.com/cloud) or set up [self-hosting](https://langfuse.com/self-hosting).
 
@@ -38,7 +38,7 @@ os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com" # 🇪🇺 EU reg
 os.environ["ELEVENLABS_API_KEY"] = "sk_..."  # ElevenLabs API key with Eleven Agents read + write permissions
 ```
 
-## Step 3: Create a demo agent
+## Create a demo agent
 
 We create a small agent with two data sources, so the trace contains a real tool call and a real RAG flow:
 
@@ -119,7 +119,7 @@ AGENT_ID = agent.agent_id
 print(f"Created agent: {AGENT_ID}")
 ```
 
-## Step 4: Run a text-only conversation
+## Run a text-only conversation
 
 ElevenLabs agents support [chat mode](https://elevenlabs.io/docs/eleven-agents/guides/chat-mode): with `text_only` enabled on the agent, the SDK's `Conversation` runs without microphone or speakers. This creates a **real conversation** in your call history, exactly like a voice call.
 
@@ -163,15 +163,15 @@ conversation_id = conversation.wait_for_session_end()
 print(f"Conversation ID: {conversation_id}")
 ```
 
-## Step 5: Fetch the conversation as an OpenTelemetry trace
+## Fetch the conversation as an OpenTelemetry trace
 
 ElevenLabs does not push traces to Langfuse. It hands you a complete trace as **OTLP JSON** (a `resourceSpans` object) on three surfaces, and you forward it:
 
-| Surface                                                                                     | When you get data                        | Best for                                    |
-| ------------------------------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------- |
-| [GET conversation API](https://elevenlabs.io/docs/api-reference/conversations/get)          | On demand, after the conversation exists | Backfill, debugging (used in this notebook) |
-| [Post-call webhook](https://elevenlabs.io/docs/eleven-agents/workflows/post-call-webhooks)  | After the conversation ends              | Production pipelines (see Step 9)           |
-| [Monitoring WebSocket](https://elevenlabs.io/docs/eleven-agents/guides/realtime-monitoring) | Live, during the conversation            | Live dashboards (Enterprise feature)        |
+| Surface                                                                                     | When you get data                        | Best for                                                   |
+| ------------------------------------------------------------------------------------------- | ---------------------------------------- | ---------------------------------------------------------- |
+| [GET conversation API](https://elevenlabs.io/docs/api-reference/conversations/get)          | On demand, after the conversation exists | Backfill, debugging (used in this notebook)                |
+| [Post-call webhook](https://elevenlabs.io/docs/eleven-agents/workflows/post-call-webhooks)  | After the conversation ends              | Production pipelines (see the production setup step below) |
+| [Monitoring WebSocket](https://elevenlabs.io/docs/eleven-agents/guides/realtime-monitoring) | Live, during the conversation            | Live dashboards (Enterprise feature)                       |
 
 All three surfaces share the same trace ID per conversation and the same `elevenlabs.*` span attributes. We poll until ElevenLabs has processed the conversation, then request it in OpenTelemetry format.
 
@@ -184,7 +184,7 @@ headers = {"xi-api-key": os.environ["ELEVENLABS_API_KEY"]}
 url = f"https://api.elevenlabs.io/v1/convai/conversations/{conversation_id}"
 
 # Wait until ElevenLabs has finished processing the conversation.
-# Keep the regular conversation JSON, Step 7 needs its transcript.
+# Keep the regular conversation JSON, attach_rag_chunks (below) needs its transcript.
 for _ in range(30):
     conversation = requests.get(url, headers=headers).json()
     if conversation.get("status") == "done":
@@ -205,18 +205,18 @@ print(f"Fetched {len(span_names)} spans:")
 print("\n".join(f"- {name}" for name in span_names))
 ```
 
-## Step 6: Enrich the spans with Langfuse attributes
+## Enrich the spans with Langfuse attributes
 
 ElevenLabs spans only carry `elevenlabs.*` attributes. Langfuse would ingest them as generic spans with empty input/output and all details buried in metadata. This transformation adds [`langfuse.*` mapped attributes](https://langfuse.com/integrations/native/opentelemetry#property-mapping) so the trace becomes readable and filterable:
 
 - The **root conversation span** becomes an `agent` observation with the first user message as input, the last agent response as output, and the call summary in the trace metadata.
 - The **conversation ID** becomes the Langfuse [session ID](https://langfuse.com/docs/observability/features/sessions), so application-side traces that know the conversation ID group together with the voice trace.
-- **Agent turns backed by an LLM call** (`elevenlabs.producing_llm`) become `generation` observations with the user message they respond to as input, plus model name, token usage, and cost parsed from `elevenlabs.llm_usage.*`. Evaluators see the full exchange, and cost dashboards work out of the box.
-- **Tool call spans** become `tool` observations with parameters as input and results as output.
-- **RAG retrievals** become `retriever` observations nested under the generation that used them, with the rewritten retrieval query as input plus embedding model and latency. ElevenLabs reports RAG as `elevenlabs.rag.*` attributes on the turn rather than a separate span, so the transformation synthesizes a child span with a deterministic ID. Step 7 adds the retrieved chunks as output.
+- **Agent turns backed by an LLM call** (`elevenlabs.producing_llm`) become `generation` observations with the user message they respond to as input, plus model name, token usage, and cost parsed from `elevenlabs.llm_usage.*`. Evaluators see the full exchange, and cost dashboards populate automatically.
+- **Tool call spans** turn into `tool` observations with parameters as input and results as output.
+- **RAG retrievals** become `retriever` observations nested under the generation that used them, with the rewritten retrieval query as input plus embedding model and latency. ElevenLabs reports RAG as `elevenlabs.rag.*` attributes on the turn rather than a separate span, so the transformation synthesizes a child span with a deterministic ID. The next step adds the retrieved chunks as output.
 - **Transcript turns** get the user/agent text as observation input/output.
 - The **ElevenLabs environment** maps to the Langfuse [environment](https://langfuse.com/docs/observability/features/environments), keeping test and production traces separate.
-- **Empty agent turns** (no text, no LLM call, no children) are dropped as noise.
+- **Empty agent turns** (without text, an LLM call, or children) are dropped as noise.
 - **Turn order is restored**: ElevenLabs exports timestamps with one-second granularity, so spans within the same second would render in arbitrary order. Each span is nudged by its `elevenlabs.turn.index` in milliseconds.
 
 All original `elevenlabs.*` attributes (latency metrics, analysis results, dynamic variables) stay available in each observation's metadata. The mapping follows the [trace best practices](https://langfuse.com/docs/observability/best-practices). If your application knows the end user, also map a user identifier to `langfuse.user.id` (see the commented line in the code).
@@ -329,7 +329,7 @@ def enrich_for_langfuse(otlp_traces: dict) -> dict:
                 elif name.endswith(".agent_response"):
                     text = _get(attributes, "elevenlabs.agent.text")
                     model = _get(attributes, "elevenlabs.producing_llm")
-                    # Drop empty agent turns (no text, no LLM call, no children)
+                    # Drop empty agent turns (without text, an LLM call, or children)
                     if not text and not model and span.get("spanId") not in parent_ids:
                         continue
                     _set(attributes, "langfuse.observation.output", text)
@@ -369,9 +369,9 @@ def enrich_for_langfuse(otlp_traces: dict) -> dict:
     return otlp_traces
 ```
 
-## Step 7: Add retrieved chunks to the retriever observations
+## Add retrieved chunks to the retriever observations
 
-The OTLP export records that retrieval happened (query, embedding model, latency) but not what was retrieved. The conversation JSON from Step 5 has the missing piece: each agent turn carries `rag_retrieval_info` with the retrieved chunk IDs and vector distances, and the [knowledge base API](https://elevenlabs.io/docs/api-reference/knowledge-base) returns the chunk text.
+The OTLP export records that retrieval happened (query, embedding model, latency) but not what was retrieved. The conversation JSON fetched earlier has the missing piece: each agent turn carries `rag_retrieval_info` with the retrieved chunk IDs and vector distances, and the [knowledge base API](https://elevenlabs.io/docs/api-reference/knowledge-base) returns the chunk text.
 
 This step joins them into the `retriever` observations, so the retrieved text becomes the observation output. You can then check the agent's answer against the exact text it retrieved, e.g. with an [LLM-as-a-judge evaluator](https://langfuse.com/docs/evaluation/evaluation-methods/llm-as-a-judge) for faithfulness.
 
@@ -415,7 +415,7 @@ def attach_rag_chunks(otlp_traces: dict, conversation: dict, client: ElevenLabs)
     return otlp_traces
 ```
 
-## Step 8: Forward the trace to Langfuse
+## Forward the trace to Langfuse
 
 Langfuse accepts [OTLP over HTTP in JSON format](https://langfuse.com/integrations/native/opentelemetry#opentelemetry-endpoint), so the payload can be sent as-is with a single POST request. No OpenTelemetry SDK or protobuf encoding needed. The `x-langfuse-ingestion-version: 4` header enables real-time ingestion on the v4 data model.
 
@@ -445,7 +445,7 @@ send_to_langfuse(enriched)
 print("Forwarded conversation to Langfuse")
 ```
 
-## Step 9: Production setup with a post-call webhook
+## Production setup with a post-call webhook
 
 In production, don't poll the GET API. Configure an [ElevenLabs post-call webhook](https://elevenlabs.io/docs/eleven-agents/workflows/post-call-webhooks) with the **Transcript** event and **OpenTelemetry transcript payloads** enabled (in [Agents settings](https://elevenlabs.io/app/agents/settings)). ElevenLabs then POSTs a `post_call_transcription_otel` event with the same `otlp_traces` object after every completed call.
 
@@ -481,7 +481,7 @@ async def post_call(request: Request, elevenlabs_signature: str = Header(...)):
     return {"ok": True}
 ```
 
-To include the retrieved chunks (Step 7) in production, fetch the transcript once via the [GET conversation API](https://elevenlabs.io/docs/api-reference/conversations/get) when the event arrives and run `attach_rag_chunks` before `send_to_langfuse`. (The webhook's regular `post_call_transcription` event also carries the transcript with `rag_retrieval_info`, but it is a separate delivery, so joining it with the OTel event requires buffering one of the two.)
+To include the retrieved chunks in production, fetch the transcript once via the [GET conversation API](https://elevenlabs.io/docs/api-reference/conversations/get) when the event arrives and run `attach_rag_chunks` before `send_to_langfuse`. (The webhook's regular `post_call_transcription` event also carries the transcript with `rag_retrieval_info`, but it is a separate delivery, so joining it with the OTel event requires buffering one of the two.)
 
 **Forward each conversation exactly once.** The trace ID is stable per conversation, but ElevenLabs generates fresh span IDs on every export. Re-exporting a conversation via the GET API and forwarding it again duplicates all observations inside the same trace. Re-sending the **same** payload (e.g. your own retry around a failed POST) is idempotent. If you need retries, persist the exported payload and re-send that exact payload.
 
@@ -493,11 +493,11 @@ For live use cases (supervisor dashboards, real-time alerting), the [monitoring 
 - **No trace context propagation**: ElevenLabs mints its own trace IDs, so the conversation cannot be nested inside an existing application trace. Use the conversation ID (mapped to the Langfuse session ID above) to correlate application-side traces with the voice conversation.
 - **LLM cost only**: per-turn token usage and cost cover the LLM calls. The total conversation cost including voice (TTS/ASR) is in the `elevenlabs.cost_fiat` attribute in the root observation's metadata.
 - **4 KB truncation**: ElevenLabs truncates long tool parameters and results at 4 KB per span attribute.
-- **RAG chunk contents require a join**: the OTLP trace only carries the retrieval query, embedding model, and latency. Step 7 joins the retrieved chunk IDs and distances from the conversation transcript and the chunk text from the knowledge base API.
+- **RAG chunk contents require a join**: the OTLP trace only carries the retrieval query, embedding model, and latency. `attach_rag_chunks` joins the retrieved chunk IDs and distances from the conversation transcript and the chunk text from the knowledge base API.
 
-## Step 10: View the trace in Langfuse
+## View the trace in Langfuse
 
-Open [Langfuse Cloud](https://langfuse.com/cloud) to see the full conversation trace: the conversation as the root `agent` observation, transcript turns, LLM generations with token usage and cost, the tool call with its parameters and result, and the RAG retrievals with their queries and retrieved chunks. The conversation ID is the Langfuse session ID, so all traces of the same conversation group together in the [Sessions view](https://langfuse.com/docs/observability/features/sessions).
+Open [Langfuse Cloud](https://langfuse.com/cloud) to see the full conversation trace, from the root `agent` observation down to the tool call and the RAG retrievals with their retrieved chunks. The conversation ID is the Langfuse session ID, so all traces of the same conversation group together in the [Sessions view](https://langfuse.com/docs/observability/features/sessions).
 
 ![Example ElevenLabs trace in Langfuse](https://langfuse.com/images/cookbook/integration_elevenlabs/elevenlabs-example-trace.png)
 

@@ -535,11 +535,10 @@ def _set_observation_attrs(span, obs) -> None:
             _set_scalar(span, f"langfuse.observation.metadata.{k}", v)
     elif md is not None:
         _set_scalar(span, "langfuse.observation.metadata._raw", md)
-    # Generation-only attributes. ObservationV2 renames `model` to
-    # `provided_model_name`; fall back to `model` for the v1 type used by
-    # self-hosted migrations.
+    # Generation-only attributes. ObservationV2 exposes the model name as
+    # `model`; retain a fallback for older SDK response types.
     if obs_type == "generation":
-        model_name = getattr(obs, "provided_model_name", None) or getattr(obs, "model", None)
+        model_name = getattr(obs, "model", None) or getattr(obs, "provided_model_name", None)
         _set_scalar(span, "langfuse.observation.model.name", model_name)
         if obs.model_parameters:
             span.set_attribute("langfuse.observation.model.parameters", dumps(obs.model_parameters))
@@ -579,7 +578,7 @@ obs_id_map: Dict[str, str] = {}
 # Field groups we need from the v2 Observations API. `core` is always included.
 # `basic` gives name/level/status/version/environment; `time` adds
 # completionStartTime; `io` adds input/output; `metadata` adds metadata;
-# `model` adds providedModelName/modelParameters; `usage` adds
+# `model` adds model/modelParameters; `usage` adds
 # usageDetails/costDetails; `prompt` adds promptName/promptVersion.
 OBSERVATIONS_FIELDS = "core,basic,time,io,metadata,model,usage,prompt"
 
