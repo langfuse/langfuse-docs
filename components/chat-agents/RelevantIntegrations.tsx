@@ -1,7 +1,10 @@
+import type { ReactNode } from "react";
 import IconPython from "@/components/icons/python";
 import IconTypescript from "@/components/icons/typescript";
 import Link from "next/link";
 import { IntegrationLabel } from "@/components/ui/integration-label";
+import { integrationsSource } from "@/lib/source";
+import { cn } from "@/lib/utils";
 
 const agentFrameworks = [
   { label: "LangChain", href: "/integrations/frameworks/langchain" },
@@ -30,7 +33,11 @@ const modelProviders = [
     label: "Amazon Bedrock",
     href: "/integrations/model-providers/amazon-bedrock",
   },
-  { label: "Azure OpenAI", href: "/integrations/model-providers/openai-py" },
+  {
+    label: "Azure OpenAI",
+    href: "/integrations/model-providers/openai-py",
+    logo: "/images/integrations/microsoft_icon.svg",
+  },
   { label: "LiteLLM", href: "/integrations/frameworks/litellm-sdk" },
 ] as const;
 
@@ -48,54 +55,12 @@ const languagesAndTelemetry = [
   },
 ] as const;
 
-function ChipSquare() {
-  return (
-    <span className="h-[10px] w-[10px] border border-line-structure bg-surface-1" />
-  );
-}
-
-function IntegrationRow({
-  title,
-  items,
-}: {
-  title: string;
-  items: readonly {
-    label: string;
-    href: string;
-    icon?: "python" | "typescript";
-  }[];
-}) {
-  return (
-    <div className="grid gap-3 border-b border-line-structure py-4 md:grid-cols-[170px_1fr] md:gap-6 md:py-5">
-      <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary md:pt-1">
-        {title}
-      </p>
-      <div className="flex flex-wrap gap-1.5 md:gap-2">
-        {items.map((item) => (
-          <IntegrationLabel
-            key={item.label}
-            href={item.href}
-            label={item.label}
-            icon={
-              item.icon === "python" ? (
-                <IconPython className="h-[12px] w-[12px]" />
-              ) : item.icon === "typescript" ? (
-                <IconTypescript className="h-[12px] w-[12px]" />
-              ) : (
-                <ChipSquare />
-              )
-            }
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 export type IntegrationItem = {
   label: string;
   href: string;
   icon?: "python" | "typescript";
+  logo?: string;
+  logoAppearance?: "light" | "dark" | "both";
 };
 
 export type IntegrationGroup = {
@@ -108,6 +73,73 @@ const DEFAULT_GROUPS: IntegrationGroup[] = [
   { title: "Model providers", items: modelProviders },
   { title: "Languages & telemetry", items: languagesAndTelemetry },
 ];
+
+function integrationSlugFromHref(href: string): string[] | undefined {
+  const path = href.split("#")[0];
+  if (!path.startsWith("/integrations/")) return undefined;
+  return path
+    .replace(/^\/integrations\//, "")
+    .split("/")
+    .filter(Boolean);
+}
+
+function resolveChipIcon(item: IntegrationItem): ReactNode {
+  if (item.icon === "python") {
+    return <IconPython className="h-[12px] w-[12px]" />;
+  }
+  if (item.icon === "typescript") {
+    return <IconTypescript className="h-[12px] w-[12px]" />;
+  }
+
+  const slug = integrationSlugFromHref(item.href);
+  const page = slug ? integrationsSource.getPage(slug) : undefined;
+  const data = page?.data as
+    | { logo?: string; logoAppearance?: "light" | "dark" | "both" }
+    | undefined;
+  const logo = item.logo ?? data?.logo;
+  if (!logo) return undefined;
+
+  const appearance = item.logoAppearance ?? data?.logoAppearance;
+
+  return (
+    <img
+      src={logo}
+      alt=""
+      aria-hidden
+      className={cn(
+        "h-full w-full object-contain",
+        appearance === "dark" && "dark:brightness-0 dark:invert",
+        appearance === "light" && "invert dark:invert-0",
+      )}
+    />
+  );
+}
+
+function IntegrationRow({
+  title,
+  items,
+}: {
+  title: string;
+  items: readonly IntegrationItem[];
+}) {
+  return (
+    <div className="grid gap-3 border-b border-line-structure py-4 md:grid-cols-[170px_1fr] md:gap-6 md:py-5">
+      <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary md:pt-1">
+        {title}
+      </p>
+      <div className="flex flex-wrap gap-1.5 md:gap-2">
+        {items.map((item) => (
+          <IntegrationLabel
+            key={item.label}
+            href={item.href}
+            label={item.label}
+            icon={resolveChipIcon(item)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function RelevantIntegrations({
   headingLine1 = "Any model,",
