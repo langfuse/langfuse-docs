@@ -92,35 +92,67 @@ function IntegrationRow({
   );
 }
 
-export function RelevantIntegrations() {
+export type IntegrationItem = {
+  label: string;
+  href: string;
+  icon?: "python" | "typescript";
+};
+
+export type IntegrationGroup = {
+  title: string;
+  items: readonly IntegrationItem[];
+};
+
+const DEFAULT_GROUPS: IntegrationGroup[] = [
+  { title: "Agent frameworks", items: agentFrameworks },
+  { title: "Model providers", items: modelProviders },
+  { title: "Languages & telemetry", items: languagesAndTelemetry },
+];
+
+export function RelevantIntegrations({
+  headingLine1 = "Any model,",
+  headingLine2 = "any framework",
+  description = "Based on OpenTelemetry. Two lines in your handler, or point an existing OTel exporter at Langfuse — nothing else in your stack changes.",
+  groups = DEFAULT_GROUPS,
+  browseLabel = "Need another framework?",
+  browseHref = "/integrations",
+  browseCta = "Browse all 80+ integrations →",
+}: {
+  headingLine1?: string;
+  headingLine2?: string;
+  description?: string;
+  groups?: readonly IntegrationGroup[];
+  browseLabel?: string;
+  browseHref?: string;
+  browseCta?: string;
+} = {}) {
   return (
     <div className="mt-8 border border-line-structure bg-surface-bg px-4 py-4 sm:px-6 sm:py-6">
       <div className="grid gap-4 border-b border-line-structure pb-5 md:grid-cols-[1fr_1fr] md:items-center md:gap-8">
         <h3 className="text-[48px] leading-[0.95] text-text-primary">
-          <span className="block">Any model,</span>
-          <span className="block">any framework</span>
+          <span className="block">{headingLine1}</span>
+          <span className="block">{headingLine2}</span>
         </h3>
         <p className="max-w-[58ch] text-[13px] leading-[1.45] text-text-secondary md:justify-self-end">
-          Based on OpenTelemetry. Two lines in your handler, or point an
-          existing OTel exporter at Langfuse — nothing else in your stack
-          changes.
+          {description}
         </p>
       </div>
 
-      <IntegrationRow title="Agent frameworks" items={agentFrameworks} />
-      <IntegrationRow title="Model providers" items={modelProviders} />
-      <IntegrationRow
-        title="Languages & telemetry"
-        items={languagesAndTelemetry}
-      />
+      {groups.map((group) => (
+        <IntegrationRow
+          key={group.title}
+          title={group.title}
+          items={group.items}
+        />
+      ))}
 
       <div className="pt-4 text-right text-[12px] text-text-tertiary">
-        Need another framework?{" "}
+        {browseLabel}{" "}
         <Link
-          href="/integrations"
+          href={browseHref}
           className="text-text-secondary underline underline-offset-2 hover:text-text-primary"
         >
-          Browse all 80+ integrations →
+          {browseCta}
         </Link>
       </div>
     </div>

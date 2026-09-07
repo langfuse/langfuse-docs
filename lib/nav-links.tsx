@@ -4,6 +4,7 @@ import {
   Bot,
   BookOpen,
   Bookmark,
+  Code2,
   FlaskConical,
   GraduationCap,
   HelpCircle,
@@ -51,6 +52,7 @@ export const resourcesLinks: NavPanelLink[] = [
 
 export const useCaseLinks: NavPanelLink[] = [
   { name: "Chat agents", href: "/chat-agents", icon: Bot },
+  { name: "Coding agents", href: "/coding-agents", icon: Code2 },
 ];
 
 export const simpleLinks = [
