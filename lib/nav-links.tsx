@@ -13,6 +13,7 @@ import {
   Newspaper,
   Presentation,
   ScrollText,
+  Workflow,
   type LucideIcon,
 } from "lucide-react";
 
@@ -51,6 +52,7 @@ export const resourcesLinks: NavPanelLink[] = [
 
 export const useCaseLinks: NavPanelLink[] = [
   { name: "Chat agents", href: "/chat-agents", icon: Bot },
+  { name: "Workflow automation", href: "/workflow-automation", icon: Workflow },
 ];
 
 export const simpleLinks = [

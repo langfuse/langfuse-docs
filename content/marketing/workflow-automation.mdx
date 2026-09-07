@@ -1,143 +1,229 @@
 ---
-title: Build reliable automation agents
-seoTitle: Langfuse for workflow automation
+title: Langfuse for workflow automation
 description: Trace multi-step workflow automation across systems and frameworks. Track cost at every step and include human expertise to improve your agents over time.
+contentWidth: full
 ---
 
-import { UseCaseCtas } from "@/components/use-cases/UseCaseCtas";
+import { CustomerQuoteGrid } from "@/components/chat-agents/CustomerQuoteGrid";
+import { RelevantIntegrations } from "@/components/chat-agents/RelevantIntegrations";
+import { ValueInsightsAccordion } from "@/components/chat-agents/ValueInsightsAccordion";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+import {
+  workflowAutomationInsights,
+  workflowAutomationQuoteRoutes,
+  workflowAutomationIntegrationGroups,
+} from "@/components/workflow-automation/content";
+import { BookOpen, Rocket, Workflow } from "lucide-react";
 
-# Build reliable automation agents
+<h1 className="sr-only">Langfuse for workflow automation</h1>
 
-Workflow automation includes dozens of steps across systems and frameworks. Trace the full execution, track cost at every step, and continuously include human expertise to improve your system.
+<div className="not-prose mt-6 overflow-hidden border border-line-structure bg-surface-bg">
+  <section className="grid border-b border-line-structure lg:grid-cols-[1.2fr_0.8fr]">
+    <div className="min-w-0 border-b border-line-structure px-6 py-7 sm:px-10 sm:py-8 lg:border-b-0 lg:border-r">
+      <p className="font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
+        Use case / workflow automation
+      </p>
+      <h2 className="mt-2 text-[38px] leading-[0.95] text-text-primary sm:text-[48px]">
+        <span className="block">Build</span>
+        <span className="block">reliable</span>
+        <span className="mt-1 inline-block bg-surface-cta-primary px-1.5 whitespace-nowrap">
+          automation agents
+        </span>
+      </h2>
+      <p className="mt-4 max-w-[56ch] text-[14px] leading-[1.45] text-text-secondary">
+        Workflow automation includes dozens of steps across systems and
+        frameworks. Trace the full execution, track cost at every step, and
+        continuously include human expertise to improve your system.
+      </p>
+      <div className="mt-6 flex flex-wrap gap-2">
+        <a
+          href="/cloud"
+          className="border border-line-cta bg-text-primary px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-surface-bg transition-opacity hover:opacity-90"
+        >
+          Start free
+        </a>
+        <a
+          href="/talk-to-us"
+          className="border border-line-structure bg-surface-bg px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary"
+        >
+          Talk to sales
+        </a>
+        <a
+          href="/docs/observability/get-started"
+          className="border border-line-structure bg-surface-bg px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary"
+        >
+          Tracing quickstart →
+        </a>
+      </div>
+    </div>
 
-<UseCaseCtas />
+    <div className="min-w-0 bg-surface-1 px-4 py-4 sm:px-6 sm:py-5">
+      <div className="border border-line-structure bg-surface-bg">
+        <div className="grid grid-cols-2 border-b border-line-structure px-3 py-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+          <span>Run · invoice-extract-prod</span>
+          <span className="text-right">Claim #8841 · 6 steps · 02:14</span>
+        </div>
 
-## Debug agent executions [#debug]
+        <div className="space-y-2 p-3 text-[11px] text-text-secondary">
+          <p className="border border-line-structure bg-surface-bg px-2.5 py-1.5 text-text-primary">
+            Invoice PDF received · vendor Acme · $4,280.00
+          </p>
+          <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+            classify_document · 210 ms · $0.01
+          </p>
+          <p className="border border-line-structure bg-surface-bg px-2.5 py-1.5 text-text-primary">
+            Extracted 12 line items. Total confidence 0.61 — below threshold.
+          </p>
+          <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+            extract_fields · 1.4 s · $0.07
+          </p>
+          <p className="border border-line-structure bg-surface-1 px-2.5 py-1.5 text-text-primary">
+            Low-confidence total. Routed to finance reviewer before posting.
+          </p>
+          <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+            human_review · queued
+          </p>
+        </div>
 
-Trace every step, tool call, and input and output your agent produces. Find failure modes and bottlenecks across executions, then prioritize issues by how often they happen so you fix what actually matters.
+        <div className="border-t border-line-structure">
+          <p className="border-b border-line-structure px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+            Eval scores
+          </p>
+          <div className="grid grid-cols-3">
+            <div className="border-r border-line-structure px-3 py-2">
+              <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+                Field accuracy
+              </p>
+              <p className="text-[16px] leading-none text-text-primary">
+                0.61
+              </p>
+            </div>
+            <div className="border-r border-line-structure px-3 py-2">
+              <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+                Cost / run
+              </p>
+              <p className="text-[16px] leading-none text-text-primary">
+                $0.18
+              </p>
+            </div>
+            <div className="px-3 py-2">
+              <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+                Reviewed
+              </p>
+              <p className="text-[16px] leading-none text-text-primary">
+                Queued
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-A typical automation run spans APIs, tools, and models. [Langfuse traces](/docs/observability/overview) stitch that path into one timeline you can inspect, share, and filter. Use [agent graphs](/docs/observability/features/agent-graphs) to see the workflow as it ran, and [sessions](/docs/observability/features/sessions) when a job spans multiple traces.
+  </section>
 
-[Get started with tracing](/docs/observability/get-started) in minutes, then follow [what a good trace looks like](/docs/observability/best-practices) so debugging, evaluation, and cost tracking stay useful as the system grows.
+  <section className="grid sm:grid-cols-2 lg:grid-cols-4">
+    <div className="border-b border-r border-line-structure px-5 py-4 sm:border-b lg:border-b-0">
+      <p className="text-[33px] leading-none text-text-primary">80M+</p>
+      <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+        Traces ingested / day
+      </p>
+    </div>
+    <div className="border-b border-line-structure px-5 py-4 sm:border-b sm:border-r lg:border-b-0">
+      <p className="text-[33px] leading-none text-text-primary">50,000+</p>
+      <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+        Companies in production
+      </p>
+    </div>
+    <div className="border-b border-r border-line-structure px-5 py-4 sm:border-b-0 lg:border-b-0">
+      <p className="text-[33px] leading-none text-text-primary">80+</p>
+      <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+        Framework and workflow integrations
+      </p>
+    </div>
+    <div className="px-5 py-4">
+      <p className="text-[33px] leading-none text-text-primary">21</p>
+      <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+        Of the Fortune 50
+      </p>
+    </div>
+  </section>
 
-## See cost at every step [#cost]
+  <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
+    <div className="flex items-center gap-4 border-b border-line-structure pb-4">
+      <h2 className="text-[34px] leading-[1] text-text-primary sm:text-[46px]">
+        Trace the full run, not one call
+      </h2>
+      <div className="hidden h-px flex-1 bg-line-structure sm:block" />
+    </div>
 
-Get a detailed view of cost for an execution as a whole and a granular view of each sub-step. Swap models and inspect quality so you can manage the cost of the system without guessing.
+    <ValueInsightsAccordion
+      items={workflowAutomationInsights}
+      caption="trace · extract_fields · step 3 of 6"
+    />
 
-Langfuse [tracks tokens and cost](/docs/observability/features/token-and-cost-tracking) for popular models out of the box, including nested tool and LLM calls. Break spend down by model, user, or workflow, then compare quality after a model swap with [experiments](/docs/evaluation/experiments/datasets).
+  </section>
 
-## Improve with human expertise [#human-expertise]
+  <section className="border-t border-line-structure bg-surface-1 px-5 py-14 sm:px-10 sm:py-18">
+    <h2 className="mt-2 text-center text-[44px] leading-[1] text-text-primary">
+      Teams improving workflow automation agents on Langfuse
+    </h2>
+    <CustomerQuoteGrid routes={workflowAutomationQuoteRoutes} />
+  </section>
 
-Let engineers and domain experts annotate data in Langfuse and mark when the system went wrong. Log corrections from human-in-the-loop setups to build ground-truth data at scale.
+  <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-18">
+    <RelevantIntegrations
+      headingLine1="Any system,"
+      headingLine2="any workflow"
+      description="Trace n8n, Temporal, LangGraph, and no-code builders through native integrations or OpenTelemetry — nothing else in your stack changes."
+      groups={workflowAutomationIntegrationGroups}
+    />
+  </section>
 
-Use [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) to review failing runs, [scores in the UI](/docs/evaluation/evaluation-methods/scores-via-ui) to label what good looks like, and [corrections](/docs/observability/features/corrections) to capture the output the agent should have produced. Those labels become [datasets](/docs/evaluation/experiments/datasets) you can rerun as the workflow changes.
+  <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-16">
+    <h2 className="mt-2 text-center text-[40px] leading-[1] text-text-primary">
+      Learn from real automation examples
+    </h2>
+    <p className="mx-auto mt-2 max-w-[60ch] text-center text-[13px] text-text-tertiary">
+      Start tracing a full application, evaluate structured extraction, and
+      study patterns for multi-step LLM systems.
+    </p>
+    <div className="mx-auto mt-8 max-w-4xl">
+      <Cards num={2} className="sm:grid-cols-1 lg:grid-cols-2">
+        <Card
+          title="Get started with tracing"
+          href="/docs/observability/get-started"
+          icon={<Rocket />}
+          description="Ingest your first trace and see a full application run in Langfuse."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
+        <Card
+          title="Structured output extraction cookbook"
+          href="/guides/cookbook/example_structured_output_extraction"
+          icon={<Workflow />}
+          description="Evaluate document and claim extraction per field, then improve the pipeline with experiments."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
+        <Card
+          title="Observability in multi-step LLM systems"
+          href="/blog/2024-10-observability-in-multi-step-llm-systems"
+          icon={<BookOpen />}
+          description="How to debug, evaluate, and test applications that chain many LLM and tool steps."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
+      </Cards>
+    </div>
+  </section>
 
-## Teams automating workflows on Langfuse [#customers]
-
-Hugging Face, Ravenna, and Merck use Langfuse to debug and improve automation agents in production.
-
-<Cards>
-  <Card
-    title="Hugging Face"
-    href="/users/hugging-face"
-    description="Overnight agent that finds open-source models and opens GitHub issues and PRs. Traces each paper through classification and extraction; two negative comments across thousands of automated outreach after error analysis in Langfuse."
-  />
-  <Card
-    title="Ravenna"
-    href="/users/ravenna"
-    description="AI-native internal service desk. Agents automate IT, HR, and ops tickets across hundreds of systems, with traces that stitch TypeScript, Python, Slack, and the web app into one request."
-  />
-  <Card
-    title="Merck"
-    href="/users/merckgroup"
-    description="About 80 GenAI use cases on Langfuse, including multi-agent medical writing and lab assistants that automate research workflows for 200+ builders."
-  />
-</Cards>
-
-See more [customer stories](/users).
-
-## Integrations [#integrations]
-
-Langfuse connects to the frameworks and automation platforms these agents already run on. Trace n8n and Temporal workflows, LangGraph and CrewAI agents, and no-code builders through native integrations or [OpenTelemetry](/integrations/native/opentelemetry).
-
-<Cards>
-  <Card
-    title="n8n"
-    href="/integrations/no-code/n8n"
-    description="Trace LLM steps in n8n workflows and pull Langfuse prompts into nodes."
-  />
-  <Card
-    title="Temporal"
-    href="/integrations/frameworks/temporal"
-    description="Monitor durable Temporal workflows and activities via OpenTelemetry."
-  />
-  <Card
-    title="Restate"
-    href="/integrations/frameworks/restate"
-    description="Trace resilient Restate agents and workflows, including durable steps."
-  />
-  <Card
-    title="LangGraph"
-    href="/integrations/frameworks/langgraph"
-    description="Capture LangGraph nodes, tool calls, and graph executions as traces."
-  />
-  <Card
-    title="CrewAI"
-    href="/integrations/frameworks/crewai"
-    description="Observe multi-agent Crews and Flows as they hand work between roles."
-  />
-  <Card
-    title="Zapier"
-    href="/integrations/other/zapier"
-    description="Automate Langfuse project admin and prompt fetches from Zapier."
-  />
-  <Card
-    title="Dify"
-    href="/integrations/no-code/dify"
-    description="Native observability for Dify apps you assemble in the no-code builder."
-  />
-  <Card
-    title="Flowise"
-    href="/integrations/no-code/flowise"
-    description="Trace drag-and-drop Flowise pipelines and their LLM steps."
-  />
-  <Card
-    title="Langflow"
-    href="/integrations/no-code/langflow"
-    description="Monitor Langflow prototypes as they move from canvas to production."
-  />
-</Cards>
-
-Browse the [full integrations catalog](/integrations), including OpenAI, LangChain, and the Vercel AI SDK.
-
-## Additional resources [#resources]
-
-<Cards>
-  <Card
-    title="Get started with tracing"
-    href="/docs/observability/get-started"
-    description="Ingest your first trace and see a full application run in Langfuse."
-  />
-  <Card
-    title="Structured output extraction cookbook"
-    href="/guides/cookbook/example_structured_output_extraction"
-    description="Evaluate document and claim extraction per field, then improve the pipeline with experiments."
-  />
-  <Card
-    title="Observability in multi-step LLM systems"
-    href="/blog/2024-10-observability-in-multi-step-llm-systems"
-    description="How to debug, evaluate, and test applications that chain many LLM and tool steps."
-  />
-  <Card
-    title="Academy: tracing"
-    href="/academy/tracing"
-    description="What a trace is, how it is structured, and why it is the foundation for improving agents."
-  />
-  <Card
-    title="Academy: customer support chatbot"
-    href="/academy/examples/customer-support-chatbot"
-    description="A worked example of automating support in phases, from offline tests to production."
-  />
-</Cards>
-
-<UseCaseCtas variant="banner" />
+  <section className="border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
+    <div className="mx-auto max-w-5xl">
+      <CustomerStoryCTA
+        title="Ready to build reliable automation agents?"
+        description="Use traces, cost analytics, and human review to observe and improve every workflow run with Langfuse."
+        contactLabel="Talk to sales"
+      />
+    </div>
+  </section>
+</div>
