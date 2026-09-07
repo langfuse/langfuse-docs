@@ -1,5 +1,21 @@
 const BASE_URL = "https://langfuse.com";
 
+/** Origin that can actually serve unpublished static assets on this deployment. */
+function getOgAssetOrigin(): string {
+  const isPreview =
+    process.env.VERCEL_ENV === "preview" ||
+    process.env.NEXT_PUBLIC_VERCEL_ENV === "preview";
+  if (isPreview) {
+    const host = (process.env.VERCEL_BRANCH_URL || process.env.VERCEL_URL || "")
+      .replace(/^https?:\/\//, "")
+      .replace(/\/$/, "");
+    if (host) {
+      return `https://${host}`;
+    }
+  }
+  return BASE_URL;
+}
+
 /** Default site description; keep in sync with `app/layout.tsx` metadata.description. */
 export const SITE_DEFAULT_OG_DESCRIPTION =
   "Trace, evaluate, and improve AI agents with one open platform. Use production data to understand behavior, collaborate on fixes, and ship better quality at lower cost and latency.";
@@ -29,7 +45,16 @@ export function buildOgImageUrl({
   staticOgImage?: string | null;
 }): string {
   if (staticOgImage) {
-    return BASE_URL + staticOgImage;
+    if (
+      staticOgImage.startsWith("http://") ||
+      staticOgImage.startsWith("https://")
+    ) {
+      return staticOgImage;
+    }
+    const path = staticOgImage.startsWith("/")
+      ? staticOgImage
+      : `/${staticOgImage}`;
+    return `${getOgAssetOrigin()}${path}`;
   }
   const params = new URLSearchParams({ title });
   if (description) params.set("description", description);
