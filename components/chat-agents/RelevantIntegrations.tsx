@@ -1,7 +1,10 @@
+import type { ReactNode } from "react";
 import IconPython from "@/components/icons/python";
 import IconTypescript from "@/components/icons/typescript";
 import Link from "next/link";
 import { IntegrationLabel } from "@/components/ui/integration-label";
+import { integrationsSource } from "@/lib/source";
+import { cn } from "@/lib/utils";
 
 const agentFrameworks = [
   { label: "LangChain", href: "/integrations/frameworks/langchain" },
@@ -30,7 +33,11 @@ const modelProviders = [
     label: "Amazon Bedrock",
     href: "/integrations/model-providers/amazon-bedrock",
   },
-  { label: "Azure OpenAI", href: "/integrations/model-providers/openai-py" },
+  {
+    label: "Azure OpenAI",
+    href: "/integrations/model-providers/openai-py",
+    logo: "/images/integrations/microsoft_icon.svg",
+  },
   { label: "LiteLLM", href: "/integrations/frameworks/litellm-sdk" },
 ] as const;
 
@@ -48,9 +55,63 @@ const languagesAndTelemetry = [
   },
 ] as const;
 
-function ChipSquare() {
+export type IntegrationItem = {
+  label: string;
+  href: string;
+  icon?: "python" | "typescript";
+  logo?: string;
+  logoAppearance?: "light" | "dark" | "both";
+};
+
+export type IntegrationGroup = {
+  title: string;
+  items: readonly IntegrationItem[];
+};
+
+const DEFAULT_GROUPS: IntegrationGroup[] = [
+  { title: "Agent frameworks", items: agentFrameworks },
+  { title: "Model providers", items: modelProviders },
+  { title: "Languages & telemetry", items: languagesAndTelemetry },
+];
+
+function integrationSlugFromHref(href: string): string[] | undefined {
+  const path = href.split("#")[0];
+  if (!path.startsWith("/integrations/")) return undefined;
+  return path
+    .replace(/^\/integrations\//, "")
+    .split("/")
+    .filter(Boolean);
+}
+
+function resolveChipIcon(item: IntegrationItem): ReactNode {
+  if (item.icon === "python") {
+    return <IconPython className="h-[12px] w-[12px]" />;
+  }
+  if (item.icon === "typescript") {
+    return <IconTypescript className="h-[12px] w-[12px]" />;
+  }
+
+  const slug = integrationSlugFromHref(item.href);
+  const page = slug ? integrationsSource.getPage(slug) : undefined;
+  const data = page?.data as
+    | { logo?: string; logoAppearance?: "light" | "dark" | "both" }
+    | undefined;
+  const logo = item.logo ?? data?.logo;
+  if (!logo) return undefined;
+
+  const appearance = item.logoAppearance ?? data?.logoAppearance;
+
   return (
-    <span className="h-[10px] w-[10px] border border-line-structure bg-surface-1" />
+    <img
+      src={logo}
+      alt=""
+      aria-hidden
+      className={cn(
+        "h-full w-full object-contain",
+        appearance === "dark" && "dark:brightness-0 dark:invert",
+        appearance === "light" && "invert dark:invert-0",
+      )}
+    />
   );
 }
 
@@ -59,11 +120,7 @@ function IntegrationRow({
   items,
 }: {
   title: string;
-  items: readonly {
-    label: string;
-    href: string;
-    icon?: "python" | "typescript";
-  }[];
+  items: readonly IntegrationItem[];
 }) {
   return (
     <div className="grid gap-3 border-b border-line-structure py-4 md:grid-cols-[170px_1fr] md:gap-6 md:py-5">
@@ -76,15 +133,7 @@ function IntegrationRow({
             key={item.label}
             href={item.href}
             label={item.label}
-            icon={
-              item.icon === "python" ? (
-                <IconPython className="h-[12px] w-[12px]" />
-              ) : item.icon === "typescript" ? (
-                <IconTypescript className="h-[12px] w-[12px]" />
-              ) : (
-                <ChipSquare />
-              )
-            }
+            icon={resolveChipIcon(item)}
           />
         ))}
       </div>
@@ -92,27 +141,36 @@ function IntegrationRow({
   );
 }
 
-export function RelevantIntegrations() {
+export function RelevantIntegrations({
+  headingLine1 = "Any model,",
+  headingLine2 = "any framework",
+  description = "Based on OpenTelemetry. Two lines in your handler, or point an existing OTel exporter at Langfuse — nothing else in your stack changes.",
+  groups = DEFAULT_GROUPS,
+}: {
+  headingLine1?: string;
+  headingLine2?: string;
+  description?: string;
+  groups?: readonly IntegrationGroup[];
+} = {}) {
   return (
     <div className="mt-8 border border-line-structure bg-surface-bg px-4 py-4 sm:px-6 sm:py-6">
       <div className="grid gap-4 border-b border-line-structure pb-5 md:grid-cols-[1fr_1fr] md:items-center md:gap-8">
         <h3 className="text-[48px] leading-[0.95] text-text-primary">
-          <span className="block">Any model,</span>
-          <span className="block">any framework</span>
+          <span className="block">{headingLine1}</span>
+          <span className="block">{headingLine2}</span>
         </h3>
         <p className="max-w-[58ch] text-[13px] leading-[1.45] text-text-secondary md:justify-self-end">
-          Based on OpenTelemetry. Two lines in your handler, or point an
-          existing OTel exporter at Langfuse — nothing else in your stack
-          changes.
+          {description}
         </p>
       </div>
 
-      <IntegrationRow title="Agent frameworks" items={agentFrameworks} />
-      <IntegrationRow title="Model providers" items={modelProviders} />
-      <IntegrationRow
-        title="Languages & telemetry"
-        items={languagesAndTelemetry}
-      />
+      {groups.map((group) => (
+        <IntegrationRow
+          key={group.title}
+          title={group.title}
+          items={group.items}
+        />
+      ))}
 
       <div className="pt-4 text-right text-[12px] text-text-tertiary">
         Need another framework?{" "}
