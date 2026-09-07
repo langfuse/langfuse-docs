@@ -72,7 +72,7 @@ export function ValueInsightsAccordion() {
               className="border-b border-line-structure"
             >
               <AccordionPrimitive.Header className="flex">
-                <AccordionPrimitive.Trigger className="flex w-full items-start gap-4 py-5 text-left [&[data-state=open]>svg]:rotate-45">
+                <AccordionPrimitive.Trigger className="grid w-full grid-cols-[26px_1fr_auto] items-start gap-3 py-5 text-left [&[data-state=open]>svg]:rotate-45">
                   <span className="pt-1 font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
                     {String(index + 1).padStart(2, "0")}
                   </span>
