@@ -1,12 +1,20 @@
 ---
 title: Langfuse for chat agents
+seoTitle: Langfuse for Chat Agents
 description: Build and improve production chat agents with full-session tracing, quality evaluation, and cost visibility in one platform.
 contentWidth: full
 ---
 
+{/* Markdown for agents and .md consumers lives in md-override/chat-agents.md. Keep both files in sync. */}
+
 import { CustomerQuoteGrid } from "@/components/chat-agents/CustomerQuoteGrid";
 import { RelevantIntegrations } from "@/components/chat-agents/RelevantIntegrations";
 import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+import {
+  formatCompanyCount,
+  formatObservationsPerMonth,
+  formatSdkInstallsPerMonth,
+} from "@/lib/usage-stats";
 import {
   Activity,
   BookOpen,
@@ -72,7 +80,7 @@ import {
             </p>
           </div>
           <p className="border border-line-structure bg-surface-bg px-2.5 py-1.5 text-text-primary">
-            I can help with that. Your payout for 12-18 May was €248.10.
+            I can help with that. Your payout for 24–30 Aug was €248.10.
           </p>
           <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
             Agent · retrieve_payout · 340 ms · €0.04
@@ -83,7 +91,7 @@ import {
             </p>
           </div>
           <p className="border border-line-structure bg-surface-bg px-2.5 py-1.5 text-text-primary">
-            You&apos;re right — last week was 20-26 May. Payout of €412.60
+            You&apos;re right — last week was 31 Aug–6 Sep. Payout of €412.60
             settles tomorrow.
           </p>
           <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
@@ -123,27 +131,33 @@ import {
 
   <section className="grid sm:grid-cols-2 lg:grid-cols-4">
     <div className="border-b border-r border-line-structure px-5 py-4 sm:border-b lg:border-b-0">
-      <p className="text-[33px] leading-none text-text-primary">1.4B+</p>
+      <p className="text-[33px] leading-none text-text-primary">
+        {formatCompanyCount()}
+      </p>
       <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-        Chat sessions traced
+        Companies using Langfuse
       </p>
     </div>
     <div className="border-b border-line-structure px-5 py-4 sm:border-b sm:border-r lg:border-b-0">
-      <p className="text-[33px] leading-none text-text-primary">38M</p>
+      <p className="text-[33px] leading-none text-text-primary">
+        {formatObservationsPerMonth()}
+      </p>
       <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-        Turns scored / month
+        Observations / month
       </p>
     </div>
     <div className="border-b border-r border-line-structure px-5 py-4 sm:border-b-0 lg:border-b-0">
-      <p className="text-[33px] leading-none text-text-primary">2,300+</p>
+      <p className="text-[33px] leading-none text-text-primary">
+        {formatSdkInstallsPerMonth()}
+      </p>
       <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-        Companies in production
+        SDK installs / month
       </p>
     </div>
     <div className="px-5 py-4">
-      <p className="text-[33px] leading-none text-text-primary">80+</p>
+      <p className="text-[33px] leading-none text-text-primary">100+</p>
       <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-        Agent framework integrations
+        Integrations
       </p>
     </div>
   </section>
@@ -215,7 +229,7 @@ import {
           Evals
         </p>
         <h3 className="mt-2 text-[30px] leading-[1.05] text-text-primary">
-          Ensure quality for chat interactions
+          Ensure quality of chat interactions
         </h3>
         <p className="mt-3 text-[13px] leading-[1.5] text-text-secondary">
           Run LLM as a judge on production data to detect frustration,
@@ -301,6 +315,7 @@ import {
   <section className="border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
     <div className="mx-auto max-w-5xl">
       <CustomerStoryCTA
+        className="mt-0"
         title="Ready to improve your production chat agent?"
         description="Use traces, evals, and cost analytics to observe and improve every production chat session with Langfuse."
         contactLabel="Talk to sales"

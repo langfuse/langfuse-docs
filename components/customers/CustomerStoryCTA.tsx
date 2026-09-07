@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { CornerBox } from "@/components/ui/corner-box";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 type CustomerStoryCTAProps = {
@@ -14,6 +15,7 @@ type CustomerStoryCTAProps = {
   contactLabel?: string;
   contactHref?: string;
   footnote?: string;
+  className?: string;
 };
 
 export const CustomerStoryCTA = ({
@@ -26,9 +28,10 @@ export const CustomerStoryCTA = ({
   contactLabel = "Talk to an expert",
   contactHref = "/talk-to-us",
   footnote = "No credit card required · Free tier available · Self-hosting option",
+  className,
 }: CustomerStoryCTAProps = {}) => {
   return (
-    <div className="mt-14 not-prose">
+    <div className={cn("mt-14 not-prose", className)}>
       <CornerBox
         hoverStripes
         className="flex flex-col items-center gap-6 px-6 py-10 sm:px-10"
