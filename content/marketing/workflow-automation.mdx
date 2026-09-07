@@ -1,0 +1,143 @@
+---
+title: Build reliable automation agents
+seoTitle: Langfuse for workflow automation
+description: Trace multi-step workflow automation across systems and frameworks. Track cost at every step and include human expertise to improve your agents over time.
+---
+
+import { UseCaseCtas } from "@/components/use-cases/UseCaseCtas";
+
+# Build reliable automation agents
+
+Workflow automation includes dozens of steps across systems and frameworks. Trace the full execution, track cost at every step, and continuously include human expertise to improve your system.
+
+<UseCaseCtas />
+
+## Debug agent executions [#debug]
+
+Trace every step, tool call, and input and output your agent produces. Find failure modes and bottlenecks across executions, then prioritize issues by how often they happen so you fix what actually matters.
+
+A typical automation run spans APIs, tools, and models. [Langfuse traces](/docs/observability/overview) stitch that path into one timeline you can inspect, share, and filter. Use [agent graphs](/docs/observability/features/agent-graphs) to see the workflow as it ran, and [sessions](/docs/observability/features/sessions) when a job spans multiple traces.
+
+[Get started with tracing](/docs/observability/get-started) in minutes, then follow [what a good trace looks like](/docs/observability/best-practices) so debugging, evaluation, and cost tracking stay useful as the system grows.
+
+## See cost at every step [#cost]
+
+Get a detailed view of cost for an execution as a whole and a granular view of each sub-step. Swap models and inspect quality so you can manage the cost of the system without guessing.
+
+Langfuse [tracks tokens and cost](/docs/observability/features/token-and-cost-tracking) for popular models out of the box, including nested tool and LLM calls. Break spend down by model, user, or workflow, then compare quality after a model swap with [experiments](/docs/evaluation/experiments/datasets).
+
+## Improve with human expertise [#human-expertise]
+
+Let engineers and domain experts annotate data in Langfuse and mark when the system went wrong. Log corrections from human-in-the-loop setups to build ground-truth data at scale.
+
+Use [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) to review failing runs, [scores in the UI](/docs/evaluation/evaluation-methods/scores-via-ui) to label what good looks like, and [corrections](/docs/observability/features/corrections) to capture the output the agent should have produced. Those labels become [datasets](/docs/evaluation/experiments/datasets) you can rerun as the workflow changes.
+
+## Teams automating workflows on Langfuse [#customers]
+
+Hugging Face, Ravenna, and Merck use Langfuse to debug and improve automation agents in production.
+
+<Cards>
+  <Card
+    title="Hugging Face"
+    href="/users/hugging-face"
+    description="Overnight agent that finds open-source models and opens GitHub issues and PRs. Traces each paper through classification and extraction; two negative comments across thousands of automated outreach after error analysis in Langfuse."
+  />
+  <Card
+    title="Ravenna"
+    href="/users/ravenna"
+    description="AI-native internal service desk. Agents automate IT, HR, and ops tickets across hundreds of systems, with traces that stitch TypeScript, Python, Slack, and the web app into one request."
+  />
+  <Card
+    title="Merck"
+    href="/users/merckgroup"
+    description="About 80 GenAI use cases on Langfuse, including multi-agent medical writing and lab assistants that automate research workflows for 200+ builders."
+  />
+</Cards>
+
+See more [customer stories](/users).
+
+## Integrations [#integrations]
+
+Langfuse connects to the frameworks and automation platforms these agents already run on. Trace n8n and Temporal workflows, LangGraph and CrewAI agents, and no-code builders through native integrations or [OpenTelemetry](/integrations/native/opentelemetry).
+
+<Cards>
+  <Card
+    title="n8n"
+    href="/integrations/no-code/n8n"
+    description="Trace LLM steps in n8n workflows and pull Langfuse prompts into nodes."
+  />
+  <Card
+    title="Temporal"
+    href="/integrations/frameworks/temporal"
+    description="Monitor durable Temporal workflows and activities via OpenTelemetry."
+  />
+  <Card
+    title="Restate"
+    href="/integrations/frameworks/restate"
+    description="Trace resilient Restate agents and workflows, including durable steps."
+  />
+  <Card
+    title="LangGraph"
+    href="/integrations/frameworks/langgraph"
+    description="Capture LangGraph nodes, tool calls, and graph executions as traces."
+  />
+  <Card
+    title="CrewAI"
+    href="/integrations/frameworks/crewai"
+    description="Observe multi-agent Crews and Flows as they hand work between roles."
+  />
+  <Card
+    title="Zapier"
+    href="/integrations/other/zapier"
+    description="Automate Langfuse project admin and prompt fetches from Zapier."
+  />
+  <Card
+    title="Dify"
+    href="/integrations/no-code/dify"
+    description="Native observability for Dify apps you assemble in the no-code builder."
+  />
+  <Card
+    title="Flowise"
+    href="/integrations/no-code/flowise"
+    description="Trace drag-and-drop Flowise pipelines and their LLM steps."
+  />
+  <Card
+    title="Langflow"
+    href="/integrations/no-code/langflow"
+    description="Monitor Langflow prototypes as they move from canvas to production."
+  />
+</Cards>
+
+Browse the [full integrations catalog](/integrations), including OpenAI, LangChain, and the Vercel AI SDK.
+
+## Additional resources [#resources]
+
+<Cards>
+  <Card
+    title="Get started with tracing"
+    href="/docs/observability/get-started"
+    description="Ingest your first trace and see a full application run in Langfuse."
+  />
+  <Card
+    title="Structured output extraction cookbook"
+    href="/guides/cookbook/example_structured_output_extraction"
+    description="Evaluate document and claim extraction per field, then improve the pipeline with experiments."
+  />
+  <Card
+    title="Observability in multi-step LLM systems"
+    href="/blog/2024-10-observability-in-multi-step-llm-systems"
+    description="How to debug, evaluate, and test applications that chain many LLM and tool steps."
+  />
+  <Card
+    title="Academy: tracing"
+    href="/academy/tracing"
+    description="What a trace is, how it is structured, and why it is the foundation for improving agents."
+  />
+  <Card
+    title="Academy: customer support chatbot"
+    href="/academy/examples/customer-support-chatbot"
+    description="A worked example of automating support in phases, from offline tests to production."
+  />
+</Cards>
+
+<UseCaseCtas variant="banner" />
