@@ -78,11 +78,15 @@ export const Frame = ({
   className,
   fullWidth = false,
   transparent = false,
+  zoom = true,
+  zoomOnMobile = false,
 }: {
   children: React.ReactNode;
   className?: string;
   fullWidth?: boolean;
   transparent?: boolean;
+  zoom?: boolean;
+  zoomOnMobile?: boolean;
 }) => {
   const frameRef = useRef<HTMLDivElement>(null);
   const [zoomedImage, setZoomedImage] = useState<{
@@ -92,53 +96,101 @@ export const Frame = ({
 
   useEffect(() => {
     const frame = frameRef.current;
-    if (!frame) return;
+    if (!frame || !zoom) return;
 
-    const handleImageClick = (e: Event) => {
-      const target = e.target as HTMLImageElement;
-      if (target.tagName === "IMG") {
-        // Only handle clicks on desktop (screens wider than 500px)
-        if (window.innerWidth <= 500) {
-          return;
-        }
+    const isLinkedImage = (img: HTMLImageElement) =>
+      Boolean(img.closest("a[href]"));
 
-        e.preventDefault();
-        e.stopPropagation();
-        const src = target.src;
-        const alt = target.alt || "Image";
-        if (src) {
-          setZoomedImage({ src, alt });
-        }
+    const isPointerZoomEnabled = () => zoomOnMobile || window.innerWidth > 500;
+
+    const canZoomImage = (img: HTMLImageElement) =>
+      !isLinkedImage(img) && isPointerZoomEnabled();
+
+    const openImage = (target: HTMLImageElement) => {
+      const src = target.src;
+      const alt = target.alt || "Image";
+      if (src) {
+        setZoomedImage({ src, alt });
       }
     };
 
-    const updateImageCursors = () => {
-      const images = frame.querySelectorAll("img");
-      images.forEach((img) => {
-        if (window.innerWidth > 500) {
-          img.style.cursor = "pointer";
-          img.style.transition = "opacity 0.2s ease";
-        } else {
-          img.style.cursor = "default";
-          img.style.transition = "none";
-        }
-      });
+    const clearZoomChrome = (img: HTMLImageElement) => {
+      img.style.cursor = "";
+      img.style.transition = "";
+      if (img.dataset.frameZoomInteractive === "true") {
+        img.removeAttribute("tabindex");
+        img.removeAttribute("role");
+        delete img.dataset.frameZoomInteractive;
+      }
+      if (img.dataset.frameZoomAria === "true") {
+        img.removeAttribute("aria-label");
+        delete img.dataset.frameZoomAria;
+      }
     };
 
-    // Add click event listener to the frame
+    const applyZoomChrome = (img: HTMLImageElement) => {
+      if (!canZoomImage(img)) {
+        clearZoomChrome(img);
+        return;
+      }
+
+      img.style.cursor = "zoom-in";
+      img.style.transition = "opacity 0.2s ease";
+      img.tabIndex = 0;
+      img.setAttribute("role", "button");
+      img.dataset.frameZoomInteractive = "true";
+      if (!img.getAttribute("aria-label")) {
+        img.setAttribute(
+          "aria-label",
+          `Open ${img.alt || "image"} in full size`,
+        );
+        img.dataset.frameZoomAria = "true";
+      }
+    };
+
+    const handleImageClick = (e: Event) => {
+      const target = e.target as HTMLImageElement;
+      if (target.tagName !== "IMG" || !canZoomImage(target)) {
+        return;
+      }
+
+      e.preventDefault();
+      e.stopPropagation();
+      openImage(target);
+    };
+
+    const handleImageKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLImageElement;
+      if (
+        target.tagName !== "IMG" ||
+        (e.key !== "Enter" && e.key !== " ") ||
+        !canZoomImage(target)
+      ) {
+        return;
+      }
+
+      e.preventDefault();
+      e.stopPropagation();
+      openImage(target);
+    };
+
+    const updateImageAccessibility = () => {
+      frame.querySelectorAll("img").forEach((img) => applyZoomChrome(img));
+    };
+
     frame.addEventListener("click", handleImageClick);
+    frame.addEventListener("keydown", handleImageKeyDown);
 
-    // Initial cursor setup
-    updateImageCursors();
-
-    // Add resize listener to update cursors when screen size changes
-    window.addEventListener("resize", updateImageCursors);
+    updateImageAccessibility();
+    window.addEventListener("resize", updateImageAccessibility);
 
     return () => {
       frame.removeEventListener("click", handleImageClick);
-      window.removeEventListener("resize", updateImageCursors);
+      frame.removeEventListener("keydown", handleImageKeyDown);
+      window.removeEventListener("resize", updateImageAccessibility);
+      frame.querySelectorAll("img").forEach((img) => clearZoomChrome(img));
     };
-  }, []);
+  }, [zoom, zoomOnMobile]);
 
   return (
     <>

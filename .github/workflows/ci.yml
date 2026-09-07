@@ -64,6 +64,7 @@ jobs:
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
+          cache: pnpm
 
       - run: pnpm install
 
@@ -117,7 +118,6 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
           persist-credentials: false
 
       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
@@ -129,31 +129,28 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
+          cache: pnpm
 
       - run: pnpm install
+
+      - name: Run link checker unit tests
+        run: node --test scripts/check-links.test.js
 
       - name: Build next.js app
         run: pnpm build
 
-      - name: Start server and check links
+      - name: Start production server
         run: |
-          # Start the server in the background and capture its PID
-          pnpm start & SERVER_PID=$!
+          pnpm start &
+          echo "SERVER_PID=$!" >> "$GITHUB_ENV"
+          timeout 30 bash -c 'until curl -sf http://127.0.0.1:3333 > /dev/null; do sleep 1; done'
 
-          # Wait for the server to be ready (max 30 seconds)
-          timeout 30 bash -c 'until curl -s http://localhost:3333 > /dev/null; do sleep 1; done'
+      - name: Check markdown and source links
+        run: pnpm link-check
 
-          # Run the link checker
-          pnpm link-check
-
-          # Store the exit code
-          LINK_CHECK_EXIT=$?
-
-          # Kill the server using the captured PID
-          kill $SERVER_PID || true
-
-          # Exit with the link checker's exit code
-          exit $LINK_CHECK_EXIT
+      - name: Stop production server
+        if: always()
+        run: kill "$SERVER_PID" || true
 
   check-sitemap-links:
     needs:
@@ -166,7 +163,6 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
           persist-credentials: false
 
       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
@@ -178,31 +174,28 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
+          cache: pnpm
 
       - run: pnpm install
+
+      - name: Run sitemap checker unit tests
+        run: node --test scripts/check-sitemap-links.test.js
 
       - name: Build next.js app
         run: pnpm build
 
-      - name: Start server and check sitemap links
+      - name: Start production server
         run: |
-          # Start the server in the background and capture its PID
-          pnpm start & SERVER_PID=$!
+          pnpm start &
+          echo "SERVER_PID=$!" >> "$GITHUB_ENV"
+          timeout 30 bash -c 'until curl -sf http://127.0.0.1:3333 > /dev/null; do sleep 1; done'
 
-          # Wait for the server to be ready (max 30 seconds)
-          timeout 30 bash -c 'until curl -s http://localhost:3333 > /dev/null; do sleep 1; done'
+      - name: Check sitemap URLs
+        run: pnpm sitemap-check
 
-          # Run the sitemap checker
-          pnpm sitemap-check
-
-          # Store the exit code
-          SITEMAP_CHECK_EXIT=$?
-
-          # Kill the server using the captured PID
-          kill $SERVER_PID || true
-
-          # Exit with the sitemap checker's exit code
-          exit $SITEMAP_CHECK_EXIT
+      - name: Stop production server
+        if: always()
+        run: kill "$SERVER_PID" || true
 
   # Summary job that depends on all other jobs
   # This allows you to require only this single check in branch protection rules

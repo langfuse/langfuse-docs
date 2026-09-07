@@ -99,6 +99,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ...defaultMdxComponents,
     a: (props: LinkProps) => <MdxLink variant="underline" {...props} />,
     img: Image,
+    Image,
     p: MdxParagraph,
     Frame,
     Video,

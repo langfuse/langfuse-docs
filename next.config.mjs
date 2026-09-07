@@ -65,6 +65,29 @@ const nextConfig = {
     // Reduce peak memory during production build (helps avoid OOM on Vercel)
     webpackMemoryOptimizations: true,
     serverSourceMaps: false,
+    optimizePackageImports: [
+      "lucide-react",
+      "@icons-pack/react-simple-icons",
+      "fumadocs-ui",
+      "recharts",
+      "@radix-ui/react-accordion",
+      "@radix-ui/react-avatar",
+      "@radix-ui/react-collapsible",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-hover-card",
+      "@radix-ui/react-label",
+      "@radix-ui/react-popover",
+      "@radix-ui/react-presence",
+      "@radix-ui/react-scroll-area",
+      "@radix-ui/react-select",
+      "@radix-ui/react-separator",
+      "@radix-ui/react-slot",
+      "@radix-ui/react-switch",
+      "@radix-ui/react-tabs",
+      "@radix-ui/react-tooltip",
+      "@radix-ui/react-use-controllable-state",
+    ],
   },
   // Reduce memory usage during build
   productionBrowserSourceMaps: false,
@@ -93,6 +116,8 @@ const nextConfig = {
     // being hoisted into a synchronous shared chunk that loads on every page.
     // Recharts is only used on the /wrapped page — keep it in async-only chunks
     // so it's never downloaded unless the wrapped page actually renders it.
+    // webpack-only: Turbopack ignores splitChunks. Recharts isolation there is
+    // the real import() in components/wrapped/index.tsx.
     if (!isServer) {
       const sc = config.optimization?.splitChunks;
       if (sc && typeof sc === "object") {
@@ -173,7 +198,7 @@ const nextConfig = {
         pathname: "/**",
       },
     ],
-    qualities: [75, 100],
+    qualities: [75, 85, 90, 100],
   },
   headers() {
     const headers = [
