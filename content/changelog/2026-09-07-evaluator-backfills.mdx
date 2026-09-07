@@ -1,0 +1,32 @@
+---
+date: 2026-09-07
+title: Run evaluators on historical observations
+description: Backfill scores for recent observations when you attach an evaluator to a rule.
+author: Tobias Wochinger
+ogImage: /images/changelog/2026-09-07-evaluator-backfills.png
+canonical: /docs/evaluation/core-concepts#backfill-evaluator-scores
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+You can now run an evaluator on recent historical observations when you attach it to a rule. Enable **Also run on past observations** to start with scores for existing data while the rule evaluates new observations as they arrive.
+
+Use the backfill to start an online evaluation with scores for observations that arrived before you enabled its rule. For testing an evaluator on selected historical observations or running a one-off evaluation, use [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation).
+
+<Cards num={2}>
+  <Card
+    title="Online evaluation"
+    href="/docs/evaluation/core-concepts#backfill-evaluator-scores"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Batch evaluation"
+    href="/docs/evaluation/core-concepts#batch-evaluation"
+    icon={<Book />}
+    arrow
+  />
+</Cards>
