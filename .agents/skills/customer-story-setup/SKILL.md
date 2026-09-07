@@ -73,8 +73,8 @@ MDX with consistent paths so the user can drop files in later.
 Ask whether to add **sparse** internal links. **Default policy:** only link
 **major** product concepts (match what we used on Cresta):
 
-- [Observability overview](/docs/observability/overview)
-- [Prompt management](/docs/prompt-management/overview) and/or [Playground](/docs/prompt-management/features/playground)
+- [Observability overview](/docs/observability)
+- [Prompt management](/docs/prompt-management) and/or [Playground](/docs/prompt-management/features/playground)
 - [Scores](/docs/evaluation/evaluation-methods/scores-via-sdk)
 - [Self-hosting](/self-hosting)
 - [OpenTelemetry](/integrations/native/opentelemetry)

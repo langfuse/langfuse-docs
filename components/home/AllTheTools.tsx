@@ -30,7 +30,7 @@ const tools: ToolEntry[] = [
     title: "Observability",
     description:
       "Hierarchical traces capture every LLM call, tool invocation, and retrieval step. Filter by user, session, cost, latency, or custom metadata.",
-    href: "/docs/tracing",
+    href: "/docs/observability",
     tooltip: "Read more",
     span: "col-span-1",
     visual: observabilityVisual as StaticImageData,
@@ -39,7 +39,7 @@ const tools: ToolEntry[] = [
     title: "Evaluation",
     description:
       "LLM-as-a-judge, heuristic functions, or human review. Run evaluators on production data or during experiments.",
-    href: "/docs/scores",
+    href: "/docs/evaluation",
     tooltip: "Read more",
     span: "col-span-1",
     visual: evaluationVisual,
@@ -48,7 +48,7 @@ const tools: ToolEntry[] = [
     title: "Prompt Management",
     description:
       "Separate prompts from code with one-click deployments and rollbacks. Turn improving your production prompts a team sport.",
-    href: "/docs/prompts",
+    href: "/docs/prompt-management",
     tooltip: "Read more",
     span: "col-span-1",
     visual: promptManagementVisual as StaticImageData,
@@ -57,7 +57,7 @@ const tools: ToolEntry[] = [
     title: "Playground",
     description:
       "Test prompts on real production inputs and compare models side-by-side.",
-    href: "/docs/playground",
+    href: "/docs/prompt-management/features/playground",
     tooltip: "Read more",
     span: "col-span-1",
     visual: playgroundVisual as StaticImageData,
@@ -66,7 +66,7 @@ const tools: ToolEntry[] = [
     title: "Experiments",
     description:
       "Define test cases and run experiments. Compare results side by side.",
-    href: "/docs/experimentation",
+    href: "/docs/evaluation/experiments/datasets",
     tooltip: "Read more",
     span: "col-span-1",
     visual: experimentsVisual as StaticImageData,
@@ -84,7 +84,7 @@ const tools: ToolEntry[] = [
     title: "Cost & Latency",
     description:
       "Monitor cost, latency, and quality with dashboards and automated alerts.",
-    href: "/docs/analytics",
+    href: "/docs/observability/features/token-and-cost-tracking",
     tooltip: "Read more",
     span: "col-span-1",
     visual: metricsAlertsVisual as StaticImageData,

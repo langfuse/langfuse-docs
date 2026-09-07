@@ -339,7 +339,7 @@ const nextConfig = {
   ],
   async rewrites() {
     // Serve any ".md" path by mapping to the static copy in public/md-src
-    // Example: /docs.md -> /md-src/docs.md, /docs/observability/overview.md -> /md-src/docs/observability/overview.md
+    // Example: /docs.md -> /md-src/docs.md, /docs/observability.md -> /md-src/docs/observability.md
     return {
       // Run BEFORE Next serves content/public files so it can override HTML routes
       // when the client explicitly asks for markdown.
@@ -361,7 +361,7 @@ const nextConfig = {
           destination: "/md-src/index.md",
         },
 
-        // Content negotiation: /docs or /docs/observability/overview -> /md-src/... .md
+        // Content negotiation: /docs or /docs/observability -> /md-src/... .md
         // Excludes /api, /_next, md-src, .md files, and .txt files (served directly from public/).
         // The agent-traffic matcher in proxy.ts mirrors these exclusions — keep in sync.
         {

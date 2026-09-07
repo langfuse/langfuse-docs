@@ -20,6 +20,9 @@ try {
 
 const BASE_URL = process.env.CF_PAGES_URL ?? "https://langfuse.com";
 
+const { PRODUCT_OVERVIEW_PATHS } = require("./lib/product-overview-paths.js");
+const PRODUCT_OVERVIEW_PATH_SET = new Set(PRODUCT_OVERVIEW_PATHS);
+
 // Tolerate the legacy string[] shape in case a stale cache is present.
 const pageEntries = allPages.map((p) =>
   typeof p === "string" ? { loc: p } : p,
@@ -63,6 +66,7 @@ module.exports = {
       entries.push({
         loc: page.loc,
         changefreq: "daily",
+        ...(PRODUCT_OVERVIEW_PATH_SET.has(page.loc) ? { priority: 0.9 } : {}),
         ...(page.lastmod ? { lastmod: page.lastmod } : {}),
       });
     }

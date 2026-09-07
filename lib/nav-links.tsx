@@ -24,17 +24,17 @@ export type NavPanelLink = {
 export const productLinks: NavPanelLink[] = [
   { name: "Overview", href: "/docs", icon: LayoutGrid },
   {
-    name: "LLM Observability",
-    href: "/docs/observability/overview",
+    name: "Agent Observability",
+    href: "/docs/observability",
     icon: Activity,
   },
   {
     name: "Prompt Management",
-    href: "/docs/prompt-management/overview",
+    href: "/docs/prompt-management",
     icon: MessageSquare,
   },
-  { name: "Evaluation", href: "/docs/evaluation/overview", icon: FlaskConical },
-  { name: "Metrics", href: "/docs/metrics/overview", icon: BarChart2 },
+  { name: "Agent Evals", href: "/docs/evaluation", icon: FlaskConical },
+  { name: "Agent Analytics", href: "/docs/metrics", icon: BarChart2 },
 ];
 
 export const resourcesLinks: NavPanelLink[] = [

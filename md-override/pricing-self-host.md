@@ -45,7 +45,7 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 | Feature                                                                                                     | Open Source                 | Enterprise                                 |
 | ----------------------------------------------------------------------------------------------------------- | --------------------------- | ------------------------------------------ |
 | **LLM Application & Agent Tracing**                                                                         |                             |                                            |
-| [Traces and graphs (agents)](/docs/observability/overview)                                                  | Yes                         | Yes                                        |
+| [Traces and graphs (agents)](/docs/observability)                                                           | Yes                         | Yes                                        |
 | [Session tracking (chats/threads)](/docs/observability/features/sessions)                                   | Yes                         | Yes                                        |
 | [User tracking](/docs/observability/features/users)                                                         | Yes                         | Yes                                        |
 | [Token and cost tracking](/docs/observability/features/token-and-cost-tracking)                             | Yes                         | Yes                                        |

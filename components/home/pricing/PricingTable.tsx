@@ -280,11 +280,11 @@ type Section = {
 const sections: Section[] = [
   {
     name: "LLM Application & Agent Tracing",
-    href: "/docs/observability/overview",
+    href: "/docs/observability",
     features: [
       {
         name: "Traces and Graphs (Agents)",
-        href: "/docs/observability/overview",
+        href: "/docs/observability",
         tiers: {
           cloud: {
             Hobby: true,
@@ -680,7 +680,7 @@ const sections: Section[] = [
   },
   {
     name: "Metrics",
-    href: "/docs/metrics/overview",
+    href: "/docs/metrics",
     features: [
       {
         name: "Custom Dashboards",

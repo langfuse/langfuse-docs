@@ -87,7 +87,7 @@ Optional **Yearly Commitment**:
 | Feature                                                                                             | Hobby               | Core                | Pro                 | Enterprise                   |
 | --------------------------------------------------------------------------------------------------- | ------------------- | ------------------- | ------------------- | ---------------------------- |
 | **LLM Application & Agent Tracing**                                                                 |                     |                     |                     |                              |
-| [Traces and graphs (agents)](/docs/observability/overview)                                          | Yes                 | Yes                 | Yes                 | Yes                          |
+| [Traces and graphs (agents)](/docs/observability)                                                   | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Session tracking (chats/threads)](/docs/observability/features/sessions)                           | Yes                 | Yes                 | Yes                 | Yes                          |
 | [User tracking](/docs/observability/features/users)                                                 | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Token and cost tracking](/docs/observability/features/token-and-cost-tracking)                     | Yes                 | Yes                 | Yes                 | Yes                          |

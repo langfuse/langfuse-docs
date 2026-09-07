@@ -13,29 +13,6 @@ import { Text } from "@/components/ui/text";
 
 // ─── Utility functions ────────────────────────────────────────────────────────
 
-const getGithubEditUrl = (path: string): string | null => {
-  const cleanPath = path.split("#")[0].split("?")[0];
-  const [, section, ...slugParts] = cleanPath.split("/");
-
-  const sectionToDir: Record<string, string> = {
-    docs: "content/docs",
-    guides: "content/guides",
-    handbook: "content/handbook",
-    integrations: "content/integrations",
-    "self-hosting": "content/self-hosting",
-    library: "content/library",
-    academy: "content/academy",
-    resources: "content/resources",
-  };
-
-  const contentDir = sectionToDir[section];
-  if (!contentDir) return null;
-
-  const slugPath = slugParts.join("/");
-  const filePath = `${contentDir}/${slugPath === "" ? "index" : slugPath}.mdx`;
-  return `https://github.com/langfuse/langfuse-docs/edit/main/${filePath}`;
-};
-
 const getFeedbackUrl = (pageTitle?: string): string => {
   const title = (pageTitle ?? "this page").trim();
   const params = new URLSearchParams({
@@ -170,16 +147,18 @@ const processContributor = (username: string): ProcessedContributor => {
 type DocsTocFooterProps = {
   pageTitle?: string;
   lastModified?: string;
+  /** Resolved on the server so folder landings map to index.mdx. */
+  editUrl?: string | null;
 };
 
 export const DocsTocFooter = ({
   pageTitle,
   lastModified,
+  editUrl,
 }: DocsTocFooterProps) => {
   const pathname = usePathname() ?? "";
   const currentPath = pathname.split("#")[0].split("?")[0];
   const [showAll, setShowAll] = useState(false);
-  const editUrl = getGithubEditUrl(currentPath);
   const feedbackUrl = getFeedbackUrl(pageTitle);
   const lastModifiedDate = useMemo(
     () => (lastModified ? new Date(lastModified) : undefined),

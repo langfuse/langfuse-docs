@@ -18,8 +18,9 @@ type Crumb = { name: ReactNode; url?: string };
  * - otherwise we fall back to the first linkable descendant page.
  *
  * The fallback is what makes section/folder crumbs clickable even when the
- * folder has no dedicated index page (e.g. "Observability", whose landing
- * page is `overview` rather than `index`).
+ * folder has no dedicated index page. Product sections use `index.mdx`, so
+ * those folder crumbs resolve to `/docs/observability` (and the same pattern
+ * for prompt management, evaluation, and metrics).
  */
 function resolveFirstUrl(node: AnyNode): string | undefined {
   if ("type" in node && node.type === "page") {
@@ -79,17 +80,21 @@ export function DocsBreadcrumb() {
     for (let i = 0; i < path.length; i++) {
       const node = path[i];
       if (node.type === "page") {
+        const prev = i > 0 ? path[i - 1] : undefined;
+        const isFolderIndex =
+          prev?.type === "folder" &&
+          (prev.index === node || prev.index?.url === node.url);
+        // Folder index pages use the folder name (Observability), not the
+        // page sidebar title (Overview). The section root is the leading crumb.
+        if (isFolderIndex || node.url === resolveSectionUrl(root)) continue;
         result.push({ name: node.name, url: node.url });
       } else if (node.type === "folder") {
         // The active root folder is rendered as the leading crumb below.
         if (node.root) continue;
-        // Fumadocs collapses a folder and its index page into a single crumb.
-        if (i === path.length - 1 || node.index !== path[i + 1]) {
-          result.push({
-            name: node.name,
-            url: node.index?.url ?? resolveFirstUrl(node),
-          });
-        }
+        result.push({
+          name: node.name,
+          url: node.index?.url ?? resolveFirstUrl(node),
+        });
       }
     }
 
