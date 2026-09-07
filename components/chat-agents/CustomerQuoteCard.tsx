@@ -64,7 +64,7 @@ export function CustomerQuoteCard({
         )}
       </Link>
 
-      <p className="mt-4 min-h-[126px] break-words text-[14px] leading-[1.45] text-text-primary">
+      <p className="mt-4 h-[126px] overflow-hidden break-words text-[14px] leading-[1.45] text-text-primary">
         “{quote}”
       </p>
 
