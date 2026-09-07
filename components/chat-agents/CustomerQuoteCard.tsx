@@ -70,7 +70,7 @@ export function CustomerQuoteCard({
 
       <footer className="mt-auto border-t border-line-structure pt-4">
         {(quoteAuthor || quoteRole || quoteCompany) && (
-          <div className="flex items-start gap-2.5">
+          <div className="flex min-h-[72px] items-start gap-2.5">
             {quoteAuthorImage ? (
               <Image
                 src={quoteAuthorImage}
