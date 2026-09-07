@@ -2,8 +2,8 @@ import { CustomerQuoteCard } from "@/components/chat-agents/CustomerQuoteCard";
 import { getCustomerStories } from "@/lib/getCustomerStories";
 
 const QUOTE_ROUTES = [
-  "/users/canva",
   "/users/sumup",
+  "/users/canva",
   "/users/magic-patterns-ai-design-tools",
 ] as const;
 
