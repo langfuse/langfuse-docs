@@ -1,5 +1,6 @@
 ---
 title: Concepts
+seoTitle: LLM Evaluation Concepts
 description: Learn the fundamental concepts behind LLM evaluation in Langfuse - Scores, Evaluation Methods, Datasets, and Experiments.
 ---
 
@@ -7,8 +8,11 @@ description: Learn the fundamental concepts behind LLM evaluation in Langfuse - 
 
 This page digs into the different concepts of evaluations, and what's available in Langfuse.
 
+If you are still deciding _what_ to measure, [Choosing what to evaluate in the Langfuse Academy](/academy/evaluate/choosing-what-to-evaluate) works through how to turn observed failures into a small set of metrics, and [Writing good evaluators](/academy/evaluate/writing-evaluators) covers how to make those checks trustworthy.
+
 Ready to start?
 
+- [Score live production traces](/docs/evaluation/get-started/online) with an evaluator and a rule
 - [Create a dataset](/docs/evaluation/experiments/datasets) to measure your LLM application's performance consistently
 - [Run an experiment](/docs/evaluation/core-concepts#experiments) to get an overview of how your application is doing
 - [Set up LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) to evaluate your live traces
@@ -16,11 +20,11 @@ Ready to start?
 
 ## The Evaluation Loop
 
-LLM applications often have a constant loop of testing and monitoring.
+LLM applications often have a constant [loop of testing and monitoring](/academy/ai-engineering-loop).
 
-**Offline evaluation** lets you test your application against a fixed dataset before you deploy. You run your new prompt or model against test cases, review the [scores](#scores), iterate until the results look good, then deploy your changes. In Langfuse, you can do that by running [Experiments](/docs/evaluation/core-concepts#experiments).
+**[Offline evaluation](/academy/evaluate)** lets you test your application against a fixed dataset before you deploy. You run your new prompt or model against test cases, review the [scores](#scores), iterate until the results look good, then deploy your changes. In Langfuse, you can do that by running [Experiments](/docs/evaluation/core-concepts#experiments).
 
-**Online evaluation** scores live traces to catch issues in real traffic. When you find edge cases your dataset didn't cover, you add them back to your dataset so future experiments will catch them.
+**[Online evaluation](/academy/monitoring)** scores live traces to catch issues in real traffic. When you find edge cases your dataset didn't cover, you add them back to your dataset so future experiments will catch them.
 
 <LoopDiagram />
 
@@ -62,6 +66,8 @@ When setting up new evaluation methods, you can use [Score Analytics](/docs/eval
 
 For online evaluation, create a rule to match incoming production observations. The rule triggers its attached evaluators, which score those observations. This helps you catch issues in real traffic.
 
+Follow [Evaluate Production Traffic](/docs/evaluation/get-started/online) to create an evaluator and attach a rule in the UI.
+
 ### Evaluators and rules [#evaluators-and-rules]
 
 Evaluators define how Langfuse scores data. Rules define which incoming observations Langfuse scores.
@@ -99,9 +105,18 @@ Evaluators define how Langfuse scores data. Rules define which incoming observat
 
 You can reuse an evaluator across rules. For LLM-as-a-Judge, Langfuse validates the evaluator's default variable mapping against observations that match the rule. Override the mapping for a specific evaluator-rule assignment when the data has a different shape.
 
-### Monitoring with dashboards
+### Monitor evaluator results [#monitor-evaluator-results]
 
-Use [custom dashboards](/docs/metrics/features/custom-dashboards) to monitor scores and application performance over time.
+Use [custom dashboards](/docs/metrics/features/custom-dashboards) to track scores and application performance over time. To get notified when an evaluator's score or cost crosses a threshold, open the evaluator and click **Add alert**.
+
+You can create these prefilled alerts:
+
+- **Score threshold:** Numeric and Boolean outputs use the average score over one day by default. Categorical outputs use the score count over one day. For code evaluators, Langfuse uses the first declared numeric, Boolean, or categorical score output. The shortcut is unavailable when the first output is a text score.
+- **Cost threshold:** Available for individual LLM-as-a-Judge evaluators. On the **Evaluators** page, click **Add alert** to create an alert for the combined cost of all evaluators.
+
+Langfuse prefills the metric, evaluator filters, and tags and excludes evaluator test runs. Review the threshold, time window, notifications, and other settings before saving.
+
+The **Add alert** menu also lists alerts connected to the evaluator with their current severity, trigger condition, and last-fired time. It shows up to 20 alerts. Select an alert to open it, or click **See all alerts** to open the alerts table filtered to that evaluator. See the [alerts guide](/docs/observability/features/alerts#alert-setup) for the full setup flow.
 
 ## Batch evaluation [#batch-evaluation]
 
@@ -156,11 +171,13 @@ You can compare experiment runs to see if a new prompt version improves scores, 
 
 You can find more details on how these objects link together under the hood on the [data model page](/docs/evaluation/experiments/data-model).
 
-### Two ways to run experiments
+### Ways to run experiments
 
 You can **run experiments programmatically using the Langfuse SDK**. This gives you full control over the task, evaluation logic, and more. [Learn more about running experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk).
 
-Another way is to **run experiments directly from the Langfuse interface** by selecting a dataset and prompt version. This is useful for quick iterations on prompts without writing code. [Learn more about running experiments via UI](/docs/evaluation/experiments/experiments-via-ui).
+You can **run experiments directly from the Langfuse interface** by selecting a dataset and prompt version. This is useful for quick iterations on prompts without writing code. [Learn more about running experiments via UI](/docs/evaluation/experiments/experiments-via-ui).
+
+If you already emit traces through OpenTelemetry and are not using the Python or JS/TS SDK, **attach experiment attributes to those spans** so Langfuse groups them as an experiment run. [Learn more about experiments via OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry).
 
 <div className="my-6">
   <div className="grid grid-cols-3 gap-2">
@@ -181,7 +198,8 @@ Another way is to **run experiments directly from the Langfuse interface** by se
       [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui)
     </div>
     <div className="p-3 border dark:border-gray-700 rounded text-center bg-blue-50 dark:bg-blue-900/30">
-      [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)
+      [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) or
+      [OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry)
     </div>
 
     {/* Local Data row */}
@@ -192,7 +210,8 @@ Another way is to **run experiments directly from the Langfuse interface** by se
       Not supported
     </div>
     <div className="p-3 border dark:border-gray-700 rounded text-center bg-blue-50 dark:bg-blue-900/30">
-      [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)
+      [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) or
+      [OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry)
     </div>
 
   </div>

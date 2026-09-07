@@ -58,10 +58,10 @@ interface ToAppButtonProps {
 
 export const ToAppButton = ({
   signedInText = "Launch App",
-  signUpText = "Launch App",
+  signUpText = "Start free",
   dropdownText = "Launch App",
 }: ToAppButtonProps = {}) => {
-  const signedInRegions = useCloudRegionSignIn();
+  const { signedInRegions, resolved } = useCloudRegionSignIn();
 
   const signedInCount = Object.values(signedInRegions).filter(Boolean).length;
 
@@ -84,7 +84,15 @@ export const ToAppButton = ({
       <NavigatingButton href={signedInRegion[1].url} label={signedInText} />
     );
   } else {
-    return <NavigatingButton href="/cloud" label={signUpText} />;
+    // Regions start unsigned-in until the probe finishes. Treat that as
+    // unknown, not signed-out, so an already-signed-in visitor never flashes
+    // the signup label.
+    return (
+      <NavigatingButton
+        href="/cloud"
+        label={resolved ? signUpText : signedInText}
+      />
+    );
   }
 };
 

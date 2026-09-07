@@ -12,7 +12,6 @@ import {
   Newspaper,
   Presentation,
   ScrollText,
-  Users,
   type LucideIcon,
 } from "lucide-react";
 
@@ -44,13 +43,13 @@ export const resourcesLinks: NavPanelLink[] = [
   { name: "Blog", href: "/blog", icon: Newspaper },
   { name: "Changelog", href: "/changelog", icon: ScrollText },
   { name: "Roadmap", href: "/docs/roadmap", icon: Map },
-  { name: "Users", href: "/users", icon: Users },
   { name: "Example Project", href: "/docs/demo", icon: Bookmark },
   { name: "Walkthroughs", href: "/guides", icon: GraduationCap },
   { name: "Support", href: "/support", icon: HelpCircle },
 ];
 
 export const simpleLinks = [
+  { name: "Customers", href: "/users" },
   { name: "Docs", href: "/docs" },
   { name: "Changelog", href: "/changelog", tabletHidden: true },
   { name: "Pricing", href: "/pricing" },

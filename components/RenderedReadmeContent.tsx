@@ -1,19 +1,38 @@
 "use client";
 
+import { useMemo } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
+import {
+  htmlImagesToMarkdown,
+  remarkRewriteGitHubReadmeUrls,
+} from "@/lib/github-readme";
 import { cn } from "@/lib/utils";
 
 /**
- * Renders markdown content with doc-style typography (headings, lists, tables, code).
- * Used for fetched READMEs so they display like the second screen: proper structure
- * and styling inside a card, not raw pre/code.
+ * Presentational markdown renderer used by GitHubReadme after the README
+ * has been fetched. Pages should use GitHubReadme, which owns loading/error.
  */
-export function RenderedReadmeContent({ content }: { content: string }) {
+export function RenderedReadmeContent({
+  content,
+  sourceUrl,
+}: {
+  content: string;
+  sourceUrl?: string;
+}) {
+  const markdown = useMemo(() => htmlImagesToMarkdown(content), [content]);
+  const remarkPlugins = useMemo(
+    () => [remarkGfm, remarkRewriteGitHubReadmeUrls(sourceUrl)],
+    [sourceUrl],
+  );
+
   return (
     <div className="[&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={readmeComponents}>
-        {content}
+      <ReactMarkdown
+        remarkPlugins={remarkPlugins}
+        components={readmeComponents}
+      >
+        {markdown}
       </ReactMarkdown>
     </div>
   );
@@ -76,6 +95,16 @@ const readmeComponents: Components = {
     >
       {children}
     </a>
+  ),
+  img: ({ node, src, alt, ...props }) => (
+    // Native img: README assets (GitHub user-attachments, shields.io, raw SVG)
+    // are often on hosts next/image does not optimize reliably.
+    <img
+      src={src}
+      alt={alt ?? ""}
+      className="my-3 max-w-full h-auto rounded-md"
+      {...props}
+    />
   ),
   code: ({ node, className, children, ...props }) => {
     const isBlock =

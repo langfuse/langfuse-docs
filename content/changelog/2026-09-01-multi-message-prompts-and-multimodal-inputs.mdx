@@ -1,0 +1,42 @@
+---
+date: 2026-09-01
+title: Build multi-message prompts and evaluate multi-modal inputs
+description: Two new capabilities for LLM-as-a-Judge evaluators.
+ogVideo: https://static.langfuse.com/changelog-videos/2026-09-01-multi-modal-multi-prompt.mp4
+author: Tobias Wochinger
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+LLM-as-a-Judge evaluators now support two new capabilities:
+
+- **LLM-as-a-Judge with multiple prompt messages:** Use a System message for the evaluation criteria, a User message for the content to evaluate, and an Assistant message to show an example result.
+- **LLM-as-a-Judge with multi-modal inputs:** Evaluate images, audio, video, PDFs, or text files captured in your observations. The selected LLM-as-a-Judge model and provider must support the media type.
+
+Either capability can be used on its own. Self-hosters can configure media delivery and size limits with the [`LANGFUSE_EVALUATOR_MEDIA_*` environment variables](/self-hosting/configuration#llm-as-a-judge-media).
+
+## Learn more
+
+<Cards num={3}>
+  <Card
+    title="Prompt message roles"
+    href="/docs/evaluation/evaluation-methods/llm-as-a-judge#prompt-message-roles"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Multi-modality"
+    href="/docs/observability/features/multi-modality#llm-as-a-judge"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Self-hosting configuration"
+    href="/self-hosting/configuration#llm-as-a-judge-media"
+    icon={<Book />}
+    arrow
+  />
+</Cards>

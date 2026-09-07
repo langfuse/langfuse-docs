@@ -1,0 +1,249 @@
+---
+title: 良い評価器の書き方
+sidebarTitle: 良い評価器の書き方
+description: "信頼できる評価器の書き方。可能な限り検証可能なチェックにすること、失敗モードごとに二値の判定を 1 つ用意すること、ラベル付けした実例からプロンプトを組み立てること、そして自分のラベルで検証することを解説します。"
+translatedAt: 2026-08-19
+---
+
+export const references = [
+  {
+    id: "wei-asymmetry",
+    title: "Asymmetry of verification and verifier's law (Jason Wei)",
+    url: "https://www.jasonwei.net/blog/asymmetry-of-verification-and-verifiers-law",
+  },
+  {
+    id: "yan-product-evals",
+    title: "Product evals in three simple steps (Eugene Yan)",
+    url: "https://eugeneyan.com/writing/product-evals/",
+  },
+  {
+    id: "anthropic-agent-evals",
+    title: "Demystifying evals for AI agents (Anthropic)",
+    url: "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+  },
+  {
+    id: "lee-llm-judge",
+    title: "LLM-as-a-judge: rethinking model-based evaluations (Han-Chung Lee)",
+    url: "https://leehanchung.github.io/blogs/2024/08/11/llm-as-a-judge/",
+  },
+  {
+    id: "shankar-validators",
+    title: "Who validates the validators? (Shankar et al.)",
+    url: "https://arxiv.org/abs/2404.12272",
+  },
+  {
+    id: "hamel-llm-judge",
+    title:
+      "Creating an LLM-as-a-judge that drives business results (Hamel Husain)",
+    url: "https://hamel.dev/blog/posts/llm-judge/",
+  },
+  {
+    id: "yan-llm-evaluators",
+    title: "Evaluating the effectiveness of LLM-evaluators (Eugene Yan)",
+    url: "https://eugeneyan.com/writing/llm-evaluators/",
+  },
+  {
+    id: "evals-faq",
+    title: "LLM evals FAQ (Hamel Husain & Shreya Shankar)",
+    url: "https://hamel.dev/blog/posts/evals-faq/",
+  },
+];
+
+# 良い評価器の書き方
+
+何を評価したいかが決まったら、次の問いは「どう評価するか」です。
+どの種類の評価器が必要か。
+測りたいメトリクスを、どう入力と出力に落とし込むか。
+良い [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) のプロンプトはどう書くか。
+
+<Callout type="info">
+まだ何を評価するかを決めていない場合は、次を参照してください。
+
+- [何を評価するかを選ぶ](/academy/japan/evaluate/choosing-what-to-evaluate)。失敗モードとプロダクトの目標をメトリクスの集合に変える解説です
+- [エラー分析](/academy/japan/monitoring/error-analysis)。チェックする価値のある失敗モードをアプリケーションから見つける体系的な方法です
+- [Langfuse デモプロジェクト](/docs/demo) の評価器と [これらの構成例](/academy/japan/examples)。出発点となる良いテンプレートです
+
+</Callout>
+
+まず入力・出力と、どの評価器を選ぶかを扱います。
+そのあとで LLM-as-a-Judge の評価器に絞って掘り下げます。最も間違えやすいのがここだからです。
+
+## どの種類の評価器が必要か? [#what-kind-of-evaluator]
+
+評価器にはいくつかの種類があり、それぞれに長所と短所があります。
+多くの評価タスクでは、明確な正解が 1 つあります。
+
+### オフラインとオンライン [#online-or-offline]
+
+評価器が動く場所は 2 つあり、それぞれ目的が異なります。
+
+- **オフライン (実験に対して)。** アプリケーションの新バージョンをデータセットに対して実行し、評価器がその出力に対してメトリクスを測ります。このスコアは比較のために存在します。新バージョンは現行より良いか? これが [実験](/academy/japan/experiments) のループです。
+- **オンライン (本番トラフィックに対して)。** 評価器は流れてくるライブのトレースを採点します。ここに比較はなく、スコアは時系列のトレンドを見るために存在します。これは [モニタリング](/academy/japan/monitoring) の一部です。
+
+この 2 つは排他的ではありません。
+同じメトリクスを、開発中の実験でも本番トラフィックでも測って構いません。
+
+### 可能なら決定論的な評価器を選ぶ [#make-it-verifiable]
+
+評価器には大きく 2 つのカテゴリがあります。コードベース評価器 (決定論的) と LLM-as-a-Judge の評価器 (非決定論的) です。
+それぞれにトレードオフがあります。
+
+|              | コードベース評価器                   | LLM-as-a-Judge                                               |
+| ------------ | ------------------------------------ | ------------------------------------------------------------ |
+| コスト       | 安い                                 | 高い                                                         |
+| 速度         | ミリ秒                               | 数秒〜数分                                                   |
+| 回答の一貫性 | 同じ入力には常に同じ判定             | 同じ入力でも実行ごとに判定が変わりうる                       |
+| 適用範囲     | 限定的。構造、状態、期待出力との比較 | より広い。意味、関連性、トーンなど言語で記述できるものすべて |
+
+評価したい対象が
+
+- システム上で観測できる (行が書き込まれた、チケットがクローズされた、注文が発行された)、または
+- あらかじめ保存しておいた期待出力と比較できる
+
+のであれば、[コードベース評価器](/docs/evaluation/evaluation-methods/code-evaluators) で厳密に決着が付くことが多く、実行も速く、はるかに安上がりです。
+可能な場合は LLM-as-a-Judge よりこちらを選んでください。
+
+例として、PDF から構造化フィールド (ベンダー、合計金額、支払期日) を抽出する請求書処理ツールを、両方の方法で評価してみます。
+
+<Tabs items={["期待出力なしの LLM-as-a-Judge", "期待出力ありのコードベース評価器"]}>
+<Tab>
+
+比較対象が存在しないため、LLM-as-a-Judge が読む役目を負います。
+請求書のテキストと抽出されたフィールドを受け取り、各フィールドが文書中にそのフィールドとして現れているかを判断します。
+これでも機能しますが、請求書 1 件ごとにモデル呼び出しのコストがかかり、判定は実行ごとに変わりうるものになります。
+
+</Tab>
+<Tab>
+
+テスト用の PDF それぞれに正しい値をラベル付けし、期待出力として保存しておきます。
+コードベース評価器は、期待出力に対して文字列一致を取るだけです。
+厳密で、即座に終わり、安上がりです。
+
+</Tab>
+</Tabs>
+
+<Callout type="info">
+**検証の非対称性<Ref refs={references} id="wei-asymmetry" />**
+
+作るのは難しくても、誰かが準備さえしてしまえば確認は安く済む、というものは数多くあります。
+期待出力さえ用意できれば、その後の評価実行はすべて安価な決定論的チェックに変えられる場合が多いのです。
+
+</Callout>
+
+## メトリクスを入力と出力に翻訳する [#inputs-and-outputs]
+
+どの種類の評価器を使うかが決まったら、次は何を入力として渡し、出力を何にするかを決めます。
+これはユースケースに大きく依存しますが、いくつかの指針があります。
+
+### 粒度 → 「God Evaluator」を作らない [#one-evaluator-per-failure-mode]
+
+正確さ、トーン、網羅性をまとめて 1〜10 で採点する判定器を 1 つ作りたくなるかもしれません。
+これは _God Evaluator_ と呼ばれることもあります。<Ref refs={references} id="yan-product-evals" />
+問題は、出てきたスコアが何を直せばいいかを教えてくれないことです。
+
+特に LLM-as-a-Judge の評価器では、対象を絞ったもののほうが作るのも簡単です。
+1 つの具体的な基準について判定器と意見を合わせるほうが、「品質」について合わせるよりはるかに低いハードルだからです。
+
+### 入力 → 言葉より行動を見る [#outcome-not-claim]
+
+エージェントがサポート会話を「200 ドルの返金を処理しました。これで完了です!」と締めくくったのに、実際には返金が存在しない、ということは十分に起こりえます。
+評価器が会話ログだけを見ているなら、偽陽性が大量に出るかもしれません。
+一方、返金テーブルを確認するチェックなら、すべてのケースを捕まえられます。
+Anthropic のエージェント評価ガイド<Ref refs={references} id="anthropic-agent-evals" /> は、これを 1 つのルールに凝縮しています。**会話ログ上の主張ではなく、環境における結果を採点せよ** です。
+
+### 出力 → 二値かカテゴリを選ぶ [#binary-verdicts]
+
+スケールではなく、二値またはカテゴリのスコアを選んでください。理由は 2 つあります。
+
+- 合格・不合格の判定は検証しやすいからです。評価器が失敗をどれだけ捕まえ、合格をどれだけ正しく通したかを正確に数えられます。これが後で [評価器を検証する](#validate-the-judge) 方法になります。7 という点数が正しかったかを問う同等のテストは存在しません
+- スケールの目盛りは一貫して適用されません。人間でも 6 と 7 の違いを説明するのは困難です。LLM はさらに独自の癖を上乗せします。たとえば GPT-3.5 は 7 という数字を好みます<Ref refs={references} id="lee-llm-judge" />
+
+1 つの事象が互いに排他的な複数の結果を持つ場合は、重なり合う二値評価器を複数用意するのではなく、1 ケースにつき 1 つのラベルを選ぶカテゴリ評価器 (`resolved` / `abandoned` / `handed_off`) を 1 つ使ってください。
+
+<Callout type="info">
+_[「God Evaluator」を作らない](#one-evaluator-per-failure-mode)_ と関連して、複数選択のカテゴリ出力は避けてください。
+いくつ選べばよいのかが評価器にとって曖昧になります。
+この場合は、複数の独立した評価器に分けるのが妥当かもしれません。
+
+</Callout>
+
+## 良い LLM-as-a-Judge を書く [#writing-a-good-llm-as-a-judge]
+
+評価タスクには判定器が必要だ、という結論に至ることもあるでしょう。
+LLM-as-a-Judge の評価器は強力ですが、正しく作るのは難しいものでもあります。
+
+信頼できるものをどう作るかを見ていきます。
+
+### プロンプトを書く前に実ケースをラベル付けする [#label-first]
+
+評価基準を頭の中だけで書いてはいけません。
+理由は _criteria drift_ (基準のドリフト) です。<Ref refs={references} id="shankar-validators" />
+出力を採点するには基準が必要ですが、その基準を教えてくれるのは出力を採点する作業だからです。
+
+評価したい失敗モードの実ケースを 10〜20 件取り、短いコメントを添えてそれぞれにラベルを付けてください。
+頑健な判定器を作るにはそれで十分です。
+[エラー分析](/academy/japan/monitoring/error-analysis) を実施済みなら、その多くはすでに手元にあるはずです。
+
+### オンボーディング資料を書くつもりでプロンプトを書く [#the-judge-prompt]
+
+判定用プロンプトの基準は、**新しく入った同僚がそれを読んで、自分と同じ判定にたどり着けること** です。<Ref refs={references} id="hamel-llm-judge" />
+判定用プロンプトは 5 つの部分に分けられます。
+
+1. **コンテキスト。** アプリケーションが何をするものか、そして基準を確認するために必要なドメイン知識。
+2. **明確な基準 1 つ。無視すべきものも含める。** 「応答は高品質か?」は 2 人に聞けば 2 通りの答えが返る問いです。「応答は少なくとも 1 つの出典文書を引用している。書式の問題は無視する。」なら、毎回同じ答えが返ります。
+3. **理由付きのラベル付き例 (任意)。** ラベル付けしたケースを 2〜4 件、合格と不合格を混ぜて入れると役に立つことがあります。
+4. **理由が先、判定が後。** 理由を先に書かせるプロンプトは、判定精度を測定可能な形で向上させます。<Ref refs={references} id="yan-llm-evaluators" /> また、判定に納得できないときに最初に読むのも理由の部分です。
+5. **判定器に明示的な逃げ道を用意する。** 情報が足りないときは、推測させるのではなく「unknown」と答えられるようにします。<Ref refs={references} id="anthropic-agent-evals" />
+
+次の例は、5 つの部分をすべて組み立てた完全な判定用プロンプトです。
+賃貸物件アシスタントが予約の詳細を作り出していないかをチェックするもので、これは Hamel Husain が実際の賃貸アシスタントに対して行ったエラー分析で最も多かった失敗モードです。<Ref refs={references} id="evals-faq" />
+どれだけ短いかに注目してください。
+
+<JudgePromptExampleJa />
+
+<Callout type="info">
+**ラベル付きの例について**
+
+ラベル付きの例は、込み入った説明をしなくても意図を明確にできる点で有用です。
+ただし評価タスクが十分に単純な場合、ラベル付きの例は過剰であり、主に LLM-as-a-Judge のトークン消費を増やすだけになります。
+まずはラベル付きの例なしで始め、判定精度が足りないときにだけ追加してください。
+
+</Callout>
+
+### ラベル付けしたケースで判定器を検証する [#validate-the-judge]
+
+LLM の判定器は、それ自体が小さな AI システムです。
+動かしているモデルのバイアスを引き継ぎますし、そのプロンプトはアプリケーション内の他のプロンプトと同じく、最初は未検証の状態です。
+判定器を信頼するには、それを計測する必要があります。
+これは [判定器のキャリブレーション](/guides/llm-as-a-judge-calibration-skill) と呼ばれるプロセスで行い、先ほどラベル付けした例をそのまま使えます。
+
+<Callout type="info">
+**取りうる出力を最低 1 回ずつ確認する**
+
+チェック対象の失敗が 10% のケースで起きるとします。
+毎回 _pass_ と答える判定器は 90% の確率で自分と一致し、良い判定器のように解釈できてしまいますが、実際には何も分かりません。
+クラスごとに分けて確認してください。<Ref refs={references} id="evals-faq" />
+
+</Callout>
+
+[前述した](#label-first) _criteria drift_ にも注意してください。
+判定器の理由を読んで、自分が最初に付けたラベルのほうが誤っていたと気付くこともあります。
+
+<ManualGuideCalloutJa
+  href="/guides/llm-as-a-judge-calibration-skill"
+  topic="判定器のキャリブレーション"
+  lede="このループを実際に回します。正解データのデータセットを作り、判定用プロンプトを実行し、どこが食い違ったかまで含めた一致度レポートを得ます。"
+/>
+
+## どこから始めるか
+
+1. まだなら [エラー分析](/academy/japan/monitoring/error-analysis) を実施し、そこから失敗モードを 1 つ選びます。
+2. 状態や保存済みの期待出力で決着が付くかを確認します。付くなら [コードベース評価器](/docs/evaluation/evaluation-methods/code-evaluators) を書いて、ここで終わりです。
+3. LLM-as-a-Judge が必要なら、判定器にどう採点してほしいかを添えて 10〜20 件にラベルを付けます。
+4. 判定用プロンプトを書きます。コンテキスト、明確な基準 1 つ、ラベル付けした例をいくつか、判定より先に理由。
+5. 残りのラベル付きケースで判定器を実行し、比較し、自分の判断と揃うまで反復します。
+6. リリースし、その判定のサンプルをレビューし続けます。
+
+## 参考文献
+
+<FurtherReading numbered resources={references} />

@@ -1,19 +1,13 @@
 const BASE_URL = "https://langfuse.com";
 
-/** Origin that can actually serve unpublished static assets on this deployment. */
-function getOgAssetOrigin(): string {
-  const isPreview =
-    process.env.VERCEL_ENV === "preview" ||
-    process.env.NEXT_PUBLIC_VERCEL_ENV === "preview";
-  if (isPreview) {
-    const host = (process.env.VERCEL_BRANCH_URL || process.env.VERCEL_URL || "")
-      .replace(/^https?:\/\//, "")
-      .replace(/\/$/, "");
-    if (host) {
-      return `https://${host}`;
-    }
-  }
-  return BASE_URL;
+function getStaticOgImageBaseUrl(): string {
+  if (process.env.NEXT_PUBLIC_VERCEL_ENV !== "preview") return BASE_URL;
+
+  const previewUrl =
+    process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ??
+    process.env.NEXT_PUBLIC_VERCEL_URL;
+
+  return previewUrl ? `https://${previewUrl}` : BASE_URL;
 }
 
 /** Default site description; keep in sync with `app/layout.tsx` metadata.description. */
@@ -45,16 +39,7 @@ export function buildOgImageUrl({
   staticOgImage?: string | null;
 }): string {
   if (staticOgImage) {
-    if (
-      staticOgImage.startsWith("http://") ||
-      staticOgImage.startsWith("https://")
-    ) {
-      return staticOgImage;
-    }
-    const path = staticOgImage.startsWith("/")
-      ? staticOgImage
-      : `/${staticOgImage}`;
-    return `${getOgAssetOrigin()}${path}`;
+    return getStaticOgImageBaseUrl() + staticOgImage;
   }
   const params = new URLSearchParams({ title });
   if (description) params.set("description", description);

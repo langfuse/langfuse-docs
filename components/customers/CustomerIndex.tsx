@@ -1,121 +1,168 @@
-import Link from "next/link";
-import Image from "next/image";
-import { type CustomerStory } from "./CustomerCarousel";
+"use client";
 
-export const CustomerIndex = ({
+import Image from "next/image";
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import { CornerBox } from "@/components/ui/corner-box";
+import { Button } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { Text } from "@/components/ui/text";
+import { cn } from "@/lib/utils";
+import type { CustomerStory } from "./CustomerCarousel";
+import { companyName } from "./customerStoryLabels";
+
+const INITIAL_VISIBLE = 10;
+
+export function CustomerIndex({
   stories: allStories = [],
   maxItems,
+  initialVisible,
+  showHeader = true,
 }: {
   stories?: CustomerStory[];
   maxItems?: number;
-}) => {
-  const customerStories = allStories
-    .filter((page) => page.frontMatter?.showInCustomerIndex !== false)
-    .slice(0, maxItems);
+  /** Caps the grid before “Show more”. Embeds omit this to show all stories. */
+  initialVisible?: number;
+  /** Landing-page intro header. Disable for embeds that already have their own. */
+  showHeader?: boolean;
+}) {
+  const resolvedInitialVisible =
+    initialVisible ?? (showHeader ? INITIAL_VISIBLE : Number.POSITIVE_INFINITY);
+
+  const customerStories = useMemo(
+    () =>
+      allStories
+        .filter((page) => page.frontMatter?.showInCustomerIndex !== false)
+        .slice(0, maxItems),
+    [allStories, maxItems],
+  );
+
+  const [expanded, setExpanded] = useState(false);
+  const visibleCount = expanded
+    ? customerStories.length
+    : Math.min(resolvedInitialVisible, customerStories.length);
+  const visibleStories = customerStories.slice(0, visibleCount);
+  const hasMore = customerStories.length > resolvedInitialVisible;
+
+  if (customerStories.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-      {customerStories.map((story) => (
-        <Link
-          key={story.route}
-          href={story.route}
-          className="no-underline flex flex-col p-8 h-full rounded-lg border transition-all duration-200 cursor-pointer group bg-card break-inside-avoid hover:border-gray-300 dark:hover:border-gray-600"
-        >
-          {/* Customer Logo */}
-          {story.frontMatter.customerLogo && (
-            <div className="flex items-center mb-4">
-              {story.frontMatter.customerLogoDark ? (
-                <>
-                  <Image
-                    src={story.frontMatter.customerLogo as string}
-                    alt={`${story.frontMatter.title} logo`}
-                    width={250}
-                    height={80}
-                    className="object-contain w-auto h-8 dark:hidden !m-0"
-                    quality={100}
-                    priority={false}
-                    unoptimized={false}
-                  />
-                  <Image
-                    src={story.frontMatter.customerLogoDark as string}
-                    alt={`${story.frontMatter.title} logo`}
-                    width={250}
-                    height={80}
-                    className="hidden object-contain w-auto h-8 dark:block !m-0"
-                    quality={100}
-                    priority={false}
-                    unoptimized={false}
-                  />
-                </>
-              ) : (
-                <Image
-                  src={story.frontMatter.customerLogo as string}
-                  alt={`${story.frontMatter.title} logo`}
-                  width={250}
-                  height={80}
-                  className="object-contain w-auto h-8 dark:invert dark:brightness-0 dark:contrast-200 !m-0"
-                  quality={100}
-                  priority={false}
-                  unoptimized={false}
-                />
+    <section className="not-prose">
+      {showHeader ? (
+        <div className="mb-8 flex flex-col gap-3">
+          <Heading as="h2" size="normal" className="max-w-[20ch] text-left">
+            Learn from teams building AI on Langfuse
+          </Heading>
+          <Text className="max-w-[52ch] text-left">
+            Real deployments across support agents, tutoring, design tools, and
+            enterprise AI platforms. How teams trace, monitor and improve with
+            Langfuse.
+          </Text>
+        </div>
+      ) : null}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2">
+        {visibleStories.map((story, index) => {
+          const company = companyName(story);
+          const headline = story.frontMatter.title ?? story.route;
+          const quote = story.frontMatter.customerQuote;
+          const logo = story.frontMatter.customerLogo;
+          const logoDark = story.frontMatter.customerLogoDark;
+          const withStripes = index % 3 === 1;
+
+          return (
+            <CornerBox
+              key={story.route}
+              withStripes={withStripes}
+              hoverStripes={!withStripes}
+              className={cn(
+                "-mt-px flex min-h-[176px] flex-col p-5 sm:-ml-px sm:p-6",
               )}
-            </div>
-          )}
+            >
+              <Link
+                href={story.route}
+                className="group flex h-full flex-col no-underline outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <div className="mb-4 flex h-8 items-center">
+                  {logo ? (
+                    <div className="relative h-8 w-[120px]">
+                      {logoDark ? (
+                        <>
+                          <Image
+                            src={logo}
+                            alt={`${company} logo`}
+                            fill
+                            sizes="120px"
+                            className="object-contain object-left dark:hidden"
+                            unoptimized
+                          />
+                          <Image
+                            src={logoDark}
+                            alt={`${company} logo`}
+                            fill
+                            sizes="120px"
+                            className="hidden object-contain object-left dark:block"
+                            unoptimized
+                          />
+                        </>
+                      ) : (
+                        <Image
+                          src={logo}
+                          alt={`${company} logo`}
+                          fill
+                          sizes="120px"
+                          className="object-contain object-left dark:invert dark:brightness-0 dark:contrast-200"
+                          unoptimized
+                        />
+                      )}
+                    </div>
+                  ) : (
+                    <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-text-tertiary">
+                      {company}
+                    </span>
+                  )}
+                </div>
+                <h3 className="m-0 font-analog text-[20px] font-medium leading-[1.2] tracking-tight text-text-primary sm:text-[21px]">
+                  {headline}
+                </h3>
+                {quote ? (
+                  <p className="mt-2 mb-0 line-clamp-2 text-[13px] leading-[1.45] text-text-tertiary">
+                    “{quote}”
+                  </p>
+                ) : story.frontMatter.description ? (
+                  <p className="mt-2 mb-0 line-clamp-2 text-[13px] leading-[1.45] text-text-tertiary">
+                    {story.frontMatter.description}
+                  </p>
+                ) : null}
+                <span className="mt-auto inline-flex items-center gap-1.5 pt-4 font-mono text-[11px] uppercase tracking-[0.1em] text-text-secondary transition-colors group-hover:text-text-primary">
+                  Read
+                  <span aria-hidden>→</span>
+                </span>
+              </Link>
+            </CornerBox>
+          );
+        })}
+      </div>
 
-          {/* Quote */}
-          {story.frontMatter.customerQuote && (
-            <blockquote className="text-xl leading-relaxed text-gray-500 dark:text-gray-200 !m-0 !mb-4 !border-0 !pl-0 not-italic">
-              "{story.frontMatter.customerQuote as string}"
-            </blockquote>
+      {hasMore || showHeader ? (
+        <div className="mt-6 flex items-center justify-between gap-4">
+          {hasMore ? (
+            <Button
+              variant="secondary"
+              size="default"
+              className="w-auto min-w-[160px]"
+              onClick={() => setExpanded((v) => !v)}
+            >
+              {expanded ? "Show fewer stories" : "Show more stories"}
+            </Button>
+          ) : (
+            <span />
           )}
-
-          {/* Spacing div to push author info to bottom */}
-          <div className="flex-1" />
-
-          {/* Author Information */}
-          {(story.frontMatter.quoteAuthor ||
-            story.frontMatter.quoteRole ||
-            story.frontMatter.quoteCompany) && (
-            <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
-              <div>
-                {story.frontMatter.quoteAuthor && (
-                  <div className="font-semibold text-gray-900 dark:text-gray-100">
-                    {story.frontMatter.quoteAuthor as string}
-                  </div>
-                )}
-                {(story.frontMatter.quoteRole ||
-                  story.frontMatter.quoteCompany) && (
-                  <div>
-                    {story.frontMatter.quoteRole && (
-                      <span>{story.frontMatter.quoteRole as string}</span>
-                    )}
-                    {story.frontMatter.quoteRole &&
-                      story.frontMatter.quoteCompany && <span> at </span>}
-                    {story.frontMatter.quoteCompany && (
-                      <span>{story.frontMatter.quoteCompany as string}</span>
-                    )}
-                  </div>
-                )}
-              </div>
-              <div className="flex justify-center items-center w-6 h-6 bg-gray-100 rounded-full transition-colors min-w-6 dark:bg-gray-700 group-hover:bg-gray-200 dark:group-hover:bg-gray-600">
-                <svg
-                  className="w-3 h-3 text-gray-600 dark:text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 12h14M12 5l7 7-7 7"
-                  />
-                </svg>
-              </div>
-            </div>
-          )}
-        </Link>
-      ))}
-    </div>
+          <p className="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-text-tertiary">
+            {visibleCount} of {customerStories.length}
+          </p>
+        </div>
+      ) : null}
+    </section>
   );
-};
+}

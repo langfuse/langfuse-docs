@@ -404,21 +404,18 @@ CLICKHOUSE_PASSWORD=clickhouse
 CLICKHOUSE_CLUSTER_ENABLED=false
 ```
 
-## Migrating to a New Instance
+## Migrating to a New Instance [#migrating-to-a-new-instance]
 
-You may want to move Langfuse to a different ClickHouse instance, e.g. when switching providers or moving from a single-node to a clustered setup.
-We recommend the following approach:
+You may want to move Langfuse to a different ClickHouse instance, for example when switching from self-managed ClickHouse OSS to [Cloud or BYOC](#cloudbyoc), changing providers, or moving from a single-node to a clustered setup.
 
-1. Point Langfuse to the new ClickHouse instance so that incoming data is captured there.
-2. Create a backup of the existing instance to blob storage and restore it into the new instance.
+The recommended path is: run the latest Langfuse OSS release first and keep that version unchanged, pause ingestion, copy the ClickHouse database with a ClickHouse-supported method, then point Langfuse at the new service. See [How do I migrate Langfuse from ClickHouse OSS to Cloud or BYOC?](/faq/all/self-hosting-migrate-clickhouse-oss-to-cloud) for the Langfuse-side checklist.
 
-A zero-downtime switch where data is written to both instances concurrently is technically possible, but we have not tested it and it is not recommended by ClickHouse.
-Please reach out to Langfuse Support if you want to explore this option.
+Use the ClickHouse documentation for the data copy itself:
 
-Refer to the ClickHouse migration guides for backup and restore instructions:
+- [ClickHouse to ClickHouse via remoteSecure](https://clickhouse.com/docs/get-started/migrate/oss-to-cloud/clickhouse-to-cloud)
+- [ClickHouse to ClickHouse via backup and restore](https://clickhouse.com/docs/get-started/migrate/oss-to-cloud/oss-to-cloud-backup-restore)
 
-- [ClickHouse to ClickHouse via remoteSecure](https://clickhouse.com/docs/cloud/migration/clickhouse-to-cloud)
-- [ClickHouse to ClickHouse via backup and restore](https://clickhouse.com/docs/cloud/migration/oss-to-cloud-backup-restore)
+A zero-downtime switch where data is written to both instances concurrently is technically possible, but we have not tested it and it is not recommended. Contact [support](/support) if you want to explore this option.
 
 ## Encryption
 
@@ -642,6 +639,10 @@ volumes:
 This will store ClickHouse data within the Azurite bucket.
 
 ## FAQ
+
+### How do I migrate from self-managed ClickHouse to Cloud or BYOC? [#migrate-oss-to-cloud]
+
+See [How do I migrate Langfuse from ClickHouse OSS to Cloud or BYOC?](/faq/all/self-hosting-migrate-clickhouse-oss-to-cloud). Run the latest Langfuse OSS release first, keep that version unchanged, pause ingestion, copy ClickHouse with a ClickHouse-supported method, then point Langfuse at the new service.
 
 ### Is ClickHouse required for self-hosting Langfuse?
 

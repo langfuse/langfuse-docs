@@ -1,0 +1,917 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Evaluate and Improve Structured Extraction
+sidebarTitle: Evaluate and Improve Structured Extraction
+description: Evaluate structured extraction with Langfuse. Build a labeled dataset, score document extraction per field, catch LLM output parsing errors, and improve structured generation with experiments.
+category: Evaluation
+---
+
+# Evaluate and Improve Structured Extraction
+
+Most production extraction is not an agent. An invoice, insurance claim, KYC packet, or bank statement goes in. A nested object comes out. You have labels, you need accuracy per field, and you will run this loop many times. The same eval applies to any document or content extraction pipeline, including when extraction is a step inside an agent.
+
+This cookbook runs that loop on insurance claims:
+
+1. Upload a dataset of claim text plus the expected nested object
+2. Score every output field, plus overall accuracy
+3. Change one lever, remeasure, and catch a regression the pooled score hid
+
+**Stack:** OpenAI structured outputs, Langfuse Tracing, [Experiments](https://langfuse.com/docs/evaluation/experiments/experiments-via-sdk), and Prompt Management.
+
+> **Credits.** Dataset, schema, and baseline comparison are adapted from Cleanlab's structured-output [benchmark](https://cleanlab.ai/blog/structured-output-benchmark/) ([repo](https://github.com/cleanlab/structured-output-benchmark/tree/main/insurance_claims), [dataset](https://huggingface.co/datasets/Cleanlab/insurance-claims-extraction)). Their `schema.py` is our descriptive schema. The scorer extends their `utils.py` comparison with typed date/number matching and object pairing.
+
+
+## 1. Setup
+
+Install the dependencies, then set your Langfuse and OpenAI keys in the next cell.
+
+
+
+```python
+%pip install -q "langfuse>=4.14" "openai>=3" pydantic pandas
+
+```
+
+
+```python
+import os
+
+# Langfuse: project Settings → API Keys → https://cloud.langfuse.com
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")  # 🇪🇺 EU region
+# 🇺🇸 US region: https://us.cloud.langfuse.com
+
+# OpenAI: https://platform.openai.com/api-keys
+os.environ.setdefault("OPENAI_API_KEY", "sk-proj-...");
+
+```
+
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+assert langfuse.auth_check(), "Langfuse auth failed. Check your keys and host."
+print("Langfuse auth OK")
+
+```
+
+You should see `Langfuse auth OK`. Next you define the schema the model must fill.
+
+
+## 2. Schema as the extraction contract
+
+The schema is part of the pipeline. It constrains structured generation through OpenAI structured outputs and defines what the scorer checks. Each claim has `header`, optional `policy_details`, optional `insured_objects[]`, and `incident_description`.
+
+Two variants, same fields, so the first improvement round can change one thing:
+
+- **bare:** types and constraints only. The V1 floor.
+- **descriptive:** the same fields plus `description=` text for ID formats. This is the contract you would ship.
+
+
+
+```python
+from __future__ import annotations
+from datetime import date
+from typing import List, Literal, Optional
+from pydantic import BaseModel, ConfigDict, Field
+
+# ---- shared enum aliases (defined once -> both variants stay identical) -------
+Channel = Literal["Email", "Phone", "Portal", "In-Person"]
+CoverageType = Literal["Property", "Auto", "Liability", "Health", "Travel", "Other"]
+ObjectType = Literal["Vehicle", "Building", "Person", "Other"]
+IncidentType = Literal[
+    "rear_end_collision", "side_impact_collision", "head_on_collision", "parking_lot_collision",
+    "house_fire", "kitchen_fire", "electrical_fire", "burst_pipe_flood", "storm_damage", "roof_leak",
+    "slip_and_fall", "property_injury", "product_liability", "theft_burglary", "vandalism",
+]
+LocationType = Literal[
+    "intersection", "highway", "parking_lot", "driveway", "residential_street",
+    "residence_interior", "residence_exterior", "commercial_property", "public_property",
+]
+_STRICT = ConfigDict(extra="forbid")
+
+```
+
+
+```python
+# ---- BARE variant: structure + constraints only ------------------------------
+class ClaimHeaderBare(BaseModel):
+    model_config = _STRICT
+    claim_id: str
+    report_date: date
+    incident_date: date
+    reported_by: str = Field(..., min_length=1)
+    channel: Channel
+
+class PolicyDetailsBare(BaseModel):
+    model_config = _STRICT
+    policy_number: str
+    policyholder_name: str = Field(..., min_length=1)
+    coverage_type: CoverageType
+    effective_date: date
+    expiration_date: date
+
+class InsuredObjectBare(BaseModel):
+    model_config = _STRICT
+    object_id: str
+    object_type: ObjectType
+    make_model: Optional[str] = None
+    year: Optional[int] = None
+    location_address: Optional[str] = None
+    estimated_value: Optional[int] = None
+
+class IncidentDescriptionBare(BaseModel):
+    model_config = _STRICT
+    incident_type: IncidentType
+    location_type: LocationType
+    estimated_damage_amount: Optional[int] = None
+    police_report_number: Optional[str] = None
+
+class InsuranceClaimBare(BaseModel):
+    model_config = _STRICT
+    header: ClaimHeaderBare
+    policy_details: Optional[PolicyDetailsBare] = None
+    insured_objects: Optional[List[InsuredObjectBare]] = None
+    incident_description: IncidentDescriptionBare
+
+```
+
+
+```python
+# ---- DESCRIPTIVE variant: same structure + rich descriptions (the "spec") ----
+class ClaimHeader(BaseModel):
+    model_config = _STRICT
+    claim_id: str = Field(..., description="Claim ID in format CLM-XXXXXX, where X is a digit")
+    report_date: date = Field(..., description="Date claim was reported (ISO 8601)")
+    incident_date: date = Field(..., description="Date incident occurred (ISO 8601)")
+    reported_by: str = Field(..., min_length=1, description="Full name of person reporting the claim")
+    channel: Channel = Field(..., description="Channel used to report the claim")
+
+class PolicyDetails(BaseModel):
+    model_config = _STRICT
+    policy_number: str = Field(..., description="Policy number in format POL-XXXXXXXXX, where X is a digit")
+    policyholder_name: str = Field(..., min_length=1, description="Full legal name on the policy")
+    coverage_type: CoverageType = Field(..., description="Type of insurance coverage")
+    effective_date: date = Field(..., description="Policy effective start date (ISO 8601)")
+    expiration_date: date = Field(..., description="Policy expiration end date (ISO 8601)")
+
+class InsuredObject(BaseModel):
+    model_config = _STRICT
+    object_id: str = Field(..., description=(
+        "Unique identifier for the insured object. For vehicles use VIN format "
+        "(e.g., VIN12345678901234567). For buildings use PROP-XXXXXX. For liability use "
+        "LIAB-XXXXXX. Otherwise use OBJ-XXXXXX, where X is a digit"))
+    object_type: ObjectType = Field(..., description="Type of insured object")
+    make_model: Optional[str] = Field(None, description=(
+        "Make and model for vehicles (use standardized manufacturer names and models), "
+        "or building type for property"))
+    year: Optional[int] = Field(None, description="Year for vehicles or year built for buildings")
+    location_address: Optional[str] = Field(None, description="Full street address where object is located")
+    estimated_value: Optional[int] = Field(None, description="Estimated value in USD, no currency symbol")
+
+class IncidentDescription(BaseModel):
+    model_config = _STRICT
+    incident_type: IncidentType = Field(..., description="Specific standardized incident type")
+    location_type: LocationType = Field(..., description="Standardized location type where it occurred")
+    estimated_damage_amount: Optional[int] = Field(None, description="Estimated damage in USD, no symbol")
+    police_report_number: Optional[str] = Field(None, description="Police report number if applicable")
+
+class InsuranceClaim(BaseModel):
+    model_config = _STRICT
+    header: ClaimHeader = Field(..., description="Basic claim information")
+    policy_details: Optional[PolicyDetails] = Field(None, description="Policy information if available")
+    insured_objects: Optional[List[InsuredObject]] = Field(None, description="Insured objects, if applicable")
+    incident_description: IncidentDescription = Field(..., description="Structured incident details")
+
+SCHEMAS = {"bare": InsuranceClaimBare, "descriptive": InsuranceClaim}
+
+```
+
+
+```python
+# Peek at the strict JSON schema OpenAI will enforce.
+from openai.lib._pydantic import to_strict_json_schema
+strict = to_strict_json_schema(InsuranceClaim)
+print("sections:", list(strict["properties"].keys()))
+print("incident_type enum:", len(IncidentType.__args__), "values | location_type:", len(LocationType.__args__))
+
+```
+
+You should see four sections. `insured_objects` is a list. That is why the scorer pairs objects before it scores their fields.
+
+
+## 3. Upload a labeled dataset
+
+30 synthetic claims from the [Cleanlab structured-output benchmark](https://cleanlab.ai/blog/structured-output-benchmark/), uploaded as a [Langfuse dataset](https://langfuse.com/docs/evaluation/experiments/datasets). Each item is claim text in `input`, the nested label in `expected_output`, and slices in `metadata` (`has_policy`, `n_objects`). The text is LLM-generated. Treat this as a demo set.
+
+
+
+```python
+import ast
+import pandas as pd
+
+DATA_URL = "https://huggingface.co/datasets/Cleanlab/insurance-claims-extraction/resolve/main/insurance_claims_extraction.csv"
+df = pd.read_csv(DATA_URL)
+print("rows:", len(df), "| columns:", list(df.columns))
+example_gt = ast.literal_eval(df["ground_truth"].iloc[0])   # ground_truth is a stringified dict
+print("ground-truth sections:", list(example_gt.keys()))
+
+```
+
+You should see 30 rows and the four ground-truth sections. Next you attach metadata slices and upload.
+
+
+The next cell derives `has_policy` and `n_objects` for each item. Expand if you want the helpers.
+
+<details>
+<summary>Dataset slice helpers</summary>
+
+
+
+```python
+def count_leaves(d):
+    # Non-null leaf values = the real signal density (extraction target size).
+    if isinstance(d, dict):
+        return sum(count_leaves(v) for v in d.values())
+    if isinstance(d, list):
+        return sum(count_leaves(v) for v in d)
+    return 0 if d is None else 1
+
+def derive_slices(gt):
+    objects = gt.get("insured_objects") or []
+    policy = gt.get("policy_details")
+    return {"has_policy": policy is not None, "has_objects": len(objects) > 0,
+            "n_objects": len(objects), "coverage_type": (policy or {}).get("coverage_type"),
+            "incident_type": gt.get("incident_description", {}).get("incident_type"),
+            "leaf_field_count": count_leaves(gt),
+            "provenance": "cleanlab/structured-output-benchmark (synthetic)"}
+
+items = []
+for i, row in df.iterrows():
+    gt = ast.literal_eval(row["ground_truth"])
+    items.append({"id": f"claim-{i:03d}", "input": row["claim_text"],
+                  "expected_output": gt, "metadata": derive_slices(gt)})
+
+import collections
+print("has_policy:", sum(it["metadata"]["has_policy"] for it in items), "/", len(items))
+print("n_objects:", dict(sorted(collections.Counter(it["metadata"]["n_objects"] for it in items).items())))
+
+```
+
+</details>
+
+
+
+```python
+DATASET_NAME = "insurance-claims"
+
+langfuse.create_dataset(
+    name=DATASET_NAME,
+    description="Nested insurance-claim extraction (Cleanlab). 30 synthetic claims; verify before production.",
+    metadata={"source": "Cleanlab/insurance-claims-extraction", "n_items": len(items)})
+for it in items:
+    langfuse.create_dataset_item(
+        dataset_name=DATASET_NAME, id=f"{DATASET_NAME}:{it['id']}",
+        input=it["input"], expected_output=it["expected_output"], metadata=it["metadata"])
+langfuse.flush()
+dataset = langfuse.get_dataset(DATASET_NAME)
+print("uploaded & fetched:", len(dataset.items), "items")
+
+```
+
+![Insurance-claims dataset in Langfuse](https://langfuse.com/images/cookbook/example-structured-output-extraction/dataset-items.png)
+
+Open Datasets in Langfuse and confirm 30 items. Five claims have no policy and no objects. 11 of 27 labeled objects have a null `object_id`. One claim has a null `claim_id`. The labels are not schema-valid. That is the point of the later ID-format scores.
+
+
+## 4. Score every field, then overall
+
+The scorer walks each leaf and emits a boolean per path (`field.header.claim_id`, `field.policy_details.policyholder_name`, ...) plus `field_accuracy_overall`. A separate `valid_json` score catches LLM output parsing failures. A response that does not parse gets no field scores at all.
+
+The comparison is type-aware. Dates match on the parsed value, so `2025-09-23` and `September 23, 2025` are the same answer. Amounts match within a small tolerance (1.0 absolute or 1%), while `year` must match exactly because a 1% window on a year spans two decades. Because `insured_objects` is a list, the scorer first pairs labeled objects with predicted objects by field similarity, then scores fields inside each pair, so ordering differences cost nothing. Nulls are handled two ways. When a required field is null in the labels, that is a labeling gap and the leaf is skipped. When an optional field is null in the labels, the document genuinely omits the value, so the model must also output null, and inventing one counts as wrong.
+
+> The scorer adapts Cleanlab's [`utils.py`](https://github.com/cleanlab/structured-output-benchmark/blob/main/insurance_claims/utils.py) comparison (per-section matching, normalized strings, object pairing) and adds typed date/number matching.
+
+
+Run the evaluator wrapper after this block. Expand only if you want `compare_claim` and object pairing.
+
+<details>
+<summary>Scorer implementation</summary>
+
+
+
+```python
+import re
+from datetime import date, datetime
+from itertools import combinations, permutations
+
+OPTIONAL_LEAVES = {"header": set(), "policy_details": set(),
+    "insured_objects": {"make_model", "year", "location_address", "estimated_value"},
+    "incident_description": {"estimated_damage_amount", "police_report_number"}}
+DATE_FIELDS = {"header.report_date", "header.incident_date",
+               "policy_details.effective_date", "policy_details.expiration_date"}
+NUMERIC_FIELDS = {"incident_description.estimated_damage_amount",
+                  "insured_objects.year", "insured_objects.estimated_value"}
+EXACT_NUMERIC_FIELDS = {"insured_objects.year"}
+ENUM_FIELDS = {"header.channel", "policy_details.coverage_type", "insured_objects.object_type",
+               "incident_description.incident_type", "incident_description.location_type"}
+ID_REGEX = {"header.claim_id": r"^CLM-\d{6}$", "policy_details.policy_number": r"^POL-\d{9}$"}
+OBJECT_ID_REGEX = {"Vehicle": r"^VIN[A-Z0-9]{17}$", "Building": r"^PROP-\d{6}$",
+                   "Person": r"^(LIAB|OBJ)-\d{6}$", "Other": r"^(LIAB|OBJ)-\d{6}$"}
+NUMERIC_ABS_TOL, NUMERIC_REL_TOL, OBJECT_MATCH_THRESHOLD = 1.0, 0.01, 0.5
+_EMPTY_SECTION = dict(correct=0, total=0, enum_c=0, enum_t=0, date_c=0, date_t=0,
+                      num_c=0, num_t=0, leaf_results=[])
+
+def norm_str(v):
+    s = re.sub(r"[^\w\s]", "", str(v).strip().lower())
+    return re.sub(r"\s+", "", s)
+
+def to_date(v):
+    if isinstance(v, date):
+        return v
+    s = str(v).strip()
+    try:
+        return date.fromisoformat(s[:10])
+    except ValueError:
+        for fmt in ("%m/%d/%Y", "%d/%m/%Y", "%B %d, %Y", "%b %d, %Y", "%Y/%m/%d"):
+            try:
+                return datetime.strptime(s, fmt).date()
+            except ValueError:
+                continue
+    return None
+
+def match_date(gt, pred):
+    a, b = to_date(gt), to_date(pred)
+    return a == b if (a and b) else norm_str(gt) == norm_str(pred)
+
+def match_number(gt, pred, exact=False):
+    try:
+        g, p = float(gt), float(pred)
+    except (TypeError, ValueError):
+        return norm_str(gt) == norm_str(pred)
+    if exact:
+        return g == p
+    return abs(g - p) <= max(NUMERIC_ABS_TOL, NUMERIC_REL_TOL * abs(g))
+
+def match_value(path, gt, pred):
+    if path in DATE_FIELDS:
+        return match_date(gt, pred)
+    if path in NUMERIC_FIELDS:
+        return match_number(gt, pred, exact=path in EXACT_NUMERIC_FIELDS)
+    return norm_str(gt) == norm_str(pred)   # enums + free strings
+
+def is_optional(section, field):
+    return field in OPTIONAL_LEAVES.get(section, set())
+
+def compare_section(section, gt, pred, path_prefix=None):
+    pred = pred or {}
+    correct = total = enum_c = enum_t = date_c = date_t = num_c = num_t = 0
+    leaf_results = []
+    prefix = path_prefix or section
+    for field, gt_val in gt.items():
+        path = f"{section}.{field}"
+        leaf_path = f"{prefix}.{field}"
+        if gt_val is None:
+            if not is_optional(section, field):
+                continue                       # required + null => not gradable (data gap)
+            ok = pred.get(field) is None
+            total += 1; correct += int(ok)
+            leaf_results.append((leaf_path, bool(ok)))
+            continue
+        ok = (pred.get(field) is not None) and match_value(path, gt_val, pred.get(field))
+        total += 1; correct += int(ok)
+        leaf_results.append((leaf_path, bool(ok)))
+        if path in ENUM_FIELDS:   enum_t += 1; enum_c += int(ok)
+        elif path in DATE_FIELDS: date_t += 1; date_c += int(ok)
+        elif path in NUMERIC_FIELDS: num_t += 1; num_c += int(ok)
+    return dict(correct=correct, total=total, enum_c=enum_c, enum_t=enum_t,
+                date_c=date_c, date_t=date_t, num_c=num_c, num_t=num_t,
+                leaf_results=leaf_results)
+
+def object_similarity(gt_obj, pred_obj):
+    r = compare_section("insured_objects", gt_obj, pred_obj)
+    return r["correct"] / r["total"] if r["total"] else 0.0
+
+def optimal_pairing(gt_objs, pred_objs):
+    # pairing[i] = index in pred matched to gt[i] (or None), maximizing similarity.
+    n_gt, n_pred = len(gt_objs), len(pred_objs)
+    if not n_gt or not n_pred:
+        return [None] * n_gt
+    if max(n_gt, n_pred) > 6:                  # greedy fallback (never hit on this data)
+        used, pairing = set(), []
+        for g in gt_objs:
+            best, bi = -1.0, None
+            for j, p in enumerate(pred_objs):
+                if j in used:
+                    continue
+                s = object_similarity(g, p)
+                if s > best:
+                    best, bi = s, j
+            if bi is not None:
+                used.add(bi)
+            pairing.append(bi)
+        return pairing
+    sim = [[object_similarity(g, p) for p in pred_objs] for g in gt_objs]
+    best_score, best = -1.0, [None] * n_gt
+    for k in range(min(n_gt, n_pred) + 1):
+        for gt_idx in combinations(range(n_gt), k):
+            for pred_idx in permutations(range(n_pred), k):
+                pairing, score = [None] * n_gt, 0.0
+                for a, gi in enumerate(gt_idx):
+                    pairing[gi] = pred_idx[a]; score += sim[gi][pred_idx[a]]
+                if score > best_score:
+                    best_score, best = score, pairing
+    return best
+
+def score_objects(gt_objs, pred_objs):
+    gt_objs, pred_objs = gt_objs or [], pred_objs or []
+    n_gt, n_pred = len(gt_objs), len(pred_objs)
+    leaf_results = [("insured_objects.count", n_gt == n_pred)]
+    if n_gt == 0 and n_pred == 0:
+        return dict(precision=1.0, recall=1.0, f1=1.0, tp=0, field_correct=0, field_total=0,
+                    count_correct=True, counted_gt=set(), leaf_results=leaf_results)
+    pairing = optimal_pairing(gt_objs, pred_objs)
+    tp = field_correct = field_total = 0
+    counted_gt = set()   # gt indices whose fields entered field_correct/field_total
+    for gi, gobj in enumerate(gt_objs):
+        pj = pairing[gi] if gi < len(pairing) else None
+        pred_obj = pred_objs[pj] if pj is not None else {}
+        r = compare_section("insured_objects", gobj, pred_obj, path_prefix=f"insured_objects.{gi}")
+        leaf_results.extend(r["leaf_results"])
+        if pj is None:
+            continue
+        if (r["correct"] / r["total"] if r["total"] else 0.0) >= OBJECT_MATCH_THRESHOLD:
+            tp += 1; field_correct += r["correct"]; field_total += r["total"]
+            counted_gt.add(gi)
+    precision = tp / n_pred if n_pred else (1.0 if n_gt == 0 else 0.0)
+    recall = tp / n_gt if n_gt else (1.0 if n_pred == 0 else 0.0)
+    f1 = (2 * precision * recall / (precision + recall)) if (precision + recall) else 0.0
+    return dict(precision=precision, recall=recall, f1=f1, tp=tp,
+                field_correct=field_correct, field_total=field_total, count_correct=(n_gt == n_pred),
+                counted_gt=counted_gt, leaf_results=leaf_results)
+
+def score_id_formats(pred):
+    ok = total = 0
+    cid = pred.get("header", {}).get("claim_id")
+    if cid is not None:
+        total += 1; ok += int(bool(re.match(ID_REGEX["header.claim_id"], str(cid))))
+    pol = pred.get("policy_details")
+    if pol and pol.get("policy_number") is not None:
+        total += 1; ok += int(bool(re.match(ID_REGEX["policy_details.policy_number"], str(pol["policy_number"]))))
+    for obj in (pred.get("insured_objects") or []):
+        oid = obj.get("object_id")
+        if oid is None:
+            continue
+        rgx = OBJECT_ID_REGEX.get(obj.get("object_type"), r"^(OBJ|LIAB)-\d{6}$")
+        total += 1; ok += int(bool(re.match(rgx, str(oid))))
+    return dict(ok=ok, total=total)
+
+def compare_claim(pred, gt):
+    if pred is None:
+        return dict(valid_json=False, leaf_results=[])
+    header = compare_section("header", gt.get("header", {}), pred.get("header"))
+    incident = compare_section("incident_description", gt.get("incident_description", {}), pred.get("incident_description"))
+    gt_policy, pred_policy = gt.get("policy_details"), pred.get("policy_details")
+    policy = compare_section("policy_details", gt_policy, pred_policy) if gt_policy else dict(_EMPTY_SECTION)
+    objs = score_objects(gt.get("insured_objects"), pred.get("insured_objects"))
+    leaf_results = list(header["leaf_results"]) + list(incident["leaf_results"])
+    if gt_policy:
+        leaf_results.extend(policy["leaf_results"])
+    else:
+        leaf_results.append(("policy_details.present", pred_policy is None))
+    leaf_results.extend(objs["leaf_results"])
+    f_correct = header["correct"] + incident["correct"] + policy["correct"] + objs["field_correct"]
+    f_total = header["total"] + incident["total"] + policy["total"] + objs["field_total"]
+    # Objects that never entered field_total still count toward the denominator.
+    for gi, gobj in enumerate(gt.get("insured_objects") or []):
+        if gi not in objs["counted_gt"]:
+            f_total += compare_section("insured_objects", gobj, {})["total"]
+    enum_c = header["enum_c"] + incident["enum_c"] + policy["enum_c"]; enum_t = header["enum_t"] + incident["enum_t"] + policy["enum_t"]
+    date_c = header["date_c"] + incident["date_c"] + policy["date_c"]; date_t = header["date_t"] + incident["date_t"] + policy["date_t"]
+    num_c = header["num_c"] + incident["num_c"] + policy["num_c"]; num_t = header["num_t"] + incident["num_t"] + policy["num_t"]
+    pairing = optimal_pairing(gt.get("insured_objects") or [], pred.get("insured_objects") or [])
+    for gi, pj in enumerate(pairing):
+        if pj is None:
+            continue
+        r = compare_section("insured_objects", gt["insured_objects"][gi], (pred.get("insured_objects") or [])[pj])
+        enum_c += r["enum_c"]; enum_t += r["enum_t"]; num_c += r["num_c"]; num_t += r["num_t"]
+    ids = score_id_formats(pred)
+    presence = [bool(gt_policy) == bool(pred_policy), bool(gt.get("insured_objects")) == bool(pred.get("insured_objects"))]
+    ratio = lambda c, t: (c / t) if t else None
+    return dict(valid_json=True, leaf_results=leaf_results,
+        field_accuracy_overall=ratio(f_correct, f_total), header_accuracy=ratio(header["correct"], header["total"]),
+        policy_accuracy=ratio(policy["correct"], policy["total"]), incident_accuracy=ratio(incident["correct"], incident["total"]),
+        enum_accuracy=ratio(enum_c, enum_t), date_accuracy=ratio(date_c, date_t),
+        numeric_accuracy=ratio(num_c, num_t), id_format_ok=ratio(ids["ok"], ids["total"]),
+        objects_count_correct=objs["count_correct"], objects_precision=objs["precision"], objects_recall=objs["recall"],
+        objects_f1=objs["f1"], object_field_accuracy=ratio(objs["field_correct"], objs["field_total"]),
+        section_presence_correct=sum(presence) / len(presence))
+
+```
+
+</details>
+
+
+
+```python
+from langfuse import Evaluation
+
+def extraction_evaluator(*, output, expected_output, **kwargs):
+    if not isinstance(output, dict):
+        return [Evaluation(name="valid_json", value=False, data_type="BOOLEAN")]
+
+    breakdown = compare_claim(output.get("prediction"), expected_output)
+    evals = [Evaluation(name="valid_json", value=bool(breakdown.get("valid_json")), data_type="BOOLEAN")]
+
+    for path, ok in breakdown.get("leaf_results") or []:
+        evals.append(Evaluation(name=f"field.{path}", value=bool(ok), data_type="BOOLEAN"))
+
+    if breakdown.get("valid_json"):
+        overall = breakdown.get("field_accuracy_overall")
+        evals.append(Evaluation(
+            name="field_accuracy_overall",
+            value=float(overall) if overall is not None else 0.0,
+            data_type="NUMERIC",
+        ))
+        if breakdown.get("objects_f1") is not None:
+            evals.append(Evaluation(name="objects_f1", value=float(breakdown["objects_f1"]), data_type="NUMERIC"))
+    return evals
+
+def run_aggregates(*, item_results, **kwargs):
+    from collections import defaultdict
+    vals = defaultdict(list)
+    for ir in item_results:
+        for ev in (getattr(ir, "evaluations", None) or []):
+            name = ev.get("name") if isinstance(ev, dict) else getattr(ev, "name", None)
+            value = ev.get("value") if isinstance(ev, dict) else getattr(ev, "value", None)
+            if name is not None and isinstance(value, (int, float, bool)):
+                vals[name].append(float(value))
+    return [Evaluation(name=f"mean_{name}", value=sum(xs) / len(xs), data_type="NUMERIC")
+            for name, xs in vals.items() if xs]
+
+```
+
+Each experiment item in Langfuse gets those `field.*` scores. Sort failing items by a field path rather than by overall accuracy.
+
+
+## 5. Run experiments from the dataset
+
+`run_round` calls `dataset.run_experiment` and appends a row to a comparison table: overall field accuracy, `object_id`, `policyholder_name`, and `objects_F1`. Re-running a cell starts a new experiment run; Langfuse keeps every run on the Experiments tab as history.
+
+Prompts live in Langfuse as `extraction-system`. The next cell creates v1.
+
+
+
+```python
+from functools import lru_cache
+from langfuse.openai import openai
+import time
+
+PROMPT_NAME = "extraction-system"
+TERSE_V1 = "Extract the insurance claim from the text into the structured schema."
+
+@lru_cache(maxsize=16)
+def get_system_prompt(version):
+    return langfuse.get_prompt(PROMPT_NAME, version=version)
+
+def seed_prompt(version, text, labels, commit_message):
+    # Idempotent: prompt versions are immutable, so only create what doesn't exist yet.
+    metas = langfuse.api.prompts.list(name=PROMPT_NAME).data
+    if any(version in (m.versions or []) for m in metas):
+        existing = langfuse.get_prompt(PROMPT_NAME, version=version)
+        if existing.prompt.strip() != text.strip():
+            raise RuntimeError(
+                f"'{PROMPT_NAME}' v{version} already exists with different text. This project "
+                f"has an unrelated prompt under that name; change PROMPT_NAME or use a fresh project.")
+        print(f"prompt v{version} already exists")
+        return
+    langfuse.create_prompt(name=PROMPT_NAME, prompt=text, type="text",
+                           labels=labels, commit_message=commit_message)
+    get_system_prompt.cache_clear()
+    print(f"created prompt v{version}")
+
+# Seed v1 (terse baseline). Later we'll add v2/v3 when the results tell us to.
+seed_prompt(1, TERSE_V1, ["baseline"], "v1: terse baseline")
+
+```
+
+
+```python
+def build_messages(system_text, claim_text):
+    return [{"role": "system", "content": system_text},
+            {"role": "user", "content": claim_text}]
+
+def extract(cfg, claim_text, name):
+    system_text = TERSE_V1 if cfg["prompt_version"] is None else get_system_prompt(cfg["prompt_version"]).compile()
+    prompt_obj = None if cfg["prompt_version"] is None else get_system_prompt(cfg["prompt_version"])
+    t0 = time.perf_counter()
+    c = openai.chat.completions.parse(
+        model=cfg["model"],
+        messages=build_messages(system_text, claim_text),
+        response_format=SCHEMAS[cfg["schema"]],
+        name=name, langfuse_prompt=prompt_obj, temperature=0)
+    parsed = c.choices[0].message.parsed
+    return {"prediction": parsed.model_dump(mode="json") if parsed else None,
+            "valid_json": parsed is not None, "latency_ms": (time.perf_counter() - t0) * 1000,
+            "model": cfg["model"]}
+
+```
+
+
+```python
+import pandas as pd
+
+def ev_dict(evs):
+    return {getattr(e, "name", None): getattr(e, "value", None) for e in (evs or [])}
+
+def _mean(rows, name):
+    xs = [float(r[name]) for r in rows if isinstance(r.get(name), (int, float, bool))]
+    return sum(xs) / len(xs) if xs else None
+
+def _mean_field_suffix(rows, suffix):
+    xs = []
+    for r in rows:
+        for name, value in r.items():
+            if not (isinstance(name, str) and name.startswith("field.")):
+                continue
+            path = name[len("field."):]
+            if path == suffix or path.endswith("." + suffix):
+                if isinstance(value, (int, float, bool)):
+                    xs.append(float(value))
+    return sum(xs) / len(xs) if xs else None
+
+def worst_fields(run, top=10):
+    from collections import defaultdict
+    hits = defaultdict(lambda: [0, 0])
+    for ir in run.item_results:
+        for ev in (getattr(ir, "evaluations", None) or []):
+            name = ev.get("name") if isinstance(ev, dict) else getattr(ev, "name", None)
+            value = ev.get("value") if isinstance(ev, dict) else getattr(ev, "value", None)
+            if name and name.startswith("field.") and isinstance(value, (int, float, bool)):
+                hits[name][1] += 1
+                hits[name][0] += int(bool(value))
+    ranked = sorted(hits.items(), key=lambda kv: (kv[1][0] / kv[1][1] if kv[1][1] else 1.0, kv[0]))
+    print("lowest field accuracies:")
+    for name, (ok, n) in ranked[:top]:
+        print(f"  {name}: {ok}/{n} ({ok / n:.2f})")
+
+results, summaries = {}, []
+
+def _round(x):
+    return None if x is None else round(x, 3)
+
+def run_round(name, *, model="gpt-4o-mini", schema="descriptive", prompt_version=None):
+    cfg = dict(model=model, schema=schema, prompt_version=prompt_version)
+    def task(*, item, **kwargs):
+        return extract(cfg, item.input, name)
+    res = dataset.run_experiment(
+        name=name, task=task, evaluators=[extraction_evaluator],
+        run_evaluators=[run_aggregates], max_concurrency=8)
+    langfuse.flush()
+    results[name] = res
+    rows = [ev_dict(ir.evaluations) for ir in res.item_results]
+    summary = {
+        "variant": name,
+        "valid_json%": _round(_mean(rows, "valid_json")),
+        "field_acc": _round(_mean(rows, "field_accuracy_overall")),
+        "object_id": _round(_mean_field_suffix(rows, "object_id")),
+        "policyholder": _round(_mean_field_suffix(rows, "policyholder_name")),
+        "objects_F1": _round(_mean(rows, "objects_f1")),
+    }
+    for i, s in enumerate(summaries):
+        if s["variant"] == name:
+            summaries[i] = summary
+            break
+    else:
+        summaries.append(summary)
+    return comparison_table()
+
+def comparison_table():
+    cols = ["variant", "valid_json%", "field_acc", "object_id", "policyholder", "objects_F1"]
+    return pd.DataFrame([{k: s[k] for k in cols} for s in summaries])
+
+```
+
+You should see `created prompt v1` or `prompt v1 already exists`. Open Prompts in Langfuse if you want to read the terse baseline.
+
+
+## 6. Baseline: bare schema, terse prompt
+
+Run `gpt-4o-mini` with the bare schema and prompt v1. After it finishes, read the table and `worst_fields`. `field_acc` will look high. The field list is the point.
+
+
+
+```python
+run_round("V1_baseline", model="gpt-4o-mini", schema="bare", prompt_version=1)
+
+```
+
+
+```python
+worst_fields(results["V1_baseline"])
+
+```
+
+Open the experiment in Langfuse and sort failing items by a low-scoring field rather than by the overall score.
+
+`worst_fields` usually ranks `make_model` first, then dates and `object_id` (each field is defined in the schema in section 2). On this dataset the `object_id` misses are often dropped prefixes (`PROP-656048` becomes `656048`) rather than invented `1` / `2`. The next cell only changes the schema, which can teach those prefixes. `make_model` may move as a side effect. That is not the lever you are testing.
+
+At n=30, a 3-point move can be one document. Pick the next change from the field list instead of the pooled average.
+
+
+## 7. Add schema descriptions
+
+Same prompt, same model. Only the schema changes (bare to descriptive). Watch `object_id`.
+
+
+
+```python
+run_round("V2_schema_spec", model="gpt-4o-mini", schema="descriptive", prompt_version=1)
+
+```
+
+
+```python
+worst_fields(results["V2_schema_spec"])
+
+```
+
+Compare the new `object_id` column to V1. Then open Compare for the two runs: select both experiments on the dataset's Experiments tab and click **Compare** (see [Experiments via UI](https://langfuse.com/docs/evaluation/experiments/experiments-via-ui)). Each row is a claim; each run gets a column with its output and the per-field scores next to it.
+
+![V1 and V2 side by side in the Langfuse compare view, with per-field boolean scores for each item](https://langfuse.com/images/cookbook/example-structured-output-extraction/compare-v1-v2.png)
+
+
+In your table, check whether `object_id` improved. In the traces, separate a real ID that gained a prefix from a well-formatted ID that was invented because the schema requires `object_id` while 11 labels are null.
+
+Open one of each if you can. The later schema fix is to make `object_id` optional.
+
+
+If an item has a null label and a `VIN`/`PROP` id in the output, that value came from the schema forcing a string rather than from the document.
+
+
+## 8. Add prompt rules
+
+Same descriptive schema. The only change is prompt v2. Watch `objects_F1` and `policyholder`.
+
+
+
+```python
+RULES_V2 = """\
+Extract the insurance claim into the structured schema. Follow these rules:
+- IDs: claim_id must match CLM-XXXXXX (6 digits); policy_number must match POL-XXXXXXXXX (9 digits).
+  For insured objects use the format implied by object_type: VINxx... for vehicles, PROP-XXXXXX for
+  buildings, LIAB-XXXXXX for liability, OBJ-XXXXXX otherwise.
+- Dates: output ISO 8601 (YYYY-MM-DD).
+- Enums: choose the single closest standardized value; never invent new enum values.
+- Do NOT invent information. If policy details are not present in the text, omit policy_details.
+  If no insured objects are described, omit insured_objects. Leave optional fields null when absent.
+- Extract values verbatim where possible; do not normalize names beyond what the schema requires."""
+
+
+seed_prompt(2, RULES_V2, ["production"], "v2: explicit rules")
+
+```
+
+
+```python
+run_round("V3_prompt_rules", model="gpt-4o-mini", schema="descriptive", prompt_version=2)
+
+```
+
+
+```python
+worst_fields(results["V3_prompt_rules"])
+
+```
+
+Watch `objects_F1` if "do not invent objects" landed. Then check `policyholder`. A verbatim / don't-invent rule can replace a present name with `/null`. That is the regression pooled `field_acc` will hide.
+
+
+In Langfuse, open the same claim on V2 and V3 and compare `field.policy_details.policyholder_name`.
+
+
+If V3 shows `/null` or a truncated name where V2 had the full name, per-field scoring is what caught it. The pooled average would have hidden it.
+
+
+## 9. Inspect the V3 failures
+
+`drill_into` prints `location_type` confusions, remaining bad `object_id`s, and placeholder names. Use that list to write the next prompt version.
+
+
+The next cell lists enum confusions, bad `object_id`s, and placeholder names. Expand for the helper.
+
+<details>
+<summary>Drill-down audit</summary>
+
+
+
+```python
+from collections import Counter
+
+def enum_confusion(run, field_path):
+    section, field = field_path.split(".", 1)
+    conf = Counter()
+    for ir in run.item_results:
+        gt = ir.item.expected_output
+        pred = ir.output.get("prediction") if isinstance(ir.output, dict) else None
+        g = (gt.get(section) or {}).get(field) if gt else None
+        p = (pred.get(section) or {}).get(field) if pred else None
+        if g is not None:
+            conf[(g, p if p is not None else "<missing>")] += 1
+    return conf
+
+def drill_into(run, label):
+    print(f"{label} location_type confusions (ground_truth -> predicted):")
+    for (g, p), n in sorted(enum_confusion(run, "incident_description.location_type").items(), key=lambda x: -x[1]):
+        if g != p:
+            print(f"  {g} -> {p}: {n}")
+    print(f"\n{label} object_id format misses:")
+    for ir in run.item_results:
+        pred = ir.output.get("prediction") if isinstance(ir.output, dict) else None
+        for obj in ((pred or {}).get("insured_objects") or []):
+            oid, ot = obj.get("object_id"), obj.get("object_type")
+            rgx = OBJECT_ID_REGEX.get(ot, r"^(OBJ|LIAB)-\d{6}$")
+            if oid and not re.match(rgx, str(oid)):
+                print(f"  {ot}: {oid!r}")
+    print(f"\n{label} policyholder_name regressions (placeholder / truncated):")
+    for ir in run.item_results:
+        pred = ir.output.get("prediction") if isinstance(ir.output, dict) else None
+        name = ((pred or {}).get("policy_details") or {}).get("policyholder_name")
+        if name and (str(name).strip("/").lower() in ("null", "na", "") or len(str(name).split()) < 2):
+            print(f"  {getattr(ir.item, 'id', '?')}: policyholder_name={name!r}")
+
+```
+
+</details>
+
+
+
+```python
+drill_into(results["V3_prompt_rules"], "V3")
+
+```
+
+If you see placeholder names, that is the V3 regression. The next cell saves a new prompt version instead of editing v2.
+
+
+## 10. New prompt version, same dataset
+
+[Prompt versions](https://langfuse.com/docs/prompt-management/features/prompt-version-control) are immutable. Add two rules: copy `policyholder_name` exactly, and only emit objects that are actually described. Save as v3 and rerun.
+
+
+
+```python
+RULES_V3 = RULES_V2 + """
+- policyholder_name: copy the policyholder's full name exactly as written. NEVER output 'null', 'NA',
+  '/', or any placeholder for a field that IS present.
+- Insured objects: only emit an object explicitly described as insured or damaged. If none are, return
+  an empty list — do NOT invent one to fill an id. When an object exists, its object_id uses the real
+  value/format for its type; never copy the literal 'xxxx' placeholder."""
+
+
+seed_prompt(3, RULES_V3, ["candidate"], "v3: copy name verbatim; stop re-inventing objects")
+
+```
+
+
+```python
+run_round("V3_fixed", model="gpt-4o-mini", schema="descriptive", prompt_version=3)
+
+```
+
+
+```python
+worst_fields(results["V3_fixed"])
+
+```
+
+The run should link to `extraction-system` v3 in Prompt Management. All three versions stay in the history, so every experiment stays attributable to the exact prompt text it ran with.
+
+![The extraction-system prompt in Langfuse with three versions; v3 adds the verbatim-name and no-invented-objects rules](https://langfuse.com/images/cookbook/example-structured-output-extraction/prompt-versions.png)
+
+
+Read the `policyholder` column rather than the headline `field_acc`. The field you fixed is the one that matters.
+
+To verify the fix in Langfuse, compare V3 and V3_fixed and filter **Scores (boolean)** to `field.policy_details.policyholder_name = false` on the V3 baseline. Only the regressed claims remain, and the V3_fixed column shows the restored names next to them.
+
+![Compare view filtered to items where V3 got policyholder_name wrong, with V3_fixed side by side](https://langfuse.com/images/cookbook/example-structured-output-extraction/compare-v3-regression.png)
+
+The dataset's Experiments tab now shows all four runs in one table with cost, latency, and mean field accuracy. In the run pictured, V3_fixed's headline mean (0.93) is *below* V3's (0.95) even though the field you targeted recovered. Your exact numbers will vary, but the same inversion is common. Anyone reading only the single number would call the fix a regression. That is the whole argument for per-field scores.
+
+![Four experiment runs on the insurance-claims dataset with mean field accuracy per run](https://langfuse.com/images/cookbook/example-structured-output-extraction/experiment-runs.png)
+
+
+## 11. Grow the set, freeze a holdout, run in CI
+
+n=30 is enough to learn the loop but not enough to ship on. Once you have a real labeled set:
+
+1. Add production traces as dataset items, and [synthetic items](https://langfuse.com/guides/cookbook/example_synthetic_datasets) for rare slices.
+2. Freeze a holdout dataset and stop tuning against it. Every rule in this notebook came from staring at failures in these 30 items. That is how the loop should work, but if you keep going long enough, the prompt gradually adapts to the quirks of these specific claims. Scores on the tuning set keep improving while production accuracy stays flat. To catch this, set aside items that you never inspect while tuning and score them only to check whether an improvement holds up. If a change helps on the tuning set but does nothing on the holdout, it has overfit.
+3. Put `run_round` in [CI](https://langfuse.com/docs/evaluation/experiments/experiments-ci-cd) so a prompt edit cannot silently regress `field.policy_details.policyholder_name`.
+
+This notebook uses text claims. The same dataset and experiment loop works for [multi-modal items](https://langfuse.com/docs/evaluation/experiments/datasets#multi-modal-dataset-items) when you have those labels.
+
+Cost and latency already live on the experiment run in Langfuse. Read them there.
+
