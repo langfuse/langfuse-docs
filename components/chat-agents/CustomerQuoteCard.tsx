@@ -9,6 +9,7 @@ type CustomerQuoteCardProps = {
   quoteCompany?: string;
   customerLogo?: string;
   customerLogoDark?: string;
+  quoteAuthorImage?: string;
 };
 
 export function CustomerQuoteCard({
@@ -19,6 +20,7 @@ export function CustomerQuoteCard({
   quoteCompany,
   customerLogo,
   customerLogoDark,
+  quoteAuthorImage,
 }: CustomerQuoteCardProps) {
   return (
     <article className="flex h-full flex-col border border-line-structure bg-surface-bg p-5">
@@ -66,11 +68,25 @@ export function CustomerQuoteCard({
           )}
         </Link>
         {(quoteAuthor || quoteRole || quoteCompany) && (
-          <p className="mt-3 break-words text-[13px] leading-[1.45] text-text-tertiary">
-            {quoteAuthor}
-            {quoteRole ? `, ${quoteRole}` : ""}
-            {quoteCompany ? ` · ${quoteCompany}` : ""}
-          </p>
+          <div className="mt-3 flex items-start gap-2.5">
+            {quoteAuthorImage ? (
+              <Image
+                src={quoteAuthorImage}
+                alt={
+                  quoteAuthor ? `${quoteAuthor} profile image` : "Profile image"
+                }
+                width={34}
+                height={34}
+                className="h-[34px] w-[34px] shrink-0 rounded-full border border-line-structure object-cover"
+                unoptimized
+              />
+            ) : null}
+            <p className="m-0 break-words text-[13px] leading-[1.45] text-text-tertiary">
+              {quoteAuthor}
+              {quoteRole ? `, ${quoteRole}` : ""}
+              {quoteCompany ? ` · ${quoteCompany}` : ""}
+            </p>
+          </div>
         )}
       </footer>
     </article>

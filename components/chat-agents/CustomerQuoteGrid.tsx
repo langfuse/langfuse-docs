@@ -1,7 +1,11 @@
 import { CustomerQuoteCard } from "@/components/chat-agents/CustomerQuoteCard";
 import { getCustomerStories } from "@/lib/getCustomerStories";
 
-const QUOTE_ROUTES = ["/users/canva", "/users/sumup", "/users/cresta"] as const;
+const QUOTE_ROUTES = [
+  "/users/canva",
+  "/users/sumup",
+  "/users/magic-patterns-ai-design-tools",
+] as const;
 
 type Story = ReturnType<typeof getCustomerStories>[number];
 
@@ -17,7 +21,7 @@ export function CustomerQuoteGrid() {
   );
 
   return (
-    <div className="mt-8 grid gap-2 md:grid-cols-2 2xl:grid-cols-3">
+    <div className="mt-8 grid gap-2 lg:grid-cols-3">
       {selected.map((story) => {
         const frontMatter = story.frontMatter ?? {};
         const quote = frontMatter.customerQuote;
@@ -33,6 +37,7 @@ export function CustomerQuoteGrid() {
             quoteCompany={frontMatter.quoteCompany}
             customerLogo={frontMatter.customerLogo}
             customerLogoDark={frontMatter.customerLogoDark}
+            quoteAuthorImage={frontMatter.quoteAuthorImage}
           />
         );
       })}
