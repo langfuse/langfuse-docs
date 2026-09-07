@@ -19,6 +19,8 @@ Get started, no credit card required. Great for hobby projects and POCs.
 - 2 users
 - Community support via GitHub
 
+Trusted by: 50,000+ companies using Langfuse
+
 [Sign up](/cloud)
 
 ### Core ($29/month)
@@ -68,7 +70,7 @@ For large-scale teams. Enterprise-grade support and security.
 - Custom rate limits
 - Uptime SLA
 - Support SLA
-- Dedicated support engineer
+- Named lead support engineer
 
 Optional **Yearly Commitment**:
 
@@ -147,7 +149,7 @@ Optional **Yearly Commitment**:
 | [Community (GitHub)](/support#community)                                                            | Yes                 | Yes                 | Yes                 | Yes                          |
 | [In-app support](/support#in-app)                                                                   | --                  | Yes                 | Yes                 | Yes                          |
 | [Private Slack channel](/support#slack)                                                             | --                  | --                  | Teams add-on        | Yes                          |
-| [Dedicated support engineer](/support#onboarding)                                                   | --                  | --                  | --                  | Yes                          |
+| [Named lead support engineer](/support#onboarding)                                                  | --                  | --                  | --                  | Yes                          |
 | [Onboarding & architectural guidance](/support#onboarding)                                          | --                  | --                  | --                  | Yes                          |
 | Response time SLO                                                                                   | n/a                 | 48h                 | 48h (Teams: 24h)    | Custom                       |
 | [Support SLA](/enterprise#faq)                                                                      | --                  | --                  | --                  | Yes                          |
@@ -277,6 +279,9 @@ Yes, you can configure [spend alerts](/docs/administration/spend-alerts) to rece
 
 **How can I manage my subscription?**
 Through the organization settings in Langfuse Cloud or the [Customer Portal](/billing-portal).
+
+**Can I purchase Langfuse through AWS Marketplace?**
+Yes. Enterprise customers with a yearly commitment can bill via AWS Marketplace. [Talk to us](/talk-to-us?deployment=cloud) to request a private offer. Invoice billing is also available.
 
 **Can I redline the contracts?**
 Yes, customized contracts are available for Enterprise customers with a yearly commitment. [Contact sales](/talk-to-us) to discuss your requirements. Default plans are self-serve on standard terms.

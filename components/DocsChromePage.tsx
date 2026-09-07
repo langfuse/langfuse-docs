@@ -33,11 +33,14 @@ const getIsoDate = (value: unknown): string | undefined => {
 export async function DocsChromePage({
   page,
   bodyChromeProps,
+  topPrefix,
   bottomSuffix,
 }: {
   page: LoadedPage;
   /** Extra props forwarded to `DocBodyChrome` (e.g. `versionLabel` on self-hosting). */
   bodyChromeProps?: BodyChromeProps;
+  /** Optional node rendered inside DocBodyChrome, before the MDX body. */
+  topPrefix?: ReactNode;
   /** Optional node rendered inside DocBodyChrome, after the MDX body. */
   bottomSuffix?: ReactNode;
 }) {
@@ -66,6 +69,7 @@ export async function DocsChromePage({
       footer={{ component: <DocsAndPageFooter /> }}
     >
       <DocBodyChrome {...bodyChromeProps}>
+        {topPrefix}
         <MDX components={getMDXComponents()} />
         {bottomSuffix}
       </DocBodyChrome>

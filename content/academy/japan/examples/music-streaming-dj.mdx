@@ -1,0 +1,327 @@
+---
+title: 音楽ストリーミングの DJ
+sidebarTitle: 音楽 DJ
+description: 音楽ストリーミングアプリの新規かつ低リスクな DJ 機能を、ほぼ即座に本番投入し、リスナーの視聴行動から改善していく例です。
+translatedAt: 2026-08-19
+---
+
+import { DjProductScreens } from "@/components/academy/japan/DjProductScreens";
+
+# 音楽ストリーミングの DJ
+
+<Callout type="info">
+  これは [Langfuse Academy](/academy/japan) の概念を説明するための例です。
+</Callout>
+
+## 背景
+
+ある音楽ストリーミングアプリが、DJ 機能をベータとして追加します。
+DJ は、ユーザーがこれまでに再生した曲と、アルゴリズムがユーザーの好みだと判断したものをもとに、キューを途切れさせずに回し続けます。
+数曲おきに、次にかかる曲とその選曲理由について短くコメントします。
+リスナーはマイクボタンを押して話しかけることで、DJ に方向性を指示することもできます。
+
+<DjProductScreens />
+
+AI エンジニアリングの構成をどう組むかは、2 つの特徴から決まります。
+
+1. **出力が悪かったときのリスクが低い。** 最悪でも曲がスキップされるか、DJ のコメントがぎこちない程度で、機能はベータと明示されています。
+2. 新機能なので **出発点となる過去データがない。** チームはリスナーの実際の行動から学んでいく必要があります。
+
+このため、できるだけ早く本番に出し、[最初からライブのフィードバックをもとに反復する](/academy/japan/ai-engineering-loop#you-dont-have-to-close-the-full-loop-on-day-one) のが理にかなっています。
+
+## DJ のトレーシング
+
+2 種類の [トレース](/academy/japan/tracing#anatomy-of-a-trace) があり、これらが合わさって [1 つのセッションを構成](/academy/japan/tracing#traces-vs-sessions) します。
+
+| トレース名          | 詳細                                                                                                                                                                                                                       |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `plan-next-set`     | 次にかける曲のセットを組み立て、コメントを書きます。数曲おきに DJ 自身が開始するか、DJ への依頼をきっかけに開始します。<br />**入力:** 視聴コンテキストと、あれば指示<br />**出力:** キューに入れた次の曲と、コメント 1 行 |
+| `handle-dj-request` | リスナーからの音声依頼を処理します。マイクボタンで開始します。<br />**入力:** 音声クリップと現在のキュー<br />**出力:** 短い返答と、これが起動する `plan-next-set` への指示                                                |
+
+視聴セッションと、2 種類のトレースを近くで見てみます。
+
+<Tabs
+  items={[
+    "セッションの例",
+    "plan-next-set トレースの例",
+    "handle-dj-request トレースの例",
+  ]}
+>
+<Tab>
+
+<TraceViewDiagramJa
+  ariaLabel="DJ 側から開始したトレースと、ユーザーからの依頼 1 件を含む視聴セッション"
+  label="セッション listen_7f3e · ユーザー u_8841"
+  rows={[
+    {
+      kind: "trace",
+      name: "plan-next-set",
+      preview: "「今週よく聴いた 2 曲から始めます。」",
+      duration: "2.8s",
+    },
+    {
+      kind: "trace",
+      name: "plan-next-set",
+      preview: "「この流れのまま、少し落ち着いたエレクトロニカで。」",
+      duration: "2.4s",
+    },
+    {
+      kind: "trace",
+      name: "handle-dj-request",
+      preview: "「もう少し落ち着いた曲をかけて。」",
+      duration: "1.6s",
+    },
+    {
+      kind: "trace",
+      name: "plan-next-set",
+      preview: "「少し落ち着いた流れにします。アンビエントピアノをどうぞ。」",
+      chips: ["dj-request 起点"],
+      duration: "1.5s",
+    },
+  ]}
+/>
+
+</Tab>
+<Tab>
+
+<TraceViewDiagramJa
+  ariaLabel="plan-next-set トレースの中にあるオブザベーション"
+  rows={[
+    {
+      kind: "trace",
+      name: "plan-next-set",
+      chips: ["session: listen_7f3e", "user: u_8841"],
+      duration: "1.5s",
+      input:
+        '好み: エレクトロニカ, ダウンテンポ · 直近の再生: アーティストA「曲名1」, アーティストB「曲名2」 · 指示: "もっと落ち着いた曲"',
+      output:
+        "4 曲をキューに追加 · コメント: 「少し落ち着いた流れにします。アンビエントピアノをどうぞ。」",
+    },
+    {
+      kind: "tool",
+      name: "select-tracks",
+      duration: "0.6s",
+      indent: true,
+      input:
+        '好み: エレクトロニカ, ダウンテンポ · 直近の再生: アーティストA「曲名1」, アーティストB「曲名2」 · 指示: "もっと落ち着いた曲"',
+      output:
+        "アーティストD「曲名4」· アーティストE「曲名5」· アーティストF「曲名6」· アーティストG「曲名7」",
+    },
+    {
+      kind: "gen",
+      name: "write-commentary",
+      chips: ["gpt-4.1-mini", "120 tok", "$0.0002"],
+      duration: "0.9s",
+      indent: true,
+      input: '選ばれた 4 曲 · 指示: "もっと落ち着いた曲"',
+      output: "「少し落ち着いた流れにします。アンビエントピアノをどうぞ。」",
+    },
+  ]}
+/>
+
+</Tab>
+<Tab>
+
+<TraceViewDiagramJa
+  ariaLabel="handle-dj-request トレースの中にあるオブザベーション"
+  rows={[
+    {
+      kind: "trace",
+      name: "handle-dj-request",
+      chips: ["session: listen_7f3e", "user: u_8841"],
+      duration: "1.6s",
+      input: "音声クリップ (2 秒)",
+      output: '返答: 「了解です、落ち着いた流れにしますね。」 · 指示: "もっと落ち着いた曲"',
+    },
+    {
+      kind: "tool",
+      name: "transcribe-request",
+      duration: "0.4s",
+      indent: true,
+      input: "音声クリップ (2 秒)",
+      output: "「もう少し落ち着いた曲をかけて。」",
+    },
+    {
+      kind: "gen",
+      name: "interpret-request",
+      chips: ["gpt-4.1-mini", "210 tok", "$0.0004"],
+      duration: "1.2s",
+      indent: true,
+      input: "「もう少し落ち着いた曲をかけて。」 · 現在のキュー",
+      output: '返答: 「了解です、落ち着いた流れにしますね。」 · 指示: "もっと落ち着いた曲"',
+    },
+    {
+      kind: "event",
+      name: "trigger-plan-next-set",
+      duration: "@ 1.6s",
+      indent: true,
+      input: '指示: "もっと落ち着いた曲"',
+    },
+  ]}
+/>
+
+</Tab>
+</Tabs>
+
+## ユーザーの行動を捕捉する
+
+ユーザーから学ぶために、[注目すべき行動](/academy/japan/monitoring#user-feedback) を該当するトレースに記録します。
+
+<EvaluatorBlockJa
+  evaluators={[
+    {
+      name: "track_skipped",
+      type: "プレイヤーのイベント",
+      check: "DJ が選んだ曲を、再生開始直後にリスナーがスキップした",
+      returns: "二値とコメント。plan-next-set トレースに付与",
+      details: (
+        <>
+          評価器は不要で、プレイヤーがスコアを書き込みます。スコアは常に、その瞬間に再生されていたセットの <code>plan-next-set</code>{" "}
+          トレースに付きます。コメントにはどの曲がスキップされたかが入るため、
+          外しの多いセットには複数のスコアが集まります。
+        </>
+      ),
+    },
+    {
+      name: "dj_replaced",
+      type: "プレイヤーのイベント",
+      check: "リスナーが DJ をオフにしたが、視聴自体は続けている",
+      returns: "二値。セッションに付与",
+      details: (
+        <>
+          単にセッションが終わったことは、ほとんど何も語りません。リスナーは目的地に着いただけかもしれないからです。DJ なしで聴き続けたことがシグナルになります。リスナーが DJ ではなく音楽を選んだということです。
+        </>
+      ),
+    },
+    {
+      name: "message_type",
+      type: "LLM-as-a-Judge",
+      check: (
+        <>
+          音声依頼を <code>steering</code>、<code>correction</code>、{" "}
+          <code>repeated_instruction</code>、<code>positive_reaction</code>、{" "}
+          <code>negative_reaction</code> のいずれかに分類します
+        </>
+      ),
+      returns: "カテゴリ。handle-dj-request トレースに付与",
+      details: (
+        <>
+          <code>steering</code>{" "}
+          はこの機能の通常の使い方であり、失敗の集計には含めません。
+          <code>correction</code> は DJ の直前の動作が外したことを意味します。
+          <code>repeated_instruction</code>{" "}
+          は、すでに受け取った指示に DJ が従えなかったことを意味します。好みの読み違いではなく指示違反であり、
+          <a href="/academy/japan/evaluate/choosing-what-to-evaluate#tie-every-metric-to-a-decision">
+            必要な手当ても変わってきます
+          </a>
+          。またここで唯一 LLM のコストがかかるシグナルでもありますが、音声依頼はトラフィックのごく一部なので、
+          <a href="/academy/japan/evaluate/choosing-what-to-evaluate#mind-the-budget">
+            評価器のコスト
+          </a>{" "}
+          は小さく収まります。
+        </>
+      ),
+    },
+  ]}
+/>
+
+原理的には、これだけあればチームはもう反復を始められます。
+トレーシングと [モニタリング](/academy/japan/monitoring#metrics-and-signals) だけで、それ自体が小さなループを形成するからです。
+最初のうちは、DJ 機能をすばやく改善していくにはおそらくこれで十分です。
+
+<AnnotatedLoopJa
+  ariaLabel="トレーシングとモニタリングの間のサブループ。オフラインの各段階はまだ使っていない"
+  subloop
+  stations={{
+    trace: { note: "すべてのセットとすべての依頼" },
+    monitor: { note: "スキップ、dj_replaced、message_type" },
+    dataset: { dimmed: true, note: "まだ使わない" },
+    change: { dimmed: true, note: "まだ使わない" },
+    eval: { dimmed: true, note: "まだ使わない" },
+  }}
+/>
+
+構成が成熟し、より体系的なテストを整えたくなったら、これらのシグナルの上にデータセットと実験を組み立てていけます。
+
+## 体系的なテスト
+
+ライブのシグナルだけの状態では、変更をテストするということはリリースしてスコアを見ることを意味します。
+チームはさらに 2 つの意図的なテスト方法を追加できます。[データセットに対する実験](/academy/japan/experiments#how-experiments-are-used) と、実ユーザーに対する A/B テストです。
+
+### データセットに対する実験
+
+このユースケースでは、エンドツーエンドをオフラインでテストするのは非常に困難です。
+セッションが良かったかどうかは実際の視聴行動にしか現れず、好みはユーザーごとに違うため、全員に当てはまる期待出力が存在しないからです。
+一方で `select-tracks` のような [単一のステップ](/academy/japan/datasets#what-makes-a-good-dataset) はテストできます。期待値として、正確な曲目ではなくセットの方向性を記述します。
+
+<DatasetBlockJa
+  datasets={[
+    {
+      name: "selection-directions",
+      description:
+        "視聴コンテキストと、次のセットとして良い方向性・悪い方向性を組にしたもの。select-tracks ステップだけをテストします。",
+      items: [
+        {
+          input:
+            "好み: インディーフォーク · 直近の再生: アーティストH「曲名8」, アーティストI「曲名9」 · 指示: なし",
+          expectedOutput:
+            "良い方向性: 近接するインディーフォーク、ソフトロック。悪い方向性: 高テンポの EDM、ヒップホップ。",
+        },
+        {
+          input:
+            "好み: エレクトロニカ, ハウス · 直近の再生: アップテンポなハウスのセット · 指示: 「もう少し落ち着いた曲を」",
+          expectedOutput:
+            "良い方向性: ダウンテンポ、アンビエント・エレクトロニカ。悪い方向性: さらにアップテンポなハウス、指示の無視。",
+        },
+      ],
+    },
+  ]}
+/>
+
+<EvaluatorBlockJa
+  evaluators={[
+    {
+      name: "direction_match",
+      type: "LLM-as-a-Judge",
+      check:
+        "選ばれたセットは、良い方向性のいずれかに沿っていて、悪い方向性を避けているか?",
+      returns: "二値。データセットアイテムごと",
+      details: (
+        <>
+          <a href="/academy/japan/evaluate#reference-based-vs-reference-free">
+            参照あり
+          </a>{" "}
+          の評価器です。期待出力が、採点の基準となる方向性を与えます。DJ 全体ではなく <code>select-tracks</code>{" "}
+          ステップだけで動くため、1 回の実行が安く、失敗したときは選曲が原因だとすぐ分かります。
+        </>
+      ),
+    },
+  ]}
+/>
+
+### 実ユーザーに対する A/B テスト
+
+コメントのトーンのように、オフラインでは採点しにくい変更もあります。
+リスクが低いので、チームは一部のリスナーに新バージョンを提供し、スキップ率や `message_type` の分布といったシグナルのスコアをグループ間で比較できます。
+新バージョンのほうが良ければ、全体に展開します。
+
+ここまでそろうと、ループ全体が回っている状態になります。
+
+<AnnotatedLoopJa
+  ariaLabel="DJ におけるループ全体: ライブのシグナル、ステップ単位のデータセット、実験、A/B テスト"
+  stations={{
+    trace: { note: "すべてのセットとすべての依頼" },
+    monitor: { note: "スキップ、dj_replaced、message_type、A/B 比較" },
+    dataset: { note: "本番のモニタリングで見えたものから" },
+    change: { note: "選曲アルゴリズム、DJ のプロンプト、…" },
+    eval: { note: "ステップの出力を期待値に照らして採点" },
+  }}
+/>
+
+## まとめ
+
+これは、リスクが低く、学習に使える過去データもない機能の例です。
+こうした場合に取れる最善の手は、できるだけ早くトレースを取り始め、それをモニタリングすることです。
+データセット、実験、A/B テストといった残りは、その上に時間をかけて積み上げていけます。
+
+[他の例](/academy/japan/examples) や [Academy](/academy/japan) も参照してみてください。

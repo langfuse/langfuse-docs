@@ -3,7 +3,10 @@
 import { MarketoContactForm } from "@/components/MarketoContactForm";
 import { CheckCircle2 } from "lucide-react";
 import { getGitHubStars } from "@/lib/github-stars";
-import { SDK_INSTALLS_PER_MONTH, DOCKER_PULLS } from "@/components/home/Usage";
+import {
+  DOCKER_PULLS,
+  formatSdkInstallsPerMonth,
+} from "@/components/home/Usage";
 import Image from "next/image";
 import { HomeSection } from "@/components/home/HomeSection";
 import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
@@ -82,8 +85,7 @@ function TalkToUsContent() {
         </strong>
         ,{" "}
         <strong className="font-[580]">
-          {(SDK_INSTALLS_PER_MONTH / 1_000_000).toFixed(0)}M+ SDK installs per
-          month
+          {formatSdkInstallsPerMonth()} SDK installs per month
         </strong>
         , and{" "}
         <strong className="font-[580]">

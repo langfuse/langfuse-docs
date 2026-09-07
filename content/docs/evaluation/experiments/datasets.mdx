@@ -6,7 +6,7 @@ sidebarTitle: Datasets
 
 # Datasets
 
-A dataset is a collection of inputs and expected outputs and is used to test your application. Both [UI-based](/docs/evaluation/experiments/experiments-via-ui) and [SDK-based](/docs/evaluation/experiments/experiments-via-sdk) experiments support Langfuse Datasets.
+A dataset is a collection of inputs and expected outputs and is used to test your application. [UI-based](/docs/evaluation/experiments/experiments-via-ui), [SDK-based](/docs/evaluation/experiments/experiments-via-sdk), and [OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry) experiments can all use Langfuse Datasets.
 
 _Langfuse Dataset View_
 
@@ -17,6 +17,8 @@ _Langfuse Dataset View_
 - Create test cases for your application with real production traces
 - Collaboratively create and collect dataset items with your team
 - Have a single source of truth for your test data
+
+For guidance on scoping a dataset, picking realistic inputs, and writing expected outputs you can actually evaluate against, read [Designing datasets in the Langfuse Academy](/academy/datasets/designing-great-datasets).
 
 ## Get Started
 
@@ -39,7 +41,7 @@ import CreateDatasetItem from "@/components-mdx/datasets-create-dataset-item.mdx
 <CreateDatasetItem />
 </Steps>
 
-## Multi-modal dataset items
+## Multi-modal dataset items [#multi-modal-dataset-items]
 
 Dataset item `input`, `expectedOutput`, and `metadata` fields can include media attachments such as images, audio, video, documents, and other files. You can add media from the Langfuse UI when creating or editing an item, or upload media through the Python and JS/TS SDKs with `LangfuseMedia`.
 
@@ -538,7 +540,7 @@ In the UI, you can edit the item by clicking on the item id. To archive or delet
 
 Once you created a dataset, you can test and evaluate your application based on it.
 
-import { Table, WandSparkles, CodeXml, Database } from "lucide-react";
+import { Table, WandSparkles, CodeXml, Database, Radio } from "lucide-react";
 
 <Cards num={1}>
 
@@ -552,6 +554,12 @@ import { Table, WandSparkles, CodeXml, Database } from "lucide-react";
     icon={<CodeXml size="24" />}
     title="Experiments via UI"
     href="/docs/evaluation/experiments/experiments-via-ui"
+    arrow
+  />
+  <Card
+    icon={<Radio size="24" />}
+    title="Experiments via OpenTelemetry"
+    href="/docs/evaluation/experiments/experiments-via-opentelemetry"
     arrow
   />
 </Cards>

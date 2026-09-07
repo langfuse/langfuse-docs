@@ -12,7 +12,7 @@ export default async function UsersIndexPage() {
 
   return (
     <ContentColumns footerClassName="md:max-w-none xl:max-w-none px-6 sm:px-6 md:px-6">
-      <div className="mx-auto w-full px-6 py-8">
+      <div className="mx-auto w-full">
         <MDX components={getMDXComponents()} />
       </div>
     </ContentColumns>
@@ -22,5 +22,5 @@ export default async function UsersIndexPage() {
 export async function generateMetadata(): Promise<Metadata> {
   const page = usersSource.getPage([]);
   if (!page) return { title: "Not Found" };
-  return buildSectionMetadata(page, "users", "User stories", []);
+  return buildSectionMetadata(page, "users", "Customers", []);
 }

@@ -1,5 +1,3 @@
-"use client";
-
 import { AsideShell } from "@/components/home/layout/AsideShell";
 import { RightSidebarHiringAndCommunity } from "@/components/home/layout/RightSidebarHiringAndCommunity";
 

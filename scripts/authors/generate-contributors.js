@@ -23,28 +23,29 @@ async function fetchFromGitHub(endpoint) {
     headers["Authorization"] = `token ${process.env.GITHUB_ACCESS_TOKEN}`;
   }
 
+  let response;
   try {
-    const response = await fetch(`${CONFIG.github.apiBase}${endpoint}`, {
-      headers,
-    });
-
-    if (!response.ok) {
-      if (response.status === 404) return null;
-      throw new Error(`GitHub API: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    cache.set(endpoint, data);
-    return data;
+    response = await fetch(`${CONFIG.github.apiBase}${endpoint}`, { headers });
   } catch (error) {
-    console.warn(`GitHub API failed for ${endpoint}:`, error.message);
-    return null;
+    throw new Error(
+      `GitHub API request failed for ${endpoint}: ${error.message}`,
+    );
   }
+
+  if (!response.ok) {
+    throw new Error(
+      `GitHub API request failed for ${endpoint}: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  const data = await response.json();
+  cache.set(endpoint, data);
+  return data;
 }
 
 // Contributor resolution helpers
 const extractGitHubUsernameFromEmail = (email) => {
-  const match = email.match(/^\d+\+([^@]+)@users\.noreply\.github\.com$/);
+  const match = email.match(/^(?:\d+\+)?([^@]+)@users\.noreply\.github\.com$/);
   return match ? match[1] : null;
 };
 
@@ -57,10 +58,7 @@ const resolveContributor = async (email, commitSha) => {
 
   // Check if we have cached the GitHub username for this email
   if (emailToUsernameCache.has(email)) {
-    const cachedUsername = emailToUsernameCache.get(email);
-    if (cachedUsername) {
-      return cachedUsername;
-    }
+    return emailToUsernameCache.get(email);
   }
 
   // Use GitHub API to get the actual GitHub username
@@ -330,4 +328,4 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { analyzeContributors };
+module.exports = { analyzeContributors, resolveContributor };
