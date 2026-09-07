@@ -41,17 +41,22 @@ const INSIGHT_ITEMS: InsightItem[] = [
 
 export function ValueInsightsAccordion() {
   return (
-    <div className="mx-auto mt-8 max-w-6xl">
-      <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:items-start">
-        <div className="order-2 border border-line-structure bg-surface-1 p-4 lg:order-1">
-          <Image
-            src="/images/docs/observability/first-trace.png"
-            alt="Langfuse trace screenshot"
-            width={1600}
-            height={1000}
-            className="h-auto w-full border border-line-structure bg-surface-bg"
-            unoptimized
-          />
+    <div className="mx-auto mt-6 max-w-6xl">
+      <div className="grid gap-7 lg:grid-cols-[1.08fr_1fr] lg:items-start">
+        <div className="order-2 border border-line-structure bg-surface-bg p-2 lg:order-1">
+          <div className="border border-dashed border-line-structure bg-surface-1 p-2">
+            <Image
+              src="/images/docs/observability/first-trace.png"
+              alt="Langfuse trace screenshot"
+              width={1600}
+              height={1000}
+              className="h-auto w-full border border-line-structure bg-surface-bg"
+              unoptimized
+            />
+          </div>
+          <p className="px-1 pt-2 font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+            trace · frustrated turn 3 of 7
+          </p>
         </div>
 
         <AccordionPrimitive.Root
@@ -60,26 +65,29 @@ export function ValueInsightsAccordion() {
           defaultValue="sessions"
           className="order-1 border-t border-line-structure lg:order-2"
         >
-          {INSIGHT_ITEMS.map((item) => (
+          {INSIGHT_ITEMS.map((item, index) => (
             <AccordionPrimitive.Item
               key={item.id}
               value={item.id}
               className="border-b border-line-structure"
             >
               <AccordionPrimitive.Header className="flex">
-                <AccordionPrimitive.Trigger className="flex w-full items-center justify-between gap-4 py-6 text-left [&[data-state=open]>svg]:rotate-45">
-                  <h3 className="text-[22px] leading-[1.12] text-text-primary sm:text-[30px]">
+                <AccordionPrimitive.Trigger className="flex w-full items-start gap-4 py-5 text-left [&[data-state=open]>svg]:rotate-45">
+                  <span className="pt-1 font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <h3 className="flex-1 text-[20px] leading-[1.12] text-text-primary sm:text-[24px]">
                     {item.title}
                   </h3>
-                  <Plus className="h-6 w-6 shrink-0 text-text-tertiary transition-transform duration-200" />
+                  <Plus className="mt-1 h-5 w-5 shrink-0 text-text-tertiary transition-transform duration-200" />
                 </AccordionPrimitive.Trigger>
               </AccordionPrimitive.Header>
               <AccordionPrimitive.Content className="overflow-hidden border-t border-line-structure bg-surface-1 transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-                <div className="pb-6 pr-12 pt-5 text-[13px] leading-[1.5] text-text-secondary">
+                <div className="pb-5 pl-8 pr-8 pt-4 text-[13px] leading-[1.5] text-text-secondary">
                   <p>{item.description}</p>
                   <a
                     href={item.href}
-                    className="mt-5 inline-block text-[12px] text-text-secondary underline underline-offset-4 hover:text-text-primary"
+                    className="mt-4 inline-block text-[12px] text-text-secondary underline underline-offset-4 hover:text-text-primary"
                   >
                     {item.ctaLabel} →
                   </a>
