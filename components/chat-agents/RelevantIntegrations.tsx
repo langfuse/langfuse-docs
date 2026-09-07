@@ -1,84 +1,90 @@
-import Image from "next/image";
-import Link from "next/link";
-import { IntegrationLabel } from "@/components/ui/integration-label";
 import IconPython from "@/components/icons/python";
 import IconTypescript from "@/components/icons/typescript";
+import Link from "next/link";
+import { IntegrationLabel } from "@/components/ui/integration-label";
 
 const agentFrameworks = [
-  {
-    label: "LangChain",
-    href: "/integrations/frameworks/langchain",
-    icon: "/images/integrations/langchain_icon.png",
-  },
-  {
-    label: "LangGraph",
-    href: "/integrations/frameworks/langgraph",
-    icon: "/images/integrations/langgraph_icon.svg",
-  },
+  { label: "LangChain", href: "/integrations/frameworks/langchain" },
+  { label: "LangGraph", href: "/integrations/frameworks/langgraph" },
   {
     label: "OpenAI Agents",
     href: "/integrations/frameworks/openai-agents",
-    icon: "/images/integrations/openai_icon.svg",
   },
   {
     label: "Vercel AI SDK",
     href: "/integrations/frameworks/vercel-ai-sdk",
-    icon: "/images/integrations/vercel_ai_sdk_icon.png",
   },
-  {
-    label: "Pydantic AI",
-    href: "/integrations/frameworks/pydantic-ai",
-    icon: "/images/integrations/pydantic_ai_icon.svg",
-  },
-  {
-    label: "CrewAI",
-    href: "/integrations/frameworks/crewai",
-    icon: "/images/integrations/crewai_icon.svg",
-  },
+  { label: "Pydantic AI", href: "/integrations/frameworks/pydantic-ai" },
+  { label: "CrewAI", href: "/integrations/frameworks/crewai" },
+  { label: "Mastra", href: "/integrations/frameworks/mastra" },
 ] as const;
 
 const modelProviders = [
-  {
-    label: "OpenAI",
-    href: "/integrations/model-providers/openai-py",
-    icon: "/images/integrations/openai_icon.svg",
-  },
-  {
-    label: "Anthropic",
-    href: "/integrations/model-providers/anthropic",
-    icon: "/images/integrations/anthropic_icon.png",
-  },
+  { label: "OpenAI", href: "/integrations/model-providers/openai-py" },
+  { label: "Anthropic", href: "/integrations/model-providers/anthropic" },
   {
     label: "Google Gemini",
     href: "/integrations/model-providers/google-gemini",
-    icon: "/images/integrations/google_gemini_icon.svg",
   },
   {
     label: "Amazon Bedrock",
     href: "/integrations/model-providers/amazon-bedrock",
-    icon: "/images/integrations/bedrock_icon.png",
+  },
+  { label: "Azure OpenAI", href: "/integrations/model-providers/openai-py" },
+  { label: "LiteLLM", href: "/integrations/frameworks/litellm-sdk" },
+] as const;
+
+const languagesAndTelemetry = [
+  { label: "Python", href: "/docs/observability/sdk/overview", icon: "python" },
+  {
+    label: "TypeScript",
+    href: "/docs/observability/sdk/overview",
+    icon: "typescript",
+  },
+  { label: "OpenTelemetry", href: "/integrations/native/opentelemetry" },
+  {
+    label: "REST API",
+    href: "/docs/api-and-data-platform/features/public-api",
   },
 ] as const;
 
-function IntegrationGroup({
+function ChipSquare() {
+  return (
+    <span className="h-[10px] w-[10px] border border-line-structure bg-surface-1" />
+  );
+}
+
+function IntegrationRow({
   title,
   items,
 }: {
   title: string;
-  items: readonly { label: string; href: string; icon: string }[];
+  items: readonly {
+    label: string;
+    href: string;
+    icon?: "python" | "typescript";
+  }[];
 }) {
   return (
-    <div className="border border-line-structure bg-surface-bg p-4">
-      <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+    <div className="grid gap-3 border-b border-line-structure py-4 md:grid-cols-[170px_1fr] md:gap-6 md:py-5">
+      <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary md:pt-1">
         {title}
       </p>
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5 md:gap-2">
         {items.map((item) => (
           <IntegrationLabel
             key={item.label}
             href={item.href}
             label={item.label}
-            icon={<Image src={item.icon} alt="" width={18} height={18} />}
+            icon={
+              item.icon === "python" ? (
+                <IconPython className="h-[12px] w-[12px]" />
+              ) : item.icon === "typescript" ? (
+                <IconTypescript className="h-[12px] w-[12px]" />
+              ) : (
+                <ChipSquare />
+              )
+            }
           />
         ))}
       </div>
@@ -88,38 +94,34 @@ function IntegrationGroup({
 
 export function RelevantIntegrations() {
   return (
-    <div className="mt-8 grid gap-2 lg:grid-cols-3">
-      <IntegrationGroup title="Agent frameworks" items={agentFrameworks} />
-      <IntegrationGroup title="Model providers" items={modelProviders} />
-      <div className="border border-line-structure bg-surface-bg p-4">
-        <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-          Languages and telemetry
+    <div className="mt-8 border border-line-structure bg-surface-bg px-4 py-4 sm:px-6 sm:py-6">
+      <div className="grid gap-4 border-b border-line-structure pb-5 md:grid-cols-[1fr_1fr] md:items-center md:gap-8">
+        <h3 className="text-[48px] leading-[0.95] text-text-primary">
+          <span className="block">Any model,</span>
+          <span className="block">any framework</span>
+        </h3>
+        <p className="max-w-[58ch] text-[13px] leading-[1.45] text-text-secondary md:justify-self-end">
+          Based on OpenTelemetry. Two lines in your handler, or point an
+          existing OTel exporter at Langfuse — nothing else in your stack
+          changes.
         </p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <IntegrationLabel
-            href="/docs/observability/sdk/overview"
-            label="Python"
-            icon={<IconPython className="h-[18px] w-[18px]" />}
-          />
-          <IntegrationLabel
-            href="/docs/observability/sdk/overview"
-            label="TypeScript"
-            icon={<IconTypescript className="h-[18px] w-[18px]" />}
-          />
-          <IntegrationLabel
-            href="/integrations/native/opentelemetry"
-            label="OpenTelemetry"
-          />
-        </div>
-        <p className="mt-4 text-[12px] text-text-tertiary">
-          Need another framework?{" "}
-          <Link
-            href="/integrations"
-            className="text-text-secondary underline underline-offset-2 hover:text-text-primary"
-          >
-            Browse all integrations →
-          </Link>
-        </p>
+      </div>
+
+      <IntegrationRow title="Agent frameworks" items={agentFrameworks} />
+      <IntegrationRow title="Model providers" items={modelProviders} />
+      <IntegrationRow
+        title="Languages & telemetry"
+        items={languagesAndTelemetry}
+      />
+
+      <div className="pt-4 text-right text-[12px] text-text-tertiary">
+        Need another framework?{" "}
+        <Link
+          href="/integrations"
+          className="text-text-secondary underline underline-offset-2 hover:text-text-primary"
+        >
+          Browse all 80+ integrations →
+        </Link>
       </div>
     </div>
   );
