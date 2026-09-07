@@ -67,8 +67,8 @@ export function ValueInsightsAccordion() {
               className="border-b border-line-structure"
             >
               <AccordionPrimitive.Header className="flex">
-                <AccordionPrimitive.Trigger className="flex w-full items-center justify-between gap-4 py-7 text-left [&[data-state=open]>svg]:rotate-45">
-                  <h3 className="text-[27px] leading-[1.08] text-text-primary sm:text-[38px]">
+                <AccordionPrimitive.Trigger className="flex w-full items-center justify-between gap-4 py-6 text-left [&[data-state=open]>svg]:rotate-45">
+                  <h3 className="text-[22px] leading-[1.12] text-text-primary sm:text-[30px]">
                     {item.title}
                   </h3>
                   <Plus className="h-6 w-6 shrink-0 text-text-tertiary transition-transform duration-200" />
