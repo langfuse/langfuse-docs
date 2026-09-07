@@ -76,17 +76,17 @@ export default async function ChangelogIndexPage({ searchParams }: PageProps) {
             to see what&apos;s next.
           </Text>
           <div>
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-              className="inline-flex w-auto items-center gap-2"
-            >
-              <Link href="/api/changelog-rss.xml" target="_blank">
-                <Rss className="w-4 h-4" />
-                <span>RSS Feed</span>
-              </Link>
-            </Button>
+           <Button
+  asChild
+  variant="secondary"
+  size="small"
+  className="inline-flex w-auto items-center gap-2"
+>
+  <Link href="/api/changelog-rss.xml" target="_blank">
+    <Rss className="w-4 h-4" />
+    <span>RSS Feed</span>
+  </Link>
+</Button>
           </div>
         </div>
         <div className="mb-8">
