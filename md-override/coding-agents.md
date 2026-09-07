@@ -12,7 +12,7 @@ Coding agents make engineers faster, but they also make AI spend unpredictable. 
 Pick the path that matches how your organization runs coding agents. Platform teams usually start with a **gateway**. Individual developers and team rollouts often start with **hooks**.
 
 - **50,000+** companies using Langfuse
-- **90B+** observations / month
+- **130M+** SDK installs / month
 - **9+** coding agent integrations
 - **21** of the Fortune 50
 
