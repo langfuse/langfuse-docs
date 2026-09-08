@@ -13,12 +13,16 @@ function getStoryMap(stories: Story[]) {
   return new Map(stories.map((story) => [story.route, story]));
 }
 
-export function CustomerQuoteGrid() {
+export function CustomerQuoteGrid({
+  routes = QUOTE_ROUTES,
+}: {
+  routes?: readonly string[];
+} = {}) {
   const stories = getCustomerStories();
   const byRoute = getStoryMap(stories);
-  const selected = QUOTE_ROUTES.map((route) => byRoute.get(route)).filter(
-    (story): story is Story => Boolean(story),
-  );
+  const selected = routes
+    .map((route) => byRoute.get(route))
+    .filter((story): story is Story => Boolean(story));
 
   return (
     <div className="mt-8 grid gap-2 lg:grid-cols-3">

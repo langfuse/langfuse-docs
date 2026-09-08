@@ -4,8 +4,8 @@ import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { Plus } from "lucide-react";
 import Image from "next/image";
 
-type InsightItem = {
-  id: "sessions" | "cost" | "evals";
+export type InsightItem = {
+  id: string;
   title: string;
   description: string;
   href: string;
@@ -39,15 +39,27 @@ const INSIGHT_ITEMS: InsightItem[] = [
   },
 ];
 
-export function ValueInsightsAccordion() {
+type ValueInsightsAccordionProps = {
+  items?: InsightItem[];
+  imageSrc?: string;
+  imageAlt?: string;
+  caption?: string;
+};
+
+export function ValueInsightsAccordion({
+  items = INSIGHT_ITEMS,
+  imageSrc = "/images/docs/observability/first-trace.png",
+  imageAlt = "Langfuse trace screenshot",
+  caption = "trace · frustrated turn 3 of 7",
+}: ValueInsightsAccordionProps = {}) {
   return (
     <div className="mx-auto mt-6 max-w-6xl">
       <div className="grid gap-7 lg:grid-cols-[1.08fr_1fr] lg:items-start">
         <div className="order-2 border border-line-structure bg-surface-bg p-2 lg:order-1">
           <div className="border border-dashed border-line-structure bg-surface-1 p-2">
             <Image
-              src="/images/docs/observability/first-trace.png"
-              alt="Langfuse trace screenshot"
+              src={imageSrc}
+              alt={imageAlt}
               width={1600}
               height={1000}
               className="h-auto w-full border border-line-structure bg-surface-bg"
@@ -55,17 +67,17 @@ export function ValueInsightsAccordion() {
             />
           </div>
           <p className="px-1 pt-2 font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
-            trace · frustrated turn 3 of 7
+            {caption}
           </p>
         </div>
 
         <AccordionPrimitive.Root
           type="single"
           collapsible
-          defaultValue="sessions"
+          defaultValue={items[0]?.id}
           className="order-1 border-t border-line-structure lg:order-2"
         >
-          {INSIGHT_ITEMS.map((item, index) => (
+          {items.map((item, index) => (
             <AccordionPrimitive.Item
               key={item.id}
               value={item.id}
