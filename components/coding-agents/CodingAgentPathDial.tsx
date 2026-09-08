@@ -109,7 +109,7 @@ export function CodingAgentPathSwitcher() {
   };
 
   return (
-    <div className="flex flex-col gap-2 border-t border-line-structure px-5 py-3 sm:flex-row sm:items-center sm:gap-4 sm:px-10">
+    <div className="flex items-center gap-3 border-t border-line-structure px-5 py-2 sm:px-10">
       <p className="shrink-0 font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
         Set up
       </p>
@@ -117,7 +117,7 @@ export function CodingAgentPathSwitcher() {
         role="radiogroup"
         aria-label="Set up path"
         id="integration-paths"
-        className="grid min-w-0 flex-1 grid-cols-1 overflow-hidden rounded-[1px] border border-line-structure sm:grid-cols-2"
+        className="inline-flex w-fit overflow-hidden rounded-[1px] border border-line-structure"
       >
         {PATHS.map((item, index) => {
           const active = value === item.value;
@@ -134,20 +134,19 @@ export function CodingAgentPathSwitcher() {
               onClick={() => selectPath(item.value)}
               onKeyDown={handleKeyDown}
               className={cn(
-                "flex items-center justify-between gap-3 px-4 py-2.5 text-left",
-                index === 0 &&
-                  "border-b border-line-structure sm:border-b-0 sm:border-r",
+                "inline-flex items-center gap-1.5 whitespace-nowrap px-2 py-1 text-left",
+                index === 0 && "border-r border-line-structure",
                 active
                   ? "bg-surface-cta-primary text-text-primary"
                   : "bg-surface-bg text-text-primary hover:bg-surface-1",
               )}
             >
-              <span className="font-mono text-[11px] uppercase tracking-[0.06em]">
+              <span className="font-mono text-[10px] uppercase tracking-[0.06em]">
                 {item.label}
               </span>
               <span
                 className={cn(
-                  "text-[12px] leading-tight",
+                  "text-[11px] leading-none",
                   active ? "text-text-primary" : "text-text-tertiary",
                 )}
               >
