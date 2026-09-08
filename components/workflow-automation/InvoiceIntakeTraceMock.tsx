@@ -48,7 +48,7 @@ export function InvoiceIntakeTraceMock() {
                   )}
                   style={{ left: step.offset, width: step.width }}
                 />
-                {"cost" in step && step.cost ? (
+                {step.cost ? (
                   <span
                     className="absolute font-mono text-[10px] leading-none text-text-tertiary"
                     style={{

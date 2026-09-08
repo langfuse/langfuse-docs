@@ -1,4 +1,18 @@
-export const invoiceIntakeTrace = {
+export type InvoiceIntakeStep = {
+  name: string;
+  indent: boolean;
+  offset: string;
+  width: string;
+  highlight?: boolean;
+  cost?: string;
+};
+
+export const invoiceIntakeTrace: {
+  title: string;
+  summary: string;
+  insight: string;
+  steps: InvoiceIntakeStep[];
+} = {
   title: "trace · invoice-intake",
   summary: "9 steps · $0.092",
   insight: "one retry step · 66% of run cost",
@@ -16,7 +30,7 @@ export const invoiceIntakeTrace = {
     },
     { name: "post_to_erp", indent: false, offset: "78%", width: "12%" },
   ],
-} as const;
+};
 
 export const workflowAutomationInsights = [
   {
