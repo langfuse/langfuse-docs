@@ -18,7 +18,7 @@ Langfuse is open source. Send traces to [Langfuse Cloud](https://langfuse.com/cl
 
 This notebook demonstrates **two** different ways to use Anthropic models with Langfuse:
 
-1. **OpenTelemetry Instrumentation (recommended):** Use the [`opentelemetry-instrumentation-anthropic`](https://pypi.org/project/opentelemetry-instrumentation-anthropic/) package to wrap Anthropic SDK calls and send OpenTelemetry spans to Langfuse. The Langfuse SDK exports these spans by default: they carry `gen_ai.*` attributes and come from an allowlisted instrumentation scope ([details](https://langfuse.com/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope)). The package is maintained by a third party (Traceloop), so pin its version in your requirements.
+1. **OpenTelemetry Instrumentation (recommended):** Use the [`opentelemetry-instrumentation-anthropic`](https://pypi.org/project/opentelemetry-instrumentation-anthropic/) package to wrap Anthropic SDK calls and send OpenTelemetry spans to Langfuse. 
 2. **OpenAI SDK:** Use Anthropic's OpenAI-compatible endpoints via [Langfuse's OpenAI SDK wrapper](https://langfuse.com/integrations/model-providers/openai-py).
 
 > **What is Anthropic?**\
