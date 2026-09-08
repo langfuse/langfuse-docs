@@ -23,6 +23,7 @@ import { CustomerQuoteGrid } from "@/components/chat-agents/CustomerQuoteGrid";
 import { RelevantIntegrations } from "@/components/chat-agents/RelevantIntegrations";
 import { ValueInsightsAccordion } from "@/components/chat-agents/ValueInsightsAccordion";
 import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+import { SpendByTaskMock } from "@/components/coding-agents/SpendByTaskMock";
 import { FORTUNE_50_COMPANIES, formatCompanyCount } from "@/lib/usage-stats";
 import { BookOpen, Network, Radar, Sparkles } from "lucide-react";
 
@@ -79,120 +80,8 @@ import { BookOpen, Network, Radar, Sparkles } from "lucide-react";
         </div>
       </div>
 
-      <div className="min-w-0 bg-surface-1 px-4 py-4 sm:px-6 sm:py-5">
-        <CodingAgentPathPanel value="gateway" label="Gateway session mock">
-          <div className="border border-line-structure bg-surface-bg">
-            <div className="grid grid-cols-2 border-b border-line-structure px-3 py-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-              <span>Gateway · org-platform</span>
-              <span className="text-right">Budget 72% · eng · 14:02</span>
-            </div>
-
-            <div className="space-y-2 p-3 text-[11px] text-text-secondary">
-              <p className="border border-line-structure bg-surface-bg px-2.5 py-1.5 text-text-primary">
-                claude-sonnet · repo checkout-api · auth retry loop
-              </p>
-              <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-                litellm · virtual-key eng-platform · $0.18
-              </p>
-              <p className="border border-line-structure bg-surface-bg px-2.5 py-1.5 text-text-primary">
-                4 file reads, 2 edits, 1 test run. Repeated auth.ts context.
-              </p>
-              <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-                skill candidate · org/code-review · save 12k tokens
-              </p>
-            </div>
-
-            <div className="border-t border-line-structure">
-              <p className="border-b border-line-structure px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-                Department spend
-              </p>
-              <div className="grid grid-cols-3">
-                <div className="border-r border-line-structure px-3 py-2">
-                  <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-                    Engineering
-                  </p>
-                  <p className="text-[16px] leading-none text-text-primary">
-                    $1,240
-                  </p>
-                </div>
-                <div className="border-r border-line-structure px-3 py-2">
-                  <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-                    Data
-                  </p>
-                  <p className="text-[16px] leading-none text-text-primary">
-                    $410
-                  </p>
-                </div>
-                <div className="px-3 py-2">
-                  <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-                    Budget left
-                  </p>
-                  <p className="text-[16px] leading-none text-text-primary">
-                    28%
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CodingAgentPathPanel>
-
-        <CodingAgentPathPanel value="hooks" label="Hooks session mock">
-          <div className="border border-line-structure bg-surface-bg">
-            <div className="grid grid-cols-2 border-b border-line-structure px-3 py-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-              <span>Session · claude-code</span>
-              <span className="text-right">@alex · 12 tools · 08:14</span>
-            </div>
-
-            <div className="space-y-2 p-3 text-[11px] text-text-secondary">
-              <div className="flex justify-end">
-                <p className="max-w-[88%] border border-line-structure bg-surface-1 px-2.5 py-1.5 text-text-primary">
-                  Fix the flaky checkout test.
-                </p>
-              </div>
-              <p className="border border-line-structure bg-surface-bg px-2.5 py-1.5 text-text-primary">
-                I&apos;ll inspect the test and recent diffs first.
-              </p>
-              <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-                tool · Read · tests/checkout.test.ts · 210 ms
-              </p>
-              <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-                skill · code-review · 48.2k in · $0.31
-              </p>
-            </div>
-
-            <div className="border-t border-line-structure">
-              <p className="border-b border-line-structure px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-                Session spend
-              </p>
-              <div className="grid grid-cols-3">
-                <div className="border-r border-line-structure px-3 py-2">
-                  <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-                    Input tokens
-                  </p>
-                  <p className="text-[16px] leading-none text-text-primary">
-                    48.2k
-                  </p>
-                </div>
-                <div className="border-r border-line-structure px-3 py-2">
-                  <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-                    Tools
-                  </p>
-                  <p className="text-[16px] leading-none text-text-primary">
-                    12
-                  </p>
-                </div>
-                <div className="px-3 py-2">
-                  <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-                    Cost
-                  </p>
-                  <p className="text-[16px] leading-none text-text-primary">
-                    $0.31
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CodingAgentPathPanel>
+      <div className="flex min-w-0 items-center bg-surface-1 px-4 py-4 sm:px-6 sm:py-5">
+        <SpendByTaskMock />
       </div>
     </section>
 
