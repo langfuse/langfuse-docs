@@ -13,11 +13,6 @@ Engineering spend by task, last 30 days: Implementation $486, Code review $379, 
 
 Pick the path that matches how your organization runs coding agents. Platform teams usually start with a **gateway**. Individual developers and team rollouts often start with **hooks**.
 
-- **50,000+** companies using Langfuse
-- **130M+** SDK installs / month
-- **9+** coding agent integrations
-- **21** of the Fortune 50
-
 ## Via gateways (for platform teams)
 
 Route coding agent traffic through an LLM gateway so every model call is authenticated, budgeted, and traced in one place — without changing each developer's local setup.

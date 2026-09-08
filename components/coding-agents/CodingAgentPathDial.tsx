@@ -109,7 +109,7 @@ export function CodingAgentPathSwitcher() {
   };
 
   return (
-    <div className="flex flex-col gap-2 border-t border-line-structure px-5 py-3 sm:flex-row sm:items-center sm:gap-3 sm:px-10">
+    <div className="flex flex-col gap-2 px-5 py-3 sm:flex-row sm:items-center sm:gap-3 sm:px-10">
       <p className="shrink-0 font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
         Set up
       </p>
