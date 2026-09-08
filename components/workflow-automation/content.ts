@@ -1,3 +1,23 @@
+export const invoiceIntakeTrace = {
+  title: "trace · invoice-intake",
+  summary: "9 steps · $0.092",
+  insight: "one retry step · 66% of run cost",
+  steps: [
+    { name: "ingest_pdf", indent: false, offset: "6%", width: "16%" },
+    { name: "ocr_pages ×14", indent: true, offset: "18%", width: "20%" },
+    { name: "extract_fields", indent: true, offset: "32%", width: "14%" },
+    {
+      name: "reconcile_retry ×3",
+      indent: true,
+      offset: "40%",
+      width: "40%",
+      highlight: true,
+      cost: "$0.061",
+    },
+    { name: "post_to_erp", indent: false, offset: "78%", width: "12%" },
+  ],
+} as const;
+
 export const workflowAutomationInsights = [
   {
     id: "debug",

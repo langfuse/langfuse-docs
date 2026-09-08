@@ -13,6 +13,7 @@ import {
   workflowAutomationQuoteRoutes,
   workflowAutomationIntegrationGroups,
 } from "@/components/workflow-automation/content";
+import { InvoiceIntakeTraceMock } from "@/components/workflow-automation/InvoiceIntakeTraceMock";
 import { BookOpen, Rocket, Workflow } from "lucide-react";
 
 <h1 className="sr-only">Langfuse for workflow automation</h1>
@@ -57,61 +58,8 @@ import { BookOpen, Rocket, Workflow } from "lucide-react";
       </div>
     </div>
 
-    <div className="min-w-0 bg-surface-1 px-4 py-4 sm:px-6 sm:py-5">
-      <div className="border border-line-structure bg-surface-bg">
-        <div className="space-y-2 p-3 text-[11px] text-text-secondary">
-          <p className="border border-line-structure bg-surface-bg px-2.5 py-1.5 text-text-primary">
-            Invoice PDF received · vendor Acme · $4,280.00
-          </p>
-          <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-            classify_document · 210 ms · $0.01
-          </p>
-          <p className="border border-line-structure bg-surface-bg px-2.5 py-1.5 text-text-primary">
-            Extracted 12 line items. Total confidence 0.61 — below threshold.
-          </p>
-          <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-            extract_fields · 1.4 s · $0.07
-          </p>
-          <p className="border border-line-structure bg-surface-1 px-2.5 py-1.5 text-text-primary">
-            Low-confidence total. Routed to finance reviewer before posting.
-          </p>
-          <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-            human_review · queued
-          </p>
-        </div>
-
-        <div className="border-t border-line-structure">
-          <p className="border-b border-line-structure px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-            Eval scores
-          </p>
-          <div className="grid grid-cols-3">
-            <div className="border-r border-line-structure px-3 py-2">
-              <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-                Field accuracy
-              </p>
-              <p className="text-[16px] leading-none text-text-primary">
-                0.61
-              </p>
-            </div>
-            <div className="border-r border-line-structure px-3 py-2">
-              <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-                Cost / run
-              </p>
-              <p className="text-[16px] leading-none text-text-primary">
-                $0.18
-              </p>
-            </div>
-            <div className="px-3 py-2">
-              <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-                Reviewed
-              </p>
-              <p className="text-[16px] leading-none text-text-primary">
-                Queued
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="flex min-w-0 items-center bg-surface-1 px-4 py-4 sm:px-6 sm:py-5">
+      <InvoiceIntakeTraceMock />
     </div>
 
   </section>
@@ -153,7 +101,7 @@ import { BookOpen, Rocket, Workflow } from "lucide-react";
 
     <ValueInsightsAccordion
       items={workflowAutomationInsights}
-      caption="trace · extract_fields · step 3 of 6"
+      caption="trace · invoice-intake"
     />
 
   </section>
