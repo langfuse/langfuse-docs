@@ -99,7 +99,9 @@ function resolveChipIcon(item: IntegrationItem): ReactNode {
   const logo = item.logo ?? data?.logo;
   if (!logo) return undefined;
 
-  const appearance = item.logoAppearance ?? data?.logoAppearance;
+  const appearance = item.logo
+    ? item.logoAppearance
+    : (item.logoAppearance ?? data?.logoAppearance);
 
   return (
     <img

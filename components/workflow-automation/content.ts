@@ -14,7 +14,7 @@ export const invoiceIntakeTrace: {
   steps: InvoiceIntakeStep[];
 } = {
   title: "trace · invoice-intake",
-  summary: "9 steps · $0.092",
+  summary: "5 steps · $0.092",
   insight: "one retry step · 66% of run cost",
   steps: [
     { name: "ingest_pdf", indent: false, offset: "6%", width: "16%" },

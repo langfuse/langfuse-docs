@@ -39,7 +39,10 @@ export function DocBodyChrome({
   versionLabel,
 }: Props) {
   const pathname = usePathname();
-  const isEnterprisePage = pathname === "/enterprise";
+  const isInFlowCopyButton =
+    pathname === "/enterprise" ||
+    pathname === "/chat-agents" ||
+    pathname === "/workflow-automation";
   const isCustomerStory = (pathname ?? "").startsWith("/users/");
   const cookbook = withProse
     ? COOKBOOK_ROUTE_MAPPING.find((c) => c.path === pathname)
@@ -54,7 +57,7 @@ export function DocBodyChrome({
       <div className="mx-auto w-full">
         <div
           className={
-            isEnterprisePage
+            isInFlowCopyButton
               ? "mb-4 flex w-full flex-wrap justify-end gap-2 items-center"
               : "mb-4 flex flex-wrap gap-2 items-center sm:absolute sm:max-w-[15rem] sm:justify-end right-0 top-[-62px]"
           }
