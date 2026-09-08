@@ -53,93 +53,70 @@ import { Activity, BookOpen, Rocket } from "lucide-react";
     </div>
 
     <div className="min-w-0 bg-surface-1 px-4 py-4 sm:px-6 sm:py-5">
-      <div className="border border-line-structure bg-surface-bg">
-        <div className="grid grid-cols-2 border-b border-line-structure px-3 py-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-          <span>Session · cs-agent-prod</span>
-          <span className="text-right">Ticket #2104 · 7 turns · 08:04</span>
-        </div>
-
-        <div className="space-y-2 p-3 text-[11px] text-text-secondary">
-          <div className="flex justify-end">
-            <p className="max-w-[88%] border border-line-structure bg-surface-1 px-2.5 py-1.5 text-text-primary">
+      <div className="border border-line-structure bg-surface-bg p-3 sm:p-4">
+        <div className="space-y-4 text-[11px] text-text-secondary">
+          <div className="grid grid-cols-[28px_1fr] items-start gap-x-3 gap-y-2">
+            <p className="pt-2 font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+              01
+            </p>
+            <p className="justify-self-end border border-line-structure bg-surface-1 px-2.5 py-1.5 text-[16px] text-text-primary">
               Where is my payout for last week?
             </p>
-          </div>
-          <p className="border border-line-structure bg-surface-bg px-2.5 py-1.5 text-text-primary">
-            I can help with that. Your payout for 12-18 May was $248.10.
-          </p>
-          <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-            Agent · retrieve_payout · 340 ms · $0.04
-          </p>
-          <div className="flex justify-end">
-            <p className="max-w-[88%] border border-line-structure bg-surface-1 px-2.5 py-1.5 text-text-primary">
-              That&apos;s not what I asked. Last week.
+            <div />
+            <p className="justify-self-end font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+              User · 0.9s
             </p>
           </div>
-          <p className="border border-line-structure bg-surface-bg px-2.5 py-1.5 text-text-primary">
-            You&apos;re right — last week was 20-26 May. Payout of $412.60
-            settles tomorrow.
-          </p>
-          <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-            Agent · retry_payout · 2.1 s
-          </p>
+
+          <div className="grid grid-cols-[28px_1fr] items-start gap-x-3 gap-y-2">
+            <p className="pt-2 font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+              02
+            </p>
+            <p className="max-w-[92%] border border-line-structure bg-surface-bg px-2.5 py-1.5 text-[16px] text-text-primary">
+              Your payout for 12-18 May was $248.10.
+            </p>
+            <div />
+            <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+              Agent · retrieve_payouts · 0.4s
+            </p>
+          </div>
+
+          <div className="grid grid-cols-[28px_1fr] items-start gap-x-3 gap-y-2">
+            <p className="pt-2 font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+              03
+            </p>
+            <p className="justify-self-end border border-line-structure border-l-surface-cta-primary border-l-2 bg-surface-1 px-2.5 py-1.5 text-[16px] text-text-primary">
+              That&apos;s not what I asked. Last <em>week</em>.
+            </p>
+            <div />
+            <p className="justify-self-end font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+              Frustration true · flagged
+            </p>
+          </div>
+
+          <div className="grid grid-cols-[28px_1fr] items-start gap-x-3 gap-y-2">
+            <p className="pt-2 font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+              04
+            </p>
+            <p className="max-w-[92%] border border-line-structure bg-surface-bg px-2.5 py-1.5 text-[16px] text-text-primary">
+              You&apos;re right — 20-26 May: $412.60, settling tomorrow.
+            </p>
+            <div />
+            <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+              Agent · retry_payouts_v2 · 2.1s · helpfulness 0.92
+            </p>
+          </div>
         </div>
 
-        <div className="border-t border-line-structure">
-          <p className="border-b border-line-structure px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-            Eval scores
+        <div className="mt-4 border-t border-line-structure pt-3">
+          <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+            Resolved
           </p>
-          <div className="grid grid-cols-3">
-            <div className="border-r border-line-structure px-3 py-2">
-              <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-                Frustration
-              </p>
-              <p className="text-[16px] leading-none text-text-primary">True</p>
-            </div>
-            <div className="border-r border-line-structure px-3 py-2">
-              <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-                Cost / turn
-              </p>
-              <p className="text-[16px] leading-none text-text-primary">$0.04</p>
-            </div>
-            <div className="px-3 py-2">
-              <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-                Resolution
-              </p>
-              <p className="text-[16px] leading-none text-text-primary">Yes</p>
-            </div>
-          </div>
+          <p className="mt-1 text-[38px] leading-none text-text-primary">yes</p>
         </div>
       </div>
     </div>
 
-  </section>
-
-  <section className="grid sm:grid-cols-2 lg:grid-cols-4">
-    <div className="border-b border-r border-line-structure px-5 py-4 sm:border-b lg:border-b-0">
-      <p className="text-[33px] leading-none text-text-primary">1.4B+</p>
-      <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-        Chat sessions traced
-      </p>
-    </div>
-    <div className="border-b border-line-structure px-5 py-4 sm:border-b sm:border-r lg:border-b-0">
-      <p className="text-[33px] leading-none text-text-primary">38M</p>
-      <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-        Turns scored / month
-      </p>
-    </div>
-    <div className="border-b border-r border-line-structure px-5 py-4 sm:border-b-0 lg:border-b-0">
-      <p className="text-[33px] leading-none text-text-primary">2,300+</p>
-      <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-        Companies in production
-      </p>
-    </div>
-    <div className="px-5 py-4">
-      <p className="text-[33px] leading-none text-text-primary">80+</p>
-      <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
-        Agent framework integrations
-      </p>
-    </div>
   </section>
 
   <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
