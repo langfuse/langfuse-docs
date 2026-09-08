@@ -276,7 +276,7 @@ const result = await langfuse.experiment.run({
     title: "Collaborate on human reviews",
     subtitle: "Add manual feedback and corrections.",
     body: "Create manual annotations to provide feedback, corrections, and improvements to your LLM outputs. Use annotations to build high-quality datasets and set a baseline for automated evals.",
-    docsHref: "/docs/evaluation/evaluation-methods/annotation",
+    docsHref: "/docs/evaluation/evaluation-methods/scores-via-ui",
     image: {
       light: AnnotationPng,
       dark: AnnotationPng,

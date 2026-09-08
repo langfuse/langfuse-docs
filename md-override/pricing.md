@@ -93,9 +93,9 @@ Optional **Yearly Commitment**:
 | [Token and cost tracking](/docs/observability/features/token-and-cost-tracking)                     | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Native framework integrations](/integrations)                                                      | Yes                 | Yes                 | Yes                 | Yes                          |
 | [SDKs (Python, JavaScript)](/docs/observability/sdk/overview)                                       | Yes                 | Yes                 | Yes                 | Yes                          |
-| [OpenTelemetry (Java, Go, custom)](/docs/opentelemetry/get-started)                                 | Yes                 | Yes                 | Yes                 | Yes                          |
+| [OpenTelemetry (Java, Go, custom)](/integrations/native/opentelemetry)                              | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Proxy-based logging (via LiteLLM)](/integrations/gateways/litellm)                                 | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Custom via API](/api-and-data-platform/features/public-api)                                        | Yes                 | Yes                 | Yes                 | Yes                          |
+| [Custom via API](/docs/api-and-data-platform/features/public-api)                                   | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Included usage](/docs/administration/billable-units)                                               | 50k units           | 100k units          | 100k units          | 100k units                   |
 | [Additional usage](/docs/administration/billable-units)                                             | --                  | $8/100k units       | $8/100k units       | $8/100k units                |
 | Custom usage pricing                                                                                | --                  | --                  | --                  | Yearly Commitment            |
@@ -112,19 +112,19 @@ Optional **Yearly Commitment**:
 | [Prompt composability](/docs/prompt-management/features/composability)                              | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Prompt caching (server and client)](/docs/prompt-management/features/caching)                      | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Playground](/docs/prompt-management/features/playground)                                           | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Prompt experiments](/docs/evaluation/dataset-runs/native-run)                                      | Yes                 | Yes                 | Yes                 | Yes                          |
+| [Prompt experiments](/docs/evaluation/experiments/experiments-via-ui)                               | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Webhooks & Slack](/docs/prompt-management/features/webhooks-slack-integrations)                    | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Protected deployment labels](/docs/prompt-management/get-started#protected-prompt-labels)          | --                  | --                  | Teams add-on        | Yes                          |
 | **Evaluation (online and offline)**                                                                 |                     |                     |                     |                              |
-| [Datasets](/docs/evaluation/dataset-runs/datasets)                                                  | Yes                 | Yes                 | Yes                 | Yes                          |
+| [Datasets](/docs/evaluation/experiments/datasets)                                                   | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)                             | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui)                               | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Evaluation scores (custom)](/docs/evaluation/evaluation-methods/custom-scores)                     | Yes                 | Yes                 | Yes                 | Yes                          |
-| [User feedback tracking](/faq/all/user-feedback)                                                    | Yes                 | Yes                 | Yes                 | Yes                          |
+| [Evaluation scores (custom)](/docs/evaluation/evaluation-methods/scores-via-sdk)                    | Yes                 | Yes                 | Yes                 | Yes                          |
+| [User feedback tracking](/docs/observability/features/user-feedback)                                | Yes                 | Yes                 | Yes                 | Yes                          |
 | [External evaluation pipelines](/guides/cookbook/example_external_evaluation_pipelines)             | Yes                 | Yes                 | Yes                 | Yes                          |
 | [LLM-as-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge)                       | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Human annotation](/docs/scores/annotation)                                                         | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Human annotation queues](/docs/evaluation/evaluation-methods/annotation#annotation-queues)         | 1 queue             | 3 queues            | Yes                 | Yes                          |
+| [Human annotation](/docs/evaluation/evaluation-methods/scores-via-ui)                               | Yes                 | Yes                 | Yes                 | Yes                          |
+| [Human annotation queues](/docs/evaluation/evaluation-methods/annotation-queues)                    | 1 queue             | 3 queues            | Yes                 | Yes                          |
 | **Metrics**                                                                                         |                     |                     |                     |                              |
 | [Custom dashboards](/docs/metrics/features/custom-dashboards)                                       | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Alerts](/docs/observability/features/alerts)                                                       | 2 alerts            | 20 alerts           | 50 alerts           | 100 alerts                   |
@@ -250,7 +250,7 @@ A billable unit in Langfuse is any tracing data point sent to the platform -- in
 ## Frequently Asked Questions
 
 **What is the easiest way to try Langfuse?**
-You can view the [public example project](/demo) or sign up for a [free account](/cloud) to try Langfuse with your own data. The Hobby plan is completely free and does not require a credit card.
+You can view the [public example project](/docs/demo) or sign up for a [free account](/cloud) to try Langfuse with your own data. The Hobby plan is completely free and does not require a credit card.
 
 **Can I self-host Langfuse for free?**
 Yes, Langfuse is open source and you can self-host it for free. Use Docker Compose to run Langfuse locally, or use one of the templates to self-host in production on Kubernetes. See the [self-hosting documentation](/self-hosting) to learn more.

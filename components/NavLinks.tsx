@@ -47,7 +47,7 @@ const productFeatured: FeaturedItem = {
   title: "Get Started with Tracing",
   description: "This guide walks you through ingesting your first trace.",
   cta: "Read docs",
-  href: "/docs/get-started",
+  href: "/docs/observability/get-started",
 };
 
 const resourcesFeatured: FeaturedItem = {
