@@ -7,7 +7,10 @@ import { HomeSection } from "./HomeSection";
 import { Heading } from "@/components/ui/heading";
 import { TextHighlight } from "@/components/ui/text-highlight";
 import { Text } from "@/components/ui/text";
-import { formatCompanyCount } from "@/lib/usage-stats";
+import {
+  formatCompanyCount,
+  formatSdkInstallsPerMonth,
+} from "@/lib/usage-stats";
 
 const reasons = [
   {
@@ -44,7 +47,7 @@ const reasons = [
   },
   {
     title: "Production-proven",
-    body: `${formatCompanyCount()} companies using Langfuse. Billions of events processed per month. 130M+ SDK installs/month. Fortune 50 deployments.`,
+    body: `${formatCompanyCount()} companies using Langfuse. Billions of events processed per month. ${formatSdkInstallsPerMonth()} SDK installs/month. Fortune 50 deployments.`,
   },
   {
     title: "Shipping velocity",

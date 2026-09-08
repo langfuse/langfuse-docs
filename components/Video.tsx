@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { MediaPlayer, MediaProvider } from "@vidstack/react";
+import "@vidstack/react/player/styles/base.css";
 
 export const Video = ({
   src,

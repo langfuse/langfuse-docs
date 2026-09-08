@@ -7,7 +7,10 @@ import { Text } from "@/components/ui/text";
 import { FeaturedCustomers } from "./FeaturedCustomers";
 import { BulletList } from "./BulletList";
 import securityVisual from "./img/visuals/visual-security.svg";
-import { formatCompanyCount } from "@/lib/usage-stats";
+import {
+  formatCompanyCount,
+  formatSdkInstallsPerMonth,
+} from "@/lib/usage-stats";
 
 const architecture = [
   {
@@ -29,7 +32,10 @@ const architecture = [
 ];
 
 const openApis = [
-  { label: "130M+ SDK installs/month", href: "/careers#public-metrics" },
+  {
+    label: `${formatSdkInstallsPerMonth()} SDK installs/month`,
+    href: "/careers#public-metrics",
+  },
   { label: "90B+ observations processed per month" },
   {
     label: `${formatCompanyCount()} companies using Langfuse`,

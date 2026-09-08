@@ -7,6 +7,7 @@ import { HomeSection } from "@/components/home/HomeSection";
 import { Button, CornerBox, Heading, TextHighlight } from "@/components/ui";
 import { Text } from "@/components/ui/text";
 import RiveMock from "@/components/home/img/rive-mock.png";
+import { MD_MIN_WIDTH_QUERY, useMinWidth } from "@/lib/use-min-width";
 
 const RiveAnimation = dynamic(
   () => import("@/components/rive/RiveAnimation").then((m) => m.RiveAnimation),
@@ -65,6 +66,7 @@ const LABELS: Record<string, RiveLabel> = {
 };
 
 export const RiveSection = () => {
+  const isMd = useMinWidth(MD_MIN_WIDTH_QUERY);
   const [label, setLabel] = useState<RiveLabel>(OVERVIEW);
   const [riveSectionInView, setRiveSectionInView] = useState(false);
   const riveViewportRef = useRef<HTMLDivElement>(null);
@@ -165,12 +167,13 @@ export const RiveSection = () => {
             className="object-cover object-center -translate-y-4"
             sizes="(max-width: 768px) 100vw, 800px"
             quality={100}
-            priority
           />
         </div>
       </div>
 
-      {/* Desktop: Rive animation + dynamic label (lg and above) */}
+      {/* Desktop slot stays in the layout (CSS-hidden on small viewports) so
+          SSR/desktop height does not shift. RiveAnimation mounts only at md+
+          so phones never fetch rive.wasm. */}
       <div className="hidden md:block">
         <div
           ref={riveViewportRef}
@@ -178,15 +181,17 @@ export const RiveSection = () => {
           onPointerEnter={handlePointerEnter}
           onPointerLeave={handlePointerLeave}
         >
-          <RiveAnimation
-            src={RIVE_FILE}
-            stateMachine="Langfuse_SM"
-            fit="cover"
-            zoom={1.4}
-            className="w-full h-full -translate-x-4 -translate-y-6"
-            onStateChange={handleStateChange}
-            viewModelBooleanInputs={loadViewModelBooleans}
-          />
+          {isMd ? (
+            <RiveAnimation
+              src={RIVE_FILE}
+              stateMachine="Langfuse_SM"
+              fit="cover"
+              zoom={1.4}
+              className="w-full h-full -translate-x-4 -translate-y-6"
+              onStateChange={handleStateChange}
+              viewModelBooleanInputs={loadViewModelBooleans}
+            />
+          ) : null}
         </div>
       </div>
 
