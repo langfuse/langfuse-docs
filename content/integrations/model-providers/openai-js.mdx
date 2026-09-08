@@ -10,11 +10,13 @@ logoAppearance: dark
 # Observability for OpenAI SDK (JS/TS)
 
 <Callout type="info">
-  Looking for the Python version? [Check it out
-  here](/integrations/model-providers/openai-py).
+  Looking for the Python version? See the [OpenAI (Python)
+  integration](/integrations/model-providers/openai-py).
 </Callout>
 
 The Langfuse JS/TS SDK offers a wrapper function around the OpenAI SDK, enabling you to easily add observability to your OpenAI calls. This includes tracking latencies, time-to-first-token on stream responses, errors, and model usage.
+
+Langfuse is open source. Send traces to [Langfuse Cloud](/cloud) (managed, free tier, nothing to run) or to a [self-hosted](/self-hosting) instance; the integration code is the same for both.
 
 ```ts {2, 4}
 import OpenAI from "openai";
@@ -26,6 +28,26 @@ const res = await openai.chat.completions.create({
   messages: [{ role: "system", content: "Tell me a story about a dog." }],
 });
 ```
+
+The wrapped client also traces the Responses API:
+
+```ts
+const response = await openai.responses.create({
+  model: "gpt-4o",
+  input: [
+    { role: "developer", content: "You are a poet." },
+    { role: "user", content: "Tell me a story about a dog." },
+  ],
+});
+```
+
+<Callout type="warning">
+  For Responses API calls, Langfuse records the `input` argument as the
+  generation input. A system prompt passed via the separate `instructions`
+  parameter is not part of the captured input; it only shows up in the
+  generation's metadata. To see the system prompt in the trace input, pass it
+  as a `developer` message inside `input` as shown above.
+</Callout>
 
 Langfuse automatically tracks:
 
@@ -105,7 +127,7 @@ await langfuseSpanProcessor.forceFlush();
 await langfuse.flush();
 ```
 
-Learn more about queuing and batching of events [here](/docs/observability/features/queuing-batching).
+Learn more about [queuing and batching of events](/docs/observability/features/queuing-batching).
 
 ### Assistants API
 

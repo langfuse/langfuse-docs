@@ -10,11 +10,13 @@ logoAppearance: dark
 # Observability for OpenAI SDK (Python)
 
 <Callout type="info">
-  Looking for the JS/TS version? [Check it out
-  here](/integrations/model-providers/openai-js).
+  Looking for the JS/TS version? See the [OpenAI (JS/TS)
+  integration](/integrations/model-providers/openai-js).
 </Callout>
 
 If you use the OpenAI Python SDK, you can use the Langfuse **drop-in replacement** to get full logging by changing only the import. This works with OpenAI and Azure OpenAI.
+
+Langfuse is open source. Send traces to [Langfuse Cloud](/cloud) (managed, free tier, nothing to run) or to a [self-hosted](/self-hosting) instance; the integration code is the same for both.
 
 ```diff
 - import openai
@@ -31,7 +33,7 @@ Langfuse automatically tracks:
 - [API Errors](#error-tracking)
 - Model usage (tokens) and cost (USD) ([learn more](/docs/model-usage-and-cost))
 
-## How it works
+## How it works [#how-it-works]
 
 <Steps>
 
@@ -126,7 +128,7 @@ langfuse = get_client()
 langfuse.flush()
 ```
 
-Learn more about queuing and batching of events [here](/docs/observability/features/queuing-batching).
+Learn more about [queuing and batching of events](/docs/observability/features/queuing-batching).
 
 ### Assistants API
 
@@ -444,7 +446,7 @@ Tracing of the assistants api is not supported by this integration as OpenAI Ass
 
 Langfuse automatically tracks and monitors OpenAI API errors if you use the native integration. They are captured via the `level` and `statusMessage` fields (see [docs](/docs/observability/features/log-levels)).
 
-Learn more about how to get started [here](/integrations/model-providers/openai-py).
+See the [setup steps above](#how-it-works) to get started.
 
 ```diff
 - import openai
