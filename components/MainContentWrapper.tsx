@@ -44,6 +44,7 @@ const pathsWithoutFooterWidgets = [
   "/enterprise",
   "/chat-agents",
   "/coding-agents",
+  "/workflow-automation",
   "/events",
   "/changelog",
   "/cn",
@@ -70,6 +71,7 @@ const pathsWithCopyAsMarkdownButton = [
   "/enterprise",
   "/chat-agents",
   "/coding-agents",
+  "/workflow-automation",
   "/resources",
   "/academy",
 ];

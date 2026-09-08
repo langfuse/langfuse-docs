@@ -41,6 +41,7 @@ const menuItems: {
       { name: "Metrics", href: "/docs/metrics/overview" },
       { name: "Langfuse for Agents", href: "/agents" },
       { name: "Coding agents", href: "/coding-agents" },
+      { name: "Workflow automation", href: "/workflow-automation" },
       {
         name: "Playground",
         href: "/docs/prompt-management/features/playground",

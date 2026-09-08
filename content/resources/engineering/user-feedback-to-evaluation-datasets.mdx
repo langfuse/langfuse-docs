@@ -1,0 +1,218 @@
+---
+title: "Turn user feedback on AI responses into evaluation datasets"
+description: "How to collect user feedback on AI responses and turn it into evaluation datasets: capture ratings as scores, filter the failures, build dataset items, gate CI."
+tags: [guide, evaluation]
+---
+
+# Turn user feedback on AI responses into evaluation datasets
+
+User feedback is the cheapest quality signal an LLM application produces, and most teams waste it: a thumbs-down lands in a dashboard and the conversation behind it is never seen again. The better move is to treat every negative rating as a candidate test case, attach the answer the user should have received, and run every future prompt or model change against that growing set. This guide covers the full path in Langfuse, from the rating click to a CI gate.
+
+**TL;DR:** Capture feedback as scores on the traces that produced the response: explicit ratings from the browser with a public key, implicit signals from your backend. Filter traces or observations by that score to get a concrete list of failures. Turn them into dataset items with one click on a trace, in bulk from the observations table, or via the SDK, linking each item to its source trace and using a corrected output as the expected output. Run experiments against the dataset from the UI or SDK, pin a dataset version, and fail CI with `langfuse/experiment-action` when scores drop. Close the loop by measuring how well an LLM judge agrees with human feedback and routing disagreements to an annotation queue.
+
+## Capture feedback as scores on traces
+
+Every feedback signal becomes a [score](/docs/evaluation/evaluation-methods/scores-via-sdk) with a name, a value, a data type (boolean, numeric, categorical, or text), and an optional comment, attached to the trace that produced the output. Evaluators, human annotators, and user feedback all write to the same score table, so a negative rating is filterable and comparable with a judge's verdict without any joining on your side. Which signals to capture depends on the product; the guide on [setting up a user feedback loop](/guides/user-feedback-loop) covers that design question, so this page focuses on what to do with the signals once you have them.
+
+### Explicit ratings from the frontend
+
+Thumbs and star ratings go directly from the browser to Langfuse using the browser SDK, which needs only your public key. The backend returns the trace ID with the response so the frontend can attach the rating to the right trace:
+
+```typescript
+import { LangfuseBrowserClient } from "@langfuse/browser";
+
+const langfuse = new LangfuseBrowserClient({
+  publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY!,
+});
+
+// On a thumbs up / down click
+await langfuse.score({
+  traceId, // returned by your backend with the response
+  id: `response_rating-${traceId}`, // stable id, so re-rating updates instead of duplicating
+  name: "response_rating", // one descriptive name per signal
+  value: 1, // 1 for thumbs up, 0 for thumbs down
+  dataType: "BOOLEAN",
+});
+```
+
+The stable `id` acts as an idempotency key: a user who changes their mind updates the existing score instead of adding a second one. Never expose a secret key in frontend code.
+
+### Implicit signals and outcomes from the backend
+
+Events your application observes, such as an edited draft or a closed support ticket, are scored from the server when they happen:
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# The user edited the drafted reply before sending it
+langfuse.create_score(
+    trace_id=trace_id,  # the trace that produced the draft
+    name="draft_edited",
+    value=1,
+    data_type="BOOLEAN",
+    comment=edit_diff,  # the edit itself, as context for later analysis
+)
+```
+
+The `comment` field is where the dataset value hides: an edit diff or a free-text complaint tells you what was wrong, which is what you need when you write the expected output later. Signals that exist only in conversation text (a user asking for a human, a repeated question) have no event to catch; an LLM-as-a-judge evaluator on production observations can read the conversation and write the score without an application change.
+
+## Find the responses that failed
+
+A boolean or categorical score is a filter, so the list of failures is one query away. On the traces and observations tables, filter by score name and value, for example `response_rating = false`, combined with a time window, trace name, or user ID. Score filters match by name regardless of the level the score sits on, so an observation-level judge score and a trace-level user rating share one namespace.
+
+Read a sample before adding anything to a dataset. Thumbs feedback skews toward unhappy users, and some negative ratings are about latency or tone rather than correctness. Twenty minutes of reading usually yields two or three failure clusters, which decide how many datasets you create.
+
+## Turn failures into dataset items
+
+A dataset item is an input, an optional expected output, optional metadata, and an optional link to the source trace and observation. [Datasets](/docs/evaluation/experiments/datasets) can be filled from production in three ways, and the choice depends on volume.
+
+| Method                            | Best for                              | What you control                                   |
+| --------------------------------- | ------------------------------------- | -------------------------------------------------- |
+| `+ Add to dataset` on a trace     | A few failures found while reading    | Input and expected output edited by hand           |
+| Batch add from observations table | Tens to hundreds of filtered failures | Field mapping from observation fields, in bulk     |
+| SDK or API                        | Recurring pipelines                   | Everything, including expected output from records |
+
+### From the UI, one or many at a time
+
+On any observation of a production trace (span, event, or generation), `+ Add to dataset` opens the item form prefilled from that observation, so you can write the expected output while the context is open. For volume, go to the observations table, apply the score filter, select the failing rows with the checkboxes, and click **Actions** then **Add to dataset**. Pick or create a dataset, then configure the field mapping: use a field as-is, extract a value with a JSON path expression, or compose an object from several fields. Preview and confirm.
+
+The batch runs in the background with partial success: items that fail validation against the dataset's schema are logged while valid items are still added, and progress is visible under **Settings** then **Batch Actions**. The observation output in these items is the answer the user disliked, so do not map it to the expected output. Leave `expectedOutput` empty and use reference-free checks, or fill it in with corrections as described below.
+
+### Via the SDK
+
+When your own systems know the right answer (a human agent's final reply, a corrected extraction), write the item programmatically and link it to its trace:
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+langfuse.create_dataset_item(
+    dataset_name="feedback/support-replies",
+    input={"question": user_question},
+    expected_output={"reply": agent_final_reply},
+    # link to a trace
+    source_trace_id=trace_id,
+    # optional: link to a specific span, event, or generation
+    source_observation_id=observation_id,
+)
+```
+
+The slash in the dataset name creates a folder: `feedback/support-replies` shows up as `support-replies` inside a `feedback` folder, and the full name is what you fetch. Folders keep a growing collection navigable.
+
+### Corrections as expected outputs
+
+The best expected output for a failed response is the one a domain expert would have written, and Langfuse has a field for it. On any trace or observation, the **Corrected Output** field accepts an improved version, with a diff view and a JSON or plain text mode. [Corrections](/docs/observability/features/corrections) are stored as scores with `dataType: "CORRECTION"` and `name: "output"`, one per trace or observation, so they can also be written via the SDK:
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+
+# Add correction to a trace
+langfuse.create_score(
+    trace_id="trace-123",
+    name="output",
+    value="The corrected output text here",
+    data_type="CORRECTION"
+)
+```
+
+To collect corrections for a dataset, fetch scores with `dataType=CORRECTION` from the scores API; the corrected text is in `value`, and the `subject` field group identifies the trace or observation. Reviewers can add corrections while working through an annotation queue, the natural place to produce expected outputs for a batch of failures.
+
+### What a good item contains
+
+An item should let a future experiment reproduce the failure and decide whether it is fixed: keep the input in the shape your task function or prompt expects (a prompt with a `{{question}}` variable needs a `question` key in the item input), put the corrected answer in the expected output, keep the `source_trace_id` link, and record the failure cluster in item metadata. Two dataset features protect the collection as it grows. JSON Schema validation on `input` and `expectedOutput` rejects malformed items with a specific error, which matters when several people and a batch job feed the same dataset. Versioning records every add, update, delete, or archive as a timestamped version, and `get_dataset(name, version=timestamp)` returns the dataset exactly as it was, so an experiment result stays reproducible after the dataset has moved on.
+
+## Use the dataset to test changes
+
+A feedback dataset earns its keep the first time it blocks a change that would have reintroduced a known failure. Langfuse runs experiments two ways.
+
+For prompt-only changes, run an experiment from the UI: open the dataset, start an experiment, pick a prompt version and model, optionally attach an LLM-as-a-judge or code evaluator, and compare runs side by side. Item input keys must match the prompt's variables.
+
+For changes to application logic, retrieval, or tools, run the experiment through the SDK so your real task function executes against every item. [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) accept item-level evaluators that see the output and expected output, plus run-level evaluators for aggregates:
+
+```python
+from langfuse import get_client, Evaluation
+
+langfuse = get_client()
+
+def my_task(*, item, **kwargs):
+    # item.input is the dataset item input; call your application here
+    return answer_question(item.input["question"])
+
+def matches_correction(*, output, expected_output, **kwargs):
+    if expected_output and expected_output["reply"].lower() in output.lower():
+        return Evaluation(name="matches_correction", value=1.0)
+    return Evaluation(name="matches_correction", value=0.0)
+
+dataset = langfuse.get_dataset("feedback/support-replies")
+
+result = dataset.run_experiment(
+    name="Support replies: prompt v12",
+    task=my_task,
+    evaluators=[matches_correction],
+)
+
+print(result.format())
+```
+
+Each run becomes a dataset run with one trace per item, so a failing item is one click from the output that failed. Substring matching against a correction is blunt; for semantic comparison, map the expected output as the reference in an LLM-as-a-judge evaluator.
+
+### Gate CI on the feedback dataset
+
+The [experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd) setup turns the dataset into a merge check. An experiment script raises `RegressionError` when an aggregate score misses a threshold, and the `langfuse/experiment-action` GitHub Action runs it against the named dataset, posts the scores as a pull request comment, and fails the job on regression. Pinning `dataset_version` keeps the gate deterministic while the dataset grows:
+
+```yaml
+- uses: langfuse/experiment-action@<release tag>
+  with:
+    langfuse_public_key: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+    langfuse_secret_key: ${{ secrets.LANGFUSE_SECRET_KEY }}
+    langfuse_base_url: https://cloud.langfuse.com
+    experiment_path: experiments/feedback-gate.py
+    dataset_name: feedback/support-replies
+    dataset_version: "2026-08-15T00:00:00Z"
+    github_token: ${{ github.token }}
+```
+
+As of September 2026 the action requires Python SDK v4.6.0+ or JS SDK v5.3.0+. Keep the gated dataset small enough to run on every pull request (tens to low hundreds of items) and move the long tail into a second dataset that runs on a schedule.
+
+## Close the loop with judges and annotators
+
+User feedback is sparse, so the durable win is using it to make automated evaluation trustworthy enough to flag failures on every trace, not only the rated ones.
+
+### Feedback as ground truth for an LLM judge
+
+An [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluator on production observations scores every sampled response, but its rubric is a prompt you wrote, and the question is whether it agrees with your users. Give the judge a boolean or categorical output that mirrors the feedback signal (a boolean `judge_helpful` next to `response_rating`) and compare the two in Score Analytics: the matched view shows only traces that carry both scores, with Cohen's Kappa, F1, and overall agreement for boolean and categorical scores, and a confusion matrix that makes systematic disagreement visible. Score Analytics compares two scores of the same data type at a time. The feedback dataset doubles as a calibration set: items whose expected output came from a correction are labeled examples of what "good" means, so running the judge prompt against the dataset as an experiment measures its accuracy directly.
+
+### Route disagreements to annotation queues
+
+The interesting traces are the ones where the judge and the user disagree: a thumbs-down the judge rated helpful, or a judge failure the user rated positively. Filter to that intersection, select the traces, and add them to an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues) where a domain expert scores them against fixed criteria and adds a corrected output. Each resolved disagreement improves the judge rubric, the dataset, or your understanding of what users mean by a thumbs-down.
+
+## FAQ
+
+### How do I collect user feedback on LLM responses? [#collect-user-feedback]
+
+Attach each signal as a score to the trace that produced the response. Explicit ratings go from the frontend through the Langfuse browser SDK, which needs only your public key and a trace ID your backend returns with the response; implicit signals such as edited drafts or closed tickets are written from the backend with `create_score`. Use a stable score ID so a changed rating overwrites the old one.
+
+### How do I find traces with negative user feedback? [#find-negative-feedback]
+
+Filter the traces or observations table by score name and value, for example a boolean `response_rating` equal to false, combined with a time range, trace name, or user ID. Score filters match by name regardless of the level the score sits on. From the filtered table you can select rows and add them to a dataset or an annotation queue in one action.
+
+### What should the expected output of a feedback-derived item be? [#expected-output]
+
+The answer a domain expert would have given, not the answer the user disliked. Langfuse stores such answers as corrected outputs on any trace or observation, persisted as scores with `dataType: "CORRECTION"`, which you can fetch via the scores API or have reviewers add in an annotation queue. If no reference exists, leave the expected output empty and use reference-free checks.
+
+### Can I run experiments on a dataset that keeps changing? [#dataset-versioning]
+
+Yes. Every add, update, delete, or archive of a dataset item creates a timestamped dataset version. The SDK's `get_dataset` accepts a `version` timestamp and `langfuse/experiment-action` accepts `dataset_version`, so an experiment or CI gate runs against the dataset as it was at that time while new feedback flows into the latest version.
+
+### How do I use user feedback to calibrate an LLM-as-a-judge? [#calibrate-judge]
+
+Give the judge a score type that mirrors the feedback signal, run it on the same traces, and compare the two scores in Score Analytics, which reports Cohen's Kappa, F1, and overall agreement on matched traces plus a confusion matrix. Disagreements are the calibration set: read them, tighten the judge rubric, and re-run.
+
+### Should user feedback go into the same dataset as hand-written test cases? [#separate-datasets]
+
+Usually not. Feedback-derived items drift with your traffic, while hand-written cases encode requirements that may never appear in production. Keep them in separate datasets, side by side in a folder, so CI gates on a small, stable set while the larger feedback set runs on a schedule.

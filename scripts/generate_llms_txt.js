@@ -124,6 +124,7 @@ const IGNORED_SECTION_PATHS = new Set([
   "agents",
   "chat-agents",
   "coding-agents",
+  "workflow-automation",
   "cloud",
   "status",
   "support",
