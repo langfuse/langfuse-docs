@@ -74,9 +74,7 @@ Compare sessions to find unused tools, repeated file reads, and prompts that sho
 - [Tracing coding agents with Langfuse](/resources/engineering/coding-agent-tracing) — Setup patterns for Claude Code, Codex, Copilot, Cursor, and more — plus cost tracking and team governance.
 - [What is an LLM gateway?](/resources/engineering/llm-gateway) — When a gateway is the right enforcement layer for model access, budgets, and tracing.
 - [Evaluating AI agent skills](/blog/2026-02-26-evaluate-ai-agent-skills) — Measure whether skills actually improve quality and reduce wasted context.
-- [Optimizing an AI skill with Autoresearch](/blog/2026-03-24-optimizing-ai-skill-with-autoresearch) — Iterate on skills with traces and experiments.
-- [How Langfuse uses a gateway for coding agents (placeholder)](/blog)
-- [Academy example for coding agents (placeholder)](/academy)
+- [Optimizing an AI skill with Autoresearch](/blog/2026-03-24-optimizing-ai-skill-with-autoresearch) — Iterate on skills with traces and experiments so token spend actually drops.
 
 ## Ready to govern coding agent usage?
 

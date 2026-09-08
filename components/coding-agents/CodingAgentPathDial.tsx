@@ -83,7 +83,7 @@ export function CodingAgentPathPanel({
   const active = current === value;
 
   return (
-    <div hidden={!active} className={cn(!active && "hidden", className)}>
+    <div hidden={!active} className={active ? className : "hidden"}>
       {label ? <h3 className="sr-only">{label}</h3> : null}
       {children}
     </div>
