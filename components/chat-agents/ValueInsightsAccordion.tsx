@@ -120,9 +120,11 @@ export function ValueInsightsAccordion({
           />
         )}
       </div>
-      <p className="px-1 pt-2 font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
-        {caption}
-      </p>
+      {caption ? (
+        <p className="px-1 pt-2 font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+          {caption}
+        </p>
+      ) : null}
     </>
   );
 
