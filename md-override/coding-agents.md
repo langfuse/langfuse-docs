@@ -9,7 +9,7 @@ Coding agents make engineers faster, but they also make AI spend unpredictable. 
 
 Engineering spend by task, last 30 days: Implementation $486, Code review $379, Planning $321, Bug fix $178, Documentation $104, Other $72. Total spend $1,540 · 4,812 sessions · 28% budget left.
 
-[Start free](/cloud) · [Talk to sales](/talk-to-us) · [Gateway guide](/resources/engineering/llm-gateway) · [Tracing guide](/resources/engineering/coding-agent-tracing)
+[Start free](/cloud) · [Talk to sales](/talk-to-us)
 
 Pick the path that matches how your organization runs coding agents. Platform teams usually start with a **gateway**. Individual developers and team rollouts often start with **hooks**.
 
@@ -62,12 +62,6 @@ Compare sessions to find unused tools, repeated file reads, and prompts that sho
 [Optimizing an AI skill](/blog/2026-03-24-optimizing-ai-skill-with-autoresearch)
 
 **Coding agents:** [Claude Code](/integrations/developer-tools/claude-code), [Codex](/integrations/developer-tools/codex), [OpenCode](/integrations/developer-tools/opencode), [Cursor](/integrations/developer-tools/cursor), [GitHub Copilot](/integrations/developer-tools/github-copilot), [more coding agents](/integrations#developer-tools)
-
-## Teams tracing developer AI usage on Langfuse
-
-- [Khan Academy](/users/khan-academy)
-- [Hugging Face](/users/hugging-face)
-- [Merck](/users/merckgroup)
 
 ## Learn how to trace and govern coding agents
 

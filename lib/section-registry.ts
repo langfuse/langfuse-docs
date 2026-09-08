@@ -146,6 +146,13 @@ export const MARKETING_SLUGS = marketingSource
   .map((p) => p.url.replace(/^\//, ""))
   .filter(Boolean) as string[];
 
+/** Use case landing pages share compact spacing and omit the copy toolbar. */
+export const USE_CASE_SECTIONS = new Set<string>([
+  "chat-agents",
+  "coding-agents",
+  "workflow-automation",
+]);
+
 /** Build a unified config that includes both doc sections and marketing entries. */
 const marketingEntries: Record<string, SectionMeta> = Object.fromEntries(
   MARKETING_SLUGS.map((slug) => [

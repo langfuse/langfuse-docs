@@ -3,7 +3,9 @@
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { Plus } from "lucide-react";
 import Image from "next/image";
+import { useState } from "react";
 
+import { chatAgentsInsights } from "@/components/chat-agents/content";
 import { CornerBox } from "@/components/ui/corner-box";
 import { cn } from "@/lib/utils";
 
@@ -13,34 +15,10 @@ export type InsightItem = {
   description: string;
   href: string;
   ctaLabel: string;
+  imageSrc?: string;
+  imageAlt?: string;
+  imageClassName?: string;
 };
-
-const INSIGHT_ITEMS: InsightItem[] = [
-  {
-    id: "sessions",
-    title: "Identify where conversations go sideways",
-    description:
-      "See deep insights into user inputs and agent responses. Dive deep into every step the agent takes in between. Inspect the overall user session as a whole and follow the conversation flow as your users did.",
-    href: "/docs/observability/features/sessions",
-    ctaLabel: "Session tracing",
-  },
-  {
-    id: "cost",
-    title: "Track detailed cost of interactions",
-    description:
-      "Context grows with every turn and so does your bill. Break cost and token usage by turn, session, model, and release. Build dashboards and set alerts to stay on top of your spend.",
-    href: "/docs/observability/features/token-and-cost-tracking",
-    ctaLabel: "Cost tracking",
-  },
-  {
-    id: "evals",
-    title: "Measure and improve quality of your chat agent",
-    description:
-      "Run LLM as a judge on production data to detect frustration, follow-ups, or other user signals that are worth investigating. Promote happy paths from production into datasets to measure and improve quality.",
-    href: "/docs/evaluation/overview",
-    ctaLabel: "Evaluations",
-  },
-];
 
 type ValueInsightsAccordionProps = {
   items?: InsightItem[];
@@ -85,12 +63,21 @@ function InsightBody({ item, locked }: { item: InsightItem; locked: boolean }) {
 }
 
 export function ValueInsightsAccordion({
-  items = INSIGHT_ITEMS,
+  items = chatAgentsInsights,
   imageSrc = "/images/docs/observability/first-trace.png",
   imageAlt = "Langfuse trace screenshot",
   caption = "trace · frustrated turn 3 of 7",
   locked = false,
 }: ValueInsightsAccordionProps = {}) {
+  const [activeItemId, setActiveItemId] = useState(items[0]?.id);
+  const activeItem = items.find((item) => item.id === activeItemId) ?? items[0];
+  const activeImageSrc = activeItem?.imageSrc ?? imageSrc;
+  const activeImageAlt = activeItem?.imageAlt ?? imageAlt;
+
+  function handleValueChange(value: string) {
+    if (value) setActiveItemId(value);
+  }
+
   const media = (
     <>
       <div
@@ -100,22 +87,36 @@ export function ValueInsightsAccordion({
         )}
       >
         {locked ? (
-          <div className="relative h-full min-h-[200px] w-full">
+          <div
+            className={cn(
+              "relative w-full",
+              activeItem?.imageSrc
+                ? "aspect-square lg:aspect-auto lg:h-full lg:min-h-[200px]"
+                : "h-full min-h-[200px]",
+            )}
+          >
             <Image
-              src={imageSrc}
-              alt={imageAlt}
+              src={activeImageSrc}
+              alt={activeImageAlt}
               fill
-              className="object-cover object-top"
+              className={cn(
+                "object-top",
+                activeItem?.imageSrc ? "object-contain" : "object-cover",
+                activeItem?.imageClassName,
+              )}
               unoptimized
             />
           </div>
         ) : (
           <Image
-            src={imageSrc}
-            alt={imageAlt}
+            src={activeImageSrc}
+            alt={activeImageAlt}
             width={1600}
             height={1000}
-            className="h-auto w-full border border-line-structure bg-surface-bg"
+            className={cn(
+              "h-auto w-full border border-line-structure bg-surface-bg",
+              activeItem?.imageClassName,
+            )}
             unoptimized
           />
         )}
@@ -198,6 +199,7 @@ export function ValueInsightsAccordion({
               type="single"
               collapsible
               defaultValue={items[0]?.id}
+              onValueChange={handleValueChange}
               className="absolute inset-0 overflow-hidden border-t border-line-structure"
             >
               {accordionItems}
@@ -208,6 +210,7 @@ export function ValueInsightsAccordion({
             type="single"
             collapsible
             defaultValue={items[0]?.id}
+            onValueChange={handleValueChange}
             className="order-1 border-t border-line-structure lg:order-2"
           >
             {accordionItems}

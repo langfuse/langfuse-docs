@@ -161,9 +161,9 @@ export function RelevantIntegrations({
   browseCta?: string;
 } = {}) {
   return (
-    <div className="mt-8 border border-line-structure bg-surface-bg px-4 py-4 sm:px-6 sm:py-6">
+    <div>
       <div className="grid gap-4 border-b border-line-structure pb-5 md:grid-cols-[1fr_1fr] md:items-center md:gap-8">
-        <h3 className="text-[48px] leading-[0.95] text-text-primary">
+        <h3 className="text-[34px] leading-[0.95] text-text-primary sm:text-[48px]">
           <span className="block">{headingLine1}</span>
           <span className="block">{headingLine2}</span>
         </h3>

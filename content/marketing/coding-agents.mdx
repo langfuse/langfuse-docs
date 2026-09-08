@@ -17,9 +17,7 @@ import {
   codingAgentsGatewayIntegrationGroups,
   codingAgentsHooksInsights,
   codingAgentsHooksIntegrationGroups,
-  codingAgentsQuoteRoutes,
 } from "@/components/coding-agents/content";
-import { CustomerQuoteGrid } from "@/components/chat-agents/CustomerQuoteGrid";
 import { RelevantIntegrations } from "@/components/chat-agents/RelevantIntegrations";
 import { ValueInsightsAccordion } from "@/components/chat-agents/ValueInsightsAccordion";
 import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
@@ -60,22 +58,6 @@ import { BookOpen, Network, Radar, Sparkles } from "lucide-react";
           >
             Talk to sales
           </a>
-          <CodingAgentPathPanel value="gateway" className="contents">
-            <a
-              href="/resources/engineering/llm-gateway"
-              className="border border-line-structure bg-surface-bg px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary"
-            >
-              Gateway guide →
-            </a>
-          </CodingAgentPathPanel>
-          <CodingAgentPathPanel value="hooks" className="contents">
-            <a
-              href="/resources/engineering/coding-agent-tracing"
-              className="border border-line-structure bg-surface-bg px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary"
-            >
-              Tracing guide →
-            </a>
-          </CodingAgentPathPanel>
         </div>
       </div>
 
@@ -88,7 +70,7 @@ import { BookOpen, Network, Radar, Sparkles } from "lucide-react";
 
     <CodingAgentPathPanel value="gateway" label="Via gateways">
       <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
-        <div className="flex items-center gap-4 border-b border-line-structure pb-4">
+        <div className="flex items-center gap-4 pb-4">
           <h2 className="text-[34px] leading-[1] text-text-primary sm:text-[46px]">
             Govern spend from one control plane
           </h2>
@@ -104,7 +86,7 @@ import { BookOpen, Network, Radar, Sparkles } from "lucide-react";
 
     <CodingAgentPathPanel value="hooks" label="Via hooks">
       <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
-        <div className="flex items-center gap-4 border-b border-line-structure pb-4">
+        <div className="flex items-center gap-4 pb-4">
           <h2 className="text-[34px] leading-[1] text-text-primary sm:text-[46px]">
             See the session, not just the bill
           </h2>
@@ -112,21 +94,14 @@ import { BookOpen, Network, Radar, Sparkles } from "lucide-react";
 
         <ValueInsightsAccordion
           items={codingAgentsHooksInsights}
-          caption="session · claude-code · 12 tools"
+          caption=""
           locked
         />
       </section>
     </CodingAgentPathPanel>
 
-    <section className="border-t border-line-structure bg-surface-1 px-5 py-14 sm:px-10 sm:py-18">
-      <h2 className="mt-2 text-center text-[44px] leading-[1] text-text-primary">
-        Teams tracing developer AI usage on Langfuse
-      </h2>
-      <CustomerQuoteGrid routes={codingAgentsQuoteRoutes} />
-    </section>
-
     <CodingAgentPathPanel value="gateway" label="Gateway integrations">
-      <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-18">
+      <section className="border-t border-line-structure px-5 py-8 sm:px-10 sm:py-10">
         <RelevantIntegrations
           headingLine1="Any gateway,"
           headingLine2="one trace stream"
@@ -140,7 +115,7 @@ import { BookOpen, Network, Radar, Sparkles } from "lucide-react";
     </CodingAgentPathPanel>
 
     <CodingAgentPathPanel value="hooks" label="Hooks integrations">
-      <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-18">
+      <section className="border-t border-line-structure px-5 py-8 sm:px-10 sm:py-10">
         <RelevantIntegrations
           headingLine1="Your coding agent,"
           headingLine2="fully traced"

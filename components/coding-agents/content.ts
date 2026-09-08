@@ -55,12 +55,6 @@ export const codingAgentsHooksInsights: InsightItem[] = [
   },
 ];
 
-export const codingAgentsQuoteRoutes = [
-  "/users/khan-academy",
-  "/users/hugging-face",
-  "/users/merckgroup",
-] as const;
-
 export const codingAgentsGatewayIntegrationGroups: IntegrationGroup[] = [
   {
     title: "LLM gateways",
