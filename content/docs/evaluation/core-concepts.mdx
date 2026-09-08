@@ -105,6 +105,12 @@ Evaluators define how Langfuse scores data. Rules define which incoming observat
 
 You can reuse an evaluator across rules. For LLM-as-a-Judge, Langfuse validates the evaluator's default variable mapping against observations that match the rule. Override the mapping for a specific evaluator-rule assignment when the data has a different shape.
 
+### Run an evaluator on historical observations [#backfill-evaluator-scores]
+
+When you save an evaluator, enable **Also run on past observations** to score existing observations that match the rule. Choose a preset or custom range of up to six months and evaluate up to 25,000 observations. Check the estimated LLM cost before starting the evaluation.
+
+For a one-off evaluation of observations selected from the traces table, use [batch evaluation](#batch-evaluation) instead.
+
 ### Monitor evaluator results [#monitor-evaluator-results]
 
 Use [custom dashboards](/docs/metrics/features/custom-dashboards) to track scores and application performance over time. To get notified when an evaluator's score or cost crosses a threshold, open the evaluator and click **Add alert**.

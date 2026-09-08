@@ -18,13 +18,15 @@ For Langfuse OSS, the same telemetry helps us understand adoption and prioritize
   metrics are shared.
 </Callout>
 
-## Where telemetry is sent
+## Application telemetry [#application-telemetry]
+
+### Where telemetry is sent
 
 Telemetry is sent to Langfuse's telemetry pipeline via PostHog Cloud.
 
 Implementation reference: [Telemetry job](https://github.com/langfuse/langfuse/blob/main/web/src/features/telemetry/index.ts)
 
-## What is sent
+### What is sent
 
 Langfuse calculates these values locally and sends a single telemetry event.
 All metrics are aggregated across all projects of the instance before they are sent.
@@ -55,3 +57,11 @@ Yes. Set `TELEMETRY_ENABLED=false` on all Langfuse application containers.
 
 Enterprise self-hosted telemetry is used for license compliance and cannot be disabled.
 If you have procurement, network, or privacy questions, please [contact us](/support).
+
+### Container image downloads [#container-image-downloads]
+
+Our deployment templates — the [`docker-compose.yml`](https://github.com/langfuse/langfuse/blob/main/docker-compose.yml) file and the [`langfuse-k8s`](https://github.com/langfuse/langfuse-k8s) Helm chart — reference the Langfuse application images as `docker.langfuse.com/langfuse/langfuse` and `docker.langfuse.com/langfuse/langfuse-worker`.
+
+`docker.langfuse.com` is a registry endpoint used to measure open source adoption via [Reo.dev](https://reo.dev). Only the pull is observed — no data from your running Langfuse instance is involved, and the endpoint is contacted only when you fetch an image.
+
+You can also pull the images directly from Docker Hub. Replace `docker.langfuse.com/langfuse/...` with `langfuse/...` (or the fully qualified `docker.io/langfuse/...`) wherever the image is referenced.

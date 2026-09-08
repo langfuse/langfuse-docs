@@ -105,3 +105,9 @@ docker run --name langfuse-worker \
   -a STDOUT \
 docker.langfuse.com/langfuse/langfuse-worker:4
 ```
+
+## Container images [#container-images]
+
+The images are published to Docker Hub as `langfuse/langfuse` and `langfuse/langfuse-worker`.
+Our deployment templates and the examples below pull them through `docker.langfuse.com`, a registry endpoint run by [Reo.dev](https://reo.dev), our analytics provider, which records the pull so that we can measure open source adoption and then serves the image from Docker Hub.
+The tags and digests are identical either way, and you can pull from Docker Hub directly by dropping the `docker.langfuse.com/` prefix.

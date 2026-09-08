@@ -104,6 +104,7 @@ Optional **Yearly Commitment**:
 | [Ingestion throughput](/faq/all/api-limits)                                                         | 1,000 req/min       | 4,000 req/min       | 20,000 req/min      | Custom                       |
 | **Langfuse AI**                                                                                     |                     |                     |                     |                              |
 | [Langfuse Assistant (in-app agent)](/docs/langfuse-assistant)                                       | Yes                 | Yes                 | Yes                 | Yes                          |
+| Langfuse Assistant usage limits                                                                     | Low                 | Medium              | High                | High                         |
 | **Prompt Management**                                                                               |                     |                     |                     |                              |
 | [Prompt versioning](/docs/prompt-management/get-started)                                            | Yes                 | Yes                 | Yes                 | Yes                          |
 | Prompt fetching                                                                                     | Unlimited           | Unlimited           | Unlimited           | Unlimited                    |
