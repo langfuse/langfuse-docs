@@ -4,7 +4,9 @@ import {
   createContext,
   useContext,
   useEffect,
+  useRef,
   useState,
+  type KeyboardEvent,
   type ReactNode,
 } from "react";
 import { cn } from "@/lib/utils";
@@ -28,7 +30,22 @@ const PATHS: {
   },
 ];
 
-const PathContext = createContext<CodingAgentPath>("gateway");
+type PathContextValue = {
+  value: CodingAgentPath;
+  setValue: (next: CodingAgentPath) => void;
+};
+
+const PathContext = createContext<PathContextValue | null>(null);
+
+function usePathContext() {
+  const context = useContext(PathContext);
+  if (!context) {
+    throw new Error(
+      "Coding agent path controls must be used inside CodingAgentPathDial",
+    );
+  }
+  return context;
+}
 
 function readPathFromUrl(): CodingAgentPath | null {
   if (typeof window === "undefined") return null;
@@ -62,13 +79,84 @@ export function CodingAgentPathPanel({
   className?: string;
   children: ReactNode;
 }) {
-  const current = useContext(PathContext);
+  const { value: current } = usePathContext();
   const active = current === value;
 
   return (
     <div hidden={!active} className={cn(!active && "hidden", className)}>
       {label ? <h3 className="sr-only">{label}</h3> : null}
       {children}
+    </div>
+  );
+}
+
+export function CodingAgentPathSwitcher() {
+  const { value, setValue } = usePathContext();
+  const buttonRefs = useRef<
+    Partial<Record<CodingAgentPath, HTMLButtonElement | null>>
+  >({});
+
+  const selectPath = (next: CodingAgentPath, focus = false) => {
+    setValue(next);
+    writePathToUrl(next);
+    if (focus) buttonRefs.current[next]?.focus();
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+    event.preventDefault();
+    selectPath(value === "gateway" ? "hooks" : "gateway", true);
+  };
+
+  return (
+    <div className="flex flex-col gap-2 border-t border-line-structure px-5 py-3 sm:flex-row sm:items-center sm:gap-4 sm:px-10">
+      <p className="shrink-0 font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
+        Set up
+      </p>
+      <div
+        role="radiogroup"
+        aria-label="Set up path"
+        id="integration-paths"
+        className="grid min-w-0 flex-1 grid-cols-1 overflow-hidden rounded-[1px] border border-line-structure sm:grid-cols-2"
+      >
+        {PATHS.map((item, index) => {
+          const active = value === item.value;
+          return (
+            <button
+              key={item.value}
+              ref={(node) => {
+                buttonRefs.current[item.value] = node;
+              }}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              tabIndex={active ? 0 : -1}
+              onClick={() => selectPath(item.value)}
+              onKeyDown={handleKeyDown}
+              className={cn(
+                "flex items-center justify-between gap-3 px-4 py-2.5 text-left",
+                index === 0 &&
+                  "border-b border-line-structure sm:border-b-0 sm:border-r",
+                active
+                  ? "bg-surface-cta-primary text-text-primary"
+                  : "bg-surface-bg text-text-primary hover:bg-surface-1",
+              )}
+            >
+              <span className="font-mono text-[11px] uppercase tracking-[0.06em]">
+                {item.label}
+              </span>
+              <span
+                className={cn(
+                  "text-[12px] leading-tight",
+                  active ? "text-text-primary" : "text-text-tertiary",
+                )}
+              >
+                {item.description}
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -87,48 +175,9 @@ export function CodingAgentPathDial({
     if (fromUrl) setValue(fromUrl);
   }, []);
 
-  const handleChange = (next: CodingAgentPath) => {
-    setValue(next);
-    writePathToUrl(next);
-  };
-
   return (
-    <PathContext.Provider value={value}>
-      <div>
-        <div
-          role="tablist"
-          aria-label="Integration path"
-          id="integration-paths"
-          className="grid grid-cols-2 border-b border-line-structure"
-        >
-          {PATHS.map((item) => {
-            const active = value === item.value;
-            return (
-              <button
-                key={item.value}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => handleChange(item.value)}
-                className={cn(
-                  "flex flex-col items-start gap-0.5 border-r border-line-structure px-5 py-3.5 text-left last:border-r-0",
-                  active
-                    ? "bg-surface-1 text-text-primary"
-                    : "bg-surface-bg text-text-tertiary hover:text-text-secondary",
-                )}
-              >
-                <span className="font-mono text-[10px] uppercase tracking-[0.09em]">
-                  {item.label}
-                </span>
-                <span className="font-sans text-[12px] leading-tight">
-                  {item.description}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-        {children}
-      </div>
+    <PathContext.Provider value={{ value, setValue }}>
+      {children}
     </PathContext.Provider>
   );
 }
