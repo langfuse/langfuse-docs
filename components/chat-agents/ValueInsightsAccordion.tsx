@@ -51,12 +51,6 @@ type ValueInsightsAccordionProps = {
   locked?: boolean;
 };
 
-function longestItem(items: InsightItem[]) {
-  return items.reduce((current, item) =>
-    item.description.length >= current.description.length ? item : current,
-  );
-}
-
 function InsightHeader({ index, title }: { index: number; title: string }) {
   return (
     <div className="grid w-full grid-cols-[26px_1fr_auto] items-start gap-3 py-5 text-left">
@@ -97,7 +91,6 @@ export function ValueInsightsAccordion({
   caption = "trace · frustrated turn 3 of 7",
   locked = false,
 }: ValueInsightsAccordionProps = {}) {
-  const sizerItem = longestItem(items);
   const media = (
     <>
       <div
@@ -191,7 +184,13 @@ export function ValueInsightsAccordion({
                   <InsightHeader index={index} title={item.title} />
                 </div>
               ))}
-              <InsightBody item={sizerItem} locked />
+              <div className="grid pb-6">
+                {items.map((item) => (
+                  <div key={item.id} className="col-start-1 row-start-1">
+                    <InsightBody item={item} locked />
+                  </div>
+                ))}
+              </div>
             </div>
             <AccordionPrimitive.Root
               type="single"
