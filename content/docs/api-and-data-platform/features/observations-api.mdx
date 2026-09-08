@@ -48,7 +48,7 @@ The v2 Observations API is a redesigned endpoint optimized for high-performance 
 
 ### Upgrade from older trace and observation reads [#upgrade-from-older-reads]
 
-The [migration guide](/faq/all/deprecated-api-migration) maps every deprecated read endpoint (`/api/public/traces`, `/api/public/observations`, `/api/public/sessions`, ...) to its v2 replacement, with parameter mappings and before/after examples. Include `fromStartTime` and `toStartTime` for scans and known trace time ranges. For an exact trace ID without a timestamp, both bounds may be omitted; see [ID-only lookups](/faq/all/deprecated-api-migration#trace-id-only-lookups).
+The [migration guide](/faq/all/deprecated-api-migration) maps every deprecated read endpoint (`/api/public/traces`, `/api/public/observations`, `/api/public/sessions`, ...) to its v2 replacement, with parameter mappings and before/after examples. Include `fromStartTime` and `toStartTime` for scans and known trace time ranges.
 
 The v2 Observations API returns observation rows, not full trace objects. Group rows by `traceId` when you need to reconstruct trace activity, and use [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregate reporting with trace-level dimensions such as `traceName`, `traceRelease`, or `traceVersion`. There is no get-by-id route on v2; for single-observation lookups, pass a URL-encoded `filter` condition on the `id` column instead. See the [v2 Observations API Reference](https://api.reference.langfuse.com/#tag/observations/GET/api/public/v2/observations) for the filter schema.
 
@@ -90,7 +90,6 @@ The v1 API returns complete rows with all fields (input/output, usage, metadata,
 
 If `fields` is not specified, `core` and `basic` field groups are returned by default. Fields from groups you do not request are **absent** from the response, not `null`. The following fields are an exception and are always present but only populated when the field group `model` is selected: `modelId`, `inputPrice`, `outputPrice`, and `totalPrice`. Note that `inputPrice`, `outputPrice`, and `totalPrice` are returned as **strings** (e.g. `"0.000005"`) to preserve decimal precision; cast them to a numeric type in your pipeline.
 
-Unknown field groups are silently ignored, so HTTP 200 does not confirm that the requested data was included. For example, `fields=core,basic,cost` omits cost fields: use `usage`, which includes both usage and costs. Check that the fields your consumer requires are present. Empty `usageDetails` and null `totalCost` can be valid when no usage or cost was recorded; verify usage/cost readers with a generation known to contain those values.
 
 The `metadata` group returns a flat key map. OTEL resource attributes can appear as literal dotted keys, such as `metadata["resourceAttributes.service.name"]`, rather than nested objects. Metadata values may themselves be structured; preserve the returned keys and types. For legacy usage and cost field replacements, see the [response-field mapping](/faq/all/deprecated-api-migration#observation-response-fields).
 
@@ -148,7 +147,6 @@ curl \
 
 **Getting observations for a specific trace:**
 
-If only the trace ID is known, omit the time bounds as below. When its time range is known, include it. In either case, follow cursor pagination; results remain subject to retention and data-access limits.
 
 ```bash
 curl \

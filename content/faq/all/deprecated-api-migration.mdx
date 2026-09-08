@@ -146,7 +146,6 @@ curl \
 
 These replacements return observation rows, not the legacy trace response shape. Group them by `traceId` and reconstruct trace-level fields as described below.
 
-### Trace ID without a timestamp [#trace-id-only-lookups]
 
 For a known trace time range, include `fromStartTime` and `toStartTime` wide enough to cover the observations you need. If you only have a trace ID, for example from a trace URL, filter by that exact `traceId` and omit the unknown time bounds. Both parameters are optional on Observations API v2; an epoch-to-now range is unnecessary. In Python use `get_many(trace_id=trace_id)`; in JS/TS use `getMany({ traceId })`.
 
