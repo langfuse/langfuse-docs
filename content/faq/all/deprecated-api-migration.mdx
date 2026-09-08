@@ -75,24 +75,43 @@ These mappings cover the latest Python SDK v4 and JS/TS SDK v5 method surfaces. 
 | JS/TS v5  | `client.api.legacy.observationsV1.get(observationId)`   | `client.api.observations.getMany({ filter: "<observation ID filter>", fromStartTime, toStartTime })`         |
 | JS/TS v5  | `client.fetchObservation(observationId)`                | `client.api.observations.getMany({ filter: "<observation ID filter>", fromStartTime, toStartTime })`         |
 
-There is no v2 single-observation getter; filter `get_many` / `getMany` by ID and take the matching row. Always bound observation queries with a time range and follow cursor pagination. `client.fetchObservations(...)` is not listed because in JS/TS v5 it already calls Observations API v2.
+There is no v2 single-observation getter; filter `get_many` / `getMany` by ID and take the matching row. Bound scans with a time range and follow cursor pagination. For a trace ID without a known timestamp, use the [ID-only lookup guidance](#trace-id-only-lookups). `client.fetchObservations(...)` is not listed because in JS/TS v5 it already calls Observations API v2.
 
 ### Parameter mapping
 
-| Deprecated (v1)                                                                                                               | v2 equivalent                                                                        |
-| ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `page`                                                                                                                        | `cursor` (from the previous response's `meta.cursor`)                                |
-| `limit` (default 50, max 100)                                                                                                 | `limit` (default 50, max 1,000)                                                      |
-| `GET /observations/{observationId}`                                                                                           | `filter` condition on the `id` column                                                |
-| `name`, `userId`, `type`, `traceId`, `level`, `parentObservationId`, `environment`, `version`, `fromStartTime`, `toStartTime` | Unchanged; always set `fromStartTime` and `toStartTime` to keep each request bounded |
-| -                                                                                                                             | `fields`: comma-separated field groups; defaults to `core,basic`                     |
+| Deprecated (v1)                                                                                                               | v2 equivalent                                                    |
+| ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `page`                                                                                                                        | `cursor` (from the previous response's `meta.cursor`)            |
+| `limit` (default 50, max 100)                                                                                                 | `limit` (default 50, max 1,000)                                  |
+| `GET /observations/{observationId}`                                                                                           | `filter` condition on the `id` column                            |
+| `name`, `userId`, `type`, `traceId`, `level`, `parentObservationId`, `environment`, `version`, `fromStartTime`, `toStartTime` | Unchanged; use time bounds for scans and known trace time ranges |
+| -                                                                                                                             | `fields`: comma-separated field groups; defaults to `core,basic` |
 
 ### Semantic differences
 
 - Responses include only the requested `fields` groups; fields from groups you did not request are **absent**, not `null`. One exception: `modelId`, `inputPrice`, `outputPrice`, and `totalPrice` are always present but `null` unless the `model` field group is requested.
+- Unknown `fields` groups are silently ignored. For example, `fields=core,basic,cost` can return HTTP 200 without cost fields; request `usage` for usage and costs.
+- Metadata keys are returned flat, including dotted keys such as `resourceAttributes.service.name`. Replace nested access such as `metadata.resourceAttributes["service.name"]` with access to the literal returned key, `metadata["resourceAttributes.service.name"]`. Values can still be structured; do not split every dotted key to reconstruct a nested object. See the [response examples](/docs/api-and-data-platform/features/observations-api#sample-response).
 - `input`/`output` are returned as raw strings; parse them in your pipeline when you need JSON (v1 parsed them automatically). The `parseIoAsJson` parameter is deprecated: omit it or set it to `false`; setting it to `true` returns a `400` error.
 - Pagination is cursor-based: pass `meta.cursor` from the previous response until no cursor is returned. Results are always sorted by `startTime` descending.
 - When the `model` group is requested, `inputPrice`, `outputPrice`, and `totalPrice` are returned as strings (e.g. `"0.000005"`) to preserve decimal precision; cast them to a numeric type in your pipeline.
+
+### Response-field mapping [#observation-response-fields]
+
+These are JSON wire names; SDKs may expose language-specific names, such as Python's `total_cost`. Update downstream readers and fixtures as well as the request method.
+
+| Deprecated v1 response field       | v2 response field                                                     | Field group |
+| ---------------------------------- | --------------------------------------------------------------------- | ----------- |
+| `usage.input`, `promptTokens`      | `inputUsage`                                                          | `usage`     |
+| `usage.output`, `completionTokens` | `outputUsage`                                                         | `usage`     |
+| `usage.total`, `totalTokens`       | `totalUsage`                                                          | `usage`     |
+| `calculatedInputCost`              | `inputCost`                                                           | `usage`     |
+| `calculatedOutputCost`             | `outputCost`                                                          | `usage`     |
+| `calculatedTotalCost`              | `totalCost`                                                           | `usage`     |
+| `usage.unit`, `unit`               | Removed; no direct replacement                                        | —           |
+| `usageDetails`, `costDetails`      | Unchanged; preserve these maps for detailed usage and cost breakdowns | `usage`     |
+
+The legacy `usage` object is absent in v2. A row with no recorded usage can have `usageDetails: {}` and zero usage totals. A row with no recorded cost can have `costDetails: {}` and `totalCost: null`. Neither is the same as a missing field because `usage` was not requested, and `null` cost does not establish that the operation was free. Test cost readers with a known priced generation so a missing field cannot silently become zero.
 
 ### Example
 
@@ -126,6 +145,12 @@ curl \
 | JS/TS v5  | `client.fetchTrace(traceId)`     | `client.api.observations.getMany({ traceId, fromStartTime, toStartTime })`                    |
 
 These replacements return observation rows, not the legacy trace response shape. Group them by `traceId` and reconstruct trace-level fields as described below.
+
+### Trace ID without a timestamp [#trace-id-only-lookups]
+
+For a known trace time range, include `fromStartTime` and `toStartTime` wide enough to cover the observations you need. If you only have a trace ID, for example from a trace URL, filter by that exact `traceId` and omit the unknown time bounds. Both parameters are optional on Observations API v2; an epoch-to-now range is unnecessary. In Python use `get_many(trace_id=trace_id)`; in JS/TS use `getMany({ traceId })`.
+
+Follow `meta.cursor` until no cursor is returned, keeping the same filters and field groups on each page. Omitting time bounds does not bypass project access, retention, or plan data-access limits. Continue to use bounded windows for scans across traces.
 
 ### Parameter mapping
 
