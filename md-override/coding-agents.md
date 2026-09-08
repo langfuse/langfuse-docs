@@ -13,7 +13,7 @@ Engineering spend by task, last 30 days: Implementation $486, Code review $379, 
 
 Pick the path that matches how your organization runs coding agents. Platform teams usually start with a **gateway**. Individual developers and team rollouts often start with **hooks**.
 
-## Via gateways (for platform teams)
+## Govern spend from one central place
 
 Route coding agent traffic through an LLM gateway so every model call is authenticated, budgeted, and traced in one place — without changing each developer's local setup.
 
@@ -35,9 +35,13 @@ Use traces to find repeated context, failed tool loops, and prompts that should 
 
 [Evaluating AI agent skills](/blog/2026-02-26-evaluate-ai-agent-skills)
 
+### Any gateway, one place for LLM calls
+
+Route coding-agent traffic through LiteLLM or OpenRouter today. Langfuse Gateway is coming soon: virtual keys, access control, and tracing built in.
+
 **LLM gateways:** [LiteLLM](/integrations/gateways/litellm), [OpenRouter](/integrations/gateways/openrouter), [Langfuse Gateway (coming soon)](/docs/roadmap#langfuse-gateway)
 
-## Via hooks
+## Dive deep into session details
 
 Trace the full execution of your preferred coding agent. Log tool calls, token spend, and skill usage to identify bottlenecks. Optimize your coding setup, test skills, and inspect agent context for maximum efficiency.
 
