@@ -148,11 +148,17 @@ export function RelevantIntegrations({
   headingLine2 = "any framework",
   description = "Based on OpenTelemetry. Two lines in your handler, or point an existing OTel exporter at Langfuse — nothing else in your stack changes.",
   groups = DEFAULT_GROUPS,
+  browseLabel = "Need another framework?",
+  browseHref = "/integrations",
+  browseCta = "Browse all 80+ integrations →",
 }: {
   headingLine1?: string;
   headingLine2?: string;
   description?: string;
   groups?: readonly IntegrationGroup[];
+  browseLabel?: string;
+  browseHref?: string;
+  browseCta?: string;
 } = {}) {
   return (
     <div className="mt-8 border border-line-structure bg-surface-bg px-4 py-4 sm:px-6 sm:py-6">
@@ -175,12 +181,12 @@ export function RelevantIntegrations({
       ))}
 
       <div className="pt-4 text-right text-[12px] text-text-tertiary">
-        Need another framework?{" "}
+        {browseLabel}{" "}
         <Link
-          href="/integrations"
+          href={browseHref}
           className="text-text-secondary underline underline-offset-2 hover:text-text-primary"
         >
-          Browse all 80+ integrations →
+          {browseCta}
         </Link>
       </div>
     </div>

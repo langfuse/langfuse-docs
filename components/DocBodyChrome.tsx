@@ -42,6 +42,7 @@ export function DocBodyChrome({
   const isInFlowCopyButton =
     pathname === "/enterprise" ||
     pathname === "/chat-agents" ||
+    pathname === "/coding-agents" ||
     pathname === "/workflow-automation";
   const isCustomerStory = (pathname ?? "").startsWith("/users/");
   const cookbook = withProse
