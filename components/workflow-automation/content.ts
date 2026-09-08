@@ -8,13 +8,9 @@ export type InvoiceIntakeStep = {
 };
 
 export const invoiceIntakeTrace: {
-  title: string;
-  summary: string;
   insight: string;
   steps: InvoiceIntakeStep[];
 } = {
-  title: "trace · invoice-intake",
-  summary: "5 steps · $0.092",
   insight: "one retry step · 66% of run cost",
   steps: [
     { name: "ingest_pdf", indent: false, offset: "6%", width: "16%" },

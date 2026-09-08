@@ -22,11 +22,6 @@ export function InvoiceIntakeTraceMock() {
       <CropMark className="bottom-0 right-0 border-b border-r" />
 
       <div className="border border-line-structure bg-surface-bg shadow-sm">
-        <div className="flex items-center justify-between gap-3 border-b border-line-structure px-3 py-2 font-mono text-[10px] text-text-tertiary">
-          <span>{invoiceIntakeTrace.title}</span>
-          <span className="shrink-0">{invoiceIntakeTrace.summary}</span>
-        </div>
-
         <div className="space-y-2.5 px-3 py-3">
           {invoiceIntakeTrace.steps.map((step) => (
             <div key={step.name} className="flex items-center gap-3">
