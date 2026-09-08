@@ -196,7 +196,7 @@ export function ValueInsightsAccordion({
               type="single"
               collapsible
               defaultValue={items[0]?.id}
-              className="absolute inset-0 overflow-y-auto border-t border-line-structure"
+              className="absolute inset-0 overflow-hidden border-t border-line-structure"
             >
               {accordionItems}
             </AccordionPrimitive.Root>
