@@ -75,7 +75,7 @@ These mappings cover the latest Python SDK v4 and JS/TS SDK v5 method surfaces. 
 | JS/TS v5  | `client.api.legacy.observationsV1.get(observationId)`   | `client.api.observations.getMany({ filter: "<observation ID filter>", fromStartTime, toStartTime })`         |
 | JS/TS v5  | `client.fetchObservation(observationId)`                | `client.api.observations.getMany({ filter: "<observation ID filter>", fromStartTime, toStartTime })`         |
 
-There is no v2 single-observation getter; filter `get_many` / `getMany` by ID and take the matching row. Bound scans with a time range and follow cursor pagination. For a trace ID without a known timestamp, use the [ID-only lookup guidance](#trace-id-only-lookups). `client.fetchObservations(...)` is not listed because in JS/TS v5 it already calls Observations API v2.
+There is no v2 single-observation getter; filter `get_many` / `getMany` by ID and take the matching row. Bound scans with a time range and follow cursor pagination. `client.fetchObservations(...)` is not listed because in JS/TS v5 it already calls Observations API v2.
 
 ### Parameter mapping
 
@@ -145,11 +145,6 @@ curl \
 | JS/TS v5  | `client.fetchTrace(traceId)`     | `client.api.observations.getMany({ traceId, fromStartTime, toStartTime })`                    |
 
 These replacements return observation rows, not the legacy trace response shape. Group them by `traceId` and reconstruct trace-level fields as described below.
-
-
-For a known trace time range, include `fromStartTime` and `toStartTime` wide enough to cover the observations you need. If you only have a trace ID, for example from a trace URL, filter by that exact `traceId` and omit the unknown time bounds. Both parameters are optional on Observations API v2; an epoch-to-now range is unnecessary. In Python use `get_many(trace_id=trace_id)`; in JS/TS use `getMany({ traceId })`.
-
-Follow `meta.cursor` until no cursor is returned, keeping the same filters and field groups on each page. Omitting time bounds does not bypass project access, retention, or plan data-access limits. Continue to use bounded windows for scans across traces.
 
 ### Parameter mapping
 

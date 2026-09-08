@@ -162,16 +162,6 @@ When using the [LangChain Integration](/integrations/frameworks/langchain), `lev
 
 </LangTabs>
 
-## Root status and shutdown handling [#root-status-and-shutdown]
-
-When a root observation represents an application's overall result, record its outcome as well as its input/output. If downstream error triage reads the root's `level` and `statusMessage`, verify those fields on successful, failed, and interrupted runs.
-
-For custom exception or shutdown wrappers:
-
-- Preserve the application's failure classification. In Python, catching `BaseException` also catches control-flow exits: `SystemExit(0)` and `SystemExit(None)` should not become `ERROR` solely because they exit. Classify cancellation, interrupts, and SIGTERM according to whether the application completed, shut down normally, or failed.
-- When explicitly setting `level="ERROR"`, include a useful `status_message` (Python) or `statusMessage` (JS/TS). If the exception text is empty, include its type or another meaningful diagnostic.
-- Preserve more specific messages set by application handlers; generic cleanup must not replace them with an empty or less informative message. Keep exception propagation and shutdown behavior intact.
-
 ## Filter Trace by Log Level
 
 When viewing a single trace, you can filter the observations by log level.

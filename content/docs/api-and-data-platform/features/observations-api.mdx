@@ -90,7 +90,6 @@ The v1 API returns complete rows with all fields (input/output, usage, metadata,
 
 If `fields` is not specified, `core` and `basic` field groups are returned by default. Fields from groups you do not request are **absent** from the response, not `null`. The following fields are an exception and are always present but only populated when the field group `model` is selected: `modelId`, `inputPrice`, `outputPrice`, and `totalPrice`. Note that `inputPrice`, `outputPrice`, and `totalPrice` are returned as **strings** (e.g. `"0.000005"`) to preserve decimal precision; cast them to a numeric type in your pipeline.
 
-
 The `metadata` group returns a flat key map. OTEL resource attributes can appear as literal dotted keys, such as `metadata["resourceAttributes.service.name"]`, rather than nested objects. Metadata values may themselves be structured; preserve the returned keys and types. For legacy usage and cost field replacements, see the [response-field mapping](/faq/all/deprecated-api-migration#observation-response-fields).
 
 **2. Cursor-Based Pagination**
@@ -146,7 +145,6 @@ curl \
 ```
 
 **Getting observations for a specific trace:**
-
 
 ```bash
 curl \
@@ -287,53 +285,6 @@ Illustrative response with all field groups requested. This generation has recor
   "meta": {
     "cursor": "eyJsYXN0U3RhcnRUaW1lVG8iOiIyMDI1LTEyLTE3VDE2OjA5OjAwLjg3NVoiLCJsYXN0VHJhY2VJZCI6InN1cHBvcnQtY2hhdC03LTk1MGRjNTNhIiwibGFzdElkIjoic3VwcG9ydC1jaGF0LTctOTUwZGM1M2EtZ2VuIn0="
   }
-}
-```
-
-A separate example with `fields=core,basic,io,metadata,usage` shows a terminal page containing a root span with no recorded usage or cost. Empty usage, null cost, and an absent field have different meanings. The empty `meta` object means pagination is complete:
-
-```json
-{
-  "data": [
-    {
-      "id": "support-request-root",
-      "traceId": "support-request",
-      "startTime": "2025-12-17T16:09:00.000Z",
-      "endTime": "2025-12-17T16:09:01.500Z",
-      "projectId": "7a88fb47-b4e2-43b8-a06c-a5ce950dc53a",
-      "parentObservationId": null,
-      "type": "SPAN",
-      "name": "support-request",
-      "level": "DEFAULT",
-      "statusMessage": "",
-      "version": "",
-      "environment": "default",
-      "bookmarked": false,
-      "public": false,
-      "userId": "",
-      "sessionId": "support-chat-session",
-      "isRootObservation": true,
-      "input": "{\"query\":\"Perfect.\"}",
-      "output": "{\"answer\":\"You are all set.\"}",
-      "metadata": {
-        "resourceAttributes.service.name": "support-api"
-      },
-      "usageDetails": {},
-      "inputUsage": 0,
-      "outputUsage": 0,
-      "totalUsage": 0,
-      "costDetails": {},
-      "inputCost": null,
-      "outputCost": null,
-      "totalCost": null,
-      "usagePricingTierName": null,
-      "modelId": null,
-      "inputPrice": null,
-      "outputPrice": null,
-      "totalPrice": null
-    }
-  ],
-  "meta": {}
 }
 ```
 
