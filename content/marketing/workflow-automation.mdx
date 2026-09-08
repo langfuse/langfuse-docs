@@ -65,13 +65,17 @@ import { BookOpen, Rocket, Workflow } from "lucide-react";
   </section>
 
   <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
-    <h2 className="text-[34px] leading-[1] text-text-primary sm:text-[46px]">
-      Trace the full run, not one call
-    </h2>
+    <div className="flex items-center gap-4 border-b border-line-structure pb-4">
+      <h2 className="text-[34px] leading-[1] text-text-primary sm:text-[46px]">
+        Trace the full run, not one call
+      </h2>
+      <div className="hidden h-px flex-1 bg-line-structure sm:block" />
+    </div>
 
     <ValueInsightsAccordion
       items={workflowAutomationInsights}
       caption="trace · invoice-intake"
+      locked
     />
 
   </section>
