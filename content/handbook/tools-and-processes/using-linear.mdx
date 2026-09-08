@@ -93,13 +93,13 @@ Feature owners clear triage continuously and normally decide within one working 
 
 ## Agents may write to Linear [#agents]
 
-Agents may write to Linear, but **updates to an existing ticket are proposals first** — show the comment or description block, get a yes, then write. Creating a subticket under an existing issue does not need that gate. The detailed rules are not repeated here; they live as agent skills in the `langfuse/langfuse` repository, under `.agents/skills/`, together with the tooling that implements them:
+Agents may write to Linear, but **updates to an existing ticket are proposals first** — show the comment or description block, get a yes, then write. Creating a subticket under an existing issue does not need that gate. At the end of a productive agent session, the agent should ask clearly whether to update the ticket(s) so the session’s results are preserved, rather than writing unsolicited or skipping the preserve step. The detailed rules are not repeated here; they live as agent skills in the `langfuse/langfuse` repository, under `.agents/skills/`, together with the tooling that implements them:
 
 - `linear-agent-writes` — what an agent may write, when it must ask first, and how each write must be marked. Read this one before your first agentic write.
 - `linear-planning` — planning a feature as issues that map onto a stack of pull requests.
 - `linear-context-handover` — recovering the history behind a piece of work, and proposing the reasoning for the issue when you finish.
 
-Keeping them in the repo means an agent loads them where the work happens, and there is one copy to keep correct. The short version: every agent write is labelled and says in its own text that an agent wrote it, so you can always tell at a glance which words on an issue are a person's. Changing state — assigning, moving, closing, prioritising — stays with a human.
+Keeping them in the repo means an agent loads them where the work happens, and there is one copy to keep correct — org defaults for agent behaviour live in those skills; personal overrides stay local. The short version: every agent write is labelled and says in its own text that an agent wrote it, so you can always tell at a glance which words on an issue are a person's. Changing state — assigning, moving, closing, prioritising — stays with a human.
 
 ## Setup Linear
 
