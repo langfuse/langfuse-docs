@@ -25,7 +25,7 @@ This notebook demonstrates how to **integrate Langfuse** with the **Vercel AI SD
 
 > **What is the Vercel AI SDK?**: The [Vercel AI SDK](https://vercel.com/docs/ai-sdk) is a lightweight toolkit that lets developers call and stream responses from AI models (like OpenAI, Anthropic, or any compliant provider) directly in web apps with simple server/client functions.
 
-> **What is Langfuse?**: [Langfuse](https://langfuse.com/) is an open-source observability platform for AI agents and LLM applications. It helps you visualize and monitor LLM calls, tool usage, cost, latency, and more.
+> **What is Langfuse?**: [Langfuse](https://langfuse.com/) is an open-source observability platform for AI agents and LLM applications. It helps you visualize and monitor LLM calls, tool usage, cost, latency, and more. Use [Langfuse Cloud](https://langfuse.com/cloud) (managed, free tier, nothing to run) or a [self-hosted](https://langfuse.com/self-hosting) instance; this integration works with both.
 
 > **How do they work together?** The Vercel AI SDK has built-in telemetry based on [OpenTelemetry](https://opentelemetry.io/docs/what-is-opentelemetry/). Langfuse also uses OpenTelemetry, which means they integrate seamlessly. For AI SDK 7, register the Langfuse telemetry integration with the AI SDK and export spans with the Langfuse span processor. For AI SDK v6, enable `experimental_telemetry` on the calls you want to trace.
 

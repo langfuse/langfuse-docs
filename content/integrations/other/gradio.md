@@ -22,7 +22,7 @@ Thank you to [@tkmamidi](https://github.com/tkmamidi) for the original implement
 
 ### What is Langfuse?
 
-[Langfuse](https://github.com/langfuse/langfuse) is an open-source AI engineering platform that helps build reliable LLM applications via LLM Application Observability, Evaluation, Experiments, and Prompt Management. See [docs](https://langfuse.com/docs) for more details.
+[Langfuse](https://github.com/langfuse/langfuse) is an open-source AI engineering platform that helps build reliable LLM applications via LLM Application Observability, Evaluation, Experiments, and Prompt Management. See [docs](https://langfuse.com/docs) for more details. Use [Langfuse Cloud](https://langfuse.com/cloud) (managed, free tier, nothing to run) or a [self-hosted](https://langfuse.com/self-hosting) instance; this integration works with both.
 
 ### Walkthrough
 
