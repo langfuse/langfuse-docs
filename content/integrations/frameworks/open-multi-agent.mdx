@@ -1,0 +1,143 @@
+---
+title: Trace Open Multi-Agent (OMA) with Langfuse
+sidebarTitle: Open Multi-Agent
+logo: /images/integrations/open-multi-agent.svg
+description: Learn how to use Langfuse to monitor Open Multi-Agent runs to debug and evaluate your multi-agent workflows
+category: Integrations
+---
+
+# Tracing Open Multi-Agent with Langfuse
+
+This guide shows how to send [Open Multi-Agent](https://github.com/open-multi-agent/open-multi-agent) traces to Langfuse over OpenTelemetry, so you can inspect the agent, tool, and model spans of a multi-agent run.
+
+> **What is Open Multi-Agent?** [Open Multi-Agent](https://github.com/open-multi-agent/open-multi-agent) (OMA) is a TypeScript orchestration framework for multi-agent systems. You describe a goal and a coordinator turns it into a task DAG at runtime, or you declare the dependency graph yourself when the workflow has to stay fixed. It is provider neutral and runs on your own infrastructure and credentials, with approvals, budgets, checkpointing, and resumable runs built in. Documentation is available at [open-multi-agent.com](https://open-multi-agent.com).
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source AI engineering platform. It offers tracing and monitoring capabilities for LLM applications.
+
+OMA emits OpenTelemetry spans through its optional `@open-multi-agent/otel` adapter, which maps run, agent, tool, and model spans onto the GenAI semantic conventions. Langfuse ingests those as agent, tool, and generation observations.
+
+## Integration
+
+<Steps>
+
+### Install dependencies
+
+The OTel adapter is a separate package, and your application owns the OpenTelemetry SDK and exporter.
+
+```bash
+npm install @open-multi-agent/core @open-multi-agent/otel
+npm install @opentelemetry/sdk-trace-node @opentelemetry/exporter-trace-otlp-http @opentelemetry/resources @opentelemetry/api
+```
+
+### Configure environment and Langfuse credentials
+
+Get these from your Langfuse project settings, or from a [self-hosted](https://langfuse.com/self-hosting) instance.
+
+```bash
+export LANGFUSE_PUBLIC_KEY=pk-lf-...
+export LANGFUSE_SECRET_KEY=sk-lf-...
+export LANGFUSE_HOST=https://cloud.langfuse.com  # US region: https://us.cloud.langfuse.com
+```
+
+### Send OMA traces to Langfuse
+
+Build the tracer provider your application owns, point an OTLP exporter at Langfuse, and hand the provider to OMA's sink.
+
+```typescript
+import { resourceFromAttributes } from '@opentelemetry/resources'
+import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
+import { createOtelTraceSink } from '@open-multi-agent/otel'
+import { OpenMultiAgent } from '@open-multi-agent/core'
+
+const auth = Buffer.from(
+  `${process.env.LANGFUSE_PUBLIC_KEY}:${process.env.LANGFUSE_SECRET_KEY}`,
+).toString('base64')
+
+const exporter = new OTLPTraceExporter({
+  // Langfuse ingests OTLP at /api/public/otel, so the traces signal lands
+  // on /api/public/otel/v1/traces.
+  url: `${process.env.LANGFUSE_HOST}/api/public/otel/v1/traces`,
+  headers: {
+    authorization: `Basic ${auth}`,
+    'x-langfuse-ingestion-version': '4',
+  },
+})
+
+// service.name comes from the Resource. Without one, spans arrive under the
+// OpenTelemetry default of `unknown_service:node`.
+const provider = new NodeTracerProvider({
+  resource: resourceFromAttributes({ 'service.name': 'my-oma-app' }),
+  spanProcessors: [new BatchSpanProcessor(exporter)],
+})
+
+const sink = createOtelTraceSink({ tracerProvider: provider })
+
+const orchestrator = new OpenMultiAgent({
+  observability: { sinks: [sink] },
+})
+```
+
+### Run your agents
+
+```typescript
+const researcher = {
+  name: 'researcher',
+  model: 'claude-sonnet-4-6',
+  systemPrompt: 'You research topics and report concise, sourced findings.',
+  tools: ['file_read', 'grep'],
+}
+
+const writer = {
+  name: 'writer',
+  model: 'claude-sonnet-4-6',
+  systemPrompt: 'You turn research notes into a short structured summary.',
+  tools: ['file_write'],
+}
+
+const team = orchestrator.createTeam('research-team', {
+  name: 'research-team',
+  agents: [researcher, writer],
+  sharedMemory: true,
+})
+
+const result = await orchestrator.runTeam(
+  team,
+  'Compare the top three TypeScript agent frameworks and summarize the differences.',
+)
+
+// Drain OMA's sink before the application shuts down its own provider.
+await sink.forceFlush({ timeoutMs: 5_000 })
+await sink.shutdown({ timeoutMs: 5_000 })
+await provider.shutdown()
+```
+
+### View traces in Langfuse
+
+Open your Langfuse project. Each OMA run arrives as one trace whose observations mirror the structure of the run, including the root run span, an agent observation per agent, a tool observation per tool call, and a generation per model call carrying the model name and token usage. A `runTeam` call also records the orchestrator's routing decision as its own span.
+
+</Steps>
+
+## Capturing tool input and output
+
+OMA records no prompts, completions, tool arguments, or tool results by default. Tool arguments and results become span attributes only under an explicit capture policy:
+
+```typescript
+const orchestrator = new OpenMultiAgent({
+  observability: {
+    sinks: [createOtelTraceSink({
+      tracerProvider: provider,
+      contentCapture: { mode: 'upstream-policy' },
+    })],
+    capture: { toolInput: 'redacted', toolOutput: 'redacted' },
+  },
+})
+```
+
+Both opt-ins are required. The adapter setting alone exports nothing extra, because without the core policy the attributes are never recorded. Values have structured credentials stripped and are truncated before they leave the process. Reasoning and chain-of-thought content have no opt-in and are never exported.
+
+## Learn more
+
+- [OMA observability documentation](https://github.com/open-multi-agent/open-multi-agent/blob/main/docs/observability.md)
+- [Runnable OTLP export example](https://github.com/open-multi-agent/open-multi-agent/blob/main/packages/core/examples/integrations/observability-v2/otlp-backend.ts)
