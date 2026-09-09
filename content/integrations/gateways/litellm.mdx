@@ -111,6 +111,12 @@ You can add additional Langfuse attributes to the requests in order to group req
 </Tab>
 </Tabs>
 
+<Callout type="info">
+
+**Self-host both on Railway:** the community-maintained [AI Gateway + Observability template](https://railway.com/deploy/ai-gateway-observability-litellm-langfus) deploys LiteLLM and Langfuse v3 together with the success/failure callbacks pre-configured over a private network ([source](https://github.com/Kjudeh/ai-gateway-stack)).
+
+</Callout>
+
 ## Trace calls client-side with the OpenAI SDK wrapper [#openai-sdk-wrapper]
 
 Instead of (or in addition to) logging from the proxy, you can trace calls in your application code with the Langfuse OpenAI SDK wrapper ([Python](/integrations/model-providers/openai-py), [JS/TS](/integrations/model-providers/openai-js)). Since the proxy exposes an OpenAI-compatible API, the wrapper captures every call routed through it as a generation in Langfuse, and you can group multiple calls into a single trace.
