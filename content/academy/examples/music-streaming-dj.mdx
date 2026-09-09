@@ -162,7 +162,7 @@ A listening session and both trace types up close:
 
 ## Capturing user behavior
 
-In order to learn from users, we will capture [user signals](/academy/monitoring/capturing-signals) on the applicable traces: behavioral signals from the player and conversation signals from the voice requests.
+In order to learn from users, we will capture [user signals](/academy/monitoring/capturing-signals) on the applicable traces: behavioral signals from the player, conversation signals from the voice requests, and one explicit rating the app already has.
 
 <EvaluatorBlock
   evaluators={[
@@ -178,6 +178,21 @@ In order to learn from users, we will capture [user signals](/academy/monitoring
           moment, and the comment holds which track was skipped, so a set with
           several misses collects several scores. Beware: a skip is a weak negative. It
           says as much about taste and mood as about the DJ.
+        </>
+      ),
+    },
+    {
+      name: "track_liked",
+      type: "Player event",
+      check: "The listener likes or saves a DJ-picked track",
+      returns: "binary, on the plan-next-set trace",
+      details: (
+        <>
+          The like button already exists in the app, so capturing it costs
+          nothing. It is the only{" "}
+          <a href="/academy/monitoring/capturing-signals#explicit-ratings">explicit rating</a> here: rare and
+          unambiguous, read as a trend per set rather than as a target on its
+          own.
         </>
       ),
     },
@@ -238,7 +253,7 @@ In principle, the team could already iterate with only this in place. Tracing an
   subloop
   stations={{
     trace: { note: "every set and every request" },
-    monitor: { note: "skips, dj_replaced, message_type" },
+    monitor: { note: "skips, likes, dj_replaced, message_type" },
     dataset: { dimmed: true, note: "not yet" },
     change: { dimmed: true, note: "not yet" },
     eval: { dimmed: true, note: "not yet" },
@@ -313,7 +328,7 @@ With this in place, the full loop is running:
   ariaLabel="The full loop for the DJ: live signals, step-scoped datasets, experiments, and A/B tests"
   stations={{
     trace: { note: "every set and every request" },
-    monitor: { note: "skips, dj_replaced, message_type, A/B comparisons" },
+    monitor: { note: "skips, likes, dj_replaced, message_type, A/B comparisons" },
     dataset: { note: "from what we see while monitoring production" },
     change: { note: "selection algorithm, DJ prompt, ..." },
     eval: { note: "grade step outputs against their expectations" },
