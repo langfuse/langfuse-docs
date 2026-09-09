@@ -162,7 +162,7 @@ A listening session and both trace types up close:
 
 ## Capturing user behavior
 
-In order to learn from users, we will capture [user signals](/academy/monitoring/capturing-signals) on the applicable traces: behavioral signals from the player, conversation signals from the voice requests, and one explicit rating the app already has.
+In order to learn from users, we will capture [user signals](/academy/monitoring/capturing-signals) on the applicable traces: behavioral signals from the player and conversation signals from the voice requests.
 
 <EvaluatorBlock
   evaluators={[
@@ -180,7 +180,7 @@ In order to learn from users, we will capture [user signals](/academy/monitoring
           says as much about taste and mood as about the DJ.
         </>
       ),
-    }, 
+    },
     {
       name: "dj_replaced",
       type: "Player event",
@@ -238,7 +238,7 @@ In principle, the team could already iterate with only this in place. Tracing an
   subloop
   stations={{
     trace: { note: "every set and every request" },
-    monitor: { note: "skips, likes, dj_replaced, message_type" },
+    monitor: { note: "skips, dj_replaced, message_type" },
     dataset: { dimmed: true, note: "not yet" },
     change: { dimmed: true, note: "not yet" },
     eval: { dimmed: true, note: "not yet" },
@@ -313,7 +313,7 @@ With this in place, the full loop is running:
   ariaLabel="The full loop for the DJ: live signals, step-scoped datasets, experiments, and A/B tests"
   stations={{
     trace: { note: "every set and every request" },
-    monitor: { note: "skips, likes, dj_replaced, message_type, A/B comparisons" },
+    monitor: { note: "skips, dj_replaced, message_type, A/B comparisons" },
     dataset: { note: "from what we see while monitoring production" },
     change: { note: "selection algorithm, DJ prompt, ..." },
     eval: { note: "grade step outputs against their expectations" },
