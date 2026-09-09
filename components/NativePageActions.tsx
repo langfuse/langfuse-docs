@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import {
   MarkdownCopyButton,
   ViewOptionsPopover,
-} from "fumadocs-ui/layouts/docs/page";
+} from "@/components/fumadocs/page-actions";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 import { getGithubEditUrl } from "@/components/DocsTocFooter";
 
@@ -35,9 +35,12 @@ function getMarkdownUrl(pathname: string): string {
   return `/${basePath}.md`;
 }
 
-function captureTypeFromAnchor(href: string): "chatgpt" | "claude" | undefined {
+function captureTypeFromAnchor(
+  href: string,
+): "chatgpt" | "claude" | "mcp" | undefined {
   if (href.includes("chatgpt.com")) return "chatgpt";
   if (href.includes("claude.ai")) return "claude";
+  if (href.includes("/docs/docs-mcp")) return "mcp";
   return undefined;
 }
 
