@@ -22,10 +22,18 @@ import {
 } from "fumadocs-ui/components/ui/popover";
 import { buttonVariants } from "fumadocs-ui/components/ui/button";
 import { usePathname } from "fumadocs-core/framework";
-import { useTranslations } from "@fuma-translate/react";
 import IconMCP from "@/components/icons/mcp";
 
 const cache = new Map<string, Promise<string>>();
+
+/** Native Fumadocs keys are English; interpolate `{url}` like @fuma-translate/react. */
+function t(key: string, opts?: { variables?: Record<string, string> }) {
+  if (!opts?.variables) return key;
+  return key.replace(
+    /\{(\w+)\}/g,
+    (_, name: string) => opts.variables?.[name] ?? "",
+  );
+}
 
 /**
  * see https://fumadocs.dev/docs/integrations/llms#page-actions to customize.
@@ -39,7 +47,6 @@ export function MarkdownCopyButton({
    */
   markdownUrl: string;
 }) {
-  const t = useTranslations({ note: "page actions" });
   const [isLoading, setLoading] = useState(false);
   const [checked, onClick] = useCopyButton(async () => {
     const cached = cache.get(markdownUrl);
@@ -101,7 +108,6 @@ export function ViewOptionsPopover({
   githubUrl?: string;
 }) {
   const pathname = usePathname();
-  const t = useTranslations({ note: "page actions" });
   const items = useMemo(() => {
     const pageUrl =
       typeof window === "undefined"
@@ -249,7 +255,7 @@ export function ViewOptionsPopover({
         icon: <IconMCP />,
       },
     ].filter((v) => !!v);
-  }, [githubUrl, markdownUrl, pathname, t]);
+  }, [githubUrl, markdownUrl, pathname]);
 
   return (
     <Popover>
