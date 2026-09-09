@@ -21,7 +21,7 @@ export const chatAgentsInsights: InsightItem[] = [
     ctaLabel: "Cost tracking",
     imageSrc: "/images/chat-agents/interaction-cost.png",
     // Clip the black capture border at the screenshot's left edge.
-    imageClassName: "object-left-top [clip-path:inset(0_0_0_1px)]",
+    imageClassName: "[clip-path:inset(0_0_0_1px)]",
     imageAlt:
       "Chatbot interaction showing the breakdown of input, cached input, output, and total cost",
   },

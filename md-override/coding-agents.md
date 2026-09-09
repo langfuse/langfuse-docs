@@ -53,7 +53,7 @@ Hooks are per-machine and user-serviceable. Treat them as telemetry, not enforce
 
 ### Trace the full coding-agent session
 
-Log tool calls, retries, skill usage, and model turns — not only the bill. Reconstruct what the agent did so you can debug loops, bloated context, and skills that need a rewrite.
+Log tool calls, retries, skill usage, and model turns. Reconstruct what the agent did so you can debug loops, bloated context, and skills that need a rewrite.
 
 [Tracing coding agents](/resources/engineering/coding-agent-tracing)
 

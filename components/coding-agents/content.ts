@@ -33,7 +33,7 @@ export const codingAgentsHooksInsights: InsightItem[] = [
     id: "execution",
     title: "Trace the full coding-agent session",
     description:
-      "Log tool calls, retries, skill usage, and model turns — not only the bill. Reconstruct what the agent did so you can debug loops, bloated context, and skills that need a rewrite.",
+      "Log tool calls, retries, skill usage, and model turns. Reconstruct what the agent did so you can debug loops, bloated context, and skills that need a rewrite.",
     href: "/resources/engineering/coding-agent-tracing",
     ctaLabel: "Tracing coding agents",
   },

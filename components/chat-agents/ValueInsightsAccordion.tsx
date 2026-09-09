@@ -73,6 +73,22 @@ export function ValueInsightsAccordion({
   const activeItem = items.find((item) => item.id === activeItemId) ?? items[0];
   const activeImageSrc = activeItem?.imageSrc ?? imageSrc;
   const activeImageAlt = activeItem?.imageAlt ?? imageAlt;
+  const hasItemImages = items.some((item) => item.imageSrc);
+  const mediaImages = Array.from(
+    new Map(
+      items.map((item) => {
+        const src = item.imageSrc ?? imageSrc;
+        return [
+          src,
+          {
+            src,
+            alt: item.imageAlt ?? imageAlt,
+            className: item.imageClassName,
+          },
+        ];
+      }),
+    ).values(),
+  );
 
   function handleValueChange(value: string) {
     if (value) setActiveItemId(value);
@@ -90,22 +106,29 @@ export function ValueInsightsAccordion({
           <div
             className={cn(
               "relative w-full",
-              activeItem?.imageSrc
-                ? "aspect-square lg:aspect-auto lg:h-full lg:min-h-[200px]"
-                : "h-full min-h-[200px]",
+              // A shared portrait viewport keeps every detail screenshot at the
+              // same width, including the tallest trace, without cropping it.
+              hasItemImages ? "aspect-[7/8]" : "h-full min-h-[200px]",
             )}
           >
-            <Image
-              src={activeImageSrc}
-              alt={activeImageAlt}
-              fill
-              className={cn(
-                "object-top",
-                activeItem?.imageSrc ? "object-contain" : "object-cover",
-                activeItem?.imageClassName,
-              )}
-              unoptimized
-            />
+            {mediaImages.map((image) => (
+              <Image
+                key={image.src}
+                src={image.src}
+                alt={image.src === activeImageSrc ? image.alt : ""}
+                aria-hidden={image.src !== activeImageSrc}
+                fill
+                className={cn(
+                  "transition-opacity duration-200 motion-reduce:transition-none",
+                  hasItemImages
+                    ? "object-contain object-left-top"
+                    : "object-cover object-top",
+                  image.className,
+                  image.src === activeImageSrc ? "opacity-100" : "opacity-0",
+                )}
+                unoptimized
+              />
+            ))}
           </div>
         ) : (
           <Image
