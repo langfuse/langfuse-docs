@@ -35,6 +35,8 @@ Use traces to find repeated context, failed tool loops, and prompts that should 
 
 [Evaluating AI agent skills](/blog/2026-02-26-evaluate-ai-agent-skills)
 
+[![Coding agents send requests through an LLM gateway to model providers, while asynchronous OpenTelemetry traces go to Langfuse.](/images/coding-agents/gateway-architecture.png)](/images/coding-agents/gateway-architecture.png)
+
 ### Any gateway, one place for LLM calls
 
 Route coding-agent traffic through LiteLLM or OpenRouter today. Langfuse Gateway is coming soon: virtual keys, access control, and tracing built in.
