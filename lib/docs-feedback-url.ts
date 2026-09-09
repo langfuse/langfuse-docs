@@ -4,16 +4,11 @@ const FEEDBACK_ISSUE_BASE =
   "https://github.com/langfuse/langfuse-docs/issues/new";
 
 /** GitHub issue URL for the docs sidebar "Give us feedback" action. */
-export function getDocsFeedbackIssueUrl(
-  pagePath: string,
-  pageTitle?: string,
-): string {
-  const title = (pageTitle ?? "this page").trim();
+export function getDocsFeedbackIssueUrl(pagePath: string): string {
   const pageUrl = buildPageUrl(pagePath);
   const params = new URLSearchParams({
-    title: `Feedback for "${title}"`,
+    title: `Feedback for ${pageUrl}`,
     labels: "feedback",
-    body: `**Page:** ${pageUrl}\n`,
   });
   return `${FEEDBACK_ISSUE_BASE}?${params.toString()}`;
 }

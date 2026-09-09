@@ -160,19 +160,15 @@ const processContributor = (username: string): ProcessedContributor => {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 type DocsTocFooterProps = {
-  pageTitle?: string;
   lastModified?: string;
 };
 
-export const DocsTocFooter = ({
-  pageTitle,
-  lastModified,
-}: DocsTocFooterProps) => {
+export const DocsTocFooter = ({ lastModified }: DocsTocFooterProps) => {
   const pathname = usePathname() ?? "";
   const currentPath = pathname.split("#")[0].split("?")[0];
   const [showAll, setShowAll] = useState(false);
   const editUrl = getGithubEditUrl(currentPath);
-  const feedbackUrl = getDocsFeedbackIssueUrl(currentPath, pageTitle);
+  const feedbackUrl = getDocsFeedbackIssueUrl(currentPath);
   const lastModifiedDate = useMemo(
     () => (lastModified ? new Date(lastModified) : undefined),
     [lastModified],
