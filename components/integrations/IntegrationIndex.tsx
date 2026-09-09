@@ -35,12 +35,12 @@ const categoryConfig: Record<
         title: "API",
       },
       {
-        route: "/docs/sdk/python/sdk-v3",
+        route: "/docs/observability/sdk/overview",
         frontMatter: { title: "Python SDK" },
         title: "Python SDK",
       },
       {
-        route: "/docs/sdk/typescript/guide",
+        route: "/docs/observability/sdk/overview",
         frontMatter: { title: "JS/TS SDK" },
         title: "JS/TS SDK",
       },

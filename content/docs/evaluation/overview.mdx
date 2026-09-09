@@ -11,7 +11,12 @@ import { LoopDiagram } from "@/components/academy/LoopDiagram";
 Evals give you a repeatable check of your LLM application's behavior. You replace guesswork with data, and catch regressions before you ship a change.
 
 <Frame fullWidth>
-  <img src="/images/docs/score-analytics-full-dashboard.png" alt="Score Analytics dashboard in Langfuse showing evaluation scores trended over time across multiple evaluators." />
+  <Image
+    src="/images/docs/score-analytics-full-dashboard.png"
+    alt="Score Analytics dashboard in Langfuse showing evaluation scores trended over time across multiple evaluators."
+    loading="lazy"
+    quality={85}
+  />
 </Frame>
 
 Evaluation runs across most of the [AI engineering loop](/academy/ai-engineering-loop): you score live traces in production, turn interesting examples into datasets, run experiments to compare changes, and judge the results with manual or automated evaluators. It happens both **online**, on live production traces, and **offline**, before you ship a change.
@@ -26,9 +31,16 @@ Want to see it in action? [**Create a free account**](/cloud) and explore Langfu
 
 ## Getting Started
 
-Start with the [Core Concepts](/docs/evaluation/core-concepts) page. It explains how evaluators, scores, datasets, and experiments fit together in Langfuse, which makes the rest of the docs much easier to navigate.
+You can evaluate both:
 
-Once you have that context, use the table below to find the right feature page:
+- [live incoming traces](/docs/evaluation/get-started/online) to measure quality on production data and track trends over time.
+- [results from running tests on a pre-defined dataset](/docs/evaluation/get-started/offline), to make sure your changes are ready for production.
+
+For more information on how evaluators, scores, datasets, and experiments fit together, read [Core Concepts](/docs/evaluation/core-concepts).
+
+To catch regressions before they ship, run experiments in CI: add the [`langfuse/experiment-action`](/docs/evaluation/experiments/experiments-ci-cd) GitHub Action to a `pull_request` workflow and raise `RegressionError` from your experiment script when a score violates your threshold; the action then fails the job. It works with Langfuse Cloud and self-hosted Langfuse.
+
+If you're looking for another specific workflow, use the table below to find the right feature page:
 
 | If you want to...                                   | Use this Langfuse feature                                                                                                                                                                                                                   |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

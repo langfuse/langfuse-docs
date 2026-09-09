@@ -13,7 +13,7 @@ const faqs: FAQItem[] = [
   {
     question: "What does Langfuse help me with?",
     answer:
-      "Langfuse helps you [debug LLM applications](/docs/observability/overview) with detailed traces that capture every step of your AI pipeline, including [agent graphs](/docs/observability/features/agent-graphs). You can [manage and version your prompts](/docs/prompt-management/overview) collaboratively, run [automated evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) (including LLM-as-a-judge and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators)), track [costs and latency](/docs/observability/features/token-and-cost-tracking) across models and providers, and run [experiments on datasets](/docs/evaluation/experiments/overview) to measure improvements before shipping. It also supports [custom dashboards](/docs/metrics/features/custom-dashboards) for team-wide visibility.",
+      "Langfuse helps you [debug LLM applications](/docs/observability/overview) with detailed traces that capture every step of your AI pipeline, including [agent graphs](/docs/observability/features/agent-graphs). You can [manage and version your prompts](/docs/prompt-management/overview) collaboratively, run [automated evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) (including LLM-as-a-judge and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators)), track [costs and latency](/docs/observability/features/token-and-cost-tracking) across models and providers, and run [experiments on datasets](/docs/evaluation/experiments/datasets) to measure improvements before shipping. It also supports [custom dashboards](/docs/metrics/features/custom-dashboards) for team-wide visibility.",
   },
   {
     question: "Can I use just tracing without the other features?",
@@ -23,7 +23,7 @@ const faqs: FAQItem[] = [
   {
     question: "What deployment options do exist?",
     answer:
-      "Langfuse is available as a [managed cloud service](https://cloud.langfuse.com) in [US and EU regions](/security), or you can [self-host](/self-hosting) it on your own infrastructure using [Docker Compose](/self-hosting/deployment/docker-compose), [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm), or Terraform templates for [AWS](/self-hosting/deployment/aws), [GCP](/self-hosting/deployment/gcp), and [Azure](/self-hosting/deployment/azure). The self-hosted version includes all product features under the [MIT license](/open-source). For teams needing additional support and compliance, there is a [self-hosted Enterprise plan](/pricing-self-host).",
+      "Langfuse is available as a [managed cloud service](https://cloud.langfuse.com) in [US and EU regions](/security), or you can [self-host](/self-hosting) it on your own infrastructure using [Docker Compose](/self-hosting/deployment/docker-compose), [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm), or Terraform templates for [AWS](/self-hosting/deployment/aws), [GCP](/self-hosting/deployment/gcp), and [Azure](/self-hosting/deployment/azure). The self-hosted version includes all product features under the [MIT license](/handbook/chapters/open-source). For teams needing additional support and compliance, there is a [self-hosted Enterprise plan](/pricing-self-host).",
   },
   {
     question: "Is self-hosting actually free?",
@@ -48,7 +48,7 @@ const faqs: FAQItem[] = [
   {
     question: "How do I get started?",
     answer:
-      "It depends on where you are in your workflow. To **add tracing**, follow the [tracing quickstart](/docs/observability/get-started). To **set up prompt management**, see the [prompt management guide](/docs/prompt-management/get-started). To **build an evaluation strategy**, the [evaluation overview](/docs/evaluation/overview) walks you through the different approaches. [Sign up for Langfuse Cloud](/cloud) (free, no credit card required) or explore the [public demo project](/docs/demo) to see everything in action.",
+      "It depends on where you are in your workflow. To **add tracing**, follow the [tracing quickstart](/docs/observability/get-started). To **set up prompt management**, see the [prompt management guide](/docs/prompt-management/get-started). To **score live production traces**, follow [Evaluate Production Traffic](/docs/evaluation/get-started/online). [Sign up for Langfuse Cloud](/cloud) (free, no credit card required) or explore the [public demo project](/docs/demo) to see everything in action.",
   },
   {
     question: "How does pricing work?",

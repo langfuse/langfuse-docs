@@ -11,7 +11,7 @@ This guide shows you how to integrate **Langfuse** with **eve** to trace and deb
 
 > **What is eve?** [eve](https://eve.dev) is an open-source TypeScript framework from Vercel for building durable agents as ordinary files in a project. It ships with durable execution, a sandbox, tools, subagents, schedules, and built-in OpenTelemetry tracing.
 
-> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source observability platform for AI agents and LLM applications. It helps you visualize and monitor model calls, tool usage, cost, latency, and more.
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source observability platform for AI agents and LLM applications. It helps you visualize and monitor model calls, tool usage, cost, latency, and more. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it.
 
 [Every eve run produces a trace](https://eve.dev/docs/guides/instrumentation), and the spans are standard OpenTelemetry, built on the [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk) telemetry conventions. eve registers its tracer in `agent/instrumentation.ts` via `registerOTel`. By adding the `LangfuseSpanProcessor`, every model call and tool call flows into Langfuse — where Langfuse maps them to traces, generations, and tool observations.
 

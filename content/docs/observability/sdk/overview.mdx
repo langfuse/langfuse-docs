@@ -1,5 +1,6 @@
 ---
 title: Overview
+seoTitle: "Python & JS/TS Observability SDKs"
 description: Fully typed SDKs for Python and JavaScript/TypeScript with unified setup, instrumentation, and advanced guidance.
 category: SDKs
 ---
@@ -18,7 +19,9 @@ Langfuse offers two SDKs:
 - **JS/TS SDK v5** <a href="https://github.com/langfuse/langfuse-js"><img className="inline" alt="GitHub repository langfuse/langfuse-js" src="https://img.shields.io/badge/repo-langfuse--js-blue?style=flat-square&logo=GitHub" /></a> <a href="https://www.npmjs.com/package/@langfuse/tracing"><img className="inline" src="https://img.shields.io/npm/v/@langfuse/tracing?style=flat-square&label=npm+@langfuse/tracing" alt="NPM @langfuse/tracing" /></a>
 - [**Other Languages**](#other-languages) via OpenTelemetry
 
-The Langfuse SDKs are the recommended way to create [custom observations and traces](/docs/observability/sdk/instrumentation#custom-instrumentation) and use the Langfuse [prompt-management](/docs/prompt-management/overview) and [evaluation](/docs/evaluation/overview) features.
+Upgrading from Python SDK v3 or JS/TS SDK v4? Follow the [upgrade paths](/docs/observability/sdk/upgrade-path) ([Python v3 → v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4), [JS/TS v4 → v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5)).
+
+The Langfuse SDKs are the recommended way to create [custom observations and traces](/docs/observability/sdk/instrumentation#custom-instrumentation) and use the Langfuse [prompt-management](/docs/prompt-management/overview) and [evaluation](/docs/evaluation/overview) features. Both SDKs work with [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) and [self-hosted Langfuse](/self-hosting) with the same code; only the credentials and base URL differ.
 
 **Key benefits**
 
@@ -48,8 +51,8 @@ import VersionsCompatibilitySummary from "@/components-mdx/versions-compatibilit
 
 This documentation is for the latest versions of the Langfuse SDKs.
 
-- Documentation for the legacy Python SDK v3 can be found [here](https://python-sdk-v3.docs-snapshot.langfuse.com/docs/observability/sdk/overview/).
-- Documentation for the legacy TypeScript SDK v4 can be found [here](https://js-sdk-v4-docs-snapshot.langfuse.com/docs/observability/sdk/overview/).
+- [Legacy Python SDK v3 documentation](https://python-sdk-v3.docs-snapshot.langfuse.com/docs/observability/sdk/overview/)
+- [Legacy TypeScript SDK v4 documentation](https://js-sdk-v4-docs-snapshot.langfuse.com/docs/observability/sdk/overview/)
 
 </Details>
 
@@ -200,7 +203,7 @@ By default, the processor exports Langfuse + GenAI/LLM spans. To customize this,
 
 For more options to configure the [`LangfuseSpanProcessor`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html) such as masking, filtering, and more, see [advanced features](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope).
 
-You can learn more about setting up OpenTelemetry in your JS environment [here](https://opentelemetry.io/docs/languages/js/getting-started/nodejs/).
+Learn more in the [OpenTelemetry JS getting-started guide](https://opentelemetry.io/docs/languages/js/getting-started/nodejs/).
 
 <Callout type="info">
 **Next.js users:**
@@ -424,4 +427,4 @@ To instrument your application, you can send OpenTelemetry spans to the [Langfus
 
 ### Prompt management, evaluation, and querying:
 
-To use other Langfuse features, you can use the [public API](/docs/api-and-data-platform/features/public-api) to integrate Langfuse from any runtime. We also provide a list of community-maintained SDKs [here](https://github.com/langfuse/langfuse-examples?tab=readme-ov-file#community-maintained-sdks).
+To use other Langfuse features, you can use the [public API](/docs/api-and-data-platform/features/public-api) to integrate Langfuse from any runtime. We also maintain a [list of community-maintained SDKs](https://github.com/langfuse/langfuse-examples?tab=readme-ov-file#community-maintained-sdks).

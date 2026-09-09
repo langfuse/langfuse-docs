@@ -996,7 +996,7 @@ function FAQ() {
           </h2>
           <p className="japan-body-sm mt-3.5">
             載っていないことがあれば、
-            <Link className="japan-link" href="/ask-ai">
+            <Link className="japan-link" href="/docs/ask-ai">
               AIに質問
             </Link>
             、

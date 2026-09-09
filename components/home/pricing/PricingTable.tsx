@@ -197,7 +197,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Custom rate limits",
         "Uptime SLA",
         "Support SLA",
-        "Dedicated support engineer",
+        "Named lead support engineer",
       ],
       addOn: {
         name: "Yearly Commitment",
@@ -243,10 +243,11 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "All Open Source features plus management APIs, project-level RBAC, data retention policies, and audit logs",
         "Bundled with ClickHouse Cloud, ClickHouse BYOC, or ClickHouse Private",
         "Langfuse pricing is additive to your ClickHouse commercial plan",
-        "Dedicated support engineer for deployment and hosting guidance",
+        "Named lead support engineer for deployment and hosting guidance",
         "Solutions architect support during evaluation and rollout",
         "Direct access to the product team for feedback",
         "SOC 2 Type II and ISO 27001 reports",
+        "Hardening for Government (in development)",
         "Support SLA",
         "Billing via AWS Marketplace or invoice",
       ],
@@ -355,7 +356,7 @@ const sections: Section[] = [
         name: "OpenTelemetry (Java, Go, custom)",
         description:
           "Use Langfuse as an OpenTelemetry backend. Thereby you can use any OpenTelemetry compatible SDKs (Java, Go, etc.) to send traces to Langfuse. This also increases compatibility with many frameworks and LLM providers.",
-        href: "/docs/opentelemetry/get-started",
+        href: "/integrations/native/opentelemetry",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -371,7 +372,7 @@ const sections: Section[] = [
       },
       {
         name: "Custom via API",
-        href: "/api-and-data-platform/features/public-api",
+        href: "/docs/api-and-data-platform/features/public-api",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -469,6 +470,17 @@ const sections: Section[] = [
           selfHosted: { "Open Source": false, Enterprise: false },
         },
       },
+      {
+        name: "Langfuse Assistant usage limits",
+        tiers: {
+          cloud: {
+            Hobby: "Low",
+            Core: "Medium",
+            Pro: "High",
+            Enterprise: "High",
+          },
+        },
+      },
     ],
   },
   {
@@ -536,7 +548,7 @@ const sections: Section[] = [
       {
         name: "Prompt Experiments",
         description: "Run structured experiments on new prompt versions",
-        href: "/docs/evaluation/dataset-runs/native-run",
+        href: "/docs/evaluation/experiments/experiments-via-ui",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -576,7 +588,7 @@ const sections: Section[] = [
         name: "Datasets",
         description:
           "Create and manage datasets of inputs and expected outputs. These can be created from production traces, manually in the UI, or uploaded via the SDK/UI. Datasets are the baseline for offline evaluation.",
-        href: "/docs/evaluation/dataset-runs/datasets",
+        href: "/docs/evaluation/experiments/datasets",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -604,7 +616,7 @@ const sections: Section[] = [
       },
       {
         name: "Evaluation Scores (custom)",
-        href: "/docs/evaluation/evaluation-methods/custom-scores",
+        href: "/docs/evaluation/evaluation-methods/scores-via-sdk",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -612,7 +624,7 @@ const sections: Section[] = [
       },
       {
         name: "User Feedback Tracking",
-        href: "/faq/all/user-feedback",
+        href: "/docs/observability/features/user-feedback",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -644,7 +656,7 @@ const sections: Section[] = [
       {
         name: "Human Annotation",
         description: "Manually annotate LLM traces in Langfuse",
-        href: "/docs/scores/annotation",
+        href: "/docs/evaluation/evaluation-methods/scores-via-ui",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -653,7 +665,7 @@ const sections: Section[] = [
       {
         name: "Human Annotation Queues",
         description: "Managed human annotation workflows with queues",
-        href: "/docs/evaluation/evaluation-methods/annotation#annotation-queues",
+        href: "/docs/evaluation/evaluation-methods/annotation-queues",
         tiers: {
           cloud: {
             Hobby: "1 queue",
@@ -995,7 +1007,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Dedicated Support Engineer",
+        name: "Named Lead Support Engineer",
         href: "/support#onboarding",
         description:
           "Includes deployment and hosting guidance for your dedicated Langfuse environment.",
@@ -1076,7 +1088,7 @@ const sections: Section[] = [
   },
   {
     name: "Security",
-    href: "/docs/security",
+    href: "/docs/security-and-guardrails",
     features: [
       {
         name: "Data region",
@@ -1114,6 +1126,13 @@ const sections: Section[] = [
             Enterprise: true,
           },
           selfHosted: { "Open Source": true, Enterprise: true },
+        },
+      },
+      {
+        name: "Hardening for Government (in development)",
+        href: "/self-hosting/configuration/hardening#hardening-for-government",
+        tiers: {
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {

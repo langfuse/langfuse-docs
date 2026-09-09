@@ -70,7 +70,7 @@ For large-scale teams. Enterprise-grade support and security.
 - Custom rate limits
 - Uptime SLA
 - Support SLA
-- Dedicated support engineer
+- Named lead support engineer
 
 Optional **Yearly Commitment**:
 
@@ -93,9 +93,9 @@ Optional **Yearly Commitment**:
 | [Token and cost tracking](/docs/observability/features/token-and-cost-tracking)                     | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Native framework integrations](/integrations)                                                      | Yes                 | Yes                 | Yes                 | Yes                          |
 | [SDKs (Python, JavaScript)](/docs/observability/sdk/overview)                                       | Yes                 | Yes                 | Yes                 | Yes                          |
-| [OpenTelemetry (Java, Go, custom)](/docs/opentelemetry/get-started)                                 | Yes                 | Yes                 | Yes                 | Yes                          |
+| [OpenTelemetry (Java, Go, custom)](/integrations/native/opentelemetry)                              | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Proxy-based logging (via LiteLLM)](/integrations/gateways/litellm)                                 | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Custom via API](/api-and-data-platform/features/public-api)                                        | Yes                 | Yes                 | Yes                 | Yes                          |
+| [Custom via API](/docs/api-and-data-platform/features/public-api)                                   | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Included usage](/docs/administration/billable-units)                                               | 50k units           | 100k units          | 100k units          | 100k units                   |
 | [Additional usage](/docs/administration/billable-units)                                             | --                  | $8/100k units       | $8/100k units       | $8/100k units                |
 | Custom usage pricing                                                                                | --                  | --                  | --                  | Yearly Commitment            |
@@ -104,6 +104,7 @@ Optional **Yearly Commitment**:
 | [Ingestion throughput](/faq/all/api-limits)                                                         | 1,000 req/min       | 4,000 req/min       | 20,000 req/min      | Custom                       |
 | **Langfuse AI**                                                                                     |                     |                     |                     |                              |
 | [Langfuse Assistant (in-app agent)](/docs/langfuse-assistant)                                       | Yes                 | Yes                 | Yes                 | Yes                          |
+| Langfuse Assistant usage limits                                                                     | Low                 | Medium              | High                | High                         |
 | **Prompt Management**                                                                               |                     |                     |                     |                              |
 | [Prompt versioning](/docs/prompt-management/get-started)                                            | Yes                 | Yes                 | Yes                 | Yes                          |
 | Prompt fetching                                                                                     | Unlimited           | Unlimited           | Unlimited           | Unlimited                    |
@@ -111,19 +112,19 @@ Optional **Yearly Commitment**:
 | [Prompt composability](/docs/prompt-management/features/composability)                              | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Prompt caching (server and client)](/docs/prompt-management/features/caching)                      | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Playground](/docs/prompt-management/features/playground)                                           | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Prompt experiments](/docs/evaluation/dataset-runs/native-run)                                      | Yes                 | Yes                 | Yes                 | Yes                          |
+| [Prompt experiments](/docs/evaluation/experiments/experiments-via-ui)                               | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Webhooks & Slack](/docs/prompt-management/features/webhooks-slack-integrations)                    | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Protected deployment labels](/docs/prompt-management/get-started#protected-prompt-labels)          | --                  | --                  | Teams add-on        | Yes                          |
 | **Evaluation (online and offline)**                                                                 |                     |                     |                     |                              |
-| [Datasets](/docs/evaluation/dataset-runs/datasets)                                                  | Yes                 | Yes                 | Yes                 | Yes                          |
+| [Datasets](/docs/evaluation/experiments/datasets)                                                   | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)                             | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui)                               | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Evaluation scores (custom)](/docs/evaluation/evaluation-methods/custom-scores)                     | Yes                 | Yes                 | Yes                 | Yes                          |
-| [User feedback tracking](/faq/all/user-feedback)                                                    | Yes                 | Yes                 | Yes                 | Yes                          |
+| [Evaluation scores (custom)](/docs/evaluation/evaluation-methods/scores-via-sdk)                    | Yes                 | Yes                 | Yes                 | Yes                          |
+| [User feedback tracking](/docs/observability/features/user-feedback)                                | Yes                 | Yes                 | Yes                 | Yes                          |
 | [External evaluation pipelines](/guides/cookbook/example_external_evaluation_pipelines)             | Yes                 | Yes                 | Yes                 | Yes                          |
 | [LLM-as-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge)                       | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Human annotation](/docs/scores/annotation)                                                         | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Human annotation queues](/docs/evaluation/evaluation-methods/annotation#annotation-queues)         | 1 queue             | 3 queues            | Yes                 | Yes                          |
+| [Human annotation](/docs/evaluation/evaluation-methods/scores-via-ui)                               | Yes                 | Yes                 | Yes                 | Yes                          |
+| [Human annotation queues](/docs/evaluation/evaluation-methods/annotation-queues)                    | 1 queue             | 3 queues            | Yes                 | Yes                          |
 | **Metrics**                                                                                         |                     |                     |                     |                              |
 | [Custom dashboards](/docs/metrics/features/custom-dashboards)                                       | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Alerts](/docs/observability/features/alerts)                                                       | 2 alerts            | 20 alerts           | 50 alerts           | 100 alerts                   |
@@ -148,7 +149,7 @@ Optional **Yearly Commitment**:
 | [Community (GitHub)](/support#community)                                                            | Yes                 | Yes                 | Yes                 | Yes                          |
 | [In-app support](/support#in-app)                                                                   | --                  | Yes                 | Yes                 | Yes                          |
 | [Private Slack channel](/support#slack)                                                             | --                  | --                  | Teams add-on        | Yes                          |
-| [Dedicated support engineer](/support#onboarding)                                                   | --                  | --                  | --                  | Yes                          |
+| [Named lead support engineer](/support#onboarding)                                                  | --                  | --                  | --                  | Yes                          |
 | [Onboarding & architectural guidance](/support#onboarding)                                          | --                  | --                  | --                  | Yes                          |
 | Response time SLO                                                                                   | n/a                 | 48h                 | 48h (Teams: 24h)    | Custom                       |
 | [Support SLA](/enterprise#faq)                                                                      | --                  | --                  | --                  | Yes                          |
@@ -249,7 +250,7 @@ A billable unit in Langfuse is any tracing data point sent to the platform -- in
 ## Frequently Asked Questions
 
 **What is the easiest way to try Langfuse?**
-You can view the [public example project](/demo) or sign up for a [free account](/cloud) to try Langfuse with your own data. The Hobby plan is completely free and does not require a credit card.
+You can view the [public example project](/docs/demo) or sign up for a [free account](/cloud) to try Langfuse with your own data. The Hobby plan is completely free and does not require a credit card.
 
 **Can I self-host Langfuse for free?**
 Yes, Langfuse is open source and you can self-host it for free. Use Docker Compose to run Langfuse locally, or use one of the templates to self-host in production on Kubernetes. See the [self-hosting documentation](/self-hosting) to learn more.
@@ -278,6 +279,9 @@ Yes, you can configure [spend alerts](/docs/administration/spend-alerts) to rece
 
 **How can I manage my subscription?**
 Through the organization settings in Langfuse Cloud or the [Customer Portal](/billing-portal).
+
+**Can I purchase Langfuse through AWS Marketplace?**
+Yes. Enterprise customers with a yearly commitment can bill via AWS Marketplace. [Talk to us](/talk-to-us?deployment=cloud) to request a private offer. Invoice billing is also available.
 
 **Can I redline the contracts?**
 Yes, customized contracts are available for Enterprise customers with a yearly commitment. [Contact sales](/talk-to-us) to discuss your requirements. Default plans are self-serve on standard terms.

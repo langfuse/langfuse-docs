@@ -2,7 +2,7 @@ import { ImageResponse } from "@vercel/og";
 import { NextRequest } from "next/server";
 import { SITE_DEFAULT_OG_DESCRIPTION } from "@/lib/og-url";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 function wrapWords(text: string, maxChars: number): string[] {
   const words = text.split(/\s+/).filter(Boolean);
@@ -792,7 +792,7 @@ function fitDescLayout(
 function toDataUrl(buffer: ArrayBuffer, mime: string): string {
   const bytes = new Uint8Array(buffer);
   let binary = "";
-  // `fromCharCode(...subarray)` can exceed the engine's max call/spread size on Edge; use `apply` with bounded chunks.
+  // `fromCharCode(...subarray)` can exceed the engine's max call/spread size; use `apply` with bounded chunks.
   const chunk = 0x2000; // 8192, safe for apply
   for (let i = 0; i < bytes.length; i += chunk) {
     const sub = bytes.subarray(i, i + chunk);

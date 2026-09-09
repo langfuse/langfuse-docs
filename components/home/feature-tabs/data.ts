@@ -207,6 +207,7 @@ async function handleRequest(userInput: string) {
     subtitle: "Collect feedback and run evaluations.",
     body: "Run online/offline evals, via UI (experiment with prompts/models) and via SDKs (experiment with end-to-end application). Build datasets from traces to continuously improve your evals. View results in UI.",
     docsHref: "/docs/evaluation/overview",
+    quickstartHref: "/docs/evaluation/get-started/online",
     image: {
       light: EvalsPng,
       dark: EvalsPng,
@@ -275,7 +276,7 @@ const result = await langfuse.experiment.run({
     title: "Collaborate on human reviews",
     subtitle: "Add manual feedback and corrections.",
     body: "Create manual annotations to provide feedback, corrections, and improvements to your LLM outputs. Use annotations to build high-quality datasets and set a baseline for automated evals.",
-    docsHref: "/docs/evaluation/evaluation-methods/annotation",
+    docsHref: "/docs/evaluation/evaluation-methods/scores-via-ui",
     image: {
       light: AnnotationPng,
       dark: AnnotationPng,
