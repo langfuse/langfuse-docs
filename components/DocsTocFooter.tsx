@@ -10,6 +10,7 @@ import { HoverCard, HoverCardTrigger } from "@/components/ui/hover-card";
 import { ArrowUpRight } from "lucide-react";
 import TocCommunity from "@/components/TocCommunity";
 import { Text } from "@/components/ui/text";
+import { getDocsFeedbackIssueUrl } from "@/lib/docs-feedback-url";
 
 // ─── Utility functions ────────────────────────────────────────────────────────
 
@@ -34,15 +35,6 @@ const getGithubEditUrl = (path: string): string | null => {
   const slugPath = slugParts.join("/");
   const filePath = `${contentDir}/${slugPath === "" ? "index" : slugPath}.mdx`;
   return `https://github.com/langfuse/langfuse-docs/edit/main/${filePath}`;
-};
-
-const getFeedbackUrl = (pageTitle?: string): string => {
-  const title = (pageTitle ?? "this page").trim();
-  const params = new URLSearchParams({
-    title: `Feedback for "${title}"`,
-    labels: "feedback",
-  });
-  return `https://github.com/langfuse/langfuse-docs/issues/new?${params.toString()}`;
 };
 
 const getContributors = (path: string): string[] => {
@@ -180,7 +172,7 @@ export const DocsTocFooter = ({
   const currentPath = pathname.split("#")[0].split("?")[0];
   const [showAll, setShowAll] = useState(false);
   const editUrl = getGithubEditUrl(currentPath);
-  const feedbackUrl = getFeedbackUrl(pageTitle);
+  const feedbackUrl = getDocsFeedbackIssueUrl(currentPath, pageTitle);
   const lastModifiedDate = useMemo(
     () => (lastModified ? new Date(lastModified) : undefined),
     [lastModified],
