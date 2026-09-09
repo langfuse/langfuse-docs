@@ -2,11 +2,8 @@
 
 import { usePathname } from "next/navigation";
 import { DocsBody } from "fumadocs-ui/page";
-import {
-  CopyMarkdownButton,
-  DocsFeedback,
-  DocsSupport,
-} from "@/components/MainContentWrapper";
+import { DocsFeedback, DocsSupport } from "@/components/MainContentWrapper";
+import { NativePageActions } from "@/components/NativePageActions";
 import { NotebookBanner } from "@/components/NotebookBanner";
 import { COOKBOOK_ROUTE_MAPPING } from "@/lib/cookbook_route_mapping";
 import type { ReactNode } from "react";
@@ -27,8 +24,8 @@ type Props = {
 };
 
 /**
- * Thin "use client" wrapper that adds interactive chrome (copy button, feedback,
- * support, notebook banner) around server-rendered MDX content passed as children.
+ * Thin "use client" wrapper that adds interactive chrome (native page actions,
+ * feedback, support, notebook banner) around server-rendered MDX content.
  *
  * The MDX itself is rendered on the server; only this shell runs on the client.
  */
@@ -64,7 +61,7 @@ export function DocBodyChrome({
               {versionLabel}
             </span>
           )}
-          <CopyMarkdownButton key={pathname} />
+          <NativePageActions key={pathname} />
         </div>
         {cookbook && (
           <NotebookBanner src={cookbook.ipynbPath} className="mb-4" />

@@ -12,7 +12,7 @@ import { Text } from "@/components/ui/text";
 
 // ─── Utility functions ────────────────────────────────────────────────────────
 
-const getGithubEditUrl = (path: string): string | null => {
+export const getGithubEditUrl = (path: string): string | null => {
   const cleanPath = path.split("#")[0].split("?")[0];
   const [, section, ...slugParts] = cleanPath.split("/");
 

@@ -71,6 +71,7 @@ const pathsWithCopyAsMarkdownButton = [
 ];
 const isCustomerStory = (pathname: string) => pathname.startsWith("/users/");
 
+/** Kept for comparison/revert. Docs chrome now uses NativePageActions. */
 export const CopyMarkdownButton = () => {
   const pathname = usePathname();
   const capture = usePostHogClientCapture();
@@ -335,18 +336,8 @@ export const MainContentWrapper = (props) => {
     (cookbook) => cookbook.path === pathname,
   );
 
-  const shouldShowCopyButton = pathsWithCopyAsMarkdownButton.some((prefix) =>
-    (pathname ?? "").startsWith(prefix),
-  );
-
   return (
     <>
-      {shouldShowCopyButton && (
-        <div className="flex flex-wrap gap-2 items-center mt-5">
-          <CopyMarkdownButton key={pathname} />
-        </div>
-      )}
-
       {cookbook ? (
         <NotebookBanner src={cookbook.ipynbPath} className="mt-4 mb-4" />
       ) : null}
