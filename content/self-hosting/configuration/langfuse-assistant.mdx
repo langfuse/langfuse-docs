@@ -15,7 +15,7 @@ This guide covers the infrastructure setup for the self-hosted Langfuse Assistan
 
 <Callout type="info">
   The Langfuse Assistant is in public beta on self-hosted deployments from
-  version `>=v4.25.0`. It is not covered by SemVer, and its configuration may
+  version `>=v4.28.0`. It is not covered by SemVer, and its configuration may
   change between releases. [Subscribe to Langfuse OSS
   updates](/self-hosting/oss-newsletter) to hear when it leaves beta.
 </Callout>
@@ -162,7 +162,7 @@ The Assistant reaches Langfuse data through this instance's native [Langfuse MCP
 
 The worker uses `LANGFUSE_MCP_BASE_URL` when set, otherwise `NEXTAUTH_URL`, and appends `/api/public/mcp`. Keep `NEXTAUTH_URL` set to the public Langfuse URL. Langfuse also uses it for links in emails, Slack notifications, and integration settings.
 
-On `>=v4.25.0`, set `LANGFUSE_MCP_BASE_URL` on the worker when it cannot reach the public URL. If that URL uses a different hostname than `NEXTAUTH_URL`, add the hostname to `LANGFUSE_MCP_ALLOWED_HOSTS` on web.
+Set `LANGFUSE_MCP_BASE_URL` on the worker when it cannot reach the public URL. If that URL uses a different hostname than `NEXTAUTH_URL`, add the hostname to `LANGFUSE_MCP_ALLOWED_HOSTS` on web.
 
 After applying the variables, confirm that the worker can resolve the hostname and reach `/api/public/mcp` on web. A `403` response with `Invalid Host header` means the hostname is missing from `LANGFUSE_MCP_ALLOWED_HOSTS`.
 
@@ -371,7 +371,7 @@ langfuse:
       eks.amazonaws.com/role-arn: arn:aws:iam::<account-id>:role/<langfuse-role>
 ```
 
-`inAppAgent.mcp.useInternalWebUrl` points the worker's MCP calls at the in-cluster web Service and allows that hostname on web. It sets `LANGFUSE_MCP_BASE_URL` and leaves `NEXTAUTH_URL` alone, which the worker also uses for links in emails and Slack notifications. This value requires Langfuse `>=v4.25.0`.
+`inAppAgent.mcp.useInternalWebUrl` points the worker's MCP calls at the in-cluster web Service and allows that hostname on web. It sets `LANGFUSE_MCP_BASE_URL` and leaves `NEXTAUTH_URL` alone, which the worker also uses for links in emails and Slack notifications.
 
 The chart gives web and worker one shared ServiceAccount, so both services assume the same IAM role. Scope it to Bedrock invoke and, if used, the MicroVM permissions above.
 
@@ -384,7 +384,7 @@ The [Langfuse Terraform module for AWS](https://github.com/langfuse/langfuse-ter
 ```hcl
 module "langfuse" {
   # ...
-  app_version = "4.25.0" # or newer
+  app_version = "4.28.0" # or newer
 
   enable_ai_features   = true
   ai_features_provider = "bedrock"
