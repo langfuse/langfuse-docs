@@ -41,14 +41,6 @@ const response = await openai.responses.create({
 });
 ```
 
-<Callout type="warning">
-  For Responses API calls, Langfuse records the `input` argument as the
-  generation input. A system prompt passed via the separate `instructions`
-  parameter is not part of the captured input; it only shows up in the
-  generation's metadata. To see the system prompt in the trace input, pass it
-  as a `developer` message inside `input` as shown above.
-</Callout>
-
 Langfuse automatically tracks:
 
 - All prompts/completions with support for streaming and function calling
