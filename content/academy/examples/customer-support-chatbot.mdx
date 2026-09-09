@@ -216,9 +216,9 @@ Before moving on to the next section, this is what a trace could look like:
 
 ## Phase 2: internal rollout
 
-In this phase, the agent drafts a reply for every incoming ticket, and a support team member can use it and edit it before sending. We can use the difference between the agent's draft and what the team member actually sends as a very reliable [user signal](/academy/monitoring#user-feedback).
+In this phase, the agent drafts a reply for every incoming ticket, and a support team member can use it and edit it before sending. We can use the difference between the agent's draft and what the team member actually sends as an [outcome signal](/academy/monitoring/capturing-signals#outcome-signals), the most reliable kind of [user signal](/academy/monitoring/capturing-signals).
 
-Another, more explicit user signal is a thumbs up or thumbs down button on the draft, where the team can also leave written feedback.
+A second, [explicit rating](/academy/monitoring/capturing-signals#explicit-ratings) signal is a thumbs up or thumbs down button on the draft, where the team can also leave written feedback.
 
 <AnnotatedLoop
   ariaLabel="The loop in phase 2: fully active, driven by the difference between drafted and sent replies"
@@ -285,7 +285,7 @@ The share of edited drafts should go down over time. Once drafts go out mostly u
 
 ## Phase 3: customer-facing rollout
 
-The bot now answers customers directly, and the signal that drove phase 2 disappears: nobody edits the reply before the customer sees it. Instead, we introduce a couple of new implicit user signals that will help us learn and improve over time.
+The bot now answers customers directly, and the signal that drove phase 2 disappears: nobody edits the reply before the customer sees it. Instead, we introduce new [conversation and outcome signals](/academy/monitoring/capturing-signals#four-kinds) that will help us learn and improve over time.
 
 <Callout type="info">
   Instead of going full-auto immediately, you could also automate only the request categories that cleared the phase 2 gate, while the rest keeps going through the support team for a little longer.
@@ -302,7 +302,7 @@ The bot now answers customers directly, and the signal that drove phase 2 disapp
   }}
 />
 
-Customers rarely rate their support chat, so the main focus is on gathering implicit user signals:
+Customers rarely rate their support chat, so the main focus is on [conversation signals](/academy/monitoring/capturing-signals#conversation-signals), with a one-question rating kept in place for the few who do:
 
 <EvaluatorBlock
   evaluators={[
@@ -327,8 +327,8 @@ Customers rarely rate their support chat, so the main focus is on gathering impl
       details: (
         <>
           A form of{" "}
-          <a href="/academy/monitoring#user-feedback">implicit feedback</a>:
-          a customer repeating themself means the previous answer didn't land.
+          <a href="/academy/monitoring#user-feedback">implicit feedback</a>: a
+          customer repeating themself means the previous answer didn't land.
           Only a judge reading the conversation can tell a rephrasing apart
           from a follow-up question.
         </>
@@ -355,8 +355,66 @@ Customers rarely rate their support chat, so the main focus is on gathering impl
         </>
       ),
     },
+    {
+      name: "conversation_rating",
+      type: "Human",
+      check: "One-question rating when the conversation closes",
+      returns: "binary, on the session",
+      details: (
+        <>
+          Collected in the chat widget when the conversation closes: a
+          single thumbs up or thumbs down, with an optional free-text comment.
+          The comment is stored on the score, so the customer's own wording is
+          there when the conversation gets reviewed. Attached to the session
+          rather than a trace, since the customer is rating the conversation
+          and not one specific reply.
+        </>
+      ),
+    },
   ]}
 />
+
+The strongest signals in this phase come from the ticketing system rather than from the chat: [outcome signals](/academy/monitoring/capturing-signals#outcome-signals) that show what happened after the conversation ended. They arrive days later, so they are written back to the session by its ID:
+
+<EvaluatorBlock
+  evaluators={[
+    {
+      name: "ticket_reopened",
+      type: "Ticketing event",
+      check:
+        "The customer contacts support again about the same issue within seven days",
+      returns: "binary, on the session",
+      details: (
+        <>
+          No evaluator needed: the ticketing system writes the score when a
+          ticket is reopened or a new ticket references the same issue. A
+          conversation that ended as <code>resolved</code> and comes back was
+          not resolved. This is the phase 3 counterpart of{" "}
+          <code>edit_type</code>: the environment's verdict on the reply,
+          arriving late but hard to argue with.
+        </>
+      ),
+    },
+    {
+      name: "handoff_resolution",
+      type: "LLM-as-a-judge",
+      check:
+        "Classifies what the human did after a handoff: confirmed the bot's answer, corrected it, or handled a request the bot could not",
+      returns: "categorical, on the session",
+      details: (
+        <>
+          Runs only on handed-off conversations, once the human has replied.{" "}
+          <code>corrected</code> marks the bot failures worth opening one by
+          one. <code>confirmed</code> means the customer wanted a human rather
+          than a better answer, which asks for a different fix than a wrong
+          reply.
+        </>
+      ),
+    },
+  ]}
+/>
+
+Two things to look out for when [reading these signals](/academy/monitoring/capturing-signals#how-to-interpret-signals). Handoff and repeat rates differ by ticket category and by customer cohort, so compare a category against its own history rather than reading one overall rate. And customers who give up silently never ask for a human, so they show up as `abandoned` as the `session_outcome` score.
 
 With no human in the loop anymore, we monitor every reply for reputation-damaging behavior. These two evaluators come from [hard constraints](/academy/evaluate/choosing-what-to-evaluate#goals-and-hard-constraints) rather than observed failures: they exist from day one, even though neither has ever fired. They don't block anything: they flag sent replies so the team can follow up with the customer quickly.
 
@@ -397,7 +455,7 @@ With no human in the loop anymore, we monitor every reply for reputation-damagin
   ]}
 />
 
-With these signals, there is a good setup to continuously improve the agent: bad conversations get surfaced, get improved, and become dataset items, to test against structurally. The team can also use this setup to safely try out a newer/cheaper/faster model, and make an informed decision on whether to deploy it or not.
+With these signals, there is a good setup to continuously improve the agent: [alerts](/docs/observability/features/alerts) on handoff and reopen spikes and a filtered view of negatively scored conversations surface the bad ones, which get improved and become dataset items, to test against structurally. The team can also use this setup to safely try out a newer/cheaper/faster model, and make an informed decision on whether to deploy it or not.
 
 ## Conclusion
 

@@ -162,7 +162,7 @@ A listening session and both trace types up close:
 
 ## Capturing user behavior
 
-In order to learn from users, we will log some [interesting behavior](/academy/monitoring#user-feedback) on the applicable traces.
+In order to learn from users, we will capture [user signals](/academy/monitoring/capturing-signals) on the applicable traces: behavioral signals from the player, conversation signals from the voice requests, and one explicit rating the app already has.
 
 <EvaluatorBlock
   evaluators={[
@@ -176,10 +176,11 @@ In order to learn from users, we will log some [interesting behavior](/academy/m
           No evaluator needed, the player writes the score. It always lands on
           the <code>plan-next-set</code> trace whose set was playing at that
           moment, and the comment holds which track was skipped, so a set with
-          several misses collects several scores.
+          several misses collects several scores. Beware: a skip is a weak negative. It
+          says as much about taste and mood as about the DJ.
         </>
       ),
-    },
+    }, 
     {
       name: "dj_replaced",
       type: "Player event",
@@ -219,12 +220,16 @@ In order to learn from users, we will log some [interesting behavior](/academy/m
           <a href="/academy/evaluate/choosing-what-to-evaluate#mind-the-budget">
             evaluator budget
           </a>{" "}
-          stays small.
+          stays small. <code>correction</code> and{" "}
+          <code>repeated_instruction</code> are the negatives worth{" "}
+          <a href="/academy/monitoring/capturing-signals#how-to-interpret-signals">opening one by one</a>.
         </>
       ),
     },
   ]}
 />
+
+These signals are acted upon with inherent biases in mind: the DJ only gets signal on tracks it plays, so a genre it never tries stays [unlabeled](/academy/monitoring/capturing-signals#biases). And beta listeners and time of day influence skip rates independent of DJ quality: a commute plays differently from a focus session.
 
 In principle, the team could already iterate with only this in place. Tracing and [monitoring](/academy/monitoring#metrics-and-signals) form a small loop of their own. In the beginning, this is probably enough for the team to quickly improve the DJ feature.
 
@@ -233,7 +238,7 @@ In principle, the team could already iterate with only this in place. Tracing an
   subloop
   stations={{
     trace: { note: "every set and every request" },
-    monitor: { note: "skips, dj_replaced, message_type" },
+    monitor: { note: "skips, likes, dj_replaced, message_type" },
     dataset: { dimmed: true, note: "not yet" },
     change: { dimmed: true, note: "not yet" },
     eval: { dimmed: true, note: "not yet" },
@@ -300,7 +305,7 @@ In this use case, testing end to end is very hard offline: whether a session was
 
 ### A/B tests on live users
 
-Some changes are hard to grade offline, like the tone of voice of the commentary. Since the risk is low, the team can give a small group of listeners the new version and compare the signal scores between the groups, like the skip rate and the `message_type` distribution. If the new version does better, they can roll it out to everyone.
+Some changes are hard to grade offline, like the tone of voice of the commentary. Since the risk is low, the team can give a small group of listeners the new version and compare the signal scores between the groups, like the skip rate and the `message_type` distribution. Skip rate alone is a risky target: a DJ optimized never to be skipped learns to play safe favorites on repeat. Pair it with a signal closer to [what the product is for](/academy/monitoring/capturing-signals#which-signal), like time listened per session or how often the DJ stays on. If the new version does better, they can roll it out to everyone.
 
 With this in place, the full loop is running:
 
@@ -308,7 +313,7 @@ With this in place, the full loop is running:
   ariaLabel="The full loop for the DJ: live signals, step-scoped datasets, experiments, and A/B tests"
   stations={{
     trace: { note: "every set and every request" },
-    monitor: { note: "skips, dj_replaced, message_type, A/B comparisons" },
+    monitor: { note: "skips, likes, dj_replaced, message_type, A/B comparisons" },
     dataset: { note: "from what we see while monitoring production" },
     change: { note: "selection algorithm, DJ prompt, ..." },
     eval: { note: "grade step outputs against their expectations" },
