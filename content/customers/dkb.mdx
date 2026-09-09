@@ -17,7 +17,6 @@ showInCustomerIndex: true
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
 import { CustomerQuote } from "@/components/customers/CustomerQuote";
-import { CustomerScreenshotCarousel } from "@/components/customers/CustomerScreenshotCarousel";
 import { ImpactChart } from "@/components/customers/ImpactChart";
 import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
@@ -35,30 +34,9 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
 First introduced in spring 2024, it has evolved from a simple question-answering tool into a fully agentic assistant handling 10,000 to 20,000 conversations a day. It can access a customer's account to help resolve complex requests (for example, change a transfer limit, access a tax certificate in the postbox, or block a lost card), always leaving the final action to the customer and staying within strict compliance rules, like never giving investment advice.
 
-<CustomerScreenshotCarousel
-  slides={[
-    {
-      src: "/images/customers/dkb/dkb-assistant-greeting.png",
-      alt: "DKB assistant greeting screen asking the customer to describe what they need help with",
-      label: "Greeting",
-    },
-    {
-      src: "/images/customers/dkb/dkb-assistant-check-transactions.png",
-      alt: "DKB assistant checking the customer's latest credit card transaction",
-      label: "Check transactions",
-    },
-    {
-      src: "/images/customers/dkb/dkb-assistant-last-transaction.png",
-      alt: "DKB assistant showing a declined Lufthansa credit card payment with a card widget",
-      label: "Transaction details",
-    },
-    {
-      src: "/images/customers/dkb/dkb-assistant-block-card.png",
-      alt: "DKB assistant helping the customer block a Visa credit card after suspected fraud",
-      label: "Block card",
-    },
-  ]}
-/>
+<Frame fullWidth className="w-full">
+  ![DKB assistant greeting screen asking the customer to describe what they need help with](/images/customers/dkb/dkb-assistant-greeting.png)
+</Frame>
 
 As David Hinrichs, a Senior Machine Learning Scientist at DKB, notes, the more an agent can do, especially in a regulated industry like banking, the more important it is to know exactly what it is doing. "In scaling a solution like this," he says, "you want to make sure you maintain observability into what's actually going on in your chatbot."
 
