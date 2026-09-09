@@ -1,4 +1,5 @@
 import defaultMdxComponents from "fumadocs-ui/mdx";
+import { TypeTable } from "fumadocs-ui/components/type-table";
 import type { MDXComponents } from "mdx/types";
 import React from "react";
 import dynamic from "next/dynamic";
@@ -109,6 +110,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Tabs: LangTabsWithTab,
     Tab: LangTab,
     table: Table,
+    TypeTable,
     Cards,
     Card,
     "Cards.Card": Card,
