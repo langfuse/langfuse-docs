@@ -302,6 +302,54 @@ You can also set `langfuse.observation.input` and `langfuse.observation.output` 
 - Verify the `ChatModelCompletionContentObservationFilter` is registered as a Spring `@Component`. Without it, prompt and completion data won't be added as span attributes even if logging is enabled.
 - Sampling probability must be high enough.
 
+### JDBC Dependency Conflict
+
+If your Spring AI application uses a JDBC datasource, you may encounter a dependency conflict that prevents the application from starting, caused by a version mismatch between OpenTelemetry libraries.
+
+When you add JDBC dependencies (e.g., `spring-boot-starter-jdbc`), the application fails to start with an error like:
+
+```
+APPLICATION FAILED TO START
+
+An attempt was made to call a method that does not exist.
+
+The following method did not exist:
+    'setCaptureQueryParameters(boolean)'
+```
+
+This happens because:
+
+1. `micrometer-tracing-bridge-otel` (managed by Spring Boot) has a transitive dependency on an older `opentelemetry-instrumentation-api-incubator` version
+2. `opentelemetry-jdbc` (from `opentelemetry-spring-boot-starter`) requires a newer `opentelemetry-instrumentation-api-incubator` version
+3. Maven resolves this in favor of the older transitive dependency, causing the method-not-found error
+
+> **Note:** The exact version numbers in the error message may vary depending on your Spring Boot and OpenTelemetry versions. Look for the same `setCaptureQueryParameters` method-not-found error.
+
+**The fix:** Exclude the problematic transitive dependency from `micrometer-tracing-bridge-otel`. Since the `opentelemetry-instrumentation-bom` defined earlier in this guide already manages `opentelemetry-instrumentation-api-incubator`, you don't need to specify a version:
+
+```xml
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-tracing-bridge-otel</artifactId>
+    <exclusions>
+        <exclusion>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-instrumentation-api-incubator</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+```
+
+For Gradle users:
+
+```groovy
+configurations.all {
+    exclude group: 'io.opentelemetry.instrumentation', module: 'opentelemetry-instrumentation-api-incubator'
+}
+```
+
+For more details, see the [Spring AI demo fix PR](https://github.com/langfuse/langfuse-examples/pull/34) and the [related bug report](https://github.com/langfuse/langfuse/issues/14312).
+
 ## GitHub Discussions
 
 import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
