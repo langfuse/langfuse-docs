@@ -13,7 +13,7 @@ This guide covers one pattern: exposing an OpenTelemetry endpoint through Azure 
 
 > **What is Azure API Management?** [Azure API Management](https://azure.microsoft.com/en-us/products/api-management) is Microsoft's managed API gateway. Enterprises commonly place it in front of Azure OpenAI to centralize authentication, apply quotas and policies, and keep model traffic inside their network perimeter; Microsoft documents this pattern as APIM's [AI gateway capabilities](https://learn.microsoft.com/en-us/azure/api-management/genai-gateway-capabilities).
 
-> **What is Langfuse?** [Langfuse](https://langfuse.com/) is an open-source LLM engineering platform that helps teams trace, debug, and evaluate their LLM applications. Langfuse is not a proxy: your requests never pass through Langfuse on the way to the model, so it adds no hop to the gateway path.
+> **What is Langfuse?** [Langfuse](https://langfuse.com/) is an open-source LLM engineering platform that helps teams trace, debug, and evaluate their LLM applications. Langfuse is not a proxy: your requests never pass through Langfuse on the way to the model, so it adds no hop to the gateway path. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it.
 
 This guide is about the telemetry route, not about instrumenting your application. To generate the spans in the first place, instrument your services with the [Langfuse SDKs](/docs/observability/get-started) or, for languages the SDKs do not cover, any [OpenTelemetry SDK](/resources/engineering/opentelemetry-languages).
 
