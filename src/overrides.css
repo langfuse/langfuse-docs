@@ -845,6 +845,22 @@ ul[data-gh-discussions-list] {
   margin-bottom: 0;
 }
 
+/* Fumadocs ImageZoom: fill Frame chrome and keep screenshot margins at 0 */
+.prose [data-rmiz] {
+  display: block;
+  max-width: 100%;
+}
+
+.prose [data-rmiz] img {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* Linked images: navigation cursor rather than zoom-in */
+.prose a[href] [data-rmiz-content="found"] img {
+  cursor: pointer;
+}
+
 /* Prose (Docs) font */
 .prose {
   --tw-prose-body: var(--text-secondary);

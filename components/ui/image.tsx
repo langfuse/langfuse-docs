@@ -1,5 +1,6 @@
 import NextImage from "next/image";
 import type { ImgHTMLAttributes } from "react";
+import { isOptimizable } from "@/components/ui/image-utils";
 
 /**
  * Unified image component wrapping next/image.
@@ -8,26 +9,11 @@ import type { ImgHTMLAttributes } from "react";
  * - External URLs (badges, shields.io, etc.) → native <img> (unoptimized, safe)
  * - Unknown dimensions: fills container width, preserves aspect ratio
  * - Known dimensions: renders at exact size
+ *
+ * MDX pages should use `MdxImage` (mapped as `img` / `Image`) so screenshots
+ * get Fumadocs ImageZoom. Direct imports here stay non-zoomable (logos,
+ * cards, video posters).
  */
-
-const OPTIMIZED_HOSTNAMES = [
-  "static.langfuse.com",
-  "langfuse.com",
-  "github.com",
-  "raw.githubusercontent.com",
-];
-
-function isOptimizable(src: string): boolean {
-  if (!src.startsWith("http://") && !src.startsWith("https://")) return true; // local path
-  try {
-    const { hostname } = new URL(src);
-    return OPTIMIZED_HOSTNAMES.some(
-      (h) => hostname === h || hostname.endsWith(`.${h}`),
-    );
-  } catch {
-    return false;
-  }
-}
 
 export function Image(
   props: ImgHTMLAttributes<HTMLImageElement> & {
