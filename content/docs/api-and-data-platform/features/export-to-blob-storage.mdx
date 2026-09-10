@@ -44,6 +44,19 @@ Schedule exports to Amazon S3, S3-compatible storage, Google Cloud Storage, or A
 | Schedule            | Every 20 minutes, hourly, daily, or weekly. Each run exports one time window.                                                                                                                                                                               |
 | Export Mode         | **Full history** starts at the project's earliest data; **From setup date** starts when the integration is enabled; **From custom date** starts at a selected date. Changing this setting resets the sync position and re-scans from that point.            |
 
+<span id="monitor-and-reconfigure" /><span id="export-status" />
+
+The integration settings page shows a status badge:
+
+| Badge        | Meaning                                                   |
+| ------------ | --------------------------------------------------------- |
+| **Active**   | Enabled and synced; the next run is scheduled.            |
+| **Running**  | A run is in progress.                                     |
+| **Queued**   | A run is due and waiting.                                 |
+| **Pending**  | Enabled but has not run yet.                              |
+| **Disabled** | Turned off.                                               |
+| **Error**    | The last run failed; the message and timestamp are shown. |
+
 <span id="file-formats" />
 
 **Parquet notes**
@@ -160,25 +173,6 @@ If your S3-compatible provider has no object-created events, poll the manifest p
 
 Make manifest processing idempotent. Provider events can be delivered more than once, and a catch-up can create several manifests close together.
 
-## Troubleshooting [#monitor-and-reconfigure]
-
-The integration settings page shows a status badge:
-
-| Badge        | Meaning                                                   |
-| ------------ | --------------------------------------------------------- |
-| **Active**   | Enabled and synced; the next run is scheduled.            |
-| **Running**  | A run is in progress.                                     |
-| **Queued**   | A run is due and waiting.                                 |
-| **Pending**  | Enabled but has not run yet.                              |
-| **Disabled** | Turned off.                                               |
-| **Error**    | The last run failed; the message and timestamp are shown. |
-
-import { FaqPreview } from "@/components/faq/FaqPreview";
-
-<span id="how-exports-run" /><span id="empty-files" /><span id="export-status" /><span id="re-exporting" />
-
-<FaqPreview tags={["blob-storage"]} />
-
 ## Upgrade a legacy export [#legacy-export-sources]
 
 <Callout type="warning">
@@ -232,3 +226,11 @@ Do not load both observation layouts into the same production dataset. Check the
 - **All deployments:** `traces/` and `observations/` stop receiving files after the switch, including empty files. Use `manifests/` as the run-completion signal.
 - **Langfuse Cloud:** Ignore `DEPRECATION_NOTICE.txt` when processing exports; it is not part of a run.
 - **Self-hosted Langfuse v4:** `dual` is the only write mode in which both layouts are selectable, so the optional dual-layout validation above requires it.
+
+## FAQ
+
+import { FaqPreview } from "@/components/faq/FaqPreview";
+
+<span id="how-exports-run" /><span id="empty-files" /><span id="re-exporting" />
+
+<FaqPreview tags={["blob-storage"]} />
