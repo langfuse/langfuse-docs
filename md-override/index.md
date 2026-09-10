@@ -1,5 +1,5 @@
 ---
-title: "Langfuse: Open-source LLM observability and evaluation"
+title: "Langfuse: Open Source Agent Evals & Observability"
 canonical: https://langfuse.com/
 description: Trace, evaluate, and improve AI agents with one open platform. Use production data to understand behavior, collaborate on fixes, and ship better quality at lower cost and latency.
 ---
