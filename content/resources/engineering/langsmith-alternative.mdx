@@ -69,13 +69,13 @@ A purpose-built store is a reasonable choice for closed SaaS. If you operate the
 
 Langfuse prices observability, evaluation, prompt management, and metrics as one platform: traces, observations, and scores meter as units, with no seat fees. LangSmith meters seats, traces, and a retention upgrade, plus separate lines for Deployment, Engine, Fleet, Sandboxes, the LLM Gateway, and per-evaluation charges for Tuned Evaluators on [their pricing page](https://www.langchain.com/pricing). The worked example covers observability seats and traces only.
 
-|            | Langfuse                                                                       | LangSmith                                                                  |
-| ---------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
-| Seats      | **No seat fees.** Unlimited users on Core and above ([pricing](/pricing))      | **$39/seat/month** on Plus                                                 |
-| Free tier  | 50,000 units/month, 2 users                                                    | 5,000 base traces/month, 1 seat                                            |
-| Paid entry | **Core $29/month** (100,000 units)                                             | Plus, $39/seat + usage (10,000 base traces, 1 small serverless deployment) |
-| Usage rate | 1 unit = 1 trace, observation, or score. Then $8/100k units (volume discounts) | **$0.005**/base trace + **$0.0025** extended upgrade                       |
-| Retention  | 30 days Hobby, 90 days Core, **3 years** Pro and Enterprise                    | 14 days base, 400 days extended                                            |
+|            | Langfuse                                                                       | LangSmith                                                                                                                                   |
+| ---------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Seats      | **No seat fees.** Unlimited users on Core and above ([pricing](/pricing))      | **$39/seat/month** on Plus                                                                                                                  |
+| Free tier  | 50,000 units/month, 2 users                                                    | 5,000 base traces/month, 1 seat                                                                                                             |
+| Paid entry | **Core $29/month** (100,000 units)                                             | Plus, $39/seat + usage (10,000 base traces, 1 small serverless deployment)                                                                  |
+| Usage rate | 1 unit = 1 trace, observation, or score. Then $8/100k units (volume discounts) | **$0.005**/base trace + **$0.0025** extended upgrade                                                                                        |
+| Retention  | 30 days Hobby, 90 days Core, **3 years** Pro and Enterprise                    | 14 days base, 400 days extended (reducing to a [180-day maximum](https://docs.langchain.com/langsmith/usage-and-billing) in September 2026) |
 
 ### Worked example [#worked-example]
 
@@ -90,7 +90,7 @@ Public list prices. Edit the inputs yourself: [Langfuse vs LangSmith pricing mod
 
 **1.** LangSmith bills seats on invitations. A ten-person team is $390/month before a single trace.
 
-**2.** LangSmith's included window is 14 days. Keeping traces longer is a per-trace upgrade, and [online evaluators and automation rules promote traces into the paid tier by default](https://docs.langchain.com/langsmith/usage-and-billing), though each evaluator or rule can opt out. Hitting a self-set extended-trace limit blocks further retention-extending evaluators and rules; UI feedback and annotation-queue adds keep working.
+**2.** LangSmith's included window is 14 days. Keeping traces longer is a per-trace upgrade, and [online evaluators and automation rules promote traces into the paid tier by default](https://docs.langchain.com/langsmith/usage-and-billing), though each evaluator or rule can opt out. Hitting a self-set extended-trace limit blocks further retention-extending evaluators and rules; UI feedback and annotation-queue adds keep working. LangSmith is reducing the maximum retention from 400 to 180 days in September 2026, below this example's 12-month requirement.
 
 **3.** We bill every span; they bill the trace. We are likely cheaper on shallow traces. The gap narrows as traces deepen. The sheet takes spans-per-trace as an input so you can find the crossover for your workload.
 
@@ -198,7 +198,7 @@ The same reasons recur in migration conversations. Cost leads, and it is several
 
 - **Trace-volume pricing.** LangSmith's per-trace usage grows linearly with traffic, so a bill that works in a pilot becomes the blocker at production scale. At 500k traces with 5 users, the [worked example](#worked-example) lands at $3,895/month on LangSmith Plus vs $621 on Langfuse Pro.
 - **Seat fees tax adoption.** LangSmith bills $39/seat on invitation, so giving product managers, reviewers, and domain experts view access has a per-head price. Langfuse [meters usage, not people](#pricing).
-- **Retention is its own meter.** LangSmith's included window is 14 days, keeping traces longer is a per-trace upgrade, and [online evaluators and automation rules promote traces into the paid tier by default](#pricing). Retention is $1,250 of the worked example's monthly LangSmith total.
+- **Retention is its own meter.** LangSmith's included window is 14 days, keeping traces longer is a per-trace upgrade, and [online evaluators and automation rules promote traces into the paid tier by default](#pricing). Retention is $1,250 of the worked example's monthly LangSmith total, and the maximum paid window drops from 400 to 180 days in September 2026. Langfuse Pro and Enterprise retain traces for 3 years with no per-trace retention charge.
 - **Compliance routes through sales.** Self-hosting, custom SSO, and role-based access control are [Enterprise-only on LangSmith](https://www.langchain.com/pricing), so teams that must run in their own infrastructure cannot evaluate on the free or Plus tiers. Langfuse self-hosts [MIT-licensed on every tier](#open-source-and-distribution) and signs a [BAA from the Pro plan](#enterprise-security).
 - **Framework coupling.** Platform teams serving heterogeneous stacks don't want the observability layer tied to one agent framework. Off LangChain and LangGraph, LangSmith's zero-setup instrumentation is gone, and [Deployment, Engine, Fleet, and the Gateway](#integrations) are priced separately on top.
 - **Turning trace data into answers.** LangSmith captures the traces, but slicing them into business views or moving them into your own analytics stack hits walls: [bulk export is Enterprise-gated](#storage) and there is no direct database access on LangSmith Cloud. Langfuse pairs [custom dashboards and Pulse](#observability-and-monitoring) with the [Observations and Metrics APIs](#open-platform) for high-volume reads on Cloud, and self-hosters can additionally query the ClickHouse table directly in SQL.
@@ -275,7 +275,7 @@ On the Enterprise plan. As of LangSmith Self-Hosted v0.16, SmithDB, Engine, and 
 
 ### How do I migrate from LangSmith to Langfuse? [#how-do-i-migrate-from-langsmith]
 
-Point your OpenTelemetry exporter at the Langfuse [OTLP endpoint](/integrations/native/opentelemetry), or swap the LangSmith environment variables for the [Langfuse integration](/integrations/frameworks/langchain) in LangChain and LangGraph apps. Import datasets via CSV, SDK, or API, and recreate prompts and evaluators. Most teams see first traces the same day; trace history stays in LangSmith. See [Switching from LangSmith](#switching-from-langsmith).
+Follow the [step-by-step migration guide](/resources/engineering/migrate-from-langsmith). LangSmith's OpenTelemetry mode can fan traces out to Langfuse and LangSmith in parallel while you verify, LangChain and LangGraph apps add the [Langfuse callback handler](/integrations/frameworks/langchain), and datasets and Prompt Hub prompts copy over via the SDK. Most teams see first traces the same day. See [Switching from LangSmith](#switching-from-langsmith).
 
 ### What is SmithDB? [#what-is-smithdb]
 
