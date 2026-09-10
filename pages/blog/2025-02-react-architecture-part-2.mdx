@@ -1,0 +1,203 @@
+---
+title: "Production-Grade React Components Part 2: Co-Location and Pure Functions"
+date: 2025/02/12
+description: "Organizing code by feature instead of file type, and extracting business logic into testable pure functions."
+tag: engineering, react, architecture, testing
+author: Michael
+---
+
+At Langfuse, we believe in the power of engineers shipping with [extreme ownership](https://langfuse.com/handbook/how-we-work/principles). As we ship features and improvements iteratively, React components evolve. Occasionally, it makes sense to take a step back and refactor them to maintain velocity and code quality.
+
+In [Part 1](/blog/2025-02-react-architecture-part-1), we covered layer separation - organizing code into data fetching, pure transformation, context orchestration, and presentation layers. This separation improved maintainability but introduced more files: separate files for API hooks, pure transformation functions, context providers, and presentation components.
+
+With more files comes a new challenge: _where_ should these files live in your directory structure?
+
+## The Co-Location Principle
+
+The co-location principle can be summarized as: place code as close to where it's relevant as possible. Related code should live together, making it easier to find, understand, modify, and delete as a unit.
+
+The challenge is knowing how close is too close. Move things too far apart and you create friction. Move them too close and you lose clarity. Finding the right distance for each situation is key.
+
+### Feature-Level Organization
+
+Traditional folder structures organize by file type - separate folders for components, hooks, utils, and types. Understanding a feature requires opening files across multiple directories. Refactoring means modifying files scattered across folders. Deleting a feature often leaves orphaned code.
+
+We organize by feature instead. The trace view lives in a single `trace/` folder containing everything related to traces:
+
+```
+trace/
+├── api/                 # Data fetching layer
+├── lib/                 # Pure transformation layer
+├── contexts/            # Context orchestration layer
+├── components/          # Presentation layer
+└── config/              # Feature configuration
+```
+
+_([View actual structure](https://github.com/langfuse/langfuse/tree/main/web/src/components/trace2))_
+
+Deleting a feature means deleting one folder. Dependencies become clear through import paths - if `TraceLogView` imports from `TraceTimeline`, you see it in the path. Circular dependencies become obvious. Everything related lives together.
+
+### Component-Level Organization
+
+Within a feature, complex components get their own folders. The `TraceTimeline` component visualizes observation timing - it needs multiple sub-components, pure calculation functions, and tests. Files share a common prefix pattern that serves as a discovery mechanism - in your IDE, you can type the prefix to see all related files, or use grep/file search to find them programmatically:
+
+```
+TraceTimeline/
+├── TimelineIndex.tsx                   # Main component
+├── TimelineBar.tsx                     # Sub-components
+├── TimelineRow.tsx
+├── TimelineScale.tsx
+├── timeline-calculations.ts            # Pure functions
+├── timeline-calculations.clienttest.ts # Tests co-located
+├── timeline-flattening.ts              # More utilities
+└── types.ts                            # Type definitions
+```
+
+This naming convention provides practical benefits for both human developers and automated tools. In your IDE, typing "timeline" shows all related files instantly. For programmatic access, `grep -r "timeline-" .` or similar file search patterns find everything at once - useful when your agent needs to understand or modify a component. Tests live next to the code they verify, marked with `.clienttest.ts`, making coverage visible at a glance.
+
+### When NOT to Co-Locate
+
+Co-location is a means to an end, not an end in itself. The goal is making code easier to work with, not rigidly following a principle. Don't over-abstract by creating folder structures and file separations that add no practical value.
+
+Simple prop interfaces that live in one place stay in the component file - defining them separately adds navigation overhead without benefit. Start with things together. If they become too tightly coupled or create confusion, separate them. The structure should serve the work, not constrain it.
+
+## Co-Locating Pure Functions and Tests
+
+Co-location becomes particularly valuable when extracting business logic from React components. Pure functions can be tested without React setup, reused in different contexts, and co-located with both the components that use them and the tests that verify them.
+
+### Example: Timeline Calculations
+
+The timeline component needs to position bars, calculate widths, and select appropriate time intervals. Extracting this logic into pure functions enables testing without React, reuse in other contexts, and separation of calculation from rendering:
+
+```typescript
+// timeline-calculations.ts
+export const SCALE_WIDTH = 900;
+export const STEP_SIZE = 100;
+
+export const PREDEFINED_STEP_SIZES = [
+  0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25,
+  35, 40, 45, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500,
+];
+
+/**
+ * Calculate horizontal offset from trace start time
+ */
+export function calculateTimelineOffset(
+  nodeStartTime: Date,
+  traceStartTime: Date,
+  totalScaleSpan: number,
+  scaleWidth: number = SCALE_WIDTH,
+): number {
+  const timeFromStart =
+    (nodeStartTime.getTime() - traceStartTime.getTime()) / 1000;
+  return (timeFromStart / totalScaleSpan) * scaleWidth;
+}
+
+/**
+ * Calculate width of timeline bar from duration
+ */
+export function calculateTimelineWidth(
+  duration: number,
+  totalScaleSpan: number,
+  scaleWidth: number = SCALE_WIDTH,
+): number {
+  return (duration / totalScaleSpan) * scaleWidth;
+}
+
+/**
+ * Calculate appropriate step size for time axis
+ */
+export function calculateStepSize(
+  traceDuration: number,
+  scaleWidth: number = SCALE_WIDTH,
+): number {
+  const calculatedStepSize = traceDuration / (scaleWidth / STEP_SIZE);
+  return (
+    PREDEFINED_STEP_SIZES.find((step) => step >= calculatedStepSize) ||
+    PREDEFINED_STEP_SIZES[PREDEFINED_STEP_SIZES.length - 1]
+  );
+}
+```
+
+The pure functions live in `timeline-calculations.ts`, co-located with the component that uses them. _([View implementation](https://github.com/langfuse/langfuse/blob/main/web/src/components/trace2/components/TraceTimeline/timeline-calculations.ts))_
+
+The component becomes cleaner:
+
+```typescript
+// index.tsx
+import {
+  calculateTimelineOffset,
+  calculateTimelineWidth,
+  calculateStepSize,
+} from "./timeline-calculations";
+
+function TraceTimeline() {
+  const { tree } = useTraceData();
+  const traceDuration = tree.latency ?? 0;
+
+  return (
+    <div>
+      {tree.children.map((node) => {
+        const offset = calculateTimelineOffset(
+          node.startTime,
+          tree.startTime,
+          traceDuration,
+        );
+        const width = calculateTimelineWidth(node.duration, traceDuration);
+
+        return <TimelineBar offset={offset} width={width} />;
+      })}
+    </div>
+  );
+}
+```
+
+Tests live next to the functions they verify:
+
+```typescript
+// timeline-calculations.clienttest.ts
+import {
+  calculateTimelineOffset,
+  calculateStepSize,
+} from "./timeline-calculations";
+
+describe("calculateTimelineOffset", () => {
+  it("calculates offset for node starting 5 seconds into 10-second trace", () => {
+    const result = calculateTimelineOffset(
+      new Date("2024-01-01T00:00:05Z"),
+      new Date("2024-01-01T00:00:00Z"),
+      10, // total span
+      900, // scale width
+    );
+    expect(result).toBe(450); // 50% * 900px
+  });
+});
+
+describe("calculateStepSize", () => {
+  it("selects appropriate step size for 100-second trace", () => {
+    expect(calculateStepSize(100, 900)).toBe(15);
+  });
+});
+```
+
+Co-locating tests with code makes coverage visible. Looking at the `TraceTimeline/` folder, you immediately see which utilities have tests. _([View tests](https://github.com/langfuse/langfuse/blob/main/web/src/components/trace2/components/TraceTimeline/timeline-calculations.clienttest.ts))_
+
+The decision to extract depends on complexity, reusability, and testability. Complex logic, code used across components, and deterministic functions benefit from extraction. Simple logic, lifecycle-coupled code, and hook-heavy operations stay in components.
+
+## Key Takeaways
+
+At Langfuse, we prioritize [shipping above little else](https://langfuse.com/handbook/how-we-work/principles). Engineers work on end-to-end ownership - planning, implementing, and supporting features without handoffs. This requires finding and modifying code quickly, with confidence that related pieces are discovered together. The layer separation from [Part 1](/blog/2025-02-react-architecture-part-1) created clear boundaries but introduced more files - addressing where those files live became the next challenge.
+
+The co-location principle provides a pragmatic framework: place related code together. Feature-level organization means one folder per feature. Component-level organization uses name prefixes for discovery. Tests live next to code. The structure requires discipline - more nesting, consistent naming - but enables developers and coding agents to find code quickly, refactor with confidence, and navigate without tribal knowledge.
+
+Layer separation created boundaries between concerns. Co-location organized those boundaries into navigable structures. [Part 3](/blog/2025-02-react-architecture-part-3) addresses performance: handling datasets that vary by orders of magnitude within these well-organized components.
+
+_Browse the actual implementation:_
+
+- _[TraceLogView/](https://github.com/langfuse/langfuse/tree/main/web/src/components/trace2/components/TraceLogView) - Feature folder example_
+- _[timeline-calculations.ts](https://github.com/langfuse/langfuse/blob/main/web/src/components/trace2/components/TraceTimeline/timeline-calculations.ts) - Pure functions_
+- _[tree-building.ts](https://github.com/langfuse/langfuse/blob/main/web/src/components/trace2/lib/tree-building.ts) - Complex pure logic_
+
+---
+
+**Building Langfuse?** We're growing our engineering team. If you value well-organized, maintainable code, [check out our open positions](https://langfuse.com/careers).
