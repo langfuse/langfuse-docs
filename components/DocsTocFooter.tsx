@@ -13,7 +13,7 @@ import { getDocsFeedbackIssueUrl } from "@/lib/docs-feedback-url";
 
 // ─── Utility functions ────────────────────────────────────────────────────────
 
-const getGithubEditUrl = (path: string): string | null => {
+export const getGithubEditUrl = (path: string): string | null => {
   const cleanPath = path.split("#")[0].split("?")[0];
   const [, section, ...slugParts] = cleanPath.split("/");
 
