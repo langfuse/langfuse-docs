@@ -32,6 +32,9 @@ export const workflowAutomationInsights = [
   {
     id: "debug",
     title: "Easily debug your agent executions",
+    imageSrc: "/images/workflow-automation/execution-trace.png",
+    imageAlt:
+      "Agent execution trace showing model turns, tool calls, approval waits, and failed dashboard-widget operations",
     description:
       "Trace every step, tool call, and input and output your agent produces. Find failure modes and bottlenecks across executions, then prioritize issues by how often they happen so you fix what actually matters.",
     href: "/docs/observability/overview",
@@ -40,6 +43,9 @@ export const workflowAutomationInsights = [
   {
     id: "cost",
     title: "Get a full view on cost at every step",
+    imageSrc: "/images/workflow-automation/step-costs.png",
+    imageAlt:
+      "Agent execution trace with the total run cost and individual model-step costs highlighted",
     description:
       "See the cost of an execution as a whole and a granular view of each sub-step. Swap models and inspect quality so you can manage the cost of the system without guessing.",
     href: "/docs/observability/features/token-and-cost-tracking",
@@ -48,6 +54,9 @@ export const workflowAutomationInsights = [
   {
     id: "human-expertise",
     title: "Leverage human expertise to improve your system",
+    imageSrc: "/images/workflow-automation/human-review.png",
+    imageAlt:
+      "Human annotation of an incorrect tool query, with a written explanation and a failed assessment",
     description:
       "Let engineers and domain experts annotate data in Langfuse and mark when the system went wrong. Log corrections from human-in-the-loop setups to build ground-truth data at scale.",
     href: "/docs/evaluation/evaluation-methods/annotation-queues",

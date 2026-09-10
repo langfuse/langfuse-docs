@@ -28,7 +28,7 @@ import { BookOpen, Network, Radar, Sparkles } from "lucide-react";
 
 <div className="not-prose mt-6 overflow-hidden border border-line-structure bg-surface-bg">
   <CodingAgentPathDial>
-    <section className="grid border-b border-line-structure lg:grid-cols-[1.2fr_0.8fr]">
+    <section data-use-case-section="hero" className="grid border-b border-line-structure lg:grid-cols-[1.2fr_0.8fr]">
       <div className="min-w-0 border-b border-line-structure px-6 py-7 sm:px-10 sm:py-8 lg:border-b-0 lg:border-r">
         <p className="font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
           Use case / coding agents
@@ -69,7 +69,7 @@ import { BookOpen, Network, Radar, Sparkles } from "lucide-react";
     <CodingAgentPathSwitcher />
 
     <CodingAgentPathPanel value="gateway" label="Via gateways">
-      <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
+      <section data-use-case-section="benefits" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
         <div className="flex items-center gap-4 pb-4">
           <h2 className="text-[34px] leading-[1] text-text-primary sm:text-[46px]">
             Govern AI spend from a central place
@@ -105,7 +105,7 @@ import { BookOpen, Network, Radar, Sparkles } from "lucide-react";
     </CodingAgentPathPanel>
 
     <CodingAgentPathPanel value="hooks" label="Via hooks">
-      <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
+      <section data-use-case-section="benefits" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
         <div className="flex items-center gap-4 pb-4">
           <h2 className="text-[34px] leading-[1] text-text-primary sm:text-[46px]">
             Dive deep into session details
@@ -121,7 +121,7 @@ import { BookOpen, Network, Radar, Sparkles } from "lucide-react";
     </CodingAgentPathPanel>
 
     <CodingAgentPathPanel value="gateway" label="Gateway integrations">
-      <section className="border-t border-line-structure px-5 py-8 sm:px-10 sm:py-10">
+      <section data-use-case-section="integrations" className="border-t border-line-structure px-5 py-8 sm:px-10 sm:py-10">
         <RelevantIntegrations
           headingLine1="Any gateway,"
           headingLine2="one place for LLM calls"
@@ -135,7 +135,7 @@ import { BookOpen, Network, Radar, Sparkles } from "lucide-react";
     </CodingAgentPathPanel>
 
     <CodingAgentPathPanel value="hooks" label="Hooks integrations">
-      <section className="border-t border-line-structure px-5 py-8 sm:px-10 sm:py-10">
+      <section data-use-case-section="integrations" className="border-t border-line-structure px-5 py-8 sm:px-10 sm:py-10">
         <RelevantIntegrations
           headingLine1="Your coding agent,"
           headingLine2="fully traced"
@@ -148,7 +148,7 @@ import { BookOpen, Network, Radar, Sparkles } from "lucide-react";
       </section>
     </CodingAgentPathPanel>
 
-    <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-16">
+    <section data-use-case-section="resources" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-16">
       <h2 className="mt-2 text-center text-[40px] leading-[1] text-text-primary">
         Learn how to trace and govern coding agents
       </h2>
@@ -158,14 +158,16 @@ import { BookOpen, Network, Radar, Sparkles } from "lucide-react";
       </p>
       <div className="mx-auto mt-8 max-w-4xl">
         <Cards num={2} className="sm:grid-cols-1 lg:grid-cols-2">
-          <Card
-            title="Tracing coding agents with Langfuse"
-            href="/resources/engineering/coding-agent-tracing"
-            icon={<Radar />}
-            description="Setup patterns for Claude Code, Codex, Copilot, Cursor, and more — plus cost tracking and team governance."
-            contentClassName="items-start p-4 sm:p-5"
-            contentWrapperClassName="gap-2"
-          />
+          <CodingAgentPathPanel value="hooks" className="contents">
+            <Card
+              title="Tracing coding agents with Langfuse"
+              href="/resources/engineering/coding-agent-tracing"
+              icon={<Radar />}
+              description="Setup patterns for Claude Code, Codex, Copilot, Cursor, and more — plus cost tracking and team governance."
+              contentClassName="items-start p-4 sm:p-5"
+              contentWrapperClassName="gap-2"
+            />
+          </CodingAgentPathPanel>
           <Card
             title="What is an LLM gateway?"
             href="/resources/engineering/llm-gateway"
@@ -194,7 +196,7 @@ import { BookOpen, Network, Radar, Sparkles } from "lucide-react";
       </div>
     </section>
 
-    <section className="border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
+    <section data-use-case-section="closing_cta" className="border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
       <div className="mx-auto max-w-5xl">
         <CustomerStoryCTA
           title="Ready to govern coding agent usage?"

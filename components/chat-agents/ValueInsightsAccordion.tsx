@@ -3,11 +3,12 @@
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { Plus } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { chatAgentsInsights } from "@/components/chat-agents/content";
 import { CornerBox } from "@/components/ui/corner-box";
 import { cn } from "@/lib/utils";
+import { dispatchUseCaseInteraction } from "@/lib/use-case-analytics";
 
 export type InsightItem = {
   id: string;
@@ -54,6 +55,7 @@ function InsightBody({ item, locked }: { item: InsightItem; locked: boolean }) {
       <p>{item.description}</p>
       <a
         href={item.href}
+        data-use-case-item={item.id}
         className="mt-4 inline-block text-[12px] text-text-secondary underline underline-offset-4 hover:text-text-primary"
       >
         {item.ctaLabel} →
@@ -70,6 +72,7 @@ export function ValueInsightsAccordion({
   locked = false,
 }: ValueInsightsAccordionProps = {}) {
   const [activeItemId, setActiveItemId] = useState(items[0]?.id);
+  const analyticsRef = useRef<HTMLDivElement>(null);
   const activeItem = items.find((item) => item.id === activeItemId) ?? items[0];
   const activeImageSrc = activeItem?.imageSrc ?? imageSrc;
   const activeImageAlt = activeItem?.imageAlt ?? imageAlt;
@@ -91,6 +94,9 @@ export function ValueInsightsAccordion({
   );
 
   function handleValueChange(value: string) {
+    if (value && analyticsRef.current) {
+      dispatchUseCaseInteraction(analyticsRef.current, "benefit_opened", value);
+    }
     if (value) setActiveItemId(value);
   }
 
@@ -182,7 +188,7 @@ export function ValueInsightsAccordion({
   ));
 
   return (
-    <div className="mx-auto mt-6 max-w-6xl">
+    <div ref={analyticsRef} className="mx-auto mt-6 max-w-6xl">
       <div
         className={cn(
           "grid gap-7 lg:grid-cols-[1.08fr_1fr]",

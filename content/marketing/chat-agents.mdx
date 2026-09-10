@@ -11,7 +11,7 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 import { Activity, BookOpen, Rocket } from "lucide-react";
 
 <div className="not-prose mt-6 overflow-hidden border border-line-structure bg-surface-bg">
-  <section className="grid border-b border-line-structure lg:grid-cols-[1.2fr_0.8fr]">
+  <section data-use-case-section="hero" className="grid border-b border-line-structure lg:grid-cols-[1.2fr_0.8fr]">
     <div className="min-w-0 border-b border-line-structure px-6 py-7 sm:px-10 sm:py-8 lg:border-b-0 lg:border-r">
       <p className="font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">Use case / chat agents</p>
       <h1 className="mt-2 text-[38px] leading-[0.95] text-text-primary sm:text-[48px]">
@@ -23,7 +23,7 @@ import { Activity, BookOpen, Rocket } from "lucide-react";
       <div className="mt-6 flex flex-wrap items-center gap-2">
         <a href="/cloud" className="border border-line-cta bg-text-primary px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-surface-bg transition-opacity hover:opacity-90">Start free</a>
         <a href="/talk-to-us" className="border border-line-structure bg-surface-bg px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary">Talk to sales</a>
-        <a href="/docs/observability/get-started" className="inline-flex items-center py-1.5 text-[12px] text-text-tertiary underline decoration-line-structure underline-offset-4 transition-colors hover:text-text-primary hover:decoration-text-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:ml-2">Chat agent quickstart →</a>
+        <a href="/docs/observability/get-started" data-use-case-action="quickstart" className="inline-flex items-center py-1.5 text-[12px] text-text-tertiary underline decoration-line-structure underline-offset-4 transition-colors hover:text-text-primary hover:decoration-text-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:ml-2">Chat agent quickstart →</a>
       </div>
     </div>
 
@@ -64,7 +64,7 @@ import { Activity, BookOpen, Rocket } from "lucide-react";
 
   </section>
 
-  <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
+  <section data-use-case-section="benefits" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
     <div className="flex items-center gap-4 pb-4">
       <h2 className="text-[34px] leading-[1] text-text-primary sm:text-[46px]">
         Trace the full session, not one call
@@ -75,18 +75,18 @@ import { Activity, BookOpen, Rocket } from "lucide-react";
 
   </section>
 
-  <section className="border-t border-line-structure bg-surface-1 px-5 py-14 sm:px-10 sm:py-18">
+  <section data-use-case-section="customer_stories" className="border-t border-line-structure bg-surface-1 px-5 py-14 sm:px-10 sm:py-18">
     <h2 className="mt-2 text-center text-[44px] leading-[1] text-text-primary">
       Teams observing and improving production chat agents on Langfuse
     </h2>
     <CustomerQuoteGrid />
   </section>
 
-  <section className="border-t border-line-structure px-5 py-8 sm:px-10 sm:py-10">
+  <section data-use-case-section="integrations" className="border-t border-line-structure px-5 py-8 sm:px-10 sm:py-10">
     <RelevantIntegrations />
   </section>
 
-  <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-16">
+  <section data-use-case-section="resources" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-16">
     <h2 className="mt-2 text-center text-[40px] leading-[1] text-text-primary">
       Learn from real chat-agent examples
     </h2>
@@ -121,7 +121,7 @@ import { Activity, BookOpen, Rocket } from "lucide-react";
     </div>
   </section>
 
-  <section className="border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
+  <section data-use-case-section="closing_cta" className="border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
     <div className="mx-auto max-w-5xl">
       <CustomerStoryCTA
         title="Ready to improve your production chat agent?"

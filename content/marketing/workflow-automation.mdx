@@ -19,7 +19,7 @@ import { BookOpen, Rocket, Workflow } from "lucide-react";
 <h1 className="sr-only">Langfuse for workflow automation</h1>
 
 <div className="not-prose mt-6 overflow-hidden border border-line-structure bg-surface-bg">
-  <section className="grid border-b border-line-structure lg:grid-cols-[1.2fr_0.8fr]">
+  <section data-use-case-section="hero" className="grid border-b border-line-structure lg:grid-cols-[1.2fr_0.8fr]">
     <div className="min-w-0 border-b border-line-structure px-6 py-7 sm:px-10 sm:py-8 lg:border-b-0 lg:border-r">
       <p className="font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
         Use case / workflow automation
@@ -49,7 +49,7 @@ import { BookOpen, Rocket, Workflow } from "lucide-react";
         >
           Talk to sales
         </a>
-        <a href="/docs/observability/get-started" className="inline-flex items-center py-1.5 text-[12px] text-text-tertiary underline decoration-line-structure underline-offset-4 transition-colors hover:text-text-primary hover:decoration-text-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:ml-2">Tracing quickstart →</a>
+        <a href="/docs/observability/get-started" data-use-case-action="quickstart" className="inline-flex items-center py-1.5 text-[12px] text-text-tertiary underline decoration-line-structure underline-offset-4 transition-colors hover:text-text-primary hover:decoration-text-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:ml-2">Tracing quickstart →</a>
       </div>
     </div>
 
@@ -59,7 +59,7 @@ import { BookOpen, Rocket, Workflow } from "lucide-react";
 
   </section>
 
-  <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
+  <section data-use-case-section="benefits" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
     <div className="flex items-center gap-4 pb-4">
       <h2 className="text-[34px] leading-[1] text-text-primary sm:text-[46px]">
         Trace the full execution across systems
@@ -74,14 +74,14 @@ import { BookOpen, Rocket, Workflow } from "lucide-react";
 
   </section>
 
-  <section className="border-t border-line-structure bg-surface-1 px-5 py-14 sm:px-10 sm:py-18">
+  <section data-use-case-section="customer_stories" className="border-t border-line-structure bg-surface-1 px-5 py-14 sm:px-10 sm:py-18">
     <h2 className="mt-2 text-center text-[44px] leading-[1] text-text-primary">
       Teams improving workflow automation agents on Langfuse
     </h2>
     <CustomerQuoteGrid routes={workflowAutomationQuoteRoutes} />
   </section>
 
-  <section className="border-t border-line-structure px-5 py-8 sm:px-10 sm:py-10">
+  <section data-use-case-section="integrations" className="border-t border-line-structure px-5 py-8 sm:px-10 sm:py-10">
     <RelevantIntegrations
       headingLine1="Any system,"
       headingLine2="any workflow"
@@ -90,7 +90,7 @@ import { BookOpen, Rocket, Workflow } from "lucide-react";
     />
   </section>
 
-  <section className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-16">
+  <section data-use-case-section="resources" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-16">
     <h2 className="mt-2 text-center text-[40px] leading-[1] text-text-primary">
       Learn from real automation examples
     </h2>
@@ -102,7 +102,7 @@ import { BookOpen, Rocket, Workflow } from "lucide-react";
       <Cards num={2} className="sm:grid-cols-1 lg:grid-cols-2">
         <Card
           title="Get started with tracing"
-          href="/docs/observability/get-started"
+          href="/docs/observability/get-started" data-use-case-action="quickstart"
           icon={<Rocket />}
           description="Ingest your first trace and see a full application run in Langfuse."
           contentClassName="items-start p-4 sm:p-5"
@@ -128,7 +128,7 @@ import { BookOpen, Rocket, Workflow } from "lucide-react";
     </div>
   </section>
 
-  <section className="border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
+  <section data-use-case-section="closing_cta" className="border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
     <div className="mx-auto max-w-5xl">
       <CustomerStoryCTA
         title="Ready to build reliable automation agents?"

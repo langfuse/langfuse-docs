@@ -1,11 +1,9 @@
 import { CustomerQuoteCard } from "@/components/chat-agents/CustomerQuoteCard";
 import { getCustomerStories } from "@/lib/getCustomerStories";
-
-const QUOTE_ROUTES = [
-  "/users/sumup",
-  "/users/canva",
-  "/users/magic-patterns-ai-design-tools",
-] as const;
+import {
+  chatAgentQuoteRoutes,
+  useCaseQuoteExcerpts,
+} from "@/lib/use-case-quotes";
 
 type Story = ReturnType<typeof getCustomerStories>[number];
 
@@ -14,7 +12,7 @@ function getStoryMap(stories: Story[]) {
 }
 
 export function CustomerQuoteGrid({
-  routes = QUOTE_ROUTES,
+  routes = chatAgentQuoteRoutes,
 }: {
   routes?: readonly string[];
 } = {}) {
@@ -27,7 +25,10 @@ export function CustomerQuoteGrid({
   return (
     <div className="mt-8 grid gap-2 lg:grid-cols-3">
       {selected.map((story) => {
-        const frontMatter = story.frontMatter ?? {};
+        const frontMatter = {
+          ...story.frontMatter,
+          ...useCaseQuoteExcerpts[story.route],
+        };
         const quote = frontMatter.customerQuote;
         if (!quote) return null;
 

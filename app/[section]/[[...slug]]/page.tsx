@@ -88,6 +88,8 @@ export default async function SectionDocPage(props: PageProps) {
         contentWidthClasses[contentWidth],
       )}
       data-content-width={contentWidth}
+      data-use-case={isUseCase ? section.replaceAll("-", "_") : undefined}
+      data-use-case-page={isUseCase ? `/${section}` : undefined}
     >
       <DocBodyChrome withProse showCopyButton={!isUseCase}>
         {bodyClient}

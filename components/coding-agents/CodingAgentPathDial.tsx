@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { cn } from "@/lib/utils";
+import { dispatchUseCaseInteraction } from "@/lib/use-case-analytics";
 
 export type CodingAgentPath = "gateway" | "hooks";
 
@@ -97,8 +98,16 @@ export function CodingAgentPathSwitcher() {
   >({});
 
   const selectPath = (next: CodingAgentPath, focus = false) => {
+    const changed = next !== value;
     setValue(next);
     writePathToUrl(next);
+    if (changed && buttonRefs.current[next]) {
+      dispatchUseCaseInteraction(
+        buttonRefs.current[next]!,
+        "path_selected",
+        next,
+      );
+    }
     if (focus) buttonRefs.current[next]?.focus();
   };
 
@@ -176,7 +185,7 @@ export function CodingAgentPathDial({
 
   return (
     <PathContext.Provider value={{ value, setValue }}>
-      {children}
+      <div data-use-case-path={value}>{children}</div>
     </PathContext.Provider>
   );
 }

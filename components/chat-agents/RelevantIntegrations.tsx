@@ -133,6 +133,7 @@ function IntegrationRow({
         {items.map((item) => (
           <IntegrationLabel
             key={item.label}
+            analyticsItem={item.label.toLowerCase().replace(/[^a-z0-9]+/g, "_")}
             href={item.href}
             label={item.label}
             icon={resolveChipIcon(item)}
