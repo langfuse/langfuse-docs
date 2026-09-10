@@ -2,6 +2,7 @@ import { faqSource } from "@/lib/source";
 import { Cards } from "@/components/docs";
 import { MessageCircleQuestion } from "lucide-react";
 import { Link } from "@/components/ui/link";
+import { getFaqTags, isFaqArticle } from "@/lib/faq-tags";
 
 type FaqPage = ReturnType<typeof faqSource.getPages>[number];
 
@@ -23,19 +24,17 @@ export const formatTag = (tag: string) =>
 
 export const FaqIndex = () => {
   const pages = faqSource.getPages();
-  const categorizedPages = pages
-    .filter((page) => page.url !== "/faq/all")
-    .reduce(
-      (acc, page) => {
-        const tags = (page.data.tags as string[] | undefined) ?? ["Other"];
-        tags.forEach((tag) => {
-          if (!acc[tag]) acc[tag] = [];
-          acc[tag].push(page);
-        });
-        return acc;
-      },
-      {} as Record<string, FaqPage[]>,
-    );
+  const categorizedPages = pages.filter(isFaqArticle).reduce(
+    (acc, page) => {
+      const tags = getFaqTags(page);
+      tags.forEach((tag) => {
+        if (!acc[tag]) acc[tag] = [];
+        acc[tag].push(page);
+      });
+      return acc;
+    },
+    {} as Record<string, FaqPage[]>,
+  );
 
   return (
     <>
