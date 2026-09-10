@@ -36,7 +36,7 @@ export const workflowAutomationInsights = [
     imageAlt:
       "Agent execution trace showing model turns, tool calls, approval waits, and failed dashboard-widget operations",
     description:
-      "Trace every step, tool call, and input and output your agent produces. Find failure modes and bottlenecks across executions, then prioritize issues by how often they happen so you fix what actually matters.",
+      "Trace every step, tool call, and input and output your agent produces. Add deep links to and from your product to easily debug traces. Find failure modes and bottlenecks across executions, then prioritize issues by how often they happen so you fix what actually matters.",
     href: "/docs/observability/overview",
     ctaLabel: "Tracing overview",
   },
