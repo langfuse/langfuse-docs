@@ -1,5 +1,6 @@
 ---
 title: Ollama Observability and Tracing for local LLMs using Langfuse
+seoTitle: Ollama Observability and Tracing for Local LLMs
 sidebarTitle: Ollama
 description: Run Open Source LLMs locally on your machine with Ollama and trace outputs with Langfuse for Open Source LLM Observability
 category: Integrations
@@ -19,7 +20,7 @@ Ollama ([GitHub](https://github.com/ollama/ollama)) is an open-source platform t
 
 ## What is Langfuse?
 
-Langfuse ([GitHub](https://github.com/langfuse/langfuse)) is an open-source AI engineering platform that helps teams collaboratively debug, analyze, and iterate on their LLM applications via tracing, prompt management and evaluations.
+Langfuse ([GitHub](https://github.com/langfuse/langfuse)) is an open-source AI engineering platform that helps teams collaboratively debug, analyze, and iterate on their LLM applications via tracing, prompt management and evaluations. Use [Langfuse Cloud](https://langfuse.com/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](https://langfuse.com/self-hosting) it.
 
 ### Local Deployment of Langfuse
 

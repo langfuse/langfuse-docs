@@ -10,11 +10,13 @@ logoAppearance: dark
 # Observability for OpenAI SDK (JS/TS)
 
 <Callout type="info">
-  Looking for the Python version? [Check it out
-  here](/integrations/model-providers/openai-py).
+  Looking for the Python version? See the [OpenAI (Python)
+  integration](/integrations/model-providers/openai-py).
 </Callout>
 
 The Langfuse JS/TS SDK offers a wrapper function around the OpenAI SDK, enabling you to easily add observability to your OpenAI calls. This includes tracking latencies, time-to-first-token on stream responses, errors, and model usage.
+
+Langfuse is open source. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it. The integration code is the same for both.
 
 ```ts {2, 4}
 import OpenAI from "openai";
@@ -24,6 +26,18 @@ const openai = observeOpenAI(new OpenAI());
 
 const res = await openai.chat.completions.create({
   messages: [{ role: "system", content: "Tell me a story about a dog." }],
+});
+```
+
+The wrapped client also traces the Responses API:
+
+```ts
+const response = await openai.responses.create({
+  model: "gpt-4o",
+  input: [
+    { role: "developer", content: "You are a poet." },
+    { role: "user", content: "Tell me a story about a dog." },
+  ],
 });
 ```
 
@@ -105,7 +119,7 @@ await langfuseSpanProcessor.forceFlush();
 await langfuse.flush();
 ```
 
-Learn more about queuing and batching of events [here](/docs/observability/features/queuing-batching).
+Learn more about [queuing and batching of events](/docs/observability/features/queuing-batching).
 
 ### Assistants API
 

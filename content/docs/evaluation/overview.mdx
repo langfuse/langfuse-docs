@@ -38,6 +38,8 @@ You can evaluate both:
 
 For more information on how evaluators, scores, datasets, and experiments fit together, read [Core Concepts](/docs/evaluation/core-concepts).
 
+To catch regressions before they ship, run experiments in CI: add the [`langfuse/experiment-action`](/docs/evaluation/experiments/experiments-ci-cd) GitHub Action to a `pull_request` workflow and raise `RegressionError` from your experiment script when a score violates your threshold; the action then fails the job. It works with Langfuse Cloud and self-hosted Langfuse.
+
 If you're looking for another specific workflow, use the table below to find the right feature page:
 
 | If you want to...                                   | Use this Langfuse feature                                                                                                                                                                                                                   |

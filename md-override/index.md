@@ -25,7 +25,7 @@ One integrated platform to trace, manage prompts, evaluate, and experiment from 
 - **[Evaluation](/docs/evaluation/overview)** — LLM-as-a-judge, heuristic functions, or human review. Run evaluators on production data or during experiments.
 - **[Prompt management](/docs/prompt-management/overview)** — separate prompts from code with one-click deployments and rollbacks.
 - **[Playground](/docs/prompt-management/features/playground)** — test prompts on real production inputs and compare models side by side.
-- **[Experiments](/docs/evaluation/experiments/overview)** — define test cases, run experiments, and compare results side by side.
+- **[Experiments](/docs/evaluation/experiments/datasets)** — define test cases, run experiments, and compare results side by side.
 - **[Human annotation](/docs/evaluation/evaluation-methods/annotation-queues)** — collaborative human-in-the-loop workflows to review traces and create golden datasets.
 - **[Cost and latency](/docs/observability/features/token-and-cost-tracking)** — monitor cost, latency, and quality with [dashboards](/docs/metrics/features/custom-dashboards) and [automated alerts](/docs/observability/features/alerts).
 
@@ -33,7 +33,7 @@ One integrated platform to trace, manage prompts, evaluate, and experiment from 
 
 Langfuse works with any language and framework supporting OpenTelemetry instrumentation. [100+ integrations](/integrations) make getting started easier, with no framework lock-in.
 
-- **Languages** — [Python](/docs/observability/sdk/python/overview) and [TypeScript](/docs/observability/sdk/typescript/overview) native SDKs, plus Go, Java, .NET, Ruby, PHP, and Swift via [OpenTelemetry](/integrations/native/opentelemetry).
+- **Languages** — [Python](/docs/observability/sdk/overview) and [TypeScript](/docs/observability/sdk/overview) native SDKs, plus Go, Java, .NET, Ruby, PHP, and Swift via [OpenTelemetry](/integrations/native/opentelemetry).
 - **Agent frameworks** — [LangChain](/integrations/frameworks/langchain), [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk), [LiteLLM](/integrations/frameworks/litellm-sdk), [Pydantic AI](/integrations/frameworks/pydantic-ai), [Google ADK](/integrations/frameworks/google-adk), [CrewAI](/integrations/frameworks/crewai), [LiveKit](/integrations/frameworks/livekit), and many more.
 - **Model providers** — [OpenAI](/integrations/model-providers/openai-py), [Anthropic](/integrations/model-providers/anthropic), [Amazon Bedrock](/integrations/model-providers/amazon-bedrock), Azure OpenAI, [Mistral AI](/integrations/model-providers/mistral-sdk), [Google Gemini](/integrations/model-providers/google-gemini), xAI, vLLM, Groq, and many more.
 - **Coding agents and tools** — [Claude Code](/integrations/developer-tools/claude-code), [Cursor](/integrations/developer-tools/cursor), [Codex](/integrations/developer-tools/codex), [OpenWebUI](/integrations/no-code/openwebui), [Dify](/integrations/no-code/dify), [n8n](/integrations/no-code/n8n), [PostHog](/integrations/analytics/posthog), and more.
@@ -44,7 +44,7 @@ Langfuse works with any language and framework supporting OpenTelemetry instrume
 
 Langfuse is built on open standards and data portability, and will not lock in your data.
 
-- **MIT license** — all product features are MIT licensed, scale to billions of monthly events, and you can fork, modify, and contribute. See [open source](/open-source).
+- **MIT license** — all product features are MIT licensed, scale to billions of monthly events, and you can fork, modify, and contribute. See [open source](/handbook/chapters/open-source).
 - **[Self-host at scale](/self-hosting)** — [Docker Compose](/self-hosting/deployment/docker-compose), [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm), and Terraform for [AWS](/self-hosting/deployment/aws), [GCP](/self-hosting/deployment/gcp), and [Azure](/self-hosting/deployment/azure).
 - **APIs and exports** — [REST APIs](/docs/api-and-data-platform/features/public-api) for everything, a [query SDK](/docs/api-and-data-platform/features/query-via-sdk), and [S3 blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage).
 - **Active community** — 22,000+ GitHub stars, 5,000+ Discord members, weekly releases and community hours.
@@ -108,7 +108,7 @@ Langfuse is an [open-source](https://github.com/langfuse/langfuse) AI engineerin
 
 ### What does Langfuse help me with?
 
-Langfuse helps you [debug LLM applications](/docs/observability/overview) with detailed traces that capture every step of your AI pipeline, including [agent graphs](/docs/observability/features/agent-graphs). You can [manage and version your prompts](/docs/prompt-management/overview) collaboratively, run [automated evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) (including LLM-as-a-judge and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators)), track [costs and latency](/docs/observability/features/token-and-cost-tracking) across models and providers, and run [experiments on datasets](/docs/evaluation/experiments/overview) to measure improvements before shipping. It also supports [custom dashboards](/docs/metrics/features/custom-dashboards) for team-wide visibility.
+Langfuse helps you [debug LLM applications](/docs/observability/overview) with detailed traces that capture every step of your AI pipeline, including [agent graphs](/docs/observability/features/agent-graphs). You can [manage and version your prompts](/docs/prompt-management/overview) collaboratively, run [automated evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) (including LLM-as-a-judge and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators)), track [costs and latency](/docs/observability/features/token-and-cost-tracking) across models and providers, and run [experiments on datasets](/docs/evaluation/experiments/datasets) to measure improvements before shipping. It also supports [custom dashboards](/docs/metrics/features/custom-dashboards) for team-wide visibility.
 
 ### Can I use just tracing without the other features?
 
@@ -116,7 +116,7 @@ Yes, you can use Langfuse purely for [tracing](/docs/observability/overview). Th
 
 ### What deployment options do exist?
 
-Langfuse is available as a [managed cloud service](https://cloud.langfuse.com) in [US and EU regions](/security), or you can [self-host](/self-hosting) it on your own infrastructure using [Docker Compose](/self-hosting/deployment/docker-compose), [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm), or Terraform templates for [AWS](/self-hosting/deployment/aws), [GCP](/self-hosting/deployment/gcp), and [Azure](/self-hosting/deployment/azure). The self-hosted version includes all product features under the [MIT license](/open-source). For teams needing additional support and compliance, there is a [self-hosted Enterprise plan](/pricing-self-host).
+Langfuse is available as a [managed cloud service](https://cloud.langfuse.com) in [US and EU regions](/security), or you can [self-host](/self-hosting) it on your own infrastructure using [Docker Compose](/self-hosting/deployment/docker-compose), [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm), or Terraform templates for [AWS](/self-hosting/deployment/aws), [GCP](/self-hosting/deployment/gcp), and [Azure](/self-hosting/deployment/azure). The self-hosted version includes all product features under the [MIT license](/handbook/chapters/open-source). For teams needing additional support and compliance, there is a [self-hosted Enterprise plan](/pricing-self-host).
 
 ### Is self-hosting actually free?
 
