@@ -1,7 +1,5 @@
 "use client";
 
-import { CLOUD_PRICING_VALUES } from "@/lib/cloud-pricing";
-
 import Link from "next/link";
 import { HomeSection } from "../HomeSection";
 import { cn } from "@/lib/utils";
@@ -81,11 +79,6 @@ export function PricingPage({
                 </TextHighlight>
               </Heading>
               <Text>{deploymentOptions[variant].subtitle}</Text>
-              {variant === "cloud" && (
-                <p className="text-sm text-muted-foreground">
-                  {CLOUD_PRICING_VALUES.reviewed}
-                </p>
-              )}
             </div>
 
             {/* Deployment Options Tabs */}

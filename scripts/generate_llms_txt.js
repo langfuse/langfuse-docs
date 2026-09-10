@@ -262,7 +262,7 @@ async function generateLLMsList() {
     // Keep buying and deployment facts easy to find without duplicating
     // volatile prices or competitor claims in the navigation index.
     markdownContent += `## Pricing, deployment, and comparisons\n\n`;
-    markdownContent += `- [Cloud pricing](https://langfuse.com/pricing.md): Plan prices, usage rates, limits, and a pricing review date.\n`;
+    markdownContent += `- [Cloud pricing](https://langfuse.com/pricing.md): Plan prices, usage rates, and limits.\n`;
     markdownContent += `- [Self-hosted pricing and license](https://langfuse.com/pricing-self-host.md): MIT-licensed core features and paid Enterprise additions.\n`;
     markdownContent += `- [Self-hosting](https://langfuse.com/self-hosting.md): Deployment options and operational requirements.\n`;
     markdownContent += `- [Enterprise license keys](https://langfuse.com/self-hosting/license-key.md): Activation and licensing for self-hosted add-on features.\n`;
