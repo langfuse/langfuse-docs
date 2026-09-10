@@ -149,7 +149,7 @@ observations = await langfuse.async_api.observations.get_many(
 metrics = await langfuse.async_api.metrics.metrics(query = query)
 ```
 
-For row-level observation filters, field selection, and cursor pagination, see the [Observations API v2 documentation](/docs/api-and-data-platform/features/observations-api#v2).
+For row-level observation filters, field selection, and cursor pagination, see the [Observations API v2 documentation](/docs/api-and-data-platform/features/public-api#v2).
 
 </Tab>
 <Tab title="JS/TS SDK">
@@ -183,7 +183,7 @@ const observations = await langfuse.api.observations.getMany({
 
 Use `traceId` to retrieve the observations that belong to a single trace. Use `parentObservationId` in the response to reconstruct an observation tree when needed.
 
-For row-level observation filters, field selection, and cursor pagination, see the [Observations API v2 documentation](/docs/api-and-data-platform/features/observations-api#v2).
+For row-level observation filters, field selection, and cursor pagination, see the [Observations API v2 documentation](/docs/api-and-data-platform/features/public-api#v2).
 
 ### Metrics
 
@@ -257,7 +257,7 @@ Explore more entities via Intellisense on `langfuse.api`.
 
 ## Related Resources
 
-- To move existing trace or observation reads to v2, see [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2).
+- To move existing trace or observation reads to v2, see [Observations API v2](/docs/api-and-data-platform/features/public-api#v2).
 - To move existing score reads to v3, see [Migration of deprecated APIs](/faq/all/deprecated-api-migration#scores).
 - To move existing metrics queries to v2, see [Metrics API v2](/docs/metrics/features/metrics-api#v2).
 - For large-scale data exports (e.g., all traces for fine-tuning or analytics), consider using the [Blob Storage Export](/docs/api-and-data-platform/features/export-to-blob-storage) to automatically sync data to S3, GCS, or Azure on a schedule instead of paginating through the API.
