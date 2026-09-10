@@ -774,6 +774,7 @@ span format.
 ## Validation checklist [#validation]
 
 - [ ] Each request produces one Langfuse trace: root span named after the agent, tool spans, generations with model, tokens, and cost
+- [ ] Open a generation in the UI: the formatted view renders system/user/assistant messages cleanly (if it shows raw attributes instead, [report it](/docs/ask-ai) before cutover)
 - [ ] No duplicate generations (a second capture path shows up as doubled cost)
 - [ ] Threads map to [sessions](/docs/observability/features/sessions) and users/tags are populated (requires the [attribute mapping](#threads-users-tags))
 - [ ] Streamed generations show token usage (`stream_options={"include_usage": True}`)
