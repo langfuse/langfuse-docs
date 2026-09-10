@@ -25,4 +25,3 @@ export const nativeIntegrationsMeta: Record<string, MetaEntry> = {
     title: "API",
   },
 };
-export const dataPlatformIntegrationsMeta: Record<string, MetaEntry> = {};
