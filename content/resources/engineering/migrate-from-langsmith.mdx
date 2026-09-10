@@ -9,13 +9,9 @@ import { Details, Summary } from "@/components/Details";
 
 # Migrate from LangSmith to Langfuse
 
-This guide walks through migrating LLM observability from
-[LangSmith](https://www.langchain.com/langsmith) to [Langfuse](/): live tracing first (usually a same-day change),
-then datasets, prompts, experiments, and evaluators, and optionally historical traces.
+This guide walks through migrating AI observability from [LangSmith](https://www.langchain.com/langsmith) to [Langfuse](/): live tracing first (usually a same-day change), then datasets, prompts, experiments, and evaluators, and optionally historical traces.
 
-Every step in this guide was executed and verified against a live LangSmith workspace and a live
-Langfuse project. For a product comparison, see
-[Langfuse vs. LangSmith](/resources/engineering/langsmith-alternative).
+The [Langfuse vs. LangSmith comparison](/resources/engineering/langsmith-alternative) covers how the two products differ; this guide covers the move.
 
 **TL;DR:**
 
@@ -23,7 +19,7 @@ Langfuse project. For a product comparison, see
 - LangChain and LangGraph apps add the [Langfuse callback handler](/integrations/frameworks/langchain), then unset `LANGSMITH_TRACING`.
 - Copy datasets and Prompt Hub prompts via the LangSmith SDK into Langfuse.
 - Recreate evaluators and re-run experiments; do not import old experiment scores.
-- Historical traces can be reingested over OTLP with original timestamps; reingested history is billed as new ingestion.
+- Optionally, historical traces can be reingested over OTLP with original timestamps.
 
 Want help cutting over? [Talk to us](/talk-to-us) about Cloud (EU, US, Japan; [HIPAA](/security/hipaa) on Pro+) or self-host.
 
@@ -36,22 +32,12 @@ Want help cutting over? [Talk to us](/talk-to-us) about Cloud (EU, US, Japan; [H
 
 Teams tend to evaluate a LangSmith-to-Langfuse move for a few recurring reasons:
 
-- **Pricing model.** LangSmith charges [per seat plus per trace, retention upgrade, and LangSmith Unit](https://www.langchain.com/pricing), with
-  Tuned Evaluators billed per evaluation. Langfuse Cloud has [no seat fees on any plan](/pricing); platform
-  price covers observability, evaluation, prompt management, and metrics.
-- **Retention.** LangSmith bills retention per trace, and the maximum paid window drops from 400 to
-  [180 days in September 2026](https://docs.langchain.com/langsmith/usage-and-billing). Langfuse Pro and
-  Enterprise retain traces for 3 years with no per-trace retention charge. If you have LangSmith history
-  you care about, export it before it ages out.
-- **Hosting and licensing.** LangSmith is proprietary SaaS; self-hosting is an Enterprise option. Langfuse's
-  core is [MIT-licensed](https://github.com/langfuse/langfuse), and [self-hosting](/self-hosting) runs the
-  same core product as [Langfuse Cloud](https://cloud.langfuse.com).
-- **Framework neutrality.** LangSmith is lowest-friction with LangChain and LangGraph. Langfuse is
-  [OpenTelemetry-based](/integrations/native/opentelemetry) and framework-neutral, with
-  [native integrations](/integrations) for LangChain, OpenAI, the Vercel AI SDK, Pydantic AI, and many more.
+- **Pricing model.** LangSmith charges [per seat plus per trace, retention upgrade, and LangSmith Unit](https://www.langchain.com/pricing), with Tuned Evaluators billed per evaluation. Langfuse Cloud has [no seat fees on any plan](/pricing); platform price covers observability, evaluation, prompt management, and metrics.
+- **Retention.** LangSmith bills retention per trace, and the maximum paid window drops from 400 to [180 days in September 2026](https://docs.langchain.com/langsmith/usage-and-billing). Langfuse Pro and Enterprise retain traces for 3 years with no per-trace retention charge. If you have LangSmith history you care about, export it before it ages out.
+- **Hosting and licensing.** LangSmith is proprietary SaaS; self-hosting is an Enterprise option. Langfuse's core is [MIT-licensed](https://github.com/langfuse/langfuse), and [self-hosting](/self-hosting) runs the same core product as [Langfuse Cloud](https://cloud.langfuse.com).
+- **Framework neutrality.** LangSmith is lowest-friction with LangChain and LangGraph. Langfuse is [OpenTelemetry-based](/integrations/native/opentelemetry) and framework-neutral, with [native integrations](/integrations) for LangChain, OpenAI, the Vercel AI SDK, Pydantic AI, and many more.
 
-LangSmith remains a capable platform, and if it serves your team well, there is no urgency to move. This
-guide is for teams that have decided to consolidate on Langfuse.
+LangSmith remains a capable platform, and if it serves your team well, there is no urgency to move. This guide is for teams that have decided to consolidate on Langfuse.
 
 ## Concept mapping
 
@@ -60,7 +46,7 @@ guide is for teams that have decided to consolidate on Langfuse.
 | Workspace                   | [Organization](/docs/administration/rbac)                                                             | One org per workspace is typical; LangSmith orgs hold multiple workspaces           |
 | Tracing project             | [Project](/docs/observability/data-model) or [environment](/docs/observability/features/environments) | Langfuse API keys select the project                                                |
 | Run tree (chain, llm, tool) | [Trace / observations](/docs/observability/data-model)                                                | Run types map to observation types (chain, generation, tool)                        |
-| Threads                     | [Sessions](/docs/observability/features/sessions)                                                     | Not automatic during fan-out; see [Threads, users, and tags](#threads-users-tags)   |
+| Threads                     | [Sessions](/docs/observability/features/sessions)                                                     | Requires the [Threads, users, and tags](#threads-users-tags) mapping during fan-out |
 | Datasets + examples         | [Datasets](/docs/evaluation/experiments/datasets)                                                     | `inputs` / `outputs` become `input` / `expected_output`                             |
 | Experiments (`evaluate()`)  | [Experiments / dataset runs](/docs/evaluation/experiments/experiments-via-sdk)                        | Re-run; do not import old scores                                                    |
 | Prompt Hub (commits, tags)  | [Prompt management](/docs/prompt-management) (versions, labels)                                       | Variable syntax changes from `{var}` to `{{var}}`                                   |
@@ -85,23 +71,16 @@ guide is for teams that have decided to consolidate on Langfuse.
 
 ## Step 1: Fan out live traces, then cut over [#cutover]
 
-LangSmith's [OpenTelemetry mode](https://docs.langchain.com/langsmith/trace-with-opentelemetry)
-routes your existing `traceable` and wrapper spans through OpenTelemetry to Langfuse. The
-parallel-run story differs by SDK: Python has a hybrid mode that sends every request to both
-backends from one process; JS/TS has no hybrid mode, so the parallel window runs per process
-(keep production on LangSmith, point a canary at Langfuse, then flip).
+LangSmith's [OpenTelemetry mode](https://docs.langchain.com/langsmith/trace-with-opentelemetry) routes your existing `traceable` and wrapper spans through OpenTelemetry to Langfuse. The parallel-run story differs by SDK: Python has a hybrid mode that sends every request to both backends from one process; JS/TS (as of `langsmith` 0.10.x) has no hybrid mode, so the parallel window runs per process (keep production on LangSmith, point a canary at Langfuse, then flip).
 
-Set `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL`
-(`https://cloud.langfuse.com` for EU; see [Get started](/docs/observability/get-started) for
-US, Japan, HIPAA, and self-hosted).
+If your services already route OpenTelemetry through a collector, add a [Langfuse OTLP exporter](/integrations/native/opentelemetry) to the collector pipeline instead of configuring each application. The rest of this step covers the in-process setup.
+
+Set `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` (`https://cloud.langfuse.com` for EU; [other regions and self-hosted deployments](/docs/observability/get-started) use different URLs). Optionally tag migration traffic with an [environment](/docs/observability/features/environments): `OTEL_RESOURCE_ATTRIBUTES="langfuse.environment=production"` on the OTel export path, or `LANGFUSE_TRACING_ENVIRONMENT` once you use the Langfuse SDK or callback handler.
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
-In hybrid mode (`LANGSMITH_OTEL_ENABLED=true`, Python SDK ≥ 0.4.1, ≥ 0.4.25 recommended; newer
-SDKs spell it `tracing_mode="hybrid"` on the `Client`), LangSmith keeps receiving runs while a
-global tracer provider exports the same spans to Langfuse: one instrumentation, two backends.
-That is your parallel-run window.
+In hybrid mode (`LANGSMITH_OTEL_ENABLED=true`, Python SDK ≥ 0.4.1, ≥ 0.4.25 recommended; newer SDKs spell it `tracing_mode="hybrid"` on the `Client`), LangSmith keeps receiving runs while a global tracer provider exports the same spans to Langfuse: one instrumentation, two backends. That is your parallel-run window.
 
 ```bash
 pip install "langsmith[otel]" opentelemetry-sdk opentelemetry-exporter-otlp-proto-http
@@ -153,22 +132,14 @@ from langsmith import traceable
 from langsmith.wrappers import wrap_anthropic
 ```
 
-Confirm in Langfuse that each request produces one trace: a root span named after your agent,
-tool spans, and generations with model, token usage, and cost. Then cut over by setting
-`LANGSMITH_OTEL_ONLY=true`, which stops sending runs to LangSmith.
+Confirm in Langfuse that each request produces one trace: a root span named after your agent, tool spans, and generations with model, token usage, and cost. Then cut over by setting `LANGSMITH_OTEL_ONLY=true`, which stops sending runs to LangSmith.
 
 </Tab>
 <Tab>
 
-The JS/TS SDK has no hybrid mode, so one process sends to one destination:
-`LANGSMITH_TRACING_MODE` set to `langsmith` (default) or `otel`. The migration adds an OTel
-bootstrap and flips that variable; the `traceable` and wrapper code stays unchanged, and the
-switch is reversible.
+The JS/TS SDK (as of `langsmith` 0.10.x) has [no hybrid mode](https://docs.langchain.com/langsmith/log-traces-to-project#route-between-langsmith-and-opentelemetry-destinations), so one process sends to one destination: `LANGSMITH_TRACING_MODE` set to `langsmith` (default) or `otel`. The migration adds an OTel bootstrap and flips that variable; the `traceable` and wrapper code stays unchanged, and the switch is reversible.
 
-Two JS-specific requirements, both verified: LangSmith ignores the standard global OTel
-provider unless you also pass it to `initializeOTEL()`, and in `otel` mode it is the LangSmith
-client's batch queue that ends and exports the OTel spans, so short-lived scripts must flush
-the same `Client` instance the traceables use.
+Two JS-specific requirements: LangSmith ignores the standard global OTel provider unless you also pass it to `initializeOTEL()`, and in `otel` mode it is the LangSmith client's batch queue that ends and exports the OTel spans, so short-lived scripts must flush the same `Client` instance the traceables use, then [flush the Langfuse span processor](/docs/observability/features/queuing-batching).
 
 ```bash
 npm install langsmith @langfuse/otel @opentelemetry/sdk-trace-node \
@@ -208,33 +179,21 @@ export const answer = traceable(
   { name: "support-agent", run_type: "chain", client: lsClient },
 );
 
-// Short-lived scripts only; long-running servers flush automatically:
+// Required in short-lived scripts (batched spans are lost at exit otherwise):
 await lsClient.awaitPendingTraceBatches();
 await langfuseProcessor.forceFlush();
 ```
 
-Run the canary with `LANGSMITH_TRACING_MODE=otel`: its traces arrive in Langfuse as a full
-tree (root chain span, tool spans, generations with model and token usage) and LangSmith
-receives nothing from that process. Unset the variable and the process reverts to LangSmith.
-Cut over by setting it fleet-wide.
+Run the canary with `LANGSMITH_TRACING_MODE=otel`: its traces arrive in Langfuse as a full tree (root chain span, tool spans, generations with model and token usage) and LangSmith receives nothing from that process. Unset the variable and the process reverts to LangSmith. Cut over by setting it fleet-wide.
 
 </Tab>
 </LangTabs>
 
-As an end state, most teams move to the [Langfuse SDK](/docs/observability/sdk/overview) or a
-[native integration](/integrations) and drop the `langsmith` dependency; until then the
-parallel window keeps the migration reversible.
+As an end state, most teams move to the [Langfuse SDK](/docs/observability/sdk/overview) or a [native integration](/integrations) and drop the `langsmith` dependency; until then the parallel window keeps the migration reversible.
 
 ### LangChain and LangGraph apps [#langchain]
 
-If your tracing comes from `LANGSMITH_TRACING=true` rather than SDK decorators, the migration is a
-callback handler, not an exporter change. The
-[Langfuse LangChain integration](/integrations/frameworks/langchain) hooks LangChain's standard
-callback mechanism, so graphs, chains, tools, and generations trace without touching application
-code. During the parallel window, keep `LANGSMITH_TRACING=true`: both backends receive the same
-execution independently. In the verified runs (Python and JS/TS), inputs, outputs, start
-timestamps, and token totals matched exactly, and the LangSmith run tree arrived in Langfuse
-one-to-one as typed observations (agent, chain, generation, tool).
+If your tracing comes from `LANGSMITH_TRACING=true` rather than SDK decorators, the migration is a callback handler. The [Langfuse LangChain integration](/integrations/frameworks/langchain) hooks LangChain's standard callback mechanism, so graphs, chains, tools, and generations trace without touching application code. During the parallel window, keep `LANGSMITH_TRACING=true`: both backends receive the same execution independently. In the verified runs (Python and JS/TS), inputs, outputs, start timestamps, and token totals matched exactly, and the LangSmith run tree arrived in Langfuse one-to-one as typed observations (agent, chain, generation, tool).
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
@@ -243,15 +202,14 @@ one-to-one as typed observations (agent, chain, generation, tool).
 pip install langfuse langchain
 ```
 
-The handler imports the `langchain` package. A pure LangGraph app that only pulls in
-`langchain-core` needs it added explicitly.
+The handler imports the `langchain` package. A pure LangGraph app that only pulls in `langchain-core` needs it added explicitly.
 
 ```python
 # Before: LANGSMITH_TRACING=true in the environment; no tracing code
 from langchain.agents import create_agent
 from langchain_anthropic import ChatAnthropic
 
-model = ChatAnthropic(model="claude-haiku-4-5-20251001", max_tokens=1024)
+model = ChatAnthropic(model="claude-haiku-4-5-20251001", max_tokens=1024)  # your existing model
 agent = create_agent(model, tools, system_prompt=SYSTEM_PROMPT)
 
 agent.invoke({"messages": [{"role": "user", "content": question}]})
@@ -274,7 +232,7 @@ agent.invoke(
     config={"callbacks": [langfuse_handler]},
 )
 
-get_client().flush()  # short-lived scripts only; servers flush on shutdown
+get_client().flush()  # required in short-lived scripts
 ```
 
 </Tab>
@@ -289,7 +247,7 @@ npm install @langfuse/langchain @langfuse/otel @opentelemetry/sdk-node
 import { ChatAnthropic } from "@langchain/anthropic";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 
-const model = new ChatAnthropic({ model: "claude-haiku-4-5-20251001" });
+const model = new ChatAnthropic({ model: "claude-haiku-4-5-20251001" }); // your existing model
 const agent = createReactAgent({ llm: model, tools, prompt: SYSTEM_PROMPT });
 
 await agent.invoke({ messages: [{ role: "user", content: question }] });
@@ -323,34 +281,22 @@ await langfuseProcessor.forceFlush(); // short-lived scripts only
 </Tab>
 </LangTabs>
 
-To cut over, set `LANGSMITH_TRACING=false` (or unset it). The callback handler is unaffected and
-LangSmith stops receiving runs; no other change is needed.
+The flush calls follow the standard Langfuse [event batching](/docs/observability/features/queuing-batching) pattern: spans are exported in batches, so scripts and serverless functions must flush before exit.
+
+To cut over, set `LANGSMITH_TRACING=false` (or unset it). The callback handler is unaffected and LangSmith stops receiving runs; no other change is needed.
+
+If your app mixes `traceable` code with LangChain, run either the OTel fan-out or the callback handler, not both: two capture paths ingest every LLM call twice, and doubled cost in Langfuse is the giveaway.
 
 ### Threads, users, and tags [#threads-users-tags]
 
-LangSmith threads, user metadata, and tags do **not** become Langfuse
-[sessions](/docs/observability/features/sessions),
-[users](/docs/observability/features/users), and
-[tags](/docs/observability/features/tags) automatically. In both SDKs, LangSmith's OTel
-export emits its own attribute names (the thread lands as the string attribute
-`langsmith.metadata.session_id`, users as `langsmith.metadata.user_id`, and tags as one
-comma-joined string `langsmith.span.tags`), which Langfuse stores as plain trace metadata.
-`trace.session_id`, `trace.user_id`, and `trace.tags` stay empty. (Also note:
-`langsmith.trace.session_name` is the LangSmith _project_ name, not the thread.)
+LangSmith threads, user metadata, and tags do **not** become Langfuse [sessions](/docs/observability/features/sessions), [users](/docs/observability/features/users), and [tags](/docs/observability/features/tags) automatically. In both SDKs, LangSmith's OTel export emits its own attribute names (the thread lands as the string attribute `langsmith.metadata.session_id`, users as `langsmith.metadata.user_id`, and tags as one comma-joined string `langsmith.span.tags`), which Langfuse stores as plain trace metadata. `trace.session_id`, `trace.user_id`, and `trace.tags` stay empty. (Also note: `langsmith.trace.session_name` is the LangSmith _project_ name, not the thread.)
 
-The verified fix differs by SDK. (Langfuse accepts both spellings used below:
-`session.id` and `langfuse.session.id` are
-[equivalent aliases](/integrations/native/opentelemetry#property-mapping), same for
-`user.id`.)
+The verified fix differs by SDK. (Langfuse accepts both spellings used below: `session.id` and `langfuse.session.id` are [equivalent aliases](/integrations/native/opentelemetry#property-mapping), same for `user.id`.)
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
-Wrap the Langfuse-bound OTLP exporter and rewrite the attributes to the names Langfuse maps
-(`session.id`, `user.id`, `langfuse.trace.tags`). Only the Langfuse export path is touched;
-LangSmith ingestion is unaffected, and the mapping survives the `LANGSMITH_OTEL_ONLY=true`
-cutover. Do not try to `set_attribute` inside a `@traceable` instead: in Python the context
-span is non-recording and the change is silently dropped.
+Wrap the Langfuse-bound OTLP exporter and rewrite the attributes to the names Langfuse maps (`session.id`, `user.id`, `langfuse.trace.tags`). Only the Langfuse export path is touched; LangSmith ingestion is unaffected, and the mapping survives the `LANGSMITH_OTEL_ONLY=true` cutover. Do not try to `set_attribute` inside a `@traceable` instead: in Python the context span is non-recording and the change is silently dropped.
 
 ```python
 from opentelemetry.sdk.trace.export import SpanExporter, SpanExportResult
@@ -393,9 +339,7 @@ class LangfuseAttributeMapper(SpanExporter):
 </Tab>
 <Tab>
 
-In `LANGSMITH_TRACING_MODE=otel` the LangSmith span _is_ the active, recording OTel span, so
-you can set the Langfuse attributes directly inside the root `traceable` function; no
-exporter wrapper is needed:
+In `LANGSMITH_TRACING_MODE=otel` the LangSmith span _is_ the active, recording OTel span, so you can set the Langfuse attributes directly inside the root `traceable` function; no exporter wrapper is needed:
 
 ```typescript
 import { trace as otelApi } from "@opentelemetry/api";
@@ -407,58 +351,33 @@ activeSpan?.setAttribute("langfuse.user.id", userId); // → trace.userId
 activeSpan?.setAttribute("langfuse.trace.tags", ["support", "js-migration"]); // string[] → trace.tags
 ```
 
-Keep the LangSmith `metadata: { session_id, user_id }` convention in the `traceable` options
-as before. LangSmith threads keep working from that, and the three lines above populate the
-Langfuse fields.
+Keep the LangSmith `metadata: { session_id, user_id }` convention in the `traceable` options as before. LangSmith threads keep working from that, and the three lines above populate the Langfuse fields.
 
-Related gotcha: in otel mode `getCurrentRunTree().trace_id` returns a mangled UUID. If you
-need the Langfuse trace ID (for example to log a trace URL), read
-`otelApi.getActiveSpan()?.spanContext().traceId` instead.
+In otel mode `getCurrentRunTree().trace_id` returns a mangled UUID. If you need the Langfuse trace ID (for example to log a trace URL), read `otelApi.getActiveSpan()?.spanContext().traceId` instead.
 
 </Tab>
 </LangTabs>
 
-After moving to the Langfuse SDK or callback handler, set the attributes natively instead:
-`propagate_attributes(session_id=..., user_id=...)` in the Python SDK, or
-`langfuse_session_id` / `langfuse_user_id` / `langfuse_tags` in the invocation metadata when
-using the [LangChain callback handler](/integrations/frameworks/langchain).
+After moving to the Langfuse SDK or callback handler, set the attributes natively instead: `propagate_attributes(session_id=..., user_id=...)` in the Python SDK, or `langfuse_session_id` / `langfuse_user_id` / `langfuse_tags` in the invocation metadata when using the [LangChain callback handler](/integrations/frameworks/langchain).
 
 ### Streaming [#streaming]
 
-Streaming responses migrate cleanly in both SDKs: with streaming enabled and
-`stream_options={"include_usage": True}` (Python) or
-`stream_options: { include_usage: true }` (JS/TS) on wrapped OpenAI calls, generations
-arrived in both backends with complete input/output/total token usage in the verified runs.
-Without `include_usage`, OpenAI omits usage on streams, so keep that option set.
+Streaming responses migrate cleanly in both SDKs: with streaming enabled and `stream_options={"include_usage": True}` (Python) or `stream_options: { include_usage: true }` (JS/TS) on wrapped OpenAI calls, generations arrived in both backends with complete input/output/total token usage in the verified runs. Without `include_usage`, OpenAI omits usage on streams, so keep that option set.
 
 <Details>
 <Summary>LangSmith tracing notes</Summary>
 
-- **Region.** EU workspaces use `https://eu.api.smith.langchain.com` (`LANGSMITH_ENDPOINT`) and
-  `https://eu.smith.langchain.com` (UI). Langfuse region is independent: pick EU / US / Japan /
-  HIPAA / self-host with `LANGFUSE_BASE_URL`.
-- **Workspace-scoped keys.** A workspace-scoped LangSmith API key needs no workspace ID. Org-scoped
-  keys need `LANGSMITH_WORKSPACE_ID` for the export steps below.
-- **Trace IDs differ between backends.** In hybrid mode, LangSmith keeps its own run UUIDs; the
-  Langfuse trace ID comes from the OTel context. If you need to cross-reference during the parallel
-  window, match on input and start time, or put a shared request ID in metadata.
-- **`wrap_anthropic` requires `anthropic<1` (Python).** As of `langsmith` (Python) 0.12.2, the wrapper
-  patches the legacy completions API that the Anthropic SDK removed in v1.0 and crashes on import
-  with `anthropic>=1.0`. Moving to the Langfuse SDK with a current Anthropic SDK removes the pin.
-  The JS `wrapAnthropic` has no such constraint.
-- **Trace-level fields materialize asynchronously.** A freshly ingested Langfuse trace can show an
-  empty name and input for a few seconds before the root span is processed.
-- If you already run an OpenTelemetry Collector, add a Langfuse OTLP exporter to its pipeline
-  instead of configuring the application; see [OTLP endpoint](/integrations/native/opentelemetry).
+- **Region.** EU workspaces use `LANGSMITH_ENDPOINT=https://eu.api.smith.langchain.com`; the Langfuse region is independent of it, picked with `LANGFUSE_BASE_URL`.
+- **Workspace-scoped keys.** A workspace-scoped LangSmith API key needs no workspace ID. Org-scoped keys need `LANGSMITH_WORKSPACE_ID` for the export steps below.
+- **Trace IDs differ between backends.** In hybrid mode, LangSmith keeps its own run UUIDs; the Langfuse trace ID comes from the OTel context. If you need to cross-reference during the parallel window, match on input and start time, or put a shared request ID in metadata.
+- **`anthropic<1` pin (Python).** If your requirements pin `anthropic<1`, that is a `langsmith` `wrap_anthropic` constraint (crashes on import with `anthropic>=1.0` as of 0.12.2); moving to the Langfuse SDK removes it.
+- **Trace-level fields materialize asynchronously.** A freshly ingested Langfuse trace can show an empty name and input for a few seconds before the root span is processed.
 
 </Details>
 
 ## Step 2: Export and recreate datasets [#datasets]
 
-List examples with the LangSmith SDK and insert them as Langfuse dataset items. Reuse the
-LangSmith example UUID as the Langfuse item `id` so a retry upserts instead of duplicating.
-LangSmith `inputs` / `outputs` map to `input` / `expected_output`; example metadata (splits,
-scenario tags) carries over as `metadata`. Confirm item counts match after import.
+List examples with the LangSmith SDK and insert them as Langfuse dataset items. Reuse the LangSmith example UUID as the Langfuse item `id` so a retry upserts instead of duplicating. LangSmith `inputs` / `outputs` map to `input` / `expected_output`; example metadata (splits, scenario tags) carries over as `metadata`. Confirm item counts match after import.
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
@@ -533,13 +452,7 @@ console.log(`migrated ${count} dataset items`);
 
 ## Step 3: Copy Prompt Hub prompts [#prompts]
 
-Pull each prompt from the Prompt Hub and create it in
-[Langfuse prompt management](/docs/prompt-management). Two things change in the transfer:
-LangSmith's f-string variables (`{question}`) become Langfuse variables (`{{question}}`), and
-Prompt Hub commits become Langfuse versions with [labels](/docs/prompt-management/features/prompt-version-control)
-(for example `production`) taking the place of commit tags. `MessagesPlaceholder` entries
-(chat history) map to Langfuse
-[message placeholders](/docs/prompt-management/features/message-placeholders).
+Pull each prompt from the Prompt Hub and create it in [Langfuse prompt management](/docs/prompt-management). Two things change in the transfer: LangSmith's f-string variables (`{question}`) become Langfuse variables (`{{question}}`), and Prompt Hub commits become Langfuse versions with [labels](/docs/prompt-management/features/prompt-version-control) (for example `production`) taking the place of commit tags. `MessagesPlaceholder` entries (chat history) map to Langfuse [message placeholders](/docs/prompt-management/features/message-placeholders).
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
@@ -578,8 +491,7 @@ langfuse.create_prompt(
 </Tab>
 <Tab>
 
-`pull` from `langchain/hub` returns the same `ChatPromptTemplate` the Python SDK gets, so the
-role mapping and variable rewrite carry over directly.
+`pull` from `langchain/hub` returns the same `ChatPromptTemplate` the Python SDK gets, so the role mapping and variable rewrite carry over directly.
 
 ```typescript
 import { LangfuseClient } from "@langfuse/client";
@@ -615,26 +527,22 @@ await langfuse.prompt.create({
 </Tab>
 </LangTabs>
 
-This copies the latest commit. If you need older versions, enumerate commits with
-`list_prompt_commits` and pull each one in commit order so Langfuse version numbers reflect
-the history:
+This copies the latest commit. If you need older versions, enumerate commits with `list_prompt_commits` (returns newest first) and pull each one oldest-first so Langfuse version numbers mirror the history:
 
 ```python
 from langsmith import Client
 
 ls = Client()
-for commit in ls.list_prompt_commits("support-agent"):
+for commit in reversed(list(ls.list_prompt_commits("support-agent"))):
     pulled = ls.pull_prompt(f"support-agent:{commit.commit_hash}")
-    # convert and langfuse.create_prompt(...) as above, oldest first
+    # convert and langfuse.create_prompt(...) as above
 ```
+
+Unlike dataset items, prompt creation is not idempotent: every `create_prompt` call adds a new version, so run the import once. Once your app fetches prompts from Langfuse, [link them to traces](/docs/prompt-management/features/link-to-traces) so generation metrics break down by prompt version.
 
 ## Step 4: Recreate evaluators and re-run experiments [#experiments]
 
-Do not import LangSmith experiment scores. Rewrite the `evaluate()` call for the
-[Langfuse experiment runner](/docs/evaluation/experiments/experiments-via-sdk) and re-run it
-against the migrated dataset so future experiments have an anchor. Evaluator functions port
-nearly one-to-one: LangSmith's `outputs` / `reference_outputs` arguments become `output` /
-`expected_output`.
+Do not import LangSmith experiment scores. Rewrite the `evaluate()` call for the [Langfuse experiment runner](/docs/evaluation/experiments/experiments-via-sdk) and re-run it against the migrated dataset so future experiments have an anchor. Evaluator functions port nearly one-to-one: LangSmith's `outputs` / `reference_outputs` arguments become `output` / `expected_output`.
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
@@ -651,7 +559,10 @@ def target(inputs: dict) -> dict:
 
 
 def keyword_match(outputs: dict, reference_outputs: dict) -> dict:
-    hit = reference_outputs["answer"].lower() in outputs["answer"].lower()
+    got = (outputs.get("answer") or "").lower()
+    want = (reference_outputs.get("answer") or "").lower()
+    keywords = [w for w in want.replace(".", " ").split() if len(w) > 4][:3]
+    hit = all(k in got for k in keywords) if keywords else False
     return {"key": "keyword_match", "score": 1.0 if hit else 0.0}
 
 
@@ -671,7 +582,10 @@ def task(*, item, **kwargs):
 
 
 def keyword_match(*, input, output, expected_output, **kwargs):
-    hit = expected_output["answer"].lower() in (output or "").lower()
+    got = (output or "").lower()
+    want = ((expected_output or {}).get("answer") or "").lower()
+    keywords = [w for w in want.replace(".", " ").split() if len(w) > 4][:3]
+    hit = all(k in got for k in keywords) if keywords else False
     return Evaluation(name="keyword_match", value=1.0 if hit else 0.0)
 
 
@@ -699,9 +613,14 @@ const keywordMatch = async ({
   output: any;
   expectedOutput?: any;
 }): Promise<Evaluation> => {
-  const hit = String(output ?? "")
-    .toLowerCase()
-    .includes(String(expectedOutput?.answer ?? "").toLowerCase());
+  const got = String(output ?? "").toLowerCase();
+  const want = String(expectedOutput?.answer ?? "").toLowerCase();
+  const keywords = want
+    .replaceAll(".", " ")
+    .split(/\s+/)
+    .filter((w) => w.length > 4)
+    .slice(0, 3);
+  const hit = keywords.length > 0 && keywords.every((k) => got.includes(k));
   return { name: "keyword_match", value: hit ? 1.0 : 0.0 };
 };
 
@@ -713,61 +632,35 @@ const result = await dataset.runExperiment({
 console.log(await result.format());
 ```
 
-If the task still uses LangSmith `traceable` code, run the experiment with
-`LANGSMITH_TRACING_MODE=otel` (and the [Step 1](#cutover) OTel bootstrap) so the task's traces
-land in Langfuse and link to the experiment run.
+If the task still uses LangSmith `traceable` code, run the experiment with `LANGSMITH_TRACING_MODE=otel` (and the [Step 1](#cutover) OTel bootstrap) so the task's traces land in Langfuse and link to the experiment run.
 
 </Tab>
 </LangTabs>
 
-- **LLM judges:** recreate rubrics as [managed or custom LLM-as-a-judge
-  evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge), or as
-  [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators).
-- **Online evaluators:** LangSmith rules on live traffic map to Langfuse
-  [evaluators on production traces](/docs/evaluation/get-started/online), with their own sampling.
-  Tuned Evaluators and Perceived Error are LangSmith-specific; recreate the underlying rubric.
-- **Annotation queues:** recreate in
-  [Langfuse annotation queues](/docs/evaluation/evaluation-methods/annotation-queues).
+- **LLM judges:** recreate rubrics as [managed or custom LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge), or as [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators).
+- **Online evaluators:** LangSmith rules on live traffic map to Langfuse [evaluators on production traces](/docs/evaluation/get-started/online), with their own sampling. Tuned Evaluators and Perceived Error are LangSmith-specific; recreate the underlying rubric.
+- **Annotation queues:** recreate in [Langfuse annotation queues](/docs/evaluation/evaluation-methods/annotation-queues).
 
 ## Step 5: Decide what to do with historical traces [#historical-traces]
 
-Most teams cut over fresh: old runs stay in LangSmith for the retention window, and Langfuse is
-the system of record from cutover day. Two things to weigh:
+Most teams cut over fresh. Old runs stay in LangSmith for the retention window, and Langfuse is the system of record from cutover day. Two things to weigh:
 
 - Reingested history is **billed as new Langfuse ingestion**.
-- LangSmith's maximum paid retention drops from 400 to
-  [180 days in September 2026](https://docs.langchain.com/langsmith/usage-and-billing), so history
-  you skip will age out on LangSmith's schedule.
+- LangSmith's maximum paid retention drops from 400 to [180 days in September 2026](https://docs.langchain.com/langsmith/usage-and-billing), so history you skip will age out on LangSmith's schedule.
 
 <Details>
 <Summary>Reingest history over OTLP (verified pattern)</Summary>
 
-Unlike most vendors, LangSmith history migrates cleanly because the run export API returns full
-trees with timing and usage. The pattern, verified end-to-end (counts reconciled, original
-timestamps preserved, error levels intact):
+LangSmith history migrates cleanly because the run export API returns full trees with timing and usage. The pattern, verified end-to-end (counts reconciled, original timestamps preserved, error levels intact):
 
-1. **Extract** runs with the LangSmith SDK. `list_runs()` is deprecated (removal after Jan 2027) in
-   favor of `client.runs.query()`; either returns root runs and full trees per `trace_id`.
-2. **Bound the window at cutover time.** Runs after the fan-out went live are already in Langfuse;
-   reingesting them duplicates data.
-3. **Transform to plain OTLP JSON** and POST to `{LANGFUSE_BASE_URL}/api/public/otel/v1/traces`
-   with Basic auth and the `x-langfuse-ingestion-version: 4` header. Do not create the spans
-   through an OTel tracer: tracers assign new timestamps and IDs. Raw JSON preserves the original
-   `start_time` / `end_time`.
-4. **Derive IDs deterministically** from LangSmith IDs (for example `sha256(trace_id)[:32]` for the
-   trace, `sha256(run_id)[:16]` per span) so re-runs upsert instead of duplicating.
-5. **Map fields**: run type to `langfuse.observation.type` (`llm` → `generation`, `tool` → `tool`,
-   `chain` → `chain`), `inputs` / `outputs` to observation input/output, `prompt_tokens` /
-   `completion_tokens` to `langfuse.observation.usage_details`, the model name from
-   `extra.invocation_params.model`, and errored runs to `langfuse.observation.level: ERROR`. Keep
-   the source ID in `langfuse.trace.metadata.langsmith_trace_id`.
-6. **Reconcile counts** per trace (source runs vs destination observations) and spot-check
-   timestamps in the Langfuse UI.
+1. **Extract** runs with the LangSmith SDK. `list_runs()` is deprecated (removal after Jan 2027) in favor of `client.runs.query()`; either returns root runs and full trees per `trace_id`. For large histories, [LangSmith bulk export](https://docs.langchain.com/langsmith/data-export) (Parquet to S3, plan-gated) extracts the same run fields without paging the API; the mapping below stays the same.
+2. **Bound the window at cutover time.** Runs after the fan-out went live are already in Langfuse; reingesting them duplicates data.
+3. **Transform to plain OTLP JSON** and POST to `{LANGFUSE_BASE_URL}/api/public/otel/v1/traces` with Basic auth and the `x-langfuse-ingestion-version: 4` header. Do not create the spans through an OTel tracer. Tracers assign new timestamps and IDs. Raw JSON preserves the original `start_time` / `end_time`.
+4. **Derive IDs deterministically** from LangSmith IDs (for example `sha256(trace_id)[:32]` for the trace, `sha256(run_id)[:16]` per span) so re-runs upsert instead of duplicating.
+5. **Map fields**: run type to `langfuse.observation.type` (`llm` → `generation`, `tool` → `tool`, `chain` → `chain`), `inputs` / `outputs` to observation input/output, `prompt_tokens` / `completion_tokens` to `langfuse.observation.usage_details`, the model name from `extra.invocation_params.model` with a fallback to `extra.metadata.ls_model_name` (some runs only set the latter; without it, cost is lost), and errored runs to `langfuse.observation.level: ERROR`. Keep the source ID in `langfuse.trace.metadata.langsmith_trace_id`.
+6. **Reconcile counts** per trace (source runs vs destination observations) and spot-check timestamps in the Langfuse UI.
 
-The [project-to-project migration cookbook](/guides/cookbook/example_data_migration) contains
-adaptable pagination, retry, and ID-mapping code, and
-[Migrate custom ingestion to v4](/integrations/native/opentelemetry/migration-to-v4) documents the
-span format.
+The [project-to-project migration cookbook](/guides/cookbook/example_data_migration) contains adaptable pagination, retry, and ID-mapping code, and [Migrate custom ingestion to v4](/integrations/native/opentelemetry/migration-to-v4) documents the span format.
 
 </Details>
 
@@ -788,60 +681,34 @@ span format.
 
 ## Limitations and gaps [#limitations]
 
-- **Experiment scores do not transfer.** The Langfuse score API stamps creation time, so historical
-  experiment results cannot be imported with their original timestamps. Re-run experiments instead.
-- **Trace IDs differ across backends during fan-out.** Hybrid mode keeps LangSmith's run UUIDs;
-  cross-reference by metadata, not by ID.
-- **Threads, users, and tags need an explicit mapping.** LangSmith's OTel export uses its own
-  attribute names in both SDKs, so without the [attribute mapping](#threads-users-tags) they
-  land in Langfuse as plain metadata instead of sessions, users, and tags.
-- **Token rollups differ.** LangSmith root runs include child LLM usage in their own token counts;
-  Langfuse aggregates usage from generations. Totals match, per-span numbers differ by design.
-- **Tuned Evaluators and Perceived Error are not portable.** They are LangSmith-managed models
-  (US Cloud only); recreate the evaluation intent as an LLM-as-a-judge rubric.
-- **Per-request dual-send is Python-only.** The JS/TS SDK has no hybrid tracing mode, and its
-  documented workaround (write replicas mixing a `langsmith`-mode and an `otel`-mode client)
-  does not work in `langsmith` (JS) 0.10.2: with the OTel client as a replica no OTel spans are
-  created, and with it as the primary the LangSmith replica is rejected with a `dotted_order`
-  validation error. Run the JS/TS parallel window per process via `LANGSMITH_TRACING_MODE`
-  instead, as in [Step 1](#cutover). LangChain JS apps are unaffected: the callback handler
-  dual-sends fine.
+- **Experiment scores do not transfer.** The Langfuse score API stamps creation time, so historical experiment results cannot be imported with their original timestamps. Re-run experiments instead.
+- **Trace IDs differ across backends during fan-out.** Hybrid mode keeps LangSmith's run UUIDs; cross-reference by metadata, not by ID.
+- **Threads, users, and tags need an explicit mapping.** LangSmith's OTel export uses its own attribute names in both SDKs, so without the [attribute mapping](#threads-users-tags) they land in Langfuse as plain metadata instead of sessions, users, and tags.
+- **Token rollups differ.** LangSmith root runs include child LLM usage in their own token counts; Langfuse aggregates usage from generations. Totals match, per-span numbers differ by design.
+- **Tuned Evaluators and Perceived Error are not portable.** They are LangSmith-managed models (US Cloud only); recreate the evaluation intent as an LLM-as-a-judge rubric.
+- **Per-request dual-send is Python-only.** The JS/TS SDK has no hybrid tracing mode, and its documented workaround (write replicas mixing a `langsmith`-mode and an `otel`-mode client) does not work in `langsmith` (JS) 0.10.2: with the OTel client as a replica no OTel spans are created, and with it as the primary the LangSmith replica is rejected with a `dotted_order` validation error. Run the JS/TS parallel window per process via `LANGSMITH_TRACING_MODE` instead, as in [Step 1](#cutover). LangChain JS apps are unaffected: the callback handler dual-sends fine.
 
 ## FAQ
 
 ### Do I have to re-instrument my application?
 
-Not to start. `traceable` code reaches Langfuse over OpenTelemetry unchanged (Python:
-`LANGSMITH_OTEL_ENABLED=true`; JS/TS: `LANGSMITH_TRACING_MODE=otel` plus the OTel bootstrap),
-and LangChain apps add a callback handler. Moving fully to the
-[Langfuse SDK](/docs/observability/sdk/overview) is a follow-up step that removes the
-`langsmith` dependency (and its Python `anthropic<1` pin if you use `wrap_anthropic`).
+Not to start. `traceable` code reaches Langfuse over OpenTelemetry unchanged (Python: `LANGSMITH_OTEL_ENABLED=true`; JS/TS: `LANGSMITH_TRACING_MODE=otel` plus the OTel bootstrap), and LangChain apps add a callback handler. Moving fully to the [Langfuse SDK](/docs/observability/sdk/overview) is a follow-up step that removes the `langsmith` dependency.
 
 ### Can I send traces to both platforms during the migration?
 
-In Python, yes, per request: hybrid OTel mode exports to LangSmith and Langfuse simultaneously
-until you set `LANGSMITH_OTEL_ONLY=true`. In JS/TS, per process: point a canary at Langfuse with
-`LANGSMITH_TRACING_MODE=otel` while the rest stays on LangSmith (see
-[Limitations](#limitations) for why per-request dual-send does not work there). LangChain and
-LangGraph apps dual-send in both languages via the callback handler. Keep the parallel window
-until you have confirmed the Langfuse data.
+In Python, yes, per request: hybrid OTel mode exports to LangSmith and Langfuse simultaneously until you set `LANGSMITH_OTEL_ONLY=true`. In JS/TS, per process: point a canary at Langfuse with `LANGSMITH_TRACING_MODE=otel` while the rest stays on LangSmith ([Limitations](#limitations) explains why per-request dual-send does not work there). LangChain and LangGraph apps dual-send in both languages via the callback handler. Keep the parallel window until you have confirmed the Langfuse data.
 
 ### Can I evaluate old LangSmith traces in Langfuse?
 
-Evaluators run on data in Langfuse, so historical evaluation requires
-[reingesting those traces](#historical-traces) first. Most teams start judges on new traffic at
-cutover instead.
+Evaluators run on data in Langfuse, so historical evaluation requires [reingesting those traces](#historical-traces) first. Most teams start judges on new traffic at cutover instead.
 
 ### I use the EU (or another regional) LangSmith instance. Anything different?
 
-Only the endpoints: set `LANGSMITH_ENDPOINT` to your regional API host (for example
-`https://eu.api.smith.langchain.com`) for the export steps. The Langfuse region is chosen
-independently via `LANGFUSE_BASE_URL`.
+Only the endpoints: set `LANGSMITH_ENDPOINT` to your regional API host (for example `https://eu.api.smith.langchain.com`) for the export steps. The Langfuse region is chosen independently via `LANGFUSE_BASE_URL`.
 
 ## Get help with the migration [#get-help]
 
-Start on [Langfuse Cloud](https://cloud.langfuse.com) or [self-host](/self-hosting). If you
-want a migration plan, [talk to us](/talk-to-us).
+Start on [Langfuse Cloud](https://cloud.langfuse.com) or [self-host](/self-hosting). If you want a migration plan, [talk to us](/talk-to-us).
 
 <Cards num={2}>
   <Card title="Get started free" href="https://cloud.langfuse.com" icon={<Cloud />} />
