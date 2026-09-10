@@ -54,7 +54,7 @@ Dynatrace's [acquisition announcement](https://www.dynatrace.com/news/press-rele
 
 Phoenix starts as one container on SQLite. A production Langfuse self-host runs ClickHouse, Postgres, Redis, and blob storage. [Docker Compose](/self-hosting/deployment/docker-compose) brings that stack up on one VM. Helm and Terraform are the high-availability paths. Agent traces are deep trees with large payloads and high-cardinality group-bys, so Langfuse left Postgres in v3. [How Langfuse runs ClickHouse at agent scale](/resources/engineering/clickhouse-at-agent-scale) is the design write-up. Joining ClickHouse in January 2026 put the team that builds that engine and the team that runs it on Langfuse Cloud in one company. The [public commitment](/blog/joining-clickhouse) keeps the MIT license, self-hosting, Cloud endpoints, and the same roadmap.
 
-High-volume reads use the [Observations](/docs/api-and-data-platform/features/observations-api) and [Metrics](/docs/metrics/features/metrics-api) APIs; self-hosters can query ClickHouse in SQL.
+High-volume reads use the [Observations](/docs/api-and-data-platform/features/public-api#v2) and [Metrics](/docs/metrics/features/metrics-api) APIs; self-hosters can query ClickHouse in SQL.
 
 The [Arize pricing page](https://arize.com/pricing/) lists **15 days** of retention on Free and **30 days** on Pro; Enterprise retention is custom. AX Cloud stores telemetry in adb. Warehouse SQL is [Data Fabric](https://arize.com/docs/ax/security-and-settings/data-fabric): Enterprise-only and currently waitlisted. Phoenix SQL is a different product on Postgres.
 

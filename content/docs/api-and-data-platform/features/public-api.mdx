@@ -1,11 +1,12 @@
 ---
 title: Public API
 sidebarTitle: Public API
-description: All Langfuse data and features are available via the API. Follow this guide to get started.
+description: All Langfuse data and features are available via the API. Follow this guide to authenticate, ingest traces, and retrieve observations, scores, and experiments.
 ---
 
 import { V4CutoverDate } from "@/components/V4CutoverDate";
 import { V4_CUTOVER_DATE_SHORT } from "@/lib/v4-migration-dates";
+import DataFreshness from "@/components-mdx/compat/data-freshness.mdx";
 
 # Public API [#public-api]
 
@@ -23,7 +24,7 @@ There are 3 different groups of APIs:
 
 ## API reference [#api-reference]
 
-References:
+This page covers concepts and workflows. For the complete request and response contract of every endpoint — parameters, schemas, and interactive examples — see the API reference:
 
 - API Reference: https://api.reference.langfuse.com
 - OpenAPI spec: https://cloud.langfuse.com/generated/api/openapi.yml
@@ -112,7 +113,7 @@ Use the same credentials and regional base URL for the rest of the Public API.
 
 Both the Langfuse [Python SDK](/docs/observability/sdk/overview) and the [JS/TS SDK](/docs/observability/sdk/overview) provide a strongly-typed wrapper around our public REST API for your convenience. The API methods are accessible via the `api` property on the Langfuse client instance in both SDKs.
 
-You can use your editor's Intellisense to explore the API methods and their parameters.
+You can use your editor's Intellisense to explore the API methods and their parameters. See [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk) for more examples.
 
 <Callout type="info">
 
@@ -121,8 +122,7 @@ metrics resources are the defaults: `api.observations` and `api.metrics`.
 Scores API v3 is available as `api.scores_v3` in Python SDK `4.8.1+` and
 `api.scoresV3` in JS/TS SDK `5.5.0+`; the `api.scores` v2 reads are deprecated
 ([migration guide](/faq/all/deprecated-api-migration#scores)). Deprecated v1
-resources moved under `api.legacy.*` (Python: `*_v1`, JS/TS: `*V1`). See
-[Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk) for SDK examples.
+resources moved under `api.legacy.*` (Python: `*_v1`, JS/TS: `*V1`).
 
 Observations API v2 and Metrics API v2 are available on Langfuse Cloud and
 self-hosted Langfuse v4. On self-hosted Langfuse v3, use the `api.legacy.*`
@@ -254,7 +254,7 @@ try {
 </Tab>
 </LangTabs>
 
-## Ingest Traces via the API
+## Ingest traces via the API [#ingest-traces]
 
 <Callout type="info">
   The OpenTelemetry endpoint is the supported path for trace ingestion. The
@@ -270,26 +270,262 @@ try {
 - [OpenTelemetry Traces Ingestion Endpoint](https://api.reference.langfuse.com/#tag/opentelemetry/POST/api/public/otel/v1/traces) implements the OTLP/HTTP specification for trace ingestion, providing native OpenTelemetry integration for Langfuse Observability.
 - (Sunset as of {V4_CUTOVER_DATE_SHORT}) [Ingestion API](https://api.reference.langfuse.com/#tag/ingestion/POST/api/public/ingestion) allows trace ingestion using an API.
 
-## Retrieve Data via the API
+## Retrieve data via the API [#retrieve-data]
 
-For new data extraction workflows, use the high-performance data APIs:
+For new data extraction workflows, use the high-performance read APIs below. Each is designed around cursor-based pagination and selective field retrieval so you only fetch the columns you need.
 
-- [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) - Retrieve observation data (spans, generations, events) from Langfuse for custom workflows, evaluation pipelines, and analytics.
-- [Scores API v3](/docs/api-and-data-platform/features/scores-api#v3) - Retrieve score data (evaluations, annotations, and API-ingested scores) with a typed value field and cursor-based pagination.
-- [Metrics API v2](/docs/metrics/features/metrics-api#v2) - Retrieve aggregated analytics and metrics from your Langfuse data.
+| To retrieve...                                      | Use                                                     |
+| --------------------------------------------------- | ------------------------------------------------------- |
+| Row-level observations (spans, generations, events) | [Observations API v2](#v2)                              |
+| Score data (evaluations, annotations, API-ingested) | [Scores API v3](#v3)                                    |
+| Experiment runs and items                           | [Experiments API](#experiments)                         |
+| Aggregated analytics (cost, usage, latency, volume) | [Metrics API v2](/docs/metrics/features/metrics-api#v2) |
 
 <Callout type="info">
 
-The deprecated trace, observation, score, and metrics read APIs are documented, with migration steps, in [Migration of deprecated APIs](/faq/all/deprecated-api-migration).
+The deprecated trace, observation, score, and metrics read APIs are documented, with migration steps, in [Migration of deprecated APIs](/faq/all/deprecated-api-migration). Always include a bounded time range (e.g. `fromStartTime`/`toStartTime`) to keep each request fast.
 
 </Callout>
 
-## Alternatives
+### Observations API v2 [#v2]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "v4",
+  }}
+/>
+
+Retrieve observation data (spans, generations, events) for custom workflows, evaluation pipelines, and analytics. For aggregated metrics (total cost, token counts, trace volumes grouped by user, model, or time period), use the [Metrics API](/docs/metrics/features/metrics-api) instead of fetching and aggregating raw rows yourself.
+
+```
+GET /api/public/v2/observations
+```
+
+<Callout type="info">
+
+<DataFreshness />
+
+On self-hosted Langfuse v3, use the [v1 Observations API](https://api.reference.langfuse.com/#tag/observations/GET/api/public/observations) instead; see the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
+
+</Callout>
+
+The v2 Observations API is redesigned for high-performance retrieval, minimizing the work Langfuse performs per query. See the [v2 Observations API reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations) for the full parameter and response schema.
+
+#### Upgrade from older trace and observation reads [#upgrade-from-older-reads]
+
+The [migration guide](/faq/all/deprecated-api-migration) maps every deprecated read endpoint (`/api/public/traces`, `/api/public/observations`, `/api/public/sessions`, ...) to its v2 replacement, with parameter mappings and before/after examples. Always include `fromStartTime` and `toStartTime` to keep each request bounded.
+
+The v2 Observations API returns observation rows, not full trace objects. Group rows by `traceId` when you need to reconstruct trace activity, and use [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregate reporting with trace-level dimensions such as `traceName`, `traceRelease`, or `traceVersion`. There is no get-by-id route on v2; for single-observation lookups, pass a URL-encoded `filter` condition on the `id` column instead.
+
+#### Logical root observations [#logical-root-observations]
+
+The v2 API distinguishes physical parentage from logical root status:
+
+- `parentObservationId` identifies the physical parent observation. An empty value matches observations without a physical parent.
+- `isRootObservation` is `true` when an observation has no physical parent or the SDK explicitly marked it as an application root.
+
+An application-root observation can therefore have `isRootObservation: true` and a non-null `parentObservationId`. Use `isRootObservation` when you want application roots, and `parentObservationId` when you need to query the physical observation tree.
+
+The logical-root filter assumes one exported application root per trace. If a trace has no exported root in this project — for example, its root lives in another service — `isRootObservation = true` will not match it; group by `traceId` when you need complete trace counts. Multiple matching roots indicate an integration issue.
+
+#### Selective field retrieval [#field-groups]
+
+Rather than returning every column on every row, the v2 API lets you request only the field groups you need as a comma-separated string:
+
+```
+?fields=core,basic,usage
+```
+
+| Group           | Fields                                                                                                                 |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `core`          | Always included: id, traceId, startTime, endTime, projectId, parentObservationId, type                                 |
+| `basic`         | name, level, statusMessage, version, environment, bookmarked, public, userId, sessionId, isRootObservation             |
+| `time`          | completionStartTime, createdAt, updatedAt                                                                              |
+| `io`            | input, output                                                                                                          |
+| `metadata`      | metadata                                                                                                               |
+| `model`         | model, internalModelId, modelParameters                                                                                |
+| `usage`         | usageDetails, inputUsage, outputUsage, totalUsage, costDetails, inputCost, outputCost, totalCost, usagePricingTierName |
+| `prompt`        | promptId, promptName, promptVersion                                                                                    |
+| `metrics`       | latency, timeToFirstToken                                                                                              |
+| `trace_context` | tags, release, traceName                                                                                               |
+
+If `fields` is not specified, `core` and `basic` are returned by default. Fields from groups you do not request are **absent** from the response, not `null`. The exception is `modelId`, `inputPrice`, `outputPrice`, and `totalPrice`, which are always present but only populated when the `model` group is selected. `inputPrice`, `outputPrice`, and `totalPrice` are returned as **strings** (e.g. `"0.000005"`) to preserve decimal precision; cast them to a numeric type in your pipeline.
+
+The v2 API also returns I/O as raw strings instead of always parsing them as JSON; parse them in your pipeline when needed. (The `parseIoAsJson` parameter is deprecated: omit it or set it to `false`; `true` returns a `400`.)
+
+#### Cursor-based pagination [#observations-pagination]
+
+Instead of offset-based page numbers, the v2 API paginates with a cursor for consistent performance on large datasets:
+
+1. Make your initial request with a `limit` parameter (default 50, max 1,000 — up from the v1 maximum of 100).
+2. If more results exist, the response includes a `cursor` in the `meta` object.
+3. Pass this cursor via the `cursor` parameter in your next request to continue where you left off.
+4. Repeat until no `cursor` is returned (or `meta.cursor` is `null`) — you've reached the end.
+
+Results are always sorted by `startTime` descending (newest first).
+
+On Langfuse Cloud, requests count toward the general per-organization API rate limit (see the [API limits FAQ](/faq/all/api-limits)). Self-hosted instances have no enforced rate limits.
+
+#### Examples [#observations-examples]
+
+Get observations for a specific trace, then paginate with the returned cursor:
+
+```bash
+# Fetch a page for one trace
+curl \
+  -H "Authorization: Basic <BASIC AUTH HEADER>" \
+  "https://cloud.langfuse.com/api/public/v2/observations?fields=core,basic,usage&traceId=your-trace-id&limit=100"
+
+# Response includes: "meta": { "cursor": "eyJsYXN0..." }
+# Pass it back to fetch the next page
+curl \
+  -H "Authorization: Basic <BASIC AUTH HEADER>" \
+  "https://cloud.langfuse.com/api/public/v2/observations?fields=core,basic,usage&traceId=your-trace-id&limit=100&cursor=eyJsYXN0..."
+```
+
+Filter for logical roots with the first-class query parameter:
+
+```bash
+curl \
+  -H "Authorization: Basic <BASIC AUTH HEADER>" \
+  "https://cloud.langfuse.com/api/public/v2/observations?isRootObservation=true&fromStartTime=2025-12-15T00:00:00Z&toStartTime=2025-12-16T00:00:00Z"
+```
+
+The advanced `filter` parameter supports the same field with boolean `=` and `<>` operators, e.g. a URL-encoded JSON value of `[{"type":"boolean","column":"isRootObservation","operator":"=","value":true}]`.
+
+### Scores API v3 [#v3]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "v3.179",
+  }}
+/>
+
+Retrieve score data (evaluations, annotations, and API-ingested scores) for custom workflows, evaluation pipelines, and analytics. For aggregated score metrics (e.g. average scores grouped by trace name, user, or time period), use the [Metrics API](/docs/metrics/features/metrics-api) instead.
+
+```
+GET /api/public/v3/scores
+```
+
+<Callout type="info">
+
+This section covers reading scores. Scores are created via `POST /api/public/scores` or the SDK helpers; see [scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk). See the [v3 Scores API reference](https://api.reference.langfuse.com/#tag/scoresv3/GET/api/public/v3/scores) for the full parameter and response schema.
+
+</Callout>
+
+#### `value` field [#scores-value]
+
+Every score carries exactly one typed `value`. Its type is determined by the score's `dataType`:
+
+| `dataType`    | `value` type | Notes                         |
+| ------------- | ------------ | ----------------------------- |
+| `NUMERIC`     | number       |                               |
+| `BOOLEAN`     | boolean      |                               |
+| `CATEGORICAL` | string       | The category                  |
+| `TEXT`        | string       |                               |
+| `CORRECTION`  | string       | Empty string if no correction |
+
+If your pipeline handles mixed score types, branch on `dataType`.
+
+#### Selective field retrieval [#scores-field-groups]
+
+Responses always include a lean core (`id`, `projectId`, `name`, `value`, `dataType`, `source`, `timestamp`, `environment`, `createdAt`, `updatedAt`); opt into additional groups via a comma-separated `fields` parameter (unknown group names return HTTP 400):
+
+```
+?fields=details,subject,annotation
+```
+
+| Group        | Fields                                                   |
+| ------------ | -------------------------------------------------------- |
+| core         | Always included (see above)                              |
+| `details`    | comment, configId, metadata                              |
+| `subject`    | subject (the entity the score is attached to, see below) |
+| `annotation` | authorUserId, queueId                                    |
+
+#### `subject` object [#scores-subject]
+
+Every score is attached to exactly one entity. Request the `subject` field group to see which one; it is discriminated by `kind`:
+
+```json
+{ "kind": "observation", "id": "obs-1", "traceId": "trace-1" }
+```
+
+- `kind: "trace"`: `id` is the trace ID
+- `kind: "observation"`: `id` is the observation ID; includes the parent `traceId`
+- `kind: "session"`: `id` is the session ID
+- `kind: "experiment"`: `id` is the dataset run ID
+
+#### Filtering [#scores-filtering]
+
+- **Multi-value filters:** most filters accept comma-separated lists (`id`, `name`, `source`, `dataType`, `environment`, `configId`, `queueId`, `authorUserId`, `traceId`, `sessionId`, `observationId`, `experimentId`). Values within one parameter are OR-ed, parameters are AND-ed: `name=hallucination,toxicity&source=EVAL` returns eval scores named either `hallucination` or `toxicity`.
+- **Value filters:** use `value` for exact matches (comma-separated, requires a single `dataType` of `NUMERIC`, `BOOLEAN`, or `CATEGORICAL`) or `valueMin`/`valueMax` for inclusive numeric range bounds (require `dataType=NUMERIC`).
+- **Mutual exclusivity:** `traceId`, `sessionId`, and `experimentId` are mutually exclusive. `observationId` requires `traceId` because observation IDs are scoped to a trace.
+- **Case-insensitive enums:** `source` and `dataType` accept any casing (`numeric` and `NUMERIC` are equivalent).
+- **Timestamp bounds:** `fromTimestamp` is inclusive, `toTimestamp` is exclusive.
+
+Invalid filter combinations are rejected with HTTP 400 rather than silently ignored. Pagination is cursor-based (default 50, max 100); pass the returned `meta.cursor` back with the same filter parameters to fetch the next page. For recurring full exports to your data warehouse, use the [scheduled blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) instead of paginating through the API.
+
+#### Examples [#scores-examples]
+
+Pull failing evals within a numeric range:
+
+```bash
+curl \
+  -H "Authorization: Basic <BASIC AUTH HEADER>" \
+  "https://cloud.langfuse.com/api/public/v3/scores?name=hallucination,toxicity&dataType=NUMERIC&valueMax=0.5"
+```
+
+Get scores for specific traces, including what they are attached to:
+
+```bash
+curl \
+  -H "Authorization: Basic <BASIC AUTH HEADER>" \
+  "https://cloud.langfuse.com/api/public/v3/scores?traceId=trace-1,trace-2&fields=details,subject"
+```
+
+The generated SDK clients expose the same endpoint (`api.scores_v3` in Python, `api.scoresV3` in JS/TS); see [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk). Score creation uses separate SDK helpers (e.g. `create_score` in Python); this client is for reads.
+
+### Experiments API [#experiments]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "v4",
+  }}
+/>
+
+Retrieve experiment data for analysis, evaluation pipelines, notebooks, and CI/CD workflows. An experiment is a run of your application against test data; each experiment item represents one input, its expected output, and the actual output produced by your application. See the [Experiments API reference](https://api.reference.langfuse.com/#tag/experiments) for the full request and response contract.
+
+| If you want to...                                                                           | Use                                                                                                                                                                      |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Run experiments and ingest experiment data                                                  | [Experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk) or [Experiments via OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry) |
+| List experiment runs and their summaries                                                    | `GET /api/public/experiments?fromStartTime=2026-01-01T00:00:00Z`                                                                                                         |
+| Retrieve experiment items and their inputs, outputs, expected outputs, metadata, and scores | `GET /api/public/experiment-items?fromStartTime=2026-01-01T00:00:00Z`                                                                                                    |
+| Retrieve the complete trace and observation tree for an item                                | [Observations API v2](#v2), using the item's `traceId`                                                                                                                   |
+| Query evaluation scores independently                                                       | [Scores API v3](#v3)                                                                                                                                                     |
+
+The experiment endpoints support filtering, cursor-based pagination, and optional response fields; see the [Experiments API reference](https://api.reference.langfuse.com/#tag/experiments) for the available filters and response fields.
+
+Experiment-level scores summarize the complete run, while item-level and trace-level scores evaluate individual experiment items. The Experiments API returns both levels in their corresponding responses; the [Scores API v3](#v3) is useful when scores are the primary data you want to query. To understand how datasets, experiments, items, traces, observations, and scores relate, see the [Experiments data model](/docs/evaluation/experiments/data-model).
+
+## Alternatives [#alternatives]
 
 You can also export data via:
 
-- [UI](/docs/api-and-data-platform/features/export-from-ui) - Manual batch-exports from the Langfuse UI
-- [Blob Storage](/docs/api-and-data-platform/features/export-to-blob-storage) - Scheduled automated exports to cloud storage
+- [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk) - typed Python and JS/TS wrappers for the same endpoints
+- [UI](/docs/api-and-data-platform/features/export-from-ui) - manual batch-exports from the Langfuse UI
+- [Blob Storage](/docs/api-and-data-platform/features/export-to-blob-storage) - scheduled automated exports to cloud storage
 
 ## FAQ
 
@@ -300,10 +536,7 @@ import { FaqPreview } from "@/components/faq/FaqPreview";
 ## Related API resources [#related-api-resources]
 
 - [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk) — typed Python and JS/TS wrappers for the same endpoints
-- [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) — retrieve row-level spans, generations, and events
-- [Scores API v3](/docs/api-and-data-platform/features/scores-api#v3) — retrieve evaluation and annotation scores
 - [Metrics API v2](/docs/metrics/features/metrics-api#v2) — retrieve aggregated analytics
-- [Experiments API](/docs/api-and-data-platform/features/experiments-api) — retrieve experiment runs and items
 - [CLI](/docs/api-and-data-platform/features/cli) — call the Public API from the terminal
 - [MCP Server](/docs/api-and-data-platform/features/mcp-server) — connect AI assistants to Langfuse data
 - [Organization-level APIs](/docs/administration/scim-and-org-api) — provision projects, users (SCIM), and permissions

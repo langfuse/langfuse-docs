@@ -56,12 +56,12 @@ Langfuse runs on open-source [ClickHouse](https://clickhouse.com/) and works dir
 
 A purpose-built store is a reasonable choice for closed SaaS. If you operate the platform yourself, ClickHouse is a database you can run, inspect, and query with SQL. High-volume reads go through the Observations and Metrics APIs.
 
-|                            | Langfuse                                                                                                                                    | LangSmith                                                                                            |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Storage engine             | **ClickHouse** (Apache 2.0): operable and queryable by you.                                                                                 | **SmithDB** (proprietary): Rust, DataFusion, Vortex; operated by LangChain                           |
-| Cloud / self-hosted parity | Same engine and observations-first data model ([v4 GA](/docs/v4))                                                                           | SmithDB on US Cloud; self-hosted runs ClickHouse + Postgres, SmithDB there is public beta / waitlist |
-| Full-text search           | [Yes](/docs/observability/features/full-text-search) on ClickHouse                                                                          | Yes — SmithDB (Cloud), Quickwit (self-hosted)                                                        |
-| High-volume reads          | [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2) | SmithDB (Cloud), Managed Bulk Data Export (Enterprise-only)                                          |
+|                            | Langfuse                                                                                                                              | LangSmith                                                                                            |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Storage engine             | **ClickHouse** (Apache 2.0): operable and queryable by you.                                                                           | **SmithDB** (proprietary): Rust, DataFusion, Vortex; operated by LangChain                           |
+| Cloud / self-hosted parity | Same engine and observations-first data model ([v4 GA](/docs/v4))                                                                     | SmithDB on US Cloud; self-hosted runs ClickHouse + Postgres, SmithDB there is public beta / waitlist |
+| Full-text search           | [Yes](/docs/observability/features/full-text-search) on ClickHouse                                                                    | Yes — SmithDB (Cloud), Quickwit (self-hosted)                                                        |
+| High-volume reads          | [Observations API v2](/docs/api-and-data-platform/features/public-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2) | SmithDB (Cloud), Managed Bulk Data Export (Enterprise-only)                                          |
 
 ---
 
