@@ -64,9 +64,13 @@ module.exports = {
       // This dynamic index has no content/index.mdx entry in the catalog.
       // Subsequent pages are discovered through its crawlable pagination.
       { loc: "/changelog", changefreq: "daily" },
+      { loc: "/cloud", changefreq: "monthly" },
     ];
     for (const page of pageEntries) {
-      if (["/", "/changelog"].includes(page.loc) || isSearchUtility(page.loc))
+      if (
+        ["/", "/changelog", "/cloud"].includes(page.loc) ||
+        isSearchUtility(page.loc)
+      )
         continue;
       entries.push({
         loc: page.loc,

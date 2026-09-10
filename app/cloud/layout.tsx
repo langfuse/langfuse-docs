@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Select a region",
-  description: "Select a Langfuse Cloud region to continue.",
-  // This region selector (including deep links) is a navigation utility.
-  robots: { index: false, follow: true },
+  title: { absolute: "Langfuse login" },
+  description:
+    "Log in to Langfuse Cloud. Choose your region to access your projects, traces, prompts, and evaluations.",
 };
 
 export default function CloudLayout({

@@ -43,11 +43,17 @@ test("FAQ tags are derived from articles, with a consistent Other fallback", () 
   assert.deepEqual(getFaqTags(pages[5]), ["Other"]);
 });
 
-test("search utility policy excludes selectors and tag listings, not articles", () => {
-  for (const route of ["/cloud", "/cloud/project/123", "/faq/tag/Other"]) {
+test("search utility policy keeps the login landing page indexable, excluding deep links and tags", () => {
+  for (const route of ["/cloud/project/123", "/faq/tag/Other"]) {
     assert.equal(isSearchUtility(route), true);
   }
-  for (const route of ["/faq", "/faq/all/migration", "/changelog", "/docs"]) {
+  for (const route of [
+    "/cloud",
+    "/faq",
+    "/faq/all/migration",
+    "/changelog",
+    "/docs",
+  ]) {
     assert.equal(isSearchUtility(route), false);
   }
 });
