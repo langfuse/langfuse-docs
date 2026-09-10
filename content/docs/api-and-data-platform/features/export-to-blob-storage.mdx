@@ -233,25 +233,21 @@ Do not load both observation layouts into the same production dataset. Check the
 
 ## Export field reference [#export-field-reference]
 
-Field names and types for enriched observations, scores, and the deprecated legacy exports. Types match JSON and JSONL output. Timestamps use `YYYY-MM-DD HH:MM:SS.ffffff` in UTC. The full schema is collapsed below so the top of the page stays short.
-
-<details>
-<summary>Show the full export field reference</summary>
+Field names and types for each exported file. Types match JSON and JSONL output. Timestamps use `YYYY-MM-DD HH:MM:SS.ffffff` in UTC. Each schema is collapsed on its own below—open the file you need.
 
 <span id="export-sources" />
 
-### Exported files
+| File               | When it is exported      | Schema                                          |
+| ------------------ | ------------------------ | ----------------------------------------------- |
+| `observations_v2/` | Current enriched export  | [Enriched observations](#enriched-observations) |
+| `scores/`          | Every export             | [Scores](#scores)                               |
+| `traces/`          | Deprecated legacy export | [Legacy exports](#legacy-export-paths)          |
+| `observations/`    | Deprecated legacy export | [Legacy exports](#legacy-export-paths)          |
 
-| File               | When it is exported      |
-| ------------------ | ------------------------ |
-| `observations_v2/` | Current enriched export  |
-| `scores/`          | Every export             |
-| `traces/`          | Deprecated legacy export |
-| `observations/`    | Deprecated legacy export |
+<details>
+<summary>**Enriched observations** — `observations_v2/`</summary>
 
 <span id="enriched-observations" />
-
-### Enriched observations (`observations_v2/`)
 
 Each row represents one observation and includes its trace context. Only the [selected field groups](#export-field-groups) appear; `core` is always included.
 
@@ -309,9 +305,12 @@ Each row represents one observation and includes its trace context. Only the [se
   milliseconds for backward compatibility.
 </Callout>
 
-<span id="scores" />
+</details>
 
-### Scores (`scores/`)
+<details>
+<summary>**Scores** — `scores/`</summary>
+
+<span id="scores" />
 
 Scores are always exported. Their fields are not configurable. Scores with data type `NUMERIC`, `BOOLEAN`, `CATEGORICAL`, or `TEXT` are included; [corrections](/docs/observability/features/corrections) (data type `CORRECTION`) are not.
 
@@ -334,15 +333,18 @@ Scores are always exported. Their fields are not configurable. Scores with data 
 | `created_at`     | string (timestamp) | Row creation time.                                     |
 | `updated_at`     | string (timestamp) | Last row update time.                                  |
 
-<span id="legacy-export-paths" />
+</details>
 
-### Legacy exports
+<details>
+<summary>**Legacy exports** — `traces/` and `observations/`</summary>
+
+<span id="legacy-export-paths" />
 
 Legacy exports are deprecated. They split trace context into `traces/` and observation data into `observations/`; consumers join them on `trace_id`. See [upgrade a legacy export](#legacy-export-sources) before changing a consumer.
 
 <span id="traces" />
 
-#### Traces (`traces/`)
+### Traces (`traces/`)
 
 The trace file has a fixed schema; field groups do not apply.
 
@@ -374,7 +376,7 @@ The trace file does not include `total_cost`, `latency`, `observations`, `scores
 
 <span id="observations" />
 
-#### Observations (`observations/`)
+### Observations (`observations/`)
 
 <span id="enriched-vs-legacy-differences" />
 
@@ -431,9 +433,12 @@ Empty strings appear where the v4 events table stores the column as non-nullable
 
 For the field groups that select these columns and how they differ from the enriched export, see [what changes in the exported data](#legacy-field-differences).
 
-<span id="parquet-exports" />
+</details>
 
-### Parquet differences
+<details>
+<summary>**Parquet differences**</summary>
+
+<span id="parquet-exports" />
 
 Parquet uses internal encoding and compression, so gzip does not apply.
 
@@ -441,10 +446,8 @@ Observation files omit `input_price`, `output_price`, and `total_price`. Use `co
 
 Trace and score fields are the same across all formats.
 
+</details>
+
 <span id="file-organization" />
 
-### File organization
-
-See [process exports](#consume-exports) for paths, filenames, and the manifest workflow.
-
-</details>
+For paths, filenames, and the manifest workflow, see [process exports](#consume-exports).
