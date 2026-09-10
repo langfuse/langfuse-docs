@@ -353,6 +353,11 @@ const marqueeRow2: MarqueeItem[] = [
     icon: "/images/integrations/temporal.svg",
   },
   {
+    label: "ClickHouse Agents",
+    href: "/integrations/other/clickhouse-agents",
+    icon: "/images/integrations/clickhouse_icon.svg",
+  },
+  {
     label: "ClickHouse Agentic Data Stack",
     href: "/integrations/other/agentic-data-stack",
     icon: "/images/integrations/clickhouse_icon.svg",

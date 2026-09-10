@@ -1,0 +1,103 @@
+---
+title: "ClickHouse Agents Observability with Langfuse"
+sidebarTitle: ClickHouse Agents
+logo: /images/integrations/clickhouse_icon.svg
+description: "Send traces and user feedback from ClickHouse Agents to your own Langfuse project to debug agent runs, monitor cost and latency, and evaluate response quality."
+category: Integrations
+---
+
+# ClickHouse Agents tracing with Langfuse
+
+> **What is ClickHouse Agents?** [ClickHouse Agents](https://clickhouse.com/docs/cloud/features/ai-ml/agents) is a fully managed agentic analytics service in [ClickHouse Cloud](https://clickhouse.com/cloud). Built on [LibreChat](https://www.librechat.ai/), it lets anyone define no-code agents that are grounded in live ClickHouse data via [MCP](https://modelcontextprotocol.io) and query them in natural language.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform that helps teams trace, debug, and evaluate their LLM applications.
+
+ClickHouse Agents has a built-in Langfuse connection. An organization admin adds Langfuse API keys once, and from then on every agent run in that organization is traced to your own Langfuse project — no code, no deployment changes.
+
+## What gets traced
+
+- **Agent runs** — one trace per assistant message, with the full call hierarchy from the incoming prompt to the final response
+- **Model calls** — generations with model name, prompt, completion, token usage, cost, and latency
+- **Tool calls** — ClickHouse MCP queries, code interpreter runs (Bash, Python, JavaScript), and any other MCP tools the agent has access to
+- **User feedback** — the thumbs up / thumbs down on an assistant message, plus its reason tag and comment, arrives as a `user-feedback` [score](/docs/evaluation/evaluation-methods/scores-via-ui) on that message's trace
+- **Organization attribution** — traces carry a `tenant:<organizationId>` tag and `librechat.tenant.id` in metadata, so you can slice them via the [Metrics API](/docs/metrics/features/metrics-api)
+
+## How it works
+
+ClickHouse Agents emits agent traces as OpenTelemetry spans and exports them to Langfuse's OTLP endpoint. When you enable the Langfuse connection for your organization, ClickHouse Cloud routes your organization's spans to the Langfuse project belonging to the keys you configured. Feedback scores are sent separately through the Langfuse API and attached to the matching trace.
+
+The connection is scoped to the **organization**, so it applies to all agents in it. Only new conversations are traced — enabling the connection does not backfill existing chat history.
+
+## Connect Langfuse
+
+<Steps>
+
+### Create a Langfuse project
+
+Sign up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-host Langfuse](/self-hosting), then create a project. Copy the **public key** and **secret key** from the project settings.
+
+### Open the Langfuse settings in ClickHouse Agents
+
+In ClickHouse Agents, go to **Settings → Langfuse** and find the **Langfuse connection** panel. This setting is only visible to organization admins.
+
+### Select your destination
+
+Pick the **Destination** that matches the region of your Langfuse project:
+
+| Destination | Langfuse URL                    |
+| ----------- | ------------------------------- |
+| EU          | `https://cloud.langfuse.com`    |
+| US          | `https://us.cloud.langfuse.com` |
+| Japan       | `https://jp.cloud.langfuse.com` |
+
+<Callout type="info">
+  The destination must match the region your project lives in. Keys from an EU project are rejected against the US or Japan destination.
+</Callout>
+
+### Add your keys and enable the connection
+
+Paste the public and secret key, then choose **Save & enable**. ClickHouse Agents verifies the keys against Langfuse before storing them, and the status changes to **Verified with Langfuse** once the connection is live. The secret key is stored encrypted and shown masked afterwards.
+
+### Chat with your agents
+
+Run a conversation with any agent in the organization. Each assistant message produces a trace in your Langfuse project.
+
+### View traces in Langfuse
+
+Open your Langfuse project to work with the incoming data:
+
+- Follow an agent run step by step in the trace tree — prompts, completions, SQL generated against ClickHouse, and tool results
+- Group the messages of a conversation with [sessions](/docs/observability/features/sessions) to review a full chat rather than a single turn
+- Track token usage, cost, and latency per model and per agent
+- Turn thumbs up / thumbs down into response-quality analysis using the `user-feedback` scores on your traces
+- Score outputs with [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators or [human annotations](/docs/evaluation/evaluation-methods/annotation-queues)
+- Build [datasets](/docs/evaluation/experiments/datasets) from real conversations and run [experiments](/docs/evaluation/experiments/experiments-via-ui) against them
+
+</Steps>
+
+## Manage the connection
+
+- **Disable** pauses trace and score export while keeping the stored keys, and **Enable** resumes it. Neither action re-runs verification.
+- **Rotating keys**: click a stored key to replace it, paste the new pair, and choose **Save & enable** to verify and persist it.
+- ClickHouse Agents re-verifies the saved credentials when the settings page loads and whenever you change the destination, so a revoked key surfaces as a failed connection.
+
+## Troubleshooting
+
+**There is no Langfuse section in Settings.** The setting is admin-only, so check that your user is an organization admin.
+
+**"Langfuse rejected these keys."** Either the destination does not match your project's region, or the public and secret key are not from the same project. Copy both keys again from the project settings page and confirm the region.
+
+**"Langfuse denied access."** The keys reached Langfuse but were refused. Check that you are using project API keys (`pk-lf-…` / `sk-lf-…`) rather than an organization-level key, and that the project is still active.
+
+**"Connection failed" but traces are arriving.** The status reflects a one-time verification ping. If traces continue to show up in Langfuse, the export path is healthy — retry the check later.
+
+**No traces after enabling.** Only conversations started after you enabled the connection are traced. Send a new message and reload the Langfuse **Tracing** view.
+
+**Feedback does not show up as a score.** Feedback scores are attached to the trace of the assistant message that was rated. Open that trace and check its **Scores** tab rather than looking for a separate trace.
+
+## Learn more
+
+- [ClickHouse Agents documentation](https://clickhouse.com/docs/cloud/features/ai-ml/agents) — Building and running agents in ClickHouse Cloud
+- [Agentic Data Stack](/integrations/other/agentic-data-stack) — Self-host LibreChat, ClickHouse, and Langfuse together
+- [LibreChat integration](/integrations/other/librechat) — Add Langfuse to a self-managed LibreChat instance
+- [Self-host Langfuse](/self-hosting) — Deploy Langfuse on your own infrastructure
