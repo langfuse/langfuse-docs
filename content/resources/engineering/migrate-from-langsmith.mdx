@@ -132,7 +132,7 @@ from langsmith import traceable
 from langsmith.wrappers import wrap_anthropic
 ```
 
-Confirm in Langfuse that each request produces one trace: a root span named after your agent, tool spans, and generations with model, token usage, and cost. Then cut over by setting `LANGSMITH_OTEL_ONLY=true`, which stops sending runs to LangSmith.
+Confirm in Langfuse that each request produces one trace: a root span named after your agent, tool spans, and generations with model, token usage, and cost. One mapping gap to expect: the root `@traceable` chain arrives as a generic span observation, because Langfuse does not map the `langsmith.span.kind` attribute. Tools and generations still type correctly through other conventions; if you want typed chain roots, rewrite the attribute in the same exporter wrapper used for [threads, users, and tags](#threads-users-tags). Then cut over by setting `LANGSMITH_OTEL_ONLY=true`, which stops sending runs to LangSmith.
 
 </Tab>
 <Tab>
@@ -296,7 +296,7 @@ The verified fix differs by SDK. (Langfuse accepts both spellings used below: `s
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
 
-Wrap the Langfuse-bound OTLP exporter and rewrite the attributes to the names Langfuse maps (`session.id`, `user.id`, `langfuse.trace.tags`). Only the Langfuse export path is touched; LangSmith ingestion is unaffected, and the mapping survives the `LANGSMITH_OTEL_ONLY=true` cutover. Do not try to `set_attribute` inside a `@traceable` instead: in Python the context span is non-recording and the change is silently dropped.
+Wrap the Langfuse-bound OTLP exporter and rewrite the attributes to the names Langfuse maps (`session.id`, `user.id`, `langfuse.trace.tags`, and `langfuse.observation.type` so `@traceable` chain roots stop arriving as generic spans). Only the Langfuse export path is touched; LangSmith ingestion is unaffected, and the mapping survives the `LANGSMITH_OTEL_ONLY=true` cutover. Do not try to `set_attribute` inside a `@traceable` instead: in Python the context span is non-recording and the change is silently dropped.
 
 ```python
 from opentelemetry.sdk.trace.export import SpanExporter, SpanExportResult
@@ -320,6 +320,13 @@ class LangfuseAttributeMapper(SpanExporter):
                 mapped["langfuse.trace.tags"] = [
                     t.strip() for t in str(attrs["langsmith.span.tags"]).split(",")
                 ]
+            # langsmith.span.kind is not mapped either; without this, chain
+            # roots land in Langfuse as generic spans.
+            kind = str(attrs.get("langsmith.span.kind", "")).lower()
+            if kind in ("chain", "tool", "llm"):
+                mapped["langfuse.observation.type"] = (
+                    "generation" if kind == "llm" else kind
+                )
             if mapped != attrs:
                 # relies on SDK internals; verified with opentelemetry-sdk 1.44
                 span._attributes = mapped
