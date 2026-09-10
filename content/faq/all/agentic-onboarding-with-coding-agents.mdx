@@ -1,0 +1,58 @@
+---
+title: What happens when I use Langfuse's agentic onboarding with a coding agent?
+description: Learn what Langfuse's coding-agent onboarding does automatically for tracing and prompt management.
+tags: [agent-skill, observability-get-started, prompt-management-get-started]
+---
+
+# What happens when I use Langfuse's agentic onboarding with a coding agent?
+
+It is not just pasting boilerplate into your repo.
+
+When you use Langfuse's agentic onboarding with the [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill) or the Cursor plugin that bundles it, the coding agent first inspects your codebase and then chooses the Langfuse workflow that fits what it found.
+
+## For tracing
+
+If you ask the agent to instrument your app, it will typically:
+
+- Detect which LLM libraries or frameworks you already use, such as OpenAI, Anthropic, LangChain, or other supported integrations
+- Prefer the matching Langfuse integration instead of falling back to generic manual instrumentation
+- Add the required imports, environment-variable usage, and setup code
+- Refactor existing LLM calls so they are traced with the right integration pattern
+- Keep the integration close to your current code instead of rewriting the whole flow
+
+Typical prompt:
+
+```txt
+Add tracing to this application with Langfuse following best practices.
+```
+
+## For prompt management
+
+If you ask the agent to work with prompts, it can:
+
+- Create a prompt in Langfuse with the variables you describe
+- Migrate hardcoded prompts from your codebase into Langfuse
+- Replace inline prompt strings with fetched prompts in application code
+- Fetch a specific prompt version or label, such as `production`, and wire it into the relevant code path
+
+Typical prompts:
+
+```txt
+Create a prompt in Langfuse called "movie-critic" that takes a movie name and critic level as variables.
+```
+
+```txt
+Migrate the hardcoded prompts in this codebase to Langfuse.
+```
+
+```txt
+Fetch the "movie-critic" prompt, production version, from Langfuse and use it in my application.
+```
+
+## Why it works better than a generic coding prompt
+
+The skill gives the agent Langfuse-specific instructions for instrumentation, prompt migration, documentation lookup, and common workflows. That means the agent is not guessing how Langfuse should be used in your stack. It has explicit guidance on what to look for and which implementation patterns to prefer.
+
+## What you should expect
+
+In a good run, the output is a focused diff that wires Langfuse into the code you already have. You should still review the changes before merging. The agent can automate most of the setup, but the final result still depends on your environment variables, your application structure, and whether the agent can clearly infer the right integration points from the repo.
