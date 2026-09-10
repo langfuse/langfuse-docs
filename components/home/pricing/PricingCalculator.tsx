@@ -25,74 +25,13 @@ import Link from "next/link";
 import { InfoIcon, MessageCircle } from "lucide-react";
 import { Button, Text } from "@/components/ui";
 
+import {
+  CLOUD_USAGE_TIERS as pricingTiers,
+  CLOUD_PLAN_CONFIGS as PLAN_CONFIGS,
+  calculateCloudPricingBreakdown as calculatePricingBreakdown,
+} from "@/lib/cloud-pricing";
+
 const SALES_ASSISTED_UNITS_THRESHOLD = 50_000_000;
-
-// Graduated pricing tiers
-const pricingTiers = [
-  { min: 0, max: 100000, rate: 0, description: "0-100k units" },
-  { min: 100001, max: 1000000, rate: 8, description: "100k-1M units" },
-  { min: 1000001, max: 10000000, rate: 7, description: "1-10M units" },
-  {
-    min: 10000001,
-    max: 50000000,
-    rate: 6.5,
-    description: "10-50M units",
-  },
-  { min: 50000001, max: Infinity, rate: 6, description: "50M+ units" },
-];
-
-// Calculate pricing breakdown for all tiers
-type TierBreakdown = {
-  tier: (typeof pricingTiers)[0];
-  eventsInTier: number;
-  costForTier: number;
-  tierRate: string;
-};
-
-const calculatePricingBreakdown = (events: number): TierBreakdown[] => {
-  return pricingTiers.map((tier, index) => {
-    let eventsInTier = 0;
-    let costForTier = 0;
-    let tierRate = "";
-
-    if (index === 0) {
-      // Free tier
-      eventsInTier = Math.min(events, 100000);
-      costForTier = 0;
-      tierRate = "Free";
-    } else {
-      // Paid tiers
-      if (events >= tier.min) {
-        const tierStart = tier.min;
-        const tierEnd =
-          tier.max === Infinity ? events : Math.min(events, tier.max);
-        eventsInTier = Math.max(0, tierEnd - tierStart + 1);
-        costForTier = (eventsInTier / 100000) * tier.rate;
-      }
-      tierRate = `$${tier.rate}/100k`;
-    }
-
-    return {
-      tier,
-      eventsInTier,
-      costForTier,
-      tierRate,
-    };
-  });
-};
-
-// Plan configuration
-type PlanConfig = {
-  name: string;
-  baseFee: number;
-};
-
-const PLAN_CONFIGS: PlanConfig[] = [
-  { name: "Core", baseFee: 29 },
-  { name: "Pro", baseFee: 199 },
-  { name: "Pro + Teams", baseFee: 499 },
-  { name: "Enterprise", baseFee: 2499 },
-];
 
 // Utility functions
 const formatNumber = (num: number) => num.toLocaleString();

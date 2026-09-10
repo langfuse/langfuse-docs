@@ -259,6 +259,17 @@ async function generateLLMsList() {
     let markdownContent = `# ${TITLE}\n\n`;
     markdownContent += `> ${INTRO_DESCRIPTION}\n\n`;
 
+    // Keep buying and deployment facts easy to find without duplicating
+    // volatile prices or competitor claims in the navigation index.
+    markdownContent += `## Pricing, deployment, and comparisons\n\n`;
+    markdownContent += `- [Cloud pricing](https://langfuse.com/pricing.md): Plan prices, usage rates, limits, and a pricing review date.\n`;
+    markdownContent += `- [Self-hosted pricing and license](https://langfuse.com/pricing-self-host.md): MIT-licensed core features and paid Enterprise additions.\n`;
+    markdownContent += `- [Self-hosting](https://langfuse.com/self-hosting.md): Deployment options and operational requirements.\n`;
+    markdownContent += `- [Enterprise license keys](https://langfuse.com/self-hosting/license-key.md): Activation and licensing for self-hosted add-on features.\n`;
+    markdownContent += `- [Security](https://langfuse.com/security.md): Security controls, compliance, and supporting documentation.\n`;
+    markdownContent += `- [Data regions](https://langfuse.com/security/data-regions.md): Hosting locations and regional availability.\n`;
+    markdownContent += `- Comparisons: [LangSmith](https://langfuse.com/resources/engineering/langsmith-alternative.md), [Braintrust](https://langfuse.com/resources/engineering/best-braintrustdata-alternatives.md), and [Arize / Phoenix](https://langfuse.com/resources/engineering/best-phoenix-arize-alternatives.md), with dated competitor sources.\n\n`;
+
     // Markdown access + search endpoint. Listed before the MCP server section
     // because these need no client setup: an agent with `curl` can use them
     // immediately.

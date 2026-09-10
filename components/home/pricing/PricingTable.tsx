@@ -31,13 +31,14 @@ import {
 } from "@/components/ui/hover-card";
 import { TrustedBy } from "../components/TrustedBy";
 import { trustedByData } from "@/data/trusted-by";
+import { CLOUD_PRICING_VALUES as pricing } from "@/lib/cloud-pricing";
 import { isCloudAppHref } from "@/lib/google-ads";
 
 // Reusable graduated pricing text with calculator link
 const GraduatedPricingText = () => {
   return (
     <>
-      $8/100k units. Lower with volume (
+      {pricing.startingRate}. Lower with volume (
       <Link href="#pricing-calculator" className="underline hover:text-primary">
         pricing calculator
       </Link>
@@ -103,8 +104,8 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       price: "Free",
       mainFeatures: [
         "All platform features (with limits)",
-        "50k units / month included",
-        "30 days data access",
+        `${pricing.hobbyUnits} units / month included`,
+        `${pricing.hobbyHistory} data access`,
         "2 users",
         "Community support via GitHub",
       ],
@@ -118,7 +119,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       pill: "Unlimited Users",
       description:
         "For production projects. Longer data access and unlimited users.",
-      price: "$29",
+      price: pricing.corePrice,
       priceDiscountCta: {
         name: "Discounts available",
         href: "/pricing#discounts",
@@ -130,9 +131,10 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       mainFeatures: [
         "Everything in Hobby",
         <>
-          100k units / month included, additional: <GraduatedPricingText />
+          {pricing.paidUnits} units / month included, additional:{" "}
+          <GraduatedPricingText />
         </>,
-        "90 days data access",
+        `${pricing.coreHistory} data access`,
         "Unlimited users",
         "In-app support",
       ],
@@ -144,9 +146,8 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       href: "/cloud",
       featured: false,
       pill: "Unlimited Users",
-      price: "$199",
-      description:
-        "For scaling projects. Unlimited history, high rate limits, all features.",
+      price: pricing.proPrice,
+      description: `For scaling projects. ${pricing.proHistory} of history, high rate limits, all features.`,
       calloutLink: {
         text: "Discounts: Startups, EDU, OSS",
         href: "/pricing#discounts",
@@ -154,9 +155,10 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       mainFeatures: [
         "Everything in Core",
         <>
-          100k units / month included, additional: <GraduatedPricingText />
+          {pricing.paidUnits} units / month included, additional:{" "}
+          <GraduatedPricingText />
         </>,
-        "3 years data access",
+        `${pricing.proHistory} data access`,
         "Data retention management",
         "Unlimited annotation queues",
         "High rate limits",
@@ -165,7 +167,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       ],
       addOn: {
         name: "Teams Add-on",
-        price: "$300/mo",
+        price: `${pricing.teamsPrice}/mo`,
         mainFeatures: [
           "Enterprise SSO (e.g. Okta)",
           "SSO enforcement",
@@ -182,7 +184,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       featured: false,
       description:
         "For large scale teams. Enterprise-grade support and security.",
-      price: "$2499",
+      price: pricing.enterprisePrice,
       calloutLink: {
         text: "Enterprise FAQ",
         href: "/enterprise",
@@ -190,7 +192,8 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       mainFeatures: [
         "Everything in Pro + Teams",
         <>
-          100k units / month included, additional: <GraduatedPricingText />
+          {pricing.paidUnits} units / month included, additional:{" "}
+          <GraduatedPricingText />
         </>,
         "Audit Logs",
         "SCIM API",
@@ -385,10 +388,10 @@ const sections: Section[] = [
         href: "/docs/administration/billable-units",
         tiers: {
           cloud: {
-            Hobby: "50k units",
-            Core: "100k units",
-            Pro: "100k units",
-            Enterprise: "100k units",
+            Hobby: `${pricing.hobbyUnits} units`,
+            Core: `${pricing.paidUnits} units`,
+            Pro: `${pricing.paidUnits} units`,
+            Enterprise: `${pricing.paidUnits} units`,
           },
           selfHosted: { "Open Source": "Unlimited", Enterprise: "Unlimited" },
         },
@@ -436,10 +439,10 @@ const sections: Section[] = [
         name: "Access to historical data",
         tiers: {
           cloud: {
-            Hobby: "30 days",
-            Core: "90 days",
-            Pro: "3 years",
-            Enterprise: "3 years",
+            Hobby: pricing.hobbyHistory,
+            Core: pricing.coreHistory,
+            Pro: pricing.proHistory,
+            Enterprise: pricing.proHistory,
           },
         },
       },

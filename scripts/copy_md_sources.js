@@ -260,7 +260,10 @@ function applyOverrides() {
     const destRel = rel.split(path.sep).join("/");
     fs.writeFileSync(
       dest,
-      appendAgentInstructionsFooter(fs.readFileSync(file, "utf8"), destRel),
+      appendAgentInstructionsFooter(
+        replaceComponentsWithMarkdown(fs.readFileSync(file, "utf8")),
+        destRel,
+      ),
       "utf8",
     );
     overridden += 1;
