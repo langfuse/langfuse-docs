@@ -31,6 +31,8 @@ Want to see it in action? [**Create a free account**](/cloud) and explore Langfu
 
 ## Getting Started
 
+Start with [Evaluate an existing application](/docs/evaluation/get-started/existing-application): run your application on fixed test cases, reuse deterministic checks, [compare changes](/docs/evaluation/experiments/compare-experiments), and [block regressions in CI](/docs/evaluation/experiments/experiments-ci-cd). The Python and TypeScript examples run without model-provider calls.
+
 You can evaluate both:
 
 - [live incoming traces](/docs/evaluation/get-started/online) to measure quality on production data and track trends over time.
@@ -50,9 +52,21 @@ If you're looking for another specific workflow, use the table below to find the
 | Build a reusable set of test cases                  | [Datasets](/docs/evaluation/experiments/datasets)                                                                                                                                                                                           |
 | Compare prompt, model, or code changes side by side | [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui), [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk), [Experiments via OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry) |
 | Block deploys on regressions                        | [CI/CD experiments](/docs/evaluation/experiments/experiments-ci-cd)                                                                                                                                                                         |
-| Run deterministic checks                            | [Code Evaluators](/docs/evaluation/evaluation-methods/code-evaluators)                                                                                                                                                                      |
+| Reuse checks in your application or CI process      | [Evaluate an existing application](/docs/evaluation/get-started/existing-application)                                                                                                                                                       |
 | Automatically score live production traces          | [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk)                                                                                              |
 | See how scores trend over time                      | [Score Analytics](/docs/evaluation/scores/score-analytics), [custom dashboards](/docs/metrics/features/custom-dashboards)                                                                                                                   |
+
+## Choose where evaluations run [#where-evaluations-run]
+
+| Approach                                                                       | Execution and setup                                                                                                                                                               |
+| ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Existing Python or TypeScript graders                                          | Run in your application or CI process. The SDK sends experiment inputs, outputs, and scores to Langfuse. No managed code evaluator dispatcher is required.                        |
+| [Managed Code Evaluators](/docs/evaluation/evaluation-methods/code-evaluators) | Langfuse executes your checks. Self-hosted deployments require a configured dispatcher.                                                                                           |
+| [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)           | Use a model for checks that need semantic judgment. Configure a model connection for managed evaluators, or provider credentials in your own process for SDK evaluator functions. |
+
+Use [Langfuse Cloud](/cloud) for hosted storage and reporting, or [self-host Langfuse](/self-hosting) to operate the platform yourself. Both accept experiments from your own runner. Self-hosting Langfuse does not make calls to an external model provider local; choose your model endpoint separately. Deterministic graders require no model-provider calls, but Langfuse storage and infrastructure still have their own [pricing](/pricing) and operational requirements.
+
+For a small suite that only needs a local pass/fail result, existing tests may be sufficient. Add Langfuse when you need shared experiment history, comparison, or review. A local dataset is a data source for an experiment, not a promise of offline-only storage.
 
 Already know what you're looking for? Browse _Evaluation Methods_ and _Experiments_ in the sidebar.
 

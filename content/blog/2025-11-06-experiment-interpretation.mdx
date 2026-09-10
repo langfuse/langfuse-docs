@@ -16,6 +16,8 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
   authors={["marliesmayerhofer"]}
 />
 
+For the current Langfuse v4 workflow, see [Compare experiments](/docs/evaluation/experiments/compare-experiments).
+
 AI systems are stochastic. Traditional deterministic software tests are insufficient for validating non-deterministic outputs. Every prompt tweak, model swap, or config change is an experiment. The performance of each experiment must be quantified to drive improvements and prevent regressions in production. Next to request duration, evaluation metrics such as accuracy or quality often provide crucial insight. These sometimes qualitative metrics are, however, notoriously difficult to quantify reliably at scale.
 
 Langfuse experiments solve this by producing performance snapshots of an application, measuring output quality, cost, and latency.
@@ -45,7 +47,7 @@ The data provides the inputs for the task. This can be a simple local list of te
 
 ### 3\. Evaluators
 
-Evaluators score the quality of the task's output for a single item. They receive the input, output, and optional expected output, and produce scores (e.g., `relevance`, `correctness`). Often if expected output is provided evaluators compare actual and expected output. Diving deeper into evals is recommended \[link\].
+Evaluators score the quality of the task's output for a single item. They receive the input, output, and optional expected output, and produce scores (e.g., `relevance`, `correctness`). Often if expected output is provided evaluators compare actual and expected output. See [Evaluation methods](/docs/evaluation/overview) for choosing evaluators.
 
 ### Managed Execution
 
@@ -122,9 +124,9 @@ Averages can hide outliers. A 4% average improvement can hide a 16% regression o
 The goal is to build a high-priority worklist. Use the UI tools systematically:
 
 1. **Filtering:** This is the primary tool. Use column header summaries to filter for specific value failures (e.g., `Candidate Correctness < 0.3`).
-2. **\[Coming soon\] Sorting:** Sort the table by the scores to surface the single worst-performing items immediately.
+2. **Inspection:** Open the filtered cases and compare their outputs and score explanations.
 
-This filtered, sorted list is the work queue.
+This filtered list is the work queue.
 
 <Video
   src="https://static.langfuse.com/docs-videos/2025-11-06-experiment-interpretation-compare-filter.mp4"

@@ -259,6 +259,13 @@ async function generateLLMsList() {
     let markdownContent = `# ${TITLE}\n\n`;
     markdownContent += `> ${INTRO_DESCRIPTION}\n\n`;
 
+    markdownContent += `## Evaluation workflows\n\n`;
+    markdownContent += `- [Test an existing application and reuse graders](https://langfuse.com/docs/evaluation/get-started/existing-application.md): Runnable Python and TypeScript examples.\n`;
+    markdownContent += `- [Compare versions and inspect failures](https://langfuse.com/docs/evaluation/experiments/compare-experiments.md): Baselines, individual regressions, and human review.\n`;
+    markdownContent += `- [Block regressions in CI](https://langfuse.com/docs/evaluation/experiments/experiments-ci-cd.md): Thresholds and approved-baseline checks.\n`;
+    markdownContent += `- [Evaluate grounding](https://langfuse.com/resources/engineering/rag-faithfulness-evaluation.md) and [hallucinations](https://langfuse.com/resources/engineering/hallucination-detection.md).\n`;
+    markdownContent += `- [Choose where evaluations run](https://langfuse.com/docs/evaluation/overview.md): Application code, managed evaluators, Cloud, and self-hosting.\n\n`;
+
     // Keep buying and deployment facts easy to find without duplicating
     // volatile prices or competitor claims in the navigation index.
     markdownContent += `## Pricing, deployment, and comparisons\n\n`;
