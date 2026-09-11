@@ -24,7 +24,7 @@ Use the URL for your [data region](/security/data-regions) or self-hosted instan
 
 ## Run two versions with the same checks [#run-two-versions]
 
-The scripts create a new dataset, add two reviewed cases, and capture a UTC timestamp after the writes complete. Both runs fetch that exact version. In an existing project, reuse your dataset and store its approved version timestamp with your test configuration.
+The scripts create a new dataset, add two reviewed cases, and pin the latest server-assigned creation timestamp returned by those writes. Both runs use that exact version, avoiding dependence on your computer's clock. In an existing project, reuse your dataset and store its approved version timestamp with your test configuration.
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
@@ -36,7 +36,6 @@ pip install langfuse
 Save as `evaluate.py` and run `python evaluate.py`:
 
 ```python title="evaluate.py"
-from datetime import datetime, timezone
 from uuid import uuid4
 
 from langfuse import Evaluation, get_client
@@ -66,18 +65,21 @@ langfuse = get_client()
 dataset_name = f"refund-regression-{uuid4().hex[:8]}"
 try:
     langfuse.create_dataset(name=dataset_name)
+    created_versions = []
     for case_id, question, days in [
         ("standard", "What is the standard refund window?", 30),
         ("sale", "What is the sale-item refund window?", 14),
     ]:
-        langfuse.create_dataset_item(
+        created_item = langfuse.create_dataset_item(
             dataset_name=dataset_name,
             input={"question": question},
             expected_output={"refund_days": days},
             metadata={"case_id": case_id},
         )
 
-    version = datetime.now(timezone.utc)
+        created_versions.append(created_item.created_at)
+
+    version = max(created_versions)
     dataset = langfuse.get_dataset(dataset_name, version=version)
     print(f"Dataset: {dataset_name}; version: {version.isoformat()}")
 
@@ -139,19 +141,23 @@ async function main() {
   const datasetName = `refund-regression-${randomUUID().slice(0, 8)}`;
   try {
     await langfuse.api.datasets.create({ name: datasetName });
+    const createdVersions: string[] = [];
     for (const [caseId, question, days] of [
       ["standard", "What is the standard refund window?", 30],
       ["sale", "What is the sale-item refund window?", 14],
     ] as const) {
-      await langfuse.api.datasetItems.create({
+      const createdItem = await langfuse.api.datasetItems.create({
         datasetName,
         input: { question },
         expectedOutput: { refund_days: days },
         metadata: { case_id: caseId },
       });
+      createdVersions.push(createdItem.createdAt);
     }
 
-    const version = new Date().toISOString();
+    const version = createdVersions.reduce((latest, current) =>
+      Date.parse(current) > Date.parse(latest) ? current : latest,
+    );
     const dataset = await langfuse.dataset.get(datasetName, { version });
     console.log(`Dataset: ${datasetName}; version: ${version}`);
     for (const applicationVersion of ["baseline", "candidate"]) {

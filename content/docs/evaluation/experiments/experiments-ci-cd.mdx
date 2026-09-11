@@ -387,11 +387,22 @@ from langfuse import RegressionError
 EVALUATOR_VERSION = "refund-window-v1"
 
 
-def check_approved_baseline(result, *, dataset_version):
+def parse_version(value: str | datetime) -> datetime:
+    parsed = (
+        datetime.fromisoformat(value.replace("Z", "+00:00"))
+        if isinstance(value, str)
+        else value
+    )
+    if parsed.utcoffset() is None:
+        raise ValueError("Dataset version must include a timezone")
+    return parsed
+
+
+def check_approved_baseline(result, *, dataset_version: str | datetime):
     baseline = json.loads(Path("experiments/approved-baseline.json").read_text())
     if (
-        datetime.fromisoformat(baseline["dataset_version"].replace("Z", "+00:00"))
-        != datetime.fromisoformat(dataset_version.replace("Z", "+00:00"))
+        parse_version(baseline["dataset_version"])
+        != parse_version(dataset_version)
         or baseline["evaluator_version"] != EVALUATOR_VERSION
     ):
         raise ValueError(
@@ -431,7 +442,7 @@ def check_approved_baseline(result, *, dataset_version):
         )
 ```
 
-Call `check_approved_baseline(result, dataset_version=version)` from your experiment entry point before returning `result`. Here, `version` is the ISO timestamp used to fetch the candidate dataset. Increment `EVALUATOR_VERSION` whenever the grader changes and review a new baseline before using it.
+Call `check_approved_baseline(result, dataset_version=version)` from your experiment entry point before returning `result`. Here, `version` is the timezone-aware `datetime` or ISO timestamp used to fetch the candidate dataset. Increment `EVALUATOR_VERSION` whenever the grader changes and review a new baseline before using it.
 
 </Tab>
 <Tab>
