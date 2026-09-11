@@ -120,7 +120,10 @@ provider.add_span_processor(
         OTLPSpanExporter(
             endpoint=os.environ.get("LANGFUSE_BASE_URL", "https://cloud.langfuse.com").rstrip("/")
             + "/api/public/otel/v1/traces",
-            headers={"Authorization": f"Basic {auth}"},
+            headers={
+                "Authorization": f"Basic {auth}",
+                "x-langfuse-ingestion-version": "4",  # real-time ingestion
+            },
         )
     )
 )
@@ -483,7 +486,9 @@ for msg in pulled.messages:
         messages.append({"type": "placeholder", "name": msg.variable_name})
         continue
     role = role_map[msg.__class__.__name__.replace("MessagePromptTemplate", "")]
-    template = re.sub(r"\{(\w+)\}", r"{{\1}}", msg.prompt.template)  # {var} -> {{var}}
+    template = msg.prompt.template
+    if msg.prompt.template_format == "f-string":  # mustache is already {{var}}
+        template = re.sub(r"\{(\w+)\}", r"{{\1}}", template)  # {var} -> {{var}}
     messages.append({"role": role, "content": template})
 
 langfuse.create_prompt(
@@ -517,9 +522,13 @@ const roleMap: Record<string, "system" | "user" | "assistant"> = {
 const messages = pulled.promptMessages.map((msg) => {
   if (msg.constructor.name === "MessagesPlaceholder") // e.g. chat history
     return { type: "placeholder", name: (msg as any).variableName };
-  const role = roleMap[msg.constructor.name.replace("MessagePromptTemplate", "")];
-  const template: string = (msg as any).prompt.template;
-  return { role, content: template.replace(/\{(\w+)\}/g, "{{$1}}") }; // {var} -> {{var}}
+  const key = msg.constructor.name.replace("MessagePromptTemplate", "");
+  const role = roleMap[key];
+  if (!role) throw new Error(`Unmapped message type: ${key}`);
+  let template: string = (msg as any).prompt.template;
+  if ((msg as any).prompt.templateFormat !== "mustache") // mustache is already {{var}}
+    template = template.replace(/\{(\w+)\}/g, "{{$1}}"); // f-string {var} -> {{var}}
+  return { role, content: template };
 });
 
 await langfuse.prompt.create({
@@ -607,8 +616,15 @@ print(result.format())
 </Tab>
 <Tab>
 
+In JS/TS, the experiment runner exports task traces via OpenTelemetry: without a registered span processor and a flush at the end, the run is created but its traces never arrive.
+
 ```typescript
 import { LangfuseClient, type Evaluation } from "@langfuse/client";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+
+const otelSdk = new NodeSDK({ spanProcessors: [new LangfuseSpanProcessor()] });
+otelSdk.start();
 
 const langfuse = new LangfuseClient();
 const dataset = await langfuse.dataset.get("support-golden");
@@ -637,9 +653,10 @@ const result = await dataset.runExperiment({
   evaluators: [keywordMatch],
 });
 console.log(await result.format());
+await otelSdk.shutdown(); // flush pending spans
 ```
 
-If the task still uses LangSmith `traceable` code, run the experiment with `LANGSMITH_TRACING_MODE=otel` (and the [Step 1](#cutover) OTel bootstrap) so the task's traces land in Langfuse and link to the experiment run.
+If the task still uses LangSmith `traceable` code, replace the `NodeSDK` setup with the [Step 1](#cutover) OTel bootstrap and run the experiment with `LANGSMITH_TRACING_MODE=otel` so the task's traces land in Langfuse and link to the experiment run.
 
 </Tab>
 </LangTabs>
@@ -663,7 +680,7 @@ LangSmith history migrates cleanly because the run export API returns full trees
 1. **Extract** runs with the LangSmith SDK. `list_runs()` is deprecated (removal after Jan 2027) in favor of `client.runs.query()`; either returns root runs and full trees per `trace_id`. For large histories, [LangSmith bulk export](https://docs.langchain.com/langsmith/data-export) (Parquet to S3, plan-gated) extracts the same run fields without paging the API; the mapping below stays the same.
 2. **Bound the window at cutover time.** Runs after the fan-out went live are already in Langfuse; reingesting them duplicates data.
 3. **Transform to plain OTLP JSON** and POST to `{LANGFUSE_BASE_URL}/api/public/otel/v1/traces` with Basic auth and the `x-langfuse-ingestion-version: 4` header. Do not create the spans through an OTel tracer. Tracers assign new timestamps and IDs. Raw JSON preserves the original `start_time` / `end_time`.
-4. **Derive IDs deterministically** from LangSmith IDs (for example `sha256(trace_id)[:32]` for the trace, `sha256(run_id)[:16]` per span) so re-runs upsert instead of duplicating.
+4. **Derive IDs deterministically** from LangSmith IDs (for example `sha256(trace_id)[:32]` for the trace, `sha256(run_id)[:16]` per span) so every run maps to a stable Langfuse ID. Langfuse does [not deduplicate re-ingested IDs](/integrations/native/opentelemetry/migration-to-v4#export-complete-immutable-spans), so an interrupted import must not resend what was already accepted: checkpoint ingested LangSmith trace IDs and resume by skipping them.
 5. **Map fields**: run type to `langfuse.observation.type` (`llm` → `generation`, `tool` → `tool`, `chain` → `chain`), `inputs` / `outputs` to observation input/output, `prompt_tokens` / `completion_tokens` to `langfuse.observation.usage_details`, the model name from `extra.invocation_params.model` with a fallback to `extra.metadata.ls_model_name` (some runs only set the latter; without it, cost is lost), and errored runs to `langfuse.observation.level: ERROR`. Keep the source ID in `langfuse.trace.metadata.langsmith_trace_id`.
 6. **Reconcile counts** per trace (source runs vs destination observations) and spot-check timestamps in the Langfuse UI.
 
