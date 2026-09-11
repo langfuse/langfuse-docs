@@ -4,6 +4,10 @@ import { Fragment } from "react";
 import { motion } from "framer-motion";
 import { Text } from "@/components/ui/text";
 import { Dot } from "@/components/ui/dot";
+import {
+  FORTUNE_50_COMPANIES,
+  formatObservationsPerMonth,
+} from "@/lib/usage-stats";
 
 /** Slower than Integrations marquee rows (40–48s) for short hero copy */
 const MARQUEE_DURATION_SEC = 40;
@@ -12,11 +16,13 @@ function StatItems() {
   return (
     <>
       <Text size="s" className="whitespace-nowrap shrink-0">
-        Used by <b className="text-primary">21</b> of Fortune 50
+        Used by <b className="text-primary">{FORTUNE_50_COMPANIES}</b> of
+        Fortune 50
       </Text>
       <Dot />
       <Text size="s" className="whitespace-nowrap shrink-0">
-        <b className="text-primary">90B+</b> observations/month
+        <b className="text-primary">{formatObservationsPerMonth()}</b>{" "}
+        observations/month
       </Text>
       <Dot />
       <Text size="s" className="whitespace-nowrap shrink-0">

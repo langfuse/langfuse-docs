@@ -58,9 +58,10 @@ import { Details, Summary } from "@/components/Details";
 
 // Lazy-load Video so @vidstack/react (~800 KB) is NOT bundled on every MDX page.
 // It only downloads on pages that actually render a <Video> tag.
+// next/dynamic() returns ComponentType (class or function); MDX expects a function.
 const Video = dynamic(() =>
   import("@/components/Video").then((m) => ({ default: m.Video })),
-);
+) as typeof import("@/components/Video").Video;
 
 const BLOCK_TAGS = new Set([
   "div",
@@ -99,6 +100,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ...defaultMdxComponents,
     a: (props: LinkProps) => <MdxLink variant="underline" {...props} />,
     img: Image,
+    Image,
     p: MdxParagraph,
     Frame,
     Video,

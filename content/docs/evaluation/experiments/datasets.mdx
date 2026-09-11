@@ -41,7 +41,7 @@ import CreateDatasetItem from "@/components-mdx/datasets-create-dataset-item.mdx
 <CreateDatasetItem />
 </Steps>
 
-## Multi-modal dataset items
+## Multi-modal dataset items [#multi-modal-dataset-items]
 
 Dataset item `input`, `expectedOutput`, and `metadata` fields can include media attachments such as images, audio, video, documents, and other files. You can add media from the Langfuse UI when creating or editing an item, or upload media through the Python and JS/TS SDKs with `LangfuseMedia`.
 
@@ -201,7 +201,7 @@ You can retrieve a dataset as it existed at a specific point in time by providin
 
 ```python
 from langfuse import get_client
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
 
 langfuse = get_client()
 
@@ -227,7 +227,7 @@ import { LangfuseClient } from "@langfuse/client";
 const langfuse = new LangfuseClient();
 
 // Capture the timestamp (use item's createdAt)
-const versionTimestamp = new Date("2025-12-15T06:30:00").toISOString();
+const versionTimestamp = new Date("2025-12-15T06:30:00Z").toISOString();
 
 // Fetch dataset at version timestamp
 const datasetAtVersion = await langfuse.dataset.get("my-dataset", {
@@ -248,7 +248,7 @@ You can view all dataset versions by navigating to **Datasets** → **Select a d
 </Tab>
 </LangTabs>
 
-### Run experiments on versioned datasets
+### Run experiments on versioned datasets [#run-experiments-on-versioned-datasets]
 
 You can run experiments directly on versioned datasets. This is useful for comparing how your model performs against different dataset versions or reproducing experiment results with the exact dataset state from a specific point in time.
 
@@ -256,8 +256,7 @@ You can run experiments directly on versioned datasets. This is useful for compa
 <Tab>
 
 ```python
-from datetime import timedelta
-import time
+from datetime import datetime, timezone
 from langfuse import Langfuse
 
 langfuse = Langfuse()
@@ -289,7 +288,7 @@ import { LangfuseClient } from "@langfuse/client";
 const langfuse = new LangfuseClient();
 
 // Capture the version timestamp
-const versionTimestamp = new Date("2025-12-15T06:30:00").toISOString();
+const versionTimestamp = new Date("2025-12-15T06:30:00Z").toISOString();
 
 // Fetch versioned dataset
 const versionedDataset = await langfuse.dataset.get("qa-dataset", {

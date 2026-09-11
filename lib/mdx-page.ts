@@ -1,7 +1,7 @@
 import "server-only";
 import type { Metadata } from "next";
 import type { TOCItemType } from "fumadocs-core/toc";
-import { buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
+import { buildCanonicalUrl, buildOgImageUrl, buildPageUrl } from "@/lib/og-url";
 import type { ComponentType } from "react";
 
 type AnySource = {
@@ -127,8 +127,9 @@ export function buildSectionMetadata(
 ): Metadata {
   const pageData = page.data;
   const pagePath = `/${section}${slug.length > 0 ? `/${slug.join("/")}` : ""}`;
-  const canonicalUrl =
-    pageData.canonical ?? opts?.canonicalFallback ?? buildPageUrl(pagePath);
+  const canonicalUrl = buildCanonicalUrl(
+    pageData.canonical ?? opts?.canonicalFallback ?? pagePath,
+  );
   const seoTitle = pageData.seoTitle || page.data.title;
   const ogTitle = pageData.seoTitle
     ? seoTitle
@@ -162,6 +163,8 @@ export function buildSectionMetadata(
     },
     ...(pageData.noindex ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
+      type:
+        section === "blog" || section === "changelog" ? "article" : "website",
       images: [{ url: ogImage }],
       url: canonicalUrl,
       ...(ogVideoUrl ? { videos: [{ url: ogVideoUrl }] } : {}),

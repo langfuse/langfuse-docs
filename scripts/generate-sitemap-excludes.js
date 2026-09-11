@@ -19,6 +19,7 @@
 const fs = require("fs");
 const path = require("path");
 const { execFileSync } = require("child_process");
+const { isSearchUtility } = require("../lib/search-index-policy.js");
 
 const repoRoot = path.join(__dirname, "..");
 const contentDir = path.join(repoRoot, "content");
@@ -184,7 +185,7 @@ for (const filePath of walkDir(contentDir)) {
 
   // Determine if this page should be excluded
   let exclude = false;
-  if (fm.noindex === "true") {
+  if (fm.noindex === "true" || isSearchUtility(route)) {
     exclude = true;
   } else if (fm.canonical) {
     // Normalise: strip https://langfuse.com prefix so we compare path-to-path

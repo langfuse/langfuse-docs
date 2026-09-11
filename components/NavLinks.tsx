@@ -52,7 +52,7 @@ const productFeatured: FeaturedItem = {
   title: "Get Started with Tracing",
   description: "This guide walks you through ingesting your first trace.",
   cta: "Read docs",
-  href: "/docs/get-started",
+  href: "/docs/observability/get-started",
 };
 
 const resourcesFeatured: FeaturedItem = {
@@ -290,7 +290,9 @@ function NavDropdown({
             : "pointer-events-none opacity-0 -translate-y-1 transition-[opacity,transform] duration-0",
         )}
         style={{
-          top: "66px",
+          // Viewport-fixed: banner + primary bar + 6px gap. Do not rely on a
+          // header containing block (backdrop-filter used to create one).
+          top: "calc(var(--fd-banner-height, 0px) + var(--lf-nav-primary-height) + 6px)",
           left,
         }}
       >

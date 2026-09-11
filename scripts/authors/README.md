@@ -56,22 +56,26 @@ node scripts/authors/generate-contributors.js
 
 ## Automated Process
 
-The `contributors.json` file is **automatically generated** during the build process by:
+The `contributors.json` file is automatically refreshed by the scheduled GitHub data workflow. Deployments validate and consume the committed snapshot without calling the GitHub contributors API.
+
+The scheduled refresh:
 
 1. Reading configuration from `config.js` (sections to analyze, paths, settings)
 2. Scanning current documentation files across all configured sections
 3. Running a single optimized git command for all historical data (~0.2s)
-4. Filtering to only include pages that currently exist
-5. Mapping commit emails to author keys using `data/authors.json`
+4. Resolving each unique non-noreply email with at most one GitHub API request
+5. Filtering to only include pages that currently exist
 6. Ordering contributors by most recent contribution (descending)
-7. Creating the page-to-contributors mapping for all sections
+7. Merging the result into the committed page-to-contributors mapping
+
+The refresh fails without committing partial output when GitHub returns an error. A successful response without a linked GitHub username is cached only for the duration of that refresh.
 
 ## Workflow
 
 1. **Check for new contributors:** `node scripts/authors/update-authors.js analyze` (analyzes all documentation sections)
 2. **For existing team members:** Map new email to existing author
 3. **For new contributors:** Add author profile to `data/authors.json` first
-4. **Contributors.json updates automatically** on next build
+4. **Contributors.json updates automatically** during the next scheduled GitHub data refresh
 
 ## Author Profile Format (data/authors.json)
 

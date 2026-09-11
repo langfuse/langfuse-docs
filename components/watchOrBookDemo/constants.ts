@@ -26,7 +26,7 @@ export const WALKTHROUGH_TABS = [
     cta: "Any questions after watching this video? Check out the resources at the bottom of the page, or reach out to us.",
     docs: {
       title: "Observability documentation",
-      href: "/docs/observability",
+      href: "/docs/observability/overview",
     },
   },
   {
@@ -40,7 +40,7 @@ export const WALKTHROUGH_TABS = [
     cta: "Any questions after watching this video? Check out the resources at the bottom of the page, or reach out to us.",
     docs: {
       title: "Prompt Management documentation",
-      href: "/docs/prompt-management",
+      href: "/docs/prompt-management/overview",
     },
   },
   {
@@ -54,7 +54,7 @@ export const WALKTHROUGH_TABS = [
     cta: "Any questions after watching this video? Check out the resources at the bottom of the page, or reach out to us.",
     docs: {
       title: "Evaluation documentation",
-      href: "/docs/evaluation",
+      href: "/docs/evaluation/overview",
     },
   },
 ];

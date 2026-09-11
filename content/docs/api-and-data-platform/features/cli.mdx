@@ -19,14 +19,46 @@ Read the full documentation in the dedicated [CLI GitHub Repo](https://github.co
 Get started by running:
 
 ```bash
-npx langfuse-cli api <resource> <action>
+npx @langfuse/cli api <resource> <action>
 ```
 
 Or just ask your coding agent to do it for you:
 
 ```markdown
-please install langfuse-cli
+please install @langfuse/cli
 ```
+
+<Callout type="info">
+  **Note:** The package was previously published under `langfuse-cli`. That
+  package is identical to this one and will be updated alongside it until we
+  release a new major version. We recommend using `@langfuse/cli` from now on.
+</Callout>
+
+## Move from `langfuse-cli` to the new `@langfuse/cli` package
+
+We will maintain the `langfuse-cli` until the next major version, but we recommend using `@langfuse/cli` from now on.
+
+To migrate from `langfuse-cli`, replace the package name in your command:
+
+```bash
+npx @langfuse/cli api <resource> <action>
+# or
+bunx @langfuse/cli api <resource> <action>
+```
+
+or switch:
+
+```bash
+# npm
+npm uninstall --global langfuse-cli
+npm install --global @langfuse/cli
+
+# Bun
+bun remove --global langfuse-cli
+bun add --global @langfuse/cli
+```
+
+After migrating, continue running the CLI with the same `langfuse` command.
 
 ## Authentication [#authentication]
 

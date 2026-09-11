@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   // Next.js replaces (not deep-merges) openGraph across segments, so the root
   // layout's default `images` is dropped unless re-supplied here.
   openGraph: {
+    type: "website",
     title: "Langfuse Launch Week #5",
     description:
       "Five days, five feature drops, May 25–29, 2026. Live demos at ClickHouse OpenHouse.",

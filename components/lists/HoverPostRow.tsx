@@ -27,6 +27,8 @@ export function HoverPostRow({
   previewOnHover?: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
+  // Prefetch on hover only — viewport prefetch of every list row contends with first paint.
+  const [prefetch, setPrefetch] = useState(false);
 
   const hasHoverPreview = previewOnHover && !!previewImage;
   const showPreview = hasHoverPreview && hovered;
@@ -34,8 +36,12 @@ export function HoverPostRow({
   return (
     <Link
       href={href}
-      className="group relative flex flex-col md:flex-row gap-1.5 md:gap-4 px-4 py-3 transition-colors hover:bg-surface-1"
-      onMouseEnter={() => setHovered(true)}
+      prefetch={prefetch}
+      className="group relative flex flex-col md:flex-row gap-1.5 md:gap-4 px-4 py-3 md:min-h-[5.75rem] transition-colors hover:bg-surface-1"
+      onMouseEnter={() => {
+        setHovered(true);
+        setPrefetch(true);
+      }}
       onMouseLeave={() => setHovered(false)}
     >
       {leadingVisual ? (
