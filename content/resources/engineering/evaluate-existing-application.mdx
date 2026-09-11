@@ -1,0 +1,263 @@
+---
+title: Evaluate an existing application
+description: Reuse Python or TypeScript application functions and deterministic graders, compare versions on a fixed dataset, and catch regressions in CI.
+tags: [guide, evaluation]
+---
+
+# Evaluate an existing application
+
+Keep your application code and existing checks. Wrap the function you want to test in an experiment task, run it on a fixed dataset, and use Langfuse to compare outputs and review failures. This works for a single model call, a retrieval pipeline, or an agent that calls tools.
+
+This example tests a small refund-policy function. The candidate fixes one case and breaks another, so the average score stays the same. Both SDK examples run without a model provider or an LLM judge. Replace the sample function with your application to evaluate fresh outputs from your own system.
+
+## Set up Langfuse [#setup]
+
+Use Langfuse v4 with Python SDK v4 or JS/TS SDK v5. Create a [Cloud project](/cloud) or use your [self-hosted instance](/self-hosting), then get API keys from **Settings → API Keys**.
+
+```bash
+export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+export LANGFUSE_BASE_URL="https://cloud.langfuse.com"
+```
+
+Use the URL for your [data region](/security/data-regions) or self-hosted instance. These scripts run the application and graders in your process and send test inputs, outputs, and scores to Langfuse.
+
+## Run two versions with the same checks [#run-two-versions]
+
+The scripts create a new dataset, add two reviewed cases, and pin the latest server-assigned creation timestamp returned by those writes. Both runs use that exact version, avoiding dependence on your computer's clock. In an existing project, reuse your dataset and store its approved version timestamp with your test configuration.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```bash
+pip install langfuse
+```
+
+Save as `evaluate.py` and run `python evaluate.py`:
+
+```python title="evaluate.py"
+from uuid import uuid4
+
+from langfuse import Evaluation, get_client
+
+
+def answer_question(question, version):
+    # Replace this sample function with your application's entry point.
+    # Its returned output, not a separately rewritten prompt, is evaluated.
+    if version == "baseline":
+        return {"refund_days": 30}
+    return {"refund_days": 14}
+
+
+def grade(output, expected_output):
+    # Keep your existing business-rule checks here.
+    return output["refund_days"] == expected_output["refund_days"]
+
+
+def exact_refund_window(*, output, expected_output, **kwargs):
+    return Evaluation(
+        name="refund_window",
+        value=int(grade(output, expected_output)),
+    )
+
+
+langfuse = get_client()
+dataset_name = f"refund-regression-{uuid4().hex[:8]}"
+try:
+    langfuse.create_dataset(name=dataset_name)
+    created_versions = []
+    for case_id, question, days in [
+        ("standard", "What is the standard refund window?", 30),
+        ("sale", "What is the sale-item refund window?", 14),
+    ]:
+        created_item = langfuse.create_dataset_item(
+            dataset_name=dataset_name,
+            input={"question": question},
+            expected_output={"refund_days": days},
+            metadata={"case_id": case_id},
+        )
+
+        created_versions.append(created_item.created_at)
+
+    version = max(created_versions)
+    dataset = langfuse.get_dataset(dataset_name, version=version)
+    print(f"Dataset: {dataset_name}; version: {version.isoformat()}")
+
+    for application_version in ["baseline", "candidate"]:
+
+        def task(*, item, **kwargs):
+            return answer_question(item.input["question"], application_version)
+
+        result = dataset.run_experiment(
+            name="Refund policy",
+            run_name=application_version,
+            task=task,
+            evaluators=[exact_refund_window],
+            metadata={
+                "application_version": application_version,
+                "evaluator_version": "refund-window-v1",
+            },
+        )
+        print(result.format())
+finally:
+    langfuse.flush()
+```
+
+</Tab>
+<Tab>
+
+```bash
+npm install @langfuse/client @langfuse/otel @opentelemetry/sdk-node
+npm install --save-dev tsx typescript
+```
+
+Save as `evaluate.ts` and run `npx tsx evaluate.ts`:
+
+```typescript title="evaluate.ts"
+import { randomUUID } from "node:crypto";
+import { LangfuseClient } from "@langfuse/client";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+
+type Answer = { refund_days: number };
+
+async function answerQuestion(
+  question: string,
+  version: string,
+): Promise<Answer> {
+  // Replace this sample function with your application's entry point.
+  return { refund_days: version === "baseline" ? 30 : 14 };
+}
+
+function grade(output: Answer, expectedOutput: Answer): boolean {
+  // Keep your existing business-rule checks here.
+  return output.refund_days === expectedOutput.refund_days;
+}
+
+async function main() {
+  const otel = new NodeSDK({ spanProcessors: [new LangfuseSpanProcessor()] });
+  otel.start();
+  const langfuse = new LangfuseClient();
+  const datasetName = `refund-regression-${randomUUID().slice(0, 8)}`;
+  try {
+    await langfuse.api.datasets.create({ name: datasetName });
+    const createdVersions: string[] = [];
+    for (const [caseId, question, days] of [
+      ["standard", "What is the standard refund window?", 30],
+      ["sale", "What is the sale-item refund window?", 14],
+    ] as const) {
+      const createdItem = await langfuse.api.datasetItems.create({
+        datasetName,
+        input: { question },
+        expectedOutput: { refund_days: days },
+        metadata: { case_id: caseId },
+      });
+      createdVersions.push(createdItem.createdAt);
+    }
+
+    const version = createdVersions.reduce((latest, current) =>
+      Date.parse(current) > Date.parse(latest) ? current : latest,
+    );
+    const dataset = await langfuse.dataset.get(datasetName, { version });
+    console.log(`Dataset: ${datasetName}; version: ${version}`);
+    for (const applicationVersion of ["baseline", "candidate"]) {
+      const result = await dataset.runExperiment({
+        name: "Refund policy",
+        runName: applicationVersion,
+        task: async (item) =>
+          answerQuestion(item.input.question, applicationVersion),
+        evaluators: [
+          async ({ output, expectedOutput }) => ({
+            name: "refund_window",
+            value: Number(grade(output, expectedOutput)),
+          }),
+        ],
+        metadata: {
+          application_version: applicationVersion,
+          evaluator_version: "refund-window-v1",
+        },
+      });
+      console.log(await result.format());
+    }
+  } finally {
+    await otel.shutdown();
+  }
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
+```
+
+</Tab>
+</LangTabs>
+
+Open **Experiments** in Langfuse and select the two runs. The standard-refund case changes from pass to fail; the sale-item case changes from fail to pass. Both runs score 50%, which is why reviewing individual cases matters. Follow [Compare experiments](/docs/evaluation/experiments/compare-experiments) to inspect the differences.
+
+## Connect your application [#connect-your-application]
+
+Replace `answer_question` or `answerQuestion` with an import from your application. Pass the same inputs and configuration that the deployed application receives, including retrieved context or tool results when applicable. For a multi-stage application, return the fields your checks need and [trace the stages](/docs/observability/get-started) so you can inspect where a failure originated.
+
+Keep `grade` as ordinary application code. You can call it from your existing test runner and from the SDK evaluator. Add semantic evaluators only for requirements those checks cannot decide, such as whether a paraphrase is supported by retrieved context. See [RAG faithfulness evaluation](/resources/engineering/rag-faithfulness-evaluation) and [hallucination detection](/resources/engineering/hallucination-detection).
+
+### Evaluate saved outputs [#saved-outputs]
+
+To evaluate recorded answers without calling your application again, replace the task body with a lookup in your saved outputs, keyed by dataset item ID or `case_id`. Let missing outputs raise an error; do not substitute an empty answer. Record the original application version and mark the experiment metadata as `execution_mode: replay`.
+
+For example, save this as `saved-outputs.json`:
+
+```json title="saved-outputs.json"
+{
+  "standard": { "refund_days": 30 },
+  "sale": { "refund_days": 30 }
+}
+```
+
+Use the following task in place of the task in the example above. Keep the same dataset and evaluators, set the run name to identify the recorded version, and add `execution_mode: replay` to the run metadata.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python
+import json
+from pathlib import Path
+
+saved_outputs = json.loads(Path("saved-outputs.json").read_text())
+
+
+def replay_task(*, item, **kwargs):
+    return saved_outputs[item.metadata["case_id"]]
+```
+
+Pass `task=replay_task` to `dataset.run_experiment`.
+
+</Tab>
+<Tab>
+
+```typescript
+import { readFileSync } from "node:fs";
+import type { ExperimentTask } from "@langfuse/client";
+
+const savedOutputs = JSON.parse(readFileSync("saved-outputs.json", "utf8"));
+const replayTask: ExperimentTask = async (item) => {
+  const metadata = item.metadata as { case_id: string };
+  if (!Object.hasOwn(savedOutputs, metadata.case_id)) {
+    throw new Error(`Missing saved output: ${metadata.case_id}`);
+  }
+  return savedOutputs[metadata.case_id];
+};
+```
+
+Pass `task: replayTask` to `dataset.runExperiment`.
+
+</Tab>
+</LangTabs>
+
+This measures the quality of recorded outputs under the current graders. It does not validate a new prompt, model, or code change. For that, run the changed application on the same inputs. To score existing traces directly, use [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk).
+
+## Add a regression gate [#regression-gate]
+
+Choose a reviewed baseline, keep the dataset and evaluator versions fixed, and fail CI when a previously passing critical case fails. See [Compare against an approved baseline](/docs/evaluation/experiments/experiments-ci-cd#approved-baseline) for a gate that checks individual cases as well as aggregate scores.
+
+Hosted datasets are useful for sharing and versioning cases. You can also run [experiments on local data](/docs/evaluation/experiments/experiments-via-sdk). In Langfuse v4, these experiments appear in the same experiment list without requiring a hosted dataset.
