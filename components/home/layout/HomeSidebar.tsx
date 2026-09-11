@@ -1,5 +1,6 @@
 import { changelogSource } from "@/lib/source";
 import { getBlogIndexPages } from "@/lib/blog-index";
+import { parseCalendarDate } from "@/components/blog/utils";
 import { getGitHubStars } from "@/lib/github-stars";
 import { getLatestGitHubReleaseDate } from "@/lib/github-releases";
 import { LinkBox } from "@/components/ui/link-box";
@@ -128,27 +129,29 @@ function RecentArticleList({ items }: { items: RecentArticle[] }) {
 export async function HomeSidebar() {
   const changelogItems: RecentArticle[] = changelogSource
     .getPages()
-    .filter((p) => p.data.title && p.data.date)
-    .sort(
-      (a, b) =>
-        new Date(b.data.date as string).getTime() -
-        new Date(a.data.date as string).getTime(),
-    )
-    .slice(0, 3)
-    .map((p) => ({
-      route: p.url,
-      title: p.data.title as string,
-      date: new Date(p.data.date as string).toISOString(),
-    }));
+    .flatMap((p) => {
+      const parsed = parseCalendarDate(p.data.date as string | undefined);
+      if (!p.data.title || !parsed) return [];
+      return [
+        {
+          route: p.url,
+          title: p.data.title as string,
+          date: parsed.toISOString(),
+        },
+      ];
+    })
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 3);
 
   const blogItems: RecentArticle[] = getBlogIndexPages()
     .flatMap((p) => {
-      if (!p.title || !p.frontMatter?.date) return [];
+      const parsed = parseCalendarDate(p.frontMatter?.date);
+      if (!p.title || !parsed) return [];
       return [
         {
           route: p.route,
           title: p.title,
-          date: new Date(p.frontMatter.date).toISOString(),
+          date: parsed.toISOString(),
         },
       ];
     })
