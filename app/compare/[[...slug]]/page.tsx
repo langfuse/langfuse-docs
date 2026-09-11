@@ -5,6 +5,8 @@ import { loadPage, buildSectionMetadata } from "@/lib/mdx-page";
 import { getMDXComponents } from "@/mdx-components";
 import { DocBodyChrome } from "@/components/DocBodyChrome";
 import { MainContentWrapper } from "@/components/MainContentWrapper";
+import { PostArticleHeader } from "@/components/PostArticleHeader";
+import { compareCrumbs } from "@/lib/post-crumbs";
 import { ContentColumns } from "@/components/layout";
 
 type PageProps = {
@@ -20,7 +22,8 @@ export default async function ComparePage({ params }: PageProps) {
   return (
     <ContentColumns footerClassName="xl:max-w-[680px]">
       <div className="mx-auto w-full max-w-[680px] px-4 py-6 md:px-0">
-        <MainContentWrapper>
+        <MainContentWrapper showCopyButton={false}>
+          <PostArticleHeader items={compareCrumbs(slug)} />
           <DocBodyChrome showCopyButton={false}>
             <MDX components={getMDXComponents()} />
           </DocBodyChrome>
