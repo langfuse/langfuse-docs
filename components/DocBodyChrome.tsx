@@ -19,6 +19,8 @@ type Props = {
    * Used by wide/marketing sections (pricing, etc.).
    */
   withProse?: boolean;
+  /** Show the copy controls above the page content. */
+  showCopyButton?: boolean;
   /**
    * Optional version label (e.g. "Version: v3") shown next to the copy button.
    * Used by self-hosting pages.
@@ -36,10 +38,11 @@ export function DocBodyChrome({
   children,
   lang,
   withProse = true,
+  showCopyButton = true,
   versionLabel,
 }: Props) {
   const pathname = usePathname();
-  const isEnterprisePage = pathname === "/enterprise";
+  const isInFlowCopyButton = pathname === "/enterprise";
   const isCustomerStory = (pathname ?? "").startsWith("/users/");
   const cookbook = withProse
     ? COOKBOOK_ROUTE_MAPPING.find((c) => c.path === pathname)
@@ -52,20 +55,22 @@ export function DocBodyChrome({
   return (
     <DocsBody className="flex-1" lang={lang}>
       <div className="mx-auto w-full">
-        <div
-          className={
-            isEnterprisePage
-              ? "mb-4 flex w-full flex-wrap justify-end gap-2 items-center"
-              : "mb-4 flex flex-wrap gap-2 items-center sm:absolute sm:max-w-[15rem] sm:justify-end right-0 top-[-62px]"
-          }
-        >
-          {versionLabel != null && versionLabel !== "" && (
-            <span className="inline-flex items-center px-2 py-1 text-xs font-medium border bg-stripe-pattern text-text-secondary">
-              {versionLabel}
-            </span>
-          )}
-          <CopyMarkdownButton key={pathname} />
-        </div>
+        {(showCopyButton || versionLabel) && (
+          <div
+            className={
+              isInFlowCopyButton
+                ? "mb-4 flex w-full flex-wrap justify-end gap-2 items-center"
+                : "mb-4 flex flex-wrap gap-2 items-center sm:absolute sm:max-w-[15rem] sm:justify-end right-0 top-[-62px]"
+            }
+          >
+            {versionLabel != null && versionLabel !== "" && (
+              <span className="inline-flex items-center px-2 py-1 text-xs font-medium border bg-stripe-pattern text-text-secondary">
+                {versionLabel}
+              </span>
+            )}
+            {showCopyButton && <CopyMarkdownButton key={pathname} />}
+          </div>
+        )}
         {cookbook && (
           <NotebookBanner src={cookbook.ipynbPath} className="mb-4" />
         )}
