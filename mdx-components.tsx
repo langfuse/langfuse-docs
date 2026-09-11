@@ -1,5 +1,5 @@
 import defaultMdxComponents from "fumadocs-ui/mdx";
-import { TypeTable } from "fumadocs-ui/components/type-table";
+import { TypeTable } from "@/components/docs/type-table";
 import type { MDXComponents } from "mdx/types";
 import React from "react";
 import dynamic from "next/dynamic";

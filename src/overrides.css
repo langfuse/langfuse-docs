@@ -1291,3 +1291,279 @@ inkeep-portal .inkeep-widget-vars {
 .prose blockquote p:last-of-type::after {
   content: none;
 }
+
+/*
+ * Fumadocs TypeTable — Langfuse docs chrome
+ *
+ * Default (no query, or ?typetable=1): flat table, no radius.
+ * ?typetable=2 / html[data-typetable="2"]: CornerBox + stripe header.
+ * ?typetable=3 / html[data-typetable="3"]: always-visible descriptions.
+ */
+.lf-type-table {
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  background-color: var(--surface-bg) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--line-structure) !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  font-size: 0.813rem;
+}
+
+.lf-type-table.corner-box-corners::before {
+  display: none;
+}
+
+/* ── Variant 1 (default): flat table, matches markdown Table ─────────────── */
+.lf-type-table--accordion > :first-child {
+  background-color: var(--surface-1);
+  border-bottom: 1px solid var(--line-structure);
+  color: var(--text-tertiary) !important;
+  font-size: 0.813rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem !important;
+}
+
+.lf-type-table--accordion > [data-state] {
+  border-radius: 0 !important;
+  border: none !important;
+  border-bottom: 1px solid var(--line-structure) !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  margin: 0 !important;
+  overflow: hidden;
+}
+
+.lf-type-table--accordion > [data-state]:last-child {
+  border-bottom: none !important;
+}
+
+.lf-type-table--accordion > [data-state] > button {
+  padding: 0.5rem 1rem !important;
+  background-color: transparent;
+  border-radius: 0;
+}
+
+.lf-type-table--accordion > [data-state] > button:hover {
+  background-color: var(--surface-1);
+}
+
+.lf-type-table--accordion > [data-state] > button code {
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 0.813rem;
+  font-weight: 500;
+}
+
+.lf-type-table--accordion > [data-state] > button > span,
+.lf-type-table--accordion > [data-state] > button > a {
+  color: var(--text-secondary);
+  font-size: 0.813rem;
+}
+
+.lf-type-table--accordion > [data-state] > button svg {
+  color: var(--text-tertiary);
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.lf-type-table--accordion > [data-state] > [data-state] > div {
+  border-top-color: var(--line-structure) !important;
+  background-color: var(--surface-bg);
+  padding: 0.75rem 1rem !important;
+  color: var(--text-secondary);
+}
+
+/* ── Variant 2: Langfuse chrome (CornerBox + stripe header) ─────────────── */
+html[data-typetable="2"] .lf-type-table--accordion.corner-box-corners::before {
+  display: block;
+}
+
+html[data-typetable="2"] .lf-type-table--accordion > :first-child {
+  --stripe-mix: 20%;
+  --stripe-base: var(--color-surface-bg);
+  --stripe-line: var(--stripe-color, rgba(108, 103, 96, 0.1));
+  background: repeating-linear-gradient(
+    315deg,
+    var(--stripe-base),
+    var(--stripe-base) 2px,
+    var(--stripe-line) 4px,
+    var(--stripe-base) 4px
+  );
+  font-size: 0.75rem;
+  font-weight: 430;
+  letter-spacing: 0.01em;
+  padding-top: 0.375rem !important;
+  padding-bottom: 0.375rem !important;
+  min-height: 2.25rem;
+}
+
+html[data-typetable="2"] .lf-type-table--accordion > [data-state] > button {
+  font-size: 0.75rem;
+}
+
+html[data-typetable="2"]
+  .lf-type-table--accordion
+  > [data-state]
+  > button
+  code {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+html[data-typetable="2"]
+  .lf-type-table--accordion
+  > [data-state]
+  > button
+  > span,
+html[data-typetable="2"] .lf-type-table--accordion > [data-state] > button > a {
+  font-size: 0.75rem;
+  font-weight: 430;
+  color: var(--text-tertiary);
+}
+
+html[data-typetable="2"]
+  .lf-type-table--accordion
+  > [data-state="open"]
+  > button {
+  --stripe-mix: 20%;
+  --stripe-base: var(--color-surface-bg);
+  --stripe-line: var(--stripe-color, rgba(108, 103, 96, 0.1));
+  background: repeating-linear-gradient(
+    315deg,
+    var(--stripe-base),
+    var(--stripe-base) 2px,
+    var(--stripe-line) 4px,
+    var(--stripe-base) 4px
+  );
+  border-bottom: 1px solid var(--line-structure);
+}
+
+html[data-typetable="2"] .lf-type-table--accordion > [data-state] > button svg {
+  display: none;
+}
+
+html[data-typetable="2"]
+  .lf-type-table--accordion
+  > [data-state]
+  > button::after {
+  content: "+";
+  position: absolute;
+  right: 1rem;
+  width: 0.75rem;
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: 1;
+  color: var(--text-tertiary);
+}
+
+html[data-typetable="2"]
+  .lf-type-table--accordion
+  > [data-state="open"]
+  > button::after {
+  content: "−";
+  color: var(--text-primary);
+}
+
+@supports (color: color-mix(in lab, red, red)) {
+  html[data-typetable="2"] .lf-type-table--accordion > :first-child,
+  html[data-typetable="2"]
+    .lf-type-table--accordion
+    > [data-state="open"]
+    > button {
+    --stripe-line: color-mix(
+      in oklab,
+      var(--stripe-color, var(--color-fd-border)) var(--stripe-mix),
+      var(--stripe-base)
+    );
+  }
+}
+
+/* ── Variant 3: open rows (always-visible descriptions) ─────────────────── */
+.lf-type-table--open {
+  display: none;
+  flex-direction: column;
+}
+
+html[data-typetable="3"] .lf-type-table--accordion {
+  display: none;
+}
+
+html[data-typetable="3"] .lf-type-table--open {
+  display: flex;
+}
+
+.lf-type-table-open__head,
+.lf-type-table-open__meta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.lf-type-table-open__head {
+  background-color: var(--surface-1);
+  border-bottom: 1px solid var(--line-structure);
+  color: var(--text-tertiary);
+  font-size: 0.813rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+}
+
+.lf-type-table-open__head > span:first-child,
+.lf-type-table-open__meta > code {
+  width: 25%;
+  min-width: fit-content;
+}
+
+.lf-type-table-open__row {
+  border-bottom: 1px solid var(--line-structure);
+  padding: 0.625rem 1rem 0.75rem;
+}
+
+.lf-type-table-open__row:last-child {
+  border-bottom: none;
+}
+
+.lf-type-table-open__meta code {
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 0.813rem;
+  font-weight: 500;
+}
+
+.lf-type-table-open__deprecated {
+  text-decoration: line-through;
+  color: var(--text-tertiary);
+}
+
+.lf-type-table-open__meta > span,
+.lf-type-table-open__meta > a {
+  color: var(--text-secondary);
+}
+
+.lf-type-table-open__desc {
+  margin-top: 0.25rem;
+  padding-left: 0.75rem;
+  border-left: 1px solid var(--line-structure);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.lf-type-table-open__default {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.375rem;
+  color: var(--text-tertiary);
+  font-size: 0.75rem;
+}
+
+.lf-type-table-open__default > span:first-child {
+  width: 25%;
+  min-width: fit-content;
+}
