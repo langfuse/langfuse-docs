@@ -14,6 +14,10 @@ In Langfuse v4, **Experiments** is a project-level feature. Runs can use hosted 
 
 Open [Experiments](https://cloud.langfuse.com/project/~/experiments), select the runs to compare, and open the comparison view. Choose the reviewed release run as the baseline.
 
+<Frame fullWidth>
+  ![Three experiment runs selected in the Experiments table with the Compare button available](/images/docs/experiment-comparison-selection.png)
+</Frame>
+
 For a release decision, use the same dataset version and evaluator definitions for baseline and candidate. Record the application commit, prompt or model version, and evaluator version in experiment metadata. A dataset version fixes the test data; it does not make model outputs deterministic.
 
 You can compare runs from different data sources, but first check that the cases represent the same inputs and expected outputs. A missing case is not a passing case. For local data, preserve case identifiers in your test artifacts so your CI policy can match cases explicitly.
