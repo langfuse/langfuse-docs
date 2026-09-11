@@ -1,0 +1,191 @@
+---
+title: Capturing signals
+sidebarTitle: Capturing signals
+description: "Instrument your application so production usage produces quality judgments: explicit ratings, behavioral events, conversation signals, and task outcomes captured as scores on traces."
+---
+
+export const references = [
+  {
+    id: "rluf",
+    title: "Reinforcement learning from user feedback (Han et al., Meta)",
+    url: "https://arxiv.org/abs/2505.14946",
+  },
+  {
+    id: "park-alexa",
+    title: "A scalable framework for learning from implicit user feedback (Park et al., Amazon Alexa)",
+    url: "https://arxiv.org/abs/2010.12251",
+  },
+  {
+    id: "spur",
+    title: "Interpretable user satisfaction estimation for conversational systems with LLMs (Lin et al., Microsoft)",
+    url: "https://arxiv.org/abs/2403.12388",
+  },
+  {
+    id: "wildfeedback",
+    title: "WildFeedback: aligning LLMs with in-situ user interactions and feedback (Shi et al., Microsoft)",
+    url: "https://arxiv.org/abs/2408.15549",
+  },
+  {
+    id: "yan-patterns",
+    title: "Patterns for building LLM-based systems and products (Eugene Yan)",
+    url: "https://eugeneyan.com/writing/llm-patterns/",
+  },
+  {
+    id: "marlin-mar",
+    title: "Collaborative filtering and the missing at random assumption (Marlin et al.)",
+    url: "https://arxiv.org/abs/1206.5267",
+  },
+  {
+    id: "joachims-clicks",
+    title: "Accurately interpreting clickthrough data as implicit feedback (Joachims et al.)",
+    url: "https://www.cs.cornell.edu/~tj/publications/joachims_etal_05a.pdf",
+  },
+  {
+    id: "covington-youtube",
+    title: "Deep neural networks for YouTube recommendations (Covington et al.)",
+    url: "https://dl.acm.org/doi/10.1145/2959100.2959190",
+  },
+  {
+    id: "openai-sycophancy",
+    title: "Expanding on what we missed with sycophancy (OpenAI)",
+    url: "https://openai.com/index/expanding-on-sycophancy/",
+  },
+];
+
+# Capturing signals
+
+Once you have [traces](/academy/tracing), you will want to know whether what your agent did was good. You can either set up [online evaluators](/academy/evaluate) that measure specific aspects of a trace, or you can capture [signals of judgment from your users](/docs/observability/features/user-feedback).
+
+Unlike traditional online evaluation, capturing signals does not directly evaluate the quality of the agent's work. Instead, it captures things a user did or said that indicate the user perceives the agent's work as very good or very bad: a thumbs down, a retry, a request for a human, a draft sent unedited.
+
+<Callout type="info">
+**Signals measure perceived quality at the moment of use.** For example, a user can approve a hallucination they could not verify.
+</Callout>
+
+## Why this is important [#why-this-is-important]
+
+This is a **cheap and scalable way to get quality judgments on production traffic**, compared to other methods such as experts annotating traces (human time) or online LLM-as-a-judge evaluators (LLM cost). Your users judge every output anyway, through what they do next, so you just need to instrument your application to catch these signals.
+
+While through traditional evaluation you encode what you believe is important, user signals will also **surface behaviors you didn't anticipate but might be worth taking a look at**. This makes them especially valuable in staying on top of how users experience your agent's work.
+
+## Four kinds of signals [#four-kinds]
+
+Every signal falls into one of four kinds: explicit ratings, behavioral signals, conversation signals, and outcome signals.
+
+### Explicit ratings [#explicit-ratings]
+
+Explicit ratings are the only signals where the **user knowingly grades the output**, which makes them unambiguous, but also rare.
+
+| Explicit rating signal                                             |
+| ------------------------------------------------------------------ |
+| Thumbs up/down reactions                                           |
+| Star rating/CSAT question at the end of a conversation             |
+| Written comment attached to a rating                               |
+| Reason picker on thumbs down (wrong, unsafe, ignored instructions) |
+| Choice between two regenerated answers                             |
+| Report or flag button                                              |
+
+_In Meta's production assistant, about 0.1% of model messages receive a positive emoji reaction,<Ref refs={references} id="rluf" /> and the ratings that do arrive are [skewed toward users with strong reactions](#biases)._
+
+### Behavioral signals [#behavioral-signals]
+
+Behavioral signals are **actions users take on the output**: accepting, copying, editing, regenerating, skipping, abandoning. They occur inside the normal workflow, so coverage is high; on a copilot-style product, every suggestion produces one.
+
+| Behavioral signal                                  |
+| -------------------------------------------------- |
+| User regenerates a response                        |
+| User stops generation mid-stream                   |
+| User copies the response                           |
+| User clicks a cited source                         |
+| User switches model and retries                    |
+| Suggestion is accepted                             |
+| Suggestion is accepted, then undone within seconds |
+| Suggestion is dismissed by continuing to type      |
+| Draft is inserted into the document                |
+| Draft is discarded                                 |
+| AI feature is turned off while usage continues     |
+| User interrupts the agent mid-sentence             |
+
+### Conversation signals [#conversation-signals]
+
+In a conversational product, the **user's next message often tells you what they thought of the agent's output**: a rephrased question, a correction, a request for a human, or a thank you all say something about the quality of the output they received.
+
+<Callout type="info">
+Separate steering from correction. In the [music DJ example](/academy/examples/music-streaming-dj), "play something calmer" is normal use of the feature and "I said calmer" is a compliance failure; only the second belongs in failure counts.
+</Callout>
+
+| Conversation signal                                                         |
+| --------------------------------------------------------------------------- |
+| User rephrases the same question                                            |
+| User corrects the agent ("no, I meant the March invoice")                   |
+| User asks for a human                                                       |
+| User repeats an instruction the agent already received, or says "try again" |
+| User quotes an error back ("you said X, but...")                            |
+| User expresses frustration ("this is useless", "you are not listening")     |
+| User confirms success or thanks the agent                                   |
+
+_Amazon used rephrase and follow-up patterns to curate training data for Alexa's language understanding from live traffic.<Ref refs={references} id="park-alexa" /> Microsoft's SPUR goes a step further: an LLM learns satisfaction and dissatisfaction patterns from the small slice of thumbs-labeled conversations, condenses them into a rubric, and scores the unlabeled majority with it.<Ref refs={references} id="spur" />_
+
+### Outcome signals [#outcome-signals]
+
+Outcome signals tell you what the environment did with the output: a draft was sent unedited, a ticket was closed, etc. **They are the strongest kind because they are grounded in the environment rather than in someone's opinion.**
+
+| Outcome signal                                                                                         |
+| ------------------------------------------------------------------------------------------------------ |
+| Diff between a drafted reply and what was actually sent, classified as none, tone, corrected, or added |
+| Extracted field is corrected in a downstream approval step                                             |
+| Support ticket stays closed, or reopens within days                                                    |
+| Escalated conversation is resolved quickly by a human                                                  |
+| Accepted code is still present at commit time                                                          |
+| Agent's pull request is merged, closed, or reverted                                                    |
+
+## How to interpret signals [#how-to-interpret-signals]
+
+Once relevant signals are implemented, every trace sits in one of three groups: labeled negative, labeled positive, or unlabeled, with unlabeled being the large majority.
+
+| Group            | What to do with it                                                             |
+| ---------------- | ------------------------------------------------------------------------------ |
+| Labeled negative | Look at each trace individually to debug and decide if something needs fixing. |
+| Labeled positive | Focus on the trend instead of single events.                                   |
+| Unlabeled        | Treat this as missing data (don't do anything with it based on this).          |
+
+<Callout type="info">
+Which polarity is dense depends on the channel. Thumbs may skew positive while conversation signals tend to skew negative, for example.<Ref refs={references} id="spur" /><Ref refs={references} id="wildfeedback" />
+</Callout>
+
+**A negative is close to a confirmed bad experience.** Users rarely retry or correct an answer they liked. Each trace with a negative user signal is worth opening, and negatives are the natural entry points for [error analysis](/academy/monitoring/error-analysis).
+
+**A positive signal shows acceptance, but not necessarily quality.**<Ref refs={references} id="yan-patterns" /> Read positives as a trend, and never make one the [optimization target](#which-signal) on its own.
+
+### Who labels is not random [#biases]
+
+Often, you won't get a signal from the entire population of users, and there will be biases in labeled/unlabeled data groups. You can split these kinds of biases into:
+
+- **Self-selection.** People rate what they feel strongly about.
+  - When Yahoo! Music surveyed its listeners, 65% said their opinion of a song decides whether they rate it at all, and songs they loved or hated were rated far more often than songs they felt neutral about.<Ref refs={references} id="marlin-mar" />
+- **Survivorship.** All your signals are from users who stayed long enough to take the action you're tracking. Keep in mind that it's likely not the full set of users that started an interaction.
+- **Exposure and interface.** Users react only to what the system shows, in the form it is shown.
+  - For example, search users will keep clicking top-ranked results disproportionately regardless of whether they are the most relevant for their use case.<Ref refs={references} id="joachims-clicks" />
+- **Cohorts.** Signal rates vary across users, languages, and time of day without the quality of the output changing.
+
+### Which signal should you optimize for? [#which-signal]
+
+Prefer signals closest to what the product is for. Otherwise you might start optimizing for behavior you don't want.
+
+Two examples of this:
+
+- YouTube ranked recommendations by clicks and got clickbait; ranking by expected watch time fixed it, because watch time is closer to what the product is for.<Ref refs={references} id="covington-youtube" />
+- When OpenAI added a reward signal built from ChatGPT thumbs data, the model turned sycophantic: user feedback favored agreeable answers and weakened the signal that had been holding sycophancy in check, while offline evaluations and A/B tests looked fine and only expert testers noticed the model felt off.<Ref refs={references} id="openai-sycophancy" />
+
+## What comes next
+
+Once signals land as scores on your traces, put them to work in four places:
+
+- Set up [alerts](/docs/observability/features/alerts) on the signals that mark a bad experience, so that a spike in them reaches you right away.
+- Create filtered views of negatively labeled traces, so that you can go through them frequently.
+- Add graphs of signal rates to your [dashboards](/docs/metrics/features/custom-dashboards) to track how they develop over time.
+- When reviewing flagged traces, use them: run [error analysis](/academy/monitoring/error-analysis) on them and add them to [datasets](/academy/datasets).
+
+## References
+
+<FurtherReading numbered resources={references} />
