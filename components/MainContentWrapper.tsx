@@ -47,6 +47,7 @@ const pathsWithoutFooterWidgets = [
   "/workflow-automation",
   "/events",
   "/changelog",
+  "/resources",
   "/cn",
   "/community",
   "/cookie-policy",

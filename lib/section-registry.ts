@@ -130,7 +130,7 @@ export const docSections: Record<string, SectionMeta> = {
     source: resourcesSource,
     collection: "resources",
     title: "Resources",
-    layout: "docs",
+    layout: "post",
     hasOwnRoute: true,
   },
 };

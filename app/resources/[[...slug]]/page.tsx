@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { resourcesSource } from "@/lib/source";
-import { DocsChromePage } from "@/components/DocsChromePage";
-import { buildSectionMetadata } from "@/lib/mdx-page";
+import { loadPage, buildSectionMetadata } from "@/lib/mdx-page";
+import { getMDXComponents } from "@/mdx-components";
+import { DocBodyChrome } from "@/components/DocBodyChrome";
+import { MainContentWrapper } from "@/components/MainContentWrapper";
+import { ContentColumns } from "@/components/layout";
 
 type PageProps = {
   params: Promise<{ slug?: string[] }>;
@@ -10,9 +13,21 @@ type PageProps = {
 
 export default async function ResourcesPage({ params }: PageProps) {
   const { slug = [] } = await params;
-  const page = resourcesSource.getPage(slug);
-  if (!page) notFound();
-  return <DocsChromePage page={page} />;
+  const result = await loadPage(resourcesSource, slug);
+  if (!result) notFound();
+  const { MDX } = result;
+
+  return (
+    <ContentColumns footerClassName="xl:max-w-[680px]">
+      <div className="mx-auto w-full max-w-[680px] px-4 py-6 md:px-0">
+        <MainContentWrapper>
+          <DocBodyChrome showCopyButton={false}>
+            <MDX components={getMDXComponents()} />
+          </DocBodyChrome>
+        </MainContentWrapper>
+      </div>
+    </ContentColumns>
+  );
 }
 
 export async function generateMetadata({
