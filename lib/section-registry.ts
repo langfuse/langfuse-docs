@@ -14,6 +14,7 @@ import {
   academySource,
   workshopSource,
   resourcesSource,
+  compareSource,
   marketingSource,
 } from "@/lib/source";
 
@@ -130,6 +131,13 @@ export const docSections: Record<string, SectionMeta> = {
     source: resourcesSource,
     collection: "resources",
     title: "Resources",
+    layout: "post",
+    hasOwnRoute: true,
+  },
+  compare: {
+    source: compareSource,
+    collection: "compare",
+    title: "Compare",
     layout: "post",
     hasOwnRoute: true,
   },

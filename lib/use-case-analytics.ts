@@ -58,7 +58,7 @@ export function destinationGroup(url: URL, origin: string): DestinationGroup {
   if (/^\/integrations(?:\/|$)/.test(path)) return "integrations";
   if (/^\/users(?:\/|$)/.test(path)) return "stories";
   if (/^\/(docs|self-hosting)(?:\/|$)/.test(path)) return "docs";
-  if (/^\/(resources|guides|academy|blog)(?:\/|$)/.test(path))
+  if (/^\/(resources|guides|academy|blog|compare)(?:\/|$)/.test(path))
     return "resources";
   if (/^\/images\//.test(path)) return "image";
   return "other";

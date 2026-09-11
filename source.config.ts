@@ -216,6 +216,13 @@ export const resources = defineDocs({
   },
 });
 
+export const compare = defineDocs({
+  dir: "content/compare",
+  docs: {
+    schema: resourcesFrontmatterSchema,
+  },
+});
+
 export const marketing = defineDocs({
   dir: "content/marketing",
   docs: { schema: marketingFrontmatterSchema },

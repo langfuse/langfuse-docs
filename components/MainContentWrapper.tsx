@@ -48,6 +48,7 @@ const pathsWithoutFooterWidgets = [
   "/events",
   "/changelog",
   "/resources",
+  "/compare",
   "/cn",
   "/community",
   "/cookie-policy",
@@ -74,6 +75,7 @@ const pathsWithCopyAsMarkdownButton = [
   "/coding-agents",
   "/workflow-automation",
   "/resources",
+  "/compare",
   "/academy",
 ];
 const isCustomerStory = (pathname: string) => pathname.startsWith("/users/");

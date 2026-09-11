@@ -61,6 +61,11 @@ const SECTION_CONFIG = {
     heading: "Resources",
     subFileHeading: "Langfuse Resources",
   },
+  compare: {
+    file: "llms-compare.txt",
+    heading: "Compare",
+    subFileHeading: "Langfuse Compare",
+  },
   security: {
     file: "llms-security.txt",
     heading: "Security and compliance",
@@ -278,7 +283,7 @@ async function generateLLMsList() {
     markdownContent += `- [Enterprise license keys](https://langfuse.com/self-hosting/license-key.md): Activation and licensing for self-hosted add-on features.\n`;
     markdownContent += `- [Security](https://langfuse.com/security.md): Security controls, compliance, and supporting documentation.\n`;
     markdownContent += `- [Data regions](https://langfuse.com/security/data-regions.md): Hosting locations and regional availability.\n`;
-    markdownContent += `- Comparisons: [LangSmith](https://langfuse.com/resources/engineering/langsmith-alternative.md), [Braintrust](https://langfuse.com/resources/engineering/best-braintrustdata-alternatives.md), and [Arize / Phoenix](https://langfuse.com/resources/engineering/best-phoenix-arize-alternatives.md), with dated competitor sources.\n\n`;
+    markdownContent += `- Comparisons: [LangSmith](https://langfuse.com/compare/langsmith.md), [Braintrust](https://langfuse.com/compare/braintrust.md), [Arize / Phoenix](https://langfuse.com/compare/arize-phoenix.md), [Galileo](https://langfuse.com/compare/galileo.md), and [Datadog](https://langfuse.com/compare/datadog.md), with dated competitor sources.\n\n`;
 
     // Markdown access + search endpoint. Listed before the MCP server section
     // because these need no client setup: an agent with `curl` can use them
