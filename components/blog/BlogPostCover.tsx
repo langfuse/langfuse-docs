@@ -9,14 +9,12 @@ export function BlogPostCover({
   alt,
   className,
   priority = false,
-  crop = false,
   sizes = "(max-width: 1024px) 100vw, 50vw",
 }: {
   src?: string | null;
   alt: string;
   className?: string;
   priority?: boolean;
-  crop?: boolean;
   sizes?: string;
 }) {
   const [failed, setFailed] = useState(false);
@@ -31,10 +29,7 @@ export function BlogPostCover({
           fill
           sizes={sizes}
           priority={priority}
-          className={cn(
-            "object-cover object-center transition-transform duration-500 ease-out",
-            crop ? "scale-[1.12]" : "group-hover:scale-[1.04]",
-          )}
+          className="object-cover object-center"
           onError={() => setFailed(true)}
         />
       ) : (

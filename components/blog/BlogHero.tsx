@@ -111,11 +111,10 @@ export function BlogHero({ posts }: { posts: BlogPageItem[] }) {
                 ) : null}
               </div>
               {image ? (
-                <div className="relative z-0 mt-6 aspect-[16/10] overflow-hidden lg:hidden">
+                <div className="relative z-0 mt-6 aspect-[16/9] overflow-hidden lg:hidden">
                   <BlogPostCover
                     src={image}
                     alt=""
-                    crop
                     priority={active === 0}
                     className="h-full w-full"
                     sizes="(max-width: 1024px) 100vw, 280px"
@@ -138,11 +137,10 @@ export function BlogHero({ posts }: { posts: BlogPageItem[] }) {
 
         <div className="relative hidden min-w-0 flex-col justify-center border-l border-line-structure py-10 pr-4 pl-4 lg:flex">
           {image ? (
-            <div className="relative mb-6 aspect-[16/10] overflow-hidden">
+            <div className="relative mb-6 aspect-[16/9] overflow-hidden">
               <BlogPostCover
                 src={image}
                 alt=""
-                crop
                 priority={active === 0}
                 className="h-full w-full"
                 sizes="280px"
