@@ -1,6 +1,6 @@
 ---
 title: Data Retention
-description: Control Data Retention in Langfuse
+description: Configure project data retention and understand what happens to traces, audit logs, dataset items, experiment results, and media.
 sidebarTitle: Data Retention
 ---
 
@@ -18,10 +18,12 @@ sidebarTitle: Data Retention
 
 With Langfuse's Data Retention feature, you can control how long your event data (Traces, Observations, Scores, and Media Assets) is stored in Langfuse.
 
+**Project data retention does not delete audit logs or dataset items.** If you add a trace to a dataset, the saved dataset item remains usable after the original trace expires. Adding a trace to a dataset does not protect the trace from deletion.
+
 ## Configuration
 
 Data retention is configured on a project level, and we accept a number of days with a minimum of 3 days.
-Project owners and administrators can change the data retention setting within the Project Settings view.
+Project owners and administrators can change the setting in **Project Settings → Data Retention**.
 
 <Callout type="info">
   Without a retention policy, Langfuse does not automatically delete event data
@@ -39,7 +41,7 @@ Data retention can also be configured via the [projects API](/docs/administratio
 
 ## Details
 
-On a nightly basis, Langfuse selects traces, observations, scores, and media assets that are older than the configured retention period and deletes them.
+On a nightly basis, Langfuse selects traces, observations, scores, and media assets that are older than the configured retention period and deletes them, except for media associated with saved dataset items (see [Dataset media](#dataset-media)).
 We use the following properties per entity to decide whether they are outside the retention window:
 
 - **Traces**: `timestamp`
@@ -49,8 +51,36 @@ We use the following properties per entity to decide whether they are outside th
 
 Deleted assets cannot be recovered. If you need to preserve data beyond the retention window, you can set up a [Blob Storage Export](/docs/api-and-data-platform/features/export-to-blob-storage) to automatically sync traces, observations, and scores to S3, GCS, or Azure on a recurring schedule.
 
-The retention policy applies to the respective data, independent of any references.
-For example, if a dataset references a trace but the trace is e.g. deleted after 30 days, the dataset run item will point to a non-existent trace.
+## What does project retention delete? [#retention-scope]
+
+| Data                               | Effect of project retention                                                                             |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Traces, observations, and scores   | Deleted when they fall outside the retention window, including those linked to datasets or experiments. |
+| Audit logs                         | Unaffected by project retention.                                                                        |
+| Datasets and dataset items         | Unaffected. Saved input, expected output, and metadata remain available.                                |
+| Dataset runs and dataset run items | The records remain, but their linked experiment traces, observations, and scores can expire.            |
+| Media assets stored in Langfuse    | Deleted when they expire, unless associated with saved dataset items.                                   |
+
+### If I add a trace to a dataset, will the dataset item be deleted? [#dataset-items-and-source-traces]
+
+**No.** When you add a trace or observation to a [dataset](/docs/evaluation/experiments/datasets) from the trace view, Langfuse saves the selected input, expected output, and metadata as a separate dataset item. It also stores a reference to the source trace or observation.
+
+For example, with **30-day retention**, after the source trace falls outside the retention window and cleanup deletes it:
+
+- The dataset item and its saved data remain available for future experiments.
+- The source link points to a deleted trace. You can no longer inspect the original trace's spans, timing, or other details through that link.
+
+Adding an older trace to a dataset does not reset the trace's retention window.
+
+### What happens to experiment results? [#experiment-results]
+
+Traces, observations, and scores created by experiments follow the project's retention policy too. Dataset run and run-item records do not preserve this linked data: once it expires, the corresponding trace details and scores are no longer available, even though the experiment records remain.
+
+### Dataset media [#dataset-media]
+
+Langfuse-managed media associated with saved dataset items is excluded from retention deletion, including when the original trace expires. See [multi-modal dataset items](/docs/evaluation/experiments/datasets#multi-modal-dataset-items) for how to save media with a dataset item.
+
+External URLs are references to files hosted elsewhere. Saving an external URL in a dataset item does not copy the file into Langfuse or ensure that it remains available; its availability depends on the external host.
 
 ## Self-hosted Instances
 
