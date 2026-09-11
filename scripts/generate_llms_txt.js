@@ -260,7 +260,7 @@ async function generateLLMsList() {
     markdownContent += `> ${INTRO_DESCRIPTION}\n\n`;
 
     markdownContent += `## Evaluation workflows\n\n`;
-    markdownContent += `- [Test an existing application and reuse graders](https://langfuse.com/docs/evaluation/get-started/existing-application.md): Runnable Python and TypeScript examples.\n`;
+    markdownContent += `- [Test an existing application and reuse graders](https://langfuse.com/resources/engineering/evaluate-existing-application.md): Runnable Python and TypeScript examples.\n`;
     markdownContent += `- [Compare versions and inspect failures](https://langfuse.com/docs/evaluation/experiments/compare-experiments.md): Baselines, individual regressions, and human review.\n`;
     markdownContent += `- [Block regressions in CI](https://langfuse.com/docs/evaluation/experiments/experiments-ci-cd.md): Thresholds and approved-baseline checks.\n`;
     markdownContent += `- [Evaluate grounding](https://langfuse.com/resources/engineering/rag-faithfulness-evaluation.md) and [hallucinations](https://langfuse.com/resources/engineering/hallucination-detection.md).\n`;
