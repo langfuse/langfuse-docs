@@ -1,4 +1,5 @@
 import { changelogSource } from "@/lib/source";
+import { getBlogIndexPages } from "@/lib/blog-index";
 import { getGitHubStars } from "@/lib/github-stars";
 import { getLatestGitHubReleaseDate } from "@/lib/github-releases";
 import { LinkBox } from "@/components/ui/link-box";
@@ -58,18 +59,6 @@ const communityStats: Array<{
     tooltip: "Leave a Star ⭐",
   },
   {
-    label: "Observations / month",
-    value: "90B+",
-    href: "/docs/observability/overview",
-    tooltip: "Explore observability",
-  },
-  {
-    label: "Global adopters",
-    value: "100k+",
-    href: "/users#adopters",
-    tooltip: "View global adopters",
-  },
-  {
     label: "Community Q&A threads",
     value: formatCount(qaCount),
     href: "https://github.com/orgs/langfuse/discussions/categories/support",
@@ -89,15 +78,55 @@ const selfHostingLinks = [
     label: "Kubernetes (Helm)",
     href: "/self-hosting/deployment/kubernetes-helm",
   },
-  { label: "AWS (Terraform)", href: "/self-hosting/deployment/aws" },
-  { label: "GCP (Terraform)", href: "/self-hosting/deployment/gcp" },
-  { label: "Azure (Terraform)", href: "/self-hosting/deployment/azure" },
 ];
+
+const terraformLinks = [
+  { label: "AWS", href: "/self-hosting/deployment/aws" },
+  { label: "GCP", href: "/self-hosting/deployment/gcp" },
+  { label: "Azure", href: "/self-hosting/deployment/azure" },
+];
+
+type RecentArticle = {
+  route: string;
+  title: string;
+  date: string;
+};
+
+function RecentArticleList({ items }: { items: RecentArticle[] }) {
+  return (
+    <div className="flex flex-col gap-2">
+      {items.map((item) => (
+        <LinkBox
+          key={item.route}
+          href={item.route}
+          tooltip="Read article"
+          tooltipPlacement="bottom-right"
+          className="block px-2 w-full hover:bg-surface-bg"
+        >
+          <div className="flex flex-col gap-1.5">
+            <Text
+              size="s"
+              className="leading-snug text-left text-[13px] group-hover:text-text-primary"
+            >
+              {item.title}
+            </Text>
+            <Text
+              size="xs"
+              className="text-left no-underline group-hover:text-text-primary"
+            >
+              {formatRelativeDate(item.date)}
+            </Text>
+          </div>
+        </LinkBox>
+      ))}
+    </div>
+  );
+}
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export async function HomeSidebar() {
-  const changelogItems = changelogSource
+  const changelogItems: RecentArticle[] = changelogSource
     .getPages()
     .filter((p) => p.data.title && p.data.date)
     .sort(
@@ -111,6 +140,19 @@ export async function HomeSidebar() {
       title: p.data.title as string,
       date: new Date(p.data.date as string).toISOString(),
     }));
+
+  const blogItems: RecentArticle[] = getBlogIndexPages()
+    .flatMap((p) => {
+      if (!p.title || !p.frontMatter?.date) return [];
+      return [
+        {
+          route: p.route,
+          title: p.title,
+          date: new Date(p.frontMatter.date).toISOString(),
+        },
+      ];
+    })
+    .slice(0, 3);
 
   const latestReleaseDate =
     (await getLatestGitHubReleaseDate()) ?? changelogItems[0]?.date;
@@ -203,32 +245,7 @@ export async function HomeSidebar() {
                 </Text>
               </Link>
             </div>
-            <div className="flex flex-col gap-2">
-              {changelogItems.map((item) => (
-                <LinkBox
-                  key={item.route}
-                  href={item.route}
-                  tooltip="Read article"
-                  tooltipPlacement="bottom-right"
-                  className="block px-2 w-full hover:bg-surface-bg"
-                >
-                  <div className="flex flex-col gap-1.5">
-                    <Text
-                      size="s"
-                      className="leading-snug text-left text-[13px] group-hover:text-text-primary"
-                    >
-                      {item.title}
-                    </Text>
-                    <Text
-                      size="xs"
-                      className="text-left no-underline group-hover:text-text-primary"
-                    >
-                      {formatRelativeDate(item.date)}
-                    </Text>
-                  </div>
-                </LinkBox>
-              ))}
-            </div>
+            <RecentArticleList items={changelogItems} />
           </div>
         </div>
 
@@ -256,7 +273,51 @@ export async function HomeSidebar() {
                   </Text>
                 </LinkBox>
               ))}
+              <div className="px-2 py-1.25">
+                <Text
+                  size="s"
+                  className="text-left whitespace-nowrap text-text-tertiary text-[13px]"
+                >
+                  {"Terraform ("}
+                  {terraformLinks.map((link, index) => (
+                    <span key={link.href}>
+                      {index > 0 && ", "}
+                      <Link
+                        href={link.href}
+                        variant="text"
+                        className="text-[13px]"
+                      >
+                        {link.label}
+                      </Link>
+                    </span>
+                  ))}
+                  {")"}
+                </Text>
+              </div>
             </div>
+          </div>
+        </div>
+
+        {/* ── Blog Posts ────────────────────────────────────────────────── */}
+        <div className="pb-px bg-line-structure">
+          <div className="px-2 py-4 rounded-sm bg-surface-1">
+            <div className="flex justify-between items-center px-2 mb-3">
+              <Text
+                size="s"
+                className="font-[430] text-[13px] text-left text-text-primary"
+              >
+                Blog Posts
+              </Text>
+              <Link href="/blog">
+                <Text
+                  size="xs"
+                  className="transition-colors hover:text-text-primary"
+                >
+                  View All
+                </Text>
+              </Link>
+            </div>
+            <RecentArticleList items={blogItems} />
           </div>
         </div>
 
