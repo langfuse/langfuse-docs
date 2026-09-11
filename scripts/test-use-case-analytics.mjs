@@ -138,6 +138,43 @@ test("attribution rejects malformed values and expires after 30 minutes", () => 
   delete globalThis.sessionStorage;
 });
 
+function installBrowserTracker(sources) {
+  window.captures = [];
+  window.cleanups = [];
+  const modules = {};
+  const load = (source) => {
+    const module = { exports: {} };
+    new Function("require", "module", "exports", source)(
+      (name) => {
+        if (name === "./cloud-regions") return modules.regions;
+        if (name === "@/lib/use-case-analytics") return modules.analytics;
+        if (name === "react")
+          return {
+            useRef: () => ({ current: null }),
+            useEffect: (run) => window.cleanups.push(run()),
+          };
+        if (name === "next/navigation")
+          return { usePathname: () => window.location.pathname };
+        if (name === "posthog-js/react")
+          return {
+            usePostHog: () => ({
+              capture: (event, props) => window.captures.push({ event, props }),
+            }),
+          };
+        throw Error(name);
+      },
+      module,
+      module.exports,
+    );
+    return module.exports;
+  };
+  modules.regions = load(sources.regions);
+  modules.analytics = load(sources.analytics);
+  const tracker = load(sources.tracker);
+  tracker.UseCaseAnalytics({ ready: true });
+  window.interact = modules.analytics.dispatchUseCaseInteraction;
+}
+
 test("browser: exposure, hidden panels, fast clicks, modifier clicks, path switches, and cleanup", async () => {
   const fixture = `<!doctype html><style>body{margin:0}a{display:block;width:220px;height:45px;margin:4px}section{margin:8px}.invisible{visibility:hidden}</style>
     <nav><a id="nav" href="/cloud?utm_source=email#form">Start free</a></nav>
@@ -169,42 +206,8 @@ test("browser: exposure, hidden panels, fast clicks, modifier clicks, path switc
     await page.goto(
       "http://127.0.0.1:" + server.address().port + "/coding-agents",
     );
-    await page.evaluate((sources) => {
-      window.captures = [];
-      window.cleanups = [];
-      const modules = {};
-      const load = (source) => {
-        const module = { exports: {} };
-        new Function("require", "module", "exports", source)(
-          (name) => {
-            if (name === "./cloud-regions") return modules.regions;
-            if (name === "@/lib/use-case-analytics") return modules.analytics;
-            if (name === "react")
-              return {
-                useRef: () => ({ current: null }),
-                useEffect: (run) => window.cleanups.push(run()),
-              };
-            if (name === "next/navigation")
-              return { usePathname: () => window.location.pathname };
-            if (name === "posthog-js/react")
-              return {
-                usePostHog: () => ({
-                  capture: (event, props) =>
-                    window.captures.push({ event, props }),
-                }),
-              };
-            throw Error(name);
-          },
-          module,
-          module.exports,
-        );
-        return module.exports;
-      };
-      modules.regions = load(sources.regions);
-      modules.analytics = load(sources.analytics);
-      const tracker = load(sources.tracker);
-      tracker.UseCaseAnalytics({ ready: true });
-      window.interact = modules.analytics.dispatchUseCaseInteraction;
+    await page.evaluate(installBrowserTracker, sources);
+    await page.evaluate(() => {
       // Suppress only the fixture's navigations; the tracker runs in capture phase.
       document.addEventListener("click", (event) => event.preventDefault());
       document.addEventListener("auxclick", (event) => event.preventDefault());
@@ -215,7 +218,7 @@ test("browser: exposure, hidden panels, fast clicks, modifier clicks, path switc
           ctrlKey: true,
         }),
       );
-    }, sources);
+    });
     await page.waitForFunction(
       () =>
         window.captures.filter((x) => x.event === "use_case:action_viewed")
@@ -361,6 +364,93 @@ test("browser: exposure, hidden panels, fast clicks, modifier clicks, path switc
       await page.$eval("#hero", (a) => a.getAttribute("href")),
       "/next-route",
     );
+  } finally {
+    await browser.close();
+    await new Promise((resolve) => server.close(resolve));
+  }
+});
+
+test("browser: signup clicks and keyboard activation have one attributed navigation", async () => {
+  const fixture = `<!doctype html>
+    <nav><a id="signup" href="/cloud?utm_source=email#form">Start free</a></nav>
+    <main data-use-case="coding_agents" data-use-case-page="/coding-agents">
+      <div data-use-case-path="hooks"></div>
+    </main>`;
+  const server = createServer((_, res) => {
+    res.setHeader("Content-Type", "text/html");
+    res.end(fixture);
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const browser = await puppeteer.launch({ headless: true });
+  try {
+    for (const activation of ["click", "keyboard"]) {
+      const page = await browser.newPage();
+      await page.goto(
+        "http://127.0.0.1:" +
+          server.address().port +
+          "/coding-agents?path=hooks",
+      );
+      await page.evaluate(installBrowserTracker, sources);
+      await page.evaluate(() => {
+        // Model a custom button's unconditional client-side navigation to its
+        // original href, even after a capture listener prevents the default.
+        document.querySelector("#signup").addEventListener("click", (event) => {
+          event.preventDefault();
+          sessionStorage.setItem("competing_navigation", "true");
+          history.pushState(null, "", "/cloud");
+        });
+        // Other document-level capture listeners (e.g. ad conversions) must
+        // still receive the click when the tracker owns the navigation.
+        document.addEventListener(
+          "click",
+          () => {
+            sessionStorage.setItem("captures", JSON.stringify(window.captures));
+          },
+          true,
+        );
+      });
+      const navigations = [];
+      page.on("request", (request) => {
+        if (
+          request.isNavigationRequest() &&
+          request.frame() === page.mainFrame()
+        ) {
+          navigations.push(request.url());
+        }
+      });
+      const navigation = page.waitForNavigation();
+      if (activation === "keyboard") {
+        await page.focus("#signup");
+        await page.keyboard.press("Enter");
+      } else {
+        await page.click("#signup");
+      }
+      await navigation;
+      const result = await page.evaluate(() => ({
+        competingNavigation: sessionStorage.getItem("competing_navigation"),
+        captures: JSON.parse(sessionStorage.getItem("captures")),
+      }));
+      assert.equal(result.competingNavigation, null, activation);
+      assert.equal(navigations.length, 1, activation);
+      const destination = new URL(page.url());
+      assert.equal(destination.pathname, "/cloud");
+      assert.equal(destination.searchParams.get("utm_source"), "email");
+      assert.equal(
+        destination.searchParams.get("lf_use_case"),
+        "coding_agents",
+      );
+      assert.equal(destination.searchParams.get("lf_section"), "navigation");
+      assert.equal(destination.searchParams.get("lf_action"), "start_free");
+      assert.equal(destination.searchParams.get("lf_setup_path"), "hooks");
+      assert.equal(destination.hash, "#form");
+      assert.equal(
+        result.captures.filter(
+          (event) => event.event === "use_case:action_clicked",
+        ).length,
+        1,
+      );
+      await page.close();
+    }
   } finally {
     await browser.close();
     await new Promise((resolve) => server.close(resolve));

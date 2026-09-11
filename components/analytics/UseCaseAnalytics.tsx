@@ -245,7 +245,8 @@ export function UseCaseAnalytics({ ready }: { ready: boolean }) {
           props,
         );
         decoratedHrefs.set(link, link.getAttribute("href")!);
-        // Next Link otherwise navigates to its original prop, losing the tags.
+        // Own this navigation: Next Link and custom button handlers can still
+        // navigate to their original props after preventDefault(), losing tags.
         if (
           !event.defaultPrevented &&
           event.button === 0 &&
@@ -256,6 +257,7 @@ export function UseCaseAnalytics({ ready }: { ready: boolean }) {
           (!link.target || link.target === "_self")
         ) {
           event.preventDefault();
+          event.stopPropagation();
           window.location.assign(link.href);
         }
       }
