@@ -28,6 +28,28 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
   date="August 31, 2026"
 />
 
+## Summary [#summary]
+
+<ImpactChart
+  items={[
+    {
+      area: "AI assistant at banking scale",
+      impact:
+        "DKB's in-app assistant serves around 6 million customers and handles 10,000 to 20,000 conversations a day.",
+    },
+    {
+      area: "Trace, screen, and review",
+      impact:
+        "Langfuse traces every interaction, automatically screens answers for compliance and quality, and routes anything flagged to banking specialists.",
+    },
+    {
+      area: "Shared space for two kinds of expertise",
+      impact:
+        "Engineers and customer service experts work together in Langfuse to keep the assistant accurate, compliant, and trustworthy.",
+    },
+  ]}
+/>
+
 ## About DKB
 
 [DKB](https://www.dkb.de/) (Deutsche Kreditbank) is one of Germany's largest direct banks. For the roughly 6 million customers who rely on DKB, the first point of contact is increasingly the bank's AI assistant, which is available 24/7 through the DKB app.
@@ -113,33 +135,6 @@ A year in, Langfuse has become the place where DKB turns a high-volume AI assist
   name="David Hinrichs"
   role="Senior Machine Learning Scientist"
   company="DKB"
-/>
-
-## Business impact
-
-<ImpactChart
-  items={[
-    {
-      area: "Observability at banking scale",
-      impact:
-        "Every interaction of an assistant that handles 10,000 to 20,000 conversations a day is traced, so DKB can tell a one-off miss from a pattern.",
-    },
-    {
-      area: "Automated compliance screening",
-      impact:
-        "An LLM-as-a-judge scores every answer for compliance, grounding, and customer satisfaction, and writes the results back as tags and scores.",
-    },
-    {
-      area: "Shared workspace for two kinds of expertise",
-      impact:
-        "Engineers and customer service specialists work in the same traces, annotation queues, and datasets, so domain experts can steer what the assistant learns next.",
-    },
-    {
-      area: "License to operate",
-      impact:
-        "Traceable screening is part of how DKB meets audit requirements for agentic systems. Without it, the bank would have to stop agent activity.",
-    },
-  ]}
 />
 
 <CustomerStoryCTA />
