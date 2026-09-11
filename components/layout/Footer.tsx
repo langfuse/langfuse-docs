@@ -40,6 +40,7 @@ const menuItems: {
       { name: "Evaluations", href: "/docs/evaluation/overview" },
       { name: "Metrics", href: "/docs/metrics/overview" },
       { name: "Langfuse for Agents", href: "/agents" },
+      { name: "Chat agents", href: "/chat-agents" },
       { name: "Coding agents", href: "/coding-agents" },
       { name: "Workflow automation", href: "/workflow-automation" },
       {
