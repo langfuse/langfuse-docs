@@ -105,7 +105,7 @@ jobs:
       - pre-job
     if: needs.pre-job.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     env:
       GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -120,13 +120,14 @@ jobs:
           cache: true
           require-lockfile: true
 
-      - name: Run link checker unit tests
-        run: node --test scripts/check-links.test.js
+      - name: Run link and sitemap checker unit tests
+        run: pnpm run test:link-check
 
       - name: Build next.js app
         run: pnpm build
 
       - name: Start production server
+        id: server
         run: |
           pnpm start &
           echo "SERVER_PID=$!" >> "$GITHUB_ENV"
@@ -135,48 +136,28 @@ jobs:
       - name: Check markdown and source links
         run: pnpm link-check
 
-      - name: Stop production server
-        if: always()
-        run: kill "$SERVER_PID" || true
-
-  check-sitemap-links:
-    needs:
-      - pre-job
-    if: needs.pre-job.outputs.should_skip != 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    env:
-      GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
-        id: pnpm-install
-        with:
-          runtime: node@22
-          cache: true
-          require-lockfile: true
-
-      - name: Run sitemap checker unit tests
-        run: node --test scripts/check-sitemap-links.test.js
-
-      - name: Build next.js app
-        run: pnpm build
-
-      - name: Start production server
-        run: |
-          pnpm start &
-          echo "SERVER_PID=$!" >> "$GITHUB_ENV"
-          timeout 30 bash -c 'until curl -sf http://127.0.0.1:3333 > /dev/null; do sleep 1; done'
-
+      # Run even if the preceding link check failed, but only with a ready server.
       - name: Check sitemap URLs
+        if: ${{ !cancelled() && steps.server.outcome == 'success' }}
         run: pnpm sitemap-check
 
       - name: Stop production server
         if: always()
         run: kill "$SERVER_PID" || true
+
+  # Preserve the existing required check name; both suites run in the job above.
+  check-sitemap-links:
+    needs:
+      - pre-job
+      - build-and-check-links
+    if: ${{ !cancelled() && needs.pre-job.outputs.should_skip != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify shared build and checks passed
+        env:
+          RESULT: ${{ needs.build-and-check-links.result }}
+        run: test "$RESULT" = success
 
   # Summary job that depends on all other jobs
   # This allows you to require only this single check in branch protection rules
@@ -193,10 +174,10 @@ jobs:
     if: always()
     steps:
       - name: Successful CI
-        if: ${{ !(contains(needs.*.result, 'failure')) }}
+        if: ${{ !(contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
         run: exit 0
         working-directory: .
       - name: Failing CI
-        if: ${{ contains(needs.*.result, 'failure') }}
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
         run: exit 1
         working-directory: .
