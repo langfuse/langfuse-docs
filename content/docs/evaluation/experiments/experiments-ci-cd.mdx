@@ -357,6 +357,173 @@ If your experiment needs provider keys or other secrets, set them as environment
 
 Your experiment can read these values from `os.environ[...]` in Python or `process.env...` in TypeScript and JavaScript. See the [`langfuse/experiment-action` README](https://github.com/langfuse/experiment-action/blob/main/README.md#how-do-i-pass-extra-secrets-openai-keys-etc-to-my-experiment) for details.
 
+## Compare against an approved baseline [#approved-baseline]
+
+An aggregate threshold can miss a newly failing case. For example, a candidate that fixes two cases and breaks one has a higher average score, but the broken case may be a release blocker.
+
+Keep a reviewed baseline artifact in your repository. Generate it from a complete run, review its outputs in [Compare experiments](/docs/evaluation/experiments/compare-experiments), and approve changes through your normal code review. Store the dataset version, evaluator version, source run identity, and a pass/fail verdict for every case. Never generate the approved artifact automatically from the candidate being tested.
+
+```json title="experiments/approved-baseline.json"
+{
+  "run": "reviewed-release-run-id",
+  "dataset_version": "2026-07-01T00:00:00Z",
+  "evaluator_version": "refund-window-v1",
+  "cases": { "standard": true, "sale": false }
+}
+```
+
+The following helpers use the `case_id` metadata and `refund_window` evaluator from [Evaluate an existing application](/resources/engineering/evaluate-existing-application). Replace the example timestamp and run ID with those from your reviewed run. Use the same timestamp to load the dataset for the candidate. Pass that timestamp to the helper after running the experiment; this checks that the gate is using the approved configuration.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python title="experiments/baseline_gate.py"
+import json
+from datetime import datetime
+from pathlib import Path
+
+from langfuse import RegressionError
+
+EVALUATOR_VERSION = "refund-window-v1"
+
+
+def parse_version(value: str | datetime) -> datetime:
+    parsed = (
+        datetime.fromisoformat(value.replace("Z", "+00:00"))
+        if isinstance(value, str)
+        else value
+    )
+    if parsed.utcoffset() is None:
+        raise ValueError("Dataset version must include a timezone")
+    return parsed
+
+
+def check_approved_baseline(result, *, dataset_version: str | datetime):
+    baseline = json.loads(Path("experiments/approved-baseline.json").read_text())
+    if (
+        parse_version(baseline["dataset_version"])
+        != parse_version(dataset_version)
+        or baseline["evaluator_version"] != EVALUATOR_VERSION
+    ):
+        raise ValueError(
+            "Dataset or evaluator version differs from the approved baseline"
+        )
+    approved = baseline["cases"]
+    if not approved or any(type(value) is not bool for value in approved.values()):
+        raise ValueError("Baseline must contain reviewed boolean verdicts")
+
+    current = {}
+    for row in result.item_results:
+        item = row.item
+        metadata = item.get("metadata") if isinstance(item, dict) else item.metadata
+        case_id = (metadata or {}).get("case_id")
+        scores = [e.value for e in row.evaluations if e.name == "refund_window"]
+        if (
+            not isinstance(case_id, str)
+            or case_id in current
+            or len(scores) != 1
+            or scores[0] not in (0, 1)
+        ):
+            raise ValueError("Incomplete, duplicate, or invalid case result")
+        current[case_id] = scores[0] == 1
+    if current.keys() != approved.keys():
+        raise ValueError("Candidate and baseline contain different cases")
+
+    regressions = [
+        case_id for case_id in approved if approved[case_id] and not current[case_id]
+    ]
+    if regressions:
+        print("Newly failing cases:", ", ".join(regressions))
+        raise RegressionError(
+            result=result,
+            metric="newly_failing_cases",
+            value=float(len(regressions)),
+            threshold=0.0,
+        )
+```
+
+Call `check_approved_baseline(result, dataset_version=version)` from your experiment entry point before returning `result`. Here, `version` is the timezone-aware `datetime` or ISO timestamp used to fetch the candidate dataset. Increment `EVALUATOR_VERSION` whenever the grader changes and review a new baseline before using it.
+
+</Tab>
+<Tab>
+
+```typescript title="experiments/baseline-gate.ts"
+import { readFileSync } from "node:fs";
+import { RegressionError, type ExperimentResult } from "@langfuse/client";
+
+const EVALUATOR_VERSION = "refund-window-v1";
+
+export function checkApprovedBaseline(
+  result: ExperimentResult,
+  datasetVersion: string,
+) {
+  const baseline = JSON.parse(
+    readFileSync("experiments/approved-baseline.json", "utf8"),
+  );
+  if (
+    !Number.isFinite(Date.parse(datasetVersion)) ||
+    Date.parse(baseline.dataset_version) !== Date.parse(datasetVersion) ||
+    baseline.evaluator_version !== EVALUATOR_VERSION
+  ) {
+    throw new Error(
+      "Dataset or evaluator version differs from the approved baseline",
+    );
+  }
+  const approved = baseline.cases as Record<string, boolean>;
+  if (
+    !approved ||
+    Object.keys(approved).length === 0 ||
+    Object.values(approved).some((value) => typeof value !== "boolean")
+  ) {
+    throw new Error("Baseline must contain reviewed boolean verdicts");
+  }
+
+  const current = new Map<string, boolean>();
+  for (const row of result.itemResults) {
+    const metadata = row.item.metadata as { case_id?: unknown } | undefined;
+    const caseId = metadata?.case_id;
+    const scores = row.evaluations.filter((e) => e.name === "refund_window");
+    if (
+      typeof caseId !== "string" ||
+      current.has(caseId) ||
+      scores.length !== 1 ||
+      (scores[0].value !== 0 && scores[0].value !== 1)
+    ) {
+      throw new Error("Incomplete, duplicate, or invalid case result");
+    }
+    current.set(caseId, scores[0].value === 1);
+  }
+  if (
+    current.size !== Object.keys(approved).length ||
+    Object.keys(approved).some((id) => !current.has(id))
+  ) {
+    throw new Error("Candidate and baseline contain different cases");
+  }
+
+  const regressions = Object.keys(approved).filter(
+    (id) => approved[id] && !current.get(id),
+  );
+  if (regressions.length) {
+    console.error("Newly failing cases:", regressions.join(", "));
+    throw new RegressionError({
+      result,
+      metric: "newly_failing_cases",
+      value: regressions.length,
+      threshold: 0,
+    });
+  }
+}
+```
+
+Call `checkApprovedBaseline(result, version)` from your experiment entry point before returning `result`. Here, `version` is the ISO timestamp used to fetch the candidate dataset. Increment `EVALUATOR_VERSION` whenever the grader changes and review a new baseline before using it.
+
+</Tab>
+</LangTabs>
+
+This example treats every previously passing case as protected. If only a subset is release-critical, store that reviewed subset explicitly in the baseline policy. Keep aggregate thresholds as an additional check.
+
+Missing evaluations, duplicate identifiers, and changed case sets raise script errors; newly failing cases raise `RegressionError`. Keep both `should_fail_on_script_error` and `should_fail_on_regression` enabled. A failed evaluator must not silently disappear from the denominator and make a run look better.
+
 ## Other CI/CD systems [#other-cicd-systems]
 
 Integrate the experiment runner with testing frameworks like Pytest and Vitest to run automated evaluations in your CI pipeline. Use evaluators to create assertions that fail tests based on experiment results.

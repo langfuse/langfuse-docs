@@ -82,10 +82,10 @@ Two core capabilities: **programmatic API access** via the Langfuse CLI, and **d
 
 ## 1. Langfuse API via CLI
 
-Use the `langfuse-cli` to interact with the full Langfuse REST API from the command line. Run via npx (no install required):
+Use the `@langfuse/cli` package to interact with the full Langfuse REST API from the command line. Run via npx (no install required):
 
 ```bash
-npx langfuse-cli api <resource> <action>
+npx @langfuse/cli api <resource> <action>
 ```
 
 ### Quickstart
@@ -197,7 +197,7 @@ Check the project:
 
 Agents often work in terminal environments and Langfuse has APIs for all core features. How can we help Agents interact with Langfuse without writing HTTP requests manually?
 
-We built [`langfuse-cli`](https://github.com/langfuse/langfuse-cli), a command-line interface that wraps the entire Langfuse API, auto-generated from our OpenAPI spec with some modifications.
+We built [`@langfuse/cli`](https://github.com/langfuse/langfuse-cli), a command-line interface that wraps the entire Langfuse API, auto-generated from our OpenAPI spec with some modifications.
 
 It's a CLI tool built on [specli](https://github.com/vercel-labs/specli) that generates commands directly from the OpenAPI specification. Every API endpoint becomes a CLI command with proper flags, validation, and help text (that again helps with progressive disclosure).
 
@@ -214,10 +214,10 @@ In the main Langfuse Skill (see above) we include a reference that teaches AI ag
 ## Install
 
 ```bash
-npx langfuse-cli api <resource> <action>   ## Run directly (recommended)
-bunx langfuse-cli api <resource> <action>
+npx @langfuse/cli api <resource> <action>   ## Run directly (recommended)
+bunx @langfuse/cli api <resource> <action>
 
-npm i -g langfuse-cli                      ## Or install globally
+npm i -g @langfuse/cli                      ## Or install globally
 langfuse api <resource> <action>
 ```
 
@@ -483,7 +483,7 @@ Try it out and let us know what you think. And if you build something cool with 
 ## Resources
 
 - [Agent Skills Repository](https://github.com/langfuse/skills)
-- [Langfuse CLI on npm](https://www.npmjs.com/package/langfuse-cli)
+- [Langfuse CLI on npm](https://www.npmjs.com/package/@langfuse/cli)
 - [Langfuse MCP Reference](https://mcp.reference.langfuse.com)
 - [Langfuse Docs MCP Server](https://langfuse.com/docs/docs-mcp)
 - [Langfuse Authenticated MCP Server](/docs/api-and-data-platform/features/mcp-server)

@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
 import { reportTalkToUsConversion } from "@/lib/ad-conversions";
+import posthog from "posthog-js";
+import { readUseCaseAttribution } from "@/lib/use-case-analytics";
 
 const MARKETO_BASE_URL = "https://discover.clickhouse.com";
 const MARKETO_MUNCHKIN_ID = "238-FPC-317";
@@ -48,6 +50,7 @@ export function MarketoContactForm() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [hasError, setHasError] = useState(false);
   const formLoadedRef = useRef(false);
+  const conversionReportedRef = useRef(false);
 
   const loadMarketoForm = useCallback(() => {
     if (formLoadedRef.current || !window.MktoForms2) {
@@ -71,6 +74,17 @@ export function MarketoContactForm() {
         setIsFormLoaded(true);
 
         form.onSuccess(() => {
+          if (conversionReportedRef.current) return false;
+          conversionReportedRef.current = true;
+          const attribution = readUseCaseAttribution();
+          try {
+            posthog.capture("sales:inquiry_completed", {
+              form_id: MARKETO_FORM_ID,
+              ...(attribution ?? {}),
+            });
+          } catch {
+            // Analytics must not prevent showing a successful submission.
+          }
           reportTalkToUsConversion();
           setIsSuccess(true);
 
