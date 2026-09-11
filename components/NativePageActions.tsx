@@ -35,12 +35,21 @@ function getMarkdownUrl(pathname: string): string {
   return `/${basePath}.md`;
 }
 
+function hostnameIs(hostname: string, domain: string): boolean {
+  return hostname === domain || hostname.endsWith(`.${domain}`);
+}
+
 function captureTypeFromAnchor(
   href: string,
 ): "chatgpt" | "claude" | "mcp" | undefined {
-  if (href.includes("chatgpt.com")) return "chatgpt";
-  if (href.includes("claude.ai")) return "claude";
-  if (href.includes("/docs/docs-mcp")) return "mcp";
+  try {
+    const url = new URL(href, window.location.origin);
+    if (hostnameIs(url.hostname, "chatgpt.com")) return "chatgpt";
+    if (hostnameIs(url.hostname, "claude.ai")) return "claude";
+    if (url.pathname.endsWith("/docs/docs-mcp")) return "mcp";
+  } catch {
+    return undefined;
+  }
   return undefined;
 }
 
