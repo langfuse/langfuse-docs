@@ -59,39 +59,118 @@ direction LR
 
 #### Dataset object [#dataset-object]
 
-| Attribute                 | Type   | Required | Description                                 |
-| ------------------------- | ------ | -------- | ------------------------------------------- |
-| `id`                      | string | Yes      | Unique identifier for the dataset           |
-| `name`                    | string | Yes      | Name of the dataset                         |
-| `description`             | string | No       | Description of the dataset                  |
-| `metadata`                | object | No       | Additional metadata for the dataset         |
-| `remoteExperimentUrl`     | string | No       | Webhook endpoint for triggering experiments |
-| `remoteExperimentPayload` | object | No       | Payload for triggering experiments          |
+<TypeTable
+  type={{
+    id: {
+      type: "string",
+      required: true,
+      description: "Unique identifier for the dataset",
+    },
+    name: {
+      type: "string",
+      required: true,
+      description: "Name of the dataset",
+    },
+    description: {
+      type: "string",
+      description: "Description of the dataset",
+    },
+    metadata: {
+      type: "object",
+      description: "Additional metadata for the dataset",
+    },
+    remoteExperimentUrl: {
+      type: "string",
+      description: "Webhook endpoint for triggering experiments",
+    },
+    remoteExperimentPayload: {
+      type: "object",
+      description: "Payload for triggering experiments",
+    },
+  }}
+/>
 
 #### DatasetItem object [#datasetitem-object]
 
-| Attribute             | Type          | Required | Description                                                                                                                                                          |
-| --------------------- | ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                  | string        | Yes      | Unique identifier for the dataset item. Dataset items are upserted on their id. Id needs to be unique (project-level) and cannot be reused across datasets.          |
-| `datasetId`           | string        | Yes      | ID of the dataset this item belongs to                                                                                                                               |
-| `input`               | object        | No       | Input data for the dataset item                                                                                                                                      |
-| `expectedOutput`      | object        | No       | Expected output data for the dataset item                                                                                                                            |
-| `metadata`            | object        | No       | Additional metadata for the dataset item                                                                                                                             |
-| `mediaReferences`     | object[]      | No       | Resolved media references found in `input`, `expectedOutput`, and `metadata`. Included on SDK dataset fetches and API responses that include resolved dataset media. |
-| `sourceTraceId`       | string        | No       | ID of the source trace to link this dataset item to                                                                                                                  |
-| `sourceObservationId` | string        | No       | ID of the source observation to link this dataset item to                                                                                                            |
-| `status`              | DatasetStatus | No       | Status of the dataset item. Defaults to ACTIVE for newly created items. Possible values: `ACTIVE`, `ARCHIVED`                                                        |
+<TypeTable
+  type={{
+    id: {
+      type: "string",
+      required: true,
+      description:
+        "Unique identifier for the dataset item. Dataset items are upserted on their id. Id needs to be unique (project-level) and cannot be reused across datasets.",
+    },
+    datasetId: {
+      type: "string",
+      required: true,
+      description: "ID of the dataset this item belongs to",
+    },
+    input: {
+      type: "object",
+      description: "Input data for the dataset item",
+    },
+    expectedOutput: {
+      type: "object",
+      description: "Expected output data for the dataset item",
+    },
+    metadata: {
+      type: "object",
+      description: "Additional metadata for the dataset item",
+    },
+    mediaReferences: {
+      type: "object[]",
+      description:
+        "Resolved media references found in input, expectedOutput, and metadata. Included on SDK dataset fetches and API responses that include resolved dataset media.",
+    },
+    sourceTraceId: {
+      type: "string",
+      description: "ID of the source trace to link this dataset item to",
+    },
+    sourceObservationId: {
+      type: "string",
+      description: "ID of the source observation to link this dataset item to",
+    },
+    status: {
+      type: "DatasetStatus",
+      default: "ACTIVE",
+      description:
+        "Status of the dataset item. Defaults to ACTIVE for newly created items. Possible values: ACTIVE, ARCHIVED",
+    },
+  }}
+/>
 
 #### DatasetItemMediaReference object [#datasetitemmediareference-object]
 
 Dataset item media references point from a stored media token in `input`, `expectedOutput`, or `metadata` to a signed media download URL.
 
-| Attribute         | Type   | Required       | Description                                                                                                                                 |
-| ----------------- | ------ | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `field`           | string | Yes            | Field enum for the dataset item property containing the reference. One of `input`, `expected_output` (for `expectedOutput`), or `metadata`. |
-| `referenceString` | string | Yes            | Original Langfuse media reference string stored in the dataset item.                                                                        |
-| `jsonPath`        | string | Yes            | JSONPath of the string holding the reference inside the field, for example `$['image']`.                                                    |
-| `media`           | object | Yes (nullable) | Resolved media metadata. `null` if the referenced media does not exist or has not been uploaded successfully.                               |
+<TypeTable
+  type={{
+    field: {
+      type: "string",
+      required: true,
+      description:
+        "Field enum for the dataset item property containing the reference. One of input, expected_output (for expectedOutput), or metadata.",
+    },
+    referenceString: {
+      type: "string",
+      required: true,
+      description:
+        "Original Langfuse media reference string stored in the dataset item.",
+    },
+    jsonPath: {
+      type: "string",
+      required: true,
+      description:
+        "JSONPath of the string holding the reference inside the field, for example $['image'].",
+    },
+    media: {
+      type: "object | null",
+      required: true,
+      description:
+        "Resolved media metadata. null if the referenced media does not exist or has not been uploaded successfully.",
+    },
+  }}
+/>
 
 The nested `media` object contains `mediaId`, `contentType`, `contentLength`, `url`, and `urlExpiry`. The `url` is a signed download URL and should be used before its expiration date. To refresh the signed URL, refetch the dataset.
 
@@ -125,23 +204,64 @@ direction LR
 
 #### DatasetRun object [#datasetrun-object]
 
-| Attribute     | Type   | Required | Description                             |
-| ------------- | ------ | -------- | --------------------------------------- |
-| `id`          | string | Yes      | Unique identifier for the dataset run   |
-| `name`        | string | Yes      | Name of the dataset run                 |
-| `description` | string | No       | Description of the dataset run          |
-| `metadata`    | object | No       | Additional metadata for the dataset run |
-| `datasetId`   | string | Yes      | ID of the dataset this run belongs to   |
+<TypeTable
+  type={{
+    id: {
+      type: "string",
+      required: true,
+      description: "Unique identifier for the dataset run",
+    },
+    name: {
+      type: "string",
+      required: true,
+      description: "Name of the dataset run",
+    },
+    description: {
+      type: "string",
+      description: "Description of the dataset run",
+    },
+    metadata: {
+      type: "object",
+      description: "Additional metadata for the dataset run",
+    },
+    datasetId: {
+      type: "string",
+      required: true,
+      description: "ID of the dataset this run belongs to",
+    },
+  }}
+/>
 
 #### DatasetRunItem object [#datasetrunitem-object]
 
-| Attribute       | Type   | Required | Description                                |
-| --------------- | ------ | -------- | ------------------------------------------ |
-| `id`            | string | Yes      | Unique identifier for the dataset run item |
-| `datasetRunId`  | string | Yes      | ID of the dataset run this item belongs to |
-| `datasetItemId` | string | Yes      | ID of the dataset item to link to this run |
-| `traceId`       | string | Yes      | ID of the trace to link to this run        |
-| `observationId` | string | No       | ID of the observation to link to this run  |
+<TypeTable
+  type={{
+    id: {
+      type: "string",
+      required: true,
+      description: "Unique identifier for the dataset run item",
+    },
+    datasetRunId: {
+      type: "string",
+      required: true,
+      description: "ID of the dataset run this item belongs to",
+    },
+    datasetItemId: {
+      type: "string",
+      required: true,
+      description: "ID of the dataset item to link to this run",
+    },
+    traceId: {
+      type: "string",
+      required: true,
+      description: "ID of the trace to link to this run",
+    },
+    observationId: {
+      type: "string",
+      description: "ID of the observation to link to this run",
+    },
+  }}
+/>
 
 Langfuse currently assumes that experiments do not contain repetitions: each dataset item appears once per experiment. Accordingly, reads surface at most one experiment item per dataset item within an experiment. Repetition support is tracked in [#5855](https://github.com/langfuse/langfuse/issues/5855).
 
