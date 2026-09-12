@@ -120,6 +120,11 @@ const categoryConfig: Record<
     description:
       "Analytics tools that can visualize Langfuse traces and metrics",
   },
+  clickhouse: {
+    title: "ClickHouse Products",
+    description:
+      "Send traces to ClickHouse Observability and load Langfuse exports into ClickHouse Cloud",
+  },
   data: {
     title: "Data Platform",
     description:
