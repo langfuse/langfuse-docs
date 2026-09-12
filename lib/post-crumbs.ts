@@ -1,5 +1,3 @@
-import { comparePageLabel } from "./compare-labels.js";
-
 export type PostCrumb = {
   label: string;
   href?: string;
@@ -13,11 +11,14 @@ function titleCaseSlug(segment: string): string {
 }
 
 /** Breadcrumbs for `/compare` and `/compare/[competitor]`. */
-export function compareCrumbs(slug: string[]): PostCrumb[] {
+export function compareCrumbs(
+  slug: string[],
+  currentLabel?: string,
+): PostCrumb[] {
   if (slug.length === 0) return [{ label: "Compare" }];
   return [
     { label: "Compare", href: "/compare" },
-    { label: comparePageLabel(slug[0]) },
+    { label: currentLabel || titleCaseSlug(slug[0]) },
   ];
 }
 

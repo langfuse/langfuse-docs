@@ -203,8 +203,7 @@ export const workshop = defineDocs({
 });
 
 // SEO/GEO resources section (e.g. /resources/engineering). Supports optional
-// tags so the index listing can group articles by category (comparisons,
-// migrations, …).
+// tags so the index listing can group articles by category.
 const resourcesFrontmatterSchema = sidebarFrontmatterSchema.extend({
   tags: z.array(z.string()).optional(),
 });

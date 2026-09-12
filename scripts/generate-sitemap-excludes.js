@@ -204,6 +204,8 @@ for (const filePath of walkDir(contentDir)) {
     const entry = { loc: route };
     if (lastmod) entry.lastmod = lastmod;
     if (fm.title) entry.title = fm.title;
+    if (fm.shortTitle) entry.shortTitle = fm.shortTitle;
+    else if (fm.sidebarTitle) entry.shortTitle = fm.sidebarTitle;
     if (fm.description) entry.description = fm.description;
     pagesByRoute.set(route, entry);
   }

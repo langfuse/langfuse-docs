@@ -190,6 +190,7 @@ function loadPageMeta() {
         map.set(page.loc, {
           title: page.title,
           description: page.description,
+          shortTitle: page.shortTitle,
         });
       }
     }
@@ -237,6 +238,7 @@ async function generateLLMsList() {
       const entry = {
         title: meta.title || generateTitle(url),
         description: meta.description || "",
+        shortTitle: meta.shortTitle,
         url,
       };
 
