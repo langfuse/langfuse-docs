@@ -1,14 +1,8 @@
+import { comparePageLabel } from "./compare-labels.js";
+
 export type PostCrumb = {
   label: string;
   href?: string;
-};
-
-const COMPARE_LABELS: Record<string, string> = {
-  langsmith: "LangSmith",
-  braintrust: "Braintrust",
-  "arize-phoenix": "Arize / Phoenix",
-  galileo: "Galileo",
-  datadog: "Datadog",
 };
 
 function titleCaseSlug(segment: string): string {
@@ -23,7 +17,7 @@ export function compareCrumbs(slug: string[]): PostCrumb[] {
   if (slug.length === 0) return [{ label: "Compare" }];
   return [
     { label: "Compare", href: "/compare" },
-    { label: COMPARE_LABELS[slug[0]] ?? titleCaseSlug(slug[0]) },
+    { label: comparePageLabel(slug[0]) },
   ];
 }
 

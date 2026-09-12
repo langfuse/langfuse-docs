@@ -1,6 +1,7 @@
 const fs = require("fs");
 const xml2js = require("xml2js");
 const path = require("path");
+const { formatCompareIndexLine } = require("../lib/compare-labels");
 
 // Resolve paths from the repo root so the script is CWD-independent
 // (matches scripts/generate-sitemap-excludes.js).
@@ -283,7 +284,7 @@ async function generateLLMsList() {
     markdownContent += `- [Enterprise license keys](https://langfuse.com/self-hosting/license-key.md): Activation and licensing for self-hosted add-on features.\n`;
     markdownContent += `- [Security](https://langfuse.com/security.md): Security controls, compliance, and supporting documentation.\n`;
     markdownContent += `- [Data regions](https://langfuse.com/security/data-regions.md): Hosting locations and regional availability.\n`;
-    markdownContent += `- Comparisons: [LangSmith](https://langfuse.com/compare/langsmith.md), [Braintrust](https://langfuse.com/compare/braintrust.md), [Arize / Phoenix](https://langfuse.com/compare/arize-phoenix.md), [Galileo](https://langfuse.com/compare/galileo.md), and [Datadog](https://langfuse.com/compare/datadog.md), with dated competitor sources.\n\n`;
+    markdownContent += formatCompareIndexLine(sectionEntries.compare) || "\n";
 
     // Markdown access + search endpoint. Listed before the MCP server section
     // because these need no client setup: an agent with `curl` can use them
