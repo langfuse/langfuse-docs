@@ -83,13 +83,6 @@ export default function RootLayout({
       className={`${interVariable.variable} ${geistMono.variable} ${f37Analog.variable}`}
     >
       <body className="font-sans antialiased">
-        <Script
-          id="typetable-variant"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var v=new URLSearchParams(window.location.search).get("typetable");if(v==="1"||v==="2"||v==="3")document.documentElement.setAttribute("data-typetable",v);}catch(e){}})();`,
-          }}
-        />
         {process.env.NODE_ENV === "development" && (
           <DevAriaHiddenConsoleFilter />
         )}
