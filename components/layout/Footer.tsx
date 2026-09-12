@@ -72,6 +72,7 @@ const menuItems: {
       { name: "Roadmap", href: "/docs/roadmap" },
       { name: "Interactive Demo", href: "/docs/demo" },
       { name: "Customers", href: "/users" },
+      { name: "Compare", href: "/compare" },
       { name: "AI Engineering Library", href: "/library" },
       { name: "Workshop", href: "/workshop" },
       { name: "Guides & Cookbooks", href: "/guides" },

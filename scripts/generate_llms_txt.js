@@ -1,6 +1,7 @@
 const fs = require("fs");
 const xml2js = require("xml2js");
 const path = require("path");
+const { formatCompareIndexLine } = require("../lib/compare-labels");
 
 // Resolve paths from the repo root so the script is CWD-independent
 // (matches scripts/generate-sitemap-excludes.js).
@@ -60,6 +61,11 @@ const SECTION_CONFIG = {
     file: "llms-resources.txt",
     heading: "Resources",
     subFileHeading: "Langfuse Resources",
+  },
+  compare: {
+    file: "llms-compare.txt",
+    heading: "Compare",
+    subFileHeading: "Langfuse Compare",
   },
   security: {
     file: "llms-security.txt",
@@ -184,6 +190,7 @@ function loadPageMeta() {
         map.set(page.loc, {
           title: page.title,
           description: page.description,
+          shortTitle: page.shortTitle,
         });
       }
     }
@@ -231,6 +238,7 @@ async function generateLLMsList() {
       const entry = {
         title: meta.title || generateTitle(url),
         description: meta.description || "",
+        shortTitle: meta.shortTitle,
         url,
       };
 
@@ -278,7 +286,7 @@ async function generateLLMsList() {
     markdownContent += `- [Enterprise license keys](https://langfuse.com/self-hosting/license-key.md): Activation and licensing for self-hosted add-on features.\n`;
     markdownContent += `- [Security](https://langfuse.com/security.md): Security controls, compliance, and supporting documentation.\n`;
     markdownContent += `- [Data regions](https://langfuse.com/security/data-regions.md): Hosting locations and regional availability.\n`;
-    markdownContent += `- Comparisons: [LangSmith](https://langfuse.com/resources/engineering/langsmith-alternative.md), [Braintrust](https://langfuse.com/resources/engineering/best-braintrustdata-alternatives.md), and [Arize / Phoenix](https://langfuse.com/resources/engineering/best-phoenix-arize-alternatives.md), with dated competitor sources.\n\n`;
+    markdownContent += formatCompareIndexLine(sectionEntries.compare) || "\n";
 
     // Markdown access + search endpoint. Listed before the MCP server section
     // because these need no client setup: an agent with `curl` can use them
