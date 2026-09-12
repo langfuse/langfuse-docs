@@ -1,15 +1,16 @@
 ---
 title: Braintrust Alternative? Langfuse vs. Braintrust for AI Engineering
 seoTitle: "Braintrust Alternative: Langfuse vs. Braintrust"
-description: Langfuse is the open-source Braintrust alternative. August 2026 comparison of MIT self-hosting, ClickHouse vs Brainstore, unit vs GB pricing, and evals.
+description: Langfuse is the open-source Braintrust alternative. September 2026 comparison of MIT self-hosting, ClickHouse vs Brainstore, unit vs GB pricing, and evals.
 tags: [comparison, integration]
 ---
 
 import { Cloud, MessageSquare } from "lucide-react";
+import CompareClickhouseDatastore from "@/components-mdx/compare-clickhouse-datastore.mdx";
 
 # Langfuse vs. Braintrust
 
-This guide outlines the key differences between **[Langfuse](/)** and **[Braintrust](https://www.braintrust.dev)** to help engineering teams choose the right AI engineering platform. All Braintrust facts were checked against public Braintrust sources in August 2026.
+This guide outlines the key differences between **[Langfuse](/)** and **[Braintrust](https://www.braintrust.dev)** to help engineering teams choose the right AI engineering platform. All Braintrust facts were checked against public Braintrust sources in September 2026.
 
 ## TL;DR
 
@@ -17,7 +18,7 @@ This guide outlines the key differences between **[Langfuse](/)** and **[Braintr
 
 **1. Open source and full control.** MIT-licensed self-hosting of the entire application on every tier, with data in a database you can query directly.
 
-**2. Production observability at scale.** Complete traces at high volume on ClickHouse, with dashboards, alerts, and full-text search. Observability is the foundation; evals, prompts, and datasets layer on the same data.
+**2. Production observability at scale.** Complete traces at high volume on ClickHouse ([open source since 2016](https://clickhouse.com/blog/yandex-opensources-click-house)), with dashboards, alerts, and full-text search. Observability is the foundation; evals, prompts, and datasets layer on the same data.
 
 **3. Predictable, count-based pricing.** A trace, observation, or score is one unit: cost follows request count, not payload size, and scores are not a separate meter. Pro includes 3-year retention.
 
@@ -49,18 +50,22 @@ That model fits teams whose requirement is keeping payloads in their own VPC. If
 
 Both platforms re-architected storage for agent-scale trace data.
 
-Braintrust built [Brainstore](https://www.braintrust.dev/blog/brainstore), a Rust engine that writes spans to object storage and indexes them with the open-source Tantivy library. It runs inside the data plane, so in hybrid deployments it lives in your cloud account and follows Braintrust's release cadence.
+Braintrust built [Brainstore](https://www.braintrust.dev/blog/brainstore), a proprietary Rust engine [launched March 3, 2025](https://www.braintrust.dev/blog/brainstore) that writes spans to object storage and indexes them with the open-source Tantivy library. It runs inside the data plane, so in hybrid deployments it lives in your cloud account and follows Braintrust's release cadence.
 
-Langfuse runs on [ClickHouse](https://clickhouse.com/), an open-source analytical database proven at petabyte scale across thousands of companies since 2016, and works directly with its core team as [part of ClickHouse](/blog/joining-clickhouse). Every LLM call, tool execution, and agent step is written once to a wide, immutable observations table ([v4 GA](/docs/v4); [details](/blog/2026-03-10-simplify-langfuse-for-scale)).
+<CompareClickhouseDatastore />
+
+Langfuse works directly with ClickHouse's core team as [part of ClickHouse](/blog/joining-clickhouse). Every LLM call, tool execution, and agent step is written once to a wide, immutable observations table ([v4 GA](/docs/v4); [details](/blog/2026-03-10-simplify-langfuse-for-scale)).
 
 Brainstore is queried through Braintrust's APIs and BTQL. ClickHouse speaks standard SQL with broad tooling and operational expertise you can hire for: run and query it directly when self-hosting; on Cloud, high-volume reads go through the Observations and Metrics APIs.
 
-|                            | Langfuse                                                            | Braintrust                                                                              |
-| -------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Storage engine             | **ClickHouse** (Apache 2.0): operable and queryable by you          | **Brainstore**: proprietary Rust engine on object storage, not published as open source |
-| Maturity and ecosystem     | Battle-tested at petabyte scale; SQL, broad tooling and hiring pool | New purpose-built engine; runs only inside Braintrust deployments                       |
-| Cloud / self-hosted parity | Same engine and observations-first data model ([v4 GA](/docs/v4))   | Same data plane stack in SaaS and hybrid deployments                                    |
-| Full-text search           | [Yes](/docs/observability/features/full-text-search) on ClickHouse  | Yes via Brainstore                                                                      |
+|                            | Langfuse                                                                                                      | Braintrust                                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Data store                 | **ClickHouse**, [launched 2016 (OSS)](https://clickhouse.com/blog/yandex-opensources-click-house), Apache 2.0 | **Brainstore**, [launched 2025](https://www.braintrust.dev/blog/brainstore), proprietary / closed |
+| Maturity                   | ~10 years open source; [2,000+ contributors](https://clickhouse.com/blog/open-source-10); SQL hiring pool     | First public release March 3, 2025; runs only inside Braintrust deployments                       |
+| Cloud / self-hosted parity | Same engine and observations-first data model ([v4 GA](/docs/v4))                                             | Same data plane stack in SaaS and hybrid deployments                                              |
+| Full-text search           | [Yes](/docs/observability/features/full-text-search) on ClickHouse                                            | Yes via Brainstore                                                                                |
+
+**Sources:** [ClickHouse OSS launch (Jun 15, 2016)](https://clickhouse.com/blog/yandex-opensources-click-house) · [ClickHouse 10-year / 2,000+ contributors](https://clickhouse.com/blog/open-source-10) · [Brainstore announcement (Mar 3, 2025)](https://www.braintrust.dev/blog/brainstore)
 
 ---
 
@@ -181,7 +186,7 @@ The same reasons recur in migration conversations. Cost leads, and it is the met
 - **Retention is short and metered.** Keeping data past the included window bills per GB monthly and [caps at 180 days on Pro](#pricing), so multi-year lookback needs an Enterprise contract.
 - **Eval-first packaging.** Teams whose primary job is production observability end up paying for an evaluation-centric package they use as a logging system; Langfuse is [built the other way around](#observability-and-monitoring).
 - **Getting data out takes work.** Bulk export from Braintrust means cursor pagination in 1,000-record pages or the CLI; automated cloud-storage export is Enterprise-gated, and there is no direct database access. Langfuse pairs [high-volume read APIs and blob-storage export](#open-platform) with direct SQL on ClickHouse when self-hosting.
-- **Full self-hosting is not offered.** Braintrust's self-hosted option covers the data plane only, requires Enterprise, and keeps a runtime dependency on Braintrust's cloud for UI and auth. When something breaks in closed software, only the vendor can diagnose and fix it. On Langfuse, [running the whole application yourself](#open-source-and-distribution) is a first-class deployment mode, open source down to the storage engine.
+- **Full self-hosting is not offered.** Braintrust's self-hosted option covers the data plane only, requires Enterprise, and keeps a runtime dependency on Braintrust's cloud for UI and auth. When something breaks in closed software, only the vendor can diagnose and fix it. On Langfuse, [running the whole application yourself](#open-source-and-distribution) is a first-class deployment mode, open source down to ClickHouse ([open source since 2016](https://clickhouse.com/blog/yandex-opensources-click-house)). Brainstore is a [proprietary engine launched in 2025](https://www.braintrust.dev/blog/brainstore).
 
 ---
 
@@ -227,7 +232,7 @@ Yes, if you want an open-source platform where production observability, evaluat
 
 ### Is Braintrust open source? [#is-braintrust-open-source]
 
-No. The Braintrust platform, control plane, and Brainstore storage engine are closed source; the SDKs and the [autoevals](https://github.com/braintrustdata/autoevals) evaluator library are open source. Langfuse is MIT-licensed and [self-hostable](/self-hosting).
+No. The Braintrust platform, control plane, and [Brainstore](https://www.braintrust.dev/blog/brainstore) storage engine ([launched 2025](https://www.braintrust.dev/blog/brainstore)) are closed source; the SDKs and the [autoevals](https://github.com/braintrustdata/autoevals) evaluator library are open source. Langfuse is MIT-licensed and [self-hostable](/self-hosting) on [ClickHouse](#storage), open source since 2016.
 
 ### Can I self-host Braintrust? [#can-i-self-host-braintrust]
 

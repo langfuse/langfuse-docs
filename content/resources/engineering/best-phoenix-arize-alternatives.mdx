@@ -6,12 +6,13 @@ tags: [comparison]
 ---
 
 import { Cloud, MessageSquare } from "lucide-react";
+import CompareClickhouseDatastore from "@/components-mdx/compare-clickhouse-datastore.mdx";
 
 # Langfuse vs. Arize AX / Arize Phoenix
 
 This guide compares **[Langfuse](/)**, **[Arize Phoenix](https://phoenix.arize.com)**, and **[Arize AX](https://arize.com/products/ax/)**. All Arize facts were checked against public Arize sources in September 2026.
 
-Phoenix and AX are different products. Phoenix is source-available (Elastic License 2.0) on SQLite or PostgreSQL. AX is proprietary on [adb](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database). Langfuse is one [MIT-licensed](https://github.com/langfuse/langfuse) codebase on [ClickHouse](https://clickhouse.com/), identical on Cloud and self-hosted.
+Phoenix and AX are different products. Phoenix is source-available (Elastic License 2.0) on SQLite or PostgreSQL. AX is proprietary on [adb](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database) ([public launch June 2025](https://arize.com/docs/ax/release-notes/history/2025/06-2025)). Langfuse is one [MIT-licensed](https://github.com/langfuse/langfuse) codebase on [ClickHouse](https://clickhouse.com/) ([open source since 2016](https://clickhouse.com/blog/yandex-opensources-click-house)), identical on Cloud and self-hosted.
 
 On August 13, 2026, Dynatrace [announced a definitive agreement to acquire Arize](https://www.dynatrace.com/news/press-release/dynatrace-to-acquire-arize/). The transaction has not closed; this page compares AX and Phoenix as they ship today. See [the FAQ](#dynatrace-acquisition).
 
@@ -21,7 +22,7 @@ On August 13, 2026, Dynatrace [announced a definitive agreement to acquire Arize
 
 **1. The same product in production.** Tracing, evaluations, prompt management, and experiments in the MIT distribution. Cloud and self-host share the codebase. Used by 21 of the Fortune 50.
 
-**2. An open data plane.** Every span lands in ClickHouse. Self-hosters query it in SQL. Langfuse ran on ClickHouse before joining the company that builds it.
+**2. An open data plane.** Every span lands in ClickHouse, [open source since 2016](https://clickhouse.com/blog/yandex-opensources-click-house), with [2,000+ contributors](https://clickhouse.com/blog/open-source-10). Self-hosters query it in SQL. Cloud and self-host share the same engine.
 
 **3. One meter, years of history, code evals on every plan.** A unit is a trace, an observation, or a score. Pro includes 3-year retention. Custom code evaluators are not an Enterprise gate.
 
@@ -35,7 +36,7 @@ On August 13, 2026, Dynatrace [announced a definitive agreement to acquire Arize
 
 Langfuse is [MIT-licensed](https://github.com/langfuse/langfuse) across tracing, evaluations, prompt management, and experiments. [Self-hosting](/self-hosting) runs the same codebase and ClickHouse architecture as Langfuse Cloud, so you can move between Cloud and self-host without rewriting the application layer. [Enterprise governance modules](/pricing-self-host), including audit logs, project-level RBAC, SCIM, protected labels, and retention policies, need an Enterprise license when self-hosted.
 
-Arize ships two products. [Phoenix](https://docs.arize.com/phoenix) is source-available under the [Elastic License 2.0](https://github.com/Arize-ai/phoenix/blob/main/LICENSE) (not an OSI-approved open-source license) and [self-hosts](https://docs.arize.com/phoenix/deployment) on SQLite or PostgreSQL. [Arize AX](https://arize.com/products/ax/) is proprietary; self-hosting is an [Enterprise option](https://arize.com/pricing/). Phoenix and AX do not share a storage engine: Phoenix uses Postgres/SQLite, while AX runs on [adb](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database), Arize's proprietary OLAP database.
+Arize ships two products. [Phoenix](https://docs.arize.com/phoenix) is source-available under the [Elastic License 2.0](https://github.com/Arize-ai/phoenix/blob/main/LICENSE) (not an OSI-approved open-source license) and [self-hosts](https://docs.arize.com/phoenix/deployment) on SQLite or PostgreSQL. [Arize AX](https://arize.com/products/ax/) is proprietary; self-hosting is an [Enterprise option](https://arize.com/pricing/). Phoenix and AX do not share a storage engine: Phoenix uses Postgres/SQLite, while AX runs on [adb](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database), Arize's proprietary OLAP database ([public launch June 25, 2025](https://arize.com/docs/ax/release-notes/history/2025/06-2025)).
 
 Dynatrace's [acquisition announcement](https://www.dynatrace.com/news/press-release/dynatrace-to-acquire-arize/) describes Arize as "OSS-native" and highlights its open-source community, but it does not name Phoenix or state a license or continuity commitment for a standalone open-source product.
 
@@ -56,15 +57,21 @@ Phoenix starts as one container on SQLite. A production Langfuse self-host runs 
 
 High-volume reads use the [Observations](/docs/api-and-data-platform/features/observations-api) and [Metrics](/docs/metrics/features/metrics-api) APIs; self-hosters can query ClickHouse in SQL.
 
-The [Arize pricing page](https://arize.com/pricing/) lists **15 days** of retention on Free and **30 days** on Pro; Enterprise retention is custom. AX Cloud stores telemetry in adb. Warehouse SQL is [Data Fabric](https://arize.com/docs/ax/security-and-settings/data-fabric): Enterprise-only and currently waitlisted. Phoenix SQL is a different product on Postgres.
+<CompareClickhouseDatastore />
 
-|                         | Langfuse                                                                                                                         | Arize AX                                                         |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| Storage engine          | **ClickHouse** (Apache 2.0), Cloud and self-hosted                                                                               | adb, Arize-operated (Phoenix: Postgres/SQLite, separate product) |
-| Default trace retention | 30 days Hobby, **90 days Core**, **3 years** [Pro and Enterprise](/pricing)                                                      | **15 days** Free, **30 days** Pro, custom Enterprise             |
-| Storage quota           | None (units are the only meter)                                                                                                  | 1 GB Free, 10 GB Pro, then $3/GB; custom Enterprise              |
-| Warehouse sync          | [Scheduled blob exports](/docs/api-and-data-platform/features/export-to-blob-storage) (Teams add-on, Enterprise, or self-hosted) | Data Fabric: Enterprise-only, currently waitlisted               |
-| SQL access              | Direct ClickHouse SQL when self-hosting                                                                                          | Via Data Fabric sync to your warehouse (Enterprise)              |
+The [Arize pricing page](https://arize.com/pricing/) lists **15 days** of retention on Free and **30 days** on Pro; Enterprise retention is custom. AX Cloud stores telemetry in [adb](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database), a proprietary store with a [June 2025 public launch](https://arize.com/docs/ax/release-notes/history/2025/06-2025). Warehouse SQL is [Data Fabric](https://arize.com/docs/ax/security-and-settings/data-fabric): Enterprise-only and currently waitlisted. Phoenix SQL is a different product on Postgres.
+
+|                         | Langfuse                                                                                                                         | Arize AX                                                                                                                 |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Data store              | **ClickHouse**, [launched 2016 (OSS)](https://clickhouse.com/blog/yandex-opensources-click-house), Apache 2.0                    | **adb**, [launched 2025](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database/), proprietary / closed |
+| Maturity                | ~10 years open source; [2,000+ contributors](https://clickhouse.com/blog/open-source-10)                                         | First public release June 25, 2025 ([release notes](https://arize.com/docs/ax/release-notes/history/2025/06-2025))       |
+| Cloud / self-host       | Same ClickHouse engine on Cloud and self-hosted                                                                                  | adb on AX Cloud (Phoenix: Postgres/SQLite, separate product)                                                             |
+| Default trace retention | 30 days Hobby, **90 days Core**, **3 years** [Pro and Enterprise](/pricing)                                                      | **15 days** Free, **30 days** Pro, custom Enterprise                                                                     |
+| Storage quota           | None (units are the only meter)                                                                                                  | 1 GB Free, 10 GB Pro, then $3/GB; custom Enterprise                                                                      |
+| Warehouse sync          | [Scheduled blob exports](/docs/api-and-data-platform/features/export-to-blob-storage) (Teams add-on, Enterprise, or self-hosted) | Data Fabric: Enterprise-only, currently waitlisted                                                                       |
+| SQL access              | Direct ClickHouse SQL when self-hosting                                                                                          | Via Data Fabric sync to your warehouse (Enterprise)                                                                      |
+
+**Sources:** [ClickHouse OSS launch (Jun 15, 2016)](https://clickhouse.com/blog/yandex-opensources-click-house) · [ClickHouse 10-year / 2,000+ contributors](https://clickhouse.com/blog/open-source-10) · [adb announcement](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database/) · [Arize June 2025 release notes](https://arize.com/docs/ax/release-notes/history/2025/06-2025)
 
 ---
 
@@ -177,6 +184,7 @@ Langfuse lists a [GDPR DPA](/dpa) on all Cloud plans, and [SOC 2 Type II and ISO
 - **Every span and every GB bills.** Arize AX meters span volume and ingestion together; at 500k traces/month the [worked example](#worked-example) lands at $4,055 on AX Pro vs. $621 on Langfuse Pro, which meters units only.
 - **Parts of the quality loop are Enterprise-gated.** Custom code evaluators are Enterprise-only on Arize AX. Langfuse runs [code evaluators and CI experiments](#evaluation-and-experiments) on every plan and self-hosted.
 - **Self-hosting below Enterprise means a different product.** Arize AX self-hosting is Enterprise-only; the free path is Phoenix, a separate product on a different storage engine under the Elastic License. Langfuse [self-hosts the same codebase](#open-source-and-distribution) as Cloud, MIT-licensed.
+- **AX Cloud uses a closed store that launched in 2025.** [adb](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database) is proprietary ([public launch June 2025](https://arize.com/docs/ax/release-notes/history/2025/06-2025)). Langfuse runs on [ClickHouse](#history-and-data-plane), open source since 2016, with the same architecture on Cloud and self-hosted.
 - **30 days of history below Enterprise.** Arize AX includes 15 days on Free and 30 on Pro, with no public price for more. Langfuse Pro includes [3-year retention](#history-and-data-plane).
 
 ---
@@ -220,7 +228,7 @@ Yes. Langfuse is an open-source alternative to both Arize AX and Arize Phoenix. 
 
 ### What is the difference between Arize AX and Arize Phoenix? [#arize-ax-vs-phoenix]
 
-Arize AX is the managed platform on Arize's proprietary adb database; Phoenix is a source-available (Elastic License 2.0) tool you run on SQLite or Postgres. They do not share a storage engine, so Phoenix is not a self-hosted AX. Details in [Open source and distribution](#open-source-and-distribution).
+Arize AX is the managed platform on Arize's proprietary [adb](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database) database ([launched 2025](https://arize.com/docs/ax/release-notes/history/2025/06-2025)); Phoenix is a source-available (Elastic License 2.0) tool you run on SQLite or Postgres. They do not share a storage engine, so Phoenix is not a self-hosted AX. Details in [Open source and distribution](#open-source-and-distribution) and [History and data plane](#history-and-data-plane).
 
 ### Is Arize Phoenix open source? [#is-phoenix-open-source]
 
