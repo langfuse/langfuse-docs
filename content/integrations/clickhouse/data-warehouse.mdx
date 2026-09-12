@@ -8,17 +8,16 @@ description: Export Langfuse data as Parquet and load it into ClickHouse Cloud w
 # ClickHouse Data Warehouse
 
 <Callout type="info">
-  **Work in progress:** This page outlines the recommended integration path. A
-  more detailed setup guide will follow. If you have questions or want to share
-  your requirements, [contact support](/support) or [open a GitHub
-  issue](https://github.com/langfuse/langfuse-docs/issues/new).
+  **Work in progress:** This is the recommended path. A detailed setup guide
+  will follow. Questions or requirements? [Contact support](/support) or [open a
+  GitHub issue](https://github.com/langfuse/langfuse-docs/issues/new).
 </Callout>
 
-Export Langfuse data to ClickHouse to analyze AI application activity alongside your business and product data. For example, you can combine AI usage and cost with customer account data or explore how agent quality relates to product outcomes.
+Export Langfuse data to ClickHouse to analyze AI activity alongside business and product data — for example, join usage and cost with customer accounts, or relate agent quality to product outcomes.
 
 ## Recommended integration: Parquet export and an S3 ClickPipe [#recommended-integration]
 
-Use Langfuse's blob storage export to write Parquet files to Amazon S3, then use an S3 ClickPipe to load those files into ClickHouse Cloud.
+Write Parquet files to Amazon S3 with Langfuse's blob storage export, then load them into ClickHouse Cloud with an S3 ClickPipe.
 
 ```mermaid
 flowchart LR
@@ -27,6 +26,6 @@ flowchart LR
     pipe --> ch["ClickHouse Cloud"]
 ```
 
-1. **Configure Langfuse's blob storage export.** In your project, open **Settings → Integrations → Blob Storage**, configure an S3 destination, and select Parquet as the export format. Choose the export schedule and historical range you need. See [Export to blob storage](/docs/api-and-data-platform/features/export-to-blob-storage) for setup and feature availability.
-2. **Create an S3 ClickPipe.** Connect ClickHouse Cloud to the exported Parquet files in your bucket and configure continuous ingestion for subsequent exports. Use the [S3 ClickPipe setup guide](https://clickhouse.com/docs/integrations/clickpipes/object-storage/amazon-s3/get-started) for bucket access, file selection, and ingestion configuration.
-3. **Analyze the exported data in ClickHouse.** Use the [Langfuse export field reference](/docs/api-and-data-platform/features/blob-storage-export-fields) to understand the available data and combine it with your other datasets.
+1. **Export from Langfuse.** In **Settings → Integrations → Blob Storage**, configure an S3 destination and choose Parquet. See [Export to blob storage](/docs/api-and-data-platform/features/export-to-blob-storage) for setup and availability.
+2. **Create an S3 ClickPipe.** Point ClickHouse Cloud at the exported files and enable continuous ingestion. See the [S3 ClickPipe setup guide](https://clickhouse.com/docs/integrations/clickpipes/object-storage/amazon-s3/get-started).
+3. **Analyze in ClickHouse.** Use the [export field reference](/docs/api-and-data-platform/features/blob-storage-export-fields) when joining Langfuse data with your other datasets.
