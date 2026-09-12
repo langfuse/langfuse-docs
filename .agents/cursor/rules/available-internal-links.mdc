@@ -12,6 +12,14 @@ Please make sure that all relative links match to what is available.
 
 > Langfuse is an **open-source AI engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow.
 
+## Evaluation workflows
+
+- [Test an existing application and reuse graders](/resources/engineering/evaluate-existing-application.md): Runnable Python and TypeScript examples.
+- [Compare versions and inspect failures](/docs/evaluation/experiments/compare-experiments.md): Baselines, individual regressions, and human review.
+- [Block regressions in CI](/docs/evaluation/experiments/experiments-ci-cd.md): Thresholds and approved-baseline checks.
+- [Evaluate grounding](/resources/engineering/rag-faithfulness-evaluation.md) and [hallucinations](/resources/engineering/hallucination-detection.md).
+- [Choose where evaluations run](/docs/evaluation/overview.md): Application code, managed evaluators, Cloud, and self-hosting.
+
 ## Pricing, deployment, and comparisons
 
 - [Cloud pricing](/pricing.md): Plan prices, usage rates, and limits.
@@ -71,7 +79,7 @@ For the best results, install the [Langfuse skill](https://github.com/langfuse/s
 
 For the full list with links to each page, see: /llms-docs.txt
 
-Pages: Overview, Audit Logs, Authentication & SSO, Billable Units, Data Deletion, Data Retention, LLM Connections, Access Control (RBAC), SCIM and Org API, Spend Alerts, Troubleshooting and FAQ, Agent Skill, Blob storage export field reference, CLI, Experiments API, Export from UI, Export to blob storage, MCP Server, Observations API, Public API, Query via SDKs, Scores API, Overview, Ask AI, Versions & Compatibility, Example Project, Docs MCP Server, Agentic access, Concepts, Annotation Queues, Code evaluators, LLM-as-a-Judge, Scores via API/SDK, Scores via UI, Experiments Data Model, Datasets, Experiments in CI/CD, Experiments via OpenTelemetry, Experiments via SDK, Experiments via UI, Evaluate with Datasets, Evaluate Production Traffic, Overview, Data Model, Overview, Analytics, Troubleshooting and FAQ, Glossary, Langfuse Assistant, Custom Dashboards, Metrics API, Overview, What does a good trace look like?, Concepts, Agent Graphs, Agentic access, Alerts, Comments, Corrections, Environments, Chart any table, Filter search bar, Full-Text Search, Log Levels, Masking, MCP Tracing, Metadata, Multi-Modality, Observation Types, Pulse, Event queuing/batching, Releases & Versioning, Sampling, Sessions, Tags, Token & Cost Tracking, Trace IDs & Distributed Tracing, Trace URLs, User Feedback, User Tracking, Web Callouts, Get Started, Overview, Advanced Features, Instrumentation, Overview, Troubleshooting & FAQ, Upgrade path, JS/TS v3 → v4, JS/TS v4 → v5, Python v2 → v3, Python v3 → v4, Troubleshooting & FAQ, Concepts, A/B Testing, Agentic Prompt Management, Caching, Prompt Composability, Config, Folders, GitHub Integration, Guaranteed Availability, Link to Traces, Message Placeholders, n8n Node, Playground, Version Control, Variables, Webhooks, Get Started, Overview, Troubleshooting and FAQ, Roadmap, Security & Guardrails
+Pages: Overview, Audit Logs, Authentication & SSO, Billable Units, Data Deletion, Data Retention, LLM Connections, Access Control (RBAC), SCIM and Org API, Spend Alerts, Troubleshooting and FAQ, Agent Skill, Blob storage export field reference, CLI, Experiments API, Export from UI, Export to blob storage, MCP Server, Observations API, Public API, Query via SDKs, Scores API, Overview, Ask AI, Versions & Compatibility, Example Project, Docs MCP Server, Agentic access, Concepts, Annotation Queues, Code evaluators, LLM-as-a-Judge, Scores via API/SDK, Scores via UI, Compare experiments, Experiments Data Model, Datasets, Experiments in CI/CD, Experiments via OpenTelemetry, Experiments via SDK, Experiments via UI, Evaluate with Datasets, Evaluate Production Traffic, Overview, Data Model, Overview, Analytics, Troubleshooting and FAQ, Glossary, Langfuse Assistant, Custom Dashboards, Metrics API, Overview, What does a good trace look like?, Concepts, Agent Graphs, Agentic access, Alerts, Comments, Corrections, Environments, Chart any table, Filter search bar, Full-Text Search, Log Levels, Masking, MCP Tracing, Metadata, Multi-Modality, Observation Types, Pulse, Event queuing/batching, Releases & Versioning, Sampling, Sessions, Tags, Token & Cost Tracking, Trace IDs & Distributed Tracing, Trace URLs, User Feedback, User Tracking, Web Callouts, Get Started, Overview, Advanced Features, Instrumentation, Overview, Troubleshooting & FAQ, Upgrade path, JS/TS v3 → v4, JS/TS v4 → v5, Python v2 → v3, Python v3 → v4, Troubleshooting & FAQ, Concepts, A/B Testing, Agentic Prompt Management, Caching, Prompt Composability, Config, Folders, GitHub Integration, Guaranteed Availability, Link to Traces, Message Placeholders, n8n Node, Playground, Version Control, Variables, Webhooks, Get Started, Overview, Troubleshooting and FAQ, Roadmap, Security & Guardrails
 
 ## Integrations
 
@@ -144,7 +152,7 @@ For the full list with links to each page, see: /llms-changelog.txt
 - [Authentication & SSO](/docs/administration/authentication-and-sso.md): Overview of Single Sign-On (SSO) methods in Langfuse
 - [Billable Units](/docs/administration/billable-units.md): Learn how billable units are calculated in Langfuse.
 - [Data Deletion](/docs/administration/data-deletion.md): Delete data from Langfuse
-- [Data Retention](/docs/administration/data-retention.md): Control Data Retention in Langfuse
+- [Data Retention](/docs/administration/data-retention.md): Configure project data retention and understand what happens to traces, audit logs, dataset items, experiment results, and media.
 - [LLM Connections](/docs/administration/llm-connection.md): How to set up an LLM connection in Langfuse to use in the Playground or for LLM-as-a-Judge evaluations.
 - [Access Control (RBAC)](/docs/administration/rbac.md): Langfuse offers extensive RBAC capabilities to manage project sharing and permissions across different organizations and projects.
 - [SCIM and Org API](/docs/administration/scim-and-org-api.md): Langfuse is open and meant to be extended via custom workflows and integrations. You can use these endpoints to automate project and user management on your Langfuse organization.
@@ -173,6 +181,7 @@ For the full list with links to each page, see: /llms-changelog.txt
 - [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge.md): Learn how LLM-as-a-Judge evaluation works — use large language models to automatically score, evaluate, and monitor your LLM application outputs at scale with rubric-guided assessments.
 - [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk.md): Ingest custom scores via the Langfuse SDKs or API.
 - [Scores via UI](/docs/evaluation/evaluation-methods/scores-via-ui.md): Annotate traces and observations with scores in the Langfuse UI to record human-in-the-loop evaluations.
+- [Compare experiments](/docs/evaluation/experiments/compare-experiments.md): Compare application versions against a baseline, inspect individual regressions, and review failures in Langfuse.
 - [Experiments Data Model](/docs/evaluation/experiments/data-model.md): Data model for Datasets, DatasetItems, DatasetRuns, DatasetRunItems, and function definitions for Tasks and Evaluators.
 - [Datasets](/docs/evaluation/experiments/datasets.md): Use Langfuse Datasets to create structured experiments to test and benchmark LLM applications.
 - [Experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd.md): Run Langfuse experiments in CI and gate changes before production.
