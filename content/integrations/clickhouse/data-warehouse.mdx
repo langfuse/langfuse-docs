@@ -30,5 +30,3 @@ flowchart LR
 1. **Configure Langfuse's blob storage export.** In your project, open **Settings → Integrations → Blob Storage**, configure an S3 destination, and select Parquet as the export format. Choose the export schedule and historical range you need. See [Export to blob storage](/docs/api-and-data-platform/features/export-to-blob-storage) for setup and feature availability.
 2. **Create an S3 ClickPipe.** Connect ClickHouse Cloud to the exported Parquet files in your bucket and configure continuous ingestion for subsequent exports. Use the [S3 ClickPipe setup guide](https://clickhouse.com/docs/integrations/clickpipes/object-storage/amazon-s3/get-started) for bucket access, file selection, and ingestion configuration.
 3. **Analyze the exported data in ClickHouse.** Use the [Langfuse export field reference](/docs/api-and-data-platform/features/blob-storage-export-fields) to understand the available data and combine it with your other datasets.
-
-To send the same OpenTelemetry traces to ClickHouse Observability and Langfuse, see [ClickHouse Observability](/integrations/clickhouse/observability).
