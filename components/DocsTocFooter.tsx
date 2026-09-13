@@ -26,6 +26,7 @@ const getGithubEditUrl = (path: string): string | null => {
     library: "content/library",
     academy: "content/academy",
     resources: "content/resources",
+    compare: "content/compare",
   };
 
   const contentDir = sectionToDir[section];

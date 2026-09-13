@@ -160,7 +160,7 @@ jobs:
           require-lockfile: true
 
       - name: Run sitemap checker unit tests
-        run: node --test scripts/check-sitemap-links.test.js
+        run: node --test scripts/check-sitemap-links.test.js lib/compare-labels.test.js
 
       - name: Build next.js app
         run: pnpm build
