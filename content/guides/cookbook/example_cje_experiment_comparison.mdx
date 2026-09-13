@@ -1,0 +1,278 @@
+---
+source: Jupyter Notebook
+title: Compare experiments with calibrated human outcomes
+description: Use sparse human labels and an independent audit to interpret two Langfuse experiments with CJE.
+category: Evaluation
+sidebarTitle: Calibrated Human Outcomes
+---
+
+# Compare experiments with calibrated human outcomes
+
+This cookbook is for Langfuse users who have two experiment runs scored by the same LLM judge and want to estimate human-rated outcomes. It replays published saved outputs through Langfuse's local experiment runner, joins sparse human labels to the exact outputs, and uses [CJE](https://github.com/cimo-labs/cje) for a paired comparison and an independent residual-transport audit.
+
+Prerequisites: Python 3.12 and `pip install langfuse==4.15.2 cje-eval==0.7.1 ipykernel`. The public-data download needs internet access. The example disables tracing, uses local experiments, and needs no Langfuse account or model API key. It creates no hosted dataset or scores.
+
+Steps: load the panel, allocate human labels, run two cached experiments, fit and audit, and interpret the comparison. To adapt it, retain the returned experiment results and join your own human annotations using the response identity described below.
+
+## 1. Load a published human-reference panel
+
+This retrospective example uses the processed [SummEval panel and cached G-Eval coherence judgments](https://github.com/nlpyang/geval/tree/6f84404ce4503d2ba0cde0293c5d402ecf2976a8). Each human label is the mean coherence rating from three experts (1 to 5, higher is better). Each judge score is the mean of 20 cached numeric judgments of **one saved summary**. Those 20 judgments are not 20 independently generated responses.
+
+We select systems M0 and M1 by identifier and require exact document, source, and output agreement between the authors' processed human panel and judge cache. The processed panel differs from the original annotation export's text preprocessing; this is an analysis of that published panel. It is not a new human labeling study or evidence about current models. Of the 100 paired documents, 33 are excluded because the processed source or output strings disagree. The target population below is the remaining 67 documents, not the original 100-document panel. Never repair an uncertain response match by attaching its label to another answer.
+
+The first run downloads about 17 MB to a temporary cache. Subsequent runs reuse files after checking their SHA-256 hashes. No model API key is needed.
+
+
+```python
+import hashlib
+import json
+import random
+import statistics
+import tempfile
+import urllib.request
+from pathlib import Path
+
+COMMIT = "6f84404ce4503d2ba0cde0293c5d402ecf2976a8"
+BASE = f"https://raw.githubusercontent.com/nlpyang/geval/{COMMIT}"
+CACHE = Path(tempfile.gettempdir()) / "cje-summeval-coherence"
+CACHE.mkdir(exist_ok=True)
+
+def load_panel(relative_path, checksum):
+    path = CACHE / Path(relative_path).name
+    if not path.exists():
+        with urllib.request.urlopen(f"{BASE}/{relative_path}", timeout=60) as response:
+            payload = response.read()
+    else:
+        payload = path.read_bytes()
+    if hashlib.sha256(payload).hexdigest() != checksum:
+        raise ValueError(f"Checksum mismatch: {path.name}")
+    path.write_bytes(payload)
+    return json.loads(payload)
+
+human = load_panel("data/summeval.json", "b109068754e58722f7e50f1bef70cf121eb34c9015fc3486f51bc5b8e3e3ec81")
+judged = load_panel("results/gpt4_coh_detailed.json", "bec62a6a8408b7f0c7a55a665d8c9a44b97eecf671bf0b4319284b192d218508")
+POLICIES = ("M0", "M1")
+ORIGINAL_PROMPTS, MATCHED_PROMPTS, JUDGE_REPLICATES = 100, 67, 20
+
+def index_rows(rows):
+    indexed = {(r["doc_id"], r["system_id"]): r for r in rows}
+    assert len(indexed) == len(rows), "Duplicate document/system identities"
+    return indexed
+
+human_index, judge_index = index_rows(human), index_rows(judged)
+assert human_index.keys() == judge_index.keys()
+candidates = sorted({key[0] for key in human_index})
+prompt_ids = [doc for doc in candidates if all(
+    human_index[doc, policy][field] == judge_index[doc, policy][field]
+    for policy in POLICIES for field in ("source", "system_output")
+)]
+assert len(candidates) == ORIGINAL_PROMPTS
+assert len(prompt_ids) == MATCHED_PROMPTS
+assert all(human_index[doc, "M0"]["source"] == human_index[doc, "M1"]["source"]
+           for doc in prompt_ids)
+
+records = {}
+for policy in POLICIES:
+    records[policy] = []
+    for doc in prompt_ids:
+        h, j = human_index[doc, policy], judge_index[doc, policy]
+        assert len(j["all_responses"]) == JUDGE_REPLICATES
+        assert all(value.strip() in {"1", "2", "3", "4", "5"} for value in j["all_responses"])
+        records[policy].append({
+            "prompt_id": doc, "input": h["source"], "output": h["system_output"],
+            "judge_score": statistics.mean(float(v) for v in j["all_responses"]),
+            "human_label": float(h["scores"]["coherence"]),
+        })
+print(f"{len(prompt_ids)} paired prompts; {len(candidates) - len(prompt_ids)} excluded")
+```
+
+    67 paired prompts; 33 excluded
+
+
+## 2. Fix the label allocation before fitting
+
+Keep the same prompt identity across both systems so CJE can account for paired outcomes. Randomly hold out 25 prompts for an independent residual-transport audit; exclude those prompts from the entire analysis population in both policies. Randomly reveal human labels on 15 of the remaining 42 prompts. The other 27 prompts per policy remain in the analysis with judge scores only.
+
+This uses 30 calibration labels plus 50 audit labels, each already averaged over three experts. The retrospective masking demonstrates a representative labeling design; it does not establish a universal label budget or savings rate. For a new study, collect reference labels without selecting examples based on observed errors or the desired comparison result. Count repeated responses by prompt cluster when allocating labels.
+
+We predeclare a residual-transport tolerance of 0.5 coherence points on the 1-to-5 output scale for this exercise. It is an illustrative decision threshold, not a recommended threshold for other tasks. Do not change it after inspecting the audit to obtain a PASS.
+
+
+```python
+shuffled = sorted(prompt_ids)
+random.Random(20260912).shuffle(shuffled)
+audit_ids = set(shuffled[:25])
+label_ids = set(shuffled[25:40])
+analysis_ids = set(shuffled[25:])
+assert not audit_ids & analysis_ids
+assert label_ids <= analysis_ids
+DELTA_MAX = 0.5
+print(f"Per policy: {len(analysis_ids)} analysis prompts, {len(label_ids)} labeled, "
+      f"{len(audit_ids)} independent audit prompts")
+print(f"Human labels used across both policies: {2 * (len(label_ids) + len(audit_ids))}")
+```
+
+    Per policy: 42 analysis prompts, 15 labeled, 25 independent audit prompts
+    Human labels used across both policies: 80
+
+
+## 3. Run two cached experiments and retain response identities
+
+A policy is a frozen experiment configuration. The prompt ID is shared across policies; a response key additionally includes policy and output hash. This example has one text output per prompt per policy. With repeated generations, include a stable response or observation ID as well and keep `prompt_id` shared for clustering.
+
+The evaluator below reuses a published judge score only after verifying the output. Human labels remain separate from those judge scores. For new experiments, run your judge evaluator normally and collect human ratings on the saved outputs. A dataset item's expected answer is not automatically a human rating of the model's actual answer.
+
+
+```python
+from langfuse import Langfuse
+from langfuse.experiment import Evaluation
+import httpx
+
+def block_api_request(request):
+    raise RuntimeError("This local example must not make Langfuse API requests")
+
+client = Langfuse(tracing_enabled=False, public_key="pk-lf-offline-example",
+                  secret_key="sk-lf-offline-example", base_url="http://127.0.0.1:1",
+                  httpx_client=httpx.Client(transport=httpx.MockTransport(block_api_request)))
+lookup = {p: {r["prompt_id"]: r for r in records[p]} for p in POLICIES}
+data = [{"input": lookup["M0"][doc]["input"], "metadata": {"prompt_id": doc}}
+        for doc in prompt_ids]
+
+def replay(policy):
+    def task(*, item, **kwargs):
+        return lookup[policy][item["metadata"]["prompt_id"]]["output"]
+    return task
+
+def cached_judge(policy):
+    def evaluator(*, output, metadata, **kwargs):
+        row = lookup[policy][metadata["prompt_id"]]
+        assert output == row["output"], "Cached judge score belongs to a different output"
+        return Evaluation(name="geval_coherence", value=row["judge_score"])
+    return evaluator
+
+runs = {p: client.run_experiment(name="SummEval cached coherence", run_name=f"cached-{p}",
+                                data=data, task=replay(p), evaluators=[cached_judge(p)],
+                                max_concurrency=1) for p in POLICIES}
+client.shutdown()
+assert all(len(run.item_results) == 67 for run in runs.values())
+for policy, run in runs.items():
+    print(f"{policy}: {len(run.item_results)} completed experiment items")
+```
+
+    M0: 67 completed experiment items
+    M1: 67 completed experiment items
+
+
+
+```python
+def response_key(policy, prompt_id, output):
+    if not isinstance(output, str):
+        raise ValueError("This example requires text outputs; define canonical serialization for other types")
+    return policy, prompt_id, hashlib.sha256(output.encode("utf-8")).hexdigest()
+
+# Human annotation records come from the reference panel, not from the evaluator.
+labels = {response_key(p, r["prompt_id"], r["output"]): r["human_label"]
+          for p in POLICIES for r in records[p]
+          if r["prompt_id"] in label_ids | audit_ids}
+fresh_draws, probes = {}, {}
+for policy, run in runs.items():
+    fresh_draws[policy], probes[policy] = [], []
+    seen = set()
+    for item_result in run.item_results:
+        doc = item_result.item["metadata"]["prompt_id"]
+        assert doc in set(prompt_ids) and doc not in seen
+        seen.add(doc)
+        assert item_result.item["input"] == lookup[policy][doc]["input"]
+        scores = [e.value for e in item_result.evaluations if e.name == "geval_coherence"]
+        assert len(scores) == 1 and isinstance(scores[0], (int, float))
+        row = {"prompt_id": doc, "judge_score": float(scores[0])}
+        key = response_key(policy, doc, item_result.output)
+        if doc in label_ids | audit_ids:
+            row["oracle_label"] = labels[key]  # A changed output cannot receive the old label.
+        (probes[policy] if doc in audit_ids else fresh_draws[policy]).append(row)
+    assert seen == set(prompt_ids), "Missing experiment items would change the population"
+assert all(len(rows) == len(analysis_ids) for rows in fresh_draws.values())
+assert sum("oracle_label" in r for rows in fresh_draws.values() for r in rows) == 30
+assert not {r["prompt_id"] for rows in probes.values() for r in rows} & {
+    r["prompt_id"] for rows in fresh_draws.values() for r in rows}
+```
+
+## 4. Estimate human outcomes and audit the mapping
+
+Both runs enter one CJE call to retain prompt pairing. Scores and reference labels use a fixed 1-to-5 coherence rubric. The held-out audit receives its own rows and the previously declared tolerance in the same output units.
+
+
+```python
+from cje import analyze_dataset
+from cje.diagnostics import TransportAuditConfig
+
+result = analyze_dataset(
+    fresh_draws_data=fresh_draws, estimator="direct",
+    fresh_judge_scale=(1, 5), fresh_oracle_scale=(1, 5), output_scale=(1, 5),
+    transport=TransportAuditConfig(probes_by_policy=probes,
+                                   delta_max_by_policy={p: DELTA_MAX for p in POLICIES}))
+lower, upper = result.confidence_interval()
+for i, policy in enumerate(result.metadata["target_policies"]):
+    print(f"{policy}: mean={result.estimates[i]:.3f}, 95% CI=[{lower[i]:.3f}, {upper[i]:.3f}]")
+    print(f"  Claim: {result.metadata['claim_tier_by_policy'][policy]}; "
+          f"transport: {result.metadata['transport_audits'][policy]['status']}; "
+          f"flagged: {result.gates[policy].flagged}")
+    for reason in result.gates[policy].reasons:
+        print(f"  Reason: {reason}")
+```
+
+    M0: mean=4.527, 95% CI=[3.975, 5.080]
+      Claim: CALIBRATED_ORACLE_MEAN; transport: INCONCLUSIVE; flagged: False
+    M1: mean=3.391, 95% CI=[2.732, 4.051]
+      Claim: CALIBRATED_ORACLE_MEAN; transport: INCONCLUSIVE; flagged: False
+
+
+## 5. Read the claim and the audit before using the comparison
+
+`RAW_JUDGE_MEAN` estimates the judge's score scale; reference labels were absent or insufficient for calibration. `DIRECT_ORACLE_MEAN` uses human labels for every analysis response. `CALIBRATED_ORACLE_MEAN` estimates the human-reference scale using the fitted mapping. Read the per-policy claim, because policies can have different tiers in the same result.
+
+`NOT_CHECKED` means there was no transport audit. `INCONCLUSIVE` means the audit could not establish the stated tolerance, and `FAIL` means the audit found a problem. An unflagged result alone does not mean the audit passed. Even a PASS is conditional on the audit design, rubric, population, and tolerance; it does not certify a judge for other tasks.
+
+Use CJE's joint policy contrast for the uncertainty of the difference. Overlap between two policy confidence intervals is not a test of their difference. The intervals account for the fitted workflow's sampling and calibration uncertainty; they do not remove reference-label bias or establish deployment validity. This small historical panel supports a worked example, not a deployment winner.
+
+
+```python
+order = result.metadata["target_policies"]
+contrast = result.compare_policies(order.index("M1"), order.index("M0"))
+print("M1 minus M0, in human coherence points:")
+for key in ("difference", "se_difference", "ci_lower", "ci_upper", "method", "basis"):
+    print(f"{key}: {contrast[key]}")
+statuses = {p: result.metadata["transport_audits"][p]["status"] for p in order}
+print("Transport audit: " + ", ".join(f"{p}={status}" for p, status in statuses.items()))
+if any(status != "PASS" for status in statuses.values()):
+    print("The stated transport tolerance has not been established for both policies.")
+```
+
+    M1 minus M0, in human coherence points:
+    difference: -1.1360052910052905
+    se_difference: 0.23782664411111532
+    ci_lower: -1.6151367214600103
+    ci_upper: -0.6568738605505706
+    method: paired_if_oua
+    basis: prompt_cluster_paired
+    Transport audit: M0=INCONCLUSIVE, M1=INCONCLUSIVE
+    The stated transport tolerance has not been established for both policies.
+
+
+### Use your own Langfuse runs
+
+Retain `ExperimentResult.item_results` from your two `run_experiment` calls. For hosted dataset items, read the item's `id` and `input` attributes instead of this example's local dictionary metadata. Keep the dataset version and input fixed across runs. Keep a separate policy identifier for each frozen configuration and match human scores to the saved output or exact generation observation, not only to a trace or question.
+
+Human annotations must measure the same outcome as the intended reference rubric. Export the annotation's run/item identity, observation identity when relevant, output, score name/configuration, and numeric value; resolve multiple raters using a predeclared rule. Reject ambiguous or missing identities. Allocate prompts to calibration and audit before requesting labels, and preserve unlabeled experiment items. A selectively labeled error queue does not by itself justify representative-label inference.
+
+The code above covers local experiment results, not paginated retrieval or annotation export from an existing hosted project. For that path, start with [Langfuse experiments](https://langfuse.com/docs/evaluation/experiments/experiments-via-sdk) and [human annotation](https://langfuse.com/docs/evaluation/evaluation-methods/scores-via-ui). Validate the export on the project's actual score configuration and run/item identities before using it for a decision. Store CJE estimates as run-level analysis; they are not per-response correctness scores.
+
+## 6. Exercise and next steps
+
+**Exercise:** Copy the analysis rows and remove every `oracle_label`, then call `analyze_dataset` without transport probes. What quantity does the resulting interval describe?
+
+**Answer scaffold:** Check `raw.metadata["claim_tier_by_policy"]` and `raw.gates`. The result should report `RAW_JUDGE_MEAN`, with an interval for the judge-score mean that does not account for judge bias. Supplying a few labels from the same prompt is not a substitute for independent labeled prompts.
+
+**Optional extension:** Predeclare a larger human-label budget or a second held-out panel, then rerun the entire fixed workflow. Keep the judge model, prompt, rubric, score scale, and reference-label aggregation fixed within each analysis. If you change any of them, treat it as a new analysis and obtain suitable reference labels and independent probes.
+
+Further reading: [CJE usage and diagnostics](https://github.com/cimo-labs/cje/tree/v0.7.1), [G-Eval data and experiment code](https://github.com/nlpyang/geval/tree/6f84404ce4503d2ba0cde0293c5d402ecf2976a8), and [SummEval](https://github.com/Yale-LILY/SummEval).
