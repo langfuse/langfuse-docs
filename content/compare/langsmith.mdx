@@ -7,6 +7,7 @@ tags: [comparison, integration]
 ---
 
 import { Cloud, MessageSquare } from "lucide-react";
+import CompareClickhouseDatastore from "@/components-mdx/compare-clickhouse-datastore.mdx";
 
 # Langfuse vs. LangSmith
 
@@ -18,7 +19,7 @@ This guide outlines the key differences between **[Langfuse](/)** and **[LangSmi
 
 **1. Control without rebuilding governance.** MIT-licensed self-hosting on every tier, including free, with SSO and org RBAC in the OSS distribution, and a framework-agnostic approach built on OpenTelemetry.
 
-**2. Data sovereignty.** An open-source ClickHouse data plane you can query, join, and hire for. Cloud and self-hosted share the same engine.
+**2. Data sovereignty.** An open-source ClickHouse data plane ([launched 2016](https://clickhouse.com/blog/yandex-opensources-click-house)) you can query, join, and hire for. Cloud and self-hosted share the same engine.
 
 **3. One usage meter and no seat fees.** Traces, observations, and scores bill as units. Langfuse Core and higher plans include unlimited users.
 
@@ -51,18 +52,23 @@ On Langfuse Cloud, Enterprise SSO and project-level RBAC sit behind the Teams ad
 
 Both platforms were built for high-volume trace data, and both re-architected their storage layers as agent traces grew into thousands of spans with large payloads. They made different choices:
 
-LangSmith's storage engine was ClickHouse. In May 2026, LangChain replaced it on their US Cloud with [SmithDB](https://www.langchain.com/blog/introducing-smithdb), a proprietary Rust engine on Apache DataFusion and Vortex. Self-hosted LangSmith still runs on ClickHouse and Postgres; there, SmithDB is a [public beta](https://docs.langchain.com/langsmith/self-hosted-changelog#new-features): LangChain does not recommend operating it yourself and routes access through a waitlist.
+LangSmith's storage engine was ClickHouse. In May 2026, LangChain replaced it on their US Cloud with [SmithDB](https://www.langchain.com/blog/introducing-smithdb) ([launched May 13, 2026](https://www.langchain.com/blog/introducing-smithdb)), a proprietary Rust engine on Apache DataFusion and Vortex. Self-hosted LangSmith still runs on ClickHouse and Postgres; there, SmithDB is a [public beta](https://docs.langchain.com/langsmith/self-hosted-changelog#new-features): LangChain does not recommend operating it yourself and routes access through a waitlist.
 
-Langfuse runs on open-source [ClickHouse](https://clickhouse.com/) and works directly with the database's core team as [part of ClickHouse](/blog/joining-clickhouse). Every LLM call, tool execution, and agent step is written once to a wide, immutable observations table. Details are in [Simplifying Langfuse for Scale](/blog/2026-03-10-simplify-langfuse-for-scale).
+<CompareClickhouseDatastore />
+
+Langfuse works directly with ClickHouse's core team as [part of ClickHouse](/blog/joining-clickhouse). Every LLM call, tool execution, and agent step is written once to a wide, immutable observations table. Details are in [Simplifying Langfuse for Scale](/blog/2026-03-10-simplify-langfuse-for-scale).
 
 A purpose-built store is a reasonable choice for closed SaaS. If you operate the platform yourself, ClickHouse is a database you can run, inspect, and query with SQL. High-volume reads go through the Observations and Metrics APIs.
 
-|                            | Langfuse                                                                                                                                    | LangSmith                                                                                            |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Storage engine             | **ClickHouse** (Apache 2.0): operable and queryable by you.                                                                                 | **SmithDB** (proprietary): Rust, DataFusion, Vortex; operated by LangChain                           |
-| Cloud / self-hosted parity | Same engine and observations-first data model ([v4 GA](/docs/v4))                                                                           | SmithDB on US Cloud; self-hosted runs ClickHouse + Postgres, SmithDB there is public beta / waitlist |
-| Full-text search           | [Yes](/docs/observability/features/full-text-search) on ClickHouse                                                                          | Yes (SmithDB on Cloud, Quickwit on self-hosted)                                                      |
-| High-volume reads          | [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2) | SmithDB (Cloud), Managed Bulk Data Export (Enterprise-only)                                          |
+|                            | Langfuse                                                                                                                                    | LangSmith                                                                                              |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Data store                 | **ClickHouse**, [launched 2016 (OSS)](https://clickhouse.com/blog/yandex-opensources-click-house), Apache 2.0                               | **SmithDB**, [launched 2026](https://www.langchain.com/blog/introducing-smithdb), proprietary / closed |
+| Maturity                   | ~10 years open source; [2,000+ contributors](https://clickhouse.com/blog/open-source-10)                                                    | First public release May 13, 2026                                                                      |
+| Cloud / self-hosted parity | Same engine and observations-first data model ([v4 GA](/docs/v4))                                                                           | SmithDB on US Cloud; self-hosted runs ClickHouse + Postgres, SmithDB there is public beta / waitlist   |
+| Full-text search           | [Yes](/docs/observability/features/full-text-search) on ClickHouse                                                                          | Yes (SmithDB on Cloud, Quickwit on self-hosted)                                                        |
+| High-volume reads          | [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2) | SmithDB (Cloud), Managed Bulk Data Export (Enterprise-only)                                            |
+
+**Sources:** [ClickHouse OSS launch (Jun 15, 2016)](https://clickhouse.com/blog/yandex-opensources-click-house) · [ClickHouse 10-year / 2,000+ contributors](https://clickhouse.com/blog/open-source-10) · [SmithDB announcement (May 13, 2026)](https://www.langchain.com/blog/introducing-smithdb)
 
 ---
 
@@ -203,6 +209,7 @@ The same reasons recur in migration conversations. Cost leads, and it is several
 - **Compliance routes through sales.** Self-hosting, custom SSO, and role-based access control are [Enterprise-only on LangSmith](https://www.langchain.com/pricing), so teams that must run in their own infrastructure cannot evaluate on the free or Plus tiers. Langfuse self-hosts [MIT-licensed on every tier](#open-source-and-distribution) and signs a [BAA from the Pro plan](#enterprise-security).
 - **Framework coupling.** Platform teams serving heterogeneous stacks don't want the observability layer tied to one agent framework. Off LangChain and LangGraph, LangSmith's zero-setup instrumentation is gone, and [Deployment, Engine, Fleet, and the Gateway](#integrations) are priced separately on top.
 - **Turning trace data into answers.** LangSmith captures the traces, but slicing them into business views or moving them into your own analytics stack hits walls: [bulk export is Enterprise-gated](#storage) and there is no direct database access on LangSmith Cloud. Langfuse pairs [custom dashboards and Pulse](#observability-and-monitoring) with the [Observations and Metrics APIs](#open-platform) for high-volume reads on Cloud, and self-hosters can additionally query the ClickHouse table directly in SQL.
+- **Cloud stores traces in a closed engine launched in 2026.** [SmithDB](https://www.langchain.com/blog/introducing-smithdb) is proprietary ([May 13, 2026](https://www.langchain.com/blog/introducing-smithdb)). Langfuse Cloud and self-hosted stay on the same [ClickHouse](#storage) architecture, [open source since 2016](https://clickhouse.com/blog/yandex-opensources-click-house).
 
 ---
 
@@ -264,7 +271,7 @@ Yes. [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) run 
 
 ### Is LangSmith open source? [#is-langsmith-open-source]
 
-No. The LangSmith platform (backend, UI, storage, including SmithDB) is closed source. LangChain, LangGraph, and the LangSmith client SDKs are MIT open source. Langfuse is MIT and [self-hostable](/self-hosting).
+No. The LangSmith platform (backend, UI, storage, including [SmithDB](https://www.langchain.com/blog/introducing-smithdb), [launched 2026](https://www.langchain.com/blog/introducing-smithdb)) is closed source. LangChain, LangGraph, and the LangSmith client SDKs are MIT open source. Langfuse is MIT and [self-hostable](/self-hosting) on [ClickHouse](#storage), open source since 2016.
 
 ### Does LangSmith require LangChain? [#does-langsmith-require-langchain]
 
@@ -280,7 +287,7 @@ Follow the [step-by-step migration guide](/resources/engineering/migrate-from-la
 
 ### What is SmithDB? [#what-is-smithdb]
 
-SmithDB is LangSmith's proprietary trace database (May 2026), written in Rust on Apache DataFusion and Vortex, with trace data on object storage. LangChain reports up to 15× faster core experiences. Langfuse runs on open-source ClickHouse with an observations-first data model, so Cloud and self-hosted share the same architecture. See [Storage: ClickHouse vs SmithDB](#storage).
+SmithDB is LangSmith's proprietary trace database ([launched May 13, 2026](https://www.langchain.com/blog/introducing-smithdb)), written in Rust on Apache DataFusion and Vortex, with trace data on object storage. LangChain reports up to 15× faster core experiences. Langfuse runs on open-source ClickHouse ([launched 2016](https://clickhouse.com/blog/yandex-opensources-click-house); [2,000+ contributors](https://clickhouse.com/blog/open-source-10)) with an observations-first data model, so Cloud and self-hosted share the same architecture. See [Storage: ClickHouse vs SmithDB](#storage).
 
 <Callout type="info">
   This comparison is out of date? Please [raise a pull request](https://github.com/langfuse/langfuse-docs/blob/main/content/compare/langsmith.mdx) with up-to-date information.
