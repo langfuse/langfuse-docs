@@ -165,6 +165,8 @@ for policy, run in runs.items():
 
 
 ```python
+import math
+
 def response_key(policy, prompt_id, output):
     if not isinstance(output, str):
         raise ValueError("This example requires text outputs; define canonical serialization for other types")
@@ -184,8 +186,13 @@ for policy, run in runs.items():
         seen.add(doc)
         assert item_result.item["input"] == lookup[policy][doc]["input"]
         scores = [e.value for e in item_result.evaluations if e.name == "geval_coherence"]
-        assert len(scores) == 1 and isinstance(scores[0], (int, float))
-        row = {"prompt_id": doc, "judge_score": float(scores[0])}
+        if len(scores) != 1:
+            raise ValueError(f"{policy}/{doc}: expected one geval_coherence score")
+        score = scores[0]
+        if (isinstance(score, bool) or not isinstance(score, (int, float))
+                or not math.isfinite(score) or not 1 <= score <= 5):
+            raise ValueError(f"{policy}/{doc}: coherence must be a finite number from 1 to 5")
+        row = {"prompt_id": doc, "judge_score": float(score)}
         key = response_key(policy, doc, item_result.output)
         if doc in label_ids | audit_ids:
             row["oracle_label"] = labels[key]  # A changed output cannot receive the old label.
@@ -217,19 +224,31 @@ for i, policy in enumerate(result.metadata["target_policies"]):
     print(f"  Claim: {result.metadata['claim_tier_by_policy'][policy]}; "
           f"transport: {result.metadata['transport_audits'][policy]['status']}; "
           f"flagged: {result.gates[policy].flagged}")
+    audit = result.metadata["transport_audits"][policy]
+    print(f"  Held-out residual: {audit['delta_hat']:.3f}, "
+          f"{audit['per_audit_confidence_level']:.1%} CI="
+          f"[{audit['delta_ci'][0]:.3f}, {audit['delta_ci'][1]:.3f}]; "
+          f"tolerance=[{-audit['delta_max']:.3f}, {audit['delta_max']:.3f}]")
+    print(f"  Audit action: {audit['recommended_action']}")
     for reason in result.gates[policy].reasons:
         print(f"  Reason: {reason}")
 ```
 
     M0: mean=4.527, 95% CI=[3.975, 5.080]
       Claim: CALIBRATED_ORACLE_MEAN; transport: INCONCLUSIVE; flagged: False
+      Held-out residual: 0.103, 97.5% CI=[-0.342, 0.548]; tolerance=[-0.500, 0.500]
+      Audit action: collect more independent oracle-probe clusters to resolve the margin
     M1: mean=3.391, 95% CI=[2.732, 4.051]
       Claim: CALIBRATED_ORACLE_MEAN; transport: INCONCLUSIVE; flagged: False
+      Held-out residual: -0.513, 97.5% CI=[-0.958, -0.067]; tolerance=[-0.500, 0.500]
+      Audit action: collect more independent oracle-probe clusters to resolve the margin
 
 
 ## 5. Read the claim and the audit before using the comparison
 
 `RAW_JUDGE_MEAN` estimates the judge's score scale; reference labels were absent or insufficient for calibration. `DIRECT_ORACLE_MEAN` uses human labels for every analysis response. `CALIBRATED_ORACLE_MEAN` estimates the human-reference scale using the fitted mapping. Read the per-policy claim, because policies can have different tiers in the same result.
+
+The audit measures the mean residual, human rating minus the fitted judge prediction, on held-out prompts. Each displayed audit interval is 97.5% because CJE adjusts for the two policy audits to provide simultaneous 95% coverage. A PASS requires the entire interval to lie within the predeclared tolerance; an interval crossing a tolerance boundary is inconclusive.
 
 `NOT_CHECKED` means there was no transport audit. `INCONCLUSIVE` means the audit could not establish the stated tolerance, and `FAIL` means the audit found a problem. An unflagged result alone does not mean the audit passed. Even a PASS is conditional on the audit design, rubric, population, and tolerance; it does not certify a judge for other tasks.
 
