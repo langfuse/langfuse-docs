@@ -1,52 +1,27 @@
 import { useEffect, useState } from "react";
 import {
-  cloudRegions,
-  type CloudRegionKey,
-  createInitialCloudRegionSignInState,
-  isSignedInSession,
-} from "@/lib/cloud-regions";
+  getCloudRegionSignInSnapshot,
+  startCloudRegionSignInProbe,
+  subscribeToCloudRegionSignIn,
+} from "@/lib/cloud-region-sign-in-store";
 
+// React binding for the shared cloud-region sign-in probe: every caller gets
+// the same snapshot from a single set of requests, however many components ask.
+// Callers that treat signed-out as meaningful must wait for `resolved`.
+// See lib/cloud-region-sign-in-store.ts.
 export const useCloudRegionSignIn = (
   enabled = process.env.NODE_ENV === "production",
 ) => {
-  const [signedInRegions, setSignedInRegions] = useState<
-    Record<CloudRegionKey, boolean>
-  >(() => createInitialCloudRegionSignInState());
+  const [snapshot, setSnapshot] = useState(getCloudRegionSignInSnapshot);
 
   useEffect(() => {
-    if (!enabled) {
-      return;
-    }
-
-    const abortController = new AbortController();
-
-    Object.entries(cloudRegions).forEach(([key, region]) => {
-      fetch(`${region.url}/api/auth/session`, {
-        credentials: "include",
-        mode: "cors",
-        signal: abortController.signal,
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          setSignedInRegions((prev) => ({
-            ...prev,
-            [key]: isSignedInSession(data),
-          }));
-        })
-        .catch((error) => {
-          if (error.name !== "AbortError") {
-            setSignedInRegions((prev) => ({
-              ...prev,
-              [key]: false,
-            }));
-          }
-        });
-    });
-
-    return () => {
-      abortController.abort();
-    };
+    startCloudRegionSignInProbe(enabled);
+    // The probe may already have answered before this component mounted.
+    setSnapshot(getCloudRegionSignInSnapshot());
+    return subscribeToCloudRegionSignIn(() =>
+      setSnapshot(getCloudRegionSignInSnapshot()),
+    );
   }, [enabled]);
 
-  return signedInRegions;
+  return snapshot;
 };

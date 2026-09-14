@@ -3,13 +3,18 @@ import {
   observe,
   propagateAttributes,
   updateActiveObservation,
-  setActiveTraceIO,
+  setActiveTraceAsPublic,
   getActiveTraceId,
 } from "@langfuse/tracing";
 import { LangfuseMedia } from "@langfuse/core";
 import { after } from "next/server";
+import { context, trace } from "@opentelemetry/api";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
+import {
+  buildDemoTraceRedirectUrl,
+  DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL,
+} from "@/lib/demo-public-trace";
 
 let _openai: OpenAI | null = null;
 const getOpenAI = () => (_openai ??= new OpenAI());
@@ -44,7 +49,16 @@ const handler = async (req: Request) => {
     },
     async () => {
       const traceId = getActiveTraceId();
-      setActiveTraceIO({ input: prompt });
+      const activeSpan = trace.getActiveSpan();
+      const rootObservationId = activeSpan?.spanContext().spanId;
+      const runWithActiveSpan = <T>(fn: () => T) =>
+        activeSpan
+          ? context.with(trace.setSpan(context.active(), activeSpan), fn)
+          : fn();
+
+      runWithActiveSpan(() => {
+        updateActiveObservation({ input: prompt });
+      });
 
       try {
         const result = await getOpenAI().images.generate({
@@ -73,32 +87,45 @@ const handler = async (req: Request) => {
             }
           | undefined;
 
-        updateActiveObservation(
-          {
-            input: prompt,
-            output: imageMedia,
-            model: "gpt-image-1",
-            modelParameters: {
-              size: "1024x1024",
-              quality: "low",
-            },
-            ...(usage && {
-              usageDetails: {
-                input_tokens: usage.input_tokens ?? 0,
-                output_tokens: usage.output_tokens ?? 0,
-                total: usage.total_tokens ?? 0,
+        runWithActiveSpan(() => {
+          updateActiveObservation(
+            {
+              input: prompt,
+              output: imageMedia,
+              model: "gpt-image-1",
+              modelParameters: {
+                size: "1024x1024",
+                quality: "low",
               },
-            }),
-          },
-          { asType: "generation" },
-        );
-
-        after(async () => await flush());
+              ...(usage && {
+                usageDetails: {
+                  input_tokens: usage.input_tokens ?? 0,
+                  output_tokens: usage.output_tokens ?? 0,
+                  total: usage.total_tokens ?? 0,
+                },
+              }),
+            },
+            { asType: "generation" },
+          );
+          setActiveTraceAsPublic();
+          activeSpan?.end();
+        });
+        let traceUrl = DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL;
+        try {
+          await flush();
+          traceUrl = buildDemoTraceRedirectUrl({
+            traceId,
+            observationId: rootObservationId,
+          });
+        } catch (error) {
+          console.warn("Failed to publish demo trace link", error);
+        }
 
         return new Response(
           JSON.stringify({
             image: { base64: imageData, mediaType: "image/png" },
             traceId,
+            traceUrl,
           }),
           { status: 200, headers: { "Content-Type": "application/json" } },
         );
@@ -121,6 +148,7 @@ export const POST = observe(handler, {
   name: "image-generator",
   asType: "generation",
   captureOutput: false,
+  endOnExit: false,
 });
 
 export const maxDuration = 60;

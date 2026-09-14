@@ -748,7 +748,7 @@ function Compliance() {
             </Link>
             <Link
               className="japan-btn japan-btn-secondary japan-btn-small !shadow-none"
-              href="/security/dpa"
+              href="/dpa"
             >
               DPA ↗
             </Link>
@@ -902,8 +902,8 @@ function FAQ() {
         <p>
           主要サブプロセッサー（リージョン内）: <b>AWS</b> と <b>ClickHouse</b>
           。どちらも日本で稼働しています。最新の一覧は{" "}
-          <Link className="japan-link" href="/security/subprocessors">
-            langfuse.com/security/subprocessors
+          <Link className="japan-link" href="/subprocessors">
+            langfuse.com/subprocessors
           </Link>{" "}
           にあります。
         </p>
@@ -971,6 +971,17 @@ function FAQ() {
         </p>
       ),
     },
+    {
+      q: "Langfuseの使い方を体系的に学ぶには?",
+      a: (
+        <p>
+          <Link className="japan-link" href="/academy/japan">
+            Langfuse Academy（日本語版）
+          </Link>
+          で、トレース・モニタリング・データセット・実験・評価まで、LLMエンジニアリングのループを日本語で学べます。
+        </p>
+      ),
+    },
   ];
   return (
     <section className="japan-section pt-[120px] pb-10">
@@ -985,7 +996,7 @@ function FAQ() {
           </h2>
           <p className="japan-body-sm mt-3.5">
             載っていないことがあれば、
-            <Link className="japan-link" href="/ask-ai">
+            <Link className="japan-link" href="/docs/ask-ai">
               AIに質問
             </Link>
             、

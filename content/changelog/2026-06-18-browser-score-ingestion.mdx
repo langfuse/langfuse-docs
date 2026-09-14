@@ -1,0 +1,63 @@
+---
+date: 2026-06-18
+title: Score from the browser
+description: Use @langfuse/browser to send frontend feedback scores with only a public key.
+author: Hassieb
+canonical: /docs/evaluation/evaluation-methods/scores-via-sdk
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, MessageSquare, Package } from "lucide-react";
+
+<ChangelogHeader />
+
+Langfuse now ships `@langfuse/browser` for browser-side score ingestion. Use it to collect thumbs up/down feedback on chat responses, star ratings after generated content, or lightweight client-side quality signals and attach them directly to traces or observations.
+
+The package is intentionally small: initialize `LangfuseBrowserClient` with your public key and call `score()`. It sends each score immediately via the ingestion API, so frontend interactions do not need batching or a flush lifecycle. Use `@langfuse/client` for backend services, scripts, CI jobs, and evaluation pipelines.
+
+```bash
+npm install @langfuse/browser
+```
+
+```typescript
+import { LangfuseBrowserClient } from "@langfuse/browser";
+
+const langfuse = new LangfuseBrowserClient({
+  publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY!,
+  baseUrl: process.env.NEXT_PUBLIC_LANGFUSE_BASE_URL,
+});
+
+await langfuse.score({
+  traceId: message.traceId,
+  id: `user-feedback-${message.traceId}`,
+  name: "user-feedback",
+  value: 1,
+  dataType: "BOOLEAN",
+  comment: "Helpful answer",
+});
+```
+
+Only expose the Langfuse public key in browser code. The secret key remains server-side only.
+
+## Get started [#get-started]
+
+<Cards num={3}>
+  <Card
+    title="Scores via API/SDK"
+    href="/docs/evaluation/evaluation-methods/scores-via-sdk"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="User feedback"
+    href="/docs/observability/features/user-feedback"
+    icon={<MessageSquare />}
+    arrow
+  />
+  <Card
+    title="NPM package"
+    href="https://www.npmjs.com/package/@langfuse/browser"
+    icon={<Package />}
+    arrow
+  />
+</Cards>

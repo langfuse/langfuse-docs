@@ -1,8 +1,10 @@
 import {
   Activity,
   BarChart2,
+  Bot,
   BookOpen,
   Bookmark,
+  Code2,
   FlaskConical,
   GraduationCap,
   HelpCircle,
@@ -12,7 +14,7 @@ import {
   Newspaper,
   Presentation,
   ScrollText,
-  Users,
+  Workflow,
   type LucideIcon,
 } from "lucide-react";
 
@@ -44,13 +46,19 @@ export const resourcesLinks: NavPanelLink[] = [
   { name: "Blog", href: "/blog", icon: Newspaper },
   { name: "Changelog", href: "/changelog", icon: ScrollText },
   { name: "Roadmap", href: "/docs/roadmap", icon: Map },
-  { name: "Users", href: "/users", icon: Users },
   { name: "Example Project", href: "/docs/demo", icon: Bookmark },
   { name: "Walkthroughs", href: "/guides", icon: GraduationCap },
   { name: "Support", href: "/support", icon: HelpCircle },
 ];
 
+export const useCaseLinks: NavPanelLink[] = [
+  { name: "Chat agents", href: "/chat-agents", icon: Bot },
+  { name: "Coding agents", href: "/coding-agents", icon: Code2 },
+  { name: "Workflow automation", href: "/workflow-automation", icon: Workflow },
+];
+
 export const simpleLinks = [
+  { name: "Customers", href: "/users" },
   { name: "Docs", href: "/docs" },
   { name: "Changelog", href: "/changelog", tabletHidden: true },
   { name: "Pricing", href: "/pricing" },

@@ -31,7 +31,6 @@ import {
 } from "@/components/ui/hover-card";
 import { TrustedBy } from "../components/TrustedBy";
 import { trustedByData } from "@/data/trusted-by";
-import Image from "next/image";
 import { isCloudAppHref } from "@/lib/google-ads";
 
 // Reusable graduated pricing text with calculator link
@@ -161,7 +160,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Data retention management",
         "Unlimited annotation queues",
         "High rate limits",
-        "SOC2 & ISO27001 reports, BAA available (HIPAA)",
+        "SOC2 & ISO27001 reports, HIPAA-ready region",
         "Prioritized in-app support",
       ],
       addOn: {
@@ -198,7 +197,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Custom rate limits",
         "Uptime SLA",
         "Support SLA",
-        "Dedicated support engineer",
+        "Named lead support engineer",
       ],
       addOn: {
         name: "Yearly Commitment",
@@ -237,32 +236,18 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       id: "tier-self-hosted-enterprise",
       href: "/talk-to-us?deployment=self-hosted",
       featured: false,
-      pillClassName: "bg-[#FAFF6A] text-[#1A1A1A]",
       description:
         "Dedicated Langfuse deployment with enterprise capabilities and support.",
-      pill: (
-        <>
-          <span className="inline-flex rounded-sm p-0.5">
-            <Image
-              src="/images/logos/clickhouse_icon.svg"
-              alt=""
-              width={14}
-              height={14}
-              className="size-3.5 rounded-[2px]"
-            />
-          </span>
-          ClickHouse Cloud / BYOC / Private
-        </>
-      ),
       price: "Custom Pricing",
       mainFeatures: [
         "All Open Source features plus management APIs, project-level RBAC, data retention policies, and audit logs",
         "Bundled with ClickHouse Cloud, ClickHouse BYOC, or ClickHouse Private",
         "Langfuse pricing is additive to your ClickHouse commercial plan",
-        "Dedicated support engineer for deployment and hosting guidance",
+        "Named lead support engineer for deployment and hosting guidance",
         "Solutions architect support during evaluation and rollout",
         "Direct access to the product team for feedback",
         "SOC 2 Type II and ISO 27001 reports",
+        "Hardening for Government (in development)",
         "Support SLA",
         "Billing via AWS Marketplace or invoice",
       ],
@@ -371,7 +356,7 @@ const sections: Section[] = [
         name: "OpenTelemetry (Java, Go, custom)",
         description:
           "Use Langfuse as an OpenTelemetry backend. Thereby you can use any OpenTelemetry compatible SDKs (Java, Go, etc.) to send traces to Langfuse. This also increases compatibility with many frameworks and LLM providers.",
-        href: "/docs/opentelemetry/get-started",
+        href: "/integrations/native/opentelemetry",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -387,7 +372,7 @@ const sections: Section[] = [
       },
       {
         name: "Custom via API",
-        href: "/api-and-data-platform/features/public-api",
+        href: "/docs/api-and-data-platform/features/public-api",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -473,6 +458,32 @@ const sections: Section[] = [
     ],
   },
   {
+    name: "Langfuse AI",
+    features: [
+      {
+        name: "Langfuse Assistant (in-app agent)",
+        description:
+          "In-product AI assistant to explore your Langfuse project data and take selected actions with your approval. Available on Langfuse Cloud only.",
+        href: "/docs/langfuse-assistant",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": false, Enterprise: false },
+        },
+      },
+      {
+        name: "Langfuse Assistant usage limits",
+        tiers: {
+          cloud: {
+            Hobby: "Low",
+            Core: "Medium",
+            Pro: "High",
+            Enterprise: "High",
+          },
+        },
+      },
+    ],
+  },
+  {
     name: "Prompt Management",
     href: "/docs/prompt-management/get-started",
     features: [
@@ -537,7 +548,7 @@ const sections: Section[] = [
       {
         name: "Prompt Experiments",
         description: "Run structured experiments on new prompt versions",
-        href: "/docs/evaluation/dataset-runs/native-run",
+        href: "/docs/evaluation/experiments/experiments-via-ui",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -577,7 +588,7 @@ const sections: Section[] = [
         name: "Datasets",
         description:
           "Create and manage datasets of inputs and expected outputs. These can be created from production traces, manually in the UI, or uploaded via the SDK/UI. Datasets are the baseline for offline evaluation.",
-        href: "/docs/evaluation/dataset-runs/datasets",
+        href: "/docs/evaluation/experiments/datasets",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -605,7 +616,7 @@ const sections: Section[] = [
       },
       {
         name: "Evaluation Scores (custom)",
-        href: "/docs/evaluation/evaluation-methods/custom-scores",
+        href: "/docs/evaluation/evaluation-methods/scores-via-sdk",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -613,7 +624,7 @@ const sections: Section[] = [
       },
       {
         name: "User Feedback Tracking",
-        href: "/faq/all/user-feedback",
+        href: "/docs/observability/features/user-feedback",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -645,7 +656,7 @@ const sections: Section[] = [
       {
         name: "Human Annotation",
         description: "Manually annotate LLM traces in Langfuse",
-        href: "/docs/scores/annotation",
+        href: "/docs/evaluation/evaluation-methods/scores-via-ui",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -654,7 +665,7 @@ const sections: Section[] = [
       {
         name: "Human Annotation Queues",
         description: "Managed human annotation workflows with queues",
-        href: "/docs/evaluation/evaluation-methods/annotation#annotation-queues",
+        href: "/docs/evaluation/evaluation-methods/annotation-queues",
         tiers: {
           cloud: {
             Hobby: "1 queue",
@@ -663,6 +674,38 @@ const sections: Section[] = [
             Enterprise: true,
           },
           selfHosted: { "Open Source": true, Enterprise: true },
+        },
+      },
+    ],
+  },
+  {
+    name: "Metrics",
+    href: "/docs/metrics/overview",
+    features: [
+      {
+        name: "Custom Dashboards",
+        href: "/docs/metrics/features/custom-dashboards",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: { "Open Source": true, Enterprise: true },
+        },
+      },
+      {
+        name: "Alerts",
+        description:
+          "Threshold-based alerts on your LLM application metrics with notifications via Slack, webhooks, and GitHub Actions. Alert limits per organization on Langfuse Cloud depend on the plan. Self-hosted deployments require Langfuse v4 and have no alert limit.",
+        href: "/docs/observability/features/alerts",
+        tiers: {
+          cloud: {
+            Hobby: "2 alerts",
+            Core: "20 alerts",
+            Pro: "50 alerts",
+            Enterprise: "100 alerts",
+          },
+          selfHosted: {
+            "Open Source": "Langfuse v4+",
+            Enterprise: "Langfuse v4+",
+          },
         },
       },
     ],
@@ -714,7 +757,19 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Rate limit (general API routes)",
+        name: "Metrics & Observations APIs (v2)",
+        description:
+          "High-performance v2 endpoints for aggregate metrics and row-level observation data. On self-hosted deployments, these APIs require Langfuse v4.",
+        href: "/docs/metrics/features/metrics-api#v2",
+        tiers: {
+          selfHosted: {
+            "Open Source": "Langfuse v4+",
+            Enterprise: "Langfuse v4+",
+          },
+        },
+      },
+      {
+        name: "Rate limit (General API)",
         href: "/faq/all/api-limits",
         tiers: {
           cloud: {
@@ -726,7 +781,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Rate limit (datasets api)",
+        name: "Rate limit (Datasets API)",
         href: "/faq/all/api-limits",
         tiers: {
           cloud: {
@@ -738,13 +793,39 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Rate limit (metrics api)",
+        name: "Rate limit (Metrics API v2)",
         href: "/faq/all/api-limits",
         tiers: {
           cloud: {
             Hobby: "100 requests / day",
-            Core: "200 requests / day",
-            Pro: "2000 requests / day",
+            Core: "100 requests / hour",
+            Pro: "500 requests / hour",
+            Enterprise: "Custom",
+          },
+        },
+      },
+      {
+        name: "Rate limit (Observations API v2)",
+        description:
+          "The v2 Observations API counts toward the general API rate-limit bucket.",
+        href: "/faq/all/api-limits",
+        tiers: {
+          cloud: {
+            Hobby: "30 requests / min",
+            Core: "100 requests / min",
+            Pro: "1,000 requests / min",
+            Enterprise: "Custom",
+          },
+        },
+      },
+      {
+        name: "Rate limit (Legacy Metrics API)",
+        href: "/faq/all/api-limits",
+        tiers: {
+          cloud: {
+            Hobby: "100 requests / day",
+            Core: "2,000 requests / day",
+            Pro: "2,000 requests / day",
             Enterprise: "Custom",
           },
         },
@@ -926,7 +1007,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Dedicated Support Engineer",
+        name: "Named Lead Support Engineer",
         href: "/support#onboarding",
         description:
           "Includes deployment and hosting guidance for your dedicated Langfuse environment.",
@@ -1007,7 +1088,7 @@ const sections: Section[] = [
   },
   {
     name: "Security",
-    href: "/docs/security",
+    href: "/docs/security-and-guardrails",
     features: [
       {
         name: "Data region",
@@ -1016,8 +1097,22 @@ const sections: Section[] = [
           cloud: {
             Hobby: "US, EU, or JP",
             Core: "US, EU, or JP",
-            Pro: "US, EU, or JP",
+            Pro: "US, EU, JP, or HIPAA",
             Enterprise: "US, EU, JP, or HIPAA",
+          },
+        },
+      },
+      {
+        name: "AWS PrivateLink",
+        href: "/security/networking",
+        description:
+          "Available for Enterprise customers with a committed contract; subject to regional availability.",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: true,
           },
         },
       },
@@ -1031,6 +1126,13 @@ const sections: Section[] = [
             Enterprise: true,
           },
           selfHosted: { "Open Source": true, Enterprise: true },
+        },
+      },
+      {
+        name: "Hardening for Government (in development)",
+        href: "/self-hosting/configuration/hardening#hardening-for-government",
+        tiers: {
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -1249,7 +1351,7 @@ const sections: Section[] = [
       },
       {
         name: "Data processing agreement (GDPR)",
-        href: "/security/dpa",
+        href: "/dpa",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
         },
@@ -1268,7 +1370,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "HIPAA compliance",
+        name: "HIPAA-ready region",
         href: "/security/hipaa",
         tiers: {
           cloud: {

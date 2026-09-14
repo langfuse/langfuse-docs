@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useMemo, type MouseEvent, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowRight, ShieldCheck } from "lucide-react";
@@ -14,6 +21,10 @@ import {
   type CloudRegionKey,
 } from "@/lib/cloud-regions";
 import { useCloudRegionSignIn } from "@/lib/use-cloud-region-sign-in";
+import {
+  readUseCaseAttribution,
+  withUseCaseAttribution,
+} from "@/lib/use-case-analytics";
 
 const regionCards: Record<
   CloudRegionKey,
@@ -93,7 +104,35 @@ const getCloudHost = (url: string) => new URL(url).host;
 
 export default function CloudRegionSelectorPage() {
   const pathname = usePathname();
-  const signedInRegions = useCloudRegionSignIn();
+  const { signedInRegions } = useCloudRegionSignIn();
+  const [locationSuffix, setLocationSuffix] = useState({
+    search: "",
+    hash: "",
+  });
+
+  useEffect(() => {
+    const sync = () => {
+      const attribution = readUseCaseAttribution();
+      const url = new URL(
+        attribution
+          ? withUseCaseAttribution(
+              window.location.href,
+              window.location.origin,
+              attribution,
+            )
+          : window.location.href,
+        window.location.origin,
+      );
+      setLocationSuffix({ search: url.search, hash: url.hash });
+    };
+    sync();
+    window.addEventListener("hashchange", sync);
+    window.addEventListener("popstate", sync);
+    return () => {
+      window.removeEventListener("hashchange", sync);
+      window.removeEventListener("popstate", sync);
+    };
+  }, [pathname]);
 
   const { cloudSubpath } = useMemo(
     () => getCloudRedirectPartsFromPathname(pathname || ""),
@@ -110,8 +149,18 @@ export default function CloudRegionSelectorPage() {
         event.altKey;
       if (isModifiedClick) return;
       event.preventDefault();
-      const search =
-        typeof window === "undefined" ? "" : window.location.search;
+      const attribution = readUseCaseAttribution();
+      const url = new URL(
+        attribution
+          ? withUseCaseAttribution(
+              window.location.href,
+              window.location.origin,
+              attribution,
+            )
+          : window.location.href,
+        window.location.origin,
+      );
+      const search = url.search;
       const hash = typeof window === "undefined" ? "" : window.location.hash;
       const targetUrl = buildCloudRedirectUrl({
         region,
@@ -131,13 +180,17 @@ export default function CloudRegionSelectorPage() {
       translate="no"
       className="flex min-h-screen flex-col items-center justify-center bg-surface-bg px-4 py-10 sm:px-6 lg:px-8 notranslate"
     >
-      <div className="flex w-full max-w-[480px] flex-col items-center gap-8">
-        <div className="flex flex-col items-center gap-5">
-          <Logo />
+      <div className="flex w-full max-w-[480px] flex-col items-center gap-10">
+        <div className="flex flex-col items-center gap-8">
+          <div className="flex flex-col items-center gap-1">
+            <Logo variant="byClickHouse" />
+            <Text size="s" className="tracking-[0.01em]">
+              Agent Observability and Evals
+            </Text>
+          </div>
           <Heading as="h1" size="normal" className="text-center">
-            Select your region
+            Select a region
           </Heading>
-          <Text className="max-w-xs">Choose a cloud region to continue.</Text>
         </div>
 
         <CornerBox className="w-full">
@@ -149,8 +202,8 @@ export default function CloudRegionSelectorPage() {
               const href = buildCloudRedirectUrl({
                 region: regionKey,
                 cloudSubpath,
-                search: "",
-                hash: "",
+                search: locationSuffix.search,
+                hash: locationSuffix.hash,
               });
               const isSignedIn = signedInRegions[regionKey];
 
@@ -166,9 +219,9 @@ export default function CloudRegionSelectorPage() {
                     {card.icon}
                   </span>
 
-                  <div className="min-w-0 flex-1">
+                  <div className="flex min-w-0 flex-1 flex-col gap-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-analog text-[15px] font-medium text-text-primary">
+                      <span className="font-analog text-[15px] font-medium leading-none text-text-primary">
                         {card.title}
                       </span>
                       {isSignedIn && <SignedInBadge />}
@@ -176,7 +229,7 @@ export default function CloudRegionSelectorPage() {
                     <Text
                       size="s"
                       as="span"
-                      className="mt-0.5 block text-left text-text-tertiary"
+                      className="block text-left leading-[150%] text-text-tertiary lg:leading-[150%]"
                     >
                       {host}
                       <span className="mx-1.5 text-text-disabled">

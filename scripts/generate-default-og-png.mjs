@@ -26,9 +26,9 @@ const ogBgDataUri = `data:image/png;base64,${fs
   .readFileSync(ogBgPath)
   .toString("base64")}`;
 
-const title = "Langfuse \u2013 Open Source AI Engineering Platform";
+const title = "Langfuse \u2013 Open Source Agent Evals & Observability";
 const description =
-  "Traces, evals, prompt management and metrics to debug and improve your LLM application.";
+  "Trace, evaluate, and improve AI agents with one open platform. Use production data to understand behavior, collaborate on fixes, and ship better quality at lower cost and latency.";
 
 const CONTENT_INSET_X = 86;
 const CONTENT_W = W - CONTENT_INSET_X * 2;

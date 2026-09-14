@@ -19,7 +19,7 @@ const HOME_SECTIONS: TocItem[] = [
   { id: "overview", title: "Overview", depth: 2, url: "#overview" },
   {
     id: "llm-engineering-loop",
-    title: "LLM engineering loop",
+    title: "AI engineering loop",
     depth: 2,
     url: "#llm-engineering-loop",
   },

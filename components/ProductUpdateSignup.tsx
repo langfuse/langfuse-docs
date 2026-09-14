@@ -10,6 +10,8 @@ export function ProductUpdateSignup(props: {
   className?: string;
   small?: boolean;
   compact?: boolean;
+  /** Which Loops mailing list to subscribe to. Defaults to the general product update list. */
+  list?: "product" | "oss";
 }) {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,6 +25,7 @@ export function ProductUpdateSignup(props: {
       body: JSON.stringify({
         email,
         source: props.source ?? "Website signup",
+        list: props.list ?? "product",
       }),
       headers: {
         "Content-Type": "application/json",

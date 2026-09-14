@@ -6,8 +6,10 @@ import {
   MARKETING_SLUGS,
   SECTION_SLUGS,
   MARKETING_SECTIONS,
+  USE_CASE_SECTIONS,
 } from "@/lib/section-registry";
 import { loadPage, buildSectionMetadata, primitiveOnly } from "@/lib/mdx-page";
+import { buildPageUrl } from "@/lib/og-url";
 import { getMDXComponents } from "@/mdx-components";
 import { WrappedDataProvider } from "@/components/wrapped/WrappedDataContext";
 import { DocBodyChrome } from "@/components/DocBodyChrome";
@@ -32,9 +34,15 @@ export default async function SectionDocPage(props: PageProps) {
     section as (typeof MARKETING_SLUGS)[number],
   );
   const effectiveSlug = isMarketing ? [section] : slug;
+  const isUseCase = USE_CASE_SECTIONS.has(section);
 
   if (!SECTION_SLUGS.includes(section)) notFound();
   if (DEDICATED_APP_SECTIONS.has(section)) notFound();
+  // Marketing entries are single pages: the slug is ignored when building
+  // `effectiveSlug`, so without this guard every `/{marketing}/{anything}`
+  // path rendered the parent page with a 200 and became an indexable
+  // duplicate of it.
+  if (isMarketing && slug.length > 0) notFound();
 
   const config = SECTION_CONFIG[section as keyof typeof SECTION_CONFIG];
   const result = await loadPage(config.source, effectiveSlug);
@@ -80,12 +88,17 @@ export default async function SectionDocPage(props: PageProps) {
   return (
     <div
       className={cn(
-        "mx-auto w-full py-10 md:py-16",
+        "mx-auto w-full pb-10 md:pb-16",
+        isUseCase ? "pt-4 md:pt-8" : "pt-10 md:pt-16",
         contentWidthClasses[contentWidth],
       )}
       data-content-width={contentWidth}
+      data-use-case={isUseCase ? section.replaceAll("-", "_") : undefined}
+      data-use-case-page={isUseCase ? `/${section}` : undefined}
     >
-      <DocBodyChrome withProse>{bodyClient}</DocBodyChrome>
+      <DocBodyChrome withProse showCopyButton={!isUseCase}>
+        {bodyClient}
+      </DocBodyChrome>
     </div>
   );
 }
@@ -100,6 +113,11 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
   if (!SECTION_SLUGS.includes(section)) {
     return { title: "Not Found" };
   }
+  // Matches the guard in the page component, so a deep path under a marketing
+  // page does not advertise a canonical URL for a route that 404s.
+  if (isMarketing && slug.length > 0) {
+    return { title: "Not Found" };
+  }
   const config = SECTION_CONFIG[section];
   const page = config.source.getPage(effectiveSlug);
 
@@ -109,6 +127,15 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
     section,
     config.title,
     effectiveSlug,
+    // Marketing pages route as `/${section}` but use `[section]` as their
+    // Fumadocs slug, so the default `pagePath` would double the segment
+    // (e.g. `/careers/careers`). Pin the canonical to the real public path.
+    isMarketing
+      ? {
+          canonicalFallback: buildPageUrl(`/${section}`),
+          publicPath: `/${section}`,
+        }
+      : undefined,
   );
 }
 

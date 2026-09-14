@@ -4,16 +4,19 @@ sidebarTitle: OpenAI (Python)
 seoTitle: Open Source Observability for OpenAI (Python)
 description: Drop-in replacement of OpenAI SDK (Python) to get full observability in Langfuse by changing only the import.
 logo: /images/integrations/openai_icon.svg
+logoAppearance: dark
 ---
 
 # Observability for OpenAI SDK (Python)
 
 <Callout type="info">
-  Looking for the JS/TS version? [Check it out
-  here](/integrations/model-providers/openai-js).
+  Looking for the JS/TS version? See the [OpenAI (JS/TS)
+  integration](/integrations/model-providers/openai-js).
 </Callout>
 
 If you use the OpenAI Python SDK, you can use the Langfuse **drop-in replacement** to get full logging by changing only the import. This works with OpenAI and Azure OpenAI.
+
+Langfuse is open source. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it. The integration code is the same for both.
 
 ```diff
 - import openai
@@ -30,7 +33,7 @@ Langfuse automatically tracks:
 - [API Errors](#error-tracking)
 - Model usage (tokens) and cost (USD) ([learn more](/docs/model-usage-and-cost))
 
-## How it works
+## How it works [#how-it-works]
 
 <Steps>
 
@@ -106,18 +109,6 @@ get_client().auth_check()
 
 _No changes required._
 
-Check out the notebook for end-to-end examples of the integration:
-
-import { FileCode } from "lucide-react";
-
-<Cards>
-  <Card
-    title="Example notebook"
-    href="/guides/cookbook/integration_openai_sdk"
-    icon={<FileCode />}
-  />
-</Cards>
-
 </Steps>
 
 ## Troubleshooting
@@ -137,7 +128,7 @@ langfuse = get_client()
 langfuse.flush()
 ```
 
-Learn more about queuing and batching of events [here](/docs/observability/features/queuing-batching).
+Learn more about [queuing and batching of events](/docs/observability/features/queuing-batching).
 
 ### Assistants API
 
@@ -199,7 +190,7 @@ export LANGFUSE_TRACING_ENABLED=false
 
 ## Advanced usage
 
-### Custom trace properties
+### Custom trace properties [#custom-trace-properties]
 
 You can add the following properties to the openai method:
 
@@ -235,7 +226,7 @@ result = openai.chat.completions.create(
 )
 ```
 
-**Option 2: Via enclosing span (for more control):**
+**Option 2: Via enclosing [observation](/docs/observability/data-model#observations-traces-and-sessions) (for more control):**
 
 ```python
 from langfuse import get_client, propagate_attributes
@@ -379,7 +370,7 @@ get_client().flush()
 
 Since OpenAI beta APIs are changing frequently across versions, we fully support only the stable APIs in the OpenAI SDK. If you are using a beta API, you can still use the Langfuse SDK by wrapping the OpenAI SDK manually with the `@observe()` [decorator](/docs/sdk/python/decorators).
 
-#### Structured Output
+#### Structured Output [#structured-output]
 
 For **structured output parsing**, you have two fully instrumented options depending on your `openai` Python SDK version:
 
@@ -455,7 +446,7 @@ Tracing of the assistants api is not supported by this integration as OpenAI Ass
 
 Langfuse automatically tracks and monitors OpenAI API errors if you use the native integration. They are captured via the `level` and `statusMessage` fields (see [docs](/docs/observability/features/log-levels)).
 
-Learn more about how to get started [here](/integrations/model-providers/openai-py).
+See the [setup steps above](#how-it-works) to get started.
 
 ```diff
 - import openai
@@ -482,7 +473,7 @@ Throws error 👆
 
 import { FaqPreview } from "@/components/faq/FaqPreview";
 
-<FaqPreview tags={["integration"]} />
+<FaqPreview tags={["openai"]} />
 
 ## GitHub Discussions
 

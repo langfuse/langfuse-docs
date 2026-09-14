@@ -34,6 +34,7 @@ export function Image(
     fill?: boolean;
     sizes?: string;
     priority?: boolean;
+    quality?: number;
   },
 ) {
   const {
@@ -46,6 +47,7 @@ export function Image(
     fill,
     sizes,
     priority,
+    quality,
     ...rest
   } = props;
   if (!src) return null;
@@ -75,6 +77,7 @@ export function Image(
         fill
         sizes={sizes}
         priority={priority}
+        quality={quality}
         className={className}
         style={style}
         {...(rest as object)}
@@ -94,6 +97,7 @@ export function Image(
         sizes ??
         (hasExplicitDimensions ? undefined : "(max-width: 768px) 100vw, 800px")
       }
+      quality={quality}
       style={
         hasExplicitDimensions
           ? style

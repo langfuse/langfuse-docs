@@ -67,9 +67,9 @@ export function ManualGuideList({
           align-items: center;
           gap: 16px;
           font-family: var(--font-mono);
-          font-size: 11px;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
+          font-size: 13px;
+          letter-spacing: 0.02em;
+          text-transform: none;
           color: var(--text-primary);
         }
 

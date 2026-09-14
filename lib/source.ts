@@ -14,7 +14,10 @@ import {
   handbook,
   marketing,
   academy,
+  academyJa,
   workshop,
+  resources,
+  compare,
 } from "fumadocs-mdx:collections/server";
 import { CONTENT_DIR_TO_URL_PREFIX } from "./content-dir-map.js";
 
@@ -148,10 +151,33 @@ export const academySource = loader({
   pageTree: { idPrefix: "academy", transformers: [shortTitleTransformer] },
 });
 
+// Japanese academy is implemented as a separate collection rather than via
+// Fumadocs i18n, so URLs sit naturally under /academy/japan/ instead of
+// requiring a /<locale> prefix. baseUrl is a literal nested path (not the
+// baseUrl() helper) because this is a sub-collection of academy, not a
+// top-level content dir, so it has no content-dir-map entry. Fumadocs splits
+// baseUrl on "/", so a multi-segment value yields /academy/japan/<slug>.
+export const academyJaSource = loader({
+  baseUrl: "/academy/japan",
+  source: academyJa.toFumadocsSource(),
+  pageTree: { idPrefix: "academy-ja", transformers: [shortTitleTransformer] },
+});
+
 export const workshopSource = loader({
   baseUrl: baseUrl("workshop"),
   source: workshop.toFumadocsSource(),
   pageTree: { idPrefix: "workshop", transformers: [shortTitleTransformer] },
+});
+
+export const resourcesSource = loader({
+  baseUrl: baseUrl("resources"),
+  source: resources.toFumadocsSource(),
+  pageTree: { idPrefix: "resources", transformers: [shortTitleTransformer] },
+});
+
+export const compareSource = loader({
+  baseUrl: baseUrl("compare"),
+  source: compare.toFumadocsSource(),
 });
 
 export const marketingSource = loader({

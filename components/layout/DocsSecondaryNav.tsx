@@ -22,9 +22,9 @@ const SECTIONS = [
   { title: "Docs", path: "/docs", Icon: IconBook },
   { title: "Integrations", path: "/integrations", Icon: Unplug },
   { title: "Self Hosting", path: "/self-hosting", Icon: IconDesktopTower },
-  { title: "Guides", path: "/guides", Icon: IconCompass },
   { title: "Academy", path: "/academy", Icon: GraduationCap },
   { title: "Workshop", path: "/workshop", Icon: Presentation },
+  { title: "Guides", path: "/guides", Icon: IconCompass },
   { title: "AI Engineering Library", path: "/library", Icon: IconBookBookmark },
 ] as const;
 

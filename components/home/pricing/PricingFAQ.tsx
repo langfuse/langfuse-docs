@@ -1,11 +1,26 @@
 import { Heading } from "@/components/ui/heading";
 import { FAQAccordion, type FAQItem } from "@/components/shared/FAQAccordion";
 
+const MARKETPLACE_QUESTION = "Can I purchase Langfuse through AWS Marketplace?";
+
+const marketplaceFaqByVariant: Record<"cloud" | "selfHosted", FAQItem> = {
+  cloud: {
+    question: MARKETPLACE_QUESTION,
+    answer:
+      "Yes. Enterprise customers with a yearly commitment can bill via AWS Marketplace. [Talk to us](/talk-to-us?deployment=cloud) to request a private offer. Invoice billing is also available.",
+  },
+  selfHosted: {
+    question: MARKETPLACE_QUESTION,
+    answer:
+      "Yes. Self-hosted Enterprise can be billed via AWS Marketplace or invoice. [Talk to us](/talk-to-us?deployment=self-hosted) to request a private offer.",
+  },
+};
+
 const faqs: FAQItem[] = [
   {
     question: "What is the easiest way to try Langfuse?",
     answer:
-      "You can view the [public example project](/demo) or sign up for a [free account](/cloud) to try Langfuse with your own data. The Hobby plan is completely free and does not require a credit card.",
+      "You can view the [public example project](/docs/demo) or sign up for a [free account](/cloud) to try Langfuse with your own data. The Hobby plan is completely free and does not require a credit card.",
   },
   {
     question: "Can I self-host Langfuse for free?",
@@ -33,6 +48,11 @@ const faqs: FAQItem[] = [
       "You get one bill each month. We charge your Core, Pro, or Team plan at the start of the month. We charge for your usage at the end of the month. The bill you get at the start of the month shows two things: the plan cost for the new month and the usage from last month.",
   },
   {
+    question: "What are Langfuse Cloud Credits, and how do they affect me?",
+    answer:
+      "A Langfuse Cloud Credit is a prepaid unit of credit, equal to one (1) US dollar, to be applied to a customer's use of Langfuse Cloud. Credits are drawn down according to the then-current pricing at [langfuse.com/pricing](/pricing). Langfuse Cloud Credits only apply to customers with a committed spend contract for Langfuse Cloud. If you have questions about your credit balance, drawdown schedule, or committed spend contract, please contact your account team. If you use Langfuse Cloud on a Pay-as-you-Go basis, Langfuse Cloud Credits do not apply to you.",
+  },
+  {
     question: "Can I set up alerts on the usage fees?",
     answer:
       "Yes, you can configure spend alerts to receive email notifications when your organization's spending exceeds predefined monetary thresholds. This helps you monitor costs and take action before unexpected charges occur. Navigate to your organization settings and the Billing tab to configure spend alerts. Learn more in our [spend alerts documentation](/docs/administration/spend-alerts).",
@@ -42,10 +62,11 @@ const faqs: FAQItem[] = [
     answer:
       "You can manage your subscription through the organization settings in Langfuse Cloud or by using this [Customer Portal](/billing-portal).",
   },
+  marketplaceFaqByVariant.cloud,
   {
     question: "Can I redline the contracts?",
     answer:
-      "Yes, we offer customized contracts for Langfuse Enterprise customers with a yearly commitment. Please contact us at enterprise@langfuse.com for more details. The default plans are affordable as they are designed to be self-serve on our standard terms.",
+      "Yes, we offer customized contracts for Langfuse Enterprise customers with a yearly commitment. Please [contact sales](/talk-to-us) for more details. The default plans are affordable as they are designed to be self-serve on our standard terms.",
   },
   {
     question: "Where is the data stored?",
@@ -59,7 +80,17 @@ const faqs: FAQItem[] = [
   },
 ];
 
-export function PricingFAQ() {
+export function PricingFAQ({
+  variant = "cloud",
+}: {
+  variant?: "cloud" | "selfHosted";
+}) {
+  const faqsForVariant = faqs.map((faq) =>
+    faq.question === MARKETPLACE_QUESTION
+      ? marketplaceFaqByVariant[variant]
+      : faq,
+  );
+
   return (
     <div id="faq">
       <div className="pt-16">
@@ -67,7 +98,7 @@ export function PricingFAQ() {
           <Heading as="h2" size="normal" className="text-left">
             FAQ
           </Heading>
-          <FAQAccordion faqs={faqs} />
+          <FAQAccordion faqs={faqsForVariant} />
         </div>
       </div>
     </div>

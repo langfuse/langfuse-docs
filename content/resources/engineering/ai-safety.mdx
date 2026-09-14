@@ -1,0 +1,85 @@
+---
+title: "AI safety research with Langfuse: tracing and evaluation"
+description: "Use Langfuse for AI safety research: trace agent behavior, review failures, evaluate safety monitors, and compare interventions with open-source infrastructure."
+tags: [guide, evaluation]
+---
+
+# AI safety research with Langfuse: tracing and evaluation
+
+AI safety research often starts with a question about behavior: did an agent follow its instructions, act outside its permissions, or claim to have done something it never did? Answering requires the record of what happened between the request and the final response.
+
+**TL;DR:** Langfuse helps researchers trace agent behavior, review failures, and compare interventions through experiments. Human annotations and automated scores stay attached to the recorded execution. Research teams can self-host the open-source platform or apply for Langfuse Cloud research grants.
+
+## Trace agent behavior [#agent-traces]
+
+A trace records the model calls, tool executions, and intermediate results of an agent run. Researchers can use it to compare what the agent said with what its tools actually did.
+
+Consider a hypothetical coding agent that reports that all tests passed. Its trace shows that the test command failed to start and the agent never tried again. Reviewing the final response alone would miss the unsupported claim.
+
+Different research questions need different records:
+
+| Research question                       | Evidence to capture                                                |
+| --------------------------------------- | ------------------------------------------------------------------ |
+| Did the agent exceed its permissions?   | Instructions, approval decisions, and executed tool calls.         |
+| Did it misreport completion?            | The final claim, tool results, and independently checked outcomes. |
+| Did a monitor miss a concerning action? | The monitor's input, decision, and timing relative to the action.  |
+| Did an intervention change behavior?    | Matched test cases, configurations, interventions, and outcomes.   |
+
+Langfuse's [tracing integrations](/integrations) capture model calls and agent activity across frameworks and providers. Add instrumentation for application-specific events, such as permission checks or human approvals. For multiagent runs, preserve parent-child relationships so reviewers can follow each agent's actions and context.
+
+## Review failures and evaluate safety monitors [#review-and-monitors]
+
+Human review helps researchers define the behavior they want to measure before automating its detection. Langfuse's [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) let reviewers inspect recorded interactions and attach scores and notes.
+
+For the coding-agent example, a rubric could distinguish four outcomes:
+
+| Label                 | Definition                                                        |
+| --------------------- | ----------------------------------------------------------------- |
+| Supported success     | The agent reports success and the recorded execution supports it. |
+| Reported failure      | The agent accurately reports that execution failed.               |
+| Unsupported success   | The agent reports success despite evidence that execution failed. |
+| Insufficient evidence | The record does not establish whether the claim is correct.       |
+
+A tool failure is not itself an unsupported success claim. The rubric needs to account for both the execution result and what the agent says about it.
+
+### Choose the evaluator for the question [#evaluation-methods]
+
+Use code for checks with explicit rules and an LLM judge for judgments that require reading context. A code check can identify a failed test command. A judge can assess whether the agent's final response contradicts that result. Provide the relevant execution history explicitly; an observation-level evaluator does not automatically receive every child observation.
+
+Check the monitor against a held-out set of human-reviewed examples. Measure missed failures and false alarms, then read the disagreements. Langfuse's [score analytics](/docs/evaluation/scores/score-analytics) compares automated scores with human annotations, including confusion matrices and agreement metrics.
+
+[AISI's transcript-analysis guidance](https://www.aisi.gov.uk/blog/a-pipeline-for-transcript-analysis-using-inspect-scout) describes the same progression: inspect examples, define the behavior, build a scanner, and validate its judgments.
+
+## Compare interventions with experiments [#comparing-interventions]
+
+A reviewed failure becomes a test case for changes to prompts, models, tool permissions, or oversight. Langfuse's [datasets and experiments](/docs/evaluation/overview) connect those cases with repeated runs and evaluation scores.
+
+For the coding-agent example:
+
+1. **Define the failure.** Identify the unsupported claim and the tool result that contradicts it.
+2. **Reproduce the conditions.** Create a test environment where the test command fails to start and the outcome can be checked independently.
+3. **Test an intervention.** Compare the baseline with an agent instructed to verify successful test execution before reporting success.
+4. **Measure both outcomes.** Score the accuracy of the report and task completion, so avoiding all work does not count as an improvement.
+5. **Test beyond the original case.** Repeat runs and include held-out cases with different tasks and execution failures.
+
+Keep the dataset version, agent code revision, model configuration, evaluator rubric, and environment details with each experiment. Use the same test cases to compare interventions. Permissions and approval requirements should be enforced by the agent runtime; Langfuse records their decisions and outcomes for analysis.
+
+## Self-host research infrastructure [#research-support]
+
+Research teams can [self-host Langfuse](/self-hosting) to store and analyze traces in their own environment. The open-source core also lets researchers inspect the code and extend it for their workflows. The deployment documentation lists the capabilities available in each edition.
+
+Choose where both the traces and evaluation models run. A self-hosted trace store can still send data to an external provider if that provider runs the judge. When transcripts contain sensitive information, configure access and redaction around the research team's requirements.
+
+## Langfuse Cloud research grants [#research-grants]
+
+Researchers who prefer managed infrastructure can apply to the [research and education program](/research). As of September 9, 2026, the program offers $200 in monthly Cloud credits through its Fast Grant and larger research grants that can cover up to 100% of eligible usage. The program page explains eligibility, applications, and current terms.
+
+## FAQ [#faq]
+
+### Can Langfuse establish whether an AI model is aligned? [#establish-alignment]
+
+No. Langfuse records agent behavior and supports evaluations of that behavior. Researchers define the experiment, validate the measurements, and decide which conclusions the evidence supports.
+
+### Can external safety evaluators send results to Langfuse? [#external-evaluators]
+
+Yes. The [scores API and SDK](/docs/evaluation/evaluation-methods/scores-via-sdk) accept externally computed evaluations. A custom pipeline can attach a finding and explanation to the relevant trace or observation without running the evaluator inside Langfuse.

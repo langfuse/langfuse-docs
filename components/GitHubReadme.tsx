@@ -4,27 +4,37 @@ import { useState, useEffect } from "react";
 import { RenderedReadmeContent } from "@/components/RenderedReadmeContent";
 
 /**
- * Fetches and renders a README from GitHub at runtime.
- * Renders as formatted markdown (headings, lists, tables) for all README usages
- * (terraform, k8s, n8n, changelog, etc.).
+ * Fetches a README from GitHub and renders it as formatted markdown.
+ * Relative links/images are rewritten to GitHub; HTML `<img>` tags render as images.
  */
 export function GitHubReadme({ url }: { url: string }) {
   const [content, setContent] = useState<string | null>(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    fetch(url)
+    const controller = new AbortController();
+    setContent(null);
+    setError(false);
+
+    fetch(url, { signal: controller.signal })
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.text();
       })
-      .then(setContent)
-      .catch(() => setError(true));
+      .then((text) => {
+        if (!controller.signal.aborted) setContent(text);
+      })
+      .catch((e) => {
+        if (e instanceof DOMException && e.name === "AbortError") return;
+        setError(true);
+      });
+
+    return () => controller.abort();
   }, [url]);
 
   if (error) return <p>Error loading README content.</p>;
   if (!content)
     return <p className="text-sm text-muted-foreground">Loading README…</p>;
 
-  return <RenderedReadmeContent content={content} />;
+  return <RenderedReadmeContent content={content} sourceUrl={url} />;
 }

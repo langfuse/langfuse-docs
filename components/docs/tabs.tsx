@@ -14,10 +14,12 @@ const tabContentClass = "!bg-card tabs-content-normalized";
 // in MDX v3 (which compiles it as Tabs.Tab, not components["Tabs.Tab"]).
 export function TabsContent({
   className,
+  forceMount = true,
   ...props
 }: React.ComponentProps<typeof FumadocsTabsContent>) {
   return (
     <FumadocsTabsContent
+      forceMount={forceMount}
       className={cn(tabContentClass, className)}
       {...props}
     />
@@ -26,9 +28,16 @@ export function TabsContent({
 
 export function Tab({
   className,
+  forceMount = true,
   ...props
 }: React.ComponentProps<typeof FumadocsTab>) {
-  return <FumadocsTab className={cn(tabContentClass, className)} {...props} />;
+  return (
+    <FumadocsTab
+      forceMount={forceMount}
+      className={cn(tabContentClass, className)}
+      {...props}
+    />
+  );
 }
 
 export const Tabs = Object.assign(FumadocsTabs, { Tab });

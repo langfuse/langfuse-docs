@@ -4,7 +4,7 @@ title: Run Experiments on Versioned Datasets
 description: Fetch datasets at specific version timestamps and run experiments on historical dataset versions via UI, API, and SDKs for full reproducibility.
 author: Marlies
 ogImage: /images/changelog/2026-02-11-experiments-versioned-datasets.jpg
-canonical: /docs/evaluation/experiments/datasets#versioning
+canonical: /docs/evaluation/experiments/datasets
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
@@ -124,7 +124,7 @@ const versionedDataset = await langfuse.dataset.get("qa-dataset", {
 const result = await versionedDataset.runExperiment({
   name: "Baseline Experiment v1",
   description: "Testing against dataset from Dec 15",
-  task: async ({ item }) => {
+  task: async (item) => {
     const response = await observeOpenAI(new OpenAI()).chat.completions.create({
       model: "gpt-4.1",
       messages: [{ role: "user", content: item.input }]
