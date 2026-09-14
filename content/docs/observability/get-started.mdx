@@ -308,6 +308,66 @@ use the Langfuse OpenTelemetry integration to send OTLP traces to Langfuse.
 This is the right entry point for custom OTEL setups and languages beyond the
 Langfuse SDKs.
 
+To send one span without an SDK, set your project credentials and run this
+OTLP/HTTP JSON request:
+
+```bash
+export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+export LANGFUSE_HOST="https://cloud.langfuse.com" # EU region
+
+TRACE_ID=$(openssl rand -hex 16)
+SPAN_ID=$(openssl rand -hex 8)
+START_TIME=$(($(date +%s) * 1000000000))
+END_TIME=$((START_TIME + 1000000))
+
+curl -X POST "$LANGFUSE_HOST/api/public/otel/v1/traces" \
+  -u "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -H "x-langfuse-ingestion-version: 4" \
+  --data-binary @- <<JSON
+{
+  "resourceSpans": [{
+    "resource": {
+      "attributes": [{
+        "key": "service.name",
+        "value": { "stringValue": "curl-example" }
+      }]
+    },
+    "scopeSpans": [{
+      "scope": { "name": "manual-curl" },
+      "spans": [{
+        "traceId": "$TRACE_ID",
+        "spanId": "$SPAN_ID",
+        "name": "hello-langfuse",
+        "startTimeUnixNano": "$START_TIME",
+        "endTimeUnixNano": "$END_TIME",
+        "attributes": [
+          {
+            "key": "langfuse.observation.type",
+            "value": { "stringValue": "span" }
+          },
+          {
+            "key": "langfuse.observation.input",
+            "value": { "stringValue": "\"Hello, Langfuse!\"" }
+          },
+          {
+            "key": "langfuse.observation.output",
+            "value": { "stringValue": "\"Hello from curl!\"" }
+          }
+        ]
+      }]
+    }]
+  }]
+}
+JSON
+```
+
+Use the host for your [data region](/security/data-regions) or self-hosted
+deployment. See the [OpenTelemetry property
+mapping](/integrations/native/opentelemetry#property-mapping) to add model,
+usage, user, session, and other Langfuse attributes.
+
 <Cards num={2}>
   <Card
     icon={
