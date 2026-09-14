@@ -166,7 +166,7 @@ const res = await observeOpenAI(new OpenAI(), {
 
 ### Group multiple generations into a single trace
 
-Use `propagateAttributes` to apply trace attributes (name, tags, metadata) to all observations created inside its callback, and the `startActiveObservation` context manager to group multiple OpenAI generations under a single root observation. Input and output are set on the root observation.
+Use `propagateAttributes` to apply trace attributes (name, tags, metadata) to all observations created inside its callback, and the `startActiveObservation` context manager to group multiple OpenAI generations under a single root [observation](/docs/observability/data-model#observations-traces-and-sessions). Input and output are set on the root observation.
 
 ```typescript
 import { startActiveObservation, propagateAttributes } from "@langfuse/tracing";

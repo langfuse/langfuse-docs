@@ -24,7 +24,7 @@ OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING},x-langfuse-ingest
 
 If your SDK requires signal-specific configuration, the traces path is `/api/public/otel/v1/traces`. See how to [enable real-time ingestion](/integrations/native/opentelemetry#real-time-ingestion), or review the full [OpenTelemetry property mapping](/integrations/native/opentelemetry#property-mapping).
 
-Two rules determine how your OpenTelemetry spans render as Langfuse observations (Langfuse calls spans observations; `span` is also a specific observation type):
+Two rules determine how your OpenTelemetry spans render as Langfuse [observations](/docs/observability/data-model#observations-traces-and-sessions) (Langfuse calls spans observations; `span` is also a specific observation type):
 
 1. **OpenTelemetry spans carrying `gen_ai.*` attributes become generations**, with model name, token usage, and cost mapped from the semantic conventions.
 2. **Everything else becomes a regular observation** in the trace tree. To attach user and session context, set `user.id` and `session.id` attributes on your spans.

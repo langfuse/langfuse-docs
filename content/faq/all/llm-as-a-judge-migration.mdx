@@ -137,14 +137,14 @@ Existing evaluator configurations typically fall into these cases:
 
 | Current variable mapping                                       | Typical configuration change                                                                                                                                                           |
 | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`Observation` for every variable, all from one observation** | Target the same observation and translate the filters and variable mappings.                                                                                                           |
+| **`Observation` for every variable, all from one observation** | Target the same [observation](/docs/observability/data-model#observations-traces-and-sessions) and translate the filters and variable mappings.                                        |
 | **`Trace` for every variable**                                 | Select the observation holding the equivalent input, output, and metadata. For end-to-end evaluations, this is often a root observation.                                               |
 | **A mix of `Trace` and one `Observation`**                     | Target that observation and make the trace fields available there via [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes) or an instrumentation update. |
 | **More than one `Observation`, with or without `Trace`**       | Write the required values to a root or dedicated evaluation observation, then target it directly. Any future multi-span support will also use the observations-first model.            |
 | **`Dataset` target**                                           | Create an `Experiment` successor with the same evaluator configuration. Translate `datasetId` to `experimentDatasetId` and map dataset-item fields to the experiment-item context.     |
 
 Dataset-target evaluators are the simplest v3-to-v4 compatibility migration. A
-dataset run's root observation is the same observation that carries the run's input and
+dataset run's root observation is the same [observation](/docs/observability/data-model#observations-traces-and-sessions) that carries the run's input and
 output, so mapping `trace.input` to `observation.input` and `trace.output` to
 `observation.output` is safe. No evaluator-specific instrumentation change is
 needed for this case. Map dataset-item expected output and metadata to the
@@ -153,7 +153,7 @@ the legacy dataset-target evaluator to avoid duplicate scores.
 
 ### Before and after example
 
-This example upgrades a trace-level evaluator that reads trace input and output to target the observation containing the same values.
+This example upgrades a trace-level evaluator that reads trace input and output to target the [observation](/docs/observability/data-model#observations-traces-and-sessions) containing the same values.
 
 **Before: trace-level evaluator**
 

@@ -17,7 +17,7 @@ There are two main ways to instrument your application with the Langfuse SDKs:
   - **[Observe wrapper](#observe-wrapper)**
   - **[Manual observations](#manual-observations)**
 
-All approaches are interoperable. You can nest a decorator-created observation inside a context manager or mix manual observations with our [native integrations](/integrations).
+All approaches are interoperable. You can nest a decorator-created observation inside a context manager or mix manual [observations](/docs/observability/data-model#observations-traces-and-sessions) with our [native integrations](/integrations).
 
 ## Custom instrumentation [#custom]
 
@@ -788,7 +788,7 @@ await startObservation("run", async (span) => {
 
 **Link to existing traces**
 
-When integrating with upstream services that already have trace IDs, supply the W3C trace context so Langfuse observations join the existing tree rather than creating a new one.
+When integrating with upstream services that already have trace IDs, supply the W3C trace context so Langfuse [observations](/docs/observability/data-model#observations-traces-and-sessions) join the existing tree rather than creating a new one.
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">
@@ -842,7 +842,7 @@ span.end();
 
 ## Client lifecycle & flushing
 
-As the Langfuse SDKs are [asynchronous](/docs/observability/data-model#background-processing), they buffer observations in the background. Always [`flush()`](https://python.reference.langfuse.com/langfuse#Langfuse.flush) or [`shutdown()`](https://python.reference.langfuse.com/langfuse#Langfuse.shutdown) the client in short-lived processes (scripts, serverless functions, workers) to avoid losing data.
+As the Langfuse SDKs are [asynchronous](/docs/observability/data-model#background-processing), they buffer [observations](/docs/observability/data-model#observations-traces-and-sessions) in the background. Always [`flush()`](https://python.reference.langfuse.com/langfuse#Langfuse.flush) or [`shutdown()`](https://python.reference.langfuse.com/langfuse#Langfuse.shutdown) the client in short-lived processes (scripts, serverless functions, workers) to avoid losing data.
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">

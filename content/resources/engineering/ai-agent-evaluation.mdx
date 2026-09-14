@@ -94,7 +94,7 @@ Two related patterns: in experiments, a tool-call assertion makes a good regress
 
 Task completion asks whether the agent achieved the user's goal, and it usually needs an LLM judge because "achieved the goal" is a semantic judgment over the whole run. The judge needs the overall input and final output, not an intermediate step.
 
-In Langfuse, [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators run at the observation level, which is the recommended target as of July 2026 (trace-level judge evaluators are legacy). The pattern for whole-run judgments is to target the root observation of the agent, the observation that records the overall request and final response, and map its input and output into the judge prompt. If your instrumentation does not yet write a summary of the run onto the root observation, add that first; the evaluator sees the observation it targets, not its children.
+In Langfuse, [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators run at the observation level, which is the recommended target as of July 2026 (trace-level judge evaluators are legacy). The pattern for whole-run judgments is to target the root observation of the agent, the [observation](/docs/observability/data-model#observations-traces-and-sessions) that records the overall request and final response, and map its input and output into the judge prompt. If your instrumentation does not yet write a summary of the run onto the root observation, add that first; the evaluator sees the observation it targets, not its children.
 
 Concretely:
 
