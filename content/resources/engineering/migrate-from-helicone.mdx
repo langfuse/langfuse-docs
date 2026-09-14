@@ -1,74 +1,310 @@
 ---
-title: "How to Migrate from Helicone to Langfuse"
-description: Step-by-step guide to migrate your prompt management and observability from Helicone to Langfuse, covering prompt templates, variables, versioning, and tracing.
-tags: [migration, integration]
+title: Migrate from Helicone to Langfuse
+description: "Step-by-step guide to migrate from Helicone to Langfuse: switch tracing off the gateway, map users, sessions, and properties, migrate prompts with versions, and export request history."
+tags: [migration, guide]
 ---
+
+import { Cloud, MessageSquare } from "lucide-react"; import { Details, Summary } from "@/components/Details";
 
 # Migrate from Helicone to Langfuse
 
-Helicone has [moved into maintenance mode](https://www.helicone.ai/blog/joining-mintlify) following its acquisition by Mintlify. This guide covers how to migrate your **prompt management** and **observability/tracing** setup from Helicone to Langfuse.
+This guide walks through migrating LLM observability and prompt management from [Helicone](https://www.helicone.ai) to [Langfuse](/): tracing first, then user/session attribution, prompts, and your historical request data.
 
-## Migrating Prompt Management
+**TL;DR:** Helicone captures LLM calls at the gateway; Langfuse captures them in your application via SDK wrappers or OpenTelemetry, outside the request path. The tracing swap is usually a same-day change: replace the Helicone base URL with a traced client (or keep the gateway during a transition window, since the two capture mechanisms don't conflict). Helicone's `Helicone-User-Id`, session, and `Helicone-Property-*` headers map to first-class Langfuse users, sessions, and metadata/tags. Prompts export through Helicone's REST API and import as versioned Langfuse prompts with environment labels. Historical requests export via Helicone's `@helicone/export` CLI and can be selectively reingested over OTLP. Since Helicone is in maintenance mode, export your data early even if you only reingest part of it.
 
-Helicone offers two approaches to [prompt management](https://docs.helicone.ai/gateway/prompt-integration): a **gateway approach** where you pass a `prompt_id` and the gateway compiles the template server-side in a single API call, and an **SDK approach** where you fetch and compile prompts client-side via the `@helicone/helpers` package. Langfuse uses an SDK-based model similar to Helicone's SDK approach: prompts are [fetched and compiled in your application code](/docs/prompt-management/get-started), with built-in [caching](/docs/prompt-management/features/caching) to keep latency low and ensure [guaranteed availability](/docs/prompt-management/features/guaranteed-availability).
+<Cards num={2}>
+  <Card title="Get started free" href="https://cloud.langfuse.com" icon={<Cloud />} />
+  <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
+</Cards>
 
-If you used **Helicone's gateway approach**, the main change is moving prompt resolution into your application code. If you already used **Helicone's SDK approach** (`HeliconePromptManager` → `getPromptBody`), the migration is more straightforward — you're replacing one SDK fetch+compile pattern with another.
+## Why teams migrate [#why-teams-migrate]
 
-### 1. Export Prompts from Helicone
+Helicone [moved into maintenance mode](https://www.helicone.ai/blog/joining-mintlify) following its acquisition by Mintlify (announced March 2026): services remain live for the foreseeable future, but the product is no longer actively developed. That makes the two usual migration motivations concrete:
 
-Use the [Helicone Prompt API](https://docs.helicone.ai/rest/prompt/query-prompts) to export your existing prompts:
+- **A maintained, actively developed platform.** Langfuse ships tracing, [prompt management](/docs/prompt-management/overview), [evaluation](/docs/evaluation/overview), datasets, and [custom dashboards](/docs/metrics/features/custom-dashboards) as one actively developed product, open source and fully [self-hostable](/self-hosting) (UI, API, and data in your own infrastructure).
+- **Observability moves out of the request path.** Helicone's primary integration is a gateway/proxy that sits between your application and the LLM provider. Langfuse SDKs capture traces asynchronously in your application and export them in the background, so the observability layer adds no hop and no availability dependency to your LLM calls. You also get [hierarchical traces](/docs/observability/data-model) with nested spans for retrieval steps, tool calls, and agent loops, rather than one log entry per LLM request.
 
-1. **List all prompts** via `POST /v1/prompt-2025/query` to get prompt IDs.
-2. **List versions** for each prompt via `POST /v1/prompt-2025/query/versions`.
-3. **Fetch the full body** for each version via `GET /v1/prompt-2025/{promptVersionId}/prompt-body`.
-4. **Record environment assignments** via `POST /v1/prompt-2025/query/environment-version` to know which version is deployed where (production, staging, etc.).
+There is a real timing angle: your Helicone request history, prompts, and configuration are only exportable while the service stays up. Even teams that migrate gradually should run the data export (Step 4) early.
 
-### 2. Convert Variable Syntax
+## Concept mapping [#concept-mapping]
 
-Helicone uses typed variables (`{{hc:name:type}}`), while Langfuse uses plain `{{variable}}` placeholders compiled at runtime via [`.compile()`](/docs/prompt-management/features/variables).
+| Helicone                                     | Langfuse                                                                                                          | Notes                                                     |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Request log entry                            | [Trace](/docs/observability/data-model) with nested observations                                                  | One request becomes a generation inside a trace           |
+| `Helicone-User-Id` header                    | `user_id` on the trace ([user tracking](/docs/observability/features/users))                                      | Per-user cost and usage views carry over                  |
+| `Helicone-Session-Id` / `-Name` headers      | `session_id` on the trace ([sessions](/docs/observability/features/sessions))                                     | Groups multi-step interactions                            |
+| `Helicone-Session-Path` hierarchy            | Span nesting via [instrumentation](/docs/observability/sdk/instrumentation)                                       | Path strings become a real trace tree                     |
+| `Helicone-Property-*` custom properties      | [Metadata](/docs/observability/features/metadata) and [tags](/docs/observability/features/tags)                   | Filterable in tables and dashboards                       |
+| Prompts + environments (production, staging) | [Prompts](/docs/prompt-management/data-model) + [labels](/docs/prompt-management/features/prompt-version-control) | The production environment becomes the `production` label |
+| Prompt variables `{{hc:name:type}}`          | [Variables](/docs/prompt-management/features/variables) `{{name}}`                                                | Type validation moves into application code               |
+| AI Gateway (routing, failover)               | Not needed for tracing; [LiteLLM Proxy](/integrations/gateways/litellm) if you want a gateway                     | Langfuse SDKs capture client-side                         |
+| Requests table, dashboards                   | Observations table, [custom dashboards](/docs/metrics/features/custom-dashboards)                                 | Rebuild saved views as dashboards                         |
 
-| Helicone                      | Langfuse            |
-| ----------------------------- | ------------------- |
-| `{{hc:customer_name:string}}` | `{{customer_name}}` |
-| `{{hc:is_premium:boolean}}`   | `{{is_premium}}`    |
+## Supported data types [#supported-data-types]
 
-If you relied on Helicone's type validation, move that logic into your application code before calling `.compile()`.
+| Data                                        | Move?     | Path                                                                                                                                             |
+| ------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Live LLM calls                              | Yes       | SDK wrapper, OTel exporter, or LiteLLM Proxy (Step 1)                                                                                            |
+| Users, sessions, custom properties          | Yes       | Header values re-mapped via `propagate_attributes` (Step 2)                                                                                      |
+| Prompts (all versions + environments)       | Yes       | REST API export → Langfuse prompt management with labels (Step 3)                                                                                |
+| Prompt partials (`{{hcp:...}}`)             | Recreate  | [Composability](/docs/prompt-management/features/composability) or [message placeholders](/docs/prompt-management/features/message-placeholders) |
+| Historical requests                         | Selective | `@helicone/export` → OTLP reingest for traces you actively need (Step 4)                                                                         |
+| Gateway features (routing, failover, cache) | No        | Call providers directly, or use [LiteLLM Proxy](/integrations/gateways/litellm)                                                                  |
+| Dashboards, saved views, alerts             | Recreate  | [Custom dashboards](/docs/metrics/features/custom-dashboards) and [alerts](/docs/observability/features/alerts)                                  |
 
-### 3. Map Prompt Bodies to Langfuse
+## Step 1: Switch tracing [#tracing]
 
-Helicone stores the full LLM request shape (`model`, `messages`, `temperature`, `tools`, etc.) in a single prompt body. In Langfuse, split this into two parts:
+This is usually a same-day change, and it's reversible: the Langfuse SDK wraps your LLM client inside your application, so you can keep routing through Helicone's gateway during a transition window. Each system captures the call once, on different sides of the request.
 
-- **Prompt content** (type `chat`): the `messages` array with converted variable syntax. See [prompt data model](/docs/prompt-management/data-model).
-- **Prompt config** (JSON): model parameters (`model`, `temperature`, `max_tokens`) and tool definitions (`tools`, `tool_choice`, `response_format`). See [prompt config](/docs/prompt-management/features/config).
+Langfuse provides Python and JS/TS [SDKs](/docs/observability/sdk/overview) plus native [integrations with 100+ frameworks and providers](/integrations) (OpenAI, Anthropic, LangChain, Vercel AI SDK, and more). For OpenAI-compatible clients, which is what Helicone gateway users have, the drop-in wrapper is the fastest path:
 
-### 4. Recreate Prompts in Langfuse
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+{/* Python SDK */}
 
-Create prompts in Langfuse via the [SDK](/docs/prompt-management/get-started) or [API](/docs/api-and-data-platform/features/public-api), setting:
+```python
+# pip install langfuse
+# env: LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, LANGFUSE_BASE_URL
+from langfuse.openai import openai  # traced drop-in replacement
 
-- **Prompt name**: maps to Helicone's `prompt_id`.
-- **Prompt type**: `chat` (since Helicone stores chat messages).
-- **Labels**: map Helicone environments (production/staging) to [Langfuse labels](/docs/prompt-management/features/a-b-testing). For example, the Helicone version assigned to "production" gets the `production` label in Langfuse.
-- **Config JSON**: include model parameters and tool definitions.
+client = openai.OpenAI(
+    api_key="your-provider-api-key",
+    base_url="https://api.openai.com/v1",  # or keep Helicone's gateway URL during transition
+)
 
-### 5. Migrate Prompt Partials and Composition
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
 
-Helicone prompt partials (`{{hcp:prompt_id:index:environment}}`) pull messages from other prompts. Langfuse offers two alternatives:
+from langfuse import get_client
+get_client().flush()  # flush pending spans before a short-lived script exits
+```
 
-- **Shared system instructions**: create a Langfuse _text_ prompt for the shared snippet and reference it via [prompt composability](/docs/prompt-management/features/composability).
-- **Multi-message fragments**: fetch both prompts in code, compile each, and merge message arrays — or use [message placeholders](/docs/prompt-management/features/message-placeholders) to insert messages at specific positions at runtime.
+</Tab>
+<Tab>
+{/* JS/TS SDK */}
 
-### 6. Update Application Code
+```ts
+// npm install @langfuse/openai @langfuse/otel @opentelemetry/sdk-node openai
+// env: LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, LANGFUSE_BASE_URL
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import OpenAI from "openai";
+import { observeOpenAI } from "@langfuse/openai";
 
-Replace Helicone's prompt integration with Langfuse's fetch + compile flow.
+const sdk = new NodeSDK({ spanProcessors: [new LangfuseSpanProcessor()] });
+sdk.start();
 
-**If you used Helicone's gateway approach** (`prompt_id` + `inputs` in the API call):
+const client = observeOpenAI(
+  new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: "https://api.openai.com/v1", // or keep Helicone's gateway URL during transition
+  }),
+);
+
+const response = await client.chat.completions.create({
+  model: "gpt-4o",
+  messages: [{ role: "user", content: "Hello!" }],
+});
+
+await sdk.shutdown(); // flush pending spans before the script exits
+```
+
+</Tab>
+</LangTabs>
+
+Beyond single LLM calls, the [`@observe()` decorator](/docs/observability/sdk/instrumentation) (Python) and `startActiveObservation` (JS/TS) trace any function in your application, nesting LLM calls, tool calls, and retrieval steps into one trace. This is the structure that Helicone's flat request log and `Helicone-Session-Path` strings approximate.
+
+Make a few requests and confirm in the Langfuse UI that each produces a trace with the model, token usage, and cost populated.
+
+**Parallel run and cutover.** Keeping Helicone's gateway as `base_url` while the Langfuse wrapper traces the same calls gives you a comparison window with no double-capture risk: Helicone logs at the proxy, Langfuse at the client, one record each. Set an end date for the window; the cutover is pointing `base_url` back at the provider, and the rollback is removing the wrapper import.
+
+### If you already have OpenTelemetry instrumentation [#opentelemetry]
+
+Point your OTLP exporter at [Langfuse's OTLP endpoint](/integrations/native/opentelemetry) instead of adding an SDK:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel"
+export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic <base64(public_key:secret_key)>,x-langfuse-ingestion-version=4"
+```
+
+Langfuse accepts OTLP over HTTP in both JSON and protobuf encodings (gRPC is not supported), and the [`x-langfuse-ingestion-version=4` header](/integrations/native/opentelemetry#real-time-ingestion) enables real-time visibility in the tracing table.
+
+### If you used Helicone primarily as a gateway [#gateway-replacement]
+
+For multi-provider routing and failover, [LiteLLM Proxy](/integrations/gateways/litellm) is a drop-in gateway replacement with native Langfuse export:
+
+```yaml
+# litellm_config.yaml
+litellm_settings:
+  callbacks: ["langfuse_otel"]
+```
+
+This preserves the gateway pattern while routing all traces to Langfuse. See the [LiteLLM Proxy integration guide](/integrations/gateways/litellm) for details.
+
+## Step 2: Map users, sessions, and properties [#users-sessions-properties]
+
+Helicone attaches attribution via request headers; Langfuse promotes the same concepts to first-class trace attributes, set at instrumentation time. `user_id` powers the [user view](/docs/observability/features/users) with per-user cost and token usage (the `Helicone-User-Id` equivalent), `session_id` groups traces into [sessions](/docs/observability/features/sessions), and custom properties become [metadata](/docs/observability/features/metadata) or [tags](/docs/observability/features/tags):
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+{/* Python SDK */}
+
+```python
+from langfuse import observe, propagate_attributes
+
+@observe()
+def handle_request(question: str, user_id: str, conversation_id: str) -> str:
+    # replaces Helicone-User-Id, Helicone-Session-Id, and Helicone-Property-* headers
+    with propagate_attributes(
+        user_id=user_id,
+        session_id=conversation_id,
+        tags=["support"],
+        metadata={"plan": "enterprise"},
+    ):
+        ...  # traced client calls inherit these attributes
+```
+
+</Tab>
+<Tab>
+{/* JS/TS SDK */}
+
+```ts
+import { observe, propagateAttributes } from "@langfuse/tracing";
+
+const handleRequest = observe(
+  async (question: string, userId: string, conversationId: string) => {
+    // replaces Helicone-User-Id, Helicone-Session-Id, and Helicone-Property-* headers
+    return propagateAttributes(
+      {
+        userId,
+        sessionId: conversationId,
+        tags: ["support"],
+        metadata: { plan: "enterprise" },
+      },
+      async () => {
+        // traced client calls inherit these attributes
+      },
+    );
+  },
+);
+```
+
+</Tab>
+</LangTabs>
+
+`Helicone-Session-Path` hierarchies need no equivalent mapping: nesting comes from the instrumentation itself. Wrap each workflow step (`/analysis`, `/analysis/security`, ...) in its own observed function and the trace tree reproduces the hierarchy, with timings per step.
+
+Confirm in the Langfuse UI that traces carry the user ID and session ID, and that the users and sessions views populate.
+
+## Step 3: Migrate prompts [#prompts]
+
+Helicone offers two approaches to [prompt management](https://docs.helicone.ai/gateway/prompt-integration): a **gateway approach** where you pass a `prompt_id` and the gateway compiles the template server-side, and an **SDK approach** where you fetch and compile prompts client-side via `@helicone/helpers` (npm) / `helicone-helpers` (pip). Langfuse uses an SDK-based model similar to Helicone's SDK approach: prompts are [fetched and compiled in your application code](/docs/prompt-management/get-started), with built-in [caching](/docs/prompt-management/features/caching) to keep latency low and ensure [guaranteed availability](/docs/prompt-management/features/guaranteed-availability).
+
+### Export from Helicone and recreate in Langfuse [#prompt-export]
+
+Helicone's [prompt API](https://docs.helicone.ai/rest/prompts/post-v1prompt-2025-query) exposes prompts, versions, bodies, and environment assignments. The script below walks all of them and recreates each version in Langfuse, oldest-first so Langfuse version numbers mirror the Helicone history, converting the variable syntax along the way and labeling the version that Helicone has deployed to production:
+
+```python
+import os
+import re
+
+import requests
+from langfuse import Langfuse
+
+API = "https://api.helicone.ai"  # EU: https://eu.api.helicone.ai
+HEADERS = {"Authorization": f"Bearer {os.environ['HELICONE_API_KEY']}"}
+
+langfuse = Langfuse()
+
+
+def to_langfuse_syntax(content: str) -> str:
+    # {{ hc:customer_name:string }} -> {{customer_name}}
+    return re.sub(r"\{\{\s*hc:(\w+):\w+\s*\}\}", r"{{\1}}", content)
+
+
+prompts = requests.post(
+    f"{API}/v1/prompt-2025/query",
+    headers=HEADERS,
+    json={"page": 0, "pageSize": 100},
+).json()
+
+for p in prompts:
+    versions = requests.post(
+        f"{API}/v1/prompt-2025/query/versions",
+        headers=HEADERS,
+        json={"promptId": p["id"]},
+    ).json()
+
+    # the version currently deployed to Helicone's production environment
+    production = requests.post(
+        f"{API}/v1/prompt-2025/query/environment-version",
+        headers=HEADERS,
+        json={"promptId": p["id"], "environment": "production"},
+    ).json()
+    production_id = production.get("id") if isinstance(production, dict) else None
+
+    # oldest first, so Langfuse version numbers mirror Helicone's history
+    for v in sorted(versions, key=lambda v: (v["major_version"], v["minor_version"])):
+        body = requests.get(
+            f"{API}/v1/prompt-2025/{v['id']}/prompt-body",
+            headers=HEADERS,
+        ).json()["data"]
+
+        langfuse.create_prompt(
+            name=p["name"],
+            type="chat",
+            prompt=[
+                {"role": m["role"], "content": to_langfuse_syntax(m["content"])}
+                for m in body["messages"]
+            ],
+            # model parameters and tools move into the prompt config
+            config={
+                k: body[k]
+                for k in ("model", "temperature", "max_tokens", "tools")
+                if body.get(k) is not None
+            },
+            labels=["production"] if v["id"] == production_id else [],
+            commit_message=v.get("commit_message")
+            or f"Helicone v{v['major_version']}.{v['minor_version']}",
+        )
+```
+
+<Callout type="warning">
+  Prompt creation is not idempotent: every `create_prompt` call creates a new version. Run the export once, not as a retried batch job. To change labels afterwards, use `langfuse.update_prompt(name=..., version=..., new_labels=[...])` instead of re-creating.
+</Callout>
+
+The mapping the script applies:
+
+- **Name**: Helicone's prompt name becomes the Langfuse prompt name.
+- **Body split**: Helicone stores the full request shape in one body. The `messages` array becomes the `chat` prompt content (see the [prompt data model](/docs/prompt-management/data-model)); model parameters and tool definitions move into the prompt [config](/docs/prompt-management/features/config).
+- **Variable syntax**: Helicone's typed variables become plain Langfuse [variables](/docs/prompt-management/features/variables) compiled at runtime via `.compile()`. If you relied on Helicone's type validation, move that check into your application code.
+
+  | Helicone                      | Langfuse            |
+  | ----------------------------- | ------------------- |
+  | `{{hc:customer_name:string}}` | `{{customer_name}}` |
+  | `{{hc:is_premium:boolean}}`   | `{{is_premium}}`    |
+
+- **Environments → labels**: the version deployed to Helicone's `production` environment gets the `production` [label](/docs/prompt-management/features/prompt-version-control); map other environments (staging, development) to labels the same way.
+- **Partials**: Helicone prompt partials (`{{hcp:prompt_id:index:environment}}`) pull messages from other prompts. Recreate shared snippets as Langfuse text prompts referenced via [composability](/docs/prompt-management/features/composability), or insert message lists at runtime with [message placeholders](/docs/prompt-management/features/message-placeholders).
+
+Confirm in the Langfuse UI that each prompt shows its full version history, variables render in the preview, and the `production` label sits on the right version.
+
+### Update application code [#prompt-app-code]
+
+Replace Helicone's prompt resolution with Langfuse's fetch + compile flow.
+
+**If you used the gateway approach** (`prompt_id` + `inputs` compiled server-side):
 
 ```python
 # Before (Helicone gateway)
 response = client.chat.completions.create(
     model="gpt-4o-mini",
-    prompt_id="customer_support",
-    inputs={"customer_name": "Alice", "issue_type": "billing"}
+    extra_body={
+        "prompt_id": "customer_support",
+        "inputs": {"customer_name": "Alice", "issue_type": "billing"},
+    },
 )
 
 # After (Langfuse)
@@ -80,18 +316,21 @@ compiled_messages = prompt.compile(customer_name="Alice", issue_type="billing")
 
 response = client.chat.completions.create(
     model=prompt.config.get("model", "gpt-4o-mini"),
-    messages=compiled_messages
+    messages=compiled_messages,
 )
 ```
 
-**If you used Helicone's SDK approach** (`@helicone/helpers` / `HeliconePromptManager`):
+**If you used the SDK approach** (`HeliconePromptManager` from `@helicone/helpers` / `helicone-helpers`), the pattern is the same: one SDK fetch+compile swaps for another.
 
 ```python
 # Before (Helicone SDK)
-# body = prompt_manager.get_prompt_body(prompt_id="customer_support", inputs={...})
-# response = client.chat.completions.create(**body)
+# result = prompt_manager.get_prompt_body({
+#     "prompt_id": "customer_support",
+#     "inputs": {"customer_name": "Alice", "issue_type": "billing"},
+# })
+# response = client.chat.completions.create(**result["body"])
 
-# After (Langfuse) — same pattern, different SDK
+# After (Langfuse)
 from langfuse import Langfuse
 
 langfuse = Langfuse()
@@ -100,73 +339,84 @@ compiled_messages = prompt.compile(customer_name="Alice", issue_type="billing")
 
 response = client.chat.completions.create(
     model=prompt.config.get("model", "gpt-4o-mini"),
-    messages=compiled_messages
+    messages=compiled_messages,
 )
 ```
 
-See the [prompt management get-started guide](/docs/prompt-management/get-started) for full Python and TypeScript examples.
+See the [prompt management get-started guide](/docs/prompt-management/get-started) for full Python and TypeScript examples. To link traced generations to your migrated prompts, pass the prompt object to the generation as shown in [linking prompts to traces](/docs/prompt-management/features/link-to-traces).
 
-## Migrating Tracing / Observability
+## Step 4: Decide what to do with historical requests [#historical-data]
 
-Helicone logs LLM requests at the gateway level. Langfuse provides [hierarchical traces](/docs/observability/data-model) with nested spans, giving you visibility into multi-step agent workflows — not just individual LLM calls.
-
-### Option A: Use the Langfuse SDK (Recommended)
-
-Langfuse offers a [Python and TypeScript SDK](/docs/observability/sdk/overview) that can flexibly wrap any application code, plus native [integrations with 100+ frameworks and model providers](/integrations) including OpenAI, LangChain, LlamaIndex, Vercel AI SDK, Anthropic, and many more. You can choose the integration that matches your stack — see the full [integrations overview](/integrations) for all options.
-
-The simplest starting point for OpenAI users is the drop-in [OpenAI SDK wrapper](/integrations/model-providers/openai-py). Since Helicone is OpenAI-compatible, you can even keep Helicone as a gateway during the transition:
-
-```python
-from langfuse.openai import openai
-
-client = openai.OpenAI(
-    api_key="your-api-key",
-    base_url="https://api.openai.com/v1"  # or keep Helicone's URL during transition
-)
-
-response = client.chat.completions.create(
-    model="gpt-4o",
-    messages=[{"role": "user", "content": "Hello!"}]
-)
-```
-
-Beyond simple LLM call logging, the Langfuse SDK provides the [`@observe()` decorator](/docs/observability/sdk/instrumentation) (Python) and equivalent patterns in TypeScript to trace any function in your application — creating hierarchical traces with nested spans for multi-step agent workflows, tool calls, retrieval steps, and more. This gives you the full trace context that gateway-only logging cannot provide.
-
-To link traced generations to your migrated prompts, pass the prompt object to the generation. See [linking prompts to traces](/docs/prompt-management/features/link-to-traces).
-
-### Option B: Use OpenTelemetry
-
-If you already have OpenTelemetry instrumentation, you can point your OTLP exporter at [Langfuse's OTLP endpoint](/docs/observability/sdk/instrumentation):
+Export your Helicone request history early: with the vendor in maintenance mode, "export before you need it" is the safe default even if you never reingest most of it. Helicone ships a purpose-built export CLI with date filtering, full request/response bodies, and checkpoint-based crash recovery:
 
 ```bash
-export OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel"
-export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic <base64(public_key:secret_key)>,x-langfuse-ingestion-version=4"
+# JSONL export with full bodies (EU: add --region eu)
+HELICONE_API_KEY="your-api-key" npx @helicone/export \
+  --start-date 2026-01-01 --include-body --format jsonl
 ```
 
-Key constraints:
+For programmatic exports, the underlying [`POST /v1/request/query-clickhouse`](https://docs.helicone.ai/rest/request/post-v1requestquery-clickhouse) endpoint returns the same records with `request_id`, `request_created_at`, `user_id`, custom `properties`, token counts, latency, and bodies.
 
-- Langfuse supports **OTLP over HTTP via both HTTP/JSON and HTTP/protobuf** (`gRPC` is not supported yet).
-- The [`x-langfuse-ingestion-version=4` header](/integrations/native/opentelemetry#real-time-ingestion) enables real-time visibility in the Langfuse v4 tracing table for data sent directly via OTEL.
-- See the [OpenTelemetry integration docs](/integrations/native/opentelemetry) for full setup details.
+Archive the export, then reingest selectively. Most teams keep history as an archive and start fresh: dashboards rebuild within days on live traffic, and reingested traces are [billed as new ingestion](/docs/administration/billable-units). Reingest the subset you actively reference, such as requests you link from tickets, incident timelines, or eval datasets.
 
-### Option C: Replace the Gateway with LiteLLM Proxy
+<Details>
+<Summary>Reingest pattern: exported requests → OTLP spans</Summary>
 
-If you used Helicone primarily as an AI gateway (multi-provider routing, failover), [LiteLLM Proxy](/integrations/gateways/litellm) is a drop-in replacement with native Langfuse integration:
+Transform exported records into OTLP spans and send them to [Langfuse's OTLP endpoint](/integrations/native/opentelemetry). The rules that make this safe and idempotent:
 
-```yaml
-# litellm_config.yaml
-litellm_settings:
-  callbacks: ["langfuse_otel"]
-```
+- **Preserve original timestamps.** Set each span's start/end from `request_created_at` and latency; OTLP accepts historical timestamps, so traces sort correctly in time-range queries.
+- **Derive deterministic IDs.** Hash the Helicone `request_id` into the trace/span IDs so re-running the script overwrites instead of duplicating.
+- **Map the attribution fields.** `user_id` → `user_id`, session header values → `session_id`, `properties` → metadata, request/response bodies → generation input/output, and `prompt_tokens`/`completion_tokens` → usage so cost tracking works on the reingested generations.
+- **Bound the window.** Only reingest requests created before your Step 1 cutover time, so the historical import can't overlap live traces from the parallel-run window.
+- **Reconcile counts.** Compare the number of exported records against the observation count in Langfuse for the reingested window before deleting anything at the source.
 
-This preserves the gateway pattern while routing all traces to Langfuse. See the [LiteLLM Proxy integration guide](/integrations/gateways/litellm) for details.
+</Details>
 
-## Further Resources
+## Validation checklist [#validation-checklist]
 
-- [Langfuse Prompt Management Overview](/docs/prompt-management/overview)
-- [Langfuse Observability Overview](/docs/observability/overview)
-- [Langfuse Get Started Guide](/docs/observability/get-started)
-- [Helicone Integration (use Langfuse alongside Helicone)](/integrations/gateways/helicone)
-- [Helicone Prompt Integration Docs](https://docs.helicone.ai/gateway/prompt-integration)
-- [Helicone Prompt API Docs](https://docs.helicone.ai/rest/prompt/query-prompts)
-- [Helicone Announcement](https://www.helicone.ai/blog/joining-mintlify)
+- [ ] Live requests produce Langfuse traces with model, token usage, and cost populated
+- [ ] `user_id` and `session_id` appear on traces; users and sessions views populate
+- [ ] Custom properties are queryable as metadata or tags
+- [ ] Every Helicone prompt exists in Langfuse with its version history, and `production` labels sit on the deployed versions
+- [ ] Prompts resolve by name and label in application code, and variables compile correctly
+- [ ] Traced generations link to their prompt versions
+- [ ] Helicone request history exported and archived; selectively reingested traces reconciled by count
+- [ ] Dashboards and alerts recreated for the views your team actually used
+- [ ] Parallel-run window has an end date; Helicone gateway URL and headers removed at cutover
+
+## Limitations and gaps [#limitations]
+
+Know these before you commit to the cutover:
+
+- **Gateway features are out of scope.** Multi-provider routing, failover, caching, and rate limiting are Helicone AI Gateway features, not Langfuse features. Call providers directly or run [LiteLLM Proxy](/integrations/gateways/litellm) alongside Langfuse.
+- **Typed prompt variables lose their types.** `{{hc:name:type}}` validation moves into your application code; Langfuse variables are untyped strings at compile time.
+- **Session paths require instrumentation.** Helicone builds hierarchy from header strings; Langfuse builds it from nested spans, which means wrapping workflow steps in observed functions rather than adding a header.
+- **Prompt import is not idempotent.** Every `create_prompt` call creates a new version; run the export script once.
+- **Historical reingest is billed as new ingestion.** Import selectively rather than wholesale.
+
+## FAQ [#faq]
+
+### Can I keep Helicone running during the transition? [#keep-helicone]
+
+Yes. The Langfuse SDK wraps the client inside your application while Helicone's gateway sits in the request path, so both capture the same call once, independently. Keep the gateway `base_url` during your validation window, compare the two systems, then point `base_url` back at the provider. The [Helicone integration page](/integrations/gateways/helicone) covers running the two together in more detail.
+
+### I use Helicone's EU region. Anything different? [#eu-region]
+
+Use `eu.api.helicone.ai` for the prompt and request export APIs and `--region eu` on the export CLI. On the Langfuse side, pick the region when creating your project; `LANGFUSE_BASE_URL` is `https://cloud.langfuse.com` (EU) or `https://us.cloud.langfuse.com` (US), or your own domain when [self-hosting](/self-hosting).
+
+### Do I still need a gateway at all? [#need-gateway]
+
+Not for observability: Langfuse SDKs capture traces client-side and export them in the background, off the request path. If you used Helicone's gateway for routing or failover, keep a gateway for that job ([LiteLLM Proxy](/integrations/gateways/litellm) integrates natively with Langfuse); if the gateway was only there for logging, drop it.
+
+### What happens to my Helicone dashboards and saved views? [#dashboards]
+
+Rebuild them on live data: the observations table supports the same filtering (by user, metadata, model) via the [filter search bar](/docs/observability/features/filter-search-bar), and [custom dashboards](/docs/metrics/features/custom-dashboards) cover cost, latency, and usage breakdowns. The [Metrics API](/docs/metrics/features/metrics-api) serves programmatic consumers.
+
+## Get help with the migration [#get-help]
+
+Start on [Langfuse Cloud](https://cloud.langfuse.com) or [self-host](/self-hosting). If you want a migration plan, [talk to us](/talk-to-us).
+
+<Cards num={2}>
+  <Card title="Get started free" href="https://cloud.langfuse.com" icon={<Cloud />} />
+  <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
+</Cards>
