@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Select a region",
-  description: "Select a Langfuse Cloud region to continue.",
+  title: { absolute: "Langfuse login" },
+  description:
+    "Log in to Langfuse Cloud. Choose your region to access your projects, traces, prompts, and evaluations.",
 };
 
 export default function CloudLayout({

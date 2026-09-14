@@ -1,0 +1,140 @@
+---
+title: Langfuse for workflow automation
+description: Trace multi-step workflow automation across systems and frameworks. Track cost at every step and include human expertise to improve your agents over time.
+contentWidth: full
+---
+
+import { CustomerQuoteGrid } from "@/components/chat-agents/CustomerQuoteGrid";
+import { RelevantIntegrations } from "@/components/chat-agents/RelevantIntegrations";
+import { ValueInsightsAccordion } from "@/components/chat-agents/ValueInsightsAccordion";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+import {
+  workflowAutomationInsights,
+  workflowAutomationQuoteRoutes,
+  workflowAutomationIntegrationGroups,
+} from "@/components/workflow-automation/content";
+import { InvoiceIntakeTraceMock } from "@/components/workflow-automation/InvoiceIntakeTraceMock";
+import { BookOpen, Rocket, Workflow } from "lucide-react";
+
+<h1 className="sr-only">Langfuse for workflow automation</h1>
+
+<div className="not-prose mt-6 overflow-hidden border border-line-structure bg-surface-bg">
+  <section data-use-case-section="hero" className="grid border-b border-line-structure lg:grid-cols-[1.2fr_0.8fr]">
+    <div className="min-w-0 border-b border-line-structure px-6 py-7 sm:px-10 sm:py-8 lg:border-b-0 lg:border-r">
+      <p className="font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
+        Use case / workflow automation
+      </p>
+      <h2 className="mt-2 text-[38px] leading-[0.95] text-text-primary sm:text-[48px]">
+        <span className="block">Build</span>
+        <span className="block">reliable</span>
+        <span className="mt-1 inline-block bg-surface-cta-primary px-1.5 whitespace-nowrap">
+          automation agents
+        </span>
+      </h2>
+      <p className="mt-4 max-w-[56ch] text-[14px] leading-[1.45] text-text-secondary">
+        Workflow automation includes dozens of steps across systems and
+        frameworks. Trace the full execution, track cost at every step, and
+        continuously include human expertise to improve your system.
+      </p>
+      <div className="mt-6 flex flex-wrap items-center gap-2">
+        <a
+          href="/cloud"
+          className="border border-line-cta bg-text-primary px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-surface-bg transition-opacity hover:opacity-90"
+        >
+          Start free
+        </a>
+        <a
+          href="/talk-to-us"
+          className="border border-line-structure bg-surface-bg px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary"
+        >
+          Talk to sales
+        </a>
+        <a href="/docs/observability/get-started" data-use-case-action="quickstart" className="inline-flex items-center py-1.5 text-[12px] text-text-tertiary underline decoration-line-structure underline-offset-4 transition-colors hover:text-text-primary hover:decoration-text-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:ml-2">Tracing quickstart →</a>
+      </div>
+    </div>
+
+    <div className="flex min-w-0 items-center bg-surface-1 px-4 py-4 sm:px-6 sm:py-5">
+      <InvoiceIntakeTraceMock />
+    </div>
+
+  </section>
+
+  <section data-use-case-section="benefits" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
+    <div className="flex items-center gap-4 pb-4">
+      <h2 className="text-[34px] leading-[1] text-text-primary sm:text-[46px]">
+        Trace the full execution across systems
+      </h2>
+    </div>
+
+    <ValueInsightsAccordion
+      items={workflowAutomationInsights}
+      caption=""
+      locked
+    />
+
+  </section>
+
+  <section data-use-case-section="customer_stories" className="border-t border-line-structure bg-surface-1 px-5 py-14 sm:px-10 sm:py-18">
+    <h2 className="mt-2 text-center text-[44px] leading-[1] text-text-primary">
+      Teams improving workflow automation agents on Langfuse
+    </h2>
+    <CustomerQuoteGrid routes={workflowAutomationQuoteRoutes} />
+  </section>
+
+  <section data-use-case-section="integrations" className="border-t border-line-structure px-5 py-8 sm:px-10 sm:py-10">
+    <RelevantIntegrations
+      headingLine1="Any system,"
+      headingLine2="any workflow"
+      description="Trace n8n, Temporal, LangGraph, and no-code builders through native integrations or OpenTelemetry — nothing else in your stack changes."
+      groups={workflowAutomationIntegrationGroups}
+    />
+  </section>
+
+  <section data-use-case-section="resources" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-16">
+    <h2 className="mt-2 text-center text-[40px] leading-[1] text-text-primary">
+      Learn from real automation examples
+    </h2>
+    <p className="mx-auto mt-2 max-w-[60ch] text-center text-[13px] text-text-tertiary">
+      Start tracing a full application, evaluate structured extraction, and
+      study patterns for multi-step LLM systems.
+    </p>
+    <div className="mx-auto mt-8 max-w-4xl">
+      <Cards num={2} className="sm:grid-cols-1 lg:grid-cols-2">
+        <Card
+          title="Get started with tracing"
+          href="/docs/observability/get-started" data-use-case-action="quickstart"
+          icon={<Rocket />}
+          description="Ingest your first trace and see a full application run in Langfuse."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
+        <Card
+          title="Structured output extraction cookbook"
+          href="/guides/cookbook/example_structured_output_extraction"
+          icon={<Workflow />}
+          description="Evaluate document and claim extraction per field, then improve the pipeline with experiments."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
+        <Card
+          title="Observability in multi-step LLM systems"
+          href="/blog/2024-10-observability-in-multi-step-llm-systems"
+          icon={<BookOpen />}
+          description="How to debug, evaluate, and test applications that chain many LLM and tool steps."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
+      </Cards>
+    </div>
+  </section>
+
+  <section data-use-case-section="closing_cta" className="border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
+    <div className="mx-auto max-w-5xl">
+      <CustomerStoryCTA
+        title="Ready to build reliable automation agents?"
+        description="Use traces, cost analytics, and human review to observe and improve every workflow run with Langfuse."
+        contactLabel="Talk to sales"
+      />
+    </div>
+  </section>
+</div>

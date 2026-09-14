@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useMemo, type MouseEvent, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowRight, ShieldCheck } from "lucide-react";
@@ -14,6 +21,10 @@ import {
   type CloudRegionKey,
 } from "@/lib/cloud-regions";
 import { useCloudRegionSignIn } from "@/lib/use-cloud-region-sign-in";
+import {
+  readUseCaseAttribution,
+  withUseCaseAttribution,
+} from "@/lib/use-case-analytics";
 
 const regionCards: Record<
   CloudRegionKey,
@@ -94,6 +105,34 @@ const getCloudHost = (url: string) => new URL(url).host;
 export default function CloudRegionSelectorPage() {
   const pathname = usePathname();
   const { signedInRegions } = useCloudRegionSignIn();
+  const [locationSuffix, setLocationSuffix] = useState({
+    search: "",
+    hash: "",
+  });
+
+  useEffect(() => {
+    const sync = () => {
+      const attribution = readUseCaseAttribution();
+      const url = new URL(
+        attribution
+          ? withUseCaseAttribution(
+              window.location.href,
+              window.location.origin,
+              attribution,
+            )
+          : window.location.href,
+        window.location.origin,
+      );
+      setLocationSuffix({ search: url.search, hash: url.hash });
+    };
+    sync();
+    window.addEventListener("hashchange", sync);
+    window.addEventListener("popstate", sync);
+    return () => {
+      window.removeEventListener("hashchange", sync);
+      window.removeEventListener("popstate", sync);
+    };
+  }, [pathname]);
 
   const { cloudSubpath } = useMemo(
     () => getCloudRedirectPartsFromPathname(pathname || ""),
@@ -110,8 +149,18 @@ export default function CloudRegionSelectorPage() {
         event.altKey;
       if (isModifiedClick) return;
       event.preventDefault();
-      const search =
-        typeof window === "undefined" ? "" : window.location.search;
+      const attribution = readUseCaseAttribution();
+      const url = new URL(
+        attribution
+          ? withUseCaseAttribution(
+              window.location.href,
+              window.location.origin,
+              attribution,
+            )
+          : window.location.href,
+        window.location.origin,
+      );
+      const search = url.search;
       const hash = typeof window === "undefined" ? "" : window.location.hash;
       const targetUrl = buildCloudRedirectUrl({
         region,
@@ -153,8 +202,8 @@ export default function CloudRegionSelectorPage() {
               const href = buildCloudRedirectUrl({
                 region: regionKey,
                 cloudSubpath,
-                search: "",
-                hash: "",
+                search: locationSuffix.search,
+                hash: locationSuffix.hash,
               });
               const isSignedIn = signedInRegions[regionKey];
 

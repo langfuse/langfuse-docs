@@ -3,10 +3,21 @@ import { ArrowUpRight } from "lucide-react";
 import { CornerBox } from "@/components/ui/corner-box";
 import { Image } from "@/components/ui/image";
 import { Link } from "@/components/ui/link";
-import {
-  langfusePartnerProfiles,
-  type PartnerProfile,
-} from "@/lib/partner-profiles";
+import { langfusePartnerProfiles } from "@/lib/partner-profiles";
+
+type PartnerProfile = {
+  name: string;
+  url: string;
+  logo?: {
+    src: string;
+    alt: string;
+    width: number;
+    height: number;
+  };
+  regions: readonly string[];
+  capabilities: readonly string[];
+  summary: string;
+};
 
 export function PartnerProfiles({
   profiles = langfusePartnerProfiles,
