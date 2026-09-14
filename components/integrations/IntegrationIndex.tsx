@@ -117,6 +117,11 @@ const categoryConfig: Record<
     description:
       "Analytics tools that can visualize Langfuse traces and metrics",
   },
+  clickhouse: {
+    title: "ClickHouse Products",
+    description:
+      "Use Langfuse with ClickHouse Observability, warehouse exports, and the Agentic Data Stack",
+  },
   "developer-tools": {
     title: "Developer Tools",
     description:
