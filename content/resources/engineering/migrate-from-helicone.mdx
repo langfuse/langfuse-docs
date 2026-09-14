@@ -4,7 +4,8 @@ description: "Step-by-step guide to migrate from Helicone to Langfuse: switch tr
 tags: [migration, guide]
 ---
 
-import { Cloud, MessageSquare } from "lucide-react"; import { Details, Summary } from "@/components/Details";
+import { Cloud, MessageSquare } from "lucide-react";
+import { Details, Summary } from "@/components/Details";
 
 # Migrate from Helicone to Langfuse
 
@@ -224,11 +225,18 @@ def to_langfuse_syntax(content: str) -> str:
     return re.sub(r"\{\{\s*hc:(\w+):\w+\s*\}\}", r"{{\1}}", content)
 
 
-prompts = requests.post(
-    f"{API}/v1/prompt-2025/query",
-    headers=HEADERS,
-    json={"page": 0, "pageSize": 100},
-).json()
+prompts = []
+page = 0
+while True:
+    batch = requests.post(
+        f"{API}/v1/prompt-2025/query",
+        headers=HEADERS,
+        json={"page": page, "pageSize": 100},
+    ).json()
+    if not batch:
+        break
+    prompts.extend(batch)
+    page += 1
 
 for p in prompts:
     versions = requests.post(
@@ -362,11 +370,11 @@ Archive the export, then reingest selectively. Most teams keep history as an arc
 <Details>
 <Summary>Reingest pattern: exported requests → OTLP spans</Summary>
 
-Transform exported records into OTLP spans and send them to [Langfuse's OTLP endpoint](/integrations/native/opentelemetry). The rules that make this safe and idempotent:
+Transform exported records into OTLP spans and send them to [Langfuse's OTLP endpoint](/integrations/native/opentelemetry). The rules that make this safe to run and to resume:
 
 - **Preserve original timestamps.** Set each span's start/end from `request_created_at` and latency; OTLP accepts historical timestamps, so traces sort correctly in time-range queries.
-- **Derive deterministic IDs.** Hash the Helicone `request_id` into the trace/span IDs so re-running the script overwrites instead of duplicating.
-- **Map the attribution fields.** `user_id` → `user_id`, session header values → `session_id`, `properties` → metadata, request/response bodies → generation input/output, and `prompt_tokens`/`completion_tokens` → usage so cost tracking works on the reingested generations.
+- **Derive deterministic IDs and checkpoint progress.** Hash the Helicone `request_id` into the trace/span IDs so every source record maps to a stable Langfuse ID. Langfuse does [not deduplicate re-ingested IDs](/integrations/native/opentelemetry/migration-to-v4#export-complete-immutable-spans), so checkpoint accepted source IDs and resume an interrupted import by skipping them.
+- **Map the attribution fields.** `user_id` → `langfuse.user.id`, session header values → `langfuse.session.id`, `properties` → `langfuse.trace.metadata.*`, request/response bodies → `langfuse.observation.input`/`langfuse.observation.output`, and `prompt_tokens`/`completion_tokens` → `langfuse.observation.usage_details` so cost tracking works on the reingested generations.
 - **Bound the window.** Only reingest requests created before your Step 1 cutover time, so the historical import can't overlap live traces from the parallel-run window.
 - **Reconcile counts.** Compare the number of exported records against the observation count in Langfuse for the reingested window before deleting anything at the source.
 
