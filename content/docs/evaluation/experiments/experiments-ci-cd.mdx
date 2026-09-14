@@ -66,8 +66,9 @@ jobs:
           langfuse_secret_key: ${{ secrets.LANGFUSE_SECRET_KEY }}
           langfuse_base_url: https://cloud.langfuse.com
 
-          # the location of your experiment scripts
-          experiment_path: experiments/support-agent-gate
+          # the directory containing your experiment scripts,
+          # or the path to a single script file (e.g. experiments/support-agent-gate.py)
+          experiment_path: experiments/
 
           # the dataset to run the experiment against
           dataset_name: support-agent-regression-set
@@ -351,7 +352,7 @@ If your experiment needs provider keys or other secrets, set them as environment
   with:
     langfuse_public_key: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
     langfuse_secret_key: ${{ secrets.LANGFUSE_SECRET_KEY }}
-    experiment_path: experiments/support-agent-gate
+    experiment_path: experiments/
     dataset_name: support-agent-regression-set
 ```
 
