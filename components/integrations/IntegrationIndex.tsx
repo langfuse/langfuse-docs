@@ -123,7 +123,7 @@ const categoryConfig: Record<
   clickhouse: {
     title: "ClickHouse Products",
     description:
-      "Send traces to ClickHouse Observability and load Langfuse exports into ClickHouse Cloud",
+      "Use Langfuse with ClickHouse Observability, warehouse exports, and the Agentic Data Stack",
   },
   data: {
     title: "Data Platform",
