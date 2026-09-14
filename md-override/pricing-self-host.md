@@ -142,7 +142,7 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 ## Frequently Asked Questions
 
 **How does Langfuse pricing compare to LangSmith, Braintrust, Arize, and Datadog?**
-On a representative workload, Langfuse Cloud is cheaper than [LangSmith](/compare/langsmith), [Braintrust](/compare/braintrust), [Arize](/compare/arize-phoenix), and [Datadog Agent Observability](/compare/datadog). Open the [editable pricing comparison sheet](/pricing-comparison-sheet) to fill in your own assumptions and check the numbers for your workload. For product-by-product differences, see the [compare pages](/compare).
+On a representative workload, Langfuse Cloud is cheaper than [LangSmith](/compare/langsmith), [Braintrust](/compare/braintrust), [Arize](/compare/arize-phoenix), and [Datadog Agent Observability](/compare/datadog). Open the [editable pricing comparison sheet](/pricing-comparison-sheet) to fill in your own assumptions and check the numbers for your workload. For product-by-product differences, see the [comparison pages](/compare).
 
 **Can I purchase Langfuse through AWS Marketplace?**
 Yes. Self-hosted Enterprise can be billed via AWS Marketplace or invoice. [Talk to us](/talk-to-us?deployment=self-hosted) to request a private offer.
