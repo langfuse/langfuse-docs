@@ -18,7 +18,9 @@ Langfuse connects production observations to a continuous improvement loop. Clic
 ```mermaid
 flowchart LR
     subgraph langfuse_loop["Langfuse: continuous AI improvement"]
+        direction LR
         subgraph operational_overlap["Overlap with ClickHouse Observability: operational use cases"]
+            direction LR
             observe["Observe"] --> monitor["Monitor"]
         end
         monitor --> datasets["Datasets"]
@@ -48,7 +50,7 @@ Each team can set its own sampling and retention. An AI team may keep a broad hi
 Instrument your application with OpenTelemetry and export to a Langfuse project and your ClickHouse Observability environment.
 
 ```mermaid
-flowchart TD
+flowchart LR
     app["Your application / AI agent"] --> otel["OpenTelemetry instrumentation"]
     otel -->|"Export traces"| obs["ClickHouse Observability"]
     otel -->|"Export traces"| langfuse["Langfuse"]
