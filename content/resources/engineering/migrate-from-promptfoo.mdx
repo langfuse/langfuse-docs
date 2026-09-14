@@ -364,7 +364,7 @@ langfuse.flush()  # flush pending spans before a short-lived script exits
 ```ts
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
-import { LangfuseClient } from "@langfuse/client";
+import { LangfuseClient, ExperimentItem } from "@langfuse/client";
 
 const otelSdk = new NodeSDK({ spanProcessors: [new LangfuseSpanProcessor()] });
 otelSdk.start();
@@ -372,10 +372,12 @@ otelSdk.start();
 const langfuse = new LangfuseClient();
 const dataset = await langfuse.dataset.get("support-agent-regression");
 
+const supportAgentTask = async (item: ExperimentItem) =>
+  answerQuestion((item.input as { question: string }).question); // your application logic
+
 const result = await dataset.runExperiment({
   name: "post-migration-baseline",
-  task: async (item) =>
-    answerQuestion((item.input as { question: string }).question), // your application logic
+  task: supportAgentTask,
   evaluators: [containsExpected, rubricJudge],
 });
 console.log(await result.format());
