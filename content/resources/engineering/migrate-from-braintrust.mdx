@@ -4,51 +4,30 @@ description: "Step-by-step guide to migrate from Braintrust to Langfuse: swap SD
 tags: [migration, guide]
 ---
 
+import { Cloud, MessageSquare } from "lucide-react"; import { Details, Summary } from "@/components/Details";
+
 # Migrate from Braintrust to Langfuse
 
-This guide walks through migrating LLM observability and evaluation from
-[Braintrust](https://www.braintrust.dev) to [Langfuse](/): instrumentation first, then
-datasets, experiments, prompts, and online scoring.
+This guide walks through migrating LLM observability and evaluation from [Braintrust](https://www.braintrust.dev) to [Langfuse](/): instrumentation first, then datasets, experiments, prompts, and online scoring.
 
-**TL;DR:** Braintrust and Langfuse share the same core concepts (projects, logs/traces,
-datasets, experiments, scorers), so this is a re-pointing exercise rather than a redesign.
-Instrumentation is a wrapper swap: `wrap_openai` becomes Langfuse's OpenAI drop-in and
-`@traced` becomes `@observe`. Datasets export through Braintrust's REST API or SDK and import
-via the Langfuse SDK. Your autoevals scorers run in Langfuse experiments without a rewrite,
-because Langfuse integrates the autoevals library directly. Historical logs usually stay
-behind; experiments re-run against the migrated datasets.
+**TL;DR:** Braintrust and Langfuse share the same core concepts (projects, logs/traces, datasets, experiments, scorers), so this is a re-pointing exercise rather than a redesign. Instrumentation is a wrapper swap: `wrap_openai` becomes Langfuse's OpenAI drop-in and `@traced` becomes `@observe`. Datasets export through Braintrust's REST API or SDK and import via the Langfuse SDK. Your autoevals scorers run in Langfuse experiments without a rewrite, because Langfuse integrates the autoevals library directly. Historical logs usually stay behind; experiments re-run against the migrated datasets.
 
-## Why teams migrate
+<Cards num={2}>
+  <Card title="Get started free" href="https://cloud.langfuse.com" icon={<Cloud />} />
+  <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
+</Cards>
+
+## Why teams migrate [#why-teams-migrate]
 
 Teams tend to evaluate a Braintrust-to-Langfuse move for a few recurring reasons:
 
-- **Open source and full self-hosting.** Langfuse's core is MIT-licensed open source, and
-  [self-hosting](/self-hosting) runs the entire stack (UI, API, and data) in your own
-  infrastructure. Braintrust's self-hosted option is a hybrid model: you deploy the data
-  plane into your own AWS or Azure account via Terraform while Braintrust hosts the control
-  plane (web app and metadata), as described in their
-  [architecture docs](https://www.braintrust.dev/docs/reference/platform/architecture)
-  (as of July 2026). The hybrid model keeps your event data in your environment, but a fully
-  self-contained or air-gapped deployment is only possible with software you can run
-  end-to-end.
-- **Billing that follows request counts.** Langfuse Cloud bills on counted units (traces,
-  observations, scores) with [public pricing](/pricing) starting free at 50k units per month.
-  Braintrust bills primarily on processed data, measured in GB ingested across logs,
-  experiments, and datasets, with paid plans starting at $249 per month
-  ([Braintrust pricing](https://www.braintrust.dev/pricing), as of July 2026). Byte-based
-  billing scales with payload size rather than request count, which matters if your traces
-  carry large contexts or attachments.
-- **Ingestion-level sampling.** Langfuse SDKs include a built-in
-  [sample rate](/docs/observability/features/sampling) (`LANGFUSE_SAMPLE_RATE`) that keeps a
-  configurable fraction of traces at the source, a direct dial for controlling volume and
-  cost on high-traffic applications.
+- **Open source and full self-hosting.** Langfuse's core is MIT-licensed open source, and [self-hosting](/self-hosting) runs the entire stack (UI, API, and data) in your own infrastructure. Braintrust's self-hosted option is a hybrid model: you deploy the data plane into your own AWS, GCP, or Azure account (Terraform for AWS, Helm for GCP/Azure) while Braintrust hosts the control plane (web app, auth, and metadata), as described in their [architecture docs](https://www.braintrust.dev/docs/admin/self-hosting/architecture) (as of September 2026; a BYOC variant, where Braintrust operates the data plane in your cloud, exists too). The hybrid model keeps your event data in your environment, but a fully self-contained or air-gapped deployment is only possible with software you can run end-to-end.
+- **Billing that follows request counts.** Langfuse Cloud bills on counted units (traces, observations, scores) with [public pricing](/pricing) starting free at 50k units per month. Braintrust bills on processed data, measured in GB ingested across logs, experiments, and datasets, plus separately metered scores and model credits, with paid plans starting at $249 per month ([Braintrust pricing](https://www.braintrust.dev/pricing), as of September 2026). Byte-based billing scales with payload size rather than request count, which matters if your traces carry large contexts or attachments, and every autoevals or LLM-judge score adds to the score meter.
+- **Ingestion-level sampling.** Langfuse SDKs include a built-in [sample rate](/docs/observability/features/sampling) (`LANGFUSE_SAMPLE_RATE`) that keeps a configurable fraction of traces at the source, a direct dial for controlling volume and cost on high-traffic applications.
 
-Braintrust remains a polished platform with a tight evaluation loop, a capable playground,
-and a managed hybrid deployment, and if it serves your team well there is no urgency to
-move. This guide is for teams that have decided to consolidate on Langfuse. For a
-feature-by-feature comparison, see [Langfuse vs. Braintrust](/compare/braintrust).
+Braintrust remains a polished platform with a tight evaluation loop, a capable playground, and a managed hybrid deployment, and if it serves your team well there is no urgency to move. This guide is for teams that have decided to consolidate on Langfuse. For a feature-by-feature comparison, see [Langfuse vs. Braintrust](/compare/braintrust).
 
-## Concept mapping
+## Concept mapping [#concept-mapping]
 
 Braintrust and Langfuse map almost one-to-one, which keeps the mental migration small:
 
@@ -65,18 +44,26 @@ Braintrust and Langfuse map almost one-to-one, which keeps the mental migration 
 | Gateway (formerly AI proxy)               | Not needed; pair with a gateway like [LiteLLM](/integrations/gateways/litellm) if you want one                                                | Langfuse observes asynchronously, outside the request path |
 | BTQL                                      | [Metrics API](/docs/metrics/features/metrics-api) and [custom dashboards](/docs/metrics/features/custom-dashboards)                           | Aggregated metrics via REST API and in-UI dashboards       |
 
-One architectural difference is worth knowing before you start: Braintrust's optional
-[gateway](https://www.braintrust.dev/docs/deploy/gateway) (which replaced its deprecated AI
-proxy) sits in the request path between your app and the model providers. Langfuse never
-proxies your LLM calls. The SDKs batch and send telemetry asynchronously, so a Langfuse
-outage cannot add latency to or drop your production traffic.
+One architectural difference is worth knowing before you start: Braintrust's optional [gateway](https://www.braintrust.dev/docs/deploy/gateway) (which replaced its deprecated AI proxy) sits in the request path between your app and the model providers. Langfuse never proxies your LLM calls. The SDKs batch and send telemetry asynchronously, so a Langfuse outage cannot add latency to or drop your production traffic.
 
-## Step 1: Switch instrumentation
+## Supported data types [#supported-data-types]
 
-Both platforms instrument the same way: wrap your model client, decorate your functions. The
-migration is a package swap.
+| Data                                  | Move?      | Path                                                                         |
+| ------------------------------------- | ---------- | ---------------------------------------------------------------------------- |
+| Live traces (wrapper or OTel)         | Yes        | Swap the wrappers, or repoint the OTLP exporter; instrumentation stays       |
+| Datasets                              | Yes        | Braintrust SDK/API export → Langfuse dataset items                           |
+| Experiment _code_ + autoevals scorers | Yes        | Experiment runner SDK + the autoevals converter                              |
+| Prompts                               | Yes        | `GET /v1/prompt` export → Langfuse prompt management                         |
+| Online scorers, human-review rubrics  | Recreate   | Langfuse evaluators on production traces; score configs on annotation queues |
+| Historical logs                       | Usually no | Selective OTLP reingest for traces you actively reference                    |
+| Experiment scores, BTQL saved queries | No         | Re-run experiments; rebuild queries as dashboards or Metrics API calls       |
 
-### Python
+## Step 1: Switch instrumentation [#instrumentation]
+
+Both platforms instrument the same way: wrap your model client, decorate your functions. The migration is a package swap.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
 
 ```python
 # Before (Braintrust)
@@ -107,18 +94,20 @@ def answer(question: str) -> str:
         model="gpt-4o", messages=[{"role": "user", "content": question}]
     )
     return response.choices[0].message.content
+
+
+# Required in short-lived scripts (batched spans are lost at exit otherwise):
+from langfuse import get_client
+
+get_client().flush()
 ```
 
-Configuration moves from `BRAINTRUST_API_KEY` to Langfuse's key pair
-(`LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_BASE_URL`). There is no
-`init_logger` equivalent to call: the project is determined by the API keys. Nesting works
-the same way as in Braintrust: `@observe` on outer functions produces the trace hierarchy,
-and the wrapped OpenAI client attaches generations to the active span.
+Configuration moves from `BRAINTRUST_API_KEY` to Langfuse's key pair (`LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_BASE_URL`). There is no `init_logger` equivalent to call: the project is determined by the API keys. Nesting works the same way as in Braintrust: `@observe` on outer functions produces the trace hierarchy, and the wrapped OpenAI client attaches generations to the active span.
 
-### TypeScript
+</Tab>
+<Tab>
 
-The Langfuse JS/TS SDK is built on OpenTelemetry, so setup registers a span processor once,
-then wraps clients and functions like Braintrust does:
+The Langfuse JS/TS SDK is built on OpenTelemetry, so setup registers a span processor once, then wraps clients and functions like Braintrust does:
 
 ```typescript
 // Before (Braintrust)
@@ -160,39 +149,51 @@ const answer = observe(
   },
   { name: "answer" },
 );
+
+// Required in short-lived scripts (batched spans are lost at exit otherwise):
+await sdk.shutdown();
 ```
 
-Both SDKs cover the same ground beyond OpenAI: Langfuse has
-[native integrations](/integrations) for Anthropic, LangChain, the Vercel AI SDK, LiteLLM,
-Pydantic AI, and 100+ other frameworks and providers, so wrapper-based instrumentation
-(`wrap_anthropic`, `wrap_litellm`, and friends) has a direct counterpart.
+</Tab>
+</LangTabs>
 
-### If you instrumented via OpenTelemetry
+Both SDKs cover the same ground beyond OpenAI: Langfuse has [native integrations](/integrations) for Anthropic, LangChain, the Vercel AI SDK, LiteLLM, Pydantic AI, and 100+ other frameworks and providers, so wrapper-based instrumentation (`wrap_anthropic`, `wrap_litellm`, and friends) has a direct counterpart.
 
-If you used Braintrust's OTel integration (`braintrust[otel]` in Python or
-`@braintrust/otel` in JS) or exported spans from an OTel collector, you do not need to touch
-instrumentation at all. Point the OTLP exporter at
-[Langfuse's endpoint](/integrations/native/opentelemetry) instead:
+The wrapper swap is reversible, and both stacks can run in parallel during the migration window, even in the same process: Braintrust's wrappers and Langfuse's instrumentation use independent capture paths, so each backend records the request exactly once (verified with `@observe` stacked on `@traced` and Langfuse's OTel-based Anthropic instrumentation alongside `wrap_anthropic`). If you prefer not to stack them, run the window per process instead: keep production on Braintrust and point a canary deployment at Langfuse. If you instrumented via OpenTelemetry, you can dual-export per request with two exporters on one tracer provider (see below).
+
+After the swap, confirm in Langfuse that each request produces one trace: a root span named after your decorated function, and a generation carrying the model name, token usage, and cost.
+
+### Users, sessions, and tags [#users-sessions-tags]
+
+Braintrust has no first-class user or session fields; teams keep them in log `metadata` (and `tags`). Langfuse promotes them to first-class trace attributes: `user_id` powers the [user view](/docs/observability/features/users), `session_id` groups traces into [sessions](/docs/observability/features/sessions), and [tags](/docs/observability/features/tags) filter tables. Re-map them at instrumentation time instead of leaving them in metadata:
+
+```python
+from langfuse import observe, propagate_attributes
+
+@observe()
+def answer(question: str, user_id: str, thread_id: str) -> str:
+    with propagate_attributes(user_id=user_id, session_id=thread_id):
+        ...  # wrapped client calls inherit both attributes
+```
+
+The JS/TS equivalent is `propagateAttributes({ userId, sessionId }, async () => ...)` from `@langfuse/tracing`.
+
+### If you instrumented via OpenTelemetry [#opentelemetry]
+
+If you used Braintrust's OTel integration (`braintrust[otel]` in Python or `@braintrust/otel` in JS) or exported spans from an OTel collector, you do not need to touch instrumentation at all. Point the OTLP exporter at [Langfuse's endpoint](/integrations/native/opentelemetry) instead:
 
 ```bash
 OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel"  # EU region
 OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic ${AUTH_STRING},x-langfuse-ingestion-version=4"
 ```
 
-`AUTH_STRING` is your base64-encoded project keys
-(`echo -n "pk-lf-...:sk-lf-..." | base64`). Langfuse accepts OTLP over HTTP in protobuf and
-JSON encodings (no gRPC). Running both exporters in parallel during a validation window is a
-common way to de-risk the cutover.
+`AUTH_STRING` is your base64-encoded project keys (`echo -n "pk-lf-...:sk-lf-..." | base64`). Langfuse accepts OTLP over HTTP in protobuf and JSON encodings (no gRPC). Running both exporters in parallel during a validation window is a common way to de-risk the cutover.
 
-While you are configuring the SDK, decide on a
-[sample rate](/docs/observability/features/sampling). `LANGFUSE_SAMPLE_RATE=0.1` keeps 10% of
-traces, which is often enough for monitoring high-volume endpoints while cutting ingestion
-cost proportionally. The default is 1.0 (keep everything).
+While you are configuring the SDK, decide on a [sample rate](/docs/observability/features/sampling). `LANGFUSE_SAMPLE_RATE=0.1` keeps 10% of traces, which is often enough for monitoring high-volume endpoints while cutting ingestion cost proportionally. The default is 1.0 (keep everything).
 
-## Step 2: Export and recreate datasets
+## Step 2: Export and recreate datasets [#datasets]
 
-Braintrust datasets export cleanly through its API or SDK, and the record shapes map
-directly onto Langfuse dataset items:
+Braintrust datasets export cleanly through its API or SDK, and the record shapes map directly onto Langfuse dataset items:
 
 | Braintrust field | Langfuse field                                                |
 | ---------------- | ------------------------------------------------------------- |
@@ -201,8 +202,10 @@ directly onto Langfuse dataset items:
 | `metadata`       | `metadata`                                                    |
 | `tags`           | `metadata` (no dedicated column; keep them as a metadata key) |
 
-A common migration path is a short script that iterates each Braintrust dataset and inserts
-the rows into Langfuse:
+A common migration path is a short script that iterates each Braintrust dataset and inserts the rows into Langfuse:
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
 
 ```python
 from braintrust import init_dataset
@@ -215,34 +218,52 @@ langfuse.create_dataset(name="golden-set")
 for row in init_dataset(project="my-app", name="golden-set"):
     langfuse.create_dataset_item(
         dataset_name="golden-set",
+        id=row["id"],  # reuse the Braintrust record ID as a stable retry key
         input=row["input"],
         expected_output=row.get("expected"),
         metadata={**(row.get("metadata") or {}), "tags": row.get("tags")},
     )
 ```
 
-If you prefer working against the REST API (for example, from a language without a
-Braintrust SDK), the export endpoints are `GET /v1/dataset` to list datasets and
-`GET /v1/dataset/{dataset_id}/fetch` to page through records with a cursor, authenticated
-via `Authorization: Bearer <api key>` against `https://api.braintrust.dev` (per Braintrust's
-[OpenAPI spec](https://github.com/braintrustdata/braintrust-openapi), as of July 2026). The
-fetch endpoint also accepts a `version` parameter if you need a snapshot of a dataset as of
-a past point in time.
+</Tab>
+<Tab>
 
-Langfuse [datasets](/docs/evaluation/experiments/datasets) support folders, JSON schema
-validation on `input` and `expectedOutput`, and media attachments, so structure that lived
-in Braintrust conventions can usually become explicit during the import.
+```typescript
+import { initDataset } from "braintrust";
+import { LangfuseClient } from "@langfuse/client";
 
-## Step 3: Re-run experiments and keep your autoevals scorers
+const langfuse = new LangfuseClient();
+await langfuse.dataset.create("golden-set");
 
-Braintrust experiments are defined with `Eval(name, data, task, scores)` and run via the
-`braintrust eval` CLI. The Langfuse equivalent is the
-[experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk): a plain script
-that loops your task over a dataset and applies evaluators, with concurrency, tracing, and
-error isolation handled for you.
+const dataset = initDataset({ project: "my-app", dataset: "golden-set" });
+for await (const row of dataset.fetch()) {
+  await langfuse.dataset.createItem({
+    datasetName: "golden-set",
+    id: row.id, // reuse the Braintrust record ID as a stable retry key
+    input: row.input,
+    expectedOutput: row.expected,
+    metadata: { ...(row.metadata ?? {}), tags: row.tags },
+  });
+}
+```
 
-The scorers you wrote with [autoevals](https://github.com/braintrustdata/autoevals) carry
-over as-is. Langfuse ships a converter that makes any autoevals scorer a Langfuse evaluator:
+</Tab>
+</LangTabs>
+
+Reusing the source record ID makes the import idempotent: a rerun after a partial failure upserts the same items instead of duplicating them. When the import finishes, confirm the Langfuse dataset's item count matches the Braintrust dataset before moving on.
+
+If you prefer working against the REST API (for example, from a language without a Braintrust SDK), the export endpoints are `GET /v1/dataset` to list datasets and `/v1/dataset/{dataset_id}/fetch` to page through records (`GET` paginates via `max_xact_id`/`max_root_span_id`; the `POST` variant accepts a `cursor` in the body), authenticated via `Authorization: Bearer <api key>` against `https://api.braintrust.dev` (per Braintrust's [OpenAPI spec](https://github.com/braintrustdata/braintrust-openapi), as of September 2026). The fetch endpoint also accepts a `version` parameter if you need a snapshot of a dataset as of a past point in time.
+
+Langfuse [datasets](/docs/evaluation/experiments/datasets) support folders, JSON schema validation on `input` and `expectedOutput`, and media attachments, so structure that lived in Braintrust conventions can usually become explicit during the import.
+
+## Step 3: Re-run experiments and keep your autoevals scorers [#experiments]
+
+Braintrust experiments are defined with `Eval(name, data, task, scores)` and run via the `braintrust eval` (now `bt eval`) CLI. The Langfuse equivalent is the [experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk): a plain script that loops your task over a dataset and applies evaluators, with concurrency, tracing, and error isolation handled for you.
+
+The scorers you wrote with [autoevals](https://github.com/braintrustdata/autoevals) carry over as-is. Langfuse ships a converter that makes any autoevals scorer a Langfuse evaluator:
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
 
 ```python
 # Before (Braintrust)
@@ -277,47 +298,114 @@ result = dataset.run_experiment(
 print(result.format())
 ```
 
-The TypeScript SDK provides the same bridge via `createEvaluatorFromAutoevals` from
-`@langfuse/client`. Two differences to note when porting:
+</Tab>
+<Tab>
 
-- **Task signature.** Braintrust tasks receive the raw `input`; Langfuse tasks receive the
-  full dataset `item` (with `item.input`, `item.expected_output`, `item.metadata`).
-- **Runner.** There is no dedicated CLI; experiments are ordinary Python/TS scripts, which
-  makes them straightforward to [run in CI/CD](/docs/evaluation/experiments/experiments-ci-cd)
-  as regression gates.
+In JS/TS, the experiment runner exports task traces via OpenTelemetry: without a registered span processor and a flush at the end, the run is created but its traces never arrive.
 
-Historical Braintrust experiment results are best kept as an archived reference rather than
-imported: scores are cheap to regenerate against the migrated datasets, and score
-comparability across tools is shaky anyway. Re-run your latest baseline experiment in
-Langfuse right after the dataset import so future runs have an anchor.
+```typescript
+// After (Langfuse): same scorer, no rewrite
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { LangfuseClient, createEvaluatorFromAutoevals } from "@langfuse/client";
+import { Factuality } from "autoevals";
 
-## Step 4: Recreate prompts, online scorers, and review workflows
+const otelSdk = new NodeSDK({ spanProcessors: [new LangfuseSpanProcessor()] });
+otelSdk.start();
 
-- **Prompts.** Export prompt definitions via Braintrust's `GET /v1/prompt` endpoint and
-  recreate them in [Langfuse prompt management](/docs/prompt-management), using labels
-  (e.g. `production`, `staging`) for deployment targeting. Application code then fetches
-  prompts by name and label and compiles variables at runtime.
-- **Online scorers.** Braintrust's online scoring (scorers sampled over production logs)
-  maps to Langfuse [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge)
-  and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) running
-  continuously on incoming traces, with their own sampling and filter controls.
-- **Human review.** Rubrics from Braintrust's human review map to score configs on Langfuse
-  [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues): numeric,
-  categorical, and boolean scores plus comments, assigned to reviewers as a queue.
+const langfuse = new LangfuseClient();
+const dataset = await langfuse.dataset.get("golden-set");
 
-## Step 5: Decide what to do with historical logs
+const result = await dataset.runExperiment({
+  name: "post-migration-baseline",
+  task: async (item) => answer(item.input), // your existing application logic
+  evaluators: [createEvaluatorFromAutoevals(Factuality)],
+});
+console.log(await result.format());
+await otelSdk.shutdown(); // flush pending spans
+```
 
-Most teams cut over fresh: old logs stay queryable in Braintrust for their retention window,
-and Langfuse becomes the system of record from cutover day. If you need selected history
-(for example, traces referenced in open incidents), Braintrust's
-`GET /v1/project_logs/{project_id}/fetch` endpoint exports log events, and the Langfuse
-ingestion API can backfill them. Bulk-importing everything is rarely worth it: stale traces
-have low value, and the effort is better spent validating the new pipeline.
+Note the converter argument: the TS bridge takes the scorer itself (`Factuality`), while the Python bridge takes an instance (`Factuality()`).
 
-## Validation checklist
+</Tab>
+</LangTabs>
+
+Two differences to note when porting:
+
+- **Task signature.** Braintrust tasks receive the raw `input`; Langfuse tasks receive the full dataset `item` (with `item.input`, `item.expected_output`, `item.metadata`).
+- **Runner.** There is no dedicated CLI; experiments are ordinary Python/TS scripts, which makes them straightforward to [run in CI/CD](/docs/evaluation/experiments/experiments-ci-cd) as regression gates.
+
+Historical Braintrust experiment results are best kept as an archived reference rather than imported: scores are cheap to regenerate against the migrated datasets, and score comparability across tools is shaky anyway. Re-run your latest baseline experiment in Langfuse right after the dataset import so future runs have an anchor.
+
+## Step 4: Recreate prompts, online scorers, and review workflows [#prompts]
+
+### Prompts
+
+Export prompt definitions via Braintrust's `GET /v1/prompt` endpoint and recreate them in [Langfuse prompt management](/docs/prompt-management), using labels (e.g. `production`, `staging`) for deployment targeting. Both platforms use mustache-style `{{variable}}` syntax, so prompt templates port without conversion:
+
+```python
+import os
+
+import requests
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+headers = {"Authorization": f"Bearer {os.environ['BRAINTRUST_API_KEY']}"}
+
+prompts = requests.get(
+    "https://api.braintrust.dev/v1/prompt",
+    headers=headers,
+    params={"project_name": "my-app"},
+).json()["objects"]
+
+for p in prompts:
+    prompt = p["prompt_data"]["prompt"]
+    if prompt["type"] != "chat":
+        continue  # completion prompts port the same way with type="text"
+    langfuse.create_prompt(
+        name=p["slug"],
+        type="chat",
+        prompt=[
+            {"role": m["role"], "content": m["content"]}
+            for m in prompt["messages"]
+        ],
+        config=p["prompt_data"].get("options", {}),  # model name + parameters
+        labels=["production"],
+        commit_message="Migrated from Braintrust",
+    )
+```
+
+Unlike the dataset import, prompt creation is not idempotent: every `create_prompt` call adds a new version, so run the import once. Application code then fetches prompts by name and label and compiles variables at runtime; once that is live, [link prompts to traces](/docs/prompt-management/features/link-to-traces) so generation metrics break down by prompt version.
+
+### Online scorers and human review
+
+- **Online scorers.** Braintrust's online scoring (scorers sampled over production logs) maps to Langfuse [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) running continuously on incoming traces, with their own sampling and filter controls.
+- **Human review.** Rubrics from Braintrust's human review map to score configs on Langfuse [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues): numeric, categorical, and boolean scores plus comments, assigned to reviewers as a queue.
+
+## Step 5: Decide what to do with historical logs [#historical-logs-step]
+
+Most teams cut over fresh: old logs stay queryable in Braintrust for their retention window, and Langfuse becomes the system of record from cutover day. Bulk-importing everything is rarely worth it: stale traces have low value, reingested history is **billed as new Langfuse ingestion**, and the effort is better spent validating the new pipeline. If you need selected history (for example, traces referenced in open incidents), reingest it over Langfuse's OTLP endpoint.
+
+<Details>
+<Summary>Reingest history over OTLP</Summary>
+
+Do not build a backfill on the legacy `/api/public/ingestion` endpoint: it is [deprecated for trace and observation events](/faq/all/deprecated-api-migration). The current path is OTLP:
+
+1. **Extract** log events with Braintrust's `GET /v1/project_logs/{project_id}/fetch` endpoint (Bearer auth against `https://api.braintrust.dev`), which returns spans with IDs, timing, input/output, and metrics.
+2. **Bound the window at cutover time.** Events after the new instrumentation went live are already in Langfuse; reingesting them duplicates data.
+3. **Transform to plain OTLP JSON** and POST to `{LANGFUSE_BASE_URL}/api/public/otel/v1/traces` with Basic auth and the `x-langfuse-ingestion-version: 4` header. Do not create the spans through an OTel tracer: tracers assign new timestamps and IDs, while raw JSON preserves the original span start and end times.
+4. **Derive IDs deterministically** from Braintrust span/trace IDs (for example, a hash) so every source record maps to a stable Langfuse ID. Langfuse does [not deduplicate re-ingested IDs](/integrations/native/opentelemetry/migration-to-v4#export-complete-immutable-spans), so checkpoint accepted source IDs and resume an interrupted import by skipping them.
+5. **Map fields**: Braintrust span type → `langfuse.observation.type`, `input`/`output` → observation input/output, token counts from `metrics` → `langfuse.observation.usage_details`, errors → `langfuse.observation.level: ERROR`. Keep the source ID in `langfuse.trace.metadata.braintrust_span_id`.
+6. **Reconcile counts** per trace (source events vs destination observations) and spot-check timestamps in the Langfuse UI.
+
+[Migrate custom ingestion to v4](/integrations/native/opentelemetry/migration-to-v4) documents the span format, and the [project-to-project migration cookbook](/guides/cookbook/example_data_migration) contains adaptable pagination, retry, and ID-mapping code.
+
+</Details>
+
+## Validation checklist [#validation]
 
 - [ ] Traces arrive in Langfuse with the expected hierarchy, timing, and token/cost data
-- [ ] User and session attribution works (`user_id`, `session_id` set where Braintrust used metadata)
+- [ ] User and session attribution works (`user_id`, `session_id` set via the [attribute mapping](#users-sessions-tags) where Braintrust used metadata)
 - [ ] Sample rate configured deliberately (default keeps 100% of traces)
 - [ ] Datasets migrated with item counts matching the source
 - [ ] Baseline experiment re-run in Langfuse with autoevals scorers producing scores
@@ -326,40 +414,44 @@ have low value, and the effort is better spent validating the new pipeline.
 - [ ] Team access set up (org/project roles, SSO if applicable)
 - [ ] Braintrust exporter removed, or the parallel-running window has an end date
 
-## FAQ
+## Limitations and gaps [#limitations]
+
+- **Experiment scores do not transfer.** Braintrust experiment results stay behind; re-running experiments against the migrated datasets regenerates scores, but historical score timelines are not comparable across tools.
+- **Trace IDs differ across backends during a parallel window.** Braintrust and Langfuse assign their own IDs; cross-reference by input and start time or put a shared request ID in metadata.
+- **BTQL saved queries and playground sessions do not port.** Rebuild the queries you rely on as [custom dashboards](/docs/metrics/features/custom-dashboards) or [Metrics API](/docs/metrics/features/metrics-api) calls.
+- **Prompt version history flattens by default.** The Step 4 import copies the latest version of each prompt; recreating full version history means iterating Braintrust's prompt versions oldest-first, which is rarely worth it.
+
+## FAQ [#faq]
 
 ### Can I keep my autoevals scorers? [#keep-autoevals]
 
-Yes. autoevals is an Apache-2.0 open-source library, and Langfuse's experiment SDKs include
-converters (`create_evaluator_from_autoevals` in Python, `createEvaluatorFromAutoevals` in
-TypeScript) that run autoevals scorers unchanged inside Langfuse experiments. Custom scorers
-written as plain functions port directly as Langfuse evaluators.
+Yes. autoevals is an MIT-licensed open-source library, and Langfuse's experiment SDKs include converters (`create_evaluator_from_autoevals` in Python, `createEvaluatorFromAutoevals` in TypeScript) that run autoevals scorers unchanged inside Langfuse experiments. Custom scorers written as plain functions port directly as Langfuse evaluators.
 
 ### Do I have to migrate historical logs? [#historical-logs]
 
-No, and most teams do not. Old logs remain in Braintrust for their retention window while
-Langfuse records everything from cutover day. Selective backfill is possible via
-Braintrust's project-logs fetch endpoint and the Langfuse ingestion API, but it is usually
-only worth doing for traces you actively reference.
+No, and most teams do not. Old logs remain in Braintrust for their retention window while Langfuse records everything from cutover day. Selective backfill is possible via Braintrust's project-logs fetch endpoint and reingestion over Langfuse's OTLP endpoint (see [Step 5](#historical-logs-step)), but it is usually only worth doing for traces you actively reference.
 
 ### Does Langfuse have an LLM gateway or proxy like Braintrust? [#gateway]
 
-No, by design. Langfuse SDKs send telemetry asynchronously outside the request path, so
-observability cannot add latency or become a point of failure for model calls. If you want
-gateway features such as routing, caching, or failover, Langfuse integrates with dedicated
-gateways like [LiteLLM](/integrations/gateways/litellm) and receives traces from them.
+No, by design. Langfuse SDKs send telemetry asynchronously outside the request path, so observability cannot add latency or become a point of failure for model calls. If you want gateway features such as routing, caching, or failover, Langfuse integrates with dedicated gateways like [LiteLLM](/integrations/gateways/litellm) and receives traces from them.
 
 ### How do I control ingestion volume and cost in Langfuse? [#sampling]
 
-Set a [sample rate](/docs/observability/features/sampling) in the SDK
-(`LANGFUSE_SAMPLE_RATE=0.1` keeps 10% of traces) to cap volume at the source. Because
-Langfuse bills on counted units rather than bytes of processed data, cost scales with how
-many traces you keep, not with payload size.
+Set a [sample rate](/docs/observability/features/sampling) in the SDK (`LANGFUSE_SAMPLE_RATE=0.1` keeps 10% of traces) to cap volume at the source. Because Langfuse bills on counted units rather than bytes of processed data, cost scales with how many traces you keep, not with payload size.
+
+### I use Braintrust's EU (or another regional) endpoint. Anything different? [#regional-endpoints]
+
+Only the API host: set `BRAINTRUST_API_URL` (for example `https://api-eu.braintrust.dev`) in your environment (the Braintrust SDK picks it up automatically) and use the same host for the REST export calls in Steps 2, 4, and 5. The Langfuse region is chosen independently via `LANGFUSE_BASE_URL`.
 
 ### Is Langfuse open source where Braintrust is not? [#open-source]
 
-Langfuse's core platform is MIT-licensed and fully self-hostable, including the UI and
-storage layer. Braintrust's SDKs are Apache-2.0 open source, but the platform itself is
-proprietary; its self-hosted option is a hybrid deployment where the data plane runs in your
-cloud account and Braintrust hosts the control plane (as of July 2026). Check both models
-against your compliance requirements, particularly if you need air-gapped operation.
+Langfuse's core platform is MIT-licensed and fully self-hostable, including the UI and storage layer. Braintrust's SDKs and the autoevals library are MIT-licensed open source, but the platform itself is proprietary; its self-hosted option is a hybrid deployment where the data plane runs in your cloud account and Braintrust hosts the control plane (as of September 2026). Check both models against your compliance requirements, particularly if you need air-gapped operation.
+
+## Get help with the migration [#get-help]
+
+Start on [Langfuse Cloud](https://cloud.langfuse.com) or [self-host](/self-hosting). If you want a migration plan, [talk to us](/talk-to-us).
+
+<Cards num={2}>
+  <Card title="Get started free" href="https://cloud.langfuse.com" icon={<Cloud />} />
+  <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
+</Cards>
