@@ -23,6 +23,18 @@ Upgrading from Python SDK v3 or JS/TS SDK v4? Follow the [upgrade paths](/docs/o
 
 The Langfuse SDKs are the recommended way to create [custom observations and traces](/docs/observability/sdk/instrumentation#custom-instrumentation) and use the Langfuse [prompt-management](/docs/prompt-management/overview) and [evaluation](/docs/evaluation/overview) features. Both SDKs work with [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) and [self-hosted Langfuse](/self-hosting) with the same code; only the credentials and base URL differ.
 
+<Callout type="warning">
+  **Writing traces with a custom HTTP client?** Send them as OTLP to `POST
+  /api/public/otel/v1/traces`; do not send trace, span, or generation events to
+  the legacy `POST /api/public/ingestion` endpoint. That endpoint remains
+  available for supported event types such as scores, but it is not the
+  supported trace and observation write path in Langfuse v4. Prefer the
+  official SDKs when one is available; otherwise follow the [native
+  OpenTelemetry guide](/integrations/native/opentelemetry) or the [custom
+  ingestion migration
+  guide](/integrations/native/opentelemetry/migration-to-v4).
+</Callout>
+
 **Key benefits**
 
 - Based on [OpenTelemetry](https://opentelemetry.io/), so you can use any OTEL-based instrumentation library for your LLM stack.
