@@ -13,7 +13,7 @@ import CompareClickhouseDatastore from "@/components-mdx/compare-clickhouse-data
 
 This guide compares **[Langfuse](/)**, **[Arize Phoenix](https://phoenix.arize.com)**, and **[Arize AX](https://arize.com/products/ax/)**. All Arize facts were checked against public Arize sources in September 2026.
 
-Phoenix and AX are different products. Phoenix is source-available (Elastic License 2.0) on SQLite or PostgreSQL. AX is proprietary on [adb](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database) ([public launch June 2025](https://arize.com/docs/ax/release-notes/history/2025/06-2025)). Langfuse is one [MIT-licensed](https://github.com/langfuse/langfuse) codebase on [ClickHouse](https://clickhouse.com/) ([open source since 2016](https://clickhouse.com/blog/yandex-opensources-click-house)), identical on Cloud and self-hosted.
+Phoenix and AX are different products. Phoenix is source-available (Elastic License 2.0) on SQLite or PostgreSQL. AX is proprietary on [adb](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database) ([public launch June 2025](https://arize.com/docs/ax/release-notes/history/2025/06-2025)). Langfuse is one [MIT-licensed](https://github.com/langfuse/langfuse) codebase on [ClickHouse](https://clickhouse.com/) ([open source since 2016](https://clickhouse.com/blog/open-source-10)), identical on Cloud and self-hosted.
 
 On August 13, 2026, Dynatrace [announced a definitive agreement to acquire Arize](https://www.dynatrace.com/news/press-release/dynatrace-to-acquire-arize/). The transaction has not closed; this page compares AX and Phoenix as they ship today. See [the FAQ](#dynatrace-acquisition).
 
@@ -23,7 +23,7 @@ On August 13, 2026, Dynatrace [announced a definitive agreement to acquire Arize
 
 **1. The same product in production.** Tracing, evaluations, prompt management, and experiments in the MIT distribution. Cloud and self-host share the codebase. Used by 21 of the Fortune 50.
 
-**2. An open data plane.** Every span lands in ClickHouse, [open source since 2016](https://clickhouse.com/blog/yandex-opensources-click-house), with [2,000+ contributors](https://clickhouse.com/blog/open-source-10). Self-hosters query it in SQL. Cloud and self-host share the same engine.
+**2. An open data plane.** Every span lands in ClickHouse, [open source since 2016](https://clickhouse.com/blog/open-source-10), with [2,000+ contributors](https://clickhouse.com/blog/open-source-10). Self-hosters query it in SQL. Cloud and self-host share the same engine.
 
 **3. One meter, years of history, code evals on every plan.** A unit is a trace, an observation, or a score. Pro includes 3-year retention. Custom code evaluators are not an Enterprise gate.
 
@@ -64,7 +64,7 @@ The [Arize pricing page](https://arize.com/pricing/) lists **15 days** of retent
 
 |                         | Langfuse                                                                                                                         | Arize AX                                                                                                                 |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Data store              | **ClickHouse**, [launched 2016 (OSS)](https://clickhouse.com/blog/yandex-opensources-click-house), Apache 2.0                    | **adb**, [launched 2025](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database/), proprietary / closed |
+| Data store              | **ClickHouse**, [launched 2016 (OSS)](https://clickhouse.com/blog/open-source-10), Apache 2.0                                    | **adb**, [launched 2025](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database/), proprietary / closed |
 | Maturity                | ~10 years open source; [2,000+ contributors](https://clickhouse.com/blog/open-source-10)                                         | First public release June 25, 2025 ([release notes](https://arize.com/docs/ax/release-notes/history/2025/06-2025))       |
 | Cloud / self-host       | Same ClickHouse engine on Cloud and self-hosted                                                                                  | adb on AX Cloud (Phoenix: Postgres/SQLite, separate product)                                                             |
 | Default trace retention | 30 days Hobby, **90 days Core**, **3 years** [Pro and Enterprise](/pricing)                                                      | **15 days** Free, **30 days** Pro, custom Enterprise                                                                     |
@@ -72,7 +72,7 @@ The [Arize pricing page](https://arize.com/pricing/) lists **15 days** of retent
 | Warehouse sync          | [Scheduled blob exports](/docs/api-and-data-platform/features/export-to-blob-storage) (Teams add-on, Enterprise, or self-hosted) | Data Fabric: Enterprise-only, currently waitlisted                                                                       |
 | SQL access              | Direct ClickHouse SQL when self-hosting                                                                                          | Via Data Fabric sync to your warehouse (Enterprise)                                                                      |
 
-**Sources:** [ClickHouse OSS launch (Jun 15, 2016)](https://clickhouse.com/blog/yandex-opensources-click-house) · [ClickHouse 10-year / 2,000+ contributors](https://clickhouse.com/blog/open-source-10) · [adb announcement](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database/) · [Arize June 2025 release notes](https://arize.com/docs/ax/release-notes/history/2025/06-2025)
+**Sources:** [ClickHouse 10 years open source (Jun 15, 2016; 2,000+ contributors)](https://clickhouse.com/blog/open-source-10) · [adb announcement](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database/) · [Arize June 2025 release notes](https://arize.com/docs/ax/release-notes/history/2025/06-2025)
 
 ---
 
