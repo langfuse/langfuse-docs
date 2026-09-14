@@ -132,7 +132,7 @@ Choose your framework, SDK, or OpenTelemetry setup to get started. If your
 application already emits OTEL spans, start with the OpenTelemetry guide.
 (Langfuse calls spans [observations](/docs/observability/data-model#observations-traces-and-sessions); `span` is also a specific observation type.)
 
-<LangTabs items={["OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Vercel AI SDK", "LangChain (Python)", "LangChain (JS/TS)", "Python SDK", "JS/TS SDK", "OpenTelemetry (OTEL)", "More integrations"]}>
+<LangTabs items={["OpenAI SDK (Python)", "OpenAI SDK (JS/TS)", "Vercel AI SDK", "LangChain (Python)", "LangChain (JS/TS)", "Python SDK", "JS/TS SDK", "OpenTelemetry (API)", "More integrations"]}>
 
 <Tab>
 {/* PYTHON - OPENAI*/}
@@ -303,12 +303,7 @@ Use the Langfuse JS/TS SDK to wrap any LLM or Agent
 <Tab>
 {/* OTEL */}
 
-If your app, framework, or collector already emits OpenTelemetry (OTEL) spans,
-use the Langfuse OpenTelemetry integration to send OTLP traces to Langfuse.
-This is the right entry point for custom OTEL setups and languages beyond the
-Langfuse SDKs.
-
-<Cards num={2}>
+<Cards num={1}>
   <Card
     icon={
       <div className="w-6 h-6 dark:bg-white rounded-sm p-0.5 flex items-center justify-center">
@@ -322,10 +317,56 @@ Langfuse SDKs.
     href="/integrations/native/opentelemetry"
     arrow
   />
+</Cards>
+
+Send OTLP spans straight to the Langfuse API from an OTEL SDK, a collector,
+or plain `curl`:
+
+```bash
+export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+export LANGFUSE_HOST="https://cloud.langfuse.com" # EU region
+
+TRACE_ID=$(openssl rand -hex 16)
+SPAN_ID=$(openssl rand -hex 8)
+START=$(($(date +%s) * 1000000000))
+
+curl -X POST "$LANGFUSE_HOST/api/public/otel/v1/traces" \
+  -u "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -H "x-langfuse-ingestion-version: 4" \
+  --data-binary @- <<JSON
+{"resourceSpans": [{"scopeSpans": [{"spans": [{
+  "traceId": "$TRACE_ID",
+  "spanId": "$SPAN_ID",
+  "name": "hello-langfuse",
+  "startTimeUnixNano": "$START",
+  "endTimeUnixNano": "$((START + 1000000))",
+  "attributes": [
+    {
+      "key": "langfuse.observation.input",
+      "value": {"stringValue": "Hello, Langfuse!"}
+    },
+    {
+      "key": "langfuse.observation.output",
+      "value": {"stringValue": "Hello from curl!"}
+    }
+  ]
+}]}]}]}
+JSON
+```
+
+Point `LANGFUSE_HOST` at your [data region](/security/data-regions) or
+self-hosted deployment. See the [OpenTelemetry property
+mapping](/integrations/native/opentelemetry#property-mapping) to add model,
+usage, user, session, and other Langfuse attributes.
+
+<Cards num={1}>
   <Card
     icon={<BookOpen />}
-    title="Attribute propagation"
-    href="/integrations/native/opentelemetry#propagating-attributes"
+    title="OTLP endpoint reference"
+    href="https://api.reference.langfuse.com/#tag/opentelemetry/POST/api/public/otel/v1/traces"
+    newWindow
     arrow
   />
 </Cards>
