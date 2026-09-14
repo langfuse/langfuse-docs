@@ -58,7 +58,7 @@ Framework integrations typically set these types automatically. If you're instru
 
 ### Is it nested correctly?
 
-A tool call should nest under the `agent` or `span` that orchestrates the step, as a sibling of the `generation` that requested it, so the tree shows which step each action belongs to instead of leaving tool calls dangling at the trace root.
+A tool call should nest under the `agent` or `span` observation that orchestrates the step, as a sibling of the `generation` that requested it, so the tree shows which step each action belongs to instead of leaving tool calls dangling at the trace root.
 
 <Callout type="info">
 
@@ -93,11 +93,11 @@ Framework integrations usually get this right automatically. If you're instrumen
 
 ### Is there noise you don't need?
 
-Not every observation in the tree is useful for understanding what your application did. HTTP spans, database queries, and framework internals often add clutter without giving you meaningful insight. If you see observations like these polluting your trace tree, you can [filter them out](/faq/all/unwanted-http-database-spans).
+Not every observation in the tree is useful for understanding what your application did. HTTP observations, database queries, and framework internals often add clutter without giving you meaningful insight. If you see observations like these polluting your trace tree, you can [filter them out](/faq/all/unwanted-http-database-spans).
 
 <div className="max-w-[50%]">
 
-![Noisy spans in a trace tree](/images/docs/faq/good-trace-noisy-spans.png)
+![Noisy observations in a trace tree](/images/docs/faq/good-trace-noisy-spans.png)
 
 </div>
 

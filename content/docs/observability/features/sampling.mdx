@@ -40,11 +40,11 @@ Langfuse(sample_rate=0.3)  # 30% of traces will be sampled
 @observe()
 def process_data():
     # Only ~30% of calls to this function will generate traces
-    # The decision is made at the trace level (first span)
+    # The decision is made at the trace level (first observation)
     pass
 ```
 
-If a trace is not sampled, none of its observations (spans or generations) or associated scores will be sent to Langfuse, which can significantly reduce data volume for high-traffic applications.
+If a trace is not sampled, none of its observations or associated scores will be sent to Langfuse, which can significantly reduce data volume for high-traffic applications.
 
 </Tab>
 <Tab title="JS/TS SDK">

@@ -47,9 +47,9 @@ langfuse.create_score(
     comment="Factually correct", # optional
 )
 
-# Method 2: Score current span/generation (within context)
+# Method 2: Score current observation (within context)
 with langfuse.start_as_current_observation(as_type="span", name="my-operation") as span:
-    # Score the current span
+    # Score the current observation
     span.score(
         name="correctness",
         value=0.9,
@@ -67,7 +67,7 @@ with langfuse.start_as_current_observation(as_type="span", name="my-operation") 
 
 # Method 3: Score via the current context
 with langfuse.start_as_current_observation(as_type="span", name="my-operation"):
-    # Score the current span
+    # Score the current observation
     langfuse.score_current_span(
         name="correctness",
         value=0.9,
@@ -101,9 +101,9 @@ langfuse.create_score(
     comment="Some factual errors", # optional
 )
 
-# Method 2: Score current span/generation (within context)
+# Method 2: Score current observation (within context)
 with langfuse.start_as_current_observation(as_type="span", name="my-operation") as span:
-    # Score the current span
+    # Score the current observation
     span.score(
         name="accuracy",
         value="partially correct",
@@ -120,7 +120,7 @@ with langfuse.start_as_current_observation(as_type="span", name="my-operation") 
 
 # Method 3: Score via the current context
 with langfuse.start_as_current_observation(as_type="span", name="my-operation"):
-    # Score the current span
+    # Score the current observation
     langfuse.score_current_span(
         name="accuracy",
         value="partially correct",
@@ -154,9 +154,9 @@ langfuse.create_score(
     comment="Incorrect answer", # optional
 )
 
-# Method 2: Score current span/generation (within context)
+# Method 2: Score current observation (within context)
 with langfuse.start_as_current_observation(as_type="span", name="my-operation") as span:
-    # Score the current span
+    # Score the current observation
     span.score(
         name="helpfulness",
         value=1, # 0 or 1
@@ -172,7 +172,7 @@ with langfuse.start_as_current_observation(as_type="span", name="my-operation") 
     )
 # Method 3: Score via the current context
 with langfuse.start_as_current_observation(as_type="span", name="my-operation"):
-    # Score the current span
+    # Score the current observation
     langfuse.score_current_span(
         name="helpfulness",
         value=1, # 0 or 1
@@ -206,9 +206,9 @@ langfuse.create_score(
     comment="Reviewed by QA team", # optional
 )
 
-# Method 2: Score current span/generation (within context)
+# Method 2: Score current observation (within context)
 with langfuse.start_as_current_observation(as_type="span", name="my-operation") as span:
-    # Score the current span
+    # Score the current observation
     span.score(
         name="reviewer_notes",
         value="The response was helpful but could be more concise.",
@@ -225,7 +225,7 @@ with langfuse.start_as_current_observation(as_type="span", name="my-operation") 
 
 # Method 3: Score via the current context
 with langfuse.start_as_current_observation(as_type="span", name="my-operation"):
-    # Score the current span
+    # Score the current observation
     langfuse.score_current_span(
         name="reviewer_notes",
         value="The response was helpful but could be more concise.",

@@ -76,7 +76,7 @@ A dataset item is an input, an optional expected output, optional metadata, and 
 
 ### From the UI, one or many at a time
 
-On any observation of a production trace (span, event, or generation), `+ Add to dataset` opens the item form prefilled from that observation, so you can write the expected output while the context is open. For volume, go to the observations table, apply the score filter, select the failing rows with the checkboxes, and click **Actions** then **Add to dataset**. Pick or create a dataset, then configure the field mapping: use a field as-is, extract a value with a JSON path expression, or compose an object from several fields. Preview and confirm.
+On any observation of a production trace, `+ Add to dataset` opens the item form prefilled from that observation, so you can write the expected output while the context is open. For volume, go to the observations table, apply the score filter, select the failing rows with the checkboxes, and click **Actions** then **Add to dataset**. Pick or create a dataset, then configure the field mapping: use a field as-is, extract a value with a JSON path expression, or compose an object from several fields. Preview and confirm.
 
 The batch runs in the background with partial success: items that fail validation against the dataset's schema are logged while valid items are still added, and progress is visible under **Settings** then **Batch Actions**. The observation output in these items is the answer the user disliked, so do not map it to the expected output. Leave `expectedOutput` empty and use reference-free checks, or fill it in with corrections as described below.
 
@@ -95,7 +95,7 @@ langfuse.create_dataset_item(
     expected_output={"reply": agent_final_reply},
     # link to a trace
     source_trace_id=trace_id,
-    # optional: link to a specific span, event, or generation
+    # optional: link to a specific observation
     source_observation_id=observation_id,
 )
 ```
