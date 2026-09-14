@@ -264,6 +264,9 @@ Graduated pricing means you pay different rates for different volume tiers. The 
 **How can I reduce my Langfuse Cloud bill?**
 The primary way is to reduce the number of billable units you ingest. See [tips for cutting costs](/faq/all/cutting-costs). With graduated pricing, you automatically get lower rates as your volume increases.
 
+**How does Langfuse pricing compare to LangSmith, Braintrust, Arize, and Datadog?**
+On a representative workload, Langfuse Cloud is cheaper than [LangSmith](/compare/langsmith), [Braintrust](/compare/braintrust), [Arize](/compare/arize-phoenix), and [Datadog Agent Observability](/compare/datadog). Open the [editable pricing comparison sheet](/pricing-comparison-sheet) to fill in your own assumptions and check the numbers for your workload. For product-by-product differences, see the [comparison pages](/compare).
+
 **When do I get billed?**
 You get one bill each month. The plan fee is charged at the start of the month, and usage is charged at the end of the month.
 
