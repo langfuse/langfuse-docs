@@ -1,0 +1,683 @@
+{
+  "project_id": 7132,
+  "host": "https://eu.posthog.com",
+  "production_host": "langfuse.com",
+  "dashboards": [
+    {
+      "key": "overview",
+      "name": "Use cases · traffic and next steps",
+      "description": "Traffic, first next destination, and content interest for chat agents, coding agents, and workflow automation. Production langfuse.com only; Vercel previews and localhost excluded. New use_case events start after the tracking release. SQL tables use a fixed rolling 30 days.",
+      "id": 942720,
+      "url": "https://eu.posthog.com/project/7132/dashboard/942720"
+    },
+    {
+      "key": "cta",
+      "name": "Use cases · CTA visibility and clicks",
+      "description": "Compare placements among visitors who actually saw each CTA. Exposure requires at least 50% visible for 1 second; only later same-visit clicks qualify. Distinct visitors, separate gateway/hooks paths. Production only. Starts after deployment; SQL tables use a fixed rolling 30 days.",
+      "id": 942721,
+      "url": "https://eu.posthog.com/project/7132/dashboard/942721"
+    },
+    {
+      "key": "conversions",
+      "name": "Use cases · completed conversions",
+      "description": "Use-case visits and actions leading to actual account creation or accepted Marketo inquiries. Signup window 14 days, sales window 1 day. Person identity joins website and Cloud. Existing signup event covers EU/US only; ad blocking and unavailable identity reduce coverage. Attribution is observational. New click and sales events require deployment.",
+      "id": 942723,
+      "url": "https://eu.posthog.com/project/7132/dashboard/942723"
+    }
+  ],
+  "insights": [
+    {
+      "group": "overview",
+      "name": "0. Traffic by page",
+      "description": "Production pageviews and distinct visitors during the last 30 days. Preview hosts excluded. Historical pageview counts may include duplicates before this tracking release.",
+      "query": {
+        "kind": "DataVisualizationNode",
+        "display": "ActionsTable",
+        "source": {
+          "kind": "HogQLQuery",
+          "query": "SELECT properties.$pathname AS page, count() AS pageviews, count(DISTINCT person_id) AS visitors FROM events WHERE event = '$pageview' AND timestamp >= now() - INTERVAL 30 DAY AND properties.$host = 'langfuse.com' AND properties.$pathname IN ('/chat-agents','/coding-agents','/workflow-automation') GROUP BY page ORDER BY visitors DESC"
+        }
+      },
+      "id": 5866834,
+      "short_id": "pKcrv4DW"
+    },
+    {
+      "group": "overview",
+      "name": "0. Daily visitors by page",
+      "description": "Distinct visitors per day on the three production use-case pages; last 30 days. No preview traffic.",
+      "query": {
+        "kind": "InsightVizNode",
+        "source": {
+          "kind": "TrendsQuery",
+          "dateRange": {
+            "date_from": "-30d"
+          },
+          "interval": "day",
+          "series": [
+            {
+              "kind": "EventsNode",
+              "event": "$pageview",
+              "properties": [
+                {
+                  "key": "$host",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": ["langfuse.com"]
+                },
+                {
+                  "key": "$pathname",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": ["/chat-agents"]
+                }
+              ],
+              "name": "/chat-agents",
+              "math": "dau"
+            },
+            {
+              "kind": "EventsNode",
+              "event": "$pageview",
+              "properties": [
+                {
+                  "key": "$host",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": ["langfuse.com"]
+                },
+                {
+                  "key": "$pathname",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": ["/coding-agents"]
+                }
+              ],
+              "name": "/coding-agents",
+              "math": "dau"
+            },
+            {
+              "kind": "EventsNode",
+              "event": "$pageview",
+              "properties": [
+                {
+                  "key": "$host",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": ["langfuse.com"]
+                },
+                {
+                  "key": "$pathname",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": ["/workflow-automation"]
+                }
+              ],
+              "name": "/workflow-automation",
+              "math": "dau"
+            }
+          ],
+          "trendsFilter": {
+            "display": "ActionsLineGraph",
+            "showLegend": true
+          },
+          "filterTestAccounts": false
+        }
+      },
+      "id": 5866835,
+      "short_id": "FB6ahCYP"
+    },
+    {
+      "group": "overview",
+      "name": "1. Where visitors go next",
+      "description": "First outbound action per use-case page visit; excludes image zoom and links within the same page. Counts visits and distinct people. Starts after deployment.",
+      "query": {
+        "kind": "DataVisualizationNode",
+        "display": "ActionsTable",
+        "source": {
+          "kind": "HogQLQuery",
+          "query": "SELECT use_case, next_destination, count() AS visits, count(DISTINCT person_id) AS visitors FROM (SELECT person_id, properties.page_view_id AS visit, properties.use_case AS use_case, argMin(properties.destination_group, timestamp) AS next_destination FROM events WHERE event = 'use_case:action_clicked' AND timestamp >= now() - INTERVAL 30 DAY AND properties.$host = 'langfuse.com' AND properties.use_case IN ('chat_agents', 'coding_agents', 'workflow_automation') AND properties.destination_group != 'image' AND properties.destination != properties.page_path AND properties.destination NOT LIKE concat(properties.page_path, '#%') GROUP BY person_id, visit, use_case) GROUP BY use_case, next_destination ORDER BY visits DESC"
+        }
+      },
+      "id": 5866860,
+      "short_id": "usVlhujV"
+    },
+    {
+      "group": "overview",
+      "name": "3. Benefits opened",
+      "description": "Explicit accordion opens only, excluding the initially open benefit. Broken down by page and gateway/hooks path.",
+      "query": {
+        "kind": "DataVisualizationNode",
+        "display": "ActionsTable",
+        "source": {
+          "kind": "HogQLQuery",
+          "query": "SELECT properties.use_case AS use_case, properties.setup_path AS setup_path, properties.item AS benefit, count() AS opens, count(DISTINCT person_id) AS visitors FROM events WHERE event = 'use_case:benefit_opened' AND timestamp >= now() - INTERVAL 30 DAY AND properties.$host = 'langfuse.com' AND properties.use_case IN ('chat_agents', 'coding_agents', 'workflow_automation') GROUP BY use_case, setup_path, benefit ORDER BY visitors DESC"
+        }
+      },
+      "id": 5866861,
+      "short_id": "NItRWzHG"
+    },
+    {
+      "group": "overview",
+      "name": "3. Customer stories attracting interest",
+      "description": "Distinct people clicking each item on a use-case page, with the source placement and setup path. Each whole-card activation is counted once.",
+      "query": {
+        "kind": "DataVisualizationNode",
+        "display": "ActionsTable",
+        "source": {
+          "kind": "HogQLQuery",
+          "query": "SELECT properties.use_case AS use_case, properties.setup_path AS setup_path, properties.section AS placement, properties.item AS item, properties.destination AS destination, count() AS clicks, count(DISTINCT person_id) AS visitors FROM events WHERE event = 'use_case:action_clicked' AND timestamp >= now() - INTERVAL 30 DAY AND properties.$host = 'langfuse.com' AND properties.use_case IN ('chat_agents', 'coding_agents', 'workflow_automation') AND properties.destination_group = 'stories' GROUP BY use_case, setup_path, placement, item, destination ORDER BY visitors DESC LIMIT 100"
+        }
+      },
+      "id": 5866862,
+      "short_id": "458Ldr5u"
+    },
+    {
+      "group": "overview",
+      "name": "3. Integrations attracting interest",
+      "description": "Distinct people clicking each item on a use-case page, with the source placement and setup path. Each whole-card activation is counted once.",
+      "query": {
+        "kind": "DataVisualizationNode",
+        "display": "ActionsTable",
+        "source": {
+          "kind": "HogQLQuery",
+          "query": "SELECT properties.use_case AS use_case, properties.setup_path AS setup_path, properties.section AS placement, properties.item AS item, properties.destination AS destination, count() AS clicks, count(DISTINCT person_id) AS visitors FROM events WHERE event = 'use_case:action_clicked' AND timestamp >= now() - INTERVAL 30 DAY AND properties.$host = 'langfuse.com' AND properties.use_case IN ('chat_agents', 'coding_agents', 'workflow_automation') AND properties.section = 'integrations' GROUP BY use_case, setup_path, placement, item, destination ORDER BY visitors DESC LIMIT 100"
+        }
+      },
+      "id": 5866863,
+      "short_id": "pkH72wiJ"
+    },
+    {
+      "group": "overview",
+      "name": "3. Docs and resources attracting interest",
+      "description": "Distinct people clicking each item on a use-case page, with the source placement and setup path. Each whole-card activation is counted once.",
+      "query": {
+        "kind": "DataVisualizationNode",
+        "display": "ActionsTable",
+        "source": {
+          "kind": "HogQLQuery",
+          "query": "SELECT properties.use_case AS use_case, properties.setup_path AS setup_path, properties.section AS placement, properties.item AS item, properties.destination AS destination, count() AS clicks, count(DISTINCT person_id) AS visitors FROM events WHERE event = 'use_case:action_clicked' AND timestamp >= now() - INTERVAL 30 DAY AND properties.$host = 'langfuse.com' AND properties.use_case IN ('chat_agents', 'coding_agents', 'workflow_automation') AND properties.destination_group IN ('docs', 'resources') GROUP BY use_case, setup_path, placement, item, destination ORDER BY visitors DESC LIMIT 100"
+        }
+      },
+      "id": 5866864,
+      "short_id": "lUianFub"
+    },
+    {
+      "group": "overview",
+      "name": "3. Gateway versus hooks selections",
+      "description": "Explicit setup-path changes, including keyboard selection. The default selection is not an interaction.",
+      "query": {
+        "kind": "DataVisualizationNode",
+        "display": "ActionsTable",
+        "source": {
+          "kind": "HogQLQuery",
+          "query": "SELECT properties.item AS setup_path, count() AS selections, count(DISTINCT person_id) AS visitors FROM events WHERE event = 'use_case:path_selected' AND timestamp >= now() - INTERVAL 30 DAY AND properties.$host = 'langfuse.com' AND properties.use_case IN ('chat_agents', 'coding_agents', 'workflow_automation') GROUP BY setup_path ORDER BY visitors DESC"
+        }
+      },
+      "id": 5866865,
+      "short_id": "eVjceRp3"
+    },
+    {
+      "group": "cta",
+      "name": "2. Click-through among visitors who saw each placement",
+      "description": "A view requires 50% of the link/card visible for 1 continuous second in the foreground. Numerator requires a later click on that same placement in that same page visit, then deduplicates people. Gateway/hooks are separate. Quick clicks without qualifying exposure are excluded from this rate.",
+      "query": {
+        "kind": "DataVisualizationNode",
+        "display": "ActionsTable",
+        "source": {
+          "kind": "HogQLQuery",
+          "query": "SELECT use_case, setup_path, section, action, item, uniqIf(person_id, saw) AS exposed_visitors, uniqIf(person_id, saw AND clicked AND clicked_at >= exposed_at) AS exposed_clickers, round(100.0 * uniqIf(person_id, saw AND clicked AND clicked_at >= exposed_at) / nullIf(uniqIf(person_id, saw), 0), 1) AS exposed_ctr_percent FROM (SELECT person_id, properties.page_view_id AS visit, properties.placement_id AS placement, properties.use_case AS use_case, properties.setup_path AS setup_path, properties.section AS section, properties.action AS action, properties.item AS item, countIf(event = 'use_case:action_viewed') > 0 AS saw, countIf(event = 'use_case:action_clicked' AND properties.was_exposed = true) > 0 AS clicked, minIf(timestamp, event = 'use_case:action_viewed') AS exposed_at, maxIf(timestamp, event = 'use_case:action_clicked' AND properties.was_exposed = true) AS clicked_at FROM events WHERE event IN ('use_case:action_viewed', 'use_case:action_clicked') AND timestamp >= now() - INTERVAL 30 DAY AND properties.$host = 'langfuse.com' AND properties.use_case IN ('chat_agents', 'coding_agents', 'workflow_automation') AND properties.action IN ('start_free', 'talk_to_sales', 'quickstart', 'documentation') GROUP BY person_id, visit, placement, use_case, setup_path, section, action, item) GROUP BY use_case, setup_path, section, action, item HAVING exposed_visitors > 0 ORDER BY exposed_visitors DESC LIMIT 100"
+        }
+      },
+      "id": 5866874,
+      "short_id": "xwOD9Ki8"
+    },
+    {
+      "group": "cta",
+      "name": "2. All CTA clicks, including quick clicks",
+      "description": "All signup and sales CTA clicks, including activations before the one-second visibility threshold. Use the exposure table for placement CTR.",
+      "query": {
+        "kind": "DataVisualizationNode",
+        "display": "ActionsTable",
+        "source": {
+          "kind": "HogQLQuery",
+          "query": "SELECT properties.use_case AS use_case, properties.setup_path AS setup_path, properties.section AS placement, properties.action AS action, count() AS clicks, count(DISTINCT person_id) AS clickers, countIf(properties.was_exposed = false) AS quick_clicks FROM events WHERE event = 'use_case:action_clicked' AND timestamp >= now() - INTERVAL 30 DAY AND properties.$host = 'langfuse.com' AND properties.use_case IN ('chat_agents', 'coding_agents', 'workflow_automation') AND properties.destination_group IN ('signup', 'sales') GROUP BY use_case, setup_path, placement, action ORDER BY clickers DESC"
+        }
+      },
+      "id": 5866875,
+      "short_id": "iiGWmydh"
+    },
+    {
+      "group": "conversions",
+      "name": "4. Page visit → completed signup",
+      "description": "A production use-case visit followed by cloud_signup_complete within 14 days, joined by PostHog person identity. Existing Cloud event covers EU/US only. Excludes preview hosts on the visit step. No signup is inferred from a button click.",
+      "query": {
+        "kind": "InsightVizNode",
+        "source": {
+          "kind": "FunnelsQuery",
+          "series": [
+            {
+              "kind": "EventsNode",
+              "event": "$pageview",
+              "properties": [
+                {
+                  "key": "$host",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": ["langfuse.com"]
+                },
+                {
+                  "key": "$pathname",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": [
+                    "/chat-agents",
+                    "/coding-agents",
+                    "/workflow-automation"
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "EventsNode",
+              "event": "cloud_signup_complete",
+              "properties": []
+            }
+          ],
+          "dateRange": {
+            "date_from": "-30d"
+          },
+          "funnelsFilter": {
+            "funnelOrderType": "ordered",
+            "funnelWindowInterval": 14,
+            "funnelWindowIntervalUnit": "day",
+            "funnelVizType": "steps",
+            "breakdownAttributionType": "first_touch"
+          },
+          "breakdownFilter": {
+            "breakdown": "$pathname",
+            "breakdown_type": "event"
+          },
+          "filterTestAccounts": false
+        }
+      },
+      "id": 5866876,
+      "short_id": "9lIsZ9wF"
+    },
+    {
+      "group": "conversions",
+      "name": "4. Page visit → completed sales inquiry",
+      "description": "Production use-case visit followed by the Marketo success callback within 1 day, joined by person identity. This records accepted submissions, not form starts or button clicks. Starts after deployment.",
+      "query": {
+        "kind": "InsightVizNode",
+        "source": {
+          "kind": "FunnelsQuery",
+          "series": [
+            {
+              "kind": "EventsNode",
+              "event": "$pageview",
+              "properties": [
+                {
+                  "key": "$host",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": ["langfuse.com"]
+                },
+                {
+                  "key": "$pathname",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": [
+                    "/chat-agents",
+                    "/coding-agents",
+                    "/workflow-automation"
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "EventsNode",
+              "event": "sales:inquiry_completed",
+              "properties": [
+                {
+                  "key": "$host",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": ["langfuse.com"]
+                }
+              ]
+            }
+          ],
+          "dateRange": {
+            "date_from": "-30d"
+          },
+          "funnelsFilter": {
+            "funnelOrderType": "ordered",
+            "funnelWindowInterval": 1,
+            "funnelWindowIntervalUnit": "day",
+            "funnelVizType": "steps",
+            "breakdownAttributionType": "first_touch"
+          },
+          "breakdownFilter": {
+            "breakdown": "$pathname",
+            "breakdown_type": "event"
+          },
+          "filterTestAccounts": false
+        }
+      },
+      "id": 5866878,
+      "short_id": "xvjuhsCs"
+    },
+    {
+      "group": "conversions",
+      "name": "4. Next destinations → completed signup",
+      "description": "Any outgoing action on a use-case page followed by a completed EU/US Cloud signup within 14 days. Broken down by the destination of the first qualifying action. Describes associations, not causal impact or exclusive attribution.",
+      "query": {
+        "kind": "InsightVizNode",
+        "source": {
+          "kind": "FunnelsQuery",
+          "series": [
+            {
+              "kind": "EventsNode",
+              "event": "use_case:action_clicked",
+              "properties": [
+                {
+                  "key": "$host",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": ["langfuse.com"]
+                },
+                {
+                  "key": "use_case",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": [
+                    "chat_agents",
+                    "coding_agents",
+                    "workflow_automation"
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "EventsNode",
+              "event": "cloud_signup_complete",
+              "properties": []
+            }
+          ],
+          "dateRange": {
+            "date_from": "-30d"
+          },
+          "funnelsFilter": {
+            "funnelOrderType": "ordered",
+            "funnelWindowInterval": 14,
+            "funnelWindowIntervalUnit": "day",
+            "funnelVizType": "steps",
+            "breakdownAttributionType": "first_touch"
+          },
+          "breakdownFilter": {
+            "breakdown": "destination_group",
+            "breakdown_type": "event"
+          },
+          "filterTestAccounts": false
+        }
+      },
+      "id": 5866880,
+      "short_id": "nHocRJGG"
+    },
+    {
+      "group": "conversions",
+      "name": "4. CTA placements → completed signup",
+      "description": "Start free clicks followed by actual EU/US signup within 14 days, broken down by stable placement ID. Person identity must be available across marketing and Cloud.",
+      "query": {
+        "kind": "InsightVizNode",
+        "source": {
+          "kind": "FunnelsQuery",
+          "series": [
+            {
+              "kind": "EventsNode",
+              "event": "use_case:action_clicked",
+              "properties": [
+                {
+                  "key": "$host",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": ["langfuse.com"]
+                },
+                {
+                  "key": "use_case",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": [
+                    "chat_agents",
+                    "coding_agents",
+                    "workflow_automation"
+                  ]
+                },
+                {
+                  "key": "destination_group",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": ["signup"]
+                }
+              ]
+            },
+            {
+              "kind": "EventsNode",
+              "event": "cloud_signup_complete",
+              "properties": []
+            }
+          ],
+          "dateRange": {
+            "date_from": "-30d"
+          },
+          "funnelsFilter": {
+            "funnelOrderType": "ordered",
+            "funnelWindowInterval": 14,
+            "funnelWindowIntervalUnit": "day",
+            "funnelVizType": "steps",
+            "breakdownAttributionType": "first_touch"
+          },
+          "breakdownFilter": {
+            "breakdown": "placement_id",
+            "breakdown_type": "event"
+          },
+          "filterTestAccounts": false
+        }
+      },
+      "id": 5866881,
+      "short_id": "Z6ATCPMe"
+    },
+    {
+      "group": "conversions",
+      "name": "4. CTA placements → completed sales inquiry",
+      "description": "Talk to sales clicks followed by the Marketo success event within 1 day. Broken down by source placement ID.",
+      "query": {
+        "kind": "InsightVizNode",
+        "source": {
+          "kind": "FunnelsQuery",
+          "series": [
+            {
+              "kind": "EventsNode",
+              "event": "use_case:action_clicked",
+              "properties": [
+                {
+                  "key": "$host",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": ["langfuse.com"]
+                },
+                {
+                  "key": "use_case",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": [
+                    "chat_agents",
+                    "coding_agents",
+                    "workflow_automation"
+                  ]
+                },
+                {
+                  "key": "destination_group",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": ["sales"]
+                }
+              ]
+            },
+            {
+              "kind": "EventsNode",
+              "event": "sales:inquiry_completed",
+              "properties": [
+                {
+                  "key": "$host",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": ["langfuse.com"]
+                }
+              ]
+            }
+          ],
+          "dateRange": {
+            "date_from": "-30d"
+          },
+          "funnelsFilter": {
+            "funnelOrderType": "ordered",
+            "funnelWindowInterval": 1,
+            "funnelWindowIntervalUnit": "day",
+            "funnelVizType": "steps",
+            "breakdownAttributionType": "first_touch"
+          },
+          "breakdownFilter": {
+            "breakdown": "placement_id",
+            "breakdown_type": "event"
+          },
+          "filterTestAccounts": false
+        }
+      },
+      "id": 5866883,
+      "short_id": "4cOdIUYT"
+    },
+    {
+      "group": "conversions",
+      "name": "4. Gateway versus hooks → completed signup",
+      "description": "Coding-agent CTA clicks followed by completed signup within 14 days, attributed to the path selected at the click. Only actual EU/US Cloud signup completions count.",
+      "query": {
+        "kind": "InsightVizNode",
+        "source": {
+          "kind": "FunnelsQuery",
+          "series": [
+            {
+              "kind": "EventsNode",
+              "event": "use_case:action_clicked",
+              "properties": [
+                {
+                  "key": "$host",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": ["langfuse.com"]
+                },
+                {
+                  "key": "use_case",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": ["coding_agents"]
+                },
+                {
+                  "key": "destination_group",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": ["signup"]
+                }
+              ]
+            },
+            {
+              "kind": "EventsNode",
+              "event": "cloud_signup_complete",
+              "properties": []
+            }
+          ],
+          "dateRange": {
+            "date_from": "-30d"
+          },
+          "funnelsFilter": {
+            "funnelOrderType": "ordered",
+            "funnelWindowInterval": 14,
+            "funnelWindowIntervalUnit": "day",
+            "funnelVizType": "steps",
+            "breakdownAttributionType": "first_touch"
+          },
+          "breakdownFilter": {
+            "breakdown": "setup_path",
+            "breakdown_type": "event"
+          },
+          "filterTestAccounts": false
+        }
+      },
+      "id": 5866885,
+      "short_id": "mjnBEdt5"
+    },
+    {
+      "group": "conversions",
+      "name": "4. Next destinations → completed sales inquiry",
+      "description": "A use-case outgoing action followed by an accepted Marketo sales inquiry within 1 day, broken down by the first qualifying destination. Includes paths through docs, stories, and integrations. Starts after deployment.",
+      "query": {
+        "kind": "InsightVizNode",
+        "source": {
+          "kind": "FunnelsQuery",
+          "series": [
+            {
+              "kind": "EventsNode",
+              "event": "use_case:action_clicked",
+              "properties": [
+                {
+                  "key": "$host",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": ["langfuse.com"]
+                },
+                {
+                  "key": "use_case",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": [
+                    "chat_agents",
+                    "coding_agents",
+                    "workflow_automation"
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "EventsNode",
+              "event": "sales:inquiry_completed",
+              "properties": [
+                {
+                  "key": "$host",
+                  "type": "event",
+                  "operator": "exact",
+                  "value": ["langfuse.com"]
+                }
+              ]
+            }
+          ],
+          "dateRange": {
+            "date_from": "-30d"
+          },
+          "funnelsFilter": {
+            "funnelOrderType": "ordered",
+            "funnelWindowInterval": 1,
+            "funnelWindowIntervalUnit": "day",
+            "funnelVizType": "steps",
+            "breakdownAttributionType": "first_touch"
+          },
+          "breakdownFilter": {
+            "breakdown": "destination_group",
+            "breakdown_type": "event"
+          },
+          "filterTestAccounts": false
+        }
+      },
+      "id": 5866898,
+      "short_id": "Nk90fdBL"
+    }
+  ]
+}

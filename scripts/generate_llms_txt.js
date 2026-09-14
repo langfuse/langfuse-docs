@@ -1,6 +1,7 @@
 const fs = require("fs");
 const xml2js = require("xml2js");
 const path = require("path");
+const { formatCompareIndexLine } = require("../lib/compare-labels");
 
 // Resolve paths from the repo root so the script is CWD-independent
 // (matches scripts/generate-sitemap-excludes.js).
@@ -60,6 +61,11 @@ const SECTION_CONFIG = {
     file: "llms-resources.txt",
     heading: "Resources",
     subFileHeading: "Langfuse Resources",
+  },
+  compare: {
+    file: "llms-compare.txt",
+    heading: "Compare",
+    subFileHeading: "Langfuse Compare",
   },
   security: {
     file: "llms-security.txt",
@@ -122,6 +128,9 @@ const IGNORED_SECTION_PATHS = new Set([
   "research",
   "events",
   "agents",
+  "chat-agents",
+  "coding-agents",
+  "workflow-automation",
   "cloud",
   "status",
   "support",
@@ -181,6 +190,7 @@ function loadPageMeta() {
         map.set(page.loc, {
           title: page.title,
           description: page.description,
+          shortTitle: page.shortTitle,
         });
       }
     }
@@ -228,6 +238,7 @@ async function generateLLMsList() {
       const entry = {
         title: meta.title || generateTitle(url),
         description: meta.description || "",
+        shortTitle: meta.shortTitle,
         url,
       };
 
@@ -259,6 +270,13 @@ async function generateLLMsList() {
     let markdownContent = `# ${TITLE}\n\n`;
     markdownContent += `> ${INTRO_DESCRIPTION}\n\n`;
 
+    markdownContent += `## Evaluation workflows\n\n`;
+    markdownContent += `- [Test an existing application and reuse graders](https://langfuse.com/resources/engineering/evaluate-existing-application.md): Runnable Python and TypeScript examples.\n`;
+    markdownContent += `- [Compare versions and inspect failures](https://langfuse.com/docs/evaluation/experiments/compare-experiments.md): Baselines, individual regressions, and human review.\n`;
+    markdownContent += `- [Block regressions in CI](https://langfuse.com/docs/evaluation/experiments/experiments-ci-cd.md): Thresholds and approved-baseline checks.\n`;
+    markdownContent += `- [Evaluate grounding](https://langfuse.com/resources/engineering/rag-faithfulness-evaluation.md) and [hallucinations](https://langfuse.com/resources/engineering/hallucination-detection.md).\n`;
+    markdownContent += `- [Choose where evaluations run](https://langfuse.com/docs/evaluation/overview.md): Application code, managed evaluators, Cloud, and self-hosting.\n\n`;
+
     // Keep buying and deployment facts easy to find without duplicating
     // volatile prices or competitor claims in the navigation index.
     markdownContent += `## Pricing, deployment, and comparisons\n\n`;
@@ -268,7 +286,7 @@ async function generateLLMsList() {
     markdownContent += `- [Enterprise license keys](https://langfuse.com/self-hosting/license-key.md): Activation and licensing for self-hosted add-on features.\n`;
     markdownContent += `- [Security](https://langfuse.com/security.md): Security controls, compliance, and supporting documentation.\n`;
     markdownContent += `- [Data regions](https://langfuse.com/security/data-regions.md): Hosting locations and regional availability.\n`;
-    markdownContent += `- Comparisons: [LangSmith](https://langfuse.com/resources/engineering/langsmith-alternative.md), [Braintrust](https://langfuse.com/resources/engineering/best-braintrustdata-alternatives.md), and [Arize / Phoenix](https://langfuse.com/resources/engineering/best-phoenix-arize-alternatives.md), with dated competitor sources.\n\n`;
+    markdownContent += formatCompareIndexLine(sectionEntries.compare) || "\n";
 
     // Markdown access + search endpoint. Listed before the MCP server section
     // because these need no client setup: an agent with `curl` can use them
