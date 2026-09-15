@@ -8,7 +8,7 @@ The agent (`agent.py`) is a Python-based LiveKit agent that:
 
 - Runs on [OpenAI GPT-Live](https://docs.livekit.io/agents/models/realtime/plugins/gpt-live/), a full-duplex speech-to-speech model, by default (`VOICE_AGENT_MODE=gpt-live`)
 - Falls back to a cascaded STT → LLM → TTS pipeline on LiveKit's inference API with provider fallback adapters when `VOICE_AGENT_MODE=pipeline`
-- Connects to the [Langfuse Docs MCP server](https://langfuse.com/docs/docs-mcp) to answer questions about Langfuse
+- Connects to the [Langfuse Docs MCP server](https://langfuse.com/docs/docs-mcp) to answer questions about Langfuse. Tool results are compacted to about 6,000 characters (title, URL, and an excerpt per matching page) before they reach the model, because GPT-Live's session context is capped at 8k tokens and the raw search result is about 15k tokens
 - Sends OpenTelemetry spans to Langfuse for tracing
 - Records the conversation audio and attaches it to the trace's root observation in Langfuse
 
