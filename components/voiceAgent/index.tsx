@@ -113,8 +113,8 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
             typeof data.traceId === "string" &&
             /^[0-9a-f]{32}$/i.test(data.traceId)
           ) {
-            // Sent by the agent once the conversation's root span exists. The
-            // redirect resolves once the trace is ingested and public.
+            // Sent by the agent once the conversation's root span exists; the
+            // link is shown after the call ends, when the trace is complete.
             const params = new URLSearchParams({
               traceId: data.traceId,
               source: "voice_agent",
@@ -281,8 +281,8 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
                 <p className="text-xs text-destructive mb-4">{error}</p>
               )}
 
-              {/* Link to the conversation's trace, available once the agent has joined */}
-              {traceUrl && (
+              {/* Link to the conversation's trace, shown once the call has ended */}
+              {traceUrl && agentState === "idle" && (
                 <div className="flex justify-center mb-4">
                   <DemoTraceLink traceUrl={traceUrl} source="voice_agent" />
                 </div>
