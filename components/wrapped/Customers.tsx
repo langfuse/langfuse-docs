@@ -11,6 +11,7 @@ import { WrappedSection } from "./components/WrappedSection";
 import { WrappedGrid, WrappedGridItem } from "./components/WrappedGrid";
 import { SectionHeading } from "./components/SectionHeading";
 import { HoverStars } from "./components/HoverStars";
+import { wordmarkDisplaySize } from "@/components/shared/wordmark";
 import canvaLogo from "../home/img/canva.svg";
 import circlebackLogo from "../home/img/circleback.svg";
 import freeeLogo from "../home/img/freee.svg";
@@ -195,14 +196,18 @@ function CustomerStoryCard({ story }: { story: CustomerStory }) {
 }
 
 function CompanyLogo({ name, logo }: { name: string; logo: StaticImageData }) {
+  const { width, height } = wordmarkDisplaySize(logo, 32);
+
   return (
     <div className="p-3 lg:p-4 flex items-center justify-center min-h-[100px]">
       <Image
         src={logo}
         alt={`${name} logo`}
-        width={200}
-        height={80}
-        className="object-contain w-auto h-8"
+        width={logo.width}
+        height={logo.height}
+        unoptimized
+        className="h-auto w-auto object-contain"
+        style={{ width, height }}
         quality={100}
       />
     </div>

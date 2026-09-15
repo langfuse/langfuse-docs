@@ -21,8 +21,10 @@ import sumupLogo from "../home/img/sumup.svg";
 import twilioLogo from "../home/img/twilio.svg";
 import { cn } from "@/lib/utils";
 import { LinkBox } from "@/components/ui/link-box";
+import { wordmarkDisplaySize } from "@/components/shared/wordmark";
 
 const MARQUEE_DURATION_SEC = 40;
+const LOGO_DISPLAY_HEIGHT = 56;
 
 type CompanyLogo = {
   name: string;
@@ -111,44 +113,27 @@ const LogoImage = ({
   logo,
   name,
   hoverable = true,
-  compact = false,
 }: {
   logo: StaticImageData;
   name: string;
   hoverable?: boolean;
-  compact?: boolean;
 }) => {
-  if (compact) {
-    return (
-      <div className="overflow-hidden h-[40px] -mx-5 flex items-center">
-        <Image
-          src={logo}
-          alt={`${name} logo`}
-          className={cn(
-            "h-[56px] w-auto scale-125",
-            hoverable
-              ? "hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] transition-[filter] duration-200"
-              : "",
-          )}
-          sizes="(max-width: 768px) 30vw"
-          priority={false}
-        />
-      </div>
-    );
-  }
+  const { width, height } = wordmarkDisplaySize(logo, LOGO_DISPLAY_HEIGHT);
 
   return (
     <Image
       src={logo}
       alt={`${name} logo`}
+      width={logo.width}
+      height={logo.height}
+      unoptimized
       className={cn(
-        "h-[56px] max-w-full object-cover",
+        "h-auto w-auto max-w-full",
         hoverable
           ? "hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] transition-[filter] duration-200"
           : "",
       )}
-      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-      priority={false}
+      style={{ height, width }}
     />
   );
 };
@@ -157,7 +142,7 @@ const visibleCompanies = companies.filter((c) => !c.hidden);
 
 function LogoMarqueeItems({ duplicate = false }: { duplicate?: boolean }) {
   return (
-    <>
+    <div className="flex items-center gap-8 pr-8">
       {visibleCompanies.map((company) => {
         const hasStory = Boolean(company.customerStoryPath);
         return (
@@ -175,12 +160,11 @@ function LogoMarqueeItems({ duplicate = false }: { duplicate?: boolean }) {
               hoverable={false}
               logo={company.logo}
               name={company.name}
-              compact
             />
           </div>
         );
       })}
-    </>
+    </div>
   );
 }
 
@@ -250,7 +234,7 @@ export const EnterpriseLogoGrid = ({
             <LinkBox
               key={company.name}
               href={company.customerStoryPath}
-              className="-mr-px -mb-px flex items-center justify-center !p-0"
+              className="-mr-px -mb-px relative flex min-h-14 items-center justify-center !p-0"
               aria-label={
                 hasStory
                   ? `Read ${company.name} user story`
