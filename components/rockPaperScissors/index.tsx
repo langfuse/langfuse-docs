@@ -326,17 +326,19 @@ export const RockPaperScissors = ({
                           : `${opponentMeta.label} wins this round`}
                     </div>
                     <div className="mt-1 text-xs text-text-tertiary">
-                      {result.timedOut
-                        ? "The model ran out of time, so a fallback move was played."
-                        : result.predictedUserMove
-                          ? `It predicted you would play ${result.predictedUserMove}${
-                              result.predictionCorrect
-                                ? " and was right."
-                                : ", but you didn't."
-                            }`
-                          : null}
+                      {result.fallbackReason === "timeout"
+                        ? "The model did not commit a move within 6 seconds, so a scripted fallback move was played."
+                        : result.fallbackReason === "no_tool_call"
+                          ? "The model finished without choosing a move, so a scripted fallback move was played."
+                          : result.predictedUserMove
+                            ? `It predicted you would play ${result.predictedUserMove}${
+                                result.predictionCorrect
+                                  ? " and was right."
+                                  : ", but you didn't."
+                              }`
+                            : null}
                     </div>
-                    {result.taunt && !result.timedOut && (
+                    {result.taunt && !result.fallbackReason && (
                       <div className="mt-1.5 text-sm italic text-text-secondary">
                         “{result.taunt}”
                       </div>

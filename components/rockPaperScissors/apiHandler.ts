@@ -11,7 +11,7 @@ import {
   setActiveTraceAsPublic,
   getActiveTraceId,
 } from "@langfuse/tracing";
-import { trace } from "@opentelemetry/api";
+import { context, trace } from "@opentelemetry/api";
 import { after } from "next/server";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
@@ -20,6 +20,7 @@ import {
   demoProjectLangfuseClient,
 } from "@/lib/demo-public-trace";
 import {
+  MAX_HISTORY_ROUNDS,
   MOVES,
   fallbackMove,
   isMove,
@@ -27,6 +28,7 @@ import {
   resolveRound,
   sanitizeHistory,
   tally,
+  type FallbackReason,
   type Move,
   type OpponentId,
   type RoundOutcome,
@@ -99,6 +101,9 @@ export type RoundResultPayload = {
   predictionCorrect: boolean | null;
   outcome: RoundOutcome;
   taunt: string | null;
+  /** Set when the server played a scripted move instead of the model. */
+  fallbackReason: FallbackReason | null;
+  /** True when the model did not commit a move within the time cap. */
   timedOut: boolean;
   responseTimeMs: number;
   opponent: OpponentId;
@@ -111,11 +116,10 @@ export type StreamChunk =
   | RoundResultPayload
   | { type: "error"; message: string };
 
+const GENERIC_ERROR_MESSAGE =
+  "The model did not respond. Please try again in a moment.";
+
 const encoder = new TextEncoder();
-const writeChunk = (
-  controller: ReadableStreamDefaultController<Uint8Array>,
-  chunk: StreamChunk,
-) => controller.enqueue(encoder.encode(`${JSON.stringify(chunk)}\n`));
 
 const json = (body: unknown, status: number) =>
   new Response(JSON.stringify(body), {
@@ -123,17 +127,9 @@ const json = (body: unknown, status: number) =>
     headers: { "Content-Type": "application/json" },
   });
 
-const extractMoveFromText = (text: string): Move | null => {
-  const lower = text.toLowerCase();
-  let best: { move: Move; index: number } | null = null;
-  for (const move of MOVES) {
-    const index = lower.lastIndexOf(move);
-    if (index !== -1 && (!best || index > best.index)) {
-      best = { move, index };
-    }
-  }
-  return best?.move ?? null;
-};
+const isAbortError = (err: unknown) =>
+  err instanceof Error &&
+  (err.name === "AbortError" || err.name === "TimeoutError");
 
 const handler = async (req: Request) => {
   const { success } = rateLimit(req, { limit: 30, windowMs: 60_000 });
@@ -162,9 +158,12 @@ const handler = async (req: Request) => {
     return json({ error: "userId is required." }, 400);
   }
 
-  const history: RoundRecord[] = sanitizeHistory(body.history);
-  const round = history.length + 1;
-  const scoreBefore = tally(history);
+  // The full history drives the round counter and the score; only the most
+  // recent rounds are shown to the model.
+  const fullHistory: RoundRecord[] = sanitizeHistory(body.history);
+  const round = fullHistory.length + 1;
+  const history = fullHistory.slice(-MAX_HISTORY_ROUNDS);
+  const scoreBefore = tally(fullHistory);
   const config = OPPONENTS[opponent];
 
   return propagateAttributes(
@@ -184,6 +183,9 @@ const handler = async (req: Request) => {
       const traceId = getActiveTraceId() ?? null;
       const rootSpan = trace.getActiveSpan();
       const rootObservationId = rootSpan?.spanContext().spanId ?? null;
+      // Captured so the streaming body keeps running inside this trace even
+      // after the Response has been returned to Next.js.
+      const traceContext = context.active();
 
       setActiveTraceIO({
         input: { round, userMove, opponent, history },
@@ -196,17 +198,56 @@ const handler = async (req: Request) => {
         { asType: "event" },
       );
 
-      const stream = new ReadableStream<Uint8Array>({
-        async start(controller) {
-          const startedAt = Date.now();
-          let modelMove: Move | null = null;
-          let predictedUserMove: Move | null = null;
-          let taunt: string | null = null;
-          let timedOut = false;
-          let reasoningText = "";
-          let plainText = "";
-          let sawReasoningSummary = false;
+      // Aborted when the visitor disconnects or the time cap is hit.
+      const abortController = new AbortController();
+      const timeout = setTimeout(
+        () =>
+          abortController.abort(new DOMException("Time cap", "TimeoutError")),
+        MODEL_TIME_CAP_MS,
+      );
+      const onRequestAbort = () =>
+        abortController.abort(new DOMException("Client left", "AbortError"));
+      req.signal.addEventListener("abort", onRequestAbort, { once: true });
 
+      const finalize = async () => {
+        clearTimeout(timeout);
+        req.signal.removeEventListener("abort", onRequestAbort);
+        rootSpan?.end();
+        await Promise.allSettled([flush(), demoProjectLangfuseClient.flush()]);
+      };
+
+      const run = async (
+        controller: ReadableStreamDefaultController<Uint8Array>,
+      ) => {
+        let closed = false;
+        const write = (chunk: StreamChunk) => {
+          if (closed) return;
+          try {
+            controller.enqueue(encoder.encode(`${JSON.stringify(chunk)}\n`));
+          } catch {
+            closed = true; // client went away
+          }
+        };
+        const close = () => {
+          if (closed) return;
+          closed = true;
+          try {
+            controller.close();
+          } catch {
+            // already closed by cancellation
+          }
+        };
+
+        const startedAt = Date.now();
+        let modelMove: Move | null = null;
+        let predictedUserMove: Move | null = null;
+        let taunt: string | null = null;
+        let aborted = false;
+        let reasoningText = "";
+        let plainText = "";
+        let sawReasoningSummary = false;
+
+        try {
           try {
             const result = streamText({
               model: config.model(),
@@ -216,12 +257,12 @@ const handler = async (req: Request) => {
               toolChoice: "auto",
               maxOutputTokens: 1_500,
               providerOptions: config.providerOptions,
-              abortSignal: AbortSignal.timeout(MODEL_TIME_CAP_MS),
+              abortSignal: abortController.signal,
               telemetry: {
                 functionId: "rps-model-turn",
               },
               onError: () => {
-                // Handled via fullStream below; keep AI SDK from logging noisily.
+                // Surfaced through fullStream below.
               },
             });
 
@@ -230,10 +271,7 @@ const handler = async (req: Request) => {
                 case "reasoning-delta":
                   sawReasoningSummary = true;
                   reasoningText += part.text;
-                  writeChunk(controller, {
-                    type: "reasoning",
-                    text: part.text,
-                  });
+                  write({ type: "reasoning", text: part.text });
                   break;
                 case "text-delta": {
                   // Providers often return an empty reasoning summary at low
@@ -246,14 +284,11 @@ const handler = async (req: Request) => {
                       ? "\n\n"
                       : "";
                   plainText += part.text;
-                  writeChunk(controller, {
-                    type: "reasoning",
-                    text: separator + part.text,
-                  });
+                  write({ type: "reasoning", text: separator + part.text });
                   break;
                 }
                 case "tool-call": {
-                  if (part.toolName === "play_move") {
+                  if (part.toolName === "play_move" && modelMove === null) {
                     const input = part.input as Partial<PlayMoveInput>;
                     if (isMove(input.move)) modelMove = input.move;
                     if (isMove(input.predicted_user_move)) {
@@ -264,15 +299,11 @@ const handler = async (req: Request) => {
                   break;
                 }
                 case "abort":
-                  timedOut = true;
+                  aborted = true;
                   break;
                 case "error":
-                  if (
-                    part.error instanceof Error &&
-                    (part.error.name === "AbortError" ||
-                      part.error.name === "TimeoutError")
-                  ) {
-                    timedOut = true;
+                  if (isAbortError(part.error)) {
+                    aborted = true;
                   } else {
                     throw part.error;
                   }
@@ -282,39 +313,42 @@ const handler = async (req: Request) => {
               }
             }
           } catch (err) {
-            if (
-              err instanceof Error &&
-              (err.name === "AbortError" || err.name === "TimeoutError")
-            ) {
-              timedOut = true;
+            if (isAbortError(err)) {
+              aborted = true;
             } else {
               console.error("rps model turn failed", err);
-              writeChunk(controller, {
-                type: "error",
-                message:
-                  err instanceof Error ? err.message : "Model call failed.",
-              });
-              controller.close();
-              rootSpan?.end();
-              after(async () => await flush());
+              write({ type: "error", message: GENERIC_ERROR_MESSAGE });
+              close();
               return;
             }
           }
 
+          if (req.signal.aborted) {
+            // Visitor left mid-round. Nothing to resolve or score.
+            close();
+            return;
+          }
+
           const responseTimeMs = Date.now() - startedAt;
 
-          if (!modelMove && plainText) {
-            modelMove = extractMoveFromText(plainText);
-          }
-          if (!modelMove) {
+          // A completed play_move call always wins over a late abort. Only
+          // when the model never committed a move do we play the scripted
+          // fallback. Free text is never parsed for a move: the model's prose
+          // names the predicted human move as well as its own.
+          let fallbackReason: FallbackReason | null = null;
+          if (modelMove === null) {
+            fallbackReason = aborted ? "timeout" : "no_tool_call";
             modelMove = fallbackMove(round);
+            predictedUserMove = null;
+            taunt = null;
             startObservation(
               "fallback-move",
               {
                 input: {
-                  reason: timedOut
-                    ? `model did not answer within ${MODEL_TIME_CAP_MS}ms`
-                    : "model did not call play_move",
+                  reason:
+                    fallbackReason === "timeout"
+                      ? `model did not commit a move within ${MODEL_TIME_CAP_MS}ms`
+                      : "model finished without calling play_move",
                 },
                 output: { move: modelMove },
                 level: "WARNING",
@@ -322,13 +356,15 @@ const handler = async (req: Request) => {
               { asType: "event" },
             );
           }
+          const timedOut = fallbackReason === "timeout";
+          const committedMove: Move = modelMove;
 
           const outcome = await startActiveObservation(
             "resolve-round",
             async (span) => {
-              const resolved = resolveRound(userMove, modelMove as Move);
+              const resolved = resolveRound(userMove, committedMove);
               span.update({
-                input: { userMove, modelMove },
+                input: { userMove, modelMove: committedMove },
                 output: { outcome: resolved },
               });
               startObservation(
@@ -338,7 +374,7 @@ const handler = async (req: Request) => {
                     ? "user-won"
                     : "model-won",
                 {
-                  input: { userMove, modelMove },
+                  input: { userMove, modelMove: committedMove },
                   output: { outcome: resolved },
                 },
                 { asType: "event" },
@@ -390,10 +426,11 @@ const handler = async (req: Request) => {
             output: {
               round,
               userMove,
-              modelMove,
+              modelMove: committedMove,
               predictedUserMove,
               outcome,
               taunt,
+              fallbackReason,
               timedOut,
               responseTimeMs,
               reasoningSummary: reasoningText || undefined,
@@ -401,36 +438,37 @@ const handler = async (req: Request) => {
             },
           });
           setActiveTraceAsPublic();
-          rootSpan?.end();
 
-          const traceUrl = buildDemoTraceRedirectUrl({
-            traceId,
-            observationId: rootObservationId,
-          });
-
-          writeChunk(controller, {
+          write({
             type: "result",
             round,
             userMove,
-            modelMove,
+            modelMove: committedMove,
             predictedUserMove,
             predictionCorrect,
             outcome,
             taunt,
+            fallbackReason,
             timedOut,
             responseTimeMs,
             opponent,
             traceId,
-            traceUrl,
+            traceUrl: buildDemoTraceRedirectUrl({
+              traceId,
+              observationId: rootObservationId,
+            }),
           });
-          controller.close();
+          close();
+        } finally {
+          after(finalize);
+        }
+      };
 
-          after(async () => {
-            await Promise.allSettled([
-              flush(),
-              demoProjectLangfuseClient.flush(),
-            ]);
-          });
+      const stream = new ReadableStream<Uint8Array>({
+        start: (controller) =>
+          context.with(traceContext, () => run(controller)),
+        cancel: () => {
+          abortController.abort(new DOMException("Client left", "AbortError"));
         },
       });
 

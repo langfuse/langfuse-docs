@@ -6,6 +6,9 @@ export type OpponentId = (typeof OPPONENT_IDS)[number];
 
 export type RoundOutcome = "user_won" | "model_won" | "draw";
 
+/** Why the server played a scripted move instead of the model's own. */
+export type FallbackReason = "timeout" | "no_tool_call";
+
 export type RoundRecord = {
   round: number;
   userMove: Move;
@@ -45,11 +48,15 @@ export const resolveRound = (userMove: Move, modelMove: Move): RoundOutcome => {
 export const fallbackMove = (round: number): Move =>
   MOVES[(round * 2) % MOVES.length];
 
+/** Rounds shown to the model as context. */
 export const MAX_HISTORY_ROUNDS = 30;
+/** Upper bound on rounds accepted from the client per request. */
+export const MAX_HISTORY_LENGTH = 1_000;
 
 export const sanitizeHistory = (input: unknown): RoundRecord[] => {
   if (!Array.isArray(input)) return [];
   return input
+    .slice(-MAX_HISTORY_LENGTH)
     .filter(
       (item): item is RoundRecord =>
         typeof item === "object" &&
@@ -66,8 +73,7 @@ export const sanitizeHistory = (input: unknown): RoundRecord[] => {
         ? item.predictedUserMove
         : null,
       outcome: resolveRound(item.userMove, item.modelMove),
-    }))
-    .slice(-MAX_HISTORY_ROUNDS);
+    }));
 };
 
 export const formatHistory = (history: RoundRecord[]): string => {
