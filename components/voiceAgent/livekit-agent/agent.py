@@ -76,6 +76,8 @@ class LangfuseAttributeSpanProcessor(SpanProcessor):
     def on_start(self, span, parent_context=None):
         span.set_attribute("langfuse.trace.name", "livekit-voice-agent")
         span.set_attribute("langfuse.trace.tags", ["voice-agent", VOICE_AGENT_MODE])
+        # The demo UI links to the trace; public traces open without a login.
+        span.set_attribute("langfuse.trace.public", True)
 
     def on_end(self, span):
         pass
@@ -374,6 +376,7 @@ async def on_session_end(ctx: JobContext) -> None:
         "session-recording",
         context=otel_trace.set_span_in_context(conversation.root_span),
     )
+    recording_span.set_attribute("langfuse.observation.type", "event")
     _set_transcript(recording_span, _transcript_messages(conversation.session))
     # The media reference renders as an audio player once the file is uploaded.
     recording_span.set_attribute(
@@ -472,6 +475,21 @@ async def entrypoint(ctx: JobContext):
                 "logs": False,
                 "transcript": False,
             },
+        )
+
+        # Tell the demo UI which trace this conversation lands in so it can
+        # show a "View trace in Langfuse" link while the call is running.
+        root_context = root_span.get_span_context()
+        await ctx.room.local_participant.publish_data(
+            json.dumps(
+                {
+                    "type": "trace",
+                    "traceId": format(root_context.trace_id, "032x"),
+                    "observationId": format(root_context.span_id, "016x"),
+                }
+            ).encode(),
+            reliable=True,
+            topic="langfuse",
         )
 
         # Audible cue while the agent is thinking or calling the docs tools, so
