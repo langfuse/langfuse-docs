@@ -23,26 +23,9 @@ import { cn } from "@/lib/utils";
 import { LinkBox } from "@/components/ui/link-box";
 
 const MARQUEE_DURATION_SEC = 40;
-const LOGO_CANVAS_WIDTH = 140;
-const COMPACT_IMAGE_HEIGHT = 56;
-const COMPACT_SCALE = COMPACT_IMAGE_HEIGHT / 40;
-
-// Opaque artwork on the shared 140×40 SVG canvas. Mobile crops to these
-// bounds so wordmarks are spaced by `gap` instead of by equal empty boxes.
-const COMPACT_INK: Record<string, { x: number; width: number }> = {
-  Ramp: { x: 45.5, width: 49 },
-  Canva: { x: 51, width: 37 },
-  Twilio: { x: 46.3, width: 46.8 },
-  Pigment: { x: 34, width: 71 },
-  "Khan Academy": { x: 34, width: 71.8 },
-  "Hugging Face": { x: 34.5, width: 70.3 },
-  Intuit: { x: 51, width: 38.8 },
-  SumUp: { x: 45.3, width: 49.5 },
-  Merck: { x: 44.3, width: 50.5 },
-  Samsara: { x: 41.5, width: 57 },
-  Cisco: { x: 51, width: 38 },
-  "Rocket Money": { x: 44.5, width: 51 },
-};
+// Tight wordmark SVGs, scaled as if they still sat on the old 40px canvas.
+const LOGO_DISPLAY_HEIGHT = 56;
+const LOGO_DISPLAY_SCALE = LOGO_DISPLAY_HEIGHT / 40;
 
 type CompanyLogo = {
   name: string;
@@ -131,58 +114,28 @@ const LogoImage = ({
   logo,
   name,
   hoverable = true,
-  compact = false,
 }: {
   logo: StaticImageData;
   name: string;
   hoverable?: boolean;
-  compact?: boolean;
 }) => {
-  if (compact) {
-    const ink = COMPACT_INK[name];
-    const buffer = 1;
-    const cropX = ink ? Math.max(0, ink.x - buffer) : 0;
-    const cropWidth = ink
-      ? Math.min(LOGO_CANVAS_WIDTH - cropX, ink.width + buffer * 2)
-      : LOGO_CANVAS_WIDTH;
-
-    return (
-      <div
-        className="overflow-hidden h-10 flex items-center"
-        style={{ width: cropWidth * COMPACT_SCALE }}
-      >
-        <Image
-          src={logo}
-          alt={`${name} logo`}
-          className={cn(
-            "w-auto max-w-none",
-            hoverable
-              ? "hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] transition-[filter] duration-200"
-              : "",
-          )}
-          style={{
-            height: COMPACT_IMAGE_HEIGHT,
-            marginLeft: -cropX * COMPACT_SCALE,
-          }}
-          sizes="(max-width: 768px) 30vw"
-          priority={false}
-        />
-      </div>
-    );
-  }
+  const height = logo.height * LOGO_DISPLAY_SCALE;
+  const width = logo.width * LOGO_DISPLAY_SCALE;
 
   return (
     <Image
       src={logo}
       alt={`${name} logo`}
+      width={logo.width}
+      height={logo.height}
+      unoptimized
       className={cn(
-        "h-[56px] max-w-full object-cover",
+        "h-auto w-auto max-w-full",
         hoverable
           ? "hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] transition-[filter] duration-200"
           : "",
       )}
-      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-      priority={false}
+      style={{ height, width }}
     />
   );
 };
@@ -209,7 +162,6 @@ function LogoMarqueeItems({ duplicate = false }: { duplicate?: boolean }) {
               hoverable={false}
               logo={company.logo}
               name={company.name}
-              compact
             />
           </div>
         );
@@ -284,7 +236,7 @@ export const EnterpriseLogoGrid = ({
             <LinkBox
               key={company.name}
               href={company.customerStoryPath}
-              className="-mr-px -mb-px flex items-center justify-center !p-0"
+              className="-mr-px -mb-px relative flex min-h-14 items-center justify-center !p-0"
               aria-label={
                 hasStory
                   ? `Read ${company.name} user story`
