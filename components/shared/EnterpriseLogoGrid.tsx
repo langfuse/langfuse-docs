@@ -21,11 +21,10 @@ import sumupLogo from "../home/img/sumup.svg";
 import twilioLogo from "../home/img/twilio.svg";
 import { cn } from "@/lib/utils";
 import { LinkBox } from "@/components/ui/link-box";
+import { wordmarkDisplaySize } from "@/components/shared/wordmark";
 
 const MARQUEE_DURATION_SEC = 40;
-// Tight wordmark SVGs, scaled as if they still sat on the old 40px canvas.
 const LOGO_DISPLAY_HEIGHT = 56;
-const LOGO_DISPLAY_SCALE = LOGO_DISPLAY_HEIGHT / 40;
 
 type CompanyLogo = {
   name: string;
@@ -119,8 +118,7 @@ const LogoImage = ({
   name: string;
   hoverable?: boolean;
 }) => {
-  const height = logo.height * LOGO_DISPLAY_SCALE;
-  const width = logo.width * LOGO_DISPLAY_SCALE;
+  const { width, height } = wordmarkDisplaySize(logo, LOGO_DISPLAY_HEIGHT);
 
   return (
     <Image
