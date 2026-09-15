@@ -23,6 +23,26 @@ import { cn } from "@/lib/utils";
 import { LinkBox } from "@/components/ui/link-box";
 
 const MARQUEE_DURATION_SEC = 40;
+const LOGO_CANVAS_WIDTH = 140;
+const COMPACT_IMAGE_HEIGHT = 56;
+const COMPACT_SCALE = COMPACT_IMAGE_HEIGHT / 40;
+
+// Opaque artwork on the shared 140×40 SVG canvas. Mobile crops to these
+// bounds so wordmarks are spaced by `gap` instead of by equal empty boxes.
+const COMPACT_INK: Record<string, { x: number; width: number }> = {
+  Ramp: { x: 45.5, width: 49 },
+  Canva: { x: 51, width: 37 },
+  Twilio: { x: 46.3, width: 46.8 },
+  Pigment: { x: 34, width: 71 },
+  "Khan Academy": { x: 34, width: 71.8 },
+  "Hugging Face": { x: 34.5, width: 70.3 },
+  Intuit: { x: 51, width: 38.8 },
+  SumUp: { x: 45.3, width: 49.5 },
+  Merck: { x: 44.3, width: 50.5 },
+  Samsara: { x: 41.5, width: 57 },
+  Cisco: { x: 51, width: 38 },
+  "Rocket Money": { x: 44.5, width: 51 },
+};
 
 type CompanyLogo = {
   name: string;
@@ -119,17 +139,28 @@ const LogoImage = ({
   compact?: boolean;
 }) => {
   if (compact) {
+    const ink = COMPACT_INK[name];
+    const buffer = 1;
+    const cropX = ink ? Math.max(0, ink.x - buffer) : 0;
+    const cropWidth = ink
+      ? Math.min(LOGO_CANVAS_WIDTH - cropX, ink.width + buffer * 2)
+      : LOGO_CANVAS_WIDTH;
+
     return (
-      <div className="overflow-hidden h-[40px] -mx-5 flex items-center">
+      <div
+        className="overflow-hidden h-10 flex items-center"
+        style={{ width: cropWidth * COMPACT_SCALE }}
+      >
         <Image
           src={logo}
           alt={`${name} logo`}
           className={cn(
-            "h-[56px] w-auto scale-125",
+            "h-14 w-auto max-w-none",
             hoverable
               ? "hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] transition-[filter] duration-200"
               : "",
           )}
+          style={{ marginLeft: -cropX * COMPACT_SCALE }}
           sizes="(max-width: 768px) 30vw"
           priority={false}
         />
@@ -206,7 +237,7 @@ export const EnterpriseLogoGrid = ({
           )}
           aria-label="Enterprise customers using Langfuse"
         >
-          <div className="flex items-center w-max py-2">
+          <div className="flex items-center gap-8 w-max py-2">
             <LogoMarqueeItems />
           </div>
         </div>
@@ -219,7 +250,7 @@ export const EnterpriseLogoGrid = ({
           aria-label="Enterprise customers using Langfuse"
         >
           <motion.div
-            className="flex items-center w-max py-2"
+            className="flex items-center gap-8 w-max py-2"
             animate={{ x: ["0%", "-50%"] }}
             transition={{
               duration: MARQUEE_DURATION_SEC,
