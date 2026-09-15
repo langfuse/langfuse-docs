@@ -49,6 +49,7 @@ const menuItems: {
       },
       { name: "Pricing", href: "/pricing" },
       { name: "Enterprise", href: "/enterprise" },
+      { name: "Government", href: "/government" },
     ],
   },
   {
