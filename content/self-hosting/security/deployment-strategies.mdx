@@ -1,7 +1,7 @@
 ---
 title: Deployment Strategies (self-hosted)
 description: Learn how to manage Langfuse effectively. It covers strategies for handling multiple projects and environments.
-label: "Version: v3"
+label: "Version: v4"
 sidebarTitle: "Deployment Strategies"
 ---
 
@@ -16,8 +16,6 @@ In most cases, a single Langfuse deployment is the best approach. It leverages R
 ## Single Langfuse Deployment
 
 A single Langfuse deployment is the standard and recommended setup. It centralizes management, scales efficiently across projects and environments, and takes full advantage of Langfuse's built-in RBAC features.
-
-<div className="border rounded p-4 pt-0 bg-card mt-6">
 
 ```mermaid
 graph TB
@@ -42,8 +40,6 @@ graph TB
     LF -- Public Hostname and SSO --> User
 ```
 
-</div>
-
 ### When to Use
 
 - Your team can rely on Langfuse's RBAC to enforce data isolation.
@@ -66,8 +62,6 @@ graph TB
 In this approach, you run a separate Langfuse deployment for each service, project, or environment. This provides complete isolation at the infrastructure level but comes with additional complexity.
 
 Langfuse can be deployed via infrastructure as code (IaC) tools like Terraform or Helm, making this approach more manageable.
-
-<div className="border rounded p-4 pt-0 bg-card mt-6">
 
 ```mermaid
 graph TB
@@ -92,8 +86,6 @@ graph TB
     LF2 -- VPN --> User
     LFn -- VPN --> User
 ```
-
-</div>
 
 ### When to Use
 

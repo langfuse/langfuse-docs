@@ -1,10 +1,12 @@
 .next
 node_modules
+.pnpm-store
 .vercel
+node-compile-cache
 
-.env.local
-.env
-.env*.local
+.env*
+!.env.template
+!.env.example
 
 # next sitemap
 public/robots.txt
@@ -13,6 +15,13 @@ public/sitemap*.xml
 .sitemap-all-pages.json
 public/llms*.txt
 public/md-src
+content/workshop/
+
+# Generated from public/design.template.md by scripts/sync-design-tokens.js
+public/design.md
+
+# Generated at build time by scripts/generate_brand_assets_zip.js
+public/brand-assets.zip
 
 # we use pnpm
 package-lock.json
@@ -109,6 +118,19 @@ fabric.properties
 .playwright/
 .playwright-cli/
 .playwright-mcp/
+.mcp.json
+.claude/settings.json
+.claude/settings.local.json
+.claude/launch.json
+.claude/skills/
+.cursor/mcp.json
+.cursor/environment.json
+.cursor/commands/
+.cursor/skills/
+.cursor/rules/
+.vscode/mcp.json
+.codex/config.toml
+.codex/environments/environment.toml
 
 # Editor-based Rest Client
 .idea/httpRequests
@@ -129,3 +151,4 @@ fabric.properties
 
 # fumadocs-mdx generated
 .source/
+*.tsbuildinfo

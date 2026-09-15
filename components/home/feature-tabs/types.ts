@@ -11,16 +11,21 @@ export interface StatementItem {
   description: string;
 }
 
-export type TabDisplayMode = 'default' | 'code-only' | 'feature-only' | 'image-only';
+export type TabDisplayMode =
+  | "default"
+  | "code-only"
+  | "feature-only"
+  | "image-only";
 
 export interface FeatureTabData {
   id: string;
   icon: LucideIcon;
+  /** Product-area name shown on the homepage screenshot switcher. */
+  name: string;
   title: string;
   subtitle: string;
   body: string;
   docsHref: string;
-  videoHref?: string;
   image: {
     light: StaticImageData;
     dark: StaticImageData;

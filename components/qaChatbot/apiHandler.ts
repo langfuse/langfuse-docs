@@ -1,11 +1,6 @@
 import { openai, OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
-import {
-  streamText,
-  UIMessage,
-  experimental_createMCPClient as createMCPClient,
-  MCPTransport,
-  stepCountIs,
-} from "ai";
+import { streamText, UIMessage, stepCountIs } from "ai";
+import { createMCPClient } from "@ai-sdk/mcp";
 import {
   observe,
   propagateAttributes,
@@ -58,12 +53,21 @@ export const handler = async (req: Request) => {
         type: "chat",
       });
 
-      const reasoningSummary = prompt.config
-        .reasoningSummary as "low" | "medium" | "high" | undefined;
-      const textVerbosity = prompt.config
-        .textVerbosity as "low" | "medium" | "high" | undefined;
-      const reasoningEffort = prompt.config
-        .reasoningEffort as "low" | "medium" | "high" | undefined;
+      const reasoningSummary = prompt.config.reasoningSummary as
+        | "low"
+        | "medium"
+        | "high"
+        | undefined;
+      const textVerbosity = prompt.config.textVerbosity as
+        | "low"
+        | "medium"
+        | "high"
+        | undefined;
+      const reasoningEffort = prompt.config.reasoningEffort as
+        | "low"
+        | "medium"
+        | "high"
+        | undefined;
 
       const chatHistory = messages.map((msg) => ({
         role: msg.role,
@@ -74,6 +78,13 @@ export const handler = async (req: Request) => {
       }));
 
       const compiledPrompt = prompt.compile({}, { chat_history: chatHistory });
+      const systemPrompt = compiledPrompt
+        .filter((message) => message.role === "system")
+        .map((message) => message.content)
+        .join("\n\n");
+      const modelMessages = compiledPrompt.filter(
+        (message) => message.role !== "system",
+      );
 
       const mcpClient = await startActiveObservation(
         "create-mcp-client",
@@ -83,7 +94,7 @@ export const handler = async (req: Request) => {
           return createMCPClient({
             transport: new StreamableHTTPClientTransport(mcpUrl, {
               sessionId: `qa-chatbot-${crypto.randomUUID()}`,
-            }) as MCPTransport,
+            }),
           });
         },
       );
@@ -99,12 +110,18 @@ export const handler = async (req: Request) => {
             reasoningEffort,
           } satisfies OpenAIResponsesProviderOptions,
         },
-        messages: compiledPrompt,
-        tools,
+        instructions: systemPrompt || undefined,
+        messages: modelMessages,
+        tools: tools as Parameters<typeof streamText>[0]["tools"],
         stopWhen: stepCountIs(10),
-        experimental_telemetry: {
-          isEnabled: true,
-          metadata: { langfusePrompt: prompt.toJSON() },
+        runtimeContext: {
+          langfusePrompt: prompt,
+        },
+        telemetry: {
+          functionId: "qa-chatbot",
+          includeRuntimeContext: {
+            langfusePrompt: true,
+          },
         },
         onFinish: async (result) => {
           await mcpClient.close();

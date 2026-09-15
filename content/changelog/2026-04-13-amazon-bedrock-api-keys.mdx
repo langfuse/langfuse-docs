@@ -1,0 +1,40 @@
+---
+date: 2026-04-13
+title: Amazon Bedrock API Keys
+description: Use Amazon Bedrock API keys to connect Bedrock models to Langfuse for Playground, LLM-as-a-judge evaluations, and prompt experiments.
+author: tobiaswochinger
+ogImage: /images/changelog/2026-04-13-bedrock-api-keys.png
+canonical: /docs/administration/llm-connection
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, KeyRound } from "lucide-react";
+
+<ChangelogHeader />
+
+Langfuse now supports Amazon Bedrock API keys for LLM Connections in addition to AWS Access Keys. This makes it easier to use Bedrock models in the Langfuse Playground, LLM-as-a-judge evaluations, and prompt experiments with the credential type that best fits your AWS setup.
+
+For teams already building on AWS, this shortens the path from "we have Bedrock access" to "we can test prompts, run evals, and compare experiment results in Langfuse." Create a Bedrock API key in AWS, add it to Langfuse as an LLM Connection, and use your Bedrock models across the evaluation workflow.
+
+For Langfuse LLM Connections, we recommend long-term Bedrock API keys to avoid interruptions from expired short-term keys. See the [Amazon Bedrock API keys documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys.html) for setup, permissions, and key management guidance.
+
+## What's New [#whats-new]
+
+- Add Amazon Bedrock API keys as bearer tokens for LLM Connections
+- Keep existing AWS credential-based Bedrock setups working while adopting the simpler API key flow where it fits
+
+## Get started [#get-started]
+
+<Cards num={2}>
+  <Card
+    title="LLM Connections"
+    href="/docs/administration/llm-connection"
+    icon={<KeyRound />}
+  />
+  <Card
+    title="Amazon Bedrock API Keys"
+    href="https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys.html"
+    target="_blank"
+    icon={<Book />}
+  />
+</Cards>

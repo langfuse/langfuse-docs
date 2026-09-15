@@ -5,6 +5,8 @@ import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 import { Loader } from "@/components/ai-elements/loader";
 import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { MicIcon, MicOffIcon, PhoneOffIcon } from "lucide-react";
 
 type AgentState =
@@ -22,6 +24,7 @@ type VoiceAgentProps = HTMLAttributes<HTMLDivElement>;
 export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
   const [agentState, setAgentState] = useState<AgentState>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [storeAudio, setStoreAudio] = useState(true);
   const [transcripts, setTranscripts] = useState<
     { role: "user" | "assistant"; text: string }[]
   >([]);
@@ -48,7 +51,7 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
       const res = await fetch("/api/voice-agent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({ userId, storeAudio }),
       });
 
       if (!res.ok) {
@@ -174,7 +177,7 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
 
   return (
     <div className={cn("h-[62vh]", className)} {...props}>
-      <div className="flex flex-col h-full border border-border/40 rounded-2xl bg-gradient-to-br from-background via-background/95 to-muted/20 backdrop-blur-md shadow-xl shadow-black/10 dark:shadow-black/30 p-5 transition-all duration-300 hover:shadow-2xl hover:shadow-black/15 dark:hover:shadow-black/40 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-br before:from-primary/5 before:via-transparent before:to-transparent before:pointer-events-none">
+      <div className="flex flex-col h-full rounded-[2px] border border-line-structure bg-surface-bg corner-box-corners p-5 relative overflow-hidden">
         <div className="flex-1 flex flex-col items-center justify-center relative z-10">
           {/* Not configured fallback */}
           {agentState === "not-configured" && (
@@ -187,7 +190,7 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
                 The voice agent demo is powered by{" "}
                 <a
                   href="https://livekit.io"
-                  className="underline hover:text-foreground"
+                  className="text-text-links decoration-text-links underline decoration-1 underline-offset-2 hover:text-primary hover:decoration-primary"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -203,7 +206,7 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
                 See the{" "}
                 <a
                   href="/integrations/frameworks/livekit"
-                  className="underline hover:text-foreground"
+                  className="text-text-links decoration-text-links underline decoration-1 underline-offset-2 hover:text-primary hover:decoration-primary"
                 >
                   LiveKit integration docs
                 </a>{" "}
@@ -264,6 +267,25 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
                 <p className="text-xs text-destructive mb-4">{error}</p>
               )}
 
+              {/* Store-audio toggle (applies when the next conversation starts) */}
+              <div className="flex items-center gap-2 mb-4">
+                <Switch
+                  id="voice-agent-store-audio"
+                  checked={storeAudio}
+                  onCheckedChange={setStoreAudio}
+                  disabled={isActive}
+                />
+                <Label
+                  htmlFor="voice-agent-store-audio"
+                  className={cn(
+                    "text-xs font-normal text-muted-foreground cursor-pointer",
+                    isActive && "cursor-not-allowed opacity-70",
+                  )}
+                >
+                  Store audio recording on the trace
+                </Label>
+              </div>
+
               {/* Transcripts */}
               {transcripts.length > 0 && (
                 <div className="w-full max-w-md space-y-2 overflow-y-auto max-h-48">
@@ -271,13 +293,11 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
                     <div
                       key={i}
                       className={cn(
-                        "text-sm px-3 py-2 rounded-lg",
-                        t.role === "user"
-                          ? "bg-primary/10 text-foreground ml-8"
-                          : "bg-muted text-foreground mr-8",
+                        "text-sm px-3 py-2 rounded-[2px] border border-line-structure bg-[#403d391a] dark:bg-[#b8b6a01a] text-text-primary",
+                        t.role === "user" ? "ml-8" : "mr-8",
                       )}
                     >
-                      <span className="text-xs text-muted-foreground font-medium">
+                      <span className="text-xs text-text-tertiary font-medium">
                         {t.role === "user" ? "You" : "Agent"}:{" "}
                       </span>
                       {t.text}
@@ -293,7 +313,7 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
                   LLM → TTS pipeline is traced in Langfuse via{" "}
                   <a
                     href="/integrations/frameworks/livekit"
-                    className="underline hover:text-foreground"
+                    className="text-text-links decoration-text-links underline decoration-1 underline-offset-2 hover:text-primary hover:decoration-primary"
                   >
                     LiveKit Agents
                   </a>

@@ -4,8 +4,22 @@ import { createMDX } from "fumadocs-mdx/next";
 import NextBundleAnalyzer from "@next/bundle-analyzer";
 
 import * as redirects from "./lib/redirects.js";
+import contentDirMap from "./lib/content-dir-map.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// URL prefixes whose pages are mirrored as markdown by copy_md_sources.js,
+// derived from the same map the copy script uses so a new content section is
+// picked up automatically. The empty prefix (marketing pages, served from the
+// site root) is dropped: those sit alongside app-only routes such as /cloud
+// and /events that have no mirror, and a root-level matcher cannot tell them
+// apart. Marketing pages still advertise their mirror through the <link> tag
+// in buildSectionMetadata(), which is only emitted when the page exists.
+const MIRRORED_URL_PREFIXES = Array.from(
+  new Set(
+    Object.values(contentDirMap.CONTENT_DIR_TO_URL_PREFIX).filter(Boolean),
+  ),
+).sort();
 
 const withBundleAnalyzer = NextBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
@@ -51,6 +65,29 @@ const nextConfig = {
     // Reduce peak memory during production build (helps avoid OOM on Vercel)
     webpackMemoryOptimizations: true,
     serverSourceMaps: false,
+    optimizePackageImports: [
+      "lucide-react",
+      "@icons-pack/react-simple-icons",
+      "fumadocs-ui",
+      "recharts",
+      "@radix-ui/react-accordion",
+      "@radix-ui/react-avatar",
+      "@radix-ui/react-collapsible",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-hover-card",
+      "@radix-ui/react-label",
+      "@radix-ui/react-popover",
+      "@radix-ui/react-presence",
+      "@radix-ui/react-scroll-area",
+      "@radix-ui/react-select",
+      "@radix-ui/react-separator",
+      "@radix-ui/react-slot",
+      "@radix-ui/react-switch",
+      "@radix-ui/react-tabs",
+      "@radix-ui/react-tooltip",
+      "@radix-ui/react-use-controllable-state",
+    ],
   },
   // Reduce memory usage during build
   productionBrowserSourceMaps: false,
@@ -61,20 +98,26 @@ const nextConfig = {
   },
   transpilePackages: ["react-tweet", "react-syntax-highlighter", "geist"],
 
+  // Sparticuz Chromium ships brotli-compressed binaries under `bin/`; Next's file tracer
+  // often omits them from the serverless bundle, breaking `executablePath()` on Vercel.
+  // Keys are matched with picomatch against normalized app routes (e.g. `/app/api/md-to-pdf`
+  // matches `/api/md-to-pdf` via `contains: true`).
+  outputFileTracingIncludes: {
+    "/api/md-to-pdf": [
+      "./lib/stripMdxForPlainMarkdown.js",
+      "./node_modules/@sparticuz/chromium/**",
+      "./node_modules/.pnpm/@sparticuz+chromium@*/node_modules/@sparticuz/chromium/**",
+    ],
+  },
+
   webpack(config, { isServer, webpack }) {
     config.resolve = config.resolve ?? {};
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "nextra/context": path.resolve(__dirname, "lib/nextra-shim/context.tsx"),
-      "nextra/hooks": path.resolve(__dirname, "lib/nextra-shim/hooks.ts"),
-      nextra: path.resolve(__dirname, "lib/nextra-shim/nextra-types.ts"),
-      "nextra-theme-docs": path.resolve(__dirname, "lib/nextra-shim/theme-docs.tsx"),
-      "nextra/components": path.resolve(__dirname, "lib/nextra-shim/components.tsx"),
-    };
     // Prevent recharts (and its exclusive deps: redux toolkit, immer, etc.) from
     // being hoisted into a synchronous shared chunk that loads on every page.
     // Recharts is only used on the /wrapped page — keep it in async-only chunks
     // so it's never downloaded unless the wrapped page actually renders it.
+    // webpack-only: Turbopack ignores splitChunks. Recharts isolation there is
+    // the real import() in components/wrapped/index.tsx.
     if (!isServer) {
       const sc = config.optimization?.splitChunks;
       if (sc && typeof sc === "object") {
@@ -108,7 +151,7 @@ const nextConfig = {
       config.plugins.push(
         new webpack.NormalModuleReplacementPlugin(/^node:/, (resource) => {
           resource.request = resource.request.replace(/^node:/, "");
-        })
+        }),
       );
     }
     return config;
@@ -136,7 +179,26 @@ const nextConfig = {
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "raw.githubusercontent.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "images.lumacdn.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        port: "",
+        pathname: "/**",
+      },
     ],
+    qualities: [75, 85, 90, 100],
   },
   headers() {
     const headers = [
@@ -167,6 +229,74 @@ const nextConfig = {
           {
             key: "Content-Security-Policy",
             value: cspHeader.replace(/\n/g, ""),
+          },
+        ],
+      },
+      // The Japanese pages serve Japanese content, so they declare the
+      // document language at the transport level too. `<html lang>` itself is
+      // set by `components/DocumentLanguage.tsx`, because Next.js only lets
+      // the root layout render `<html>`.
+      {
+        source: "/japan",
+        headers: [{ key: "Content-Language", value: "ja" }],
+      },
+      {
+        source: "/academy/japan/:path*",
+        headers: [{ key: "Content-Language", value: "ja" }],
+      },
+      // Agent Skills Discovery — CORS and caching
+      {
+        source: "/.well-known/agent-skills/:path*",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Cache-Control", value: "public, max-age=3600" },
+        ],
+      },
+      // MCP Discovery — CORS and caching
+      {
+        source: "/.well-known/mcp.json",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Cache-Control", value: "public, max-age=3600" },
+        ],
+      },
+      // Content negotiation: these paths return markdown instead of HTML when
+      // the request carries `Accept: text/markdown` (see the rewrites in
+      // `beforeFiles`). `Vary: Accept` tells caches and intermediaries that
+      // Accept is part of the cache key, so a cached HTML response is never
+      // served to a markdown request or vice versa.
+      //
+      // Static assets are excluded: they never negotiate, and declaring a Vary
+      // they do not honour would fragment CDN cache entries per Accept string
+      // for every asset on the site. The extension list mirrors the matcher in
+      // proxy.ts, plus `.md` — a `.md` URL is always markdown, so it does not
+      // vary on Accept either.
+      {
+        source: "/",
+        headers: [{ key: "Vary", value: "Accept" }],
+      },
+      {
+        source:
+          "/:path((?!api|_next|md-src|\\.well-known)(?!.*\\.(?:md|txt|json|png|jpe?g|gif|svg|ico|webp|avif|css|js|mjs|map|woff2?|ttf|otf|eot|mp4|webm|mp3|zip|pdf|xml|webmanifest|ipynb)$).*)",
+        headers: [{ key: "Vary", value: "Accept" }],
+      },
+      // Advertise the markdown representation over HTTP as well as in the HTML
+      // head, per the llms.txt v2 link relations, so agents that read headers
+      // only can discover it.
+      //
+      // Scoped to a mirrored section prefix plus at least one path segment.
+      // Section roots are excluded because some of them (/blog, /changelog,
+      // /resources) are listing routes with no markdown mirror, and anything
+      // outside these prefixes is excluded because app routes such as /cloud
+      // and /events have no mirror either. Advertising a Link that 404s is
+      // worse than advertising nothing.
+      {
+        source: `/:section(${MIRRORED_URL_PREFIXES.join("|")})/:path((?!.*\\.md$).+)`,
+        headers: [
+          {
+            key: "Link",
+            value:
+              '</:section/:path.md>; rel="alternate"; type="text/markdown"',
           },
         ],
       },
@@ -214,10 +344,14 @@ const nextConfig = {
       // Run BEFORE Next serves content/public files so it can override HTML routes
       // when the client explicitly asks for markdown.
       beforeFiles: [
-        // /support.md → raw markdown from the Support page (content/marketing/support.mdx → md-src/marketing/support.md)
+        // Agent Skills Discovery (RFC 8615 .well-known URI)
         {
-          source: "/support.md",
-          destination: "/md-src/marketing/support.md",
+          source: "/.well-known/agent-skills",
+          destination: "/well-known-agent-skills.json",
+        },
+        {
+          source: "/.well-known/agent-skills/index.json",
+          destination: "/well-known-agent-skills.json",
         },
 
         // Optional: make "/" negotiable too (remove if you don't have md-src/index.md)
@@ -229,8 +363,10 @@ const nextConfig = {
 
         // Content negotiation: /docs or /docs/observability/overview -> /md-src/... .md
         // Excludes /api, /_next, md-src, .md files, and .txt files (served directly from public/).
+        // The agent-traffic matcher in proxy.ts mirrors these exclusions — keep in sync.
         {
-          source: "/:path((?!api|_next|md-src)(?!.*\\.md$)(?!.*\\.txt$).*)",
+          source:
+            "/:path((?!api|_next|md-src|\\.well-known)(?!.*\\.md$)(?!.*\\.txt$)(?!.*\\.json$).*)",
           has: [{ type: "header", key: "accept", value: ".*text/markdown.*" }],
           destination: "/md-src/:path.md",
         },

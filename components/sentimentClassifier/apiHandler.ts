@@ -25,17 +25,17 @@ const handler = async (req: Request) => {
   if (!success) {
     return new Response(
       JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
-      { status: 429, headers: { "Content-Type": "application/json" } }
+      { status: 429, headers: { "Content-Type": "application/json" } },
     );
   }
 
   const { text, userId }: { text: string; userId: string } = await req.json();
 
   if (!text || text.trim().length === 0) {
-    return new Response(
-      JSON.stringify({ error: "Text is required." }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Text is required." }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   return propagateAttributes(
@@ -53,8 +53,8 @@ const handler = async (req: Request) => {
           model: openai("gpt-4o-mini"),
           schema: SentimentSchema,
           prompt: `Analyze the sentiment of the following text. Classify it as positive, negative, or neutral. Provide a confidence score between 0 and 1, a brief explanation of your reasoning, and extract the key phrases that influenced your classification.\n\nText: ${text}`,
-          experimental_telemetry: {
-            isEnabled: true,
+          telemetry: {
+            functionId: "sentiment-classifier",
           },
         });
 
@@ -64,16 +64,17 @@ const handler = async (req: Request) => {
 
         return new Response(
           JSON.stringify({ result: result.object, traceId }),
-          { status: 200, headers: { "Content-Type": "application/json" } }
+          { status: 200, headers: { "Content-Type": "application/json" } },
         );
       } catch (err) {
         after(async () => await flush());
 
         return new Response(
           JSON.stringify({
-            error: err instanceof Error ? err.message : "Failed to classify text",
+            error:
+              err instanceof Error ? err.message : "Failed to classify text",
           }),
-          { status: 500, headers: { "Content-Type": "application/json" } }
+          { status: 500, headers: { "Content-Type": "application/json" } },
         );
       }
     },

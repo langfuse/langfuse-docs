@@ -1,0 +1,85 @@
+---
+title: "Debug a Fan-Out RAG Agent With Tracing"
+description: "A confident, fluent, completely wrong answer from a RAG support agent — and how one Langfuse trace leads straight to the single broken config line behind the bad retrieval, wrong tool, and hallucination."
+ogImage: /images/videos/debug-rag-agent-with-tracing.jpg
+---
+
+# Debug a Fan-Out RAG Agent With Tracing
+
+This is a support agent built on RAG that answers product-specific questions. Unlike a simple setup where one customer question triggers a single LLM call, this one fans out. For a single question it:
+
+- classifies the topic
+- makes a plan
+- rewrites the query three ways
+- embeds each rewrite
+- searches the vector store
+- re-ranks the results
+- calls a backend tool
+- writes an answer
+- grades its own work with two separate judges
+
+When an agent branches into this many steps, you don't debug it by reading the output — you read the [trace](/docs/observability/get-started).
+
+<iframe
+  width="100%"
+  className="aspect-[16/9] rounded-lg border mt-6 w-full"
+  src="https://www.youtube-nocookie.com/embed/I2HhkwlXw8c"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
+
+## A confident, fluent, wrong answer [#the-symptom]
+
+We ask the agent one thing:
+
+> How do I increase my API rate limit on the Pro plan?
+
+The answer comes back confident, fluent, and completely wrong. The endpoint it pointed to was about billing, not rate limits — nothing to do with the task at hand.
+
+When the final answer is wrong, a notification saying "the agent is broken" is useless. Which step actually failed? That's what the trace tells you.
+
+## Following the bad score down the trace [#tracing-it-back]
+
+Open the [trace](/docs/observability/get-started) for this exact run. At the top, the [scores](/docs/evaluation/evaluation-methods/scores-via-ui) show **retrieval relevance is very low** — something clearly broke upstream. Trace it back step by step.
+
+- **Classify step** — the obvious suspect. Did it misunderstand the question? No: the output shows it correctly categorized this as a rate limits question. That's not it.
+- **Retrieve step** — the metadata shows it was classified as `rate_limits`, but the filter that actually got applied is `billing`. Every document it pulled back is a billing doc, with similarity scores near zero. Whatever came back wasn't even about the question.
+- **Tool call** — the same problem from a different angle. Tool selection keys off that same category field, so it called `get_billing_summary` and pulled the customer's invoice data instead of the rate limit tool.
+- **Answer step** — everything it was handed is billing content: documents and account data, nothing about rate limits anywhere.
+
+So the agent did the most natural thing with what it had: it stitched the closest-looking pieces together into a confident, baseless answer. That's **hallucination** — not a lying model, just an agent fed the wrong material.
+
+## One broken line [#root-cause]
+
+Every symptom — the bad retrieval, the wrong tool, the hallucination — traces back to one line. A single wrong entry in the routing table mapped `rate_limits` to the `billing` filter. No exception, no error log, nothing crashed. Just a fluent, confident, wrong answer sitting on one row of a config file.
+
+## Fix it and confirm in seconds [#fix-and-confirm]
+
+Hand that exact problem to your coding agent:
+
+> This routing table maps the `rate_limits` category to the wrong filter — it's pointing at `billing` instead of `rate_limits`. Fix the mapping.
+
+The agent finds the entry and corrects it. Ask the same question again:
+
+> How do I increase my API rate limit on the Pro plan?
+
+Now it routes correctly to `rate_limits`, retrieves the actual rate limit doc, calls the rate limit tool, and answers correctly — pointing the user to request an increase under settings or hit the rate limit increase endpoint. **Relevance and faithfulness both come back strong.** From the outside it's the same tree of steps, but now every branch is doing its job.
+
+## The LLM was never the problem [#takeaway]
+
+Classification was right, the model was capable, nothing threw an error. The failure sat earlier in the chain — three steps before the model ever wrote an answer.
+
+Without tracing, you're guessing: reprompting the model, blaming retrieval quality, adding retries that can't help. With one trace, you follow the bad score straight down to the exact broken step, fix the actual cause, and confirm it in seconds.
+
+When your agent fans out into many steps, you read the trace.
+
+## Learn more [#learn-more]
+
+- [Get started with observability](/docs/observability/get-started) — add tracing to your app
+- [Agent graphs](/docs/observability/features/agent-graphs) — visualize fan-out agents step by step
+- [Scores and evaluation](/docs/evaluation/overview) — attach relevance, faithfulness, and other scores to traces
+- [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) — the judges that flagged the low relevance score
+- [Langfuse Academy](/academy) — a deeper course on tracing and evaluation

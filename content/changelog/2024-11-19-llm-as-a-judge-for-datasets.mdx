@@ -9,6 +9,7 @@ author: Marlies
 canonical: /docs/evaluation/evaluation-methods/llm-as-a-judge
 ---
 
+import { Details, Summary } from "@/components/Details";
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
@@ -28,8 +29,8 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 Building reliable AI applications is challenging because it's hard to understand how changes impact performance. Without proper evaluation, teams end up playing whack-a-mole with bugs and regressions. [Datasets and experiments](/docs/datasets/overview) in Langfuse help transform this uncertainty into a structured engineering process.
 
-<details>
-<summary>Benefits of investing into datasets and development evaluations</summary>
+<Details>
+<Summary>Benefits of investing into datasets and development evaluations</Summary>
 
 - Measure the impact of changes before deployment
 - Identify regressions early
@@ -37,7 +38,7 @@ Building reliable AI applications is challenging because it's hard to understand
 - Build stronger conviction in your test datasets by identifying gaps between test and production evaluations
 - Create reliable feedback loops for development
 
-</details>
+</Details>
 
 Until now, datasets and experiments depended on custom evaluations that were added to the run via the SDKs/API. This is great if you need full flexibility or want to use your preferred evaluation library or scoring logic. There were LLM-as-a-judge evaluators, but they were _limited to production runs_ and _could not access the ground truth of your dataset_ (`expected_output`) which is necessary for a reliable offline evaluation.
 

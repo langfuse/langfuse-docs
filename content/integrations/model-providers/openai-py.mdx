@@ -4,16 +4,19 @@ sidebarTitle: OpenAI (Python)
 seoTitle: Open Source Observability for OpenAI (Python)
 description: Drop-in replacement of OpenAI SDK (Python) to get full observability in Langfuse by changing only the import.
 logo: /images/integrations/openai_icon.svg
+logoAppearance: dark
 ---
 
 # Observability for OpenAI SDK (Python)
 
 <Callout type="info">
-  Looking for the JS/TS version? [Check it out
-  here](/integrations/model-providers/openai-js).
+  Looking for the JS/TS version? See the [OpenAI (JS/TS)
+  integration](/integrations/model-providers/openai-js).
 </Callout>
 
 If you use the OpenAI Python SDK, you can use the Langfuse **drop-in replacement** to get full logging by changing only the import. This works with OpenAI and Azure OpenAI.
+
+Langfuse is open source. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it. The integration code is the same for both.
 
 ```diff
 - import openai
@@ -30,7 +33,7 @@ Langfuse automatically tracks:
 - [API Errors](#error-tracking)
 - Model usage (tokens) and cost (USD) ([learn more](/docs/model-usage-and-cost))
 
-## How it works
+## How it works [#how-it-works]
 
 <Steps>
 
@@ -84,7 +87,7 @@ openai.langfuse_public_key = "pk-lf-..."
 openai.langfuse_secret_key = "sk-lf-..."
 openai.langfuse_enabled = True # Default is True, set to False to disable Langfuse
 openai.LANGFUSE_BASE_URL = "https://cloud.langfuse.com" # 🇪🇺 EU region
-# openai.LANGFUSE_BASE_URL = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Set openai key via attribute
 openai.api_key = "sk-..."
@@ -106,18 +109,6 @@ get_client().auth_check()
 
 _No changes required._
 
-Check out the notebook for end-to-end examples of the integration:
-
-import { FileCode } from "lucide-react";
-
-<Cards>
-  <Card
-    title="Example notebook"
-    href="/guides/cookbook/integration_openai_sdk"
-    icon={<FileCode />}
-  />
-</Cards>
-
 </Steps>
 
 ## Troubleshooting
@@ -137,7 +128,7 @@ langfuse = get_client()
 langfuse.flush()
 ```
 
-Learn more about queuing and batching of events [here](/docs/observability/features/queuing-batching).
+Learn more about [queuing and batching of events](/docs/observability/features/queuing-batching).
 
 ### Assistants API
 
@@ -199,7 +190,7 @@ export LANGFUSE_TRACING_ENABLED=false
 
 ## Advanced usage
 
-### Custom trace properties
+### Custom trace properties [#custom-trace-properties]
 
 You can add the following properties to the openai method:
 
@@ -235,7 +226,7 @@ result = openai.chat.completions.create(
 )
 ```
 
-**Option 2: Via enclosing span (for more control):**
+**Option 2: Via enclosing [observation](/docs/observability/data-model#observations-traces-and-sessions) (for more control):**
 
 ```python
 from langfuse import get_client, propagate_attributes
@@ -379,22 +370,60 @@ get_client().flush()
 
 Since OpenAI beta APIs are changing frequently across versions, we fully support only the stable APIs in the OpenAI SDK. If you are using a beta API, you can still use the Langfuse SDK by wrapping the OpenAI SDK manually with the `@observe()` [decorator](/docs/sdk/python/decorators).
 
-#### Structured Output
+#### Structured Output [#structured-output]
 
-For **structured output parsing**, please use the `response_format` argument to `openai.chat.completions.create()` instead of the Beta API. This will allow you to set Langfuse attributes and metadata.
+For **structured output parsing**, you have two fully instrumented options depending on your `openai` Python SDK version:
 
-If you rely on parsing Pydantic defintions for your `response_format`, you may leverage the `type_to_response_format_param` utility function from the OpenAI Python SDK to convert the Pydantic definition to a `response_format` dictionary. This is the same function the OpenAI Beta API uses to convert Pydantic definitions to `response_format` dictionaries.
+- **`openai>=1.92.0` (recommended):** use `client.chat.completions.parse(...)`. OpenAI graduated `parse` and `stream` out of beta in [v1.92.0](https://github.com/openai/openai-python/releases/tag/v1.92.0), and Langfuse wraps the stable `openai.resources.chat.completions.Completions.parse` (and the async variant). You can pass a Pydantic model directly via `response_format` and still set Langfuse attributes such as `name`, `metadata`, `langfuse_session_id`, etc.
+- **`openai<1.92.0` (legacy):** the parse helper is only available under `client.beta.chat.completions.parse(...)`. Langfuse also wraps the beta path on these older versions, so attributes like `name` and `metadata` work there too.
+
+<Callout type="info">
+  On `openai>=1.92.0`, calls to `client.beta.chat.completions.parse(...)` are
+  re-routed to the stable `parse` method by the OpenAI SDK, so they remain
+  instrumented. Prefer `client.chat.completions.parse(...)` in new code.
+</Callout>
 
 ```python
 from langfuse import get_client
+from langfuse.openai import openai
+from pydantic import BaseModel
+
+class CalendarEvent(BaseModel):
+    name: str
+    date: str
+    participants: list[str]
+
+completion = openai.chat.completions.parse(
+    model="gpt-4o-2024-08-06",
+    messages=[
+        {"role": "system", "content": "Extract the event information."},
+        {
+            "role": "user",
+            "content": "Alice and Bob are going to a science fair on Friday.",
+        },
+    ],
+    response_format=CalendarEvent,
+    name="extract-calendar-event",
+    metadata={"langfuse_tags": ["structured-output"]},
+)
+
+print(completion.choices[0].message.parsed)
+
+# Flush via global client
+get_client().flush()
+```
+
+If you cannot upgrade the OpenAI SDK and want to stay on `chat.completions.create`, you can still pass a Pydantic model by converting it with `type_to_response_format_param` from the OpenAI SDK:
+
+```python
 from langfuse.openai import openai
 from openai.lib._parsing._completions import type_to_response_format_param
 from pydantic import BaseModel
 
 class CalendarEvent(BaseModel):
-  name: str
-  date: str
-  participants: list[str]
+    name: str
+    date: str
+    participants: list[str]
 
 completion = openai.chat.completions.create(
     model="gpt-4o-2024-08-06",
@@ -407,11 +436,6 @@ completion = openai.chat.completions.create(
     ],
     response_format=type_to_response_format_param(CalendarEvent),
 )
-
-print(completion)
-
-# Flush via global client
-get_client().flush()
 ```
 
 #### Assistants API
@@ -422,7 +446,7 @@ Tracing of the assistants api is not supported by this integration as OpenAI Ass
 
 Langfuse automatically tracks and monitors OpenAI API errors if you use the native integration. They are captured via the `level` and `statusMessage` fields (see [docs](/docs/observability/features/log-levels)).
 
-Learn more about how to get started [here](/integrations/model-providers/openai-py).
+See the [setup steps above](#how-it-works) to get started.
 
 ```diff
 - import openai
@@ -449,7 +473,7 @@ Throws error 👆
 
 import { FaqPreview } from "@/components/faq/FaqPreview";
 
-<FaqPreview tags={["integration"]} />
+<FaqPreview tags={["openai"]} />
 
 ## GitHub Discussions
 

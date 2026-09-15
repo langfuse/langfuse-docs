@@ -1,5 +1,6 @@
 ---
 title: Version Control
+seoTitle: "Prompt Version Control"
 sidebarTitle: Version Control
 description: Use prompt labels to fetch specific prompt versions in the SDKs.
 ---
@@ -8,7 +9,9 @@ description: Use prompt labels to fetch specific prompt versions in the SDKs.
 
 In Langfuse, version control & deployment of prompts is managed via `versions` and `labels`.
 
-## Versions & Labels
+## Implementation
+
+### Versions & Labels [#versions--labels]
 
 Each prompt version is automatically assigned a `version ID`. Additionally, you can assign `labels` to follow your own versioning scheme.
 
@@ -83,7 +86,7 @@ await langfuse.prompt.update({
 
 ## Fetching by Label or Version
 
-When fetching prompts to use them in your application you can either do so by fetching a specific version or label. 
+When fetching prompts to use them in your application you can either do so by fetching a specific version or label.
 Here are code examples for fetching prompts by label or version.
 
 **To "deploy" a prompt version**, you have to assign the label `production` or any environment label you created to that prompt version.
@@ -141,11 +144,13 @@ const prompt = await langfuse.prompt.get("movie-critic", {
 
 </LangTabs>
 
-## Rollbacks
+## Operational workflows
+
+### Rollbacks
 
 When a prompt has a `production` label, then that version will be served by default in the SDKs. You can quickly rollback to a previous version by setting the `production` label to that previous version in the Langfuse UI.
 
-## Prompt Diffs
+### Prompt Diffs
 
 The prompt version diff view shows you the changes you made to the prompt over time. This helps you understand how the prompt has evolved and what changes have been made to debug issues or understand the impact of changes.
 
@@ -155,7 +160,7 @@ The prompt version diff view shows you the changes you made to the prompt over t
   aspectRatio={16 / 9}
 />
 
-## Protected prompt labels
+### Protected prompt labels [#protected-prompt-labels]
 
 <AvailabilityBanner
   availability={{

@@ -16,7 +16,13 @@ export function Outro() {
         </p>
         <div className="flex gap-4 flex-wrap items-center justify-center">
           <Button variant="cta" size="lg" asChild>
-            <Link href="https://github.com/langfuse/langfuse" target="_blank" rel="noopener noreferrer">Leave a ⭐ on GitHub</Link>
+            <Link
+              href="https://github.com/langfuse/langfuse"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Leave a ⭐ on GitHub
+            </Link>
           </Button>
         </div>
       </div>
@@ -33,4 +39,3 @@ export function Outro() {
     </WrappedSection>
   );
 }
-

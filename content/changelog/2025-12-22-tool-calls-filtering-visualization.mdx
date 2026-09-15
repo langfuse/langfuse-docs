@@ -1,6 +1,7 @@
 ---
 date: 2025-12-22
 title: Filter Observations by Tool Calls and add Tool Calls to Dashboard Widgets
+seoTitle: "Filter Observations by Tool Calls"
 description: Add filtering, table columns, and dashboard widgets for analyzing tool usage in your LLM applications.
 ogImage: /images/changelog/2025-12-22-tool-calls-tables.jpg
 author: Nimar
@@ -19,6 +20,7 @@ We distinguish between **available tools** (tools available to an LLM) and **too
 ## Tool Call Filters on the Observations Table
 
 You can filter the observations table by the following new properties:
+
 - **Available Tools**: the count of tools available to an LLM
 - **Tool Calls**: the count of tools invoked by an LLM
 - **Available Tools Names**: list of tool names which were available to all your LLM calls. You can filter to only show generations to which tools like `get_weather` or `search` were available
@@ -27,6 +29,7 @@ You can filter the observations table by the following new properties:
 Hint: click on the "Columns" to add the columns "Available Tools" and "Tool Calls" to your table view if they are not visible.
 
 ## Visualize Tool Calls Over Time with Dashboard Widgets
+
 - **New Metrics**: `toolDefinitions` and `toolCalls` with user-selectable aggregation (SUM, AVG, MAX, MIN, percentiles)
 - **New Filters**: `toolNames` to break down metrics by tool name and to filter for specific tools
 
@@ -37,7 +40,9 @@ Hint: click on the "Columns" to add the columns "Available Tools" and "Tool Call
 - Create a time series widget showing tool calls over time
 
 ## Supported Frameworks
+
 Currently, we support parsing tool calls originating from the following frameworks:
+
 - OpenAI
 - Langchain / LangGraph
 - Vercel AI SDK

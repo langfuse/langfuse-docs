@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" font-family="system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="kept-fill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ea580c" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#ea580c" stop-opacity="0.02"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="400" fill="none"/>
+
+  <!-- Chart area: x=80..760, y=40..340 -->
+  <!-- Y axis gridlines and labels -->
+  <line x1="80" y1="340" x2="760" y2="340" stroke="#e5e7eb" stroke-width="1"/>
+  <line x1="80" y1="280" x2="760" y2="280" stroke="#e5e7eb" stroke-width="1"/>
+  <line x1="80" y1="220" x2="760" y2="220" stroke="#e5e7eb" stroke-width="1"/>
+  <line x1="80" y1="160" x2="760" y2="160" stroke="#e5e7eb" stroke-width="1"/>
+  <line x1="80" y1="100" x2="760" y2="100" stroke="#e5e7eb" stroke-width="1"/>
+  <line x1="80" y1="40" x2="760" y2="40" stroke="#e5e7eb" stroke-width="1"/>
+
+  <text x="70" y="344" text-anchor="end" fill="#6b7280" font-size="12">0.0</text>
+  <text x="70" y="284" text-anchor="end" fill="#6b7280" font-size="12">0.2</text>
+  <text x="70" y="224" text-anchor="end" fill="#6b7280" font-size="12">0.4</text>
+  <text x="70" y="164" text-anchor="end" fill="#6b7280" font-size="12">0.6</text>
+  <text x="70" y="104" text-anchor="end" fill="#6b7280" font-size="12">0.8</text>
+  <text x="70" y="44" text-anchor="end" fill="#6b7280" font-size="12">1.0</text>
+
+  <!-- Y axis label -->
+  <text x="20" y="190" text-anchor="middle" fill="#374151" font-size="13" font-weight="500" transform="rotate(-90,20,190)">Score</text>
+
+  <!-- X axis label -->
+  <text x="420" y="390" text-anchor="middle" fill="#374151" font-size="13" font-weight="500">Experiment</text>
+
+  <!-- Best score line (0.824) -->
+  <line x1="80" y1="92.8" x2="760" y2="92.8" stroke="#ea580c" stroke-width="1" stroke-dasharray="6,4" opacity="0.4"/>
+  <text x="765" y="89" fill="#ea580c" font-size="11" opacity="0.6">0.824</text>
+
+  <!-- Baseline line (0.350) -->
+  <line x1="80" y1="235" x2="760" y2="235" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,4" opacity="0.4"/>
+  <text x="765" y="231" fill="#9ca3af" font-size="11" opacity="0.6">0.350</text>
+
+  <!--
+    Data points (experiment, score, status):
+    1:  0.350 (baseline)
+    2:  0.365 (keep)
+    3:  0.574 (keep)
+    4:  0.542 (discard)
+    5:  0.544 (keep/infra)
+    6:  0.699 (keep/best)
+    7:  0.607 (discard)
+    8:  0.824 (keep/best)
+    9:  0.554 (discard)
+    10: 0.743 (discard)
+    11: 0.627 (discard)
+    12: 0.653 (discard)
+    13: 0.667 (discard)
+
+    x = 80 + (i-1) * (680/12)  → spacing ~56.7px
+    y = 340 - (score * 300)
+  -->
+
+  <!-- Connecting line (all points) -->
+  <polyline
+    points="80,235 136.7,230.5 193.3,167.8 250,177.4 306.7,176.8 363.3,130.3 420,157.9 476.7,92.8 533.3,173.8 590,117.1 646.7,151.9 703.3,144.1 760,139.9"
+    fill="none" stroke="#94a3b8" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- Area fill under kept points trend -->
+
+  <!-- Discard points (hollow circles) -->
+  <circle cx="250" cy="177.4" r="5" fill="white" stroke="#94a3b8" stroke-width="2"/>
+  <circle cx="420" cy="157.9" r="5" fill="white" stroke="#94a3b8" stroke-width="2"/>
+  <circle cx="533.3" cy="173.8" r="5" fill="white" stroke="#94a3b8" stroke-width="2"/>
+  <circle cx="590" cy="117.1" r="5" fill="white" stroke="#94a3b8" stroke-width="2"/>
+  <circle cx="646.7" cy="151.9" r="5" fill="white" stroke="#94a3b8" stroke-width="2"/>
+  <circle cx="703.3" cy="144.1" r="5" fill="white" stroke="#94a3b8" stroke-width="2"/>
+  <circle cx="760" cy="139.9" r="5" fill="white" stroke="#94a3b8" stroke-width="2"/>
+
+  <!-- Kept points (filled circles) -->
+  <circle cx="80" cy="235" r="6" fill="#ea580c"/>
+  <circle cx="136.7" cy="230.5" r="6" fill="#ea580c"/>
+  <circle cx="193.3" cy="167.8" r="6" fill="#ea580c"/>
+  <circle cx="306.7" cy="176.8" r="6" fill="#ea580c"/>
+  <circle cx="363.3" cy="130.3" r="6" fill="#ea580c"/>
+  <circle cx="476.7" cy="92.8" r="6" fill="#ea580c"/>
+
+  <!-- Score labels for key points -->
+  <text x="80" y="253" text-anchor="middle" fill="#374151" font-size="11" font-weight="500">0.35</text>
+  <text x="193.3" y="157" text-anchor="middle" fill="#374151" font-size="11" font-weight="500">0.57</text>
+  <text x="363.3" y="120" text-anchor="middle" fill="#374151" font-size="11" font-weight="500">0.70</text>
+  <text x="476.7" y="82" text-anchor="middle" fill="#ea580c" font-size="12" font-weight="600">0.824</text>
+
+  <!-- X axis tick labels -->
+  <text x="80" y="360" text-anchor="middle" fill="#6b7280" font-size="11">1</text>
+  <text x="136.7" y="360" text-anchor="middle" fill="#6b7280" font-size="11">2</text>
+  <text x="193.3" y="360" text-anchor="middle" fill="#6b7280" font-size="11">3</text>
+  <text x="250" y="360" text-anchor="middle" fill="#6b7280" font-size="11">4</text>
+  <text x="306.7" y="360" text-anchor="middle" fill="#6b7280" font-size="11">5</text>
+  <text x="363.3" y="360" text-anchor="middle" fill="#6b7280" font-size="11">6</text>
+  <text x="420" y="360" text-anchor="middle" fill="#6b7280" font-size="11">7</text>
+  <text x="476.7" y="360" text-anchor="middle" fill="#6b7280" font-size="11">8</text>
+  <text x="533.3" y="360" text-anchor="middle" fill="#6b7280" font-size="11">9</text>
+  <text x="590" y="360" text-anchor="middle" fill="#6b7280" font-size="11">10</text>
+  <text x="646.7" y="360" text-anchor="middle" fill="#6b7280" font-size="11">11</text>
+  <text x="703.3" y="360" text-anchor="middle" fill="#6b7280" font-size="11">12</text>
+  <text x="760" y="360" text-anchor="middle" fill="#6b7280" font-size="11">13</text>
+
+  <!-- Legend -->
+  <circle cx="260" cy="20" r="5" fill="#ea580c"/>
+  <text x="270" y="24" fill="#374151" font-size="12">Kept</text>
+  <circle cx="330" cy="20" r="5" fill="white" stroke="#94a3b8" stroke-width="2"/>
+  <text x="340" y="24" fill="#374151" font-size="12">Discarded</text>
+
+</svg>

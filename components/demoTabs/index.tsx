@@ -14,10 +14,22 @@ import dynamic from "next/dynamic";
 
 // Lazy-load all tab content so their heavy deps (katex, livekit, AI SDKs) are NOT
 // pulled into the catch-all [section]/[[...slug]] bundle that serves every docs page.
-const Chat = dynamic(() => import("@/components/qaChatbot").then((m) => ({ default: m.Chat })));
-const SentimentClassifier = dynamic(() => import("@/components/sentimentClassifier").then((m) => ({ default: m.SentimentClassifier })));
-const ImageGenerator = dynamic(() => import("@/components/imageGenerator").then((m) => ({ default: m.ImageGenerator })));
-const VoiceAgent = dynamic(() => import("@/components/voiceAgent").then((m) => ({ default: m.VoiceAgent })));
+const Chat = dynamic(() =>
+  import("@/components/qaChatbot").then((m) => ({ default: m.Chat })),
+);
+const SentimentClassifier = dynamic(() =>
+  import("@/components/sentimentClassifier").then((m) => ({
+    default: m.SentimentClassifier,
+  })),
+);
+const ImageGenerator = dynamic(() =>
+  import("@/components/imageGenerator").then((m) => ({
+    default: m.ImageGenerator,
+  })),
+);
+const VoiceAgent = dynamic(() =>
+  import("@/components/voiceAgent").then((m) => ({ default: m.VoiceAgent })),
+);
 
 const TAB_MAP: Record<string, string> = {
   chatbot: "chatbot",
@@ -59,6 +71,11 @@ export const DemoTabs = ({ className, ...props }: DemoTabsProps) => {
             <span className="hidden sm:inline">Q&A Chatbot</span>
             <span className="sm:hidden">Chat</span>
           </TabsTrigger>
+          <TabsTrigger value="voice" className="gap-1.5">
+            <MicIcon className="size-4" />
+            <span className="hidden sm:inline">Voice Agent</span>
+            <span className="sm:hidden">Voice</span>
+          </TabsTrigger>
           <TabsTrigger value="image" className="gap-1.5">
             <ImageIcon className="size-4" />
             <span className="hidden sm:inline">Image Generator</span>
@@ -69,11 +86,6 @@ export const DemoTabs = ({ className, ...props }: DemoTabsProps) => {
             <span className="hidden sm:inline">Sentiment Classifier</span>
             <span className="sm:hidden">Sentiment</span>
           </TabsTrigger>
-          <TabsTrigger value="voice" className="gap-1.5">
-            <MicIcon className="size-4" />
-            <span className="hidden sm:inline">Voice Agent</span>
-            <span className="sm:hidden">Voice</span>
-          </TabsTrigger>
         </TabsList>
 
         <TabsContent
@@ -82,6 +94,14 @@ export const DemoTabs = ({ className, ...props }: DemoTabsProps) => {
           className={activeTab !== "chatbot" ? "hidden" : undefined}
         >
           <Chat />
+        </TabsContent>
+
+        <TabsContent
+          value="voice"
+          forceMount
+          className={activeTab !== "voice" ? "hidden" : undefined}
+        >
+          <VoiceAgent />
         </TabsContent>
 
         <TabsContent
@@ -98,14 +118,6 @@ export const DemoTabs = ({ className, ...props }: DemoTabsProps) => {
           className={activeTab !== "sentiment" ? "hidden" : undefined}
         >
           <SentimentClassifier />
-        </TabsContent>
-
-        <TabsContent
-          value="voice"
-          forceMount
-          className={activeTab !== "voice" ? "hidden" : undefined}
-        >
-          <VoiceAgent />
         </TabsContent>
       </Tabs>
     </div>

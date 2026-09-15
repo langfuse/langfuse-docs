@@ -17,11 +17,12 @@ import { CustomerQuote } from "@/components/customers/CustomerQuote";
   date="November 30, 2025"
 />
 
-What a month! 
+What a month!
 
 We have just wrapped up Launch Week 4 ([full recap here](/blog/2025-10-29-launch-week-4)) with major updates to Agent Observability, Model Pricing Tiers in Cost Tracking, new Score Analytics to align Evaluations, a new hosted MCP server, and so much more...
 
 ## Major Updates to Agent Observability
+
 We have made agent tracing & evals much more powerful by introducing: [1] improved tool call visibility with inline details and arguments (available and selected tools), [2] a unified Trace Log View that simplifies scrolling and searching through agent observations, [3] added more observation types which add meaning to agent spans, and by making [4] Agent Graphs generally available to visualize complex executions across Agent frameworks and custom implementations.
 
 <Frame>
@@ -31,6 +32,7 @@ We have made agent tracing & evals much more powerful by introducing: [1] improv
 [Read more about the updates here](/changelog/2025-11-05-langfuse-for-agents)
 
 ## Model Pricing Tiers in Cost Tracking
+
 Langfuse now supports pricing tiers for models with context-dependent pricing, enabling accurate cost calculation for models like Claude Sonnet 4.5, Gemini 2.5 Pro, Gemini 3 Pro Preview that charge different rates based on input token count. We have added pre-configured pricing tiers for 3 commonly used models. Alternatively you can configure any number of custom pricing tiers via the Langfuse UI or API.
 
 <Frame>
@@ -40,8 +42,8 @@ Langfuse now supports pricing tiers for models with context-dependent pricing, e
 [Read more about the updates here](/changelog/2025-12-02-model-pricing-tiers)
 
 ## Score Analytics to align Evaluations
-Score Analytics now provides comprehensive tools for analyzing and comparing evaluation scores across your LLM application. Whether you’re validating that different LLM judges agree, checking if human annotations align with automated evaluations, or exploring score distributions and trends, Score Analytics gives you the insights you need to trust your evaluation process.
 
+Score Analytics now provides comprehensive tools for analyzing and comparing evaluation scores across your LLM application. Whether you’re validating that different LLM judges agree, checking if human annotations align with automated evaluations, or exploring score distributions and trends, Score Analytics gives you the insights you need to trust your evaluation process.
 
 <Frame>
 ![Score Analytics Dashboard](/images/blog/2025-11-30-langfuse-november-update/score-analytics-compare-numeric.webp)
@@ -49,8 +51,8 @@ Score Analytics now provides comprehensive tools for analyzing and comparing eva
 
 [Read more about the updates here](/changelog/2025-11-07-score-analytics-multi-score-comparison)
 
-
 ## Schema Enforcement for Dataset Items
+
 You can now add JSON Schema validation to your datasets to ensure all dataset items conform to the expected structure. This helps maintain data quality, catch errors early, and ensure consistency across your team when building and maintaining test datasets.
 
 <Frame>
@@ -60,7 +62,8 @@ You can now add JSON Schema validation to your datasets to ensure all dataset it
 [Read more about the updates here](/changelog/2025-11-06-dataset-schema-enforcement)
 
 ## MCP Server for Prompt Management
-Langfuse now includes a hosted MCP server built directly into the platform (StreamableHTTP, authenticated with Langfuse API keys). You can use it to iterate on Prompts with Claude Code or let production agents fetch them dynamically as needed. We will extend it to the rest of the Langfuse data platform in the future. 
+
+Langfuse now includes a hosted MCP server built directly into the platform (StreamableHTTP, authenticated with Langfuse API keys). You can use it to iterate on Prompts with Claude Code or let production agents fetch them dynamically as needed. We will extend it to the rest of the Langfuse data platform in the future.
 
 <Frame>
 ![MCP Server](/images/blog/2025-11-30-langfuse-november-update/2025-11-20-native-mcp-server.webp)
@@ -69,11 +72,12 @@ Langfuse now includes a hosted MCP server built directly into the platform (Stre
 [Read more about the updates here](/changelog/2025-11-20-native-mcp-server)
 
 ## New Integrations
+
 - [Mixpanel](/integrations/analytics/mixpanel)
 - [Amazon Bedrock AgentCore](/integrations/frameworks/amazon-agentcore) – If you want to dive deep, I recommend watching this [workshop with our friends at AWS](https://www.youtube.com/watch?v=api-Z4TfDvM)
 
-
 ## Fixes & Improvements
+
 - Advanced Filtering for Public Traces and Observations API
 - Organize Your Datasets in Folders
 - Mentions and Reactions in Comments
@@ -100,6 +104,7 @@ Langfuse now includes a hosted MCP server built directly into the platform (Stre
 - Navigation: Better project access verification
 
 ## User Story: Merck
+
 The oldest pharmaceutical company in the world, Merck, is leading innovation in their field. Langfuse is powering 80+ of their AI project teams globally to ship large scale AI Applications and Agents. [Read the story](/users/merckgroup).
 
 <Frame>
@@ -114,7 +119,7 @@ The oldest pharmaceutical company in the world, Merck, is leading innovation in 
 />
 
 ## Some Pointers
+
 - Our CEO Marc spoke on a panel at TypeScript AI Conf - we chatted about tracing vs. evals, online vs. offline evals, OTEL, pre-AI vs. AI native observability and where the industry is heading ([watch the session](https://www.youtube.com/watch?v=3TqaDP63Qdk&t=13465s))
 - Due to popular demand we recorded a workshop on Continuous Agent Evaluation using AWS Bedrock AgentCore and Langfuse with our friends at AWS ([watch the workshop](https://www.youtube.com/watch?v=api-Z4TfDvM))
 - We relaunched our Guides Section in the Documentation, now featuring more helpful blogposts, videos, and notebooks on Agent Evals and Tracing! Go check it out and let us know what you think ([here](/guides)).
-

@@ -6,7 +6,7 @@ export const POST = async (req: Request) => {
   if (!success) {
     return new Response(
       JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
-      { status: 429, headers: { "Content-Type": "application/json" } }
+      { status: 429, headers: { "Content-Type": "application/json" } },
     );
   }
 
@@ -17,13 +17,15 @@ export const POST = async (req: Request) => {
   if (!livekitUrl || !apiKey || !apiSecret) {
     return new Response(
       JSON.stringify({
-        error: "Voice agent is not configured. LiveKit credentials are missing.",
+        error:
+          "Voice agent is not configured. LiveKit credentials are missing.",
       }),
-      { status: 503, headers: { "Content-Type": "application/json" } }
+      { status: 503, headers: { "Content-Type": "application/json" } },
     );
   }
 
-  const { userId }: { userId: string } = await req.json();
+  const { userId, storeAudio }: { userId: string; storeAudio?: boolean } =
+    await req.json();
 
   const roomName = `voice-demo-${crypto.randomUUID()}`;
   const participantName = userId;
@@ -31,6 +33,9 @@ export const POST = async (req: Request) => {
   const token = new AccessToken(apiKey, apiSecret, {
     identity: participantName,
     name: participantName,
+    // Read by the agent to decide whether to record the conversation audio
+    // and attach it to the Langfuse trace (defaults to true).
+    attributes: { store_audio: String(storeAudio !== false) },
   });
 
   token.addGrant({
@@ -48,7 +53,7 @@ export const POST = async (req: Request) => {
       url: livekitUrl,
       roomName,
     }),
-    { status: 200, headers: { "Content-Type": "application/json" } }
+    { status: 200, headers: { "Content-Type": "application/json" } },
   );
 };
 

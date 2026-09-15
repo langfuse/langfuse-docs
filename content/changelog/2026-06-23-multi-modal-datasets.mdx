@@ -1,0 +1,45 @@
+---
+date: 2026-06-23
+title: Multi-modal datasets
+description: Create Langfuse dataset items with images, audio, video, documents, and other attachments for SDK-based multi-modal experiments.
+author: Tobias Wochinger
+canonical: /docs/evaluation/experiments/datasets
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, FlaskConical } from "lucide-react";
+
+<ChangelogHeader />
+
+<Video
+  src="https://static.langfuse.com/docs-videos/2026-06-17-create-multimodal-dataset-item.mp4"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+You can now add media attachments to Langfuse dataset items and use them in SDK-based multi-modal experiments. Dataset item `input`, `expectedOutput`, and `metadata` can include media uploaded from the UI or via the Python and JS/TS SDKs.
+
+Use this to build visual QA datasets, compare generated images against reference files, or run evaluations over audio, documents, and other multi-modal inputs. In SDK-based experiments, dataset media is resolved into media references by default, with helpers to fetch them as bytes, base64, or data URIs depending on the format your model provider expects.
+
+<Callout type="info">
+  Multi-modal datasets are supported for SDK-based experiments with Python SDK
+  `>= 4.10.0` and JS/TS SDK `@langfuse/client >= 5.6.0`. UI-based
+  experiments do not yet support dataset items with media attachments.
+</Callout>
+
+## Get started
+
+<Cards num={2}>
+  <Card
+    title="Datasets"
+    href="/docs/evaluation/experiments/datasets"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Experiments via SDK"
+    href="/docs/evaluation/experiments/experiments-via-sdk"
+    icon={<FlaskConical />}
+    arrow
+  />
+</Cards>

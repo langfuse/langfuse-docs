@@ -1,9 +1,9 @@
 **Install packages**
 
-Install the Vercel AI SDK, OpenTelemetry, and the Langfuse integration packages.
+Install AI SDK 7, OpenTelemetry, and the Langfuse integration packages.
 
 ```bash
-npm install ai @ai-sdk/openai @langfuse/tracing @langfuse/otel @opentelemetry/sdk-node
+npm install ai @ai-sdk/openai @langfuse/vercel-ai-sdk @langfuse/tracing @langfuse/otel @opentelemetry/sdk-node
 ```
 
 **Add credentials**
@@ -16,30 +16,36 @@ import EnvJS from "@/components-mdx/env-js.mdx";
 
 **Initialize OpenTelemetry with Langfuse**
 
-Set up the OpenTelemetry SDK with the Langfuse span processor. This captures telemetry data from the Vercel AI SDK and sends it to Langfuse.
+Set up the OpenTelemetry SDK with the Langfuse span processor and register the Langfuse Vercel AI SDK telemetry integration once at application startup.
 
 ```typescript
+import { registerTelemetry } from "ai";
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { LangfuseVercelAiSdkIntegration } from "@langfuse/vercel-ai-sdk";
 
 const sdk = new NodeSDK({
   spanProcessors: [new LangfuseSpanProcessor()],
 });
 
 sdk.start();
+
+registerTelemetry(new LangfuseVercelAiSdkIntegration());
 ```
 
-**Enable telemetry in your AI SDK calls**
+**Run AI SDK calls**
 
-Pass `experimental_telemetry: { isEnabled: true }` to your AI SDK functions. The AI SDK automatically creates telemetry spans, which the `LangfuseSpanProcessor` captures and sends to Langfuse.
+After telemetry is registered, AI SDK 7 emits telemetry by default. Use `telemetry` to set a function name, include selected runtime context keys, or opt out of telemetry for a specific call.
 
 ```typescript
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 
 const { text } = await generateText({
-  model: openai("gpt-4o"),
+  model: openai("gpt-5.1"),
   prompt: "What is the weather like today?",
-  experimental_telemetry: { isEnabled: true },
+  telemetry: {
+    functionId: "weather-chat",
+  },
 });
 ```

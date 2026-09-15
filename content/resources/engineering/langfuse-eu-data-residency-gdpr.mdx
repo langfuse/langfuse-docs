@@ -1,0 +1,89 @@
+---
+title: "Langfuse for EU teams: data residency, GDPR, and compliance"
+description: "Where Langfuse Cloud's EU region stores data and backups, what the DPA and DSAR process cover, and which controls and certifications apply to EU teams."
+tags: [guide]
+---
+
+# Langfuse for EU teams: data residency, GDPR, and compliance
+
+Traces from an LLM application carry prompts, completions, and user identifiers, so the first question an EU team asks about an observability platform is where that data is stored and who can reach it. Langfuse answers it two ways: Langfuse Cloud has a dedicated EU region, and the same software can be self-hosted in infrastructure you control. This page collects what the Langfuse documentation states about the EU region, its backups, GDPR, and the controls a reviewer will ask about, as of September 2026. Where the documentation points to an agreement, a form, or a contact instead of stating a fact, this page says so.
+
+**TL;DR:** Langfuse Cloud's EU region runs in Ireland (AWS `eu-west-1`) at `https://cloud.langfuse.com`, with data, user accounts, and infrastructure completely separated from the US, Japan, and HIPAA regions. Primary storage and backups stay in the EU: Postgres backups are copied daily to a second EU region (`eu-central-1`) for disaster recovery. Langfuse offers a DPA, a DSAR process, a published sub-processor list, project-level retention, deletion through the UI and API, client-side masking in the SDKs, and SOC 2 Type II and ISO 27001 attestations for Langfuse Cloud. Teams that need infrastructure-level isolation can self-host the same MIT-licensed codebase in the EU.
+
+## The EU region [#eu-region]
+
+Langfuse Cloud runs on AWS and ClickHouse Cloud in isolated regional environments:
+
+| Region | URL                                | Location                     |
+| ------ | ---------------------------------- | ---------------------------- |
+| EU     | `https://cloud.langfuse.com`       | Ireland (AWS `eu-west-1`)    |
+| US     | `https://us.cloud.langfuse.com`    | Oregon (AWS `us-west-2`)     |
+| Japan  | `https://jp.cloud.langfuse.com`    | Tokyo (AWS `ap-northeast-1`) |
+| HIPAA  | `https://hipaa.cloud.langfuse.com` | Oregon (AWS `us-west-2`)     |
+
+The EU region uses the unprefixed hostname; the others carry a `us.`, `jp.`, or `hipaa.` prefix. All data, user accounts, and infrastructure are completely separated between regions, so you can hold accounts in several regions but nothing is shared between them, and moving to the EU from another region means creating a new EU account and migrating data with the data migration cookbook linked from the data regions page.
+
+You select the region through the SDK base URL: set the `LANGFUSE_BASE_URL` environment variable, or pass `base_url` in Python or `baseUrl` in JS/TS.
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse(base_url="https://cloud.langfuse.com")
+```
+
+## What "data stays in the EU" means in practice [#data-in-eu]
+
+The EU region stores customer data in three systems, all in `eu-west-1`: Postgres holds organization, project, user, API key, prompt, dataset, annotation, and score configuration data; ClickHouse holds traces, observations, and scores; and an S3 bucket holds uploaded media referenced from traces. Backups are encrypted, stored across multiple availability zones within the primary region, and tested for restoration integrity at least annually.
+
+The one place data leaves `eu-west-1` is disaster-recovery replication, and the documentation is precise about which store it covers:
+
+| Data store                | Primary region | Secondary region | Cross-region replication                                                                              |
+| ------------------------- | -------------- | ---------------- | ----------------------------------------------------------------------------------------------------- |
+| Postgres                  | `eu-west-1`    | `eu-central-1`   | Daily snapshot copy through AWS Backup, re-encrypted with a dedicated CMK, retained 7 days per region |
+| ClickHouse (tracing data) | `eu-west-1`    | None             | Not replicated                                                                                        |
+| S3 media bucket           | `eu-west-1`    | None             | Not replicated                                                                                        |
+
+Two consequences follow. First, the secondary region is inside the EU: the documentation states that every secondary region is in the same legal jurisdiction as its primary (EU to EU, US to US, Japan to Japan), so the replication does not change the data-residency or cross-border-transfer posture declared in the DPA. Second, the replication is a disaster-recovery control, not active-active failover. On the permanent loss of `eu-west-1`, Langfuse would rebuild in the secondary region within an expected 12 hours and restore projects, credentials, and prompts from the Postgres copy, but historical tracing data and uploaded media would not be recoverable from Langfuse.
+
+For tracing data that must survive a regional failure, the documentation recommends the [Blob Storage integration](/docs/api-and-data-platform/features/export-to-blob-storage), which continuously exports traces and observations to a bucket you own; a bucket in a second EU region keeps both residency and an out-of-region copy. The data regions page also states the RPO (10 minutes), RTO (12 hours), and per-store backup retention periods.
+
+## Certifications and attestations [#certifications]
+
+For Langfuse Cloud, the documentation states the following as of September 2026:
+
+- **SOC 2 Type II.** Langfuse Cloud has completed the SOC 2 Type II audit. The report is available on request to customers on the Pro, Team, or Enterprise plans through the [security document request form](/request-security-docs).
+- **ISO 27001.** Langfuse Cloud is ISO 27001 certified. The certificate is available on request under the same conditions.
+- **Penetration testing.** Independent penetration tests run annually, with continuous vulnerability scanning between them.
+- **HIPAA.** A HIPAA-ready region with a Business Associate Agreement exists for eligible customers on the Pro plan or higher. It is in Oregon (`us-west-2`) and separate from the EU region, so it is not a residency option for EU teams.
+
+The certifications are described for Langfuse Cloud; a self-hosted deployment runs the same codebase, but the audit scope is the managed service. The documentation lists no framework beyond SOC 2 Type II and ISO 27001.
+
+## When the EU region is not enough [#self-hosting]
+
+Some policies require more than a regional deployment of a multi-tenant service. The documentation names the triggers: a customer-controlled VPC, private connectivity managed by your team, a dedicated infrastructure boundary, or customer-operated database access controls. For those cases it points to [self-hosting](/self-hosting).
+
+Self-hosted Langfuse is the same codebase and architecture as Langfuse Cloud, released under an MIT license with all core features and no scale limits. You choose the provider and region, and it can run fully offline or air-gapped. Langfuse does not operate installations on customer infrastructure; an Enterprise license key unlocks project-level RBAC roles, data retention policies, audit logs, server-side ingestion masking, and SCIM. Backups, monitoring, endpoint security, and IAM hygiene remain your responsibility.
+
+For an EU team, the EU region satisfies a residency requirement and self-hosting satisfies an isolation requirement.
+
+## FAQ
+
+### Is Langfuse Cloud data processed outside the EU? [#processed-outside-eu]
+
+For the EU region, primary storage in Postgres, ClickHouse, and S3 is in Ireland (AWS `eu-west-1`), and the only cross-region copy is a daily Postgres backup to `eu-central-1`, which the documentation describes as the same legal jurisdiction. Tracing data and media are not replicated anywhere. The documentation does not state where sub-processors or support personnel operate; those details are in the DPA and the published sub-processor list.
+
+### Can I move an existing US project to the EU region? [#move-us-to-eu]
+
+Not in place. Regions are completely separated, including user accounts, so switching means creating a new account in the EU region and migrating data. The documentation links a data migration cookbook with Python scripts that transfer traces, prompts, and datasets between projects.
+
+### Is Langfuse GDPR compliant? [#is-langfuse-gdpr-compliant]
+
+The documentation states that Langfuse is committed to complying with the GDPR and describes Langfuse Cloud as GDPR compliant. The commitments it documents are a Data Processing Agreement, a DSAR process through privacy@clickhouse.com, a published sub-processor list, no model training on customer data, and return or destruction of client data within 30 days of contract end. Compliance of your deployment also depends on what you send and how you configure masking, retention, and deletion.
+
+### How do I delete one user's data from Langfuse? [#delete-user-data]
+
+Attach a `userId` to your traces; the documentation recommends this so deletion requests can be handled efficiently. Then filter the traces table by that user ID, select all matching items, and choose Delete, or call `DELETE /api/public/traces` with the trace IDs. Deleting a trace removes its observations and scores across all storage layers, and the data is usually gone within 15 minutes; query again to verify, because there is no notification.
+
+### How do I keep PII out of traces in the first place? [#keep-pii-out]
+
+Configure a masking function in the SDK so redaction happens before data leaves your application: `mask_otel_spans` in Python, which also covers spans from third-party OpenTelemetry instrumentation exported by the Langfuse client, or the `mask` option on `LangfuseSpanProcessor` in JS/TS. Self-hosted Enterprise deployments can add server-side ingestion masking as a safety net. Pair either with a project retention window so anything that slips through has a bounded lifetime.

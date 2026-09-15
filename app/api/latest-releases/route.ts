@@ -27,7 +27,7 @@ async function getLatestReleases(): Promise<ApiResponse[]> {
   }
 
   const responses = await Promise.all(
-    REPOS.map((repo) => fetch(GITHUB_REPO_API_URL_RELEASE(repo), { headers }))
+    REPOS.map((repo) => fetch(GITHUB_REPO_API_URL_RELEASE(repo), { headers })),
   );
 
   if (responses.some((res) => !res.ok)) {
@@ -40,7 +40,9 @@ async function getLatestReleases(): Promise<ApiResponse[]> {
       if (!Array.isArray(data) || data.length === 0) {
         throw new Error(`No releases found for ${REPOS[index]}`);
       }
-      const latestRelease = data.find((r: { prerelease?: boolean }) => !r.prerelease);
+      const latestRelease = data.find(
+        (r: { prerelease?: boolean }) => !r.prerelease,
+      );
       if (!latestRelease) {
         throw new Error(`No latest release found for ${REPOS[index]}`);
       }
@@ -50,7 +52,7 @@ async function getLatestReleases(): Promise<ApiResponse[]> {
         publishedAt: latestRelease.published_at,
         url: latestRelease.html_url,
       };
-    })
+    }),
   );
 
   return langfuseReleases;
@@ -69,7 +71,7 @@ export async function GET() {
     console.error(error);
     return NextResponse.json(
       { message: "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

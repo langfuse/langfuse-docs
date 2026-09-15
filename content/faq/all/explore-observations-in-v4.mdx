@@ -1,23 +1,31 @@
 ---
-title: How do I work with observations in Langfuse v4?
-sidebarTitle: Explore Observations in V4
-description: Guide for transitioning from the traces table to the unified observations table in Langfuse v4, with before/after workflow comparisons and SDK upgrade steps.
+title: How do I work with the observations table in Langfuse v4?
+sidebarTitle: Working with the observations table
+description: Filter recipes, saved views, and the root-observations default for the observations table in Langfuse v4.
 tags: [observability, tracing, evaluation]
 ---
 
-# Explore Observations in Langfuse Cloud Fast Preview (v4)
+# Working with the observations table
 
-In v4, Langfuse replaces the separate traces and observations tables with a **single unified observations table**. Trace input and trace output no longer exist. Removing them was required to eliminate one of the key scaling bottlenecks. All inputs and outputs now live exclusively on observations. Use filters, [saved views](/changelog/2025-05-20-save-table-views), and row peek-views to surface the data that matters most.
+In [Langfuse v4](/docs/v4#what-changed), every operation your application performs (LLM calls, tool executions, retrievals, agent steps) is one row in a single observations table. A trace is just the set of rows sharing a `trace_id`; the [data model docs](/docs/observability/data-model#observations-and-traces) explain the model.
 
-For conceptual background, see the [observation-centric data model](/docs/observability/data-model#underlying-data-model). For broader release context, see the [Fast Preview (v4) docs](/docs/v4).
+That means more rows than the old traces table, which is expected. Work with filters and [saved views](/changelog/2025-05-20-save-table-views), not by scrolling: filter by observation name, type, or model, then save the view. The filter sidebar shows available values with counts. Filters depend on trace-level attributes (`user_id`, `session_id`, `tags`) living on every observation; the SDKs propagate them via `propagate_attributes()` / `propagateAttributes()` (see [adding attributes](/docs/observability/sdk/instrumentation#add-attributes)).
 
-## Before → After
+## Common views [#common-views]
 
-| I want to have… | v3 | v4 |
-|---|---|---|
-| One row per trace | Traces table | Filter to the most relevant span(s) per trace, save as a [saved view](/changelog/2025-05-20-save-table-views) |
-| One row per trace, scoped to a user or session | Traces table → filter by user/session | Same as above, add user_id or session_id filter |
-| Cost, latency, or errors by user, session, or span name | Traces table with filters | [Self-serve dashboards](/docs/metrics) |
+Save 2-3 of these as saved views for one-click access:
+
+| I want to see…                        | How to filter                                                                                          |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Key operations                        | Filter by observation `name` or `type` matching your most important operations                         |
+| All LLM generations                   | Filter `type = generation`                                                                             |
+| Expensive LLM calls                   | Filter `type = generation`, sort by `total_cost` descending                                            |
+| Errors for a specific user            | Filter by `user_id` and `level = ERROR`                                                                |
+| Operations scoped to a session        | Filter by `session_id`, sort by `latency` descending                                                   |
+| All operations for one trace          | Filter by `trace_id`                                                                                   |
+| Application entry points              | Filter `Is Root Observation = true`                                                                    |
+| Model latency comparison              | Filter `type = generation`, group by `model` in a [dashboard](/docs/metrics) or sort by `model` column |
+| Cost, latency, or errors by dimension | [Self-serve dashboards](/docs/metrics)                                                                 |
 
 <Video
   src="https://static.langfuse.com/docs-videos/2026-03-10-demo-saved-views.mp4"
@@ -25,51 +33,17 @@ For conceptual background, see the [observation-centric data model](/docs/observ
   className="mt-3"
 />
 
-## Upgrade checklist
+## Start with root observations [#root-observations]
 
-### Ingest with a v4-compatible setup
+For projects that ingest with Python SDK ≥ 4.7.0 or JS/TS SDK ≥ 5.4.0, Langfuse applies `Is Root Observation = true` when you open the observations table without a saved view, shared filter link, or other table state. You see your application entry points first and drill into their child operations from there.
 
-Use one of these ingestion paths so your data appears in the unified table in real time:
+The filter includes two kinds of roots:
 
-- Python SDK v4: [migration guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4)
-- JS/TS SDK v5: [migration guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5)
-- Direct OpenTelemetry ingestion: set `x-langfuse-ingestion-version: 4` on your OTEL span exporter. If you use OTLP HTTP environment variables, add `x-langfuse-ingestion-version=4` to `OTEL_EXPORTER_OTLP_HEADERS`. See [OpenTelemetry setup](/integrations/native/opentelemetry).
+- **Outer roots** are top-level observations with no parent.
+- **App roots** are the highest exported application observations. When an OpenTelemetry or infrastructure span is the outer parent and the SDK filters it from export, the exported child still carries its parent span ID, so a "no parent" filter alone would miss it. App-root-aware SDKs mark that entry point instead.
+
+Remove the filter in the sidebar to see every operation; Langfuse remembers that choice. Saved views and links with table state keep their own filters, and if the filter matches no roots while other observations exist, Langfuse removes it automatically.
 
 <Callout type="info">
-If you are still sending data via **older SDK versions**, or via **direct OpenTelemetry ingestion without `x-langfuse-ingestion-version: 4`**, traces can appear in the unified tracing table with a **delay of up to 10 minutes**.
+Data appearing with up to a 10-minute delay? You are ingesting via older SDKs or via OpenTelemetry without the `x-langfuse-ingestion-version: 4` header. Upgrade to Python SDK ≥ 4.7.0 / JS/TS SDK ≥ 5.4.0, or set the header on your exporter; see [Versions & Compatibility](/docs/compatibility#faq-delay).
 </Callout>
-
-### Propagate correlating attributes across spans
-
-Use the SDK propagation helpers to propagate correlating attributes across child observations:
-
-- Python: `propagate_attributes()`
-- JS/TS: `propagateAttributes()`
-
-This is very important for filters to work accurately.
-Attributes such as `userId`, `sessionId`, `tags`, `metadata`, `version`, and `traceName` should be available on observations so you can filter one table by request-level context and still work at observation granularity.
-
-See [Add attributes to observations](/docs/observability/sdk/instrumentation#add-attributes) for the SDK implementation details.
-
-## Share feedback
-
-We are still iterating on the unified tracing experience.
-If something feels confusing, missing, or slower than expected, share feedback via [support](/support).
-
-## FAQ
-
-### Why are observations delayed or missing in the unified table?
-
-The most common reason is that data is still being sent via older SDK versions or through a direct OpenTelemetry exporter without `x-langfuse-ingestion-version: 4`.
-In the new v4 experience, those setups can lead to multi-minute delays before traces show up in the unified table.
-If this happens, upgrade to Python SDK v4 or JS/TS SDK v5, or add the ingestion version header to your OTEL exporter.
-
-### How can I make this look more like the old traces table?
-
-Create a saved view that filters to the root observation representing the start of each trace in your application.
-That gives you a stable, trace-like list while still letting you drill into lower-level observations when needed.
-
-### Can I get the old experience back?
-
-Yes. For now, you can switch the v4 beta experience off in the UI and return to the previous tracing experience.
-This is temporary, though: the unified table will become the standard experience, so it is worth setting up saved views and instrumentation for the new model.

@@ -2,7 +2,7 @@
 title: LLM API / Gateway (self-hosted)
 sidebarTitle: LLM API / Gateway
 description: Optionally, you can configure Langfuse to use an external LLM API or gateway for add-on features. Langfuse tracing does not need access to the LLM API as traces are captured client-side.
-label: "Version: v3"
+label: "Version: v4"
 ---
 
 # LLM API / Gateway
@@ -19,10 +19,12 @@ Langfuse supports:
 - Google Vertex
 - Amazon Bedrock
 
-Via the OpenAI API, many other LLM services and proxies can be used.
+Via the OpenAI API, many other LLM services and proxies can be used, including any [LLM gateway](/resources/engineering/llm-gateway) that exposes an OpenAI-compatible endpoint.
 
 ## Features powered by LLM API
 
 - [Playground](/docs/playground)
 - [LLM-as-a-Judge Evaluation](/docs/scores/model-based-evals)
 - [Prompt Experiments](/docs/datasets/prompt-experiments)
+
+The [Langfuse Assistant](/docs/langfuse-assistant) and [Ask AI](/docs/observability/features/filter-search-bar#ask-ai) do not use project LLM connections. Configure an instance-wide Langfuse AI model instead. See [self-hosted Assistant setup](/self-hosting/configuration/langfuse-assistant).

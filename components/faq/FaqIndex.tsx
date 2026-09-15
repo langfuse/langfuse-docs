@@ -2,6 +2,7 @@ import { faqSource } from "@/lib/source";
 import { Cards } from "@/components/docs";
 import { MessageCircleQuestion } from "lucide-react";
 import { Link } from "@/components/ui/link";
+import { getFaqTags, isFaqArticle } from "@/lib/faq-tags";
 
 type FaqPage = ReturnType<typeof faqSource.getPages>[number];
 
@@ -11,6 +12,7 @@ const wordCasing: Record<string, string> = {
   api: "API",
   openai: "OpenAI",
   langchain: "LangChain",
+  opentelemetry: "OpenTelemetry",
 };
 
 export const formatTag = (tag: string) =>
@@ -23,16 +25,17 @@ export const formatTag = (tag: string) =>
 
 export const FaqIndex = () => {
   const pages = faqSource.getPages();
-  const categorizedPages = pages
-    .filter((page) => page.url !== "/faq/all")
-    .reduce((acc, page) => {
-      const tags = (page.data.tags as string[] | undefined) ?? ["Other"];
+  const categorizedPages = pages.filter(isFaqArticle).reduce(
+    (acc, page) => {
+      const tags = getFaqTags(page);
       tags.forEach((tag) => {
         if (!acc[tag]) acc[tag] = [];
         acc[tag].push(page);
       });
       return acc;
-    }, {} as Record<string, FaqPage[]>);
+    },
+    {} as Record<string, FaqPage[]>,
+  );
 
   return (
     <>
@@ -61,7 +64,10 @@ export const FaqIndex = () => {
               ))}
             </Cards>
             <p className="mt-4">
-              <Link href={`/faq/tag/${encodeURIComponent(tag)}`} variant="underline">
+              <Link
+                href={`/faq/tag/${encodeURIComponent(tag)}`}
+                variant="underline"
+              >
                 {pages.length > PREVIEW_PAGES_PER_TAG
                   ? `View all (${pages.length - PREVIEW_PAGES_PER_TAG} more) ->`
                   : `View all ->`}

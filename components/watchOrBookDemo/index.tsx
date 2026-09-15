@@ -1,48 +1,18 @@
 "use client";
 
-import { Suspense } from "react";
-import { Background } from "@/components/Background";
-import { Header } from "@/components/Header";
-import { ContactSalesForm } from "@/components/ContactSalesForm";
-import { CheckCircle2, ArrowRight } from "lucide-react";
+import { MarketoContactForm } from "@/components/MarketoContactForm";
+import { CheckCircle2 } from "lucide-react";
 import { getGitHubStars } from "@/lib/github-stars";
-import Link from "next/link";
-import { SDK_INSTALLS_PER_MONTH, DOCKER_PULLS } from "@/components/home/Usage";
-import { Switch } from "@/components/ui/switch";
+import {
+  DOCKER_PULLS,
+  formatSdkInstallsPerMonth,
+} from "@/components/home/Usage";
 import Image from "next/image";
-import { WatchWalkthroughs } from "@/components/watchOrBookDemo/WatchWalkthroughs";
-import { HomeSection } from "@/components/home/components/HomeSection";
+import { HomeSection } from "@/components/home/HomeSection";
 import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
-
-function SwitchToggle({
-  checked,
-  page,
-}: {
-  checked: boolean;
-  page: "talk-to-us" | "watch-demo";
-}) {
-  const switchHref = page === "talk-to-us" ? "/watch-demo" : "/talk-to-us";
-
-  return (
-    <div className="flex items-center justify-center md:justify-start gap-3 -mt-2 mb-6 md:mb-0">
-      <Link
-        href="/talk-to-us"
-        className="text-sm font-medium hover:text-primary transition-colors"
-      >
-        Talk to us
-      </Link>
-      <Link href={switchHref}>
-        <Switch checked={checked} alwaysOn />
-      </Link>
-      <Link
-        href="/watch-demo"
-        className="text-sm font-medium hover:text-primary transition-colors"
-      >
-        Watch videos
-      </Link>
-    </div>
-  );
-}
+import { Heading } from "@/components/ui/heading";
+import { Text } from "@/components/ui/text";
+import { TextHighlight } from "@/components/ui/text-highlight";
 
 function TeamMemberCard({
   imageSrc,
@@ -65,7 +35,7 @@ function TeamMemberCard({
         className="rounded-full aspect-square object-cover"
       />
       <div className="flex flex-col">
-        <span className="text-sm font-semibold">{name}</span>
+        <span className="text-sm font-[580]">{name}</span>
         <span className="text-xs text-muted-foreground">{title}</span>
       </div>
     </div>
@@ -75,53 +45,64 @@ function TeamMemberCard({
 function TalkToUsContent() {
   return (
     <>
-      <h2 className="text-3xl font-bold tracking-tight">Talk to a human</h2>
-      <div>
-        <p>
+      <Heading as="h2">Talk to a human</Heading>
+      <div className="not-prose">
+        <Text className="text-left">
           Get all of Langfuse's core features plus enterprise capabilities to
           suit your business and workflow:
-        </p>
-        <ul className="flex flex-col gap-2 mt-2">
+        </Text>
+        <ul className="flex flex-col gap-2 my-4">
           <li className="flex items-start gap-3">
-            <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-            <span>Get a Demo</span>
+            <CheckCircle2 className="h-4 w-4 text-primary mt-0.25 shrink-0" />
+            <Text size="s" className="text-left text-text-secondary">
+              Get a Demo
+            </Text>
           </li>
           <li className="flex items-start gap-3">
-            <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-            <span>Get Volume Pricing</span>
+            <CheckCircle2 className="h-4 w-4 text-primary mt-0.25 shrink-0" />
+            <Text size="s" className="text-left text-text-secondary">
+              Get Volume Pricing
+            </Text>
           </li>
           <li className="flex items-start gap-3">
-            <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-            <span>Pay by Invoice</span>
+            <CheckCircle2 className="h-4 w-4 text-primary mt-0.25 shrink-0" />
+            <Text size="s" className="text-left text-text-secondary">
+              Pay by Invoice
+            </Text>
           </li>
           <li className="flex items-start gap-3">
-            <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-            <span>Ask questions about our Security & Compliance Policies</span>
+            <CheckCircle2 className="h-4 w-4 text-primary mt-0.25 shrink-0" />
+            <Text size="s" className="text-left text-text-secondary">
+              Ask questions about our Security & Compliance Policies
+            </Text>
           </li>
         </ul>
       </div>
-      <p>
-        Langfuse is the most widely adopted LLM Engineering platform with{" "}
-        <strong className="font-semibold">
+      <Text className="text-left not-prose">
+        Langfuse is the most widely adopted AI Engineering platform with{" "}
+        <strong className="font-[580]">
           {getGitHubStars().toLocaleString()} GitHub stars
         </strong>
         ,{" "}
-        <strong className="font-semibold">
-          {(SDK_INSTALLS_PER_MONTH / 1_000_000).toFixed(1)}M+ SDK installs per
-          month
+        <strong className="font-[580]">
+          {formatSdkInstallsPerMonth()} SDK installs per month
         </strong>
         , and{" "}
-        <strong className="font-semibold">
+        <strong className="font-[580]">
           {(DOCKER_PULLS / 1_000_000).toFixed(0)}M+ Docker pulls
         </strong>
         .
-      </p>
-      <p>Selected customers who built great LLM applications with Langfuse:</p>
+      </Text>
+      <Text className="text-left not-prose">
+        Selected customers who built great LLM applications with Langfuse:
+      </Text>
       <EnterpriseLogoGrid small />
 
       <div className="mt-2">
-        <p>We are looking forward to talk to you,</p>
-        <div className="flex flex-col lg:flex-row gap-6 mt-4">
+        <Text className="text-left not-prose">
+          We are looking forward to talk to you,
+        </Text>
+        <div className="flex flex-col gap-6 mt-4">
           <TeamMemberCard
             imageSrc="/images/people/akionuernberger.jpg"
             name="Akio Nuernberger"
@@ -140,127 +121,39 @@ function TalkToUsContent() {
   );
 }
 
-function DiscoverYourselfContent() {
-  const links = [
-    { href: "/docs", label: "Documentation" },
-    { href: "/self-hosting", label: "Self-hosting docs" },
-    { href: "/demo", label: "Interactive Example Project" },
-    { href: "/pricing", label: "Pricing" },
-    { href: "/enterprise", label: "Enterprise FAQ" },
-    { href: "/security", label: "Security Center" },
-    { href: "/ask-ai", label: "Questions? Ask AI" },
-    { href: "/support", label: "Contact Support" },
-    {
-      href: "https://cloud.langfuse.com",
-      label: "Create a free account (no credit card required)",
-    },
-  ];
-
-  return (
-    <>
-      <h2 className="text-3xl font-bold tracking-tight">
-        Self-serve resources
-      </h2>
-      <div>
-        <p>Everything you need to get started:</p>
-        <ul className="flex flex-col gap-2 mt-2">
-          {links.map((link) => (
-            <li key={link.href} className="flex items-start gap-3">
-              <ArrowRight className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-              <Link
-                href={link.href}
-                className="text-primary underline underline-offset-4 hover:text-primary/80 hover:underline-offset-2 transition-all font-medium"
-              >
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className="mt-2">
-        <p>
-          Questions?{" "}
-          <Link
-            href="/ask-ai"
-            className="text-primary underline underline-offset-4 hover:text-primary/80 hover:underline-offset-2 transition-all font-medium"
-          >
-            Ask AI
-          </Link>{" "}
-          or{" "}
-          <Link
-            href="/support"
-            className="text-primary underline underline-offset-4 hover:text-primary/80 hover:underline-offset-2 transition-all font-medium"
-          >
-            reach out to us
-          </Link>
-          .
-        </p>
-        <div className="flex flex-col lg:flex-row gap-6 mt-4">
-          <TeamMemberCard
-            imageSrc="/images/people/jannikmaierhoefer.jpg"
-            name="Jannik Maierhöfer"
-            title="Growth Engineer"
-            alt="Jannik Maierhöfer"
-          />
-          <TeamMemberCard
-            imageSrc="/images/people/marcklingen.jpg"
-            name="Marc Klingen"
-            title="Co-founder & CEO"
-            alt="Marc Klingen"
-          />
-        </div>
-      </div>
-    </>
-  );
-}
-
 function ContactFormSection() {
   return (
-    <div className="max-w-md mx-auto rounded-lg border p-6 bg-card">
-      <ContactSalesForm />
+    <div className="relative w-full max-w-md mx-auto p-4 bg-stripe-pattern corner-box-corners border border-line-structure">
+      <MarketoContactForm />
     </div>
   );
 }
 
-export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
-  const isDiscoverOpen = page === "watch-demo";
-
+export function Demo() {
   return (
     <HomeSection>
-      <Header
-        title={isDiscoverOpen ? "See Langfuse in Action" : "Get a Demo"}
-        h="h1"
-        description={
-          isDiscoverOpen
-            ? "Watch short videos to see how Langfuse helps you build better LLM applications"
-            : "Learn more about Langfuse — talk to us or watch videos"
-        }
-      />
+      <div className="not-prose flex flex-col gap-2 mb-6 items-center text-center text-balance">
+        <Heading as="h1" size="large" className="m-0">
+          <TextHighlight>Get a demo</TextHighlight>
+        </Heading>
+        <Text className="m-0">
+          Learn more about how Langfuse can help your team
+        </Text>
+      </div>
 
-      <div className="w-full max-w-6xl px-4">
-        <div className="flex flex-col md:flex-row gap-14">
-          {/* Left Column: Content based on switch */}
-          <div
-            className={`flex flex-col gap-4 ${
-              isDiscoverOpen ? "flex-1 md:flex-[0.4]" : "flex-1"
-            }`}
-          >
-            <SwitchToggle checked={isDiscoverOpen} page={page} />
-            {!isDiscoverOpen ? (
-              <TalkToUsContent />
-            ) : (
-              <DiscoverYourselfContent />
-            )}
+      <div className="w-full max-w-6xl px-4 not-prose">
+        <div className="flex flex-col md:flex-row gap-8">
+          {/* Left Column: Value proposition */}
+          <div className="flex flex-1 flex-col gap-8">
+            <TalkToUsContent />
           </div>
 
-          {/* Right Column: Calendar or Walkthroughs */}
-          <div className={isDiscoverOpen ? "flex-1 md:flex-[0.6]" : "flex-1"}>
-            {!isDiscoverOpen ? <ContactFormSection /> : <Suspense><WatchWalkthroughs /></Suspense>}
+          {/* Right Column: Contact form */}
+          <div className="flex-1">
+            <ContactFormSection />
           </div>
         </div>
       </div>
-
-      <Background />
     </HomeSection>
   );
 }

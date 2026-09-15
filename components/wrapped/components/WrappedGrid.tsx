@@ -12,7 +12,7 @@ export function WrappedGrid({ children, className }: WrappedGridProps) {
     <div
       className={cn(
         "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 border-t border-l border-border auto-rows-auto",
-        className
+        className,
       )}
     >
       {children}
@@ -49,7 +49,7 @@ export function WrappedGridItem({
       className={cn(
         "relative group border-r border-b border-border",
         spanClasses[colSpan],
-        className
+        className,
       )}
       style={rowSpanStyle}
     >
@@ -58,4 +58,3 @@ export function WrappedGridItem({
     </div>
   );
 }
-

@@ -2,21 +2,28 @@
 
 import { cn } from "@/lib/utils";
 import { MediaPlayer, MediaProvider } from "@vidstack/react";
+import "@vidstack/react/player/styles/base.css";
 
 export const Video = ({
   src,
   aspectRatio,
   className,
   gifStyle = false,
+  poster,
+  onCanPlay,
 }: {
   src: string;
   aspectRatio?: number;
   gifStyle?: boolean;
   className?: string;
+  poster?: string;
+  onCanPlay?: () => void;
 }) => {
   return (
     <MediaPlayer
       src={src}
+      poster={poster}
+      posterLoad="eager"
       controls={!gifStyle}
       autoPlay={gifStyle}
       muted={gifStyle}
@@ -25,9 +32,10 @@ export const Video = ({
       playsInline={gifStyle}
       aspectRatio={aspectRatio ? `${aspectRatio}` : undefined}
       className={cn(
-        "my-4 overflow-hidden rounded-lg shadow-lg ring-1 ring-slate-700 bg-cover object-cover",
-        className
+        "overflow-hidden shadow-lg bg-surface-bg object-cover",
+        className,
       )}
+      onCanPlay={onCanPlay}
     >
       <MediaProvider />
     </MediaPlayer>

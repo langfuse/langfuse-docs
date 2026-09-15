@@ -1,7 +1,8 @@
 ---
 title: How to integrate Langfuse with an existing OpenTelemetry setup
+seoTitle: "Add Langfuse to an Existing OpenTelemetry Setup"
 description: Learn how to add Langfuse as a backend to your existing OpenTelemetry instrumentation without changing your application code.
-tags: [observability, integration]
+tags: [observability, integration, opentelemetry]
 ---
 
 # Using Langfuse with an Existing OpenTelemetry Setup
@@ -52,6 +53,7 @@ To bypass the default filter and export everything, use an always-true custom ca
 ```
 
 Multiple problems arise from this:
+
 - When multiple tools register their processors on the global provider, **every span from every library is seen by every processor**. Each processor then decides what to export.
 - If one tool initializes the global provider before another, **the second tool's configuration may not take effect at all**.
 - If a third party SDK is tinkering with the global TracerProvider in an incompatible way, this may lead to unexpected behavior and hard to debug issues
@@ -76,13 +78,13 @@ This is why you might still see infrastructure spans in Langfuse (if export-all 
 
 Every span has an **instrumentation scope**: a label identifying which library created it. For example:
 
-| Scope Name | What Creates It |
-|------------|-----------------|
-| `langfuse-sdk` | Langfuse SDK |
-| `ai` | Vercel AI SDK |
-| `openai` | OpenAI instrumentation |
-| `fastapi` | FastAPI instrumentation |
-| `sqlalchemy` | SQLAlchemy instrumentation |
+| Scope Name                            | What Creates It             |
+| ------------------------------------- | --------------------------- |
+| `langfuse-sdk`                        | Langfuse SDK                |
+| `ai`                                  | Vercel AI SDK               |
+| `openai`                              | OpenAI instrumentation      |
+| `fastapi`                             | FastAPI instrumentation     |
+| `sqlalchemy`                          | SQLAlchemy instrumentation  |
 | `@opentelemetry/instrumentation-http` | HTTP client instrumentation |
 
 You can use instrumentation scopes to [**filter which spans reach Langfuse**](#unwanted-spans-in-langfuse). This is key to solving most conflicts.
@@ -100,12 +102,14 @@ HTTP Request (parent)
 ```
 
 **Important:** Even when using [isolated TracerProviders](/docs/observability/sdk/advanced-features#isolated-tracer-provider) (covered below), they still share this context. This means:
+
 - A parent span from one [TracerProvider](#global-tracer-provider) can have children from another
 - If you filter out a parent span either by a rule in the span processor or if it originated from a different TraceProvider, its children become "orphaned" and appear disconnected in the UI
 
 Keep it in mind when filtering spans.
 
 ## Troubleshooting
+
 Below are some common issues and how to fix them.
 
 ### No Traces Appearing in Langfuse [#no-traces-in-langfuse]
@@ -217,6 +221,7 @@ If your other tool allows adding [span processors](#span-processors), add `Langf
 <Tab>
 
 {/* PYTHON */}
+
 ```python
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
@@ -244,6 +249,7 @@ trace.set_tracer_provider(provider)
 <Tab>
 
 {/* JS/TS */}
+
 ```typescript
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
@@ -269,6 +275,7 @@ sdk.start();
 </LangTabs>
 
 When to use this:
+
 - You want distributed tracing across your entire application
 - You want your APM to see everything, but Langfuse to only see LLM traces
 - You want consistent parent-child relationships
@@ -282,6 +289,7 @@ Create a separate [TracerProvider](#global-tracer-provider) that only Langfuse u
 <Tab>
 
 {/* PYTHON */}
+
 ```python
 from opentelemetry.sdk.trace import TracerProvider
 from langfuse import Langfuse
@@ -295,6 +303,7 @@ langfuse = Langfuse(tracer_provider=TracerProvider())
 <Tab>
 
 {/* JS/TS */}
+
 ```typescript
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
@@ -313,11 +322,13 @@ setLangfuseTracerProvider(langfuseProvider);
 </LangTabs>
 
 When to use this:
+
 - You want LLM traces only in Langfuse
 - You don't want Langfuse spans in your APM
 - You don't need distributed tracing across Langfuse and your APM
 
 Trade-offs:
+
 - Spans won't share parent-child relationships across providers
 - Some Langfuse spans may appear orphaned if their parent is in the global provider
 
@@ -338,6 +349,7 @@ Use an [isolated TracerProvider](/docs/observability/sdk/advanced-features#isola
 <Tab>
 
 {/* PYTHON */}
+
 ```python
 from opentelemetry.sdk.trace import TracerProvider
 from langfuse import Langfuse
@@ -353,6 +365,7 @@ langfuse = Langfuse(tracer_provider=langfuse_provider)
 <Tab>
 
 {/* JS/TS */}
+
 ```typescript
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
@@ -376,14 +389,18 @@ setLangfuseTracerProvider(langfuseProvider);
 
 Your Langfuse dashboard shows HTTP requests, database queries, or other infrastructure spans instead of just LLM traces.
 
+<Callout type="warning">
+Every span that reaches Langfuse is ingested as a **billable observation**. If your OpenTelemetry pipeline forwards HTTP, database, or framework spans, they are counted and billed like any other observation, so an over-permissive export configuration can increase your usage and cost significantly. You control what reaches Langfuse through the `should_export_span` / `shouldExportSpan` callback described below. To catch unexpected volume early, set up [spend alerts](/docs/administration/spend-alerts) and review how usage is counted in [billable units](/docs/administration/billable-units).
+</Callout>
+
 **Why this happens**
 
-This usually happens when one of these is true:
+Langfuse attaches its span processor to your [TracerProvider](#global-tracer-provider). If that provider also has OTEL auto-instrumentation attached, spans from your web frameworks, databases, and HTTP clients flow through the same pipeline. They reach Langfuse when one of these is true:
 
-- You configured a custom `should_export_span` / `shouldExportSpan` callback that is too permissive
-- A third-party span matches Langfuse's default LLM-focused criteria (`gen_ai.*` attributes or known LLM scope)
+- Your custom `should_export_span` / `shouldExportSpan` callback is more permissive than the default filter
+- A third-party span matches the default LLM-focused criteria (`gen_ai.*` attributes or a known LLM scope)
 
-This is especially common with [OTEL auto-instrumentation](https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/), which instruments web frameworks, databases, HTTP clients, and more.
+This is especially common with [OTEL auto-instrumentation](https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/), which instruments web frameworks, databases, HTTP clients, and more. You decide what reaches Langfuse: the export filter is yours to configure.
 
 **How to debug**
 
@@ -500,6 +517,7 @@ Traces in Langfuse appear as standalone items when they should be nested under a
 **Why this happens**
 
 This typically occurs when:
+
 1. You're filtering spans, and a parent span got filtered out
 2. You're using multiple [TracerProviders](#global-tracer-provider), and they're creating interleaved span hierarchies
 3. The root span is from a [blocked instrumentation scope](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope)
@@ -532,9 +550,16 @@ This is largely a tradeoff. You can't filter parent spans without affecting the 
 <Tab>
 
 {/* PYTHON */}
+
 ```python
-with langfuse.trace(name="my-operation", user_id="user-123", session_id="session-456") as trace:
-    # Your code here
+from langfuse import get_client, propagate_attributes
+
+langfuse = get_client()
+
+with langfuse.start_as_current_observation(as_type="span", name="my-operation"):
+    with propagate_attributes(user_id="user-123", session_id="session-456"):
+        # Your code here
+        pass
 ```
 
 </Tab>
@@ -542,6 +567,7 @@ with langfuse.trace(name="my-operation", user_id="user-123", session_id="session
 <Tab>
 
 {/* JS/TS */}
+
 ```typescript
 propagateAttributes({ userId: "user_123" }, async () => {
   const result = await startActiveObservation("parent", async (parentSpan) => {
@@ -563,6 +589,7 @@ Traces appear in Langfuse, but [token counts and cost information](/docs/observa
 **Why this happens**
 
 Langfuse expects usage attributes (like `gen_ai.usage.prompt_tokens`) to be present on spans. When using certain OTEL configurations, these attributes may:
+
 - Only exist on child spans, not the root span
 - Be named differently than Langfuse expects
 - Be added after the span closes
@@ -576,6 +603,7 @@ Enable debug logging and check if usage attributes are present in the span data 
 <Tab>
 
 {/* PYTHON */}
+
 ```python
 import os
 os.environ["LANGFUSE_DEBUG"] = "True"
@@ -586,6 +614,7 @@ os.environ["LANGFUSE_DEBUG"] = "True"
 <Tab>
 
 {/* JS/TS */}
+
 ```typescript
 process.env.LANGFUSE_DEBUG = "true";
 // or: process.env.LANGFUSE_LOG_LEVEL = "debug";
@@ -612,6 +641,7 @@ Sentry requires special configuration because it automatically initializes OpenT
 ### Pydantic Logfire
 
 Logfire automatically scrubs values that look like personally identifiable information (PII). This includes strings containing words like "session", "password", "token", etc. If you're setting session IDs in Langfuse, you may see them appear as:
+
 ```
 [Scrubbed due to 'session']
 ```
@@ -664,7 +694,7 @@ OTEL_EXPORTER_OTLP_ENDPOINT="https://cloud.langfuse.com/api/public/otel"
 OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic $(echo -n 'pk-xxx:sk-xxx' | base64),x-langfuse-ingestion-version=4"
 ```
 
-For US region, use `https://us.cloud.langfuse.com/api/public/otel` as the endpoint.
+For other regions, replace the endpoint host accordingly: `https://us.cloud.langfuse.com/api/public/otel` (US), `https://jp.cloud.langfuse.com/api/public/otel` (Japan), or `https://hipaa.cloud.langfuse.com/api/public/otel` (HIPAA).
 
 This applies regardless of which framework (LangChain, LlamaIndex, Strands, etc.) you use on AgentCore.
 

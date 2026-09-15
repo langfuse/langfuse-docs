@@ -2,6 +2,7 @@
 title: Observability and tracing for Dify
 sidebarTitle: Dify
 logo: /images/integrations/dify_icon.svg
+logoAppearance: dark
 description: Open source observability and prompt management for Dify applications. Automatically capture detailed traces and metrics for every request.
 ---
 
@@ -25,13 +26,13 @@ description: Open source observability and prompt management for Dify applicatio
 
 The integration automatically maps the following fields from Dify to Langfuse:
 
-| Dify                                                                                                        | Langfuse                               |
-| ----------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `user`                                                                                                      | [`userId`](/docs/tracing/users)        |
+| Dify                                                                                                        | Langfuse                                     |
+| ----------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `user`                                                                                                      | [`userId`](/docs/tracing/users)              |
 | [`message_id`](https://docs.dify.ai/api-reference/completion/create-completion-message#response-message-id) | [`trace_id`](/docs/observability/data-model) |
-| `conversation_id`                                                                                           | [`sessionId`](/docs/tracing/sessions)  |
-|                                                                                                             | `trace.name`                           |
-| type of application, type of model                                                                          | [`tags`](/docs/tracing/tags)           |
+| `conversation_id`                                                                                           | [`sessionId`](/docs/tracing/sessions)        |
+|                                                                                                             | `trace.name`                                 |
+| type of application, type of model                                                                          | [`tags`](/docs/tracing/tags)                 |
 
 ## Langfuse Prompt Management
 
@@ -41,7 +42,7 @@ The [Langfuse Prompt Management Plugin](https://github.com/gao-ai-com/dify-plugi
 - **Search Prompts:** Search for prompts in Langfuse using various filters.
 - **Update Prompt:** Create new versions of prompts in Langfuse and set tags/labels.
 
-This integration streamlines the process of managing and versioning your prompts, contributing to more efficient development and iteration cycles. You can find the plugin and installation instructions [here](https://github.com/gao-ai-com/dify-plugin-langfuse).
+This integration streamlines the process of managing and versioning your prompts, contributing to more efficient development and iteration cycles. The [plugin and installation instructions](https://github.com/gao-ai-com/dify-plugin-langfuse) are available on GitHub.
 
 ## About Dify
 
@@ -51,13 +52,13 @@ Dify is an open-source LLM app development platform. Its intuitive interface com
 
 1. **Workflow**: Build and test powerful AI workflows on a visual canvas, leveraging all the following features and beyond.
 
-   <Video
-     src="https://static.langfuse.com/docs-videos/Dify%20workflow.mp4"
-     aspectRatio={16 / 9}
-     className="max-w-lg"
-   />
+<Video
+  src="https://static.langfuse.com/docs-videos/Dify%20workflow.mp4"
+  aspectRatio={16 / 9}
+  className="max-w-lg"
+/>
 
-2. **Comprehensive model support**: Seamless integration with hundreds of proprietary / open-source LLMs from dozens of inference providers and self-hosted solutions, covering GPT, Mistral, Llama3, and any OpenAI API-compatible models. A full list of supported model providers can be found [here](https://docs.dify.ai/getting-started/readme/model-providers).
+2. **Comprehensive model support**: Seamless integration with hundreds of proprietary / open-source LLMs from dozens of inference providers and self-hosted solutions, covering GPT, Mistral, Llama3, and any OpenAI API-compatible models. See the [full list of supported model providers](https://docs.dify.ai/getting-started/readme/model-providers).
 
 3. **Prompt IDE**: Intuitive interface for crafting prompts, comparing model performance, and adding additional features such as text-to-speech to a chat-based app.
 

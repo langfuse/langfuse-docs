@@ -7,6 +7,10 @@ export const cloudRegions = {
     url: "https://us.cloud.langfuse.com",
     label: "US region",
   },
+  jp: {
+    url: "https://jp.cloud.langfuse.com",
+    label: "Japan region",
+  },
   hipaa: {
     url: "https://hipaa.cloud.langfuse.com",
     label: "HIPAA region",
@@ -19,21 +23,12 @@ export const cloudRegionSelectorOrder: CloudRegionKey[] = [
   "us",
   "hipaa",
   "eu",
+  "jp",
 ];
-
-export const continentHostMapping: Record<string, string> = {
-  AF: cloudRegions.eu.url, // Africa
-  AN: cloudRegions.eu.url, // Antarctica
-  AS: cloudRegions.eu.url, // Asia
-  EU: cloudRegions.eu.url, // Europe
-  NA: cloudRegions.us.url, // North America
-  OC: cloudRegions.eu.url, // Oceania
-  SA: cloudRegions.us.url, // South America
-};
 
 export const createInitialCloudRegionSignInState = () =>
   Object.fromEntries(
-    Object.keys(cloudRegions).map((key) => [key, false])
+    Object.keys(cloudRegions).map((key) => [key, false]),
   ) as Record<CloudRegionKey, boolean>;
 
 export const isSignedInSession = (session: unknown) => {

@@ -10,11 +10,11 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
-
 Both the Langfuse [Python SDK](/docs/sdk/python/decorators) and the [JS/TS SDK](/docs/sdk/typescript/guide) now provide a strongly-typed wrapper around our public REST API for your convenience. The API methods are accessible via the `api` property on the Langfuse client instance in both SDKs.
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
+
 When using the [decorator-based integration](/docs/sdk/python/decorators):
 
 ```python
@@ -40,9 +40,11 @@ langfuse.api.trace.get(trace_id)
 # async client via asyncio
 await langfuse.async_api.trace(trace_id)
 ```
+
 </Tab>
 
 <Tab>
+
 ```ts
 import { Langfuse } from "langfuse"
 
@@ -51,6 +53,7 @@ const langfuse = new Langfuse()
 // fetch a trace
 await langfuse.api.traceGet(traceId)
 ```
+
 </Tab>
 </LangTabs>
 

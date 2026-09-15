@@ -1,20 +1,61 @@
 ---
 title: Roadmap
-description: Sneak peak into upcoming new features and changes in Langfuse. This page is updated regularly.
+description: Explore the current product focus areas for Langfuse.
 ---
 
-# Langfuse Roadmap
+# Langfuse roadmap
 
-Langfuse is [open source](/open-source) and we want to be fully transparent what we're working on and what's next. This roadmap is a living document and we'll update it as we make progress.
-
+Langfuse is [open source](/open-source), and we want to be transparent about where the project is going. This page summarizes the product areas we are currently investing in.
 
 <Callout type="info">
-  **Your feedback is highly appreciated**. Feel like something is missing? Add
-  new [ideas on GitHub](/ideas) or vote on existing ones. Both are a great way
-  to contribute to Langfuse and help us understand what is important to you.
+  This roadmap is directional, not a commitment to ship individual features or
+  dates. Priorities may evolve as we learn from users and the community.
 </Callout>
 
-## 🚀 Released
+## Current focus areas [#roadmap]
+
+Our goal is to make Langfuse the best open platform for understanding, evaluating, and improving AI agents (see [Why Langfuse?](/why)).
+
+### Langfuse Gateway [#langfuse-gateway]
+
+Bring model access, observability, and governance into one Langfuse-native control plane.
+
+- Provide a thin, bring-your-own-key gateway with virtual keys and access controls across Langfuse Cloud and self-hosted deployments.
+- Connect requests directly to Langfuse tracing and cost tracking, with clear visibility into model usage and spend.
+
+### Proactive issue detection
+
+Help teams find the problems that matter without manually reviewing every trace.
+
+- Build a consistent representation of agent traces, including long-running and multi-span interactions.
+- Group interactions into recurring topics, behaviors, and failure modes, and surface the most important issues with useful summaries and examples.
+- Make it easier to turn production issues into datasets, evaluations, experiments, and improvement workflows.
+
+### Better evals and experiments
+
+Extend evaluation and experimentation workflows for increasingly complex agent systems.
+
+- Improve the evaluator foundation and use AI to generate code-based evaluators for specific use cases.
+- Evaluate complete agent trajectories and other multi-span interactions.
+- Make it easier to compare prompts, models, and runtime changes, including experiments on production traffic.
+
+### Scale and enterprise controls
+
+Expand the capabilities teams use to operate Langfuse at increasing scale in the cloud or on their own infrastructure.
+
+- Unify query behavior and improve ingestion reliability, performance, and scale for large agent workloads.
+- Make model pricing and regional matching more accurate, and clearly flag missing price definitions.
+- Improve API key management, role-based access controls, self-hosting, security, and compliance.
+
+### A clearer agent-engineering workflow
+
+Make Langfuse easier to adopt and more coherent across the full improvement loop.
+
+- Create clearer onboarding, home, agent, score, and experiment views.
+- Make Langfuse capabilities available through MCP so external agents can use them in their workflows.
+- Connect tracing, datasets, evaluations, and experiments with fewer manual steps.
+
+## Recently released [#releases]
 
 import { changelogSource } from "@/lib/source";
 import { Link } from "@/components/ui/link";
@@ -26,7 +67,7 @@ export const ChangelogList = () => (
       .sort(
         (a, b) =>
           new Date(String(b.data.date || 0)).getTime() -
-          new Date(String(a.data.date || 0)).getTime()
+          new Date(String(a.data.date || 0)).getTime(),
       )
       .slice(0, 10)
       .map((page) => (
@@ -47,7 +88,7 @@ export const ChangelogList = () => (
                     month: "short",
                     day: "numeric",
                     timeZone: "UTC",
-                  }
+                  },
                 )})`
               : null}
           </span>
@@ -56,66 +97,25 @@ export const ChangelogList = () => (
   </ul>
 );
 
-10 most recent [changelog](/changelog) items:
+The 10 most recent [changelog](/changelog) updates:
 
 <ChangelogList />
 
-import { ProductUpdateSignup } from "@/components/productUpdateSignup";
+import { ProductUpdateSignup } from "@/components/ProductUpdateSignup";
 
 <Callout type="info">
 
-Subscribe to our mailing list to get occasional email updates about new features.
+Subscribe to receive occasional email updates about new features.
 
-<ProductUpdateSignup source="self-host guide" className="my-3 max-w-sm" />
+<ProductUpdateSignup source="roadmap" className="my-3 max-w-sm" />
 
 </Callout>
 
-## Active Development
+## Shape the roadmap [#feedback]
 
-### Agent Observability
+Your feedback helps us decide what to prioritize:
 
-- Improve Langfuse to dig into complex, long running agents more intuitively
-
-### Evals
-
-- Introduce experiments as a first class citizen, remove the dependency on datasets to allow for more bespoke unit-tests
-- Overhaul experiment (dataset run) comparison views to make it easier to work with experiment results
-- Dataset management: bulk add traces to datasets
-- Improve comments across the product to allow for more qualitative evaluation workflows and collaboration
-
-### Playground
-
-- Experiment with prompts/models in playground based on logged traces and datasets with reference inputs
-- Langfuse model input/output data schema to increase model interoperability for structured outputs and tool calls
-- Make Playground stateful and collaborative
-
-### UI/UX
-
-- Improve onboarding experience
-- Improve core screens, especially for new and non-technical users
-- Increase UI performance for extremely large traces and datasets
-
-### Infrastructure / Data Platform
-
-- We strongly increase ingestion throughput, response times, and error rates across APIs by simplifying the core data model.
-- Move to an observation-only and immutable data model as it better aligns with complex agents and allows us to scale our platform. Thereby, we remove traces as a first class citizen.
-- Improvements across our tracing UI to make it easier to find relevant spans for complex agents.
-- Webhooks for observability and evaluation events, useful for routing and alerting
-
-## 🙏 Feature requests and bug reports
-
-The best way to support Langfuse is to share your feedback, report bugs, and upvote on ideas suggested by others.
-
-### Feature requests
-
-import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
-
-<GhDiscussionsPreview filterCategory="Ideas" itemsPerPage={10} />
-
-### Bug reports
-
-import { Bug } from "lucide-react";
-
-<Cards num={2}>
-  <Card href="/issues" title="Bugs (GitHub Issues)" arrow icon={<Bug />} />
-</Cards>
+- Suggest a [feature or improvement](/ideas), or vote on ideas from other users.
+- Report a [bug](/new-issue).
+- Discuss your use case with the community on [Discord](/discord).
+- Join a [community hour](/events) to talk with the Langfuse team.

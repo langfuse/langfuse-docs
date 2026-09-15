@@ -12,72 +12,47 @@ const LogoContextMenu: React.FC<{
   open: boolean;
   setOpen: (open: boolean) => void;
 }> = ({ open, setOpen }) => {
-  const handleAction = (
-    e: React.MouseEvent,
-    url: string,
-    isDownload: boolean
-  ) => {
-    e.preventDefault();
-
-    if (isDownload) {
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = url.split("/").pop() || ""; // Get filename from URL
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } else {
-      window.open(url, "_blank", "noopener,noreferrer");
-    }
-  };
-
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
       <DropdownMenuTrigger />
       <DropdownMenuPortal>
-        <DropdownMenuContent>
-          <DropdownMenuItem onClick={(e) => handleAction(e, "/", false)}>
-            <ExternalLink size={14} className="mr-2" />
-            Open in new tab
+        <DropdownMenuContent className="min-w-[180px]">
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <a href="/brand-assets/icon/color/langfuse-icon.png" download>
+              <Download size={14} className="shrink-0" />
+              Langfuse Icon (png)
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <a href="/brand-assets/icon/color/langfuse-icon.svg" download>
+              <Download size={14} className="shrink-0" />
+              Langfuse Icon (svg)
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <a
+              href="/brand-assets/wordmark/Langfuse/light/langfuse-wordart.png"
+              download
+            >
+              <Download size={14} className="shrink-0" />
+              Langfuse Logo (png)
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <a
+              href="/brand-assets/wordmark/Langfuse/light/langfuse-wordart.svg"
+              download
+            >
+              <Download size={14} className="shrink-0" />
+              Langfuse Logo (svg)
+            </a>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={(e) => handleAction(e, "/langfuse_logo.png", true)}
-          >
-            <Download size={14} className="mr-2" />
-            Logo (png)
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={(e) => handleAction(e, "/langfuse_logo.svg", true)}
-          >
-            <Download size={14} className="mr-2" />
-            Logo (svg)
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={(e) => handleAction(e, "/langfuse_logo_white.png", true)}
-          >
-            <Download size={14} className="mr-2" />
-            Logo white (png)
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={(e) => handleAction(e, "/langfuse_logo_white.svg", true)}
-          >
-            <Download size={14} className="mr-2" />
-            Logo white (svg)
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={(e) => handleAction(e, "/langfuse_icon.png", true)}
-          >
-            <Download size={14} className="mr-2" />
-            Icon (png)
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={(e) => handleAction(e, "/langfuse_icon.svg", true)}
-          >
-            <Download size={14} className="mr-2" />
-            Icon (svg)
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <a href="/brand" target="_blank" rel="noopener noreferrer">
+              <ExternalLink size={14} className="shrink-0" />
+              Brand Assets & Guide
+            </a>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenuPortal>
