@@ -19,7 +19,7 @@ This guide outlines the key differences between **[Langfuse](/)** and **[Braintr
 
 **1. Open source and full control.** MIT-licensed self-hosting of the entire application on every tier, with data in a database you can query directly.
 
-**2. Production observability at scale.** Complete traces at high volume on ClickHouse ([open source since 2016](https://clickhouse.com/blog/open-source-10)), with dashboards, alerts, and full-text search. Observability is the foundation; evals, prompts, and datasets layer on the same data.
+**2. Production observability at scale.** Complete traces at high volume on ClickHouse, open source since 2016, with dashboards, alerts, and full-text search. Observability is the foundation; evals, prompts, and datasets layer on the same data.
 
 **3. Predictable, count-based pricing.** A trace, observation, or score is one unit: cost follows request count, not payload size, and scores are not a separate meter. Pro includes 3-year retention.
 
@@ -51,7 +51,7 @@ That model fits teams whose requirement is keeping payloads in their own VPC. If
 
 Both platforms re-architected storage for agent-scale trace data.
 
-Braintrust built [Brainstore](https://www.braintrust.dev/blog/brainstore), a proprietary Rust engine [launched March 3, 2025](https://www.braintrust.dev/blog/brainstore) that writes spans to object storage and indexes them with the open-source Tantivy library. It runs inside the data plane, so in hybrid deployments it lives in your cloud account and follows Braintrust's release cadence.
+Braintrust built [Brainstore](https://www.braintrust.dev/blog/brainstore), a proprietary Rust engine launched in March 2025 that writes spans to object storage and indexes them with the open-source Tantivy library. It runs inside the data plane, so in hybrid deployments it lives in your cloud account and follows Braintrust's release cadence.
 
 <CompareClickhouseDatastore />
 
@@ -233,7 +233,7 @@ Yes, if you want an open-source platform where production observability, evaluat
 
 ### Is Braintrust open source? [#is-braintrust-open-source]
 
-No. The Braintrust platform, control plane, and [Brainstore](https://www.braintrust.dev/blog/brainstore) storage engine ([launched 2025](https://www.braintrust.dev/blog/brainstore)) are closed source; the SDKs and the [autoevals](https://github.com/braintrustdata/autoevals) evaluator library are open source. Langfuse is MIT-licensed and [self-hostable](/self-hosting) on [ClickHouse](#storage), open source since 2016.
+No. The Braintrust platform, control plane, and [Brainstore](https://www.braintrust.dev/blog/brainstore) storage engine (launched 2025) are closed source; the SDKs and the [autoevals](https://github.com/braintrustdata/autoevals) evaluator library are open source. Langfuse is MIT-licensed and [self-hostable](/self-hosting) on [ClickHouse](#storage), open source since 2016.
 
 ### Can I self-host Braintrust? [#can-i-self-host-braintrust]
 
