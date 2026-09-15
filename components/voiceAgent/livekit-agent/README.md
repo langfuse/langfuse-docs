@@ -16,8 +16,8 @@ The agent (`agent.py`) is a Python-based LiveKit agent that:
 
 `VOICE_AGENT_MODE` selects which agent joins the room:
 
-- `gpt-live` (default): the `Marin` agent uses `GPTLiveModel`. The voice model handles listening, turn taking, and speaking; a backend Responses model (`GPT_LIVE_RESPONSES_MODEL`, default `gpt-5.6-luna`) handles reasoning and the Langfuse docs MCP tool calls. The voice can be changed with `GPT_LIVE_VOICE` (default `marin`). Requires `OPENAI_API_KEY` from an account with GPT-Live access. No VAD, STT, or TTS is configured in this mode.
-- `pipeline`: the `Kelly` agent runs the cascaded pipeline with Silero VAD, LiveKit inference STT/LLM/TTS fallback adapters, and a keyboard-typing "thinking" sound during slow tool calls.
+- `gpt-live` (default): the `Marin` agent uses `GPTLiveModel`. The voice model handles listening, turn taking, and speaking; a backend Responses model (`GPT_LIVE_RESPONSES_MODEL`, default `gpt-5.6-luna`) handles reasoning and the Langfuse docs MCP tool calls. The voice can be changed with `GPT_LIVE_VOICE` (default `marin`). Requires `OPENAI_API_KEY` from an account with GPT-Live access. No VAD, STT, or TTS is configured in this mode. A keyboard-typing "thinking" sound plays while docs tool calls run.
+- `pipeline`: the `Kelly` agent runs the cascaded pipeline with Silero VAD, LiveKit inference STT/LLM/TTS fallback adapters, and the same "thinking" sound for the whole LLM turn.
 
 Traces are tagged with the active mode (`voice-agent`, `gpt-live` or `pipeline`).
 

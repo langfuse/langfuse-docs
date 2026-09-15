@@ -389,18 +389,19 @@ async def entrypoint(ctx: JobContext):
             },
         )
 
-        # Audible cue while the cascaded pipeline is thinking or calling the
-        # docs tools, so slower turns (e.g. RAG searches) don't feel like dead
-        # air. GPT-Live keeps talking while its backend model reasons, so the
-        # cue is only used in pipeline mode.
-        if VOICE_AGENT_MODE == "pipeline":
-            background_audio = BackgroundAudioPlayer(
-                thinking_sound=[
-                    AudioConfig(BuiltinAudioClip.KEYBOARD_TYPING, volume=0.6),
-                    AudioConfig(BuiltinAudioClip.KEYBOARD_TYPING2, volume=0.5),
-                ],
-            )
-            await background_audio.start(room=ctx.room, agent_session=session)
+        # Audible cue while the agent is thinking or calling the docs tools, so
+        # slower turns (e.g. RAG searches) don't feel like dead air. In the
+        # cascaded pipeline this covers the whole LLM turn; with GPT-Live the
+        # session enters "thinking" while backend tool calls are running, so
+        # the cue plays during docs lookups. It is a separate audio track, so
+        # it can overlap with the model's own speech; keep the volume low.
+        background_audio = BackgroundAudioPlayer(
+            thinking_sound=[
+                AudioConfig(BuiltinAudioClip.KEYBOARD_TYPING, volume=0.5),
+                AudioConfig(BuiltinAudioClip.KEYBOARD_TYPING2, volume=0.4),
+            ],
+        )
+        await background_audio.start(room=ctx.room, agent_session=session)
 
 
 if __name__ == "__main__":
