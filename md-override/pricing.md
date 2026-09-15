@@ -84,7 +84,7 @@ Optional **Yearly Commitment**:
 - Billing via invoice
 - Vendor onboarding
 
-Trusted by: GoDaddy, [Khan Academy](/users/khan-academy), [Merck Group](/users/merckgroup)
+Trusted by: Ramp, GoDaddy, [Khan Academy](/users/khan-academy), [Merck Group](/users/merckgroup)
 
 [Contact sales](/talk-to-us?deployment=cloud) | [Enterprise FAQ](/enterprise)
 
