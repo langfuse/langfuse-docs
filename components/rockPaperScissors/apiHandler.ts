@@ -66,7 +66,7 @@ const OPPONENTS: Record<OpponentId, Opponent> = {
     providerOptions: {
       openai: {
         reasoningEffort: "low",
-        reasoningSummary: "auto",
+        reasoningSummary: "detailed",
       } satisfies OpenAIResponsesProviderOptions,
     },
   },
@@ -205,6 +205,7 @@ const handler = async (req: Request) => {
           let timedOut = false;
           let reasoningText = "";
           let plainText = "";
+          let sawReasoningSummary = false;
 
           try {
             const result = streamText({
@@ -227,15 +228,30 @@ const handler = async (req: Request) => {
             for await (const part of result.fullStream) {
               switch (part.type) {
                 case "reasoning-delta":
+                  sawReasoningSummary = true;
                   reasoningText += part.text;
                   writeChunk(controller, {
                     type: "reasoning",
                     text: part.text,
                   });
                   break;
-                case "text-delta":
+                case "text-delta": {
+                  // Providers often return an empty reasoning summary at low
+                  // effort, so the model also narrates its thinking as plain
+                  // text before calling the tool. Stream that too.
+                  const separator =
+                    plainText.length === 0 &&
+                    sawReasoningSummary &&
+                    !reasoningText.endsWith("\n")
+                      ? "\n\n"
+                      : "";
                   plainText += part.text;
+                  writeChunk(controller, {
+                    type: "reasoning",
+                    text: separator + part.text,
+                  });
                   break;
+                }
                 case "tool-call": {
                   if (part.toolName === "play_move") {
                     const input = part.input as Partial<PlayMoveInput>;
@@ -381,6 +397,7 @@ const handler = async (req: Request) => {
               timedOut,
               responseTimeMs,
               reasoningSummary: reasoningText || undefined,
+              visibleReasoning: plainText || undefined,
             },
           });
           setActiveTraceAsPublic();

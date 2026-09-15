@@ -6,9 +6,17 @@ import { cn } from "@/lib/utils";
 import { Loader } from "@/components/ai-elements/loader";
 import { DemoTraceLink } from "@/components/demoTraceLink";
 import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId";
-import { RotateCcwIcon, ArrowLeftIcon } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { RotateCcwIcon } from "lucide-react";
 import {
   MOVES,
+  OPPONENT_IDS,
   tally,
   type Move,
   type OpponentId,
@@ -17,21 +25,11 @@ import {
 import type { RoundResultPayload, StreamChunk } from "./apiHandler";
 
 const TIME_CAP_MS = 6_000;
+const DEFAULT_OPPONENT: OpponentId = "gpt-6-astra";
 
-const OPPONENTS: Record<
-  OpponentId,
-  { label: string; vendor: string; blurb: string }
-> = {
-  "fable-5-1": {
-    label: "Claude Fable 5.1",
-    vendor: "Anthropic",
-    blurb: "Adaptive thinking, summarized reasoning.",
-  },
-  "gpt-6-astra": {
-    label: "GPT-6 Astra",
-    vendor: "OpenAI",
-    blurb: "Reasoning model with streamed summaries.",
-  },
+const OPPONENTS: Record<OpponentId, { label: string; vendor: string }> = {
+  "gpt-6-astra": { label: "GPT-6 Astra", vendor: "OpenAI" },
+  "fable-5-1": { label: "Claude Fable 5.1", vendor: "Anthropic" },
 };
 
 const MOVE_EMOJI: Record<Move, string> = {
@@ -46,17 +44,22 @@ const MOVE_LABEL: Record<Move, string> = {
   scissors: "Scissors",
 };
 
-type Phase = "choose-model" | "choose-move" | "thinking" | "reveal";
+type Phase = "choose-move" | "thinking" | "reveal";
 
 type RockPaperScissorsProps = HTMLAttributes<HTMLDivElement>;
+
+const newGameId = () =>
+  typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
 export const RockPaperScissors = ({
   className,
   ...props
 }: RockPaperScissorsProps) => {
-  const [phase, setPhase] = useState<Phase>("choose-model");
-  const [opponent, setOpponent] = useState<OpponentId | null>(null);
-  const [gameId, setGameId] = useState<string | null>(null);
+  const [phase, setPhase] = useState<Phase>("choose-move");
+  const [opponent, setOpponent] = useState<OpponentId>(DEFAULT_OPPONENT);
+  const [gameId, setGameId] = useState<string>(newGameId);
   const [history, setHistory] = useState<RoundRecord[]>([]);
   const [pendingUserMove, setPendingUserMove] = useState<Move | null>(null);
   const [reasoning, setReasoning] = useState("");
@@ -71,6 +74,7 @@ export const RockPaperScissors = ({
   }, []);
 
   const score = useMemo(() => tally(history), [history]);
+  const opponentMeta = OPPONENTS[opponent];
 
   // Progress timer while the model is thinking.
   useEffect(() => {
@@ -89,24 +93,15 @@ export const RockPaperScissors = ({
     if (el) el.scrollTop = el.scrollHeight;
   }, [reasoning]);
 
-  const startGame = (id: OpponentId) => {
-    setOpponent(id);
-    setGameId(crypto.randomUUID());
+  const resetGame = (nextOpponent: OpponentId = opponent) => {
+    setOpponent(nextOpponent);
+    setGameId(newGameId());
     setHistory([]);
     setResult(null);
     setReasoning("");
     setError(null);
+    setPendingUserMove(null);
     setPhase("choose-move");
-  };
-
-  const resetToModelSelect = () => {
-    setPhase("choose-model");
-    setOpponent(null);
-    setGameId(null);
-    setHistory([]);
-    setResult(null);
-    setReasoning("");
-    setError(null);
   };
 
   const nextRound = () => {
@@ -118,7 +113,7 @@ export const RockPaperScissors = ({
   };
 
   const playMove = async (move: Move) => {
-    if (!opponent || !gameId || !userId || phase === "thinking") return;
+    if (!userId || phase === "thinking") return;
 
     setPendingUserMove(move);
     setReasoning("");
@@ -200,89 +195,82 @@ export const RockPaperScissors = ({
     }
   };
 
-  const opponentMeta = opponent ? OPPONENTS[opponent] : null;
+  const roundNumber = history.length + (phase === "reveal" ? 0 : 1);
 
   return (
-    <div className={cn("h-[62vh] min-h-[520px]", className)} {...props}>
-      <div className="relative flex h-full flex-col overflow-hidden rounded-[2px] border border-line-structure bg-surface-bg p-5 corner-box-corners">
+    <div className={cn("min-h-[440px]", className)} {...props}>
+      <div className="relative flex flex-col rounded-[2px] border border-line-structure bg-surface-bg p-5 corner-box-corners">
         {/* Header */}
-        <div className="flex items-start justify-between gap-3">
-          <div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
             <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary">
-              {phase === "choose-model"
-                ? "Pick your opponent"
-                : `Round ${history.length + (phase === "reveal" ? 0 : 1)} · vs ${opponentMeta?.label}`}
+              Round {roundNumber}
             </div>
-            {phase !== "choose-model" && (
-              <div className="mt-1 text-sm text-text-secondary">
-                <span className="font-semibold text-text-primary">
-                  You {score.user}
+            <div className="text-sm text-text-secondary">
+              <span className="font-semibold text-text-primary">
+                You {score.user}
+              </span>
+              <span className="mx-1.5 text-text-disabled">:</span>
+              <span className="font-semibold text-text-primary">
+                {score.model} Model
+              </span>
+              {score.draws > 0 && (
+                <span className="ml-2 text-xs text-text-tertiary">
+                  {score.draws} draw{score.draws === 1 ? "" : "s"}
                 </span>
-                <span className="mx-2 text-text-disabled">:</span>
-                <span className="font-semibold text-text-primary">
-                  {score.model} Model
-                </span>
-                {score.draws > 0 && (
-                  <span className="ml-2 text-xs text-text-tertiary">
-                    ({score.draws} draw{score.draws === 1 ? "" : "s"})
-                  </span>
-                )}
-              </div>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Select
+              value={opponent}
+              onValueChange={(value) => resetGame(value as OpponentId)}
+              disabled={phase === "thinking"}
+            >
+              <SelectTrigger
+                aria-label="Opponent model"
+                className="h-8 w-auto min-w-[168px] rounded-[2px] border-line-structure bg-surface-bg text-xs text-text-primary"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent align="end">
+                {OPPONENT_IDS.map((id) => (
+                  <SelectItem key={id} value={id} className="text-xs">
+                    {OPPONENTS[id].label}
+                    <span className="ml-1.5 text-text-tertiary">
+                      · {OPPONENTS[id].vendor}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {history.length > 0 && (
+              <button
+                type="button"
+                onClick={() => resetGame()}
+                disabled={phase === "thinking"}
+                title="Start a new game (new session)"
+                className="inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[2px] border border-line-structure px-2.5 text-xs text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <RotateCcwIcon className="size-3.5" />
+                New game
+              </button>
             )}
           </div>
-          {phase !== "choose-model" && (
-            <button
-              type="button"
-              onClick={resetToModelSelect}
-              disabled={phase === "thinking"}
-              className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[2px] border border-line-structure px-2.5 py-1.5 text-xs text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <ArrowLeftIcon className="size-3.5" />
-              New game
-            </button>
-          )}
         </div>
 
         {/* Body */}
-        <div className="relative z-10 mt-5 flex flex-1 flex-col overflow-y-auto">
-          {phase === "choose-model" && (
-            <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
-              {(Object.keys(OPPONENTS) as OpponentId[]).map((id) => {
-                const meta = OPPONENTS[id];
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => startGame(id)}
-                    className="group flex min-h-[140px] flex-col justify-between rounded-[2px] border border-line-structure bg-surface-bg p-4 text-left transition-colors hover:border-line-cta hover:bg-surface-1"
-                  >
-                    <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary">
-                      {meta.vendor}
-                    </div>
-                    <div>
-                      <div className="text-base font-semibold leading-tight text-text-primary">
-                        {meta.label}
-                      </div>
-                      <div className="mt-2 text-xs leading-5 text-text-tertiary">
-                        {meta.blurb}
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
+        <div className="relative z-10 mt-5 flex flex-col">
           {phase === "choose-move" && (
-            <div className="flex flex-1 flex-col">
+            <div className="flex flex-col">
               {error && (
                 <div className="mb-4 rounded-[2px] bg-destructive/10 p-3 text-sm text-destructive">
                   {error}
                 </div>
               )}
               <p className="text-sm text-text-secondary">
-                Pick your move. The model commits after you, using only the
-                history of previous rounds.
+                Pick your move. {opponentMeta.label} commits after you, using
+                only the history of previous rounds.
               </p>
               <div className="mt-4 grid grid-cols-3 gap-3">
                 {MOVES.map((move) => (
@@ -290,7 +278,7 @@ export const RockPaperScissors = ({
                     key={move}
                     type="button"
                     onClick={() => playMove(move)}
-                    className="flex min-h-[120px] flex-col items-center justify-center gap-2 rounded-[2px] border border-line-structure bg-surface-bg transition-colors hover:border-line-cta hover:bg-surface-1"
+                    className="flex min-h-[112px] flex-col items-center justify-center gap-2 rounded-[2px] border border-line-structure bg-surface-bg transition-colors hover:border-line-cta hover:bg-surface-1"
                   >
                     <span className="text-4xl" aria-hidden="true">
                       {MOVE_EMOJI[move]}
@@ -306,13 +294,79 @@ export const RockPaperScissors = ({
           )}
 
           {(phase === "thinking" || phase === "reveal") && (
-            <div className="flex flex-1 flex-col gap-4">
+            <div className="flex flex-col gap-4">
+              {/* Reveal */}
+              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+                <MoveCard
+                  label="You"
+                  move={pendingUserMove}
+                  revealed
+                  highlight={result?.outcome === "user_won"}
+                />
+                <div className="font-mono text-xs uppercase tracking-[0.16em] text-text-tertiary">
+                  vs
+                </div>
+                <MoveCard
+                  label={opponentMeta.label}
+                  move={result?.modelMove ?? null}
+                  revealed={phase === "reveal"}
+                  highlight={result?.outcome === "model_won"}
+                  thinking={phase === "thinking"}
+                />
+              </div>
+
+              {phase === "reveal" && result && (
+                <div className="flex flex-col items-center gap-3 text-center">
+                  <div>
+                    <div className="text-lg font-semibold text-text-primary">
+                      {result.outcome === "draw"
+                        ? "Draw"
+                        : result.outcome === "user_won"
+                          ? "You win this round"
+                          : `${opponentMeta.label} wins this round`}
+                    </div>
+                    <div className="mt-1 text-xs text-text-tertiary">
+                      {result.timedOut
+                        ? "The model ran out of time, so a fallback move was played."
+                        : result.predictedUserMove
+                          ? `It predicted you would play ${result.predictedUserMove}${
+                              result.predictionCorrect
+                                ? " and was right."
+                                : ", but you didn't."
+                            }`
+                          : null}
+                    </div>
+                    {result.taunt && !result.timedOut && (
+                      <div className="mt-1.5 text-sm italic text-text-secondary">
+                        “{result.taunt}”
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={nextRound}
+                      autoFocus
+                      className="inline-flex items-center gap-2 rounded-[2px] border border-line-structure bg-text-primary px-4 py-2 text-sm font-medium text-surface-bg shadow-sm transition-opacity hover:opacity-90"
+                    >
+                      Play next round
+                    </button>
+                    <DemoTraceLink
+                      traceUrl={result.traceUrl}
+                      source="rock_paper_scissors"
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Reasoning panel */}
               <div className="rounded-[2px] border border-line-structure bg-[#403d391a] dark:bg-[#b8b6a01a]">
                 <div className="flex items-center justify-between border-b border-line-structure px-3 py-2">
                   <div className="flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary">
                     {phase === "thinking" && <Loader size={12} />}
-                    {opponentMeta?.label} is reasoning
+                    {phase === "thinking"
+                      ? `${opponentMeta.label} is reasoning`
+                      : `${opponentMeta.label}'s reasoning`}
                   </div>
                   <div className="font-mono text-[11px] text-text-tertiary">
                     {phase === "thinking"
@@ -334,80 +388,17 @@ export const RockPaperScissors = ({
                 )}
                 <pre
                   ref={reasoningRef}
-                  className="max-h-40 min-h-[88px] overflow-y-auto whitespace-pre-wrap break-words p-3 font-mono text-xs leading-5 text-text-secondary"
+                  className="max-h-36 min-h-[72px] overflow-y-auto whitespace-pre-wrap break-words p-3 font-mono text-xs leading-5 text-text-secondary"
                 >
                   {reasoning ||
                     (phase === "thinking"
                       ? "…"
-                      : "The model did not return a reasoning summary for this round.")}
+                      : "The model did not share its reasoning for this round.")}
                   {phase === "thinking" && (
                     <span className="ml-0.5 inline-block h-3 w-1.5 animate-pulse bg-text-tertiary align-middle" />
                   )}
                 </pre>
               </div>
-
-              {/* Reveal */}
-              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-                <MoveCard
-                  label="You"
-                  move={pendingUserMove}
-                  revealed
-                  highlight={result?.outcome === "user_won"}
-                />
-                <div className="font-mono text-xs uppercase tracking-[0.16em] text-text-tertiary">
-                  vs
-                </div>
-                <MoveCard
-                  label={opponentMeta?.label ?? "Model"}
-                  move={result?.modelMove ?? null}
-                  revealed={phase === "reveal"}
-                  highlight={result?.outcome === "model_won"}
-                />
-              </div>
-
-              {phase === "reveal" && result && (
-                <div className="space-y-3">
-                  <div className="text-center">
-                    <div className="text-lg font-semibold text-text-primary">
-                      {result.outcome === "draw"
-                        ? "Draw"
-                        : result.outcome === "user_won"
-                          ? "You win this round"
-                          : `${opponentMeta?.label} wins this round`}
-                    </div>
-                    <div className="mt-1 text-xs text-text-tertiary">
-                      {result.timedOut
-                        ? "The model ran out of time, so a fallback move was played."
-                        : result.predictedUserMove
-                          ? `It predicted you would play ${result.predictedUserMove}${
-                              result.predictionCorrect
-                                ? " and was right."
-                                : ", but you didn't."
-                            }`
-                          : null}
-                    </div>
-                    {result.taunt && !result.timedOut && (
-                      <div className="mt-2 text-sm italic text-text-secondary">
-                        “{result.taunt}”
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap items-center justify-center gap-3">
-                    <button
-                      type="button"
-                      onClick={nextRound}
-                      className="inline-flex items-center gap-2 rounded-[2px] border border-line-structure bg-text-primary px-4 py-2 text-sm font-medium text-surface-bg shadow-sm transition-opacity hover:opacity-90"
-                    >
-                      <RotateCcwIcon className="size-4" />
-                      Play next round
-                    </button>
-                    <DemoTraceLink
-                      traceUrl={result.traceUrl}
-                      source="rock_paper_scissors"
-                    />
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>
@@ -427,19 +418,24 @@ const MoveCard = ({
   move,
   revealed,
   highlight,
+  thinking,
 }: {
   label: string;
   move: Move | null;
   revealed: boolean;
   highlight?: boolean;
+  thinking?: boolean;
 }) => (
   <div
     className={cn(
-      "flex min-h-[120px] flex-col items-center justify-center gap-2 rounded-[2px] border bg-surface-bg transition-colors",
+      "flex min-h-[104px] flex-col items-center justify-center gap-1.5 rounded-[2px] border bg-surface-bg transition-colors",
       highlight ? "border-line-cta bg-surface-1" : "border-line-structure",
     )}
   >
-    <span className="text-4xl" aria-hidden="true">
+    <span
+      className={cn("text-4xl", thinking && "animate-pulse")}
+      aria-hidden="true"
+    >
       {revealed && move ? MOVE_EMOJI[move] : "❔"}
     </span>
     <span className="text-xs text-text-tertiary">{label}</span>
@@ -450,9 +446,9 @@ const MoveCard = ({
 );
 
 const HistoryStrip = ({ history }: { history: RoundRecord[] }) => (
-  <div className="mt-6">
+  <div className="mt-5">
     <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary">
-      Previous rounds
+      Previous rounds (you / model)
     </div>
     <div className="mt-2 flex flex-wrap gap-1.5">
       {history.map((r) => (
