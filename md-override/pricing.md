@@ -19,7 +19,7 @@ Get started, no credit card required. Great for hobby projects and POCs.
 - 2 users
 - Community support via GitHub
 
-Trusted by: 50,000+ companies using Langfuse
+Trusted by: [Hugging Face](/users/hugging-face)
 
 [Sign up](/cloud)
 
@@ -34,6 +34,8 @@ For production projects. Longer data access and unlimited users.
 - In-app support
 
 Discounts available for [startups](/startups), [research/students](/research), and [open-source projects](/pricing#discounts).
+
+Trusted by: [Magic Patterns](/users/magic-patterns-ai-design-tools), Draftbit
 
 [Sign up](/cloud)
 
@@ -57,6 +59,8 @@ Optional **Teams Add-on** ($300/month):
 - Fine-grained RBAC
 - Support via dedicated Slack channel
 
+Trusted by: [Canva](/users/canva), Twilio, [SumUp](/users/sumup), Brevo
+
 [Sign up](/cloud)
 
 ### Enterprise ($2,499/month)
@@ -79,6 +83,8 @@ Optional **Yearly Commitment**:
 - Billing via AWS Marketplace
 - Billing via invoice
 - Vendor onboarding
+
+Trusted by: GoDaddy, [Khan Academy](/users/khan-academy), [Merck Group](/users/merckgroup)
 
 [Contact sales](/talk-to-us?deployment=cloud) | [Enterprise FAQ](/enterprise)
 
