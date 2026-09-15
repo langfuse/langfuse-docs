@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import re
 from datetime import datetime, timezone
 
 import httpx
@@ -104,12 +105,52 @@ def setup_langfuse(
     return trace_provider, clients
 
 
+# Upper bound for a tool result handed to the model. searchLangfuseDocs
+# returns the full text of every matching page (about 60 KB / 15k tokens);
+# GPT-Live's session context is capped at 8k tokens, so an uncompacted
+# result never reaches the backend model and the agent keeps "waiting on
+# the docs". Roughly 1.5k tokens leaves room for the conversation itself.
+MAX_TOOL_RESULT_CHARS = 6000
+MAX_CHARS_PER_DOC = 1200
+MAX_DOCS = 5
+
+
+def _compact_docs_tool_result(ctx: mcp.MCPToolResultContext) -> str:
+    """Reduce a Langfuse docs MCP result to what a voice answer needs."""
+    raw = "\n".join(
+        c.text for c in ctx.result.content if getattr(c, "type", None) == "text"
+    )
+    if ctx.tool_name == "searchLangfuseDocs":
+        try:
+            docs = json.loads(raw).get("content", [])
+        except (json.JSONDecodeError, AttributeError):
+            docs = None
+        if isinstance(docs, list):
+            parts = []
+            for doc in docs[:MAX_DOCS]:
+                if not isinstance(doc, dict):
+                    continue
+                source = doc.get("source") or {}
+                body = " ".join(
+                    part.get("text", "")
+                    for part in source.get("content", [])
+                    if isinstance(part, dict)
+                )
+                body = re.sub(r"\s+", " ", body).strip()[:MAX_CHARS_PER_DOC]
+                parts.append(f"## {doc.get('title', '')} ({doc.get('url', '')})\n{body}")
+            raw = "\n\n".join(parts) or raw
+    return raw[:MAX_TOOL_RESULT_CHARS]
+
+
 # client_session_timeout_seconds defaults to 5s, which the RAG-backed
 # searchLangfuseDocs tool regularly exceeds (the MCP client then reports
 # "An internal error occurred" to the LLM).
 LANGFUSE_DOCS_MCP = mcp.MCPServerHTTP(
     url="https://langfuse.com/api/mcp",
     client_session_timeout_seconds=30,
+    # The voice agent answers questions; it should not file feedback.
+    allowed_tools=["searchLangfuseDocs", "getLangfuseDocsPage", "getLangfuseOverview"],
+    tool_result_resolver=_compact_docs_tool_result,
 )
 
 
