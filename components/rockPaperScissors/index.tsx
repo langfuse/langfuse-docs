@@ -200,28 +200,9 @@ export const RockPaperScissors = ({
   return (
     <div className={cn("min-h-[440px]", className)} {...props}>
       <div className="relative flex flex-col rounded-[2px] border border-line-structure bg-surface-bg p-5 corner-box-corners">
-        {/* Header */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary">
-              Round {roundNumber}
-            </div>
-            <div className="text-sm text-text-secondary">
-              <span className="font-semibold text-text-primary">
-                You {score.user}
-              </span>
-              <span className="mx-1.5 text-text-disabled">:</span>
-              <span className="font-semibold text-text-primary">
-                {score.model} Model
-              </span>
-              {score.draws > 0 && (
-                <span className="ml-2 text-xs text-text-tertiary">
-                  {score.draws} draw{score.draws === 1 ? "" : "s"}
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
+        {/* Header: picker left, scoreboard center, new game right */}
+        <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-3">
+          <div className="flex justify-start">
             <Select
               value={opponent}
               onValueChange={(value) => resetGame(value as OpponentId)}
@@ -229,38 +210,65 @@ export const RockPaperScissors = ({
             >
               <SelectTrigger
                 aria-label="Opponent model"
-                className="h-8 w-auto min-w-[168px] rounded-[2px] border-line-structure bg-surface-bg text-xs text-text-primary"
+                className="h-7 w-auto gap-1 rounded-[2px] border-line-structure bg-surface-bg px-2 text-xs text-text-secondary"
               >
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent align="end">
+              <SelectContent align="start">
                 {OPPONENT_IDS.map((id) => (
                   <SelectItem key={id} value={id} className="text-xs">
                     {OPPONENTS[id].label}
-                    <span className="ml-1.5 text-text-tertiary">
-                      · {OPPONENTS[id].vendor}
-                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="text-center">
+            <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary">
+              Round {roundNumber}
+            </div>
+            <div className="mt-1 flex items-baseline justify-center gap-3 text-2xl font-semibold tabular-nums text-text-primary">
+              <span>
+                <span className="mr-2 text-xs font-medium uppercase tracking-[0.12em] text-text-tertiary">
+                  You
+                </span>
+                {score.user}
+              </span>
+              <span className="text-text-disabled">:</span>
+              <span>
+                {score.model}
+                <span className="ml-2 text-xs font-medium uppercase tracking-[0.12em] text-text-tertiary">
+                  {opponentMeta.label}
+                </span>
+              </span>
+            </div>
+            {score.draws > 0 && (
+              <div className="mt-0.5 text-xs text-text-tertiary">
+                {score.draws} draw{score.draws === 1 ? "" : "s"}
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end">
             {history.length > 0 && (
               <button
                 type="button"
                 onClick={() => resetGame()}
                 disabled={phase === "thinking"}
-                title="Start a new game (new session)"
-                className="inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[2px] border border-line-structure px-2.5 text-xs text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-50"
+                title="New game"
+                aria-label="New game"
+                className="inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-[2px] border border-line-structure px-2 text-xs text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <RotateCcwIcon className="size-3.5" />
-                New game
+                <span className="hidden sm:inline">New game</span>
               </button>
             )}
           </div>
         </div>
 
         {/* Body */}
-        <div className="relative z-10 mt-5 flex flex-col">
+        <div className="relative z-10 mt-6 flex flex-col">
           {phase === "choose-move" && (
             <div className="flex flex-col">
               {error && (
@@ -268,11 +276,7 @@ export const RockPaperScissors = ({
                   {error}
                 </div>
               )}
-              <p className="text-sm text-text-secondary">
-                Pick your move. {opponentMeta.label} commits after you, using
-                only the history of previous rounds.
-              </p>
-              <div className="mt-4 grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 {MOVES.map((move) => (
                   <button
                     key={move}
@@ -294,8 +298,7 @@ export const RockPaperScissors = ({
           )}
 
           {(phase === "thinking" || phase === "reveal") && (
-            <div className="flex flex-col gap-4">
-              {/* Reveal */}
+            <div className="flex flex-col gap-3">
               <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
                 <MoveCard
                   label="You"
@@ -315,31 +318,66 @@ export const RockPaperScissors = ({
                 />
               </div>
 
+              {/* Reasoning */}
+              <div className="rounded-[2px] border border-line-structure bg-[#403d391a] dark:bg-[#b8b6a01a]">
+                <div className="flex items-center justify-between border-b border-line-structure px-3 py-1.5">
+                  <div className="flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary">
+                    {phase === "thinking" && <Loader size={12} />}
+                    Reasoning
+                  </div>
+                  <div className="font-mono text-[11px] tabular-nums text-text-tertiary">
+                    {phase === "thinking"
+                      ? `${(elapsedMs / 1000).toFixed(1)}s / 6.0s`
+                      : result
+                        ? `${(result.responseTimeMs / 1000).toFixed(1)}s`
+                        : null}
+                  </div>
+                </div>
+                {phase === "thinking" && (
+                  <div className="h-0.5 w-full bg-line-structure/40">
+                    <div
+                      className="h-full bg-line-cta transition-[width] duration-100"
+                      style={{
+                        width: `${Math.min((elapsedMs / TIME_CAP_MS) * 100, 100)}%`,
+                      }}
+                    />
+                  </div>
+                )}
+                <pre
+                  ref={reasoningRef}
+                  className="max-h-32 min-h-[64px] overflow-y-auto whitespace-pre-wrap break-words p-3 font-mono text-xs leading-5 text-text-secondary"
+                >
+                  {reasoning ||
+                    (phase === "thinking" ? "…" : "No reasoning returned.")}
+                  {phase === "thinking" && (
+                    <span className="ml-0.5 inline-block h-3 w-1.5 animate-pulse bg-text-tertiary align-middle" />
+                  )}
+                </pre>
+              </div>
+
               {phase === "reveal" && result && (
-                <div className="flex flex-col items-center gap-3 text-center">
+                <div className="mt-1 flex flex-col items-center gap-3 text-center">
                   <div>
                     <div className="text-lg font-semibold text-text-primary">
                       {result.outcome === "draw"
                         ? "Draw"
                         : result.outcome === "user_won"
-                          ? "You win this round"
-                          : `${opponentMeta.label} wins this round`}
+                          ? "You win"
+                          : `${opponentMeta.label} wins`}
                     </div>
-                    <div className="mt-1 text-xs text-text-tertiary">
+                    <div className="mt-0.5 text-xs text-text-tertiary">
                       {result.fallbackReason === "timeout"
-                        ? "The model did not commit a move within 6 seconds, so a scripted fallback move was played."
+                        ? "Out of time. Fallback move played."
                         : result.fallbackReason === "no_tool_call"
-                          ? "The model finished without choosing a move, so a scripted fallback move was played."
+                          ? "No move committed. Fallback move played."
                           : result.predictedUserMove
-                            ? `It predicted you would play ${result.predictedUserMove}${
-                                result.predictionCorrect
-                                  ? " and was right."
-                                  : ", but you didn't."
-                              }`
+                            ? `Predicted ${result.predictedUserMove}: ${
+                                result.predictionCorrect ? "correct" : "wrong"
+                              }.`
                             : null}
                     </div>
                     {result.taunt && !result.fallbackReason && (
-                      <div className="mt-1.5 text-sm italic text-text-secondary">
+                      <div className="mt-1 text-sm italic text-text-secondary">
                         “{result.taunt}”
                       </div>
                     )}
@@ -360,55 +398,12 @@ export const RockPaperScissors = ({
                   </div>
                 </div>
               )}
-
-              {/* Reasoning panel */}
-              <div className="rounded-[2px] border border-line-structure bg-[#403d391a] dark:bg-[#b8b6a01a]">
-                <div className="flex items-center justify-between border-b border-line-structure px-3 py-2">
-                  <div className="flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary">
-                    {phase === "thinking" && <Loader size={12} />}
-                    {phase === "thinking"
-                      ? `${opponentMeta.label} is reasoning`
-                      : `${opponentMeta.label}'s reasoning`}
-                  </div>
-                  <div className="font-mono text-[11px] text-text-tertiary">
-                    {phase === "thinking"
-                      ? `${(elapsedMs / 1000).toFixed(1)}s / 6.0s`
-                      : result
-                        ? `${(result.responseTimeMs / 1000).toFixed(1)}s`
-                        : null}
-                  </div>
-                </div>
-                {phase === "thinking" && (
-                  <div className="h-0.5 w-full bg-line-structure/40">
-                    <div
-                      className="h-full bg-line-cta transition-[width] duration-100"
-                      style={{
-                        width: `${Math.min((elapsedMs / TIME_CAP_MS) * 100, 100)}%`,
-                      }}
-                    />
-                  </div>
-                )}
-                <pre
-                  ref={reasoningRef}
-                  className="max-h-36 min-h-[72px] overflow-y-auto whitespace-pre-wrap break-words p-3 font-mono text-xs leading-5 text-text-secondary"
-                >
-                  {reasoning ||
-                    (phase === "thinking"
-                      ? "…"
-                      : "The model did not share its reasoning for this round.")}
-                  {phase === "thinking" && (
-                    <span className="ml-0.5 inline-block h-3 w-1.5 animate-pulse bg-text-tertiary align-middle" />
-                  )}
-                </pre>
-              </div>
             </div>
           )}
         </div>
 
-        <p className="relative z-10 mt-4 text-center text-xs italic text-muted-foreground">
-          Each round is one trace, each game is one session in the public
-          example project. Scores track who won, whether the model predicted
-          your move, and response time.
+        <p className="relative z-10 mt-5 text-center text-xs italic text-muted-foreground">
+          One trace per round, one session per game.
         </p>
       </div>
     </div>
