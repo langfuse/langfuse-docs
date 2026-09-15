@@ -48,6 +48,10 @@ Regions without credentials are skipped. `LIVEKIT_URL`, `LIVEKIT_API_KEY`, and `
 
 ### Deploy
 
+`livekit.toml` pins the LiveKit Cloud project and agent ID so `lk agent deploy` updates the existing agent. Authenticate once with `lk cloud auth`, then from this directory:
+
 ```bash
-lk agent deploy
+lk agent deploy --project langfuse-docs-demo
 ```
+
+Several configured CLI projects share the same subdomain, so pass `--project langfuse-docs-demo` explicitly to avoid the CLI picking the wrong credentials.
