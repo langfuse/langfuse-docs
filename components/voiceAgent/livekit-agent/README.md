@@ -27,7 +27,9 @@ The agent configures an OpenTelemetry `TracerProvider` shared between LiveKit (v
 
 ### Conversation recordings
 
-The whole conversation is wrapped in a Langfuse root observation (`voice-conversation`) that LiveKit's `agent_session` span nests under. The session is started with `record={"audio": True}`, which makes LiveKit write a stereo OGG recording (user left channel, agent right channel) to `ctx.session_directory / "audio.ogg"`. When the session ends (`on_session_end`), the recording is attached to the still-open root observation's metadata as a `LangfuseMedia` file, where it renders with an audio player. Because Langfuse media IDs are derived from the file's content hash, the same media reference resolves in every region; the file is uploaded to the remaining regions via each client's media API.
+The whole conversation is wrapped in a Langfuse root observation (`voice-conversation`) that LiveKit's `agent_session` span nests under. The root observation is ended as soon as the agent session closes, with the full transcript as its input/output, so the conversation is complete in Langfuse without waiting for LiveKit's teardown (which takes 20-30s after the user hangs up).
+
+The session is started with `record={"audio": True}`, which makes LiveKit write a stereo OGG recording (user left channel, agent right channel) to `ctx.session_directory / "audio.ogg"`. Once LiveKit has finalized it (`on_session_end`), a `session-recording` child observation is added under the root with a copy of the transcript and the recording in its metadata as a `LangfuseMedia` file, where it renders with an audio player. Because Langfuse media IDs are derived from the file's content hash, the same media reference resolves in every region; the file is uploaded to all regions concurrently via each client's media API.
 
 ## Deployment
 
