@@ -121,8 +121,8 @@ INSTRUCTIONS = (
 )
 
 GREETING = (
-    "Greet the user and let them know you can answer questions about Langfuse "
-    "using the documentation. Keep it short and friendly."
+    "Greet the user in one short, friendly sentence and say you can answer "
+    "questions about Langfuse using the docs. Do not list example topics."
 )
 
 # VOICE_AGENT_MODE selects the agent: "gpt-live" (default) runs the OpenAI
