@@ -8,6 +8,7 @@ import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { MicIcon, MicOffIcon, PhoneOffIcon } from "lucide-react";
+import { DemoTraceLink } from "@/components/demoTraceLink";
 
 type AgentState =
   | "idle"
@@ -28,6 +29,7 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
   const [transcripts, setTranscripts] = useState<
     { role: "user" | "assistant"; text: string }[]
   >([]);
+  const [traceUrl, setTraceUrl] = useState<string | null>(null);
   const roomRef = useRef<any>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
 
@@ -45,6 +47,7 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
     setAgentState("connecting");
     setError(null);
     setTranscripts([]);
+    setTraceUrl(null);
 
     try {
       // Get token from our API
@@ -105,6 +108,18 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
               ...prev,
               { role: data.role, text: data.text },
             ]);
+          } else if (
+            data.type === "trace" &&
+            typeof data.traceId === "string" &&
+            /^[0-9a-f]{32}$/i.test(data.traceId)
+          ) {
+            // Sent by the agent once the conversation's root span exists. The
+            // redirect resolves once the trace is ingested and public.
+            const params = new URLSearchParams({
+              traceId: data.traceId,
+              source: "voice_agent",
+            });
+            setTraceUrl(`/api/demo-public-trace?${params.toString()}`);
           }
         } catch {
           // ignore invalid messages
@@ -264,6 +279,13 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
               {/* Error details */}
               {error && agentState === "error" && (
                 <p className="text-xs text-destructive mb-4">{error}</p>
+              )}
+
+              {/* Link to the conversation's trace, available once the agent has joined */}
+              {traceUrl && (
+                <div className="flex justify-center mb-4">
+                  <DemoTraceLink traceUrl={traceUrl} source="voice_agent" />
+                </div>
               )}
 
               {/* Store-audio toggle (applies when the next conversation starts) */}

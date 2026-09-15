@@ -3,12 +3,13 @@
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 
+import type { DemoTraceSource } from "@/lib/demo-public-trace";
 import { cn } from "@/lib/utils";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 
 type DemoTraceLinkProps = {
   traceUrl?: string | null;
-  source: "image_generator";
+  source: DemoTraceSource;
   className?: string;
 };
 
