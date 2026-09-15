@@ -17,7 +17,8 @@ const redirectWithoutCaching = (url: string) => {
 };
 
 const isDemoTraceSource = (value: string | null): value is DemoTraceSource =>
-  value !== null && value in DEMO_PUBLIC_TRACE_FALLBACK_URLS;
+  value !== null &&
+  Object.prototype.hasOwnProperty.call(DEMO_PUBLIC_TRACE_FALLBACK_URLS, value);
 
 export async function GET(request: NextRequest) {
   const sourceParam = request.nextUrl.searchParams.get("source");
