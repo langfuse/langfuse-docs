@@ -16,7 +16,11 @@ interface EventDefinitions {
     prompt_char_count: number;
   };
   "demo:view_trace_in_langfuse_clicked": {
-    source: "qa_chatbot" | "image_generator" | "sentiment_classifier";
+    source:
+      | "qa_chatbot"
+      | "image_generator"
+      | "sentiment_classifier"
+      | "voice_agent";
     trace_url: string;
   };
   "home:start_free_clicked": {

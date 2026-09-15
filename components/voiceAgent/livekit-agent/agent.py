@@ -1,6 +1,9 @@
+import asyncio
 import json
 import logging
 import os
+import re
+from dataclasses import dataclass
 from datetime import datetime, timezone
 
 import httpx
@@ -73,6 +76,8 @@ class LangfuseAttributeSpanProcessor(SpanProcessor):
     def on_start(self, span, parent_context=None):
         span.set_attribute("langfuse.trace.name", "livekit-voice-agent")
         span.set_attribute("langfuse.trace.tags", ["voice-agent", VOICE_AGENT_MODE])
+        # The demo UI links to the trace; public traces open without a login.
+        span.set_attribute("langfuse.trace.public", True)
 
     def on_end(self, span):
         pass
@@ -97,11 +102,51 @@ def setup_langfuse(
                 base_url=host,
                 tracer_provider=trace_provider,
                 should_export_span=lambda span: True,
+                # Export finished spans within a second so turns show up in
+                # Langfuse while the conversation is still going.
+                flush_interval=1,
             )
         )
 
     set_tracer_provider(trace_provider, metadata=metadata)
     return trace_provider, clients
+
+
+# Upper bound for a tool result handed to the model. searchLangfuseDocs
+# returns the full text of every matching page (about 60 KB / 15k tokens);
+# GPT-Live's session context is capped at 8k tokens, so an uncompacted
+# result never reaches the backend model and the agent keeps "waiting on
+# the docs". Roughly 1.5k tokens leaves room for the conversation itself.
+MAX_TOOL_RESULT_CHARS = 6000
+MAX_CHARS_PER_DOC = 1200
+MAX_DOCS = 5
+
+
+def _compact_docs_tool_result(ctx: mcp.MCPToolResultContext) -> str:
+    """Reduce a Langfuse docs MCP result to what a voice answer needs."""
+    raw = "\n".join(
+        c.text for c in ctx.result.content if getattr(c, "type", None) == "text"
+    )
+    if ctx.tool_name == "searchLangfuseDocs":
+        try:
+            docs = json.loads(raw).get("content", [])
+        except (json.JSONDecodeError, AttributeError):
+            docs = None
+        if isinstance(docs, list):
+            parts = []
+            for doc in docs[:MAX_DOCS]:
+                if not isinstance(doc, dict):
+                    continue
+                source = doc.get("source") or {}
+                body = " ".join(
+                    part.get("text", "")
+                    for part in source.get("content", [])
+                    if isinstance(part, dict)
+                )
+                body = re.sub(r"\s+", " ", body).strip()[:MAX_CHARS_PER_DOC]
+                parts.append(f"## {doc.get('title', '')} ({doc.get('url', '')})\n{body}")
+            raw = "\n\n".join(parts) or raw
+    return raw[:MAX_TOOL_RESULT_CHARS]
 
 
 # client_session_timeout_seconds defaults to 5s, which the RAG-backed
@@ -110,6 +155,9 @@ def setup_langfuse(
 LANGFUSE_DOCS_MCP = mcp.MCPServerHTTP(
     url="https://langfuse.com/api/mcp",
     client_session_timeout_seconds=30,
+    # The voice agent answers questions; it should not file feedback.
+    allowed_tools=["searchLangfuseDocs", "getLangfuseDocsPage", "getLangfuseOverview"],
+    tool_result_resolver=_compact_docs_tool_result,
 )
 
 
@@ -212,11 +260,19 @@ class Kelly(Agent):
 
 server = AgentServer()
 
-# Wrapper root spans, Langfuse clients, agent session, and the store-audio
-# preference per room, shared between the entrypoint and on_session_end.
-_recording_context: dict[
-    str, tuple[otel_trace.Span, list[Langfuse], AgentSession, bool]
-] = {}
+@dataclass
+class _ConversationContext:
+    """Per-room state shared between the entrypoint and on_session_end."""
+
+    root_span: otel_trace.Span
+    tracer: otel_trace.Tracer
+    langfuse_clients: list[Langfuse]
+    session: AgentSession
+    store_audio: bool
+    root_ended: bool = False
+
+
+_conversations: dict[str, _ConversationContext] = {}
 
 
 def _transcript_messages(session: AgentSession) -> list[dict[str, str]]:
@@ -228,102 +284,127 @@ def _transcript_messages(session: AgentSession) -> list[dict[str, str]]:
     ]
 
 
-async def on_session_end(ctx: JobContext) -> None:
-    """Enrich the conversation's root observation once the session closed.
-
-    The wrapper root span opened in the entrypoint is still open at this point,
-    so the full transcript lands on the top-level observation's input/output
-    and, if the user opted in, the stereo OGG written by `record={"audio": True}`
-    lands in its metadata. The file is then uploaded to every configured region
-    through the Langfuse media API (the media ID is derived from the file's
-    SHA-256 client-side, so the reference is identical in every region).
-    """
-    context = _recording_context.pop(ctx.room.name, None)
-    if context is None:
+def _set_transcript(span: otel_trace.Span, messages: list[dict[str, str]]) -> None:
+    """Put the transcript on a span as Langfuse input/output."""
+    if not messages:
         return
-    root_span, langfuse_clients, session, store_audio = context
-    span_context = root_span.get_span_context()
+    last = messages[-1]
+    if last["role"] == "assistant":
+        span.set_attribute("langfuse.observation.input", json.dumps(messages[:-1]))
+        span.set_attribute("langfuse.observation.output", last["content"])
+    else:
+        span.set_attribute("langfuse.observation.input", json.dumps(messages))
+
+
+def _end_root_span(conversation: _ConversationContext) -> None:
+    """End the root observation with the transcript. Idempotent."""
+    if conversation.root_ended:
+        return
+    conversation.root_ended = True
+    _set_transcript(conversation.root_span, _transcript_messages(conversation.session))
+    conversation.root_span.end()
+
+
+async def _upload_recording(
+    client: Langfuse,
+    *,
+    trace_id: str,
+    observation_id: str,
+    audio_bytes: bytes,
+    sha256: str,
+) -> None:
+    """Upload the recording to one region through the Langfuse media API."""
+    try:
+        res = await client.async_api.media.get_upload_url(
+            trace_id=trace_id,
+            observation_id=observation_id,
+            content_type="audio/ogg",
+            content_length=len(audio_bytes),
+            sha256hash=sha256,
+            field="metadata",
+        )
+        # upload_url is None if this file was already uploaded (dedup)
+        if res.upload_url:
+            async with httpx.AsyncClient(timeout=30) as http:
+                upload = await http.put(
+                    res.upload_url,
+                    content=audio_bytes,
+                    headers={
+                        "Content-Type": "audio/ogg",
+                        "x-amz-checksum-sha256": sha256,
+                    },
+                )
+            await client.async_api.media.patch(
+                media_id=res.media_id,
+                uploaded_at=datetime.now(timezone.utc),
+                upload_http_status=upload.status_code,
+            )
+    except Exception:
+        logger.exception("failed to upload recording to %s", client._base_url)
+
+
+async def on_session_end(ctx: JobContext) -> None:
+    """Attach the session recording once LiveKit has finalized it.
+
+    The root observation was already ended (with the transcript) when the
+    agent session closed, so the conversation is complete in Langfuse without
+    waiting for LiveKit's teardown. This callback runs after that teardown and
+    adds a `session-recording` child observation carrying the stereo OGG
+    written by `record={"audio": True}` plus a copy of the transcript. The file
+    is uploaded to every configured region through the Langfuse media API (the
+    media ID is derived from the file's SHA-256 client-side, so the reference
+    is identical in every region).
+    """
+    conversation = _conversations.pop(ctx.room.name, None)
+    if conversation is None:
+        return
+    _end_root_span(conversation)  # in case the close event never fired
+
+    if not conversation.store_audio:
+        logger.info("audio recording disabled for this session")
+        return
+    audio_path = ctx.session_directory / "audio.ogg"
+    if not audio_path.exists():
+        logger.warning("no session recording found at %s", audio_path)
+        return
+
+    audio_bytes = audio_path.read_bytes()
+    recording = LangfuseMedia(content_bytes=audio_bytes, content_type="audio/ogg")
+
+    # Child of the (already ended) root span so it lands in the same trace.
+    recording_span = conversation.tracer.start_span(
+        "session-recording",
+        context=otel_trace.set_span_in_context(conversation.root_span),
+    )
+    recording_span.set_attribute("langfuse.observation.type", "event")
+    _set_transcript(recording_span, _transcript_messages(conversation.session))
+    # The media reference renders as an audio player once the file is uploaded.
+    recording_span.set_attribute(
+        "langfuse.observation.metadata.recording", recording._reference_string
+    )
+    recording_span.end()
+
+    span_context = recording_span.get_span_context()
     trace_id = format(span_context.trace_id, "032x")
     observation_id = format(span_context.span_id, "016x")
 
-    recording = None
-    audio_bytes = b""
-    try:
-        # Full transcript as the root observation's input/output (lifts to the
-        # trace input/output as well).
-        messages = _transcript_messages(session)
-        if messages:
-            last = messages[-1]
-            if last["role"] == "assistant":
-                root_span.set_attribute(
-                    "langfuse.observation.input", json.dumps(messages[:-1])
-                )
-                root_span.set_attribute(
-                    "langfuse.observation.output", last["content"]
-                )
-            else:
-                root_span.set_attribute(
-                    "langfuse.observation.input", json.dumps(messages)
-                )
-
-        audio_path = ctx.session_directory / "audio.ogg"
-        if not store_audio:
-            logger.info("audio recording disabled for this session")
-        elif audio_path.exists():
-            audio_bytes = audio_path.read_bytes()
-            recording = LangfuseMedia(
-                content_bytes=audio_bytes,
-                content_type="audio/ogg",
+    await asyncio.gather(
+        *(
+            _upload_recording(
+                client,
+                trace_id=trace_id,
+                observation_id=observation_id,
+                audio_bytes=audio_bytes,
+                sha256=recording._content_sha256_hash,
             )
-            # The media reference renders as an audio player on the root
-            # observation once the file is uploaded below.
-            root_span.set_attribute(
-                "langfuse.observation.metadata.recording",
-                recording._reference_string,
-            )
-        else:
-            logger.warning("no session recording found at %s", audio_path)
-    finally:
-        root_span.end()
+            for client in conversation.langfuse_clients
+        )
+    )
+    logger.info("attached session recording to trace %s", trace_id)
 
-    # Upload the file to every configured region so the media reference
-    # resolves everywhere.
-    if recording is not None:
-        sha256 = recording._content_sha256_hash
-        for client in langfuse_clients:
-            try:
-                res = await client.async_api.media.get_upload_url(
-                    trace_id=trace_id,
-                    observation_id=observation_id,
-                    content_type="audio/ogg",
-                    content_length=len(audio_bytes),
-                    sha256hash=sha256,
-                    field="metadata",
-                )
-                # upload_url is None if this file was already uploaded (dedup)
-                if res.upload_url:
-                    async with httpx.AsyncClient(timeout=30) as http:
-                        upload = await http.put(
-                            res.upload_url,
-                            content=audio_bytes,
-                            headers={
-                                "Content-Type": "audio/ogg",
-                                "x-amz-checksum-sha256": sha256,
-                            },
-                        )
-                    await client.async_api.media.patch(
-                        media_id=res.media_id,
-                        uploaded_at=datetime.now(timezone.utc),
-                        upload_http_status=upload.status_code,
-                    )
-            except Exception:
-                logger.exception(
-                    "failed to upload recording to %s", client._base_url
-                )
-        logger.info("attached session recording to trace %s", trace_id)
-
-    for client in langfuse_clients:
-        client.flush()
+    await asyncio.gather(
+        *(asyncio.to_thread(client.flush) for client in conversation.langfuse_clients)
+    )
 
 
 @server.rtc_session(on_session_end=on_session_end)
@@ -359,8 +440,7 @@ async def entrypoint(ctx: JobContext):
     store_audio = participant.attributes.get("store_audio", "true") != "false"
 
     # Wrap the whole conversation in a root span. LiveKit's agent_session span
-    # is created without an explicit OTel context, so it nests under this span,
-    # which stays open until on_session_end attaches transcript and recording.
+    # is created without an explicit OTel context, so it nests under this span.
     #
     # The span is created with a plain OTel tracer (NOT a Langfuse client): the
     # LangfuseSpanProcessor only exports SDK-created spans to the project of
@@ -368,14 +448,22 @@ async def entrypoint(ctx: JobContext):
     # the only kind that all regions' processors export.
     tracer = trace_provider.get_tracer("voice-agent")
     root_span = tracer.start_span("voice-conversation")
-    _recording_context[ctx.room.name] = (
-        root_span,
-        langfuse_clients,
-        session,
-        store_audio,
+    conversation = _conversations[ctx.room.name] = _ConversationContext(
+        root_span=root_span,
+        tracer=tracer,
+        langfuse_clients=langfuse_clients,
+        session=session,
+        store_audio=store_audio,
     )
 
-    with otel_trace.use_span(root_span, end_on_exit=False):  # ended in on_session_end
+    # End the root observation as soon as the conversation is over, with the
+    # full transcript as input/output. LiveKit's teardown and the recording
+    # upload (on_session_end) take another 20-30s and must not hold it back.
+    @session.on("close")
+    def _on_session_close(_ev) -> None:
+        _end_root_span(conversation)
+
+    with otel_trace.use_span(root_span, end_on_exit=False):  # ended on session close
         await session.start(
             agent=Kelly() if VOICE_AGENT_MODE == "pipeline" else Marin(),
             room=ctx.room,
@@ -387,6 +475,21 @@ async def entrypoint(ctx: JobContext):
                 "logs": False,
                 "transcript": False,
             },
+        )
+
+        # Tell the demo UI which trace this conversation lands in so it can
+        # show a "View trace in Langfuse" link while the call is running.
+        root_context = root_span.get_span_context()
+        await ctx.room.local_participant.publish_data(
+            json.dumps(
+                {
+                    "type": "trace",
+                    "traceId": format(root_context.trace_id, "032x"),
+                    "observationId": format(root_context.span_id, "016x"),
+                }
+            ).encode(),
+            reliable=True,
+            topic="langfuse",
         )
 
         # Audible cue while the agent is thinking or calling the docs tools, so
