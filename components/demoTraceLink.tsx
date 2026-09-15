@@ -8,7 +8,7 @@ import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 
 type DemoTraceLinkProps = {
   traceUrl?: string | null;
-  source: "image_generator";
+  source: "image_generator" | "rock_paper_scissors";
   className?: string;
 };
 
