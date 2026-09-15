@@ -19,7 +19,7 @@ Get started, no credit card required. Great for hobby projects and POCs.
 - 2 users
 - Community support via GitHub
 
-Trusted by: 50,000+ companies using Langfuse
+Trusted by: [Hugging Face](/users/hugging-face)
 
 [Sign up](/cloud)
 
@@ -34,6 +34,8 @@ For production projects. Longer data access and unlimited users.
 - In-app support
 
 Discounts available for [startups](/startups), [research/students](/research), and [open-source projects](/pricing#discounts).
+
+Trusted by: [Magic Patterns](/users/magic-patterns-ai-design-tools), Draftbit
 
 [Sign up](/cloud)
 
@@ -57,6 +59,8 @@ Optional **Teams Add-on** ($300/month):
 - Fine-grained RBAC
 - Support via dedicated Slack channel
 
+Trusted by: [Canva](/users/canva), Twilio, [SumUp](/users/sumup), Brevo
+
 [Sign up](/cloud)
 
 ### Enterprise ($2,499/month)
@@ -79,6 +83,8 @@ Optional **Yearly Commitment**:
 - Billing via AWS Marketplace
 - Billing via invoice
 - Vendor onboarding
+
+Trusted by: Ramp, GoDaddy, [Khan Academy](/users/khan-academy), [Merck Group](/users/merckgroup)
 
 [Contact sales](/talk-to-us?deployment=cloud) | [Enterprise FAQ](/enterprise)
 
@@ -263,6 +269,9 @@ Graduated pricing means you pay different rates for different volume tiers. The 
 
 **How can I reduce my Langfuse Cloud bill?**
 The primary way is to reduce the number of billable units you ingest. See [tips for cutting costs](/faq/all/cutting-costs). With graduated pricing, you automatically get lower rates as your volume increases.
+
+**How does Langfuse pricing compare to LangSmith, Braintrust, Arize, and Datadog?**
+On a representative workload, Langfuse Cloud is cheaper than [LangSmith](/compare/langsmith), [Braintrust](/compare/braintrust), [Arize](/compare/arize-phoenix), and [Datadog Agent Observability](/compare/datadog). Open the [editable pricing comparison sheet](/pricing-comparison-sheet) to fill in your own assumptions and check the numbers for your workload. For product-by-product differences, see the [comparison pages](/compare). Langfuse is also [open source](/why), based on [OpenTelemetry](/integrations/native/opentelemetry) for interoperability, [self-hostable](/self-hosting) at the same scale as Langfuse Cloud, and model- and framework-agnostic.
 
 **When do I get billed?**
 You get one bill each month. The plan fee is charged at the start of the month, and usage is charged at the end of the month.

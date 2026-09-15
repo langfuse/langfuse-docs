@@ -248,8 +248,8 @@ export const ImageGenerator = ({
         </div>
 
         <p className="mt-4 text-xs text-muted-foreground text-center relative z-10 italic">
-          Powered by GPT-Image-1. Limited to 3 generations per minute. All
-          interactions are traced in the public example project.
+          Powered by GPT-Image-2.5 Flare. Limited to 3 generations per minute.
+          All interactions are traced in the public example project.
         </p>
       </div>
     </div>

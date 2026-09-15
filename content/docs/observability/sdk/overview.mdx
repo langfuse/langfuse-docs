@@ -23,6 +23,17 @@ Upgrading from Python SDK v3 or JS/TS SDK v4? Follow the [upgrade paths](/docs/o
 
 The Langfuse SDKs are the recommended way to create [custom observations and traces](/docs/observability/sdk/instrumentation#custom-instrumentation) and use the Langfuse [prompt-management](/docs/prompt-management/overview) and [evaluation](/docs/evaluation/overview) features. Both SDKs work with [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) and [self-hosted Langfuse](/self-hosting) with the same code; only the credentials and base URL differ.
 
+<Callout type="info">
+  **Not using a Langfuse SDK?** Send traces via
+  [OpenTelemetry](/integrations/native/opentelemetry), either directly or with an
+  [auto-instrumentation
+  library](/integrations/native/opentelemetry#instrumentation-libraries). On
+  Langfuse Cloud, `POST /api/public/ingestion` stops accepting everything except
+  scores on November 16, 2026. See the [migration
+  guide](/integrations/native/opentelemetry/migration-to-v4) to move a custom
+  integration to v4.
+</Callout>
+
 **Key benefits**
 
 - Based on [OpenTelemetry](https://opentelemetry.io/), so you can use any OTEL-based instrumentation library for your LLM stack.
@@ -309,7 +320,7 @@ With the SDK set up, you can:
 The Langfuse SDKs are built on top of [OpenTelemetry](https://opentelemetry.io/). This provides:
 
 - **Standardization** with the wider observability ecosystem and tooling.
-- **Robust context propagation** so nested spans stay connected, even across async workloads.
+- **Robust context propagation** so nested [observations](/docs/observability/data-model#observations-traces-and-sessions) stay connected, even across async workloads.
 - **Attribute propagation** to keep `userId`, `sessionId`, `metadata`, `version`, and `tags` aligned across observations.
 - **Ecosystem interoperability** meaning third-party instrumentations automatically appear inside Langfuse traces.
 

@@ -1,9 +1,6 @@
 import { integrationsSource } from "@/lib/source";
 import { Cards } from "@/components/docs";
-import {
-  nativeIntegrationsMeta,
-  dataPlatformIntegrationsMeta,
-} from "@/lib/integrations-meta";
+import { nativeIntegrationsMeta } from "@/lib/integrations-meta";
 import { cn } from "@/lib/utils";
 
 function additionalLinksFromMeta(metaConfig: Record<string, any>) {
@@ -120,11 +117,10 @@ const categoryConfig: Record<
     description:
       "Analytics tools that can visualize Langfuse traces and metrics",
   },
-  data: {
-    title: "Data Platform",
+  clickhouse: {
+    title: "ClickHouse Products",
     description:
-      "Use Langfuse data and metrics in your own application and data platform",
-    additionalLinks: additionalLinksFromMeta(dataPlatformIntegrationsMeta),
+      "Use Langfuse with ClickHouse Observability, warehouse exports, and the Agentic Data Stack",
   },
   "developer-tools": {
     title: "Developer Tools",

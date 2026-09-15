@@ -62,7 +62,7 @@ const handler = async (req: Request) => {
 
       try {
         const result = await getOpenAI().images.generate({
-          model: "gpt-image-1",
+          model: "gpt-image-2.5-flare",
           prompt,
           size: "1024x1024",
           quality: "low",
@@ -92,7 +92,7 @@ const handler = async (req: Request) => {
             {
               input: prompt,
               output: imageMedia,
-              model: "gpt-image-1",
+              model: "gpt-image-2.5-flare",
               modelParameters: {
                 size: "1024x1024",
                 quality: "low",
