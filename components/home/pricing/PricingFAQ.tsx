@@ -46,7 +46,7 @@ const faqs: FAQItem[] = [
     question:
       "How does Langfuse pricing compare to LangSmith, Braintrust, Arize, and Datadog?",
     answer:
-      "On a representative workload, Langfuse Cloud is cheaper than [LangSmith](/compare/langsmith), [Braintrust](/compare/braintrust), [Arize](/compare/arize-phoenix), and [Datadog Agent Observability](/compare/datadog). Open the [editable pricing comparison sheet](/pricing-comparison-sheet) to fill in your own assumptions and check the numbers for your workload. For product-by-product differences, see the [comparison pages](/compare).",
+      "On a representative workload, Langfuse Cloud is cheaper than [LangSmith](/compare/langsmith), [Braintrust](/compare/braintrust), [Arize](/compare/arize-phoenix), and [Datadog Agent Observability](/compare/datadog). Open the [editable pricing comparison sheet](/pricing-comparison-sheet) to fill in your own assumptions and check the numbers for your workload. For product-by-product differences, see the [comparison pages](/compare). Langfuse is also [open source](/why), based on [OpenTelemetry](/integrations/native/opentelemetry) for interoperability, [self-hostable](/self-hosting) at the same scale as Langfuse Cloud, and model- and framework-agnostic.",
   },
   {
     question: "When do I get billed?",
