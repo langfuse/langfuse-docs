@@ -76,8 +76,8 @@ class LangfuseAttributeSpanProcessor(SpanProcessor):
     def on_start(self, span, parent_context=None):
         span.set_attribute("langfuse.trace.name", "livekit-voice-agent")
         span.set_attribute("langfuse.trace.tags", ["voice-agent", VOICE_AGENT_MODE])
-        # The demo UI links to the trace; public traces open without a login.
-        span.set_attribute("langfuse.trace.public", True)
+        # Temporarily disabled: demo traces are not shared publicly right now.
+        # span.set_attribute("langfuse.trace.public", True)
 
     def on_end(self, span):
         pass
