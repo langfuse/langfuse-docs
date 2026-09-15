@@ -196,8 +196,7 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
                 >
                   LiveKit Agents
                 </a>{" "}
-                and traces real-time STT → LLM → TTS voice pipelines in
-                Langfuse.
+                and traces real-time speech-to-speech voice agents in Langfuse.
               </p>
               {error && (
                 <p className="text-xs text-muted-foreground">{error}</p>
@@ -309,8 +308,9 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
               {/* Info when idle */}
               {agentState === "idle" && transcripts.length === 0 && (
                 <p className="text-xs text-muted-foreground text-center max-w-sm mt-2">
-                  Start a voice conversation with the AI agent. The full STT →
-                  LLM → TTS pipeline is traced in Langfuse via{" "}
+                  Start a voice conversation with the AI agent. It runs on
+                  OpenAI GPT-Live, and every turn, tool call, and the recording
+                  is traced in Langfuse via{" "}
                   <a
                     href="/integrations/frameworks/livekit"
                     className="text-text-links decoration-text-links underline decoration-1 underline-offset-2 hover:text-primary hover:decoration-primary"

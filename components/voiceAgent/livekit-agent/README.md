@@ -6,10 +6,20 @@ This directory contains the LiveKit voice agent that powers the voice assistant 
 
 The agent (`agent.py`) is a Python-based LiveKit agent that:
 
-- Uses LiveKit's inference API with fallback adapters for LLM, STT, and TTS
+- Runs on [OpenAI GPT-Live](https://docs.livekit.io/agents/models/realtime/plugins/gpt-live/), a full-duplex speech-to-speech model, by default (`VOICE_AGENT_MODE=gpt-live`)
+- Falls back to a cascaded STT → LLM → TTS pipeline on LiveKit's inference API with provider fallback adapters when `VOICE_AGENT_MODE=pipeline`
 - Connects to the [Langfuse Docs MCP server](https://langfuse.com/docs/docs-mcp) to answer questions about Langfuse
 - Sends OpenTelemetry spans to Langfuse for tracing
 - Records the conversation audio and attaches it to the trace's root observation in Langfuse
+
+### Agent modes
+
+`VOICE_AGENT_MODE` selects which agent joins the room:
+
+- `gpt-live` (default): the `Marin` agent uses `GPTLiveModel`. The voice model handles listening, turn taking, and speaking; a backend Responses model (`GPT_LIVE_RESPONSES_MODEL`, default `gpt-5.6-luna`) handles reasoning and the Langfuse docs MCP tool calls. The voice can be changed with `GPT_LIVE_VOICE` (default `marin`). Requires `OPENAI_API_KEY` from an account with GPT-Live access. No VAD, STT, or TTS is configured in this mode.
+- `pipeline`: the `Kelly` agent runs the cascaded pipeline with Silero VAD, LiveKit inference STT/LLM/TTS fallback adapters, and a keyboard-typing "thinking" sound during slow tool calls.
+
+Traces are tagged with the active mode (`voice-agent`, `gpt-live` or `pipeline`).
 
 ### OTel tracing
 
@@ -23,7 +33,12 @@ The whole conversation is wrapped in a Langfuse root observation (`voice-convers
 
 ### Secrets
 
-The following secrets must be configured on the LiveKit Cloud agent (via `--secrets` or `--secrets-file`), one set per Langfuse region (`EU`, `US`, `JP`, `INTERNAL`):
+The following secrets must be configured on the LiveKit Cloud agent (via `--secrets` or `--secrets-file`):
+
+- `OPENAI_API_KEY` (required for the default `gpt-live` mode)
+- `VOICE_AGENT_MODE` (optional, `gpt-live` or `pipeline`), `GPT_LIVE_VOICE`, `GPT_LIVE_RESPONSES_MODEL` (optional overrides)
+
+Plus one set of Langfuse credentials per region (`EU`, `US`, `JP`, `INTERNAL`):
 
 - `NEXT_PUBLIC_<REGION>_LANGFUSE_BASE_URL` (e.g. `https://cloud.langfuse.com`)
 - `NEXT_PUBLIC_<REGION>_LANGFUSE_PUBLIC_KEY`

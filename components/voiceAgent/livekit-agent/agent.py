@@ -29,7 +29,8 @@ from livekit.agents.stt import FallbackAdapter as FallbackSTTAdapter
 from livekit.agents.telemetry import set_tracer_provider
 from livekit.agents.tts import FallbackAdapter as FallbackTTSAdapter
 from livekit.agents.voice import MetricsCollectedEvent
-from livekit.plugins import openai, silero
+from livekit.plugins import silero
+from livekit.plugins.openai.realtime import GPTLiveModel
 
 logger = logging.getLogger("langfuse-trace-example")
 
@@ -71,7 +72,7 @@ class LangfuseAttributeSpanProcessor(SpanProcessor):
 
     def on_start(self, span, parent_context=None):
         span.set_attribute("langfuse.trace.name", "livekit-voice-agent")
-        span.set_attribute("langfuse.trace.tags", ["voice-agent"])
+        span.set_attribute("langfuse.trace.tags", ["voice-agent", VOICE_AGENT_MODE])
 
     def on_end(self, span):
         pass
@@ -112,15 +113,71 @@ LANGFUSE_DOCS_MCP = mcp.MCPServerHTTP(
 )
 
 
-class Kelly(Agent):
+INSTRUCTIONS = (
+    "Your name is {name}. You are a friendly voice assistant for Langfuse, "
+    "an open-source LLM observability platform. Keep responses brief and conversational. "
+    "When the user asks about Langfuse features, integrations, SDKs, pricing, or usage, "
+    "use the Langfuse docs tools to find accurate information before answering."
+)
+
+GREETING = (
+    "Greet the user and let them know you can answer questions about Langfuse "
+    "using the documentation. Keep it short and friendly."
+)
+
+# VOICE_AGENT_MODE selects the agent: "gpt-live" (default) runs the OpenAI
+# GPT-Live speech-to-speech model, "pipeline" runs the cascaded STT -> LLM -> TTS
+# pipeline on LiveKit inference (no OpenAI key required). Keep the pipeline as a
+# fallback in case GPT-Live is unavailable.
+VOICE_AGENT_MODE = os.getenv("VOICE_AGENT_MODE", "gpt-live").strip().lower()
+if VOICE_AGENT_MODE not in ("gpt-live", "pipeline"):
+    raise ValueError(
+        f"invalid VOICE_AGENT_MODE={VOICE_AGENT_MODE!r}, expected 'gpt-live' or 'pipeline'"
+    )
+
+
+class Marin(Agent):
+    """Speech-to-speech agent on OpenAI GPT-Live.
+
+    GPT-Live is a full-duplex voice model: the voice model handles listening,
+    turn taking, and speaking while a backend Responses model (configured via
+    ``responses_options``) handles reasoning and tool calls, including the
+    Langfuse docs MCP tools registered on the AgentSession. No separate STT, TTS,
+    or VAD is needed. Requires OPENAI_API_KEY with GPT-Live access.
+    """
+
     def __init__(self) -> None:
         super().__init__(
-            instructions=(
-                "Your name is Kelly. You are a friendly voice assistant for Langfuse, "
-                "an open-source LLM observability platform. Keep responses brief and conversational. "
-                "When the user asks about Langfuse features, integrations, SDKs, pricing, or usage, "
-                "use the Langfuse docs tools to find accurate information before answering."
+            instructions=INSTRUCTIONS.format(name="Marin"),
+            llm=GPTLiveModel(
+                voice=os.getenv("GPT_LIVE_VOICE", "marin"),
+                responses_options={
+                    "model": os.getenv("GPT_LIVE_RESPONSES_MODEL", "gpt-5.6-luna"),
+                    "instructions": (
+                        "You answer questions about Langfuse for a voice assistant. "
+                        "Use the Langfuse docs tools whenever the user asks about "
+                        "features, integrations, SDKs, pricing, or usage. Keep answers "
+                        "short and spoken-word friendly: no markdown, no lists, no URLs."
+                    ),
+                    "reasoning": {"effort": "low"},
+                    "text": {"verbosity": "low"},
+                },
             ),
+        )
+
+    async def on_enter(self):
+        logger.info("Marin is entering the session")
+        # GPT-Live treats generate_reply() as refused if the model has not
+        # started speaking within 10s, so keep the greeting instruction short.
+        self.session.generate_reply(instructions=GREETING)
+
+
+class Kelly(Agent):
+    """Cascaded STT -> LLM -> TTS agent on LiveKit inference with provider fallbacks."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            instructions=INSTRUCTIONS.format(name="Kelly"),
             llm=FallbackLLMAdapter(
                 llm=[
                     inference.LLM("openai/gpt-5.4-mini"),
@@ -145,28 +202,7 @@ class Kelly(Agent):
 
     async def on_enter(self):
         logger.info("Kelly is entering the session")
-        self.session.generate_reply(
-            instructions="Greet the user and let them know you can answer questions about Langfuse using the documentation. Keep it short and friendly."
-        )
-
-
-class Alloy(Agent):
-    def __init__(self) -> None:
-        super().__init__(
-            instructions=(
-                "Your name is Alloy. You are a friendly voice assistant for Langfuse, "
-                "an open-source LLM observability platform. Keep responses brief and conversational. "
-                "When the user asks about Langfuse features, integrations, SDKs, pricing, or usage, "
-                "use the Langfuse docs tools to find accurate information before answering."
-            ),
-            llm=openai.realtime.RealtimeModel(voice="alloy"),
-        )
-
-    async def on_enter(self):
-        logger.info("Alloy is entering the session")
-        self.session.generate_reply(
-            instructions="Greet the user and let them know you can answer questions about Langfuse using the documentation. Keep it short and friendly."
-        )
+        self.session.generate_reply(instructions=GREETING)
 
 
 server = AgentServer()
@@ -301,8 +337,10 @@ async def entrypoint(ctx: JobContext):
 
     ctx.add_shutdown_callback(flush_trace)
 
+    # GPT-Live is full-duplex and manages turn taking itself; the cascaded
+    # pipeline needs VAD for end-of-turn and interruption detection.
     session = AgentSession(
-        vad=silero.VAD.load(),
+        vad=silero.VAD.load() if VOICE_AGENT_MODE == "pipeline" else None,
         mcp_servers=[LANGFUSE_DOCS_MCP],
     )
 
@@ -334,7 +372,7 @@ async def entrypoint(ctx: JobContext):
 
     with otel_trace.use_span(root_span, end_on_exit=False):  # ended in on_session_end
         await session.start(
-            agent=Kelly(),
+            agent=Kelly() if VOICE_AGENT_MODE == "pipeline" else Marin(),
             room=ctx.room,
             # Record the conversation audio (stereo OGG in ctx.session_directory)
             # unless the user opted out; other recording features stay off.
@@ -346,15 +384,18 @@ async def entrypoint(ctx: JobContext):
             },
         )
 
-        # Audible cue while the agent is thinking or calling the docs tools, so
-        # slower turns (e.g. RAG searches) don't feel like dead air.
-        background_audio = BackgroundAudioPlayer(
-            thinking_sound=[
-                AudioConfig(BuiltinAudioClip.KEYBOARD_TYPING, volume=0.6),
-                AudioConfig(BuiltinAudioClip.KEYBOARD_TYPING2, volume=0.5),
-            ],
-        )
-        await background_audio.start(room=ctx.room, agent_session=session)
+        # Audible cue while the cascaded pipeline is thinking or calling the
+        # docs tools, so slower turns (e.g. RAG searches) don't feel like dead
+        # air. GPT-Live keeps talking while its backend model reasons, so the
+        # cue is only used in pipeline mode.
+        if VOICE_AGENT_MODE == "pipeline":
+            background_audio = BackgroundAudioPlayer(
+                thinking_sound=[
+                    AudioConfig(BuiltinAudioClip.KEYBOARD_TYPING, volume=0.6),
+                    AudioConfig(BuiltinAudioClip.KEYBOARD_TYPING2, volume=0.5),
+                ],
+            )
+            await background_audio.start(room=ctx.room, agent_session=session)
 
 
 if __name__ == "__main__":
