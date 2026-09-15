@@ -155,12 +155,15 @@ const LogoImage = ({
           src={logo}
           alt={`${name} logo`}
           className={cn(
-            "h-14 w-auto max-w-none",
+            "w-auto max-w-none",
             hoverable
               ? "hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] transition-[filter] duration-200"
               : "",
           )}
-          style={{ marginLeft: -cropX * COMPACT_SCALE }}
+          style={{
+            height: COMPACT_IMAGE_HEIGHT,
+            marginLeft: -cropX * COMPACT_SCALE,
+          }}
           sizes="(max-width: 768px) 30vw"
           priority={false}
         />
@@ -188,7 +191,7 @@ const visibleCompanies = companies.filter((c) => !c.hidden);
 
 function LogoMarqueeItems({ duplicate = false }: { duplicate?: boolean }) {
   return (
-    <>
+    <div className="flex items-center gap-8 pr-8">
       {visibleCompanies.map((company) => {
         const hasStory = Boolean(company.customerStoryPath);
         return (
@@ -211,7 +214,7 @@ function LogoMarqueeItems({ duplicate = false }: { duplicate?: boolean }) {
           </div>
         );
       })}
-    </>
+    </div>
   );
 }
 
@@ -237,7 +240,7 @@ export const EnterpriseLogoGrid = ({
           )}
           aria-label="Enterprise customers using Langfuse"
         >
-          <div className="flex items-center gap-8 w-max py-2">
+          <div className="flex items-center w-max py-2">
             <LogoMarqueeItems />
           </div>
         </div>
@@ -250,7 +253,7 @@ export const EnterpriseLogoGrid = ({
           aria-label="Enterprise customers using Langfuse"
         >
           <motion.div
-            className="flex items-center gap-8 w-max py-2"
+            className="flex items-center w-max py-2"
             animate={{ x: ["0%", "-50%"] }}
             transition={{
               duration: MARQUEE_DURATION_SEC,
