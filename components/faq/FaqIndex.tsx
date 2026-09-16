@@ -12,6 +12,7 @@ const wordCasing: Record<string, string> = {
   api: "API",
   openai: "OpenAI",
   langchain: "LangChain",
+  opentelemetry: "OpenTelemetry",
 };
 
 export const formatTag = (tag: string) =>

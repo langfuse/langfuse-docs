@@ -436,7 +436,7 @@ langfuse.create_dataset_item(
     expected_output={ "text": "hello world" },
     # link to a trace
     source_trace_id="<trace_id>",
-    # optional: link to a specific span, event, or generation
+    # optional: link to a specific observation
     source_observation_id="<observation_id>"
 )
 ```
@@ -455,14 +455,14 @@ await langfuse.dataset.createItem({
   expectedOutput: { text: "hello world" },
   // link to a trace
   sourceTraceId: "<trace_id>",
-  // optional: link to a specific span, event, or generation
+  // optional: link to a specific observation
   sourceObservationId: "<observation_id>",
 });
 ```
 
 </Tab>
 <Tab>
-In the UI, use `+ Add to dataset` on any observation (span, event, generation) of a production trace.
+In the UI, use `+ Add to dataset` on any [observation](/docs/observability/data-model#observations-traces-and-sessions) of a production trace.
 
 <Video
   src="https://static.langfuse.com/docs-videos/datasets-add-from-trace.mp4"

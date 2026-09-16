@@ -43,6 +43,12 @@ const faqs: FAQItem[] = [
       "The primary way to reduce your Langfuse Cloud bill is to reduce the number of billable units that you ingest. We have summarized how this can be done [here](/faq/all/cutting-costs). Additionally, with our new graduated pricing model, you automatically get lower rates per 100k units as your volume increases.",
   },
   {
+    question:
+      "How does Langfuse pricing compare to LangSmith, Braintrust, Arize, and Datadog?",
+    answer:
+      "On a representative workload, Langfuse Cloud is cheaper than [LangSmith](/compare/langsmith), [Braintrust](/compare/braintrust), [Arize](/compare/arize-phoenix), and [Datadog Agent Observability](/compare/datadog). Open the [editable pricing comparison sheet](/pricing-comparison-sheet) to fill in your own assumptions and check the numbers for your workload. For product-by-product differences, see the [comparison pages](/compare). Langfuse is also [open source](/why), based on [OpenTelemetry](/integrations/native/opentelemetry) for interoperability, [self-hostable](/self-hosting) at the same scale as Langfuse Cloud, and model- and framework-agnostic.",
+  },
+  {
     question: "When do I get billed?",
     answer:
       "You get one bill each month. We charge your Core, Pro, or Team plan at the start of the month. We charge for your usage at the end of the month. The bill you get at the start of the month shows two things: the plan cost for the new month and the usage from last month.",
