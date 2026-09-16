@@ -122,6 +122,21 @@ MAX_CHARS_PER_DOC = 1200
 MAX_DOCS = 5
 
 
+def _clean_excerpt(text: str, limit: int) -> str:
+    """Plain, readable text for the model: keep line breaks, drop link URLs,
+    collapse repeated whitespace, and cut at a word boundary."""
+    # [label](url) -> label; the model speaks, it does not click
+    text = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", text)
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"\n\s*\n+", "\n", text).strip()
+    if len(text) <= limit:
+        return text
+    cut = text[:limit]
+    # keep the last complete word / line
+    cut = cut[: max(cut.rfind("\n"), cut.rfind(" "), limit // 2)]
+    return cut.rstrip(" ,;:-") + " …"
+
+
 def _compact_docs_tool_result(ctx: mcp.MCPToolResultContext) -> str:
     """Reduce a Langfuse docs MCP result to what a voice answer needs."""
     raw = "\n".join(
@@ -138,15 +153,15 @@ def _compact_docs_tool_result(ctx: mcp.MCPToolResultContext) -> str:
                 if not isinstance(doc, dict):
                     continue
                 source = doc.get("source") or {}
-                body = " ".join(
+                body = "\n".join(
                     part.get("text", "")
                     for part in source.get("content", [])
                     if isinstance(part, dict)
                 )
-                body = re.sub(r"\s+", " ", body).strip()[:MAX_CHARS_PER_DOC]
+                body = _clean_excerpt(body, MAX_CHARS_PER_DOC)
                 parts.append(f"## {doc.get('title', '')} ({doc.get('url', '')})\n{body}")
             raw = "\n\n".join(parts) or raw
-    return raw[:MAX_TOOL_RESULT_CHARS]
+    return _clean_excerpt(raw, MAX_TOOL_RESULT_CHARS)
 
 
 # client_session_timeout_seconds defaults to 5s, which the RAG-backed
