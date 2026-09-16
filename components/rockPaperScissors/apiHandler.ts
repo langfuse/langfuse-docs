@@ -446,6 +446,7 @@ const handler = async (req: Request) => {
             traceUrl: buildDemoTraceRedirectUrl({
               traceId,
               observationId: rootObservationId,
+              source: "rock_paper_scissors",
             }),
           });
           close();

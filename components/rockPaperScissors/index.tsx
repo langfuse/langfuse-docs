@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 import { Loader } from "@/components/ai-elements/loader";
-import { DemoTraceLink } from "@/components/demoTraceLink";
+// import { DemoTraceLink } from "@/components/demoTraceLink"; // temporarily disabled
 import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId";
 import {
   Select,
@@ -396,11 +396,13 @@ export const RockPaperScissors = ({
                       >
                         New round
                       </button>
+                      {/* Temporarily disabled: trace link (traces are not shared publicly right now)
                       <DemoTraceLink
                         traceUrl={result.traceUrl}
                         source="rock_paper_scissors"
                         label="Show trace"
                       />
+                      */}
                     </div>
                   </div>
                 </div>
@@ -452,7 +454,7 @@ const MoveCard = ({
 const HistoryStrip = ({ history }: { history: RoundRecord[] }) => (
   <div className="mt-5">
     <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary">
-      Previous rounds (you / model)
+      Previous rounds
     </div>
     <div className="mt-2 flex flex-wrap gap-1.5">
       {history.map((r) => (
@@ -468,9 +470,15 @@ const HistoryStrip = ({ history }: { history: RoundRecord[] }) => (
                 : "border-line-structure text-text-secondary",
           )}
         >
+          <span className="text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+            you
+          </span>
           <span aria-hidden="true">{MOVE_EMOJI[r.userMove]}</span>
           <span className="text-text-disabled">/</span>
           <span aria-hidden="true">{MOVE_EMOJI[r.modelMove]}</span>
+          <span className="text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+            model
+          </span>
         </span>
       ))}
     </div>

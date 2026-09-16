@@ -120,7 +120,7 @@ const categoryConfig: Record<
   clickhouse: {
     title: "ClickHouse Products",
     description:
-      "Use Langfuse with ClickHouse Observability, warehouse exports, and the Agentic Data Stack",
+      "Use Langfuse with ClickStack, warehouse exports, and the Agentic Data Stack",
   },
   "developer-tools": {
     title: "Developer Tools",
