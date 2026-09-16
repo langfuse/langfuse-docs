@@ -79,16 +79,12 @@ const playMoveInputSchema = z.object({
   predicted_user_move: z
     .enum(MOVES)
     .describe("The move you predict the human plays this round"),
-  taunt: z
-    .string()
-    .max(120)
-    .describe("One playful line for the human, max 12 words"),
 });
 type PlayMoveInput = z.infer<typeof playMoveInputSchema>;
 
 const playMoveTool = tool({
   description:
-    "Play your move for this round. Call exactly once. Include the move you predict the human will play and a short playful taunt.",
+    "Play your move for this round. Call exactly once. Include the move you predict the human will play.",
   inputSchema: playMoveInputSchema,
 });
 
@@ -100,7 +96,6 @@ export type RoundResultPayload = {
   predictedUserMove: Move | null;
   predictionCorrect: boolean | null;
   outcome: RoundOutcome;
-  taunt: string | null;
   /** Set when the server played a scripted move instead of the model. */
   fallbackReason: FallbackReason | null;
   /** True when the model did not commit a move within the time cap. */
@@ -241,7 +236,6 @@ const handler = async (req: Request) => {
         const startedAt = Date.now();
         let modelMove: Move | null = null;
         let predictedUserMove: Move | null = null;
-        let taunt: string | null = null;
         let aborted = false;
         let reasoningText = "";
         let plainText = "";
@@ -294,7 +288,6 @@ const handler = async (req: Request) => {
                     if (isMove(input.predicted_user_move)) {
                       predictedUserMove = input.predicted_user_move;
                     }
-                    taunt = input.taunt?.trim() || null;
                   }
                   break;
                 }
@@ -340,7 +333,6 @@ const handler = async (req: Request) => {
             fallbackReason = aborted ? "timeout" : "no_tool_call";
             modelMove = fallbackMove(round);
             predictedUserMove = null;
-            taunt = null;
             startObservation(
               "fallback-move",
               {
@@ -429,7 +421,6 @@ const handler = async (req: Request) => {
               modelMove: committedMove,
               predictedUserMove,
               outcome,
-              taunt,
               fallbackReason,
               timedOut,
               responseTimeMs,
@@ -447,7 +438,6 @@ const handler = async (req: Request) => {
             predictedUserMove,
             predictionCorrect,
             outcome,
-            taunt,
             fallbackReason,
             timedOut,
             responseTimeMs,

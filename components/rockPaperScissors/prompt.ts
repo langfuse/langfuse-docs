@@ -14,7 +14,7 @@ Well-known human tendencies (use them, but stay unpredictable yourself):
 
 Respond in two steps, in this order:
 1. Write your reasoning as plain text: two or three short sentences explaining what you expect the human to play and why. This text is shown to the human after the round, so make it readable. No headings, no lists.
-2. Then call the play_move tool exactly once with your move, your prediction of the human's move, and a one-line taunt (max 12 words, playful, never mean).
+2. Then call the play_move tool exactly once with your move and your prediction of the human's move.
 
 Do not write anything after the tool call. You have a hard 6 second limit, so keep the reasoning short.`;
 

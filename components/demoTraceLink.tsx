@@ -9,12 +9,14 @@ import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 type DemoTraceLinkProps = {
   traceUrl?: string | null;
   source: "image_generator" | "rock_paper_scissors";
+  label?: string;
   className?: string;
 };
 
 export const DemoTraceLink = ({
   traceUrl,
   source,
+  label = "View trace in Langfuse",
   className,
 }: DemoTraceLinkProps) => {
   const capture = usePostHogClientCapture();
@@ -45,7 +47,7 @@ export const DemoTraceLink = ({
         aria-hidden="true"
         className="size-4 shrink-0"
       />
-      View trace in Langfuse
+      {label}
       <ArrowUpRight className="size-[18px] shrink-0" aria-hidden="true" />
     </a>
   );
