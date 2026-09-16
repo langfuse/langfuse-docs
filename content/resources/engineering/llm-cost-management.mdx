@@ -217,6 +217,13 @@ highest-spend segments show you where to start. The recurring levers:
 - **Cap loops and retries.** Sort traces by cost to find outliers; runaway agent loops and
   retry storms show up as single traces costing hundreds of times the median.
 
+For sustained, high-volume production workloads, it is also worth evaluating dedicated
+inference capacity. Providers such as
+[Morph](https://www.morphllm.com/dedicated-inference) offer reserved capacity with managed
+model serving, trading per-token pricing for a fixed reservation. Compare the reservation
+against your measured usage, including idle time, to see whether it fits your traffic
+pattern.
+
 ## LLM cost management in Langfuse [#llm-cost-management-in-langfuse]
 
 Langfuse covers the four layers as follows:
