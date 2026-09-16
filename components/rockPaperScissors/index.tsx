@@ -13,14 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { RotateCcwIcon } from "lucide-react";
 import {
   MOVES,
@@ -74,7 +66,6 @@ export const RockPaperScissors = ({
   const [result, setResult] = useState<RoundResultPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [elapsedMs, setElapsedMs] = useState(0);
-  const [dialogOpen, setDialogOpen] = useState(false);
   const reasoningRef = useRef<HTMLPreElement>(null);
 
   const userId = useMemo(() => {
@@ -110,7 +101,6 @@ export const RockPaperScissors = ({
     setReasoning("");
     setError(null);
     setPendingUserMove(null);
-    setDialogOpen(false);
     setPhase("choose-move");
   };
 
@@ -199,7 +189,6 @@ export const RockPaperScissors = ({
         },
       ]);
       setPhase("reveal");
-      setDialogOpen(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
       setPhase("choose-move");
@@ -366,19 +355,54 @@ export const RockPaperScissors = ({
                 </pre>
               </div>
 
-              {phase === "reveal" && result && !dialogOpen && (
-                <div className="mt-1 flex flex-wrap items-center justify-center gap-3">
-                  <button
-                    type="button"
-                    onClick={nextRound}
-                    className="inline-flex items-center gap-2 rounded-[2px] border border-line-structure bg-text-primary px-4 py-2 text-sm font-medium text-surface-bg shadow-sm transition-opacity hover:opacity-90"
-                  >
-                    New round
-                  </button>
-                  <DemoTraceLink
-                    traceUrl={result.traceUrl}
-                    source="rock_paper_scissors"
-                  />
+              {phase === "reveal" && result && (
+                <div className="rounded-[2px] border border-line-structure bg-[#403d391a] dark:bg-[#b8b6a01a]">
+                  <div className="flex items-center justify-between border-b border-line-structure px-3 py-1.5">
+                    <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary">
+                      Result
+                    </div>
+                    <div className="font-mono text-[11px] tabular-nums text-text-tertiary">
+                      {MOVE_LABEL[result.userMove]} vs{" "}
+                      {MOVE_LABEL[result.modelMove]}
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-center gap-3 p-4 text-center sm:flex-row sm:justify-between sm:text-left">
+                    <div>
+                      <div className="text-base font-semibold text-text-primary">
+                        {result.outcome === "draw"
+                          ? "Draw"
+                          : result.outcome === "user_won"
+                            ? "You win this round"
+                            : `${opponentMeta.label} wins this round`}
+                      </div>
+                      <div className="mt-0.5 text-xs text-text-tertiary">
+                        {result.fallbackReason === "timeout"
+                          ? "Out of time. Fallback move played."
+                          : result.fallbackReason === "no_tool_call"
+                            ? "No move committed. Fallback move played."
+                            : result.predictedUserMove
+                              ? `It predicted ${result.predictedUserMove}: ${
+                                  result.predictionCorrect ? "correct" : "wrong"
+                                }.`
+                              : null}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      <button
+                        type="button"
+                        onClick={nextRound}
+                        autoFocus
+                        className="inline-flex items-center rounded-[2px] border border-line-structure bg-text-primary px-4 py-2 text-sm font-medium text-surface-bg shadow-sm transition-opacity hover:opacity-90"
+                      >
+                        New round
+                      </button>
+                      <DemoTraceLink
+                        traceUrl={result.traceUrl}
+                        source="rock_paper_scissors"
+                        label="Show trace"
+                      />
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -389,73 +413,6 @@ export const RockPaperScissors = ({
           One trace per round, one session per game.
         </p>
       </div>
-
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-sm rounded-[2px] border-line-structure bg-surface-bg p-6 sm:max-w-sm">
-          {result && (
-            <>
-              <DialogHeader className="items-center text-center sm:text-center">
-                <div
-                  className="flex items-center justify-center gap-4 text-4xl"
-                  aria-hidden="true"
-                >
-                  <span>{MOVE_EMOJI[result.userMove]}</span>
-                  <span className="font-mono text-xs uppercase tracking-[0.16em] text-text-tertiary">
-                    vs
-                  </span>
-                  <span>{MOVE_EMOJI[result.modelMove]}</span>
-                </div>
-                <DialogTitle className="mt-2 text-xl font-semibold text-text-primary">
-                  {result.outcome === "draw"
-                    ? "Draw"
-                    : result.outcome === "user_won"
-                      ? "You win this round"
-                      : `${opponentMeta.label} wins this round`}
-                </DialogTitle>
-                <DialogDescription className="text-xs text-text-tertiary">
-                  {result.fallbackReason === "timeout"
-                    ? "Out of time. Fallback move played."
-                    : result.fallbackReason === "no_tool_call"
-                      ? "No move committed. Fallback move played."
-                      : result.predictedUserMove
-                        ? `It predicted ${result.predictedUserMove}: ${
-                            result.predictionCorrect ? "correct" : "wrong"
-                          }.`
-                        : `${MOVE_LABEL[result.userMove]} vs ${MOVE_LABEL[result.modelMove]}.`}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="mt-2 text-center text-sm text-text-secondary">
-                <span className="font-semibold text-text-primary">
-                  You {score.user}
-                </span>
-                <span className="mx-1.5 text-text-disabled">:</span>
-                <span className="font-semibold text-text-primary">
-                  {score.model} {opponentMeta.label}
-                </span>
-              </div>
-              <DialogFooter className="mt-4 flex-col gap-2 sm:flex-col sm:space-x-0">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDialogOpen(false);
-                    nextRound();
-                  }}
-                  autoFocus
-                  className="inline-flex w-full items-center justify-center rounded-[2px] border border-line-structure bg-text-primary px-4 py-2 text-sm font-medium text-surface-bg shadow-sm transition-opacity hover:opacity-90"
-                >
-                  New round
-                </button>
-                <DemoTraceLink
-                  traceUrl={result.traceUrl}
-                  source="rock_paper_scissors"
-                  label="Show trace"
-                  className="w-full justify-center"
-                />
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
