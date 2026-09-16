@@ -48,7 +48,7 @@ The v2 Observations API is a redesigned endpoint optimized for high-performance 
 
 ### Upgrade from older trace and observation reads [#upgrade-from-older-reads]
 
-The [migration guide](/faq/all/deprecated-api-migration) maps every deprecated read endpoint (`/api/public/traces`, `/api/public/observations`, `/api/public/sessions`, ...) to its v2 replacement, with parameter mappings and before/after examples. Always include `fromStartTime` and `toStartTime` to keep each request bounded.
+The [migration guide](/faq/all/deprecated-api-migration) maps every deprecated read endpoint (`/api/public/traces`, `/api/public/observations`, `/api/public/sessions`, ...) to its v2 replacement, with parameter mappings and before/after examples. Include `fromStartTime` and `toStartTime` for scans and known trace time ranges.
 
 The v2 Observations API returns observation rows, not full trace objects. Group rows by `traceId` when you need to reconstruct trace activity, and use [Metrics API v2](/docs/metrics/features/metrics-api#v2) for aggregate reporting with trace-level dimensions such as `traceName`, `traceRelease`, or `traceVersion`. There is no get-by-id route on v2; for single-observation lookups, pass a URL-encoded `filter` condition on the `id` column instead. See the [v2 Observations API Reference](https://api.reference.langfuse.com/#tag/observations/GET/api/public/v2/observations) for the filter schema.
 
@@ -89,6 +89,8 @@ The v1 API returns complete rows with all fields (input/output, usage, metadata,
 | `trace_context` | tags, release, traceName                                                                                               |
 
 If `fields` is not specified, `core` and `basic` field groups are returned by default. Fields from groups you do not request are **absent** from the response, not `null`. The following fields are an exception and are always present but only populated when the field group `model` is selected: `modelId`, `inputPrice`, `outputPrice`, and `totalPrice`. Note that `inputPrice`, `outputPrice`, and `totalPrice` are returned as **strings** (e.g. `"0.000005"`) to preserve decimal precision; cast them to a numeric type in your pipeline.
+
+The `metadata` group returns a flat key map. OTEL resource attributes can appear as literal dotted keys, such as `metadata["resourceAttributes.service.name"]`, rather than nested objects. Metadata values may themselves be structured; preserve the returned keys and types. For legacy usage and cost field replacements, see the [response-field mapping](/faq/all/deprecated-api-migration#observation-response-fields).
 
 **2. Cursor-Based Pagination**
 
@@ -210,9 +212,9 @@ The advanced `filter` parameter supports the same field with boolean `=` and `<>
 ]
 ```
 
-### Sample Response
+### Sample response [#sample-response]
 
-With all fields included
+Illustrative response with all field groups requested. This generation has recorded usage and cost, string-encoded I/O, and dotted metadata keys. A cursor indicates that more observations match; pass it unchanged with the same filters and field groups to retrieve the next page.
 
 ```json
 {
@@ -238,7 +240,10 @@ With all fields included
       "updatedAt": "2025-12-17T16:09:01.456Z",
       "input": "{\"messages\":[{\"role\":\"user\",\"content\":\"Perfect.\"}]}",
       "output": "{\"role\":\"assistant\",\"content\":\"You're all set. Have a great day!\"}",
-      "metadata": {},
+      "metadata": {
+        "resourceAttributes.service.name": "support-api",
+        "resourceAttributes.deployment.environment": "production"
+      },
       "model": "gpt-4o",
       "internalModelId": "clm1a2b3c4d5e6f7g8h9i0j1",
       "modelParameters": {
