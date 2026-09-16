@@ -248,6 +248,7 @@ export const RockPaperScissors = ({
                 {score.draws} draw{score.draws === 1 ? "" : "s"}
               </div>
             )}
+            {history.length > 0 && <HistoryStrip history={history} />}
           </div>
 
           <div className="flex justify-end">
@@ -293,7 +294,6 @@ export const RockPaperScissors = ({
                   </button>
                 ))}
               </div>
-              {history.length > 0 && <HistoryStrip history={history} />}
             </div>
           )}
 
@@ -452,35 +452,30 @@ const MoveCard = ({
 );
 
 const HistoryStrip = ({ history }: { history: RoundRecord[] }) => (
-  <div className="mt-5">
-    <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-text-tertiary">
-      Previous rounds
-    </div>
-    <div className="mt-2 flex flex-wrap gap-1.5">
-      {history.map((r) => (
-        <span
-          key={r.round}
-          title={`Round ${r.round}: you ${r.userMove}, model ${r.modelMove}`}
-          className={cn(
-            "inline-flex items-center gap-1 rounded-[2px] border px-2 py-0.5 font-mono text-xs",
-            r.outcome === "user_won"
-              ? "border-line-cta text-text-primary"
-              : r.outcome === "model_won"
-                ? "border-line-structure text-text-tertiary"
-                : "border-line-structure text-text-secondary",
-          )}
-        >
-          <span className="text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
-            you
-          </span>
-          <span aria-hidden="true">{MOVE_EMOJI[r.userMove]}</span>
-          <span className="text-text-disabled">/</span>
-          <span aria-hidden="true">{MOVE_EMOJI[r.modelMove]}</span>
-          <span className="text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
-            model
-          </span>
+  <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+    {history.map((r) => (
+      <span
+        key={r.round}
+        title={`Round ${r.round}: you ${r.userMove}, model ${r.modelMove}`}
+        className={cn(
+          "inline-flex items-center gap-1 rounded-[2px] border px-1.5 py-0.5 font-mono text-xs",
+          r.outcome === "user_won"
+            ? "border-line-cta text-text-primary"
+            : r.outcome === "model_won"
+              ? "border-line-structure text-text-tertiary"
+              : "border-line-structure text-text-secondary",
+        )}
+      >
+        <span className="text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+          you
         </span>
-      ))}
-    </div>
+        <span aria-hidden="true">{MOVE_EMOJI[r.userMove]}</span>
+        <span className="text-text-disabled">/</span>
+        <span aria-hidden="true">{MOVE_EMOJI[r.modelMove]}</span>
+        <span className="text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+          model
+        </span>
+      </span>
+    ))}
   </div>
 );
