@@ -110,19 +110,21 @@ export function HiringBadge({
 
   const badge = (
     <div
-      ref={containerRef}
       className={cn(
         adaptive && "hidden w-fit max-w-full min-w-0 @[6.5rem]/hiring:block",
         !adaptive && className,
       )}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => {
-        setIsHovered(false);
-        setGoats([]);
-      }}
     >
-      <div className="relative flex items-center p-1 group button-wrapper max-h-[34px]">
+      <div
+        ref={containerRef}
+        className="relative flex items-center p-1 group button-wrapper max-h-[34px]"
+        onMouseMove={handleMouseMove}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => {
+          setIsHovered(false);
+          setGoats([]);
+        }}
+      >
         <HoverCorners />
         <NextLink
           href="/careers"
@@ -140,9 +142,22 @@ export function HiringBadge({
           <span className="text-xs shrink-0" aria-hidden>
             🐐
           </span>
-          <span className="text-left">
-            <span className="block whitespace-nowrap">
-              {isHovered ? hoverLabel : idleLabel}
+          <span className="grid text-left">
+            <span
+              className={cn(
+                "col-start-1 row-start-1 whitespace-nowrap",
+                isHovered && "invisible",
+              )}
+            >
+              {idleLabel}
+            </span>
+            <span
+              className={cn(
+                "col-start-1 row-start-1 whitespace-nowrap",
+                !isHovered && "invisible",
+              )}
+            >
+              {hoverLabel}
             </span>
           </span>
         </NextLink>
