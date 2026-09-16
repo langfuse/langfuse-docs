@@ -24,6 +24,14 @@ Below, we will walk through each of the options and their guarantees.
 
 Note that all trace deletions will delete related entities like scores and observations across all data storages.
 
+<Callout type="info">
+  Trace deletion (e.g. deleting a user's traces by `userId` for a data subject
+  request) removes the traces and their related observations and scores. It does
+  **not** remove personal data that may also be stored in other objects, such as
+  prompts or datasets. To erase a user's data completely, delete those objects as
+  well, or [delete the entire project](#deleting-a-project).
+</Callout>
+
 ### Single Trace
 
 <LangTabs items={["Langfuse UI", "API"]}>
