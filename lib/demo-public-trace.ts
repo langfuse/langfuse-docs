@@ -12,12 +12,19 @@ export const DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL =
 export const DEMO_PUBLIC_VOICE_AGENT_TRACE_FALLBACK_URL =
   "https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces/9c48c89b09b13ca8766212d61d2daac1";
 
-export type DemoTraceSource = "image_generator" | "voice_agent";
+export const DEMO_PUBLIC_ROCK_PAPER_SCISSORS_TRACE_FALLBACK_URL =
+  "https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces";
+
+export type DemoTraceSource =
+  | "image_generator"
+  | "voice_agent"
+  | "rock_paper_scissors";
 
 export const DEMO_PUBLIC_TRACE_FALLBACK_URLS: Record<DemoTraceSource, string> =
   {
     image_generator: DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL,
     voice_agent: DEMO_PUBLIC_VOICE_AGENT_TRACE_FALLBACK_URL,
+    rock_paper_scissors: DEMO_PUBLIC_ROCK_PAPER_SCISSORS_TRACE_FALLBACK_URL,
   };
 
 const READINESS_POLL_DELAYS_MS = [0, 500, 1_000, 2_000, 4_000] as const;
