@@ -333,7 +333,7 @@ const marqueeRow2: MarqueeItem[] = [
     icon: "/images/integrations/bedrock_icon.png",
   },
   {
-    label: "Strands",
+    label: "Strands Agents",
     href: "/integrations/frameworks/strands-agents",
     icon: "/images/integrations/strands_agents_icon.svg",
   },
