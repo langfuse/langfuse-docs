@@ -1,0 +1,153 @@
+---
+title: "Trace AISIX AI Gateway requests with Langfuse"
+sidebarTitle: AISIX
+logo: /images/integrations/aisix_icon.svg
+description: "Export OpenTelemetry GenAI traces from AISIX AI Gateway to Langfuse without adding an SDK to each application."
+category: Integrations
+---
+
+# Trace AISIX AI Gateway requests with Langfuse
+
+[AISIX](https://github.com/api7/aisix) includes an OTLP/HTTP exporter that can send traces for proxied model requests directly to Langfuse. This gives teams a central view of model, token usage, latency, and request outcomes without adding a Langfuse SDK to every application behind the gateway.
+
+> **What is AISIX?** AISIX is an Apache-2.0-licensed open-source AI gateway maintained by API7.ai. It provides OpenAI-compatible and Anthropic-compatible APIs for routing requests to model providers and applies gateway controls such as authentication, rate limits, caching, and guardrails. AISIX is an independent project and is not an Apache Software Foundation project.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com/) is an open-source LLM engineering platform for tracing, debugging, and evaluating AI applications. Use [Langfuse Cloud](/cloud) or [self-host Langfuse](/self-hosting).
+
+## How it works
+
+AISIX emits OpenTelemetry spans with GenAI semantic convention attributes such as the requested and response model, input and output token counts, finish reason, and request status. Its OTLP/HTTP exporter sends those spans to the [Langfuse OpenTelemetry endpoint](/integrations/native/opentelemetry), where compatible GenAI spans are displayed as generations.
+
+Langfuse is not in the model request path. Model traffic flows from the caller through AISIX to the selected provider, while AISIX exports telemetry separately.
+
+## Prerequisites
+
+- AISIX 1.2.0
+- A Langfuse Cloud project or a self-hosted Langfuse deployment that supports OTLP ingestion
+- Credentials for an upstream model provider
+- Docker for the example below
+
+## Configure the integration
+
+<Steps>
+
+### Create Langfuse credentials
+
+Copy the public and secret keys from your Langfuse project settings. Build the Basic Authentication value used by the OTLP exporter:
+
+```bash
+export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+export LANGFUSE_BASIC_AUTH="$(printf '%s:%s' "$LANGFUSE_PUBLIC_KEY" "$LANGFUSE_SECRET_KEY" | base64 | tr -d '\n')"
+```
+
+The examples use the EU Langfuse Cloud endpoint. Replace the host with `us.cloud.langfuse.com`, `jp.cloud.langfuse.com`, `hipaa.cloud.langfuse.com`, or your self-hosted domain when needed.
+
+### Configure AISIX resources
+
+Create `resources.yaml` with one upstream provider, one model, one caller key, and an OTLP/HTTP exporter:
+
+```yaml filename="resources.yaml"
+_format_version: "1"
+
+provider_keys:
+  - display_name: openai-main
+    provider: openai
+    adapter: openai
+    api_key: ${OPENAI_API_KEY}
+    api_base: https://api.openai.com/v1
+
+models:
+  - display_name: gpt-4o-mini
+    provider: openai
+    model_name: gpt-4o-mini
+    provider_key: openai-main
+
+api_keys:
+  - display_name: demo-caller
+    key_env: CALLER_API_KEY
+    allowed_models:
+      - gpt-4o-mini
+
+observability_exporters:
+  - name: langfuse
+    kind: otlp_http
+    endpoint: https://cloud.langfuse.com/api/public/otel/v1/traces
+    headers:
+      Authorization: Basic ${LANGFUSE_BASIC_AUTH}
+      x-langfuse-ingestion-version: "4"
+    content_mode: metadata_only
+    sample_rate: 1.0
+```
+
+The `x-langfuse-ingestion-version: "4"` header enables real-time ingestion on the Langfuse v4 data model. The explicit `metadata_only` setting excludes prompt and response content from exported spans.
+
+### Start AISIX
+
+Create a minimal `config.yaml`. The Admin API is not required for this standalone example, so it remains disabled.
+
+```yaml filename="config.yaml"
+resources_file: /etc/aisix/resources.yaml
+proxy:
+  addr: "0.0.0.0:3000"
+admin:
+  enabled: false
+```
+
+Start the pinned AISIX image with the configuration and credentials:
+
+```bash
+export OPENAI_API_KEY="sk-..."
+export CALLER_API_KEY="choose-a-key"
+
+docker run --rm --name aisix-langfuse \
+  -v "$(pwd)/config.yaml:/etc/aisix/config.yaml:ro" \
+  -v "$(pwd)/resources.yaml:/etc/aisix/resources.yaml:ro" \
+  -e OPENAI_API_KEY \
+  -e CALLER_API_KEY \
+  -e LANGFUSE_BASIC_AUTH \
+  -p 3000:3000 \
+  ghcr.io/api7/aisix:1.2.0
+```
+
+### Send a model request
+
+In another terminal, send a request through AISIX:
+
+```bash
+curl -X POST "http://127.0.0.1:3000/v1/chat/completions" \
+  -H "Authorization: Bearer ${CALLER_API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o-mini",
+    "messages": [{"role": "user", "content": "What is an AI gateway?"}]
+  }'
+```
+
+### Inspect the trace
+
+Open the [Langfuse Traces view](https://cloud.langfuse.com/project/~/traces). The exported GenAI spans include model and token-usage attributes, finish information, status, and timing. Langfuse may calculate cost when it recognizes the reported model and has matching pricing information; AISIX does not export a calculated cost value.
+
+AISIX can emit gateway, logical request, and provider-attempt spans. The exact observation hierarchy can therefore vary when retries or fallbacks occur. Use the trace tree and AISIX request attributes to distinguish the overall gateway request from individual provider attempts.
+
+</Steps>
+
+## Privacy and sampling
+
+Keep `content_mode: metadata_only` when prompts or responses must not leave the gateway. To export synthetic or approved content for debugging, set `content_mode: full`; AISIX then truncates each captured prompt or response field at `content_max_bytes`, which defaults to 131072 bytes. Review data-retention and access requirements before enabling full-content capture.
+
+Set `sample_rate` between `0.0` and `1.0` to control how many requests are exported. Use a lower value for production traffic after validating the integration with `1.0`.
+
+## Troubleshooting
+
+- **No trace appears:** verify the Langfuse region, the `/api/public/otel/v1/traces` path, and that the Basic Auth value contains the public and secret keys from the same project.
+- **Data is not visible in real time:** include `x-langfuse-ingestion-version: "4"` in the exporter headers.
+- **Token usage is missing:** confirm that the upstream provider returns usage information for the selected API and model.
+- **Cost is missing:** check that Langfuse recognizes the reported model and has pricing information for it.
+- **Prompt or response text is missing:** this is expected with `metadata_only`. Enable `full` only after reviewing the privacy implications.
+
+## Learn more
+
+- [AISIX observability exporters](https://docs.api7.ai/ai-gateway/observability/exporters)
+- [AISIX gateway quickstart](https://docs.api7.ai/ai-gateway/getting-started/gateway-quickstart)
+- [Langfuse OpenTelemetry integration](/integrations/native/opentelemetry)
