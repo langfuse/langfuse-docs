@@ -74,14 +74,14 @@ You will see an annotation task for each item in the queue.
 
 </Steps>
 
-## Review experiment answers with a QA team [#review-experiment-answers]
+## Review experiment results with a QA team [#review-experiment-answers]
 
 Use a queue to hand experiment results to domain experts who need to review answers, check supporting sources, and explain failures.
 
 ### Engineer setup
 
-1. Run your application on the test cases, or [publish saved check results](/resources/engineering/evaluate-existing-application#saved-check-results). Include the question, relevant source material, reference answer, and case ID in the recorded input or metadata so reviewers have the evidence they need. Only upload data that belongs in this project.
-2. [Compare the experiment runs](/docs/evaluation/experiments/compare-experiments) and open the items that need review. Add the relevant **observations** to the queue through the **Annotate** dropdown. For version comparisons, include both versions and identify the baseline and candidate in the queue description.
+1. Run your application on the test cases, or [publish saved check results](/resources/engineering/evaluate-existing-application#saved-check-results). Include the question, relevant source material, reference answer, and case ID.
+2. [Compare the experiment runs](/docs/evaluation/experiments/compare-experiments) and add the relevant **observations** to the annotation queue through the **Annotate** dropdown. For version comparisons, include both versions and identify the baseline and candidate in the queue description.
 3. Configure a score such as `answer_correct` and describe what counts as a pass. Include the release policy and review instructions in the queue description; do not ask reviewers to infer them from a numeric score.
 4. Have an organization Admin or Owner [invite reviewers](/docs/administration/rbac) with a role that allows scoring, such as **Member**. A Viewer can read results but cannot annotate. Assign reviewers to the queue if needed; queue assignment does not grant project access. Project-specific roles depend on your plan.
 
