@@ -183,8 +183,8 @@ If you also enable Langfuse cluster mode, [queue key prefixes change](https://gi
 #### Database setup
 
 1. Create a database that meets the Redis version and capacity requirements on this page.
-2. Set **Data eviction policy** to **no eviction** (`maxmemory-policy=noeviction`). The default is `volatile-lru`, which does not meet Langfuse's queue requirements. See [data eviction policies](https://redis.io/docs/latest/operate/rc/databases/configuration/data-eviction-policies/).
-3. Enable **Transport layer security (TLS)** in the database's **Configuration > Edit > Security** settings. TLS is disabled by default and is available on paid Essentials and Pro plans. Download the `redis_ca.pem` CA bundle and mount it in both Langfuse containers. See [Redis Cloud TLS configuration](https://redis.io/docs/latest/operate/rc/security/database-security/tls-ssl/).
+2. Set **Data eviction policy** to **no eviction**. This provides the no-eviction behavior required by Langfuse's queue. The default is `volatile-lru`, which does not meet Langfuse's queue requirements. See [data eviction policies](https://redis.io/docs/latest/operate/rc/databases/configuration/data-eviction-policies/).
+3. Enable **Transport layer security (TLS)** in the database's **Configuration > Edit > Security** settings. TLS is disabled by default and is available on paid Essentials and Pro plans, but not on Free Essentials plans. Download the `redis_ca.pem` CA bundle and mount it in both Langfuse containers. See [Redis Cloud TLS configuration](https://redis.io/docs/latest/operate/rc/security/database-security/tls-ssl/).
 4. Copy the database hostname, port, username, and password from the [connection information](https://redis.io/docs/latest/operate/rc/databases/connect/). Use the assigned port; do not assume `6379`.
 
 Apply the environment variables to both the Langfuse Web and Worker containers. Replace the example hostname and port with your database's values, and inject the password through your deployment's secret configuration. The examples use the `default` user; if this user is disabled, use your database user's credentials.
@@ -216,7 +216,7 @@ Use the [Redis Cloud Pro example](#redis-cloud-pro) below with `REDIS_CLUSTER_EN
 
 A single endpoint does not mean a database has only one shard. Sharded databases still require keys used together in Lua scripts or transactions to share a hash slot.
 
-Both Langfuse containers must reach all endpoints and ports returned by cluster discovery. For public connections, enable **Use external endpoint** in the OSS Cluster API settings. This setting blocks the database's private endpoint.
+Both Langfuse containers must reach all endpoints and ports returned by cluster discovery. Because cluster-aware clients connect directly to discovered shard proxies, verify that `REDIS_TLS_SERVERNAME` is compatible with the endpoints returned by Redis Cloud. For public connections, enable **Use external endpoint** in the OSS Cluster API settings. This setting blocks the database's private endpoint.
 
 Before changing cluster mode on an existing deployment, account for pending jobs: enabling Langfuse cluster mode changes queue key prefixes.
 
@@ -352,7 +352,7 @@ REDIS_TLS_REJECT_UNAUTHORIZED=true
 REDIS_SENTINEL_ENABLED=false
 ```
 
-Replace the hostname, example port `12345`, and credentials with your database's connection details. Mount the Redis Cloud CA bundle at the specified path in both containers. All endpoints returned by cluster discovery must be reachable.
+Replace the hostname, example port `12345`, and credentials with your database's connection details. Mount the Redis Cloud CA bundle at the specified path in both containers. All endpoints returned by cluster discovery must be reachable, and `REDIS_TLS_SERVERNAME` must be compatible with the discovered endpoints.
 
 #### Self-hosted Redis Cluster
 
