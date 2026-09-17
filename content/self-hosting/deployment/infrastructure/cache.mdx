@@ -171,11 +171,6 @@ The **Non-clustered** policy is a separate option for instances up to 25 GB. It 
 
 For production, use a [private endpoint](https://learn.microsoft.com/en-us/azure/redis/private-link) and disable public network access. Configure private DNS so both Langfuse containers can resolve and reach the cache. Keep the normal `<cache-name>.<region>.redis.azure.net` hostname in the client and TLS settings.
 
-#### Microsoft Entra ID authentication
-
-Azure Managed Redis supports Microsoft Entra ID authentication and enables it by default. However, [Langfuse's current Redis configuration](https://github.com/langfuse/langfuse/blob/39e3cd7d6572236fa9d88e475297941eb118d74b/packages/shared/src/server/redis/redis.ts) reads static credentials; it does not implement the token acquisition and refresh required for an unattended Entra connection.
-The example above therefore uses an access key. Entra authentication requires a client integration that refreshes tokens and reauthenticates each connection before expiry. See [Microsoft Entra client requirements](https://learn.microsoft.com/en-us/azure/redis/entra-for-authentication#configure-your-redis-client-to-use-microsoft-entra).
-
 #### Replacing an existing Azure Cache for Redis instance
 
 Plan a coordinated change for the Web and Worker containers. Redis holds queued work as well as cached data. Stop new job production and process or explicitly account for outstanding jobs before switching instances.
@@ -211,8 +206,6 @@ redis:
     existingSecret: my-redis-secret
     existingSecretPasswordKey: password
 ```
-
-For Azure Managed Redis, use the hostname and port from the [Azure example](#azure-managed-redis), set `redis.deploy: false`, and apply its TLS and cluster environment variables to both Langfuse containers.
 
 Whichever option you choose, make sure `maxmemory-policy` is set to `noeviction` on the instance so that queue jobs are not evicted.
 
@@ -405,8 +398,6 @@ For every ~100000 events per minute we recommend about 1GB of memory for the Red
 Redis allows users to restrict the keys and commands that a given user can access [Redis ACL Docs](https://redis.io/docs/latest/operate/oss_and_stack/management/security/acl/).
 Langfuse expects that the provided user has access to all keys and commands within the given database, i.e. the access control should be defined as `on ~* +@all`.
 
-For Azure Managed Redis, manage authentication through the [Azure portal](https://learn.microsoft.com/en-us/azure/redis/configure#authentication). Azure restricts some administrative commands even when the client has data access; see [blocked commands](https://learn.microsoft.com/en-us/azure/redis/configure#redis-commands-not-supported-in-azure-managed-redis).
-
 ## Valkey vs Redis [#valkey-vs-redis]
 
 [Valkey](https://github.com/valkey-io/valkey) was created as an open source (BSD) alternative to Redis.
@@ -414,5 +405,3 @@ It is a drop-in replacement for Redis and is compatible with the Redis protocol.
 According to the maintainers, major version 8.0.0 retains compatibility to Redis v7 in most instances.
 Both are [officially supported](#support) — Valkey is the default in our [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) deployment.
 If you notice diverging behavior between Redis and Valkey, please create a [GitHub issue](/issues).
-
-
