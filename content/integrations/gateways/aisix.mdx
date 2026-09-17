@@ -115,6 +115,8 @@ docker run --rm --name aisix-langfuse \
 In another terminal, send a request through AISIX:
 
 ```bash
+export CALLER_API_KEY="choose-a-key"
+
 curl -X POST "http://127.0.0.1:3000/v1/chat/completions" \
   -H "Authorization: Bearer ${CALLER_API_KEY}" \
   -H "Content-Type: application/json" \
@@ -134,7 +136,7 @@ AISIX can emit gateway, logical request, and provider-attempt spans. The exact o
 
 ## Privacy and sampling
 
-Keep `content_mode: metadata_only` when prompts or responses must not leave the gateway. To export synthetic or approved content for debugging, set `content_mode: full`; AISIX then truncates each captured prompt or response field at `content_max_bytes`, which defaults to 131072 bytes. Review data-retention and access requirements before enabling full-content capture.
+Keep `content_mode: metadata_only` when prompts or responses must not leave the gateway. Operational metadata can still include identifiers, network attributes, and error details, so review it against your data-handling requirements. To export synthetic or approved content for debugging, set `content_mode: full`; AISIX then truncates each captured prompt or response field at `content_max_bytes`, which defaults to 131072 bytes. Review data-retention and access requirements before enabling full-content capture.
 
 Set `sample_rate` between `0.0` and `1.0` to control how many requests are exported. Use a lower value for production traffic after validating the integration with `1.0`.
 
