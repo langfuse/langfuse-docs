@@ -66,7 +66,7 @@ const vendors = [
       chip("Phoenix · Elastic License 2.0", 4, 22),
       chip("AX · adb · closed · 2025", 50, 58),
       chip("30-day retention (Pro)", 8, 94, { faint: true }),
-      chip("code evals: Enterprise only", 46, 130, { dot: R }),
+      chip("AX code evals: Enterprise only", 42, 130, { dot: R }),
       chip("Langfuse: code evals on every plan", 8, 168, {
         dark: true,
         dot: G,
