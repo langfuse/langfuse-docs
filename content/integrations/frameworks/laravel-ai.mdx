@@ -1,0 +1,112 @@
+---
+title: Integrating Langfuse with Laravel AI Using OpenTelemetry
+sidebarTitle: Laravel AI
+logo: /images/integrations/laravel_icon.svg
+description: Learn how to trace Laravel AI SDK agent runs in Langfuse using OpenTelemetry GenAI instrumentation.
+---
+
+# Integrating Langfuse with Laravel AI
+
+This guide shows how to send [Laravel AI SDK](https://laravel.com/docs/ai-sdk) traces to [Langfuse](/) over OpenTelemetry.
+
+**Laravel AI**: Laravel's first-party SDK for multi-step, tool-calling agents.
+
+**Langfuse**: Open source AI engineering platform for observability, evals, and prompt management.
+
+The instrumentation is the community package [`cristea-iulian/laravel-ai-otel`](https://github.com/cristea-iulian/laravel-ai-otel). It turns Laravel AI events into OpenTelemetry spans that follow the [GenAI semantic conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/). Langfuse maps those spans onto its data model with no Langfuse-specific code in your app.
+
+<Callout type="info">
+  A ready-made demo with a support agent, two tools, and a sub-agent is at
+  [cristea-iulian/laravel-ai-otel-demo](https://github.com/cristea-iulian/laravel-ai-otel-demo).
+  It can run with `--fake`, so you do not need a model API key to see a full
+  trace.
+</Callout>
+
+## Step 1: Install the instrumentation
+
+Requires PHP 8.3+ and Laravel 12 or 13.
+
+```bash
+composer require cristea-iulian/laravel-ai-otel
+composer require open-telemetry/sdk open-telemetry/exporter-otlp
+```
+
+The first package registers listeners on Laravel AI events. The SDK and OTLP exporter are what actually send spans.
+
+If you already run [`open-telemetry/opentelemetry-auto-laravel`](https://packagist.org/packages/open-telemetry/opentelemetry-auto-laravel) (or any global `TracerProvider`), skip the SDK packages. Agent spans nest under the HTTP request or queue job that triggered them.
+
+## Step 2: Point OpenTelemetry at Langfuse
+
+Sign up for [Langfuse Cloud](https://langfuse.com/cloud) or [self-host Langfuse](https://langfuse.com/self-hosting). Authentication uses HTTP Basic Auth: base64-encode your `public_key:secret_key` pair.
+
+```bash
+# Build the Basic Auth string from your Langfuse API keys
+export AUTH_STRING=$(echo -n "pk-lf-...:sk-lf-..." | base64 -w0) # Linux
+# macOS (BSD base64 has no -w0): export AUTH_STRING=$(echo -n "pk-lf-...:sk-lf-..." | base64)
+```
+
+Then set these variables in `.env` (paste the encoded string, Laravel does not expand `${AUTH_STRING}` here):
+
+```dotenv
+OTEL_EXPORTER_OTLP_ENDPOINT=https://cloud.langfuse.com/api/public/otel # 🇪🇺 EU data region
+# Other regions: 🇺🇸 US https://us.cloud.langfuse.com/api/public/otel, 🇯🇵 Japan https://jp.cloud.langfuse.com/api/public/otel, ⚕️ HIPAA https://hipaa.cloud.langfuse.com/api/public/otel
+# Self-hosted (>= v3.22.0): http://localhost:3000/api/public/otel
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic <AUTH_STRING>,x-langfuse-ingestion-version=4"
+OTEL_EXPORTER_OTLP_PROTOCOL=http/json
+OTEL_SERVICE_NAME=my-laravel-app
+```
+
+Use `http/json`. The OpenTelemetry PHP exporter defaults to `http/protobuf` and cannot parse Langfuse's JSON OTLP response body, so every batch logs an export failure even though the spans are stored. `http/json` avoids that noise.
+
+See the [OpenTelemetry setup](/integrations/native/opentelemetry) for Basic Auth and the [real-time ingestion section](/integrations/native/opentelemetry#real-time-ingestion) for the `x-langfuse-ingestion-version` header.
+
+## Step 3: Run an agent
+
+Any Laravel AI agent run is enough. The package listens for the SDK's own events, so you do not wrap calls yourself:
+
+```php
+use App\Ai\Agents\SupportAgent;
+
+$response = (new SupportAgent)->prompt('Where is order 1842?');
+```
+
+In Langfuse you should see a tree like:
+
+```text
+invoke_agent SupportAgent      AGENT
+├── chat gpt-…                 GENERATION
+├── LookupOrder                TOOL
+├── ResearchAgent              TOOL
+│   └── invoke_agent Research… AGENT
+│       └── chat gpt-…         GENERATION
+└── chat gpt-…                 GENERATION
+```
+
+| Laravel AI span        | Langfuse observation                                      |
+| ---------------------- | --------------------------------------------------------- |
+| `invoke_agent {Agent}` | Agent                                                     |
+| `chat {model}`         | Generation (model, tokens, including cache and reasoning) |
+| `execute_tool {tool}`  | Tool                                                      |
+| `embeddings {model}`   | Generation                                                |
+
+Sub-agents used as tools nest under the `execute_tool` span that delegated to them. Provider failover is recorded as a span event.
+
+## Privacy and content capture
+
+By default no prompt, instruction, model output, tool argument, or tool result is recorded. Only metadata (models, providers, token counts, durations, tool names, finish reasons, ids) leaves the application.
+
+To capture content, opt in with the GenAI convention flag:
+
+```dotenv
+OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true
+```
+
+You can also publish the package config (`php artisan vendor:publish --tag=ai-otel-config`) and attach a redactor class. See the [package README](https://github.com/cristea-iulian/laravel-ai-otel#privacy-and-content-capture) for truncation and redaction.
+
+## Troubleshooting
+
+**No traces:** confirm the agent actually ran, `AI_OTEL_ENABLED` is not `false`, and the OTLP endpoint and Basic Auth header are set. Short-lived CLI commands still flush on shutdown.
+
+**Export failures in logs, but traces appear:** you are on `http/protobuf`. Switch `OTEL_EXPORTER_OTLP_PROTOCOL` to `http/json`.
+
+**Empty input/output on generations:** content capture is off by default. Enable `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT`.

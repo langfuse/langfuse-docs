@@ -1,12 +1,12 @@
 ---
-title: Use Langfuse from Go, Java, C#, and Ruby via OpenTelemetry
+title: Use Langfuse from Go, Java, C#, Ruby, and PHP via OpenTelemetry
 tags: [guide, integration]
-description: "Langfuse works from any language with an OpenTelemetry SDK: point the OTLP exporter at the Langfuse endpoint. Setup for Go, Java, C#/.NET, and Ruby."
+description: "Langfuse works from any language with an OpenTelemetry SDK: point the OTLP exporter at the Langfuse endpoint. Setup for Go, Java, C#/.NET, Ruby, and PHP."
 ---
 
 # Use Langfuse from any language via OpenTelemetry
 
-The Langfuse SDKs cover Python and JavaScript/TypeScript, but Langfuse itself is an [OpenTelemetry backend](/integrations/native/opentelemetry): any language with an OpenTelemetry SDK can send traces to the Langfuse OTLP endpoint. If your stack is Go, Java, C#, Ruby, or anything else with OTel support, you do not need to wait for a native SDK.
+The Langfuse SDKs cover Python and JavaScript/TypeScript, but Langfuse itself is an [OpenTelemetry backend](/integrations/native/opentelemetry): any language with an OpenTelemetry SDK can send traces to the Langfuse OTLP endpoint. If your stack is Go, Java, C#, Ruby, PHP, or anything else with OTel support, you do not need to wait for a native SDK.
 
 **TL;DR:** Configure your OpenTelemetry exporter to send OTLP over HTTP (protobuf or JSON; gRPC is not supported) to `https://cloud.langfuse.com/api/public/otel` with a Basic Auth header built from your project keys. Spans with [GenAI semantic convention](https://opentelemetry.io/docs/specs/semconv/gen-ai/) attributes (`gen_ai.*`) appear in Langfuse as generations with model, token, and cost data; other spans nest around them as regular observations.
 
@@ -100,6 +100,18 @@ end
 ```
 
 There is no automatic LLM instrumentation ecosystem for Ruby yet, so the manual `gen_ai.*` pattern above is the standard approach.
+
+## PHP [#php]
+
+The [OpenTelemetry PHP SDK](https://opentelemetry.io/docs/languages/php/) exports OTLP over HTTP. Set the shared environment variables above, and use `http/json` rather than the default `http/protobuf`:
+
+```bash
+OTEL_EXPORTER_OTLP_PROTOCOL=http/json
+```
+
+The PHP exporter cannot parse Langfuse's JSON OTLP response as protobuf, so the default protocol logs an export failure for every batch even though the spans are stored.
+
+For Laravel AI SDK agent runs, use the community instrumentation in [Integrating Langfuse with Laravel AI](/integrations/frameworks/laravel-ai). It emits `invoke_agent`, `chat`, and `execute_tool` spans with `gen_ai.*` attributes, so they render as agent, generation, and tool observations in Langfuse.
 
 ## Verifying the integration
 
