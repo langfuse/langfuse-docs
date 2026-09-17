@@ -33,7 +33,7 @@ We distinguish between officially supported and community-supported options:
 | [Valkey](#valkey-vs-redis) (>= 8, self-hosted or managed)      | Official      |
 | Other Redis-compatible stores (e.g., Dragonfly, KeyDB, Garnet) | Community     |
 
-Managed services that run Redis or Valkey, such as [Amazon ElastiCache](https://aws.amazon.com/elasticache/redis/), [Azure Managed Redis](https://learn.microsoft.com/en-us/azure/redis/overview), and [GCP Memorystore](https://cloud.google.com/memorystore), are covered by the official support level.
+Managed services that run Redis or Valkey, such as [Redis Cloud](https://redis.io/docs/latest/operate/rc/), [Amazon ElastiCache](https://aws.amazon.com/elasticache/redis/), [Azure Managed Redis](https://learn.microsoft.com/en-us/azure/redis/overview), and [GCP Memorystore](https://cloud.google.com/memorystore), are covered by the official support level.
 
 import SelfHostSupportLevels from "@/components-mdx/self-host-support-levels.mdx";
 
@@ -112,7 +112,7 @@ This section covers different deployment options and provides example environmen
 
 ### Managed Redis/Valkey by Cloud Providers [#managed-redis-valkey]
 
-[Amazon ElastiCache](https://aws.amazon.com/de/elasticache/redis/), [Azure Managed Redis](https://learn.microsoft.com/en-us/azure/redis/overview), and [GCP Memorystore](https://cloud.google.com/memorystore/?hl=en) are fully managed Redis services.
+[Redis Cloud](https://redis.io/docs/latest/operate/rc/), [Amazon ElastiCache](https://aws.amazon.com/de/elasticache/redis/), [Azure Managed Redis](https://learn.microsoft.com/en-us/azure/redis/overview), and [GCP Memorystore](https://cloud.google.com/memorystore/?hl=en) are fully managed Redis services.
 Langfuse handles failovers between read-replicas and supports Redis cluster mode for horizontal scaling.
 
 For **standalone Redis instances**, use the standard configuration:
@@ -175,6 +175,61 @@ For production, use a [private endpoint](https://learn.microsoft.com/en-us/azure
 
 Plan a coordinated change for the Web and Worker containers. Redis holds queued work as well as cached data. Stop new job production and process or explicitly account for outstanding jobs before switching instances.
 If you also enable Langfuse cluster mode, [queue key prefixes change](https://github.com/langfuse/langfuse/blob/39e3cd7d6572236fa9d88e475297941eb118d74b/packages/shared/src/server/redis/redis.ts). Copying the old Redis data alone does not convert the queue keys to the new format. Validate ingestion and worker processing after the switch.
+
+### Redis Cloud [#redis-cloud]
+
+[Redis Cloud](https://redis.io/docs/latest/operate/rc/) is a fully managed Redis service. Use the configuration that matches your database's shard count and OSS Cluster API setting.
+
+#### Database setup
+
+1. Create a database that meets the Redis version and capacity requirements on this page.
+2. Set **Data eviction policy** to **no eviction** (`maxmemory-policy=noeviction`). The default is `volatile-lru`, which does not meet Langfuse's queue requirements. See [data eviction policies](https://redis.io/docs/latest/operate/rc/databases/configuration/data-eviction-policies/).
+3. Enable **Transport layer security (TLS)** in the database's **Configuration > Edit > Security** settings. TLS is disabled by default and is available on paid Essentials and Pro plans. Download the `redis_ca.pem` CA bundle and mount it in both Langfuse containers. See [Redis Cloud TLS configuration](https://redis.io/docs/latest/operate/rc/security/database-security/tls-ssl/).
+4. Copy the database hostname, port, username, and password from the [connection information](https://redis.io/docs/latest/operate/rc/databases/connect/). Use the assigned port; do not assume `6379`.
+
+Apply the environment variables to both the Langfuse Web and Worker containers. Replace the example hostname and port with your database's values, and inject the password through your deployment's secret configuration. The examples use the `default` user; if this user is disabled, use your database user's credentials.
+
+#### Single-shard database
+
+Use this configuration for a database with **one primary shard** and **OSS Cluster API disabled**. Replicas can still be enabled.
+
+```bash
+REDIS_HOST=your-redis-cloud-host
+REDIS_PORT=12345
+REDIS_USERNAME=default
+REDIS_AUTH=your-redis-cloud-database-password
+REDIS_TLS_ENABLED=true
+REDIS_TLS_CA_PATH=/app/certs/redis_ca.pem
+REDIS_TLS_SERVERNAME=your-redis-cloud-host
+REDIS_TLS_REJECT_UNAUTHORIZED=true
+REDIS_CLUSTER_ENABLED=false
+REDIS_SENTINEL_ENABLED=false
+```
+
+Leave `REDIS_CONNECTION_STRING` unset when using these separate host and credential variables.
+
+#### Sharded database with OSS Cluster API
+
+For a sharded database, use **Redis Cloud Pro** and enable **OSS Cluster API** under **Performance**. Select the **Redis** hashing policy when creating the database; the **Standard** hashing policy also supports OSS Cluster API. See [Redis Cloud clustering](https://redis.io/docs/latest/operate/rc/databases/configuration/clustering/#oss-cluster-api).
+
+Use the [Redis Cloud Pro example](#redis-cloud-pro) below with `REDIS_CLUSTER_ENABLED=true`. Langfuse adds per-queue hash tags in cluster mode so that related BullMQ keys share a hash slot.
+
+A single endpoint does not mean a database has only one shard. Sharded databases still require keys used together in Lua scripts or transactions to share a hash slot.
+
+Both Langfuse containers must reach all endpoints and ports returned by cluster discovery. For public connections, enable **Use external endpoint** in the OSS Cluster API settings. This setting blocks the database's private endpoint.
+
+Before changing cluster mode on an existing deployment, account for pending jobs: enabling Langfuse cluster mode changes queue key prefixes.
+
+#### Mutual TLS
+
+If you enable **Mutual TLS (require client authentication)**, also mount the client certificate and private key in both Langfuse containers and set:
+
+```bash
+REDIS_TLS_CERT_PATH=/app/certs/redis-client.crt
+REDIS_TLS_KEY_PATH=/app/certs/redis-client.key
+```
+
+Keep certificate validation enabled. See [TLS client authentication](https://redis.io/docs/latest/operate/rc/security/database-security/tls-ssl/#client-authentication).
 
 ### Redis on Kubernetes (Helm)
 
@@ -280,6 +335,24 @@ REDIS_SENTINEL_ENABLED=false
 ```
 
 Replace the example hostname and access key with your instance's values. Leave `REDIS_USERNAME` unset. Allow access to port `10000` and the dynamically assigned shard ports described above. Langfuse adds per-queue hash tags when cluster mode is enabled.
+
+#### Redis Cloud Pro [#redis-cloud-pro]
+
+Enable **OSS Cluster API**, configure TLS, and set the eviction policy to **no eviction** as described in [Redis Cloud](#redis-cloud). Apply this configuration to both the Langfuse Web and Worker containers:
+
+```bash
+REDIS_CLUSTER_ENABLED=true
+REDIS_CLUSTER_NODES=your-redis-cloud-host:12345
+REDIS_USERNAME=default
+REDIS_AUTH=your-redis-cloud-database-password
+REDIS_TLS_ENABLED=true
+REDIS_TLS_CA_PATH=/app/certs/redis_ca.pem
+REDIS_TLS_SERVERNAME=your-redis-cloud-host
+REDIS_TLS_REJECT_UNAUTHORIZED=true
+REDIS_SENTINEL_ENABLED=false
+```
+
+Replace the hostname, example port `12345`, and credentials with your database's connection details. Mount the Redis Cloud CA bundle at the specified path in both containers. All endpoints returned by cluster discovery must be reachable.
 
 #### Self-hosted Redis Cluster
 
@@ -405,3 +478,4 @@ It is a drop-in replacement for Redis and is compatible with the Redis protocol.
 According to the maintainers, major version 8.0.0 retains compatibility to Redis v7 in most instances.
 Both are [officially supported](#support) — Valkey is the default in our [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) deployment.
 If you notice diverging behavior between Redis and Valkey, please create a [GitHub issue](/issues).
+
