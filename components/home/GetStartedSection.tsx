@@ -178,7 +178,7 @@ function NeedHelpFooter() {
 const QUICKSTART_LINKS = [
   { label: "Observability", href: "/docs/observability/get-started" },
   { label: "Prompt Management", href: "/docs/prompt-management/get-started" },
-  { label: "Evals", href: "/docs/evaluation/overview" },
+  { label: "Evals", href: "/docs/evaluation/get-started/online" },
 ];
 
 function ManualTab() {

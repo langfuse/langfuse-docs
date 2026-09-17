@@ -98,7 +98,7 @@ export async function POST(req: Request) {
 
   try {
     const result = streamText({
-      model: inkeep("inkeep-qa-sonnet-4") as unknown as Parameters<
+      model: inkeep("inkeep-qa-expert") as unknown as Parameters<
         typeof streamText
       >[0]["model"],
       tools: {
@@ -108,6 +108,9 @@ export async function POST(req: Request) {
       },
       messages: modelMessages,
       toolChoice: "auto",
+      // AI SDK 7 emits telemetry by default once an integration is registered;
+      // keep the Inkeep proxy untraced as before.
+      telemetry: { isEnabled: false },
     });
 
     return result.toUIMessageStreamResponse();

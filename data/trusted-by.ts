@@ -13,24 +13,37 @@ export type TrustedByData = {
 export const trustedByData: TrustedByData = {
   cloud: {
     Hobby: [
-      // No logos assigned to Hobby plan yet
+      {
+        name: "Hugging Face",
+        logo: "/images/customers/picing-logos/huggingface.png",
+        caseStudyUrl: "/users/hugging-face",
+      },
     ],
     Core: [
-      //{ name: "Knowunity", logo: "/images/customers/picing-logos/knowunity.png" },
-      { name: "Kombo", logo: "/images/customers/picing-logos/kombo.png" },
+      {
+        name: "Magic Patterns",
+        logo: "/images/customers/picing-logos/magicpatterns.png",
+        caseStudyUrl: "/users/magic-patterns-ai-design-tools",
+      },
       { name: "Draftbit", logo: "/images/customers/picing-logos/draftbit.png" },
-      //{ name: "GoDaddy", logo: "/images/customers/picing-logos/godaddy.png" },
     ],
     Pro: [
+      {
+        name: "Canva",
+        logo: "/images/customers/picing-logos/canva.png",
+        caseStudyUrl: "/users/canva",
+      },
       { name: "Twilio", logo: "/images/customers/picing-logos/twilio.png" },
       {
         name: "SumUp",
         logo: "/images/customers/picing-logos/sumup.png",
         caseStudyUrl: "/users/sumup",
       },
-      //{ name: "Brevo", logo: "/images/customers/picing-logos/brevo.png" },
+      { name: "Brevo", logo: "/images/customers/picing-logos/brevo.png" },
     ],
     Enterprise: [
+      { name: "Ramp", logo: "/images/customers/picing-logos/ramp.png" },
+      { name: "GoDaddy", logo: "/images/customers/picing-logos/godaddy.png" },
       {
         name: "Khan Academy",
         logo: "/images/customers/picing-logos/khanacademy.png",
@@ -41,9 +54,6 @@ export const trustedByData: TrustedByData = {
         logo: "/images/customers/picing-logos/merckgroup.png",
         caseStudyUrl: "/users/merckgroup",
       },
-      //{ name: "Cinc Systems", logo: "/images/customers/picing-logos/cincsystems.png" },
-      //{ name: "HG Capital", logo: "/images/customers/picing-logos/hgcapital.png" },
-      //{ name: "Dixa", logo: "/images/customers/picing-logos/dixa.png" },
     ],
   },
 };

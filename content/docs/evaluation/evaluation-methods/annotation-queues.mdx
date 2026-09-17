@@ -74,6 +74,41 @@ You will see an annotation task for each item in the queue.
 
 </Steps>
 
+## Review experiment results with a QA team [#review-experiment-answers]
+
+Use a queue to hand experiment results to domain experts who need to review answers, check supporting sources, and explain failures.
+
+### Engineer setup
+
+1. Run your application on the test cases, or [publish saved check results](/resources/engineering/evaluate-existing-application#saved-check-results). Include the question, relevant source material, reference answer, and case ID.
+2. [Compare the experiment runs](/docs/evaluation/experiments/compare-experiments) and add the relevant **observations** to the annotation queue through the **Annotate** dropdown. For version comparisons, include both versions and identify the baseline and candidate in the queue description.
+3. Configure a score such as `answer_correct` and describe what counts as a pass. Include the release policy and review instructions in the queue description; do not ask reviewers to infer them from a numeric score.
+4. Have an organization Admin or Owner [invite reviewers](/docs/administration/rbac) with a role that allows scoring, such as **Member**. A Viewer can read results but cannot annotate. Assign reviewers to the queue if needed; queue assignment does not grant project access. Project-specific roles depend on your plan.
+
+### Reviewer steps
+
+1. Open the queue and read the question, supporting source, reference answer, and application output. Inspect linked observations when you need more context.
+2. Record the configured score. Add a comment explaining the failure and the supporting evidence. If the automated check is wrong, say so rather than marking the application wrong to match it.
+3. Add a [corrected output](/docs/observability/features/corrections) when you can supply the answer the application should have returned. Complete the item and move to the next one.
+
+After review, the engineer checks proposed corrections and adds accepted cases to the [dataset](/docs/evaluation/experiments/datasets), using the reviewed answer as the expected output. A correction does not automatically update the dataset or approve a release. Keep the original run and case IDs for provenance, approve the new dataset version, and re-run both application versions if inputs or expected outputs changed. If only the grader changed, re-score both versions with that definition.
+
+## Keyboard shortcuts [#keyboard-shortcuts]
+
+Processing a queue is fully keyboard-driven, so you can score items without reaching for the mouse. The shortcuts follow a navigate-then-edit model and are suppressed while you are typing in a text field or while a dialog or dropdown is open. Press `?` in the queue to open the in-app cheatsheet.
+
+| Key                    | Action                                                  |
+| ---------------------- | ------------------------------------------------------- |
+| `→` / `←`              | Next / previous item in the queue                       |
+| `↑` / `↓`              | Move between score fields (wraps at the ends)           |
+| `1`–`9`                | Select the Nth option on a categorical or boolean field |
+| `Enter`                | Commit the current value, or open a dropdown            |
+| `Esc`                  | Leave a text field and return to field navigation       |
+| `Cmd`/`Ctrl` + `Enter` | Complete the item and advance to the next               |
+| `?`                    | Open the keyboard shortcuts cheatsheet                  |
+
+Number badges appear on categorical options when a field is focused, and the `⌘↵` / `Ctrl↵` hint is shown on the **Mark Completed** button. The score-field shortcuts (`↑`/`↓`, `1`–`9`, `Enter`, `Esc`) also work in the inline **Annotate** drawer on trace, observation, and session pages; the queue navigation keys (`→`/`←`, `Cmd`/`Ctrl` + `Enter`) apply when processing a queue.
+
 ## Manage Annotation Queues via API
 
 You can manage annotation queues via the [API](https://api.reference.langfuse.com/#tag/annotationqueues/GET/api/public/annotation-queues). This allows for scaling and automating your annotation workflows or using Langfuse as the backbone for a [custom vibe coded annotation tool](/blog/2025-11-25-vibe-coding-custom-annotation-ui).

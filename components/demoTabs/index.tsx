@@ -9,6 +9,7 @@ import {
   ImageIcon,
   BarChart3Icon,
   MicIcon,
+  HandIcon,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 
@@ -30,12 +31,18 @@ const ImageGenerator = dynamic(() =>
 const VoiceAgent = dynamic(() =>
   import("@/components/voiceAgent").then((m) => ({ default: m.VoiceAgent })),
 );
+const RockPaperScissors = dynamic(() =>
+  import("@/components/rockPaperScissors").then((m) => ({
+    default: m.RockPaperScissors,
+  })),
+);
 
 const TAB_MAP: Record<string, string> = {
   chatbot: "chatbot",
   image: "image",
   sentiment: "sentiment",
   voice: "voice",
+  rps: "rps",
 };
 
 function getTabFromHash(): string {
@@ -71,6 +78,11 @@ export const DemoTabs = ({ className, ...props }: DemoTabsProps) => {
             <span className="hidden sm:inline">Q&A Chatbot</span>
             <span className="sm:hidden">Chat</span>
           </TabsTrigger>
+          <TabsTrigger value="voice" className="gap-1.5">
+            <MicIcon className="size-4" />
+            <span className="hidden sm:inline">Voice Agent</span>
+            <span className="sm:hidden">Voice</span>
+          </TabsTrigger>
           <TabsTrigger value="image" className="gap-1.5">
             <ImageIcon className="size-4" />
             <span className="hidden sm:inline">Image Generator</span>
@@ -81,10 +93,10 @@ export const DemoTabs = ({ className, ...props }: DemoTabsProps) => {
             <span className="hidden sm:inline">Sentiment Classifier</span>
             <span className="sm:hidden">Sentiment</span>
           </TabsTrigger>
-          <TabsTrigger value="voice" className="gap-1.5">
-            <MicIcon className="size-4" />
-            <span className="hidden sm:inline">Voice Agent</span>
-            <span className="sm:hidden">Voice</span>
+          <TabsTrigger value="rps" className="gap-1.5">
+            <HandIcon className="size-4" />
+            <span className="hidden sm:inline">Rock Paper Scissors</span>
+            <span className="sm:hidden">RPS</span>
           </TabsTrigger>
         </TabsList>
 
@@ -94,6 +106,14 @@ export const DemoTabs = ({ className, ...props }: DemoTabsProps) => {
           className={activeTab !== "chatbot" ? "hidden" : undefined}
         >
           <Chat />
+        </TabsContent>
+
+        <TabsContent
+          value="voice"
+          forceMount
+          className={activeTab !== "voice" ? "hidden" : undefined}
+        >
+          <VoiceAgent />
         </TabsContent>
 
         <TabsContent
@@ -113,11 +133,11 @@ export const DemoTabs = ({ className, ...props }: DemoTabsProps) => {
         </TabsContent>
 
         <TabsContent
-          value="voice"
+          value="rps"
           forceMount
-          className={activeTab !== "voice" ? "hidden" : undefined}
+          className={activeTab !== "rps" ? "hidden" : undefined}
         >
-          <VoiceAgent />
+          <RockPaperScissors />
         </TabsContent>
       </Tabs>
     </div>

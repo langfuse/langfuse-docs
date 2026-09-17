@@ -11,6 +11,7 @@ import monokaiProLightRaw from "./lib/themes/monokai-pro-light.json";
 const monokaiProLight = monokaiProLightRaw as unknown as any;
 import remarkGfm from "remark-gfm";
 import { remarkMdxMermaid } from "fumadocs-core/mdx-plugins";
+import { remarkCodeFilename } from "./lib/remark-code-filename.mjs";
 import { mdxJsxToMarkdown } from "mdast-util-mdx-jsx";
 import { z } from "zod";
 
@@ -64,6 +65,8 @@ const customerFrontmatterSchema = baseFrontmatterSchema.extend({
   customerLogo: z.string().nullish(),
   customerLogoDark: z.string().nullish(),
   customerQuote: z.string().nullish(),
+  customerQuoteHighlight: z.string().nullish(),
+  customerQuoteTag: z.string().nullish(),
   quoteAuthor: z.string().nullish(),
   quoteRole: z.string().nullish(),
   quoteCompany: z.string().nullish(),
@@ -136,6 +139,7 @@ export const faq = defineDocs({
 
 const integrationsFrontmatterSchema = sidebarFrontmatterSchema.extend({
   logo: z.string().nullish(),
+  logoAppearance: z.enum(["dark", "light", "multicolor"]).optional(),
 });
 
 export const integrations = defineDocs({
@@ -180,14 +184,42 @@ export const academy = defineDocs({
   meta: { files: ["**/*.json", "!japan/**"] },
 });
 
+// Japanese Academy pages are translated in batches and therefore lag the
+// English source between syncs. `translatedAt` records the date a page was last
+// brought in line with the English version, so the page can tell readers which
+// snapshot they are looking at and point them at the English original.
+const academyJaFrontmatterSchema = sidebarFrontmatterSchema.extend({
+  translatedAt: yamlDateField,
+});
+
 export const academyJa = defineDocs({
   dir: "content/academy/japan",
-  docs: { schema: sidebarFrontmatterSchema },
+  docs: { schema: academyJaFrontmatterSchema },
 });
 
 export const workshop = defineDocs({
   dir: "content/workshop",
   docs: { schema: sidebarFrontmatterSchema },
+});
+
+// SEO/GEO resources section (e.g. /resources/engineering). Supports optional
+// tags so the index listing can group articles by category.
+const resourcesFrontmatterSchema = sidebarFrontmatterSchema.extend({
+  tags: z.array(z.string()).optional(),
+});
+
+export const resources = defineDocs({
+  dir: "content/resources",
+  docs: {
+    schema: resourcesFrontmatterSchema,
+  },
+});
+
+export const compare = defineDocs({
+  dir: "content/compare",
+  docs: {
+    schema: resourcesFrontmatterSchema,
+  },
 });
 
 export const marketing = defineDocs({
@@ -198,7 +230,7 @@ export const marketing = defineDocs({
 export default defineConfig({
   plugins: [lastModified()],
   mdxOptions: {
-    remarkPlugins: [remarkGfm, remarkMdxMermaid],
+    remarkPlugins: [remarkGfm, remarkMdxMermaid, remarkCodeFilename],
     providerImportSource: "@/mdx-components",
     // Disable remark-image: many content files reference remote images via https://
     // and the plugin tries to fetch dimensions at compile time, causing build failures

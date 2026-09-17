@@ -1,6 +1,7 @@
 ---
 source: ⚠️ Jupyter Notebook
 title: Observability for Hugging Face Models with Langfuse Integration
+seoTitle: Hugging Face Observability with Langfuse
 sidebarTitle: Hugging Face
 logo: /images/integrations/huggingface_icon.svg
 description: Example notebook on how to monitor Hugging Face models with Langfuse using the OpenAI SDK
@@ -34,12 +35,12 @@ Set up your environment variables with the necessary keys. Get keys for your Lan
 import os
 
 # Get keys for your project from https://cloud.langfuse.com
-os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." # Private Project
-os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." # Private Project
-os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"  # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-..."); # Private Project
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-..."); # Private Project
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com");  # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
-os.environ["HUGGINGFACE_ACCESS_TOKEN"] = "hf_..."
+os.environ.setdefault("HUGGINGFACE_ACCESS_TOKEN", "hf_...");
 ```
 
 ### Import Necessary Modules

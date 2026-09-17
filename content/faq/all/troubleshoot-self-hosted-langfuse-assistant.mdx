@@ -1,0 +1,45 @@
+---
+title: How do I troubleshoot the self-hosted Langfuse Assistant?
+description: Resolve common model, MCP, worker, and sandbox setup issues for the self-hosted Langfuse Assistant.
+tags: [self-hosting]
+---
+
+# Troubleshoot the self-hosted Langfuse Assistant
+
+Use these checks when the self-hosted Langfuse Assistant does not start or work as expected. For the complete configuration flow, see [Set up the self-hosted Langfuse Assistant](/self-hosting/configuration/langfuse-assistant).
+
+## The Assistant is not visible
+
+Confirm `LANGFUSE_IN_APP_AGENT_ENABLED=true` on both web and worker, then recreate both services. Enabling organization AI Features does not show the Assistant on its own.
+
+## Runs stay queued or time out
+
+Confirm at least one worker is running with `LANGFUSE_IN_APP_AGENT_ENABLED=true` and shares Redis with web. A worker without it does not consume the run queue.
+
+## Runs fail during agent initialization
+
+The worker could not connect to the MCP server. Confirm it can reach `/api/public/mcp` at `LANGFUSE_MCP_BASE_URL` when set, otherwise at `NEXTAUTH_URL`. Add a different internal hostname to `LANGFUSE_MCP_ALLOWED_HOSTS` on web. A `403` with `Invalid Host header` means the hostname is not allowed.
+
+## The UI reports that the model is not configured
+
+Set `LANGFUSE_AI_PROVIDER` and `LANGFUSE_AI_MODEL` on both services. Also set `LANGFUSE_AI_API_KEY` for `anthropic` or `openai`, then recreate both services.
+
+## Bedrock returns access denied or model not found
+
+Check the Region, model access, and invoke permissions in [Configure the model](/self-hosting/configuration/langfuse-assistant#configure-the-model). An AWS Marketplace subscription error means an administrator must activate the model for the account first.
+
+## An OpenAI-compatible gateway returns 404
+
+Include `/v1` in `LANGFUSE_AI_BASE_URL`. The endpoint must serve `POST {base}/chat/completions`, or `POST {base}/responses` when `LANGFUSE_AI_USE_RESPONSES_API=true`.
+
+## Sandbox tools are missing
+
+This is expected when `LANGFUSE_IN_APP_AGENT_SANDBOX_PROVIDER` is unset. Configure `lambda-microvm` and all required sandbox variables to add file and code-execution tools.
+
+## File or code-execution tools fail
+
+Confirm `lambda:PassNetworkConnector` covers `HTTP_INGRESS` and the egress connector. Also confirm that the MicroVM image matches the running Langfuse version.
+
+## The image build fails
+
+Confirm Lambda MicroVMs are available in the Region, the AWS CLI supports `lambda-microvms`, the build role can read the artifact, and the caller has `iam:PassRole` on the build role.

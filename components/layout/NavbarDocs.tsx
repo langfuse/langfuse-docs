@@ -20,11 +20,16 @@ export function NavbarDocs({
 }) {
   return (
     <header
-      className="sticky z-50 h-[var(--lf-nav-primary-height)] bg-surface-1 backdrop-blur-md"
+      className="sticky z-50 isolate h-[var(--lf-nav-primary-height)] bg-surface-1"
       style={{ top: "var(--fd-banner-height, 0px)" }}
     >
       <nav className="flex mx-auto h-full border-b max-w-380 border-line-structure">
-        <div className={cn(cornersStyle, "pr-0 lg:max-w-[240px] lg:pr-px")}>
+        <div
+          className={cn(
+            cornersStyle,
+            "pr-0 lg:max-w-[240px] lg:pr-px lg:shrink-0",
+          )}
+        >
           <div className={cn(contentStyle, "rounded-r-none lg:rounded-r-sm")}>
             <Link href="/" className="flex gap-2 items-center shrink-0">
               <Logo wrapInLink={false} />
@@ -34,7 +39,9 @@ export function NavbarDocs({
             </Link>
           </div>
         </div>
-        <div className={cn(cornersStyle, "hidden relative px-0 lg:flex")}>
+        <div
+          className={cn(cornersStyle, "hidden relative px-0 min-w-0 lg:flex")}
+        >
           <div
             className="absolute left-0 w-[10px] h-[10px] bg-left-corner bgc-size-6"
             style={{
@@ -55,7 +62,7 @@ export function NavbarDocs({
         <div
           className={cn(
             cornersStyle,
-            "flex-1 justify-end pr-px pl-0 lg:justify-center lg:max-w-[240px] lg:pl-px",
+            "flex-1 justify-end pr-px pl-0 lg:justify-center lg:max-w-[240px] lg:pl-px lg:shrink-0",
           )}
         >
           <div

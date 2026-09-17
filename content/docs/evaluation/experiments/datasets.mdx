@@ -6,7 +6,7 @@ sidebarTitle: Datasets
 
 # Datasets
 
-A dataset is a collection of inputs and expected outputs and is used to test your application. Both [UI-based](/docs/evaluation/experiments/experiments-via-ui) and [SDK-based](/docs/evaluation/experiments/experiments-via-sdk) experiments support Langfuse Datasets.
+A dataset is a collection of inputs and expected outputs and is used to test your application. [UI-based](/docs/evaluation/experiments/experiments-via-ui), [SDK-based](/docs/evaluation/experiments/experiments-via-sdk), and [OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry) experiments can all use Langfuse Datasets.
 
 _Langfuse Dataset View_
 
@@ -17,6 +17,8 @@ _Langfuse Dataset View_
 - Create test cases for your application with real production traces
 - Collaboratively create and collect dataset items with your team
 - Have a single source of truth for your test data
+
+For guidance on scoping a dataset, picking realistic inputs, and writing expected outputs you can actually evaluate against, read [Designing datasets in the Langfuse Academy](/academy/datasets/designing-great-datasets).
 
 ## Get Started
 
@@ -38,6 +40,85 @@ import CreateDatasetItem from "@/components-mdx/datasets-create-dataset-item.mdx
 
 <CreateDatasetItem />
 </Steps>
+
+## Multi-modal dataset items [#multi-modal-dataset-items]
+
+Dataset item `input`, `expectedOutput`, and `metadata` fields can include media attachments such as images, audio, video, documents, and other files. You can add media from the Langfuse UI when creating or editing an item, or upload media through the Python and JS/TS SDKs with `LangfuseMedia`.
+
+<Callout type="info">
+  Multi-modal datasets are supported for SDK-based experiments with Python SDK
+  `>= 4.10.0` and JS/TS SDK `@langfuse/client >= 5.6.0`. UI-based
+  experiments do not yet support dataset items with media attachments.
+</Callout>
+
+In the UI, open a dataset item and use the attach button, drag-and-drop, or paste files into the `input`, `expectedOutput`, or `metadata` editor.
+
+<Video
+  src="https://static.langfuse.com/docs-videos/2026-06-17-create-multimodal-dataset-item.mp4"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+In the SDKs, wrap media in `LangfuseMedia` before creating the dataset item. The SDK uploads the media, stores a reference in the dataset item, and the Langfuse UI renders the attachment preview.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+from langfuse.media import LangfuseMedia
+
+langfuse = get_client()
+
+langfuse.create_dataset_item(
+    dataset_name="visual-qa",
+    input={
+        "question": "What is shown in this image?",
+        "image": LangfuseMedia(
+            file_path="./example.jpg",
+            content_type="image/jpeg",
+        ),
+    },
+    expected_output={"label": "invoice"},
+)
+
+dataset = langfuse.get_dataset("visual-qa")
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { LangfuseClient, LangfuseMedia } from "@langfuse/client";
+import fs from "node:fs";
+
+const langfuse = new LangfuseClient();
+
+await langfuse.dataset.createItem({
+  datasetName: "visual-qa",
+  input: {
+    question: "What is shown in this image?",
+    image: new LangfuseMedia({
+      source: "bytes",
+      contentBytes: fs.readFileSync("./example.jpg"),
+      contentType: "image/jpeg",
+    }),
+  },
+  expectedOutput: { label: "invoice" },
+});
+
+const dataset = await langfuse.dataset.get("visual-qa");
+```
+
+</Tab>
+</LangTabs>
+
+See [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk#multimodal-experiments) for using multi-modal items in experiments.
+
+<Callout type="info">
+  CSV imports are intended for text and structured JSON dataset items. Use the
+  UI item editor or SDKs for multi-modal dataset items.
+</Callout>
 
 ## Dataset Folders
 
@@ -120,7 +201,7 @@ You can retrieve a dataset as it existed at a specific point in time by providin
 
 ```python
 from langfuse import get_client
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
 
 langfuse = get_client()
 
@@ -146,7 +227,7 @@ import { LangfuseClient } from "@langfuse/client";
 const langfuse = new LangfuseClient();
 
 // Capture the timestamp (use item's createdAt)
-const versionTimestamp = new Date("2025-12-15T06:30:00").toISOString();
+const versionTimestamp = new Date("2025-12-15T06:30:00Z").toISOString();
 
 // Fetch dataset at version timestamp
 const datasetAtVersion = await langfuse.dataset.get("my-dataset", {
@@ -167,7 +248,7 @@ You can view all dataset versions by navigating to **Datasets** → **Select a d
 </Tab>
 </LangTabs>
 
-### Run experiments on versioned datasets
+### Run experiments on versioned datasets [#run-experiments-on-versioned-datasets]
 
 You can run experiments directly on versioned datasets. This is useful for comparing how your model performs against different dataset versions or reproducing experiment results with the exact dataset state from a specific point in time.
 
@@ -175,8 +256,7 @@ You can run experiments directly on versioned datasets. This is useful for compa
 <Tab>
 
 ```python
-from datetime import timedelta
-import time
+from datetime import datetime, timezone
 from langfuse import Langfuse
 
 langfuse = Langfuse()
@@ -208,7 +288,7 @@ import { LangfuseClient } from "@langfuse/client";
 const langfuse = new LangfuseClient();
 
 // Capture the version timestamp
-const versionTimestamp = new Date("2025-12-15T06:30:00").toISOString();
+const versionTimestamp = new Date("2025-12-15T06:30:00Z").toISOString();
 
 // Fetch versioned dataset
 const versionedDataset = await langfuse.dataset.get("qa-dataset", {
@@ -218,7 +298,7 @@ const versionedDataset = await langfuse.dataset.get("qa-dataset", {
 const result = await versionedDataset.runExperiment({
   name: "Baseline Experiment v1",
   description: "Running on dataset v1",
-  task: async ({ item }) => {
+  task: async (item) => {
     // Your LLM application logic here
     // For this example, we'll just return the expected output
     return item.expectedOutput;
@@ -356,7 +436,7 @@ langfuse.create_dataset_item(
     expected_output={ "text": "hello world" },
     # link to a trace
     source_trace_id="<trace_id>",
-    # optional: link to a specific span, event, or generation
+    # optional: link to a specific observation
     source_observation_id="<observation_id>"
 )
 ```
@@ -369,20 +449,20 @@ import { LangfuseClient } from "@langfuse/client";
 
 const langfuse = new LangfuseClient();
 
-await langfuse.api.datasetItems.create({
+await langfuse.dataset.createItem({
   datasetName: "<dataset_name>",
   input: { text: "hello world" },
   expectedOutput: { text: "hello world" },
   // link to a trace
   sourceTraceId: "<trace_id>",
-  // optional: link to a specific span, event, or generation
+  // optional: link to a specific observation
   sourceObservationId: "<observation_id>",
 });
 ```
 
 </Tab>
 <Tab>
-In the UI, use `+ Add to dataset` on any observation (span, event, generation) of a production trace.
+In the UI, use `+ Add to dataset` on any [observation](/docs/observability/data-model#observations-traces-and-sessions) of a production trace.
 
 <Video
   src="https://static.langfuse.com/docs-videos/datasets-add-from-trace.mp4"
@@ -421,6 +501,7 @@ You can upsert items by providing the `id` of the item you want to update.
 
 ```python
 langfuse.create_dataset_item(
+    dataset_name="<dataset_name>",
     id="<item_id>",
     # example: update status to "ARCHIVED"
     status="ARCHIVED"
@@ -437,7 +518,8 @@ import { LangfuseClient } from "@langfuse/client";
 
 const langfuse = new LangfuseClient();
 
-await langfuse.api.datasetItems.create({
+await langfuse.dataset.createItem({
+  datasetName: "<dataset_name>",
   id: "<item_id>",
   // example: update status to "ARCHIVED"
   status: "ARCHIVED",
@@ -457,7 +539,7 @@ In the UI, you can edit the item by clicking on the item id. To archive or delet
 
 Once you created a dataset, you can test and evaluate your application based on it.
 
-import { Table, WandSparkles, CodeXml, Database } from "lucide-react";
+import { Table, WandSparkles, CodeXml, Database, Radio } from "lucide-react";
 
 <Cards num={1}>
 
@@ -471,6 +553,12 @@ import { Table, WandSparkles, CodeXml, Database } from "lucide-react";
     icon={<CodeXml size="24" />}
     title="Experiments via UI"
     href="/docs/evaluation/experiments/experiments-via-ui"
+    arrow
+  />
+  <Card
+    icon={<Radio size="24" />}
+    title="Experiments via OpenTelemetry"
+    href="/docs/evaluation/experiments/experiments-via-opentelemetry"
     arrow
   />
 </Cards>

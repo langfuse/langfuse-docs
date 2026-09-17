@@ -21,6 +21,7 @@ type CarouselProps = {
   plugins?: CarouselPlugin;
   orientation?: "horizontal" | "vertical";
   setApi?: (api: CarouselApi) => void;
+  zoomOnMobile?: boolean;
 };
 
 type CarouselContextProps = {
@@ -159,6 +160,7 @@ const Carousel = React.forwardRef<
       plugins,
       className,
       children,
+      zoomOnMobile = false,
       ...props
     },
     ref,
@@ -236,8 +238,11 @@ const Carousel = React.forwardRef<
           target.tagName === "IMG" &&
           carouselContainerRef.current?.contains(target)
         ) {
-          // Only handle clicks on desktop (screens wider than 500px)
-          if (window.innerWidth <= 500) {
+          if (target.closest("a")) {
+            return;
+          }
+
+          if (!zoomOnMobile && window.innerWidth <= 500 && e.detail !== 0) {
             return;
           }
 
@@ -253,7 +258,7 @@ const Carousel = React.forwardRef<
           }
         }
       },
-      [extractImages],
+      [extractImages, zoomOnMobile],
     );
 
     // Navigate zoomed images
@@ -357,12 +362,15 @@ Carousel.displayName = "Carousel";
 
 const CarouselContent = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => {
+  React.HTMLAttributes<HTMLDivElement> & {
+    /** Classes on the Embla viewport (overflow-hidden wrapper). */
+    viewportClassName?: string;
+  }
+>(({ className, viewportClassName, ...props }, ref) => {
   const { carouselRef, orientation } = useCarousel();
 
   return (
-    <div ref={carouselRef} className="overflow-hidden">
+    <div ref={carouselRef} className={cn("overflow-hidden", viewportClassName)}>
       <div
         ref={ref}
         className={cn(

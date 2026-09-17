@@ -7,6 +7,10 @@ import { HomeSection } from "./HomeSection";
 import { Heading } from "@/components/ui/heading";
 import { TextHighlight } from "@/components/ui/text-highlight";
 import { Text } from "@/components/ui/text";
+import {
+  formatCompanyCount,
+  formatSdkInstallsPerMonth,
+} from "@/lib/usage-stats";
 
 const reasons = [
   {
@@ -26,7 +30,7 @@ const reasons = [
     body: "Standard trace format. Works with existing OpenTelemetry instrumentation.",
   },
   {
-    title: "80+ integrations",
+    title: "100+ integrations",
     body: "Works with any model, any framework, and stack.",
   },
   {
@@ -43,7 +47,7 @@ const reasons = [
   },
   {
     title: "Production-proven",
-    body: "Billions of events processed per month. 50M+ SDK installs/month. Fortune 50 deployments.",
+    body: `${formatCompanyCount()} companies using Langfuse. Billions of events processed per month. ${formatSdkInstallsPerMonth()} SDK installs/month. Fortune 50 deployments.`,
   },
   {
     title: "Shipping velocity",

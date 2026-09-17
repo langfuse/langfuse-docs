@@ -6,13 +6,30 @@ This directory contains the LiveKit voice agent that powers the voice assistant 
 
 The agent (`agent.py`) is a Python-based LiveKit agent that:
 
-- Uses LiveKit's inference API with fallback adapters for LLM, STT, and TTS
-- Connects to the [Langfuse Docs MCP server](https://langfuse.com/docs/docs-mcp) to answer questions about Langfuse
-- Sends OpenTelemetry spans to the [Langfuse OTel endpoint](https://langfuse.com/docs/observability/overview) for tracing
+- Runs on [OpenAI GPT-Live](https://docs.livekit.io/agents/models/realtime/plugins/gpt-live/), a full-duplex speech-to-speech model, by default (`VOICE_AGENT_MODE=gpt-live`)
+- Falls back to a cascaded STT → LLM → TTS pipeline on LiveKit's inference API with provider fallback adapters when `VOICE_AGENT_MODE=pipeline`
+- Connects to the [Langfuse Docs MCP server](https://langfuse.com/docs/docs-mcp) to answer questions about Langfuse. Tool results are compacted to about 6,000 characters (title, URL, and an excerpt per matching page) before they reach the model, because GPT-Live's session context is capped at 8k tokens and the raw search result is about 15k tokens
+- Sends OpenTelemetry spans to Langfuse for tracing
+- Records the conversation audio and attaches it to the trace's root observation in Langfuse
+
+### Agent modes
+
+`VOICE_AGENT_MODE` selects which agent joins the room:
+
+- `gpt-live` (default): the `Marin` agent uses `GPTLiveModel`. The voice model handles listening, turn taking, and speaking; a backend Responses model (`GPT_LIVE_RESPONSES_MODEL`, default `gpt-5.6-luna`) handles reasoning and the Langfuse docs MCP tool calls. The voice can be changed with `GPT_LIVE_VOICE` (default `marin`). Requires `OPENAI_API_KEY` from an account with GPT-Live access. No VAD, STT, or TTS is configured in this mode. A keyboard-typing "thinking" sound plays while docs tool calls run.
+- `pipeline`: the `Kelly` agent runs the cascaded pipeline with Silero VAD, LiveKit inference STT/LLM/TTS fallback adapters, and the same "thinking" sound for the whole LLM turn.
+
+Traces are tagged with the active mode (`voice-agent`, `gpt-live` or `pipeline`).
 
 ### OTel tracing
 
-The agent configures an OpenTelemetry `TracerProvider` that exports spans to Langfuse via the OTLP/HTTP exporter. LiveKit's agent SDK automatically instruments LLM calls, STT, TTS, and tool invocations as OTel spans. These are sent to `{LANGFUSE_HOST}/api/public/otel` using Basic auth derived from the Langfuse API keys.
+The agent configures an OpenTelemetry `TracerProvider` shared between LiveKit (via `set_tracer_provider`) and one Langfuse client per configured data region (EU, US, JP, internal). Each Langfuse client registers a `LangfuseSpanProcessor` on the provider, so LiveKit's spans (LLM calls, STT, TTS, turn detection, tool invocations) are exported to every region's demo project. Regions without configured credentials are skipped with a warning.
+
+### Conversation recordings
+
+The whole conversation is wrapped in a Langfuse root observation (`voice-conversation`) that LiveKit's `agent_session` span nests under. The root observation is ended as soon as the agent session closes, with the full transcript as its input/output, so the conversation is complete in Langfuse without waiting for LiveKit's teardown (which takes 20-30s after the user hangs up).
+
+The session is started with `record={"audio": True}`, which makes LiveKit write a stereo OGG recording (user left channel, agent right channel) to `ctx.session_directory / "audio.ogg"`. Once LiveKit has finalized it (`on_session_end`), a `session-recording` child observation is added under the root with a copy of the transcript and the recording in its metadata as a `LangfuseMedia` file, where it renders with an audio player. Because Langfuse media IDs are derived from the file's content hash, the same media reference resolves in every region; the file is uploaded to all regions concurrently via each client's media API.
 
 ## Deployment
 
@@ -20,14 +37,23 @@ The agent configures an OpenTelemetry `TracerProvider` that exports spans to Lan
 
 The following secrets must be configured on the LiveKit Cloud agent (via `--secrets` or `--secrets-file`):
 
-- `LANGFUSE_PUBLIC_KEY`
-- `LANGFUSE_SECRET_KEY`
-- `LANGFUSE_HOST` (e.g. `https://cloud.langfuse.com`)
+- `OPENAI_API_KEY` (required for the default `gpt-live` mode)
+- `VOICE_AGENT_MODE` (optional, `gpt-live` or `pipeline`), `GPT_LIVE_VOICE`, `GPT_LIVE_RESPONSES_MODEL` (optional overrides)
 
-`LIVEKIT_URL`, `LIVEKIT_API_KEY`, and `LIVEKIT_API_SECRET` are injected automatically by LiveKit Cloud.
+Plus one set of Langfuse credentials per region (`EU`, `US`, `JP`, `INTERNAL`):
+
+- `NEXT_PUBLIC_<REGION>_LANGFUSE_BASE_URL` (e.g. `https://cloud.langfuse.com`)
+- `NEXT_PUBLIC_<REGION>_LANGFUSE_PUBLIC_KEY`
+- `<REGION>_LANGFUSE_SECRET_KEY`
+
+Regions without credentials are skipped. `LIVEKIT_URL`, `LIVEKIT_API_KEY`, and `LIVEKIT_API_SECRET` are injected automatically by LiveKit Cloud.
 
 ### Deploy
 
+`livekit.toml` pins the LiveKit Cloud project and agent ID so `lk agent deploy` updates the existing agent. Authenticate once with `lk cloud auth`, then from this directory:
+
 ```bash
-lk agent deploy
+lk agent deploy --project langfuse-docs-demo
 ```
+
+Several configured CLI projects share the same subdomain, so pass `--project langfuse-docs-demo` explicitly to avoid the CLI picking the wrong credentials.

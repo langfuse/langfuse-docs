@@ -11,7 +11,7 @@ function slugFromCustomerRoute(route: string): string {
 
 /**
  * `usersSource.getPages()` order follows the content scan order (not `meta.json`).
- * Use this so the Users grid and homepage carousel match the sidebar / meta order.
+ * Use this so the customers grid and homepage carousel match the sidebar / meta order.
  */
 export function sortCustomerStoriesByMetaOrder<T extends { route: string }>(
   stories: T[],

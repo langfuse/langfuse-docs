@@ -11,7 +11,7 @@ This guide shows you how to integrate **Langfuse** with **LiveKit Agents** for o
 
 > **What is LiveKit Agents?** [LiveKit Agents](https://docs.livekit.io/agents/) ([GitHub](https://github.com/livekit/agents)) is an open-source Python and Node.js framework for building production-grade multimodal and voice AI agents. It provides a complete set of tools and abstractions for feeding realtime media through AI pipelines, supporting both high-performance STT-LLM-TTS voice pipelines and speech-to-speech models with any AI provider.
 
-> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source AI engineering platform. It offers tracing and monitoring capabilities for LLM applications. Langfuse helps developers debug, analyze, and optimize their AI systems by providing detailed insights and integrating with a wide array of tools and frameworks through native integrations, OpenTelemetry, and dedicated SDKs.
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source AI engineering platform. It offers tracing and monitoring capabilities for LLM applications. Langfuse helps developers debug, analyze, and optimize their AI systems by providing detailed insights and integrating with a wide array of tools and frameworks through native integrations, OpenTelemetry, and dedicated SDKs. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it.
 
 ## Get Started
 
@@ -82,17 +82,17 @@ from livekit.agents.telemetry import set_tracer_provider
 def setup_langfuse(
     metadata: dict[str, AttributeValue] | None = None,
     *,
-    host: str | None = None,
+    base_url: str | None = None,
     public_key: str | None = None,
     secret_key: str | None = None,
 ) -> TracerProvider:
     public_key = public_key or os.getenv("LANGFUSE_PUBLIC_KEY")
     secret_key = secret_key or os.getenv("LANGFUSE_SECRET_KEY")
-    host = host or os.getenv("LANGFUSE_HOST") or os.getenv("LANGFUSE_BASE_URL")
+    base_url = base_url or os.getenv("LANGFUSE_BASE_URL") or os.getenv("LANGFUSE_HOST")
 
-    if not public_key or not secret_key or not host:
+    if not public_key or not secret_key or not base_url:
         raise ValueError(
-            "LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, and LANGFUSE_HOST (or LANGFUSE_BASE_URL) must be set"
+            "LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, and LANGFUSE_BASE_URL (or LANGFUSE_HOST) must be set"
         )
 
     trace_provider = TracerProvider()
@@ -101,7 +101,7 @@ def setup_langfuse(
     Langfuse(
         public_key=public_key,
         secret_key=secret_key,
-        base_url=host,
+        base_url=base_url,
         tracer_provider=trace_provider,
         should_export_span=lambda span: True,
     )

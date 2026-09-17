@@ -13,6 +13,8 @@ import {
   handbookSource,
   academySource,
   workshopSource,
+  resourcesSource,
+  compareSource,
   marketingSource,
 } from "@/lib/source";
 
@@ -100,7 +102,7 @@ export const docSections: Record<string, SectionMeta> = {
   users: {
     source: usersSource,
     collection: "customers",
-    title: "User stories",
+    title: "Customers",
     layout: "post",
     hasOwnRoute: true,
   },
@@ -125,6 +127,20 @@ export const docSections: Record<string, SectionMeta> = {
     layout: "docs",
     hasOwnRoute: true,
   },
+  resources: {
+    source: resourcesSource,
+    collection: "resources",
+    title: "Resources",
+    layout: "post",
+    hasOwnRoute: true,
+  },
+  compare: {
+    source: compareSource,
+    collection: "compare",
+    title: "Compare",
+    layout: "post",
+    hasOwnRoute: true,
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -137,6 +153,13 @@ export const MARKETING_SLUGS = marketingSource
   .getPages()
   .map((p) => p.url.replace(/^\//, ""))
   .filter(Boolean) as string[];
+
+/** Use case landing pages share compact spacing and omit the copy toolbar. */
+export const USE_CASE_SECTIONS = new Set<string>([
+  "chat-agents",
+  "coding-agents",
+  "workflow-automation",
+]);
 
 /** Build a unified config that includes both doc sections and marketing entries. */
 const marketingEntries: Record<string, SectionMeta> = Object.fromEntries(
@@ -164,6 +187,7 @@ export const DEDICATED_MARKETING_SLUGS = new Set<string>([
   "pricing",
   "pricing-self-host",
   "japan",
+  "events",
 ]);
 
 export const DEDICATED_APP_SECTIONS = new Set<string>([

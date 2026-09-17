@@ -5,7 +5,12 @@ import { ChevronDown } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { HoverCorners } from "@/components/ui/corner-box";
 import { cn } from "@/lib/utils";
-import { productLinks, resourcesLinks, simpleLinks } from "@/lib/nav-links";
+import {
+  productLinks,
+  resourcesLinks,
+  simpleLinks,
+  useCaseLinks,
+} from "@/lib/nav-links";
 import type { NavPanelLink } from "@/lib/nav-links";
 import type { SectionNavData } from "@/lib/nav-tree";
 
@@ -47,7 +52,7 @@ const productFeatured: FeaturedItem = {
   title: "Get Started with Tracing",
   description: "This guide walks you through ingesting your first trace.",
   cta: "Read docs",
-  href: "/docs/get-started",
+  href: "/docs/observability/get-started",
 };
 
 const resourcesFeatured: FeaturedItem = {
@@ -73,6 +78,30 @@ const resourcesFeatured: FeaturedItem = {
     "Our goal continues to be building the best AI engineering platform",
   cta: "Read story",
   href: "/blog/joining-clickhouse",
+};
+
+const useCasesFeatured: FeaturedItem = {
+  image: (
+    <div className="flex h-full items-center justify-center px-5">
+      <div className="w-full rounded border border-line-structure bg-surface-1 px-4 py-3 shadow-sm">
+        <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+          Use case
+        </p>
+        <p className="mt-1 font-sans text-[12px] font-semibold leading-snug text-text-primary">
+          Multi-turn chat agents in production
+        </p>
+        <p className="mt-1 font-sans text-[10px] leading-relaxed text-text-tertiary">
+          Session-level tracing, evals, and cost visibility for chat support and
+          assistant experiences.
+        </p>
+      </div>
+    </div>
+  ),
+  title: "Langfuse for chat agents",
+  description:
+    "See how to monitor multi-turn chat quality, cost, and resolution in one view.",
+  cta: "Open use case",
+  href: "/chat-agents",
 };
 
 // ── Featured card component ───────────────────────────────────────────────────
@@ -139,7 +168,7 @@ function NavDropdownPanel({
 
 // ── Custom fixed-positioned dropdown ─────────────────────────────────────────
 
-type MegaMenuId = "product" | "resources";
+type MegaMenuId = "product" | "resources" | "use-cases";
 
 function NavDropdown({
   id,
@@ -261,7 +290,9 @@ function NavDropdown({
             : "pointer-events-none opacity-0 -translate-y-1 transition-[opacity,transform] duration-0",
         )}
         style={{
-          top: "66px",
+          // Viewport-fixed: banner + primary bar + 6px gap. Do not rely on a
+          // header containing block (backdrop-filter used to create one).
+          top: "calc(var(--fd-banner-height, 0px) + var(--lf-nav-primary-height) + 6px)",
           left,
         }}
       >
@@ -320,6 +351,16 @@ export function NavLinks({
           label="Resources"
           links={resourcesLinks}
           featured={resourcesFeatured}
+          openId={openId}
+          setOpenId={setOpenId}
+          cancelScheduledClose={cancelScheduledClose}
+          scheduleClose={scheduleClose}
+        />
+        <NavDropdown
+          id="use-cases"
+          label="Use cases"
+          links={useCaseLinks}
+          featured={useCasesFeatured}
           openId={openId}
           setOpenId={setOpenId}
           cancelScheduledClose={cancelScheduledClose}

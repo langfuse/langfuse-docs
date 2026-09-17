@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { RootProvider } from "fumadocs-ui/provider/next";
+import { AppRootProvider } from "@/components/AppRootProvider";
 import { GoogleTagManager } from "@next/third-parties/google";
 import localFont from "next/font/local";
 import { Inter } from "next/font/google";
@@ -11,6 +11,20 @@ import {
 } from "@/lib/og-url";
 import { PostHogProvider } from "@/components/analytics/PostHogProvider";
 import { AISearch } from "@/components/inkeep/search";
+import { Hubspot } from "@/components/analytics/hubspot";
+import { GoogleAds } from "@/components/analytics/google-ads";
+import { LinkedInInsightTag } from "@/components/analytics/linkedin-ads";
+import { RedditPixel } from "@/components/analytics/reddit-ads";
+import { SpotifyPixel } from "@/components/analytics/spotify-ads";
+import { TwitterPixel } from "@/components/analytics/twitter-ads";
+import { ConversionTracker } from "@/components/analytics/ConversionTracker";
+import { AdConsentGate } from "@/components/analytics/AdConsentGate";
+import { ClickIdPersistence } from "@/components/analytics/ClickIdPersistence";
+import { CommonRoom } from "@/components/analytics/common-room";
+import { AhrefsAnalytics } from "@/components/analytics/ahrefs";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import "../style.css";
+import "../src/overrides.css";
 
 const interVariable = Inter({
   subsets: ["latin"],
@@ -31,11 +45,6 @@ const f37Analog = localFont({
   display: "swap",
   weight: "500",
 });
-import { Hubspot } from "@/components/analytics/hubspot";
-import { GoogleAds } from "@/components/analytics/google-ads";
-import "../style.css";
-import "@vidstack/react/player/styles/base.css";
-import "../src/overrides.css";
 
 const defaultOgImageUrl = buildDefaultSiteOgImageUrl();
 
@@ -53,6 +62,7 @@ export const metadata: Metadata = {
     shortcut: ["/favicon.ico"],
   },
   openGraph: {
+    type: "website",
     images: [{ url: defaultOgImageUrl }],
   },
   twitter: {
@@ -77,22 +87,29 @@ export default function RootLayout({
           <DevAriaHiddenConsoleFilter />
         )}
         <PostHogProvider>
-          <RootProvider
-            i18n={{
-              locale: "en",
-              translations: {
-                lastUpdate: "Last edited",
-              },
-            }}
-          >
+          <AppRootProvider i18n={{ locale: "en" }}>
             <AISearch>{children}</AISearch>
-          </RootProvider>
+          </AppRootProvider>
         </PostHogProvider>
         {process.env.NODE_ENV === "production" && (
           <>
             <GoogleTagManager gtmId="GTM-NGLK4TZX" />
-            <GoogleAds />
+            {/* Ad pixels require prior consent (CookieYes "advertisement"
+                category). The gate keeps them from loading or setting cookies
+                until it is granted; every conversion helper already no-ops
+                when its tag is absent, so nothing else needs gating. */}
+            <AdConsentGate>
+              <GoogleAds />
+              <LinkedInInsightTag />
+              <RedditPixel />
+              <SpotifyPixel />
+              <TwitterPixel />
+            </AdConsentGate>
+            <ConversionTracker />
+            <ClickIdPersistence />
             <Hubspot />
+            <CommonRoom />
+            <AhrefsAnalytics />
             <Script
               id="cookieyes"
               type="text/javascript"
@@ -101,6 +118,7 @@ export default function RootLayout({
             />
           </>
         )}
+        <SpeedInsights sampleRate={0.1} />
       </body>
     </html>
   );

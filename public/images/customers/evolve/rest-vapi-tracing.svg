@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="780" viewBox="0 0 1600 780" role="img" aria-labelledby="title desc">
+  <title id="title">Vapi orchestrates the Rest voice turn</title>
+  <desc id="desc">A Rest user speaks or types. Vapi coordinates Deepgram, OpenAI, and ElevenLabs, and spans are emitted automatically to Langfuse.</desc>
+  <defs>
+    <style>
+      .sans { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    </style>
+  </defs>
+  <rect width="1600" height="780" fill="#FAFAF9"/>
+  <text class="sans" x="48" y="52" font-size="22" font-weight="700" fill="#1A1A1A">Vapi orchestrates the voice turn</text>
+  <text class="sans" x="48" y="82" font-size="15" fill="#5C5C5C">Native Langfuse integration traces the session automatically, whether the user speaks or types.</text>
+
+  <!-- User -->
+  <rect x="48" y="128" width="420" height="500" rx="16" fill="#FFFFFF" stroke="#E4E4E7"/>
+  <text class="sans" x="76" y="172" font-size="18" font-weight="700" fill="#1A1A1A">Rest user</text>
+  <text class="sans" x="76" y="198" font-size="14" fill="#5C5C5C">Speaks, or types</text>
+  <rect x="76" y="228" width="364" height="132" rx="12" fill="#FAFAF9" stroke="#E4E4E7"/>
+  <text class="sans" x="96" y="268" font-size="15" fill="#1A1A1A">&quot;I couldn't sleep again last night -</text>
+  <text class="sans" x="96" y="294" font-size="15" fill="#1A1A1A">can we move my wind-down time?&quot;</text>
+
+  <rect x="76" y="384" width="168" height="44" rx="22" fill="#F5C542"/>
+  <text class="sans" x="124" y="412" font-size="14" font-weight="700" fill="#1A1A1A">VOICE</text>
+  <rect x="256" y="384" width="184" height="44" rx="22" fill="#FAFAF9" stroke="#E4E4E7"/>
+  <text class="sans" x="286" y="412" font-size="14" font-weight="650" fill="#5C5C5C">TEXT CHAT</text>
+
+  <text class="sans" x="76" y="468" font-size="14" fill="#5C5C5C">One session, one trace - whichever</text>
+  <text class="sans" x="76" y="490" font-size="14" fill="#5C5C5C">channel it arrives on.</text>
+  <text class="sans" x="76" y="548" font-size="13" fill="#737373">Text chat and extractors land in the</text>
+  <text class="sans" x="76" y="568" font-size="13" fill="#737373">same Langfuse project.</text>
+
+  <!-- Arrow -->
+  <path d="M484 368 H540" stroke="#4C2FB9" stroke-width="2"/>
+  <polygon points="540,362 556,368 540,374" fill="#4C2FB9"/>
+
+  <!-- Vapi box -->
+  <rect x="572" y="128" width="980" height="560" rx="16" fill="#FFFFFF" stroke="#E4E4E7"/>
+  <text class="sans" x="604" y="176" font-size="22" font-weight="700" fill="#1A1A1A">Vapi</text>
+  <rect x="1188" y="148" width="332" height="36" rx="8" fill="#F5C542"/>
+  <text class="mono" x="1210" y="172" font-size="12" font-weight="700" letter-spacing="0.6" fill="#1A1A1A">NATIVE LANGFUSE INTEGRATION</text>
+
+  <!-- Steps -->
+  <rect x="604" y="208" width="916" height="88" rx="12" fill="#FAFAF9"/>
+  <text class="mono" x="624" y="244" font-size="13" font-weight="700" fill="#4C2FB9">01  Speech in</text>
+  <text class="sans" x="760" y="244" font-size="14" font-weight="650" fill="#1A1A1A">Vapi</text>
+  <text class="sans" x="624" y="272" font-size="14" fill="#5C5C5C">The user's audio streams into Vapi, which owns the call session, turn-taking, and interruptions.</text>
+
+  <rect x="604" y="308" width="916" height="88" rx="12" fill="#FAFAF9"/>
+  <text class="mono" x="624" y="344" font-size="13" font-weight="700" fill="#4C2FB9">02  Transcription</text>
+  <text class="sans" x="800" y="344" font-size="14" font-weight="650" fill="#1A1A1A">Deepgram</text>
+  <text class="sans" x="624" y="372" font-size="14" fill="#5C5C5C">Audio becomes text in real time, with partials for barge-in.</text>
+
+  <rect x="604" y="408" width="916" height="88" rx="12" fill="#FAFAF9"/>
+  <text class="mono" x="624" y="444" font-size="13" font-weight="700" fill="#4C2FB9">03  Reasoning</text>
+  <text class="sans" x="768" y="444" font-size="14" font-weight="650" fill="#1A1A1A">OpenAI</text>
+  <text class="sans" x="624" y="472" font-size="14" fill="#5C5C5C">The composed prompt plus conversation state goes to the LLM. Tool calls resolve here.</text>
+
+  <rect x="604" y="508" width="916" height="88" rx="12" fill="#FAFAF9"/>
+  <text class="mono" x="624" y="544" font-size="13" font-weight="700" fill="#4C2FB9">04  Voice out</text>
+  <text class="sans" x="760" y="544" font-size="14" font-weight="650" fill="#1A1A1A">ElevenLabs</text>
+  <text class="sans" x="624" y="572" font-size="14" fill="#5C5C5C">The reply is synthesized and streamed back to the user's ear.</text>
+
+  <text class="mono" x="604" y="644" font-size="12" font-weight="650" letter-spacing="1.2" fill="#4C2FB9">SPANS EMITTED AUTOMATICALLY</text>
+  <text class="mono" x="1288" y="644" font-size="12" font-weight="650" letter-spacing="1.2" fill="#4C2FB9">MINIMAL SETUP</text>
+</svg>
