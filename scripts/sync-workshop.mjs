@@ -5,6 +5,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import posixPath from "node:path/posix";
 import process from "node:process";
+import { pathToFileURL } from "node:url";
 import workshopConfig from "../lib/workshop-config.js";
 
 const OWNER = "langfuse";
@@ -408,6 +409,42 @@ function readInlineCodeSpan(markdown, start) {
   return { end: close + marker.length };
 }
 
+function readHtmlImage(markdown, start, sourcePath) {
+  if (!/^<img(?=\s|\/>)/i.test(markdown.slice(start))) return null;
+
+  let quote = null;
+  let end = start + 4;
+
+  while (end < markdown.length) {
+    const char = markdown[end];
+    if (quote) {
+      if (char === quote) quote = null;
+    } else if (char === `"` || char === `'`) {
+      quote = char;
+    } else if (char === ">") {
+      end += 1;
+      break;
+    }
+    end += 1;
+  }
+
+  if (end > markdown.length || markdown[end - 1] !== ">") return null;
+
+  const tag = markdown.slice(start, end);
+  const srcAttribute = /(\s+src\s*=\s*)(["'])(.*?)\2/i;
+  const match = tag.match(srcAttribute);
+  if (!match) return { end, value: tag };
+
+  const rewrittenSrc = rewriteImageUrl(match[3], sourcePath);
+  return {
+    end,
+    value: tag.replace(
+      srcAttribute,
+      (_match, prefix, quote) => `${prefix}${quote}${rewrittenSrc}${quote}`,
+    ),
+  };
+}
+
 function findClosingBracket(markdown, openBracket) {
   let depth = 1;
   let index = openBracket + 1;
@@ -569,6 +606,13 @@ function rewriteMarkdownReferenceSegment(
   let index = 0;
 
   while (index < segment.length) {
+    const htmlImage = readHtmlImage(segment, index, sourcePath);
+    if (htmlImage) {
+      output += htmlImage.value;
+      index = htmlImage.end;
+      continue;
+    }
+
     const definition = readReferenceDefinition(
       segment,
       index,
@@ -743,7 +787,14 @@ async function main() {
   );
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
+  main().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}
+
+export { rewriteMarkdownReferences };

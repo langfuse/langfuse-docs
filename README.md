@@ -12,7 +12,7 @@ Repo for [langfuse.com](https://langfuse.com). Built with [Fumadocs](https://fum
 
 ## Local Development
 
-Pre-requisites: Node.js 22, pnpm v9.5.0
+Pre-requisites: Node.js 22 (22.13+), pnpm v12.3.4
 
 To use Node 22 (e.g. with [nvm](https://github.com/nvm-sh/nvm)): `nvm install 22` then `nvm use` (or `nvm use 22`). The repo includes an `.nvmrc` so `nvm use` picks 22 automatically.
 

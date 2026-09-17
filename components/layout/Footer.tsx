@@ -40,6 +40,9 @@ const menuItems: {
       { name: "Evaluations", href: "/docs/evaluation/overview" },
       { name: "Metrics", href: "/docs/metrics/overview" },
       { name: "Langfuse for Agents", href: "/agents" },
+      { name: "Chat agents", href: "/chat-agents" },
+      { name: "Coding agents", href: "/coding-agents" },
+      { name: "Workflow automation", href: "/workflow-automation" },
       {
         name: "Playground",
         href: "/docs/prompt-management/features/playground",
@@ -69,6 +72,7 @@ const menuItems: {
       { name: "Roadmap", href: "/docs/roadmap" },
       { name: "Interactive Demo", href: "/docs/demo" },
       { name: "Customers", href: "/users" },
+      { name: "Compare", href: "/compare" },
       { name: "AI Engineering Library", href: "/library" },
       { name: "Workshop", href: "/workshop" },
       { name: "Guides & Cookbooks", href: "/guides" },

@@ -65,6 +65,8 @@ const customerFrontmatterSchema = baseFrontmatterSchema.extend({
   customerLogo: z.string().nullish(),
   customerLogoDark: z.string().nullish(),
   customerQuote: z.string().nullish(),
+  customerQuoteHighlight: z.string().nullish(),
+  customerQuoteTag: z.string().nullish(),
   quoteAuthor: z.string().nullish(),
   quoteRole: z.string().nullish(),
   quoteCompany: z.string().nullish(),
@@ -182,9 +184,17 @@ export const academy = defineDocs({
   meta: { files: ["**/*.json", "!japan/**"] },
 });
 
+// Japanese Academy pages are translated in batches and therefore lag the
+// English source between syncs. `translatedAt` records the date a page was last
+// brought in line with the English version, so the page can tell readers which
+// snapshot they are looking at and point them at the English original.
+const academyJaFrontmatterSchema = sidebarFrontmatterSchema.extend({
+  translatedAt: yamlDateField,
+});
+
 export const academyJa = defineDocs({
   dir: "content/academy/japan",
-  docs: { schema: sidebarFrontmatterSchema },
+  docs: { schema: academyJaFrontmatterSchema },
 });
 
 export const workshop = defineDocs({
@@ -193,14 +203,20 @@ export const workshop = defineDocs({
 });
 
 // SEO/GEO resources section (e.g. /resources/engineering). Supports optional
-// tags so the index listing can group articles by category (comparisons,
-// migrations, …).
+// tags so the index listing can group articles by category.
 const resourcesFrontmatterSchema = sidebarFrontmatterSchema.extend({
   tags: z.array(z.string()).optional(),
 });
 
 export const resources = defineDocs({
   dir: "content/resources",
+  docs: {
+    schema: resourcesFrontmatterSchema,
+  },
+});
+
+export const compare = defineDocs({
+  dir: "content/compare",
   docs: {
     schema: resourcesFrontmatterSchema,
   },

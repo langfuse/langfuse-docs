@@ -31,6 +31,9 @@ export function AppRootProvider({
       {...props}
       theme={{
         ...theme,
+        // Fumadocs 16.13+ binds D to theme toggle. Disable it so typing or
+        // accidental keypresses on docs/marketing pages don't flip the theme.
+        hotKey: false,
         scriptProps: { ...theme?.scriptProps, ...scriptProps },
       }}
     >

@@ -1,5 +1,6 @@
 ---
 title: "AI agent evaluation: trajectory, tool calls, and task completion"
+seoTitle: "AI Agent Evaluation: Trajectory and Tool Calls"
 description: "AI agent evaluation explained: how to measure trajectory, tool use, task completion, and multi-turn quality, with offline and online evaluation patterns."
 tags: [guide, evaluation]
 ---
@@ -93,7 +94,7 @@ Two related patterns: in experiments, a tool-call assertion makes a good regress
 
 Task completion asks whether the agent achieved the user's goal, and it usually needs an LLM judge because "achieved the goal" is a semantic judgment over the whole run. The judge needs the overall input and final output, not an intermediate step.
 
-In Langfuse, [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators run at the observation level, which is the recommended target as of July 2026 (trace-level judge evaluators are legacy). The pattern for whole-run judgments is to target the root observation of the agent, the span that records the overall request and final response, and map its input and output into the judge prompt. If your instrumentation does not yet write a summary of the run onto the root observation, add that first; the evaluator sees the observation it targets, not its children.
+In Langfuse, [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators run at the observation level, which is the recommended target as of July 2026 (trace-level judge evaluators are legacy). The pattern for whole-run judgments is to target the root observation of the agent, the [observation](/docs/observability/data-model#observations-traces-and-sessions) that records the overall request and final response, and map its input and output into the judge prompt. If your instrumentation does not yet write a summary of the run onto the root observation, add that first; the evaluator sees the observation it targets, not its children.
 
 Concretely:
 
@@ -101,7 +102,7 @@ Concretely:
 2. Map `{{input}}` and `{{output}}` from the root observation's fields, and preview the populated prompt against matched data from the last 24 hours before activating.
 3. Set a sampling rate to control judge cost in production, and choose a score type: boolean for "task completed, yes or no", numeric for degrees of completion, categorical for outcome labels.
 
-For common dimensions you can skip prompt writing: Langfuse ships a catalog of managed evaluators, built with partners such as Ragas, covering dimensions like hallucination, context relevance, toxicity, and helpfulness. For experiments with ground truth, map the dataset item's expected output as the judge's reference. Evaluators and their rules can also be created via the public API, which is useful for version-controlling your evaluation setup, though those endpoints are still marked unstable as of July 2026.
+For common dimensions you can skip prompt writing: Langfuse ships a catalog of managed evaluators, built with partners such as Ragas, covering dimensions like hallucination, context relevance, toxicity, and helpfulness. For experiments with ground truth, map the dataset item's expected output as the judge's reference. Evaluators and their rules can also be created through the stable [public API](https://api.reference.langfuse.com/#tag/evaluators), which is useful for version-controlling your evaluation setup.
 
 ## Scoring trajectories
 

@@ -116,10 +116,11 @@ You can use your editor's Intellisense to explore the API methods and their para
 
 <Callout type="info">
 
-In Python SDK v4 and JS/TS SDK v5, the high-performance resources are the
-defaults: `api.observations`, `api.metrics`, and — for score reads —
-`api.scores_v3` / `api.scoresV3` (`api.scores`, the v2 reads, is
-deprecated; see [Migration of deprecated APIs](/faq/all/deprecated-api-migration#scores)). Deprecated v1
+In Python SDK v4 and JS/TS SDK v5, the high-performance observations and
+metrics resources are the defaults: `api.observations` and `api.metrics`.
+Scores API v3 is available as `api.scores_v3` in Python SDK `4.8.1+` and
+`api.scoresV3` in JS/TS SDK `5.5.0+`; the `api.scores` v2 reads are deprecated
+([migration guide](/faq/all/deprecated-api-migration#scores)). Deprecated v1
 resources moved under `api.legacy.*` (Python: `*_v1`, JS/TS: `*V1`). See
 [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk) for SDK examples.
 
@@ -153,7 +154,7 @@ observations = langfuse.api.observations.get_many(
 )
 
 # Retrieve aggregates via Metrics API v2
-metrics = langfuse.api.metrics.get(query="""
+metrics = langfuse.api.metrics.metrics(query="""
 {
   "view": "observations",
   "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
@@ -186,7 +187,7 @@ const observations = await langfuse.api.observations.getMany({
 });
 
 // Retrieve aggregates via Metrics API v2
-const metrics = await langfuse.api.metrics.get({
+const metrics = await langfuse.api.metrics.metrics({
   query: JSON.stringify({
     view: "observations",
     metrics: [{ measure: "totalCost", aggregation: "sum" }],
@@ -273,7 +274,7 @@ try {
 
 For new data extraction workflows, use the high-performance data APIs:
 
-- [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) - Retrieve observation data (spans, generations, events) from Langfuse for custom workflows, evaluation pipelines, and analytics.
+- [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) - Retrieve [observation](/docs/observability/data-model#observations-traces-and-sessions) data (spans, generations, events) from Langfuse for custom workflows, evaluation pipelines, and analytics.
 - [Scores API v3](/docs/api-and-data-platform/features/scores-api#v3) - Retrieve score data (evaluations, annotations, and API-ingested scores) with a typed value field and cursor-based pagination.
 - [Metrics API v2](/docs/metrics/features/metrics-api#v2) - Retrieve aggregated analytics and metrics from your Langfuse data.
 
@@ -294,12 +295,12 @@ You can also export data via:
 
 import { FaqPreview } from "@/components/faq/FaqPreview";
 
-<FaqPreview tags={["platform"]} />
+<FaqPreview tags={["public-api"]} />
 
 ## Related API resources [#related-api-resources]
 
 - [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk) — typed Python and JS/TS wrappers for the same endpoints
-- [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) — retrieve row-level spans, generations, and events
+- [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) — retrieve row-level [observations](/docs/observability/data-model#observations-traces-and-sessions)
 - [Scores API v3](/docs/api-and-data-platform/features/scores-api#v3) — retrieve evaluation and annotation scores
 - [Metrics API v2](/docs/metrics/features/metrics-api#v2) — retrieve aggregated analytics
 - [Experiments API](/docs/api-and-data-platform/features/experiments-api) — retrieve experiment runs and items

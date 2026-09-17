@@ -6,7 +6,8 @@ import {
 } from "@/lib/cloud-region-sign-in-store";
 
 // React binding for the shared cloud-region sign-in probe: every caller gets
-// the same answer from a single set of requests, however many components ask.
+// the same snapshot from a single set of requests, however many components ask.
+// Callers that treat signed-out as meaningful must wait for `resolved`.
 // See lib/cloud-region-sign-in-store.ts.
 export const useCloudRegionSignIn = (
   enabled = process.env.NODE_ENV === "production",
@@ -22,5 +23,5 @@ export const useCloudRegionSignIn = (
     );
   }, [enabled]);
 
-  return snapshot.signedInRegions;
+  return snapshot;
 };

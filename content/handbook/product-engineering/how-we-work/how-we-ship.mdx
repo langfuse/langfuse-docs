@@ -9,7 +9,9 @@ description: How the engineering team prioritizes, plans, builds, and ships at L
 
 To avoid spending hours each week triaging and prioritizing tickets, everyone manages their own priorities and escalates to their lead when work piles up. This only works if we share an understanding of SLAs and the quarterly [roadmapping process](/handbook/product-engineering/how-we-work/roadmapping).
 
-When in doubt, tag your lead (24h SLA on the Linear inbox). Keep one Linear project or issue for your current main task, and the [bug view](https://linear.app/langfuse/view/bugs-confirmedopen-97856f9f745c) or "My issues" for smaller work. Every ticket has a priority.
+When in doubt, tag anyone who can help — we would always rather you tagged someone than sat on a question. Use the team's open-bugs view or "My issues" for smaller work, and give every ticket a priority.
+
+Multi-stage work belongs in a Linear **project**, and a project gets a project update whenever things change. We read those updates together at the engineering weekly and plan the coming week from them, so an out-of-date project is a gap in the plan. For a general update about what you are working on that does not belong to one project, post it to your own `<Your Name> Housekeeping` project — those are read in the same pass.
 
 ### Priority levels [#priority-levels]
 
@@ -24,8 +26,8 @@ When in doubt, tag your lead (24h SLA on the Linear inbox). Keep one Linear proj
 
 We balance busy work with making progress on the most important project we're driving forward. To keep that balance, we hold ourselves to a few response times:
 
-- **Linear inbox**: clear once a day.
-- **Pylon inbox**: clear twice a day. Acknowledge a user's request ASAP, then look into it or work on a fix.
+- **Linear inbox**: clear at least twice per working day. See [Using Linear](/handbook/tools-and-processes/using-linear).
+- **Pylon inbox**: acknowledge a user's request quickly, then look into it or work on a fix. We are moving towards Linear as the single inbox, so this one matters slightly less than it did.
 - **PR reviews**: if you're a reviewer, turn it around within 24h; if it lands in the morning, review the same day. See [Code review](/handbook/product-engineering/how-we-work/code-review) for details.
 - **Bug fixes and support**: spend at most ~2h/day on bug fixes, support tickets, and similar. Fixing bugs is sometimes critical for the company, but if you consistently spend more than 2h/day, talk to your lead to get buy-in or distribute the work across the team.
 
@@ -125,13 +127,15 @@ We use Linear as our internal project planning and ticketing tool. It helps us:
 | **Triage**             | - Unassigned, no labels or priority<br/>- Created via the GitHub Issue integration, or in Linear by non-engineering team members<br/>- Marc/Max subscribe, triage, assign, add labels, and refine the title<br/>- After assignment, the engineer dedupes against existing tickets and handles communication with users |
 | **Backlog**            | - Everyone manages their own backlog in Linear<br/>- Only backlog what you plan or hope to do over the next 1–2 quarters; send the rest to [GitHub Discussions](https://langfuse.com/ideas)<br/>- See the [conventions below](#linear-conventions) for titles, labels, and Pylon links                                 |
 | **Todo / In progress** | See [Priority levels](#priority-levels) for handling guidelines                                                                                                                                                                                                                                                        |
+| **Merged**             | - Set automatically when the linked pull request merges<br/>- A staging step, not the end: check whether the change needs a docs page, a changelog entry, or a word to a customer who asked for it                                                                                                                     |
+| **Done**               | - Moved by hand, once the change is deployed and those follow-ups are tracked or finished<br/>- See [definition of done](/handbook/tools-and-processes/using-linear#definition-of-done)                                                                                                                                |
 
 #### Conventions [#linear-conventions]
 
 - **Titles**: keep them precise and brief, so any engineer scanning a list of tickets roughly understands each one. Descriptions are optional; when you add one, keep it short and precise.
-- **Labels**: every issue has a label, and you can use Linear views to see all tickets for a label. Use labels for product areas, and the "feat-..." labels for most issues. Before creating a new label, check that no existing one fits ([labels](https://linear.app/langfuse/settings/issue-labels)); move new labels to the workspace/organization level, since they're created at the project level by default.
+- **Labels**: every issue carries one label from the `Kind` group — `bug`, `improvement` or `feature` — plus a well-known label for the product area, so filters and shared views work. Use the "feat-..." labels for most issues. Before creating a new label, check the workspace label list for one that already fits; move new labels to the workspace/organization level, since they're created at the project level by default.
 - **Assignment**: enable "assign to self on creation", and assign to self when creating from third-party tools.
-- **Projects**: only create a project for work with a clear end (no endless bucket of tickets).
+- **Projects**: multi-step work belongs in a project; small improvements and fixes stay issues. Only create a project for work with a clear end (no endless bucket of tickets), and see [projects and issues](/handbook/tools-and-processes/using-linear#projects-and-issues).
 - **Pylon**: link Pylon threads to Linear issues with "Thread links". When you close a Linear ticket, resolve the Pylon thread to tell the user we shipped the fix or request. It's two minutes of effort that shows we ship fast. Snooze threads you want to revisit (e.g. next week).
 - **Internal Slack messages**: for internal (non-user-facing) messages, use the Linear app in Slack to create an issue. This links the Slack thread to the issue, and people are notified when the ticket changes state.
 

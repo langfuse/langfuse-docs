@@ -525,10 +525,10 @@ def _set_observation_attrs(span, obs) -> None:
             _set_scalar(span, f"langfuse.observation.metadata.{k}", v)
     elif md is not None:
         _set_scalar(span, "langfuse.observation.metadata._raw", md)
-    # Generation でのみ使う属性。ObservationV2 では `model` が `provided_model_name` に
-    # 改名されているので、セルフホスト用の v1 型のときは `model` にフォールバックします。
+    # Generation でのみ使う属性。ObservationV2 のモデル名は `model` で返されます。
+    # 古い SDK のレスポンス型向けに `provided_model_name` にもフォールバックします。
     if obs_type == "generation":
-        model_name = getattr(obs, "provided_model_name", None) or getattr(obs, "model", None)
+        model_name = getattr(obs, "model", None) or getattr(obs, "provided_model_name", None)
         _set_scalar(span, "langfuse.observation.model.name", model_name)
         if obs.model_parameters:
             span.set_attribute("langfuse.observation.model.parameters", dumps(obs.model_parameters))
@@ -568,7 +568,7 @@ obs_id_map: Dict[str, str] = {}
 # Observations API v2 から取得したいフィールドグループです。`core` は常に含まれます。
 # `basic` で name / level / status / version / environment が、`time` で
 # completionStartTime が、`io` で input / output が、`metadata` で metadata が、
-# `model` で providedModelName / modelParameters が、`usage` で
+# `model` で model / modelParameters が、`usage` で
 # usageDetails / costDetails が、`prompt` で promptName / promptVersion が追加されます。
 OBSERVATIONS_FIELDS = "core,basic,time,io,metadata,model,usage,prompt"
 

@@ -12,7 +12,7 @@ A prompt tweak that fixes one complaint can quietly break ten other answers. LLM
 
 ## What is LLM regression testing?
 
-LLM regression testing is the practice of verifying that a change to an LLM application did not degrade output quality on inputs that used to work. Because LLM outputs are non-deterministic, the check is not an exact-match assertion but an evaluation: each output gets scored, and the test passes when scores meet a defined threshold. The unit under test is application behavior, not a function.
+LLM regression testing is the practice of verifying that a change to an LLM application did not degrade output quality on inputs that used to work. Use exact-match or deterministic assertions for structured outputs and business rules, and semantic evaluation when valid answers can differ in wording. Test the application function or workflow that produces the behavior you care about.
 
 A regression gate should run whenever any component that shapes outputs changes:
 
@@ -31,10 +31,11 @@ Three pieces make a regression gate:
 2. **An experiment** that runs your application against every dataset item and scores the outputs with evaluators.
 3. **A threshold check** that raises `RegressionError` when an aggregate score is too low, which is what fails the pipeline.
 
-The script below is a complete gate using the Langfuse Python SDK (v4). It combines a deterministic code evaluator, which is free and gives the same verdict every run, with an LLM-as-a-judge evaluator for the quality dimension a string check cannot decide. The `experiment(context)` entry point is the contract for the GitHub Action in the next section: the `RunnerContext` initializes the Langfuse client, loads the dataset configured in the workflow, and attaches CI metadata (commit SHA, branch, job URL, actor) to the run.
+The script below is a complete gate using the Langfuse Python SDK (v4). It combines a deterministic code evaluator, which requires no model calls and gives the same verdict for the same output, with an optional LLM-as-a-judge evaluator for reference-answer correctness. Start with deterministic checks; add the judge after reviewing its agreement with human labels. The `experiment(context)` entry point is the contract for the GitHub Action in the next section: the `RunnerContext` initializes the Langfuse client, loads the dataset configured in the workflow, and attaches CI metadata (commit SHA, branch, job URL, actor) to the run.
 
 ```python title="experiments/regression-gate.py"
 import json
+import math
 
 from langfuse import Evaluation, RegressionError, RunnerContext
 from langfuse.openai import OpenAI
@@ -43,7 +44,7 @@ client = OpenAI()
 
 THRESHOLDS = {
     "avg_contains_answer": 0.9,
-    "avg_faithfulness": 0.8,
+    "avg_reference_correctness": 0.8,
 }
 
 
@@ -53,7 +54,7 @@ def support_agent_task(*, item, **kwargs):
         model="gpt-4.1",
         messages=[
             {"role": "system", "content": "Answer using only the provided context."},
-            {"role": "user", "content": item.input["question"]},
+            {"role": "user", "content": f"Context: {item.input['context']}\nQuestion: {item.input['question']}"},
         ],
     )
     return response.choices[0].message.content
@@ -65,7 +66,7 @@ def contains_answer(*, output, expected_output, **kwargs):
     return Evaluation(name="contains_answer", value=1.0 if passed else 0.0)
 
 
-def faithfulness_judge(*, input, output, expected_output, **kwargs):
+def reference_correctness_judge(*, input, output, expected_output, **kwargs):
     """LLM-as-a-judge evaluator: returns a binary verdict with a reason."""
     judgment = client.chat.completions.create(
         model="gpt-4.1-mini",
@@ -73,7 +74,7 @@ def faithfulness_judge(*, input, output, expected_output, **kwargs):
             {
                 "role": "user",
                 "content": (
-                    "Is the answer faithful to the reference? "
+                    "Is the answer correct according to the reference answer? "
                     'Respond with JSON: {"score": 0 or 1, "reason": "<one sentence>"}\n'
                     f"Question: {input}\nReference: {expected_output}\nAnswer: {output}"
                 ),
@@ -82,8 +83,10 @@ def faithfulness_judge(*, input, output, expected_output, **kwargs):
         response_format={"type": "json_object"},
     )
     verdict = json.loads(judgment.choices[0].message.content)
+    if type(verdict.get("score")) not in (int, float) or verdict["score"] not in (0, 1):
+        raise ValueError("Judge must return a binary score")
     return Evaluation(
-        name="faithfulness",
+        name="reference_correctness",
         value=float(verdict["score"]),
         comment=verdict["reason"],
     )
@@ -100,6 +103,8 @@ def average_of(score_name: str):
             if evaluation.name == score_name
             and isinstance(evaluation.value, (int, float))
         ]
+        if not values or len(values) != len(item_results):
+            raise ValueError(f"Missing {score_name} evaluations")
         return Evaluation(
             name=f"avg_{score_name}",
             value=sum(values) / len(values) if values else 0.0,
@@ -112,15 +117,15 @@ def experiment(context: RunnerContext):
     result = context.run_experiment(
         name="PR gate: support agent",
         task=support_agent_task,
-        evaluators=[contains_answer, faithfulness_judge],
-        run_evaluators=[average_of("contains_answer"), average_of("faithfulness")],
+        evaluators=[contains_answer, reference_correctness_judge],
+        run_evaluators=[average_of("contains_answer"), average_of("reference_correctness")],
     )
 
     scores = {e.name: e.value for e in result.run_evaluations}
 
     for metric, threshold in THRESHOLDS.items():
         value = scores.get(metric)
-        if not isinstance(value, (int, float)) or value < threshold:
+        if not isinstance(value, (int, float)) or not math.isfinite(value) or value < threshold:
             raise RegressionError(
                 result=result,  # lets the action include scores in the PR comment
                 metric=metric,
@@ -130,6 +135,10 @@ def experiment(context: RunnerContext):
 
     return result
 ```
+
+Each dataset input must contain `question` and `context`; its expected output is the reference answer. Reference-answer correctness is distinct from grounding in retrieved context. To evaluate grounding, pass the actual retrieved context to a dedicated evaluator. To run deterministic checks only, remove `reference_correctness_judge`, its run evaluator, and its threshold.
+
+For a gate that detects newly failing cases even when average accuracy improves, see [Compare against an approved baseline](/docs/evaluation/experiments/experiments-ci-cd#approved-baseline).
 
 Replace `support_agent_task` with a call into your actual application. Everything else is reusable: the evaluators score whatever the task returns, and the threshold loop turns any run-level score into a gate. To run the same experiment outside CI, fetch the dataset and call `langfuse.get_dataset("support-agent-golden-set").run_experiment(...)` with the same task and evaluators.
 
@@ -212,7 +221,7 @@ def support_agent_task(*, item, **kwargs):
         model="gpt-4.1",
         messages=[
             {"role": "system", "content": candidate.compile()},
-            {"role": "user", "content": item.input["question"]},
+            {"role": "user", "content": f"Context: {item.input['context']}\nQuestion: {item.input['question']}"},
         ],
         langfuse_prompt=candidate,  # link this run to the exact prompt version
     )
@@ -225,9 +234,9 @@ The promotion itself can be locked down. [Protected prompt labels](/docs/prompt-
 
 ## Comparing regression runs over time
 
-Every gate run against a Langfuse dataset is recorded as a dataset run, so the history accumulates automatically. The experiment comparison view shows runs side by side: aggregate scores per run, per-item outputs, and which specific items regressed between two runs. When the PR comment says `avg_faithfulness` dropped from 0.86 to 0.71, the comparison view answers the follow-up question of which ten items broke and what the outputs looked like. CI metadata attached by the action (commit SHA, branch, actor) makes each run traceable to the change that produced it.
+Every gate run against a Langfuse dataset is recorded as a dataset run, so the history accumulates automatically. The experiment comparison view shows runs side by side: aggregate scores per run, per-item outputs, and which specific items regressed between two runs. When the PR comment says `avg_reference_correctness` dropped from 0.86 to 0.71, the comparison view answers the follow-up question of which ten items broke and what the outputs looked like. CI metadata attached by the action (commit SHA, branch, actor) makes each run traceable to the change that produced it.
 
-The gate only covers inputs you thought to test, so pair it with an online complement. Sampled LLM-as-a-judge evaluators score a percentage of production traffic, and [alerts](/docs/observability/features/alerts) (available on Langfuse Cloud) fire on those score metrics with warning and alert thresholds, routing breaches to Slack, webhooks, or a GitHub Actions trigger. The offline gate stops regressions you can reproduce; alerts catch the ones production finds for you.
+The gate only covers inputs you thought to test, so pair it with an online complement. Sampled LLM-as-a-judge evaluators score a percentage of production traffic, and [alerts](/docs/observability/features/alerts) (available on Langfuse Cloud and self-hosted v4+) fire on those score metrics with warning and alert thresholds, routing breaches to Slack, webhooks, or a GitHub Actions trigger. The offline gate stops regressions you can reproduce; alerts catch the ones production finds for you.
 
 ## Building the golden dataset the gate runs against
 
