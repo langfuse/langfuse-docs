@@ -47,8 +47,14 @@ const internalSpanProcessor = new LangfuseSpanProcessor({
  * stable, low-cardinality names before the Langfuse processors export them.
  * The model stays available as a separate attribute on the generation.
  */
+const AI_SDK_TRACER_SCOPES = new Set(["gen_ai", "ai"]);
+
 class AiSdkObservationNameProcessor implements SpanProcessor {
   onStart(span: Span): void {
+    // Only touch spans created by the AI SDK's own tracer. Other GenAI
+    // instrumentation uses the same gen_ai.* attributes and must stay as is.
+    if (!AI_SDK_TRACER_SCOPES.has(span.instrumentationScope.name)) return;
+
     const { attributes } = span;
     const operation = attributes["gen_ai.operation.name"];
     if (typeof operation !== "string") return;
