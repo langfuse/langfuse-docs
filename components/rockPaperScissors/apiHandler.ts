@@ -10,6 +10,7 @@ import {
   setActiveTraceIO,
   setActiveTraceAsPublic,
   getActiveTraceId,
+  updateActiveObservation,
 } from "@langfuse/tracing";
 import { context, trace } from "@opentelemetry/api";
 import { after } from "next/server";
@@ -182,13 +183,18 @@ const handler = async (req: Request) => {
       // after the Response has been returned to Next.js.
       const traceContext = context.active();
 
-      setActiveTraceIO({
-        input: { round, userMove, opponent, history },
+      // Trace-level and root-observation input. The full history goes to
+      // metadata-like detail on the trace; the root observation gets what a
+      // reviewer needs at a glance.
+      const traceInput = { round, userMove, opponent, history };
+      setActiveTraceIO({ input: traceInput });
+      updateActiveObservation({
+        input: { round, opponent, userMove },
       });
 
       // The human commits first. The model never sees this value.
       startObservation(
-        "user-picked",
+        "record-user-move",
         { input: { move: userMove }, metadata: { round } },
         { asType: "event" },
       );
@@ -253,7 +259,7 @@ const handler = async (req: Request) => {
               providerOptions: config.providerOptions,
               abortSignal: abortController.signal,
               telemetry: {
-                functionId: "rps-model-turn",
+                functionId: "choose-move",
               },
               onError: () => {
                 // Surfaced through fullStream below.
@@ -414,18 +420,26 @@ const handler = async (req: Request) => {
             }
           }
 
-          setActiveTraceIO({
+          const traceOutput = {
+            round,
+            userMove,
+            modelMove: committedMove,
+            predictedUserMove,
+            outcome,
+            fallbackReason,
+            timedOut,
+            responseTimeMs,
+            reasoningSummary: reasoningText || undefined,
+            visibleReasoning: plainText || undefined,
+          };
+          setActiveTraceIO({ output: traceOutput });
+          updateActiveObservation({
             output: {
-              round,
               userMove,
               modelMove: committedMove,
-              predictedUserMove,
               outcome,
+              predictedUserMove,
               fallbackReason,
-              timedOut,
-              responseTimeMs,
-              reasoningSummary: reasoningText || undefined,
-              visibleReasoning: plainText || undefined,
             },
           });
           setActiveTraceAsPublic();
@@ -474,7 +488,7 @@ const handler = async (req: Request) => {
 };
 
 export const POST = observe(handler, {
-  name: "rps-round",
+  name: "play-round",
   endOnExit: false, // ended once the stream has finished
 });
 

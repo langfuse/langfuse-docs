@@ -45,7 +45,7 @@ Langfuse is open source (MIT). [Self-hosting](/self-hosting) is a first-class de
 
 <CompareClickhouseDatastore />
 
-Langfuse works directly with ClickHouse's core team as [part of ClickHouse](/blog/joining-clickhouse). Every LLM call, tool execution, and agent step is written once to a wide, immutable observations table ([v4 GA](/docs/v4)) built for high-throughput ingestion and fast analytical reads, which is how Pro keeps 3 years of raw traces queryable. High-volume reads use the [Observations](/docs/api-and-data-platform/features/observations-api) and [Metrics](/docs/metrics/features/metrics-api) APIs, [scheduled exports](/docs/api-and-data-platform/features/export-to-blob-storage) land Parquet in your own bucket, and self-hosters query ClickHouse in SQL.
+Langfuse works directly with ClickHouse's core team as [part of ClickHouse](/blog/joining-clickhouse). Every LLM call, tool execution, and agent step is written once to a wide, immutable observations table ([v4 GA](/docs/v4)) built for high-throughput ingestion and fast analytical reads, which is how Pro keeps 3 years of raw traces queryable. High-volume reads use the [Observations](/docs/api-and-data-platform/features/public-api#v2) and [Metrics](/docs/metrics/features/metrics-api) APIs, [scheduled exports](/docs/api-and-data-platform/features/export-to-blob-storage) land Parquet in your own bucket, and self-hosters query ClickHouse in SQL.
 
 Datadog Agent Observability stores spans in Datadog's closed store. You reach them through the Trace Explorer, dashboards on derived metrics, and an [Export API](https://docs.datadoghq.com/llm_observability/investigate/export_api/) that pages up to 5,000 spans per request; there is no direct database access and no self-hosted deployment of the store.
 
