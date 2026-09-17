@@ -16,7 +16,7 @@ Some changes below affect only one type; others affect both. Each section notes 
 
 ## Background: from traces to observations
 
-In Langfuse, **observations** (also known as "spans" in OpenTelemetry) are the individual operations within a trace — LLM calls, tool executions, retrieval steps, and so on.
+In Langfuse, **observations** (also known as "spans" in OpenTelemetry) are the individual operations within a trace — LLM calls, tool executions, retrieval steps, and so on. (`span` is also a specific observation type.)
 
 In Langfuse v3, a `trace` is a first-class record in its own table, and observations are separate records that reference it via a foreign key. Queries JOIN these tables at read time to combine trace metadata with observation metrics.
 

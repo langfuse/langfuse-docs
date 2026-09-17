@@ -133,6 +133,13 @@ direction LR
 | `metadata`    | object | No       | Additional metadata for the dataset run |
 | `datasetId`   | string | Yes      | ID of the dataset this run belongs to   |
 
+Experiment metadata and description describe the entire run, not individual
+items. The Python and JS/TS Experiment runners propagate experiment metadata
+to child observations, but set description directly on experiment-item root
+observations without propagating it to children. Keep each field consistent
+across the observations that carry it. For direct ingestion, follow the
+[OpenTelemetry experiment attribute guide](/integrations/native/opentelemetry/experiments).
+
 #### DatasetRunItem object [#datasetrunitem-object]
 
 | Attribute       | Type   | Required | Description                                |
