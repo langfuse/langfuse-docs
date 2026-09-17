@@ -1,30 +1,30 @@
 ---
 source: ⚠️ Jupyter Notebook
-title: Observability for Strands Agents with Langfuse
-sidebarTitle: Strands Agents
+title: Observability for Strands with Langfuse
+sidebarTitle: Strands
 logo: /images/integrations/strands_agents_icon.svg
 logoAppearance: dark
-description: Learn how to integrate Langfuse with Strands Agents using OpenTelemetry for comprehensive tracing and debugging of your AI agents.
+description: Learn how to integrate Langfuse with Strands using OpenTelemetry for comprehensive tracing and debugging of your AI agents.
 category: Integrations
 ---
 
-# Integrate Langfuse with the Strands Agents SDK
+# Integrate Langfuse with Strands
 
-This notebook demonstrates how to monitor and debug your Strands Agent effectively using **Langfuse**. By following this guide, you will be able to trace your agent's operations, gaining insights into its behavior and performance.
+This notebook demonstrates how to monitor and debug your Strands agent effectively using **Langfuse**. By following this guide, you will be able to trace your agent's operations, gaining insights into its behavior and performance.
 
-> **What is the Strands Agents SDK?** The Strands Agents SDK ([docs](https://strandsagents.com)), developed by AWS, is a toolkit for building AI agents that can interact with various tools and services, including AWS Bedrock.
+> **What is Strands?** [Strands](https://strandsagents.com) is an open-source SDK, built by AWS, for building and running production AI agents in Python and TypeScript. It is model-provider agnostic, with first-class support for Amazon Bedrock, Anthropic, OpenAI, Gemini, and more, and ships with out-of-the-box components for tools, MCP, memory and sessions, context management, multi-agent patterns, structured output, guardrails, and tracing.
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source AI engineering platform. It provides robust tracing, debugging, evaluation, and monitoring capabilities for AI agents and LLM applications. Langfuse integrates seamlessly with multiple tools and frameworks through native integrations, OpenTelemetry, and its SDKs. Use [Langfuse Cloud](https://langfuse.com/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](https://langfuse.com/self-hosting) it.
 
 ## Get Started
 
-We'll guide you through a simple example of using Strands agents and integrating them with Langfuse for observability.
+We'll guide you through a simple example of building a Strands agent and integrating it with Langfuse for observability.
 
 <Steps>
 ### Step 1: Install Dependencies
 
 <Callout type="info" emoji="ℹ️">
-To enable OTEL exporting, install Strands Agents with otel extra dependencies: pip install 'strands-agents[otel]'
+To enable OTEL exporting, install Strands with the otel extra: pip install 'strands-agents[otel]'
 
 </Callout>
 
