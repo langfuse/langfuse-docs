@@ -14,7 +14,7 @@ import {
   ThumbsUpIcon,
   ThumbsDownIcon,
 } from "lucide-react";
-import { DemoTraceLink } from "@/components/demoTraceLink";
+// import { DemoTraceLink } from "@/components/demoTraceLink"; // temporarily disabled
 
 type GeneratedImage = {
   base64: string;
@@ -200,12 +200,14 @@ export const ImageGenerator = ({
                 />
               </div>
 
+              {/* Temporarily disabled: trace link (traces are not shared publicly right now)
               <div className="flex justify-center">
                 <DemoTraceLink
                   traceUrl={currentImage.traceUrl}
                   source="image_generator"
                 />
               </div>
+              */}
 
               {/* Actions */}
               <div className="flex items-center gap-2 justify-center">
@@ -248,8 +250,8 @@ export const ImageGenerator = ({
         </div>
 
         <p className="mt-4 text-xs text-muted-foreground text-center relative z-10 italic">
-          Powered by GPT-Image-1. Limited to 3 generations per minute. All
-          interactions are traced in the public example project.
+          Powered by GPT-Image-2.5 Flare. Limited to 3 generations per minute.
+          All interactions are traced in the public example project.
         </p>
       </div>
     </div>

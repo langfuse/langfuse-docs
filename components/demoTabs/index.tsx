@@ -9,6 +9,7 @@ import {
   ImageIcon,
   BarChart3Icon,
   MicIcon,
+  HandIcon,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 
@@ -30,12 +31,18 @@ const ImageGenerator = dynamic(() =>
 const VoiceAgent = dynamic(() =>
   import("@/components/voiceAgent").then((m) => ({ default: m.VoiceAgent })),
 );
+const RockPaperScissors = dynamic(() =>
+  import("@/components/rockPaperScissors").then((m) => ({
+    default: m.RockPaperScissors,
+  })),
+);
 
 const TAB_MAP: Record<string, string> = {
   chatbot: "chatbot",
   image: "image",
   sentiment: "sentiment",
   voice: "voice",
+  rps: "rps",
 };
 
 function getTabFromHash(): string {
@@ -86,6 +93,11 @@ export const DemoTabs = ({ className, ...props }: DemoTabsProps) => {
             <span className="hidden sm:inline">Sentiment Classifier</span>
             <span className="sm:hidden">Sentiment</span>
           </TabsTrigger>
+          <TabsTrigger value="rps" className="gap-1.5">
+            <HandIcon className="size-4" />
+            <span className="hidden sm:inline">Rock Paper Scissors</span>
+            <span className="sm:hidden">RPS</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent
@@ -118,6 +130,14 @@ export const DemoTabs = ({ className, ...props }: DemoTabsProps) => {
           className={activeTab !== "sentiment" ? "hidden" : undefined}
         >
           <SentimentClassifier />
+        </TabsContent>
+
+        <TabsContent
+          value="rps"
+          forceMount
+          className={activeTab !== "rps" ? "hidden" : undefined}
+        >
+          <RockPaperScissors />
         </TabsContent>
       </Tabs>
     </div>
