@@ -170,10 +170,10 @@ function TocOnThisPage({ items }: { items: TocItem[] }) {
 
 // ─── Main aside ───────────────────────────────────────────────────────────────
 
-export function HomeAside() {
+export function HomeAside({ toc }: { toc?: TocItem[] } = {}) {
   const pathname = usePathname();
   const domItems = useDOMHeadings();
-  const items = pathname === "/" ? HOME_SECTIONS : domItems;
+  const items = toc ?? (pathname === "/" ? HOME_SECTIONS : domItems);
   const { open: aiOpen } = useAISearchContext();
 
   return (
