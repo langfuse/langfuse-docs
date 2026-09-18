@@ -199,10 +199,12 @@ export function CustomerStoriesHero({
               <div className="mt-auto flex justify-end pt-10">
                 <Link
                   href={story.route}
-                  aria-label={`Read ${company} customer story`}
+                  aria-label={`${story.frontMatter.ctaLabel === "Watch" ? "Watch" : "Read"} ${company} customer story`}
                   className="inline-flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.08em] text-text-secondary no-underline transition-colors after:absolute after:inset-0 after:z-10 after:cursor-pointer after:content-[''] hover:text-text-primary focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-ring"
                 >
-                  Read the story
+                  {story.frontMatter.ctaLabel === "Watch"
+                    ? "Watch the talk"
+                    : "Read the story"}
                   <span aria-hidden>→</span>
                 </Link>
               </div>

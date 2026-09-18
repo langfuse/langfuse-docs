@@ -133,7 +133,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   Pigment: "Enterprise business planning platform",
   Pipedream: "Developer integration platform",
   Posit: "Data science software company",
-  Ramp: "Corporate finance platform",
+  Ramp: "Self-hosted agent observability",
   "Rocket Money": "Personal finance app",
   Salesloft: "Sales engagement platform",
   Samsara: "Connected operations platform",
