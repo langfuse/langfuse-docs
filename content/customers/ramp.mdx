@@ -47,6 +47,13 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
 In this talk, Ryan Delgado (Engineering) and David Traina (Data Platform) walk through Ramp's agent portfolio and the observability layer underneath it. Customer-facing agents include Policy Agent, which approves or denies expenses before a manager ever sees them, and Stack, which compresses month-end close from a week and a half to 1-3 days. Internally, Inspect - Ramp's in-house background coding agent - now accounts for ~70% of merged PRs at roughly 1,500 PRs per day, and Ramp Research answers data questions in Slack in 2-3 minutes instead of 3-5 hours.
 
+<CustomerQuote
+  quote="Inspect accounts for about 70% of the merged PRs within Ramp, and we're raising about 1,500 PRs a day across a few different repos."
+  name="Ryan Delgado"
+  role="Engineering"
+  company="Ramp"
+/>
+
 David Traina explains why Ramp chose Langfuse: fully [self-hosted](/self-hosting) on standard infra (S3, Redis, Postgres, ECS, Terraform) with ClickHouse Cloud, fully open source, [OpenTelemetry](/integrations/native/opentelemetry)-native, and API-first so agents - not just humans - can be first-class users.
 
 He then demos Reflect, a Ramp agent that monitors other agents. Reflect scores and clusters Langfuse [traces](/docs/observability/overview), diagnoses recurring failure patterns, and proposes fixes. Applied to 12 agents with 120+ merged suggestions, it cut Ramp Research token usage by 10-20%, tool calls by 15%, and session times by 30%.
