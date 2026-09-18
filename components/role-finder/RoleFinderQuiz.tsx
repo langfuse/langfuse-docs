@@ -422,12 +422,9 @@ function ClosedFallback({
       <div className="mt-6">
         <a
           href={careersFallbackUrl}
-          target="_blank"
-          rel="noopener noreferrer"
           className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           See all open roles
-          <ExternalLink className="h-4 w-4" aria-hidden />
         </a>
       </div>
     </div>

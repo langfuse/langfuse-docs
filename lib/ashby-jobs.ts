@@ -15,9 +15,56 @@ const ASHBY_JOB_BOARD_API_BASE =
 const CLICKHOUSE_BOARD_SLUG = "clickhouse";
 const LANGFUSE_BOARD_SLUG = "langfuse";
 
-/** Public ClickHouse board, pre-filtered to Langfuse postings in the hosted UI. */
-export const LANGFUSE_CAREERS_BOARD_URL =
-  "https://jobs.ashbyhq.com/clickhouse?search=langfuse";
+/** Public ClickHouse board. `?search=` is not a reliable Ashby deep link. */
+export const LANGFUSE_CAREERS_BOARD_URL = "https://jobs.ashbyhq.com/clickhouse";
+
+export function ashbyJobUrl(id: string): string {
+  return `https://jobs.ashbyhq.com/clickhouse/${id}`;
+}
+
+/**
+ * Last-known listed Langfuse postings. Used when the live board cannot be
+ * fetched (Vercel SSG cannot cache the 2MB+ ClickHouse payload). Apply links
+ * must stay on these posting URLs — never the board search page.
+ */
+export const FALLBACK_LANGFUSE_JOBS: AshbyJob[] = [
+  {
+    id: "0087feaa-a275-427d-bf4a-14a508708687",
+    title: "Langfuse - Senior Product Engineer",
+    jobUrl: ashbyJobUrl("0087feaa-a275-427d-bf4a-14a508708687"),
+    isListed: true,
+  },
+  {
+    id: "31500bec-b690-4795-b4d6-0dce06a4c180",
+    title: "Langfuse - Senior Backend Engineer",
+    jobUrl: ashbyJobUrl("31500bec-b690-4795-b4d6-0dce06a4c180"),
+    isListed: true,
+  },
+  {
+    id: "cf36e6db-3939-4ff0-8bcf-a3bb200d9e46",
+    title: "Langfuse - Senior Cloud Infra Engineer",
+    jobUrl: ashbyJobUrl("cf36e6db-3939-4ff0-8bcf-a3bb200d9e46"),
+    isListed: true,
+  },
+  {
+    id: "49953f5a-271a-492f-a8be-50b8f028fbd7",
+    title: "Langfuse - DevRel Engineer, Events & Community (EMEA)",
+    jobUrl: ashbyJobUrl("49953f5a-271a-492f-a8be-50b8f028fbd7"),
+    isListed: true,
+  },
+  {
+    id: "3b71c9a9-d3c9-4331-83e7-1a9007455b5e",
+    title: "Langfuse - Product Marketing Manager",
+    jobUrl: ashbyJobUrl("3b71c9a9-d3c9-4331-83e7-1a9007455b5e"),
+    isListed: true,
+  },
+  {
+    id: "bb3fd808-a87e-4b63-b675-f3ce55f4d1a6",
+    title: "Solutions Architect - Langfuse",
+    jobUrl: ashbyJobUrl("bb3fd808-a87e-4b63-b675-f3ce55f4d1a6"),
+    isListed: true,
+  },
+];
 
 export type AshbyJob = {
   id: string;
@@ -135,8 +182,12 @@ async function fetchJobBoard(slug: string): Promise<AshbyJob[] | null> {
     // Next.js cannot store in its data cache. Skip that cache and keep only
     // the fields we match on.
     const response = await fetch(`${ASHBY_JOB_BOARD_API_BASE}/${slug}`, {
-      headers: { Accept: "application/json" },
+      headers: {
+        Accept: "application/json",
+        "User-Agent": "langfuse.com/role-finder",
+      },
       cache: "no-store",
+      signal: AbortSignal.timeout(20_000),
     });
 
     if (!response.ok) {
@@ -162,12 +213,12 @@ const JOBS_CACHE_TTL_MS = 60 * 60 * 1000;
 let jobsCache: { jobs: AshbyJob[] | null; expiresAt: number } | null = null;
 
 /**
- * Returns listed Langfuse jobs from the public boards, or `null` if
- * availability cannot be determined. Callers should treat `null` as
- * "unknown" and fall back to static config rather than hiding everything.
+ * Returns listed Langfuse jobs. Prefers the live ClickHouse board; if that
+ * fetch fails (common at Vercel build time because the payload is >2MB),
+ * returns {@link FALLBACK_LANGFUSE_JOBS} so apply links stay posting-specific.
  */
-export async function getAshbyJobs(): Promise<AshbyJob[] | null> {
-  if (jobsCache && Date.now() < jobsCache.expiresAt) {
+export async function getAshbyJobs(): Promise<AshbyJob[]> {
+  if (jobsCache && Date.now() < jobsCache.expiresAt && jobsCache.jobs) {
     return jobsCache.jobs;
   }
 
@@ -176,6 +227,9 @@ export async function getAshbyJobs(): Promise<AshbyJob[] | null> {
     fetchJobBoard(LANGFUSE_BOARD_SLUG),
   ]);
   const jobs = collectLangfuseJobs(clickhouse, langfuse);
-  jobsCache = { jobs, expiresAt: Date.now() + JOBS_CACHE_TTL_MS };
-  return jobs;
+  if (jobs) {
+    jobsCache = { jobs, expiresAt: Date.now() + JOBS_CACHE_TTL_MS };
+    return jobs;
+  }
+  return FALLBACK_LANGFUSE_JOBS;
 }

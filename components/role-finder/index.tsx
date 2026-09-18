@@ -10,12 +10,11 @@ import { RoleFinderQuiz, type ResolvedRole } from "./RoleFinderQuiz";
 /**
  * Server component for the careers role-finder quiz.
  *
- * Fetches listed ClickHouse jobs whose title contains "langfuse" (cached via
- * ISR in `getAshbyJobs`) and matches each curated role by title fragments.
- * Live title, apply URL, and availability are merged into the quiz config
- * before handing off to the client engine. If the board can't be fetched,
- * roles fall back to the static config and stay available so the quiz keeps
- * working.
+ * Fetches listed ClickHouse jobs whose title contains "langfuse" and matches
+ * each curated role by title fragments (or Ashby posting id). Live title,
+ * apply URL, and availability are merged into the quiz config. If the board
+ * can't be fetched, last-known posting URLs are used so "View role & apply"
+ * still deep-links to a specific job — never the unfiltered board.
  */
 export async function RoleFinder() {
   const jobs = await getAshbyJobs();
@@ -27,17 +26,11 @@ export async function RoleFinder() {
         (typeof ROLES)[keyof typeof ROLES],
       ][]
     ).map(([key, role]) => {
-      const job = jobs
-        ? findJobForRole(jobs, role.titleMatch, role.ashbyId)
-        : undefined;
-      // When the board fetch succeeds, availability = a listed Langfuse
-      // posting matched this role. When it fails (jobs === null) we can't
-      // know, so assume the role is open and use the static fallback data.
-      const available = jobs ? Boolean(job) : true;
+      const job = findJobForRole(jobs, role.titleMatch, role.ashbyId);
 
       const resolved: ResolvedRole = {
         key,
-        available,
+        available: Boolean(job),
         title: job?.title ?? role.title,
         url: job?.jobUrl ?? role.url,
         pitch: role.pitch,
@@ -47,7 +40,7 @@ export async function RoleFinder() {
     }),
   ) as Record<string, ResolvedRole>;
 
-  const openJobs = (jobs ?? []).map((job) => ({
+  const openJobs = jobs.map((job) => ({
     title: job.title,
     url: job.jobUrl,
   }));

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { ROLES } from "../components/role-finder/role-finder-data";
 import {
+  FALLBACK_LANGFUSE_JOBS,
   collectLangfuseJobs,
   findJobForRole,
   isLangfuseJobTitle,
@@ -165,6 +166,24 @@ test("findJobForRole maps current ClickHouse Langfuse titles to quiz roles", () 
 test("findJobForRole prefers an exact Ashby posting id when present", () => {
   const matched = findJobForRole(LIVE_JOBS, { anyOf: ["backend"] }, "product");
   assert.equal(matched?.id, "product");
+});
+
+test("fallback jobs deep-link to ClickHouse postings, not a board search", () => {
+  for (const job of FALLBACK_LANGFUSE_JOBS) {
+    assert.match(
+      job.jobUrl,
+      /^https:\/\/jobs\.ashbyhq\.com\/clickhouse\/[0-9a-f-]{36}$/i,
+    );
+    assert.equal(job.jobUrl.includes("search="), false);
+  }
+
+  const product = findJobForRole(
+    FALLBACK_LANGFUSE_JOBS,
+    ROLES.product.titleMatch,
+    ROLES.product.ashbyId,
+  );
+  assert.equal(product?.id, ROLES.product.ashbyId);
+  assert.equal(product?.jobUrl, ROLES.product.url);
 });
 
 test("quiz roles match the current ClickHouse Langfuse postings", () => {

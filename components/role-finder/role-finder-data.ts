@@ -16,10 +16,7 @@
  * ROLES and remove any options that point at it.
  */
 
-import {
-  LANGFUSE_CAREERS_BOARD_URL,
-  type RoleTitleMatch,
-} from "@/lib/ashby-jobs";
+import { ashbyJobUrl, type RoleTitleMatch } from "@/lib/ashby-jobs";
 import { formatSdkInstallsPerMonth } from "@/lib/usage-stats";
 
 export type RoleKey =
@@ -69,17 +66,18 @@ export type Question = {
 
 export const ROOT_QUESTION_ID = "start";
 
-/** General careers board, used as a fallback when a specific role has closed. */
-export const CAREERS_FALLBACK_URL = LANGFUSE_CAREERS_BOARD_URL;
+/** On-site list of Langfuse postings; each item deep-links to Ashby. */
+export const CAREERS_FALLBACK_URL = "/careers#open-roles";
 
 export const ROLES: Record<RoleKey, Role> = {
   product: {
+    ashbyId: "0087feaa-a275-427d-bf4a-14a508708687",
     titleMatch: {
       anyOf: ["product engineer"],
       exclude: ["growth", "integration", "marketing"],
     },
     title: "Senior Product Engineer",
-    url: LANGFUSE_CAREERS_BOARD_URL,
+    url: ashbyJobUrl("0087feaa-a275-427d-bf4a-14a508708687"),
     pitch:
       "Build user-facing features end-to-end in TypeScript/React, with taste for UI detail, API design, and clear docs.",
     youll: [
@@ -91,7 +89,7 @@ export const ROLES: Record<RoleKey, Role> = {
   growth: {
     titleMatch: { anyOf: ["growth"] },
     title: "Senior Product Engineer (Growth)",
-    url: LANGFUSE_CAREERS_BOARD_URL,
+    url: CAREERS_FALLBACK_URL,
     pitch:
       "Full-stack product work aimed at product-led growth — experiments, activation, conversion, backed by SQL analytics.",
     youll: [
@@ -103,7 +101,7 @@ export const ROLES: Record<RoleKey, Role> = {
   integrations: {
     titleMatch: { anyOf: ["integration"] },
     title: "Senior Product Engineer (Integrations)",
-    url: LANGFUSE_CAREERS_BOARD_URL,
+    url: CAREERS_FALLBACK_URL,
     pitch:
       "Own the first impression across 40+ framework integrations (LangChain, Vercel AI SDK, LlamaIndex, Pydantic AI…).",
     youll: [
@@ -115,7 +113,7 @@ export const ROLES: Record<RoleKey, Role> = {
   sdk: {
     titleMatch: { anyOf: ["sdk"] },
     title: "Senior Software Engineer (SDK)",
-    url: LANGFUSE_CAREERS_BOARD_URL,
+    url: CAREERS_FALLBACK_URL,
     pitch: `Build SDKs downloaded ${formatSdkInstallsPerMonth()} times/month. Performance, versioning, and DX in code that runs in other people's production.`,
     youll: [
       "Profile & minimize overhead in hot paths",
@@ -124,12 +122,13 @@ export const ROLES: Record<RoleKey, Role> = {
     ],
   },
   data_infra: {
+    ashbyId: "31500bec-b690-4795-b4d6-0dce06a4c180",
     titleMatch: {
       anyOf: ["data infrastructure", "backend"],
       exclude: ["iam", "billing", "cloud"],
     },
     title: "Senior Backend Engineer (Data Infrastructure)",
-    url: LANGFUSE_CAREERS_BOARD_URL,
+    url: ashbyJobUrl("31500bec-b690-4795-b4d6-0dce06a4c180"),
     pitch:
       "Make Langfuse fast and affordable at scale — own the ingestion pipeline and optimize ClickHouse data models & queries.",
     youll: [
@@ -139,12 +138,13 @@ export const ROLES: Record<RoleKey, Role> = {
     ],
   },
   iam_billing: {
+    ashbyId: "31500bec-b690-4795-b4d6-0dce06a4c180",
     titleMatch: {
       anyOf: ["iam", "billing", "backend"],
       exclude: ["data infrastructure", "cloud"],
     },
     title: "Senior Backend Engineer (IAM & Billing)",
-    url: LANGFUSE_CAREERS_BOARD_URL,
+    url: ashbyJobUrl("31500bec-b690-4795-b4d6-0dce06a4c180"),
     pitch:
       "Own the platform every team depends on: authentication, authorization, and usage-based billing.",
     youll: [
@@ -154,9 +154,10 @@ export const ROLES: Record<RoleKey, Role> = {
     ],
   },
   cloud: {
+    ashbyId: "cf36e6db-3939-4ff0-8bcf-a3bb200d9e46",
     titleMatch: { anyOf: ["cloud"] },
     title: "Senior Cloud Infrastructure Engineer",
-    url: LANGFUSE_CAREERS_BOARD_URL,
+    url: ashbyJobUrl("cf36e6db-3939-4ff0-8bcf-a3bb200d9e46"),
     pitch:
       "Operate Langfuse Cloud on AWS ECS Fargate + ClickHouse Cloud, and own the self-hosted Helm/Docker story.",
     youll: [
@@ -166,9 +167,10 @@ export const ROLES: Record<RoleKey, Role> = {
     ],
   },
   devrel: {
+    ashbyId: "49953f5a-271a-492f-a8be-50b8f028fbd7",
     titleMatch: { anyOf: ["devrel", "developer relations"] },
     title: "DevRel Engineer",
-    url: LANGFUSE_CAREERS_BOARD_URL,
+    url: ashbyJobUrl("49953f5a-271a-492f-a8be-50b8f028fbd7"),
     pitch:
       "An engineer who educates through content — powering developer relations and thought leadership in LLM ops.",
     youll: [
