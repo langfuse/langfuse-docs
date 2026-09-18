@@ -97,7 +97,8 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   Cornelsen: "Educational publisher and learning provider",
   CyberAgent: "Digital advertising, media, and internet services company",
   Cybozu: "Workplace collaboration software company",
-  Defra: "UK government department",
+  "Department for Environment, Food & Rural Affairs":
+    "UK government department",
   Draftbit: "Visual mobile app development platform",
   Ecosia: "Search engine and technology company",
   Equinix: "Digital infrastructure and data center company",
@@ -154,7 +155,7 @@ const COMPANIES_WITH_DOCUMENTED_USE_CASES = new Set([
   "City of Munich",
   "CyberAgent",
   "Cybozu",
-  "Defra",
+  "Department for Environment, Food & Rural Affairs",
   "Ecosia",
   "Equinix",
   "freee",
