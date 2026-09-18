@@ -243,6 +243,11 @@ This example assumes each candidate generation has an input shaped like:
 
     {"messages": [{"role": "user", "content": "..."}, ...]}
 
+Generations without that chat shape are skipped. Consecutive generations that
+share the same latest user message (typical of tool loops) collapse into one
+turn, and only that turn's final generation is scored against the next distinct
+user message.
+
 Install and configure:
 
     pip install -U langfuse typesafe-sdk
@@ -303,35 +308,69 @@ def parse_json(value):
 def latest_user_message(observation):
     """Return the newest user message, or None when there is no user message."""
     observation_input = parse_json(observation.input)
-    messages = observation_input.get("messages", [])
+    if not isinstance(observation_input, dict):
+        return None
+
+    messages = observation_input.get("messages")
+    if not isinstance(messages, list):
+        return None
 
     for message in reversed(messages):
-        if message.get("role") == "user":
+        if isinstance(message, dict) and message.get("role") == "user":
             return message.get("content")
     return None
 
 
-def main():
-    # `api.observations` is the Observations V2 API in the current Python SDK.
-    response = langfuse.api.observations.get_many(
-        trace_id=TRACE_ID,
-        type="GENERATION",
-        fields="core,basic,io",
-        limit=50,
-    )
+def fetch_generations(trace_id):
+    """Page through every GENERATION on the trace, newest-first pages included."""
+    observations = []
+    cursor = None
+    while True:
+        response = langfuse.api.observations.get_many(
+            trace_id=trace_id,
+            type="GENERATION",
+            fields="core,basic,io",
+            limit=100,
+            cursor=cursor,
+        )
+        if not response.data:
+            break
+        observations.extend(response.data)
+        cursor = getattr(response.meta, "cursor", None) if response.meta else None
+        if not cursor:
+            break
+    return observations
 
-    # Only keep generations whose input contains a user message.
-    turns = [
+
+def collapse_to_turns(generations):
+    """Keep the last generation in each consecutive run of the same user message.
+
+    Agent traces often have several generations per user turn (a tool decision,
+    then a synthesis call). Those share the same latest user message, so pairing
+    adjacent generations would score an internal step against that same message.
+    """
+    turns = []
+    for observation, user_message in generations:
+        if turns and turns[-1][1] == user_message:
+            turns[-1] = (observation, user_message)
+        else:
+            turns.append((observation, user_message))
+    return turns
+
+
+def main():
+    generations = [
         (observation, user_message)
-        for observation in response.data
+        for observation in fetch_generations(TRACE_ID)
         if (user_message := latest_user_message(observation)) is not None
     ]
-    turns.sort(key=lambda turn: turn[0].start_time)
+    generations.sort(key=lambda item: item[0].start_time)
+    turns = collapse_to_turns(generations)
 
     # TypeSafeClient reads TYPESAFE_API_KEY and TYPESAFE_BASE_URL from the
     # environment. The context manager closes the HTTP client after the run.
     with TypeSafeClient(model=MODEL) as jev:
-        # User message N+1 is the reaction to assistant reply N.
+        # The next distinct user message is the reaction to this turn's reply.
         for (reply, _), (_, reaction_message) in zip(turns, turns[1:]):
             result = jev.system_one(
                 state={
@@ -353,6 +392,8 @@ def main():
                 name="user_disagreement",
                 value=1 if p_disagreement >= THRESHOLD else 0,
                 data_type="BOOLEAN",
+                # Pin timestamp to the observation so reruns overwrite this score.
+                timestamp=reply.start_time,
                 comment=(
                     f"TypeSafe {result.model}; "
                     f"P(disagreement)={p_disagreement:.2f}; "
