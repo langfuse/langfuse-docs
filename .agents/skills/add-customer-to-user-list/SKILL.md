@@ -161,8 +161,8 @@ Do these only when the company is already on that surface, or the user asks:
 | Homepage logo grid        | `components/shared/EnterpriseLogoGrid.tsx` | Logo is already in the grid and a story exists → set `customerStoryPath: "/users/<slug>"` |
 | Wrapped customers         | `components/wrapped/Customers.tsx`         | Same: move to `companiesWithStories` and `{ type: "story", name: "..." }`                 |
 
-Do **not** add a homepage logo in this skill. That needs a designed 140×40 SVG
-and is a separate request.
+Do **not** add a homepage logo in this skill. That needs a tight wordmark SVG
+(no padding; see `components/home/img/AGENTS.md`) and is a separate request.
 
 ## Out of scope
 
