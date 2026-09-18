@@ -6,7 +6,7 @@ export function WalkthroughVideoIframe({ className }: { className?: string }) {
     <iframe
       width="100%"
       className={cn("aspect-[16/9] rounded-[2px]", className)}
-      src={`https://www.youtube-nocookie.com/embed/${WALKTHROUGH_VIDEO.videoId}?rel=0`}
+      src={`https://www.youtube-nocookie.com/embed/${WALKTHROUGH_VIDEO.videoId}?rel=0&cc_load_policy=0&cc_lang_pref=en`}
       title="Langfuse platform walkthrough"
       frameBorder="0"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
