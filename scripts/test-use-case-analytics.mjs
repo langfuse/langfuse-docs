@@ -3,20 +3,17 @@ import { readFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { setTimeout as delay } from "node:timers/promises";
 import test from "node:test";
-import ts from "typescript";
+import { transformSync } from "esbuild";
 import puppeteer from "puppeteer";
 
+// TypeScript 7 is the native Go checker and does not expose transpileModule.
 const compile = (path) =>
-  ts.transpileModule(
-    readFileSync(new URL("../" + path, import.meta.url), "utf8"),
-    {
-      compilerOptions: {
-        module: ts.ModuleKind.CommonJS,
-        target: ts.ScriptTarget.ES2022,
-        jsx: ts.JsxEmit.ReactJSX,
-      },
-    },
-  ).outputText;
+  transformSync(readFileSync(new URL("../" + path, import.meta.url), "utf8"), {
+    loader: path.endsWith(".tsx") ? "tsx" : "ts",
+    format: "cjs",
+    target: "es2022",
+    jsx: "automatic",
+  }).code;
 const sources = {
   regions: compile("lib/cloud-regions.ts"),
   analytics: compile("lib/use-case-analytics.ts"),
@@ -489,7 +486,7 @@ test("sales completion is emitted only after Marketo success and is deduplicated
     if (name === "lucide-react") return { Check: () => null };
     if (name === "posthog-js")
       return {
-        default: { capture: (event, props) => captured.push({ event, props }) },
+        capture: (event, props) => captured.push({ event, props }),
       };
     if (name === "@/lib/ad-conversions")
       return { reportTalkToUsConversion: () => adConversions++ };
