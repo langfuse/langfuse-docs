@@ -2,33 +2,24 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { CornerBox } from "@/components/ui/corner-box";
-import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
 import type { CustomerStory } from "./CustomerCarousel";
 import { companyName } from "./customerStoryLabels";
 
-const INITIAL_VISIBLE = 10;
-
 export function CustomerIndex({
   stories: allStories = [],
   maxItems,
-  initialVisible,
   showHeader = true,
 }: {
   stories?: CustomerStory[];
   maxItems?: number;
-  /** Caps the grid before “Show more”. Embeds omit this to show all stories. */
-  initialVisible?: number;
   /** Landing-page intro header. Disable for embeds that already have their own. */
   showHeader?: boolean;
 }) {
-  const resolvedInitialVisible =
-    initialVisible ?? (showHeader ? INITIAL_VISIBLE : Number.POSITIVE_INFINITY);
-
   const customerStories = useMemo(
     () =>
       allStories
@@ -36,13 +27,6 @@ export function CustomerIndex({
         .slice(0, maxItems),
     [allStories, maxItems],
   );
-
-  const [expanded, setExpanded] = useState(false);
-  const visibleCount = expanded
-    ? customerStories.length
-    : Math.min(resolvedInitialVisible, customerStories.length);
-  const visibleStories = customerStories.slice(0, visibleCount);
-  const hasMore = customerStories.length > resolvedInitialVisible;
 
   if (customerStories.length === 0) return null;
 
@@ -62,7 +46,7 @@ export function CustomerIndex({
       ) : null}
 
       <div className="grid grid-cols-1 sm:grid-cols-2">
-        {visibleStories.map((story, index) => {
+        {customerStories.map((story, index) => {
           const company = companyName(story);
           const headline = story.frontMatter.title ?? story.route;
           const quote = story.frontMatter.customerQuote;
@@ -143,26 +127,6 @@ export function CustomerIndex({
           );
         })}
       </div>
-
-      {hasMore || showHeader ? (
-        <div className="mt-6 flex items-center justify-between gap-4">
-          {hasMore ? (
-            <Button
-              variant="secondary"
-              size="default"
-              className="w-auto min-w-[160px]"
-              onClick={() => setExpanded((v) => !v)}
-            >
-              {expanded ? "Show fewer stories" : "Show more stories"}
-            </Button>
-          ) : (
-            <span />
-          )}
-          <p className="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-text-tertiary">
-            {visibleCount} of {customerStories.length}
-          </p>
-        </div>
-      ) : null}
     </section>
   );
 }
