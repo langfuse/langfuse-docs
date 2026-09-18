@@ -119,7 +119,7 @@ const LogoImage = ({
   name: string;
   hoverable?: boolean;
 }) => {
-  const { width } = wordmarkDisplaySize(logo, LOGO_DISPLAY_HEIGHT);
+  const { width, height } = wordmarkDisplaySize(logo, LOGO_DISPLAY_HEIGHT);
 
   return (
     <Image
@@ -129,12 +129,12 @@ const LogoImage = ({
       height={logo.height}
       unoptimized
       className={cn(
-        "h-auto max-w-full",
+        "h-auto w-auto max-w-full",
         hoverable
           ? "hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] transition-[filter] duration-200"
           : "",
       )}
-      style={{ width, height: "auto" }}
+      style={{ height, width }}
     />
   );
 };
