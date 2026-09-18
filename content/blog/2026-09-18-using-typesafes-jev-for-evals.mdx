@@ -234,163 +234,142 @@ To score your Langfuse traces with Jev, you can pull observations via the [API](
 
 ```python
 #!/usr/bin/env python3
-"""Score Langfuse traces for user disagreement with TypeSafe's Jev.
+"""Score user disagreement with TypeSafe Jev and Langfuse.
 
-Pulls the generations from a trace, asks Jev one Noul question per assistant
-reply, and writes two scores back to Langfuse: the raw probability (for
-calibration) and the thresholded verdict (for filtering and alerting).
+Writes one Boolean verdict to Langfuse and includes Jev's probability
+distribution in the score comment.
 
-    pip install langfuse typesafe-sdk
-    python score_disagreement.py
+This example assumes each candidate generation has an input shaped like:
+
+    {"messages": [{"role": "user", "content": "..."}, ...]}
+
+Install and configure:
+
+    pip install -U langfuse typesafe-sdk
+
+    export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+    export LANGFUSE_SECRET_KEY="sk-lf-..."
+    export LANGFUSE_BASE_URL="https://cloud.langfuse.com"
+    export TYPESAFE_API_KEY="..."
+    export TRACE_ID="..."
+
+    python score_user_disagreement_v2.py
 """
 
+import json
 import os
 
-from langfuse import Langfuse
+from langfuse import get_client
 from typesafe_sdk import Noul, NoulCriteria, TypeSafeClient
 
-# --- configuration ---------------------------------------------------------
-# Replace the placeholders, or set the matching environment variables.
 
-LANGFUSE_PUBLIC_KEY = os.environ.get("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
-LANGFUSE_SECRET_KEY = os.environ.get("LANGFUSE_SECRET_KEY", "sk-lf-...")
-LANGFUSE_HOST = os.environ.get("LANGFUSE_HOST", "https://cloud.langfuse.com")
-
-TYPESAFE_API_KEY = os.environ.get("TYPESAFE_API_KEY", "ts-...")
-TYPESAFE_BASE_URL = os.environ.get("TYPESAFE_BASE_URL", "https://api.typesafe.ai")
-
-TRACE_ID = os.environ.get("TRACE_ID", "abcdef1234")
-
-MODEL = "jev-1.13.0"  # pin the version, not jev-latest
+TRACE_ID = os.environ["TRACE_ID"]
+MODEL = "jev-1.13.0"  # Pin the model because the verdict uses a fixed threshold.
 THRESHOLD = 0.7
 
-langfuse = Langfuse(
-    public_key=LANGFUSE_PUBLIC_KEY,
-    secret_key=LANGFUSE_SECRET_KEY,
-    host=LANGFUSE_HOST,
-)
+langfuse = get_client()
 
-jev = TypeSafeClient(
-    api_key=TYPESAFE_API_KEY,
-    base_url=TYPESAFE_BASE_URL,
-    timeout=30.0,  # SDK default is 10s
-)
-
-# --- the question and the threshold, in one reviewable place ---------------
 
 USER_DISAGREEMENT = Noul(
-    instructions={
-        "question": (
-            "Does `last_user_message` clearly communicate that the user believes "
-            "the assistant's prior response, reasoning, assumption, work, or "
-            "approach was mistaken or proceeding in the wrong direction?"
-        ),
-        "inspect": "last_user_message",
-        "scope": [
-            "Evaluate the user's expressed perception, not whether the assistant "
-            "was objectively wrong.",
-            "Use `conversation_history` only to resolve references and identify "
-            "the reply being reacted to.",
-            "If there is no prior assistant reply, the answer is false.",
-        ],
-    },
+    instructions=(
+        "Does `last_user_message` clearly communicate that the user believes "
+        "the assistant's prior response or approach was mistaken or proceeding "
+        "in the wrong direction? Evaluate the user's expressed perception, not "
+        "objective correctness."
+    ),
     criteria=NoulCriteria(
-        true={
-            "definition": (
-                "The user clearly rejects, corrects, challenges, asks to undo, or "
-                "repeatedly redirects the assistant's prior response or approach."
-            ),
-            "includes": [
-                "Directly saying the answer, assumption, or interpretation is wrong",
-                "Saying the assistant misunderstood the request",
-                "Questioning why the assistant made a particular assumption",
-                "Requesting that the assistant revert, restart, or abandon its approach",
-                "Repeated steering that indicates the assistant is still going the wrong way",
-            ],
-        },
-        false={
-            "definition": (
-                "The user does not clearly indicate that the assistant made a "
-                "mistake or took the wrong approach."
-            ),
-            "includes": [
-                "A neutral follow-up or request for more detail",
-                "A polite clarification that does not reject the prior response",
-                "Collaborative debugging without criticism of the assistant's approach",
-                "Reporting an external product or system problem",
-                "General frustration not directed at the assistant",
-                "An ambiguous reaction",
-                "No prior assistant response",
-            ],
-        },
+        true=(
+            "The user clearly rejects, corrects, challenges, asks to undo, or "
+            "redirects the assistant's prior response or approach."
+        ),
+        false=(
+            "The user does not clearly reject the prior response. This includes "
+            "neutral, additive, or ambiguous follow-ups."
+        ),
     ),
 )
 
 
-def trailing_user_message(observation) -> str:
-    """The newest user turn in a generation's input.
-
-    Depends on how your app shapes generation inputs. This handles the common
-    case of a list of chat messages.
-    """
-    messages = observation.input
-    if isinstance(messages, list):
-        for message in reversed(messages):
-            if isinstance(message, dict) and message.get("role") == "user":
-                return message.get("content", "")
-    return str(messages)
+def parse_json(value):
+    """Observations V2 can return input and output as JSON strings."""
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            pass
+    return value
 
 
-def score_trace(trace_id: str) -> None:
-    observations = langfuse.api.observations.get_many(
-        trace_id=trace_id,
+def latest_user_message(observation):
+    """Return the newest user message, or None when there is no user message."""
+    observation_input = parse_json(observation.input)
+    messages = observation_input.get("messages", [])
+
+    for message in reversed(messages):
+        if message.get("role") == "user":
+            return message.get("content")
+    return None
+
+
+def main():
+    # `api.observations` is the Observations V2 API in the current Python SDK.
+    response = langfuse.api.observations.get_many(
+        trace_id=TRACE_ID,
         type="GENERATION",
-        fields="core,basic,io",  # io is what returns input and output
+        fields="core,basic,io",
         limit=50,
     )
-    turns = sorted(observations.data, key=lambda o: o.start_time)
 
-    # Disagreement shows up in the turn AFTER the reply it reacts to,
-    # so score reply N using the user message from turn N+1.
-    for reply, reaction in zip(turns, turns[1:]):
-        result = jev.system_one(
-            state={
-                "conversation_history": reply.input,
-                "assistant_reply": reply.output,
-                "last_user_message": trailing_user_message(reaction),
-            },
-            questions={"user_disagreement": USER_DISAGREEMENT},
-            model=MODEL,
-        )
-        p = result.answers["user_disagreement"].noul
+    # Only keep generations whose input contains a user message.
+    turns = [
+        (observation, user_message)
+        for observation in response.data
+        if (user_message := latest_user_message(observation)) is not None
+    ]
+    turns.sort(key=lambda turn: turn[0].start_time)
 
-        # The probability, so you can plot a calibration curve and re-pick the
-        # threshold later without re-running Jev over everything.
-        langfuse.create_score(
-            name="user_disagreement_p",
-            value=p,
-            trace_id=trace_id,
-            observation_id=reply.id,
-            data_type="NUMERIC",
-            score_id=f"{reply.id}-user_disagreement_p",
-            comment=f"{result.model}, threshold {THRESHOLD}",
-        )
+    # TypeSafeClient reads TYPESAFE_API_KEY and TYPESAFE_BASE_URL from the
+    # environment. The context manager closes the HTTP client after the run.
+    with TypeSafeClient(model=MODEL) as jev:
+        # User message N+1 is the reaction to assistant reply N.
+        for (reply, _), (_, reaction_message) in zip(turns, turns[1:]):
+            result = jev.system_one(
+                state={
+                    "conversation_history": parse_json(reply.input),
+                    "assistant_reply": parse_json(reply.output),
+                    "last_user_message": reaction_message,
+                },
+                questions={"user_disagreement": USER_DISAGREEMENT},
+            )
 
-        # The verdict, for filtering, alerting and dashboards.
-        langfuse.create_score(
-            name="user_disagreement",
-            value=1 if p >= THRESHOLD else 0,
-            trace_id=trace_id,
-            observation_id=reply.id,
-            data_type="BOOLEAN",  # required, or a 1 is inferred as NUMERIC
-            score_id=f"{reply.id}-user_disagreement",
-            comment=f"noul={p:.2f}",
-        )
+            # A Noul is P(true), so P(false) is its complement.
+            p_disagreement = float(result.nouls["user_disagreement"].noul)
+            p_no_disagreement = 1.0 - p_disagreement
 
-        print(f"{reply.id}  noul={p:.2f}  -> {'true' if p >= THRESHOLD else 'false'}")
+            langfuse.create_score(
+                score_id=f"{reply.id}-user-disagreement",
+                trace_id=reply.trace_id,
+                observation_id=reply.id,
+                name="user_disagreement",
+                value=1 if p_disagreement >= THRESHOLD else 0,
+                data_type="BOOLEAN",
+                comment=(
+                    f"TypeSafe {result.model}; "
+                    f"P(disagreement)={p_disagreement:.2f}; "
+                    f"P(no disagreement)={p_no_disagreement:.2f}; "
+                    f"threshold={THRESHOLD}"
+                ),
+            )
+
+            print(
+                f"{reply.id}: P(disagreement)={p_disagreement:.2f}, "
+                f"P(no disagreement)={p_no_disagreement:.2f}"
+            )
+
+    # Flush buffered score events before this short-lived script exits.
+    langfuse.flush()
 
 
 if __name__ == "__main__":
-    score_trace(TRACE_ID)
-    langfuse.flush()
+    main()
 ```
