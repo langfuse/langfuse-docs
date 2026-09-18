@@ -37,17 +37,19 @@ export function WatchWalkthroughs({
         referrerPolicy="strict-origin-when-cross-origin"
         allowFullScreen
       />
-      <div className="mt-4 flex justify-center">
-        <Button
-          icon={<BookOpen size={16} />}
-          href={WALKTHROUGH_VIDEO.docs.href}
-        >
-          <span className="flex items-center gap-2">
-            {WALKTHROUGH_VIDEO.docs.title}
-            <ExternalLink size={12} className="ml-auto" />
-          </span>
-        </Button>
-      </div>
+      {!compact ? (
+        <div className="mt-4 flex justify-center">
+          <Button
+            icon={<BookOpen size={16} />}
+            href={WALKTHROUGH_VIDEO.docs.href}
+          >
+            <span className="flex items-center gap-2">
+              {WALKTHROUGH_VIDEO.docs.title}
+              <ExternalLink size={12} className="ml-auto" />
+            </span>
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }
