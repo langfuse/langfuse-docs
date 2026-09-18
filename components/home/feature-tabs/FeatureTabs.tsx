@@ -235,6 +235,14 @@ export const FeatureTabs = ({
     });
   }, [capture, clearAllTimers, pathname]);
 
+  const closeWatchDemoOnEscape = (event: React.KeyboardEvent) => {
+    if (event.key !== "Escape" || !isWatchingDemo) {
+      return;
+    }
+    event.preventDefault();
+    setIsWatchingDemo(false);
+  };
+
   // Keyboard navigation
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (features.length === 0) {
@@ -413,7 +421,10 @@ export const FeatureTabs = ({
 
       {/* Clickable product-area names, then animated subtitle */}
       <CornerBox className="px-4 py-3">
-        <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
+        <div
+          className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1"
+          onKeyDown={closeWatchDemoOnEscape}
+        >
           <div
             ref={tabListScrollRef}
             role="tablist"
@@ -460,6 +471,7 @@ export const FeatureTabs = ({
             })}
           </div>
           <Button
+            id="watch-demo-toggle"
             type="button"
             variant="secondary"
             size="small"
@@ -472,6 +484,7 @@ export const FeatureTabs = ({
             }
             className="w-auto"
             wrapperClassName="shrink-0 -mr-1 ml-auto"
+            aria-label={isWatchingDemo ? "Close demo" : "Watch demo"}
             aria-pressed={isWatchingDemo}
             aria-controls="tabpanel-product-area"
             onClick={handleWatchDemoToggle}
@@ -516,7 +529,13 @@ export const FeatureTabs = ({
         withStripes
         role="tabpanel"
         id="tabpanel-product-area"
-        aria-labelledby={activeFeature ? `tab-${activeFeature.id}` : undefined}
+        aria-labelledby={
+          isWatchingDemo
+            ? "watch-demo-toggle"
+            : activeFeature
+              ? `tab-${activeFeature.id}`
+              : undefined
+        }
       >
         <div
           className={cn(
