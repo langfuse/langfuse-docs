@@ -3,20 +3,34 @@ import { WALKTHROUGH_VIDEO } from "./constants";
 import { BookOpen, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export function WatchWalkthroughs({ className }: { className?: string }) {
+export function WatchWalkthroughs({
+  className,
+  compact = false,
+}: {
+  className?: string;
+  /** Hide the long description so the player can take more of the card. */
+  compact?: boolean;
+}) {
   return (
     <div
       className={cn(
         "relative p-4 mx-auto max-w-2xl rounded-none border border-line-structure corner-box-corners bg-stripe-pattern",
+        compact && "max-w-none w-full p-3 sm:p-4",
         className,
       )}
     >
-      <div className="mb-6">
-        <h3 className="mb-2 text-xl font-semibold">
+      {!compact ? (
+        <div className="mb-6">
+          <h3 className="mb-2 text-xl font-semibold">
+            {WALKTHROUGH_VIDEO.title}
+          </h3>
+          <p>{WALKTHROUGH_VIDEO.description}</p>
+        </div>
+      ) : (
+        <h3 className="mb-3 text-lg font-semibold">
           {WALKTHROUGH_VIDEO.title}
         </h3>
-        <p>{WALKTHROUGH_VIDEO.description}</p>
-      </div>
+      )}
       <iframe
         width="100%"
         className="aspect-[16/9] rounded-[2px]"

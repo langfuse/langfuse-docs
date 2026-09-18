@@ -206,7 +206,7 @@ export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
   const isDiscoverOpen = page === "watch-demo";
 
   return (
-    <HomeSection>
+    <HomeSection className="md:max-w-5xl xl:max-w-6xl px-4 sm:px-6 md:px-8">
       <div className="not-prose flex flex-col gap-2 mb-6 items-center text-center text-balance">
         <Heading as="h1" size="large" className="m-0">
           <TextHighlight>
@@ -220,12 +220,14 @@ export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
         </Text>
       </div>
 
-      <div className="w-full max-w-6xl px-4 not-prose">
-        <div className="flex flex-col md:flex-row gap-8">
+      <div className="w-full not-prose">
+        <div className="flex flex-col md:flex-row md:items-start gap-8">
           {/* Left Column: Content based on switch */}
           <div
             className={`flex flex-col gap-8 ${
-              isDiscoverOpen ? "flex-1 md:flex-[0.4]" : "flex-1"
+              isDiscoverOpen
+                ? "flex-1 md:flex-none md:w-[280px] lg:w-[300px]"
+                : "flex-1"
             }`}
           >
             <SwitchToggle checked={isDiscoverOpen} page={page} />
@@ -237,8 +239,12 @@ export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
           </div>
 
           {/* Right Column: Calendar or Walkthroughs */}
-          <div className={isDiscoverOpen ? "flex-1 md:flex-[0.6]" : "flex-1"}>
-            {!isDiscoverOpen ? <ContactFormSection /> : <WatchWalkthroughs />}
+          <div className="flex-1 min-w-0">
+            {!isDiscoverOpen ? (
+              <ContactFormSection />
+            ) : (
+              <WatchWalkthroughs compact />
+            )}
           </div>
         </div>
       </div>
