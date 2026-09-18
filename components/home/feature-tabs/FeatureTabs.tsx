@@ -413,12 +413,12 @@ export const FeatureTabs = ({
 
       {/* Clickable product-area names, then animated subtitle */}
       <CornerBox className="px-4 py-3">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
           <div
             ref={tabListScrollRef}
             role="tablist"
             aria-label="Product area screenshots. Use arrow keys to navigate, Escape to toggle auto-advance."
-            className="flex !flex-nowrap md:!flex-wrap items-center min-w-0 flex-1 overflow-x-auto md:overflow-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-sm leading-snug"
+            className="flex !flex-nowrap md:!flex-wrap items-center min-w-0 flex-1 overflow-x-auto md:flex-none md:overflow-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-sm leading-snug"
             onKeyDown={handleKeyDown}
           >
             {features.map((feature, index) => {
@@ -429,11 +429,6 @@ export const FeatureTabs = ({
                   key={feature.id}
                   className="inline-flex items-center shrink-0"
                 >
-                  {index > 0 && (
-                    <span aria-hidden className="px-2 text-text-tertiary">
-                      ·
-                    </span>
-                  )}
                   <button
                     ref={(el) => {
                       tabRefs.current[index] = el;
@@ -455,6 +450,11 @@ export const FeatureTabs = ({
                   >
                     {feature.name}
                   </button>
+                  {index < features.length - 1 && (
+                    <span aria-hidden className="px-2 text-text-tertiary">
+                      ·
+                    </span>
+                  )}
                 </span>
               );
             })}
@@ -471,7 +471,7 @@ export const FeatureTabs = ({
               )
             }
             className="w-auto"
-            wrapperClassName="shrink-0 -mr-1"
+            wrapperClassName="shrink-0 -mr-1 ml-auto"
             aria-pressed={isWatchingDemo}
             aria-controls="tabpanel-product-area"
             onClick={handleWatchDemoToggle}
@@ -518,7 +518,12 @@ export const FeatureTabs = ({
         id="tabpanel-product-area"
         aria-labelledby={activeFeature ? `tab-${activeFeature.id}` : undefined}
       >
-        <div className="relative w-full overflow-hidden aspect-[2205/1291] custom-card-shadow">
+        <div
+          className={cn(
+            "relative w-full overflow-hidden custom-card-shadow",
+            isWatchingDemo ? "aspect-video" : "aspect-[2205/1291]",
+          )}
+        >
           <AnimatePresence mode="sync" initial={false}>
             {isWatchingDemo ? (
               <motion.div
@@ -527,9 +532,9 @@ export const FeatureTabs = ({
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="absolute inset-0"
+                className="w-full"
               >
-                <WalkthroughVideoIframe className="h-full w-full aspect-auto" />
+                <WalkthroughVideoIframe className="w-full" />
               </motion.div>
             ) : activeFeature ? (
               <motion.div
