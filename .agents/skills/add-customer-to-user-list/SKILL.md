@@ -85,13 +85,46 @@ Link-label examples already in the table:
 
 Pick the closest label. Include a date only when it helps (`Blogpost from 12/23/2025`).
 
-When other rows for similar sources include an archive, add one:
+**Always include a Wayback Machine archive** when the Reference cell is an
+external URL. User-story links (`/users/<slug>`) and `Langfuse Customer` do
+not need one.
+
+1. Look up an existing `200` snapshot. **Always percent-encode the URL** with
+   `curl -G --data-urlencode` (or equivalent). A raw `?url=` query treats `&`
+   in the page URL as another CDX parameter and can miss snapshots.
+
+   ```bash
+   curl -sS -G "https://web.archive.org/cdx/search/cdx" \
+     --data-urlencode "url=<URL>" \
+     --data-urlencode "output=json" \
+     --data-urlencode "filter=statuscode:200" \
+     --data-urlencode "limit=1"
+   ```
+
+2. If CDX is empty, **request a snapshot** and wait for it. Do not skip this
+   step or ship the row without an archive. Percent-encode reserved characters
+   in the page URL (`?`, `&`, `#`) so Save Page Now receives the full URL.
+
+   ```bash
+   curl -sS -I "https://web.archive.org/save/$(python3 -c 'import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=":/"))' '<URL>')"
+   ```
+
+   Re-query CDX until it returns a `200` row. The Save Page Now response may
+   be `5xx` even when a capture is stored — trust CDX plus a fetch of the
+   archive URL.
+
+3. Confirm the snapshot contains the Langfuse mention (or the cited source
+   content), then use:
+
+   `https://web.archive.org/web/<timestamp>/<URL>`
 
 ```md
-[Tech Blogpost](https://example.com/post) ([Archive](https://web.archive.org/web/...))
+[Tech Blogpost](https://example.com/post) ([Archive](https://web.archive.org/web/20260304001459/https://example.com/post))
 ```
 
-Do not block the edit if no archive URL is available.
+If Wayback cannot capture the page after a retry (common for some LinkedIn
+or login-walled URLs), use an `archive.ph` snapshot the same way neighboring
+rows do. Say so in the PR. Do not omit the archive.
 
 ## Row format
 
@@ -142,6 +175,7 @@ and is a separate request.
 
 - [ ] Searched `content/customers/` and `origin/main` for a user story
 - [ ] Reference is `User Story`, a described external link, or `Langfuse Customer`
+- [ ] External reference includes a Wayback `[Archive](...)` (requested via Save Page Now if none existed)
 - [ ] Use case is a brief, sourced summary (not a long paragraph)
 - [ ] Company cell links to the official website
 - [ ] Row is alphabetical and not a duplicate

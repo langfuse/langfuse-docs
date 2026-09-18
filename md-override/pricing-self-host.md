@@ -88,10 +88,10 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 | [Extensive public API](/docs/api-and-data-platform/features/public-api)                                     | Yes                         | Yes                                        |
 | [Metrics & Observations APIs (v2)](/docs/metrics/features/metrics-api#v2)                                   | Langfuse v4+                | Langfuse v4+                               |
 | **Exports**                                                                                                 |                             |                                            |
-| [Batch export via UI](/docs/api-and-data-platform/features/query-via-sdk#ui)                                | Yes                         | Yes                                        |
+| [Batch export via UI](/docs/api-and-data-platform/features/export-from-ui)                                  | Yes                         | Yes                                        |
 | [PostHog integration](/integrations/analytics/posthog)                                                      | Yes                         | Yes                                        |
 | [Mixpanel integration](/integrations/analytics/mixpanel)                                                    | Yes                         | Yes                                        |
-| [Scheduled export to blob storage](/docs/api-and-data-platform/features/query-via-sdk#blob-storage)         | Yes                         | Yes                                        |
+| [Scheduled export to blob storage](/docs/api-and-data-platform/features/export-to-blob-storage)             | Yes                         | Yes                                        |
 | **Deployment**                                                                                              |                             |                                            |
 | ClickHouse deployment model                                                                                 | Self-managed ClickHouse OSS | Bundled: ClickHouse Cloud / BYOC / Private |
 | [Deployment templates](/self-hosting)                                                                       | Yes                         | Yes                                        |
@@ -140,6 +140,9 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 | Open-source projects | $300 in credits / month, first year | Contact support@langfuse.com        |
 
 ## Frequently Asked Questions
+
+**How does Langfuse pricing compare to LangSmith, Braintrust, Arize, and Datadog?**
+On a representative workload, Langfuse Cloud is cheaper than [LangSmith](/compare/langsmith), [Braintrust](/compare/braintrust), [Arize](/compare/arize-phoenix), and [Datadog Agent Observability](/compare/datadog). Open the [editable pricing comparison sheet](/pricing-comparison-sheet) to fill in your own assumptions and check the numbers for your workload. For product-by-product differences, see the [comparison pages](/compare). Langfuse is also [open source](/why), based on [OpenTelemetry](/integrations/native/opentelemetry) for interoperability, [self-hostable](/self-hosting) at the same scale as Langfuse Cloud, and model- and framework-agnostic.
 
 **Can I purchase Langfuse through AWS Marketplace?**
 Yes. Self-hosted Enterprise can be billed via AWS Marketplace or invoice. [Talk to us](/talk-to-us?deployment=self-hosted) to request a private offer.

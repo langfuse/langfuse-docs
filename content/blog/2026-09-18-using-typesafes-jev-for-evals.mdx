@@ -1,0 +1,416 @@
+---
+title: "Using TypeSafe's Jev for evals"
+date: 2026/09/18
+description: "A specialized decision model for routing, classification, and eval verdicts — and how to score Langfuse traces with it."
+tag: engineering
+author: Annabell
+highlight: true
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Using TypeSafe's Jev for evals"
+  description="A specialized decision model for routing, classification, and eval verdicts — and how to score Langfuse traces with it."
+  date="September 18, 2026"
+  authors={["annabellschafer"]}
+/>
+
+[TypeSafe](https://typesafe.ai) launched [Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev) mid-September 2026. It makes decisions, cannot write a single sentence, and is 20 to 200x faster and 40 to 400x cheaper than frontier models according to TypeSafe.
+
+You send a state, a string or JSON, plus typed questions. You get typed answers with probabilities. It gives you no reasoning back. Useless at other tasks.
+
+Decisions matter a lot for AI agents and AI-powered workflows. AI decides between different categories, whether something is true or not, which tool or path to take. And in the case of evals, AI classifies or simply decides if an output is right or wrong.
+
+Over the past years we forced this out of LLMs with structured outputs and JSON schemas, and still paid generation prices for a yes/no. Jev is deliberately built for that job instead of adapted to it. The flipside: it will not write code, summaries, or tell you why it answered the way it did.
+
+## What Jev is good for [#what-jev-is-good-for]
+
+Jev can help anywhere in your pipeline or eval harness where decisions are repeated, high volume, and the possible answers are known before the call:
+
+- Agent and tool routing
+- Document and ticket classification
+- Escalation decisions
+- Eval scoring, where a rubric verdict is all you need
+
+Jev covers this surface with three [question types](https://docs.typesafe.ai/primitives):
+
+- **[Choice](https://docs.typesafe.ai/primitives/choice)** picks one option from a set you define, up to 255, and returns the probability of each plus a confidence value.
+- **[Score](https://docs.typesafe.ai/primitives/score)** rates the state against ordered rubric levels and returns a probability-weighted value, the full distribution, and a confidence value. Up to 10 levels.
+- **[Noul](https://docs.typesafe.ai/primitives/noul)** answers yes or no and returns the probability it is true. It carries no separate confidence field, so code that reads `answer.confidence` on everything will break on binaries.
+
+<Frame fullWidth>
+  ![Jev Choice, Score, and Noul answers for one agent run: missing_context at 0.706, severity 2.73, needs_review 0.913](/images/blog/2026-09-18-using-typesafes-jev-for-evals/jev-question-types.png)
+</Frame>
+
+A finished agent run needs three judgments at once, and with Jev they go in one request:
+
+```json
+{
+  "model": "jev-latest",
+  "state": {
+    "task": "{{task}}",
+    "tool_calls": "{{tool_calls}}",
+    "final_output": "{{final_output}}"
+  },
+  "questions": {
+    "needs_review": {
+      "type": "noul",
+      "instructions": "Does this run need a human to look at it?"
+    },
+    "severity": {
+      "type": "score",
+      "instructions": "How badly did this run go?",
+      "criteria": [
+        "Completed the task cleanly",
+        "Completed it, but took a wasteful or confusing path",
+        "Delivered a wrong or incomplete result",
+        "Took a destructive or unsafe action"
+      ]
+    },
+    "failure_mode": {
+      "type": "choice",
+      "instructions": "What went wrong, if anything?",
+      "criteria": {
+        "tool_error": "A tool returned an error or unusable output",
+        "missing_context": "The agent lacked information it needed",
+        "wrong_approach": "The agent chose an unsuitable strategy",
+        "user_abandoned": "The user left before the task finished",
+        "none": "Nothing went wrong"
+      }
+    }
+  }
+}
+```
+
+And what you get back:
+
+```json
+{
+  "model": "jev-1.13.0",
+  "answers": {
+    "needs_review": { "type": "noul", "noul": 0.88 },
+    "severity": {
+      "type": "score",
+      "score": 1.89,
+      "confidence": 0.44,
+      "legend": {
+        "0": "Completed the task cleanly",
+        "1": "Completed it, but took a wasteful or confusing path",
+        "2": "Delivered a wrong or incomplete result",
+        "3": "Took a destructive or unsafe action"
+      },
+      "probabilities": { "0": 0.02, "1": 0.21, "2": 0.63, "3": 0.14 }
+    },
+    "failure_mode": {
+      "type": "choice",
+      "choice": "missing_context",
+      "probabilities": {
+        "tool_error": 0.11,
+        "missing_context": 0.58,
+        "wrong_approach": 0.24,
+        "user_abandoned": 0.05,
+        "none": 0.02
+      },
+      "confidence": 0.51
+    }
+  },
+  "usage": { "input_tokens": 1840, "output_tokens": 27 }
+}
+```
+
+`needs_review` comes back at 0.88, so queue it. `severity` lands at 1.89, just short of "delivered a wrong result". `failure_mode` is inconclusive: `missing_context` wins at 0.58, but confidence is 0.51 because `wrong_approach` is close behind at 0.24, and those two are genuinely hard to separate from a trace alone.
+
+Every question is evaluated in parallel and in isolation against the same state. So adding a fourth question, or a fourteenth, barely changes response time, costs only the tokens of the question itself, and cannot degrade the answers to the others. You can ask speculatively and throw away what you do not need.
+
+## Jev's strengths for evals [#jevs-strengths-for-evals]
+
+The TypeSafe docs are insistent that each question must be atomic. This is very much in line with [guidance on how to write good evaluators](/academy/evaluate/writing-evaluators).
+
+Jev gives you a cheap and scalable way to evaluate your application against criteria you define. Finding those criteria is still on you, but Jev forces you to think in distinct categories and yes/no decisions to define what good means. If you do not, the answer comes back with low confidence.
+
+Let's take user disagreement as an example. The goal is to identify from a message whether the user of a chatbot is disagreeing with the reply.
+
+With a typical [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) approach you would write a prompt and force a structured output with a decision, true or false:
+
+```text
+You are evaluating a conversation between a user and an AI assistant.
+Read the conversation history and the last user message. Decide whether the
+user is disagreeing with the assistant's prior response.
+
+The user IS disagreeing if they reject, correct or challenge the assistant's
+answer, say it misunderstood them, or ask it to start over. The user is NOT
+disagreeing if they ask a neutral follow-up, politely clarify, debug
+collaboratively, report an unrelated product problem, or express general
+frustration not aimed at the assistant. If there is no prior assistant
+response, the answer is false.
+
+Judge what the user believes, not whether the assistant was actually wrong.
+Return only JSON: {"disagreement": true | false}
+
+Conversation history: {{conversation_history}}
+Last user message: {{last_user_message}}
+```
+
+With Jev you define user disagreement as one question with a scope, and then both criteria, true and false, cleanly:
+
+```json
+{
+  "model": "jev-latest",
+  "state": {
+    "conversation_history": "{{conversation_history}}",
+    "last_user_message": "{{last_user_message}}"
+  },
+  "questions": {
+    "user_disagreement": {
+      "type": "noul",
+      "instructions": {
+        "question": "Does `last_user_message` clearly communicate that the user believes the assistant's prior response, reasoning, assumption, work, or approach was mistaken or proceeding in the wrong direction?",
+        "inspect": "last_user_message",
+        "scope": [
+          "Evaluate the user's expressed perception, not whether the assistant was objectively wrong.",
+          "Use `conversation_history` only to identify the relevant prior assistant response and resolve references.",
+          "If there is no prior assistant response, the answer is false."
+        ]
+      },
+      "criteria": {
+        "true": {
+          "definition": "The user clearly rejects, corrects, challenges, asks to undo, or repeatedly redirects the assistant's prior response or approach.",
+          "includes": [
+            "Directly saying the answer, assumption, or interpretation is wrong",
+            "Saying the assistant misunderstood the request",
+            "Questioning why the assistant made a particular assumption",
+            "Requesting that the assistant revert, restart, or abandon its approach",
+            "Repeated steering that indicates the assistant is still following the wrong direction"
+          ]
+        },
+        "false": {
+          "definition": "The user does not clearly indicate that the assistant made a mistake or took the wrong approach.",
+          "includes": [
+            "A neutral follow-up or request for more detail",
+            "A polite clarification that does not reject the prior response",
+            "Collaborative debugging without criticism of the assistant's approach",
+            "Reporting an external product or system problem",
+            "General frustration not directed at the assistant",
+            "An ambiguous reaction",
+            "No prior assistant response"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+0.93 means a 93% probability of disagreement. The cutoff is yours to define in your app context, and because you get a probability rather than a label you can run three paths instead of two: act on high confidence, send the middle band to a human, drop or flag the rest. See the [Noul documentation](https://docs.typesafe.ai/primitives/noul) for the full shape.
+
+Both versions give you a true/false indication back. Jev forces you to define distinct criteria while writing your evaluator and has the potential to save you a significant amount of money and time.
+
+## Jev's early bench results [#jevs-early-bench-results]
+
+In just a few days in developers' hands, people have already benched Jev against the established models.
+
+Early results point towards potential for time and money savings, especially over frontier models. [Good Start Labs](https://goodstartlabs.com/research/verification-is-the-bottleneck) graded 6,003 rubric checks with Jev and five LLMs on identical instructions. Jev matched Claude Fable 5.1's verdict 91.5% of the time at $160 per million graded answers, against $33,000 of Fable 5.1, $400 for GPT-5.6 Luna and $1,600 for Gemini 3.8 Flash.
+
+The open source comparison is less distinct: DeepSeek V4.1 Flash cost $260 and agreed with Fable 93.5% of the time, two points better for $100 more.
+
+Overall, this primarily points out one thing: there are tasks and decisions, like routing, classification and eval verdicts, that do not need the frontier. Models like Jev, the rise of open source models, and the increasing demand for specialized models, are means to that end.
+
+## Where Jev is falling short [#where-jev-is-falling-short]
+
+TypeSafe publishes a [per-version page listing what Jev is bad at](https://docs.typesafe.ai/model-jaggedness/jev-1.13). Read it before you design an evaluator. Most of it is general: it reads literally, it cannot do arithmetic, it treats dates as text. These are the ones that bite specifically when you are using Jev to judge.
+
+**It cannot abstain.** A forced binary with no `unknown` or `needs_review` option makes Jev pick the least wrong answer instead of saying it does not know. You have to think about and design an escape hatch, at least early on before calibrating your judge.
+
+**No rationale, when you actually need one.** Good for eval design, bad for the individual case. Jev is not trained to generate text, so when a trace scores badly it never provides a reasoning. You debug by reading your own criteria. Anything audited or customer facing still needs a generative model on top.
+
+**Context rot, and the limit is unclear.** Their docs say it plainly: "Jev suffers from context rot". Accuracy drops as the state fills with material the question does not need, which is awkward when agent traces are long and mostly irrelevant. This refocuses importance on designing the input context, much like in the old days. The [models page](https://docs.typesafe.ai/models) says 64k per request and 32k for state plus the longest question, while [OpenRouter lists 32K](https://openrouter.ai/typesafe/jev-1.13). Verify before you design around it.
+
+## How to use Jev to evaluate your Langfuse traces [#how-to-use-jev-to-evaluate-your-langfuse-traces]
+
+Access runs through a [waitlist](https://typesafe.ai), and Jev is also live on [OpenRouter](https://openrouter.ai/typesafe/jev-1.13) and the [Vercel AI Gateway](https://vercel.com/ai-gateway/models/jev), which is the quicker route if you do not want to open a new vendor relationship to run a test. There are [Python](https://docs.typesafe.ai/sdk/python) and [JavaScript](https://docs.typesafe.ai/sdk/javascript) SDKs, and an [agent skill](https://docs.typesafe.ai/agent-skill) that gives a coding agent full API context. The cookbooks have worked implementations for [guardrails](https://docs.typesafe.ai/cookbooks/llm_guardrails), [RAG passage screening](https://docs.typesafe.ai/cookbooks/classifying_rag_passages), [citation checks](https://docs.typesafe.ai/cookbooks/citation_check) and [confidence-gated classification](https://docs.typesafe.ai/cookbooks/classification_using_confidence).
+
+To score your Langfuse traces with Jev, you can pull observations via the [API](/docs/api-and-data-platform/features/query-via-sdk), determine a score with Jev, and write the result back as a [score](/docs/evaluation/evaluation-methods/scores-via-sdk).
+
+```python
+#!/usr/bin/env python3
+"""Score user disagreement with TypeSafe Jev and Langfuse.
+
+Writes one Boolean verdict to Langfuse and includes Jev's probability
+distribution in the score comment.
+
+This example assumes each candidate generation has an input shaped like:
+
+    {"messages": [{"role": "user", "content": "..."}, ...]}
+
+Generations without that chat shape are skipped. Consecutive generations that
+share the same latest user message (typical of tool loops) collapse into one
+turn, and only that turn's final generation is scored against the next distinct
+user message.
+
+Install and configure:
+
+    pip install -U langfuse typesafe-sdk
+
+    export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+    export LANGFUSE_SECRET_KEY="sk-lf-..."
+    export LANGFUSE_BASE_URL="https://cloud.langfuse.com"
+    export TYPESAFE_API_KEY="..."
+    export TRACE_ID="..."
+
+    python score_user_disagreement_v2.py
+"""
+
+import json
+import os
+
+from langfuse import get_client
+from typesafe_sdk import Noul, NoulCriteria, TypeSafeClient
+
+
+TRACE_ID = os.environ["TRACE_ID"]
+MODEL = "jev-1.13.0"  # Pin the model because the verdict uses a fixed threshold.
+THRESHOLD = 0.7
+
+langfuse = get_client()
+
+
+USER_DISAGREEMENT = Noul(
+    instructions=(
+        "Does `last_user_message` clearly communicate that the user believes "
+        "the assistant's prior response or approach was mistaken or proceeding "
+        "in the wrong direction? Evaluate the user's expressed perception, not "
+        "objective correctness."
+    ),
+    criteria=NoulCriteria(
+        true=(
+            "The user clearly rejects, corrects, challenges, asks to undo, or "
+            "redirects the assistant's prior response or approach."
+        ),
+        false=(
+            "The user does not clearly reject the prior response. This includes "
+            "neutral, additive, or ambiguous follow-ups."
+        ),
+    ),
+)
+
+
+def parse_json(value):
+    """Observations V2 can return input and output as JSON strings."""
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            pass
+    return value
+
+
+def latest_user_message(observation):
+    """Return the newest user message, or None when there is no user message."""
+    observation_input = parse_json(observation.input)
+    if not isinstance(observation_input, dict):
+        return None
+
+    messages = observation_input.get("messages")
+    if not isinstance(messages, list):
+        return None
+
+    for message in reversed(messages):
+        if isinstance(message, dict) and message.get("role") == "user":
+            return message.get("content")
+    return None
+
+
+def fetch_generations(trace_id):
+    """Page through every GENERATION on the trace, newest-first pages included."""
+    observations = []
+    cursor = None
+    while True:
+        response = langfuse.api.observations.get_many(
+            trace_id=trace_id,
+            type="GENERATION",
+            fields="core,basic,io",
+            limit=100,
+            cursor=cursor,
+        )
+        if not response.data:
+            break
+        observations.extend(response.data)
+        cursor = getattr(response.meta, "cursor", None) if response.meta else None
+        if not cursor:
+            break
+    return observations
+
+
+def collapse_to_turns(generations):
+    """Keep the last generation in each consecutive run of the same user message.
+
+    Agent traces often have several generations per user turn (a tool decision,
+    then a synthesis call). Those share the same latest user message, so pairing
+    adjacent generations would score an internal step against that same message.
+    """
+    turns = []
+    for observation, user_message in generations:
+        if turns and turns[-1][1] == user_message:
+            turns[-1] = (observation, user_message)
+        else:
+            turns.append((observation, user_message))
+    return turns
+
+
+def main():
+    generations = [
+        (observation, user_message)
+        for observation in fetch_generations(TRACE_ID)
+        if (user_message := latest_user_message(observation)) is not None
+    ]
+    generations.sort(key=lambda item: item[0].start_time)
+    turns = collapse_to_turns(generations)
+
+    # TypeSafeClient reads TYPESAFE_API_KEY and TYPESAFE_BASE_URL from the
+    # environment. The context manager closes the HTTP client after the run.
+    with TypeSafeClient(model=MODEL) as jev:
+        # The next distinct user message is the reaction to this turn's reply.
+        for (reply, _), (_, reaction_message) in zip(turns, turns[1:]):
+            result = jev.system_one(
+                state={
+                    "conversation_history": parse_json(reply.input),
+                    "assistant_reply": parse_json(reply.output),
+                    "last_user_message": reaction_message,
+                },
+                questions={"user_disagreement": USER_DISAGREEMENT},
+            )
+
+            # A Noul is P(true), so P(false) is its complement.
+            p_disagreement = float(result.nouls["user_disagreement"].noul)
+            p_no_disagreement = 1.0 - p_disagreement
+
+            langfuse.create_score(
+                score_id=f"{reply.id}-user-disagreement",
+                trace_id=reply.trace_id,
+                observation_id=reply.id,
+                name="user_disagreement",
+                value=1 if p_disagreement >= THRESHOLD else 0,
+                data_type="BOOLEAN",
+                # Pin timestamp to the observation so reruns overwrite this score.
+                timestamp=reply.start_time,
+                comment=(
+                    f"TypeSafe {result.model}; "
+                    f"P(disagreement)={p_disagreement:.2f}; "
+                    f"P(no disagreement)={p_no_disagreement:.2f}; "
+                    f"threshold={THRESHOLD}"
+                ),
+            )
+
+            print(
+                f"{reply.id}: P(disagreement)={p_disagreement:.2f}, "
+                f"P(no disagreement)={p_no_disagreement:.2f}"
+            )
+
+    # Flush buffered score events before this short-lived script exits.
+    langfuse.flush()
+
+
+if __name__ == "__main__":
+    main()
+```

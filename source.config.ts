@@ -71,6 +71,8 @@ const customerFrontmatterSchema = baseFrontmatterSchema.extend({
   quoteRole: z.string().nullish(),
   quoteCompany: z.string().nullish(),
   quoteAuthorImage: z.string().nullish(),
+  /** Card/hero CTA label override (e.g. "Watch" for video stories). Defaults to "Read". */
+  ctaLabel: z.string().nullish(),
   showInCustomerIndex: z.boolean().nullish(),
 });
 
@@ -203,14 +205,20 @@ export const workshop = defineDocs({
 });
 
 // SEO/GEO resources section (e.g. /resources/engineering). Supports optional
-// tags so the index listing can group articles by category (comparisons,
-// migrations, …).
+// tags so the index listing can group articles by category.
 const resourcesFrontmatterSchema = sidebarFrontmatterSchema.extend({
   tags: z.array(z.string()).optional(),
 });
 
 export const resources = defineDocs({
   dir: "content/resources",
+  docs: {
+    schema: resourcesFrontmatterSchema,
+  },
+});
+
+export const compare = defineDocs({
+  dir: "content/compare",
   docs: {
     schema: resourcesFrontmatterSchema,
   },
