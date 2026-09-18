@@ -42,7 +42,11 @@ export const trustedByData: TrustedByData = {
       { name: "Brevo", logo: "/images/customers/picing-logos/brevo.png" },
     ],
     Enterprise: [
-      { name: "Ramp", logo: "/images/customers/picing-logos/ramp.png" },
+      {
+        name: "Ramp",
+        logo: "/images/customers/picing-logos/ramp.png",
+        caseStudyUrl: "/users/ramp",
+      },
       { name: "GoDaddy", logo: "/images/customers/picing-logos/godaddy.png" },
       {
         name: "Khan Academy",
