@@ -220,20 +220,49 @@ export const FeatureTabs = ({
     [activeTab, clearAllTimers, isWatchingDemo],
   );
 
+  const closeWatchDemo = useCallback(() => {
+    setIsWatchingDemo(false);
+    dispatch({ type: "RESUME_AUTO_ADVANCE" });
+  }, []);
+
   const handleWatchDemoToggle = useCallback(() => {
-    setIsWatchingDemo((open) => {
-      const next = !open;
-      if (next) {
-        dispatch({ type: "PAUSE_AUTO_ADVANCE" });
-        clearAllTimers();
-        capture("home:watch_demo_clicked", {
-          source: "home_feature_tabs",
-          path: pathname,
-        });
-      }
-      return next;
+    if (isWatchingDemo) {
+      closeWatchDemo();
+      return;
+    }
+
+    dispatch({ type: "PAUSE_AUTO_ADVANCE" });
+    clearAllTimers();
+    setIsWatchingDemo(true);
+    capture("home:watch_demo_clicked", {
+      source: "home_feature_tabs",
+      path: pathname,
     });
-  }, [capture, clearAllTimers, pathname]);
+  }, [capture, clearAllTimers, closeWatchDemo, isWatchingDemo, pathname]);
+
+  useEffect(() => {
+    if (!isWatchingDemo) {
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      const root = containerRef.current;
+      const target = event.target;
+      if (root && target instanceof Node && !root.contains(target)) {
+        return;
+      }
+
+      event.preventDefault();
+      closeWatchDemo();
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [closeWatchDemo, isWatchingDemo]);
 
   // Keyboard navigation
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -271,7 +300,7 @@ export const FeatureTabs = ({
       case "Escape":
         event.preventDefault();
         if (isWatchingDemo) {
-          setIsWatchingDemo(false);
+          closeWatchDemo();
           return;
         }
         if (state.isAutoAdvancePaused) {
@@ -460,6 +489,7 @@ export const FeatureTabs = ({
             })}
           </div>
           <Button
+            id="watch-demo-toggle"
             type="button"
             variant="secondary"
             size="small"
@@ -472,6 +502,7 @@ export const FeatureTabs = ({
             }
             className="w-auto"
             wrapperClassName="shrink-0 -mr-1 ml-auto"
+            aria-label={isWatchingDemo ? "Close demo" : "Watch demo"}
             aria-pressed={isWatchingDemo}
             aria-controls="tabpanel-product-area"
             onClick={handleWatchDemoToggle}
@@ -516,7 +547,13 @@ export const FeatureTabs = ({
         withStripes
         role="tabpanel"
         id="tabpanel-product-area"
-        aria-labelledby={activeFeature ? `tab-${activeFeature.id}` : undefined}
+        aria-labelledby={
+          isWatchingDemo
+            ? "watch-demo-toggle"
+            : activeFeature
+              ? `tab-${activeFeature.id}`
+              : undefined
+        }
       >
         <div
           className={cn(
