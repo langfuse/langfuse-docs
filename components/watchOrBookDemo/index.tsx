@@ -31,7 +31,7 @@ function SwitchToggle({
   const switchHref = page === "talk-to-us" ? "/watch-demo" : "/talk-to-us";
 
   return (
-    <div className="flex items-center justify-center md:justify-start gap-3 -mt-2 mb-6 md:mb-0">
+    <div className="flex items-center justify-center gap-3 mt-4">
       <Link
         href="/talk-to-us"
         className="text-sm font-medium hover:text-primary transition-colors"
@@ -148,11 +148,13 @@ function TalkToUsContent() {
 
 function DiscoverYourselfContent() {
   return (
-    <>
-      <Heading as="h2">Self-serve resources</Heading>
+    <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-start">
       <div>
-        <Text className="text-left">Everything you need to get started:</Text>
-        <ul className="flex flex-col gap-2 mt-2">
+        <Heading as="h2">Self-serve resources</Heading>
+        <Text className="text-left mt-2">
+          Everything you need to get started:
+        </Text>
+        <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2 mt-3">
           {SELF_SERVE_LINKS.map((link) => (
             <li key={link.href} className="flex items-start gap-3">
               <ArrowRight className="h-3 w-3 text-text-tertiary mt-0.75 shrink-0" />
@@ -162,9 +164,7 @@ function DiscoverYourselfContent() {
             </li>
           ))}
         </ul>
-      </div>
-      <div className="mt-2">
-        <p>
+        <p className="mt-4">
           Questions?{" "}
           <Link href="/ask-ai" variant="text">
             Ask AI
@@ -175,22 +175,22 @@ function DiscoverYourselfContent() {
           </Link>
           .
         </p>
-        <div className="flex flex-col gap-6 mt-4">
-          <TeamMemberCard
-            imageSrc="/images/people/jannikmaierhoefer.jpg"
-            name="Jannik Maierhöfer"
-            title="Growth Engineer"
-            alt="Jannik Maierhöfer"
-          />
-          <TeamMemberCard
-            imageSrc="/images/people/marcklingen.jpg"
-            name="Marc Klingen"
-            title="Co-founder & CEO"
-            alt="Marc Klingen"
-          />
-        </div>
       </div>
-    </>
+      <div className="flex flex-col gap-6">
+        <TeamMemberCard
+          imageSrc="/images/people/jannikmaierhoefer.jpg"
+          name="Jannik Maierhöfer"
+          title="Growth Engineer"
+          alt="Jannik Maierhöfer"
+        />
+        <TeamMemberCard
+          imageSrc="/images/people/marcklingen.jpg"
+          name="Marc Klingen"
+          title="Co-founder & CEO"
+          alt="Marc Klingen"
+        />
+      </div>
+    </div>
   );
 }
 
@@ -206,8 +206,8 @@ export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
   const isDiscoverOpen = page === "watch-demo";
 
   return (
-    <HomeSection>
-      <div className="not-prose flex flex-col gap-2 mb-6 items-center text-center text-balance">
+    <HomeSection className="md:max-w-5xl xl:max-w-6xl px-4 sm:px-6 md:px-8">
+      <div className="not-prose flex flex-col gap-2 mb-8 items-center text-center text-balance">
         <Heading as="h1" size="large" className="m-0">
           <TextHighlight>
             {isDiscoverOpen ? "See Langfuse in action" : "Get a demo"}
@@ -218,30 +218,26 @@ export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
             ? "Watch a walkthrough to see how Langfuse helps you build better LLM applications"
             : "Learn more about Langfuse — talk to us or watch the walkthrough"}
         </Text>
+        <SwitchToggle checked={isDiscoverOpen} page={page} />
       </div>
 
-      <div className="w-full max-w-6xl px-4 not-prose">
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Left Column: Content based on switch */}
-          <div
-            className={`flex flex-col gap-8 ${
-              isDiscoverOpen ? "flex-1 md:flex-[0.4]" : "flex-1"
-            }`}
-          >
-            <SwitchToggle checked={isDiscoverOpen} page={page} />
-            {!isDiscoverOpen ? (
+      {isDiscoverOpen ? (
+        <div className="flex flex-col gap-10 w-full not-prose">
+          <WatchWalkthroughs compact />
+          <DiscoverYourselfContent />
+        </div>
+      ) : (
+        <div className="w-full not-prose">
+          <div className="flex flex-col md:flex-row gap-8">
+            <div className="flex flex-col gap-8 flex-1">
               <TalkToUsContent />
-            ) : (
-              <DiscoverYourselfContent />
-            )}
-          </div>
-
-          {/* Right Column: Calendar or Walkthroughs */}
-          <div className={isDiscoverOpen ? "flex-1 md:flex-[0.6]" : "flex-1"}>
-            {!isDiscoverOpen ? <ContactFormSection /> : <WatchWalkthroughs />}
+            </div>
+            <div className="flex-1">
+              <ContactFormSection />
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </HomeSection>
   );
 }

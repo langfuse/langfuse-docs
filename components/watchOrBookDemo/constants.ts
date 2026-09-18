@@ -18,6 +18,7 @@ export const SELF_SERVE_LINKS = [
   { href: "/docs", label: "Documentation" },
   { href: "/self-hosting", label: "Self-hosting docs" },
   { href: "/docs/demo", label: "Interactive Example Project" },
+  { href: "/users", label: "Customer stories" },
   { href: "/pricing", label: "Pricing" },
   { href: "/enterprise", label: "Enterprise FAQ" },
   { href: "/security", label: "Security Center" },
