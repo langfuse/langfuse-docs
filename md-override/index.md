@@ -10,7 +10,7 @@ Langfuse is an [open-source](https://github.com/langfuse/langfuse) AI engineerin
 
 Used by 21 of the Fortune 50. 100,000+ engineers build on Langfuse, and the platform processes 90B+ observations per month.
 
-[Start free](/cloud) · [Documentation](/docs) · [Interactive demo](/docs/demo)
+[Start free](/cloud) · [Documentation](/docs) · [Watch demo](/watch-demo) · [Interactive demo](/docs/demo)
 
 ## The AI engineering loop
 

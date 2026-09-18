@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { WALKTHROUGH_VIDEO } from "./constants";
+import { WalkthroughVideoIframe } from "./WalkthroughVideoIframe";
 import { BookOpen, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,16 +28,7 @@ export function WatchWalkthroughs({
           <p>{WALKTHROUGH_VIDEO.description}</p>
         </div>
       ) : null}
-      <iframe
-        width="100%"
-        className="aspect-[16/9] rounded-[2px]"
-        src={`https://www.youtube-nocookie.com/embed/${WALKTHROUGH_VIDEO.videoId}`}
-        title="Langfuse platform walkthrough"
-        frameBorder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        referrerPolicy="strict-origin-when-cross-origin"
-        allowFullScreen
-      />
+      <WalkthroughVideoIframe />
       {!compact ? (
         <div className="mt-4 flex justify-center">
           <Button

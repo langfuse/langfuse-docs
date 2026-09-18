@@ -9,10 +9,15 @@ import {
   useState,
 } from "react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { Play, X } from "lucide-react";
 import { TabContent } from "./TabContent";
 import type { AutoAdvanceConfig, FeatureTabData } from "./types";
 import { CornerBox } from "@/components/ui/corner-box";
+import { Button } from "@/components/ui/button";
+import { WalkthroughVideoIframe } from "@/components/watchOrBookDemo/WalkthroughVideoIframe";
+import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 import { cn } from "@/lib/utils";
 import { MD_MIN_WIDTH_QUERY, useMinWidth } from "@/lib/use-min-width";
 
@@ -103,7 +108,10 @@ export const FeatureTabs = ({
   const defaultAutoAdvance = autoAdvance ?? DEFAULT_AUTO_ADVANCE;
 
   const [activeTab, setActiveTab] = useState(defaultTab);
+  const [isWatchingDemo, setIsWatchingDemo] = useState(false);
   const [state, dispatch] = useReducer(tabStateReducer, initialTabState);
+  const pathname = usePathname() ?? "/";
+  const capture = usePostHogClientCapture();
 
   const tabListScrollRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -202,14 +210,30 @@ export const FeatureTabs = ({
 
   const handleTabChange = useCallback(
     (tabId: string) => {
-      if (activeTab === tabId) return;
+      if (activeTab === tabId && !isWatchingDemo) return;
 
       dispatch({ type: "PAUSE_AUTO_ADVANCE" });
       clearAllTimers();
+      setIsWatchingDemo(false);
       setActiveTab(tabId);
     },
-    [activeTab, clearAllTimers],
+    [activeTab, clearAllTimers, isWatchingDemo],
   );
+
+  const handleWatchDemoToggle = useCallback(() => {
+    setIsWatchingDemo((open) => {
+      const next = !open;
+      if (next) {
+        dispatch({ type: "PAUSE_AUTO_ADVANCE" });
+        clearAllTimers();
+        capture("home:watch_demo_clicked", {
+          source: "home_feature_tabs",
+          path: pathname,
+        });
+      }
+      return next;
+    });
+  }, [capture, clearAllTimers, pathname]);
 
   // Keyboard navigation
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -246,6 +270,10 @@ export const FeatureTabs = ({
         return;
       case "Escape":
         event.preventDefault();
+        if (isWatchingDemo) {
+          setIsWatchingDemo(false);
+          return;
+        }
         if (state.isAutoAdvancePaused) {
           dispatch({ type: "RESUME_AUTO_ADVANCE" });
         } else {
@@ -295,6 +323,7 @@ export const FeatureTabs = ({
     if (
       defaultAutoAdvance.enabled &&
       !state.isAutoAdvancePaused &&
+      !isWatchingDemo &&
       state.isInViewport
     ) {
       startAutoAdvance();
@@ -309,6 +338,7 @@ export const FeatureTabs = ({
     startAutoAdvance,
     state.isAutoAdvancePaused,
     state.isInViewport,
+    isWatchingDemo,
     clearAutoAdvanceTimer,
   ]);
 
@@ -383,65 +413,99 @@ export const FeatureTabs = ({
 
       {/* Clickable product-area names, then animated subtitle */}
       <CornerBox className="px-4 py-3">
-        <div
-          ref={tabListScrollRef}
-          role="tablist"
-          aria-label="Product area screenshots. Use arrow keys to navigate, Escape to toggle auto-advance."
-          className="flex !flex-nowrap md:!flex-wrap items-center overflow-x-auto md:overflow-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-sm leading-snug"
-          onKeyDown={handleKeyDown}
-        >
-          {features.map((feature, index) => {
-            const isActive = activeTab === feature.id;
+        <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
+          <div
+            ref={tabListScrollRef}
+            role="tablist"
+            aria-label="Product area screenshots. Use arrow keys to navigate, Escape to toggle auto-advance."
+            className="flex !flex-nowrap md:!flex-wrap items-center min-w-0 flex-1 overflow-x-auto md:flex-none md:overflow-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-sm leading-snug"
+            onKeyDown={handleKeyDown}
+          >
+            {features.map((feature, index) => {
+              const isActive = activeTab === feature.id && !isWatchingDemo;
 
-            return (
-              <span
-                key={feature.id}
-                className="inline-flex items-center shrink-0"
-              >
-                {index > 0 && (
-                  <span aria-hidden className="px-2 text-text-tertiary">
-                    ·
-                  </span>
-                )}
-                <button
-                  ref={(el) => {
-                    tabRefs.current[index] = el;
-                  }}
-                  type="button"
-                  role="tab"
-                  aria-selected={isActive}
-                  aria-controls="tabpanel-product-area"
-                  id={`tab-${feature.id}`}
-                  tabIndex={state.focusedIndex === index ? 0 : -1}
-                  onClick={() => handleTabChange(feature.id)}
-                  className={cn(
-                    "cursor-pointer whitespace-nowrap rounded-sm py-0.5 transition-colors duration-150",
-                    "focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/50",
-                    isActive
-                      ? "font-medium text-primary"
-                      : "font-normal text-text-tertiary hover:text-primary",
-                  )}
+              return (
+                <span
+                  key={feature.id}
+                  className="inline-flex items-center shrink-0"
                 >
-                  {feature.name}
-                </button>
-              </span>
-            );
-          })}
+                  <button
+                    ref={(el) => {
+                      tabRefs.current[index] = el;
+                    }}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-controls="tabpanel-product-area"
+                    id={`tab-${feature.id}`}
+                    tabIndex={state.focusedIndex === index ? 0 : -1}
+                    onClick={() => handleTabChange(feature.id)}
+                    className={cn(
+                      "cursor-pointer whitespace-nowrap rounded-sm py-0.5 transition-colors duration-150",
+                      "focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/50",
+                      isActive
+                        ? "font-medium text-primary"
+                        : "font-normal text-text-tertiary hover:text-primary",
+                    )}
+                  >
+                    {feature.name}
+                  </button>
+                  {index < features.length - 1 && (
+                    <span aria-hidden className="px-2 text-text-tertiary">
+                      ·
+                    </span>
+                  )}
+                </span>
+              );
+            })}
+          </div>
+          <Button
+            type="button"
+            variant="secondary"
+            size="small"
+            icon={
+              isWatchingDemo ? (
+                <X size={12} strokeWidth={2} />
+              ) : (
+                <Play size={12} strokeWidth={2} />
+              )
+            }
+            className="w-auto"
+            wrapperClassName="shrink-0 -mr-1 ml-auto"
+            aria-pressed={isWatchingDemo}
+            aria-controls="tabpanel-product-area"
+            onClick={handleWatchDemoToggle}
+          >
+            {isWatchingDemo ? "Close demo" : "Watch demo"}
+          </Button>
         </div>
 
         <div className="relative mt-3 min-h-[1.125rem] overflow-hidden">
           <AnimatePresence mode="wait" initial={false}>
-            {activeFeature && (
+            {isWatchingDemo ? (
               <motion.p
-                key={activeFeature.id}
+                key="watch-demo"
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.12, ease: "easeOut" }}
                 className="text-xs leading-relaxed font-normal text-text-tertiary"
               >
-                {activeFeature.subtitle}
+                End-to-end walkthrough of the Langfuse platform.
               </motion.p>
+            ) : (
+              activeFeature && (
+                <motion.p
+                  key={activeFeature.id}
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.12, ease: "easeOut" }}
+                  className="text-xs leading-relaxed font-normal text-text-tertiary"
+                >
+                  {activeFeature.subtitle}
+                </motion.p>
+              )
             )}
           </AnimatePresence>
         </div>
@@ -454,9 +518,25 @@ export const FeatureTabs = ({
         id="tabpanel-product-area"
         aria-labelledby={activeFeature ? `tab-${activeFeature.id}` : undefined}
       >
-        <div className="relative w-full overflow-hidden aspect-[2205/1291] custom-card-shadow">
+        <div
+          className={cn(
+            "relative w-full overflow-hidden custom-card-shadow",
+            isWatchingDemo ? "aspect-video" : "aspect-[2205/1291]",
+          )}
+        >
           <AnimatePresence mode="sync" initial={false}>
-            {activeFeature ? (
+            {isWatchingDemo ? (
+              <motion.div
+                key="watch-demo"
+                variants={tabImageVariants(Boolean(reduceMotion))}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="w-full"
+              >
+                <WalkthroughVideoIframe className="w-full" />
+              </motion.div>
+            ) : activeFeature ? (
               <motion.div
                 key={activeFeature.id}
                 variants={tabImageVariants(Boolean(reduceMotion))}
