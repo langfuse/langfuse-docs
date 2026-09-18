@@ -19,6 +19,7 @@ showInCustomerIndex: true
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
 import { CustomerQuote } from "@/components/customers/CustomerQuote";
+import { CustomerScreenshotCarousel } from "@/components/customers/CustomerScreenshotCarousel";
 import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
 <BlogHeader
@@ -42,6 +43,40 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 <p className="text-sm text-primary/60 mt-2 mb-8">
   <a href="https://www.youtube.com/watch?v=2P6xL6eVTPo">Watch on YouTube</a>
 </p>
+
+## Highlights from the talk [#highlights-from-the-talk]
+
+<CustomerScreenshotCarousel
+  aspectClassName="aspect-video"
+  imageFit="contain"
+  slides={[
+    {
+      src: "/images/customers/ramp/instrumentation-trace.jpg",
+      alt: "Langfuse trace view for Ramp's durable_agent/ap_coworker_agent showing nested turns, tool calls, and generation metrics",
+      label: "AI instrumentation",
+    },
+    {
+      src: "/images/customers/ramp/why-langfuse-api-first.jpg",
+      alt: "Why Langfuse slide highlighting API-first design with an agent querying 600M observations across Ramp Langfuse projects",
+      label: "Why Langfuse",
+    },
+    {
+      src: "/images/customers/ramp/working-with-langfuse-team.jpg",
+      alt: "Slack threads showing Ramp collaborating with the Langfuse team on features, SDK fixes, and session view feedback",
+      label: "Working with the team",
+    },
+    {
+      src: "/images/customers/ramp/reflect-workflow.jpg",
+      alt: "Ramp Reflect workflow diagram from production sessions through Langfuse enrichment to deeper reasoning and human review",
+      label: "Ramp Reflect",
+    },
+    {
+      src: "/images/customers/ramp/reflect-impact.jpg",
+      alt: "Reflect impact on Ramp Research showing a before and after fix path with 31% faster sessions and fewer tool calls and tokens",
+      label: "Reflect's impact",
+    },
+  ]}
+/>
 
 [Ramp](https://ramp.com/) is a smart financial infrastructure company serving 70,000+ businesses across cards, expense management, AP, travel, treasury, procurement, and token spend management - saving customers roughly $2B and 20 million hours. Nearly all of it now runs on agents.
 
