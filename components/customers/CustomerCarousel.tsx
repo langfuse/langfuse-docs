@@ -26,6 +26,7 @@ export interface CustomerStory {
     quoteRole?: string;
     quoteCompany?: string;
     quoteAuthorImage?: string;
+    ctaLabel?: string;
     showInCustomerIndex?: boolean;
     [key: string]: unknown;
   };

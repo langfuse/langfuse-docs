@@ -97,6 +97,13 @@ Then select `Delete` in the `Actions` dropdown.
 
 ### Limitations
 
+<Callout type="info">
+  Trace deletion (e.g., deleting a user's traces by `userId` for a data deletion
+  request) removes the traces and their related observations and scores. It does
+  **not** remove personal data that may also be stored in other objects, such as datasets. To erase a user's data completely, delete those objects as
+  well, or [delete the entire project](#deleting-a-project).
+</Callout>
+
 Most deletions in Langfuse happen instantly, but the deletion of tracing data does not.
 Removing those records from our data warehouse is a resource intensive operation and, therefore, we rate limit
 how many deletions we process at any point in time.

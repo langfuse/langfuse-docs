@@ -63,7 +63,7 @@ These mappings cover the latest Python SDK v4 and JS/TS SDK v5 method surfaces. 
 
 **Deprecated:** `GET /observations`, `GET /observations/{observationId}`. Langfuse Cloud serves these endpoints until <V4CutoverDate />; migrate to v4 before this date.
 
-**Replacement:** [`GET /v2/observations`](/docs/api-and-data-platform/features/observations-api#v2) ([reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations)).
+**Replacement:** [`GET /v2/observations`](/docs/api-and-data-platform/features/public-api#v2) ([reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations)).
 
 ### SDK methods [#observations-sdk-methods]
 
@@ -112,7 +112,7 @@ curl \
 
 **Deprecated:** `GET /traces`, `GET /traces/{traceId}`. Langfuse Cloud serves this endpoint until <V4CutoverDate />; migrate to v4 before this date.
 
-**Replacement:** [`GET /v2/observations`](/docs/api-and-data-platform/features/observations-api#v2), grouped by `traceId` on the client side.
+**Replacement:** [`GET /v2/observations`](/docs/api-and-data-platform/features/public-api#v2), grouped by `traceId` on the client side.
 
 ### SDK methods [#traces-sdk-methods]
 
@@ -173,7 +173,7 @@ curl -G \
 
 **Deprecated:** `GET /sessions`, `GET /sessions/{sessionId}`. Langfuse Cloud serves this endpoint until <V4CutoverDate />; migrate to v4 before this date. On Langfuse v4, these will return `404`.
 
-**Replacement:** [`GET /v2/observations`](/docs/api-and-data-platform/features/observations-api#v2) with a `filter` condition on the `sessionId` column, grouped by `sessionId` on the client side.
+**Replacement:** [`GET /v2/observations`](/docs/api-and-data-platform/features/public-api#v2) with a `filter` condition on the `sessionId` column, grouped by `sessionId` on the client side.
 
 ### SDK methods [#sessions-sdk-methods]
 
@@ -248,7 +248,7 @@ The query object structure carries over; the key changes are inside the query:
 
 ### Semantic differences
 
-- **The `traces` view is removed.** In the `observations` view, measures such as `count`, `latency`, `totalCost`, and `totalTokens` are calculated over observation rows, not traces. For trace-level counts, filter on the v2-only `isRootObservation = true` dimension. See [Logical root observations](/docs/api-and-data-platform/features/observations-api#logical-root-observations) for root semantics and trace-counting edge cases. For trace durations or raw per-trace data, use [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and group by `traceId` client-side.
+- **The `traces` view is removed.** In the `observations` view, measures such as `count`, `latency`, `totalCost`, and `totalTokens` are calculated over observation rows, not traces. For trace-level counts, filter on the v2-only `isRootObservation = true` dimension. See [Logical root observations](/docs/api-and-data-platform/features/public-api#logical-root-observations) for root semantics and trace-counting edge cases. For trace durations or raw per-trace data, use [Observations API v2](/docs/api-and-data-platform/features/public-api#v2) and group by `traceId` client-side.
 - When ordering by an aggregated metric, use the returned field name in the format `{aggregation}_{measure}`, e.g. `sum_totalCost`.
 
 ### Example
@@ -325,7 +325,7 @@ Python v4 and JS/TS v5 do not expose read wrappers for the v1 `GET /scores` or `
 - **Field groups.** Core fields are always returned; request more via `fields=details,subject,annotation`. The `subject` group replaces the flat `traceId`/`observationId`/`sessionId`/`datasetRunId` response fields with one object describing what the score is attached to (`kind`: `trace`, `observation`, `session`, or `experiment`).
 - Use at most one of the `traceId`, `sessionId`, and `experimentId` filters; they cannot be combined. `observationId` requires `traceId` alongside it (observation IDs are scoped to a trace).
 - `fromTimestamp` is inclusive; `toTimestamp` is exclusive.
-- **No trace joins.** v3 queries scores directly and does not return trace fields (the v2 `trace` field group is gone). For row-level filtering by trace properties, query [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) with the corresponding filters and `fields=core,trace_context`, collect the distinct trace IDs, then pass them to v3's comma-separated `traceId` filter.
+- **No trace joins.** v3 queries scores directly and does not return trace fields (the v2 `trace` field group is gone). For row-level filtering by trace properties, query [Observations API v2](/docs/api-and-data-platform/features/public-api#v2) with the corresponding filters and `fields=core,trace_context`, collect the distinct trace IDs, then pass them to v3's comma-separated `traceId` filter.
 - **Row counts can differ.** v2 silently dropped scores whose referenced trace could not be found (e.g., deleted or never ingested); v3 returns every matching score, so the same query can return more rows on v3.
 
 ### Example

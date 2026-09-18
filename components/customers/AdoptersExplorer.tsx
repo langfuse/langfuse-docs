@@ -387,11 +387,6 @@ export function AdoptersExplorer({
         ) : (
           <AdoptersTable adopters={adopters} />
         )}
-        <p className="mb-0 mt-4 max-w-[78ch] text-[12px] leading-[1.5] text-text-tertiary">
-          This list is assembled from public sources and may differ from current
-          usage. Please make sure you are not sharing information covered by an
-          NDA when suggesting an update.
-        </p>
       </div>
 
       <div className="mx-4 mb-8 flex flex-col gap-6 border border-text-primary bg-text-primary px-5 py-7 text-surface-bg sm:mx-8 sm:flex-row sm:items-center sm:justify-between sm:px-7 lg:mx-10">

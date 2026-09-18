@@ -24,7 +24,7 @@ You create experiment runs in Langfuse through one of these paths:
 | [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui)                       | Prompt or model experiments from the dataset page                                                |
 | [Experiments via OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry) | Direct OTEL ingestion: other languages, custom OTLP pipelines, or re-ingesting experiment traces |
 
-To **read** experiment runs, items, and scores after they exist, use the [Experiments API](/docs/api-and-data-platform/features/experiments-api). There is no public REST endpoint for creating new experiment runs; the legacy `POST /api/public/dataset-run-items` path is deprecated.
+To **read** experiment runs, items, and scores after they exist, use the [Experiments API](/docs/api-and-data-platform/features/public-api#experiments). There is no public REST endpoint for creating new experiment runs; the legacy `POST /api/public/dataset-run-items` path is deprecated.
 
 ## Objects
 
@@ -132,6 +132,13 @@ direction LR
 | `description` | string | No       | Description of the dataset run          |
 | `metadata`    | object | No       | Additional metadata for the dataset run |
 | `datasetId`   | string | Yes      | ID of the dataset this run belongs to   |
+
+Experiment metadata and description describe the entire run, not individual
+items. The Python and JS/TS Experiment runners propagate experiment metadata
+to child observations, but set description directly on experiment-item root
+observations without propagating it to children. Keep each field consistent
+across the observations that carry it. For direct ingestion, follow the
+[OpenTelemetry experiment attribute guide](/integrations/native/opentelemetry/experiments).
 
 #### DatasetRunItem object [#datasetrunitem-object]
 

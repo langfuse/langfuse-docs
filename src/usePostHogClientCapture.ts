@@ -16,7 +16,12 @@ interface EventDefinitions {
     prompt_char_count: number;
   };
   "demo:view_trace_in_langfuse_clicked": {
-    source: "qa_chatbot" | "image_generator" | "sentiment_classifier";
+    source:
+      | "qa_chatbot"
+      | "image_generator"
+      | "sentiment_classifier"
+      | "voice_agent"
+      | "rock_paper_scissors";
     trace_url: string;
   };
   "home:start_free_clicked": {
@@ -29,6 +34,10 @@ interface EventDefinitions {
   };
   "home:onboard_with_ai_clicked": {
     source: "home_hero";
+    path: string;
+  };
+  "home:watch_demo_clicked": {
+    source: "home_feature_tabs";
     path: string;
   };
 }

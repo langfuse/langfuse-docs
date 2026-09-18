@@ -71,6 +71,8 @@ const customerFrontmatterSchema = baseFrontmatterSchema.extend({
   quoteRole: z.string().nullish(),
   quoteCompany: z.string().nullish(),
   quoteAuthorImage: z.string().nullish(),
+  /** Card/hero CTA label override (e.g. "Watch" for video stories). Defaults to "Read". */
+  ctaLabel: z.string().nullish(),
   showInCustomerIndex: z.boolean().nullish(),
 });
 

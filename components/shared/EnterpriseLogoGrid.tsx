@@ -37,6 +37,7 @@ const companies: CompanyLogo[] = [
   {
     name: "Ramp",
     logo: rampLogo,
+    customerStoryPath: "/users/ramp",
   },
   {
     name: "Canva",

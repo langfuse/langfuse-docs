@@ -22,6 +22,8 @@ export LANGFUSE_BASE_URL="https://cloud.langfuse.com"
 
 Use the URL for your [data region](/security/data-regions) or self-hosted instance. These scripts run the application and graders in your process and send test inputs, outputs, and scores to Langfuse.
 
+Already have a local suite? [Keep your JSON cases and grader in Pytest or Vitest](/docs/evaluation/experiments/experiments-ci-cd#other-cicd-systems). Already have outputs **and** scores? [Publish those saved results](#saved-check-results) without running the application or checks again.
+
 ## Run two versions with the same checks [#run-two-versions]
 
 The scripts create a new dataset, add two reviewed cases, and pin the latest server-assigned creation timestamp returned by those writes. Both runs use that exact version, avoiding dependence on your computer's clock. In an existing project, reuse your dataset and store its approved version timestamp with your test configuration.
@@ -255,6 +257,177 @@ Pass `task: replayTask` to `dataset.runExperiment`.
 </LangTabs>
 
 This measures the quality of recorded outputs under the current graders. It does not validate a new prompt, model, or code change. For that, run the changed application on the same inputs. To score existing traces directly, use [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk).
+
+## Publish saved check results [#saved-check-results]
+
+If your test runner already saved outputs and grader results, report them as an experiment on local data. The adapter below returns the saved output as the task result and the saved check as an evaluation. It calls neither your application nor your grader, and does not require a hosted dataset.
+
+Export your existing results into this format. Keep stable case IDs and the original application and evaluator versions. Include the evidence reviewers need in the input or metadata. Only include data you intend to upload to your Langfuse project.
+
+```json title="results.json"
+{
+  "application_version": "release-42",
+  "evaluator_version": "refund-window-v1",
+  "cases": [
+    {
+      "id": "standard",
+      "input": { "question": "What is the standard refund window?" },
+      "expected_output": { "refund_days": 30 },
+      "output": { "refund_days": 30 },
+      "passed": true,
+      "reason": "The refund window matches the reviewed policy."
+    },
+    {
+      "id": "sale",
+      "input": { "question": "What is the sale-item refund window?" },
+      "expected_output": { "refund_days": 14 },
+      "output": { "refund_days": 30 },
+      "passed": false,
+      "reason": "Sale items have a 14-day window."
+    }
+  ]
+}
+```
+
+Use the [credentials and dependencies above](#setup). The scripts validate the boolean check results before uploading and hash the complete artifact to identify its contents. Export task or grader errors separately and resolve them before publishing a complete scored run; never turn an error into a passing check.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python title="publish_results.py"
+import hashlib
+import json
+from pathlib import Path
+
+from langfuse import Evaluation, get_client
+
+artifact = Path("results.json").read_bytes()
+saved = json.loads(artifact)
+cases = saved["cases"]
+ids = [case["id"] for case in cases]
+if not ids or not all(ids) or len(set(ids)) != len(ids):
+    raise ValueError("Expected nonempty, unique case IDs")
+for case in cases:
+    if type(case["passed"]) is not bool or case["output"] is None:
+        raise ValueError(f"Missing output or boolean check: {case['id']}")
+by_id = {case["id"]: case for case in cases}
+
+
+def saved_task(*, item, **kwargs):
+    return by_id[item["metadata"]["case_id"]]["output"]
+
+
+def saved_check(*, metadata, **kwargs):
+    case = by_id[metadata["case_id"]]
+    return Evaluation(
+        name="existing_checks", value=int(case["passed"]), comment=case["reason"]
+    )
+
+
+langfuse = get_client()
+try:
+    result = langfuse.run_experiment(
+        name="Application checks",
+        data=[{
+            "input": case["input"],
+            "expected_output": case["expected_output"],
+            "metadata": {"case_id": case["id"]},
+        } for case in cases],
+        task=saved_task,
+        evaluators=[saved_check],
+        metadata={
+            "application_version": saved["application_version"],
+            "evaluator_version": saved["evaluator_version"],
+            "execution_mode": "imported_results",
+            "artifact_sha256": hashlib.sha256(artifact).hexdigest(),
+        },
+    )
+    print(result.format())  # Includes the experiment link.
+finally:
+    langfuse.flush()
+```
+
+Run `python publish_results.py`.
+
+</Tab>
+<Tab>
+
+```typescript title="publish-results.ts"
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { LangfuseClient } from "@langfuse/client";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+
+type SavedCase = {
+  id: string;
+  input: unknown;
+  expected_output: unknown;
+  output: unknown;
+  passed: boolean;
+  reason: string;
+};
+
+async function main() {
+  const artifact = readFileSync("results.json");
+  const saved = JSON.parse(artifact.toString("utf8"));
+  const cases: SavedCase[] = saved.cases;
+  const ids = cases.map((item) => item.id);
+  if (!ids.length || !ids.every(Boolean) || new Set(ids).size !== ids.length) {
+    throw new Error("Expected nonempty, unique case IDs");
+  }
+  for (const item of cases) {
+    if (typeof item.passed !== "boolean" || item.output == null) {
+      throw new Error(`Missing output or boolean check: ${item.id}`);
+    }
+  }
+  const byId = new Map(cases.map((item) => [item.id, item]));
+  const otel = new NodeSDK({ spanProcessors: [new LangfuseSpanProcessor()] });
+  otel.start();
+  try {
+    const langfuse = new LangfuseClient();
+    const result = await langfuse.experiment.run({
+      name: "Application checks",
+      data: cases.map((item) => ({
+        input: item.input,
+        expectedOutput: item.expected_output,
+        metadata: { case_id: item.id },
+      })),
+      task: async (item) => {
+        const metadata = item.metadata as { case_id: string };
+        return byId.get(metadata.case_id)!.output;
+      },
+      evaluators: [async ({ metadata }) => {
+        const item = byId.get(metadata!.case_id)!;
+        return { name: "existing_checks", value: Number(item.passed), comment: item.reason };
+      }],
+      metadata: {
+        application_version: saved.application_version,
+        evaluator_version: saved.evaluator_version,
+        execution_mode: "imported_results",
+        artifact_sha256: createHash("sha256").update(artifact).digest("hex"),
+      },
+    });
+    console.log(await result.format()); // Includes the experiment link.
+  } finally {
+    await otel.shutdown();
+  }
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
+```
+
+Run `npx tsx publish-results.ts`.
+
+</Tab>
+</LangTabs>
+
+These are new experiment observations containing the recorded outputs and scores. Their timing describes the import, not the original application's latency or cost, and they do not reconstruct its intermediate tool calls. Retain the original run or trace identifiers in item metadata when available. If the original traces are already in Langfuse, [attach scores to those traces](/docs/evaluation/evaluation-methods/scores-via-sdk) instead of creating duplicate observations.
+
+Open the experiment link printed by the script, then [share the comparison](/docs/evaluation/experiments/compare-experiments#share-results) or [hand answers to a QA team](/docs/evaluation/evaluation-methods/annotation-queues#review-experiment-answers). A completed import reports existing results; it does not establish that the application passes your release policy.
 
 ## Add a regression gate [#regression-gate]
 

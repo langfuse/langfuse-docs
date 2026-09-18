@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import {
-  DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL,
+  DEMO_PUBLIC_TRACE_FALLBACK_URLS,
   getPublicDemoTraceUrl,
+  type DemoTraceSource,
 } from "@/lib/demo-public-trace";
 import { rateLimit } from "@/lib/rateLimit";
 
@@ -15,16 +16,27 @@ const redirectWithoutCaching = (url: string) => {
   return response;
 };
 
+const isDemoTraceSource = (value: string | null): value is DemoTraceSource =>
+  value !== null &&
+  Object.prototype.hasOwnProperty.call(DEMO_PUBLIC_TRACE_FALLBACK_URLS, value);
+
 export async function GET(request: NextRequest) {
-  const fallbackUrl = DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL;
+  const sourceParam = request.nextUrl.searchParams.get("source");
+  const source: DemoTraceSource = isDemoTraceSource(sourceParam)
+    ? sourceParam
+    : "image_generator";
+  const fallbackUrl = DEMO_PUBLIC_TRACE_FALLBACK_URLS[source];
   const traceId = request.nextUrl.searchParams.get("traceId");
   const observationId = request.nextUrl.searchParams.get("observationId");
 
+  if (!traceId || !TRACE_ID_PATTERN.test(traceId)) {
+    return redirectWithoutCaching(fallbackUrl);
+  }
+  // The image generator always pins an observation; the voice agent links to
+  // the trace as a whole while the conversation is still running.
   if (
-    !traceId ||
-    !TRACE_ID_PATTERN.test(traceId) ||
-    !observationId ||
-    !OBSERVATION_ID_PATTERN.test(observationId)
+    (source === "image_generator" && !observationId) ||
+    (observationId && !OBSERVATION_ID_PATTERN.test(observationId))
   ) {
     return redirectWithoutCaching(fallbackUrl);
   }

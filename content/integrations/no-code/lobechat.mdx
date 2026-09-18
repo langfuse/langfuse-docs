@@ -1,89 +1,58 @@
 ---
-title: Observability and Tracing for LobeChat
-description: "Monitor and trace your LobeChat conversations with Langfuse. Capture detailed traces, costs, and usage patterns for your open-source LLM chat platform."
+title: OpenTelemetry tracing for LobeChat
+description: "Send LobeChat's existing OpenTelemetry traces to Langfuse. Configure OTLP export and understand the coverage limits of the legacy integration replacement."
 sidebarTitle: LobeChat
 logo: /images/integrations/lobechat_icon.png
 ---
 
-# Langfuse Integration with LobeChat
+# OpenTelemetry tracing for LobeChat
 
-## What is LobeChat?
+[LobeChat / LobeHub](https://github.com/lobehub/lobehub) is an open-source AI chat platform. Self-hosted versions with [OpenTelemetry support](https://lobehub.com/docs/self-hosting/advanced/observability/grafana) can send their existing traces to Langfuse without adding a Langfuse SDK.
 
-[LobeChat](https://lobehub.com/) is an **[open-source](https://github.com/lobehub/lobe-chat) LLM chat platform** that seamlessly integrates with various AI models and tools, providing users with an intuitive interface to interact with advanced language technologies.
+<Callout type="warning">
+  **Legacy setup deprecated:** The built-in `ENABLE_LANGFUSE` integration uses the legacy Langfuse JavaScript SDK v3. For new Langfuse v4 setups, use OpenTelemetry as described below. This replaces the legacy setup instructions on this page; it does not provide all of the legacy integration's features.
+</Callout>
 
-## What is Langfuse?
+## What is captured?
 
-[Langfuse](https://langfuse.com/) is one of the most used **open-source LLM Observability platforms**. By enabling the Langfuse integration, you can trace your application data with Langfuse to develop, monitor, and improve the use of LobeChat, including:
+Coverage depends on your deployed LobeHub version and execution path. The current [server agent runtime](https://github.com/lobehub/lobehub/blob/ebe586289d55936b738e4dc822dbdd745196b4f3/apps/server/src/modules/AgentRuntime/adapters/ServerLLMTransport.ts) emits agent, chat, and tool spans with model names, token usage, timing, and conversation IDs. Langfuse maps supported GenAI attributes to its observations.
 
-- Application [traces](/docs/observability/overview)
-- Usage patterns
-- Cost data by user and model
-- [Evaluations](/docs/evaluation/overview)
+The existing OpenTelemetry integration has these limits:
 
-Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it.
+- **No chat content:** Chat spans omit prompts and responses, so content-based debugging and evaluations need additional upstream instrumentation.
+- **No feedback parity:** Feedback scores and message-edit events are handled by the separate legacy Langfuse integration.
+- **Not every chat path is covered:** The older `/webapi/chat` path relies on the legacy integration for detailed LLM tracing. Enabling OpenTelemetry does not add missing LLM spans to that path.
+- **Operational spans are included:** The general exporter also sends infrastructure spans. Use an OpenTelemetry collector to filter them if needed, preserving the parent spans required for the hierarchy.
 
-## Get Started
+Check your deployed version and required workflow before replacing an existing setup.
 
-<Steps>
+## Configure OpenTelemetry export
 
-### Set up Langfuse
+1. Create a [Langfuse project and API keys](https://cloud.langfuse.com). Self-hosted Langfuse is also supported.
+2. Base64-encode `public-key:secret-key` for Basic Auth. For example:
 
-Get your Langfuse API key by signing up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-hosting](/self-hosting) Langfuse.
+   ```sh
+   printf '%s' 'pk-lf-...:sk-lf-...' | base64 | tr -d '\n'
+   ```
 
-### Set up LobeChat
+3. Set these environment variables on the LobeHub server, replacing `<base64-public-key:secret-key>` with that output:
 
-There are multiple ways to [self-host LobeChat](https://lobehub.com/docs/self-hosting/start). For this example, we will use the Docker Desktop deployment.
+   ```bash
+   ENABLE_TELEMETRY=1
+   OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://cloud.langfuse.com/api/public/otel/v1/traces
+   OTEL_EXPORTER_OTLP_TRACES_HEADERS="Authorization=Basic <base64-public-key:secret-key>,x-langfuse-ingestion-version=4"
+   ```
 
-<Tabs items={["Environment Variables", "Example in Docker Desktop"]}>
-<Tab>
+   Use the host for your [Langfuse region or self-hosted instance](/integrations/native/opentelemetry#opentelemetry-endpoint). The `x-langfuse-ingestion-version=4` header enables real-time ingestion into the v4 data model.
 
-Before deploying LobeChat, set the following four environment variables with the Langfuse API keys you created in the previous step.
+4. Restart LobeHub. In local development, also set `ENABLE_TELEMETRY_IN_DEV=1`; production does not need this variable.
 
-```sh
-ENABLE_LANGFUSE = '1'
-LANGFUSE_SECRET_KEY = 'sk-lf...'
-LANGFUSE_PUBLIC_KEY = 'pk-lf...'
-LANGFUSE_HOST = 'https://cloud.langfuse.com'
-```
+Use the **traces-specific** endpoint and headers above. LobeHub also creates a metrics exporter: keep its destination configured separately, such as your existing OpenTelemetry collector. Langfuse's OTLP endpoint accepts traces, not metrics.
 
-</Tab>
+This route is controlled by the server's `ENABLE_TELEMETRY` setting. The legacy `ENABLE_LANGFUSE` flag and per-user Analytics toggle do not control this exporter. Remove `ENABLE_LANGFUSE` when switching away from the legacy integration.
 
-<Tab>
+## Verify your setup
 
-Before running the Docker container, set the environment variables in the Docker Desktop with the Langfuse API keys you created in the previous step.
+Run a server-side agent conversation and inspect the resulting [observations](/docs/observability/overview) in Langfuse. Verify the span hierarchy, model, token usage, and conversation ID for your deployed version. Prompts, responses, and feedback scores are not expected from the existing chat spans.
 
-<Frame className="sm:w-1/2">
-![Environment Variables in Docker Desktop](/images/docs/lobechat-docker-desktop-env.png)
-</Frame>
-</Tab>
-
-</Tabs>
-
-### Activate Analytics in Settings
-
-Once you have LobeChat running, navigate to the **About** tab in the **Settings** and activate analytics. This is necessary for traces to be sent to Langfuse.
-
-<Frame className="mt-5">
-  ![LobeChat Settings](/images/docs/lobechat-settings.png)
-</Frame>
-
-### See your traces in Langfuse
-
-After setting your LLM model key, you can start interacting with your LobeChat application.
-
-<Frame className="mt-5">
-  ![LobeChat Conversation](/images/docs/lobechat-converstation.png)
-</Frame>
-
-All conversations in the chat are automatically traced and sent to Langfuse. You can view the traces in the [Traces section](/docs/observability/overview) of the Langfuse platform.
-
-<Frame className="mt-5">
-  ![LobeChat Example Trace](/images/docs/lobechat-example-trace.png)
-</Frame>
-_[Example trace in the Langfuse UI](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/63e9246d-3f22-4e45-936d-b0c4ccf55a1e?timestamp=2024-11-26T17%3A00%3A02.028Z&observation=7ea75a0c-d9d1-425c-9b88-27561c63b413)_
-
-</Steps>
-
-## Feedback
-
-If you have any feedback or requests, please create a GitHub [Issue](/issue) or share your work with the community on [Discord](https://discord.langfuse.com/).
+If observations are missing, check that your version instruments the chosen workflow, telemetry is enabled, and the endpoint and credentials match your Langfuse project. If data is delayed, check the v4 ingestion header. See the [OpenTelemetry reference](/integrations/native/opentelemetry) for supported attributes and collector configuration.
