@@ -9,12 +9,12 @@ import {
 } from "lucide-react";
 import type { FeatureTabData } from "./types";
 
-import observabilityPng from "components/home/feature-tabs/img/observability-ui.png";
-import metricsPng from "components/home/feature-tabs/img/cost-ui.png";
-import PromptPng from "components/home/feature-tabs/img/prompts-ui.png";
-import EvalsPng from "components/home/feature-tabs/img/evals-ui.png";
-import PlaygroundPng from "components/home/feature-tabs/img/playground-ui.png";
-import AnnotationPng from "components/home/feature-tabs/img/annotation-ui.png";
+import observabilityPng from "@/components/home/feature-tabs/img/observability-ui.png";
+import metricsPng from "@/components/home/feature-tabs/img/cost-ui.png";
+import PromptPng from "@/components/home/feature-tabs/img/prompts-ui.png";
+import EvalsPng from "@/components/home/feature-tabs/img/evals-ui.png";
+import PlaygroundPng from "@/components/home/feature-tabs/img/playground-ui.png";
+import AnnotationPng from "@/components/home/feature-tabs/img/annotation-ui.png";
 
 export const featureTabsData: FeatureTabData[] = [
   {
