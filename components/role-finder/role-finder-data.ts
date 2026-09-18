@@ -3,18 +3,23 @@
  * branching, pitches, or bullets. No engine code needs to be touched.
  *
  * How live job-board sync works:
- *   Each role has an `ashbyId` (its Ashby posting id). At build time the server
- *   component (`./index.tsx`) fetches the live Ashby board and merges the live
- *   `title` + apply URL into the role, and marks roles that are no longer listed
- *   as unavailable. The `title` and `url` below are only fallbacks used if the
- *   board can't be fetched. The `pitch`, `youll` bullets, questions, and tree
- *   are curated content that lives only here.
+ *   Each role has `titleMatch` fragments. The server component (`./index.tsx`)
+ *   fetches listed ClickHouse jobs whose title contains "langfuse" (plus any
+ *   jobs still on the Langfuse board) and matches them by those fragments.
+ *   Live title + apply URL are merged in; unmatched roles are marked closed.
+ *   The `title` and `url` below are only fallbacks used if the board can't be
+ *   fetched. The `pitch`, `youll` bullets, questions, and tree are curated
+ *   content that lives only here.
  *
- * To add a role: add an entry to ROLES (with its Ashby posting id) and route to
+ * To add a role: add an entry to ROLES (with title-match terms) and route to
  * it from the TREE via `{ result: "<key>" }`. To remove one: delete it from
  * ROLES and remove any options that point at it.
  */
 
+import {
+  LANGFUSE_CAREERS_BOARD_URL,
+  type RoleTitleMatch,
+} from "@/lib/ashby-jobs";
 import { formatSdkInstallsPerMonth } from "@/lib/usage-stats";
 
 export type RoleKey =
@@ -28,8 +33,10 @@ export type RoleKey =
   | "devrel";
 
 export type Role = {
-  /** Ashby posting id — used to sync title/apply-URL/availability with the live board. */
-  ashbyId: string;
+  /** Optional Ashby posting id — used when it still matches a live posting. */
+  ashbyId?: string;
+  /** Title fragments used to match a live ClickHouse/Langfuse posting. */
+  titleMatch: RoleTitleMatch;
   /** Fallback title (used only if the live board can't be fetched). */
   title: string;
   /** Fallback apply URL (used only if the live board can't be fetched). */
@@ -63,13 +70,16 @@ export type Question = {
 export const ROOT_QUESTION_ID = "start";
 
 /** General careers board, used as a fallback when a specific role has closed. */
-export const CAREERS_FALLBACK_URL = "https://jobs.ashbyhq.com/langfuse";
+export const CAREERS_FALLBACK_URL = LANGFUSE_CAREERS_BOARD_URL;
 
 export const ROLES: Record<RoleKey, Role> = {
   product: {
-    ashbyId: "a2c4e24c-21d1-4a9f-8d46-422d0592efd6",
+    titleMatch: {
+      anyOf: ["product engineer"],
+      exclude: ["growth", "integration", "marketing"],
+    },
     title: "Senior Product Engineer",
-    url: "https://jobs.ashbyhq.com/langfuse/a2c4e24c-21d1-4a9f-8d46-422d0592efd6",
+    url: LANGFUSE_CAREERS_BOARD_URL,
     pitch:
       "Build user-facing features end-to-end in TypeScript/React, with taste for UI detail, API design, and clear docs.",
     youll: [
@@ -79,9 +89,9 @@ export const ROLES: Record<RoleKey, Role> = {
     ],
   },
   growth: {
-    ashbyId: "71a67633-5770-481b-9fb3-22e4f27cbca1",
+    titleMatch: { anyOf: ["growth"] },
     title: "Senior Product Engineer (Growth)",
-    url: "https://jobs.ashbyhq.com/langfuse/71a67633-5770-481b-9fb3-22e4f27cbca1",
+    url: LANGFUSE_CAREERS_BOARD_URL,
     pitch:
       "Full-stack product work aimed at product-led growth — experiments, activation, conversion, backed by SQL analytics.",
     youll: [
@@ -91,9 +101,9 @@ export const ROLES: Record<RoleKey, Role> = {
     ],
   },
   integrations: {
-    ashbyId: "f17768f8-525b-4caa-a8ee-5553a4ff4979",
+    titleMatch: { anyOf: ["integration"] },
     title: "Senior Product Engineer (Integrations)",
-    url: "https://jobs.ashbyhq.com/langfuse/f17768f8-525b-4caa-a8ee-5553a4ff4979",
+    url: LANGFUSE_CAREERS_BOARD_URL,
     pitch:
       "Own the first impression across 40+ framework integrations (LangChain, Vercel AI SDK, LlamaIndex, Pydantic AI…).",
     youll: [
@@ -103,9 +113,9 @@ export const ROLES: Record<RoleKey, Role> = {
     ],
   },
   sdk: {
-    ashbyId: "891eda0a-a9f6-45e6-8750-71874db8cc11",
+    titleMatch: { anyOf: ["sdk"] },
     title: "Senior Software Engineer (SDK)",
-    url: "https://jobs.ashbyhq.com/langfuse/891eda0a-a9f6-45e6-8750-71874db8cc11",
+    url: LANGFUSE_CAREERS_BOARD_URL,
     pitch: `Build SDKs downloaded ${formatSdkInstallsPerMonth()} times/month. Performance, versioning, and DX in code that runs in other people's production.`,
     youll: [
       "Profile & minimize overhead in hot paths",
@@ -114,9 +124,12 @@ export const ROLES: Record<RoleKey, Role> = {
     ],
   },
   data_infra: {
-    ashbyId: "1225fa3d-d590-41d2-b798-ef927320fb2e",
+    titleMatch: {
+      anyOf: ["data infrastructure", "backend"],
+      exclude: ["iam", "billing", "cloud"],
+    },
     title: "Senior Backend Engineer (Data Infrastructure)",
-    url: "https://jobs.ashbyhq.com/langfuse/1225fa3d-d590-41d2-b798-ef927320fb2e",
+    url: LANGFUSE_CAREERS_BOARD_URL,
     pitch:
       "Make Langfuse fast and affordable at scale — own the ingestion pipeline and optimize ClickHouse data models & queries.",
     youll: [
@@ -126,9 +139,12 @@ export const ROLES: Record<RoleKey, Role> = {
     ],
   },
   iam_billing: {
-    ashbyId: "69bc6e7a-0304-4d81-ae72-7ccf5652a053",
+    titleMatch: {
+      anyOf: ["iam", "billing", "backend"],
+      exclude: ["data infrastructure", "cloud"],
+    },
     title: "Senior Backend Engineer (IAM & Billing)",
-    url: "https://jobs.ashbyhq.com/langfuse/69bc6e7a-0304-4d81-ae72-7ccf5652a053",
+    url: LANGFUSE_CAREERS_BOARD_URL,
     pitch:
       "Own the platform every team depends on: authentication, authorization, and usage-based billing.",
     youll: [
@@ -138,9 +154,9 @@ export const ROLES: Record<RoleKey, Role> = {
     ],
   },
   cloud: {
-    ashbyId: "1745b263-e25e-4037-a3a8-d0460fbba165",
+    titleMatch: { anyOf: ["cloud"] },
     title: "Senior Cloud Infrastructure Engineer",
-    url: "https://jobs.ashbyhq.com/langfuse/1745b263-e25e-4037-a3a8-d0460fbba165",
+    url: LANGFUSE_CAREERS_BOARD_URL,
     pitch:
       "Operate Langfuse Cloud on AWS ECS Fargate + ClickHouse Cloud, and own the self-hosted Helm/Docker story.",
     youll: [
@@ -150,9 +166,9 @@ export const ROLES: Record<RoleKey, Role> = {
     ],
   },
   devrel: {
-    ashbyId: "60231438-f158-4e7b-b08d-12e5222fcc16",
+    titleMatch: { anyOf: ["devrel", "developer relations"] },
     title: "DevRel Engineer",
-    url: "https://jobs.ashbyhq.com/langfuse/60231438-f158-4e7b-b08d-12e5222fcc16",
+    url: LANGFUSE_CAREERS_BOARD_URL,
     pitch:
       "An engineer who educates through content — powering developer relations and thought leadership in LLM ops.",
     youll: [

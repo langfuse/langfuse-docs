@@ -1,4 +1,4 @@
-import { getAshbyJobs } from "@/lib/ashby-jobs";
+import { findJobForRole, getAshbyJobs } from "@/lib/ashby-jobs";
 import {
   CAREERS_FALLBACK_URL,
   ROLES,
@@ -10,10 +10,12 @@ import { RoleFinderQuiz, type ResolvedRole } from "./RoleFinderQuiz";
 /**
  * Server component for the careers role-finder quiz.
  *
- * Fetches the live Ashby job board (cached via ISR in `getAshbyJobs`) and merges
- * each role's live title, apply URL, and availability into the curated config
- * before handing off to the client engine. If the board can't be fetched, roles
- * fall back to the static config and stay available so the quiz keeps working.
+ * Fetches listed ClickHouse jobs whose title contains "langfuse" (cached via
+ * ISR in `getAshbyJobs`) and matches each curated role by title fragments.
+ * Live title, apply URL, and availability are merged into the quiz config
+ * before handing off to the client engine. If the board can't be fetched,
+ * roles fall back to the static config and stay available so the quiz keeps
+ * working.
  */
 export async function RoleFinder() {
   const jobs = await getAshbyJobs();
@@ -25,11 +27,13 @@ export async function RoleFinder() {
         (typeof ROLES)[keyof typeof ROLES],
       ][]
     ).map(([key, role]) => {
-      const job = jobs?.[role.ashbyId];
-      // When the board fetch succeeds, availability = the posting exists and
-      // is listed. When it fails (jobs === null) we can't know, so assume the
-      // role is open and use the static fallback data.
-      const available = jobs ? Boolean(job && job.isListed !== false) : true;
+      const job = jobs
+        ? findJobForRole(jobs, role.titleMatch, role.ashbyId)
+        : undefined;
+      // When the board fetch succeeds, availability = a listed Langfuse
+      // posting matched this role. When it fails (jobs === null) we can't
+      // know, so assume the role is open and use the static fallback data.
+      const available = jobs ? Boolean(job) : true;
 
       const resolved: ResolvedRole = {
         key,
@@ -43,12 +47,18 @@ export async function RoleFinder() {
     }),
   ) as Record<string, ResolvedRole>;
 
+  const openJobs = (jobs ?? []).map((job) => ({
+    title: job.title,
+    url: job.jobUrl,
+  }));
+
   return (
     <RoleFinderQuiz
       roles={resolvedRoles}
       tree={TREE}
       rootId={ROOT_QUESTION_ID}
       careersFallbackUrl={CAREERS_FALLBACK_URL}
+      openJobs={openJobs}
     />
   );
 }

@@ -1,14 +1,23 @@
 /**
- * Fetches the live Langfuse job board from Ashby's public posting API.
+ * Fetches live Langfuse roles from Ashby's public posting API.
  *
- * Used by the careers role-finder quiz so role titles, apply URLs, and
- * availability always reflect the current job board. Results are cached with
- * ISR (revalidated hourly) so the page stays static and cheap while staying
- * accurate without manual updates.
+ * After the ClickHouse acquisition, Langfuse postings live on the ClickHouse
+ * board and are identified by "langfuse" in the job title. The dedicated
+ * Langfuse board is kept as a secondary source in case it is republished.
+ *
+ * This uses only the public job-board endpoint — no Ashby API key is required.
+ * Unpublished, draft, or internal jobs are not visible. Results are cached
+ * with ISR (revalidated hourly).
  */
 
-const ASHBY_JOB_BOARD_API_URL =
-  "https://api.ashbyhq.com/posting-api/job-board/langfuse";
+const ASHBY_JOB_BOARD_API_BASE =
+  "https://api.ashbyhq.com/posting-api/job-board";
+const CLICKHOUSE_BOARD_SLUG = "clickhouse";
+const LANGFUSE_BOARD_SLUG = "langfuse";
+
+/** Public ClickHouse board, pre-filtered to Langfuse postings in the hosted UI. */
+export const LANGFUSE_CAREERS_BOARD_URL =
+  "https://jobs.ashbyhq.com/clickhouse?search=langfuse";
 
 export type AshbyJob = {
   id: string;
@@ -18,38 +27,128 @@ export type AshbyJob = {
   isListed?: boolean;
 };
 
-/** Map of Ashby posting id -> job, for O(1) lookup by id. */
-export type AshbyJobMap = Record<string, AshbyJob>;
+/** Title fragments used to match a curated quiz role to a live posting. */
+export type RoleTitleMatch = {
+  /** At least one of these strings must appear in the job title. */
+  anyOf: string[];
+  /** If any of these strings appear, the job is not a match. */
+  exclude?: string[];
+};
+
+export function isLangfuseJobTitle(title: string | undefined): boolean {
+  return (title ?? "").toLowerCase().includes("langfuse");
+}
+
+export function isListedJob(job: AshbyJob | null | undefined): job is AshbyJob {
+  return Boolean(job?.id && job.isListed !== false);
+}
 
 /**
- * Returns a map of live Ashby jobs keyed by posting id, or `null` if the board
- * could not be fetched. Callers should treat `null` as "unknown" and fall back
- * to their static config rather than hiding everything.
+ * Merge the ClickHouse and Langfuse public boards into the Langfuse job set.
+ *
+ * - ClickHouse: keep listed jobs whose title contains "langfuse".
+ * - Langfuse board: keep every listed job (the whole board is Langfuse).
+ *
+ * Returns `null` when we cannot tell whether roles are open (both fetches
+ * failed, or ClickHouse failed and the Langfuse board is empty) so callers
+ * can fall back to static config instead of hiding everything.
  */
-export async function getAshbyJobs(): Promise<AshbyJobMap | null> {
+export function collectLangfuseJobs(
+  clickhouse: AshbyJob[] | null,
+  langfuse: AshbyJob[] | null,
+): AshbyJob[] | null {
+  if (clickhouse === null) {
+    if (langfuse === null) return null;
+    const listed = langfuse.filter(isListedJob);
+    return listed.length > 0 ? listed : null;
+  }
+
+  const byId = new Map<string, AshbyJob>();
+  for (const job of clickhouse) {
+    if (isListedJob(job) && isLangfuseJobTitle(job.title)) {
+      byId.set(job.id, job);
+    }
+  }
+  for (const job of langfuse ?? []) {
+    if (isListedJob(job)) byId.set(job.id, job);
+  }
+  return [...byId.values()];
+}
+
+export function jobMatchesRole(
+  job: AshbyJob,
+  match: RoleTitleMatch,
+  ashbyId?: string,
+): boolean {
+  if (ashbyId && job.id === ashbyId) return true;
+  if (!isListedJob(job)) return false;
+
+  const title = job.title.toLowerCase();
+  if (match.exclude?.some((term) => title.includes(term.toLowerCase()))) {
+    return false;
+  }
+  return match.anyOf.some((term) => title.includes(term.toLowerCase()));
+}
+
+export function findJobForRole(
+  jobs: AshbyJob[],
+  match: RoleTitleMatch,
+  ashbyId?: string,
+): AshbyJob | undefined {
+  if (ashbyId) {
+    const exact = jobs.find((job) => job.id === ashbyId && isListedJob(job));
+    if (exact) return exact;
+  }
+
+  const matches = jobs.filter((job) => jobMatchesRole(job, match));
+  if (matches.length <= 1) return matches[0];
+
+  // Prefer the posting whose title contains the longest matching fragment.
+  return [...matches].sort((a, b) => {
+    const score = (job: AshbyJob) =>
+      Math.max(
+        0,
+        ...match.anyOf
+          .filter((term) =>
+            job.title.toLowerCase().includes(term.toLowerCase()),
+          )
+          .map((term) => term.length),
+      );
+    return score(b) - score(a);
+  })[0];
+}
+
+async function fetchJobBoard(slug: string): Promise<AshbyJob[] | null> {
   try {
-    const response = await fetch(ASHBY_JOB_BOARD_API_URL, {
+    const response = await fetch(`${ASHBY_JOB_BOARD_API_BASE}/${slug}`, {
       headers: { Accept: "application/json" },
       next: { revalidate: 3600 },
     });
 
     if (!response.ok) {
       console.error(
-        `Failed to fetch Ashby job board: ${response.status} ${response.statusText}`,
+        `Failed to fetch Ashby job board (${slug}): ${response.status} ${response.statusText}`,
       );
       return null;
     }
 
     const data = (await response.json()) as { jobs?: AshbyJob[] };
-    if (!Array.isArray(data.jobs)) return null;
-
-    const map: AshbyJobMap = {};
-    for (const job of data.jobs) {
-      if (job?.id) map[job.id] = job;
-    }
-    return map;
+    return Array.isArray(data.jobs) ? data.jobs : null;
   } catch (error) {
-    console.error("Failed to fetch Ashby job board", error);
+    console.error(`Failed to fetch Ashby job board (${slug})`, error);
     return null;
   }
+}
+
+/**
+ * Returns listed Langfuse jobs from the public boards, or `null` if
+ * availability cannot be determined. Callers should treat `null` as
+ * "unknown" and fall back to static config rather than hiding everything.
+ */
+export async function getAshbyJobs(): Promise<AshbyJob[] | null> {
+  const [clickhouse, langfuse] = await Promise.all([
+    fetchJobBoard(CLICKHOUSE_BOARD_SLUG),
+    fetchJobBoard(LANGFUSE_BOARD_SLUG),
+  ]);
+  return collectLangfuseJobs(clickhouse, langfuse);
 }

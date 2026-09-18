@@ -23,11 +23,18 @@ export type ResolvedRole = {
   youll: string[];
 };
 
+export type OpenJob = {
+  title: string;
+  url: string;
+};
+
 type RoleFinderQuizProps = {
   roles: Record<string, ResolvedRole>;
   tree: Record<string, Question>;
   rootId: string;
   careersFallbackUrl: string;
+  /** All currently listed Langfuse jobs, used when a quiz role has closed. */
+  openJobs?: OpenJob[];
 };
 
 type View =
@@ -39,6 +46,7 @@ export function RoleFinderQuiz({
   tree,
   rootId,
   careersFallbackUrl,
+  openJobs = [],
 }: RoleFinderQuizProps) {
   const [history, setHistory] = React.useState<string[]>([]);
   const [view, setView] = React.useState<View>({
@@ -158,12 +166,14 @@ export function RoleFinderQuiz({
           onAnswer={answer}
           isOptionVisible={optionLeadsToAvailable}
           careersFallbackUrl={careersFallbackUrl}
+          openJobs={openJobs}
         />
       ) : (
         <ResultScreen
           res={view.res}
           roles={roles}
           careersFallbackUrl={careersFallbackUrl}
+          openJobs={openJobs}
         />
       )}
 
@@ -196,21 +206,33 @@ function QuestionScreen({
   onAnswer,
   isOptionVisible,
   careersFallbackUrl,
+  openJobs,
 }: {
   question: Question | undefined;
   questionNumber: number;
   onAnswer: (option: Option) => void;
   isOptionVisible: (option: Option) => boolean;
   careersFallbackUrl: string;
+  openJobs: OpenJob[];
 }) {
   if (!question) {
-    return <ClosedFallback careersFallbackUrl={careersFallbackUrl} />;
+    return (
+      <ClosedFallback
+        careersFallbackUrl={careersFallbackUrl}
+        openJobs={openJobs}
+      />
+    );
   }
 
   const visibleOptions = question.options.filter(isOptionVisible);
 
   if (visibleOptions.length === 0) {
-    return <ClosedFallback careersFallbackUrl={careersFallbackUrl} />;
+    return (
+      <ClosedFallback
+        careersFallbackUrl={careersFallbackUrl}
+        openJobs={openJobs}
+      />
+    );
   }
 
   return (
@@ -250,22 +272,31 @@ function ResultScreen({
   res,
   roles,
   careersFallbackUrl,
+  openJobs,
 }: {
   res: QuizResult;
   roles: Record<string, ResolvedRole>;
   careersFallbackUrl: string;
+  openJobs: OpenJob[];
 }) {
   const role = roles[res.result];
 
   // Defensive: if the matched role has closed since the tree was authored,
   // fall back to the general careers board.
   if (!role || !role.available) {
-    return <ClosedFallback careersFallbackUrl={careersFallbackUrl} />;
+    return (
+      <ClosedFallback
+        careersFallbackUrl={careersFallbackUrl}
+        openJobs={openJobs}
+      />
+    );
   }
 
   const alsoRoles = (res.also ?? [])
     .map((key) => roles[key])
     .filter((r): r is ResolvedRole => Boolean(r?.available));
+  const listedUrls = new Set([role.url, ...alsoRoles.map((item) => item.url)]);
+  const otherJobs = openJobs.filter((job) => !listedUrls.has(job.url));
 
   return (
     <div className="rounded-xl border border-border bg-card p-6 md:p-8">
@@ -307,7 +338,7 @@ function ResultScreen({
         </a>
       </div>
 
-      {alsoRoles.length > 0 ? (
+      {alsoRoles.length > 0 || otherJobs.length > 0 ? (
         <div className="mt-7 border-t border-border pt-5">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Also worth a look
@@ -329,6 +360,22 @@ function ResultScreen({
                 </a>
               </li>
             ))}
+            {otherJobs.map((job) => (
+              <li key={job.url}>
+                <a
+                  href={job.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground underline-offset-4 hover:underline"
+                >
+                  {job.title}
+                  <ExternalLink
+                    className="h-3.5 w-3.5 text-muted-foreground"
+                    aria-hidden
+                  />
+                </a>
+              </li>
+            ))}
           </ul>
         </div>
       ) : null}
@@ -338,8 +385,10 @@ function ResultScreen({
 
 function ClosedFallback({
   careersFallbackUrl,
+  openJobs,
 }: {
   careersFallbackUrl: string;
+  openJobs: OpenJob[];
 }) {
   return (
     <div className="rounded-xl border border-border bg-card p-6 md:p-8">
@@ -350,6 +399,26 @@ function ClosedFallback({
         The roles change as we grow. Browse all currently open positions to find
         your fit.
       </p>
+      {openJobs.length > 0 ? (
+        <ul className="mt-5 flex flex-col gap-2">
+          {openJobs.map((job) => (
+            <li key={job.url}>
+              <a
+                href={job.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground underline-offset-4 hover:underline"
+              >
+                {job.title}
+                <ExternalLink
+                  className="h-3.5 w-3.5 text-muted-foreground"
+                  aria-hidden
+                />
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : null}
       <div className="mt-6">
         <a
           href={careersFallbackUrl}
