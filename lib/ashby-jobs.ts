@@ -72,7 +72,7 @@ export function collectLangfuseJobs(
   for (const job of langfuse ?? []) {
     if (isListedJob(job)) byId.set(job.id, job);
   }
-  return [...byId.values()];
+  return Array.from(byId.values());
 }
 
 export function jobMatchesRole(
