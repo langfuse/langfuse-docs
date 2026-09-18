@@ -119,7 +119,7 @@ const LogoImage = ({
   name: string;
   hoverable?: boolean;
 }) => {
-  const { width } = wordmarkDisplaySize(logo, LOGO_DISPLAY_HEIGHT);
+  const { width, height } = wordmarkDisplaySize(logo, LOGO_DISPLAY_HEIGHT);
 
   return (
     <Image
@@ -129,12 +129,12 @@ const LogoImage = ({
       height={logo.height}
       unoptimized
       className={cn(
-        "h-auto max-w-full",
+        "h-auto w-auto max-w-full",
         hoverable
           ? "hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] transition-[filter] duration-200"
           : "",
       )}
-      style={{ width, height: "auto" }}
+      style={{ height, width }}
     />
   );
 };
@@ -221,7 +221,7 @@ export const EnterpriseLogoGrid = ({
       {/* Desktop: grid layout */}
       <div
         className={cn(
-          "hidden sm:grid sm:grid-cols-6 auto-rows-fr px-2 py-2",
+          "hidden sm:grid sm:grid-cols-6 px-2 py-2",
           small && "sm:grid-cols-3",
           className,
         )}
@@ -235,7 +235,7 @@ export const EnterpriseLogoGrid = ({
             <LinkBox
               key={company.name}
               href={company.customerStoryPath}
-              className="-mr-px -mb-px relative flex min-h-14 items-center justify-center !p-0"
+              className="-mr-px -mb-px relative flex h-14 items-center justify-center !p-0"
               aria-label={
                 hasStory
                   ? `Read ${company.name} user story`
@@ -244,7 +244,7 @@ export const EnterpriseLogoGrid = ({
               role="gridcell"
             >
               {hasStory && (
-                <div className="absolute w-full h-full flex items-end justify-center -mt-1 pointer-events-none">
+                <div className="absolute inset-x-0 bottom-0 flex justify-center pointer-events-none">
                   <div
                     className={cn(
                       "tooltip-label z-50 inline-flex h-[12px] items-center justify-center gap-[3px] overflow-hidden rounded-none border-0 bg-primary/10 px-1 py-0.5 font-mono text-[10px] leading-none text-primary-foreground shadow-none outline-hidden group-hover:bg-primary transition",
