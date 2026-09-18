@@ -118,11 +118,25 @@ export function findJobForRole(
   })[0];
 }
 
+function slimJob(job: Partial<AshbyJob> | null | undefined): AshbyJob | null {
+  if (!job?.id) return null;
+  return {
+    id: job.id,
+    title: job.title ?? "",
+    jobUrl: job.jobUrl ?? "",
+    applyUrl: job.applyUrl,
+    isListed: job.isListed,
+  };
+}
+
 async function fetchJobBoard(slug: string): Promise<AshbyJob[] | null> {
   try {
+    // The ClickHouse board payload is >2MB (full HTML descriptions), which
+    // Next.js cannot store in its data cache. Skip that cache and keep only
+    // the fields we match on.
     const response = await fetch(`${ASHBY_JOB_BOARD_API_BASE}/${slug}`, {
       headers: { Accept: "application/json" },
-      next: { revalidate: 3600 },
+      cache: "no-store",
     });
 
     if (!response.ok) {
@@ -132,13 +146,20 @@ async function fetchJobBoard(slug: string): Promise<AshbyJob[] | null> {
       return null;
     }
 
-    const data = (await response.json()) as { jobs?: AshbyJob[] };
-    return Array.isArray(data.jobs) ? data.jobs : null;
+    const data = (await response.json()) as { jobs?: Partial<AshbyJob>[] };
+    if (!Array.isArray(data.jobs)) return null;
+    return data.jobs
+      .map(slimJob)
+      .filter((job): job is AshbyJob => job !== null);
   } catch (error) {
     console.error(`Failed to fetch Ashby job board (${slug})`, error);
     return null;
   }
 }
+
+const JOBS_CACHE_TTL_MS = 60 * 60 * 1000;
+
+let jobsCache: { jobs: AshbyJob[] | null; expiresAt: number } | null = null;
 
 /**
  * Returns listed Langfuse jobs from the public boards, or `null` if
@@ -146,9 +167,15 @@ async function fetchJobBoard(slug: string): Promise<AshbyJob[] | null> {
  * "unknown" and fall back to static config rather than hiding everything.
  */
 export async function getAshbyJobs(): Promise<AshbyJob[] | null> {
+  if (jobsCache && Date.now() < jobsCache.expiresAt) {
+    return jobsCache.jobs;
+  }
+
   const [clickhouse, langfuse] = await Promise.all([
     fetchJobBoard(CLICKHOUSE_BOARD_SLUG),
     fetchJobBoard(LANGFUSE_BOARD_SLUG),
   ]);
-  return collectLangfuseJobs(clickhouse, langfuse);
+  const jobs = collectLangfuseJobs(clickhouse, langfuse);
+  jobsCache = { jobs, expiresAt: Date.now() + JOBS_CACHE_TTL_MS };
+  return jobs;
 }
