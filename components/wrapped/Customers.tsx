@@ -42,6 +42,7 @@ interface CustomerStory {
 
 // Companies with customer stories
 const companiesWithStories = [
+  { name: "Ramp", path: "/users/ramp", logo: rampLogo },
   { name: "Canva", path: "/users/canva", logo: canvaLogo },
   { name: "SumUp", path: "/users/sumup", logo: sumupLogo },
   {
@@ -70,10 +71,6 @@ const companiesWithoutStories = [
   {
     name: "Intuit",
     logo: intuitLogo,
-  },
-  {
-    name: "Ramp",
-    logo: rampLogo,
   },
   {
     name: "Circleback",
@@ -246,6 +243,7 @@ export function Customers() {
     const order: Array<{ type: "story" | "logo" | "text"; name: string }> = [
       // First column
       { type: "logo", name: "Intuit" },
+      { type: "story", name: "Ramp" },
       { type: "story", name: "Canva" },
       { type: "story", name: "SumUp" },
       // Continue with rest in desired order...
@@ -253,7 +251,6 @@ export function Customers() {
       { type: "logo", name: "Twilio" },
       { type: "story", name: "Hugging Face" },
       { type: "logo", name: "Pigment" },
-      { type: "logo", name: "Ramp" },
       { type: "logo", name: "freee" },
       { type: "story", name: "Khan Academy" },
       { type: "logo", name: "Circleback" },

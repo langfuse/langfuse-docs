@@ -135,7 +135,7 @@ export function CustomerIndex({
                   </p>
                 ) : null}
                 <span className="mt-auto inline-flex items-center gap-1.5 pt-4 font-mono text-[11px] uppercase tracking-[0.1em] text-text-secondary transition-colors group-hover:text-text-primary">
-                  Read
+                  {story.frontMatter.ctaLabel ?? "Read"}
                   <span aria-hidden>→</span>
                 </span>
               </Link>

@@ -14,6 +14,7 @@ type CustomerPageData = {
   quoteRole?: string | null;
   quoteCompany?: string | null;
   quoteAuthorImage?: string | null;
+  ctaLabel?: string | null;
   showInCustomerIndex?: boolean | null;
 };
 
@@ -36,6 +37,7 @@ export function getCustomerStories(): CustomerStory[] {
           quoteRole: data.quoteRole ?? undefined,
           quoteCompany: data.quoteCompany ?? undefined,
           quoteAuthorImage: data.quoteAuthorImage ?? undefined,
+          ctaLabel: data.ctaLabel ?? undefined,
           showInCustomerIndex: data.showInCustomerIndex ?? undefined,
         },
       };
