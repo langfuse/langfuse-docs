@@ -122,20 +122,21 @@ const LogoImage = ({
   const { width, height } = wordmarkDisplaySize(logo, LOGO_DISPLAY_HEIGHT);
 
   return (
-    <Image
-      src={logo}
-      alt={`${name} logo`}
-      width={logo.width}
-      height={logo.height}
-      unoptimized
-      className={cn(
-        "h-auto w-auto max-w-full",
-        hoverable
-          ? "hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] transition-[filter] duration-200"
-          : "",
-      )}
-      style={{ height, width }}
-    />
+    <span className="inline-flex max-w-full" style={{ width, height }}>
+      <Image
+        src={logo}
+        alt={`${name} logo`}
+        width={logo.width}
+        height={logo.height}
+        unoptimized
+        className={cn(
+          "h-full w-full object-contain",
+          hoverable
+            ? "hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] transition-[filter] duration-200"
+            : "",
+        )}
+      />
+    </span>
   );
 };
 
