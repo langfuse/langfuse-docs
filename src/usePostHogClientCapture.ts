@@ -36,6 +36,10 @@ interface EventDefinitions {
     source: "home_hero";
     path: string;
   };
+  "home:watch_demo_clicked": {
+    source: "home_feature_tabs";
+    path: string;
+  };
 }
 
 type EventName = keyof EventDefinitions;
