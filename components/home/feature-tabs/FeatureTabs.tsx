@@ -125,6 +125,7 @@ export const FeatureTabs = ({
   const isMountedRef = useRef(true);
 
   const isAutoAdvancePausedRef = useRef(state.isAutoAdvancePaused);
+  const pausedBeforeWatchingRef = useRef(false);
 
   useEffect(() => {
     isAutoAdvancePausedRef.current = state.isAutoAdvancePaused;
@@ -222,7 +223,9 @@ export const FeatureTabs = ({
 
   const closeWatchDemo = useCallback(() => {
     setIsWatchingDemo(false);
-    dispatch({ type: "RESUME_AUTO_ADVANCE" });
+    if (!pausedBeforeWatchingRef.current) {
+      dispatch({ type: "RESUME_AUTO_ADVANCE" });
+    }
   }, []);
 
   const handleWatchDemoToggle = useCallback(() => {
@@ -231,6 +234,7 @@ export const FeatureTabs = ({
       return;
     }
 
+    pausedBeforeWatchingRef.current = isAutoAdvancePausedRef.current;
     dispatch({ type: "PAUSE_AUTO_ADVANCE" });
     clearAllTimers();
     setIsWatchingDemo(true);
@@ -547,9 +551,12 @@ export const FeatureTabs = ({
         withStripes
         role="tabpanel"
         id="tabpanel-product-area"
+        aria-label={
+          isWatchingDemo ? "Langfuse platform walkthrough" : undefined
+        }
         aria-labelledby={
           isWatchingDemo
-            ? "watch-demo-toggle"
+            ? undefined
             : activeFeature
               ? `tab-${activeFeature.id}`
               : undefined
