@@ -89,17 +89,24 @@ Pick the closest label. Include a date only when it helps (`Blogpost from 12/23/
 external URL. User-story links (`/users/<slug>`) and `Langfuse Customer` do
 not need one.
 
-1. Look up an existing `200` snapshot:
+1. Look up an existing `200` snapshot. **Always percent-encode the URL** with
+   `curl -G --data-urlencode` (or equivalent). A raw `?url=` query treats `&`
+   in the page URL as another CDX parameter and can miss snapshots.
 
    ```bash
-   curl -sS "https://web.archive.org/cdx/search/cdx?url=<URL>&output=json&filter=statuscode:200&limit=1"
+   curl -sS -G "https://web.archive.org/cdx/search/cdx" \
+     --data-urlencode "url=<URL>" \
+     --data-urlencode "output=json" \
+     --data-urlencode "filter=statuscode:200" \
+     --data-urlencode "limit=1"
    ```
 
 2. If CDX is empty, **request a snapshot** and wait for it. Do not skip this
-   step or ship the row without an archive.
+   step or ship the row without an archive. Percent-encode reserved characters
+   in the page URL (`?`, `&`, `#`) so Save Page Now receives the full URL.
 
    ```bash
-   curl -sS -I "https://web.archive.org/save/<URL>"
+   curl -sS -I "https://web.archive.org/save/$(python3 -c 'import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=":/"))' '<URL>')"
    ```
 
    Re-query CDX until it returns a `200` row. The Save Page Now response may
