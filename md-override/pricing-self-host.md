@@ -88,10 +88,10 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 | [Extensive public API](/docs/api-and-data-platform/features/public-api)                                     | Yes                         | Yes                                        |
 | [Metrics & Observations APIs (v2)](/docs/metrics/features/metrics-api#v2)                                   | Langfuse v4+                | Langfuse v4+                               |
 | **Exports**                                                                                                 |                             |                                            |
-| [Batch export via UI](/docs/api-and-data-platform/features/query-via-sdk#ui)                                | Yes                         | Yes                                        |
+| [Batch export via UI](/docs/api-and-data-platform/features/export-from-ui)                                  | Yes                         | Yes                                        |
 | [PostHog integration](/integrations/analytics/posthog)                                                      | Yes                         | Yes                                        |
 | [Mixpanel integration](/integrations/analytics/mixpanel)                                                    | Yes                         | Yes                                        |
-| [Scheduled export to blob storage](/docs/api-and-data-platform/features/query-via-sdk#blob-storage)         | Yes                         | Yes                                        |
+| [Scheduled export to blob storage](/docs/api-and-data-platform/features/export-to-blob-storage)             | Yes                         | Yes                                        |
 | **Deployment**                                                                                              |                             |                                            |
 | ClickHouse deployment model                                                                                 | Self-managed ClickHouse OSS | Bundled: ClickHouse Cloud / BYOC / Private |
 | [Deployment templates](/self-hosting)                                                                       | Yes                         | Yes                                        |
