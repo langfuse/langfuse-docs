@@ -16,6 +16,10 @@ import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { TextHighlight } from "@/components/ui/text-highlight";
+import {
+  SELF_SERVE_LINKS,
+  TALK_TO_US_BENEFITS,
+} from "@/components/watchOrBookDemo/constants";
 
 function SwitchToggle({
   checked,
@@ -34,8 +38,12 @@ function SwitchToggle({
       >
         Talk to us
       </Link>
-      <Link href={switchHref} className="mt-1.5">
-        <Switch checked={checked} alwaysOn />
+      <Link
+        href={switchHref}
+        className="mt-1.5"
+        aria-label={page === "talk-to-us" ? "Watch the video" : "Talk to us"}
+      >
+        <Switch checked={checked} alwaysOn decorative />
       </Link>
       <Link
         href="/watch-demo"
@@ -85,30 +93,14 @@ function TalkToUsContent() {
           suit your business and workflow:
         </Text>
         <ul className="flex flex-col gap-2 my-4">
-          <li className="flex items-start gap-3">
-            <CheckCircle2 className="h-4 w-4 text-primary mt-0.25 shrink-0" />
-            <Text size="s" className="text-left text-text-secondary">
-              Get a Demo
-            </Text>
-          </li>
-          <li className="flex items-start gap-3">
-            <CheckCircle2 className="h-4 w-4 text-primary mt-0.25 shrink-0" />
-            <Text size="s" className="text-left text-text-secondary">
-              Get Volume Pricing
-            </Text>
-          </li>
-          <li className="flex items-start gap-3">
-            <CheckCircle2 className="h-4 w-4 text-primary mt-0.25 shrink-0" />
-            <Text size="s" className="text-left text-text-secondary">
-              Pay by Invoice
-            </Text>
-          </li>
-          <li className="flex items-start gap-3">
-            <CheckCircle2 className="h-4 w-4 text-primary mt-0.25 shrink-0" />
-            <Text size="s" className="text-left text-text-secondary">
-              Ask questions about our Security & Compliance Policies
-            </Text>
-          </li>
+          {TALK_TO_US_BENEFITS.map((benefit) => (
+            <li key={benefit} className="flex items-start gap-3">
+              <CheckCircle2 className="h-4 w-4 text-primary mt-0.25 shrink-0" />
+              <Text size="s" className="text-left text-text-secondary">
+                {benefit}
+              </Text>
+            </li>
+          ))}
         </ul>
       </div>
       <Text className="text-left not-prose">
@@ -155,28 +147,13 @@ function TalkToUsContent() {
 }
 
 function DiscoverYourselfContent() {
-  const links = [
-    { href: "/docs", label: "Documentation" },
-    { href: "/self-hosting", label: "Self-hosting docs" },
-    { href: "/demo", label: "Interactive Example Project" },
-    { href: "/pricing", label: "Pricing" },
-    { href: "/enterprise", label: "Enterprise FAQ" },
-    { href: "/security", label: "Security Center" },
-    { href: "/ask-ai", label: "Questions? Ask AI" },
-    { href: "/support", label: "Contact Support" },
-    {
-      href: "/cloud",
-      label: "Create a free account (no credit card required)",
-    },
-  ];
-
   return (
     <>
       <Heading as="h2">Self-serve resources</Heading>
       <div>
         <Text className="text-left">Everything you need to get started:</Text>
         <ul className="flex flex-col gap-2 mt-2">
-          {links.map((link) => (
+          {SELF_SERVE_LINKS.map((link) => (
             <li key={link.href} className="flex items-start gap-3">
               <ArrowRight className="h-3 w-3 text-text-tertiary mt-0.75 shrink-0" />
               <Link href={link.href} variant="text">
