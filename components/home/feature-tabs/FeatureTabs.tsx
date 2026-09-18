@@ -249,6 +249,13 @@ export const FeatureTabs = ({
       if (event.key !== "Escape") {
         return;
       }
+
+      const root = containerRef.current;
+      const target = event.target;
+      if (root && target instanceof Node && !root.contains(target)) {
+        return;
+      }
+
       event.preventDefault();
       closeWatchDemo();
     };
