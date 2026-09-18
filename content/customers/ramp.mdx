@@ -7,8 +7,8 @@ ogImage:
 tag: customer-story
 customerLogo: "/images/customers/ramp/ramp-light.svg"
 customerLogoDark: "/images/customers/ramp/ramp-dark.svg"
-customerQuote: "We wanted something built for agents as users first. And that means API first. An agent should never get stuck waiting for a human because of a deficiency in the API. This is what Langfuse is."
-customerQuoteHighlight: "API first"
+customerQuote: "Reflect works by semantically scoring those traces and grouping similar traces together… it analyzes those traces in aggregate to find patterns, diagnose issues, and propose fixes for a human owner to either accept or reject. We've seen a 10-20% decrease in token usage, 15% fewer tool calls, and 30% faster end-to-end session times."
+customerQuoteHighlight: "30% faster"
 customerQuoteTag: "Video story"
 quoteAuthor: "David Traina"
 quoteRole: "Data Platform"
@@ -49,13 +49,13 @@ In this talk, Ryan Delgado (Engineering) and David Traina (Data Platform) walk t
 
 David Traina explains why Ramp chose Langfuse: fully [self-hosted](/self-hosting) on standard infra (S3, Redis, Postgres, ECS, Terraform) with ClickHouse Cloud, fully open source, [OpenTelemetry](/integrations/native/opentelemetry)-native, and API-first so agents - not just humans - can be first-class users.
 
+He then demos Reflect, a Ramp agent that monitors other agents. Reflect scores and clusters Langfuse [traces](/docs/observability/overview), diagnoses recurring failure patterns, and proposes fixes. Applied to 12 agents with 120+ merged suggestions, it cut Ramp Research token usage by 10-20%, tool calls by 15%, and session times by 30%.
+
 <CustomerQuote
-  quote="We wanted something built for agents as users first. And that means API first. An agent should never get stuck waiting for a human because of a deficiency in the API. This is what Langfuse is."
+  quote="Reflect works by semantically scoring those traces and grouping similar traces together… it analyzes those traces in aggregate to find patterns, diagnose issues, and propose fixes for a human owner to either accept or reject. We've seen a 10-20% decrease in token usage, 15% fewer tool calls, and 30% faster end-to-end session times."
   name="David Traina"
   role="Data Platform"
   company="Ramp"
 />
-
-He then demos Reflect, a Ramp agent that monitors other agents. Reflect scores and clusters Langfuse [traces](/docs/observability/overview), diagnoses recurring failure patterns, and proposes fixes. Applied to 12 agents with 120+ merged suggestions, it cut Ramp Research token usage by 10-20%, tool calls by 15%, and session times by 30%.
 
 <CustomerStoryCTA />
