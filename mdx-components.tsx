@@ -3,7 +3,7 @@ import type { MDXComponents } from "mdx/types";
 import React from "react";
 import dynamic from "next/dynamic";
 import { Mermaid } from "@/components/Mermaid";
-import { Image } from "@/components/ui/image";
+import { MdxImage } from "@/components/ui/mdx-image";
 import { Frame } from "@/components/Frame";
 import { LangTab, LangTabs, LangTabsWithTab } from "@/components/LangTabs";
 import { GitHubReadme } from "@/components/GitHubReadme";
@@ -99,8 +99,8 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultMdxComponents,
     a: (props: LinkProps) => <MdxLink variant="underline" {...props} />,
-    img: Image,
-    Image,
+    img: MdxImage,
+    Image: MdxImage,
     p: MdxParagraph,
     Frame,
     Video,
