@@ -1,12 +1,14 @@
 import { cn } from "@/lib/utils";
-import { HoverStars } from "./HoverStars";
 import React from "react";
+import { Heading } from "@/components/ui/heading";
+import { Text } from "@/components/ui/text";
 
 interface SectionHeadingProps {
   title: string;
   subtitle?: string;
   className?: string;
   children?: React.ReactNode;
+  id?: string;
 }
 
 export function SectionHeading({
@@ -14,30 +16,24 @@ export function SectionHeading({
   subtitle,
   className,
   children,
+  id,
 }: SectionHeadingProps) {
   return (
     <div
       className={cn(
-        "relative group border-t border-l border-r border-b border-border p-6 lg:p-8",
+        "flex flex-col gap-3 items-start mb-8 lg:flex-row lg:items-end lg:justify-between lg:gap-8",
         className,
       )}
     >
-      <HoverStars />
-      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between lg:gap-8">
-        <div className="flex-1">
-          <h2 className="text-3xl sm:text-5xl lg:text-6xl font-bold font-mono text-balance">
-            {title}
-          </h2>
-          {subtitle && (
-            <p className="mt-4 text-lg sm:text-xl text-muted-foreground max-w-2xl">
-              {subtitle}
-            </p>
-          )}
-        </div>
-        {children && (
-          <div className="mt-4 lg:mt-0 lg:text-right">{children}</div>
+      <div className="flex-1 min-w-0">
+        <Heading as="h2" id={id}>
+          {title}
+        </Heading>
+        {subtitle && (
+          <Text className="mt-3 text-left max-w-[64ch]">{subtitle}</Text>
         )}
       </div>
+      {children && <div className="lg:text-right shrink-0">{children}</div>}
     </div>
   );
 }

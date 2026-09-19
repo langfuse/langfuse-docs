@@ -59,12 +59,12 @@ function MetricCard({
   };
 
   return (
-    <div className="p-6 lg:p-8">
+    <div className="p-5 lg:p-6">
       <div
-        className={`font-bold font-mono ${
+        className={`font-medium font-analog tabular-nums text-text-primary ${
           isFullWidth
-            ? "text-3xl sm:text-4xl lg:text-5xl"
-            : "text-2xl sm:text-3xl lg:text-4xl"
+            ? "text-[28px] sm:text-[36px] lg:text-[44px] leading-[110%]"
+            : "text-[28px] sm:text-[32px] leading-[115%]"
         }`}
       >
         {isNumeric ? (
@@ -84,10 +84,10 @@ function MetricCard({
           value
         )}
       </div>
-      <div className="mt-2 flex items-center gap-2 text-base font-normal">
+      <div className="mt-2 flex items-center gap-2 text-[14px] font-normal text-text-secondary">
         {Icon && (
-          <div className="shrink-0 rounded-lg border bg-muted/50 flex items-center justify-center w-6 h-6">
-            <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+          <div className="shrink-0 rounded-[2px] border border-line-structure bg-surface-1 flex items-center justify-center w-6 h-6">
+            <Icon className="w-3.5 h-3.5 text-text-tertiary" />
           </div>
         )}
         <span>{fullLabel}</span>
@@ -279,11 +279,12 @@ export function Metrics() {
   return (
     <WrappedSection>
       <SectionHeading
-        title="You all have been busy..."
-        subtitle="Key metrics from our platform in 2025"
+        id="metrics"
+        title="You all have been busy"
+        subtitle="Key metrics from our platform in 2025."
       />
       <div ref={containerRef}>
-        <WrappedGrid className="!grid-cols-1 sm:!grid-cols-2 lg:!grid-cols-3 !border-t-0 -mt-[1px]">
+        <WrappedGrid className="!grid-cols-1 sm:!grid-cols-2 lg:!grid-cols-3 !border-t-0 -mt-px">
           {metrics
             .map((metric, index) => {
               const delay = index * 0.1; // Stagger delay
@@ -328,16 +329,16 @@ export function Metrics() {
                   <WrappedGridItem
                     key="consumption"
                     colSpan={3}
-                    className="hidden lg:block"
+                    className="hidden md:block"
                   >
                     <motion.div {...graphAnimationProps}>
                       <div className="p-6">
                         <div className="flex flex-col lg:flex-row lg:items-start lg:gap-8">
                           <div className="w-full lg:w-1/4 mb-4 lg:mb-0">
-                            <h3 className="text-2xl sm:text-3xl font-bold font-mono">
+                            <h3 className="text-[22px] sm:text-[28px] font-medium font-analog text-text-primary">
                               Consumption
                             </h3>
-                            <p className="mt-2 text-sm text-muted-foreground">
+                            <p className="mt-2 text-[13px] text-text-tertiary">
                               {" "}
                               Consumption between January and December 2025.
                               Ingestions of traces, observations and evals.
@@ -356,18 +357,18 @@ export function Metrics() {
                               >
                                 <CartesianGrid
                                   strokeDasharray="3 3"
-                                  className="stroke-muted"
+                                  className="stroke-line-structure"
                                 />
                                 <XAxis
                                   dataKey="month"
                                   className="text-xs"
-                                  tick={{ fill: "currentColor" }}
+                                  tick={{ fill: "var(--text-tertiary)" }}
                                 />
                                 <Tooltip
                                   contentStyle={{
-                                    backgroundColor: "hsl(var(--card))",
-                                    border: "1px solid hsl(var(--border))",
-                                    borderRadius: "0.5rem",
+                                    backgroundColor: "var(--surface-bg)",
+                                    border: "1px solid var(--line-structure)",
+                                    borderRadius: "2px",
                                     padding: "0.5rem",
                                   }}
                                   formatter={(value: number) => [
@@ -375,19 +376,19 @@ export function Metrics() {
                                     "Traffic relative to Dec 25",
                                   ]}
                                   labelStyle={{
-                                    color: "hsl(var(--foreground))",
+                                    color: "var(--text-primary)",
                                   }}
                                 />
                                 <Bar
                                   dataKey="growth"
-                                  fill="hsl(var(--primary))"
-                                  radius={[4, 4, 0, 0]}
+                                  fill="var(--text-primary)"
+                                  radius={[2, 2, 0, 0]}
                                 >
                                   <LabelList
                                     dataKey="growth"
                                     position="inside"
                                     formatter={formatGrowth}
-                                    fill="hsl(var(--card))"
+                                    fill="var(--surface-bg)"
                                     style={{
                                       fontWeight: 600,
                                       fontSize: "0.75rem",
@@ -421,14 +422,14 @@ export function Metrics() {
                   <WrappedGridItem
                     key="downloads"
                     colSpan={3}
-                    className="hidden lg:block"
+                    className="hidden md:block"
                   >
                     <motion.div {...graphAnimationProps}>
                       <div className="p-6">
                         <div className="flex flex-col lg:flex-row lg:items-start lg:gap-8">
                           <div className="w-full lg:w-1/4 mb-4 lg:mb-0">
-                            <h3 className="text-2xl sm:text-3xl font-bold font-mono">
-                              Monthly Package Downloads
+                            <h3 className="text-[22px] sm:text-[28px] font-medium font-analog text-text-primary">
+                              Monthly package downloads
                             </h3>
                           </div>
                           <div className="w-full lg:w-3/4 aspect-[21/9] lg:aspect-auto lg:h-[400px]">
@@ -444,18 +445,18 @@ export function Metrics() {
                               >
                                 <CartesianGrid
                                   strokeDasharray="3 3"
-                                  className="stroke-muted"
+                                  className="stroke-line-structure"
                                 />
                                 <XAxis
                                   dataKey="month"
                                   className="text-xs"
-                                  tick={{ fill: "currentColor" }}
+                                  tick={{ fill: "var(--text-tertiary)" }}
                                 />
                                 <Tooltip
                                   contentStyle={{
-                                    backgroundColor: "hsl(var(--card))",
-                                    border: "1px solid hsl(var(--border))",
-                                    borderRadius: "0.5rem",
+                                    backgroundColor: "var(--surface-bg)",
+                                    border: "1px solid var(--line-structure)",
+                                    borderRadius: "2px",
                                     padding: "0.5rem",
                                   }}
                                   formatter={(value: number) => [
@@ -463,19 +464,19 @@ export function Metrics() {
                                     "Downloads",
                                   ]}
                                   labelStyle={{
-                                    color: "hsl(var(--foreground))",
+                                    color: "var(--text-primary)",
                                   }}
                                 />
                                 <Bar
                                   dataKey="downloads"
-                                  fill="hsl(var(--primary))"
-                                  radius={[4, 4, 0, 0]}
+                                  fill="var(--text-primary)"
+                                  radius={[2, 2, 0, 0]}
                                 >
                                   <LabelList
                                     dataKey="downloads"
                                     position="inside"
                                     formatter={formatDownloads}
-                                    fill="hsl(var(--card))"
+                                    fill="var(--surface-bg)"
                                     style={{
                                       fontWeight: 600,
                                       fontSize: "0.75rem",

@@ -8,7 +8,7 @@ import { Metrics } from "./MetricsLazy";
 
 export function Wrapped() {
   return (
-    <main className="relative overflow-hidden w-full">
+    <main className="relative w-full">
       <Hero />
       <Intro />
       <Metrics />
