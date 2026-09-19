@@ -102,37 +102,6 @@ print(response.choices["tone"].choice, response.choices["tone"].confidence)
 print(response.scores["urgency"].score, response.scores["urgency"].confidence)
 ```
 
-## JavaScript / TypeScript [#javascript]
-
-There is no `@arizeai/openinference-instrumentation-typesafe` package, and [`@typesafe-ai/sdk`](https://docs.typesafe.ai/sdk/javascript) has no OpenTelemetry hook. Until an auto-instrumentor ships, wrap `systemOne` with Langfuse [`observe()`](/docs/observability/sdk/instrumentation):
-
-```ts
-import { observe } from "@langfuse/tracing";
-import { TypeSafeClient, choice, noul, score } from "@typesafe-ai/sdk";
-
-const client = new TypeSafeClient({ defaultModel: "jev-1.13.0" });
-
-const systemOne = observe((request: Parameters<TypeSafeClient["systemOne"]>[0]) => client.systemOne(request), {
-  name: "TypeSafeClient.systemOne",
-  asType: "generation",
-});
-
-const response = await systemOne({
-  state: { document: "I was charged twice. Please fix this ASAP." },
-  questions: {
-    billing: noul("Is this ticket about billing?"),
-    category: choice("What is this ticket about?", {
-      billing: "Payment or subscription issues",
-      technical: "Bugs or integration problems",
-      other: "Anything else",
-    }),
-    urgency: score("How urgent is this ticket?", ["can wait", "this week", "today"]),
-  },
-});
-```
-
-Jev is also listed on [OpenRouter](https://openrouter.ai/typesafe/jev-1.13) and the [Vercel AI Gateway](https://vercel.com/ai-gateway/models/jev). Those paths can log HTTP traffic through existing gateway integrations, but they will not record System One questions and typed answers. Use the TypeSafe SDK plus this instrumentor when you need that shape.
-
 To write Jev verdicts back onto Langfuse traces as scores, see [Using TypeSafe's Jev for evals](/blog/2026-09-18-using-typesafes-jev-for-evals).
 
 ## Step 5: View Traces in Langfuse
