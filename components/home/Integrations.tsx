@@ -256,7 +256,7 @@ const marqueeRow1: MarqueeItem[] = [
   },
   {
     label: "OpenClaw",
-    href: "/integrations/other/openclaw",
+    href: "/integrations/no-code/openclaw",
     icon: "/images/integrations/openclaw_icon.svg",
   },
   {
