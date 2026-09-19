@@ -1,9 +1,10 @@
+import { Suspense } from "react";
 import Image from "next/image";
 import {
-  CustomerStoryBackNav,
-  companyLabelFromLogo,
-} from "@/components/customers/CustomerStoryBackNav";
-import { Authors, allAuthors } from "../Authors";
+  CustomerStoryHeader,
+  CustomerStoryHeaderView,
+} from "@/components/customers/CustomerStoryHeader";
+import { Authors } from "../Authors";
 
 export const BlogHeader = ({
   authors = [],
@@ -12,6 +13,8 @@ export const BlogHeader = ({
   date,
   image,
   customerLogo,
+  customerLogoDark,
+  tag,
 }: {
   authors?: string[];
   title: string;
@@ -19,12 +22,39 @@ export const BlogHeader = ({
   date?: string;
   image?: string;
   customerLogo?: string;
+  customerLogoDark?: string;
+  tag?: string;
 }) => {
+  if (customerLogo) {
+    return (
+      <Suspense
+        fallback={
+          <CustomerStoryHeaderView
+            title={title}
+            description={description}
+            date={date}
+            tag={tag}
+            customerLogo={customerLogo}
+            customerLogoDark={customerLogoDark}
+            authors={authors}
+          />
+        }
+      >
+        <CustomerStoryHeader
+          title={title}
+          description={description}
+          date={date}
+          tag={tag}
+          customerLogo={customerLogo}
+          customerLogoDark={customerLogoDark}
+          authors={authors}
+        />
+      </Suspense>
+    );
+  }
+
   return (
     <div className="my-4 md:my-6 flex flex-col gap-3">
-      {customerLogo ? (
-        <CustomerStoryBackNav current={companyLabelFromLogo(customerLogo)} />
-      ) : null}
       <div className="flex flex-col gap-1 items-center text-center">
         {image && (
           <Image
@@ -36,17 +66,6 @@ export const BlogHeader = ({
           />
         )}
         <span className="text-primary/60">{date}</span>
-        {customerLogo && (
-          <div className="not-prose bg-white rounded-lg px-6 py-4 shadow-sm border my-0">
-            <Image
-              src={customerLogo}
-              alt={`${title} logo`}
-              width={220}
-              height={56}
-              className="h-12 w-auto object-contain my-0"
-            />
-          </div>
-        )}
         <h1 className="mt-3 font-medium leading-snug text-balance text-foreground">
           {title}
         </h1>
