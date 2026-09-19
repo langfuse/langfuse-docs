@@ -198,21 +198,9 @@ export function CustomerStoriesHero({
     >
       <div className="relative grid gap-8 px-6 py-10 sm:px-8 lg:min-h-[580px] lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)] lg:gap-10 lg:py-12">
         <div className="relative flex min-w-0 flex-col">
-          <div className="mb-8 flex items-start justify-between gap-4">
-            <h1 className="m-0 font-mono text-[11px] font-normal uppercase tracking-[0.14em] text-text-tertiary">
-              Customer stories
-            </h1>
-            <div className="flex shrink-0 items-center gap-3 font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary">
-              <span>
-                {String(active + 1).padStart(2, "0")} /{" "}
-                {String(stories.length).padStart(2, "0")}
-              </span>
-              <span className="hidden text-text-disabled sm:inline">·</span>
-              <span className="hidden sm:inline">
-                {paused ? "paused" : "auto-plays"}
-              </span>
-            </div>
-          </div>
+          <h1 className="mt-0 mb-8 font-mono text-[11px] font-normal uppercase tracking-[0.14em] text-text-tertiary">
+            Customer stories
+          </h1>
 
           <div className="grid flex-1">
             {stories.map((story, i) => (
