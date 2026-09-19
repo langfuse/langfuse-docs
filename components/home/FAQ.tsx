@@ -16,6 +16,12 @@ const faqs: FAQItem[] = [
       "Langfuse helps you [debug LLM applications](/docs/observability/overview) with detailed traces that capture every step of your AI pipeline, including [agent graphs](/docs/observability/features/agent-graphs). You can [manage and version your prompts](/docs/prompt-management/overview) collaboratively, run [automated evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) (including LLM-as-a-judge and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators)), track [costs and latency](/docs/observability/features/token-and-cost-tracking) across models and providers, and run [experiments on datasets](/docs/evaluation/experiments/datasets) to measure improvements before shipping. It also supports [custom dashboards](/docs/metrics/features/custom-dashboards) for team-wide visibility.",
   },
   {
+    question:
+      "How does Langfuse compare to LangSmith, Braintrust, Arize, Galileo, and Datadog?",
+    answer:
+      "Langfuse is an [open-source](/why) AI engineering platform for tracing, evaluations, prompt management, and experiments. Compared with [LangSmith](/compare/langsmith), [Braintrust](/compare/braintrust), [Arize](/compare/arize-phoenix), [Galileo](/compare/galileo), and [Datadog Agent Observability](/compare/datadog), it is [MIT licensed](/handbook/chapters/open-source), [OpenTelemetry](/integrations/native/opentelemetry) native, [self-hostable](/self-hosting) at the same scale as Langfuse Cloud, and model- and framework-agnostic. See [Why Langfuse?](/why) for how we position the product, or the [comparison pages](/compare) for product-by-product differences.",
+  },
+  {
     question: "Can I use just tracing without the other features?",
     answer:
       "Yes, you can use Langfuse purely for [tracing](/docs/observability/overview). The [SDKs](/docs/observability/sdk/overview) are modular — you instrument your app with a few lines of code and can integrate only what you need. Tracing works independently of [prompt management](/docs/prompt-management/overview), [evaluations](/docs/evaluation/overview), or any other feature. Many teams start with tracing alone and adopt additional capabilities as their needs grow.",
