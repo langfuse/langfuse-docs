@@ -24,7 +24,6 @@ export const BlogHeader = ({
       <CustomerStoryHeader
         title={title}
         description={description}
-        date={date}
         customerLogo={customerLogo}
         customerLogoDark={customerLogoDark}
         authors={authors}

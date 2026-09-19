@@ -53,7 +53,6 @@ function StoryLogo({
 export type CustomerStoryHeaderProps = {
   title: string;
   description?: string;
-  date?: string;
   customerLogo: string;
   customerLogoDark?: string;
   authors?: string[];
@@ -63,7 +62,6 @@ export function CustomerStoryHeader({
   authors = [],
   title,
   description,
-  date,
   customerLogo,
   customerLogoDark,
 }: CustomerStoryHeaderProps) {
@@ -72,11 +70,6 @@ export function CustomerStoryHeader({
   return (
     <header className="not-prose my-4 flex flex-col gap-6 md:my-6">
       <CustomerStoryBackNav current={company} />
-      {date ? (
-        <span className="font-mono text-[11px] font-normal uppercase tracking-[0.14em] text-text-tertiary">
-          {date}
-        </span>
-      ) : null}
       <StoryLogo
         src={customerLogo}
         srcDark={customerLogoDark}
