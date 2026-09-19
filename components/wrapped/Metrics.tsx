@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useInView, useMotionValue, useSpring, motion } from "framer-motion";
 import {
   ListTree,
@@ -17,10 +17,10 @@ import {
   XAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
   LabelList,
 } from "recharts";
 import { WrappedGrid, WrappedGridItem } from "./components/WrappedGrid";
+import { cn } from "@/lib/utils";
 
 interface MetricCardProps {
   value: number | string;
@@ -270,6 +270,51 @@ const formatGrowth = (value: number) => {
   return `${Math.round(value)}%`;
 };
 
+function SizedChart({
+  children,
+  className,
+}: {
+  children: (size: { width: number; height: number }) => React.ReactNode;
+  className?: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState<{ width: number; height: number } | null>(
+    null,
+  );
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const update = () => {
+      const { width, height } = el.getBoundingClientRect();
+      if (width > 1 && height > 1) {
+        setSize({
+          width: Math.floor(width),
+          height: Math.floor(height),
+        });
+      }
+    };
+
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "w-full min-w-0 h-[220px] sm:h-[280px] lg:h-[360px]",
+        className,
+      )}
+    >
+      {size ? children(size) : null}
+    </div>
+  );
+}
+
 export function Metrics() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { once: true, margin: "-100px" });
@@ -328,9 +373,11 @@ export function Metrics() {
                             Ingestions of traces, observations and evals.
                           </p>
                         </div>
-                        <div className="w-full lg:w-3/4 h-[220px] sm:h-[280px] lg:h-[360px]">
-                          <ResponsiveContainer width="100%" height="100%">
+                        <SizedChart className="lg:w-3/4">
+                          {({ width, height }) => (
                             <BarChart
+                              width={width}
+                              height={height}
                               data={growthData}
                               margin={{
                                 top: 5,
@@ -380,8 +427,8 @@ export function Metrics() {
                                 />
                               </Bar>
                             </BarChart>
-                          </ResponsiveContainer>
-                        </div>
+                          )}
+                        </SizedChart>
                       </div>
                     </div>
                   </motion.div>
@@ -412,9 +459,11 @@ export function Metrics() {
                             Monthly package downloads
                           </h3>
                         </div>
-                        <div className="w-full lg:w-3/4 h-[220px] sm:h-[280px] lg:h-[360px]">
-                          <ResponsiveContainer width="100%" height="100%">
+                        <SizedChart className="lg:w-3/4">
+                          {({ width, height }) => (
                             <BarChart
+                              width={width}
+                              height={height}
                               data={downloadData}
                               margin={{
                                 top: 5,
@@ -464,8 +513,8 @@ export function Metrics() {
                                 />
                               </Bar>
                             </BarChart>
-                          </ResponsiveContainer>
-                        </div>
+                          )}
+                        </SizedChart>
                       </div>
                     </div>
                   </motion.div>
