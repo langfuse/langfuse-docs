@@ -1291,3 +1291,80 @@ inkeep-portal .inkeep-widget-vars {
 .prose blockquote p:last-of-type::after {
   content: none;
 }
+
+/*
+ * Fumadocs TypeTable — rectangular chrome matching markdown tables.
+ */
+.lf-type-table {
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  background-color: var(--surface-bg) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--line-structure) !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  font-size: 0.813rem;
+}
+
+.lf-type-table > :first-child {
+  background-color: var(--surface-1);
+  border-bottom: 1px solid var(--line-structure);
+  color: var(--text-tertiary) !important;
+  font-size: 0.813rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem !important;
+}
+
+.lf-type-table > [data-state] {
+  border-radius: 0 !important;
+  border: none !important;
+  border-bottom: 1px solid var(--line-structure) !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  margin: 0 !important;
+  overflow: hidden;
+}
+
+.lf-type-table > [data-state]:last-child {
+  border-bottom: none !important;
+}
+
+.lf-type-table > [data-state] > button {
+  padding: 0.5rem 1rem !important;
+  background-color: transparent;
+  border-radius: 0;
+}
+
+.lf-type-table > [data-state] > button:hover {
+  background-color: var(--surface-1);
+}
+
+.lf-type-table > [data-state] > button code {
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 0.813rem;
+  font-weight: 500;
+}
+
+.lf-type-table > [data-state] > button > span,
+.lf-type-table > [data-state] > button > a {
+  color: var(--text-secondary);
+  font-size: 0.813rem;
+}
+
+.lf-type-table > [data-state] > button svg {
+  color: var(--text-tertiary);
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.lf-type-table > [data-state] > [data-state] > div {
+  border-top-color: var(--line-structure) !important;
+  background-color: var(--surface-bg);
+  padding: 0.75rem 1rem !important;
+  color: var(--text-secondary);
+}
