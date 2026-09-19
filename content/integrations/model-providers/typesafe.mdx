@@ -54,7 +54,7 @@ else:
 
 ## Step 3: OpenTelemetry instrumentation
 
-Official TypeSafe docs do not mention OpenTelemetry. [Arize OpenInference](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-typesafe) already ships [`TypeSafeAIInstrumentor`](https://pypi.org/project/openinference-instrumentation-typesafe/) for `typesafe-sdk >= 0.6.0`. Call `instrument()` once. It wraps `TypeSafeClient.system_one` and `AsyncTypeSafeClient.system_one` internally, so application code keeps `client = TypeSafeClient()` — no `observeTypeSafe()` helper and no Langfuse-specific client wrapper.
+Official TypeSafe docs do not mention OpenTelemetry. [OpenInference](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-typesafe) already ships [`TypeSafeAIInstrumentor`](https://pypi.org/project/openinference-instrumentation-typesafe/) for `typesafe-sdk >= 0.6.0`. Call `instrument()` once. It wraps `TypeSafeClient.system_one` and `AsyncTypeSafeClient.system_one` internally, so application code keeps `client = TypeSafeClient()` — no `observeTypeSafe()` helper and no Langfuse-specific client wrapper.
 
 Langfuse's Python SDK is OpenTelemetry-native, so the instrumentor attaches to the same tracer provider that `get_client()` registered. The same package can export to any OTLP collector, including Phoenix or Langfuse.
 
@@ -141,7 +141,7 @@ After running the example, open [Langfuse Cloud](https://langfuse.com/cloud) to 
 
 ![Example TypeSafe (Jev) trace in Langfuse](https://langfuse.com/images/cookbook/integration-typesafe/typesafe-example-trace.png)
 
-<!-- TODO: replace with a real trace screenshot (upload to langfuse.com images) and a public example trace link -->
+{/* TODO: replace with a real trace screenshot (upload to langfuse.com images) and a public example trace link */}
 
 </Steps>
 
