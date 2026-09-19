@@ -1,9 +1,5 @@
-import { Suspense } from "react";
 import Image from "next/image";
-import {
-  CustomerStoryHeader,
-  CustomerStoryHeaderView,
-} from "@/components/customers/CustomerStoryHeader";
+import { CustomerStoryHeader } from "@/components/customers/CustomerStoryHeader";
 import { Authors } from "../Authors";
 
 export const BlogHeader = ({
@@ -14,7 +10,6 @@ export const BlogHeader = ({
   image,
   customerLogo,
   customerLogoDark,
-  tag,
 }: {
   authors?: string[];
   title: string;
@@ -23,33 +18,17 @@ export const BlogHeader = ({
   image?: string;
   customerLogo?: string;
   customerLogoDark?: string;
-  tag?: string;
 }) => {
   if (customerLogo) {
     return (
-      <Suspense
-        fallback={
-          <CustomerStoryHeaderView
-            title={title}
-            description={description}
-            date={date}
-            tag={tag}
-            customerLogo={customerLogo}
-            customerLogoDark={customerLogoDark}
-            authors={authors}
-          />
-        }
-      >
-        <CustomerStoryHeader
-          title={title}
-          description={description}
-          date={date}
-          tag={tag}
-          customerLogo={customerLogo}
-          customerLogoDark={customerLogoDark}
-          authors={authors}
-        />
-      </Suspense>
+      <CustomerStoryHeader
+        title={title}
+        description={description}
+        date={date}
+        customerLogo={customerLogo}
+        customerLogoDark={customerLogoDark}
+        authors={authors}
+      />
     );
   }
 
