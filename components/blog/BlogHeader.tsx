@@ -1,6 +1,17 @@
 import Image from "next/image";
 import { CustomerStoryHeader } from "@/components/customers/CustomerStoryHeader";
+import { getCustomerStories } from "@/lib/getCustomerStories";
 import { Authors } from "../Authors";
+
+function resolveCustomerLogoDark(
+  customerLogo: string,
+  explicit?: string,
+): string | undefined {
+  if (explicit) return explicit;
+  return getCustomerStories().find(
+    (story) => story.frontMatter.customerLogo === customerLogo,
+  )?.frontMatter.customerLogoDark;
+}
 
 export const BlogHeader = ({
   authors = [],
@@ -24,8 +35,12 @@ export const BlogHeader = ({
       <CustomerStoryHeader
         title={title}
         description={description}
+        image={image}
         customerLogo={customerLogo}
-        customerLogoDark={customerLogoDark}
+        customerLogoDark={resolveCustomerLogoDark(
+          customerLogo,
+          customerLogoDark,
+        )}
         authors={authors}
       />
     );

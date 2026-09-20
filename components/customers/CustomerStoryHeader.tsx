@@ -53,6 +53,7 @@ function StoryLogo({
 export type CustomerStoryHeaderProps = {
   title: string;
   description?: string;
+  image?: string;
   customerLogo: string;
   customerLogoDark?: string;
   authors?: string[];
@@ -62,6 +63,7 @@ export function CustomerStoryHeader({
   authors = [],
   title,
   description,
+  image,
   customerLogo,
   customerLogoDark,
 }: CustomerStoryHeaderProps) {
@@ -70,6 +72,15 @@ export function CustomerStoryHeader({
   return (
     <header className="not-prose my-4 flex flex-col gap-6 md:my-6">
       <CustomerStoryBackNav current={company} />
+      {image ? (
+        <Image
+          src={image}
+          alt={title}
+          width={1200}
+          height={630}
+          className="rounded my-0"
+        />
+      ) : null}
       <StoryLogo
         src={customerLogo}
         srcDark={customerLogoDark}
