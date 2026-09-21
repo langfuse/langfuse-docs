@@ -20,7 +20,7 @@ This guide covers the infrastructure setup for the self-hosted Langfuse Assistan
   updates](/self-hosting/oss-newsletter) to hear when it leaves beta.
 </Callout>
 
-To use the Assistant, provide access to a supported model provider: Amazon Bedrock, the Anthropic Messages API, or an OpenAI-compatible endpoint. Langfuse uses one instance-wide provider and model configuration, applied to both web and worker.
+To use the Assistant, provide access to a supported model provider: Amazon Bedrock, the Anthropic Messages API, an OpenAI-compatible endpoint, or Google Vertex AI (now Gemini Enterprise Agent Platform). Langfuse uses one instance-wide provider and model configuration, applied to both web and worker. Vertex support is available from `>=v4.39.0`.
 
 ## Choose your setup [#choose-your-setup]
 
@@ -54,11 +54,11 @@ The steps below use environment variables, which apply to every deployment. The 
 
 ### Configure the model [#configure-the-model]
 
-[AI features](/security/ai-features) support Amazon Bedrock's Converse API, the Anthropic Messages API, and OpenAI-compatible Chat Completions or Responses APIs.
+[AI features](/security/ai-features) support Amazon Bedrock's Converse API, the Anthropic Messages API, OpenAI-compatible Chat Completions or Responses APIs, and Google Vertex AI.
 
 Set `LANGFUSE_AI_PROVIDER` and `LANGFUSE_AI_MODEL` on both web and worker. `LANGFUSE_AI_SMALL_MODEL` is optional:
 
-- `LANGFUSE_AI_PROVIDER` selects `bedrock`, `anthropic`, or `openai`.
+- `LANGFUSE_AI_PROVIDER` selects `bedrock`, `anthropic`, `openai`, or `vertex`.
 - `LANGFUSE_AI_MODEL` sets the primary model used by the Assistant.
 - `LANGFUSE_AI_SMALL_MODEL` sets an optional model for supplementary calls, such as conversation titles. If unset, these calls use `LANGFUSE_AI_MODEL`, which means paying the primary model's price for them. Langfuse Cloud pairs Claude Opus 5 with Claude Haiku 4.5.
 
@@ -66,7 +66,7 @@ Set `LANGFUSE_AI_PROVIDER` and `LANGFUSE_AI_MODEL` on both web and worker. `LANG
 
 An incomplete provider configuration counts as unconfigured. The UI then reports that the model is not configured.
 
-<Tabs items={["Amazon Bedrock", "Anthropic Messages", "OpenAI-compatible"]}>
+<Tabs items={["Amazon Bedrock", "Anthropic Messages", "OpenAI-compatible", "Google Vertex AI"]}>
 
 <Tab>
 
@@ -147,6 +147,28 @@ Use this provider for OpenAI and OpenAI-compatible gateways and proxies.
 When `LANGFUSE_AI_BASE_URL` is unset, Langfuse calls `https://api.openai.com/v1`. Set it, including `/v1`, for any other OpenAI-compatible endpoint. `LANGFUSE_AI_EXTRA_HEADERS` must be a valid JSON object when set. Invalid JSON fails validation at boot.
 
 The model must support OpenAI-style tool calling. When `LANGFUSE_AI_USE_RESPONSES_API` is unset, Langfuse uses Responses for `api.openai.com` and Chat Completions for other endpoints. Set it to `true` or `false` to override that choice. Responses requires the endpoint to serve `POST {base}/responses`.
+
+</Tab>
+
+<Tab>
+
+```bash
+# Required for Google Vertex AI
+LANGFUSE_AI_PROVIDER=vertex
+LANGFUSE_AI_MODEL=claude-opus-5
+
+# Optional
+LANGFUSE_AI_SMALL_MODEL=gemini-3.7-flash
+LANGFUSE_AI_VERTEX_LOCATION=global
+```
+
+Vertex (now [Gemini Enterprise Agent Platform](https://docs.cloud.google.com/gemini-enterprise-agent-platform/vertex-ai-name-changes)) authenticates through Google [application default credentials](https://cloud.google.com/docs/authentication/application-default-credentials) rather than `LANGFUSE_AI_API_KEY`. Langfuse reads the GCP project from those credentials, so there is no project-id env. Project-scoped LLM connections in the UI do not apply to the Assistant or Ask AI.
+
+Before configuring Langfuse, enable the Vertex AI API on the GCP project. For Claude, also enable the model in Model Garden. The first use of a partner model requires an administrator to accept the terms, so the Langfuse runtime identity can remain predict-only. See [Grant user access to partner models](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/partner-models/use-partner-models#grant-user-access-to-partner-models), and confirm each model works in Agent Studio.
+
+Both Claude and Gemini model IDs are accepted, for example `claude-opus-5` and `gemini-3.7-flash`. The location defaults to `global`. Set a Region such as `us-central1` when you need a regional endpoint. See [Regional, global, and multi-region endpoints](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/partner-models/use-partner-models#regional-global-and-multi-region-endpoints).
+
+Langfuse resolves credentials through application default credentials. Prefer a Cloud Run runtime service account or [GKE Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) so both services use temporary credentials. Do not mount a service-account JSON key. Grant `aiplatform.endpoints.predict`, which is included in the Agent Platform User role (`roles/aiplatform.user`).
 
 </Tab>
 
@@ -328,7 +350,7 @@ Then:
 Add the model, activation, and MCP variables to `.env`. The shipped Compose file forwards each value to the correct service.
 
 ```bash filename=".env"
-LANGFUSE_AI_PROVIDER=<bedrock|anthropic|openai>
+LANGFUSE_AI_PROVIDER=<bedrock|anthropic|openai|vertex>
 LANGFUSE_AI_MODEL=<model-id>
 # Optional, a cheaper model for supplementary calls such as conversation titles
 LANGFUSE_AI_SMALL_MODEL=<small-model-id>
@@ -345,7 +367,7 @@ Recreate both services after changing `.env`. A restart does not re-interpolate 
 
 ### Kubernetes
 
-The [Langfuse Helm chart](/self-hosting/deployment/kubernetes-helm) exposes the Assistant under `langfuse.aiFeatures` from chart `v2.1.0`. The chart renders each variable on the services that read it, so you do not split them between web and worker yourself. For Bedrock, attach the workload role with `langfuse.serviceAccount.annotations`.
+The [Langfuse Helm chart](/self-hosting/deployment/kubernetes-helm) exposes the Assistant under `langfuse.aiFeatures` from chart `v2.1.0`. The chart renders each variable on the services that read it, so you do not split them between web and worker yourself. For Bedrock, attach the workload role with `langfuse.serviceAccount.annotations`. For Vertex on GKE, attach a Workload Identity service account the same way.
 
 ```yaml filename="values.yaml"
 langfuse:
@@ -373,9 +395,9 @@ langfuse:
 
 `inAppAgent.mcp.useInternalWebUrl` points the worker's MCP calls at the in-cluster web Service and allows that hostname on web. It sets `LANGFUSE_MCP_BASE_URL` and leaves `NEXTAUTH_URL` alone, which the worker also uses for links in emails and Slack notifications.
 
-The chart gives web and worker one shared ServiceAccount, so both services assume the same IAM role. Scope it to Bedrock invoke and, if used, the MicroVM permissions above.
+The chart gives web and worker one shared ServiceAccount, so both services assume the same IAM role. Scope it to Bedrock invoke and, if used, the MicroVM permissions above. For Vertex, grant `aiplatform.endpoints.predict` on that identity.
 
-For settings the chart does not expose, use `langfuse.additionalEnv`, which applies to web and worker.
+For settings the chart does not expose, use `langfuse.additionalEnv`, which applies to web and worker. Pass `LANGFUSE_AI_VERTEX_LOCATION` this way when you need a location other than `global`.
 
 ### AWS (Terraform)
 
@@ -406,7 +428,7 @@ The sandbox runs in an isolated VPC with no route to the Langfuse VPC or the int
 Apply the shared model configuration and activation variable to both services:
 
 ```bash
-LANGFUSE_AI_PROVIDER=<bedrock|anthropic|openai>
+LANGFUSE_AI_PROVIDER=<bedrock|anthropic|openai|vertex>
 LANGFUSE_AI_MODEL=<model-id>
 # Optional, a cheaper model for supplementary calls such as conversation titles
 LANGFUSE_AI_SMALL_MODEL=<small-model-id>
