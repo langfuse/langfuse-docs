@@ -18,6 +18,7 @@ import rampLogo from "../home/img/ramp.svg";
 import rocketMoneyLogo from "../home/img/rocket-money.svg";
 import samsaraLogo from "../home/img/samsara.svg";
 import sumupLogo from "../home/img/sumup.svg";
+import tradeRepublicLogo from "../home/img/trade-republic.svg";
 import twilioLogo from "../home/img/twilio.svg";
 import { cn } from "@/lib/utils";
 import { LinkBox } from "@/components/ui/link-box";
@@ -38,6 +39,11 @@ const companies: CompanyLogo[] = [
     name: "Ramp",
     logo: rampLogo,
     customerStoryPath: "/users/ramp",
+  },
+  {
+    name: "Trade Republic",
+    logo: tradeRepublicLogo,
+    customerStoryPath: "/users/trade-republic",
   },
   {
     name: "Canva",
