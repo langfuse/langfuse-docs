@@ -44,6 +44,22 @@ Jev covers this surface with three [question types](https://docs.typesafe.ai/pri
   ![Jev Choice, Score, and Noul answers for one agent run: missing_context at 0.706, severity 2.73, needs_review 0.913](/images/blog/2026-09-18-using-typesafes-jev-for-evals/jev-question-types.png)
 </Frame>
 
+## Try a Jev-based sentiment classifier [#try-a-jev-based-sentiment-classifier]
+
+Classification is one of the jobs Jev is built for. The Langfuse [example project](/docs/demo#sentiment) includes a live sentiment classifier that asks Jev a Choice question (`positive` / `negative` / `neutral`), returns the full probability distribution, and traces every call.
+
+Paste a review below, or open the same demo on the [example project page](/docs/demo#sentiment).
+
+<div className="not-prose my-6">
+  <SentimentClassifier />
+</div>
+
+<Callout type="info">
+  [Sign up for Langfuse Cloud](https://cloud.langfuse.com/auth/sign-up) (free,
+  no credit card) to get view-only access to the public example project and
+  inspect the traces your classifications create.
+</Callout>
+
 A finished agent run needs three judgments at once, and with Jev they go in one request:
 
 ```json
@@ -415,19 +431,3 @@ def main():
 if __name__ == "__main__":
     main()
 ```
-
-## Try the sentiment classifier [#try-the-sentiment-classifier]
-
-Classification is one of the jobs Jev is built for. The Langfuse [example project](/docs/demo#sentiment) includes a live sentiment classifier that asks Jev a Choice question (`positive` / `negative` / `neutral`), returns the full probability distribution, and traces every call.
-
-Paste a review below, or open the same demo on the [example project page](/docs/demo#sentiment).
-
-<div className="not-prose my-6">
-  <SentimentClassifier />
-</div>
-
-<Callout type="info">
-  [Sign up for Langfuse Cloud](https://cloud.langfuse.com/auth/sign-up) (free,
-  no credit card) to get view-only access to the public example project and
-  inspect the traces your classifications create.
-</Callout>
