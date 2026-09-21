@@ -70,7 +70,7 @@ export function CustomerStoryHeader({
   const company = companyLabelFromLogo(customerLogo);
 
   return (
-    <header className="not-prose my-4 flex flex-col gap-6 md:my-6">
+    <header className="not-prose mt-4 mb-10 flex flex-col gap-6 md:mt-6 md:mb-14">
       <CustomerStoryBackNav current={company} />
       {image ? (
         <Image
