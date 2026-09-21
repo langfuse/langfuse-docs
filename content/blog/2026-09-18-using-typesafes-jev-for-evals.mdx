@@ -8,6 +8,7 @@ highlight: true
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
+import { SentimentClassifier } from "@/components/sentimentClassifier";
 
 <BlogHeader
   title="Using TypeSafe's Jev for evals"
@@ -414,3 +415,19 @@ def main():
 if __name__ == "__main__":
     main()
 ```
+
+## Try the sentiment classifier [#try-the-sentiment-classifier]
+
+Classification is one of the jobs Jev is built for. The Langfuse [example project](/docs/demo#sentiment) includes a live sentiment classifier that asks Jev a Choice question (`positive` / `negative` / `neutral`), returns the full probability distribution, and traces every call.
+
+Paste a review below, or open the same demo on the [example project page](/docs/demo#sentiment).
+
+<div className="not-prose my-6">
+  <SentimentClassifier />
+</div>
+
+<Callout type="info">
+  [Sign up for Langfuse Cloud](https://cloud.langfuse.com/auth/sign-up) (free,
+  no credit card) to get view-only access to the public example project and
+  inspect the traces your classifications create.
+</Callout>
