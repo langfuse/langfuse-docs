@@ -31,6 +31,19 @@ const transport = new DefaultChatTransport({
   }),
 });
 
+function questionErrorMessage(error?: Error) {
+  // The AI SDK puts non-2xx response bodies in error.message.
+  try {
+    const body = JSON.parse(error?.message ?? "");
+    if (typeof body?.error === "string" && body.error.trim()) {
+      return body.error;
+    }
+  } catch {
+    // Network errors and non-JSON responses use the generic message below.
+  }
+  return "I couldn’t get an answer right now. Please try a new question in a moment.";
+}
+
 // Model output never enables raw HTML, images, or arbitrary external links.
 function documentationUrl(url: string) {
   try {
@@ -239,8 +252,7 @@ function AskForm({ linked = false }: { linked?: boolean }) {
         )}
         {!loading && (error || (phase === "answered" && !answer)) && (
           <Text size="s" className="mt-2 text-left" role="alert">
-            I couldn’t get an answer right now. Please try a new question in a
-            moment.
+            {questionErrorMessage(error)}
           </Text>
         )}
         {answer && !error && (
