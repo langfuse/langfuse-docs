@@ -47,48 +47,11 @@ const unavailable =
   "I couldn’t get an answer right now. Please try a new question in a moment.";
 
 export async function POST(req: Request) {
-  // Bound both upload size and duration, including chunked requests.
-  const reader = req.body?.getReader();
-  const bodySignal = AbortSignal.any([req.signal, AbortSignal.timeout(5_000)]);
-  let abortRead: (() => void) | undefined;
   let body: unknown;
   try {
-    if (!reader) throw new Error("Missing body");
-    const aborted = new Promise<never>((_, reject) => {
-      abortRead = () => {
-        reject(bodySignal.reason);
-        void reader.cancel().catch(() => {});
-      };
-      if (bodySignal.aborted) abortRead();
-      else bodySignal.addEventListener("abort", abortRead, { once: true });
-    });
-    const chunks: Uint8Array[] = [];
-    let size = 0;
-    while (true) {
-      const { done, value } = await Promise.race([reader.read(), aborted]);
-      if (done) break;
-      size += value.byteLength;
-      if (size > 4096) {
-        void reader.cancel().catch(() => {});
-        return Response.json(
-          { error: "Question is too long." },
-          { status: 413 },
-        );
-      }
-      chunks.push(value);
-    }
-    body = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+    body = await req.json();
   } catch {
-    if (bodySignal.aborted && bodySignal.reason?.name === "TimeoutError") {
-      return Response.json(
-        { error: "Sending your question took too long. Please try again." },
-        { status: 408 },
-      );
-    }
     return Response.json({ error: "Invalid question." }, { status: 400 });
-  } finally {
-    if (abortRead) bodySignal.removeEventListener("abort", abortRead);
-    reader?.releaseLock();
   }
   const parsed = bodySchema.safeParse(body);
   if (!parsed.success) {
