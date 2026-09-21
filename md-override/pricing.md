@@ -297,3 +297,5 @@ Yes, customized contracts are available for Enterprise customers with a yearly c
 
 **Where is the data stored?**
 Langfuse Cloud is hosted on AWS. Data is stored in the US, EU, Japan, or the HIPAA-compliant US region depending on your selection. See [security documentation](/security) for details.
+
+[Ask anything else](/docs/ask-ai)
