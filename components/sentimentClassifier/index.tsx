@@ -9,11 +9,13 @@ import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId
 import { scoreDemoNegativeUserFeedback } from "@/components/demoLangfuseBrowserClients";
 import { SendIcon, ThumbsUpIcon, ThumbsDownIcon } from "lucide-react";
 
+type SentimentLabel = "positive" | "negative" | "neutral";
+
 type SentimentResult = {
-  sentiment: "positive" | "negative" | "neutral";
+  sentiment: SentimentLabel;
   confidence: number;
-  explanation: string;
-  keyPhrases: string[];
+  probabilities: Record<SentimentLabel, number>;
+  model: string;
 };
 
 const EXAMPLE_TEXTS = [
@@ -22,7 +24,12 @@ const EXAMPLE_TEXTS = [
   "The meeting is scheduled for 3pm in conference room B. Please bring your laptop.",
 ];
 
-const SENTIMENT_COLORS = {
+const SENTIMENT_ORDER: SentimentLabel[] = ["positive", "neutral", "negative"];
+
+const SENTIMENT_COLORS: Record<
+  SentimentLabel,
+  { bg: string; text: string; bar: string }
+> = {
   positive: {
     bg: "bg-green-100 dark:bg-green-900/30",
     text: "text-green-800 dark:text-green-300",
@@ -80,10 +87,10 @@ export const SentimentClassifier = ({
         body: JSON.stringify({ text: textToAnalyze, userId }),
       });
 
-      const text = await res.text();
+      const responseText = await res.text();
       let data: any;
       try {
-        data = text ? JSON.parse(text) : {};
+        data = responseText ? JSON.parse(responseText) : {};
       } catch {
         throw new Error("Invalid response from server");
       }
@@ -166,7 +173,7 @@ export const SentimentClassifier = ({
             <div className="flex items-center justify-center py-8">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Loader size={16} />
-                Analyzing sentiment...
+                Classifying with Jev...
               </div>
             </div>
           )}
@@ -217,29 +224,37 @@ export const SentimentClassifier = ({
                 </div>
               </div>
 
-              {/* Explanation */}
-              <div className="text-sm text-foreground">
-                {result.result.explanation}
+              {/* Probability distribution from Jev Choice */}
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground font-medium">
+                  Probabilities
+                </p>
+                {SENTIMENT_ORDER.map((label) => {
+                  const probability = result.result.probabilities[label] ?? 0;
+                  const labelColors = SENTIMENT_COLORS[label];
+                  return (
+                    <div key={label} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="capitalize text-text-secondary">
+                          {label}
+                        </span>
+                        <span className="text-muted-foreground tabular-nums">
+                          {Math.round(probability * 100)}%
+                        </span>
+                      </div>
+                      <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                        <div
+                          className={cn(
+                            "h-full rounded-full transition-all duration-500",
+                            labelColors.bar,
+                          )}
+                          style={{ width: `${probability * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-
-              {/* Key phrases */}
-              {result.result.keyPhrases.length > 0 && (
-                <div className="space-y-1.5">
-                  <p className="text-xs text-muted-foreground font-medium">
-                    Key phrases
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {result.result.keyPhrases.map((phrase, i) => (
-                      <span
-                        key={i}
-                        className="inline-flex items-center px-2 py-0.5 rounded-[2px] border border-line-structure bg-[#403d391a] dark:bg-[#b8b6a01a] text-xs text-text-secondary"
-                      >
-                        {phrase}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Feedback */}
               <div className="flex items-center gap-2">
@@ -274,8 +289,15 @@ export const SentimentClassifier = ({
         </div>
 
         <p className="mt-4 text-xs text-muted-foreground text-center relative z-10 italic">
-          Powered by GPT-4o-mini. All interactions are traced in the public
-          example project.
+          Powered by{" "}
+          <a
+            href="/integrations/model-providers/typesafe"
+            className="underline underline-offset-2 hover:text-foreground"
+          >
+            TypeSafe Jev
+          </a>
+          {result?.result.model ? ` (${result.result.model})` : ""}. All
+          interactions are traced in the public example project.
         </p>
       </div>
     </div>

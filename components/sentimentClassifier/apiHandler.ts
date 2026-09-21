@@ -1,24 +1,45 @@
-import { openai } from "@ai-sdk/openai";
-import { generateObject } from "ai";
-import { z } from "zod";
+import { choice, TypeSafeClient } from "@typesafe-ai/sdk";
 import {
   observe,
   propagateAttributes,
   setActiveTraceIO,
   getActiveTraceId,
+  updateActiveObservation,
 } from "@langfuse/tracing";
 import { after } from "next/server";
+import { context, trace } from "@opentelemetry/api";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
 
-const SentimentSchema = z.object({
-  sentiment: z.enum(["positive", "negative", "neutral"]),
-  confidence: z.number().min(0).max(1),
-  explanation: z.string(),
-  keyPhrases: z.array(z.string()),
-});
+const SENTIMENT_CRITERIA = {
+  positive:
+    "The text expresses approval, satisfaction, praise, or other favorable feelings.",
+  negative:
+    "The text expresses disapproval, frustration, complaint, or other unfavorable feelings.",
+  neutral:
+    "The text is factual, informational, or does not lean clearly positive or negative.",
+} as const;
 
-export type SentimentResult = z.infer<typeof SentimentSchema>;
+export type SentimentLabel = keyof typeof SENTIMENT_CRITERIA;
+
+export type SentimentResult = {
+  sentiment: SentimentLabel;
+  confidence: number;
+  probabilities: Record<SentimentLabel, number>;
+  model: string;
+};
+
+let _client: TypeSafeClient | null = null;
+const getClient = () => {
+  if (_client) return _client;
+  if (!process.env.TYPESAFE_API_KEY?.trim()) {
+    throw new Error(
+      "TYPESAFE_API_KEY is not configured. Add a TypeSafe API key to run the sentiment classifier.",
+    );
+  }
+  _client = new TypeSafeClient({ defaultModel: "jev-latest" });
+  return _client;
+};
 
 const handler = async (req: Request) => {
   const { success } = rateLimit(req, { limit: 15, windowMs: 60_000 });
@@ -41,31 +62,72 @@ const handler = async (req: Request) => {
   return propagateAttributes(
     {
       traceName: "Sentiment-Classifier",
-      tags: ["sentiment-classifier"],
+      tags: ["sentiment-classifier", "typesafe", "jev"],
       userId,
     },
     async () => {
       const traceId = getActiveTraceId();
-      setActiveTraceIO({ input: text });
+      const activeSpan = trace.getActiveSpan();
+      const runWithActiveSpan = <T>(fn: () => T) =>
+        activeSpan
+          ? context.with(trace.setSpan(context.active(), activeSpan), fn)
+          : fn();
+
+      runWithActiveSpan(() => {
+        setActiveTraceIO({ input: text });
+      });
 
       try {
-        const result = await generateObject({
-          model: openai("gpt-4o-mini"),
-          schema: SentimentSchema,
-          prompt: `Analyze the sentiment of the following text. Classify it as positive, negative, or neutral. Provide a confidence score between 0 and 1, a brief explanation of your reasoning, and extract the key phrases that influenced your classification.\n\nText: ${text}`,
-          telemetry: {
-            functionId: "sentiment-classifier",
+        const response = await getClient().systemOne({
+          state: text,
+          questions: {
+            sentiment: choice(
+              "What is the overall sentiment of this text?",
+              SENTIMENT_CRITERIA,
+            ),
           },
         });
 
-        setActiveTraceIO({ output: result.object });
+        const answer = response.answers.sentiment;
+        const result: SentimentResult = {
+          sentiment: answer.choice,
+          confidence: answer.confidence,
+          probabilities: {
+            positive: answer.probabilities.positive,
+            negative: answer.probabilities.negative,
+            neutral: answer.probabilities.neutral,
+          },
+          model: response.model,
+        };
+
+        runWithActiveSpan(() => {
+          setActiveTraceIO({ output: result });
+          updateActiveObservation(
+            {
+              input: text,
+              output: result,
+              model: response.model,
+              metadata: {
+                provider: "typesafe",
+                questionType: "choice",
+              },
+              usageDetails: {
+                input: response.usage.input_tokens,
+                output: response.usage.output_tokens,
+                total:
+                  response.usage.input_tokens + response.usage.output_tokens,
+              },
+            },
+            { asType: "generation" },
+          );
+        });
 
         after(async () => await flush());
 
-        return new Response(
-          JSON.stringify({ result: result.object, traceId }),
-          { status: 200, headers: { "Content-Type": "application/json" } },
-        );
+        return new Response(JSON.stringify({ result, traceId }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
       } catch (err) {
         after(async () => await flush());
 
@@ -83,6 +145,7 @@ const handler = async (req: Request) => {
 
 export const POST = observe(handler, {
   name: "sentiment-classifier",
+  asType: "generation",
 });
 
 export const maxDuration = 30;
