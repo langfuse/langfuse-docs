@@ -11,6 +11,8 @@ import { context, trace } from "@opentelemetry/api";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
 
+const SENTIMENT_INSTRUCTIONS = "What is the overall sentiment of this text?";
+
 const SENTIMENT_CRITERIA = {
   positive:
     "The text expresses approval, satisfaction, praise, or other favorable feelings.",
@@ -28,6 +30,13 @@ export type SentimentResult = {
   probabilities: Record<SentimentLabel, number>;
   model: string;
 };
+
+const buildSystemOneRequest = (text: string) => ({
+  state: text,
+  questions: {
+    sentiment: choice(SENTIMENT_INSTRUCTIONS, SENTIMENT_CRITERIA),
+  },
+});
 
 let _client: TypeSafeClient | null = null;
 const getClient = () => {
@@ -73,20 +82,15 @@ const handler = async (req: Request) => {
           ? context.with(trace.setSpan(context.active(), activeSpan), fn)
           : fn();
 
+      const request = buildSystemOneRequest(text);
+
       runWithActiveSpan(() => {
-        setActiveTraceIO({ input: text });
+        setActiveTraceIO({ input: request });
+        updateActiveObservation({ input: request });
       });
 
       try {
-        const response = await getClient().systemOne({
-          state: text,
-          questions: {
-            sentiment: choice(
-              "What is the overall sentiment of this text?",
-              SENTIMENT_CRITERIA,
-            ),
-          },
-        });
+        const response = await getClient().systemOne(request);
 
         const answer = response.answers.sentiment;
         const result: SentimentResult = {
@@ -104,7 +108,7 @@ const handler = async (req: Request) => {
           setActiveTraceIO({ output: result });
           updateActiveObservation(
             {
-              input: text,
+              input: request,
               output: result,
               model: response.model,
               metadata: {
