@@ -21,6 +21,7 @@ import rocketMoneyLogo from "../home/img/rocket-money.svg";
 import samsaraLogo from "../home/img/samsara.svg";
 import sumUpLogo from "../home/img/sumup.svg";
 import telusLogo from "../home/img/telus.svg";
+import tradeRepublicLogo from "../home/img/trade-republic.svg";
 import twilioLogo from "../home/img/twilio.svg";
 
 const ADOPTERS_TABLE_PATH = join(
@@ -48,6 +49,7 @@ const COMPANY_LOGOS: Record<string, NonNullable<Adopter["logo"]>> = {
   Slite: { src: "/images/customers/slite/slite-light.png" },
   SumUp: { src: sumUpLogo },
   TELUS: { src: telusLogo },
+  "Trade Republic": { src: tradeRepublicLogo },
   Twilio: { src: twilioLogo },
 };
 
@@ -110,6 +112,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   SumUp: "Payments and point-of-sale company",
   TELUS: "Telecommunications company",
   "The Weather Company": "Weather intelligence company",
+  "Trade Republic": "European fintech bank",
   Twilio: "Customer communications platform",
 };
 

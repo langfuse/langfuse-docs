@@ -24,6 +24,7 @@ import pigmentLogo from "../home/img/pigment.svg";
 import rampLogo from "../home/img/ramp.svg";
 import samsaraLogo from "../home/img/samsara.svg";
 import sumupLogo from "../home/img/sumup.svg";
+import tradeRepublicLogo from "../home/img/trade-republic.svg";
 import twilioLogo from "../home/img/twilio.svg";
 
 interface CustomerStory {
@@ -43,6 +44,11 @@ interface CustomerStory {
 
 const companiesWithStories = [
   { name: "Ramp", path: "/users/ramp", logo: rampLogo },
+  {
+    name: "Trade Republic",
+    path: "/users/trade-republic",
+    logo: tradeRepublicLogo,
+  },
   { name: "Canva", path: "/users/canva", logo: canvaLogo },
   { name: "SumUp", path: "/users/sumup", logo: sumupLogo },
   {
@@ -224,6 +230,7 @@ export function Customers() {
     const order: Array<{ type: "story" | "logo" | "text"; name: string }> = [
       { type: "logo", name: "Intuit" },
       { type: "story", name: "Ramp" },
+      { type: "story", name: "Trade Republic" },
       { type: "story", name: "Canva" },
       { type: "story", name: "SumUp" },
       { type: "logo", name: "Samsara" },
