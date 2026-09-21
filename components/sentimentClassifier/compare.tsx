@@ -22,7 +22,8 @@ export const SentimentClassifierCompare = ({
   ...props
 }: HTMLAttributes<HTMLDivElement>) => {
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [jevLoading, setJevLoading] = useState(false);
+  const [llmLoading, setLlmLoading] = useState(false);
   const [inputText, setInputText] = useState<string | null>(null);
   const [jev, setJev] = useState<{
     result: JevSentimentResult;
@@ -37,13 +38,14 @@ export const SentimentClassifierCompare = ({
   const [jevFeedback, setJevFeedback] = useState<boolean | null>(null);
   const [llmFeedback, setLlmFeedback] = useState<boolean | null>(null);
 
+  const loading = jevLoading || llmLoading;
+
   const handleSubmit = async (text?: string) => {
     const textToAnalyze = text ?? input;
     const userId =
       typeof window === "undefined" ? null : getPersistedSentimentUserId();
-    if (!textToAnalyze.trim() || !userId) return;
+    if (!textToAnalyze.trim() || !userId || loading) return;
 
-    setLoading(true);
     setInputText(textToAnalyze);
     setJev(null);
     setLlm(null);
@@ -51,31 +53,33 @@ export const SentimentClassifierCompare = ({
     setLlmError(null);
     setJevFeedback(null);
     setLlmFeedback(null);
+    setJevLoading(true);
+    setLlmLoading(true);
 
-    const [jevOutcome, llmOutcome] = await Promise.all([
-      classifySentiment("jev", textToAnalyze, userId),
-      classifySentiment("llm", textToAnalyze, userId),
-    ]);
+    // Paint each column as soon as its classifier returns — Jev usually lands first.
+    void classifySentiment("jev", textToAnalyze, userId).then((outcome) => {
+      if (outcome.ok) {
+        setJev({
+          result: outcome.data.result as JevSentimentResult,
+          traceId: outcome.data.traceId,
+        });
+      } else {
+        setJevError(outcome.error);
+      }
+      setJevLoading(false);
+    });
 
-    if (jevOutcome.ok) {
-      setJev({
-        result: jevOutcome.data.result as JevSentimentResult,
-        traceId: jevOutcome.data.traceId,
-      });
-    } else {
-      setJevError(jevOutcome.error);
-    }
-
-    if (llmOutcome.ok) {
-      setLlm({
-        result: llmOutcome.data.result as LlmSentimentResult,
-        traceId: llmOutcome.data.traceId,
-      });
-    } else {
-      setLlmError(llmOutcome.error);
-    }
-
-    setLoading(false);
+    void classifySentiment("llm", textToAnalyze, userId).then((outcome) => {
+      if (outcome.ok) {
+        setLlm({
+          result: outcome.data.result as LlmSentimentResult,
+          traceId: outcome.data.traceId,
+        });
+      } else {
+        setLlmError(outcome.error);
+      }
+      setLlmLoading(false);
+    });
   };
 
   const hasResults = Boolean(jev || llm || jevError || llmError);
@@ -101,7 +105,7 @@ export const SentimentClassifierCompare = ({
             </button>
             {loading && (
               <span className="text-xs text-muted-foreground">
-                Running Jev and GPT-4o-mini in parallel…
+                Results appear as each classifier finishes…
               </span>
             )}
           </div>
@@ -147,7 +151,7 @@ export const SentimentClassifierCompare = ({
                 </span>
               )}
             </div>
-            {loading && !jev && !jevError && (
+            {jevLoading && !jev && !jevError && (
               <div className="flex items-center gap-2 text-muted-foreground text-sm py-6 justify-center">
                 <Loader size={16} />
                 {ENGINE_CONFIG.jev.loading}
@@ -179,7 +183,7 @@ export const SentimentClassifierCompare = ({
                 GPT-4o mini
               </h3>
             </div>
-            {loading && !llm && !llmError && (
+            {llmLoading && !llm && !llmError && (
               <div className="flex items-center gap-2 text-muted-foreground text-sm py-6 justify-center">
                 <Loader size={16} />
                 {ENGINE_CONFIG.llm.loading}
@@ -207,7 +211,7 @@ export const SentimentClassifierCompare = ({
         </div>
 
         <p className="text-xs text-muted-foreground text-center italic">
-          One Analyze runs both classifiers. The{" "}
+          One Analyze runs both classifiers; each column updates when ready. The{" "}
           <a
             href="/docs/demo#sentiment"
             className="underline underline-offset-2 hover:text-foreground"
