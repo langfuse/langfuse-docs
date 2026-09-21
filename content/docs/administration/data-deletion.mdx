@@ -13,6 +13,7 @@ You can delete unwanted data from Langfuse by:
 
 - Deleting a single trace;
 - Deleting a batch of traces;
+- Deleting all traces in a session through the API;
 - Deleting all traces that match a query filter;
 - Deleting a project;
 - Deleting an organization; or
@@ -77,6 +78,140 @@ See [reference](https://api.reference.langfuse.com/#tag/trace/DELETE/api/public/
 
 </LangTabs>
 
+### Delete a session's traces through the API [#delete-session-traces]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "v4",
+  }}
+/>
+
+To delete a session's traces, retrieve their IDs and pass them to the existing batch deletion endpoint:
+
+1. Starting with the current month, query [`GET /api/public/v2/observations`](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations) with `sessionId` and one-month time windows until a full calendar month contains no matching observations. This read-only pass fixes the stopping boundary before any traces are deleted.
+2. Query the complete resulting time range with `limit=100`, then follow `meta.cursor` until no cursor is returned.
+3. Collect unique `traceId` values across pages. Use these trace IDs, not the observation IDs.
+4. As soon as 1,000 unique trace IDs have accumulated, send them to [`DELETE /api/public/traces`](https://api.reference.langfuse.com/#tag/trace/DELETE/api/public/traces) with a JSON body of `{"traceIds": [...]}`, then continue reading. Delete any remaining IDs after the final page.
+
+The Python example below uses `requests` (`pip install requests`). Set `LANGFUSE_BASE_URL` to your Langfuse region or self-hosted URL, and set `LANGFUSE_PUBLIC_KEY` and `LANGFUSE_SECRET_KEY` to the project's API keys. Replace the session ID with your value. The example scans backward from now, starting with the current partial month, then checking full calendar months. Each window includes its start and excludes its end, so boundaries do not overlap. **Assumption:** within the history accessible through the API, a full calendar month with no matching observations means there is no older session data to delete. The example stops there and does not check earlier months; use this workflow for recent sessions that fit within the API read window and do not resume after a month-long gap. An empty current partial month does not trigger the stop.
+
+<Callout type="info">
+  On Langfuse Cloud, the Observations API v2 read window is 30 days on Hobby
+  and 90 days on Core. This workflow can only discover traces returned within
+  that window. Pro, Team, Enterprise, and self-hosted deployments do not apply
+  this API read-window limit. A configured project-level retention policy can
+  shorten the available history further.
+</Callout>
+
+The cursor tracks both the time frontier and IDs, so pagination can continue while deletion runs asynchronously. Keep the original `fromStartTime` and `toStartTime` fixed while paginating: manually setting the exclusive `toStartTime` to the last observation's timestamp could skip other observations with that same timestamp.
+
+```python
+import os
+from datetime import datetime, timedelta, timezone
+
+import requests
+
+session_id = "your-session-id"
+scan_end = datetime.now(timezone.utc)
+base_url = os.environ["LANGFUSE_BASE_URL"].rstrip("/")
+
+
+def previous_window(window_end):
+    month_start = window_end.replace(
+        day=1, hour=0, minute=0, second=0, microsecond=0,
+    )
+    if month_start == window_end:
+        month_start = (month_start - timedelta(days=1)).replace(day=1)
+        return month_start, window_end, True
+    return month_start, window_end, False
+
+
+def delete_batch(client, trace_ids):
+    response = client.delete(
+        f"{base_url}/api/public/traces",
+        json={"traceIds": trace_ids},
+        timeout=60,
+    )
+    response.raise_for_status()
+
+
+with requests.Session() as client:
+    client.auth = (
+        os.environ["LANGFUSE_PUBLIC_KEY"],
+        os.environ["LANGFUSE_SECRET_KEY"],
+    )
+
+    # Find the first originally empty full month before deleting anything.
+    window_end = scan_end
+    while True:
+        window_start, current_window_end, full_month = previous_window(window_end)
+        response = client.get(
+            f"{base_url}/api/public/v2/observations",
+            params={
+                "sessionId": session_id,
+                "fromStartTime": window_start.isoformat(),
+                "toStartTime": current_window_end.isoformat(),
+                "fields": "core",
+                "limit": 1,
+            },
+            timeout=60,
+        )
+        response.raise_for_status()
+        if not response.json()["data"] and full_month:
+            scan_start = current_window_end
+            break
+        window_end = window_start
+
+    seen_trace_ids = set()
+    pending_trace_ids = []
+    submitted = 0
+    params = {
+        "sessionId": session_id,
+        "fromStartTime": scan_start.isoformat(),
+        "toStartTime": scan_end.isoformat(),
+        "fields": "core",
+        "limit": 100,
+    }
+
+    while True:
+        response = client.get(
+            f"{base_url}/api/public/v2/observations",
+            params=params,
+            timeout=60,
+        )
+        response.raise_for_status()
+        page = response.json()
+        for observation in page["data"]:
+            trace_id = observation["traceId"]
+            if not trace_id or trace_id in seen_trace_ids:
+                continue
+            seen_trace_ids.add(trace_id)
+            pending_trace_ids.append(trace_id)
+            if len(pending_trace_ids) == 1000:
+                delete_batch(client, pending_trace_ids)
+                submitted += len(pending_trace_ids)
+                pending_trace_ids = []
+
+        cursor = page["meta"].get("cursor")
+        if not cursor:
+            break
+        params["cursor"] = cursor
+
+    if pending_trace_ids:
+        delete_batch(client, pending_trace_ids)
+        submitted += len(pending_trace_ids)
+
+print(f"Submitted {submitted} traces for deletion.")
+```
+
+Deletion removes each selected trace and its related observations and scores, including observations outside the queried time range. It is asynchronous; see [deletion limitations](#trace-deletion-limitations) for timing and verification.
+
+This workflow does not block future data for the same `sessionId`. Pause ingestion for the session and wait for in-flight data to become queryable before collecting IDs if you need to remove all of its current traces. Data that arrives after the read can require another pass.
+
 ### Delete by Query
 
 <LangTabs items={["Langfuse UI"]}>
@@ -95,7 +230,7 @@ Then select `Delete` in the `Actions` dropdown.
 
 </LangTabs>
 
-### Limitations
+### Limitations [#trace-deletion-limitations]
 
 <Callout type="info">
   Trace deletion (e.g., deleting a user's traces by `userId` for a data deletion
