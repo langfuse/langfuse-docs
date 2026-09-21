@@ -30,7 +30,7 @@ export function CTACard({
             <p className="m-0 text-text-tertiary">{description}</p>
           </div>
           {children && (
-            <div className="flex flex-wrap gap-3">
+            <div className="flex w-fit flex-wrap gap-3 [&_a]:w-auto">
               {showArrow
                 ? React.Children.map(children, (child) => {
                     if (React.isValidElement(child) && child.type === Button) {
