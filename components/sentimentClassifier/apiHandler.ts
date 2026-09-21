@@ -146,6 +146,9 @@ const handler = async (req: Request) => {
 export const POST = observe(handler, {
   name: "sentiment-classifier",
   asType: "generation",
+  // Keep the Jev result we set via updateActiveObservation; otherwise observe
+  // would capture the HTTP Response object, which serializes to {}.
+  captureOutput: false,
 });
 
 export const maxDuration = 30;
