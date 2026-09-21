@@ -8,7 +8,7 @@ highlight: true
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
-import { SentimentClassifier } from "@/components/sentimentClassifier";
+import { SentimentClassifierCompare } from "@/components/sentimentClassifier/compare";
 
 <BlogHeader
   title="Using TypeSafe's Jev for evals"
@@ -46,12 +46,10 @@ Jev covers this surface with three [question types](https://docs.typesafe.ai/pri
 
 ## Try a Jev-based sentiment classifier [#try-a-jev-based-sentiment-classifier]
 
-Classification is one of the jobs Jev is built for. The Langfuse [example project](/docs/demo#sentiment) includes a live sentiment classifier that asks Jev a Choice question (`positive` / `negative` / `neutral`), returns the full probability distribution, and traces every call.
-
-Paste a review below, or open the same demo on the [example project page](/docs/demo#sentiment).
+Switch between Jev and the previous GPT-4o-mini classifier. Jev answers a Choice question and returns a probability for each label. GPT-4o-mini returns a label, a short explanation, and the phrases it used. The [example project](/docs/demo#sentiment) shows the Jev classifier only.
 
 <div className="not-prose my-6">
-  <SentimentClassifier />
+  <SentimentClassifierCompare />
 </div>
 
 <Callout type="info">

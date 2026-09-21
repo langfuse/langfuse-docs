@@ -11,11 +11,34 @@ import { SendIcon, ThumbsUpIcon, ThumbsDownIcon } from "lucide-react";
 
 type SentimentLabel = "positive" | "negative" | "neutral";
 
-type SentimentResult = {
+type JevSentimentResult = {
   sentiment: SentimentLabel;
   confidence: number;
   probabilities: Record<SentimentLabel, number>;
   model: string;
+};
+
+type LlmSentimentResult = {
+  sentiment: SentimentLabel;
+  confidence: number;
+  explanation: string;
+  keyPhrases: string[];
+};
+
+type SentimentEngine = "jev" | "llm";
+
+const ENGINE_CONFIG: Record<
+  SentimentEngine,
+  { endpoint: string; loading: string }
+> = {
+  jev: {
+    endpoint: "/api/sentiment-classifier",
+    loading: "Classifying with Jev...",
+  },
+  llm: {
+    endpoint: "/api/sentiment-classifier-llm",
+    loading: "Classifying with GPT-4o-mini...",
+  },
 };
 
 const EXAMPLE_TEXTS = [
@@ -47,16 +70,20 @@ const SENTIMENT_COLORS: Record<
   },
 };
 
-type SentimentClassifierProps = HTMLAttributes<HTMLDivElement>;
+type SentimentClassifierProps = HTMLAttributes<HTMLDivElement> & {
+  /** Jev is the example-project classifier. `llm` is the previous GPT-4o-mini version, used by the blog comparison tabs. */
+  engine?: SentimentEngine;
+};
 
 export const SentimentClassifier = ({
   className,
+  engine = "jev",
   ...props
 }: SentimentClassifierProps) => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{
-    result: SentimentResult;
+    result: JevSentimentResult | LlmSentimentResult;
     traceId: string;
     inputText: string;
   } | null>(null);
@@ -81,7 +108,7 @@ export const SentimentClassifier = ({
     setFeedback(null);
 
     try {
-      const res = await fetch("/api/sentiment-classifier", {
+      const res = await fetch(ENGINE_CONFIG[engine].endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: textToAnalyze, userId }),
@@ -117,6 +144,10 @@ export const SentimentClassifier = ({
   };
 
   const colors = result ? SENTIMENT_COLORS[result.result.sentiment] : null;
+  const jevResult =
+    result && "probabilities" in result.result ? result.result : null;
+  const llmResult =
+    result && "explanation" in result.result ? result.result : null;
 
   return (
     <div className={cn("h-[62vh]", className)} {...props}>
@@ -173,7 +204,7 @@ export const SentimentClassifier = ({
             <div className="flex items-center justify-center py-8">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Loader size={16} />
-                Classifying with Jev...
+                {ENGINE_CONFIG[engine].loading}
               </div>
             </div>
           )}
@@ -225,36 +256,64 @@ export const SentimentClassifier = ({
               </div>
 
               {/* Probability distribution from Jev Choice */}
-              <div className="space-y-2">
-                <p className="text-xs text-muted-foreground font-medium">
-                  Probabilities
-                </p>
-                {SENTIMENT_ORDER.map((label) => {
-                  const probability = result.result.probabilities[label] ?? 0;
-                  const labelColors = SENTIMENT_COLORS[label];
-                  return (
-                    <div key={label} className="space-y-1">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="capitalize text-text-secondary">
-                          {label}
-                        </span>
-                        <span className="text-muted-foreground tabular-nums">
-                          {Math.round(probability * 100)}%
-                        </span>
+              {jevResult && (
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground font-medium">
+                    Probabilities
+                  </p>
+                  {SENTIMENT_ORDER.map((label) => {
+                    const probability = jevResult.probabilities[label] ?? 0;
+                    const labelColors = SENTIMENT_COLORS[label];
+                    return (
+                      <div key={label} className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="capitalize text-text-secondary">
+                            {label}
+                          </span>
+                          <span className="text-muted-foreground tabular-nums">
+                            {Math.round(probability * 100)}%
+                          </span>
+                        </div>
+                        <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                          <div
+                            className={cn(
+                              "h-full rounded-full transition-all duration-500",
+                              labelColors.bar,
+                            )}
+                            style={{ width: `${probability * 100}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                        <div
-                          className={cn(
-                            "h-full rounded-full transition-all duration-500",
-                            labelColors.bar,
-                          )}
-                          style={{ width: `${probability * 100}%` }}
-                        />
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Explanation and key phrases from the GPT classifier */}
+              {llmResult && (
+                <>
+                  <div className="text-sm text-foreground">
+                    {llmResult.explanation}
+                  </div>
+                  {llmResult.keyPhrases.length > 0 && (
+                    <div className="space-y-1.5">
+                      <p className="text-xs text-muted-foreground font-medium">
+                        Key phrases
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {llmResult.keyPhrases.map((phrase, i) => (
+                          <span
+                            key={i}
+                            className="inline-flex items-center px-2 py-0.5 rounded-[2px] border border-line-structure bg-[#403d391a] dark:bg-[#b8b6a01a] text-xs text-text-secondary"
+                          >
+                            {phrase}
+                          </span>
+                        ))}
                       </div>
                     </div>
-                  );
-                })}
-              </div>
+                  )}
+                </>
+              )}
 
               {/* Feedback */}
               <div className="flex items-center gap-2">
@@ -289,15 +348,21 @@ export const SentimentClassifier = ({
         </div>
 
         <p className="mt-4 text-xs text-muted-foreground text-center relative z-10 italic">
-          Powered by{" "}
-          <a
-            href="/integrations/model-providers/typesafe"
-            className="underline underline-offset-2 hover:text-foreground"
-          >
-            TypeSafe Jev
-          </a>
-          {result?.result.model ? ` (${result.result.model})` : ""}. All
-          interactions are traced in the public example project.
+          {engine === "jev" ? (
+            <>
+              Powered by{" "}
+              <a
+                href="/integrations/model-providers/typesafe"
+                className="underline underline-offset-2 hover:text-foreground"
+              >
+                TypeSafe Jev
+              </a>
+              {jevResult?.model ? ` (${jevResult.model})` : ""}.
+            </>
+          ) : (
+            <>Powered by GPT-4o-mini.</>
+          )}{" "}
+          All interactions are traced in the public example project.
         </p>
       </div>
     </div>
