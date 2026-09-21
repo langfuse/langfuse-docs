@@ -14,7 +14,6 @@ import { after } from "next/server";
 import { context, ROOT_CONTEXT } from "@opentelemetry/api";
 import { z } from "zod";
 import { flush } from "@/src/instrumentation";
-import { rateLimit } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -48,16 +47,6 @@ const unavailable =
   "I couldn’t get an answer right now. Please try a new question in a moment.";
 
 export async function POST(req: Request) {
-  if (!rateLimit(req, { limit: 10, windowMs: 60_000 }).success) {
-    return Response.json(
-      { error: "Please wait a minute before asking again." },
-      {
-        status: 429,
-        headers: { "Retry-After": "60" },
-      },
-    );
-  }
-
   // Bound the body even when a caller omits Content-Length.
   let body: unknown;
   try {
