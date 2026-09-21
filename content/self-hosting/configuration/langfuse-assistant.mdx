@@ -20,7 +20,7 @@ This guide covers the infrastructure setup for the self-hosted Langfuse Assistan
   updates](/self-hosting/oss-newsletter) to hear when it leaves beta.
 </Callout>
 
-To use the Assistant, provide access to a supported model provider: Amazon Bedrock, the Anthropic Messages API, or an OpenAI-compatible endpoint. Langfuse uses one instance-wide provider and model configuration, applied to both web and worker.
+To use the Assistant, provide access to a supported model provider: Amazon Bedrock, Google Vertex AI, the Anthropic Messages API, or an OpenAI-compatible endpoint. Langfuse uses one instance-wide provider and model configuration, applied to both web and worker.
 
 ## Choose your setup [#choose-your-setup]
 
@@ -54,11 +54,11 @@ The steps below use environment variables, which apply to every deployment. The 
 
 ### Configure the model [#configure-the-model]
 
-[AI features](/security/ai-features) support Amazon Bedrock's Converse API, the Anthropic Messages API, and OpenAI-compatible Chat Completions or Responses APIs.
+[AI features](/security/ai-features) support Amazon Bedrock's Converse API, Google Vertex AI, the Anthropic Messages API, and OpenAI-compatible Chat Completions or Responses APIs.
 
 Set `LANGFUSE_AI_PROVIDER` and `LANGFUSE_AI_MODEL` on both web and worker. `LANGFUSE_AI_SMALL_MODEL` is optional:
 
-- `LANGFUSE_AI_PROVIDER` selects `bedrock`, `anthropic`, or `openai`.
+- `LANGFUSE_AI_PROVIDER` selects `bedrock`, `vertex`, `anthropic`, or `openai`.
 - `LANGFUSE_AI_MODEL` sets the primary model used by the Assistant.
 - `LANGFUSE_AI_SMALL_MODEL` sets an optional model for supplementary calls, such as conversation titles. If unset, these calls use `LANGFUSE_AI_MODEL`, which means paying the primary model's price for them. Langfuse Cloud pairs Claude Opus 5 with Claude Haiku 4.5.
 
@@ -66,7 +66,7 @@ Set `LANGFUSE_AI_PROVIDER` and `LANGFUSE_AI_MODEL` on both web and worker. `LANG
 
 An incomplete provider configuration counts as unconfigured. The UI then reports that the model is not configured.
 
-<Tabs items={["Amazon Bedrock", "Anthropic Messages", "OpenAI-compatible"]}>
+<Tabs items={["Amazon Bedrock", "Google Vertex AI", "Anthropic Messages", "OpenAI-compatible"]}>
 
 <Tab>
 
@@ -103,6 +103,35 @@ Langfuse resolves AWS credentials through the [default credential chain](https:/
   ]
 }
 ```
+
+</Tab>
+
+<Tab>
+
+```bash
+# Required for Google Vertex AI
+LANGFUSE_AI_PROVIDER=vertex
+LANGFUSE_AI_MODEL=claude-opus-5
+
+# Optional
+LANGFUSE_AI_SMALL_MODEL=gemini-3.7-flash
+# Defaults to the "global" endpoint
+# LANGFUSE_AI_VERTEX_LOCATION=us-east5
+```
+
+Vertex AI is available on `>=v4.39.0`. It authenticates through [application default credentials](https://cloud.google.com/docs/authentication/application-default-credentials) rather than `LANGFUSE_AI_API_KEY`. On Cloud Run or GKE the attached service account is enough: there is no key variable and no project variable, because Langfuse resolves the GCP project from the same credentials that sign the request.
+
+Both Anthropic and Gemini model IDs work. Claude runs through Vertex's Anthropic publisher endpoint and keeps the same adaptive thinking and prompt caching as the other Claude paths. Gemini works, but does not yet surface reasoning in the UI.
+
+Enable the models in [Vertex AI Model Garden](https://console.cloud.google.com/vertex-ai/model-garden) before configuring Langfuse. Third-party publisher models such as Claude require an explicit enablement per project. Grant the service account the `roles/aiplatform.user` role:
+
+```bash
+gcloud projects add-iam-policy-binding PROJECT_ID \
+  --member="serviceAccount:SERVICE_ACCOUNT_EMAIL" \
+  --role="roles/aiplatform.user"
+```
+
+`LANGFUSE_AI_VERTEX_LOCATION` defaults to `global`. Set a regional location such as `us-east5` when a model is not offered globally or when data residency requires one.
 
 </Tab>
 
