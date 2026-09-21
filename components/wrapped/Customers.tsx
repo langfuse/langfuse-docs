@@ -230,6 +230,7 @@ export function Customers() {
     const order: Array<{ type: "story" | "logo" | "text"; name: string }> = [
       { type: "logo", name: "Intuit" },
       { type: "story", name: "Ramp" },
+      { type: "story", name: "Trade Republic" },
       { type: "story", name: "Canva" },
       { type: "story", name: "SumUp" },
       { type: "logo", name: "Samsara" },
