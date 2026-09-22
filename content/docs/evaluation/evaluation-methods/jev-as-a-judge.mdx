@@ -1,0 +1,192 @@
+---
+title: Jev as a judge
+sidebarTitle: Jev as a judge
+description: Use TypeSafe's Jev decision model as a judge in Langfuse. Ask typed questions about each observation and get calibrated scores at a fraction of the cost and latency of an LLM judge.
+---
+
+# Jev as a judge
+
+<Callout type="info">
+  Jev as a judge is **experimental**. The
+  setup is stable, but details of the UI and score format may still change.
+</Callout>
+
+[Jev](https://docs.typesafe.ai/introduction) is [TypeSafe](https://typesafe.ai)'s System One model. It does not generate text. You send it a **state** (the data to judge) plus one or more **typed questions**, and it returns **typed answers with probabilities**. In Langfuse, you can use Jev as a judge next to [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators): each question you ask becomes one [score](/docs/evaluation/scores/overview) on the observation.
+
+Use Jev as a judge when the verdict you need is narrow and typed (a label, a level on a rubric, or a yes/no) and you want to make it at volume. Use LLM-as-a-Judge when you need written reasoning next to the verdict or the criteria are too open-ended to enumerate.
+
+<Callout type="info">
+  In the Langfuse UI, Jev evaluators are called **decision-model evaluators**.
+  The type is named after the model class so that other decision models can be
+  added later. Jev is currently the only supported decision model.
+</Callout>
+
+## How Jev as a judge works
+
+An LLM judge reads a prompt, reasons in free text, and then produces a structured verdict, which is an extra step that can fail on its own. Jev skips the generation step entirely. One Jev evaluator consists of:
+
+1. **A state**: a JSON object assembled from the observation, for example `{ "input": ..., "output": ... }`. You build it by mapping observation fields to state keys, the same way you map variables for an LLM judge.
+2. **One or more questions**: each question has a type, instructions that refer to state keys in backticks (for example ``Which team should handle `input`?``), and the allowed answers. All questions are answered in a **single Jev call**.
+3. **One score per question**: the typed answer becomes a Langfuse score with the score name you set on the question. Probabilities and confidence are stored in the score metadata so you can inspect and filter on them.
+
+Because every question is evaluated in parallel against the same state, adding a second or tenth question barely changes latency and only costs the tokens of that question. This makes it cheap to score one observation against many criteria at once, for example topic, frustration, and out-of-scope in one evaluator.
+
+## Why use Jev as a judge?
+
+- **Cheaper.** Jev is priced by input tokens only. According to TypeSafe, Jev is 40 to 400x cheaper than frontier models on classification tasks. This lets you score every observation instead of a sample.
+- **Faster.** Jev returns answers in well under a second, according to TypeSafe 20 to 200x faster than comparable LLMs. Online evaluators keep pace with production traffic, which shortens the time between a bad output and an [alert](/docs/observability/features/alerts#evaluator-alerts) firing.
+- **Calibrated.** Every answer comes with a probability distribution and, for Choice and Score questions, a confidence value.
+- **Consistent.** Jev does not sample text, so the same state and question return the same verdict. That makes it a good fit for regression tests and for criteria you track over time.
+
+None of this replaces LLM judges. When you need a rationale next to the verdict or want to evaluate open-ended quality, keep using [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge). Many teams run both: Jev on every observation for cheap, typed checks, and an LLM judge on a sample or on the cases Jev flags.
+
+## Question types [#question-types]
+
+Jev answers three kinds of questions. Each maps to one Langfuse score.
+
+| Question type | What Jev returns                                                                                                          | Langfuse score                                                  | Example                                                                   |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| **Choice**    | One option out of a fixed set you define (2 to 255), with probability per option and a confidence value                   | Categorical score with the selected option as value             | "Which team should handle this ticket?" → `billing`, `technical`, `sales` |
+| **Score**     | A position on ordered levels you describe (2 to 10), with the probability distribution over levels and a confidence value | Numeric score with the expected level, from `0` to `levels - 1` | "How frustrated is the customer?" → `0` calm ... `3` angry                |
+| **Yes / no**  | The probability that a statement is true (TypeSafe calls this a [Noul](https://docs.typesafe.ai/primitives/noul))         | Numeric score with `P(true)` between `0` and `1`                | "Does the message request a refund?" → `0.93`                             |
+
+Some tips for each type:
+
+- **Choice** works well for routing and classification: topic detection, intent, failure mode, which tool should have been called. Give every option a short description and include an escape hatch such as `other` or `unclear`. Jev cannot abstain, so without one it picks the least wrong option.
+- **Score** works well for rubrics: severity, frustration, answer completeness. Describe every level in plain language and order them from low to high. The score is the probability-weighted level, so `1.7` means "between level 1 and level 2, closer to 2".
+- **Yes / no** works well for guardrails and flags: out-of-scope request, PII in the output, user disagreement, policy violation. Optionally describe what counts as `true` and what counts as `false`. Because you get a probability instead of a hard label, you can pick a threshold that fits your risk tolerance, or use three bands: act, review, ignore.
+
+<Callout type="info">
+  TypeSafe's docs stress that each question must be **atomic**: one decision
+  per question. If you find yourself asking "is the answer correct and
+  polite?", split it into two questions. Both are answered in the same call
+  anyway.
+</Callout>
+
+## Set up step-by-step [#set-up-step-by-step]
+
+<Steps>
+
+### Add a TypeSafe connection
+
+Go to **Settings → LLM Connections** in your project and add a connection with the provider **typesafe**. You only need a TypeSafe API key, which you can create in the [TypeSafe console](https://console.typesafe.ai/settings/keys). No base URL or additional headers are required.
+
+TypeSafe connections are only offered to Jev evaluators. They do not show up in the playground, in prompt experiments, or in LLM-as-a-Judge model pickers, because Jev cannot generate text.
+
+### Create a Jev evaluator
+
+Go to the [Evaluators page](https://cloud.langfuse.com/project/~/evals) and click **New evaluator**. In the template gallery, click **New decision model evaluator** to start from scratch, or pick one of the Jev templates:
+
+- **Assign Input Topic** (Choice): classify the user's primary goal into a topic taxonomy you define.
+- **Flag Out-of-Scope Request** (Yes / no): flag requests that fall outside the assistant's role.
+- **Rate Customer Frustration** (Score): rate the user's frustration on four levels.
+
+Templates prefill the state and the questions; you only need to pick your TypeSafe connection.
+
+### Define the questions
+
+Add one question per criterion. For each question:
+
+1. Pick the [type](#question-types): Choice, Score, or Yes / no.
+2. Write the question. Refer to state keys in backticks, for example ``Does `input` ask for something outside the scope described in `output`?``. Use the field chips to insert a key. Keep the question literal; Jev reads instructions as written and does not infer intent.
+3. Define the allowed answers: options with descriptions for Choice, ordered levels for Score, or optional `true` / `false` criteria for Yes / no.
+4. Set the score name. Langfuse suggests one from the question; each question writes a score under this name.
+
+Select the Jev model to use, for example `jev-latest`, or pin a specific version such as `jev-1.13.0` when a threshold you rely on should not move with new releases.
+
+### Build the state
+
+Define the state that Jev judges. Click **Add field** to add a state key, then map it to observation data: input, output, metadata, or tool calls. If you plan to use the evaluator in [experiments](/docs/evaluation/experiments/experiments-via-ui), also map **Expected Output** and **Experiment Item Metadata**.
+
+A field named exactly like an observation field (for example `input`) binds to it automatically. Renaming a field rewrites the references in your questions. Langfuse shows the assembled JSON object and warns when it gets close to TypeSafe's state limit of roughly 32k tokens. Keep the state lean: Jev's accuracy drops when the state contains material the questions do not need, so map the specific fields you want judged rather than an entire trace.
+
+### Test the evaluator
+
+On the right, filter to representative sample observations, select one, and run the evaluator. The test panel shows one row per question with its probability distribution and confidence, along with the estimated cost of the call. Use **Raw output** to see the exact request sent to TypeSafe. Iterate on the questions, the options, and the state until the distributions look right on your samples.
+
+### Save the evaluator
+
+After saving, you can:
+
+- Create a [rule](/docs/evaluation/core-concepts#evaluators-and-rules) from the filters you used to select test samples, or attach the evaluator to an existing rule to run it on incoming observations.
+- Continue without a rule. You can still use the evaluator for [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation) or [prompt experiments](/docs/evaluation/experiments/experiments-via-ui).
+
+</Steps>
+
+✨ Done! Each question now writes a score to matching observations. Filter, chart, and alert on these scores like on any other score in Langfuse.
+
+## Scores written by Jev [#scores]
+
+Each question writes one score to the evaluated observation. The score value is always the answer itself; probabilities and confidence never change the value but are stored alongside it so you can inspect and filter on them:
+
+| Field                | Content                                                                                                                                                                                                                            |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`               | The score name you set on the question.                                                                                                                                                                                            |
+| `value` / `dataType` | Choice: the selected option as a `CATEGORICAL` score. Score: the expected level as a `NUMERIC` score. Yes / no: `P(true)` as a `NUMERIC` score between `0` and `1`.                                                                |
+| `comment`            | A short human-readable summary, for example `ready (p=0.91); confidence 0.82; runner-up needs_revision (0.09)` for a Choice, `1.26 ≈ level 1 "Frustrated but civil"; confidence 0.61` for a Score, or `P(true)=0.97` for Yes / no. |
+| `metadata.typesafe`  | The typed answer details: `questionId`, `type`, the resolved `model` (for example `jev-1.13.0`), and for Choice and Score questions `probabilities`, `confidence`, and (Score) the `legend` mapping levels to their descriptions.  |
+
+Jev returns no rationale, so the comment summarizes the distribution instead of explaining the verdict. When a score looks wrong, read the state and your own criteria rather than a model explanation, then tighten the question or add an option.
+
+## Debug Jev executions [#debug-executions]
+
+Every evaluator run creates an execution trace in the internal environment `langfuse-llm-as-a-judge`, named `Execute evaluator: <evaluator name>`. The trace contains a single generation with the exact request (state and questions), the returned answers, token usage, and cost. Every score written by the run links to this trace.
+
+Internal environments are hidden from the default tracing view. Filter the tracing table by `environment = langfuse-llm-as-a-judge` or open the execution trace from a score.
+
+## Limits [#limits]
+
+| Constraint              | Limit / guidance                                                                                                                                                                                       |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Questions per evaluator | 1 to 50, all answered in one call.                                                                                                                                                                     |
+| Choice options          | 2 to 255 options with unique values.                                                                                                                                                                   |
+| Score levels            | 2 to 10 ordered levels.                                                                                                                                                                                |
+| State size              | TypeSafe accepts roughly 32k tokens for the state plus the longest question. Langfuse warns in the state editor before you reach it.                                                                   |
+| Rationale               | Jev does not return reasoning. Use an LLM judge if you need an explanation next to the verdict.                                                                                                        |
+| Abstaining              | Jev always picks an answer. Add an `other` or `unclear` option to Choice questions where the state may not contain enough information.                                                                 |
+| Data handling           | State and questions are sent to TypeSafe's API. Review [TypeSafe's terms](https://typesafe.ai) before evaluating sensitive data, and use [masking](/docs/observability/features/masking) where needed. |
+
+## FAQ
+
+import { Details, Summary } from "@/components/Details";
+
+<Details>
+<Summary>When should I use Jev instead of an LLM judge?</Summary>
+
+Use Jev when the decision is narrow and typed, the possible answers are known before the call, and you want to make that decision on many observations: routing, classification, rubric levels, guardrail flags. Use an LLM judge when you need written reasoning, when the criteria are open-ended, or when the output must be audited by humans who need an explanation. Combining both works well: Jev on every observation, an LLM judge on a sample or on the cases Jev flags.
+
+</Details>
+
+<Details>
+<Summary>Why is my Yes / no score a number and not a boolean?</Summary>
+
+Jev returns the probability that the statement is true, not a hard label. Langfuse stores that probability as a numeric score between `0` and `1` so you keep the calibration. Choose the threshold that fits your use case when you filter or alert, for example `>= 0.7`. If you need a boolean, use a Choice question with the two options `yes` and `no`, which writes a categorical score.
+
+</Details>
+
+<Details>
+<Summary>Can I use Jev evaluators in experiments and batch evaluation?</Summary>
+
+Yes. Jev evaluators run on incoming observations through rules, on historical observations through [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation), and on [experiments](/docs/evaluation/experiments/experiments-via-ui). For experiments, map **Expected Output** and **Experiment Item Metadata** into the state when the questions need them.
+
+</Details>
+
+<Details>
+<Summary>Where do I get a TypeSafe API key?</Summary>
+
+Create an account at [typesafe.ai](https://typesafe.ai) and generate a key in the [TypeSafe console](https://console.typesafe.ai/settings/keys). Access currently runs through a waitlist on TypeSafe's side.
+
+</Details>
+
+## Related resources
+
+- [Using TypeSafe's Jev for evals](/blog/2026-09-18-using-typesafes-jev-for-evals): background on Jev, its strengths and weaknesses for evals, and early benchmark results.
+- [Observability for TypeSafe Jev](/integrations/model-providers/typesafe): trace Jev calls made from your own application.
+- [Writing good evaluators](/academy/evaluate/writing-evaluators): how to define criteria that hold up.
+- [TypeSafe documentation](https://docs.typesafe.ai/introduction): question primitives, model versions, and known limitations.
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-evals"]} />
