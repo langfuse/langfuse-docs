@@ -21,7 +21,8 @@ interface EventDefinitions {
       | "image_generator"
       | "sentiment_classifier"
       | "voice_agent"
-      | "rock_paper_scissors";
+      | "rock_paper_scissors"
+      | "jev_evals_blog";
     trace_url: string;
   };
   "home:start_free_clicked": {
