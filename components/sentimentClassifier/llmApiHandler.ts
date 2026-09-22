@@ -13,7 +13,9 @@ import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
 import {
   LUNA_PRICE_USD_PER_MTOK,
+  addUsage,
   computeCostUsd,
+  emptyUsage,
   type SentimentUsage,
 } from "./cost";
 import {
@@ -37,25 +39,6 @@ const schemaFor = (definition: ClassifierDefinition) => {
     keyPhrases: z.array(z.string()),
   });
 };
-
-const emptyUsage = (): SentimentUsage => ({
-  inputTokens: 0,
-  outputTokens: 0,
-  reasoningTokens: 0,
-  totalTokens: 0,
-  costUsd: 0,
-});
-
-const addUsage = (
-  total: SentimentUsage,
-  next: SentimentUsage,
-): SentimentUsage => ({
-  inputTokens: total.inputTokens + next.inputTokens,
-  outputTokens: total.outputTokens + next.outputTokens,
-  reasoningTokens: (total.reasoningTokens ?? 0) + (next.reasoningTokens ?? 0),
-  totalTokens: total.totalTokens + next.totalTokens,
-  costUsd: total.costUsd + next.costUsd,
-});
 
 const classifyOne = async (definition: ClassifierDefinition, text: string) => {
   const result = await generateObject({

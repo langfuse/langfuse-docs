@@ -65,3 +65,31 @@ export function formatRatio(ratio: number): string {
   if (ratio < 10) return `${ratio.toFixed(1)}×`;
   return `${Math.round(ratio).toLocaleString("en-US")}×`;
 }
+
+export function emptyUsage(): SentimentUsage {
+  return {
+    inputTokens: 0,
+    outputTokens: 0,
+    reasoningTokens: 0,
+    totalTokens: 0,
+    costUsd: 0,
+  };
+}
+
+export function addUsage(
+  total: SentimentUsage,
+  next: SentimentUsage,
+): SentimentUsage {
+  return {
+    inputTokens: total.inputTokens + next.inputTokens,
+    outputTokens: total.outputTokens + next.outputTokens,
+    reasoningTokens: (total.reasoningTokens ?? 0) + (next.reasoningTokens ?? 0),
+    totalTokens: total.totalTokens + next.totalTokens,
+    costUsd: total.costUsd + next.costUsd,
+  };
+}
+
+export function sumUsage(usages: SentimentUsage[]): SentimentUsage | null {
+  if (usages.length === 0) return null;
+  return usages.reduce(addUsage, emptyUsage());
+}

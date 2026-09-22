@@ -5,6 +5,7 @@ import {
   formatCostUsd,
   formatLatencyMs,
   formatRatio,
+  sumUsage,
 } from "./cost";
 import { classifiersForCount, parseClassifierIds } from "./criteria";
 
@@ -38,4 +39,24 @@ test("formats cost, latency, and comparison ratios", () => {
   assert.equal(formatRatio(2.4), "2.4×");
   assert.equal(comparisonRatio(0.008, 0.0001), 80);
   assert.equal(comparisonRatio(0, 1), null);
+  assert.equal(sumUsage([]), null);
+  assert.equal(
+    sumUsage([
+      {
+        inputTokens: 10,
+        outputTokens: 2,
+        reasoningTokens: 1,
+        totalTokens: 12,
+        costUsd: 0.25,
+      },
+      {
+        inputTokens: 5,
+        outputTokens: 3,
+        reasoningTokens: 2,
+        totalTokens: 8,
+        costUsd: 0.25,
+      },
+    ])?.costUsd,
+    0.5,
+  );
 });

@@ -71,7 +71,8 @@ const MetricBox = ({
   jevDetail,
   lunaDetail,
 }: MetricBoxProps) => {
-  const ratio = comparisonRatio(luna.value, jev.value);
+  const settled = !jev.loading && !luna.loading;
+  const ratio = settled ? comparisonRatio(luna.value, jev.value) : null;
   const jevWins = ratio != null && ratio >= 1.05;
   const lunaWins = ratio != null && ratio > 0 && ratio <= 1 / 1.05;
 

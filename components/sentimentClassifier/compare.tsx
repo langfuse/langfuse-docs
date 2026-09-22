@@ -14,11 +14,14 @@ import {
   classifiersForCount,
   classifySentiment,
   getPersistedSentimentUserId,
+  type ClassifierId,
   type ClassifierRunResult,
 } from "./shared";
 import { SentimentResultPanel } from "./resultPanel";
 import { CompareMetricBoxes } from "./metricBoxes";
-import { CLASSIFIER_SEQUENCE } from "./criteria";
+import { CLASSIFIER_SEQUENCE, type ClassifierDefinition } from "./criteria";
+import { sumUsage, type SentimentUsage } from "./cost";
+import type { ClassifierAnswer } from "./types";
 
 const PUBLIC_SAMPLE_PROJECT_TRACES_URL =
   "https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces";
@@ -29,6 +32,76 @@ type EngineState = {
   latencyMs: number;
 };
 
+type LlmSlot =
+  | { status: "loading" }
+  | {
+      status: "success";
+      answer: ClassifierAnswer;
+      usage: SentimentUsage;
+      model: string;
+      traceId: string;
+      latencyMs: number;
+    }
+  | { status: "error"; error: string };
+
+type LlmSlots = Partial<Record<ClassifierId, LlmSlot>>;
+
+const LlmTaskSlot = ({
+  definition,
+  slot,
+  index,
+  total,
+  compact,
+  feedback,
+  onFeedback,
+}: {
+  definition: ClassifierDefinition;
+  slot: LlmSlot | undefined;
+  index: number;
+  total: number;
+  compact: boolean;
+  feedback?: boolean | null;
+  onFeedback?: (value: boolean) => void;
+}) => {
+  if (slot?.status === "success") {
+    return (
+      <SentimentResultPanel
+        answer={slot.answer}
+        compact={compact}
+        feedback={feedback}
+        onFeedback={onFeedback}
+      />
+    );
+  }
+
+  if (slot?.status === "error") {
+    return (
+      <div className="space-y-2">
+        <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          {definition.name}
+        </p>
+        <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+          {slot.error}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2 py-1">
+      <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+        {definition.name}
+      </p>
+      <div className="flex items-center gap-2 text-muted-foreground text-sm">
+        <Loader size={16} />
+        {total === 1
+          ? ENGINE_CONFIG.llm.loading
+          : `Call ${index + 1} of ${total} running in parallel…`}
+      </div>
+    </div>
+  );
+};
+
 export const SentimentClassifierCompare = ({
   className,
   ...props
@@ -37,24 +110,38 @@ export const SentimentClassifierCompare = ({
   const [input, setInput] = useState("");
   const [taskCount, setTaskCount] = useState(1);
   const [jevLoading, setJevLoading] = useState(false);
-  const [llmLoading, setLlmLoading] = useState(false);
   const [inputText, setInputText] = useState<string | null>(null);
   const [jev, setJev] = useState<EngineState | null>(null);
-  const [llm, setLlm] = useState<EngineState | null>(null);
   const [jevError, setJevError] = useState<string | null>(null);
-  const [llmError, setLlmError] = useState<string | null>(null);
+  const [llmSlots, setLlmSlots] = useState<LlmSlots | null>(null);
   const [jevFeedback, setJevFeedback] = useState<boolean | null>(null);
   const [llmFeedback, setLlmFeedback] = useState<boolean | null>(null);
 
-  const loading = jevLoading || llmLoading;
   const selected = classifiersForCount(taskCount);
   const compact = selected.length > 1;
+  const llmSlotList = selected.map((definition) => llmSlots?.[definition.id]);
+  const llmPending =
+    llmSlots != null &&
+    llmSlotList.some((slot) => !slot || slot.status === "loading");
+  const llmSuccesses = llmSlotList.filter(
+    (slot): slot is Extract<LlmSlot, { status: "success" }> =>
+      slot?.status === "success",
+  );
+  const llmAllFailed =
+    llmSlots != null &&
+    llmSlotList.length > 0 &&
+    llmSlotList.every((slot) => slot?.status === "error");
+  const lunaUsage = sumUsage(llmSuccesses.map((slot) => slot.usage));
+  const lunaLatencyMs =
+    llmSlots != null && !llmPending && llmSuccesses.length > 0
+      ? Math.max(...llmSuccesses.map((slot) => slot.latencyMs))
+      : null;
+  const loading = jevLoading || llmPending;
 
   const clearRun = () => {
     setJev(null);
-    setLlm(null);
     setJevError(null);
-    setLlmError(null);
+    setLlmSlots(null);
     setJevFeedback(null);
     setLlmFeedback(null);
   };
@@ -84,7 +171,12 @@ export const SentimentClassifierCompare = ({
     setInputText(textToAnalyze);
     clearRun();
     setJevLoading(true);
-    setLlmLoading(true);
+
+    const pendingSlots = Object.fromEntries(
+      selected.map((definition) => [definition.id, { status: "loading" }]),
+    ) as LlmSlots;
+    setLlmSlots(pendingSlots);
+    const llmStarted = performance.now();
 
     const jevStarted = performance.now();
     void classifySentiment("jev", textToAnalyze, userId, tasks).then(
@@ -102,25 +194,39 @@ export const SentimentClassifierCompare = ({
       },
     );
 
-    const llmStarted = performance.now();
-    void classifySentiment("llm", textToAnalyze, userId, tasks).then(
-      (outcome) => {
-        if (outcome.ok === false) {
-          setLlmError(outcome.error);
-        } else {
-          setLlm({
-            result: outcome.data.result,
-            traceId: outcome.data.traceId,
-            latencyMs: performance.now() - llmStarted,
-          });
-        }
-        setLlmLoading(false);
-      },
-    );
+    // One HTTP request per classification so each Luna call can resolve on its own.
+    for (const definition of selected) {
+      void classifySentiment("llm", textToAnalyze, userId, [
+        definition.id,
+      ]).then((outcome) => {
+        const answer =
+          outcome.ok === true ? outcome.data.result.answers[0] : undefined;
+        setLlmSlots((current) => ({
+          ...(current ?? {}),
+          [definition.id]:
+            outcome.ok === false
+              ? { status: "error", error: outcome.error }
+              : answer
+                ? {
+                    status: "success",
+                    answer,
+                    usage: outcome.data.result.usage,
+                    model: outcome.data.result.model,
+                    traceId: outcome.data.traceId,
+                    latencyMs: performance.now() - llmStarted,
+                  }
+                : {
+                    status: "error",
+                    error: "No classification returned",
+                  },
+        }));
+      });
+    }
   };
 
-  const hasResults = Boolean(jev || llm || jevError || llmError);
+  const hasResults = Boolean(jev || jevError || llmSlots);
   const showMetrics = hasResults || loading;
+  const firstLlmSuccess = llmSuccesses[0];
 
   return (
     <div className={cn(className)} {...props}>
@@ -182,7 +288,9 @@ export const SentimentClassifierCompare = ({
             </button>
             {loading && (
               <span className="text-xs text-muted-foreground">
-                Results appear as each classifier finishes…
+                {selected.length > 1
+                  ? "Jev returns together; Luna calls resolve as each one finishes…"
+                  : "Results appear as each classifier finishes…"}
               </span>
             )}
           </div>
@@ -291,39 +399,40 @@ export const SentimentClassifierCompare = ({
                     : `${selected.length} parallel calls · high reasoning`}
                 </p>
               </div>
+              {firstLlmSuccess?.model && (
+                <span className="text-[11px] text-muted-foreground font-mono">
+                  {firstLlmSuccess.model}
+                </span>
+              )}
             </div>
-            {llmLoading && !llm && !llmError && (
-              <div className="flex items-center gap-2 text-muted-foreground text-sm py-6 justify-center">
-                <Loader size={16} />
-                {ENGINE_CONFIG.llm.loading}
-              </div>
-            )}
-            {llmError && (
-              <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
-                {llmError}
-              </div>
-            )}
-            {llm && (
+            {llmSlots && (
               <div className="space-y-4">
-                {llm.result.answers.map((answer, index) => (
+                {selected.map((definition, index) => (
                   <div
-                    key={answer.id}
+                    key={definition.id}
                     className={
                       index > 0
                         ? "border-t border-line-structure pt-4"
                         : undefined
                     }
                   >
-                    <SentimentResultPanel
-                      answer={answer}
+                    <LlmTaskSlot
+                      definition={definition}
+                      slot={llmSlots[definition.id]}
+                      index={index}
+                      total={selected.length}
                       compact={compact}
-                      feedback={index === 0 ? llmFeedback : undefined}
+                      feedback={
+                        firstLlmSuccess?.answer.id === definition.id
+                          ? llmFeedback
+                          : undefined
+                      }
                       onFeedback={
-                        index === 0
+                        firstLlmSuccess?.answer.id === definition.id
                           ? (value) => {
                               setLlmFeedback(value);
                               scoreDemoNegativeUserFeedback({
-                                traceId: llm.traceId,
+                                traceId: firstLlmSuccess.traceId,
                                 value,
                               });
                             }
@@ -340,13 +449,13 @@ export const SentimentClassifierCompare = ({
         {showMetrics && (
           <CompareMetricBoxes
             jevLatencyMs={jev?.latencyMs ?? null}
-            lunaLatencyMs={llm?.latencyMs ?? null}
+            lunaLatencyMs={lunaLatencyMs}
             jevUsage={jev?.result.usage}
-            lunaUsage={llm?.result.usage}
+            lunaUsage={lunaUsage}
             jevLoading={jevLoading}
-            lunaLoading={llmLoading}
+            lunaLoading={llmPending}
             jevError={Boolean(jevError)}
-            lunaError={Boolean(llmError)}
+            lunaError={llmAllFailed}
           />
         )}
 
@@ -375,8 +484,9 @@ export const SentimentClassifierCompare = ({
             <li>
               Jev is a lot faster and cheaper than GPT-5.6 Luna with high
               reasoning. Add classifications with the 1–4 control: Jev keeps one
-              request, Luna runs parallel calls so cost scales with the count.
-              Latency and estimated cost are compared below the results.
+              request, Luna runs parallel calls that resolve independently so
+              cost scales with the count. Latency and estimated cost are
+              compared below the results.
             </li>
             <li>
               Jev returns a decision and confidence only, with no reasoning.
