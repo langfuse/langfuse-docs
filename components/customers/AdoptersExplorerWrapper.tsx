@@ -8,6 +8,7 @@ import adobeLogo from "../home/img/adobe.svg";
 import canvaLogo from "../home/img/canva.svg";
 import circlebackLogo from "../home/img/circleback.svg";
 import ciscoLogo from "../home/img/cisco.svg";
+import enbwLogo from "../home/img/enbw.svg";
 import expediaLogo from "../home/img/expedia.svg";
 import freeeLogo from "../home/img/freee.svg";
 import huggingFaceLogo from "../home/img/huggingface.svg";
@@ -35,6 +36,7 @@ const COMPANY_LOGOS: Record<string, NonNullable<Adopter["logo"]>> = {
   Canva: { src: canvaLogo },
   Circleback: { src: circlebackLogo },
   Cisco: { src: ciscoLogo },
+  EnBW: { src: enbwLogo },
   "Expedia Group": { src: expediaLogo },
   freee: { src: freeeLogo },
   "Hugging Face": { src: huggingFaceLogo },
@@ -69,6 +71,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   "Dep for Environment, Food & Rural Affairs": "UK government department",
   Draftbit: "Visual mobile app development platform",
   Ecosia: "Search engine and technology company",
+  EnBW: "German energy and utilities company",
   Equinix: "Digital infrastructure and data center company",
   "Expedia Group": "Travel technology company",
   Fletch: "Security and threat intelligence platform",
