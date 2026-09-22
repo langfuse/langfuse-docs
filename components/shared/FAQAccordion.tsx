@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Link } from "@/components/ui/link";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
+import { FaqAsk } from "@/components/faq/FaqAsk";
 
 export type FAQItem = {
   question: string;
@@ -179,6 +180,7 @@ export function FAQAccordion({
           </AccordionPrimitive.Content>
         </AccordionPrimitive.Item>
       ))}
+      <FaqAsk />
     </AccordionPrimitive.Root>
   );
 }
