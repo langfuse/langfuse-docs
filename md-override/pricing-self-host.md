@@ -155,3 +155,5 @@ Open Source includes all core platform features under the MIT license with commu
 
 **Where is the data stored?**
 Self-hosted Langfuse stores data in your own infrastructure. You control data residency and can deploy in any region. See [security documentation](/security) for details.
+
+[Ask anything else](/docs/ask-ai)

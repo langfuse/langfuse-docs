@@ -3,6 +3,7 @@ import { Cards } from "@/components/docs";
 import { MessageCircleQuestion } from "lucide-react";
 import { Link } from "@/components/ui/link";
 import { getFaqTags, isFaqArticle } from "@/lib/faq-tags";
+import { FaqAsk } from "./FaqAsk";
 
 type FaqPage = ReturnType<typeof faqSource.getPages>[number];
 
@@ -73,6 +74,7 @@ export const FaqList = ({
             </Link>
           </li>
         ))}
+        <FaqAsk linked />
       </ul>
     </>
   );

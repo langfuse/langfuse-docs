@@ -8,6 +8,7 @@ highlight: true
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
+import { SentimentClassifierCompare } from "@/components/sentimentClassifier/compare";
 
 <BlogHeader
   title="Using TypeSafe's Jev for evals"
@@ -42,6 +43,16 @@ Jev covers this surface with three [question types](https://docs.typesafe.ai/pri
 <Frame fullWidth>
   ![Jev Choice, Score, and Noul answers for one agent run: missing_context at 0.706, severity 2.73, needs_review 0.913](/images/blog/2026-09-18-using-typesafes-jev-for-evals/jev-question-types.png)
 </Frame>
+
+## Try a Jev-based sentiment classifier [#try-a-jev-based-sentiment-classifier]
+
+Run Jev and GPT-5.6 Luna (high reasoning) on the same text at once. Each column updates when its model finishes, so you can feel the speed and cost difference live.
+
+<div className="not-prose my-6">
+  <SentimentClassifierCompare />
+</div>
+
+## The shape of a Jev request [#the-shape-of-a-jev-request]
 
 A finished agent run needs three judgments at once, and with Jev they go in one request:
 

@@ -146,3 +146,5 @@ It depends on where you are in your workflow. To **add tracing**, follow the [tr
 ### How does pricing work?
 
 Langfuse Cloud has a [free Hobby plan](/pricing) with no credit card required. Paid plans use usage-based [graduated pricing](/pricing) based on [billable units](/docs/administration/billable-units) — traces, observations, and scores you send to the platform. Volume discounts apply automatically as you scale. You can also [self-host](/self-hosting) Langfuse for free under the MIT license. See the [pricing page](/pricing) for the full calculator and plan comparison.
+
+[Ask anything else](/docs/ask-ai)
