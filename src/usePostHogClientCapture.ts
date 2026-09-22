@@ -25,6 +25,14 @@ interface EventDefinitions {
       | "jev_evals_blog";
     trace_url: string;
   };
+  "demo:sentiment_analyze_submitted": {
+    source: "jev_evals_blog" | "sentiment_classifier";
+    /** Both engines run side-by-side on the blog compare widget. */
+    mode: "compare" | "single";
+    engine?: "jev" | "llm";
+    from_example: boolean;
+    text_char_count: number;
+  };
   "home:start_free_clicked": {
     source: "home_hero";
     path: string;

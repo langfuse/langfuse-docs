@@ -51,6 +51,13 @@ export const SentimentClassifierCompare = ({
       typeof window === "undefined" ? null : getPersistedSentimentUserId();
     if (!textToAnalyze.trim() || !userId || loading) return;
 
+    capture("demo:sentiment_analyze_submitted", {
+      source: "jev_evals_blog",
+      mode: "compare",
+      from_example: typeof text === "string",
+      text_char_count: textToAnalyze.trim().length,
+    });
+
     setInputText(textToAnalyze);
     setJev(null);
     setLlm(null);
