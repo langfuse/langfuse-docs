@@ -55,6 +55,7 @@ import { EvaluatorBlock as EvaluatorBlockJa } from "@/components/academy/japan/E
 import { JudgePromptExample as JudgePromptExampleJa } from "@/components/academy/japan/JudgePromptExample";
 import { TraceViewDiagram as TraceViewDiagramJa } from "@/components/academy/japan/TraceViewDiagram";
 import { Details, Summary } from "@/components/Details";
+import { FaqDetails } from "@/components/faq/FaqDetails";
 
 // Lazy-load Video so @vidstack/react (~800 KB) is NOT bundled on every MDX page.
 // It only downloads on pages that actually render a <Video> tag.
@@ -155,6 +156,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     TraceViewDiagramJa,
     details: Details,
     summary: Summary,
+    FaqDetails,
     ...components,
   };
 }
