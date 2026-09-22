@@ -36,10 +36,10 @@ export const SentimentResultPanel = ({
 }: SentimentResultPanelProps) => {
   const colors = answerColors(answer);
   const probabilityEntries = answer.probabilities
-    ? Object.keys(CLASSIFIERS[answer.id].criteria).map((label) => [
+    ? Object.keys(CLASSIFIERS[answer.id].criteria).map((label) => ({
         label,
-        answer.probabilities?.[label] ?? 0,
-      ])
+        probability: answer.probabilities?.[label] ?? 0,
+      }))
     : [];
   const showReasoning = Boolean(
     answer.explanation || answer.keyPhrases?.length,
@@ -105,7 +105,7 @@ export const SentimentResultPanel = ({
           <p className="text-xs text-muted-foreground font-medium">
             Probabilities
           </p>
-          {probabilityEntries.map(([label, probability]) => {
+          {probabilityEntries.map(({ label, probability }) => {
             const labelColors =
               answer.id === "sentiment" && label in SENTIMENT_COLORS
                 ? SENTIMENT_COLORS[label as SentimentLabel]
