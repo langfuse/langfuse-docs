@@ -7,6 +7,7 @@ import { Loader } from "@/components/ai-elements/loader";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 import { scoreDemoNegativeUserFeedback } from "@/components/demoLangfuseBrowserClients";
 import { SendIcon } from "lucide-react";
+import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 import {
   EXAMPLE_TEXTS,
   ENGINE_CONFIG,
@@ -17,10 +18,14 @@ import {
 } from "./shared";
 import { SentimentResultPanel } from "./resultPanel";
 
+const PUBLIC_SAMPLE_PROJECT_TRACES_URL =
+  "https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces";
+
 export const SentimentClassifierCompare = ({
   className,
   ...props
 }: HTMLAttributes<HTMLDivElement>) => {
+  const capture = usePostHogClientCapture();
   const [input, setInput] = useState("");
   const [jevLoading, setJevLoading] = useState(false);
   const [llmLoading, setLlmLoading] = useState(false);
@@ -210,16 +215,57 @@ export const SentimentClassifierCompare = ({
           </div>
         </div>
 
-        <p className="text-xs text-muted-foreground text-center italic">
-          One Analyze runs both classifiers; each column updates when ready. The{" "}
-          <a
-            href="/docs/demo#sentiment"
-            className="underline underline-offset-2 hover:text-foreground"
-          >
-            example project
-          </a>{" "}
-          shows the Jev classifier only. All interactions are traced.
-        </p>
+        <div className="space-y-3 text-sm text-text-secondary leading-relaxed border-t border-line-structure pt-4">
+          <p>
+            Check out the traces of both in our{" "}
+            <a
+              href={PUBLIC_SAMPLE_PROJECT_TRACES_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                capture("demo:view_trace_in_langfuse_clicked", {
+                  source: "jev_evals_blog",
+                  trace_url: PUBLIC_SAMPLE_PROJECT_TRACES_URL,
+                });
+              }}
+              className="underline underline-offset-2 text-text-links hover:text-primary"
+            >
+              public sample project
+            </a>
+            . Look for <code className="text-xs">Sentiment-Classifier-Jev</code>{" "}
+            and <code className="text-xs">Sentiment-Classifier-GPT</code>. In
+            this example we can see two very distinct differences:
+          </p>
+          <ul className="list-disc pl-5 space-y-1.5">
+            <li>
+              Jev is a lot faster than the GPT-4o-mini classifier — each column
+              updates when its model finishes, so the latency gap is obvious.
+            </li>
+            <li>
+              Jev returns a decision and confidence only, with no reasoning.
+              GPT-4o-mini returns an explanation and key phrases.
+            </li>
+          </ul>
+          <p className="text-xs text-muted-foreground">
+            The interactive{" "}
+            <a
+              href="/docs/demo#sentiment"
+              className="underline underline-offset-2 hover:text-foreground"
+            >
+              example project
+            </a>{" "}
+            demo tab shows the Jev classifier only.{" "}
+            <a
+              href="https://cloud.langfuse.com/auth/sign-up"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2 hover:text-foreground"
+            >
+              Sign up for Langfuse Cloud
+            </a>{" "}
+            (free) for view access to the shared project.
+          </p>
+        </div>
       </div>
     </div>
   );

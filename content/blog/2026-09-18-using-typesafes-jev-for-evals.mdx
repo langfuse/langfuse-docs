@@ -46,17 +46,11 @@ Jev covers this surface with three [question types](https://docs.typesafe.ai/pri
 
 ## Try a Jev-based sentiment classifier [#try-a-jev-based-sentiment-classifier]
 
-Run Jev and the previous GPT-4o-mini classifier on the same text at once. Jev returns a Choice probability for each label. GPT-4o-mini returns a label, a short explanation, and the phrases it used. The [example project](/docs/demo#sentiment) shows the Jev classifier only.
+Run Jev and the previous GPT-4o-mini classifier on the same text at once. Each column updates when its model finishes, so you can feel the speed difference live.
 
 <div className="not-prose my-6">
   <SentimentClassifierCompare />
 </div>
-
-<Callout type="info">
-  [Sign up for Langfuse Cloud](https://cloud.langfuse.com/auth/sign-up) (free,
-  no credit card) to get view-only access to the public example project and
-  inspect the traces your classifications create.
-</Callout>
 
 A finished agent run needs three judgments at once, and with Jev they go in one request:
 
