@@ -96,7 +96,7 @@ Select the Jev model to use, for example `jev-latest`, or pin a specific version
 
 ### Build the state
 
-Define the state that Jev judges. Click **Add field** to add a state key, then map it to observation data: input, output, metadata, or tool calls. If you plan to use the evaluator in [prompt experiments](/docs/evaluation/experiments/experiments-via-ui), also map **Expected Output** and **Experiment Item Metadata**. Those fields stay empty on an observation-level rule, including rules that match webhook or SDK experiment traces. See [Evaluate externally run experiments](/docs/evaluation/experiments/evaluate-external-experiments).
+Define the state that Jev judges. Click **Add field** to add a state key, then map it to observation data: input, output, metadata, or tool calls. If you plan to use the evaluator in [experiments](/docs/evaluation/experiments/experiments-via-ui), also map **Expected Output** and **Experiment Item Metadata**.
 
 A field named exactly like an observation field (for example `input`) binds to it automatically. Renaming a field rewrites the references in your questions. Langfuse shows the assembled JSON object and warns when it gets close to TypeSafe's state limit of roughly 32k tokens. Keep the state lean: Jev's accuracy drops when the state contains material the questions do not need, so map the specific fields you want judged rather than an entire trace.
 
@@ -167,7 +167,7 @@ Jev returns the probability that the statement is true, not a hard label. Langfu
 <Details>
 <Summary>Can I use Jev evaluators in experiments and batch evaluation?</Summary>
 
-Yes. Jev evaluators run on incoming observations through rules, on historical observations through [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation), and on [prompt experiments](/docs/evaluation/experiments/experiments-via-ui). Map **Expected Output** and **Experiment Item Metadata** into the state when the questions need them. Those mappings populate only on prompt experiments, not on rules that match webhook or SDK experiment traces. See [Evaluate externally run experiments](/docs/evaluation/experiments/evaluate-external-experiments).
+Yes. Jev evaluators run on incoming observations through rules, on historical observations through [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation), and on [experiments](/docs/evaluation/experiments/experiments-via-ui). For experiments, map **Expected Output** and **Experiment Item Metadata** into the state when the questions need them.
 
 </Details>
 

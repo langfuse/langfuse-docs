@@ -150,11 +150,11 @@ Run evaluators on controlled test datasets to compare model versions, prompt var
 
 **Data flow**
 
-Each experiment run generates traces and observations that can be scored by your selected evaluators. The evaluator receives observation data plus experiment item context, such as expected output and item metadata, **only when you select it on a prompt experiment**.
+Each experiment run generates traces and observations that can be scored by your selected evaluators. The evaluator receives observation data plus experiment item context, such as expected output and item metadata.
 
 1. Create a dataset with test inputs and, optionally, expected outputs.
 2. Run an experiment via UI or SDK. See [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui) or [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk).
-3. For prompt experiments, select code evaluators so they receive experiment context. For webhook or SDK runs, score in your pipeline. See [Evaluate externally run experiments](/docs/evaluation/experiments/evaluate-external-experiments).
+3. Select code evaluators to score the generated observations.
 4. Compare results across experiment runs to make data-driven decisions.
 
 **Example use case**
@@ -195,7 +195,7 @@ Unlike LLM-as-a-Judge, code evaluators do not have a separate variable-mapping s
 After saving, you can:
 
 - Create a [rule](/docs/evaluation/core-concepts#evaluators-and-rules) from the filters you used to select test samples, or attach the evaluator to an existing rule to run it on incoming observations.
-- Continue without a rule. You can still use the evaluator for [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation) or [prompt experiments](/docs/evaluation/experiments/experiments-via-ui). To score [webhook or SDK experiments](/docs/evaluation/experiments/evaluate-external-experiments), evaluate in your pipeline instead of adding a rule.
+- Continue without a rule. You can still use the evaluator for [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation) or [prompt experiments](/docs/evaluation/experiments/experiments-via-ui).
 
 </Steps>
 
@@ -369,17 +369,17 @@ function evaluate({
 </Tab>
 </LangTabs>
 
-### Context fields [#context-fields]
+### Context fields
 
-| Field                                                                                             | Description                                                                                                                                                                                                             |
-| ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ctx.observation.input`                                                                           | The input recorded on the observation selected by the evaluator target.                                                                                                                                                 |
-| `ctx.observation.output`                                                                          | The output recorded on the observation selected by the evaluator target.                                                                                                                                                |
-| `ctx.observation.metadata`                                                                        | The metadata recorded on the observation.                                                                                                                                                                               |
-| `ctx.observation.tool_calls` (Python) / `ctx.observation.toolCalls` (TypeScript)                  | Ordered calls with `id`, `name`, `arguments`, `type`, and `index`. Valid JSON arguments are parsed.                                                                                                                     |
-| `ctx.experiment`                                                                                  | Present only when you select the evaluator on a [prompt experiment](/docs/evaluation/experiments/experiments-via-ui). Absent when a rule scores an observation, including observations from webhook or SDK experiments. |
-| `ctx.experiment.item_expected_output` (Python) / `ctx.experiment.itemExpectedOutput` (TypeScript) | Expected output from the experiment item.                                                                                                                                                                               |
-| `ctx.experiment.item_metadata` (Python) / `ctx.experiment.itemMetadata` (TypeScript)              | Metadata from the experiment item.                                                                                                                                                                                      |
+| Field                                                                                             | Description                                                                                         |
+| ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `ctx.observation.input`                                                                           | The input recorded on the observation selected by the evaluator target.                             |
+| `ctx.observation.output`                                                                          | The output recorded on the observation selected by the evaluator target.                            |
+| `ctx.observation.metadata`                                                                        | The metadata recorded on the observation.                                                           |
+| `ctx.observation.tool_calls` (Python) / `ctx.observation.toolCalls` (TypeScript)                  | Ordered calls with `id`, `name`, `arguments`, `type`, and `index`. Valid JSON arguments are parsed. |
+| `ctx.experiment`                                                                                  | Present only when the evaluator runs on an experiment.                                              |
+| `ctx.experiment.item_expected_output` (Python) / `ctx.experiment.itemExpectedOutput` (TypeScript) | Expected output from the experiment item.                                                           |
+| `ctx.experiment.item_metadata` (Python) / `ctx.experiment.itemMetadata` (TypeScript)              | Metadata from the experiment item.                                                                  |
 
 ### Score fields
 
@@ -532,9 +532,7 @@ No. Code evaluators currently support standard libraries only. If your evaluatio
 <Details>
 <Summary>Why does the experiment context sometimes not exist?</Summary>
 
-`ctx.experiment` is present only when you select the evaluator on a [prompt experiment](/docs/evaluation/experiments/experiments-via-ui). It is `None` / `undefined` when a [rule](/docs/evaluation/core-concepts#evaluators-and-rules) scores an observation, even if that observation came from a webhook or SDK experiment. For those runs, score in your pipeline. See [Evaluate externally run experiments](/docs/evaluation/experiments/evaluate-external-experiments).
-
-For live observation evaluators, write your code so it handles `ctx.experiment` being `None` in Python or `undefined` in TypeScript.
+`ctx.experiment` is only present when the evaluator runs on an experiment. For live observation evaluators, write your code so it handles `ctx.experiment` being `None` in Python or `undefined` in TypeScript.
 
 </Details>
 

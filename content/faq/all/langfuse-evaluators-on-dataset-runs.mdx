@@ -1,27 +1,16 @@
 ---
-title: How do I evaluate webhook or SDK experiments with Langfuse evaluators?
-sidebarTitle: Evaluators on external experiments
-description: How to score experiments that run outside Langfuse. Observation-level rules cannot see expected output, so similarity judges on webhook traces score 0.
-tags: [evaluation, experiments]
+title: How to use Langfuse-hosted Evaluators on Dataset Runs?
+sidebarTitle: Langfuse-hosted Evaluators on Dataset Runs
+description: How to use Langfuse-hosted Evaluators on Dataset Runs?
+tags: [evaluation]
 ---
 
-# How do I evaluate webhook or SDK experiments with Langfuse evaluators?
+# How to use Langfuse-hosted Evaluators on Dataset Runs?
 
-Langfuse-managed evaluators ([LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators), [Jev](/docs/evaluation/evaluation-methods/jev-as-a-judge)) receive **expected output** only when you select them on a [prompt experiment](/docs/evaluation/experiments/experiments-via-ui).
+Before running an [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk), you will need to set up which evaluators you want to run in the Langfuse UI. You will need to configure a running evaluator in the following format:
 
-They do not get expected output when a [rule](/docs/evaluation/core-concepts#evaluators-and-rules) scores incoming observations — including observations created by a [webhook](/docs/evaluation/experiments/experiments-via-sdk#configure-webhook) or the [SDK experiment runner](/docs/evaluation/experiments/experiments-via-sdk).
+- **Dataset**: Filter which source dataset the evaluator should run on.
+- **Scope**: Choose whether to target only new Dataset Runs and/or execute the evaluator on past Dataset Runs (for backfilling).
+- **Sampling**: To manage costs and evaluation throughput, you can configure the evaluator to run on a percentage (e.g., 5%) of Dataset Run items.
 
-That is why a similarity judge often returns `0` on webhook runs: `{{expected_output}}` (or `{{ground_truth}}`) is empty, so the judge follows an instruction such as "if expected output is missing, return 0".
-
-## What to do instead
-
-| How the experiment runs                                                              | How to attach scores that need expected output                                                                                         |
-| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| [Remote webhook](/docs/evaluation/experiments/experiments-via-sdk#configure-webhook) | Score in the webhook after you fetch the dataset, or call the SDK runner from the webhook. The trigger dialog has no evaluator picker. |
-| [SDK experiment runner](/docs/evaluation/experiments/experiments-via-sdk#evaluators) | Pass `evaluators` / `run_evaluators`. Those functions receive `expected_output` / `expectedOutput`.                                    |
-| [Prompt experiment](/docs/evaluation/experiments/experiments-via-ui)                 | Select the evaluator on the run and map **Expected Output**.                                                                           |
-| Observation-level [rule](/docs/evaluation/get-started/online)                        | Use only for **reference-free** checks. Do not map expected output.                                                                    |
-
-`{{ground_truth}}` is not a reserved parameter. You name prompt variables yourself. Mapping a variable to **Expected Output** is what supplies the dataset label, and that mapping is empty on the rule path.
-
-See [Evaluate externally run experiments](/docs/evaluation/experiments/evaluate-external-experiments) for the full decision table, why a rule cannot follow the dataset-item link, and how to test what the judge received.
+See the [llm-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) documentation for more details.

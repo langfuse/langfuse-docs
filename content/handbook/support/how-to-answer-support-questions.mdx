@@ -855,7 +855,6 @@ Related FAQ: [/faq/all/observation-eval-not-executing](/faq/all/observation-eval
 - **"How do I version a dataset?"**: datasets are versioned automatically; experiments pin to a snapshot. See the experiments docs.
 - **Java / non-Python SDK** running experiments, they must propagate the right OTEL attributes (`langfuse.experiment.id`, `langfuse.experiment.dataset.id`, `langfuse.experiment.item.id`, `langfuse.experiment.item.root_observation_id`) on the trace. The official `langfuse-java` client covers prompts and scores via the public API but does not provide native tracing, so experiments require manual OTEL attribute propagation; route to engineering for the canonical attribute schema. See GitHub #13438.
 - **Experiments in CI**: point to the GitHub Action for Langfuse Experiments.
-- **"How do I add a Langfuse evaluator to webhook / Custom Experiment runs?"**: the webhook only triggers the customer's endpoint. Observation-level rules cannot map expected output, so similarity judges score `0`. Point them to [Evaluate externally run experiments](/docs/evaluation/experiments/evaluate-external-experiments): score in the webhook or use the SDK runner; select managed evaluators only on prompt experiments.
 
 Related FAQ: [/faq/all/langfuse-evaluators-on-dataset-runs](/faq/all/langfuse-evaluators-on-dataset-runs).
 
