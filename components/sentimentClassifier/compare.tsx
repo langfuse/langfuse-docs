@@ -117,7 +117,6 @@ export const SentimentClassifierCompare = ({
   const [input, setInput] = useState("");
   const [taskCount, setTaskCount] = useState(1);
   const [jevLoading, setJevLoading] = useState(false);
-  const [inputText, setInputText] = useState<string | null>(null);
   const [jev, setJev] = useState<EngineState | null>(null);
   const [jevError, setJevError] = useState<string | null>(null);
   const [llmSlots, setLlmSlots] = useState<LlmSlots | null>(null);
@@ -175,7 +174,6 @@ export const SentimentClassifierCompare = ({
       classification_count: tasks.length,
     });
 
-    setInputText(textToAnalyze);
     clearRun();
     setJevLoading(true);
 
@@ -317,13 +315,6 @@ export const SentimentClassifierCompare = ({
                 </Suggestion>
               ))}
             </Suggestions>
-          </div>
-        )}
-
-        {(hasResults || loading) && inputText && !compact && (
-          <div className="p-3 rounded-[2px] border border-line-structure bg-[#403d391a] dark:bg-[#b8b6a01a] text-sm text-text-secondary">
-            <span className="font-medium text-text-primary">Analyzed: </span>
-            {inputText}
           </div>
         )}
 
