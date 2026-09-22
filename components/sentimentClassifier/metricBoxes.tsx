@@ -21,46 +21,46 @@ type MetricBoxProps = {
   luna: EngineMetric;
   format: (value: number) => string;
   cheaperOrFaster: "faster" | "cheaper";
-  jevDetail?: string;
-  lunaDetail?: string;
 };
 
-const EngineRow = ({
-  label,
+const MetricValue = ({
   metric,
   format,
-  detail,
 }: {
-  label: string;
   metric: EngineMetric;
   format: (value: number) => string;
-  detail?: string;
-}) => (
-  <div className="flex items-baseline justify-between gap-3 text-sm">
-    <span className="text-text-secondary">{label}</span>
-    <span className="tabular-nums text-text-primary font-medium text-right">
-      {metric.loading && metric.value == null ? (
-        <span className="inline-flex items-center gap-1.5 text-muted-foreground font-normal">
-          <Loader size={12} />
-          Running…
-        </span>
-      ) : metric.error && metric.value == null ? (
-        <span className="text-muted-foreground font-normal">—</span>
-      ) : metric.value != null ? (
-        <>
-          {format(metric.value)}
-          {detail ? (
-            <span className="block text-[11px] font-normal text-muted-foreground">
-              {detail}
-            </span>
-          ) : null}
-        </>
-      ) : (
-        <span className="text-muted-foreground font-normal">—</span>
-      )}
-    </span>
-  </div>
-);
+}) => {
+  if (metric.loading && metric.value == null) {
+    return (
+      <span className="inline-flex items-center gap-1 text-muted-foreground font-normal">
+        <Loader size={11} />
+        Running
+      </span>
+    );
+  }
+  if (metric.value != null) {
+    return (
+      <span className="tabular-nums text-text-primary font-medium">
+        {format(metric.value)}
+      </span>
+    );
+  }
+  return <span className="text-muted-foreground font-normal">—</span>;
+};
+
+const summaryFor = (
+  jev: EngineMetric,
+  luna: EngineMetric,
+  cheaperOrFaster: "faster" | "cheaper",
+) => {
+  if (jev.loading || luna.loading) return null;
+  const ratio = comparisonRatio(luna.value, jev.value);
+  if (ratio == null) return null;
+  if (ratio >= 1.05) return `Jev ${formatRatio(ratio)} ${cheaperOrFaster}`;
+  if (ratio <= 1 / 1.05)
+    return `Luna ${formatRatio(1 / ratio)} ${cheaperOrFaster}`;
+  return "About the same";
+};
 
 const MetricBox = ({
   title,
@@ -68,37 +68,21 @@ const MetricBox = ({
   luna,
   format,
   cheaperOrFaster,
-  jevDetail,
-  lunaDetail,
 }: MetricBoxProps) => {
-  const settled = !jev.loading && !luna.loading;
-  const ratio = settled ? comparisonRatio(luna.value, jev.value) : null;
-  const jevWins = ratio != null && ratio >= 1.05;
-  const lunaWins = ratio != null && ratio > 0 && ratio <= 1 / 1.05;
-
-  let summary: string | null = null;
-  if (jevWins && ratio)
-    summary = `Jev was ${formatRatio(ratio)} ${cheaperOrFaster}`;
-  else if (lunaWins && ratio)
-    summary = `Luna was ${formatRatio(1 / ratio)} ${cheaperOrFaster}`;
-  else if (ratio != null) summary = "About the same";
+  const summary = summaryFor(jev, luna, cheaperOrFaster);
 
   return (
     <div className="rounded-[2px] border border-line-structure p-4 space-y-3">
       <h3 className="text-sm font-semibold text-text-primary">{title}</h3>
-      <div className="space-y-2">
-        <EngineRow
-          label="TypeSafe Jev"
-          metric={jev}
-          format={format}
-          detail={jevDetail}
-        />
-        <EngineRow
-          label="GPT-5.6 Luna"
-          metric={luna}
-          format={format}
-          detail={lunaDetail}
-        />
+      <div className="space-y-2 text-sm">
+        <div className="flex items-baseline justify-between gap-3">
+          <span className="text-text-secondary">TypeSafe Jev</span>
+          <MetricValue metric={jev} format={format} />
+        </div>
+        <div className="flex items-baseline justify-between gap-3">
+          <span className="text-text-secondary">GPT-5.6 Luna</span>
+          <MetricValue metric={luna} format={format} />
+        </div>
       </div>
       {summary && (
         <p className="text-xs font-medium text-text-primary border-t border-line-structure pt-3">
@@ -107,18 +91,6 @@ const MetricBox = ({
       )}
     </div>
   );
-};
-
-const usageDetail = (usage?: SentimentUsage | null) => {
-  if (!usage) return undefined;
-  const parts = [`${usage.inputTokens.toLocaleString()} in`];
-  if (usage.outputTokens > 0) {
-    parts.push(`${usage.outputTokens.toLocaleString()} out`);
-  }
-  if (usage.reasoningTokens && usage.reasoningTokens > 0) {
-    parts.push(`${usage.reasoningTokens.toLocaleString()} reasoning`);
-  }
-  return parts.join(" · ");
 };
 
 type CompareMetricBoxesProps = {
@@ -130,6 +102,7 @@ type CompareMetricBoxesProps = {
   lunaLoading: boolean;
   jevError: boolean;
   lunaError: boolean;
+  compact?: boolean;
 };
 
 export const CompareMetricBoxes = ({
@@ -141,39 +114,80 @@ export const CompareMetricBoxes = ({
   lunaLoading,
   jevError,
   lunaError,
-}: CompareMetricBoxesProps) => (
-  <div className="grid gap-4 md:grid-cols-2">
-    <MetricBox
-      title="Latency"
-      cheaperOrFaster="faster"
-      format={formatLatencyMs}
-      jev={{
-        value: jevLatencyMs,
-        loading: jevLoading,
-        error: jevError,
-      }}
-      luna={{
-        value: lunaLatencyMs,
-        loading: lunaLoading,
-        error: lunaError,
-      }}
-    />
-    <MetricBox
-      title="Cost"
-      cheaperOrFaster="cheaper"
-      format={formatCostUsd}
-      jev={{
-        value: jevUsage?.costUsd ?? null,
-        loading: jevLoading,
-        error: jevError,
-      }}
-      luna={{
-        value: lunaUsage?.costUsd ?? null,
-        loading: lunaLoading,
-        error: lunaError,
-      }}
-      jevDetail={usageDetail(jevUsage)}
-      lunaDetail={usageDetail(lunaUsage)}
-    />
-  </div>
-);
+  compact = false,
+}: CompareMetricBoxesProps) => {
+  const latency = {
+    jev: {
+      value: jevLatencyMs,
+      loading: jevLoading,
+      error: jevError,
+    },
+    luna: {
+      value: lunaLatencyMs,
+      loading: lunaLoading,
+      error: lunaError,
+    },
+  };
+  const cost = {
+    jev: {
+      value: jevUsage?.costUsd ?? null,
+      loading: jevLoading,
+      error: jevError,
+    },
+    luna: {
+      value: lunaUsage?.costUsd ?? null,
+      loading: lunaLoading,
+      error: lunaError,
+    },
+  };
+
+  if (compact) {
+    const latencySummary = summaryFor(latency.jev, latency.luna, "faster");
+    const costSummary = summaryFor(cost.jev, cost.luna, "cheaper");
+    return (
+      <div className="rounded-[2px] border border-line-structure px-2.5 py-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+        <span className="text-text-secondary">
+          <span className="font-medium text-text-primary">Latency</span> Jev{" "}
+          <MetricValue metric={latency.jev} format={formatLatencyMs} />
+          <span className="text-muted-foreground"> · </span>
+          Luna <MetricValue metric={latency.luna} format={formatLatencyMs} />
+          {latencySummary && (
+            <span className="ml-1.5 font-medium text-text-primary">
+              {latencySummary}
+            </span>
+          )}
+        </span>
+        <span className="text-text-secondary">
+          <span className="font-medium text-text-primary">Cost</span> Jev{" "}
+          <MetricValue metric={cost.jev} format={formatCostUsd} />
+          <span className="text-muted-foreground"> · </span>
+          Luna <MetricValue metric={cost.luna} format={formatCostUsd} />
+          {costSummary && (
+            <span className="ml-1.5 font-medium text-text-primary">
+              {costSummary}
+            </span>
+          )}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <MetricBox
+        title="Latency"
+        cheaperOrFaster="faster"
+        format={formatLatencyMs}
+        jev={latency.jev}
+        luna={latency.luna}
+      />
+      <MetricBox
+        title="Cost"
+        cheaperOrFaster="cheaper"
+        format={formatCostUsd}
+        jev={cost.jev}
+        luna={cost.luna}
+      />
+    </div>
+  );
+};

@@ -75,29 +75,36 @@ const LlmTaskSlot = ({
   }
 
   if (slot?.status === "error") {
-    return (
-      <div className="space-y-2">
-        <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+    return compact ? (
+      <div className="flex items-center gap-2 min-h-6 text-xs">
+        <span className="w-[4.75rem] shrink-0 text-[11px] text-muted-foreground">
           {definition.name}
-        </p>
-        <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
-          {slot.error}
-        </div>
+        </span>
+        <span className="text-destructive truncate">{slot.error}</span>
+      </div>
+    ) : (
+      <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+        {slot.error}
       </div>
     );
   }
 
-  return (
-    <div className="space-y-2 py-1">
-      <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+  return compact ? (
+    <div className="flex items-center gap-2 min-h-6 text-xs text-muted-foreground">
+      <span className="w-[4.75rem] shrink-0 text-[11px]">
         {definition.name}
-      </p>
-      <div className="flex items-center gap-2 text-muted-foreground text-sm">
-        <Loader size={16} />
+      </span>
+      <Loader size={12} />
+      <span>
         {total === 1
           ? ENGINE_CONFIG.llm.loading
-          : `Call ${index + 1} of ${total} running in parallel…`}
-      </div>
+          : `Call ${index + 1} of ${total} running…`}
+      </span>
+    </div>
+  ) : (
+    <div className="flex items-center gap-2 text-muted-foreground text-sm py-2">
+      <Loader size={16} />
+      {ENGINE_CONFIG.llm.loading}
     </div>
   );
 };
@@ -230,69 +237,65 @@ export const SentimentClassifierCompare = ({
 
   return (
     <div className={cn(className)} {...props}>
-      <div className="rounded-[2px] border border-line-structure bg-surface-bg corner-box-corners p-5 space-y-4">
-        <div className="space-y-3">
+      <div
+        className={cn(
+          "rounded-[2px] border border-line-structure bg-surface-bg corner-box-corners",
+          compact ? "p-3 space-y-2" : "p-4 space-y-3",
+        )}
+      >
+        <div className={compact ? "space-y-2" : "space-y-2.5"}>
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Enter text to analyze..."
-            className="w-full h-28 p-3 rounded-[2px] border border-line-structure bg-surface-bg text-text-secondary text-sm shadow-sm resize-none focus:outline-none focus:ring-1 focus:ring-line-cta"
+            className={cn(
+              "w-full rounded-[2px] border border-line-structure bg-surface-bg text-text-secondary text-sm shadow-sm resize-none focus:outline-none focus:ring-1 focus:ring-line-cta",
+              compact ? "h-12 p-2" : "h-24 p-2.5",
+            )}
           />
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div className="space-y-1.5">
-              <p className="text-xs font-medium text-text-primary">
-                Classifications
-              </p>
-              <div className="inline-flex rounded-[2px] border border-line-structure p-0.5">
-                {CLASSIFIER_SEQUENCE.map((_, index) => {
-                  const count = index + 1;
-                  const active = taskCount === count;
-                  return (
-                    <button
-                      key={count}
-                      type="button"
-                      onClick={() => handleTaskCount(count)}
-                      disabled={loading}
-                      aria-pressed={active}
-                      className={cn(
-                        "min-w-8 h-7 px-2.5 text-xs font-medium rounded-[2px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
-                        active
-                          ? "bg-text-primary text-surface-bg"
-                          : "text-text-secondary hover:text-text-primary",
-                      )}
-                    >
-                      {count}
-                    </button>
-                  );
-                })}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {selected.map((definition) => definition.name).join(" · ")}
-              </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-medium text-text-primary">
+              Classifications
+            </span>
+            <div className="inline-flex rounded-[2px] border border-line-structure p-0.5">
+              {CLASSIFIER_SEQUENCE.map((_, index) => {
+                const count = index + 1;
+                const active = taskCount === count;
+                return (
+                  <button
+                    key={count}
+                    type="button"
+                    onClick={() => handleTaskCount(count)}
+                    disabled={loading}
+                    aria-pressed={active}
+                    className={cn(
+                      "min-w-7 h-6 px-2 text-xs font-medium rounded-[2px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+                      active
+                        ? "bg-text-primary text-surface-bg"
+                        : "text-text-secondary hover:text-text-primary",
+                    )}
+                  >
+                    {count}
+                  </button>
+                );
+              })}
             </div>
-            <p className="text-xs text-muted-foreground max-w-xs sm:text-right">
-              Jev answers all of them in one pass. Luna runs a parallel call per
-              classification.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
+            <span className="text-[11px] text-muted-foreground">
+              {selected.map((definition) => definition.name).join(" · ")}
+            </span>
             <button
               onClick={() => handleSubmit()}
               disabled={!input.trim() || loading}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-[2px] border border-line-structure bg-text-primary text-surface-bg text-sm font-medium shadow-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+              className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[2px] border border-line-structure bg-text-primary text-surface-bg text-xs font-medium shadow-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
             >
-              {loading ? <Loader size={14} /> : <SendIcon className="size-4" />}
+              {loading ? (
+                <Loader size={12} />
+              ) : (
+                <SendIcon className="size-3.5" />
+              )}
               Analyze both
             </button>
-            {loading && (
-              <span className="text-xs text-muted-foreground">
-                {selected.length > 1
-                  ? "Jev returns together; Luna calls resolve as each one finishes…"
-                  : "Results appear as each classifier finishes…"}
-              </span>
-            )}
           </div>
         </div>
 
@@ -308,7 +311,7 @@ export const SentimentClassifierCompare = ({
                     setInput(s);
                     handleSubmit(s);
                   }}
-                  className="text-xs whitespace-normal text-left h-auto py-2 max-w-64"
+                  className="text-xs whitespace-normal text-left h-auto py-1.5 max-w-64"
                 >
                   {text.length > 60 ? `${text.slice(0, 60)}...` : text}
                 </Suggestion>
@@ -317,134 +320,157 @@ export const SentimentClassifierCompare = ({
           </div>
         )}
 
-        {(hasResults || loading) && inputText && (
+        {(hasResults || loading) && inputText && !compact && (
           <div className="p-3 rounded-[2px] border border-line-structure bg-[#403d391a] dark:bg-[#b8b6a01a] text-sm text-text-secondary">
             <span className="font-medium text-text-primary">Analyzed: </span>
             {inputText}
           </div>
         )}
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-[2px] border border-line-structure p-4 space-y-3 min-h-48">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <h3 className="text-sm font-semibold text-text-primary">
-                  TypeSafe Jev
-                </h3>
-                <p className="text-[11px] text-muted-foreground">
-                  {selected.length === 1
-                    ? "1 request · 1 question"
-                    : `1 request · ${selected.length} questions`}
-                </p>
-              </div>
-              {jev?.result.model && (
-                <span className="text-[11px] text-muted-foreground font-mono">
-                  {jev.result.model}
-                </span>
+        {(hasResults || loading) && (
+          <div
+            className={cn("grid md:grid-cols-2", compact ? "gap-2" : "gap-3")}
+          >
+            <div
+              className={cn(
+                "rounded-[2px] border border-line-structure",
+                compact ? "p-2 space-y-1.5" : "p-3 space-y-2",
               )}
-            </div>
-            {jevLoading && !jev && !jevError && (
-              <div className="flex items-center gap-2 text-muted-foreground text-sm py-6 justify-center">
-                <Loader size={16} />
-                {ENGINE_CONFIG.jev.loading}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <h3 className="text-sm font-semibold text-text-primary">
+                    TypeSafe Jev
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground">
+                    {selected.length === 1
+                      ? "1 request · 1 question"
+                      : `1 request · ${selected.length} questions`}
+                  </p>
+                </div>
+                {jev?.result.model && (
+                  <span className="text-[11px] text-muted-foreground font-mono">
+                    {jev.result.model}
+                  </span>
+                )}
               </div>
-            )}
-            {jevError && (
-              <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
-                {jevError}
-              </div>
-            )}
-            {jev && (
-              <div className="space-y-4">
-                {jev.result.answers.map((answer, index) => (
-                  <div
-                    key={answer.id}
-                    className={
-                      index > 0
-                        ? "border-t border-line-structure pt-4"
-                        : undefined
-                    }
-                  >
-                    <SentimentResultPanel
-                      answer={answer}
-                      compact={compact}
-                      feedback={index === 0 ? jevFeedback : undefined}
-                      onFeedback={
-                        index === 0
-                          ? (value) => {
-                              setJevFeedback(value);
-                              scoreDemoNegativeUserFeedback({
-                                traceId: jev.traceId,
-                                value,
-                              });
-                            }
+              {jevLoading && !jev && !jevError && (
+                <div
+                  className={cn(
+                    "flex items-center gap-2 text-muted-foreground",
+                    compact ? "text-xs py-1" : "text-sm py-3",
+                  )}
+                >
+                  <Loader size={compact ? 12 : 14} />
+                  {ENGINE_CONFIG.jev.loading}
+                </div>
+              )}
+              {jevError && (
+                <div className="p-2 rounded-lg bg-destructive/10 text-destructive text-xs">
+                  {jevError}
+                </div>
+              )}
+              {jev && (
+                <div className={compact ? "space-y-1" : "space-y-4"}>
+                  {jev.result.answers.map((answer, index) => (
+                    <div
+                      key={answer.id}
+                      className={
+                        !compact && index > 0
+                          ? "border-t border-line-structure pt-4"
                           : undefined
                       }
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+                    >
+                      <SentimentResultPanel
+                        answer={answer}
+                        compact={compact}
+                        feedback={
+                          compact || index !== 0 ? undefined : jevFeedback
+                        }
+                        onFeedback={
+                          compact || index !== 0
+                            ? undefined
+                            : (value) => {
+                                setJevFeedback(value);
+                                scoreDemoNegativeUserFeedback({
+                                  traceId: jev.traceId,
+                                  value,
+                                });
+                              }
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-          <div className="rounded-[2px] border border-line-structure p-4 space-y-3 min-h-48">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <h3 className="text-sm font-semibold text-text-primary">
-                  GPT-5.6 Luna
-                </h3>
-                <p className="text-[11px] text-muted-foreground">
-                  {selected.length === 1
-                    ? "1 call · high reasoning"
-                    : `${selected.length} parallel calls · high reasoning`}
-                </p>
+            <div
+              className={cn(
+                "rounded-[2px] border border-line-structure",
+                compact ? "p-2 space-y-1.5" : "p-3 space-y-2",
+              )}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <h3 className="text-sm font-semibold text-text-primary">
+                    GPT-5.6 Luna
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground">
+                    {selected.length === 1
+                      ? "1 call · high reasoning"
+                      : `${selected.length} parallel calls · high reasoning`}
+                  </p>
+                </div>
+                {firstLlmSuccess?.model && (
+                  <span className="text-[11px] text-muted-foreground font-mono">
+                    {firstLlmSuccess.model}
+                  </span>
+                )}
               </div>
-              {firstLlmSuccess?.model && (
-                <span className="text-[11px] text-muted-foreground font-mono">
-                  {firstLlmSuccess.model}
-                </span>
+              {llmSlots && (
+                <div className={compact ? "space-y-1" : "space-y-4"}>
+                  {selected.map((definition, index) => (
+                    <div
+                      key={definition.id}
+                      className={
+                        !compact && index > 0
+                          ? "border-t border-line-structure pt-4"
+                          : undefined
+                      }
+                    >
+                      <LlmTaskSlot
+                        definition={definition}
+                        slot={llmSlots[definition.id]}
+                        index={index}
+                        total={selected.length}
+                        compact={compact}
+                        feedback={
+                          compact ||
+                          firstLlmSuccess?.answer.id !== definition.id
+                            ? undefined
+                            : llmFeedback
+                        }
+                        onFeedback={
+                          compact ||
+                          firstLlmSuccess?.answer.id !== definition.id
+                            ? undefined
+                            : (value) => {
+                                setLlmFeedback(value);
+                                scoreDemoNegativeUserFeedback({
+                                  traceId: firstLlmSuccess.traceId,
+                                  value,
+                                });
+                              }
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
-            {llmSlots && (
-              <div className="space-y-4">
-                {selected.map((definition, index) => (
-                  <div
-                    key={definition.id}
-                    className={
-                      index > 0
-                        ? "border-t border-line-structure pt-4"
-                        : undefined
-                    }
-                  >
-                    <LlmTaskSlot
-                      definition={definition}
-                      slot={llmSlots[definition.id]}
-                      index={index}
-                      total={selected.length}
-                      compact={compact}
-                      feedback={
-                        firstLlmSuccess?.answer.id === definition.id
-                          ? llmFeedback
-                          : undefined
-                      }
-                      onFeedback={
-                        firstLlmSuccess?.answer.id === definition.id
-                          ? (value) => {
-                              setLlmFeedback(value);
-                              scoreDemoNegativeUserFeedback({
-                                traceId: firstLlmSuccess.traceId,
-                                value,
-                              });
-                            }
-                          : undefined
-                      }
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
-        </div>
+        )}
 
         {showMetrics && (
           <CompareMetricBoxes
@@ -456,63 +482,67 @@ export const SentimentClassifierCompare = ({
             lunaLoading={llmPending}
             jevError={Boolean(jevError)}
             lunaError={llmAllFailed}
+            compact={compact}
           />
         )}
 
-        <div className="space-y-3 text-sm text-text-secondary leading-relaxed border-t border-line-structure pt-4">
-          <p>
-            Check out the traces of both in our{" "}
-            <a
-              href={PUBLIC_SAMPLE_PROJECT_TRACES_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => {
-                capture("demo:view_trace_in_langfuse_clicked", {
-                  source: "jev_evals_blog",
-                  trace_url: PUBLIC_SAMPLE_PROJECT_TRACES_URL,
-                });
-              }}
-              className="underline underline-offset-2 text-text-links hover:text-primary"
-            >
-              public sample project
-            </a>
-            . Look for <code className="text-xs">Sentiment-Classifier-Jev</code>{" "}
-            and <code className="text-xs">Sentiment-Classifier-GPT</code>. In
-            this example we can see two very distinct differences:
-          </p>
-          <ul className="list-disc pl-5 space-y-1.5">
-            <li>
-              Jev is a lot faster and cheaper than GPT-5.6 Luna with high
-              reasoning. Add classifications with the 1–4 control: Jev keeps one
-              request, Luna runs parallel calls that resolve independently so
-              cost scales with the count. Latency and estimated cost are
-              compared below the results.
-            </li>
-            <li>
-              Jev returns a decision and confidence only, with no reasoning.
-              Luna returns an explanation and key phrases after thinking.
-            </li>
-          </ul>
-          <p className="text-xs text-muted-foreground">
-            The interactive{" "}
-            <a
-              href="/docs/demo#sentiment"
-              className="underline underline-offset-2 hover:text-foreground"
-            >
-              example project
-            </a>{" "}
-            demo tab shows the Jev classifier only.{" "}
-            <a
-              href="https://cloud.langfuse.com/auth/sign-up"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline underline-offset-2 hover:text-foreground"
-            >
-              Sign up for Langfuse Cloud
-            </a>{" "}
-            (free) for view access to the shared project.
-          </p>
-        </div>
+        <p
+          className={cn(
+            "text-[11px] text-muted-foreground border-t border-line-structure",
+            compact ? "pt-2" : "pt-3",
+          )}
+        >
+          Traces in the{" "}
+          <a
+            href={PUBLIC_SAMPLE_PROJECT_TRACES_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => {
+              capture("demo:view_trace_in_langfuse_clicked", {
+                source: "jev_evals_blog",
+                trace_url: PUBLIC_SAMPLE_PROJECT_TRACES_URL,
+              });
+            }}
+            className="underline underline-offset-2 text-text-links hover:text-primary"
+          >
+            public sample project
+          </a>
+          {compact
+            ? ". "
+            : " (`Sentiment-Classifier-Jev`, `Sentiment-Classifier-GPT`). Jev is faster and cheaper and returns a decision only; Luna adds reasoning. "}
+          {compact ? (
+            <>
+              The{" "}
+              <a
+                href="/docs/demo#sentiment"
+                className="underline underline-offset-2 hover:text-foreground"
+              >
+                example project
+              </a>{" "}
+              tab is Jev-only.
+            </>
+          ) : (
+            <>
+              The{" "}
+              <a
+                href="/docs/demo#sentiment"
+                className="underline underline-offset-2 hover:text-foreground"
+              >
+                example project
+              </a>{" "}
+              tab is Jev-only.{" "}
+              <a
+                href="https://cloud.langfuse.com/auth/sign-up"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:text-foreground"
+              >
+                Sign up for Langfuse Cloud
+              </a>{" "}
+              (free) for view access.
+            </>
+          )}
+        </p>
       </div>
     </div>
   );

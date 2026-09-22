@@ -44,6 +44,71 @@ export const SentimentResultPanel = ({
   const showReasoning = Boolean(
     answer.explanation || answer.keyPhrases?.length,
   );
+  const valueLabel = answer.value.replaceAll("_", " ");
+  const confidencePct = Math.round(answer.confidence * 100);
+
+  if (compact) {
+    const compactRow = (showWhy: boolean) => (
+      <div className="flex items-center gap-2 min-h-6">
+        <span className="w-[4.75rem] shrink-0 text-[11px] text-muted-foreground">
+          {answer.name}
+        </span>
+        <span
+          className={cn(
+            "inline-flex items-center px-1.5 py-px rounded-[2px] text-xs font-semibold capitalize shrink-0",
+            colors.bg,
+            colors.text,
+          )}
+        >
+          {valueLabel}
+        </span>
+        <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
+          <div
+            className={cn(
+              "h-full rounded-full transition-all duration-500",
+              colors.bar,
+            )}
+            style={{ width: `${answer.confidence * 100}%` }}
+          />
+        </div>
+        <span className="w-8 shrink-0 text-right text-[11px] tabular-nums text-muted-foreground">
+          {confidencePct}%
+        </span>
+        {showWhy && (
+          <span className="shrink-0 text-[11px] text-muted-foreground group-open:text-foreground">
+            Why
+          </span>
+        )}
+      </div>
+    );
+
+    if (!showReasoning) return compactRow(false);
+
+    return (
+      <details className="group">
+        <summary className="list-none cursor-pointer [&::-webkit-details-marker]:hidden">
+          {compactRow(true)}
+        </summary>
+        <div className="pl-[4.75rem] pt-1 space-y-1">
+          {answer.explanation && (
+            <div className="text-xs text-foreground">{answer.explanation}</div>
+          )}
+          {answer.keyPhrases && answer.keyPhrases.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {answer.keyPhrases.map((phrase, i) => (
+                <span
+                  key={i}
+                  className="inline-flex items-center px-1.5 py-px rounded-[2px] border border-line-structure bg-[#403d391a] dark:bg-[#b8b6a01a] text-[11px] text-text-secondary"
+                >
+                  {phrase}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </details>
+    );
+  }
 
   return (
     <div className="space-y-3">
@@ -59,13 +124,13 @@ export const SentimentResultPanel = ({
               colors.text,
             )}
           >
-            {answer.value.replaceAll("_", " ")}
+            {valueLabel}
           </span>
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
             <span>Confidence</span>
-            <span>{Math.round(answer.confidence * 100)}%</span>
+            <span>{confidencePct}%</span>
           </div>
           <div className="h-2 rounded-full bg-muted overflow-hidden">
             <div
@@ -135,7 +200,7 @@ export const SentimentResultPanel = ({
         </div>
       )}
 
-      {showReasoning && !compact && (
+      {showReasoning && (
         <>
           {answer.explanation && (
             <div className="text-sm text-foreground">{answer.explanation}</div>
@@ -158,33 +223,6 @@ export const SentimentResultPanel = ({
             </div>
           )}
         </>
-      )}
-
-      {showReasoning && compact && (
-        <details className="text-sm">
-          <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground">
-            Show reasoning
-          </summary>
-          <div className="mt-2 space-y-2">
-            {answer.explanation && (
-              <div className="text-sm text-foreground">
-                {answer.explanation}
-              </div>
-            )}
-            {answer.keyPhrases && answer.keyPhrases.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {answer.keyPhrases.map((phrase, i) => (
-                  <span
-                    key={i}
-                    className="inline-flex items-center px-2 py-0.5 rounded-[2px] border border-line-structure bg-[#403d391a] dark:bg-[#b8b6a01a] text-xs text-text-secondary"
-                  >
-                    {phrase}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-        </details>
       )}
 
       {onFeedback && (
