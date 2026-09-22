@@ -73,20 +73,20 @@ export const getPersistedSentimentUserId = () =>
     prefix: "u-",
   });
 
+export type ClassifySentimentSuccess = {
+  result: JevSentimentResult | LlmSentimentResult;
+  traceId: string;
+};
+
+export type ClassifySentimentOutcome =
+  | { ok: true; data: ClassifySentimentSuccess }
+  | { ok: false; error: string };
+
 export async function classifySentiment(
   engine: SentimentEngine,
   text: string,
   userId: string,
-): Promise<
-  | {
-      ok: true;
-      data: {
-        result: JevSentimentResult | LlmSentimentResult;
-        traceId: string;
-      };
-    }
-  | { ok: false; error: string }
-> {
+): Promise<ClassifySentimentOutcome> {
   try {
     const res = await fetch(ENGINE_CONFIG[engine].endpoint, {
       method: "POST",

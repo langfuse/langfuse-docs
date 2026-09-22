@@ -63,25 +63,25 @@ export const SentimentClassifierCompare = ({
 
     // Paint each column as soon as its classifier returns — Jev usually lands first.
     void classifySentiment("jev", textToAnalyze, userId).then((outcome) => {
-      if (outcome.ok) {
+      if (outcome.ok === false) {
+        setJevError(outcome.error);
+      } else {
         setJev({
           result: outcome.data.result as JevSentimentResult,
           traceId: outcome.data.traceId,
         });
-      } else {
-        setJevError(outcome.error);
       }
       setJevLoading(false);
     });
 
     void classifySentiment("llm", textToAnalyze, userId).then((outcome) => {
-      if (outcome.ok) {
+      if (outcome.ok === false) {
+        setLlmError(outcome.error);
+      } else {
         setLlm({
           result: outcome.data.result as LlmSentimentResult,
           traceId: outcome.data.traceId,
         });
-      } else {
-        setLlmError(outcome.error);
       }
       setLlmLoading(false);
     });

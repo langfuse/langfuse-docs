@@ -53,10 +53,10 @@ export const SentimentClassifier = ({
     setFeedback(null);
 
     const outcome = await classifySentiment(engine, textToAnalyze, userId);
-    if (outcome.ok) {
-      setResult({ ...outcome.data, inputText: textToAnalyze });
-    } else {
+    if (outcome.ok === false) {
       setError(outcome.error);
+    } else {
+      setResult({ ...outcome.data, inputText: textToAnalyze });
     }
     setLoading(false);
   };
