@@ -69,6 +69,7 @@ Framework integrations usually get this right automatically. If you're instrumen
 **Beware of aggregating LLM calls.** You should see a <Fan size={16} className="text-muted-magenta inline" /> `generation` for each model invocation in an agent loop, interleaved with the <Wrench size={16} className="text-orange-600 inline" /> `tool` calls it requested. Avoid wrapping the whole loop in one parent generation that only records the final output. This would make it impossible to:
 
 - see what the agent decided after each tool result
+- see the [thinking](#capture-thinking) behind each decision
 - see which tool call has blown up your agent's context window (useful when optimizing cost)
 
 <div className="grid grid-cols-1 md:grid-cols-2 mt-4 gap-4">
@@ -83,13 +84,21 @@ Framework integrations usually get this right automatically. If you're instrumen
 
 <div>
 
-**Each model invocation as its own generation.** You can see reasoning, tokens, cost after every step.
+**Each model invocation as its own generation.** You can see thinking, tokens, and cost after every step.
 
 ![Agent loop with interleaved generations](/images/docs/faq/good-trace-agent-interleaved-generations.png)
 
 </div>
 
 </div>
+
+### Is thinking captured? [#capture-thinking]
+
+Reasoning models produce **thinking** (also called **reasoning**) before they answer or call a tool. That text should appear on each `generation` in the tree, not only on the final action.
+
+When a later tool call or answer is wrong, thinking is often the only record of why. A `refund_order` call can look valid while the thinking shows a bad assumption — for example, treating a repeated question as a duplicate charge. [Reasoning tokens](/docs/observability/features/token-and-cost-tracking#cost-inference-for-reasoning-models) on the generation tell you that the model thought, not what it thought.
+
+Native [integrations](/integrations) usually capture thinking when the provider returns it. If you instrument manually, include it in the generation output so Langfuse can render it as a thinking block. Some providers hide the raw chain of thought and only return a summary when you opt in — request and store that summary if it is all you get.
 
 ### Is there noise you don't need?
 
@@ -136,6 +145,7 @@ Typical input/output for `GENERATION` observations:
 - For a chatbot: the user message (input) and the assistant response (output).
 - For a RAG pipeline: the user query and the generated answer.
 - For a classification task: the text being classified and the predicted label.
+- For a reasoning model: the prompt as input, and both the [thinking](#capture-thinking) and the final answer or tool call as output.
 
 <Callout type="info">
 
