@@ -5,51 +5,33 @@ import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 import { Loader } from "@/components/ai-elements/loader";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
-import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId";
 import { scoreDemoNegativeUserFeedback } from "@/components/demoLangfuseBrowserClients";
-import { SendIcon, ThumbsUpIcon, ThumbsDownIcon } from "lucide-react";
+import { SendIcon } from "lucide-react";
+import {
+  EXAMPLE_TEXTS,
+  ENGINE_CONFIG,
+  type JevSentimentResult,
+  type LlmSentimentResult,
+  type SentimentEngine,
+  classifySentiment,
+  getPersistedSentimentUserId,
+} from "./shared";
+import { SentimentResultPanel } from "./resultPanel";
 
-type SentimentResult = {
-  sentiment: "positive" | "negative" | "neutral";
-  confidence: number;
-  explanation: string;
-  keyPhrases: string[];
+type SentimentClassifierProps = HTMLAttributes<HTMLDivElement> & {
+  /** Jev is the example-project classifier. `llm` is available for reuse elsewhere. */
+  engine?: SentimentEngine;
 };
-
-const EXAMPLE_TEXTS = [
-  "The product quality exceeded all my expectations. Customer service was incredibly helpful and responsive!",
-  "I'm extremely disappointed with the delivery. The package arrived damaged and two weeks late.",
-  "The meeting is scheduled for 3pm in conference room B. Please bring your laptop.",
-];
-
-const SENTIMENT_COLORS = {
-  positive: {
-    bg: "bg-green-100 dark:bg-green-900/30",
-    text: "text-green-800 dark:text-green-300",
-    bar: "bg-green-500",
-  },
-  negative: {
-    bg: "bg-red-100 dark:bg-red-900/30",
-    text: "text-red-800 dark:text-red-300",
-    bar: "bg-red-500",
-  },
-  neutral: {
-    bg: "bg-yellow-100 dark:bg-yellow-900/30",
-    text: "text-yellow-800 dark:text-yellow-300",
-    bar: "bg-yellow-500",
-  },
-};
-
-type SentimentClassifierProps = HTMLAttributes<HTMLDivElement>;
 
 export const SentimentClassifier = ({
   className,
+  engine = "jev",
   ...props
 }: SentimentClassifierProps) => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{
-    result: SentimentResult;
+    result: JevSentimentResult | LlmSentimentResult;
     traceId: string;
     inputText: string;
   } | null>(null);
@@ -58,10 +40,7 @@ export const SentimentClassifier = ({
 
   const userId = useMemo(() => {
     if (typeof window === "undefined") return null;
-    return getPersistedNanoId({
-      key: "sentiment-classifier-user-id",
-      prefix: "u-",
-    });
+    return getPersistedSentimentUserId();
   }, []);
 
   const handleSubmit = async (text?: string) => {
@@ -73,49 +52,22 @@ export const SentimentClassifier = ({
     setResult(null);
     setFeedback(null);
 
-    try {
-      const res = await fetch("/api/sentiment-classifier", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: textToAnalyze, userId }),
-      });
-
-      const text = await res.text();
-      let data: any;
-      try {
-        data = text ? JSON.parse(text) : {};
-      } catch {
-        throw new Error("Invalid response from server");
-      }
-
-      if (!res.ok) {
-        throw new Error(data.error ?? `Request failed (${res.status})`);
-      }
-
-      setResult({ ...data, inputText: textToAnalyze });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setLoading(false);
+    const outcome = await classifySentiment(engine, textToAnalyze, userId);
+    if (outcome.ok === false) {
+      setError(outcome.error);
+    } else {
+      setResult({ ...outcome.data, inputText: textToAnalyze });
     }
+    setLoading(false);
   };
 
-  const handleFeedback = (value: boolean) => {
-    if (!result) return;
-    setFeedback(value);
-    scoreDemoNegativeUserFeedback({
-      traceId: result.traceId,
-      value,
-    });
-  };
-
-  const colors = result ? SENTIMENT_COLORS[result.result.sentiment] : null;
+  const jevResult =
+    result && "probabilities" in result.result ? result.result : null;
 
   return (
     <div className={cn("h-[62vh]", className)} {...props}>
       <div className="flex flex-col h-full rounded-[2px] border border-line-structure bg-surface-bg corner-box-corners p-5 relative overflow-hidden">
         <div className="flex-1 overflow-y-auto relative z-10 space-y-4">
-          {/* Input area */}
           <div className="space-y-3">
             <textarea
               value={input}
@@ -139,7 +91,6 @@ export const SentimentClassifier = ({
             </div>
           </div>
 
-          {/* Example suggestions */}
           {!result && !loading && (
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground">Try an example:</p>
@@ -161,27 +112,23 @@ export const SentimentClassifier = ({
             </div>
           )}
 
-          {/* Loading state */}
           {loading && (
             <div className="flex items-center justify-center py-8">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Loader size={16} />
-                Analyzing sentiment...
+                {ENGINE_CONFIG[engine].loading}
               </div>
             </div>
           )}
 
-          {/* Error state */}
           {error && (
             <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
               {error}
             </div>
           )}
 
-          {/* Result */}
-          {result && colors && (
+          {result && (
             <div className="space-y-4">
-              {/* Analyzed text */}
               <div className="p-3 rounded-[2px] border border-line-structure bg-[#403d391a] dark:bg-[#b8b6a01a] text-sm text-text-secondary">
                 <span className="font-medium text-text-primary">
                   Analyzed:{" "}
@@ -189,93 +136,37 @@ export const SentimentClassifier = ({
                 {result.inputText}
               </div>
 
-              {/* Sentiment badge + confidence */}
-              <div className="flex items-center gap-4">
-                <span
-                  className={cn(
-                    "inline-flex items-center px-3 py-1 rounded-[2px] text-sm font-semibold capitalize",
-                    colors.bg,
-                    colors.text,
-                  )}
-                >
-                  {result.result.sentiment}
-                </span>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                    <span>Confidence</span>
-                    <span>{Math.round(result.result.confidence * 100)}%</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    <div
-                      className={cn(
-                        "h-full rounded-full transition-all duration-500",
-                        colors.bar,
-                      )}
-                      style={{ width: `${result.result.confidence * 100}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Explanation */}
-              <div className="text-sm text-foreground">
-                {result.result.explanation}
-              </div>
-
-              {/* Key phrases */}
-              {result.result.keyPhrases.length > 0 && (
-                <div className="space-y-1.5">
-                  <p className="text-xs text-muted-foreground font-medium">
-                    Key phrases
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {result.result.keyPhrases.map((phrase, i) => (
-                      <span
-                        key={i}
-                        className="inline-flex items-center px-2 py-0.5 rounded-[2px] border border-line-structure bg-[#403d391a] dark:bg-[#b8b6a01a] text-xs text-text-secondary"
-                      >
-                        {phrase}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Feedback */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">
-                  Was this classification accurate?
-                </span>
-                <button
-                  onClick={() => handleFeedback(false)}
-                  className={cn(
-                    "p-1.5 rounded-[2px] transition-colors",
-                    feedback === false
-                      ? "text-green-700 dark:text-green-400"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
-                  )}
-                >
-                  <ThumbsUpIcon className="size-3.5" />
-                </button>
-                <button
-                  onClick={() => handleFeedback(true)}
-                  className={cn(
-                    "p-1.5 rounded-[2px] transition-colors",
-                    feedback === true
-                      ? "text-red-700 dark:text-red-400"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
-                  )}
-                >
-                  <ThumbsDownIcon className="size-3.5" />
-                </button>
-              </div>
+              <SentimentResultPanel
+                result={result.result}
+                feedback={feedback}
+                onFeedback={(value) => {
+                  setFeedback(value);
+                  scoreDemoNegativeUserFeedback({
+                    traceId: result.traceId,
+                    value,
+                  });
+                }}
+              />
             </div>
           )}
         </div>
 
         <p className="mt-4 text-xs text-muted-foreground text-center relative z-10 italic">
-          Powered by GPT-4o-mini. All interactions are traced in the public
-          example project.
+          {engine === "jev" ? (
+            <>
+              Powered by{" "}
+              <a
+                href="/integrations/model-providers/typesafe"
+                className="underline underline-offset-2 hover:text-foreground"
+              >
+                TypeSafe Jev
+              </a>
+              {jevResult?.model ? ` (${jevResult.model})` : ""}.
+            </>
+          ) : (
+            <>Powered by GPT-5.6 Luna (high reasoning).</>
+          )}{" "}
+          All interactions are traced in the public example project.
         </p>
       </div>
     </div>
