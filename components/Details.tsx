@@ -26,6 +26,7 @@ const DetailsContext = React.createContext<{ isOpen: boolean } | null>(null);
 export function Details({
   children,
   className,
+  id,
   open,
   onToggle,
   ...props
@@ -35,6 +36,52 @@ export function Details({
   React.useEffect(() => {
     setIsOpen(Boolean(open));
   }, [open]);
+
+  React.useEffect(() => {
+    if (!id) return;
+
+    const openLinkedAnswer = (hash: string) => {
+      try {
+        if (decodeURIComponent(hash.slice(1)) === id) setIsOpen(true);
+      } catch {
+        // Ignore malformed URL fragments.
+      }
+    };
+    const onHashChange = () => openLinkedAnswer(window.location.hash);
+    const onLinkClick = (event: MouseEvent) => {
+      if (
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey ||
+        !(event.target instanceof Element)
+      )
+        return;
+
+      const link = event.target.closest<HTMLAnchorElement>("a[href]");
+      if (
+        !link ||
+        (link.target && link.target !== "_self") ||
+        link.hasAttribute("download") ||
+        link.origin !== window.location.origin ||
+        link.pathname !== window.location.pathname ||
+        link.search !== window.location.search
+      )
+        return;
+
+      // Next.js can follow same-page links without emitting hashchange.
+      openLinkedAnswer(link.hash);
+    };
+
+    onHashChange();
+    window.addEventListener("hashchange", onHashChange);
+    document.addEventListener("click", onLinkClick);
+    return () => {
+      window.removeEventListener("hashchange", onHashChange);
+      document.removeEventListener("click", onLinkClick);
+    };
+  }, [id]);
 
   return (
     <DetailsContext.Provider value={{ isOpen }}>
@@ -49,7 +96,8 @@ export function Details({
             "group relative overflow-hidden bg-surface-bg [&_summary~*]:px-4 [&_summary~*]:text-text-secondary [&_summary+*]:pt-4 [&_summary~*:last-child]:pb-4 [&_summary~p:first-of-type]:mt-0 [&_summary~p:last-of-type]:mb-0",
             className,
           )}
-          open={open}
+          id={id}
+          open={isOpen}
           onToggle={(event) => {
             setIsOpen(event.currentTarget.open);
             onToggle?.(event);
