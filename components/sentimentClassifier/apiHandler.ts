@@ -5,7 +5,6 @@ import {
   setActiveTraceIO,
   getActiveTraceId,
   updateActiveObservation,
-  startActiveObservation,
 } from "@langfuse/tracing";
 import { after } from "next/server";
 import { flush } from "@/src/instrumentation";
@@ -82,62 +81,51 @@ const handler = async (req: Request) => {
       updateActiveObservation({ input: request });
 
       try {
-        const result = await startActiveObservation(
-          "classify",
-          async (generation) => {
-            generation.update({ input: request });
-
-            const response = await getClient().systemOne(request);
-            const answer = response.answers.sentiment;
-            const inputTokens = response.usage.input_tokens;
-            const outputTokens = response.usage.output_tokens;
-            const usage: SentimentUsage = {
-              inputTokens,
-              outputTokens,
-              totalTokens: inputTokens + outputTokens,
-              costUsd: computeCostUsd(
-                inputTokens,
-                outputTokens,
-                JEV_PRICE_USD_PER_MTOK,
-              ),
-            };
-            const classified: SentimentResult = {
-              sentiment: answer.choice,
-              confidence: answer.confidence,
-              probabilities: {
-                positive: answer.probabilities.positive,
-                negative: answer.probabilities.negative,
-                neutral: answer.probabilities.neutral,
-              },
-              model: response.model,
-              usage,
-            };
-
-            generation.update({
-              output: classified,
-              model: response.model,
-              metadata: {
-                provider: "typesafe",
-                questionType: "choice",
-                costUsd: usage.costUsd,
-              },
-              usageDetails: {
-                input: inputTokens,
-                output: outputTokens,
-                total: usage.totalTokens,
-              },
-              costDetails: {
-                total: usage.costUsd,
-              },
-            });
-
-            return classified;
+        const response = await getClient().systemOne(request);
+        const answer = response.answers.sentiment;
+        const inputTokens = response.usage.input_tokens;
+        const outputTokens = response.usage.output_tokens;
+        const usage: SentimentUsage = {
+          inputTokens,
+          outputTokens,
+          totalTokens: inputTokens + outputTokens,
+          costUsd: computeCostUsd(
+            inputTokens,
+            outputTokens,
+            JEV_PRICE_USD_PER_MTOK,
+          ),
+        };
+        const result: SentimentResult = {
+          sentiment: answer.choice,
+          confidence: answer.confidence,
+          probabilities: {
+            positive: answer.probabilities.positive,
+            negative: answer.probabilities.negative,
+            neutral: answer.probabilities.neutral,
           },
-          { asType: "generation" },
-        );
+          model: response.model,
+          usage,
+        };
 
         setActiveTraceIO({ output: result });
-        updateActiveObservation({ output: result });
+        updateActiveObservation({
+          input: request,
+          output: result,
+          model: response.model,
+          metadata: {
+            provider: "typesafe",
+            questionType: "choice",
+            costUsd: usage.costUsd,
+          },
+          usageDetails: {
+            input: inputTokens,
+            output: outputTokens,
+            total: usage.totalTokens,
+          },
+          costDetails: {
+            total: usage.costUsd,
+          },
+        });
 
         after(async () => await flush());
 
@@ -162,7 +150,7 @@ const handler = async (req: Request) => {
 
 export const POST = observe(handler, {
   name: "sentiment-classifier",
-  asType: "span",
+  asType: "generation",
   // Keep the result we set via updateActiveObservation; otherwise observe
   // would capture the HTTP Response object, which serializes to {}.
   captureOutput: false,

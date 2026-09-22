@@ -7,7 +7,6 @@ import {
   setActiveTraceIO,
   getActiveTraceId,
   updateActiveObservation,
-  startActiveObservation,
 } from "@langfuse/tracing";
 import { after } from "next/server";
 import { flush } from "@/src/instrumentation";
@@ -84,75 +83,64 @@ const handler = async (req: Request) => {
       updateActiveObservation({ input });
 
       try {
-        const payload = await startActiveObservation(
-          "classify",
-          async (generation) => {
-            generation.update({ input });
-
-            // Disable AI SDK OTel so we get one nested generation, not
-            // invoke_agent → chat under the observe span.
-            const result = await generateObject({
-              model: openai(LLM_MODEL),
-              schema: SentimentSchema,
-              system: LLM_SENTIMENT_SYSTEM_PROMPT,
-              prompt: `Classify the sentiment of this text:\n\n${text}`,
-              providerOptions: {
-                openai: {
-                  reasoningEffort: LLM_REASONING_EFFORT,
-                },
-              },
-              telemetry: {
-                isEnabled: false,
-              },
-            });
-
-            const inputTokens = result.usage.inputTokens ?? 0;
-            const outputTokens = result.usage.outputTokens ?? 0;
-            const reasoningTokens =
-              result.usage.outputTokenDetails?.reasoningTokens ?? 0;
-            const usage: SentimentUsage = {
-              inputTokens,
-              outputTokens,
-              reasoningTokens,
-              totalTokens: inputTokens + outputTokens,
-              costUsd: computeCostUsd(
-                inputTokens,
-                outputTokens,
-                LUNA_PRICE_USD_PER_MTOK,
-              ),
-            };
-
-            const classified: LlmSentimentResult = {
-              ...result.object,
-              model: LLM_MODEL,
-              usage,
-            };
-
-            generation.update({
-              output: classified,
-              model: LLM_MODEL,
-              metadata: {
-                reasoningEffort: LLM_REASONING_EFFORT,
-                costUsd: usage.costUsd,
-              },
-              usageDetails: {
-                input: inputTokens,
-                output: outputTokens,
-                ...(reasoningTokens > 0 ? { reasoning: reasoningTokens } : {}),
-                total: usage.totalTokens,
-              },
-              costDetails: {
-                total: usage.costUsd,
-              },
-            });
-
-            return classified;
+        // Disable AI SDK OTel so observe() is the only observation — same
+        // flat generation shape as the Jev classifier.
+        const result = await generateObject({
+          model: openai(LLM_MODEL),
+          schema: SentimentSchema,
+          system: LLM_SENTIMENT_SYSTEM_PROMPT,
+          prompt: `Classify the sentiment of this text:\n\n${text}`,
+          providerOptions: {
+            openai: {
+              reasoningEffort: LLM_REASONING_EFFORT,
+            },
           },
-          { asType: "generation" },
-        );
+          telemetry: {
+            isEnabled: false,
+          },
+        });
+
+        const inputTokens = result.usage.inputTokens ?? 0;
+        const outputTokens = result.usage.outputTokens ?? 0;
+        const reasoningTokens =
+          result.usage.outputTokenDetails?.reasoningTokens ?? 0;
+        const usage: SentimentUsage = {
+          inputTokens,
+          outputTokens,
+          reasoningTokens,
+          totalTokens: inputTokens + outputTokens,
+          costUsd: computeCostUsd(
+            inputTokens,
+            outputTokens,
+            LUNA_PRICE_USD_PER_MTOK,
+          ),
+        };
+
+        const payload: LlmSentimentResult = {
+          ...result.object,
+          model: LLM_MODEL,
+          usage,
+        };
 
         setActiveTraceIO({ output: payload });
-        updateActiveObservation({ output: payload });
+        updateActiveObservation({
+          input,
+          output: payload,
+          model: LLM_MODEL,
+          metadata: {
+            reasoningEffort: LLM_REASONING_EFFORT,
+            costUsd: usage.costUsd,
+          },
+          usageDetails: {
+            input: inputTokens,
+            output: outputTokens,
+            ...(reasoningTokens > 0 ? { reasoning: reasoningTokens } : {}),
+            total: usage.totalTokens,
+          },
+          costDetails: {
+            total: usage.costUsd,
+          },
+        });
 
         after(async () => await flush());
 
@@ -177,7 +165,7 @@ const handler = async (req: Request) => {
 
 export const POST = observe(handler, {
   name: "sentiment-classifier",
-  asType: "span",
+  asType: "generation",
   // Keep the result we set via updateActiveObservation; otherwise observe
   // would capture the HTTP Response object, which serializes to {}.
   captureOutput: false,
