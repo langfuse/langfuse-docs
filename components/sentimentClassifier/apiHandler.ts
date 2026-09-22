@@ -70,7 +70,7 @@ const handler = async (req: Request) => {
 
   return propagateAttributes(
     {
-      traceName: "Sentiment-Classifier",
+      traceName: "Sentiment-Classifier-Jev",
       tags: ["sentiment-classifier", "typesafe", "jev"],
       userId,
     },
@@ -148,7 +148,7 @@ const handler = async (req: Request) => {
 };
 
 export const POST = observe(handler, {
-  name: "sentiment-classifier",
+  name: "sentiment-classifier-jev",
   asType: "generation",
   // Keep the Jev result we set via updateActiveObservation; otherwise observe
   // would capture the HTTP Response object, which serializes to {}.

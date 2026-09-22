@@ -50,8 +50,8 @@ const handler = async (req: Request) => {
 
   return propagateAttributes(
     {
-      traceName: "Sentiment-Classifier",
-      tags: ["sentiment-classifier", "openai"],
+      traceName: "Sentiment-Classifier-GPT",
+      tags: ["sentiment-classifier", "openai", "gpt-4o-mini"],
       userId,
     },
     async () => {
@@ -64,7 +64,7 @@ const handler = async (req: Request) => {
           schema: SentimentSchema,
           prompt: `Analyze the sentiment of the following text. Classify it as positive, negative, or neutral. Provide a confidence score between 0 and 1, a brief explanation of your reasoning, and extract the key phrases that influenced your classification.\n\nText: ${text}`,
           telemetry: {
-            functionId: "sentiment-classifier",
+            functionId: "sentiment-classifier-gpt",
           },
         });
 
@@ -92,7 +92,7 @@ const handler = async (req: Request) => {
 };
 
 export const POST = observe(handler, {
-  name: "sentiment-classifier",
+  name: "sentiment-classifier-gpt",
 });
 
 export const maxDuration = 30;
