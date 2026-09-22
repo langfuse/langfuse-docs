@@ -1,0 +1,564 @@
+---
+title: "Copy our Jev eval setup"
+date: 2026/09/21
+description: "The docs chatbot monitors, rewritten as TypeSafe Jev questions you can copy: disagreement and cursing as Nouls, intent as a Choice, relevance and groundedness as Scores."
+tag: engineering
+author: Annabell
+highlight: true
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Copy our Jev eval setup"
+  description="The docs chatbot monitors, rewritten as TypeSafe Jev questions you can copy: disagreement and cursing as Nouls, intent as a Choice, relevance and groundedness as Scores."
+  date="September 21, 2026"
+  authors={["annabellschafer"]}
+/>
+
+In July we published the [eval setup for our docs chatbot](/blog/2026-07-16-steal-our-eval-setup) in full. The production monitors are almost all the same three shapes: a yes/no (did the user disagree, did they curse), a classifier (what did they ask about), and a rubric (how relevant, how grounded). That is exactly the surface [TypeSafe's Jev](/blog/2026-09-18-using-typesafes-jev-for-evals) was built for.
+
+Here is that suite rewritten as Jev questions you can copy. Run them next to the existing [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators and compare the runs.
+
+<Callout type="info">
+  To follow along, explore the [Langfuse example project](/docs/demo), the public
+  project across cloud regions
+  [EU](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi),
+  [Japan](https://jp.cloud.langfuse.com/project/cmmnj9e9n0006ad06nyz28646), and
+  [US](https://us.cloud.langfuse.com/project/cmeic4yr500qmad0772bw0tol), and the
+  [open-source chatbot
+  code](https://github.com/langfuse/langfuse-docs/tree/main/components/qaChatbot).
+  The original judge prompts live in [high-signal production
+  monitoring](/blog/2026-04-01-llm-as-a-judge-production-monitoring) and
+  [classifying user
+  intent](/blog/2026-04-14-categorical-llm-as-a-judge-user-intent).
+</Callout>
+
+Jev does not generate text. You send a state plus typed questions. You get probabilities back. [Noul](https://docs.typesafe.ai/primitives/noul) is yes or no. [Choice](https://docs.typesafe.ai/primitives/choice) picks one label from a set you define. [Score](https://docs.typesafe.ai/primitives/score) rates the state against ordered rubric levels and returns a probability-weighted value. All three can go in one request; Jev answers them in parallel.
+
+<Frame fullWidth>
+  ![Running evaluator scores for the docs chatbot including disagreement, relevance, cursing, and user intent](/images/blog/2026-07-16-steal-our-eval-setup/running-evaluator-scores.png)
+</Frame>
+
+## Which evaluators map where [#which-evaluators-map-where]
+
+The production monitors from the original writeup, mapped onto Jev's three question types:
+
+| Monitor                        | Today                      | Jev type | Langfuse score |
+| ------------------------------ | -------------------------- | -------- | -------------- |
+| User disagreeing               | Boolean LLM-as-a-judge     | Noul     | Boolean        |
+| User cursing                   | Boolean LLM-as-a-judge     | Noul     | Boolean        |
+| Input topic / user intent      | Categorical LLM-as-a-judge | Choice   | Categorical    |
+| Answer relevance               | Numeric LLM-as-a-judge     | Score    | Numeric        |
+| Groundedness in retrieved docs | Dataset LLM-as-a-judge     | Score    | Numeric        |
+
+Two things stay out of this migration. The all-caps frustration detector is a [code evaluator](/docs/evaluation/evaluation-methods/code-evaluators) and does not need a model. Keyword overlap on the experiment dataset is a deterministic match. Leave both as they are.
+
+Claim-level faithfulness, where you want a list of unsupported sentences to debug, also stays with a generative judge. Jev will not tell you which claim failed, and it cannot do the arithmetic. A Score is the Jev version of that metric: one position on a groundedness spectrum, not a claim inventory. See [RAG faithfulness evaluation](/resources/engineering/rag-faithfulness-evaluation) for the claim-extraction recipe.
+
+## Keep the state small [#keep-the-state-small]
+
+Jev [suffers from context rot](https://docs.typesafe.ai/model-jaggedness/jev-1.13). Dumping the whole session into `state` makes every question worse. Score one chatbot turn at a time, with only the fields that question needs:
+
+```json
+{
+  "conversation_history": "{{conversation_history}}",
+  "last_user_message": "{{last_user_message}}",
+  "assistant_reply": "{{assistant_reply}}",
+  "retrieved_docs": "{{retrieved_docs}}"
+}
+```
+
+`inspect` and `scope` on each question tell Jev which of those fields to actually read. If a turn has no retrieval, skip the groundedness question rather than sending an empty docs field.
+
+Pin `jev-1.13.0` (or whatever version you calibrate against). Thresholds do not travel across model releases.
+
+## User disagreeing [#user-disagreeing]
+
+A Noul. True if the latest user message rejects the assistant's prior reply. False for follow-ups, clarifications, and product complaints that are not aimed at the assistant. Same boundary as the [demo project's disagreement judge](/blog/2026-04-01-llm-as-a-judge-production-monitoring#user-disagreement).
+
+```json
+{
+  "model": "jev-1.13.0",
+  "state": {
+    "conversation_history": "{{conversation_history}}",
+    "last_user_message": "{{last_user_message}}"
+  },
+  "questions": {
+    "user_disagreement": {
+      "type": "noul",
+      "instructions": {
+        "question": "Does `last_user_message` signal disagreement with the immediately preceding assistant response?",
+        "inspect": "last_user_message",
+        "scope": [
+          "Judge the user's stance toward the assistant's prior response, not whether the product is broken.",
+          "Use `conversation_history` only to identify the last assistant turn and resolve references.",
+          "If there is no prior assistant response, the answer is false."
+        ]
+      },
+      "criteria": {
+        "true": {
+          "definition": "The last user message rejects, corrects, or challenges the assistant's prior response.",
+          "includes": [
+            "Saying the answer, assumption, or interpretation is wrong",
+            "Saying the assistant misunderstood the request",
+            "Saying they cannot find the option, setting, or step the assistant referenced",
+            "Reporting they followed the instructions and it still does not work",
+            "Repeating or rephrasing the same ask in a way that implies the prior answer missed"
+          ]
+        },
+        "false": {
+          "definition": "The last user message does not reject the prior assistant response.",
+          "includes": [
+            "A neutral follow-up or request for more detail",
+            "A new, related question that expands scope",
+            "Asking for a human without blaming the assistant",
+            "Reporting a product issue without tying it to the prior guidance",
+            "An ambiguous reaction",
+            "No prior assistant response"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+0.93 means a 93% probability of disagreement. Threshold it in your code (`>= 0.7` is a reasonable start), and send the middle band to an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues) instead of treating it as a binary. Noul has no separate confidence field; the probability is the confidence.
+
+## User cursing [#user-cursing]
+
+A second Noul on the same state. True for explicit profanity or intense frustration in the last user message. False for "ugh", "seriously?", and blunt questions. This is the [rage-click detector](/blog/2026-04-01-llm-as-a-judge-production-monitoring#user-curses) from the original setup.
+
+```json
+{
+  "user_cursing": {
+    "type": "noul",
+    "instructions": {
+      "question": "Does `last_user_message` contain explicit profanity, a strong expletive, or intense frustration beyond mild annoyance?",
+      "inspect": "last_user_message",
+      "scope": [
+        "Judge the last user message only, not assistant turns.",
+        "Mild irritation does not count.",
+        "If there is no prior assistant message, still score the last user message."
+      ]
+    },
+    "criteria": {
+      "true": {
+        "definition": "The last user message contains explicit profanity, a strong expletive, or frustration that clearly goes beyond mild annoyance.",
+        "includes": [
+          "Common expletives used in frustration",
+          "Swearing at or about the assistant or the product",
+          "Intense, explicit frustration without profanity: 'this is absolutely useless', 'this is a complete disaster'"
+        ]
+      },
+      "false": {
+        "definition": "The last user message does not contain explicit profanity or intense frustration.",
+        "includes": [
+          "Mild irritation: 'this is so annoying', 'ugh', 'seriously?'",
+          "A blunt or impatient question without profanity",
+          "Requesting a human without swearing"
+        ]
+      }
+    }
+  }
+}
+```
+
+Put `user_disagreement` and `user_cursing` in the same request. They share the state, they are independent, and Jev answers them together.
+
+## Input topic [#input-topic]
+
+A Choice. One label per user message, same six categories as the [categorical intent judge](/blog/2026-04-14-categorical-llm-as-a-judge-user-intent) on the demo project. Each option says what it is and what belongs next door, because conceptual vs. implementation is the pair Jev will otherwise split.
+
+```json
+{
+  "model": "jev-1.13.0",
+  "state": {
+    "last_user_message": "{{last_user_message}}"
+  },
+  "questions": {
+    "user_intent": {
+      "type": "choice",
+      "instructions": {
+        "question": "What is the primary intent of `last_user_message`?",
+        "inspect": "last_user_message",
+        "scope": [
+          "Classify the user's primary goal, not every topic mentioned.",
+          "Language does not affect the category."
+        ]
+      },
+      "criteria": {
+        "conceptual-question": {
+          "what": "The user wants to understand what Langfuse is, how a feature works, or wants a high-level explanation.",
+          "not_for": "The user is trying to build, integrate, debug, or deploy something.",
+          "examples": [
+            "What is Langfuse?",
+            "How does tracing work?",
+            "Explain this to a product manager."
+          ]
+        },
+        "implementation-question": {
+          "what": "The user wants to build, integrate, or write code with Langfuse, including getting started, framework integrations, debugging errors, and API usage.",
+          "not_for": "High-level 'what is X?' questions, or deploying Langfuse itself.",
+          "examples": [
+            "How do I set up tracing in Python?",
+            "My LangChain callback is not sending traces."
+          ]
+        },
+        "self-hosting": {
+          "what": "The user wants to deploy or run Langfuse on their own infrastructure: Docker, Kubernetes, local setup, or resources.",
+          "not_for": "Using Langfuse inside an application.",
+          "examples": [
+            "How do I run Langfuse with Docker Compose?",
+            "What are the ClickHouse requirements?"
+          ]
+        },
+        "pricing-and-comparison": {
+          "what": "The user asks about cost, pricing plans, or compares Langfuse to an alternative.",
+          "not_for": "A general 'what can Langfuse do?' question.",
+          "examples": [
+            "How much does the Pro plan cost?",
+            "How does Langfuse compare to LangSmith?"
+          ]
+        },
+        "ui-feedback": {
+          "what": "The user reports a UI issue, gives product feedback, or suggests a change to the Langfuse application itself.",
+          "not_for": "Asking how a feature works or how to implement something.",
+          "examples": [
+            "The traces table is not loading for me.",
+            "Please add a dark mode toggle on the dashboard."
+          ]
+        },
+        "irrelevant-to-langfuse": {
+          "what": "Greetings with no question, test messages, gibberish, or requests unrelated to Langfuse.",
+          "not_for": "Any question that is about Langfuse, even if it is poorly phrased.",
+          "examples": ["hello", "what's the weather in Berlin?"]
+        }
+      }
+    }
+  }
+}
+```
+
+Write the winning `choice` back as a categorical Langfuse score. Put `probabilities` and `confidence` in the comment. If confidence is low because two neighboring options both have mass, that is useful: those traces are the ones to review, and they tell you the category boundary needs a sharper `not_for`.
+
+## Relevance and groundedness [#relevance-and-groundedness]
+
+Two [Score](https://docs.typesafe.ai/primitives/score) questions. Relevance asks whether the answer addresses the question. Groundedness asks whether the answer stays inside the retrieved docs. They fail independently: a fluent summary of the wrong page is grounded and irrelevant; a correct answer from training data is relevant and ungrounded.
+
+TypeSafe's Score docs are insistent on this: describe situations, not degrees. "Moderately relevant" gives Jev nothing to match. Each level has to be a situation the model can recognize on its own, because it never sees the neighboring levels.
+
+```json
+{
+  "model": "jev-1.13.0",
+  "state": {
+    "last_user_message": "{{last_user_message}}",
+    "assistant_reply": "{{assistant_reply}}",
+    "retrieved_docs": "{{retrieved_docs}}"
+  },
+  "questions": {
+    "relevance": {
+      "type": "score",
+      "instructions": {
+        "question": "How well does `assistant_reply` address `last_user_message`?",
+        "inspect": ["last_user_message", "assistant_reply"],
+        "scope": [
+          "Judge question-answer fit only. Factual correctness and grounding in the docs are out of scope.",
+          "A refusal or 'I don't know' does not address the question."
+        ]
+      },
+      "criteria": [
+        {
+          "what": "The reply is about a different topic, or ignores the question.",
+          "examples": [
+            "User asks how to self-host, assistant explains cloud pricing.",
+            "User asks a tracing question, assistant greets them and lists unrelated features."
+          ]
+        },
+        {
+          "what": "The reply is related but misses the actual ask, or covers only part of a multi-part question.",
+          "examples": [
+            "User asks how to set up the Python SDK, assistant explains what tracing is.",
+            "User asks for Python and JS setup, assistant only covers Python."
+          ]
+        },
+        {
+          "what": "The reply addresses the question, but a user would still need a follow-up to act on it.",
+          "examples": [
+            "Assistant names the right docs page but does not include the steps.",
+            "Assistant answers the concept and omits the requested config snippet."
+          ]
+        },
+        {
+          "what": "The reply fully addresses the specific question the user asked.",
+          "examples": [
+            "User asks for the Python tracing snippet, assistant provides it with the required env vars.",
+            "User asks what a trace is, assistant explains the data model at the right level."
+          ]
+        }
+      ]
+    },
+    "groundedness": {
+      "type": "score",
+      "instructions": {
+        "question": "How much of `assistant_reply` is supported by `retrieved_docs`?",
+        "inspect": ["assistant_reply", "retrieved_docs"],
+        "scope": [
+          "A claim is supported only if the retrieved docs state or directly imply it, even if the claim is true.",
+          "Paraphrase counts as support. Hedges, questions back to the user, and 'I don't know' are not claims.",
+          "Do not use world knowledge."
+        ]
+      },
+      "criteria": [
+        {
+          "what": "The reply asserts product facts, API names, or setup steps that the retrieved docs do not state or imply.",
+          "examples": [
+            "Assistant invents an env var that is not in the retrieved pages.",
+            "Assistant describes a UI that the retrieved docs do not mention."
+          ]
+        },
+        {
+          "what": "Some claims in the reply are supported by the retrieved docs and some are not.",
+          "examples": [
+            "Assistant correctly quotes the tracing quickstart, then adds an undocumented SDK method.",
+            "Assistant mixes a retrieved pricing fact with a plan limit that is not in the docs."
+          ]
+        },
+        {
+          "what": "Every factual claim in the reply is stated or directly implied by the retrieved docs.",
+          "examples": [
+            "Assistant restates the Docker Compose steps from the retrieved self-hosting page.",
+            "Assistant says it cannot find the answer in the docs, and does not invent one."
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+
+A Score answer is a position, not a label. Three groundedness levels run from 0 to 2. `score: 1.43` with `probabilities` of `{ "1": 0.57, "2": 0.43 }` means Jev is split between "mixed" and "fully grounded", leaning mixed. Read `score`, `probabilities`, and `confidence` together. Different distributions can produce the same score; confidence tells you whether the mass sat on one level or spread across two.
+
+For dashboards that expect 0–1, divide by the top level number (`len(criteria) - 1`) in your code. That is also what you want when you compare this Score against the existing numeric LLM-as-a-judge.
+
+## Write the scores back [#write-the-scores-back]
+
+Pull the turn via the [API](/docs/api-and-data-platform/features/query-via-sdk), ask Jev, write four Langfuse [scores](/docs/evaluation/evaluation-methods/scores-via-sdk). The observation-fetching pattern, including collapsing tool-loop generations into one turn, is in the [Jev evals post](/blog/2026-09-18-using-typesafes-jev-for-evals#how-to-use-jev-to-evaluate-your-langfuse-traces). This is the scoring half: one request, every monitor.
+
+```python
+"""Score one docs-chatbot turn with TypeSafe Jev and write Langfuse scores.
+
+    pip install -U langfuse typesafe-sdk
+
+    export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+    export LANGFUSE_SECRET_KEY="sk-lf-..."
+    export LANGFUSE_BASE_URL="https://cloud.langfuse.com"
+    export TYPESAFE_API_KEY="..."
+"""
+
+from langfuse import get_client
+from typesafe_sdk import Choice, Noul, NoulCriteria, Score, TypeSafeClient
+
+MODEL = "jev-1.13.0"
+NOUL_THRESHOLD = 0.7
+langfuse = get_client()
+
+QUESTIONS = {
+    "user_disagreement": Noul(
+        instructions=(
+            "Does `last_user_message` signal disagreement with the immediately "
+            "preceding assistant response? Judge the user's stance toward the "
+            "assistant, not whether the product is broken. False if there is no "
+            "prior assistant response."
+        ),
+        criteria=NoulCriteria(
+            true=(
+                "The user rejects, corrects, or challenges the prior response: "
+                "says it is wrong, says it misunderstood them, cannot find the "
+                "referenced step, followed the instructions and it still failed, "
+                "or repeats the same ask."
+            ),
+            false=(
+                "A follow-up, a new related question, a product complaint not "
+                "aimed at the assistant, a request for a human, or no prior "
+                "assistant response."
+            ),
+        ),
+    ),
+    "user_cursing": Noul(
+        instructions=(
+            "Does `last_user_message` contain explicit profanity, a strong "
+            "expletive, or intense frustration beyond mild annoyance?"
+        ),
+        criteria=NoulCriteria(
+            true=(
+                "Explicit profanity, swearing at the assistant or product, or "
+                "intense frustration such as 'this is absolutely useless'."
+            ),
+            false=(
+                "Mild irritation ('ugh', 'seriously?'), a blunt question, or "
+                "asking for a human without swearing."
+            ),
+        ),
+    ),
+    "user_intent": Choice(
+        instructions=(
+            "What is the primary intent of `last_user_message`? Classify the "
+            "user's primary goal. Language does not affect the category."
+        ),
+        criteria={
+            "conceptual-question": (
+                "Wants to understand what Langfuse is or how a feature works. "
+                "Not trying to build, debug, or deploy."
+            ),
+            "implementation-question": (
+                "Wants to build, integrate, or write code with Langfuse, "
+                "including debugging errors and API usage."
+            ),
+            "self-hosting": (
+                "Wants to deploy or run Langfuse on their own infrastructure."
+            ),
+            "pricing-and-comparison": (
+                "Asks about cost, plans, or compares Langfuse to an alternative."
+            ),
+            "ui-feedback": (
+                "Reports a UI issue or suggests a change to the Langfuse app."
+            ),
+            "irrelevant-to-langfuse": (
+                "Greeting, test message, gibberish, or unrelated request."
+            ),
+        },
+    ),
+    "relevance": Score(
+        instructions=(
+            "How well does `assistant_reply` address `last_user_message`? "
+            "Judge question-answer fit only. A refusal is not relevant."
+        ),
+        criteria=[
+            "The reply is about a different topic, or ignores the question.",
+            "The reply is related but misses the actual ask, or covers only part of a multi-part question.",
+            "The reply addresses the question, but a user would still need a follow-up to act on it.",
+            "The reply fully addresses the specific question the user asked.",
+        ],
+    ),
+    "groundedness": Score(
+        instructions=(
+            "How much of `assistant_reply` is supported by `retrieved_docs`? "
+            "Support requires the docs to state or imply the claim. Paraphrase "
+            "counts. 'I don't know' is not a claim. Do not use world knowledge."
+        ),
+        criteria=[
+            "The reply asserts product facts, API names, or setup steps that the retrieved docs do not state or imply.",
+            "Some claims in the reply are supported by the retrieved docs and some are not.",
+            "Every factual claim in the reply is stated or directly implied by the retrieved docs.",
+        ],
+    ),
+}
+
+
+def noul_to_bool(probability: float) -> int:
+    return 1 if probability >= NOUL_THRESHOLD else 0
+
+
+def normalized_score(answer, question_id: str) -> float:
+    top_level = len(QUESTIONS[question_id].criteria) - 1
+    return answer.score / top_level
+
+
+def score_turn(*, trace_id: str, observation_id: str, state: dict) -> None:
+    questions = dict(QUESTIONS)
+    if not state.get("retrieved_docs"):
+        questions.pop("groundedness")
+
+    with TypeSafeClient(model=MODEL) as jev:
+        result = jev.system_one(state=state, questions=questions)
+
+    disagreement = float(result.nouls["user_disagreement"].noul)
+    cursing = float(result.nouls["user_cursing"].noul)
+    intent = result.choices["user_intent"]
+    relevance = result.scores["relevance"]
+
+    langfuse.create_score(
+        score_id=f"{observation_id}-jev-user-disagreement",
+        trace_id=trace_id,
+        observation_id=observation_id,
+        name="jev_user_disagreement",
+        value=noul_to_bool(disagreement),
+        data_type="BOOLEAN",
+        comment=f"{result.model}; P(true)={disagreement:.2f}; threshold={NOUL_THRESHOLD}",
+    )
+    langfuse.create_score(
+        score_id=f"{observation_id}-jev-user-cursing",
+        trace_id=trace_id,
+        observation_id=observation_id,
+        name="jev_user_cursing",
+        value=noul_to_bool(cursing),
+        data_type="BOOLEAN",
+        comment=f"{result.model}; P(true)={cursing:.2f}; threshold={NOUL_THRESHOLD}",
+    )
+    langfuse.create_score(
+        score_id=f"{observation_id}-jev-user-intent",
+        trace_id=trace_id,
+        observation_id=observation_id,
+        name="jev_user_intent",
+        value=intent.choice,
+        data_type="CATEGORICAL",
+        comment=(
+            f"{result.model}; confidence={intent.confidence:.2f}; "
+            f"probabilities={intent.probabilities}"
+        ),
+    )
+    langfuse.create_score(
+        score_id=f"{observation_id}-jev-relevance",
+        trace_id=trace_id,
+        observation_id=observation_id,
+        name="jev_relevance",
+        value=normalized_score(relevance, "relevance"),
+        data_type="NUMERIC",
+        comment=(
+            f"{result.model}; raw={relevance.score:.2f}; "
+            f"confidence={relevance.confidence:.2f}; "
+            f"probabilities={relevance.probabilities}"
+        ),
+    )
+    if "groundedness" in questions:
+        groundedness = result.scores["groundedness"]
+        langfuse.create_score(
+            score_id=f"{observation_id}-jev-groundedness",
+            trace_id=trace_id,
+            observation_id=observation_id,
+            name="jev_groundedness",
+            value=normalized_score(groundedness, "groundedness"),
+            data_type="NUMERIC",
+            comment=(
+                f"{result.model}; raw={groundedness.score:.2f}; "
+                f"confidence={groundedness.confidence:.2f}; "
+                f"probabilities={groundedness.probabilities}"
+            ),
+        )
+
+    langfuse.flush()
+```
+
+Use `jev_` prefixes so the new scores sit next to the existing judges instead of overwriting them. That is what makes the next step possible.
+
+To trace the Jev calls themselves, see [Observability for TypeSafe Jev](/integrations/model-providers/typesafe).
+
+## Compare the runs [#compare-the-runs]
+
+Keep the LLM-as-a-judge evaluators running. Add the Jev scores on the same observations. Then look at agreement, not at Jev in isolation.
+
+On production traffic, filter traces where `user_disagreement` and `jev_user_disagreement` disagree, or where `user-intent` and `jev_user_intent` pick different labels. Those rows are the calibration set. If Jev is systematically harsher on cursing, lower the Noul threshold or tighten `true`. If intent confidence is low on conceptual vs. implementation, the `not_for` fields are not sharp enough yet.
+
+On datasets, run both judges as experiment evaluators and [compare the runs](/docs/evaluation/experiments/compare-experiments). The SDK-grounding dataset from the original writeup is the right place to check `jev_groundedness` against the existing groundedness judge, because that dataset is reference-free on purpose: the correct answer moves every time the docs do.
+
+Three practical notes from actually putting this next to an LLM judge:
+
+- **Jev will not explain the score.** When the two systems disagree, you debug by reading your criteria and the turn, not a generated rationale. That is faster once the criteria are good, and slower the first week.
+- **A Noul is not a Boolean until you threshold it.** Do not compare `0.68` to `false` and call it a miss. Compare the thresholded value, and look at the middle band separately.
+- **Normalize Scores before you plot them against 0–1 judges.** Raw `1.43` on a 0–2 scale is not comparable to a 0–1 relevance number.
+
+The [writing evaluators](/academy/evaluate/writing-evaluators) guidance still applies. Jev just forces you to write the true/false, the labels, and the levels up front, which is the part of eval design that actually transfers from one chatbot to the next.
+
+The original LLM-as-a-judge setup is still the one running in the [public demo project](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi). Copy both. Compare them on your own traces before you switch anything off.
