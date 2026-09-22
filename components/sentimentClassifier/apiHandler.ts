@@ -5,9 +5,9 @@ import {
   setActiveTraceIO,
   getActiveTraceId,
   updateActiveObservation,
+  startActiveObservation,
 } from "@langfuse/tracing";
 import { after } from "next/server";
-import { context, trace } from "@opentelemetry/api";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
 import {
@@ -76,53 +76,45 @@ const handler = async (req: Request) => {
     },
     async () => {
       const traceId = getActiveTraceId();
-      const activeSpan = trace.getActiveSpan();
-      const runWithActiveSpan = <T>(fn: () => T) =>
-        activeSpan
-          ? context.with(trace.setSpan(context.active(), activeSpan), fn)
-          : fn();
-
       const request = buildSystemOneRequest(text);
 
-      runWithActiveSpan(() => {
-        setActiveTraceIO({ input: request });
-        updateActiveObservation({ input: request });
-      });
+      setActiveTraceIO({ input: request });
+      updateActiveObservation({ input: request });
 
       try {
-        const response = await getClient().systemOne(request);
+        const result = await startActiveObservation(
+          "classify",
+          async (generation) => {
+            generation.update({ input: request });
 
-        const answer = response.answers.sentiment;
-        const inputTokens = response.usage.input_tokens;
-        const outputTokens = response.usage.output_tokens;
-        const usage: SentimentUsage = {
-          inputTokens,
-          outputTokens,
-          totalTokens: inputTokens + outputTokens,
-          costUsd: computeCostUsd(
-            inputTokens,
-            outputTokens,
-            JEV_PRICE_USD_PER_MTOK,
-          ),
-        };
-        const result: SentimentResult = {
-          sentiment: answer.choice,
-          confidence: answer.confidence,
-          probabilities: {
-            positive: answer.probabilities.positive,
-            negative: answer.probabilities.negative,
-            neutral: answer.probabilities.neutral,
-          },
-          model: response.model,
-          usage,
-        };
+            const response = await getClient().systemOne(request);
+            const answer = response.answers.sentiment;
+            const inputTokens = response.usage.input_tokens;
+            const outputTokens = response.usage.output_tokens;
+            const usage: SentimentUsage = {
+              inputTokens,
+              outputTokens,
+              totalTokens: inputTokens + outputTokens,
+              costUsd: computeCostUsd(
+                inputTokens,
+                outputTokens,
+                JEV_PRICE_USD_PER_MTOK,
+              ),
+            };
+            const classified: SentimentResult = {
+              sentiment: answer.choice,
+              confidence: answer.confidence,
+              probabilities: {
+                positive: answer.probabilities.positive,
+                negative: answer.probabilities.negative,
+                neutral: answer.probabilities.neutral,
+              },
+              model: response.model,
+              usage,
+            };
 
-        runWithActiveSpan(() => {
-          setActiveTraceIO({ output: result });
-          updateActiveObservation(
-            {
-              input: request,
-              output: result,
+            generation.update({
+              output: classified,
               model: response.model,
               metadata: {
                 provider: "typesafe",
@@ -137,10 +129,15 @@ const handler = async (req: Request) => {
               costDetails: {
                 total: usage.costUsd,
               },
-            },
-            { asType: "generation" },
-          );
-        });
+            });
+
+            return classified;
+          },
+          { asType: "generation" },
+        );
+
+        setActiveTraceIO({ output: result });
+        updateActiveObservation({ output: result });
 
         after(async () => await flush());
 
@@ -164,9 +161,9 @@ const handler = async (req: Request) => {
 };
 
 export const POST = observe(handler, {
-  name: "sentiment-classifier-jev",
-  asType: "generation",
-  // Keep the Jev result we set via updateActiveObservation; otherwise observe
+  name: "sentiment-classifier",
+  asType: "span",
+  // Keep the result we set via updateActiveObservation; otherwise observe
   // would capture the HTTP Response object, which serializes to {}.
   captureOutput: false,
 });
