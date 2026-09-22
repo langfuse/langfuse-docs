@@ -32,6 +32,7 @@ interface EventDefinitions {
     engine?: "jev" | "llm";
     from_example: boolean;
     text_char_count: number;
+    classification_count?: number;
   };
   "home:start_free_clicked": {
     source: "home_hero";

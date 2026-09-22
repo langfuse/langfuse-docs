@@ -11,15 +11,23 @@ import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 import {
   EXAMPLE_TEXTS,
   ENGINE_CONFIG,
-  type JevSentimentResult,
-  type LlmSentimentResult,
+  classifiersForCount,
   classifySentiment,
   getPersistedSentimentUserId,
+  type ClassifierRunResult,
 } from "./shared";
 import { SentimentResultPanel } from "./resultPanel";
+import { CompareMetricBoxes } from "./metricBoxes";
+import { CLASSIFIER_SEQUENCE } from "./criteria";
 
 const PUBLIC_SAMPLE_PROJECT_TRACES_URL =
   "https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces";
+
+type EngineState = {
+  result: ClassifierRunResult;
+  traceId: string;
+  latencyMs: number;
+};
 
 export const SentimentClassifierCompare = ({
   className,
@@ -27,23 +35,35 @@ export const SentimentClassifierCompare = ({
 }: HTMLAttributes<HTMLDivElement>) => {
   const capture = usePostHogClientCapture();
   const [input, setInput] = useState("");
+  const [taskCount, setTaskCount] = useState(1);
   const [jevLoading, setJevLoading] = useState(false);
   const [llmLoading, setLlmLoading] = useState(false);
   const [inputText, setInputText] = useState<string | null>(null);
-  const [jev, setJev] = useState<{
-    result: JevSentimentResult;
-    traceId: string;
-  } | null>(null);
-  const [llm, setLlm] = useState<{
-    result: LlmSentimentResult;
-    traceId: string;
-  } | null>(null);
+  const [jev, setJev] = useState<EngineState | null>(null);
+  const [llm, setLlm] = useState<EngineState | null>(null);
   const [jevError, setJevError] = useState<string | null>(null);
   const [llmError, setLlmError] = useState<string | null>(null);
   const [jevFeedback, setJevFeedback] = useState<boolean | null>(null);
   const [llmFeedback, setLlmFeedback] = useState<boolean | null>(null);
 
   const loading = jevLoading || llmLoading;
+  const selected = classifiersForCount(taskCount);
+  const compact = selected.length > 1;
+
+  const clearRun = () => {
+    setJev(null);
+    setLlm(null);
+    setJevError(null);
+    setLlmError(null);
+    setJevFeedback(null);
+    setLlmFeedback(null);
+  };
+
+  const handleTaskCount = (count: number) => {
+    if (loading || count === taskCount) return;
+    setTaskCount(count);
+    clearRun();
+  };
 
   const handleSubmit = async (text?: string) => {
     const textToAnalyze = text ?? input;
@@ -51,50 +71,56 @@ export const SentimentClassifierCompare = ({
       typeof window === "undefined" ? null : getPersistedSentimentUserId();
     if (!textToAnalyze.trim() || !userId || loading) return;
 
+    const tasks = selected.map((definition) => definition.id);
+
     capture("demo:sentiment_analyze_submitted", {
       source: "jev_evals_blog",
       mode: "compare",
       from_example: typeof text === "string",
       text_char_count: textToAnalyze.trim().length,
+      classification_count: tasks.length,
     });
 
     setInputText(textToAnalyze);
-    setJev(null);
-    setLlm(null);
-    setJevError(null);
-    setLlmError(null);
-    setJevFeedback(null);
-    setLlmFeedback(null);
+    clearRun();
     setJevLoading(true);
     setLlmLoading(true);
 
-    // Paint each column as soon as its classifier returns — Jev usually lands first.
-    void classifySentiment("jev", textToAnalyze, userId).then((outcome) => {
-      if (outcome.ok === false) {
-        setJevError(outcome.error);
-      } else {
-        setJev({
-          result: outcome.data.result as JevSentimentResult,
-          traceId: outcome.data.traceId,
-        });
-      }
-      setJevLoading(false);
-    });
+    const jevStarted = performance.now();
+    void classifySentiment("jev", textToAnalyze, userId, tasks).then(
+      (outcome) => {
+        if (outcome.ok === false) {
+          setJevError(outcome.error);
+        } else {
+          setJev({
+            result: outcome.data.result,
+            traceId: outcome.data.traceId,
+            latencyMs: performance.now() - jevStarted,
+          });
+        }
+        setJevLoading(false);
+      },
+    );
 
-    void classifySentiment("llm", textToAnalyze, userId).then((outcome) => {
-      if (outcome.ok === false) {
-        setLlmError(outcome.error);
-      } else {
-        setLlm({
-          result: outcome.data.result as LlmSentimentResult,
-          traceId: outcome.data.traceId,
-        });
-      }
-      setLlmLoading(false);
-    });
+    const llmStarted = performance.now();
+    void classifySentiment("llm", textToAnalyze, userId, tasks).then(
+      (outcome) => {
+        if (outcome.ok === false) {
+          setLlmError(outcome.error);
+        } else {
+          setLlm({
+            result: outcome.data.result,
+            traceId: outcome.data.traceId,
+            latencyMs: performance.now() - llmStarted,
+          });
+        }
+        setLlmLoading(false);
+      },
+    );
   };
 
   const hasResults = Boolean(jev || llm || jevError || llmError);
+  const showMetrics = hasResults || loading;
 
   return (
     <div className={cn(className)} {...props}>
@@ -103,9 +129,48 @@ export const SentimentClassifierCompare = ({
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Enter text to analyze sentiment..."
+            placeholder="Enter text to analyze..."
             className="w-full h-28 p-3 rounded-[2px] border border-line-structure bg-surface-bg text-text-secondary text-sm shadow-sm resize-none focus:outline-none focus:ring-1 focus:ring-line-cta"
           />
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div className="space-y-1.5">
+              <p className="text-xs font-medium text-text-primary">
+                Classifications
+              </p>
+              <div className="inline-flex rounded-[2px] border border-line-structure p-0.5">
+                {CLASSIFIER_SEQUENCE.map((_, index) => {
+                  const count = index + 1;
+                  const active = taskCount === count;
+                  return (
+                    <button
+                      key={count}
+                      type="button"
+                      onClick={() => handleTaskCount(count)}
+                      disabled={loading}
+                      aria-pressed={active}
+                      className={cn(
+                        "min-w-8 h-7 px-2.5 text-xs font-medium rounded-[2px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+                        active
+                          ? "bg-text-primary text-surface-bg"
+                          : "text-text-secondary hover:text-text-primary",
+                      )}
+                    >
+                      {count}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {selected.map((definition) => definition.name).join(" · ")}
+              </p>
+            </div>
+            <p className="text-xs text-muted-foreground max-w-xs sm:text-right">
+              Jev answers all of them in one pass. Luna runs a parallel call per
+              classification.
+            </p>
+          </div>
+
           <div className="flex items-center gap-3">
             <button
               onClick={() => handleSubmit()}
@@ -153,10 +218,17 @@ export const SentimentClassifierCompare = ({
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-[2px] border border-line-structure p-4 space-y-3 min-h-48">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="text-sm font-semibold text-text-primary">
-                TypeSafe Jev
-              </h3>
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <h3 className="text-sm font-semibold text-text-primary">
+                  TypeSafe Jev
+                </h3>
+                <p className="text-[11px] text-muted-foreground">
+                  {selected.length === 1
+                    ? "1 request · 1 question"
+                    : `1 request · ${selected.length} questions`}
+                </p>
+              </div>
               {jev?.result.model && (
                 <span className="text-[11px] text-muted-foreground font-mono">
                   {jev.result.model}
@@ -175,28 +247,50 @@ export const SentimentClassifierCompare = ({
               </div>
             )}
             {jev && (
-              <SentimentResultPanel
-                result={jev.result}
-                feedback={jevFeedback}
-                onFeedback={(value) => {
-                  setJevFeedback(value);
-                  scoreDemoNegativeUserFeedback({
-                    traceId: jev.traceId,
-                    value,
-                  });
-                }}
-              />
+              <div className="space-y-4">
+                {jev.result.answers.map((answer, index) => (
+                  <div
+                    key={answer.id}
+                    className={
+                      index > 0
+                        ? "border-t border-line-structure pt-4"
+                        : undefined
+                    }
+                  >
+                    <SentimentResultPanel
+                      answer={answer}
+                      compact={compact}
+                      feedback={index === 0 ? jevFeedback : undefined}
+                      onFeedback={
+                        index === 0
+                          ? (value) => {
+                              setJevFeedback(value);
+                              scoreDemoNegativeUserFeedback({
+                                traceId: jev.traceId,
+                                value,
+                              });
+                            }
+                          : undefined
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 
           <div className="rounded-[2px] border border-line-structure p-4 space-y-3 min-h-48">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="text-sm font-semibold text-text-primary">
-                GPT-5.6 Luna
-              </h3>
-              <span className="text-[11px] text-muted-foreground font-mono">
-                high reasoning
-              </span>
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <h3 className="text-sm font-semibold text-text-primary">
+                  GPT-5.6 Luna
+                </h3>
+                <p className="text-[11px] text-muted-foreground">
+                  {selected.length === 1
+                    ? "1 call · high reasoning"
+                    : `${selected.length} parallel calls · high reasoning`}
+                </p>
+              </div>
             </div>
             {llmLoading && !llm && !llmError && (
               <div className="flex items-center gap-2 text-muted-foreground text-sm py-6 justify-center">
@@ -210,20 +304,51 @@ export const SentimentClassifierCompare = ({
               </div>
             )}
             {llm && (
-              <SentimentResultPanel
-                result={llm.result}
-                feedback={llmFeedback}
-                onFeedback={(value) => {
-                  setLlmFeedback(value);
-                  scoreDemoNegativeUserFeedback({
-                    traceId: llm.traceId,
-                    value,
-                  });
-                }}
-              />
+              <div className="space-y-4">
+                {llm.result.answers.map((answer, index) => (
+                  <div
+                    key={answer.id}
+                    className={
+                      index > 0
+                        ? "border-t border-line-structure pt-4"
+                        : undefined
+                    }
+                  >
+                    <SentimentResultPanel
+                      answer={answer}
+                      compact={compact}
+                      feedback={index === 0 ? llmFeedback : undefined}
+                      onFeedback={
+                        index === 0
+                          ? (value) => {
+                              setLlmFeedback(value);
+                              scoreDemoNegativeUserFeedback({
+                                traceId: llm.traceId,
+                                value,
+                              });
+                            }
+                          : undefined
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </div>
+
+        {showMetrics && (
+          <CompareMetricBoxes
+            jevLatencyMs={jev?.latencyMs ?? null}
+            lunaLatencyMs={llm?.latencyMs ?? null}
+            jevUsage={jev?.result.usage}
+            lunaUsage={llm?.result.usage}
+            jevLoading={jevLoading}
+            lunaLoading={llmLoading}
+            jevError={Boolean(jevError)}
+            lunaError={Boolean(llmError)}
+          />
+        )}
 
         <div className="space-y-3 text-sm text-text-secondary leading-relaxed border-t border-line-structure pt-4">
           <p>
@@ -249,8 +374,9 @@ export const SentimentClassifierCompare = ({
           <ul className="list-disc pl-5 space-y-1.5">
             <li>
               Jev is a lot faster and cheaper than GPT-5.6 Luna with high
-              reasoning — each column updates when its model finishes, and
-              estimated cost is shown per run.
+              reasoning. Add classifications with the 1–4 control: Jev keeps one
+              request, Luna runs parallel calls so cost scales with the count.
+              Latency and estimated cost are compared below the results.
             </li>
             <li>
               Jev returns a decision and confidence only, with no reasoning.
