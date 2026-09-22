@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
   type FormEvent,
+  type ReactNode,
 } from "react";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
@@ -42,6 +43,10 @@ function questionErrorMessage(error?: Error) {
     // Network errors and non-JSON responses use the generic message below.
   }
   return "I couldn’t get an answer right now. Please try a new question in a moment.";
+}
+
+function AnswerHeading({ children }: { children?: ReactNode }) {
+  return <p className="font-semibold">{children}</p>;
 }
 
 // Model output never enables raw HTML, images, or arbitrary external links.
@@ -257,13 +262,38 @@ function AskForm({ linked = false }: { linked?: boolean }) {
         )}
         {answer && !error && (
           <div className="pt-2">
-            <div className="pr-8 text-sm text-left font-normal leading-[150%] tracking-[-0.07px] text-text-tertiary [&_p+p]:mt-2">
+            <div className="pr-8 text-sm text-left font-normal leading-[150%] tracking-[-0.07px] text-text-tertiary [&>*+*]:mt-2 [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_li+li]:mt-1 [&_blockquote]:border-l-2 [&_blockquote]:border-line-structure [&_blockquote]:pl-3 [&_pre]:overflow-x-auto">
               <Markdown
                 skipHtml
-                allowedElements={["p", "a", "strong", "em", "code", "br"]}
+                allowedElements={[
+                  "p",
+                  "a",
+                  "strong",
+                  "em",
+                  "code",
+                  "br",
+                  "ul",
+                  "ol",
+                  "li",
+                  "h1",
+                  "h2",
+                  "h3",
+                  "h4",
+                  "h5",
+                  "h6",
+                  "blockquote",
+                  "pre",
+                ]}
                 unwrapDisallowed
                 urlTransform={documentationUrl}
                 components={{
+                  // Keep answer headings within the compact FAQ typography.
+                  h1: AnswerHeading,
+                  h2: AnswerHeading,
+                  h3: AnswerHeading,
+                  h4: AnswerHeading,
+                  h5: AnswerHeading,
+                  h6: AnswerHeading,
                   a: ({ href, children }) =>
                     href ? (
                       <a
