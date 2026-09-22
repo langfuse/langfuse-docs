@@ -7,38 +7,6 @@ import {
   type SpanProcessor,
 } from "@opentelemetry/sdk-trace-node";
 
-const realtimeIngestionHeaders = {
-  "x-langfuse-ingestion-version": "4",
-};
-
-const euSpanProcessor = new LangfuseSpanProcessor({
-  publicKey: process.env.NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY,
-  secretKey: process.env.EU_LANGFUSE_SECRET_KEY,
-  baseUrl: process.env.NEXT_PUBLIC_EU_LANGFUSE_BASE_URL,
-  additionalHeaders: realtimeIngestionHeaders,
-});
-
-const usSpanProcessor = new LangfuseSpanProcessor({
-  publicKey: process.env.NEXT_PUBLIC_US_LANGFUSE_PUBLIC_KEY,
-  secretKey: process.env.US_LANGFUSE_SECRET_KEY,
-  baseUrl: process.env.NEXT_PUBLIC_US_LANGFUSE_BASE_URL,
-  additionalHeaders: realtimeIngestionHeaders,
-});
-
-const jpSpanProcessor = new LangfuseSpanProcessor({
-  publicKey: process.env.NEXT_PUBLIC_JP_LANGFUSE_PUBLIC_KEY,
-  secretKey: process.env.JP_LANGFUSE_SECRET_KEY,
-  baseUrl: process.env.NEXT_PUBLIC_JP_LANGFUSE_BASE_URL,
-  additionalHeaders: realtimeIngestionHeaders,
-});
-
-const internalSpanProcessor = new LangfuseSpanProcessor({
-  publicKey: process.env.NEXT_PUBLIC_INTERNAL_LANGFUSE_PUBLIC_KEY,
-  secretKey: process.env.INTERNAL_LANGFUSE_SECRET_KEY,
-  baseUrl: process.env.NEXT_PUBLIC_INTERNAL_LANGFUSE_BASE_URL,
-  additionalHeaders: realtimeIngestionHeaders,
-});
-
 /**
  * The AI SDK's OpenTelemetry integration names spans after the OTel GenAI
  * semantic conventions: `invoke_agent gpt-5`, `chat gpt-5`, `step 1`, ...
@@ -103,12 +71,65 @@ class AiSdkObservationNameProcessor implements SpanProcessor {
   }
 }
 
-const spanProcessors = [
-  euSpanProcessor,
-  usSpanProcessor,
-  jpSpanProcessor,
-  internalSpanProcessor,
-];
+function initializeTracing() {
+  const realtimeIngestionHeaders = {
+    "x-langfuse-ingestion-version": "4",
+  };
+
+  const euSpanProcessor = new LangfuseSpanProcessor({
+    publicKey: process.env.NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY,
+    secretKey: process.env.EU_LANGFUSE_SECRET_KEY,
+    baseUrl: process.env.NEXT_PUBLIC_EU_LANGFUSE_BASE_URL,
+    additionalHeaders: realtimeIngestionHeaders,
+  });
+
+  const usSpanProcessor = new LangfuseSpanProcessor({
+    publicKey: process.env.NEXT_PUBLIC_US_LANGFUSE_PUBLIC_KEY,
+    secretKey: process.env.US_LANGFUSE_SECRET_KEY,
+    baseUrl: process.env.NEXT_PUBLIC_US_LANGFUSE_BASE_URL,
+    additionalHeaders: realtimeIngestionHeaders,
+  });
+
+  const jpSpanProcessor = new LangfuseSpanProcessor({
+    publicKey: process.env.NEXT_PUBLIC_JP_LANGFUSE_PUBLIC_KEY,
+    secretKey: process.env.JP_LANGFUSE_SECRET_KEY,
+    baseUrl: process.env.NEXT_PUBLIC_JP_LANGFUSE_BASE_URL,
+    additionalHeaders: realtimeIngestionHeaders,
+  });
+
+  const internalSpanProcessor = new LangfuseSpanProcessor({
+    publicKey: process.env.NEXT_PUBLIC_INTERNAL_LANGFUSE_PUBLIC_KEY,
+    secretKey: process.env.INTERNAL_LANGFUSE_SECRET_KEY,
+    baseUrl: process.env.NEXT_PUBLIC_INTERNAL_LANGFUSE_BASE_URL,
+    additionalHeaders: realtimeIngestionHeaders,
+  });
+
+  const spanProcessors = [
+    euSpanProcessor,
+    usSpanProcessor,
+    jpSpanProcessor,
+    internalSpanProcessor,
+  ];
+
+  const tracerProvider = new NodeTracerProvider({
+    // The renaming processor must run before the exporters see the span.
+    spanProcessors: [new AiSdkObservationNameProcessor(), ...spanProcessors],
+  });
+
+  tracerProvider.register();
+
+  registerTelemetry(new LangfuseVercelAiSdkIntegration());
+
+  return spanProcessors;
+}
+
+// Next.js can evaluate this module separately for startup and API routes.
+// Reuse both the telemetry registration and the exporters that flush() drains.
+const tracingGlobal = globalThis as typeof globalThis & {
+  langfuseDocsSpanProcessors?: LangfuseSpanProcessor[];
+};
+const spanProcessors = (tracingGlobal.langfuseDocsSpanProcessors ??=
+  initializeTracing());
 
 export const flush = async () => {
   const results = await Promise.allSettled(
@@ -119,12 +140,3 @@ export const flush = async () => {
     console.warn("Failed to flush one or more Langfuse span processors");
   }
 };
-
-const tracerProvider = new NodeTracerProvider({
-  // The renaming processor must run before the exporters see the span.
-  spanProcessors: [new AiSdkObservationNameProcessor(), ...spanProcessors],
-});
-
-tracerProvider.register();
-
-registerTelemetry(new LangfuseVercelAiSdkIntegration());
