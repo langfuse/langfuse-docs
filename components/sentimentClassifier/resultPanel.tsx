@@ -68,7 +68,7 @@ export const SentimentResultPanel = ({
             {usage.outputTokens > 0
               ? ` · ${usage.outputTokens.toLocaleString()} out`
               : ""}
-            {usage.reasoningTokens
+            {typeof usage.reasoningTokens === "number"
               ? ` · ${usage.reasoningTokens.toLocaleString()} reasoning`
               : ""}
           </span>

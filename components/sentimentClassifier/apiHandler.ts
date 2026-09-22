@@ -15,19 +15,13 @@ import {
   computeCostUsd,
   type SentimentUsage,
 } from "./cost";
+import {
+  SENTIMENT_CRITERIA,
+  SENTIMENT_INSTRUCTIONS,
+  type SentimentLabel,
+} from "./criteria";
 
-const SENTIMENT_INSTRUCTIONS = "What is the overall sentiment of this text?";
-
-const SENTIMENT_CRITERIA = {
-  positive:
-    "The text expresses approval, satisfaction, praise, or other favorable feelings.",
-  negative:
-    "The text expresses disapproval, frustration, complaint, or other unfavorable feelings.",
-  neutral:
-    "The text is factual, informational, or does not lean clearly positive or negative.",
-} as const;
-
-export type SentimentLabel = keyof typeof SENTIMENT_CRITERIA;
+export type { SentimentLabel };
 
 export type SentimentResult = {
   sentiment: SentimentLabel;

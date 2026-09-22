@@ -16,6 +16,7 @@ import {
   computeCostUsd,
   type SentimentUsage,
 } from "./cost";
+import { LLM_SENTIMENT_SYSTEM_PROMPT } from "./criteria";
 
 const LLM_MODEL = "gpt-5.6-luna";
 const LLM_REASONING_EFFORT = "high" as const;
@@ -73,13 +74,19 @@ const handler = async (req: Request) => {
     },
     async () => {
       const traceId = getActiveTraceId();
-      setActiveTraceIO({ input: text });
+      setActiveTraceIO({
+        input: {
+          system: LLM_SENTIMENT_SYSTEM_PROMPT,
+          text,
+        },
+      });
 
       try {
         const result = await generateObject({
           model: openai(LLM_MODEL),
           schema: SentimentSchema,
-          prompt: `Analyze the sentiment of the following text. Classify it as positive, negative, or neutral. Provide a confidence score between 0 and 1, a brief explanation of your reasoning, and extract the key phrases that influenced your classification.\n\nText: ${text}`,
+          system: LLM_SENTIMENT_SYSTEM_PROMPT,
+          prompt: `Classify the sentiment of this text:\n\n${text}`,
           providerOptions: {
             openai: {
               reasoningEffort: LLM_REASONING_EFFORT,
@@ -115,7 +122,10 @@ const handler = async (req: Request) => {
         setActiveTraceIO({ output: payload });
         updateActiveObservation(
           {
-            input: text,
+            input: {
+              system: LLM_SENTIMENT_SYSTEM_PROMPT,
+              text,
+            },
             output: payload,
             model: LLM_MODEL,
             metadata: {
