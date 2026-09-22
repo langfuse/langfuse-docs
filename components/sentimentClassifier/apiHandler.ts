@@ -78,7 +78,7 @@ const handler = async (req: Request) => {
       const request = buildSystemOneRequest(text);
 
       setActiveTraceIO({ input: request });
-      updateActiveObservation({ input: request });
+      updateActiveObservation({ input: request }, { asType: "generation" });
 
       try {
         const response = await getClient().systemOne(request);
@@ -108,24 +108,27 @@ const handler = async (req: Request) => {
         };
 
         setActiveTraceIO({ output: result });
-        updateActiveObservation({
-          input: request,
-          output: result,
-          model: response.model,
-          metadata: {
-            provider: "typesafe",
-            questionType: "choice",
-            costUsd: usage.costUsd,
+        updateActiveObservation(
+          {
+            input: request,
+            output: result,
+            model: response.model,
+            metadata: {
+              provider: "typesafe",
+              questionType: "choice",
+              costUsd: usage.costUsd,
+            },
+            usageDetails: {
+              input: inputTokens,
+              output: outputTokens,
+              total: usage.totalTokens,
+            },
+            costDetails: {
+              total: usage.costUsd,
+            },
           },
-          usageDetails: {
-            input: inputTokens,
-            output: outputTokens,
-            total: usage.totalTokens,
-          },
-          costDetails: {
-            total: usage.costUsd,
-          },
-        });
+          { asType: "generation" },
+        );
 
         after(async () => await flush());
 

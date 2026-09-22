@@ -80,7 +80,7 @@ const handler = async (req: Request) => {
       };
 
       setActiveTraceIO({ input });
-      updateActiveObservation({ input });
+      updateActiveObservation({ input }, { asType: "generation" });
 
       try {
         // Disable AI SDK OTel so observe() is the only observation — same
@@ -123,24 +123,27 @@ const handler = async (req: Request) => {
         };
 
         setActiveTraceIO({ output: payload });
-        updateActiveObservation({
-          input,
-          output: payload,
-          model: LLM_MODEL,
-          metadata: {
-            reasoningEffort: LLM_REASONING_EFFORT,
-            costUsd: usage.costUsd,
+        updateActiveObservation(
+          {
+            input,
+            output: payload,
+            model: LLM_MODEL,
+            metadata: {
+              reasoningEffort: LLM_REASONING_EFFORT,
+              costUsd: usage.costUsd,
+            },
+            usageDetails: {
+              input: inputTokens,
+              output: outputTokens,
+              ...(reasoningTokens > 0 ? { reasoning: reasoningTokens } : {}),
+              total: usage.totalTokens,
+            },
+            costDetails: {
+              total: usage.costUsd,
+            },
           },
-          usageDetails: {
-            input: inputTokens,
-            output: outputTokens,
-            ...(reasoningTokens > 0 ? { reasoning: reasoningTokens } : {}),
-            total: usage.totalTokens,
-          },
-          costDetails: {
-            total: usage.costUsd,
-          },
-        });
+          { asType: "generation" },
+        );
 
         after(async () => await flush());
 
