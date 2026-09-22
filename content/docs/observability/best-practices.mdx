@@ -94,11 +94,7 @@ Framework integrations usually get this right automatically. If you're instrumen
 
 ### Is thinking captured? [#capture-thinking]
 
-Reasoning models produce **thinking** (also called **reasoning**) before they answer or call a tool. That text should appear on each `generation` in the tree, not only on the final action.
-
-When a later tool call or answer is wrong, thinking is often the only record of why. A `refund_order` call can look valid while the thinking shows a bad assumption — for example, treating a repeated question as a duplicate charge. [Reasoning tokens](/docs/observability/features/token-and-cost-tracking#cost-inference-for-reasoning-models) on the generation tell you that the model thought, not what it thought.
-
-Native [integrations](/integrations) usually capture thinking when the provider returns it. If you instrument manually, include it in the generation output so Langfuse can render it as a thinking block. Some providers hide the raw chain of thought and only return a summary when you opt in — request and store that summary if it is all you get.
+Reasoning models produce **thinking** (also called **reasoning**) before they answer or call a tool. You should always capture thinking on each `generation` in the tree. Thinking data is instrumental in debugging why the agent made certain decisions, like calling a specific tool/endpoint/etc.
 
 ### Is there noise you don't need?
 
@@ -145,7 +141,6 @@ Typical input/output for `GENERATION` observations:
 - For a chatbot: the user message (input) and the assistant response (output).
 - For a RAG pipeline: the user query and the generated answer.
 - For a classification task: the text being classified and the predicted label.
-- For a reasoning model: the prompt as input, and both the [thinking](#capture-thinking) and the final answer or tool call as output.
 
 <Callout type="info">
 
