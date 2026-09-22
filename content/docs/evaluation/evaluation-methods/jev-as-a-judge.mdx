@@ -6,22 +6,8 @@ description: Use TypeSafe's Jev decision model as a judge in Langfuse. Ask typed
 
 # Jev as a judge
 
-<AvailabilityBanner
-  availability={{
-    hobby: "private-beta",
-    core: "private-beta",
-    pro: "private-beta",
-    enterprise: "private-beta",
-    selfHosted: "public-beta",
-  }}
-/>
-
 <Callout type="info">
-  Jev as a judge is **experimental**. On Langfuse Cloud, we enable it per
-  organization while we collect feedback; reach out via the in-app chat or
-  [GitHub Discussions](https://github.com/orgs/langfuse/discussions) to get
-  access. On self-hosted deployments, set
-  `LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES=true` on the web container. The
+  Jev as a judge is **experimental**. The
   setup is stable, but details of the UI and score format may still change.
 </Callout>
 
@@ -47,9 +33,9 @@ Because every question is evaluated in parallel against the same state, adding a
 
 ## Why use Jev as a judge?
 
-- **Cheaper.** Jev is priced by input tokens only. Langfuse ships a default price of $0.042 per million input tokens for `jev` models, so a judgment over a typical support conversation costs a fraction of a cent. According to TypeSafe, Jev is 40 to 400x cheaper than frontier models on classification tasks. This lets you score every observation instead of a sample.
+- **Cheaper.** Jev is priced by input tokens only. According to TypeSafe, Jev is 40 to 400x cheaper than frontier models on classification tasks. This lets you score every observation instead of a sample.
 - **Faster.** Jev returns answers in well under a second, according to TypeSafe 20 to 200x faster than comparable LLMs. Online evaluators keep pace with production traffic, which shortens the time between a bad output and an [alert](/docs/observability/features/alerts#evaluator-alerts) firing.
-- **Calibrated.** Every answer comes with a probability distribution and, for Choice and Score questions, a confidence value. Route low-confidence verdicts to an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues) and let high-confidence ones pass.
+- **Calibrated.** Every answer comes with a probability distribution and, for Choice and Score questions, a confidence value.
 - **Consistent.** Jev does not sample text, so the same state and question return the same verdict. That makes it a good fit for regression tests and for criteria you track over time.
 
 None of this replaces LLM judges. When you need a rationale next to the verdict or want to evaluate open-ended quality, keep using [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge). Many teams run both: Jev on every observation for cheap, typed checks, and an LLM judge on a sample or on the cases Jev flags.
@@ -182,20 +168,6 @@ Jev returns the probability that the statement is true, not a hard label. Langfu
 <Summary>Can I use Jev evaluators in experiments and batch evaluation?</Summary>
 
 Yes. Jev evaluators run on incoming observations through rules, on historical observations through [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation), and on [experiments](/docs/evaluation/experiments/experiments-via-ui). For experiments, map **Expected Output** and **Experiment Item Metadata** into the state when the questions need them.
-
-</Details>
-
-<Details>
-<Summary>Can I create Jev evaluators via the public API or MCP?</Summary>
-
-Not yet. While the feature is experimental, Jev evaluators are created and edited in the Langfuse UI only. They are hidden from the public evaluator endpoints and the MCP server. Scores written by Jev evaluators are regular scores and available through the [Scores API](/docs/evaluation/scores/overview), the SDKs, and exports.
-
-</Details>
-
-<Details>
-<Summary>How is cost tracked?</Summary>
-
-Langfuse ships a default price definition for Jev models (`jev`, `jev-latest`, `jev-<version>`) of $0.042 per million input tokens and no output cost, so every execution trace is costed at ingestion. The test panel shows the estimated cost of a single call before you save. You can override the price in **Settings → Models**.
 
 </Details>
 
