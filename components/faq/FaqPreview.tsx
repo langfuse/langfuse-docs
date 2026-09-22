@@ -2,6 +2,8 @@ import { faqSource } from "@/lib/source";
 import { Cards } from "@/components/docs";
 import { MessageCircleQuestion } from "lucide-react";
 import { Link } from "@/components/ui/link";
+import { getFaqTags, isFaqArticle } from "@/lib/faq-tags";
+import { FaqAsk } from "./FaqAsk";
 
 type FaqPage = ReturnType<typeof faqSource.getPages>[number];
 
@@ -13,9 +15,9 @@ export const getFilteredFaqPages = (
   limit: number | undefined = undefined,
 ) => {
   return faqPages
-    .filter((page) => page.url !== "/faq/all")
+    .filter(isFaqArticle)
     .filter((page) => {
-      const faqTags = (page.data.tags as string[] | undefined) ?? [];
+      const faqTags = getFaqTags(page);
       return faqTags.some((tag) => tags.includes(tag));
     })
     .sort((a, b) => (a.data.title ?? "").localeCompare(b.data.title ?? ""))
@@ -72,6 +74,7 @@ export const FaqList = ({
             </Link>
           </li>
         ))}
+        <FaqAsk linked />
       </ul>
     </>
   );

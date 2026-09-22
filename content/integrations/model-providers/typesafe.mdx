@@ -1,0 +1,115 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Observability for TypeSafe Jev with Langfuse
+sidebarTitle: TypeSafe (Jev)
+logo: /images/integrations/typesafe_icon.png
+description: Trace TypeSafe Jev System One decisions with Langfuse using OpenInference auto-instrumentation. No client wrapper required.
+category: Integrations
+---
+
+# Observability for TypeSafe Jev with Langfuse
+
+This notebook shows how to trace **TypeSafe** [Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev) System One calls with **Langfuse**. The OpenInference instrumentor patches `TypeSafeClient.system_one` in place, so you keep a plain client and still get OpenTelemetry spans for skill routers, model routers, tool-call hooks, and eval verdicts.
+
+> **What is TypeSafe Jev?** [Jev](https://docs.typesafe.ai/introduction) is TypeSafe's System One model. You send state plus typed [Choice](https://docs.typesafe.ai/primitives/choice), [Score](https://docs.typesafe.ai/primitives/score), and [Noul](https://docs.typesafe.ai/primitives/noul) questions; it returns structured answers with probabilities. It does not generate text. Official [Python](https://docs.typesafe.ai/sdk/python) and [JavaScript](https://docs.typesafe.ai/sdk/javascript) SDKs wrap `POST /v1/systemone`. Those SDKs do not emit OpenTelemetry spans themselves.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform that helps teams trace, debug, and evaluate LLM applications. Use [Langfuse Cloud](https://langfuse.com/cloud) or [self-host](https://langfuse.com/self-hosting) it.
+
+<Steps>
+## Step 1: Install Dependencies
+
+```python
+%pip install langfuse typesafe-sdk openinference-instrumentation-typesafe -U
+```
+
+## Step 2: Set Up Environment Variables
+
+Get your Langfuse keys from the project settings in [Langfuse Cloud](https://langfuse.com/cloud) or set up [self-hosting](https://langfuse.com/self-hosting).
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://langfuse.com/cloud
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region (API host)
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+
+os.environ.setdefault("TYPESAFE_API_KEY", "sk-...");  # https://console.typesafe.ai/settings/keys
+```
+
+With the environment variables set, initialize the Langfuse client. `get_client()` picks up the env vars above and returns a client bound to your project.
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
+```
+
+## Step 3: OpenTelemetry instrumentation
+
+Official TypeSafe docs do not mention OpenTelemetry. [OpenInference](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-typesafe) already ships [`TypeSafeAIInstrumentor`](https://pypi.org/project/openinference-instrumentation-typesafe/) for `typesafe-sdk >= 0.6.0`. Call `instrument()` once. It wraps `TypeSafeClient.system_one` and `AsyncTypeSafeClient.system_one` internally, so application code keeps `client = TypeSafeClient()` — no `observeTypeSafe()` helper and no Langfuse-specific client wrapper.
+
+Langfuse's Python SDK is OpenTelemetry-native, so the instrumentor attaches to the same tracer provider that `get_client()` registered. The same package can export to any OTLP collector, including Phoenix or Langfuse.
+
+Each System One call becomes an OpenInference LLM span with:
+
+- `input.value`: the request body (`state`, `model`, `questions`) as JSON
+- `output.value`: the response body (`model`, `answers`, `usage`) as JSON
+- `llm.request.model_name` / `llm.response.model_name` (for example `jev-latest` → `jev-1.13.0`)
+- `llm.token_count.prompt`, `llm.token_count.completion`, and `llm.token_count.total`
+
+A System One call is not a chat exchange, so spans do **not** set `llm.input_messages` / `llm.output_messages`.
+
+```python
+from openinference.instrumentation.typesafe import TypeSafeAIInstrumentor
+
+TypeSafeAIInstrumentor().instrument()
+```
+
+## Step 4: Run a System One call
+
+Ask Jev three questions about one ticket: a yes/no (Noul), a label (Choice), and a rubric (Score). The same shape covers tool routers, compaction gates, and eval verdicts. Pin `jev-1.13.0` when a threshold depends on a specific model version; `jev-latest` moves when TypeSafe ships a new release.
+
+```python
+from typesafe_sdk import Choice, Noul, Score, TypeSafeClient
+
+with TypeSafeClient(model="jev-1.13.0") as client:
+    response = client.system_one(
+        state={"document": "I was charged twice. Please fix this ASAP."},
+        questions={
+            "billing": Noul(instructions="Is this ticket about billing?"),
+            "tone": Choice(
+                instructions="What is the customer's tone?",
+                criteria={"calm": None, "frustrated": None, "angry": None},
+            ),
+            "urgency": Score(
+                instructions="How urgent is this ticket?",
+                criteria=["can wait", "this week", "today"],
+            ),
+        },
+    )
+
+print(response.model)
+print(response.nouls["billing"].noul)
+print(response.choices["tone"].choice, response.choices["tone"].confidence)
+print(response.scores["urgency"].score, response.scores["urgency"].confidence)
+```
+
+To write Jev verdicts back onto Langfuse traces as scores, see [Using TypeSafe's Jev for evals](/blog/2026-09-18-using-typesafes-jev-for-evals).
+
+## Step 5: View Traces in Langfuse
+
+After running the example, open [Langfuse Cloud](https://langfuse.com/cloud) to see the System One span: request `state` and questions, typed answers with probabilities, token usage, and latency.
+
+</Steps>
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />

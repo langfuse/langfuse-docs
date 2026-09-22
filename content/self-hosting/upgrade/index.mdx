@@ -40,6 +40,12 @@ If you upgrade between major versions, please follow our migration guides:
 - [v2.x.x to v3.x.x](/self-hosting/upgrade/upgrade-guides/upgrade-v2-to-v3)
 - [v1.x.x to v2.x.x](/self-hosting/upgrade/upgrade-guides/upgrade-v1-to-v2)
 
+<Callout type="info">
+
+The [Langfuse Helm chart](/self-hosting/deployment/kubernetes-helm) is versioned independently of the Langfuse server and has its own major versions. If you run the chart with bundled data stores, [upgrade the chart from v1 to v2](/self-hosting/deployment/kubernetes-helm#chart-v1-to-v2) before you upgrade Langfuse to v4: the v1 chart cannot bring its bundled ClickHouse to a v4-compatible version.
+
+</Callout>
+
 ## Release Notes
 
 import SelfHostUpdateSignup from "@/components-mdx/self-host-update-signup.mdx";
@@ -48,10 +54,12 @@ import SelfHostUpdateSignup from "@/components-mdx/self-host-update-signup.mdx";
 
 You can also watch the [GitHub releases](https://github.com/langfuse/langfuse/releases) for information about the changes in each version.
 
-<Frame className="max-w-md block">
-  ![Langfuse
-  releases](https://static.langfuse.com/docs-legacy-gifs/github-watch-changelog.gif)
-</Frame>
+<Video
+  src="https://static.langfuse.com/docs-videos/github-subscribe-releases.mp4"
+  aspectRatio={923 / 516}
+  gifStyle
+  className="max-w-md block"
+/>
 
 <span>_Watch the repository on GitHub to get notified about new releases_</span>
 
@@ -59,4 +67,4 @@ You can also watch the [GitHub releases](https://github.com/langfuse/langfuse/re
 
 If you experience any issues, please create an [issue on GitHub](/issues) or consider other [support options](/support) as part of our Enterprise offering.
 
-Alternatively, you may consider using [Langfuse Cloud](/docs/deployment/cloud), which is a fully managed version of Langfuse. If you have questions, learn more about its security and privacy [here](/security).
+Alternatively, you may consider using [Langfuse Cloud](/docs/deployment/cloud), which is a fully managed version of Langfuse. Learn more about its [security and privacy](/security).

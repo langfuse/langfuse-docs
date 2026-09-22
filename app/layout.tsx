@@ -15,12 +15,15 @@ import { Hubspot } from "@/components/analytics/hubspot";
 import { GoogleAds } from "@/components/analytics/google-ads";
 import { LinkedInInsightTag } from "@/components/analytics/linkedin-ads";
 import { RedditPixel } from "@/components/analytics/reddit-ads";
+import { SpotifyPixel } from "@/components/analytics/spotify-ads";
 import { TwitterPixel } from "@/components/analytics/twitter-ads";
 import { ConversionTracker } from "@/components/analytics/ConversionTracker";
+import { AdConsentGate } from "@/components/analytics/AdConsentGate";
+import { ClickIdPersistence } from "@/components/analytics/ClickIdPersistence";
 import { CommonRoom } from "@/components/analytics/common-room";
 import { AhrefsAnalytics } from "@/components/analytics/ahrefs";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "../style.css";
-import "@vidstack/react/player/styles/base.css";
 import "../src/overrides.css";
 
 const interVariable = Inter({
@@ -59,6 +62,7 @@ export const metadata: Metadata = {
     shortcut: ["/favicon.ico"],
   },
   openGraph: {
+    type: "website",
     images: [{ url: defaultOgImageUrl }],
   },
   twitter: {
@@ -83,25 +87,26 @@ export default function RootLayout({
           <DevAriaHiddenConsoleFilter />
         )}
         <PostHogProvider>
-          <AppRootProvider
-            i18n={{
-              locale: "en",
-              translations: {
-                lastUpdate: "Last edited",
-              },
-            }}
-          >
+          <AppRootProvider i18n={{ locale: "en" }}>
             <AISearch>{children}</AISearch>
           </AppRootProvider>
         </PostHogProvider>
         {process.env.NODE_ENV === "production" && (
           <>
             <GoogleTagManager gtmId="GTM-NGLK4TZX" />
-            <GoogleAds />
-            <LinkedInInsightTag />
-            <RedditPixel />
-            <TwitterPixel />
+            {/* Ad pixels require prior consent (CookieYes "advertisement"
+                category). The gate keeps them from loading or setting cookies
+                until it is granted; every conversion helper already no-ops
+                when its tag is absent, so nothing else needs gating. */}
+            <AdConsentGate>
+              <GoogleAds />
+              <LinkedInInsightTag />
+              <RedditPixel />
+              <SpotifyPixel />
+              <TwitterPixel />
+            </AdConsentGate>
             <ConversionTracker />
+            <ClickIdPersistence />
             <Hubspot />
             <CommonRoom />
             <AhrefsAnalytics />
@@ -113,6 +118,7 @@ export default function RootLayout({
             />
           </>
         )}
+        <SpeedInsights sampleRate={0.1} />
       </body>
     </html>
   );

@@ -333,7 +333,7 @@ const marqueeRow2: MarqueeItem[] = [
     icon: "/images/integrations/bedrock_icon.png",
   },
   {
-    label: "Strands Agents",
+    label: "Strands",
     href: "/integrations/frameworks/strands-agents",
     icon: "/images/integrations/strands_agents_icon.svg",
   },
@@ -354,7 +354,7 @@ const marqueeRow2: MarqueeItem[] = [
   },
   {
     label: "ClickHouse Agentic Data Stack",
-    href: "/integrations/other/agentic-data-stack",
+    href: "/integrations/clickhouse/agentic-data-stack",
     icon: "/images/integrations/clickhouse_icon.svg",
   },
   {

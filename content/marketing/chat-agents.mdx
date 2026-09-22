@@ -1,0 +1,142 @@
+---
+title: Langfuse for chat agents
+description: Build and improve production chat agents with full-session tracing, quality evaluation, and cost visibility in one platform.
+contentWidth: full
+---
+
+import { CustomerQuoteGrid } from "@/components/chat-agents/CustomerQuoteGrid";
+import { RelevantIntegrations } from "@/components/chat-agents/RelevantIntegrations";
+import { ValueInsightsAccordion } from "@/components/chat-agents/ValueInsightsAccordion";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+import { Activity, BookOpen, Rocket } from "lucide-react";
+
+<div className="not-prose mt-6 overflow-hidden border border-line-structure bg-surface-bg">
+  <section data-use-case-section="hero" className="grid border-b border-line-structure lg:grid-cols-[1.2fr_0.8fr]">
+    <div className="min-w-0 border-b border-line-structure px-6 py-7 sm:px-10 sm:py-8 lg:border-b-0 lg:border-r">
+      <p className="font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">Use case / chat agents</p>
+      <h1 className="mt-2 text-[38px] leading-[0.95] text-text-primary sm:text-[48px]">
+        <span className="block">Ship chat agents</span>
+        <span className="block">your users</span>
+        <span className="mt-1 inline-block bg-surface-cta-primary px-1.5 whitespace-nowrap">keep talking to</span>
+      </h1>
+      <p className="mt-4 max-w-[56ch] text-[14px] leading-[1.45] text-text-secondary">Chat-like agents are multi-turn, stateful, and stubbornly hard to debug. Langfuse traces every session end to end. See where a conversation went sideways, what each turn cost, and whether users are satisfied.</p>
+      <div className="mt-6 flex flex-wrap items-center gap-2">
+        <a href="/cloud" className="border border-line-cta bg-text-primary px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-surface-bg transition-opacity hover:opacity-90">Start free</a>
+        <a href="/talk-to-us" className="border border-line-structure bg-surface-bg px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary">Talk to sales</a>
+        <a href="/docs/observability/get-started" data-use-case-action="quickstart" className="inline-flex items-center py-1.5 text-[12px] text-text-tertiary underline decoration-line-structure underline-offset-4 transition-colors hover:text-text-primary hover:decoration-text-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:ml-2">Chat agent quickstart →</a>
+      </div>
+    </div>
+
+    <div className="flex min-w-0 items-center bg-surface-1 px-4 py-4 sm:px-6 sm:py-5">
+      <div className="corner-box-corners relative w-full border border-line-structure bg-surface-bg shadow-sm">
+        <div className="space-y-3 px-3 py-3 text-text-secondary">
+          <div className="grid grid-cols-[18px_minmax(0,1fr)] items-start gap-x-2 gap-y-1">
+            <p className="pt-2 font-mono text-[9px] leading-[1.4] text-text-tertiary">01</p>
+            <p className="justify-self-end rounded-[2px] border border-line-structure bg-surface-2 px-2 py-2 text-[11px] leading-[1.45] text-text-primary">Where is my payout for last week?</p>
+            <p className="col-start-2 text-right font-mono text-[9px] leading-[1.4] uppercase tracking-[0.08em] text-text-tertiary">User · 0.9s</p>
+          </div>
+
+          <div className="grid grid-cols-[18px_minmax(0,1fr)] items-start gap-x-2 gap-y-1">
+            <p className="pt-2 font-mono text-[9px] leading-[1.4] text-text-tertiary">02</p>
+            <p className="justify-self-start rounded-[2px] border border-line-structure bg-surface-bg px-2 py-2 text-[11px] leading-[1.45]">Your payout for 12–18 May was $248.10.</p>
+            <p className="col-start-2 font-mono text-[9px] leading-[1.4] uppercase tracking-[0.08em] text-text-tertiary">Agent · retrieve_payouts · 0.4s</p>
+          </div>
+
+          <div className="grid grid-cols-[18px_minmax(0,1fr)] items-start gap-x-2 gap-y-1">
+            <p className="pt-2 font-mono text-[9px] leading-[1.4] text-text-tertiary">03</p>
+            <p className="justify-self-end rounded-[2px] border border-line-structure bg-surface-2 px-2 py-2 text-[11px] leading-[1.45] text-text-primary">That&apos;s not what I asked. Last <em>week</em>.</p>
+            <p className="col-start-2 text-right font-mono text-[9px] leading-[1.4] uppercase tracking-[0.08em] text-text-tertiary">Frustration true · flagged</p>
+          </div>
+
+          <div className="grid grid-cols-[18px_minmax(0,1fr)] items-start gap-x-2 gap-y-1">
+            <p className="pt-2 font-mono text-[9px] leading-[1.4] text-text-tertiary">04</p>
+            <p className="justify-self-start rounded-[2px] border border-line-structure bg-surface-bg px-2 py-2 text-[11px] leading-[1.45]">You&apos;re right — 20–26 May: $412.60, settling tomorrow.</p>
+            <p className="col-start-2 font-mono text-[9px] leading-[1.4] uppercase tracking-[0.08em] text-text-tertiary">Agent · retry_payouts_v2 · 2.1s · helpfulness 0.92</p>
+          </div>
+        </div>
+
+        <div className="border-t border-line-structure px-3 py-2.5">
+          <p className="font-mono text-[9px] leading-[1.4] uppercase tracking-[0.08em] text-text-tertiary">Resolved</p>
+          <p className="mt-1 text-[18px] leading-none text-text-primary">yes</p>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <section data-use-case-section="benefits" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
+    <div className="flex items-center gap-4 pb-4">
+      <h2 className="text-[34px] leading-[1] text-text-primary sm:text-[46px]">
+        Trace the full session, not one call
+      </h2>
+    </div>
+
+    <ValueInsightsAccordion caption="" locked />
+
+  </section>
+
+  <section data-use-case-section="customer_stories" className="border-t border-line-structure bg-surface-1 px-5 py-14 sm:px-10 sm:py-18">
+    <h2 className="mt-2 text-center text-[44px] leading-[1] text-text-primary">
+      Teams observing and improving production chat agents on Langfuse
+    </h2>
+    <CustomerQuoteGrid />
+  </section>
+
+  <section data-use-case-section="integrations" className="border-t border-line-structure px-5 py-8 sm:px-10 sm:py-10">
+    <RelevantIntegrations />
+  </section>
+
+  <section data-use-case-section="resources" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-16">
+    <h2 className="mt-2 text-center text-[40px] leading-[1] text-text-primary">
+      Learn from real chat-agent examples
+    </h2>
+    <p className="mx-auto mt-2 max-w-[60ch] text-center text-[13px] text-text-tertiary">See the demo, study the academy walkthrough, and use production monitoring patterns that catch rage-click equivalents in chat sessions.</p>
+    <div className="mx-auto mt-8 max-w-4xl">
+      <Cards num={2} className="sm:grid-cols-1 lg:grid-cols-2">
+        <Card
+          title="Explore the live demo project"
+          href="/docs/demo"
+          icon={<Rocket />}
+          description="Check out how we set up Langfuse to trace and improve a docs chatbot. Inspect the full project setup in a public demo org."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
+        <Card
+          title="Academy: customer support chatbot example"
+          href="/academy/examples/customer-support-chatbot"
+          icon={<BookOpen />}
+          description="Explore a detailed recommendation on how to set up Langfuse for a customer support chat agent."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
+        <Card
+          title="Evaluate multi-turn conversations"
+          href="/guides/cookbook/example_evaluating_multi_turn_conversations"
+          icon={<BookOpen />}
+          description="Turn conversation traces into datasets and evaluate whether changes improve your chatbot's next response."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
+        <Card
+          title="The rage clicks of LLM apps (blog)"
+          href="/blog/2026-04-01-llm-as-a-judge-production-monitoring"
+          icon={<Activity />}
+          description="See concrete monitoring patterns to detect repeated re-asks, frustration loops, and quality regressions."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
+      </Cards>
+    </div>
+  </section>
+
+  <section data-use-case-section="closing_cta" className="border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
+    <div className="mx-auto max-w-5xl">
+      <CustomerStoryCTA
+        title="Ready to improve your production chat agent?"
+        description="Use traces, evals, and cost analytics to observe and improve every production chat session with Langfuse."
+        contactLabel="Talk to sales"
+      />
+    </div>
+  </section>
+
+</div>

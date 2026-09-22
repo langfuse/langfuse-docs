@@ -81,7 +81,7 @@ export function Card({
             ) : null}
           </div>
           {description ? (
-            <Text size="s" className="my-0! text-text-secondary">
+            <Text size="s" className="my-0! text-left text-text-secondary">
               {description}
             </Text>
           ) : null}

@@ -93,7 +93,12 @@ export function DocsBreadcrumb() {
       }
     }
 
-    result.unshift({ name: root.name, url: resolveSectionUrl(root) });
+    // Fumadocs 16.15 types tree context `root` as MakeRequired<Root | Folder>,
+    // which does not distribute over the union and is not assignable to Root | Folder.
+    result.unshift({
+      name: root.name,
+      url: resolveSectionUrl(root as PageTree.Root | PageTree.Folder),
+    });
     return result;
   }, [path, root]);
 

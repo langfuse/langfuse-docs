@@ -6,9 +6,17 @@ author: Tobias Wochinger
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { V4CutoverDate } from "@/components/V4CutoverDate";
 import { Book, Code, FileCode } from "lucide-react";
 
 <ChangelogHeader />
+
+<Callout type="info">
+  A new [stable API for evaluators and evaluation
+  rules](/changelog/2026-08-27-stable-evaluator-api) is now available under
+  `/api/public/v2`. The unstable API described below remains available until
+  <V4CutoverDate />.
+</Callout>
 
 You can now set up and manage evaluation directly from AI agents: the Langfuse MCP server exposes evaluators and evaluation rules as tools, and the unstable public API now supports [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) in addition to LLM-as-a-Judge.
 

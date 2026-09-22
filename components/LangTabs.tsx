@@ -62,10 +62,14 @@ function toValue(s: string): string {
 
 export function LangTab({
   className,
+  forceMount = true,
   ...props
 }: React.ComponentProps<typeof FumadocsTab>) {
   return (
     <FumadocsTab
+      // Fumadocs 16.12+ unmounts inactive tabs by default. Keep previous
+      // behavior so TOC/hash links and mermaid/code in other tabs still work.
+      forceMount={forceMount}
       className={cn(
         "pt-4 text-sm bg-transparent rounded-none prose-no-margin bg-stripe-pattern",
         className,

@@ -33,7 +33,7 @@ We distinguish between officially supported and community-supported options:
 | [Valkey](#valkey-vs-redis) (>= 8, self-hosted or managed)      | Official      |
 | Other Redis-compatible stores (e.g., Dragonfly, KeyDB, Garnet) | Community     |
 
-Managed services that run Redis or Valkey, such as [Amazon ElastiCache](https://aws.amazon.com/elasticache/redis/), [Azure Cache for Redis](https://azure.microsoft.com/en-us/products/cache/), and [GCP Memorystore](https://cloud.google.com/memorystore), are covered by the official support level.
+Managed services that run Redis or Valkey, such as [Amazon ElastiCache](https://aws.amazon.com/elasticache/redis/), [Azure Managed Redis](https://learn.microsoft.com/en-us/azure/redis/overview), and [GCP Memorystore](https://cloud.google.com/memorystore), are covered by the official support level.
 
 import SelfHostSupportLevels from "@/components-mdx/self-host-support-levels.mdx";
 
@@ -110,9 +110,9 @@ Raising `REDIS_SOCKET_TIMEOUT_MS` only lengthens the watchdog; it does not addre
 
 This section covers different deployment options and provides example environment variables.
 
-### Managed Redis/Valkey by Cloud Providers
+### Managed Redis/Valkey by Cloud Providers [#managed-redis-valkey]
 
-[Amazon ElastiCache](https://aws.amazon.com/de/elasticache/redis/), [Azure Cache for Redis](https://azure.microsoft.com/de-de/products/cache/), and [GCP Memorystore](https://cloud.google.com/memorystore/?hl=en) are fully managed Redis services.
+[Amazon ElastiCache](https://aws.amazon.com/de/elasticache/redis/), [Azure Managed Redis](https://learn.microsoft.com/en-us/azure/redis/overview), and [GCP Memorystore](https://cloud.google.com/memorystore/?hl=en) are fully managed Redis services.
 Langfuse handles failovers between read-replicas and supports Redis cluster mode for horizontal scaling.
 
 For **standalone Redis instances**, use the standard configuration:
@@ -137,32 +137,77 @@ You must set the parameter `maxmemory-policy` to `noeviction` to ensure that the
 
 </Callout>
 
+### Azure Managed Redis [#azure-managed-redis]
+
+Use the following configuration for Azure Managed Redis with **OSS clustering**.
+
+1. [Create an Azure Managed Redis instance](https://learn.microsoft.com/en-us/azure/redis/quickstart-create-managed-redis) and select the **OSS** clustering policy. Enable [high availability](https://learn.microsoft.com/en-us/azure/redis/architecture#running-without-high-availability-mode-enabled) for production.
+2. Under **Advanced settings**, set **Eviction Policy** to **NoEviction**. This corresponds to `maxmemory-policy=noeviction`. The Azure Managed Redis default is `volatile-lru`, which does not meet Langfuse's queue requirements. See [memory management](https://learn.microsoft.com/en-us/azure/redis/best-practices-memory-management#eviction-policy) and [configuration settings](https://learn.microsoft.com/en-us/azure/redis/configure#advanced-settings).
+3. Enable **Access Keys Authentication** under **Authentication > Access keys**. Use a primary or secondary access key for `REDIS_AUTH`. New instances have access-key authentication [disabled by default](https://learn.microsoft.com/en-us/azure/redis/quickstart-create-managed-redis#create-a-redis-instance). See [access information](https://learn.microsoft.com/en-us/azure/redis/how-to-redis-access-data#gather-cache-access-information).
+4. Copy the hostname from **Overview**. It has the form `<cache-name>.<region>.redis.azure.net`. Use port `10000` and enable TLS. See [TLS configuration](https://learn.microsoft.com/en-us/azure/redis/tls-configuration).
+
+Set these environment variables on **both** the Langfuse Web and Langfuse Worker containers. Replace the example hostname and inject the access key through your deployment's secret configuration.
+
+```bash
+REDIS_CLUSTER_ENABLED=true
+REDIS_CLUSTER_NODES=my-amr.eastus.redis.azure.net:10000
+REDIS_AUTH=your-azure-managed-redis-access-key
+REDIS_TLS_ENABLED=true
+REDIS_TLS_SERVERNAME=my-amr.eastus.redis.azure.net
+REDIS_TLS_REJECT_UNAUTHORIZED=true
+REDIS_SENTINEL_ENABLED=false
+```
+
+Leave `REDIS_USERNAME` unset for this access-key example. `REDIS_CONNECTION_STRING` is not needed in cluster mode; Langfuse uses `REDIS_CLUSTER_NODES` and `REDIS_AUTH`.
+Azure Managed Redis supports [one database per instance](https://learn.microsoft.com/en-us/azure/redis/configure#databases); do not select a nonzero database number.
+
+#### Clustering and network access
+
+With [OSS clustering](https://learn.microsoft.com/en-us/azure/redis/architecture#cluster-policies), allow connections to port `10000` and the dynamically discovered shard ports in the `85xx` range. Do not hardcode individual shard ports.
+Langfuse's cluster mode adds hash tags to BullMQ queue keys so related keys share a hash slot. See [BullMQ cluster requirements](https://docs.bullmq.io/patterns/redis-cluster) and the [queue-sharding guidance](#redis-cluster-mode) below.
+
+The **Enterprise** clustering policy also uses sharding and has [cross-slot restrictions](https://learn.microsoft.com/en-us/azure/redis/architecture#multi-key-commands). Its single endpoint does not make the standalone Langfuse configuration equivalent to a non-sharded Redis deployment. Use **OSS** for the example above.
+The **Non-clustered** policy is a separate option for instances up to 25 GB. It uses standalone client settings, including `REDIS_CLUSTER_ENABLED=false`, port `10000`, and TLS.
+
+For production, use a [private endpoint](https://learn.microsoft.com/en-us/azure/redis/private-link) and disable public network access. Configure private DNS so both Langfuse containers can resolve and reach the cache. Keep the normal `<cache-name>.<region>.redis.azure.net` hostname in the client and TLS settings.
+
+#### Replacing an existing Azure Cache for Redis instance
+
+Plan a coordinated change for the Web and Worker containers. Redis holds queued work as well as cached data. Stop new job production and process or explicitly account for outstanding jobs before switching instances.
+If you also enable Langfuse cluster mode, [queue key prefixes change](https://github.com/langfuse/langfuse/blob/39e3cd7d6572236fa9d88e475297941eb118d74b/packages/shared/src/server/redis/redis.ts). Copying the old Redis data alone does not convert the queue keys to the new format. Validate ingestion and worker processing after the switch.
+
 ### Redis on Kubernetes (Helm)
 
-Bitnami offers Helm Charts for [Redis](https://github.com/bitnami/charts/tree/main/bitnami/redis) and [Valkey](https://github.com/bitnami/charts/tree/main/bitnami/valkey).
-We use the Valkey chart as a dependency for [Langfuse K8s](https://github.com/langfuse/langfuse-k8s).
-See [Langfuse on Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) for more details on how to deploy Langfuse on Kubernetes.
+The [Langfuse Helm chart](/self-hosting/deployment/kubernetes-helm) can deploy a cache for you via `redis.deploy: true`.
+From chart version `v2.0.0` onwards it bundles the [valkey-io/valkey](https://github.com/valkey-io/valkey) chart and wires Langfuse to it automatically, including credentials.
+
+This bundled instance is a single Valkey pod and is intended for smaller deployments.
+For high availability, set `redis.deploy: false` and point Langfuse at an external Redis or Valkey cluster, for example a [managed service](#managed-redis-valkey).
 
 #### Example Configuration
 
-For a minimum production setup, we recommend to use the following values.yaml overwrites when deploying the Valkey Helm chart:
-
 ```yaml
-valkey:
+redis:
   deploy: true
-  architecture: standalone
-  primary:
-    extraFlags:
-      - "--maxmemory-policy noeviction" # Necessary to handle queue jobs correctly
   auth:
+    # Leave the password empty to have the chart generate one, or point
+    # auth.existingSecret at a secret you manage.
     password: changeme
 ```
 
-Set the following environment variables to connect to your Redis instance:
+For an external instance, set `redis.deploy: false` and provide the connection details:
 
 ```yaml
-REDIS_CONNECTION_STRING=redis://default:changeme@<chart-name>-valkey-master:6379/0
+redis:
+  deploy: false
+  host: your-redis-endpoint
+  port: 6379
+  auth:
+    existingSecret: my-redis-secret
+    existingSecretPasswordKey: password
 ```
+
+Whichever option you choose, make sure `maxmemory-policy` is set to `noeviction` on the instance so that queue jobs are not evicted.
 
 ### Docker
 
@@ -219,6 +264,22 @@ REDIS_AUTH=your-auth-token
 REDIS_TLS_ENABLED=true
 REDIS_TLS_SERVERNAME=clustercfg.my-redis-cluster.abc123.cache.amazonaws.com
 ```
+
+#### Azure Managed Redis
+
+Select the **OSS** clustering policy, set the eviction policy to **NoEviction**, and enable access-key authentication as described in [Azure Managed Redis](#azure-managed-redis). Apply this configuration to both the Langfuse Web and Worker containers:
+
+```bash
+REDIS_CLUSTER_ENABLED=true
+REDIS_CLUSTER_NODES=my-amr.eastus.redis.azure.net:10000
+REDIS_AUTH=your-azure-managed-redis-access-key
+REDIS_TLS_ENABLED=true
+REDIS_TLS_SERVERNAME=my-amr.eastus.redis.azure.net
+REDIS_TLS_REJECT_UNAUTHORIZED=true
+REDIS_SENTINEL_ENABLED=false
+```
+
+Replace the example hostname and access key with your instance's values. Leave `REDIS_USERNAME` unset. Allow access to port `10000` and the dynamically assigned shard ports described above. Langfuse adds per-queue hash tags when cluster mode is enabled.
 
 #### Self-hosted Redis Cluster
 

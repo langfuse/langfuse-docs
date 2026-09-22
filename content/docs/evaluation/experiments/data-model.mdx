@@ -14,6 +14,18 @@ For detailed reference please refer to
 - the [JS/TS SDK reference](https://js.reference.langfuse.com)
 - the [API reference](https://api.reference.langfuse.com)
 
+## How experiments are created [#how-experiments-are-created]
+
+You create experiment runs in Langfuse through one of these paths:
+
+| Path                                                                                        | Use when                                                                                         |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)                     | Python or JS/TS Experiment runner                                                                |
+| [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui)                       | Prompt or model experiments from the dataset page                                                |
+| [Experiments via OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry) | Direct OTEL ingestion: other languages, custom OTLP pipelines, or re-ingesting experiment traces |
+
+To **read** experiment runs, items, and scores after they exist, use the [Experiments API](/docs/api-and-data-platform/features/public-api#experiments). There is no public REST endpoint for creating new experiment runs; the legacy `POST /api/public/dataset-run-items` path is deprecated.
+
 ## Objects
 
 ### Datasets [#datasets]
@@ -120,6 +132,13 @@ direction LR
 | `description` | string | No       | Description of the dataset run          |
 | `metadata`    | object | No       | Additional metadata for the dataset run |
 | `datasetId`   | string | Yes      | ID of the dataset this run belongs to   |
+
+Experiment metadata and description describe the entire run, not individual
+items. The Python and JS/TS Experiment runners propagate experiment metadata
+to child observations, but set description directly on experiment-item root
+observations without propagating it to children. Keep each field consistent
+across the observations that carry it. For direct ingestion, follow the
+[OpenTelemetry experiment attribute guide](/integrations/native/opentelemetry/experiments).
 
 #### DatasetRunItem object [#datasetrunitem-object]
 
@@ -249,15 +268,9 @@ See SDK references for function signatures and parameters:
 - [JS/TS SDK: `RunEvaluator`](https://js.reference.langfuse.com/types/_langfuse_client.RunEvaluator.html)
 
 <Callout type="info">
-For detailed usage examples of tasks and evaluators, see [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk).
+For detailed usage examples of tasks and evaluators, see [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk). For ingesting experiment traces without the SDK, see [Experiments via OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry).
 </Callout>
 
 ## Local Datasets [#local-datasets]
 
-Currently, if an [Experiment via SDK](/docs/evaluation/experiments/experiments-via-sdk) is used to run experiments on local datasets, only traces are created in Langfuse - no dataset runs are generated. Each task execution creates an individual trace for observability and debugging.
-
-<Callout type="info">
-
-We have improvements on our roadmap to support similar functionality such as run overviews, comparison views, and more for experiments on local datasets as for Langfuse datasets.
-
-</Callout>
+With Langfuse v4 and the current SDKs, [experiments on local data](/docs/evaluation/experiments/experiments-via-sdk) appear under **Experiments** without a hosted dataset. Each task execution also creates a trace for debugging. See [Compare experiments](/docs/evaluation/experiments/compare-experiments).

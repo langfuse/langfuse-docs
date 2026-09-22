@@ -3,7 +3,8 @@ import {
   DOCKER_PULLS,
   FORTUNE_50_COMPANIES,
   FORTUNE_500_COMPANIES,
-  SDK_INSTALLS_PER_MONTH,
+  formatCompanyCount,
+  formatSdkInstallsPerMonth,
 } from "./home/Usage";
 
 export const CredibilitySentence = ({
@@ -24,6 +25,11 @@ export const CredibilitySentence = ({
         <p>Langfuse is the most widely adopted LLM Engineering platform:</p>
         <ul className="mt-2 list-disc list-inside space-y-1">
           <li>
+            Used by{" "}
+            <Metric className={metricClassName}>{formatCompanyCount()}</Metric>{" "}
+            companies
+          </li>
+          <li>
             <Metric className={metricClassName}>
               {getGitHubStars().toLocaleString()}
             </Metric>{" "}
@@ -31,7 +37,7 @@ export const CredibilitySentence = ({
           </li>
           <li>
             <Metric className={metricClassName}>
-              {(SDK_INSTALLS_PER_MONTH / 1_000_000).toFixed(0)}M+
+              {formatSdkInstallsPerMonth()}
             </Metric>{" "}
             SDK installs per month
           </li>
@@ -52,14 +58,17 @@ export const CredibilitySentence = ({
 
   return (
     <p className={className}>
-      Langfuse is the most widely adopted LLM Engineering platform with{" "}
+      Langfuse is the most widely adopted LLM Engineering platform, used by{" "}
+      <Metric className={metricClassName}>
+        {formatCompanyCount()} companies
+      </Metric>
+      , with{" "}
       <Metric className={metricClassName}>
         {getGitHubStars().toLocaleString()} GitHub stars
       </Metric>
       ,{" "}
       <Metric className={metricClassName}>
-        {(SDK_INSTALLS_PER_MONTH / 1_000_000).toFixed(0)}M+ SDK installs per
-        month
+        {formatSdkInstallsPerMonth()} SDK installs per month
       </Metric>
       , and{" "}
       <Metric className={metricClassName}>

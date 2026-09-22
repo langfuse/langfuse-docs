@@ -6,7 +6,7 @@ import { Mermaid } from "@/components/Mermaid";
 import { Image } from "@/components/ui/image";
 import { Frame } from "@/components/Frame";
 import { LangTab, LangTabs, LangTabsWithTab } from "@/components/LangTabs";
-import { FetchReadme } from "@/components/FetchReadme";
+import { GitHubReadme } from "@/components/GitHubReadme";
 import {
   Cards,
   Card,
@@ -49,13 +49,19 @@ import { DatasetFieldsDiagram as DatasetFieldsDiagramJa } from "@/components/aca
 import { ErrorAnalysisProcessDiagram as ErrorAnalysisProcessDiagramJa } from "@/components/academy/japan/ErrorAnalysisProcessDiagram";
 import { AgentPromptCallout as AgentPromptCalloutJa } from "@/components/academy/japan/AgentPromptCallout";
 import { ManualGuideCallout as ManualGuideCalloutJa } from "@/components/academy/japan/ManualGuideCallout";
+import { AnnotatedLoop as AnnotatedLoopJa } from "@/components/academy/japan/AnnotatedLoop";
+import { DatasetBlock as DatasetBlockJa } from "@/components/academy/japan/DatasetBlock";
+import { EvaluatorBlock as EvaluatorBlockJa } from "@/components/academy/japan/EvaluatorBlock";
+import { JudgePromptExample as JudgePromptExampleJa } from "@/components/academy/japan/JudgePromptExample";
+import { TraceViewDiagram as TraceViewDiagramJa } from "@/components/academy/japan/TraceViewDiagram";
 import { Details, Summary } from "@/components/Details";
 
 // Lazy-load Video so @vidstack/react (~800 KB) is NOT bundled on every MDX page.
 // It only downloads on pages that actually render a <Video> tag.
+// next/dynamic() returns ComponentType (class or function); MDX expects a function.
 const Video = dynamic(() =>
   import("@/components/Video").then((m) => ({ default: m.Video })),
-);
+) as typeof import("@/components/Video").Video;
 
 const BLOCK_TAGS = new Set([
   "div",
@@ -94,6 +100,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ...defaultMdxComponents,
     a: (props: LinkProps) => <MdxLink variant="underline" {...props} />,
     img: Image,
+    Image,
     p: MdxParagraph,
     Frame,
     Video,
@@ -109,7 +116,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     FileTree,
     "FileTree.File": FileTreeFile,
     "FileTree.Folder": FileTreeFolder,
-    FetchReadme,
+    GitHubReadme,
     AvailabilityBanner,
     Mermaid,
     Playground,
@@ -141,6 +148,11 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ErrorAnalysisProcessDiagramJa,
     AgentPromptCalloutJa,
     ManualGuideCalloutJa,
+    AnnotatedLoopJa,
+    DatasetBlockJa,
+    EvaluatorBlockJa,
+    JudgePromptExampleJa,
+    TraceViewDiagramJa,
     details: Details,
     summary: Summary,
     ...components,
