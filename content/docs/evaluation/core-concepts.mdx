@@ -181,11 +181,13 @@ You can find more details on how these objects link together under the hood on t
 
 ### Ways to run experiments
 
-You can **run experiments programmatically using the Langfuse SDK**. This gives you full control over the task, evaluation logic, and more. [Learn more about running experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk).
+You can **run experiments programmatically using the Langfuse SDK**. This gives you full control over the task, evaluation logic, and more. Pass evaluator functions to the runner so they receive each item's expected output. [Learn more about running experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk).
 
-You can **run experiments directly from the Langfuse interface** by selecting a dataset and prompt version. This is useful for quick iterations on prompts without writing code. [Learn more about running experiments via UI](/docs/evaluation/experiments/experiments-via-ui).
+You can **run experiments directly from the Langfuse interface** by selecting a dataset and prompt version. This is useful for quick iterations on prompts without writing code. Select Langfuse-managed evaluators on the run if you want them to see expected output. [Learn more about running experiments via UI](/docs/evaluation/experiments/experiments-via-ui).
 
-If you already emit traces through OpenTelemetry and are not using the Python or JS/TS SDK, **attach experiment attributes to those spans** so Langfuse groups them as an experiment run. [Learn more about experiments via OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry).
+If you already emit traces through OpenTelemetry and are not using the Python or JS/TS SDK, **attach experiment attributes to those spans** so Langfuse groups them as an experiment run. Score that pipeline yourself. [Learn more about experiments via OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry).
+
+A **remote webhook** on a dataset only starts your endpoint. It does not attach Langfuse-managed evaluators. Score in the webhook, or see [Evaluate externally run experiments](/docs/evaluation/experiments/evaluate-external-experiments).
 
 <div className="my-6">
   <div className="grid grid-cols-3 gap-2">

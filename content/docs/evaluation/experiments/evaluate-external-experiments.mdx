@@ -1,0 +1,92 @@
+---
+title: Evaluate externally run experiments
+description: Score webhook, SDK, and OpenTelemetry experiments. Langfuse-managed evaluators see expected output only on prompt experiments, not on observation-level rules.
+---
+
+# Evaluate externally run experiments
+
+When an experiment runs **outside** Langfuse — a [remote webhook](/docs/evaluation/experiments/experiments-via-sdk#configure-webhook), the [SDK experiment runner](/docs/evaluation/experiments/experiments-via-sdk), or an [OpenTelemetry pipeline](/docs/evaluation/experiments/experiments-via-opentelemetry) — Langfuse does not pick evaluators for you. The trigger only starts your pipeline. You score the run in that pipeline, or you use a [prompt experiment](/docs/evaluation/experiments/experiments-via-ui) if you want Langfuse to execute both the task and the judge.
+
+This is the path to use when you want to compare an application's output to a dataset item's **expected output** (similarity, exact match, factual coverage). Attaching an observation-level [rule](/docs/evaluation/core-concepts#evaluators-and-rules) to webhook traces does not populate expected output, so a similarity judge will score `0`.
+
+Use cases:
+
+- A Custom Experiment webhook runs your app against a dataset and you want similarity scores on each item.
+- An SDK or CI job already has `expected_output` in the experiment item and should ingest the score with the run.
+- You need a production rule that checks something on the observation alone (tone, refusal, JSON validity) and must not depend on a dataset label.
+
+## Which path provides expected output? [#which-path-provides-expected-output]
+
+| How the experiment runs                                                                 | Who runs the application | Does a Langfuse-managed evaluator see expected output?                       | How to attach scores                                                                                                                                                                                                                 |
+| --------------------------------------------------------------------------------------- | ------------------------ | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [Prompt experiment](/docs/evaluation/experiments/experiments-via-ui)                    | Langfuse                 | Yes, when you select the evaluator on the run and map **Expected Output**    | Select [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), [code](/docs/evaluation/evaluation-methods/code-evaluators), or [Jev](/docs/evaluation/evaluation-methods/jev-as-a-judge) on the experiment setup page. |
+| [SDK experiment runner](/docs/evaluation/experiments/experiments-via-sdk#evaluators)    | Your process             | Yes, in **your** evaluator functions (`expected_output` / `expectedOutput`)  | Pass `evaluators` and optional `run_evaluators` to `run_experiment`.                                                                                                                                                                 |
+| [Remote webhook](/docs/evaluation/experiments/experiments-via-sdk#configure-webhook)    | Your endpoint            | Only inside your webhook, after it fetches the dataset                       | Score in the webhook or call the SDK runner from it, then [ingest scores](/docs/evaluation/evaluation-methods/scores-via-sdk). The trigger dialog has no evaluator picker.                                                           |
+| [OpenTelemetry experiments](/docs/evaluation/experiments/experiments-via-opentelemetry) | Your pipeline            | Only inside your pipeline                                                    | Ingest scores from the pipeline.                                                                                                                                                                                                     |
+| [Observation-level rule](/docs/evaluation/get-started/online)                           | Langfuse (online eval)   | No. Mapping sources are observation input, output, metadata, and tool calls. | Use for **reference-free** checks only. Do not map expected output.                                                                                                                                                                  |
+
+Langfuse-managed evaluators and SDK evaluator functions are different things. UI judges and code evaluators run in Langfuse. SDK `evaluators` run in your process and receive the experiment item directly.
+
+## Score a webhook experiment [#score-a-webhook-experiment]
+
+A remote experiment trigger POSTs the dataset ID, name, and optional config to your endpoint. It does not run Langfuse-managed evaluators and it does not pass expected output to them.
+
+<Steps>
+
+### Fetch the dataset and run your application
+
+Your webhook already has the dataset identity. Fetch the items, run your application on each input, and create an experiment run (SDK runner or OpenTelemetry experiment attributes). Each item's `expected_output` is available in the dataset payload.
+
+### Score while you still have the item [#score-while-you-still-have-the-item]
+
+Compare the application output to `item.expected_output` in the same process. Two typical options:
+
+1. **SDK evaluator functions** — pass them to `dataset.run_experiment(...)` / `dataset.runExperiment(...)`. They receive `expected_output` automatically. See [Evaluators](/docs/evaluation/experiments/experiments-via-sdk#evaluators).
+2. **Ingest a score yourself** — compute similarity (or call your own judge) and send the result with [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk) on the item's trace or observation.
+
+### Skip observation-level rules for expected-output checks [#skip-rules-for-expected-output]
+
+A rule that fires on webhook observations (`environment = sdk-experiment`, a specific observation name, metadata) can score those observations. It still cannot load the linked dataset item. Any prompt variable you mapped to **Expected Output** stays empty.
+
+If you want an automated rule on those traces, rewrite the judge so it only uses observation data — for example "did the assistant refuse to reveal another user's data?"
+
+</Steps>
+
+<Callout type="warning">
+  A judge that says "if expected output is missing, return 0" will return `0` on
+  every rule-triggered webhook run, including cases where the actual output is
+  similar to the dataset label. That is empty context, not a failed similarity
+  check.
+</Callout>
+
+## Why a rule cannot see expected output [#why-a-rule-cannot-see-expected-output]
+
+Dataset items store expected output. An experiment run item links each execution's observation to the dataset item it came from. [Prompt experiments](/docs/evaluation/experiments/experiments-via-ui) follow that link and pass the item to the evaluator as experiment context.
+
+An observation-level rule does not follow that link. Expected output is not stored on the observation, so it is not a mapping source for online evaluation.
+
+`{{ground_truth}}`, `{{expected_output}}`, and `{{reference}}` are only names in the judge prompt. You choose them. What matters is the data source you map the variable to. Mapping it to **Expected Output** works in a prompt experiment and is empty on a rule.
+
+Code evaluators read the same split from `ctx`:
+
+- `ctx.observation.*` is always present when the evaluator runs on an observation.
+- `ctx.experiment` (with `item_expected_output` / `itemExpectedOutput`) is present only when Langfuse invoked the evaluator as part of a prompt experiment, not when a rule scored an observation that happens to belong to a webhook or SDK run.
+
+See [code evaluator context fields](/docs/evaluation/evaluation-methods/code-evaluators#context-fields).
+
+## Confirm what the judge received [#confirm-what-the-judge-received]
+
+1. Open the evaluator.
+2. Filter to an observation from a recent webhook or SDK run.
+3. Run a test.
+4. Inspect the substituted prompt, or `ctx.experiment` for a code evaluator.
+
+If the expected-output field is blank, the evaluator is on the observation-level path. Score in the webhook or run a prompt experiment instead.
+
+## Related resources
+
+- [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk), including the [remote webhook](/docs/evaluation/experiments/experiments-via-sdk#configure-webhook)
+- [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui)
+- [LLM-as-a-Judge variable mapping](/docs/evaluation/evaluation-methods/llm-as-a-judge#map-variables)
+- [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk)
+- [FAQ: evaluators on external experiments](/faq/all/langfuse-evaluators-on-dataset-runs)

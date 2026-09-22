@@ -122,7 +122,9 @@ Run evaluators on individual observations within your traces—such as LLM calls
 
 #### Data available to observation-level evaluators [#observation-evaluator-context]
 
-Observation-level evaluators map variables from the matched observation. You can select its input, output, metadata, or tool calls. Expected output and experiment item metadata are available only in prompt experiments.
+Observation-level evaluators map variables from the matched observation. You can select its input, output, metadata, or tool calls.
+
+Expected output and experiment item metadata are **not** available on this path. They are supplied only when you select the evaluator on a [prompt experiment](/docs/evaluation/experiments/experiments-via-ui). A [rule](/docs/evaluation/core-concepts#evaluators-and-rules) that matches traces from a webhook or SDK experiment still cannot load the linked dataset item, so any variable mapped to **Expected Output** stays empty. Score those runs in your pipeline instead. See [Evaluate externally run experiments](/docs/evaluation/experiments/evaluate-external-experiments).
 
 They do not load sibling or child observations from the same trace. If your evaluator needs the overall request and response of an application or agent invocation, target a logical root observation that records that overall input and output. A logical root is an observation without a physical parent or an observation explicitly marked as an application root by the SDK. It can therefore have a physical parent. The evaluator still only sees data on that root observation; it will not automatically include data from child observations unless your application writes the required summary or context onto the root observation.
 
@@ -163,8 +165,10 @@ Each experiment run generates traces that are automatically scored by your selec
 
 1. Create a dataset with test inputs and (optionally) expected outputs. You may also define your test data locally.
 2. Run experiment via UI or SDK—this executes your application code for each dataset item. See [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui) or [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) for more information.
-3. Selected evaluators to automatically score the generated outputs
+3. Select evaluators on the prompt experiment so they receive experiment context (expected output and item metadata)
 4. Compare results across experiment runs to make data-driven decisions
+
+Webhook and SDK experiments do not use this selection step. Score them in your pipeline. See [Evaluate externally run experiments](/docs/evaluation/experiments/evaluate-external-experiments).
 
 **Example Use Case**
 
@@ -194,12 +198,19 @@ Go to the Evaluators page and click **New evaluator**. In the template gallery, 
 An evaluator defines how data is scored: its [judge prompt](/academy/evaluate/writing-evaluators#writing-a-good-llm-as-a-judge), model, score definition, and default variable mappings. [Rules](/docs/evaluation/core-concepts#evaluators-and-rules) select the incoming observations on which it runs.
 
 1. Select the model to use. Use the [project default model](#project-default-model) or set a dedicated model for this evaluator.
-2. Write or edit the evaluation prompt with `{{variables}}` for the data the judge needs, such as `{{input}}`, `{{output}}`, or `{{ground_truth}}`.
+2. Write or edit the evaluation prompt with `{{variables}}` for the data the judge needs, such as `{{input}}`, `{{output}}`, or `{{expected_output}}`. Names like `{{ground_truth}}` are labels you choose, not reserved parameters.
 3. Choose a [score type](/docs/evaluation/scores/overview#score-types): Numeric for values such as helpfulness from `0` to `1`, Categorical for labels, or Boolean for `true` / `false` decisions. For Categorical scores, define the allowed categories. You can allow multiple matches when more than one category may apply.
 
-### Map variables
+### Map variables [#map-variables]
 
-Map each prompt variable by clicking the data you want to use. For online evaluation, you can select an observation's input, output, metadata, or tool calls. If you plan to use the evaluator in prompt experiments, also map **Expected Output** and **Experiment Item Metadata**.
+Map each prompt variable by clicking the data you want to use. For online evaluation, you can select an observation's input, output, metadata, or tool calls. If you plan to use the evaluator in [prompt experiments](/docs/evaluation/experiments/experiments-via-ui), also map **Expected Output** and **Experiment Item Metadata**.
+
+<Callout type="info">
+  Mapping a variable to **Expected Output** does nothing on an observation-level
+  rule, including rules that match webhook or SDK experiment traces. Score
+  those runs in your pipeline. See [Evaluate externally run
+  experiments](/docs/evaluation/experiments/evaluate-external-experiments).
+</Callout>
 
 ### Test evaluator
 
@@ -214,7 +225,7 @@ On the right, filter to representative sample observations, select one, and run 
 After saving, you can:
 
 - Create a [rule](/docs/evaluation/core-concepts#evaluators-and-rules) from the filters you used to select test samples, or attach the evaluator to an existing rule to run it on incoming observations.
-- Continue without a rule. You can still use the evaluator for [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation) or [prompt experiments](/docs/evaluation/experiments/experiments-via-ui).
+- Continue without a rule. You can still use the evaluator for [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation) or [prompt experiments](/docs/evaluation/experiments/experiments-via-ui). To score [webhook or SDK experiments](/docs/evaluation/experiments/evaluate-external-experiments), evaluate in your pipeline instead of adding a rule.
 
 </Steps>
 
@@ -356,6 +367,13 @@ The most capable models generally produce the best evaluations. Models with stro
 <Summary>How much does LLM-as-a-Judge cost?</Summary>
 
 Cost depends on the judge model and the size of the inputs being evaluated. A typical evaluation costs $0.01-0.10 per assessment. You can manage costs by: (1) using sampling to evaluate a percentage of traces, (2) targeting specific observations instead of full traces, and (3) choosing cost-effective judge models for simpler evaluations.
+
+</Details>
+
+<Details>
+<Summary>Can I map expected output on a rule that scores webhook experiments?</Summary>
+
+No. Observation-level rules only see the observation's input, output, metadata, and tool calls. Expected output lives on the dataset item and is passed to the judge only when you select the evaluator on a [prompt experiment](/docs/evaluation/experiments/experiments-via-ui). For webhook or SDK runs, score in your pipeline. See [Evaluate externally run experiments](/docs/evaluation/experiments/evaluate-external-experiments).
 
 </Details>
 

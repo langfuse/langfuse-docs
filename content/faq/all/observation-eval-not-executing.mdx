@@ -16,6 +16,8 @@ There are a couple of things you can check:
 4. [Do all mapped variables exist on matching observations?](#variable-mapping-references-missing-data)
 5. [Is your evaluator blocked by its LLM connection or model configuration?](#llm-connection)
 
+If the evaluator **does run** but every score is `0` because expected output is blank, that is a different issue: rules cannot see dataset expected output. See [Evaluate externally run experiments](/docs/evaluation/experiments/evaluate-external-experiments).
+
 ## Incompatible SDK version or ingestion method
 
 Observation-level evaluators only work with data ingested via the [OTEL endpoint](/integrations/native/opentelemetry). This means you need either:

@@ -169,7 +169,9 @@ As your prompt will be executed for each dataset item, you need to configure an 
 
 ### Optional: Set up evaluators
 
-You can set up an [LLM-as-a-judge evaluator](/docs/evaluation/evaluation-methods/llm-as-a-judge) to score semantic criteria or a [code evaluator](/docs/evaluation/evaluation-methods/code-evaluators) for deterministic checks. Make sure to target experiments and filter for the dataset you want to use.
+You can set up an [LLM-as-a-judge evaluator](/docs/evaluation/evaluation-methods/llm-as-a-judge) to score semantic criteria or a [code evaluator](/docs/evaluation/evaluation-methods/code-evaluators) for deterministic checks. Map **Expected Output** on the evaluator, then select it when you start the prompt experiment. That is the path that supplies the dataset item's expected output to the judge.
+
+Do not attach an observation-level rule to get expected output onto webhook or SDK experiment traces. Score those runs in your pipeline. See [Evaluate externally run experiments](/docs/evaluation/experiments/evaluate-external-experiments).
 
 </Steps>
 
@@ -238,7 +240,7 @@ After each Experiment run, you can check the aggregated score in the Experiments
 
 ## Related Resources
 
-- If you need to evaluate full application or agent logic (including custom runtime configuration) instead of prompt-only runs, use [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk). You can also trigger an SDK-based evaluation run via the UI with [webhooks](/docs/evaluation/experiments/experiments-via-sdk#configure-webhook).
+- If you need to evaluate full application or agent logic (including custom runtime configuration) instead of prompt-only runs, use [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk). You can also trigger an SDK-based evaluation run via the UI with [webhooks](/docs/evaluation/experiments/experiments-via-sdk#configure-webhook). Score webhook runs in your endpoint; see [Evaluate externally run experiments](/docs/evaluation/experiments/evaluate-external-experiments).
 - If you emit traces through OpenTelemetry in another language or a custom pipeline, use [Experiments via OpenTelemetry](/docs/evaluation/experiments/experiments-via-opentelemetry).
 
 ## GitHub Discussions

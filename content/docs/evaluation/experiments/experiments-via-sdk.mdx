@@ -225,7 +225,9 @@ Enhance your experiments with evaluators and advanced configuration options.
 
 Evaluators assess the quality of task outputs at the item level. They receive the input, metadata, output, and expected output for each item and return evaluation metrics that are reported as scores on the traces in Langfuse.
 
-These SDK evaluator functions run in your experiment process. If you want to write deterministic evaluator code in the Langfuse UI and have Langfuse execute it on experiment observations, use [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators).
+These SDK evaluator functions run in your experiment process and receive `expected_output` for each item. They are the way to attach scores when the experiment runs in your code.
+
+Langfuse-managed [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) and [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators see expected output only when you select them on a [prompt experiment](/docs/evaluation/experiments/experiments-via-ui). An observation-level rule on traces from this runner does not get expected output. See [Evaluate externally run experiments](/docs/evaluation/experiments/evaluate-external-experiments).
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
@@ -693,4 +695,18 @@ Once configured, team members can trigger remote experiments via the `Run` butto
 
 </Steps>
 
-**Typical workflow**: Your webhook receives the request, fetches the dataset from Langfuse, runs your application against the dataset items, evaluates the results, and ingests the scores back into Langfuse as a new Experiment run.
+The trigger does not attach Langfuse-managed evaluators. There is no evaluator picker on the remote experiment dialog.
+
+**Typical workflow**: Your webhook receives the request, fetches the dataset from Langfuse, runs your application against the dataset items, evaluates the results in that same process, and [ingests the scores](/docs/evaluation/evaluation-methods/scores-via-sdk) as a new experiment run.
+
+## Evaluate remote experiments [#evaluate-remote-experiments]
+
+Score webhook runs in your endpoint, where you already have each item's expected output. Do not add an observation-level [rule](/docs/evaluation/core-concepts#evaluators-and-rules) that maps **Expected Output** onto those traces — that field stays empty on the online-evaluation path, so a similarity judge returns `0`.
+
+| Goal                                       | Do this                                                                                                                                           |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Compare output to the dataset label        | Compute the score in the webhook, or call `dataset.run_experiment` / `dataset.runExperiment` with [SDK evaluators](#evaluators) from the webhook. |
+| Use a Langfuse-managed LLM or code judge   | Run a [prompt experiment](/docs/evaluation/experiments/experiments-via-ui) and select the evaluator there.                                        |
+| Check something that does not need a label | Attach an observation-level rule, but keep the judge reference-free (tone, refusal, JSON validity).                                               |
+
+See [Evaluate externally run experiments](/docs/evaluation/experiments/evaluate-external-experiments) for why experiment context is missing on rules and how to confirm what the judge received.
