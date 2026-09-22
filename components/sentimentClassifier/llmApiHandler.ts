@@ -6,6 +6,7 @@ import {
   propagateAttributes,
   setActiveTraceIO,
   getActiveTraceId,
+  updateActiveObservation,
 } from "@langfuse/tracing";
 import { after } from "next/server";
 import { flush } from "@/src/instrumentation";
@@ -69,6 +70,14 @@ const handler = async (req: Request) => {
         });
 
         setActiveTraceIO({ output: result.object });
+        updateActiveObservation(
+          {
+            input: text,
+            output: result.object,
+            model: "gpt-4o-mini",
+          },
+          { asType: "generation" },
+        );
 
         after(async () => await flush());
 
@@ -93,6 +102,10 @@ const handler = async (req: Request) => {
 
 export const POST = observe(handler, {
   name: "sentiment-classifier-gpt",
+  asType: "generation",
+  // Keep the GPT result we set via updateActiveObservation; otherwise observe
+  // would capture the HTTP Response object, which serializes to {}.
+  captureOutput: false,
 });
 
 export const maxDuration = 30;
