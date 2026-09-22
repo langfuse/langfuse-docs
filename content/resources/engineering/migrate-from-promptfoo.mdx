@@ -601,21 +601,37 @@ Know these before you commit to the cutover:
 
 ## FAQ [#faq]
 
-### Can I keep running Promptfoo alongside Langfuse? [#keep-both-tools]
+<FaqDetails>
+
+<Details id="keep-both-tools">
+<Summary>Can I keep running Promptfoo alongside Langfuse?</Summary>
 
 Yes, and most teams do during the transition. Promptfoo can fetch prompts from Langfuse via `langfuse://` references, so both tools can evaluate the same prompt versions while you port test cases and assertions incrementally. Many teams also keep Promptfoo permanently for red teaming, which Langfuse does not replace.
 
-### Do Langfuse evaluators cover Promptfoo's assertion types? [#assertion-parity]
+</Details>
+
+<Details id="assertion-parity">
+<Summary>Do Langfuse evaluators cover Promptfoo's assertion types?</Summary>
 
 Mostly, but not as a one-to-one catalog. Deterministic assertions (`contains`, `regex`, `is-json`, custom `javascript`/`python`) become short evaluator functions or UI-authored code evaluators. Model-graded assertions map to autoevals scorers (factuality, closed QA, similarity, RAG context metrics) or Langfuse-managed LLM-as-a-judge evaluators. Promptfoo's per-assertion `weight` and `threshold` scoring has no direct equivalent; compute composite scores in a run-level evaluator instead. Statistical metrics like `rouge-n` or `perplexity` need a library call inside an evaluator function.
 
-### Can Langfuse fail my CI pipeline the way `promptfoo eval` does? [#ci-parity]
+</Details>
+
+<Details id="ci-parity">
+<Summary>Can Langfuse fail my CI pipeline the way `promptfoo eval` does?</Summary>
 
 Yes. Where `promptfoo eval` exits with code `100` on failing test cases, a Langfuse experiment script raises `RegressionError` when a metric drops below your threshold, and the `langfuse/experiment-action` GitHub Action fails the job and posts a PR comment with scores and a link to the run. Outside GitHub Actions, the same experiment code runs as a pytest or Vitest suite with ordinary assertions.
 
-### How do non-engineers access results after migrating? [#team-access]
+</Details>
+
+<Details id="team-access">
+<Summary>How do non-engineers access results after migrating?</Summary>
 
 Through the Langfuse UI, with org- and project-level roles. Experiment runs, score comparisons, and individual traces are browsable without touching the repo, and annotation queues let reviewers grade outputs in a structured workflow. This replaces the Promptfoo pattern of sharing viewer links or result files, and it applies equally on self-hosted Langfuse deployments.
+
+</Details>
+
+</FaqDetails>
 
 ## Get help with the migration [#get-help]
 

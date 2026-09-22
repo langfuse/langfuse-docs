@@ -199,29 +199,51 @@ Move live instrumentation and durable assets. Trace history usually stays in Dat
 
 ## FAQ [#faq]
 
-### Is Langfuse an alternative to Datadog Agent Observability? [#langfuse-datadog-alternative]
+<FaqDetails>
+
+<Details id="langfuse-datadog-alternative">
+<Summary>Is Langfuse an alternative to Datadog Agent Observability?</Summary>
 
 Yes. Langfuse is an open-source alternative to Datadog's AI observability SKU. See [Which should you choose](#which-should-you-choose).
 
-### Can I use Langfuse and Datadog at the same time? [#langfuse-and-datadog-together]
+</Details>
+
+<Details id="langfuse-and-datadog-together">
+<Summary>Can I use Langfuse and Datadog at the same time?</Summary>
 
 Yes. Keep Datadog APM and add Langfuse for LLM traces and the AI quality loop. See [Using Langfuse and Datadog together](#coexistence).
 
-### How does Datadog Agent Observability pricing compare to Langfuse? [#datadog-llm-observability-pricing]
+</Details>
+
+<Details id="datadog-llm-observability-pricing">
+<Summary>How does Datadog Agent Observability pricing compare to Langfuse?</Summary>
 
 Datadog Agent Observability bills LLM inference spans (Pro **$160/month** billed annually for 100k spans, September 2026). Langfuse bills units from **$29/month**. On the rates in our [editable public model](/pricing-comparison-sheet), 500k traces / 10 observations / 2 LLM calls / 1 score per trace is **$621** Langfuse Pro with 3-year history vs **$875** Datadog Pro with the 90-day retention add-on. Details in the [worked example](#worked-example).
 
-### Can I self-host Datadog Agent Observability? [#self-host-datadog]
+</Details>
+
+<Details id="self-host-datadog">
+<Summary>Can I self-host Datadog Agent Observability?</Summary>
 
 No. Agent Observability is Datadog-hosted SaaS. Langfuse [self-hosts](/self-hosting) on every tier.
 
-### Did joining ClickHouse change the Langfuse product? [#clickhouse-acquisition]
+</Details>
+
+<Details id="clickhouse-acquisition">
+<Summary>Did joining ClickHouse change the Langfuse product?</Summary>
 
 No. Langfuse already ran on ClickHouse. The [announcement](/blog/joining-clickhouse) states the MIT license, self-hosting, Cloud endpoints, and roadmap stay the same, with more capacity to ship. Cloud Core and Pro remain self-serve; OSS self-host has no sales motion. Details in [clarifications](/resources/engineering/clarifications#clickhouse).
 
-### How do I migrate from Datadog Agent Observability to Langfuse? [#migrate-from-datadog]
+</Details>
+
+<Details id="migrate-from-datadog">
+<Summary>How do I migrate from Datadog Agent Observability to Langfuse?</Summary>
 
 Point live traffic at Langfuse and recreate datasets, prompts, and evaluators. History usually stays in Datadog. See [Switching from Datadog Agent Observability](#switching-from-datadog).
+
+</Details>
+
+</FaqDetails>
 
 <Callout type="info">
   This comparison is out of date? Please [raise a pull request](https://github.com/langfuse/langfuse-docs/blob/main/content/compare/datadog.mdx) with up-to-date information.

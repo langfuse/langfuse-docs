@@ -184,18 +184,34 @@ Both work with Langfuse. Ragas scores computed in your own pipeline can be pushe
 
 ## FAQ
 
-### What is the difference between answer relevance and answer correctness? [#relevance-vs-correctness]
+<FaqDetails>
+
+<Details id="relevance-vs-correctness">
+<Summary>What is the difference between answer relevance and answer correctness?</Summary>
 
 Answer relevance checks whether the response addresses the question asked; answer correctness checks whether the response is factually right, usually by comparing against a reference answer. An answer can be fully relevant and wrong, or correct on the facts while answering a different question. Relevance is reference-free and runs anywhere, while correctness needs ground truth and is confined to labeled datasets.
 
-### Can you evaluate answer relevance without ground truth? [#no-ground-truth]
+</Details>
+
+<Details id="no-ground-truth">
+<Summary>Can you evaluate answer relevance without ground truth?</Summary>
 
 Yes. Answer relevance is judged from the question and the answer alone, so no expected output is needed. This is why a plain list of real user questions is a complete relevance dataset, and why the same evaluator can run on production traces, where ground truth never exists.
 
-### How should refusals be scored in answer relevance evaluation? [#handling-refusals]
+</Details>
+
+<Details id="handling-refusals">
+<Summary>How should refusals be scored in answer relevance evaluation?</Summary>
 
 Score refusals as not relevant, and record a separate refusal score so they stay distinguishable from ordinary failures. A refusal does not address the question, even when refusing is the correct behavior, and counting refusals as relevant hides growing model caution inside a flat metric. Ragas handles this the same way: noncommittal answers are scored 0.
 
-### Is answer relevance the same as Ragas answer relevancy? [#ragas-answer-relevancy]
+</Details>
+
+<Details id="ragas-answer-relevancy">
+<Summary>Is answer relevance the same as Ragas answer relevancy?</Summary>
 
 They measure the same property with different mechanics. Ragas `answer_relevancy` generates questions from the answer and scores embedding similarity to the original question, producing a graded 0-to-1 value; a direct LLM-as-a-judge reads the question-answer pair against a rubric, typically returning a binary verdict with reasoning. Both are reference-free, and both can write scores to Langfuse.
+
+</Details>
+
+</FaqDetails>

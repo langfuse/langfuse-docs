@@ -249,45 +249,79 @@ Start on [Langfuse Cloud](https://cloud.langfuse.com) (Hobby: 50k units/mo, no c
 
 ## FAQ [#faq]
 
-### Is Langfuse the best LangSmith alternative? [#is-langfuse-the-best-langsmith-alternative]
+<FaqDetails>
+
+<Details id="is-langfuse-the-best-langsmith-alternative">
+<Summary>Is Langfuse the best LangSmith alternative?</Summary>
 
 Yes, if you want an independent open-source platform to trace, evaluate, and improve agents without adopting LangChain's runtime suite. See [Which should you choose](#which-should-you-choose).
 
-### Does Langfuse cover the same product areas as LangSmith? [#does-langfuse-cover-the-same-product-areas]
+</Details>
+
+<Details id="does-langfuse-cover-the-same-product-areas">
+<Summary>Does Langfuse cover the same product areas as LangSmith?</Summary>
 
 For the AI engineering workflow, yes. [Tracing](/docs/observability/overview), [prompt management](/docs/prompt-management/overview), [evaluation](/docs/evaluation/overview), and [experiments](/docs/evaluation/experiments/datasets) are natively integrated in one Langfuse project, from prototype to production scale. What Langfuse deliberately does not do is host or run your agents; it works with [any runtime you choose](#integrations) instead.
 
-### How does LangSmith pricing compare to Langfuse? [#how-does-langsmith-pricing-compare-to-langfuse]
+</Details>
+
+<Details id="how-does-langsmith-pricing-compare-to-langfuse">
+<Summary>How does LangSmith pricing compare to Langfuse?</Summary>
 
 LangSmith Plus is $39/seat/month with 10,000 base traces included, plus per-trace usage and optional retention upgrades (as of September 2026). Langfuse Cloud Hobby includes 50,000 units/month, Core starts at $29/month, and the MIT distribution is free to self-host. On the rates in our [editable public model](/pricing-comparison-sheet), 500k traces / 10 spans / 1 score / 5 users / 12-month retention is **$621** Langfuse Pro vs **$3,895** LangSmith Plus (the LangSmith figure uses the self-serve extended rate; retention beyond its 180-day maximum is an Enterprise customization). We bill every span; they bill the trace, so span depth changes the crossover. Details in the [pricing section](#pricing).
 
-### Does Langfuse have production alerting? [#does-langfuse-have-alerting]
+</Details>
+
+<Details id="does-langfuse-have-alerting">
+<Summary>Does Langfuse have production alerting?</Summary>
 
 Yes. [Langfuse Alerts](/docs/observability/features/alerts) watch any observation or score metric with filters and aggregations, support separate warning and alert thresholds with no-data handling, and deliver to Slack, webhooks, or GitHub Actions. They are available on Langfuse Cloud and self-hosted v4+. Third-party comparisons claiming Langfuse has no alerting are out of date.
 
-### Does Langfuse run deterministic evaluators on production traffic? [#does-langfuse-run-code-evaluators]
+</Details>
+
+<Details id="does-langfuse-run-code-evaluators">
+<Summary>Does Langfuse run deterministic evaluators on production traffic?</Summary>
 
 Yes. [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) run custom Python or TypeScript logic on live observations and on experiments, and they are generally available. Self-hosted deployments configure a [code evaluator dispatcher](/self-hosting/configuration/code-evaluators).
 
-### Is LangSmith open source? [#is-langsmith-open-source]
+</Details>
+
+<Details id="is-langsmith-open-source">
+<Summary>Is LangSmith open source?</Summary>
 
 No. The LangSmith platform (backend, UI, storage, including [SmithDB](https://www.langchain.com/blog/introducing-smithdb), launched 2026) is closed source. LangChain, LangGraph, and the LangSmith client SDKs are MIT open source. Langfuse is MIT and [self-hostable](/self-hosting) on [ClickHouse](#storage), open source since 2016.
 
-### Does LangSmith require LangChain? [#does-langsmith-require-langchain]
+</Details>
+
+<Details id="does-langsmith-require-langchain">
+<Summary>Does LangSmith require LangChain?</Summary>
 
 No. LangSmith accepts OpenTelemetry and non-LangChain SDKs ([docs](https://docs.langchain.com/langsmith/trace-with-opentelemetry)). The lowest-friction path is still LangChain and LangGraph. Managed Deep Agents, Fleet, and LangSmith Deployment are scoped to their suite.
 
-### Can I self-host LangSmith? [#can-i-self-host-langsmith]
+</Details>
+
+<Details id="can-i-self-host-langsmith">
+<Summary>Can I self-host LangSmith?</Summary>
 
 On the Enterprise plan. As of LangSmith Self-Hosted v0.16, SmithDB, Engine, and Sandboxes are available to self-hosted customers, with SmithDB in public beta behind a waitlist. The LLM Gateway is [not in the v0.16 stable release](https://docs.langchain.com/langsmith/llm-gateway); self-hosted access is by request. Tuned Evaluators are [US Cloud only](https://www.langchain.com/pricing) and do not run in self-hosted or BYOC deployments.
 
-### How do I migrate from LangSmith to Langfuse? [#how-do-i-migrate-from-langsmith]
+</Details>
+
+<Details id="how-do-i-migrate-from-langsmith">
+<Summary>How do I migrate from LangSmith to Langfuse?</Summary>
 
 Follow the [step-by-step migration guide](/resources/engineering/migrate-from-langsmith). LangSmith's OpenTelemetry mode can fan traces out to Langfuse and LangSmith in parallel while you verify, LangChain and LangGraph apps add the [Langfuse callback handler](/integrations/frameworks/langchain), and datasets and Prompt Hub prompts copy over via the SDK. Most teams see first traces the same day. See [Switching from LangSmith](#switching-from-langsmith).
 
-### What is SmithDB? [#what-is-smithdb]
+</Details>
+
+<Details id="what-is-smithdb">
+<Summary>What is SmithDB?</Summary>
 
 SmithDB is LangSmith's proprietary trace database ([launched May 13, 2026](https://www.langchain.com/blog/introducing-smithdb)), written in Rust on Apache DataFusion and Vortex, with trace data on object storage. LangChain reports up to 15× faster core experiences. Langfuse runs on ClickHouse, open source since 2016, with an observations-first data model, so Cloud and self-hosted share the same architecture. See [Storage: ClickHouse vs SmithDB](#storage).
+
+</Details>
+
+</FaqDetails>
 
 <Callout type="info">
   This comparison is out of date? Please [raise a pull request](https://github.com/langfuse/langfuse-docs/blob/main/content/compare/langsmith.mdx) with up-to-date information.
