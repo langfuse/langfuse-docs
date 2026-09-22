@@ -74,14 +74,17 @@ const handler = async (req: Request) => {
     },
     async () => {
       const traceId = getActiveTraceId();
-      setActiveTraceIO({
-        input: {
-          system: LLM_SENTIMENT_SYSTEM_PROMPT,
-          text,
-        },
-      });
+      const input = {
+        system: LLM_SENTIMENT_SYSTEM_PROMPT,
+        text,
+      };
+
+      setActiveTraceIO({ input });
+      updateActiveObservation({ input }, { asType: "generation" });
 
       try {
+        // Disable AI SDK OTel so observe() is the only observation — same
+        // flat generation shape as the Jev classifier.
         const result = await generateObject({
           model: openai(LLM_MODEL),
           schema: SentimentSchema,
@@ -93,7 +96,7 @@ const handler = async (req: Request) => {
             },
           },
           telemetry: {
-            functionId: "sentiment-classifier-gpt",
+            isEnabled: false,
           },
         });
 
@@ -122,10 +125,7 @@ const handler = async (req: Request) => {
         setActiveTraceIO({ output: payload });
         updateActiveObservation(
           {
-            input: {
-              system: LLM_SENTIMENT_SYSTEM_PROMPT,
-              text,
-            },
+            input,
             output: payload,
             model: LLM_MODEL,
             metadata: {
@@ -167,9 +167,9 @@ const handler = async (req: Request) => {
 };
 
 export const POST = observe(handler, {
-  name: "sentiment-classifier-gpt",
+  name: "sentiment-classifier",
   asType: "generation",
-  // Keep the GPT result we set via updateActiveObservation; otherwise observe
+  // Keep the result we set via updateActiveObservation; otherwise observe
   // would capture the HTTP Response object, which serializes to {}.
   captureOutput: false,
 });
