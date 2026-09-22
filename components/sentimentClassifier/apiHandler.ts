@@ -10,6 +10,11 @@ import { after } from "next/server";
 import { context, trace } from "@opentelemetry/api";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
+import {
+  JEV_PRICE_USD_PER_MTOK,
+  computeCostUsd,
+  type SentimentUsage,
+} from "./cost";
 
 const SENTIMENT_INSTRUCTIONS = "What is the overall sentiment of this text?";
 
@@ -29,6 +34,7 @@ export type SentimentResult = {
   confidence: number;
   probabilities: Record<SentimentLabel, number>;
   model: string;
+  usage: SentimentUsage;
 };
 
 const buildSystemOneRequest = (text: string) => ({
@@ -93,6 +99,18 @@ const handler = async (req: Request) => {
         const response = await getClient().systemOne(request);
 
         const answer = response.answers.sentiment;
+        const inputTokens = response.usage.input_tokens;
+        const outputTokens = response.usage.output_tokens;
+        const usage: SentimentUsage = {
+          inputTokens,
+          outputTokens,
+          totalTokens: inputTokens + outputTokens,
+          costUsd: computeCostUsd(
+            inputTokens,
+            outputTokens,
+            JEV_PRICE_USD_PER_MTOK,
+          ),
+        };
         const result: SentimentResult = {
           sentiment: answer.choice,
           confidence: answer.confidence,
@@ -102,6 +120,7 @@ const handler = async (req: Request) => {
             neutral: answer.probabilities.neutral,
           },
           model: response.model,
+          usage,
         };
 
         runWithActiveSpan(() => {
@@ -114,12 +133,15 @@ const handler = async (req: Request) => {
               metadata: {
                 provider: "typesafe",
                 questionType: "choice",
+                costUsd: usage.costUsd,
               },
               usageDetails: {
-                input: response.usage.input_tokens,
-                output: response.usage.output_tokens,
-                total:
-                  response.usage.input_tokens + response.usage.output_tokens,
+                input: inputTokens,
+                output: outputTokens,
+                total: usage.totalTokens,
+              },
+              costDetails: {
+                total: usage.costUsd,
               },
             },
             { asType: "generation" },

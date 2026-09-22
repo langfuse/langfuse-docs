@@ -185,8 +185,11 @@ export const SentimentClassifierCompare = ({
           <div className="rounded-[2px] border border-line-structure p-4 space-y-3 min-h-48">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-sm font-semibold text-text-primary">
-                GPT-4o mini
+                GPT-5.6 Luna
               </h3>
+              <span className="text-[11px] text-muted-foreground font-mono">
+                high reasoning
+              </span>
             </div>
             {llmLoading && !llm && !llmError && (
               <div className="flex items-center gap-2 text-muted-foreground text-sm py-6 justify-center">
@@ -238,12 +241,13 @@ export const SentimentClassifierCompare = ({
           </p>
           <ul className="list-disc pl-5 space-y-1.5">
             <li>
-              Jev is a lot faster than the GPT-4o-mini classifier — each column
-              updates when its model finishes, so the latency gap is obvious.
+              Jev is a lot faster and cheaper than GPT-5.6 Luna with high
+              reasoning — each column updates when its model finishes, and
+              estimated cost is shown per run.
             </li>
             <li>
               Jev returns a decision and confidence only, with no reasoning.
-              GPT-4o-mini returns an explanation and key phrases.
+              Luna returns an explanation and key phrases after thinking.
             </li>
           </ul>
           <p className="text-xs text-muted-foreground">

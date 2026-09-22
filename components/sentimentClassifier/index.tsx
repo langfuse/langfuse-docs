@@ -164,7 +164,7 @@ export const SentimentClassifier = ({
               {jevResult?.model ? ` (${jevResult.model})` : ""}.
             </>
           ) : (
-            <>Powered by GPT-4o-mini.</>
+            <>Powered by GPT-5.6 Luna (high reasoning).</>
           )}{" "}
           All interactions are traced in the public example project.
         </p>

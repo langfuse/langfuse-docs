@@ -1,4 +1,8 @@
 import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId";
+import type { SentimentUsage } from "./cost";
+
+export type { SentimentUsage } from "./cost";
+export { formatCostUsd } from "./cost";
 
 export type SentimentLabel = "positive" | "negative" | "neutral";
 
@@ -7,6 +11,7 @@ export type JevSentimentResult = {
   confidence: number;
   probabilities: Record<SentimentLabel, number>;
   model: string;
+  usage: SentimentUsage;
 };
 
 export type LlmSentimentResult = {
@@ -14,6 +19,8 @@ export type LlmSentimentResult = {
   confidence: number;
   explanation: string;
   keyPhrases: string[];
+  model: string;
+  usage: SentimentUsage;
 };
 
 export type SentimentEngine = "jev" | "llm";
@@ -29,8 +36,8 @@ export const ENGINE_CONFIG: Record<
   },
   llm: {
     endpoint: "/api/sentiment-classifier-llm",
-    loading: "Classifying with GPT-4o-mini...",
-    label: "GPT-4o mini",
+    loading: "Classifying with GPT-5.6 Luna (high reasoning)...",
+    label: "GPT-5.6 Luna",
   },
 };
 

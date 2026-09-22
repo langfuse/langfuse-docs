@@ -5,6 +5,7 @@ import { ThumbsUpIcon, ThumbsDownIcon } from "lucide-react";
 import {
   SENTIMENT_COLORS,
   SENTIMENT_ORDER,
+  formatCostUsd,
   type JevSentimentResult,
   type LlmSentimentResult,
 } from "./shared";
@@ -23,6 +24,7 @@ export const SentimentResultPanel = ({
   const colors = SENTIMENT_COLORS[result.sentiment];
   const jevResult = "probabilities" in result ? result : null;
   const llmResult = "explanation" in result ? result : null;
+  const usage = result.usage;
 
   return (
     <div className="space-y-4">
@@ -52,6 +54,26 @@ export const SentimentResultPanel = ({
           </div>
         </div>
       </div>
+
+      {usage && (
+        <div className="flex flex-wrap items-baseline justify-between gap-2 text-xs text-muted-foreground border border-line-structure rounded-[2px] px-2.5 py-2">
+          <span>
+            Est. cost{" "}
+            <span className="font-semibold tabular-nums text-text-primary">
+              {formatCostUsd(usage.costUsd)}
+            </span>
+          </span>
+          <span className="tabular-nums">
+            {usage.inputTokens.toLocaleString()} in
+            {usage.outputTokens > 0
+              ? ` · ${usage.outputTokens.toLocaleString()} out`
+              : ""}
+            {usage.reasoningTokens
+              ? ` · ${usage.reasoningTokens.toLocaleString()} reasoning`
+              : ""}
+          </span>
+        </div>
+      )}
 
       {jevResult && (
         <div className="space-y-2">
