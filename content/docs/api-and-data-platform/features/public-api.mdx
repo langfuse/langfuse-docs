@@ -27,7 +27,8 @@ There are 3 different groups of APIs:
 This page covers concepts and workflows. For the complete request and response contract of every endpoint — parameters, schemas, and interactive examples — see the API reference:
 
 - API Reference: https://api.reference.langfuse.com
-- OpenAPI spec: https://cloud.langfuse.com/generated/api/openapi.yml
+- OpenAPI spec: https://cloud.langfuse.com/generated/api/openapi.yml (organization API: https://cloud.langfuse.com/generated/organizations-api/openapi.yml)
+- Self-hosted: every instance serves its own spec at `/api/openapi.yaml` and an interactive reference at `/api/docs`
 
 ## Quickstart [#quickstart]
 
@@ -356,6 +357,55 @@ Rather than returning every column on every row, the v2 API lets you request onl
 If `fields` is not specified, `core` and `basic` are returned by default. Fields from groups you do not request are **absent** from the response, not `null`. The exception is `modelId`, `inputPrice`, `outputPrice`, and `totalPrice`, which are always present but only populated when the `model` group is selected. `inputPrice`, `outputPrice`, and `totalPrice` are returned as **strings** (e.g. `"0.000005"`) to preserve decimal precision; cast them to a numeric type in your pipeline.
 
 The v2 API also returns I/O as raw strings instead of always parsing them as JSON; parse them in your pipeline when needed. (The `parseIoAsJson` parameter is deprecated: omit it or set it to `false`; `true` returns a `400`.)
+
+#### Query parameters and filters [#observations-filters]
+
+Requests need an API key with read access to traces. Bound every request with `fromStartTime` and `toStartTime`. The fixed parameters cover the common cases:
+
+| Parameter             | Type                         | Matches                                                                                                     |
+| --------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `fromStartTime`       | ISO 8601 datetime            | `startTime >=` value                                                                                        |
+| `toStartTime`         | ISO 8601 datetime            | `startTime <` value                                                                                         |
+| `traceId`             | string                       | Observations of one trace                                                                                   |
+| `name`                | string                       | Exact observation name                                                                                      |
+| `type`                | enum                         | `GENERATION`, `SPAN`, `EVENT`, `AGENT`, `TOOL`, `CHAIN`, `RETRIEVER`, `EVALUATOR`, `EMBEDDING`, `GUARDRAIL` |
+| `level`               | enum                         | `DEBUG`, `DEFAULT`, `WARNING`, `ERROR`                                                                      |
+| `userId`, `sessionId` | string                       | Exact match on the trace's user or session                                                                  |
+| `environment`         | string, repeatable           | Any of the given environments                                                                               |
+| `version`             | string                       | Exact match                                                                                                 |
+| `parentObservationId` | string                       | Physical parent; an empty value matches observations without a parent                                       |
+| `isRootObservation`   | `true` / `false`             | Logical root status, see [above](#logical-root-observations)                                                |
+| `fields`              | comma-separated field groups | Which [field groups](#field-groups) to return                                                               |
+| `expandMetadata`      | comma-separated keys         | Metadata keys to return untruncated (values are otherwise cut at 200 characters)                            |
+| `limit`, `cursor`     | int (≤ 1,000), string        | [Pagination](#observations-pagination)                                                                      |
+
+Everything else — tags, cost, latency, token counts, model, prompt, input/output text, metadata by key, negations, and multi-value matches — goes through the `filter` parameter: a URL-encoded JSON array of conditions with the same columns and operators the filter bar in the Langfuse UI uses. When `filter` is present it takes precedence over the fixed parameters above.
+
+Each condition is `{"type", "column", "operator", "value"}` (plus `"key"` for metadata). Columns include `id`, `type`, `name`, `traceId`, `traceName`, `startTime`, `endTime`, `environment`, `level`, `statusMessage`, `version`, `userId`, `sessionId`, `isRootObservation`, `tags`, `latency`, `timeToFirstToken`, `tokensPerSecond`, `inputTokens`, `outputTokens`, `totalTokens`, `inputCost`, `outputCost`, `totalCost`, `model`, `promptName`, `promptVersion`, `input`, `output`, and `metadata`. The operators depend on the condition type:
+
+| `type`                          | Operators                                                       | Typical columns                                        |
+| ------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
+| `string`                        | `=`, `contains`, `does not contain`, `starts with`, `ends with` | `name`, `traceName`, `userId`, `sessionId`, `model`, … |
+| `stringOptions`                 | `any of`, `none of`                                             | `type`, `level`, `environment`, `promptName`           |
+| `arrayOptions`                  | `any of`, `none of`, `all of`                                   | `tags`                                                 |
+| `number`                        | `=`, `>`, `<`, `>=`, `<=`                                       | `latency`, `totalCost`, `totalTokens`, …               |
+| `datetime`                      | `>`, `<`, `>=`, `<=`                                            | `startTime`, `endTime`                                 |
+| `boolean`                       | `=`, `<>`                                                       | `isRootObservation`                                    |
+| `stringObject` / `numberObject` | as `string` / `number`, with `key` naming the metadata field    | `metadata`                                             |
+| `null`                          | `is null`, `is not null`                                        | any nullable column                                    |
+
+`input` and `output` conditions additionally support `matches` (full-text search) and must include at least one `=` or `matches` condition per request. There is no fixed `tags` parameter: filter tags with `{"type":"arrayOptions","column":"tags","operator":"any of","value":["prod"]}`. A filter-bar expression such as _name does not contain "healthcheck"_ translates to:
+
+```bash
+curl -G \
+  -H "Authorization: Basic <BASIC AUTH HEADER>" \
+  "https://cloud.langfuse.com/api/public/v2/observations" \
+  --data-urlencode 'fromStartTime=2025-12-15T00:00:00Z' \
+  --data-urlencode 'toStartTime=2025-12-16T00:00:00Z' \
+  --data-urlencode 'filter=[{"type":"string","column":"name","operator":"does not contain","value":"healthcheck"}]'
+```
+
+The complete list of columns and operators per type is in the [API reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations) under the `filter` parameter.
 
 #### Cursor-based pagination [#observations-pagination]
 

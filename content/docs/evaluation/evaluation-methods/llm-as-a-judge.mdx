@@ -256,6 +256,12 @@ For example, use multi-modal evaluators to:
 
 The selected LLM-as-a-Judge model and provider must support the media type. Langfuse returns an evaluator error if the media cannot be sent to that model. Self-hosters can configure media delivery and attachment size limits with the [`LANGFUSE_EVALUATOR_MEDIA_*` environment variables](/self-hosting/configuration#llm-as-a-judge-media).
 
+## Where evaluators run [#where-evaluators-run]
+
+LLM-as-a-Judge evaluators are executed by the Langfuse **worker**: it picks up each matching observation from a queue, renders the evaluation prompt, calls the model through the project's [LLM connection](/docs/administration/llm-connection), and writes the resulting score back. Nothing runs inside your application or in the browser.
+
+For self-hosted deployments this means the worker container — not the web container and not your instrumented application — needs network egress to the LLM provider or gateway configured in the LLM connection, and the [SSRF allowlist variables](/docs/administration/llm-connection#blocked-ip-address) apply to that call. Evaluator execution can be pinned to specific worker replicas with `QUEUE_CONSUMER_EVAL_EXECUTION_QUEUE_IS_ENABLED` and scaled with `LANGFUSE_EVAL_EXECUTION_WORKER_CONCURRENCY` (default `5`), but there is no option to run managed evaluators outside the worker. On Langfuse Cloud, evaluators run in Langfuse's infrastructure. [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) use a separate worker queue and sandbox.
+
 ## Project default model [#project-default-model]
 
 A project default model is used for evaluators unless you select a dedicated model for an evaluator. It lets you use one model configuration across your project instead of setting a model for every evaluator individually.

@@ -132,6 +132,8 @@ Models are matched to generations based on:
 
 User-defined models take priority over models maintained by Langfuse.
 
+Match patterns are anchored regular expressions evaluated by Postgres; the default definitions start with `(?i)` to match case-insensitively. For Amazon Bedrock, the default definitions match the model IDs and cross-region inference-profile IDs the SDKs usually report, such as `anthropic.claude-sonnet-4-20250514-v1:0` or `us.anthropic.claude-sonnet-4-20250514-v1:0` (`eu.`, `apac.`, `global.`, and the other regional prefixes work too). They do **not** match a full inference-profile ARN such as `arn:aws:bedrock:us-east-1:123456789012:inference-profile/us.anthropic.claude-sonnet-4-20250514-v1:0`, so generations that report the ARN as their `model` show usage but no cost. Either report the plain model or profile ID as the model name in your instrumentation, or add a custom model definition whose pattern accepts the ARN prefix, for example `(?i)^(arn:aws:bedrock:[a-z0-9-]+:\d{12}:inference-profile\/)?(us|eu|apac|global)\.anthropic\.claude-sonnet-4-20250514-v1:0$`.
+
 <Callout type="info">
 
 When using the `openai` tokenizer, you need to specify the following tokenization config. You can also copy the config from the list of predefined OpenAI models. See the OpenAI [documentation](https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb) for further details. `tokensPerName` and `tokensPerMessage` are required for chat models.
@@ -152,7 +154,7 @@ Some model providers charge different rates depending on context length or reque
 
 Langfuse supports **pricing tiers** for models, enabling accurate cost calculation across usage thresholds, model parameters, and metadata.
 
-#### How tier matching works
+#### How tier matching works [#how-tier-matching-works]
 
 Each model can have multiple pricing tiers, each with:
 

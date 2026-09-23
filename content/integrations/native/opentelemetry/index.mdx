@@ -114,6 +114,18 @@ flowchart LR
   class App,Langfuse subgraphBox;
 ```
 
+## Langfuse request headers [#request-headers]
+
+Besides `Authorization`, the OTLP endpoint reads a small set of `x-langfuse-*` request headers. Header names are case-insensitive, and the underscore spelling (`x_langfuse_*`) is accepted as well.
+
+| Header                                                  | Purpose                                                                                                                                                                                                                                                       |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `x-langfuse-ingestion-version`                          | Selects the ingestion path. Send `4` for the real-time v4 path described [above](#real-time-ingestion). Values above `4` or non-numeric values are rejected with `400`.                                                                                       |
+| `x-langfuse-sdk-name`, `x-langfuse-sdk-version`         | Identify the client for attribution and for the SDK version status shown in Langfuse. The official SDKs set them automatically; set them to your integration's name and version if you build your own exporter. They do not change how the data is processed. |
+| `x-langfuse-admin-api-key` with `x-langfuse-project-id` | Self-hosted only: authenticate with the instance-wide `ADMIN_API_KEY`, if configured, on behalf of the given project instead of a project API key.                                                                                                            |
+
+Everything else about a trace travels in the payload, not in headers: the project is identified by the public key in the `Authorization` header, and `userId`, `sessionId`, `environment`, `tags`, `release`, `version`, and `metadata` are span attributes (see [Attribute mapping](#property-mapping)). Other `x-langfuse-*` headers have no effect.
+
 ## Important: Propagating Trace Attributes to All Spans [#propagating-attributes]
 
 When using OpenTelemetry (OTEL) instrumentation to send traces to Langfuse,

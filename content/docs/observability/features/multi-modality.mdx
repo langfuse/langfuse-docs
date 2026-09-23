@@ -34,6 +34,8 @@ Multi-modal attachments on Langfuse Cloud are currently free on Langfuse Cloud. 
 
 Multi-modal attachments are available today. You need to configure your own object storage bucket via the Langfuse environment variables (`LANGFUSE_S3_MEDIA_UPLOAD_*`). See self-hosting documentation for details on these environment variables. S3-compatible APIs are supported across all major cloud providers and can be self-hosted via minio. Note that the configured storage bucket must have a publicly resolvable hostname to support direct uploads via our SDKs and media asset fetching directly from the browser.
 
+The maximum size of a single attachment is controlled by `LANGFUSE_S3_MEDIA_MAX_CONTENT_LENGTH` (in bytes, default `1000000000`, i.e. 1 GB); the media API rejects larger uploads with `File size must be less than … bytes`. Uploading files to dataset items through the browser is additionally capped at 100 MB.
+
 ## Supported media formats
 
 Langfuse supports a wide range of media types, including:

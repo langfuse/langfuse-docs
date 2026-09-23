@@ -8,6 +8,8 @@ sidebarTitle: LLM Connections
 
 LLM connections are used to call models in the Langfuse Playground or for LLM-as-a-Judge evaluations.
 
+They do not affect how Langfuse prices the generations you ingest. Cost is inferred from [model definitions](/docs/observability/features/token-and-cost-tracking#infer); to price a model that Langfuse does not ship a definition for, [add a custom model definition](/docs/observability/features/token-and-cost-tracking#custom-model-definitions), optionally with [pricing tiers](/docs/observability/features/token-and-cost-tracking#pricing-tiers).
+
 ## Setup
 
 <Tabs items={["Via the UI", "Via the API"]}>
@@ -220,6 +222,15 @@ Example provider options for Google models (Google AI Studio and Google Vertex A
 ```
 
 `thinkingLevel` controls the reasoning depth, and `thinkingBudget` sets the token budget for thinking. These options are only valid for Google models that support thinking.
+
+### Troubleshooting: "Blocked IP address detected" [#blocked-ip-address]
+
+Langfuse validates the base URL of every LLM connection against a server-side request forgery (SSRF) deny-list before it calls the endpoint on your behalf. The check runs when you save or test a connection, and again on every outbound request from the Playground, LLM-as-a-Judge evaluators, and experiments, including on each redirect.
+
+A URL is rejected with `Blocked IP address detected` (or `Blocked hostname detected`) when its hostname resolves to a private, loopback, link-local, or otherwise reserved range — for example `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `127.0.0.0/8`, `169.254.0.0/16`, and their IPv6 equivalents — or when the hostname itself is blocked, such as `localhost`, `*.internal`, or `host.docker.internal`. Public IP addresses and public hostnames are not blocked. A hostname that does not resolve is rejected as well.
+
+- **Langfuse Cloud**: the deny-list is always enforced and cannot be relaxed, and base URLs must use `https://`. Point the connection at a publicly resolvable endpoint, for example a gateway with a public hostname.
+- **Self-hosted**: allow specific internal endpoints with `LANGFUSE_LLM_CONNECTION_WHITELISTED_HOST`, `LANGFUSE_LLM_CONNECTION_WHITELISTED_IPS`, or `LANGFUSE_LLM_CONNECTION_WHITELISTED_IP_SEGMENTS` (each a comma-separated list). A hostname listed in `_HOST` skips the IP check entirely; `_IPS` and `_IP_SEGMENTS` are matched against every IP address the hostname resolves to. There is no setting that disables the check for all targets: every internal endpoint has to be listed explicitly, because anything on these lists is exempt from SSRF protection. Webhooks and blob storage integrations use their own variables; see [Outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists).
 
 ### Connecting via a gateway
 

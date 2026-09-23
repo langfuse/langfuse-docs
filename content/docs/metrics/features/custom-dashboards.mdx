@@ -50,12 +50,14 @@ Widgets are individual visualization components that display specific metrics fr
 2. Select the **Widgets** tab
 3. Click **New Widget**
 4. Configure your widget:
-   - **Data Source**: Choose from traces, observations, or evaluation scores
+   - **Data Source**: Choose from traces, observations, or scores (numeric, categorical, or boolean)
    - **Metrics**: Select what to measure (count, latency, cost, scores, etc.)
    - **Dimensions**: Group by user, model, time, trace name, etc.
    - **Filters**: Narrow down to specific data subsets
    - **Chart Type**: Pick the best visualization for your data
 5. Click **Save** to store your widget
+
+Sessions and users are not data sources of their own. To analyze at the session or user level, build the widget on **Traces** and use `sessionId` or `userId` as the dimension, or pick the unique-session or unique-user measure — for example "unique sessions per day" or "total cost by userId". The [Metrics API](/docs/metrics/features/metrics-api) exposes the same views, measures, and dimensions.
 
 <Video
   src="https://static.langfuse.com/docs-videos/create-widget.mov.mp4"
