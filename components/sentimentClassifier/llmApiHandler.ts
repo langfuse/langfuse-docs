@@ -13,28 +13,74 @@ import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
 import {
   LUNA_PRICE_USD_PER_MTOK,
+  addUsage,
   computeCostUsd,
+  emptyUsage,
   type SentimentUsage,
 } from "./cost";
-import { LLM_SENTIMENT_SYSTEM_PROMPT } from "./criteria";
+import {
+  llmSystemPrompt,
+  parseClassifierIds,
+  type ClassifierDefinition,
+} from "./criteria";
+import type { ClassifierAnswer, ClassifierRunResult } from "./types";
+
+export type { ClassifierRunResult as LlmSentimentResult };
 
 const LLM_MODEL = "gpt-5.6-luna";
 const LLM_REASONING_EFFORT = "high" as const;
 
-const SentimentSchema = z.object({
-  sentiment: z.enum(["positive", "negative", "neutral"]),
-  confidence: z.number().min(0).max(1),
-  explanation: z.string(),
-  keyPhrases: z.array(z.string()),
-});
+const schemaFor = (definition: ClassifierDefinition) => {
+  const labels = Object.keys(definition.criteria) as [string, ...string[]];
+  return z.object({
+    value: z.enum(labels),
+    confidence: z.number().min(0).max(1),
+    explanation: z.string(),
+    keyPhrases: z.array(z.string()),
+  });
+};
 
-export type LlmSentimentResult = z.infer<typeof SentimentSchema> & {
-  model: string;
-  usage: SentimentUsage;
+const classifyOne = async (definition: ClassifierDefinition, text: string) => {
+  const result = await generateObject({
+    model: openai(LLM_MODEL),
+    schema: schemaFor(definition),
+    system: llmSystemPrompt(definition),
+    prompt: `Classify the following text:\n\n${text}`,
+    providerOptions: {
+      openai: {
+        reasoningEffort: LLM_REASONING_EFFORT,
+      },
+    },
+    telemetry: {
+      isEnabled: false,
+    },
+  });
+
+  const inputTokens = result.usage.inputTokens ?? 0;
+  const outputTokens = result.usage.outputTokens ?? 0;
+  const reasoningTokens = result.usage.outputTokenDetails?.reasoningTokens ?? 0;
+  const usage: SentimentUsage = {
+    inputTokens,
+    outputTokens,
+    reasoningTokens,
+    totalTokens: inputTokens + outputTokens,
+    costUsd: computeCostUsd(inputTokens, outputTokens, LUNA_PRICE_USD_PER_MTOK),
+  };
+
+  const answer: ClassifierAnswer = {
+    id: definition.id,
+    name: definition.name,
+    value: result.object.value,
+    confidence: result.object.confidence,
+    explanation: result.object.explanation,
+    keyPhrases: result.object.keyPhrases,
+  };
+
+  return { answer, usage };
 };
 
 const handler = async (req: Request) => {
-  const { success } = rateLimit(req, { limit: 15, windowMs: 60_000 });
+  const { success } = rateLimit(req, { limit: 60, windowMs: 60_000 });
   if (!success) {
     return new Response(
       JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
@@ -42,7 +88,8 @@ const handler = async (req: Request) => {
     );
   }
 
-  const { text, userId }: { text: string; userId: string } = await req.json();
+  const body = await req.json();
+  const { text, userId }: { text: string; userId: string } = body;
 
   if (!text || text.trim().length === 0) {
     return new Response(JSON.stringify({ error: "Text is required." }), {
@@ -61,6 +108,27 @@ const handler = async (req: Request) => {
     );
   }
 
+  let selected: ClassifierDefinition[];
+  try {
+    selected = parseClassifierIds(body.tasks);
+  } catch (err) {
+    return new Response(
+      JSON.stringify({
+        error: err instanceof Error ? err.message : "Invalid tasks.",
+      }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  if (selected.length > 1) {
+    return new Response(
+      JSON.stringify({
+        error: "Send one classification per request.",
+      }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
   return propagateAttributes(
     {
       traceName: "Sentiment-Classifier-GPT",
@@ -75,7 +143,7 @@ const handler = async (req: Request) => {
     async () => {
       const traceId = getActiveTraceId();
       const input = {
-        system: LLM_SENTIMENT_SYSTEM_PROMPT,
+        tasks: selected.map((definition) => definition.id),
         text,
       };
 
@@ -83,43 +151,20 @@ const handler = async (req: Request) => {
       updateActiveObservation({ input }, { asType: "generation" });
 
       try {
-        // Disable AI SDK OTel so observe() is the only observation — same
-        // flat generation shape as the Jev classifier.
-        const result = await generateObject({
-          model: openai(LLM_MODEL),
-          schema: SentimentSchema,
-          system: LLM_SENTIMENT_SYSTEM_PROMPT,
-          prompt: `Classify the sentiment of this text:\n\n${text}`,
-          providerOptions: {
-            openai: {
-              reasoningEffort: LLM_REASONING_EFFORT,
-            },
-          },
-          telemetry: {
-            isEnabled: false,
-          },
-        });
+        const runs = await Promise.all(
+          selected.map((definition) => classifyOne(definition, text)),
+        );
 
-        const inputTokens = result.usage.inputTokens ?? 0;
-        const outputTokens = result.usage.outputTokens ?? 0;
-        const reasoningTokens =
-          result.usage.outputTokenDetails?.reasoningTokens ?? 0;
-        const usage: SentimentUsage = {
-          inputTokens,
-          outputTokens,
-          reasoningTokens,
-          totalTokens: inputTokens + outputTokens,
-          costUsd: computeCostUsd(
-            inputTokens,
-            outputTokens,
-            LUNA_PRICE_USD_PER_MTOK,
-          ),
-        };
+        const usage = runs.reduce(
+          (total, run) => addUsage(total, run.usage),
+          emptyUsage(),
+        );
+        const answers = runs.map((run) => run.answer);
 
-        const payload: LlmSentimentResult = {
-          ...result.object,
+        const payload: ClassifierRunResult = {
           model: LLM_MODEL,
           usage,
+          answers,
         };
 
         setActiveTraceIO({ output: payload });
@@ -133,9 +178,11 @@ const handler = async (req: Request) => {
               costUsd: usage.costUsd,
             },
             usageDetails: {
-              input: inputTokens,
-              output: outputTokens,
-              ...(reasoningTokens > 0 ? { reasoning: reasoningTokens } : {}),
+              input: usage.inputTokens,
+              output: usage.outputTokens,
+              ...(usage.reasoningTokens
+                ? { reasoning: usage.reasoningTokens }
+                : {}),
               total: usage.totalTokens,
             },
             costDetails: {
