@@ -39,6 +39,22 @@ function resolveFirstUrl(node: AnyNode): string | undefined {
 }
 
 /**
+ * Integration categories have their own sections on the integrations overview,
+ * but no index page in their folder. Link those folder crumbs to the matching
+ * overview anchor instead of the first integration page in the category.
+ */
+function resolveFolderUrl(node: PageTree.Folder): string | undefined {
+  const metaFile = (node as PageTree.Folder & { $ref?: { metaFile?: string } })
+    .$ref?.metaFile;
+  const category = metaFile?.match(
+    /(?:^|\/)integrations\/([^/]+)\/meta\.json$/,
+  )?.[1];
+
+  if (category) return `/integrations#${category}`;
+  return node.index?.url ?? resolveFirstUrl(node);
+}
+
+/**
  * Link target for the leading (section) crumb. Prefer the section's landing
  * page — the shallowest internal child page, e.g. `/docs` over `/docs/demo` —
  * so the root crumb points at the section index regardless of `meta.json`
@@ -87,7 +103,7 @@ export function DocsBreadcrumb() {
         if (i === path.length - 1 || node.index !== path[i + 1]) {
           result.push({
             name: node.name,
-            url: node.index?.url ?? resolveFirstUrl(node),
+            url: resolveFolderUrl(node),
           });
         }
       }
