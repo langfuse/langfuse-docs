@@ -295,7 +295,7 @@ export function RolePermissionTable({ roleScopes }) {
 
 ### How to read the scopes [#reading-scopes]
 
-Each scope is `resource:action`. `read` grants viewing; `CUD` (create, update, delete) or `CRUD` grants changes. The project-level `Admin` role has every project scope of `Owner` except `project:delete`. A few practical consequences of the tables above:
+Each scope is `resource:action`. `read` grants viewing; `CUD` (create, update, delete) grants changes. The project-level `Admin` role has every project scope of `Owner` except `project:delete`. A few practical consequences of the tables above:
 
 | You want a user to be able to…                                                                                    | Minimum role                                                                                           |
 | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
@@ -307,8 +307,6 @@ Each scope is `resource:action`. `read` grants viewing; `CUD` (create, update, d
 | Create organization API keys, delete the organization, or manage billing                                          | Organization `Owner` (`organization:CRUD_apiKeys`, `organization:delete`, `langfuseCloudBilling:CRUD`) |
 
 A user's effective role in a project is their [project-level role](#project-level-roles) if one is assigned, otherwise their organization role. Assigning the project role `None` means "do not override the organization role" for that project. Projects in which the effective role lacks `project:read` are hidden from the user entirely, which is why a `Viewer` or `None` organization member may see `Forbidden` on project endpoints until a project role is granted.
-
-Actions such as `traces:read`, `traces:create`, `scores:read`, `scores:create`, `sessions:read`, `metrics:read`, and `media:create` are not listed in the tables because no UI role holds them: they are granted to [API keys](#api-keys) only, and are the actions the public API checks.
 
 ## Managing users
 
