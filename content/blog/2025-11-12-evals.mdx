@@ -286,37 +286,65 @@ Each stage of this roadmap has a dedicated deep dive:
 
 ## FAQ [#faq]
 
-### How do I evaluate a full agent workflow instead of a single LLM call? [#full-trace-evals]
+<FaqDetails>
+
+<Details id="full-trace-evals">
+<Summary>How do I evaluate a full agent workflow instead of a single LLM call?</Summary>
 
 Target the root observation of the workflow: with current Langfuse SDKs, the root observation records the overall input and output of an application or agent invocation, so an observation-level evaluator on the root sees the end-to-end result. If the judge needs intermediate context (for example, which documents were retrieved), write that context onto the root observation from your application code. Trace-level LLM-as-a-judge evaluators continue producing results on Langfuse Cloud until <V4CutoverDate />; on self-hosted, they will stop producing results once you run the v4 server in `events_only` mode. Upgrade to observation-level evaluators before the cut-off to avoid a gap in your evaluation results. Observation-level evaluators complete in seconds instead of minutes, and there is a [migration guide](/faq/all/llm-as-a-judge-migration) for moving over.
 
-### Can I run evaluations on production traces without re-running the LLM? [#evals-without-rerun]
+</Details>
+
+<Details id="evals-without-rerun">
+<Summary>Can I run evaluations on production traces without re-running the LLM?</Summary>
 
 Yes. Online evaluators (LLM-as-a-judge and code evaluators) score the data already recorded on your traces at ingestion time; they never re-execute your application or its LLM calls. You can also backfill scores on historical data by selecting traces in the traces table and running an evaluator on them retroactively, which is useful when you create a new evaluator after the traffic already happened.
 
-### How much does LLM-as-a-judge cost, and how do I keep it under control? [#judge-cost]
+</Details>
+
+<Details id="judge-cost">
+<Summary>How much does LLM-as-a-judge cost, and how do I keep it under control?</Summary>
 
 Cost depends on the judge model and the size of the evaluated inputs; a typical evaluation costs $0.01-0.10 per assessment. The three main levers are sampling (score, say, 5% of matching observations instead of all of them), targeting specific observations rather than whole traces so the judge reads less text, and using cheaper judge models for simpler criteria. Deterministic pre-checks with code evaluators, which are effectively free, can filter what reaches the judge at all.
 
-### Which model should I use as a judge, and how do I configure it? [#judge-model]
+</Details>
+
+<Details id="judge-model">
+<Summary>Which model should I use as a judge, and how do I configure it?</Summary>
 
 Capable instruction-following models (GPT-4o, Claude Sonnet, or Gemini Pro class) are the common choice, and the judge must support structured output so scores can be parsed reliably. In Langfuse you set a default evaluation model via [LLM connections](/docs/administration/llm-connection) and can pin a different model per evaluator. Whatever you pick, calibrate it against a small human-annotated sample; strong judges reach 80-90% agreement with human reviewers on many criteria, which is comparable to agreement between two humans.
 
-### Can I evaluate whole sessions or multi-turn conversations? [#session-evals]
+</Details>
+
+<Details id="session-evals">
+<Summary>Can I evaluate whole sessions or multi-turn conversations?</Summary>
 
 Yes. Scores can be attached directly to a session by passing only the session ID via the SDK or API, and annotation queues accept sessions so human reviewers score the full conversation rather than individual turns. For automated multi-turn evaluation, run a judge over the assembled conversation, as shown in the [multi-turn evaluation cookbook](/guides/cookbook/example_evaluating_multi_turn_conversations).
 
-### Can I run pairwise comparisons between two prompt or model variants? [#pairwise-evals]
+</Details>
+
+<Details id="pairwise-evals">
+<Summary>Can I run pairwise comparisons between two prompt or model variants?</Summary>
 
 Langfuse does not ship a built-in pairwise judge. The standard pattern is to run two experiments on the same dataset and compare them side by side in the UI, where per-item outputs and scores line up across runs. If you specifically want preference-style scoring, write an SDK experiment evaluator that fetches the baseline output for each item, presents both candidates to a judge model, and records the preference as a score.
 
-### How do I block a deployment when evaluation scores regress? [#ci-gating]
+</Details>
+
+<Details id="ci-gating">
+<Summary>How do I block a deployment when evaluation scores regress?</Summary>
 
 Run an experiment in CI and fail the job on a threshold violation. With [`langfuse/experiment-action`](https://github.com/langfuse/experiment-action), your experiment script raises `RegressionError` when a run-level score falls below your bar, and the action fails the workflow and posts the scores to the pull request; the action requires Python SDK v4.6.0+ or JS SDK v5.3.0+. On other CI systems, the same `run_experiment` call works inside pytest or Vitest with a plain assertion, as described in [experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd).
 
-### Can I manage evaluators as code in Git? [#evals-as-code]
+</Details>
+
+<Details id="evals-as-code">
+<Summary>Can I manage evaluators as code in Git?</Summary>
 
 Partially, as of July 2026. SDK experiment evaluators are plain functions in your repository, so they version like any other code. For evaluators that Langfuse executes (LLM-as-a-judge and code evaluators), there are public API endpoints for creating evaluators and evaluation rules programmatically, which lets you sync definitions from a repository or CI pipeline; these endpoints are currently marked unstable and may change, so pin your automation to their versioned behavior and watch the [API reference](https://api.reference.langfuse.com/#tag/unstableevaluators).
+
+</Details>
+
+</FaqDetails>
 
 ## Takeaway
 

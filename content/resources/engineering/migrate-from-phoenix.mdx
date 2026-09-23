@@ -243,33 +243,45 @@ not use the deprecated ingestion API.
 
 ## FAQ
 
-### Do I have to re-instrument my application?
+<FaqDetails>
+
+<Details id="do-i-have-to-re-instrument-my-application">
+<Summary>Do I have to re-instrument my application?</Summary>
 
 No. Keep OpenInference. Replace `phoenix.otel.register()` with
 [Langfuse `get_client()`](/docs/observability/sdk/overview) and the same instrumentor's
 `.instrument()` call. Re-instrumenting with the Langfuse SDKs later is optional.
 
-### Does Langfuse support the frameworks Phoenix instrumented?
+</Details>
+
+<Details id="does-langfuse-support-the-frameworks-phoenix-instrumented">
+<Summary>Does Langfuse support the frameworks Phoenix instrumented?</Summary>
 
 Langfuse has [native integrations](/integrations) for the major frameworks (LangChain,
 LlamaIndex, OpenAI, Vercel AI SDK, and more) and accepts OpenInference instrumentation
 via OTLP, so framework coverage carries over rather than resetting. See the
 [OpenInference cookbook](/integrations/other/openinference).
 
-### Is Langfuse open source where Phoenix is?
+</Details>
+
+<Details id="is-langfuse-open-source-where-phoenix-is">
+<Summary>Is Langfuse open source where Phoenix is?</Summary>
 
 Langfuse's core platform is MIT-licensed and self-hostable. Core features match Cloud; enterprise governance modules need an [Enterprise license](/pricing-self-host) when self-hosted.
 Phoenix is licensed under the Elastic License 2.0 (source-available) as of August 2026. Check
 both licenses against your compliance requirements: ELv2 restricts offering the software as
 a managed service, which matters to some platform teams.
 
-### Can I evaluate old Phoenix traces in Langfuse?
+</Details>
+
+<Details id="can-i-evaluate-old-phoenix-traces-in-langfuse">
+<Summary>Can I evaluate old Phoenix traces in Langfuse?</Summary>
 
 Evaluators run on data in Langfuse, so historical evaluation requires those traces to exist
 in Langfuse first (see Step 4). The pragmatic path: start evaluators on new traffic at
 cutover and backfill only if a specific analysis demands it.
 
-<FaqDetails>
+</Details>
 
 <Details>
 <Summary>No traces, generic spans, or duplicate dataset items?</Summary>

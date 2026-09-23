@@ -220,18 +220,34 @@ import { FileCode } from "lucide-react";
 
 ## FAQ
 
-### Do Ragas evaluations in Langfuse require ground-truth answers? [#ragas-ground-truth]
+<FaqDetails>
+
+<Details id="ragas-ground-truth">
+<Summary>Do Ragas evaluations in Langfuse require ground-truth answers?</Summary>
 
 No. The Ragas metrics used on this page (faithfulness, answer relevancy) are reference-free: they compare the answer against the retrieved context and the question, both of which exist for every request. That is why the dataset in the example carries no `expected_output` and why the same metrics can score sampled production traces. Reference-based Ragas metrics exist too and need an expected output per dataset item.
 
-### How do Ragas scores show up in Langfuse? [#ragas-scores-in-langfuse]
+</Details>
+
+<Details id="ragas-scores-in-langfuse">
+<Summary>How do Ragas scores show up in Langfuse?</Summary>
 
 As regular Langfuse scores, named after the metric (`faithfulness`, `answer_relevancy`). In an experiment, each score attaches to the trace of the item that produced it and aggregates on the dataset run. When scoring production traces, `langfuse.create_score` attaches the value to the trace you pass. From there they behave like any other score: filterable in the traces table, chartable, and comparable across experiment runs.
 
-### Can I run Ragas metrics on a dataset that lives outside Langfuse? [#ragas-local-datasets]
+</Details>
+
+<Details id="ragas-local-datasets">
+<Summary>Can I run Ragas metrics on a dataset that lives outside Langfuse?</Summary>
 
 Yes. `langfuse.run_experiment` also accepts local data (a list of dicts with `input` and optional `expected_output`) instead of a Langfuse-hosted dataset. Task executions are still traced and evaluator scores still attach to those traces; only the dataset run comparison in the UI requires a Langfuse-hosted dataset. See [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) for both variants.
 
-### Do I need Ragas to evaluate RAG pipelines in Langfuse? [#ragas-required]
+</Details>
+
+<Details id="ragas-required">
+<Summary>Do I need Ragas to evaluate RAG pipelines in Langfuse?</Summary>
 
 No. Faithfulness and relevance are metrics, not library features: you can implement them as your own LLM-as-a-judge evaluator functions, use Langfuse's managed evaluator catalog, or use Ragas. Choose Ragas when you want the metric implementations and prompts maintained by the Ragas project; choose a custom or managed judge when you want the rubric under your own version control or running server-side in Langfuse.
+
+</Details>
+
+</FaqDetails>

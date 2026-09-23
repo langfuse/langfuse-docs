@@ -156,6 +156,8 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     TraceViewDiagramJa,
     details: Details,
     summary: Summary,
+    Details,
+    Summary,
     FaqDetails,
     ...components,
   };

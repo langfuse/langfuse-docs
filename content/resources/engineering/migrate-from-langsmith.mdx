@@ -714,21 +714,37 @@ The [project-to-project migration cookbook](/guides/cookbook/example_data_migrat
 
 ## FAQ
 
-### Do I have to re-instrument my application?
+<FaqDetails>
+
+<Details id="do-i-have-to-re-instrument-my-application">
+<Summary>Do I have to re-instrument my application?</Summary>
 
 Not to start. `traceable` code reaches Langfuse over OpenTelemetry unchanged (Python: `LANGSMITH_OTEL_ENABLED=true`; JS/TS: `LANGSMITH_TRACING_MODE=otel` plus the OTel bootstrap), and LangChain apps add a callback handler. Moving fully to the [Langfuse SDK](/docs/observability/sdk/overview) is a follow-up step that removes the `langsmith` dependency.
 
-### Can I send traces to both platforms during the migration?
+</Details>
+
+<Details id="can-i-send-traces-to-both-platforms-during-the-migration">
+<Summary>Can I send traces to both platforms during the migration?</Summary>
 
 In Python, yes, per request: hybrid OTel mode exports to LangSmith and Langfuse simultaneously until you set `LANGSMITH_OTEL_ONLY=true`. In JS/TS, per process: point a canary at Langfuse with `LANGSMITH_TRACING_MODE=otel` while the rest stays on LangSmith ([Limitations](#limitations) explains why per-request dual-send does not work there). LangChain and LangGraph apps dual-send in both languages via the callback handler. Keep the parallel window until you have confirmed the Langfuse data.
 
-### Can I evaluate old LangSmith traces in Langfuse?
+</Details>
+
+<Details id="can-i-evaluate-old-langsmith-traces-in-langfuse">
+<Summary>Can I evaluate old LangSmith traces in Langfuse?</Summary>
 
 Evaluators run on data in Langfuse, so historical evaluation requires [reingesting those traces](#historical-traces) first. Most teams start judges on new traffic at cutover instead.
 
-### I use the EU (or another regional) LangSmith instance. Anything different?
+</Details>
+
+<Details id="i-use-the-eu-or-another-regional-langsmith-instance-anything-different">
+<Summary>I use the EU (or another regional) LangSmith instance. Anything different?</Summary>
 
 Only the endpoints: set `LANGSMITH_ENDPOINT` to your regional API host (for example `https://eu.api.smith.langchain.com`) for the export steps. The Langfuse region is chosen independently via `LANGFUSE_BASE_URL`.
+
+</Details>
+
+</FaqDetails>
 
 ## Get help with the migration [#get-help]
 

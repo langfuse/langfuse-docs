@@ -424,29 +424,51 @@ Do not build a backfill on the legacy `/api/public/ingestion` endpoint: it is [d
 
 ## FAQ [#faq]
 
-### Can I keep my autoevals scorers? [#keep-autoevals]
+<FaqDetails>
+
+<Details id="keep-autoevals">
+<Summary>Can I keep my autoevals scorers?</Summary>
 
 Yes. autoevals is an MIT-licensed open-source library, and Langfuse's experiment SDKs include converters (`create_evaluator_from_autoevals` in Python, `createEvaluatorFromAutoevals` in TypeScript) that run autoevals scorers unchanged inside Langfuse experiments. Custom scorers written as plain functions port directly as Langfuse evaluators.
 
-### Do I have to migrate historical logs? [#historical-logs]
+</Details>
+
+<Details id="historical-logs">
+<Summary>Do I have to migrate historical logs?</Summary>
 
 No, and most teams do not. Old logs remain in Braintrust for their retention window while Langfuse records everything from cutover day. Selective backfill is possible via Braintrust's project-logs fetch endpoint and reingestion over Langfuse's OTLP endpoint (see [Step 5](#historical-logs-step)), but it is usually only worth doing for traces you actively reference.
 
-### Does Langfuse have an LLM gateway or proxy like Braintrust? [#gateway]
+</Details>
+
+<Details id="gateway">
+<Summary>Does Langfuse have an LLM gateway or proxy like Braintrust?</Summary>
 
 No, by design. Langfuse SDKs send telemetry asynchronously outside the request path, so observability cannot add latency or become a point of failure for model calls. If you want gateway features such as routing, caching, or failover, Langfuse integrates with dedicated gateways like [LiteLLM](/integrations/gateways/litellm) and receives traces from them.
 
-### How do I control ingestion volume and cost in Langfuse? [#sampling]
+</Details>
+
+<Details id="sampling">
+<Summary>How do I control ingestion volume and cost in Langfuse?</Summary>
 
 Set a [sample rate](/docs/observability/features/sampling) in the SDK (`LANGFUSE_SAMPLE_RATE=0.1` keeps 10% of traces) to cap volume at the source. Because Langfuse bills on counted units rather than bytes of processed data, cost scales with how many traces you keep, not with payload size.
 
-### I use Braintrust's EU (or another regional) endpoint. Anything different? [#regional-endpoints]
+</Details>
+
+<Details id="regional-endpoints">
+<Summary>I use Braintrust's EU (or another regional) endpoint. Anything different?</Summary>
 
 Only the API host: set `BRAINTRUST_API_URL` (for example `https://api-eu.braintrust.dev`) in your environment (the Braintrust SDK picks it up automatically) and use the same host for the REST export calls in Steps 2, 4, and 5. The Langfuse region is chosen independently via `LANGFUSE_BASE_URL`.
 
-### Is Langfuse open source where Braintrust is not? [#open-source]
+</Details>
+
+<Details id="open-source">
+<Summary>Is Langfuse open source where Braintrust is not?</Summary>
 
 Langfuse's core platform is MIT-licensed and fully self-hostable, including the UI and storage layer. Braintrust's SDKs and the autoevals library are MIT-licensed open source, but the platform itself is proprietary; its self-hosted option is a hybrid deployment where the data plane runs in your cloud account and Braintrust hosts the control plane (as of September 2026). Check both models against your compliance requirements, particularly if you need air-gapped operation.
+
+</Details>
+
+</FaqDetails>
 
 ## Get help with the migration [#get-help]
 
