@@ -112,7 +112,7 @@ Each alert carries a **severity** that updates after every evaluation.
 **When notifications fire:**
 
 - Breach (`UNKNOWN | OK → WARNING | ALERT`): always notifies.
-- Recovery (`WARNING | ALERT → OK`): always notifies, with the title `[OK] <alert name>` and a "recovered" message. Recovery notifications cannot be switched off on the alert itself; if an automation should only fire on breaches, add a `severity` condition to its trigger filter that excludes `OK`.
+- Recovery (`WARNING | ALERT → OK`): always notifies.
 - No data (`NO_DATA ↔ WARNING | ALERT | OK | UNKNOWN`): only notifies when no-data mode is **Notify after sustained `NO_DATA`**.
 - Sustained severity (`WARNING → WARNING`, `ALERT → ALERT`): notifies only when **Renotify** is enabled.
 
