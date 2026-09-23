@@ -158,11 +158,7 @@ The SDKs fetch prompts from `GET /api/public/v2/prompts/{name}`, so these rules 
 
 Because a missing label is an error rather than a fallback, a typo in a label name or an environment whose label was never assigned surfaces immediately as a failed fetch, not as the wrong prompt being served. The SDKs handle this with a [fallback prompt](/docs/prompt-management/features/guaranteed-availability) if you configure one; otherwise the error propagates to your code.
 
-**Label names** must be 1–36 characters of lowercase letters, digits, `_`, `-`, or `.`. The `latest` label is maintained by Langfuse — it is assigned to every new version automatically and cannot be set or removed by hand. `production` is an ordinary label that Langfuse merely uses as the default when you fetch without a label.
-
-**To check which labels exist** without fetching a specific version, list prompts: `GET /api/public/v2/prompts` returns every prompt with its `labels` array, and `GET /api/public/v2/prompts?label=staging` returns only prompts that have a version carrying that label. Labels are also visible on the prompt's version table in the UI.
-
-**Caching.** The SDKs cache fetched prompts client-side (default TTL 60 seconds) and refresh in the background, so a label reassignment takes up to one TTL to reach running applications. The TTL is configurable per call, and can be set to `0` to bypass the cache; see [Caching](/docs/prompt-management/features/caching).
+To check which labels exist without fetching a specific version, list prompts: `GET /api/public/v2/prompts` returns every prompt with its `labels` array, and `GET /api/public/v2/prompts?label=staging` returns only prompts that have a version carrying that label. Labels are also visible on the prompt's version table in the UI.
 
 ## Operational workflows
 
