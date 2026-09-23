@@ -38,6 +38,11 @@ const MetricValue = ({
       </span>
     );
   }
+  if (metric.error && metric.value == null) {
+    return (
+      <span className="text-muted-foreground font-normal">Incomplete</span>
+    );
+  }
   if (metric.value != null) {
     return (
       <span className="tabular-nums text-text-primary font-medium">
@@ -53,7 +58,7 @@ const summaryFor = (
   luna: EngineMetric,
   cheaperOrFaster: "faster" | "cheaper",
 ) => {
-  if (jev.loading || luna.loading) return null;
+  if (jev.loading || luna.loading || jev.error || luna.error) return null;
   const ratio = comparisonRatio(luna.value, jev.value);
   if (ratio == null) return null;
   if (ratio >= 1.05) return `Jev ${formatRatio(ratio)} ${cheaperOrFaster}`;

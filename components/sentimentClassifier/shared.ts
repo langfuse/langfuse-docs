@@ -71,7 +71,7 @@ export const SENTIMENT_COLORS: Record<
 };
 
 export const DEFAULT_ANSWER_COLORS = {
-  bg: "bg-[#403d391a] dark:bg-[#b8b6a01a]",
+  bg: "bg-muted",
   text: "text-text-primary",
   bar: "bg-text-primary",
 } as const;

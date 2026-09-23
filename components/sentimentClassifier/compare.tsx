@@ -133,15 +133,18 @@ export const SentimentClassifierCompare = ({
     (slot): slot is Extract<LlmSlot, { status: "success" }> =>
       slot?.status === "success",
   );
-  const llmAllFailed =
+  const llmAnyFailed = llmSlotList.some((slot) => slot?.status === "error");
+  const llmAllSucceeded =
     llmSlots != null &&
+    llmSlotList.length === selected.length &&
     llmSlotList.length > 0 &&
-    llmSlotList.every((slot) => slot?.status === "error");
-  const lunaUsage = sumUsage(llmSuccesses.map((slot) => slot.usage));
-  const lunaLatencyMs =
-    llmSlots != null && !llmPending && llmSuccesses.length > 0
-      ? Math.max(...llmSuccesses.map((slot) => slot.latencyMs))
-      : null;
+    llmSlotList.every((slot) => slot?.status === "success");
+  const lunaUsage = llmAllSucceeded
+    ? sumUsage(llmSuccesses.map((slot) => slot.usage))
+    : null;
+  const lunaLatencyMs = llmAllSucceeded
+    ? Math.max(...llmSuccesses.map((slot) => slot.latencyMs))
+    : null;
   const loading = jevLoading || llmPending;
 
   const clearRun = () => {
@@ -472,7 +475,7 @@ export const SentimentClassifierCompare = ({
             jevLoading={jevLoading}
             lunaLoading={llmPending}
             jevError={Boolean(jevError)}
-            lunaError={llmAllFailed}
+            lunaError={llmAnyFailed}
             compact={compact}
           />
         )}
