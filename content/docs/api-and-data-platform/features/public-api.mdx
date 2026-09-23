@@ -394,7 +394,7 @@ Each condition is `{"type", "column", "operator", "value"}` (plus `"key"` for me
 | `stringObject` / `numberObject` | as `string` / `number`, with `key` naming the metadata field    | `metadata`                                             |
 | `null`                          | `is null`, `is not null`                                        | any nullable column                                    |
 
-`input` and `output` conditions additionally support `matches` (full-text search) and must include at least one `=` or `matches` condition per request. There is no fixed `tags` parameter: filter tags with `{"type":"arrayOptions","column":"tags","operator":"any of","value":["prod"]}`. A filter-bar expression such as _name does not contain "healthcheck"_ translates to:
+`input` and `output` conditions support `=` or `matches` (full-text search); substring operators such as `contains`, `starts with`, and `ends with` are rejected for these columns. Each request that filters these fields must include at least one `=` or `matches` condition. There is no fixed `tags` parameter: filter tags with `{"type":"arrayOptions","column":"tags","operator":"any of","value":["prod"]}`. A filter-bar expression such as _name does not contain "healthcheck"_ translates to:
 
 ```bash
 curl -G \
