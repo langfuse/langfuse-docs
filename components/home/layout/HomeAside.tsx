@@ -67,6 +67,7 @@ function useDOMHeadings(): TocItem[] {
   useEffect(() => {
     const timer = setTimeout(() => {
       const headings = Array.from(document.querySelectorAll("h2[id], h3[id]"))
+        .filter((el) => !el.closest(".fd-steps"))
         .map((el) => ({
           id: el.id,
           url: `#${el.id}`,
