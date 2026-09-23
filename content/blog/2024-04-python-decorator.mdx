@@ -18,10 +18,13 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 />
 
 <Callout type="info" emoji="💡">
-  _**Note:** This blog post references our Python SDK v2. We have a new,
-  improved SDK available based on OpenTelemetry. Please check out the [SDK
-  v3](https://langfuse.com/docs/sdk/python/sdk-v3) for a more powerful and
-  simpler to use SDK._
+  _**Note:** This blog post references our Python SDK v2, including the
+  `from langfuse.decorators import observe` import path, which no longer
+  exists. In the current OpenTelemetry-based Python SDK the decorator is
+  imported with `from langfuse import observe`. Please follow the current
+  [Python SDK docs](/docs/observability/sdk/overview) and the [v2 to v3
+  upgrade path](/docs/observability/sdk/upgrade-path/python-v2-to-v3) instead
+  of the code samples below._
 </Callout>
 
 When we initially built complex agents for web scraping and code generation while in Y Combinator, we quickly recognized the need for new LLM-focused observability to truly understand how our applications produced their outputs. It wasn't just about the LLM calls, but also the retrieval steps, chaining of separate calls, function calling, obtaining the right JSON output, and various API calls that the agents should perform behind the scenes. In the end, all these steps led to them breaking many times on our initial users.

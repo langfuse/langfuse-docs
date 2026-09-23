@@ -48,6 +48,8 @@ DELETE /api/public/traces/{traceId}​
 
 See [reference](https://api.reference.langfuse.com/#tag/trace/DELETE/api/public/traces/%7BtraceId%7D).
 
+The endpoint responds with `Trace deleted successfully` as soon as the deletion has been queued, not when the data is gone. The trace and its observations and scores can remain visible in the UI and API for a few minutes until the background job has run; see [limitations](#trace-deletion-limitations) for timing and how to verify.
+
 </Tab>
 
 </LangTabs>

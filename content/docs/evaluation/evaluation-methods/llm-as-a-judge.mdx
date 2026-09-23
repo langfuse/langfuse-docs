@@ -201,6 +201,13 @@ An evaluator defines how data is scored: its [judge prompt](/academy/evaluate/wr
 
 Map each prompt variable by clicking the data you want to use. For online evaluation, you can select an observation's input, output, metadata, or tool calls. If you plan to use the evaluator in prompt experiments, also map **Expected Output** and **Experiment Item Metadata**.
 
+If the mapped field holds a JSON object, you can optionally narrow it down with a **JsonPath** selector, for example `$.messages[-1:].content` to pass only the last message. Without a selector, the entire object is passed into the prompt as a JSON string. Selector behavior:
+
+- A selector that matches exactly one value passes that value; a selector that matches several values (for example `$.messages[*].content`) passes an array of them.
+- A selector that matches nothing leaves the variable empty.
+- If the mapped field is a plain string or number rather than an object, the selector is skipped and the whole value is passed.
+- Filter expressions (`[?(...)]`), script expressions (`[(...)]`), and negative indices such as `[-1]` are not supported. Use a slice like `[-1:]` instead of `[-1]`. The editor warns about these and blocks saving until they are removed.
+
 ### Test evaluator
 
 On the right, filter to representative sample observations, select one, and run the evaluator. Inspect the score and reasoning, then iterate on the model, prompt, score definition, or mappings until the result is useful.
@@ -307,6 +314,15 @@ If you have existing evaluators running on traces and want to upgrade to running
 ### Troubleshooting Observation-Level Evaluators
 
 If your observation-level evaluator isn't executing, see [Why is my observation-level evaluator not executing?](/faq/all/observation-eval-not-executing) for common causes and solutions.
+
+### "Model configuration not valid for evaluation" [#model-configuration-not-valid]
+
+When you save an LLM-as-a-Judge evaluator, Langfuse sends one short test request to the selected model using the evaluator's structured output definition (the score type you chose). If that request fails, saving is blocked with `Model configuration not valid for evaluation.` followed by the error the provider returned. Typical causes:
+
+- The model or the proxy in front of it does not support structured outputs (JSON schema). Provider errors that mention `response_format` usually point to this. Choose a model that supports structured output, or route to the provider directly instead of through a proxy that strips the parameter.
+- The model name does not exist at the provider, or the API key or base URL of the [LLM Connection](/docs/administration/llm-connection) is wrong. The provider's error text names the exact problem.
+
+Fix the connection or pick a different model, then save again. The same check runs when you change the model of an existing evaluator.
 
 ### Backfill historical observation scores
 
