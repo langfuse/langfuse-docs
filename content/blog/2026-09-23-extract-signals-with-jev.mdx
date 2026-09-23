@@ -30,15 +30,9 @@ There are different types of signals in chat applications that you can use to mo
 
 Conversation signals especially help you steer attention to the relevant traces from production once manual review is no longer feasible. They tell you something is going wrong. A typical list looks like this:
 
-| Conversation signal                                                         |
-| --------------------------------------------------------------------------- |
-| User rephrases the same question                                            |
-| User corrects the agent ("no, I meant the March invoice")                   |
-| User asks for a human                                                       |
-| User repeats an instruction the agent already received, or says "try again" |
-| User quotes an error back ("you said X, but...")                            |
-| User expresses frustration ("this is useless", "you are not listening")     |
-| User confirms success or thanks the agent                                   |
+<Frame fullWidth>
+  ![Table of conversation signals including rephrase, correction, human hand-off, repeat, error quote, frustration, and success confirmation](/images/blog/2026-09-23-extract-signals-with-jev/conversation-signals-table.png)
+</Frame>
 
 Established approaches to catch these signals centered on [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge). At scale, teams mainly contained cost through [sampling](/docs/observability/features/sampling). Jev-like models now allow a full pass on all production traces.
 
