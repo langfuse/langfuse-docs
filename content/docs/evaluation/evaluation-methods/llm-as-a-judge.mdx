@@ -308,6 +308,15 @@ If you have existing evaluators running on traces and want to upgrade to running
 
 If your observation-level evaluator isn't executing, see [Why is my observation-level evaluator not executing?](/faq/all/observation-eval-not-executing) for common causes and solutions.
 
+### "Model configuration not valid for evaluation" [#model-configuration-not-valid]
+
+When you save an LLM-as-a-Judge evaluator, Langfuse sends one short test request to the selected model using the evaluator's structured output definition (the score type you chose). If that request fails, saving is blocked with `Model configuration not valid for evaluation.` followed by the error the provider returned. Typical causes:
+
+- The model or the proxy in front of it does not support structured outputs (JSON schema). Provider errors that mention `response_format` usually point to this. Choose a model that supports structured output, or route to the provider directly instead of through a proxy that strips the parameter.
+- The model name does not exist at the provider, or the API key or base URL of the [LLM Connection](/docs/administration/llm-connection) is wrong. The provider's error text names the exact problem.
+
+Fix the connection or pick a different model, then save again. The same check runs when you change the model of an existing evaluator.
+
 ### Backfill historical observation scores
 
 Use [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation) to run an LLM-as-a-Judge evaluator on selected historical observations.
