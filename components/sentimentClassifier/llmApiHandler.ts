@@ -120,6 +120,15 @@ const handler = async (req: Request) => {
     );
   }
 
+  if (selected.length > 1) {
+    return new Response(
+      JSON.stringify({
+        error: "Send one classification per request.",
+      }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
   return propagateAttributes(
     {
       traceName: "Sentiment-Classifier-GPT",
@@ -135,7 +144,6 @@ const handler = async (req: Request) => {
       const traceId = getActiveTraceId();
       const input = {
         tasks: selected.map((definition) => definition.id),
-        parallelCalls: selected.length,
         text,
       };
 
@@ -143,8 +151,6 @@ const handler = async (req: Request) => {
       updateActiveObservation({ input }, { asType: "generation" });
 
       try {
-        // One HTTP request, N parallel Luna calls — cost scales with N,
-        // wall-clock stays close to the slowest call.
         const runs = await Promise.all(
           selected.map((definition) => classifyOne(definition, text)),
         );
@@ -169,7 +175,6 @@ const handler = async (req: Request) => {
             model: LLM_MODEL,
             metadata: {
               reasoningEffort: LLM_REASONING_EFFORT,
-              parallelCalls: selected.length,
               costUsd: usage.costUsd,
             },
             usageDetails: {
@@ -216,6 +221,5 @@ export const POST = observe(handler, {
   captureOutput: false,
 });
 
-// Luna + high reasoning can take longer than gpt-4o-mini. N parallel calls
-// share that budget — wall-clock stays close to the slowest call.
+// Luna + high reasoning can take longer than gpt-4o-mini.
 export const maxDuration = 90;
