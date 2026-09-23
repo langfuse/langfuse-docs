@@ -256,12 +256,14 @@ If you need to regularly clean up old data, consider using [Data Retention](/doc
 To delete a project, navigate to the project settings and scroll to the `Danger Zone` within the `General` section.
 Confirm that you want to delete your project.
 This action immediately revokes all API keys and schedules the project for deletion.
-Within the next minutes, all related data is irreversibly removed from our system.
+Project deletion is asynchronous, and the time it takes scales with the size of the
+project.
 
 <Callout type="warning">
   Deleting a project is irreversible and all data will be removed. Be cautious
-  when executing this action. After confirming the deletion, it will take up to
-  5 minutes for the project to be deleted.
+  when executing this action. For very large projects, deletion can take multiple
+  days. If deletion is slower than you expect, please reach out to
+  [support](/support).
 </Callout>
 
 </Tab>
@@ -274,10 +276,16 @@ Within the next minutes, all related data is irreversibly removed from our syste
 
 <Tab>
 
-If there are no projects left in an organization, you can delete the organization in the organization settings.
+Only organization owners can delete an organization, and only once every project in it has been deleted or transferred to another organization. Delete the projects first, then the organization.
+
 Navigate to the organization settings and scroll to the `Danger Zone` within the `General` section.
 Confirm that you want to delete your organization.
 The organization and all associated user information will be removed from our system.
+
+Two errors can block the deletion:
+
+- `Please delete or transfer all projects before deleting the organization.` — at least one project still exists in the organization.
+- `Deletion of your projects is still being processed, please try deleting the organization later` — you already deleted the remaining projects, but their data is still being purged in the background. Project deletion is asynchronous and takes longer for projects with more data; wait and retry. The error is not a permissions problem.
 
 </Tab>
 

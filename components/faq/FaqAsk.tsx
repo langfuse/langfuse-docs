@@ -64,7 +64,13 @@ function documentationUrl(url: string) {
   }
 }
 
-function AskForm({ linked = false }: { linked?: boolean }) {
+function AskForm({
+  linked = false,
+  details = false,
+}: {
+  linked?: boolean;
+  details?: boolean;
+}) {
   const id = useId();
   const [phase, setPhase] = useState<
     "idle" | "editing" | "loading" | "answered"
@@ -89,9 +95,10 @@ function AskForm({ linked = false }: { linked?: boolean }) {
   // Accordion questions inherit Analog from Radix's h3; match it explicitly here.
   // Linked items keep the surrounding docs typography.
   // Keep the invitation and editable question identical in every state.
-  const questionTypography = linked
-    ? "text-[length:inherit] font-normal leading-[inherit]"
-    : "font-analog text-[15px] font-medium leading-snug";
+  const questionTypography =
+    linked || details
+      ? "text-[length:inherit] font-normal leading-[inherit]"
+      : "font-analog text-[15px] font-medium leading-snug";
 
   useEffect(
     () => () => {
@@ -149,7 +156,13 @@ function AskForm({ linked = false }: { linked?: boolean }) {
   }
 
   return (
-    <div className={cn("not-prose flex flex-col", !linked && "py-5")}>
+    <div
+      className={cn(
+        "not-prose flex flex-col",
+        !linked && !details && "py-5",
+        details && "px-4 py-2",
+      )}
+    >
       {phase === "idle" ? (
         <button
           type="button"
@@ -162,7 +175,7 @@ function AskForm({ linked = false }: { linked?: boolean }) {
             questionTypography,
           )}
         >
-          Ask anything else
+          {details ? "Ask another question" : "Ask anything else"}
           <span aria-hidden="true" className={styles.cursor} />
         </button>
       ) : (
@@ -317,12 +330,26 @@ function AskForm({ linked = false }: { linked?: boolean }) {
   );
 }
 
-export function FaqAsk({ linked = false }: { linked?: boolean }) {
+export function FaqAsk({
+  linked = false,
+  details = false,
+}: {
+  linked?: boolean;
+  details?: boolean;
+}) {
   if (linked) {
     return (
       <li className="my-2">
         <AskForm linked />
       </li>
+    );
+  }
+
+  if (details) {
+    return (
+      <div className="relative my-4 border border-line-structure bg-surface-bg corner-box-corners--hover">
+        <AskForm details />
+      </div>
     );
   }
 

@@ -224,7 +224,10 @@ After saving, you can:
   Need deterministic custom logic? Use [code
   evaluators](/docs/evaluation/evaluation-methods/code-evaluators) or
   ingest scores from an [external evaluation
-  pipeline](/docs/evaluation/evaluation-methods/scores-via-sdk).
+  pipeline](/docs/evaluation/evaluation-methods/scores-via-sdk). Need a
+  typed verdict (label, rubric level, or yes/no) on every observation at a
+  fraction of the cost? Use [Jev as a
+  judge](/docs/evaluation/evaluation-methods/jev-as-a-judge).
 </Callout>
 
 <Callout type="warning">
@@ -252,6 +255,12 @@ For example, use multi-modal evaluators to:
 - Check whether an answer is grounded in an attached PDF.
 
 The selected LLM-as-a-Judge model and provider must support the media type. Langfuse returns an evaluator error if the media cannot be sent to that model. Self-hosters can configure media delivery and attachment size limits with the [`LANGFUSE_EVALUATOR_MEDIA_*` environment variables](/self-hosting/configuration#llm-as-a-judge-media).
+
+## Where evaluators run [#where-evaluators-run]
+
+LLM-as-a-Judge evaluators are executed by the Langfuse **worker**: it picks up each matching observation from a queue, renders the evaluation prompt, calls the model through the project's [LLM connection](/docs/administration/llm-connection), and writes the resulting score back. Nothing runs inside your application or in the browser.
+
+For self-hosted deployments this means the worker container — not the web container and not your instrumented application — needs network egress to the LLM provider or gateway configured in the LLM connection, and the [SSRF allowlist variables](/docs/administration/llm-connection#blocked-ip-address) apply to that call. Evaluator execution can be pinned to specific worker replicas with `QUEUE_CONSUMER_EVAL_EXECUTION_QUEUE_IS_ENABLED` and scaled with `LANGFUSE_EVAL_EXECUTION_WORKER_CONCURRENCY` (default `5`), but there is no option to run managed evaluators outside the worker. On Langfuse Cloud, evaluators run in Langfuse's infrastructure. [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) use a separate worker queue and sandbox.
 
 ## Project default model [#project-default-model]
 
@@ -326,6 +335,8 @@ You can show the LLM-as-a-Judge execution traces by filtering for the environmen
 
 ## FAQ
 
+<FaqDetails>
+
 <Details>
 <Summary>What is LLM-as-a-Judge evaluation?</Summary>
 
@@ -360,6 +371,8 @@ Cost depends on the judge model and the size of the inputs being evaluated. A ty
 Yes. LLM-as-a-Judge is particularly effective for RAG pipelines. You can evaluate faithfulness (is the answer grounded in the retrieved context?), relevance (does the answer address the question?), and completeness (does the answer cover all relevant information?). Langfuse also integrates with [RAGAS](/resources/engineering/evaluation-of-rag-with-ragas) for specialized RAG evaluation metrics.
 
 </Details>
+
+</FaqDetails>
 
 ## Related Resources
 

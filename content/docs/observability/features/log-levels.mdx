@@ -162,6 +162,18 @@ When using the [LangChain Integration](/integrations/frameworks/langchain), `lev
 
 </LangTabs>
 
+## How levels are stored and mapped [#level-mapping]
+
+`level` is stored and returned as one of the four strings `DEBUG`, `DEFAULT`, `WARNING`, `ERROR`. There is no numeric encoding: the Observations API, exports, and filters all use these exact strings, and `level` is one of the fixed filter parameters of the [Observations API](/docs/api-and-data-platform/features/public-api#observations-filters). Observations ingested without a level are stored as `DEFAULT`.
+
+When you send spans through the [OpenTelemetry endpoint](/integrations/native/opentelemetry), Langfuse derives the level in this order:
+
+1. The `langfuse.observation.level` span attribute, if present. Matching is case-insensitive and accepts common aliases: `TRACE` and `VERBOSE` map to `DEBUG`; `INFO`, `LOG`, `NOTICE`, `OK`, and `SUCCESS` map to `DEFAULT`; `WARN` maps to `WARNING`; `FATAL` and `CRITICAL` map to `ERROR`. Unknown values are ignored and fall through to the next rule.
+2. Otherwise, a span whose OpenTelemetry status code is `ERROR` becomes `ERROR`.
+3. Otherwise, `DEFAULT`.
+
+`statusMessage` is taken from the `langfuse.observation.status_message` attribute, falling back to the span's OpenTelemetry status message. OpenTelemetry log-record severity fields (`SeverityNumber`, `SeverityText`) are not read; set the span attribute when you need a level other than `DEFAULT` or `ERROR`.
+
 ## Filter Trace by Log Level
 
 When viewing a single trace, you can filter the observations by log level.

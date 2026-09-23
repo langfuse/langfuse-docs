@@ -12,6 +12,7 @@ const monokaiProLight = monokaiProLightRaw as unknown as any;
 import remarkGfm from "remark-gfm";
 import { remarkMdxMermaid } from "fumadocs-core/mdx-plugins";
 import { remarkCodeFilename } from "./lib/remark-code-filename.mjs";
+import { remarkHideStepsFromToc } from "./lib/remark-hide-steps-from-toc.mjs";
 import { mdxJsxToMarkdown } from "mdast-util-mdx-jsx";
 import { z } from "zod";
 
@@ -232,7 +233,12 @@ export const marketing = defineDocs({
 export default defineConfig({
   plugins: [lastModified()],
   mdxOptions: {
-    remarkPlugins: [remarkGfm, remarkMdxMermaid, remarkCodeFilename],
+    remarkPlugins: [
+      remarkGfm,
+      remarkMdxMermaid,
+      remarkCodeFilename,
+      remarkHideStepsFromToc,
+    ],
     providerImportSource: "@/mdx-components",
     // Disable remark-image: many content files reference remote images via https://
     // and the plugin tries to fetch dimensions at compile time, causing build failures
