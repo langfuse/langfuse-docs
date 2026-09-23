@@ -20,19 +20,19 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
 Jev-based evals are now available in Langfuse. Jev-like models give you and your team a way to run evals on production traffic at scale and identify signals from agent executions and user interactions. All of this at up to 40 to 400x lower cost than with LLM-based approaches.
 
-Jev is part of a new model category that prioritizes performance on one dimension over general ability of the model. It can be seen as a "zero-shot classifier". As founder [Diogo Almeida](https://www.latent.space/p/jev) said on the latest Latent Space episode, they optimize for "Intelligence per Dollar" and design the model with fast, structured, machine-native decision-making inside software in mind.
+Jev is the first of what TypeSafe calls [System One models](https://typesafe.ai/blog/introducing-system-one-models-and-jev), a new model category that prioritizes performance on one dimension over general ability of the model. It can be seen as a "zero-shot classifier". As founder [Diogo Almeida](https://www.latent.space/p/jev) said on the latest Latent Space episode, they optimize for "Intelligence per Dollar" and design the model with fast, structured, machine-native decision-making inside software in mind.
 
 While the category is being formed, we are excited to bring Jev-based evals into Langfuse already today.
 
 ## What is Jev [#what-is-jev]
 
-Jev, [TypeSafe](https://typesafe.ai)'s new model, handles narrow, typed questions over unstructured data. It is best suited for quick decisions that are repeated, high volume, and the possible answers are known before the call.
+Jev is [TypeSafe](https://typesafe.ai)'s System One model. It does not generate text. You send it a state and typed questions, and it returns typed answers with probabilities. It handles narrow, typed questions over unstructured data and is best suited for quick decisions that are repeated, high volume, and the possible answers are known before the call.
 
-Jev offers three different output types:
+Jev answers three question types, which TypeSafe calls primitives:
 
-- **Choice** picks one option from a set you define, up to 255, and returns the probability of each plus a confidence value.
-- **Score** rates the state against ordered rubric levels and returns a probability-weighted value, the full distribution, and a confidence value. Up to 10 levels.
-- **Noul** answers yes or no and returns the probability it is true. It carries no separate confidence field, so code that reads `answer.confidence` on everything will break on binaries.
+- **[Choice](https://docs.typesafe.ai/primitives/choice)** picks one option from a set you define, up to 255, and returns the probability of each plus a confidence value.
+- **[Score](https://docs.typesafe.ai/primitives/score)** rates the state against ordered rubric levels and returns a probability-weighted value, the full distribution, and a confidence value. Up to 10 levels.
+- **[Noul](https://docs.typesafe.ai/primitives/noul)** returns the probability that a statement is true. It carries no separate confidence field, so code that reads `answer.confidence` on everything will break on Nouls.
 
 <Callout type="info">
   Want to learn more about Jev in general, check out our [write up](/blog/2026-09-18-using-typesafes-jev-for-evals) on early benchmarks and the role of Jev-like models for agents in general.
@@ -72,11 +72,13 @@ You can also check out our setup in the [demo project](https://langfuse.com/clou
 
 Open the [Evaluators page](https://cloud.langfuse.com/project/~/evals) and click **New evaluator**.
 
-### Choose Decision Model
+### Choose Decision model
 
-### Define your question and choose your output type
+Click **New decision model evaluator**. Langfuse groups System One models like Jev under the **Decision model** evaluator type, so it can support similar models from other providers as they ship.
 
-You can add multiple questions against the same state. In the editor, a Noul is labeled **Yes / no**.
+### Define your question and choose your question type
+
+You can add multiple questions against the same state. The editor offers Jev's three primitives: **Choice**, **Score**, and **Yes / no**, which is a Noul.
 
 <Frame fullWidth>
   ![Jev evaluator questions for a production monitor, with Yes / no selected for user_frustrated and Choice and Score questions listed below](/images/blog/2026-09-22-running-evals-with-jev/questions.png)
@@ -84,7 +86,7 @@ You can add multiple questions against the same state. In the editor, a Noul is 
 
 ### Specify details for choices (optional)
 
-For a yes/no question, open **Refine what yes and no mean**. For a choice, name each option and the condition that makes it the right verdict.
+For a Noul, open **Refine what yes and no mean** to describe what counts as true and false. For a choice, name each option and the condition that makes it the right verdict.
 
 ### Define state
 

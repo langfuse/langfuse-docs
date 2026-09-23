@@ -1,7 +1,7 @@
 ---
 title: Jev as a judge
 sidebarTitle: Jev as a judge
-description: Use TypeSafe's Jev decision model as a judge in Langfuse. Ask typed questions about each observation and get calibrated scores at a fraction of the cost and latency of an LLM judge.
+description: Use TypeSafe's Jev System One model as a judge in Langfuse. Ask typed questions about each observation and get calibrated scores at a fraction of the cost and latency of an LLM judge.
 ---
 
 # Jev as a judge
@@ -17,8 +17,8 @@ Use Jev as a judge when the verdict you need is narrow and typed (a label, a lev
 
 <Callout type="info">
   In the Langfuse UI, Jev evaluators are called **decision-model evaluators**.
-  The type is named after the model class so that other decision models can be
-  added later. Jev is currently the only supported decision model.
+  The evaluator type is named generically so that similar models from other
+  providers can be added later. Jev is currently the only supported model.
 </Callout>
 
 ## How Jev as a judge works
@@ -42,19 +42,19 @@ None of this replaces LLM judges. When you need a rationale next to the verdict 
 
 ## Question types [#question-types]
 
-Jev answers three kinds of questions. Each maps to one Langfuse score.
+Jev answers three kinds of questions, which TypeSafe calls primitives. Each maps to one Langfuse score. In the evaluator editor, a Noul is labeled **Yes / no**.
 
-| Question type | What Jev returns                                                                                                          | Langfuse score                                                  | Example                                                                   |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| **Choice**    | One option out of a fixed set you define (2 to 255), with probability per option and a confidence value                   | Categorical score with the selected option as value             | "Which team should handle this ticket?" → `billing`, `technical`, `sales` |
-| **Score**     | A position on ordered levels you describe (2 to 10), with the probability distribution over levels and a confidence value | Numeric score with the expected level, from `0` to `levels - 1` | "How frustrated is the customer?" → `0` calm ... `3` angry                |
-| **Yes / no**  | The probability that a statement is true (TypeSafe calls this a [Noul](https://docs.typesafe.ai/primitives/noul))         | Numeric score with `P(true)` between `0` and `1`                | "Does the message request a refund?" → `0.93`                             |
+| Question type                                                                 | What Jev returns                                                                                                          | Langfuse score                                                  | Example                                                                   |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| **[Choice](https://docs.typesafe.ai/primitives/choice)**                      | One option out of a fixed set you define (2 to 255), with probability per option and a confidence value                   | Categorical score with the selected option as value             | "Which team should handle this ticket?" → `billing`, `technical`, `sales` |
+| **[Score](https://docs.typesafe.ai/primitives/score)**                        | A position on ordered levels you describe (2 to 10), with the probability distribution over levels and a confidence value | Numeric score with the expected level, from `0` to `levels - 1` | "How frustrated is the customer?" → `0` calm ... `3` angry                |
+| **[Noul](https://docs.typesafe.ai/primitives/noul)** (**Yes / no** in the UI) | The probability that a statement is true                                                                                  | Numeric score with `P(true)` between `0` and `1`                | "Does the message request a refund?" → `0.93`                             |
 
 Some tips for each type:
 
 - **Choice** works well for routing and classification: topic detection, intent, failure mode, which tool should have been called. Give every option a short description and include an escape hatch such as `other` or `unclear`. Jev cannot abstain, so without one it picks the least wrong option.
 - **Score** works well for rubrics: severity, frustration, answer completeness. Describe every level in plain language and order them from low to high. The score is the probability-weighted level, so `1.7` means "between level 1 and level 2, closer to 2".
-- **Yes / no** works well for guardrails and flags: out-of-scope request, PII in the output, user disagreement, policy violation. Optionally describe what counts as `true` and what counts as `false`. Because you get a probability instead of a hard label, you can pick a threshold that fits your risk tolerance, or use three bands: act, review, ignore.
+- **Noul** works well for guardrails and flags: out-of-scope request, PII in the output, user disagreement, policy violation. Optionally describe what counts as `true` and what counts as `false`. Because you get a probability instead of a hard label, you can pick a threshold that fits your risk tolerance, or use three bands: act, review, ignore.
 
 <Callout type="info">
   TypeSafe's docs stress that each question must be **atomic**: one decision

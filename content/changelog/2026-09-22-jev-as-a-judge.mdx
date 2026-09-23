@@ -1,7 +1,7 @@
 ---
 date: 2026-09-22
 title: Jev as a judge
-description: Use TypeSafe's Jev decision model as a judge in Langfuse evaluators. Ask typed questions about every observation and get calibrated scores at a fraction of the cost and latency of an LLM judge.
+description: Use TypeSafe's Jev System One model as a judge in Langfuse evaluators. Ask typed questions about every observation and get calibrated scores at a fraction of the cost and latency of an LLM judge.
 author: Hassieb
 canonical: /docs/evaluation/evaluation-methods/jev-as-a-judge
 ---
@@ -17,7 +17,7 @@ Score every support conversation for e.g. topic, frustration, and whether the re
 
 ## Why Jev as a judge
 
-- **Cheaper.** Jev is priced by input tokens only, at $0.042 per million. A judgment over a typical conversation costs a fraction of a cent, so you can score more observation instead of sampling.
+- **Cheaper.** Jev is priced by input tokens only, at $0.042 per million. A judgment over a typical conversation costs a fraction of a cent, so you can score more observations instead of sampling.
 - **Faster.** Answers come back in well under a second. Online evaluators keep pace with production traffic, which shortens the time between a bad output and an [alert](/docs/observability/features/alerts#evaluator-alerts).
 - **Calibrated.** Every answer carries a probability distribution and a confidence value, stored in the score metadata.
 - **Many questions, one call.** All questions in an evaluator are answered in parallel against the same state. Adding a second or tenth question barely changes latency or cost.
@@ -26,11 +26,11 @@ Jev does not replace LLM judges. It has no rationale to give and only answers qu
 
 ## Three question types
 
-| Type         | Jev returns                                            | Langfuse score                  | Good for                                                         |
-| ------------ | ------------------------------------------------------ | ------------------------------- | ---------------------------------------------------------------- |
-| **Choice**   | One option out of a set you define, with probabilities | Categorical                     | Topic detection, intent, failure mode, routing checks            |
-| **Score**    | A position on ordered levels you describe              | Numeric (expected level)        | Frustration, severity, completeness rubrics                      |
-| **Yes / no** | The probability that a statement is true               | Numeric (`P(true)` from 0 to 1) | Out-of-scope requests, PII, policy violations, user disagreement |
+| Type                              | Jev returns                                            | Langfuse score                  | Good for                                                         |
+| --------------------------------- | ------------------------------------------------------ | ------------------------------- | ---------------------------------------------------------------- |
+| **Choice**                        | One option out of a set you define, with probabilities | Categorical                     | Topic detection, intent, failure mode, routing checks            |
+| **Score**                         | A position on ordered levels you describe              | Numeric (expected level)        | Frustration, severity, completeness rubrics                      |
+| **Noul** (**Yes / no** in the UI) | The probability that a statement is true               | Numeric (`P(true)` from 0 to 1) | Out-of-scope requests, PII, policy violations, user disagreement |
 
 ## Get started
 
@@ -38,7 +38,7 @@ Jev does not replace LLM judges. It has no rationale to give and only answers qu
 2. On the [Evaluators page](https://cloud.langfuse.com/project/~/evals), click **New evaluator** and choose **New decision model evaluator**, or start from one of the Jev templates: **Assign Input Topic**, **Flag Out-of-Scope Request**, or **Rate Customer Frustration**.
 3. Define your questions, map observation fields into the state, test on sample observations, and attach the evaluator to a rule.
 
-In the Langfuse UI, Jev evaluators are called **decision-model evaluators**. Jev is the first decision model we support.
+In the Langfuse UI, Jev evaluators are called **decision-model evaluators**. The evaluator type is named generically so that similar models from other providers can be added later. Jev is the first one we support.
 
 <Cards num={2}>
   <Card
