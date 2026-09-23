@@ -436,26 +436,48 @@ Now that you have a working agent evaluation pipeline, here are ways to extend i
 
 ## Frequently Asked Questions
 
-### What is agent evaluation?
+<FaqDetails>
+
+<Details id="what-is-agent-evaluation">
+<Summary>What is agent evaluation?</Summary>
 
 Agent evaluation is the process of systematically testing and measuring the performance of AI agents — autonomous systems that use LLMs to make decisions, call tools, and complete multi-step tasks. Unlike evaluating a single LLM call, agent evaluation must assess the entire trajectory of actions, not just the final output.
 
-### How is agent evaluation different from LLM evaluation?
+</Details>
+
+<Details id="how-is-agent-evaluation-different-from-llm-evaluation">
+<Summary>How is agent evaluation different from LLM evaluation?</Summary>
 
 Standard LLM evaluation checks whether a model produces a correct or high-quality response to a given prompt. Agent evaluation is more complex because agents make multiple decisions in sequence — choosing which tools to call, what parameters to pass, and when to stop. You need to evaluate not just the final answer, but also the reasoning path (trajectory) and each individual decision (single step).
 
-### What are the main types of agent evaluation?
+</Details>
+
+<Details id="what-are-the-main-types-of-agent-evaluation">
+<Summary>What are the main types of agent evaluation?</Summary>
 
 There are three main types: **Final Response (Black-Box)** evaluation checks only the end result; **Trajectory (Glass-Box)** evaluation checks whether the agent took the correct sequence of actions; and **Single Step (White-Box)** evaluation tests each individual decision in isolation. Most production systems use a combination of all three.
 
-### How do I build an agent evaluation dataset?
+</Details>
+
+<Details id="how-do-i-build-an-agent-evaluation-dataset">
+<Summary>How do I build an agent evaluation dataset?</Summary>
 
 Start by defining test cases that represent your most common and most critical user interactions. Each test case should include the user input, expected facts in the response, the expected sequence of tool calls (trajectory), and expected parameters for key tool calls. Grow your dataset over time by adding cases from real production failures.
 
-### Can I use LLM-as-a-judge for agent evaluation?
+</Details>
+
+<Details id="can-i-use-llm-as-a-judge-for-agent-evaluation">
+<Summary>Can I use LLM-as-a-judge for agent evaluation?</Summary>
 
 Yes. LLM-as-a-judge is one of the most effective approaches for agent evaluation because agent outputs are often too complex for simple rule-based checks. You can use different judge prompts for each evaluation level — one for final response quality, one for trajectory correctness, and one for individual step quality. See the [LLM-as-a-Judge documentation](/docs/evaluation/evaluation-methods/llm-as-a-judge) for setup instructions.
 
-### How often should I run agent evaluations?
+</Details>
+
+<Details id="how-often-should-i-run-agent-evaluations">
+<Summary>How often should I run agent evaluations?</Summary>
 
 Run offline evaluations (experiments) before every deployment that changes prompts, models, or tool configurations. Run online evaluations continuously on production traces to catch issues in real traffic. For a comprehensive approach, see the [evaluation overview](/docs/evaluation/overview).
+
+</Details>
+
+</FaqDetails>

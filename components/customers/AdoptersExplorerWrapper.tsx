@@ -21,6 +21,7 @@ import rocketMoneyLogo from "../home/img/rocket-money.svg";
 import samsaraLogo from "../home/img/samsara.svg";
 import sumUpLogo from "../home/img/sumup.svg";
 import telusLogo from "../home/img/telus.svg";
+import tradeRepublicLogo from "../home/img/trade-republic.svg";
 import twilioLogo from "../home/img/twilio.svg";
 
 const ADOPTERS_TABLE_PATH = join(
@@ -30,58 +31,26 @@ const ADOPTERS_TABLE_PATH = join(
 );
 
 const COMPANY_LOGOS: Record<string, NonNullable<Adopter["logo"]>> = {
-  Adobe: { src: adobeLogo, crop: { x: 44, y: 13, width: 53, height: 14 } },
-  Canva: { src: canvaLogo, crop: { x: 51, y: 14, width: 37, height: 12 } },
-  Circleback: {
-    src: circlebackLogo,
-    crop: { x: 37, y: 15, width: 66, height: 9 },
-  },
-  Cisco: { src: ciscoLogo, crop: { x: 51, y: 10, width: 38, height: 20 } },
-  "Expedia Group": {
-    src: expediaLogo,
-    crop: { x: 40, y: 14, width: 60, height: 12 },
-  },
-  freee: { src: freeeLogo, crop: { x: 46, y: 11, width: 48, height: 18 } },
-  "Hugging Face": {
-    src: huggingFaceLogo,
-    crop: { x: 34.5, y: 12, width: 70.5, height: 16 },
-  },
-  Intuit: { src: intuitLogo, crop: { x: 51, y: 15.5, width: 39, height: 8 } },
-  "Khan Academy": {
-    src: khanAcademyLogo,
-    crop: { x: 34, y: 14.25, width: 72, height: 11.5 },
-  },
-  "Magic Patterns": {
-    src: magicPatternsLogo,
-    crop: { x: 23, y: 13, width: 93, height: 14 },
-  },
-  "Merck Group": {
-    src: merckLogo,
-    crop: { x: 44.25, y: 15.5, width: 50.5, height: 8.5 },
-  },
-  Pigment: {
-    src: pigmentLogo,
-    crop: { x: 34, y: 13, width: 71, height: 13 },
-  },
-  Ramp: { src: rampLogo, crop: { x: 45.5, y: 13.25, width: 49, height: 13.5 } },
-  "Rocket Money": {
-    src: rocketMoneyLogo,
-    crop: { x: 44.5, y: 10.5, width: 51, height: 18 },
-  },
-  Samsara: {
-    src: samsaraLogo,
-    crop: { x: 41.5, y: 12.25, width: 57, height: 14.5 },
-  },
+  Adobe: { src: adobeLogo },
+  Canva: { src: canvaLogo },
+  Circleback: { src: circlebackLogo },
+  Cisco: { src: ciscoLogo },
+  "Expedia Group": { src: expediaLogo },
+  freee: { src: freeeLogo },
+  "Hugging Face": { src: huggingFaceLogo },
+  Intuit: { src: intuitLogo },
+  "Khan Academy": { src: khanAcademyLogo },
+  "Magic Patterns": { src: magicPatternsLogo },
+  "Merck Group": { src: merckLogo },
+  Pigment: { src: pigmentLogo },
+  Ramp: { src: rampLogo },
+  "Rocket Money": { src: rocketMoneyLogo },
+  Samsara: { src: samsaraLogo },
   Slite: { src: "/images/customers/slite/slite-light.png" },
-  SumUp: {
-    src: sumUpLogo,
-    crop: { x: 45.25, y: 12.25, width: 49.5, height: 14.5 },
-  },
-  TELUS: { src: telusLogo, crop: { x: 39, y: 15, width: 62, height: 12 } },
-  Twilio: {
-    src: twilioLogo,
-    crop: { x: 46.25, y: 12.5, width: 47, height: 14 },
-  },
+  SumUp: { src: sumUpLogo },
+  TELUS: { src: telusLogo },
+  "Trade Republic": { src: tradeRepublicLogo },
+  Twilio: { src: twilioLogo },
 };
 
 const COMPANY_DESCRIPTIONS: Record<string, string> = {
@@ -143,6 +112,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   SumUp: "Payments and point-of-sale company",
   TELUS: "Telecommunications company",
   "The Weather Company": "Weather intelligence company",
+  "Trade Republic": "European fintech bank",
   Twilio: "Customer communications platform",
 };
 

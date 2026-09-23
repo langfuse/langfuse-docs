@@ -3,7 +3,7 @@ import {
   CustomerStoryBackNav,
   companyLabelFromLogo,
 } from "@/components/customers/CustomerStoryBackNav";
-import { Authors, allAuthors } from "../Authors";
+import { Authors } from "../Authors";
 
 export const BlogHeader = ({
   authors = [],
@@ -37,7 +37,7 @@ export const BlogHeader = ({
         )}
         <span className="text-primary/60">{date}</span>
         {customerLogo && (
-          <div className="not-prose bg-white rounded-lg px-6 py-4 shadow-sm border my-0">
+          <div className="not-prose my-0">
             <Image
               src={customerLogo}
               alt={`${title} logo`}

@@ -144,7 +144,6 @@ const IGNORED_SECTION_PATHS = new Set([
   "cookie-policy",
   "oss-friends",
   "partners",
-  "role-finder",
   "wrapped",
 ]);
 

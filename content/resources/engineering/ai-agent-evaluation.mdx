@@ -178,34 +178,62 @@ If your team is aligning on vocabulary before building an agent evaluation pract
 
 ## FAQ
 
-### What is AI agent evaluation? [#what-is-ai-agent-evaluation]
+<FaqDetails>
+
+<Details id="what-is-ai-agent-evaluation">
+<Summary>What is AI agent evaluation?</Summary>
 
 AI agent evaluation is the practice of measuring the quality of autonomous, multi-step LLM systems across four dimensions: trajectory (the path of steps), tool use (correct tool selection and arguments), task completion (whether the user's goal was met), and multi-turn quality (whether performance holds across a conversation). It differs from standard LLM evaluation because the unit of evaluation is a trace or session rather than a single input-output pair.
 
-### What metrics should I use to evaluate an AI agent? [#agent-evaluation-metrics]
+</Details>
+
+<Details id="agent-evaluation-metrics">
+<Summary>What metrics should I use to evaluate an AI agent?</Summary>
 
 Start with one metric per dimension: a boolean task-completion judgment on the root of each run, a tool-selection correctness check on tool-call observations, a numeric step count with a budget threshold for trajectory efficiency, and a session-level resolution score for conversational agents. Add cost and latency per run, which tracing gives you without extra evaluators. Expand only when a metric has caught a real regression; unused metrics are noise.
 
-### How do you evaluate agent tool calls? [#tool-call-evaluation]
+</Details>
+
+<Details id="tool-call-evaluation">
+<Summary>How do you evaluate agent tool calls?</Summary>
 
 Assert on the recorded tool calls of the observation rather than parsing model output. In Langfuse, code and LLM-as-a-judge evaluators access tool calls as a structured field with `name`, `arguments`, `type`, `id`, and `index`, so a code evaluator can check that a required tool was called or that arguments match a schema, and a judge can rate whether the chosen tool fit the request. Deterministic checks belong in code; appropriateness judgments belong with a judge.
 
-### How do you evaluate an agent without ground truth? [#evaluate-without-ground-truth]
+</Details>
+
+<Details id="evaluate-without-ground-truth">
+<Summary>How do you evaluate an agent without ground truth?</Summary>
 
 Use reference-free methods: LLM-as-a-judge with a rubric (does the final answer address the stated goal, is it grounded in the tool results the agent retrieved), deterministic property checks that need no reference (valid output format, required tool called, step budget respected), and human annotation on a sample to calibrate the judge. Managed evaluators for dimensions like hallucination judge outputs against the context provided in the trace rather than against an expected answer. Ground truth is only required for exact-match style checks in experiments.
 
-### What is the difference between trace-level and observation-level evaluation? [#trace-vs-observation-evals]
+</Details>
+
+<Details id="trace-vs-observation-evals">
+<Summary>What is the difference between trace-level and observation-level evaluation?</Summary>
 
 Observation-level evaluators score one operation inside a trace (an LLM call, a tool execution, a retrieval), which makes them fast and precise; in Langfuse they are the recommended target, and trace-level judge evaluators are legacy. To evaluate a whole agent run, target the root observation that records the overall input and final output, and make sure your instrumentation writes the run's summary onto it, because an evaluator sees only the observation it targets.
 
-### How do you evaluate multi-turn conversations? [#multi-turn-evaluation]
+</Details>
+
+<Details id="multi-turn-evaluation">
+<Summary>How do you evaluate multi-turn conversations?</Summary>
 
 Score at two levels: per-turn evaluators for the quality of individual responses, and session-level scores for conversation outcomes such as resolution, goal drift, and turns-to-resolution. In Langfuse, traces share a session ID, scores attach directly to sessions via the UI, SDK, or annotation queues, and boolean or categorical session scores are filterable, so failed conversations can be pulled into review queues or datasets.
 
-### How do I evaluate a RAG agent? [#evaluate-rag-agent]
+</Details>
+
+<Details id="evaluate-rag-agent">
+<Summary>How do I evaluate a RAG agent?</Summary>
 
 Combine agent metrics with RAG metrics, each attached to the step it describes: a boolean code check that the retrieval tool was called when the question required it, a context-relevance score on retriever observations, a faithfulness judge that verifies the answer against the recorded retrieved context, and a task-completion judge on the root observation for the overall run. Instrument retrieval steps with the `retriever` observation type and record the retrieved documents on the observations your evaluators target. Per-step scores show whether a bad answer came from skipping retrieval, retrieving the wrong documents, or generating claims the context does not support.
 
-### Should agent evaluations run in CI? [#agent-evals-in-ci]
+</Details>
+
+<Details id="agent-evals-in-ci">
+<Summary>Should agent evaluations run in CI?</Summary>
 
 Yes, for any change that alters agent behavior: prompts, models, tool schemas, and orchestration logic. Run an experiment against a versioned dataset of regression cases and fail the pipeline when scores miss a threshold, exactly like a test suite. Keep the CI dataset small enough to run on every pull request (tens to low hundreds of items) and run larger sweeps on a schedule or before releases.
+
+</Details>
+
+</FaqDetails>

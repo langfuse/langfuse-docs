@@ -250,7 +250,10 @@ see teams actually ship:
 
 ## FAQ
 
-### How do I analyze what users ask my AI chatbot? [#analyze-user-questions]
+<FaqDetails>
+
+<Details id="analyze-user-questions">
+<Summary>How do I analyze what users ask my AI chatbot?</Summary>
 
 Trace every conversation in an LLM observability platform, then classify each user message
 into intents and store the labels as categorical scores on the traces. Run the
@@ -258,7 +261,10 @@ classification either as an offline batch job over the trace API or as an LLM-as
 evaluator on live traffic. The intent distribution, its trend over time, and quality metrics
 per intent then come from dashboard widgets over the score data.
 
-### Should I store intent labels as tags or scores? [#tags-vs-scores]
+</Details>
+
+<Details id="tags-vs-scores">
+<Summary>Should I store intent labels as tags or scores?</Summary>
 
 Use scores when you classify conversations after the fact, which is the usual case for
 intent analytics: scores can be attached to existing traces at any time, carry a data type,
@@ -266,17 +272,27 @@ and aggregate in dashboards and score analytics. Tags are set during tracing and
 attributes you already know at request time, such as the app feature that triggered the
 conversation.
 
-### Do I need to classify every conversation? [#classification-sampling]
+</Details>
+
+<Details id="classification-sampling">
+<Summary>Do I need to classify every conversation?</Summary>
 
 No. For monitoring the intent distribution and out-of-scope rate, a 10 to 25 percent sample
 is typically representative and proportionally cheaper; LLM-as-a-judge evaluators have a
 built-in sampling percentage for exactly this. Classify everything only when you need
 per-conversation follow-up, such as routing every out-of-scope request to a review queue.
 
-### What is the difference between chatbot analytics and product analytics? [#chatbot-vs-product-analytics]
+</Details>
+
+<Details id="chatbot-vs-product-analytics">
+<Summary>What is the difference between chatbot analytics and product analytics?</Summary>
 
 Product analytics measures user behavior around the chatbot: sessions, retention, funnels,
 drop-off. Chatbot analytics on traces measures the conversations themselves: what users
 asked, what the model did, what it cost, and whether the answer was good, often combined with
 [user feedback](/docs/observability/features/user-feedback) captured in the chat UI. Most
 teams run both and connect them through shared user and session identifiers.
+
+</Details>
+
+</FaqDetails>
