@@ -30,7 +30,7 @@ There are different types of signals in chat applications that can be used to mo
 
 Especially **conversation signals** help you steer your attention to the relevant traces from production as soon as manual review is not feasible anymore. They tell you something is going wrong. See the table below for a typical list of conversation signals.
 
-<Frame fullWidth>
+<Frame fullWidth className="w-full my-8">
   ![Table of conversation signals including rephrase, correction, human hand-off, repeat, error quote, frustration, and success confirmation](/images/blog/2026-09-23-extract-signals-with-jev/conversation-signals-table.png)
 </Frame>
 
@@ -61,21 +61,37 @@ With Jev, these signals can be caught concurrently in one pass, at the fraction 
 
 While evals should be custom to your application, catching conversation signals is universal. The Langfuse template gallery now offers a full Jev based batch evaluator template to catch production signals.
 
-1. Go to the [Evaluator tab](https://cloud.langfuse.com/project/~/evals) and click on New evaluator
-2. Choose the ‘User Conversation Signal’ template
+<Steps>
 
-   <Frame fullWidth>
+### Go to the Evaluator tab
+
+Go to the [Evaluator tab](https://cloud.langfuse.com/project/~/evals) and click on New evaluator.
+
+### Choose the User Conversation Signal template
+
+Choose the ‘User Conversation Signal’ template.
+
+<Frame fullWidth className="w-full my-8">
   ![Configure evaluator dialog with Decision model selected and seven User Conversation Signal questions listed](/images/blog/2026-09-23-extract-signals-with-jev/template-questions.png)
 </Frame>
 
-3. Add your [Jev connection](/docs/evaluation/evaluation-methods/jev-as-a-judge#add-a-typesafe-connection)
-4. Choose the observations to run on and test
+### Add your TypeSafe connection
 
-   <Frame fullWidth>
+Add your [Jev connection](/docs/evaluation/evaluation-methods/jev-as-a-judge#add-a-typesafe-connection) if you have not already.
+
+### Choose the observations to run on and test
+
+Choose the observations to run on and test.
+
+<Frame fullWidth className="w-full my-8">
   ![Test the evaluator panel showing sample observations and Decision Model Output probabilities for user conversation signal questions](/images/blog/2026-09-23-extract-signals-with-jev/test-evaluator.png)
 </Frame>
 
-5. Save and set rule for evaluators to run on
+### Save and set rule for evaluators to run on
+
+Save and set rule for evaluators to run on.
+
+</Steps>
 
 The scores will then appear on incoming traces. You can also opt to do a pass on historic traces. To visualize the scores you can create [dashboards](/docs/metrics/features/custom-dashboards), and create [saved views](/changelog/2025-05-20-save-table-views) in your tracing table.
 
