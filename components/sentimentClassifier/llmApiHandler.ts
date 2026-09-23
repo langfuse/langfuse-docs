@@ -80,7 +80,7 @@ const classifyOne = async (definition: ClassifierDefinition, text: string) => {
 };
 
 const handler = async (req: Request) => {
-  const { success } = rateLimit(req, { limit: 15, windowMs: 60_000 });
+  const { success } = rateLimit(req, { limit: 60, windowMs: 60_000 });
   if (!success) {
     return new Response(
       JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
