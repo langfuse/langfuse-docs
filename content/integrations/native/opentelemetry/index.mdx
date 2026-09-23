@@ -503,13 +503,6 @@ Once spans are arriving in Langfuse, [Tracing in the Langfuse Academy](/academy/
 - Langfuse supports OTLP over HTTP with both `HTTP/JSON` and `HTTP/protobuf`. `gRPC` is not supported yet.
 - If an observation's type or timestamps look wrong, Langfuse may have rewritten them on ingest. See [Ingestion transformations](#ingestion-transformations).
 
-## Common patterns without a Langfuse SDK [#patterns-without-sdk]
-
-If you instrument with a plain OpenTelemetry SDK (for example in Go or Java), set the attributes from the [mapping table](#property-mapping) directly on your spans:
-
-- **Link a generation to a prompt version.** Set `langfuse.observation.type` to `generation`, `langfuse.observation.prompt.name` to the prompt name, and `langfuse.observation.prompt.version` to the version number. The version must be a whole number; any other value is ignored and the prompt is not linked. Prompt linking only applies to observations of type `generation`; on other types the attributes are ignored.
-- **Record a tool call.** Set `langfuse.observation.type` to `tool` and put the arguments and result in `langfuse.observation.input` and `langfuse.observation.output`. Spans that follow the OpenTelemetry GenAI semantic conventions work without the explicit type: `gen_ai.tool.name` or `gen_ai.tool.call.id` marks the span as a tool, and `gen_ai.tool.call.arguments` and `gen_ai.tool.call.result` are read as input and output when no other input or output attribute is present.
-
 ## FAQ
 
 import { FaqPreview } from "@/components/faq/FaqPreview";
