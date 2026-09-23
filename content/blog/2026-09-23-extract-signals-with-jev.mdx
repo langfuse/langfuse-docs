@@ -17,24 +17,24 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
   authors={["annabellschafer"]}
 />
 
-Chat agents can handle millions of user interactions every day. That volume is impossible for a human to review manually. Jev-like models now open a way to review production traces for signals of failure at scale — something that gets costly with LLMs and is hard to solve with [deterministic code-based evals](/docs/evaluation/evaluation-methods/code-evaluators).
+Chat agents can handle millions of user interactions every day. A volume, impossible for a human to review manually. Jev-like models now open an opportunity to review production traces for signals of failure at scale. Something that can get costly with LLMs and is hard to solve with [deterministic code-based evals](/docs/evaluation/evaluation-methods/code-evaluators).
 
 ## About user signals [#about-user-signals]
 
-There are different types of signals in chat applications that you can use to monitor and improve AI applications:
+There are different types of signals in chat applications that can be used to monitor and improve AI applications.
 
-- You can ask for [explicit user feedback, like thumbs up or down](/docs/observability/features/user-feedback)
+- You can ask for [**explicit user feedback, like thumbs up or down**](/docs/observability/features/user-feedback)
 - You can **track behavior**, like dismissing a chat
 - You can **track factual outcomes of a chat**, like a completed booking
-- You can **track conversation signals**, like a user being upset or asking follow-ups
+- You can **track conversation signals**, like a user being upset or asking follow ups.
 
-Conversation signals especially help you steer attention to the relevant traces from production once manual review is no longer feasible. They tell you something is going wrong. A typical list looks like this:
+Especially **conversation signals** help you steer your attention to the relevant traces from production as soon as manual review is not feasible anymore. They tell you something is going wrong. See the table below for a typical list of conversation signals.
 
 <Frame fullWidth>
   ![Table of conversation signals including rephrase, correction, human hand-off, repeat, error quote, frustration, and success confirmation](/images/blog/2026-09-23-extract-signals-with-jev/conversation-signals-table.png)
 </Frame>
 
-Established approaches to catch these signals centered on [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge). At scale, teams mainly contained cost through [sampling](/docs/observability/features/sampling). Jev-like models now allow a full pass on all production traces.
+Established approaches to catch these signals were especially centered around [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge). With scale, the caused costs were primarily contained through [sampling](/docs/observability/features/sampling). Jev-like models now allow a full pass on all production traces.
 
 <Callout type="info">
   For more on the signal taxonomy (explicit, behavioral, conversation, and
@@ -46,52 +46,37 @@ Established approaches to catch these signals centered on [LLM-as-a-judge](/docs
 
 ## Catching conversation signals with Jev [#catching-conversation-signals-with-jev]
 
-Jev-like models can reuse the same state or context to answer multiple questions in parallel. That means the same conversation can concurrently be evaluated for follow-up questions, user frustration, a user disagreeing with the agent, and whether the user seems happy with the outcome.
+Jev-like models offer the advantage that the same state or context can be reused to answer multiple questions in parallel.
+This means the same conversation can concurrently be evaluated for follow-up questions, user frustration, a user disagreeing with the agent, and if the user seems to be happy with the outcome.
 
-Take a support rebooking conversation. The user wants to rebook a flight. Over the course of the interaction she first has to correct the AI, then asks a follow-up, and finally gets the request resolved. Multiple things are true at once: the conversation outcome was successful, the AI made a mistake first, and the answers were not effective enough to avoid a follow-up.
+Let us look at an example conversation in a support resolution. The user wants to rebook a flight. Over the course of the interaction she has to first correct the AI, then ask a follow up question, but then finally gets the request resolved. Multiple things are true here. The conversation outcome was successful. Nevertheless, the AI made a mistake first, and was apparently not effective enough in their answers to not cause a follow-up by a user.
 
 <Frame fullWidth className="w-full my-8">
   ![Annotated rebooking chat where the user corrects the agent, asks a follow-up about bags and seat, then confirms the booking is resolved](/images/blog/2026-09-23-extract-signals-with-jev/rebooking-conversation.png)
 </Frame>
 
-With Jev, these signals can be caught concurrently in one pass, at a fraction of the cost of frontier LLM models. Model each dimension as an individual [noul](https://docs.typesafe.ai/primitives/noul) (yes / no) question to get separate verdicts on the different conversation signals.
+With Jev, these signals can be caught concurrently in one pass, at the fraction of the cost of using frontier LLM models. All dimensions can be modelled as individual [noul questions](https://docs.typesafe.ai/primitives/noul), to get separate verdicts on the different conversation signals.
 
 ## Using Jev in Langfuse [#using-jev-in-langfuse]
 
-Evals should be custom to your application, but catching conversation signals is universal. The Langfuse template gallery now offers a Jev-based evaluator template to catch production signals.
+While evals should be custom to your application, catching conversation signals is universal. The Langfuse template gallery now offers a full Jev based batch evaluator template to catch production signals.
 
-<Steps>
+1. Go to the [Evaluator tab](https://cloud.langfuse.com/project/~/evals) and click on New evaluator
+2. Choose the ‘User Conversation Signal’ template
 
-### Open the Evaluators page
-
-Go to the [Evaluators tab](https://cloud.langfuse.com/project/~/evals) and click **New evaluator**.
-
-### Choose the User Conversation Signal template
-
-Pick the **User Conversation Signal** template from the gallery. It pre-fills seven yes / no questions that map to the conversation signals above.
-
-<Frame fullWidth>
+   <Frame fullWidth>
   ![Configure evaluator dialog with Decision model selected and seven User Conversation Signal questions listed](/images/blog/2026-09-23-extract-signals-with-jev/template-questions.png)
 </Frame>
 
-### Add your TypeSafe connection
+3. Add your [Jev connection](/docs/evaluation/evaluation-methods/jev-as-a-judge#add-a-typesafe-connection)
+4. Choose the observations to run on and test
 
-Add your [Jev connection](/docs/evaluation/evaluation-methods/jev-as-a-judge#add-a-typesafe-connection) if you have not already.
-
-### Choose observations and test
-
-Filter to the observations you want to score, pick a sample, and run the evaluator.
-
-<Frame fullWidth>
+   <Frame fullWidth>
   ![Test the evaluator panel showing sample observations and Decision Model Output probabilities for user conversation signal questions](/images/blog/2026-09-23-extract-signals-with-jev/test-evaluator.png)
 </Frame>
 
-### Save and attach a rule
+5. Save and set rule for evaluators to run on
 
-Save the evaluator and set a rule so it runs on matching production observations. You can also run a batch pass on historic traces.
-
-</Steps>
-
-The scores then appear on incoming traces. To visualize them, create [dashboards](/docs/metrics/features/custom-dashboards) and [saved views](/changelog/2025-05-20-save-table-views) on your observations table.
+The scores will then appear on incoming traces. You can also opt to do a pass on historic traces. To visualize the scores you can create [dashboards](/docs/metrics/features/custom-dashboards), and create [saved views](/changelog/2025-05-20-save-table-views) in your tracing table.
 
 <CustomerStoryCTA />
