@@ -67,9 +67,17 @@ Some tips for each type:
 
 <Steps>
 
-### Add a TypeSafe connection
+### Add a TypeSafe connection [#add-a-typesafe-connection]
 
-Go to **Settings → LLM Connections** in your project and add a connection with the provider **typesafe**. You only need a TypeSafe API key, which you can create in the [TypeSafe console](https://console.typesafe.ai/settings/keys). No base URL or additional headers are required.
+Go to **Settings → LLM Connections** in your project and add a connection with the adapter **typesafe**. Then choose the **upstream** that serves Jev and paste its API key:
+
+| Upstream          | API key                                                                             | Billing                   |
+| ----------------- | ----------------------------------------------------------------------------------- | ------------------------- |
+| TypeSafe          | A key from the [TypeSafe console](https://console.typesafe.ai/settings/keys)        | Billed by TypeSafe        |
+| Vercel AI Gateway | An [AI Gateway API key](https://vercel.com/docs/ai-gateway/authentication-and-byok) | Billed through AI Gateway |
+| OpenRouter        | An [OpenRouter API key](https://openrouter.ai/settings/keys)                        | Billed through OpenRouter |
+
+Vercel AI Gateway and OpenRouter expose TypeSafe's API, so evaluators behave the same on every upstream. The connection offers the `jev-1.13.0` and `jev-latest` models by default. No base URL or additional headers are required. Switching an existing connection to another upstream requires the API key for the new upstream.
 
 TypeSafe connections are only offered to Jev evaluators. They do not show up in the playground, in prompt experiments, or in LLM-as-a-Judge model pickers, because Jev cannot generate text.
 
@@ -136,15 +144,15 @@ Internal environments are hidden from the default tracing view. Filter the traci
 
 ## Limits [#limits]
 
-| Constraint              | Limit / guidance                                                                                                                                                                                       |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Questions per evaluator | 1 to 50, all answered in one call.                                                                                                                                                                     |
-| Choice options          | 2 to 255 options with unique values.                                                                                                                                                                   |
-| Score levels            | 2 to 10 ordered levels.                                                                                                                                                                                |
-| State size              | TypeSafe accepts roughly 32k tokens for the state plus the longest question. Langfuse warns in the state editor before you reach it.                                                                   |
-| Rationale               | Jev does not return reasoning. Use an LLM judge if you need an explanation next to the verdict.                                                                                                        |
-| Abstaining              | Jev always picks an answer. Add an `other` or `unclear` option to Choice questions where the state may not contain enough information.                                                                 |
-| Data handling           | State and questions are sent to TypeSafe's API. Review [TypeSafe's terms](https://typesafe.ai) before evaluating sensitive data, and use [masking](/docs/observability/features/masking) where needed. |
+| Constraint              | Limit / guidance                                                                                                                                                                                                                                                                                     |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Questions per evaluator | 1 to 50, all answered in one call.                                                                                                                                                                                                                                                                   |
+| Choice options          | 2 to 255 options with unique values.                                                                                                                                                                                                                                                                 |
+| Score levels            | 2 to 10 ordered levels.                                                                                                                                                                                                                                                                              |
+| State size              | TypeSafe accepts roughly 32k tokens for the state plus the longest question. Langfuse warns in the state editor before you reach it.                                                                                                                                                                 |
+| Rationale               | Jev does not return reasoning. Use an LLM judge if you need an explanation next to the verdict.                                                                                                                                                                                                      |
+| Abstaining              | Jev always picks an answer. Add an `other` or `unclear` option to Choice questions where the state may not contain enough information.                                                                                                                                                               |
+| Data handling           | State and questions are sent to TypeSafe's API, through Vercel AI Gateway or OpenRouter if you chose that upstream. Review the terms of your upstream and of [TypeSafe](https://typesafe.ai) before evaluating sensitive data, and use [masking](/docs/observability/features/masking) where needed. |
 
 ## FAQ
 
@@ -174,7 +182,7 @@ Yes. Jev evaluators run on incoming observations through rules, on historical ob
 <Details>
 <Summary>Where do I get a TypeSafe API key?</Summary>
 
-Create an account at [typesafe.ai](https://typesafe.ai) and generate a key in the [TypeSafe console](https://console.typesafe.ai/settings/keys). Access currently runs through a waitlist on TypeSafe's side.
+Create an account at [typesafe.ai](https://typesafe.ai) and generate a key in the [TypeSafe console](https://console.typesafe.ai/settings/keys). Access currently runs through a waitlist on TypeSafe's side. If you already use Vercel AI Gateway or OpenRouter, you do not need a TypeSafe account: pick that upstream in the connection and use its API key instead. See [Add a TypeSafe connection](#add-a-typesafe-connection).
 
 </Details>
 
