@@ -286,23 +286,122 @@ LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=https://${ACCOUNT_ID}.r2.cloudflarestorage.com
 
 [Azure Blob Storage](https://azure.microsoft.com/en-us/products/storage/blobs/) is a globally available object storage by Microsoft Azure.
 It does not offer an S3-compatible API and requires slightly different configurations.
-To use our dedicated Azure Blob Storage setup, follow the configuration steps below.
+Set `LANGFUSE_USE_AZURE_BLOB=true` to use our dedicated Azure Blob Storage client.
+It reuses the `LANGFUSE_S3_*` variables: the bucket is the container name, and the endpoint is the storage account's blob endpoint, e.g. `https://<account>.blob.core.windows.net`.
 
-#### Example Configuration
+#### Authentication [#azure-authentication]
+
+Langfuse authenticates to Azure Blob Storage with either a storage account access key or a Microsoft Entra ID (formerly Azure AD) identity.
+Use an Entra ID identity if your tenant disallows shared key access on storage accounts.
+Select the mode explicitly with `LANGFUSE_AZURE_BLOB_CREDENTIAL`. Langfuse does not infer it from the variables that are set, since a pod can have access to more than one identity, e.g. an AKS node's managed identity and a workload identity.
+
+| Mode                   | Use case                                                                                                        | Configuration                                                                                                                                                                                                                                                            |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `shared-key` (default) | Storage account access key.                                                                                     | `LANGFUSE_S3_*_ACCESS_KEY_ID` (account name) and `LANGFUSE_S3_*_SECRET_ACCESS_KEY` (account key). Both are required.                                                                                                                                                     |
+| `workload-identity`    | AKS with [Microsoft Entra Workload ID](https://learn.microsoft.com/en-us/azure/aks/workload-identity-overview). | None. The workload identity webhook injects `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, and `AZURE_FEDERATED_TOKEN_FILE`.                                                                                                                                                      |
+| `managed-identity`     | Managed identity of the VM, VM scale set, or AKS node.                                                          | Set `AZURE_CLIENT_ID` or `LANGFUSE_AZURE_MANAGED_IDENTITY_RESOURCE_ID` to select a user-assigned identity. Omit both to use the system-assigned identity.                                                                                                                |
+| `service-principal`    | Deployments outside Azure.                                                                                      | `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, and exactly one of `AZURE_CLIENT_SECRET` or `AZURE_CLIENT_CERTIFICATE_PATH`.                                                                                                                                                       |
+| `default-chain`        | Environments not covered by the other modes.                                                                    | [`DefaultAzureCredential`](https://learn.microsoft.com/en-us/azure/developer/javascript/sdk/authentication/credential-chains#defaultazurecredential-overview), which is slower to start and picks the identity by chain order. Narrow it with `AZURE_TOKEN_CREDENTIALS`. |
+
+Set the following variables on the Langfuse Web and Langfuse Worker containers.
+The identity parameters use the Azure SDK's standard variable names, so the values the AKS workload identity webhook injects are picked up as-is.
+
+| Variable                                      | Required / Default | Description                                                                                                                                                                                    |
+| --------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_AZURE_BLOB_CREDENTIAL`              | `shared-key`       | Authentication mode. One of `shared-key`, `workload-identity`, `managed-identity`, `service-principal`, or `default-chain`.                                                                    |
+| `AZURE_CLIENT_ID`                             |                    | Client ID of the identity. Injected by the workload identity webhook. Selects a user-assigned identity for `managed-identity`. Required for `service-principal`.                               |
+| `AZURE_TENANT_ID`                             |                    | Microsoft Entra tenant ID. Injected by the workload identity webhook. Required for `service-principal`.                                                                                        |
+| `AZURE_FEDERATED_TOKEN_FILE`                  |                    | Path to the federated service account token. Injected by the workload identity webhook.                                                                                                        |
+| `AZURE_CLIENT_SECRET`                         |                    | Client secret of the service principal.                                                                                                                                                        |
+| `AZURE_CLIENT_CERTIFICATE_PATH`               |                    | Path to a PEM file with the service principal's certificate and private key.                                                                                                                   |
+| `LANGFUSE_AZURE_MANAGED_IDENTITY_RESOURCE_ID` |                    | Resource ID of a user-assigned managed identity. Alternative to `AZURE_CLIENT_ID` for `managed-identity`; set only one of the two. Langfuse-specific, as the Azure SDK has no variable for it. |
+
+With an Entra ID mode, leave the `LANGFUSE_S3_*_ACCESS_KEY_ID` and `LANGFUSE_S3_*_SECRET_ACCESS_KEY` variables unset; they are not used.
+Langfuse logs the identity it authenticates with when it initializes the storage client, e.g. `Azure Blob Storage container langfuse authenticating with workload identity (client ID ...)`.
+
+#### Microsoft Entra ID Requirements [#azure-entra-id-requirements]
+
+The Entra ID modes have the following requirements:
+
+- **Role assignments**: Assign the identity `Storage Blob Data Contributor` and `Storage Blob Delegator` on the storage account. The first grants the data operations. The second lets Langfuse sign pre-signed URLs with a [user delegation key](https://learn.microsoft.com/en-us/rest/api/storageservices/create-user-delegation-sas). The control-plane `Owner` and `Contributor` roles do not grant data access.
+- **Endpoint**: The endpoint host must contain the storage account name, e.g. `https://<account>.blob.core.windows.net`. Langfuse derives the account name from the host to sign pre-signed URLs and reports an error for endpoints that don't follow this form, such as a custom domain.
+- **Pre-signed URL lifetime**: A user delegation key is valid for at most 7 days, so Langfuse rejects pre-signed URLs that would outlive it. The defaults of 1 hour for media downloads (`LANGFUSE_S3_MEDIA_DOWNLOAD_URL_EXPIRY_SECONDS`) and 24 hours for batch export links (`BATCH_EXPORT_DOWNLOAD_LINK_EXPIRATION_HOURS`) are well within this limit.
+
+```bash
+az role assignment create \
+  --assignee <identity-client-id> \
+  --role "Storage Blob Data Contributor" \
+  --scope <storage-account-resource-id>
+
+az role assignment create \
+  --assignee <identity-client-id> \
+  --role "Storage Blob Delegator" \
+  --scope <storage-account-resource-id>
+```
+
+<Callout type="info">
+
+The authentication mode only applies to the storage that Langfuse itself uses, as configured via environment variables.
+Project-level [Blob Storage Export integrations](/docs/api-and-data-platform/features/export-to-blob-storage) to Azure Blob Storage always authenticate with the storage account name and key entered in the integration settings.
+Langfuse never uses the deployment's own Azure identity for a user-configured endpoint.
+
+</Callout>
+
+#### Example Configuration (Shared Key)
 
 You will need an Azure Blob Storage container and a static account key with the necessary permissions.
 
 Set the following environment variables to connect Langfuse with your Azure Blob Storage container.
-This example uses sample credentials from [Azurite](https://github.com/Azure/Azurite).
+This example uses sample credentials from [Azurite](https://github.com/Azure/Azurite), which only supports shared key authentication.
 
 ```yaml
 # Special flag to enable the Azure Blob Storage interface
 LANGFUSE_USE_AZURE_BLOB=true
 
-LANGFUSE_S3_EVENT_UPLOAD_BUCKET=langfuse # Container name - If it does not exists, Langfuse will attempt to create it
+LANGFUSE_S3_EVENT_UPLOAD_BUCKET=langfuse # Container name - If it does not exist, Langfuse will attempt to create it
 LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID=devstoreaccount1 # ABS Account
 LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw== # ABS Account Key
 LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=http://localhost:10000/devstoreaccount1 # URL, e.g. `https://${account}.blob.core.windows.net`
+```
+
+#### Example Configuration (Workload Identity on AKS) [#azure-workload-identity]
+
+To authenticate from AKS without an account key:
+
+1. [Enable the OIDC issuer and workload identity](https://learn.microsoft.com/en-us/azure/aks/workload-identity-deploy-cluster) on your cluster.
+2. Create a user-assigned managed identity and assign it the [roles listed above](#azure-entra-id-requirements) on the storage account.
+3. Create a federated identity credential on that managed identity for the Kubernetes service account that the Langfuse pods run as.
+
+Then set the following environment variables:
+
+```yaml
+LANGFUSE_USE_AZURE_BLOB=true
+LANGFUSE_AZURE_BLOB_CREDENTIAL=workload-identity
+
+LANGFUSE_S3_EVENT_UPLOAD_BUCKET=langfuse # Container name - If it does not exist, Langfuse will attempt to create it
+LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=https://<account>.blob.core.windows.net
+# No access key or account key. The workload identity webhook injects AZURE_CLIENT_ID, AZURE_TENANT_ID, and AZURE_FEDERATED_TOKEN_FILE.
+```
+
+With the [Helm chart](/self-hosting/deployment/kubernetes-helm), annotate the service account with the managed identity's client ID and label the Langfuse pods so that the webhook injects the credentials:
+
+```yaml
+langfuse:
+  serviceAccount:
+    annotations:
+      azure.workload.identity/client-id: <managed-identity-client-id>
+  pod:
+    labels:
+      azure.workload.identity/use: "true"
+  additionalEnv:
+    - name: LANGFUSE_AZURE_BLOB_CREDENTIAL
+      value: workload-identity
+
+s3:
+  deploy: false
+  storageProvider: azure
+  bucket: langfuse
+  endpoint: https://<account>.blob.core.windows.net
 ```
 
 ### Google Cloud Storage (Native) [#google-cloud-storage]
