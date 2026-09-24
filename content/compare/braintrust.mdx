@@ -106,7 +106,7 @@ Public list prices. Edit the inputs yourself: [Langfuse vs Braintrust pricing mo
 
 ## Observability and monitoring [#observability-and-monitoring]
 
-Langfuse starts from production tracing: complete traces at high volume with [token and cost tracking](/docs/observability/features/token-and-cost-tracking) and [Pulse](/changelog/2026-07-28-langfuse-pulse) outlier detection on the same observations table, and SDK-level [sampling](/docs/observability/features/sampling) to cap ingestion volume at the source.
+Langfuse evaluations run on your real production traces: Langfuse records complete traces at high volume with [token and cost tracking](/docs/observability/features/token-and-cost-tracking) and [Pulse](/changelog/2026-07-28-langfuse-pulse) outlier detection on the same observations table, and SDK-level [sampling](/docs/observability/features/sampling) caps ingestion volume at the source.
 
 Braintrust's Observe covers trace inspection, monitoring, and [Topics](https://www.braintrust.dev/docs/observe/topics), a daily pipeline that classifies logs by intent, sentiment, and issues. Topics' model calls are served from Braintrust-hosted endpoints in every deployment mode, including BYOC and self-hosted, with zero data retention at the model host. Trace text crosses your deployment boundary even when the data plane runs in your cloud. Telemetry arrives via SDK wrappers or [OTLP traces](https://www.braintrust.dev/docs/integrations/sdk-integrations/opentelemetry). Langfuse ingests [OpenTelemetry](/integrations/native/opentelemetry) natively and ships [100+ framework and provider integrations](/integrations), with the SDKs sending telemetry asynchronously outside the request path.
 
