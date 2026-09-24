@@ -27,3 +27,7 @@ Customers on Pro plan or higher in the HIPAA data region can [complete and sign 
 4. Configure your application to send HIPAA-regulated data only to `https://hipaa.cloud.langfuse.com`.
 
 The HIPAA region is completely separate from the [other data regions](https://langfuse.com/security/data-regions). Data migration is possible via the [data migration cookbook](https://langfuse.com/guides/cookbook/example_data_migration).
+
+## Self-hosted deployments
+
+The HIPAA data region and the BAA cover Langfuse Cloud, where Langfuse operates the infrastructure. In a [self-hosted](/self-hosting) deployment Langfuse does not receive or process your data, so no BAA with Langfuse is involved and the HIPAA safeguards are yours to implement in your environment. Relevant building blocks: [encryption](/self-hosting/configuration/encryption), [data masking](/self-hosting/security/data-masking) before or at ingestion, [data retention](/docs/administration/data-retention), [audit logs](/docs/administration/audit-logs), [SSO](/self-hosting/security/authentication-and-sso), and [network isolation](/self-hosting/security/networking).

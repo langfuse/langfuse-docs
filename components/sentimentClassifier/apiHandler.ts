@@ -14,27 +14,22 @@ import {
   computeCostUsd,
   type SentimentUsage,
 } from "./cost";
-import {
-  SENTIMENT_CRITERIA,
-  SENTIMENT_INSTRUCTIONS,
-  type SentimentLabel,
-} from "./criteria";
+import { parseClassifierIds, type ClassifierDefinition } from "./criteria";
+import type { ClassifierAnswer, ClassifierRunResult } from "./types";
 
-export type { SentimentLabel };
+export type { ClassifierRunResult as SentimentResult };
 
-export type SentimentResult = {
-  sentiment: SentimentLabel;
-  confidence: number;
-  probabilities: Record<SentimentLabel, number>;
-  model: string;
-  usage: SentimentUsage;
-};
-
-const buildSystemOneRequest = (text: string) => ({
+const buildSystemOneRequest = (
+  text: string,
+  selected: ClassifierDefinition[],
+) => ({
   state: text,
-  questions: {
-    sentiment: choice(SENTIMENT_INSTRUCTIONS, SENTIMENT_CRITERIA),
-  },
+  questions: Object.fromEntries(
+    selected.map((definition) => [
+      definition.id,
+      choice(definition.instructions, definition.criteria),
+    ]),
+  ),
 });
 
 let _client: TypeSafeClient | null = null;
@@ -49,6 +44,25 @@ const getClient = () => {
   return _client;
 };
 
+type ChoiceAnswer = {
+  choice: string;
+  confidence: number;
+  probabilities: Record<string, number>;
+};
+
+const asChoiceAnswer = (value: unknown, id: string): ChoiceAnswer => {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    typeof (value as ChoiceAnswer).choice !== "string" ||
+    typeof (value as ChoiceAnswer).confidence !== "number" ||
+    typeof (value as ChoiceAnswer).probabilities !== "object"
+  ) {
+    throw new Error(`Jev did not return a choice answer for "${id}".`);
+  }
+  return value as ChoiceAnswer;
+};
+
 const handler = async (req: Request) => {
   const { success } = rateLimit(req, { limit: 15, windowMs: 60_000 });
   if (!success) {
@@ -58,13 +72,26 @@ const handler = async (req: Request) => {
     );
   }
 
-  const { text, userId }: { text: string; userId: string } = await req.json();
+  const body = await req.json();
+  const { text, userId }: { text: string; userId: string } = body;
 
   if (!text || text.trim().length === 0) {
     return new Response(JSON.stringify({ error: "Text is required." }), {
       status: 400,
       headers: { "Content-Type": "application/json" },
     });
+  }
+
+  let selected: ClassifierDefinition[];
+  try {
+    selected = parseClassifierIds(body.tasks);
+  } catch (err) {
+    return new Response(
+      JSON.stringify({
+        error: err instanceof Error ? err.message : "Invalid tasks.",
+      }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    );
   }
 
   return propagateAttributes(
@@ -75,14 +102,13 @@ const handler = async (req: Request) => {
     },
     async () => {
       const traceId = getActiveTraceId();
-      const request = buildSystemOneRequest(text);
+      const request = buildSystemOneRequest(text, selected);
 
       setActiveTraceIO({ input: request });
       updateActiveObservation({ input: request }, { asType: "generation" });
 
       try {
         const response = await getClient().systemOne(request);
-        const answer = response.answers.sentiment;
         const inputTokens = response.usage.input_tokens;
         const outputTokens = response.usage.output_tokens;
         const usage: SentimentUsage = {
@@ -95,16 +121,31 @@ const handler = async (req: Request) => {
             JEV_PRICE_USD_PER_MTOK,
           ),
         };
-        const result: SentimentResult = {
-          sentiment: answer.choice,
-          confidence: answer.confidence,
-          probabilities: {
-            positive: answer.probabilities.positive,
-            negative: answer.probabilities.negative,
-            neutral: answer.probabilities.neutral,
-          },
+
+        const answers: ClassifierAnswer[] = selected.map((definition) => {
+          const answer = asChoiceAnswer(
+            response.answers[definition.id],
+            definition.id,
+          );
+          const probabilities = Object.fromEntries(
+            Object.keys(definition.criteria).map((label) => [
+              label,
+              answer.probabilities[label] ?? 0,
+            ]),
+          );
+          return {
+            id: definition.id,
+            name: definition.name,
+            value: answer.choice,
+            confidence: answer.confidence,
+            probabilities,
+          };
+        });
+
+        const result: ClassifierRunResult = {
           model: response.model,
           usage,
+          answers,
         };
 
         setActiveTraceIO({ output: result });
@@ -116,6 +157,7 @@ const handler = async (req: Request) => {
             metadata: {
               provider: "typesafe",
               questionType: "choice",
+              questionCount: selected.length,
               costUsd: usage.costUsd,
             },
             usageDetails: {

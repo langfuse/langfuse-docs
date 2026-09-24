@@ -535,6 +535,13 @@ They are attached to the root observation of the trace and remain visible in the
 </Details>
 
 <Details>
+<Summary>Why do my traces seem to have disappeared after the upgrade?</Summary>
+
+Two things look like missing data but usually are not. First, the traces table is now an observations table that opens filtered to `Is Root Observation = true`, which shows one row per trace; if you cleared or changed that filter, you see every observation instead, and a trace can appear to be gone when its root observation does not match your filters. Second, data ingested before the upgrade only exists in the old tables until the [historic backfill](#historic-backfill) has rewritten it into the new `events` tables. On the default `events_only` write mode the backfill starts automatically, newest first, and can take from minutes to days depending on volume. Track its progress on the background migrations page.
+
+</Details>
+
+<Details>
 <Summary>Why is historic data missing right after enabling the backfill?</Summary>
 
 The [historic backfill](#historic-backfill) rewrites data gradually, newest first. Depending on your data volume, it can take from minutes to days until all historic data is visible.

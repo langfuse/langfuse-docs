@@ -1,27 +1,23 @@
 import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId";
-import type { SentimentUsage } from "./cost";
+import type { ClassifierId } from "./criteria";
+import type { ClassifierRunResult } from "./types";
 
 export type { SentimentUsage } from "./cost";
-export { formatCostUsd } from "./cost";
+export {
+  formatCostUsd,
+  formatLatencyMs,
+  formatRatio,
+  comparisonRatio,
+} from "./cost";
+export type { ClassifierId } from "./criteria";
+export {
+  CLASSIFIERS,
+  CLASSIFIER_SEQUENCE,
+  classifiersForCount,
+} from "./criteria";
+export type { ClassifierAnswer, ClassifierRunResult } from "./types";
 
 export type SentimentLabel = "positive" | "negative" | "neutral";
-
-export type JevSentimentResult = {
-  sentiment: SentimentLabel;
-  confidence: number;
-  probabilities: Record<SentimentLabel, number>;
-  model: string;
-  usage: SentimentUsage;
-};
-
-export type LlmSentimentResult = {
-  sentiment: SentimentLabel;
-  confidence: number;
-  explanation: string;
-  keyPhrases: string[];
-  model: string;
-  usage: SentimentUsage;
-};
 
 export type SentimentEngine = "jev" | "llm";
 
@@ -74,6 +70,12 @@ export const SENTIMENT_COLORS: Record<
   },
 };
 
+export const DEFAULT_ANSWER_COLORS = {
+  bg: "bg-muted",
+  text: "text-text-primary",
+  bar: "bg-text-primary",
+} as const;
+
 export const getPersistedSentimentUserId = () =>
   getPersistedNanoId({
     key: "sentiment-classifier-user-id",
@@ -81,7 +83,7 @@ export const getPersistedSentimentUserId = () =>
   });
 
 export type ClassifySentimentSuccess = {
-  result: JevSentimentResult | LlmSentimentResult;
+  result: ClassifierRunResult;
   traceId: string;
 };
 
@@ -93,12 +95,17 @@ export async function classifySentiment(
   engine: SentimentEngine,
   text: string,
   userId: string,
+  tasks?: ClassifierId[],
 ): Promise<ClassifySentimentOutcome> {
   try {
     const res = await fetch(ENGINE_CONFIG[engine].endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, userId }),
+      body: JSON.stringify({
+        text,
+        userId,
+        ...(tasks && tasks.length > 0 ? { tasks } : {}),
+      }),
     });
 
     const responseText = await res.text();

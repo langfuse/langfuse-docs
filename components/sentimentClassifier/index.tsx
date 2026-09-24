@@ -10,12 +10,11 @@ import { SendIcon } from "lucide-react";
 import {
   EXAMPLE_TEXTS,
   ENGINE_CONFIG,
-  type JevSentimentResult,
-  type LlmSentimentResult,
   type SentimentEngine,
   classifySentiment,
   getPersistedSentimentUserId,
 } from "./shared";
+import type { ClassifierRunResult } from "./types";
 import { SentimentResultPanel } from "./resultPanel";
 
 type SentimentClassifierProps = HTMLAttributes<HTMLDivElement> & {
@@ -31,7 +30,7 @@ export const SentimentClassifier = ({
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{
-    result: JevSentimentResult | LlmSentimentResult;
+    result: ClassifierRunResult;
     traceId: string;
     inputText: string;
   } | null>(null);
@@ -61,8 +60,8 @@ export const SentimentClassifier = ({
     setLoading(false);
   };
 
-  const jevResult =
-    result && "probabilities" in result.result ? result.result : null;
+  const firstAnswer = result?.result.answers[0];
+  const jevModel = result?.result.model;
 
   return (
     <div className={cn("h-[62vh]", className)} {...props}>
@@ -136,17 +135,20 @@ export const SentimentClassifier = ({
                 {result.inputText}
               </div>
 
-              <SentimentResultPanel
-                result={result.result}
-                feedback={feedback}
-                onFeedback={(value) => {
-                  setFeedback(value);
-                  scoreDemoNegativeUserFeedback({
-                    traceId: result.traceId,
-                    value,
-                  });
-                }}
-              />
+              {firstAnswer && (
+                <SentimentResultPanel
+                  answer={firstAnswer}
+                  usage={result.result.usage}
+                  feedback={feedback}
+                  onFeedback={(value) => {
+                    setFeedback(value);
+                    scoreDemoNegativeUserFeedback({
+                      traceId: result.traceId,
+                      value,
+                    });
+                  }}
+                />
+              )}
             </div>
           )}
         </div>
@@ -161,7 +163,7 @@ export const SentimentClassifier = ({
               >
                 TypeSafe Jev
               </a>
-              {jevResult?.model ? ` (${jevResult.model})` : ""}.
+              {jevModel ? ` (${jevModel})` : ""}.
             </>
           ) : (
             <>Powered by GPT-5.6 Luna (high reasoning).</>

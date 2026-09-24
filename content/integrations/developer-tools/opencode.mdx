@@ -14,24 +14,13 @@ category: Integrations
 > **What is Langfuse?** [Langfuse](https://langfuse.com/) is an open-source AI engineering platform. It helps teams trace agentic applications, debug issues, evaluate quality, and monitor costs in production. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it.
 
 <Callout type="info" title="Install via the OpenCode plugin">
-The easiest way to set this up is the [Langfuse OpenCode Observability Plugin](https://github.com/langfuse/opencode-observability-plugin). Enable OpenCode's OpenTelemetry support and add the plugin in your OpenCode config:
-
-```json
-{
-  "experimental": {
-    "openTelemetry": true
-  },
-  "plugin": ["@langfuse/opencode-observability-plugin@latest"]
-}
-```
-
-Then add your Langfuse keys and restart OpenCode (full steps below).
+The [Langfuse OpenCode Observability Plugin](https://github.com/langfuse/opencode-observability-plugin) supports **OpenCode 2** and **OpenCode 1.18.29 or newer** as of [plugin version 0.5.0](https://github.com/langfuse/opencode-observability-plugin/releases/tag/v0.5.0). Choose your OpenCode version in the [setup instructions](#enable-the-plugin), then add your Langfuse keys and restart OpenCode.
 
 </Callout>
 
 ## What can this integration trace?
 
-The plugin reads OpenCode's session telemetry through OpenCode's OpenTelemetry support and sends it to Langfuse. You can monitor:
+The plugin reads OpenCode's session telemetry and sends it to Langfuse. You can monitor:
 
 - **User turns**: every prompt you send to OpenCode
 - **Assistant generations**: each model response within a turn
@@ -43,9 +32,7 @@ The plugin reads OpenCode's session telemetry through OpenCode's OpenTelemetry s
 
 ## How it works
 
-OpenCode has experimental [OpenTelemetry](https://opencode.ai/docs) support. When it's enabled, plugins can receive the telemetry OpenCode emits for a session.
-
-1. You enable `experimental.openTelemetry` and add `@langfuse/opencode-observability-plugin` to the `plugin` array in your OpenCode config.
+1. You add `@langfuse/opencode-observability-plugin` to your OpenCode config using the key for your version (`plugins` in OpenCode 2, `plugin` in OpenCode 1).
 2. On startup, OpenCode loads the plugin and streams session telemetry to it.
 3. The plugin converts turns, generations, tool calls, and reasoning into Langfuse traces and sends them to your project using the [Langfuse SDK](/docs/observability/sdk/overview).
 4. Credentials and options (`environment`, `userId`) are resolved from a config file or environment variables.
@@ -59,20 +46,27 @@ OpenCode has experimental [OpenTelemetry](https://opencode.ai/docs) support. Whe
 1. Sign up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-host Langfuse](/self-hosting).
 2. Create a new project and copy your API keys from the project settings.
 
-### Enable the plugin
+### Enable the plugin [#enable-the-plugin]
 
-Enable OpenTelemetry and add the plugin in your `opencode.json` or `opencode.jsonc`:
+Use the configuration for your OpenCode version in `opencode.json` or `opencode.jsonc`:
+
+**OpenCode 2 (plugin 0.5.0 or newer)** — use the plural `plugins` key:
 
 ```json
 {
-  "experimental": {
-    "openTelemetry": true
-  },
+  "plugins": ["@langfuse/opencode-observability-plugin@latest"]
+}
+```
+
+**OpenCode 1.18.29 or newer (plugin 0.5.0 or newer)** — use the singular `plugin` key:
+
+```json
+{
   "plugin": ["@langfuse/opencode-observability-plugin@latest"]
 }
 ```
 
-Restart OpenCode after changing the config.
+Restart OpenCode after changing the config. Plugin version 0.5.0 and newer does not support OpenCode 1 versions before 1.18.29.
 
 ### Add your Langfuse credentials [#set-credentials]
 
@@ -138,7 +132,7 @@ Setting both `LANGFUSE_PUBLIC_KEY` and `LANGFUSE_SECRET_KEY` makes the plugin us
 
 ### No traces appearing in Langfuse
 
-1. **OpenTelemetry isn't enabled.** Confirm `experimental.openTelemetry` is `true` and `@langfuse/opencode-observability-plugin` is in the `plugin` array of your `opencode.json`, then restart OpenCode.
+1. **The plugin isn't loaded.** Confirm `@langfuse/opencode-observability-plugin` is in the `plugins` array for OpenCode 2 or the `plugin` array for OpenCode 1.18.29 and newer, then restart OpenCode.
 2. **Credentials are missing.** Make sure `publicKey`/`secretKey` are set, either in `~/.config/opencode/opencode-langfuse.json` or via environment variables. Verify the public key starts with `pk-lf-`.
 3. **Region mismatch.** `baseUrl` (or `LANGFUSE_BASEURL`) must match the region your keys belong to.
 

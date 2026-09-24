@@ -276,10 +276,16 @@ project.
 
 <Tab>
 
-If there are no projects left in an organization, you can delete the organization in the organization settings.
+Only organization owners can delete an organization, and only once every project in it has been deleted or transferred to another organization. Delete the projects first, then the organization.
+
 Navigate to the organization settings and scroll to the `Danger Zone` within the `General` section.
 Confirm that you want to delete your organization.
 The organization and all associated user information will be removed from our system.
+
+Two errors can block the deletion:
+
+- `Please delete or transfer all projects before deleting the organization.` — at least one project still exists in the organization.
+- `Deletion of your projects is still being processed, please try deleting the organization later` — you already deleted the remaining projects, but their data is still being purged in the background. Project deletion is asynchronous and takes longer for projects with more data; wait and retry. The error is not a permissions problem.
 
 </Tab>
 

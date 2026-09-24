@@ -116,6 +116,8 @@ jobs:
 
 Automatically sync prompt changes from Langfuse to GitHub using [Prompt Version Webhooks](/docs/prompt-management/features/webhooks). This enables version control for prompts and can trigger CI/CD workflows.
 
+This sync is one-directional: Langfuse pushes an event to GitHub (a `repository_dispatch` for the GitHub action, or a webhook to your own endpoint) whenever a prompt version is created or a label changes. Langfuse never reads from your repository. To flow changes from Git back into Langfuse — for example to promote a reviewed prompt from a pull request — have your CI workflow call the [prompts API](/docs/api-and-data-platform/features/public-api) (`POST /api/public/v2/prompts`), as shown in the CI/CD section above.
+
 ### Overview of the Sync Workflow
 
 Whenever you save a new prompt version in Langfuse, it's automatically committed to your GitHub repository. With this setup, you can also trigger CI/CD workflows when prompts change.
