@@ -7,6 +7,8 @@
     "content/docs/evaluation/evaluation-methods",
     "content/docs/evaluation/scores",
     "content/docs/evaluation",
+    "content/docs/observability",
+    "content/docs/prompt-management",
     "content/docs/api-and-data-platform",
     "content/docs",
     "content/integrations",
@@ -38,10 +40,13 @@
     "CONTRIBUTING.md"
   ],
   "rules": [
-    "For evaluation tasks, first retrieve current docs from content/docs/evaluation/experiments, evaluation-methods, and scores; use content/docs/api-and-data-platform for API access.",
-    "Before writing evaluation code, retrieve the current datasets, experiments, evaluator, or scoring page and follow its SDK/API signatures and linked reference. Do not rely on remembered APIs.",
-    "Match examples to the user's installed SDK major version and language. Use upgrade-path pages only for migrations; do not mix legacy and current SDK examples.",
-    "Use current reference documentation for API signatures and cookbooks for implementation examples. Prefer these sources over historical blog posts and changelogs.",
-    "Distinguish SDK experiment evaluators, Langfuse-hosted evaluators, and externally computed scores; follow the documentation for the requested execution model."
+    "Fetch current documentation before implementing any Langfuse feature; do not write SDK or API calls from memory. Read the relevant workflow reference in https://github.com/langfuse/skills/tree/main/skills/langfuse/references when available.",
+    "For evaluation tasks, start with content/docs/evaluation: datasets and experiments, evaluation methods, and scores. Distinguish SDK experiment evaluators, Langfuse-hosted evaluators, and externally computed scores; follow the requested execution model.",
+    "For observability, use content/docs/observability and content/integrations. Prefer framework integrations, run the instrumented path, and inspect emitted traces against current observability best practices before declaring success.",
+    "For prompt management, use content/docs/prompt-management. Preserve behavior during migration, choose chat or text deliberately, verify variables and deployment labels, and link prompt versions to generations when tracing is configured.",
+    "Prefer the latest stable SDK/API versions unless the project or user requires otherwise. Verify exact versions and use matching language-specific examples; for self-hosted Langfuse, consult the deployment-specific API reference.",
+    "For direct Langfuse data operations, prefer langfuse-cli and discover resources and arguments with api __schema and --help before calling them. Use content/docs/api-and-data-platform for access guidance.",
+    "If retrieved context is incomplete, discover pages through https://langfuse.com/llms.txt, fetch the relevant page as Markdown by appending .md, or search https://langfuse.com/api/search-docs?query=<url-encoded-query>.",
+    "Use reference documentation for API signatures and cookbooks for implementation examples. Use changelogs to confirm feature availability, not as implementation references."
   ]
 }
