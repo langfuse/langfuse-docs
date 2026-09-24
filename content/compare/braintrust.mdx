@@ -19,11 +19,11 @@ This guide outlines the key differences between **[Langfuse](/)** and **[Braintr
 
 **1. Open source and full control.** MIT-licensed self-hosting of the entire application on every tier, with data in a database you can query directly.
 
-**2. Production observability at scale.** Complete traces at high volume on ClickHouse, open source since 2016, with dashboards, alerts, and full-text search. Observability is the foundation; evals, prompts, and datasets layer on the same data.
+**2. Evals on production traces at scale.** Complete traces at high volume on ClickHouse, open source since 2016, with dashboards, alerts, and full-text search. LLM-as-a-judge and code evaluators run online and in experiments on the same observations, and any observation can be added to a dataset in one click.
 
 **3. Predictable, count-based pricing.** A trace, observation, or score is one unit: cost follows request count, not payload size, and scores are not a separate meter. Pro includes 3-year retention.
 
-**Choose Braintrust** if your team is evaluation-first and wants a vendor-managed workbench for reviewing experiments, with AI-assisted analysis built in.
+**Choose Braintrust** if you want a closed, vendor-managed workbench for experiment review, with persistent baselines, repeated trials with statistical summaries, and AI-assisted analysis through Loop and Topics.
 
 ---
 
@@ -172,7 +172,7 @@ Langfuse publishes [SOC 2 Type II, ISO 27001, GDPR, and HIPAA](/security) and si
 
 ## Which should you choose [#which-should-you-choose]
 
-Choose **Langfuse** if your deciding constraints are infrastructure and scale: the whole platform needs to run in your environment, you want to query trace data directly in SQL, or production volume makes a per-request meter the safer budget. The full evaluation stack (judges, code evaluators, experiments, annotation) comes with it in the same project.
+Choose **Langfuse** if you want evaluation and observability on the same production data: judges, code evaluators, experiments, and annotation run in the same project as your traces, the whole platform can run in your environment, and self-hosted deployments can query trace data directly in SQL. At production volume, a per-request meter is also the safer budget.
 
 Choose **Braintrust** if your deciding constraint is a vendor-managed review workbench: packaged experiment baselines, repeated trials with statistical summaries, and AI-assisted analysis through Loop and Topics, with sensitive payloads optionally kept in your VPC on Enterprise.
 
@@ -185,7 +185,7 @@ The same reasons recur in migration conversations. Cost leads, and it is the met
 - **Size-metered ingestion.** Cost follows payload size on the [GB meter](#pricing), not request count, so high-volume applications with many simple traces feel it hardest.
 - **Scores are their own meter.** Every score is a metered charge, so evaluation coverage becomes a budget decision ([worked example](#worked-example)).
 - **Retention is short and metered.** Keeping data past the included window bills per GB monthly and [caps at 180 days on Pro](#pricing), so multi-year lookback needs an Enterprise contract.
-- **Eval-first packaging.** Teams whose primary job is production observability end up paying for an evaluation-centric package they use as a logging system; Langfuse is [built the other way around](#observability-and-monitoring).
+- **Workbench-first packaging.** Teams whose main need is production tracing end up paying for an experiment-review package they use as a logging system. Langfuse runs [production tracing](#observability-and-monitoring) and [evaluation](#evaluation-and-experiments) on the same observations table and the same unit meter.
 - **Getting data out takes work.** Bulk export from Braintrust means cursor pagination in 1,000-record pages or the CLI; automated cloud-storage export is Enterprise-gated, and there is no direct database access. Langfuse pairs [high-volume read APIs and blob-storage export](#open-platform) with direct SQL on ClickHouse when self-hosting.
 - **Full self-hosting is not offered.** Braintrust's self-hosted option covers the data plane only, requires Enterprise, and keeps a runtime dependency on Braintrust's cloud for UI and auth. When something breaks in closed software, only the vendor can diagnose and fix it. On Langfuse, [running the whole application yourself](#open-source-and-distribution) is a first-class deployment mode, open source down to ClickHouse ([open source since 2016](https://clickhouse.com/blog/open-source-10)). Brainstore is a [proprietary engine launched in 2025](https://www.braintrust.dev/blog/brainstore).
 
