@@ -29,7 +29,7 @@ Then install the tracing plugin, enable its hook, and set your Langfuse keys (fu
 Using Codex's plugin hooks, this integration reads the transcript Codex writes for each session and sends it to Langfuse. You can monitor:
 
 - **User inputs**: every prompt you send to Codex
-- **Model responses**: assistant messages and reasoning summaries for each model call in a turn
+- **Model responses**: assistant messages and available reasoning summaries for each model call in a turn
 - **Tool calls**: shell commands (`exec_command`), file edits (`apply_patch`), MCP tools, web search, and subagent calls — with their inputs, outputs, and error status
 - **Token usage**: input, output, cached, and reasoning tokens per model call, so you can monitor cost
 - **Subagents**: subagent threads resolved from their own transcripts and nested under the spawning turn
@@ -132,7 +132,7 @@ codex
 Open your Langfuse project to see the captured traces. Search for `Codex Turn` and widen the time range if needed; Langfuse timestamps may be displayed in UTC. The structure mirrors how Codex actually works:
 
 - **Turn trace** (`Codex Turn`): one trace per turn, from your prompt to the final answer, captured as an [agent observation](/docs/observability/features/observation-types).
-- **Generations**: one per model response in the turn. Each shows the input it received, the model's reasoning and text, the tool calls it requested, and token usage.
+- **Generations**: one per model response in the turn. Each shows the input it received, the model's available reasoning summaries and text, the tool calls it requested, and token usage.
 - **Tool spans** (`exec_command`, `apply_patch`, `spawn_agent`, …): nested under the generation that triggered them, with input, output, and error status. Failed commands are flagged as errors.
 - **Subagents**: subagent threads are nested under the spawning turn so you can follow parallel work in one place.
 - **Sessions**: all turns from the same Codex session are grouped via [`session_id`](/docs/observability/features/sessions) — open the Sessions tab to replay the full run.
@@ -164,6 +164,18 @@ The credential variables also accept a `LANGFUSE_CODEX_` prefix (for example `LA
 3. **Tracing isn't turned on.** `TRACE_TO_LANGFUSE` must be the exact string `"true"` and visible to the Codex process, unless you enabled tracing in `~/.codex/langfuse.json`. Also verify the public key starts with `pk-lf-`.
 4. **Restart and test again.** Fully restart Codex, start a new session, and send two short messages before checking Langfuse.
 5. **Enable debug logging.** Set `LANGFUSE_CODEX_DEBUG=true` to log to stderr and surface the actual cause.
+
+### Reasoning summaries are missing
+
+The plugin captures readable reasoning summaries from Codex's session transcript. To request detailed summaries, add this top-level setting to `~/.codex/config.toml`, before any `[section]` headers:
+
+```toml
+model_reasoning_summary = "detailed"
+```
+
+Fully restart Codex and start a new session after changing the setting. Summary availability depends on the model and provider; this setting does not guarantee that every model call includes one. See the [Codex configuration reference](https://developers.openai.com/codex/config-reference).
+
+Reasoning token counts can be present even when no readable summary is returned. If the transcript contains an empty `summary` array and only `encrypted_content`, the plugin cannot recover a readable summary from it. Changing this setting does not add summaries to previous runs.
 
 ### Authentication errors
 
