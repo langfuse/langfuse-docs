@@ -203,26 +203,48 @@ Langfuse provides the storage, evaluation, and measurement layers of prompt CI/C
 
 ## FAQ [#faq]
 
-### Does Langfuse have a built-in approval workflow for prompt changes? [#faq-approval]
+<FaqDetails>
+
+<Details id="faq-approval">
+<Summary>Does Langfuse have a built-in approval workflow for prompt changes?</Summary>
 
 Not as a single feature, as of July 2026. The enforced equivalent is composed from primitives: protect the `production` label so only project admins and owners can move it, run the candidate through a CI evaluation gate so approvers review scores rather than text diffs, and use webhooks or the Slack integration to notify approvers when a candidate version is saved. On Enterprise plans and self-hosted Enterprise Edition, audit logs record every label change with user attribution.
 
-### How do I run a 90/10 traffic split between two prompt versions? [#faq-traffic-split]
+</Details>
+
+<Details id="faq-traffic-split">
+<Summary>How do I run a 90/10 traffic split between two prompt versions?</Summary>
 
 Label the incumbent `production` and the candidate `canary`, fetch both by label in your application, and select the canary when a random draw falls below 0.10. Langfuse does not split traffic for you; the percentage is application code. What Langfuse provides is the measurement: link each generation to the prompt version that produced it, and the per-version metrics separate the two variants' quality, cost, and latency on live traffic.
 
-### How do I promote the winner after a canary or A/B test? [#faq-promote-winner]
+</Details>
+
+<Details id="faq-promote-winner">
+<Summary>How do I promote the winner after a canary or A/B test?</Summary>
 
 Compare the variants in the prompt's Metrics tab, then move the `production` label to the winning version, either in the Langfuse UI or with `update_prompt` in the SDK. Your application picks up the new version on its next fetch, without a redeploy. As of July 2026, there is no automated promotion based on metric thresholds; the decision and the label move are yours.
 
-### Can a prompt change trigger my CI pipeline automatically? [#faq-trigger-ci]
+</Details>
+
+<Details id="faq-trigger-ci">
+<Summary>Can a prompt change trigger my CI pipeline automatically?</Summary>
 
 Yes. A GitHub repository dispatch automation in Langfuse sends a `repository_dispatch` event with the prompt name, version, and labels to your repository whenever a prompt changes, which starts any GitHub Actions workflow listening for it. For other CI systems, prompt version webhooks POST the same payload to any HTTPS endpoint, with HMAC signatures for verification.
 
-### How fast does a prompt rollback take effect? [#faq-rollback-speed]
+</Details>
+
+<Details id="faq-rollback-speed">
+<Summary>How fast does a prompt rollback take effect?</Summary>
 
 The label change itself is immediate. Running application instances serve [cached prompts](/docs/prompt-management/features/caching) with a default TTL of 60 seconds and background revalidation, so they pick up the rolled-back version within roughly one TTL of the change. Lower the TTL on fetches where faster convergence matters more than the saved network calls.
 
-### Should prompts live in Git or in a prompt management system? [#faq-git-vs-prompt-management]
+</Details>
+
+<Details id="faq-git-vs-prompt-management">
+<Summary>Should prompts live in Git or in a prompt management system?</Summary>
 
 The deciding factor is who edits prompts and how often. Prompts in Git get code review for free but require an engineer and a deploy for every change, which turns a two-minute wording fix into a release. Prompts in a management system deploy instantly and are editable by non-engineers, and the pipeline on this page restores the review and testing that Git provided. The two are not exclusive: webhook-driven sync mirrors every Langfuse prompt version into a repository, so teams can keep Git-based review while deployment stays label-based.
+
+</Details>
+
+</FaqDetails>

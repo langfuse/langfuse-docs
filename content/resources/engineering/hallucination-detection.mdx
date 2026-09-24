@@ -172,18 +172,34 @@ The same holds off the cloud. Langfuse is open source and [self-hostable](/self-
 
 ## FAQ
 
-### What is the difference between hallucination detection and faithfulness evaluation? [#hallucination-vs-faithfulness]
+<FaqDetails>
+
+<Details id="hallucination-vs-faithfulness">
+<Summary>What is the difference between hallucination detection and faithfulness evaluation?</Summary>
 
 Faithfulness is the RAG-specific instance of hallucination detection: it checks whether every claim in the answer is supported by the retrieved context. Hallucination detection is the broader metric, covering open-domain answers with no retrieved context and fabrications that contradict the input rather than the documents. If your application is a RAG pipeline, faithfulness is the version of this metric you should implement first.
 
-### Can you detect hallucinations without ground truth? [#detection-without-ground-truth]
+</Details>
+
+<Details id="detection-without-ground-truth">
+<Summary>Can you detect hallucinations without ground truth?</Summary>
 
 Yes, with a reference-free judge. The managed Hallucination evaluator in Langfuse checks the output against the input and context recorded on the same observation, so it needs no expected output and runs on live production traffic. What reference-free detection cannot do is verify open-domain claims that no recorded evidence supports or contradicts; those need reference datasets in offline experiments, or a judge trusted for its world knowledge.
 
-### How reliable is an LLM judge at detecting hallucinations? [#judge-reliability]
+</Details>
+
+<Details id="judge-reliability">
+<Summary>How reliable is an LLM judge at detecting hallucinations?</Summary>
 
 Reliable enough to trend on and to route with, not reliable enough to treat every verdict as truth. Judges perform best with a binary rubric and claim-level checking, and worst on subtle domain facts, where the judge can share blind spots with the model being judged (especially when both come from the same model family). Calibrate against human labels: route a sample of judge verdicts to an annotation queue, measure agreement, and tighten the rubric until agreement is stable.
 
-### Can hallucination detection block a bad answer before the user sees it? [#blocking-at-request-time]
+</Details>
+
+<Details id="blocking-at-request-time">
+<Summary>Can hallucination detection block a bad answer before the user sees it?</Summary>
 
 No. Evaluator scores are produced asynchronously, after the response has shipped, which makes them the right tool for detecting regressions, routing traces to review, and building regression datasets. A check that must stop an answer in flight is a guardrail and belongs in your application code at request time, and the guardrail's decisions should then be scored like any other output.
+
+</Details>
+
+</FaqDetails>

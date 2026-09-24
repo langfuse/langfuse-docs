@@ -46,7 +46,7 @@ Jev covers this surface with three [question types](https://docs.typesafe.ai/pri
 
 ## Try a Jev-based sentiment classifier [#try-a-jev-based-sentiment-classifier]
 
-Run Jev and GPT-5.6 Luna (high reasoning) on the same text at once. Each column updates when its model finishes, so you can feel the speed and cost difference live.
+Run Jev and GPT-5.6 Luna (high reasoning) on the same text. Add up to four classifications — sentiment, urgency, intent, and next action. Jev answers them in one pass; Luna makes a parallel call per classification, so its cost scales with the count. Jev returns all answers together; each Luna call appears as it finishes. Latency and estimated cost are compared below.
 
 <div className="not-prose my-6">
   <SentimentClassifierCompare />
@@ -239,9 +239,17 @@ TypeSafe publishes a [per-version page listing what Jev is bad at](https://docs.
 
 ## How to use Jev to evaluate your Langfuse traces [#how-to-use-jev-to-evaluate-your-langfuse-traces]
 
-Access runs through a [waitlist](https://typesafe.ai), and Jev is also live on [OpenRouter](https://openrouter.ai/typesafe/jev-1.13) and the [Vercel AI Gateway](https://vercel.com/ai-gateway/models/jev), which is the quicker route if you do not want to open a new vendor relationship to run a test. There are [Python](https://docs.typesafe.ai/sdk/python) and [JavaScript](https://docs.typesafe.ai/sdk/javascript) SDKs, and an [agent skill](https://docs.typesafe.ai/agent-skill) that gives a coding agent full API context. To trace those System One calls in Langfuse, see [Observability for TypeSafe Jev](/integrations/model-providers/typesafe). The cookbooks have worked implementations for [guardrails](https://docs.typesafe.ai/cookbooks/llm_guardrails), [RAG passage screening](https://docs.typesafe.ai/cookbooks/classifying_rag_passages), [citation checks](https://docs.typesafe.ai/cookbooks/citation_check) and [confidence-gated classification](https://docs.typesafe.ai/cookbooks/classification_using_confidence).
+Access runs through a [waitlist](https://typesafe.ai), and Jev is also live on [OpenRouter](https://openrouter.ai/typesafe/jev-1.13) and the [Vercel AI Gateway](https://vercel.com/ai-gateway/models/jev), which is the quicker route if you do not want to open a new vendor relationship to run a test. There are [Python](https://docs.typesafe.ai/sdk/python) and [JavaScript](https://docs.typesafe.ai/sdk/javascript) SDKs, and an [agent skill](https://docs.typesafe.ai/agent-skill) that gives a coding agent full API context. To trace those System One calls in Langfuse, see [Observability for TypeSafe Jev](/integrations/model-providers/typesafe) ([JS/TS](/integrations/model-providers/typesafe-js)). The cookbooks have worked implementations for [guardrails](https://docs.typesafe.ai/cookbooks/llm_guardrails), [RAG passage screening](https://docs.typesafe.ai/cookbooks/classifying_rag_passages), [citation checks](https://docs.typesafe.ai/cookbooks/citation_check) and [confidence-gated classification](https://docs.typesafe.ai/cookbooks/classification_using_confidence).
 
-To score your Langfuse traces with Jev, you can pull observations via the [API](/docs/api-and-data-platform/features/query-via-sdk), determine a score with Jev, and write the result back as a [score](/docs/evaluation/evaluation-methods/scores-via-sdk).
+<Callout type="info">
+  **Update:** Jev is now available as a judge directly in Langfuse. Add a
+  TypeSafe connection, define a state and typed questions in the evaluator UI,
+  and each question writes a score to matching observations. See [Jev as a
+  judge](/docs/evaluation/evaluation-methods/jev-as-a-judge) and the
+  [changelog](/changelog/2026-09-22-jev-as-a-judge).
+</Callout>
+
+If you prefer to run Jev from your own code, you can pull observations via the [API](/docs/api-and-data-platform/features/query-via-sdk), determine a score with Jev, and write the result back as a [score](/docs/evaluation/evaluation-methods/scores-via-sdk).
 
 ```python
 #!/usr/bin/env python3

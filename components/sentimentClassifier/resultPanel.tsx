@@ -3,45 +3,134 @@
 import { cn } from "@/lib/utils";
 import { ThumbsUpIcon, ThumbsDownIcon } from "lucide-react";
 import {
+  DEFAULT_ANSWER_COLORS,
   SENTIMENT_COLORS,
-  SENTIMENT_ORDER,
   formatCostUsd,
-  type JevSentimentResult,
-  type LlmSentimentResult,
+  type SentimentLabel,
 } from "./shared";
+import { CLASSIFIERS } from "./criteria";
+import type { ClassifierAnswer } from "./types";
+import type { SentimentUsage } from "./cost";
 
 type SentimentResultPanelProps = {
-  result: JevSentimentResult | LlmSentimentResult;
-  feedback: boolean | null;
-  onFeedback: (value: boolean) => void;
+  answer: ClassifierAnswer;
+  usage?: SentimentUsage;
+  compact?: boolean;
+  feedback?: boolean | null;
+  onFeedback?: (value: boolean) => void;
+};
+
+const answerColors = (answer: ClassifierAnswer) => {
+  if (answer.id === "sentiment" && answer.value in SENTIMENT_COLORS) {
+    return SENTIMENT_COLORS[answer.value as SentimentLabel];
+  }
+  return DEFAULT_ANSWER_COLORS;
 };
 
 export const SentimentResultPanel = ({
-  result,
+  answer,
+  usage,
+  compact = false,
   feedback,
   onFeedback,
 }: SentimentResultPanelProps) => {
-  const colors = SENTIMENT_COLORS[result.sentiment];
-  const jevResult = "probabilities" in result ? result : null;
-  const llmResult = "explanation" in result ? result : null;
-  const usage = result.usage;
+  const colors = answerColors(answer);
+  const probabilityEntries = answer.probabilities
+    ? Object.keys(CLASSIFIERS[answer.id].criteria).map((label) => ({
+        label,
+        probability: answer.probabilities?.[label] ?? 0,
+      }))
+    : [];
+  const showReasoning = Boolean(
+    answer.explanation || answer.keyPhrases?.length,
+  );
+  const valueLabel = answer.value.replaceAll("_", " ");
+  const confidencePct = Math.round(answer.confidence * 100);
 
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-4">
+  if (compact) {
+    const compactRow = (showWhy: boolean) => (
+      <div className="flex items-center gap-2 min-h-6">
+        <span className="w-[4.75rem] shrink-0 text-[11px] text-muted-foreground">
+          {answer.name}
+        </span>
         <span
           className={cn(
-            "inline-flex items-center px-3 py-1 rounded-[2px] text-sm font-semibold capitalize",
+            "inline-flex items-center px-1.5 py-px rounded-[2px] text-xs font-semibold capitalize shrink-0",
             colors.bg,
             colors.text,
           )}
         >
-          {result.sentiment}
+          {valueLabel}
         </span>
-        <div className="flex-1">
+        <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
+          <div
+            className={cn(
+              "h-full rounded-full transition-all duration-500",
+              colors.bar,
+            )}
+            style={{ width: `${answer.confidence * 100}%` }}
+          />
+        </div>
+        <span className="w-8 shrink-0 text-right text-[11px] tabular-nums text-muted-foreground">
+          {confidencePct}%
+        </span>
+        {showWhy && (
+          <span className="shrink-0 text-[11px] text-muted-foreground group-open:text-foreground">
+            Why
+          </span>
+        )}
+      </div>
+    );
+
+    if (!showReasoning) return compactRow(false);
+
+    return (
+      <details className="group">
+        <summary className="list-none cursor-pointer [&::-webkit-details-marker]:hidden">
+          {compactRow(true)}
+        </summary>
+        <div className="pl-[4.75rem] pt-1 space-y-1">
+          {answer.explanation && (
+            <div className="text-xs text-foreground">{answer.explanation}</div>
+          )}
+          {answer.keyPhrases && answer.keyPhrases.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {answer.keyPhrases.map((phrase, i) => (
+                <span
+                  key={i}
+                  className="inline-flex items-center px-1.5 py-px rounded-[2px] border border-line-structure bg-[#403d391a] dark:bg-[#b8b6a01a] text-[11px] text-text-secondary"
+                >
+                  {phrase}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </details>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-3">
+        <div className="min-w-0 space-y-1">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            {answer.name}
+          </p>
+          <span
+            className={cn(
+              "inline-flex items-center px-2.5 py-0.5 rounded-[2px] text-sm font-semibold capitalize",
+              colors.bg,
+              colors.text,
+            )}
+          >
+            {valueLabel}
+          </span>
+        </div>
+        <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
             <span>Confidence</span>
-            <span>{Math.round(result.confidence * 100)}%</span>
+            <span>{confidencePct}%</span>
           </div>
           <div className="h-2 rounded-full bg-muted overflow-hidden">
             <div
@@ -49,7 +138,7 @@ export const SentimentResultPanel = ({
                 "h-full rounded-full transition-all duration-500",
                 colors.bar,
               )}
-              style={{ width: `${result.confidence * 100}%` }}
+              style={{ width: `${answer.confidence * 100}%` }}
             />
           </div>
         </div>
@@ -68,26 +157,29 @@ export const SentimentResultPanel = ({
             {usage.outputTokens > 0
               ? ` · ${usage.outputTokens.toLocaleString()} out`
               : ""}
-            {typeof usage.reasoningTokens === "number"
+            {typeof usage.reasoningTokens === "number" &&
+            usage.reasoningTokens > 0
               ? ` · ${usage.reasoningTokens.toLocaleString()} reasoning`
               : ""}
           </span>
         </div>
       )}
 
-      {jevResult && (
+      {probabilityEntries.length > 0 && (
         <div className="space-y-2">
           <p className="text-xs text-muted-foreground font-medium">
             Probabilities
           </p>
-          {SENTIMENT_ORDER.map((label) => {
-            const probability = jevResult.probabilities[label] ?? 0;
-            const labelColors = SENTIMENT_COLORS[label];
+          {probabilityEntries.map(({ label, probability }) => {
+            const labelColors =
+              answer.id === "sentiment" && label in SENTIMENT_COLORS
+                ? SENTIMENT_COLORS[label as SentimentLabel]
+                : DEFAULT_ANSWER_COLORS;
             return (
               <div key={label} className="space-y-1">
                 <div className="flex items-center justify-between text-xs">
                   <span className="capitalize text-text-secondary">
-                    {label}
+                    {label.replaceAll("_", " ")}
                   </span>
                   <span className="text-muted-foreground tabular-nums">
                     {Math.round(probability * 100)}%
@@ -108,16 +200,18 @@ export const SentimentResultPanel = ({
         </div>
       )}
 
-      {llmResult && (
+      {showReasoning && (
         <>
-          <div className="text-sm text-foreground">{llmResult.explanation}</div>
-          {llmResult.keyPhrases.length > 0 && (
+          {answer.explanation && (
+            <div className="text-sm text-foreground">{answer.explanation}</div>
+          )}
+          {answer.keyPhrases && answer.keyPhrases.length > 0 && (
             <div className="space-y-1.5">
               <p className="text-xs text-muted-foreground font-medium">
                 Key phrases
               </p>
               <div className="flex flex-wrap gap-1.5">
-                {llmResult.keyPhrases.map((phrase, i) => (
+                {answer.keyPhrases.map((phrase, i) => (
                   <span
                     key={i}
                     className="inline-flex items-center px-2 py-0.5 rounded-[2px] border border-line-structure bg-[#403d391a] dark:bg-[#b8b6a01a] text-xs text-text-secondary"
@@ -131,33 +225,35 @@ export const SentimentResultPanel = ({
         </>
       )}
 
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-muted-foreground">
-          Was this classification accurate?
-        </span>
-        <button
-          onClick={() => onFeedback(false)}
-          className={cn(
-            "p-1.5 rounded-[2px] transition-colors",
-            feedback === false
-              ? "text-green-700 dark:text-green-400"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
-          )}
-        >
-          <ThumbsUpIcon className="size-3.5" />
-        </button>
-        <button
-          onClick={() => onFeedback(true)}
-          className={cn(
-            "p-1.5 rounded-[2px] transition-colors",
-            feedback === true
-              ? "text-red-700 dark:text-red-400"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
-          )}
-        >
-          <ThumbsDownIcon className="size-3.5" />
-        </button>
-      </div>
+      {onFeedback && (
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">
+            Was this classification accurate?
+          </span>
+          <button
+            onClick={() => onFeedback(false)}
+            className={cn(
+              "p-1.5 rounded-[2px] transition-colors",
+              feedback === false
+                ? "text-green-700 dark:text-green-400"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
+            )}
+          >
+            <ThumbsUpIcon className="size-3.5" />
+          </button>
+          <button
+            onClick={() => onFeedback(true)}
+            className={cn(
+              "p-1.5 rounded-[2px] transition-colors",
+              feedback === true
+                ? "text-red-700 dark:text-red-400"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
+            )}
+          >
+            <ThumbsDownIcon className="size-3.5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -101,25 +101,44 @@ Spans without `gen_ai.*` attributes render as regular observations, so ensure yo
 
 ## FAQ [#faq]
 
-### Does Langfuse have a native Azure API Management plugin or policy?
+<FaqDetails>
+
+<Details id="does-langfuse-have-a-native-azure-api-management-plugin-or-policy">
+<Summary>Does Langfuse have a native Azure API Management plugin or policy?</Summary>
 
 No. As of July 2026, Langfuse does not ship an APIM-specific policy, plugin, or exporter. Forwarding OTLP through an APIM-exposed endpoint as described here is the supported path. If a turnkey integration would help your team, raise or upvote a [feature request on GitHub](/ideas).
 
-### Why route telemetry through the gateway instead of exporting directly?
+</Details>
+
+<Details id="why-route-telemetry-through-the-gateway-instead-of-exporting-directly">
+<Summary>Why route telemetry through the gateway instead of exporting directly?</Summary>
 
 Governance and key management. Services send telemetry to an internal gateway URL instead of an external endpoint, egress happens at one approved point, and Langfuse API keys live only in the gateway policy rather than in every service.
 
-### Does our LLM traffic pass through Langfuse?
+</Details>
+
+<Details id="does-our-llm-traffic-pass-through-langfuse">
+<Summary>Does our LLM traffic pass through Langfuse?</Summary>
 
 No. Langfuse is an observability platform, not a proxy. Requests flow from your application through APIM to Azure OpenAI as before; telemetry is forwarded asynchronously and out of band. A Langfuse outage does not affect your LLM traffic.
 
-### Can the Langfuse Playground and evaluations call models through our gateway?
+</Details>
+
+<Details id="can-the-langfuse-playground-and-evaluations-call-models-through-our-gateway">
+<Summary>Can the Langfuse Playground and evaluations call models through our gateway?</Summary>
 
 Yes. [LLM connections](/docs/administration/llm-connection) support the Azure OpenAI provider as well as any OpenAI-compatible endpoint with a custom base URL and custom headers, so the [Playground](/docs/prompt-management/features/playground) and [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluations can route model calls through APIM. Your Langfuse deployment must be able to reach the gateway over the network.
 
-### Does this work with self-hosted Langfuse?
+</Details>
+
+<Details id="does-this-work-with-self-hosted-langfuse">
+<Summary>Does this work with self-hosted Langfuse?</Summary>
 
 Yes. Point the APIM backend at your instance's domain instead of the cloud endpoints; the endpoint path (`/api/public/otel`) is the same on [self-hosted Langfuse](/self-hosting). Self-hosting keeps traces inside your own network, which often matters to the same teams that run a corporate gateway.
+
+</Details>
+
+</FaqDetails>
 
 ## Learn more
 

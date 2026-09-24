@@ -1,0 +1,109 @@
+---
+title: "Jev-as-a-judge in Langfuse Evaluators"
+date: 2026/09/22
+description: "Jev-based evals are now available in Langfuse, so you can score production traffic at up to 40 to 400x lower cost than LLM-based approaches."
+tag: engineering
+author: Annabell, Hassieb
+ogImage: /images/blog/2026-09-22-running-evals-with-jev/og.png
+highlight: true
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+
+<BlogHeader
+  title="Jev-as-a-judge in Langfuse Evaluators"
+  description="Jev-based evals are now available in Langfuse, so you can score production traffic at up to 40 to 400x lower cost than LLM-based approaches."
+  date="September 22, 2026"
+  authors={["annabellschafer", "hassiebpakzad"]}
+/>
+
+Jev-based evals are now available in Langfuse. Jev-like models give you and your team a way to run evals on production traffic at scale and identify signals from agent executions and user interactions. All of this at up to 40 to 400x lower cost than with LLM-based approaches.
+
+Jev is TypeSafe's System One model, part of a new category that prioritizes performance on one dimension over general ability of the model. It can be seen as a "zero-shot classifier", also called decision model, which is the name we use in Langfuse. As founder [Diogo Almeida](https://www.latent.space/p/jev) said on the latest Latent Space episode, they optimize for "Intelligence per Dollar" and design the model with fast, structured, machine-native decision-making inside software in mind.
+
+While the category is being formed, we are excited to bring Jev-based evals into Langfuse already today.
+
+## What is Jev [#what-is-jev]
+
+Jev, [TypeSafe](https://typesafe.ai)'s new model, handles narrow, typed questions over unstructured data. It is best suited for quick decisions that are repeated, high volume, and the possible answers are known before the call.
+
+Jev offers three different output types:
+
+- **Choice** picks one option from a set you define, up to 255, and returns the probability of each plus a confidence value.
+- **Score** rates the state against ordered rubric levels and returns a probability-weighted value, the full distribution, and a confidence value. Up to 10 levels.
+- **Noul** answers yes or no and returns the probability it is true. It carries no separate confidence field, so code that reads `answer.confidence` on everything will break on binaries.
+
+<Callout type="info">
+  Want to learn more about Jev in general, check out our [write up](/blog/2026-09-18-using-typesafes-jev-for-evals) on early benchmarks and the role of Jev-like models for agents in general.
+</Callout>
+
+## Why is Jev exciting for evals [#why-is-jev-exciting-for-evals]
+
+Jev's key strengths align well with best practices for evaluating your AI application, while overcoming some key issues of LLM-as-a-judge setups.
+
+### Significantly cheaper than using LLM as a judge at scale [#cheaper-than-llm-as-a-judge]
+
+Jev allows you to run evals on production traces at scale. The input tokens are up to 400x cheaper than frontier models. Where sampling was previously the strategy for cost efficient production monitoring, the full traffic can now be evaluated.
+
+### Allows for concurrent questions [#concurrent-questions]
+
+The same state can be used across multiple questions. All questions are handled concurrently and independently. Where previously context creep and interaction effects of multiple LLM-based judgments interfered, Jev now treats it as separate assessments.
+
+### Forces you to think in distinct categories [#distinct-categories]
+
+The predefined output structures force you to think in distinct decisions during setup. You define a clear atomic question and in the output options need to specify the conditions for each verdict. As [TypeSafe says](https://docs.typesafe.ai/model-jaggedness/jev-1.13), Jev is judging what you say, not what you mean.
+
+While execution speed is not a bottleneck in async production evals, this new model category also allows for significantly faster execution.
+
+## Setting up Jev for production scoring in Langfuse [#setup]
+
+Setting up Jev-based evals is possible via the Evaluators tab in the Langfuse app.
+
+You can also check out our setup in the [demo project](https://langfuse.com/cloud/demo/evals/).
+
+<Steps>
+
+### Set up a model connection
+
+[Sign up for TypeSafe](https://console.typesafe.ai/) and create an [API key](https://console.typesafe.ai/settings/keys). Add that key as an [LLM connection](/docs/administration/llm-connection) in your Langfuse project settings.
+
+### Navigate to the evaluator section and click on New evaluator
+
+Open the [Evaluators page](https://cloud.langfuse.com/project/~/evals) and click **New evaluator**.
+
+### Choose Decision Model
+
+### Define your question and choose your output type
+
+You can add multiple questions against the same state. In the editor, a Noul is labeled **Yes / no**.
+
+<Frame fullWidth>
+  ![Jev evaluator questions for a production monitor, with Yes / no selected for user_frustrated and Choice and Score questions listed below](/images/blog/2026-09-22-running-evals-with-jev/questions.png)
+</Frame>
+
+### Specify details for choices (optional)
+
+For a yes/no question, open **Refine what yes and no mean**. For a choice, name each option and the condition that makes it the right verdict.
+
+### Define state
+
+<Frame fullWidth>
+  ![Build the state step mapping input from Input and output from Output on a sample observation](/images/blog/2026-09-22-running-evals-with-jev/build-the-state.png)
+</Frame>
+
+### Test on a sample observation
+
+<Frame fullWidth>
+  ![Test with sample observations filtered to root observations named handle-chatbot-message, with a Decision Model Output of 0.02 for user_frustrated](/images/blog/2026-09-22-running-evals-with-jev/test-observation.png)
+</Frame>
+
+### Set live runs based on the specified rule
+
+<Frame fullWidth>
+  ![Evaluator saved dialog reusing filters isRootObservation true and name handle-chatbot-message, with sampling at 100 percent](/images/blog/2026-09-22-running-evals-with-jev/evaluator-saved.png)
+</Frame>
+
+</Steps>
+
+<CustomerStoryCTA />
