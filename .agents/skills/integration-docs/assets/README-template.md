@@ -7,6 +7,7 @@
 ## What can this integration trace?
 
 <!-- Must match the docs page's list verbatim. Both are the same promise. -->
+
 - **User prompts**: ...
 - **Model generations**: ... with inputs, outputs, token usage and cost
 - **Tool calls**: ... with inputs, outputs and error status
@@ -17,6 +18,7 @@
 
 <!-- Evidence: claude #52 (images silently excluded), claude #39 (thinking blocks
      absent until requested). An undisclosed gap becomes a bug report. -->
+
 - ...
 
 ## Supported versions
@@ -24,11 +26,12 @@
 <!-- Evidence: codex #47 (CLI 0.147.0 moved the user prompt), opencode #39 (v2),
      claude #59 ("when will this match Langfuse v4?"). State BOTH host range and
      Langfuse SDK range, and keep it in step with the CI matrix. -->
-| | Supported |
-|---|---|
-| <Host> | ... |
-| Langfuse | ... |
-| Node / Python | ... |
+
+|               | Supported |
+| ------------- | --------- |
+| <Host>        | ...       |
+| Langfuse      | ...       |
+| Node / Python | ...       |
 
 ## Prerequisites
 
@@ -42,7 +45,7 @@
 ## Configuration
 
 | Variable | Default | Effect |
-|---|---|---|
+| -------- | ------- | ------ |
 
 ## Enable and disable tracing
 
