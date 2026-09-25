@@ -1,101 +1,144 @@
 ---
 title: Why do customers choose Langfuse?
+seoTitle: "Why do customers choose Langfuse?"
 description: Learn why we built Langfuse and what makes it different from other AI engineering platforms.
 ---
+
+import { Cloud, MessageSquare } from "lucide-react";
+import { CredibilitySentence } from "@/components/CredibilitySentence";
+import { EnterpriseLogos } from "@/components/EnterpriseLogos";
+import { SecurityBadgesGrid } from "@/components/SecurityBadgesGrid";
+import PublicMetricsDashboard from "@/components-mdx/public-metrics-dashboard.mdx";
 
 # Why do customers choose Langfuse?
 
 Customers choose Langfuse because we are...
 
-- The most used open-source AI Engineering platform [(blog post)](/blog/2024-11-most-used-oss-llmops)
-- Model and framework agnostic with [100+ integrations](/integrations)
-- Built for production & scale
-- Designed for complex agents and multi-step workflows
-- Offering a complete toolbox for AI Engineering
+- The most used open-source AI Engineering platform [since 2024](/blog/2024-11-most-used-oss-llmops)
+- Built for production & scale on ClickHouse, and now [part of the ClickHouse team](/blog/joining-clickhouse)
+- Offering a complete toolbox for complex agents and multi-step workflows
 - Incrementally adoptable, start with one feature and expand to the full platform over time
-- API-first, all features are available via API for custom integrations
-- Based on [OpenTelemetry](/integrations/native/opentelemetry) for interoperability
-- Easy to [self-host](/self-hosting)
-
-import { CredibilitySentence } from "@/components/CredibilitySentence";
-import { EnterpriseLogos } from "@/components/EnterpriseLogos";
+- Model and framework agnostic, with [100+ integrations](/integrations) and [OpenTelemetry](/integrations/native/opentelemetry) support
+- API-first, with skills for your coding agents and a UI people love using
+- Serious about security and data control, with easy [self-hosting](/self-hosting) on your own infrastructure
+- One message away, and quick to ship
 
 <CredibilitySentence style="list" />
-
-Companies who trust Langfuse:
-
 <EnterpriseLogos />
 
-## Open Source
+## Full-stack open-source [#open-source]
 
-- Langfuse is [open source](/handbook/chapters/open-source).
-- You can [self-host](/self-hosting) it, including the scalable observability backend that powers Langfuse Cloud without scalability limitations.
+Langfuse is [open source](/handbook/chapters/open-source), including the UI and backend.
+
+- [Self-host](/self-hosting) the same scalable backend that powers Langfuse Cloud. No Enterprise license needed to scale.
 - All product capabilities—tracing, evaluations, prompt management, experiments, annotation, the playground, and more—are MIT licensed without any usage limits.
 - We are transparent about [what's on the roadmap](/docs/roadmap) and [how we operate](/handbook).
 - We iterate with the [community on GitHub](https://github.com/orgs/langfuse/discussions) because best practices for building great LLM applications are rapidly evolving. Please share your feedback and ideas with us.
-- Self-hosting keeps data within your infrastructure; Cloud offloads operational overhead. You can switch between OSS, Enterprise self-host, and Langfuse Cloud at any time—no feature flags to untangle, no vendor lock-in.
+- Keep data on your infrastructure or let Cloud handle operations. You can move between OSS, Enterprise self-hosting, and Cloud as your needs change.
 
-## Extensive Integrations built on OpenTelemetry
+## Built for scale on ClickHouse [#built-for-scale]
 
-- Native SDKs for [Python](/docs/observability/sdk/python/overview) and [JavaScript/TypeScript](/docs/observability/sdk/typescript/overview)
-- [100+ integrations](/integrations) with popular frameworks, model providers, and tools
-- Framework support: [LangChain](/integrations/frameworks/langchain), [LlamaIndex](/integrations/frameworks/llamaindex), [OpenAI Agents](/integrations/frameworks/openai-agents), [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk), [CrewAI](/integrations/frameworks/crewai), and many more
-- Model providers: [OpenAI](/integrations/model-providers/openai-py), [Anthropic](/integrations/model-providers/anthropic), [Google Gemini](/integrations/model-providers/google-gemini), [Amazon Bedrock](/integrations/model-providers/amazon-bedrock), and others
-- LLM Gateways: [LiteLLM](/integrations/gateways/litellm), [OpenRouter](/integrations/gateways/openrouter), [Portkey](/integrations/gateways/portkey)
-- Native [OpenTelemetry](/integrations/native/opentelemetry) support for maximum interoperability
+We run on ClickHouse, [open source and in production for a decade](https://clickhouse.com/blog/open-source-10), with 2,000+ contributors.
 
-## Developer First
+- Langfuse Cloud already stores [petabytes of tracing data](/resources/engineering/clickhouse-at-agent-scale).
+- With [Langfuse v4](/changelog/2026-08-17-langfuse-v4), long-range dashboards in large projects load at least 10× faster than in v3.
+- Cloud and self-hosted use the same engine. Self-hosters can inspect it and query their data with standard SQL.
 
-- Langfuse is built for developers.
-- We are creating a technical product with great developer experience.
-- Langfuse is powerful yet simple, allowing you to build custom logic on top of it.
-- All data is accessible via [public APIs](/docs/api-and-data-platform/features/public-api) and [SDKs](/docs/api-and-data-platform/features/query-via-sdk).
-- [MCP Server](/docs/api-and-data-platform/features/mcp-server) for AI-native workflows and integrations.
+## Built for complex agents [#built-for-complex-use-cases]
 
-## Reliable Partner
+Agents take detours. We help you follow them.
 
-- All changes to the Langfuse API and integrations are covered by [semantic versioning](https://semver.org); we test public interfaces to ensure backward compatibility and run end-to-end integration tests for the most common use cases in CI.
-- Raised a [$4M seed round](/blog/announcing-our-seed-round) from Lightspeed Ventures, General Catalyst, Y Combinator, and angel investors.
-- [Langfuse has been included twice in the Thoughtworks Tech Radar](https://www.thoughtworks.com/en-us/radar/platforms/langfuse) as a recommended platform.
-- Strong adoption and community growth ([see metrics](#public-metrics)).
-- [Learn more](/about) about us as a team.
+- Follow nested model calls, tools (including [MCP](/docs/observability/features/mcp-tracing)), and sub-agents through [agent graphs](/docs/observability/features/agent-graphs) and a [zoomable timeline](/changelog/2026-08-28-responsive-timeline).
+- Keep conversations together with [sessions](/docs/observability/features/sessions), and add your app's context with [metadata](/docs/observability/features/metadata) and tags.
+- Inspect images, audio, video, and documents in [multimodal traces](/docs/observability/features/multi-modality). Evaluate them with a compatible judge model.
 
-## Built for Complex Use Cases
+See Langfuse in action for [chat agents](/chat-agents), [coding agents](/coding-agents), and [workflow automation](/workflow-automation).
 
-- We designed Langfuse with complex, nested LLM calls in mind—especially for agents and multi-step workflows.
-- [Agent graphs](/docs/observability/features/agent-graphs) provide visual representations of complex agent workflows, helping you understand and debug multi-step reasoning processes.
-- Langfuse enables hierarchical representations of your application in [traces](/docs/observability/overview). Why are traces the core abstraction for LLM Engineering? Learn more in this [webinar](/resources/engineering/webinar-observability-llm-systems).
-- [Multi-modal support](/docs/observability/features/multi-modality) for tracing text, images, audio, and other modalities.
-- [MCP tracing](/docs/observability/features/mcp-tracing) for Model Context Protocol server interactions.
-- We go beyond Input/Output to include all the context of your app via [metadata](/docs/observability/features/metadata), [tags](/docs/observability/features/tags), and [sessions](/docs/observability/features/sessions).
+## A complete platform. Start where you need us. [#comprehensive-platform]
 
-## Comprehensive Platform
+The pieces work together. You turn a production trace into a test case, compare prompt versions, and measure the results after you ship.
 
-We are building the core development platform you need to build robust LLM applications. Langfuse offers four integrated pillars:
+- [Observability](/docs/observability/overview): understand what happened in each run.
+- [Prompt management](/docs/prompt-management/overview): version, test, deploy, and roll back prompts.
+- [Evaluation](/docs/evaluation/overview): run experiments on datasets and score production outputs with human review, LLM judges, or code.
+- [Metrics](/docs/metrics/overview) and [data](/docs/api-and-data-platform/overview): dashboards, alerts, and exports for quality, cost, and latency.
 
-- **[Observability](/docs/observability/overview)**: Comprehensive tracing for LLM applications, including [agent graphs](/docs/observability/features/agent-graphs), [sessions](/docs/observability/features/sessions), [token & cost tracking](/docs/observability/features/token-and-cost-tracking), and [multi-modality](/docs/observability/features/multi-modality).
-- **[Prompt Management](/docs/prompt-management/overview)**: Version control, [LLM Playground](/docs/prompt-management/features/playground), [A/B testing](/docs/prompt-management/features/a-b-testing), [GitHub integration](/docs/prompt-management/features/github-integration), and collaborative workflows.
-- **[Evaluation](/docs/evaluation/overview)**: [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), [human annotations](/docs/evaluation/evaluation-methods/annotation), [experiments](/docs/evaluation/core-concepts#experiments), and [datasets](/docs/evaluation/experiments/datasets) for systematic testing.
-- **[Metrics & Data Platform](/docs/metrics/overview)**: [Custom dashboards](/docs/metrics/features/custom-dashboards), [metrics API](/docs/metrics/features/metrics-api), and extensive [data export options](/docs/api-and-data-platform/overview).
+At [Slite](/users/slite), connecting tracing and evaluations helped move experiments from quarterly to weekly.
 
-## Built for Scale
+We share how to put it all together in [Langfuse Academy](/academy).
 
-import EnterpriseCloudScale from "@/components-mdx/enterprise-cloud-scale.mdx";
+## Easy to get started and integrate [#easy-to-get-started]
 
-<EnterpriseCloudScale />
+<span id="extensive-integrations-built-on-opentelemetry" />
 
-## Security and Compliance
+You pick the models and frameworks. We'll fit in.
+
+<span id="pricing" />
+
+- Our free Cloud plan includes **50,000 usage units a month, no credit card required**.
+- Our [Cloud pricing](/pricing) is public. Paid plans include unlimited users; Pro and Enterprise include three years of history.
+- Start with our [Python and JavaScript/TypeScript SDKs](/docs/observability/sdk/overview) or [100+ integrations](/integrations) across frameworks, model providers, gateways, and tools.
+- Native [OpenTelemetry](/integrations/native/opentelemetry) support lets you reuse your tracing instrumentation.
+- Prefer to self-host? Start locally with Docker Compose, or deploy on your infrastructure with Helm and Terraform templates.
+
+At [Hugging Face](/users/hugging-face), Niels Rogge was up and running in minutes. [Khan Academy](/users/khan-academy) used our API to build a client for its Go services.
+
+## Developer-first, down to the details [#developer-first]
+
+We care about making Langfuse enjoyable to use every day.
+
+- Review answers, test prompts, and run evals together in the UI.
+- Access your data and build custom workflows with our [public APIs](/docs/api-and-data-platform/features/public-api) and [SDKs](/docs/api-and-data-platform/features/query-via-sdk).
+- Your coding agent is welcome, too: use our [Agent Skill](/docs/api-and-data-platform/features/agent-skill), [CLI](/docs/api-and-data-platform/features/cli), or [MCP server](/docs/api-and-data-platform/features/mcp-server).
+- Ask the [Assistant](/docs/langfuse-assistant) to investigate traces or create datasets and dashboards. It asks before making changes (Cloud; self-hosted public beta).
+
+[Ravenna](/users/ravenna) chose Langfuse for its clean, well-built product. At [Canva](/users/canva), a marketing manager built a tone-of-voice evaluator without engineering help.
+
+## Security and compliance [#security-and-compliance]
+
+<SecurityBadgesGrid />
 
 - We take security and compliance seriously.
-- **Certifications**: Langfuse Cloud is [SOC 2 Type II](/security/soc2) and [ISO 27001](/security/iso27001) certified.
-- **Privacy**: [GDPR](/security/gdpr) compliant with [DPA](/dpa) available. [HIPAA](/security/hipaa) aligned via a dedicated cloud region and signed Business Associate Agreement (BAA) for eligible customers.
-- **Data Regions**: Choose between US, EU, or HIPAA-ready data regions on Langfuse Cloud—or [self-host](/self-hosting) anywhere.
-- **[Hardening for Government (soon)](/self-hosting/configuration/hardening#hardening-for-government)**: FIPS-compatible deployment support, hardened images, and air-gapped operation for government and other highly regulated environments.
-- **Data Control**: [Data masking](/docs/observability/features/masking), [data retention](/docs/administration/data-retention), and [data deletion](/docs/administration/data-deletion) capabilities.
+- **Certifications:** Langfuse Cloud has completed a [SOC 2 Type II](/security/soc2) audit and is [ISO 27001](/security/iso27001) certified. We also conduct annual third-party [penetration tests](/security/penetration-testing).
+- **Privacy:** [GDPR](/security/gdpr) compliant with a [DPA](/dpa) available. For [HIPAA](/security/hipaa) workloads, eligible Pro and Enterprise customers can use a dedicated cloud region with a signed Business Associate Agreement (BAA) in place before processing PHI.
+- **Data regions:** Choose between US, EU, Japan, or HIPAA-ready [Cloud regions](/security/data-regions), or [self-host](/self-hosting) in your own infrastructure.
+- [**Hardening for Government (in development)**](/self-hosting/configuration/hardening#hardening-for-government): FIPS-compatible deployment support, hardened images, and guidance for operating the full stack in air-gapped government environments are under development for Self-Hosted Enterprise.
+- **Data control:** [Data masking](/docs/observability/features/masking), [data retention](/docs/administration/data-retention), and [data deletion](/docs/administration/data-deletion), plus Cloud [encryption](/security/encryption) at rest and in transit. Configurable retention depends on plan and deployment.
+- **Enterprise access:** [SSO](/docs/administration/authentication-and-sso), [fine-grained roles](/docs/administration/rbac), [SCIM provisioning](/docs/administration/scim-and-org-api), and [audit logs](/docs/administration/audit-logs), with availability depending on plan and deployment.
 - More details in our [Security & Privacy Center](/security).
 
-## Public Metrics
+## A partner you can build on [#reliable-partner]
 
-import PublicMetricsDashboard from "@/components-mdx/public-metrics-dashboard.mdx";
+- We're [part of ClickHouse](/blog/joining-clickhouse), working directly with its engineers on performance, reliability, and security.
+- We follow [semantic versioning](/self-hosting/upgrade/versioning) and run SDK integration and end-to-end tests in CI.
+- We publish [compatibility policies and migration paths](/docs/compatibility). Self-hosters choose when to upgrade.
+- Enterprise plans include uptime and support SLAs.
+
+[Thoughtworks' Technology Radar](https://www.thoughtworks.com/en-us/radar/platforms/langfuse) has featured Langfuse three times, most recently in April 2026. Our [adoption and community metrics](#public-metrics) are public, too.
+
+## We build with our users [#close-to-the-team]
+
+You can talk directly to the [team building Langfuse](/about) about your setup, ideas, or where you're stuck. [Magic Patterns](/users/magic-patterns-ai-design-tools) felt supported from day one.
+
+We like [shipping](/changelog). Canva noticed:
+
+> "Other vendors came back with Figma prototypes. Meanwhile, Langfuse shipped two features. That's when we knew."
+
+— The [Canva team](/users/canva), on choosing Langfuse
+
+---
+
+Still weighing your options? Our [comparisons](/compare) cover LangSmith, Braintrust, Arize / Phoenix, and Datadog.
+
+<Cards num={2}>
+  <Card
+    title="Try Langfuse for free"
+    href="https://cloud.langfuse.com"
+    icon={<Cloud />}
+  />
+  <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
+</Cards>
+
+## Public metrics [#public-metrics]
 
 <PublicMetricsDashboard />
