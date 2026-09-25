@@ -22,15 +22,15 @@ export function CTACard({
   return (
     <Card className={cn("mt-8", className)} hoverStripes>
       <CardContent className="not-prose p-6">
-        <div className="flex flex-col gap-6 md:flex-row md:items-center">
-          <div className="flex-1 space-y-2 md:flex-2">
+        <div className="flex flex-col gap-4">
+          <div className="space-y-2">
             <h3 className="m-0 text-xl font-medium leading-tight text-text-primary">
               {title}
             </h3>
             <p className="m-0 text-text-tertiary">{description}</p>
           </div>
           {children && (
-            <div className="flex flex-col gap-3 justify-center items-center sm:flex-row md:justify-end md:flex-1">
+            <div className="flex w-fit flex-wrap gap-3 [&_a]:w-auto">
               {showArrow
                 ? React.Children.map(children, (child) => {
                     if (React.isValidElement(child) && child.type === Button) {
