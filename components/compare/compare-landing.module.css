@@ -1,0 +1,47 @@
+.factField {
+  overflow: hidden;
+  padding: 24px 20px;
+  background-image: radial-gradient(var(--line-structure) 1px, transparent 1px);
+  background-position: 7px 7px;
+  background-size: 14px 14px;
+}
+
+.factPlane {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.factChip:nth-child(even) {
+  align-self: flex-end;
+}
+
+/* Use each card's width, including when the page sits between sidebars. */
+@container comparison-card (min-width: 400px) {
+  .factField {
+    position: relative;
+    height: 286px;
+    padding: 0;
+    mask-image: linear-gradient(black 88%, transparent);
+  }
+
+  .factPlane {
+    position: absolute;
+    inset: 16px 0 0;
+    display: block;
+    transform: perspective(900px) rotateX(30deg) rotateZ(-12deg);
+    transform-origin: 50% 50%;
+    transform-style: preserve-3d;
+  }
+
+  .factChip {
+    position: absolute;
+    top: var(--chip-y);
+    left: var(--chip-x);
+    white-space: nowrap;
+  }
+}
+.vendorCard {
+  container: comparison-card / inline-size;
+}
