@@ -38,30 +38,162 @@ Both work as [scores](/docs/evaluation/core-concepts) in Langfuse. Filter traces
 
 ## Quick Start
 
-This example shows how to collect explicit user feedback from a chatbot built with Next.js and AI SDK. You can find the full implementation in the [Langfuse Example](https://github.com/langfuse/langfuse-examples/tree/main/applications/user-feedback) repository.
+This example collects thumbs up/down feedback in a Next.js chat built with AI SDK 7 and `useChat`, and records it as a score on the trace of the rated answer. The key idea: **use the Langfuse trace ID as the assistant message ID**, so the message the user rates already identifies its trace. The complete app is in the [user-feedback example](https://github.com/langfuse/langfuse-examples/tree/main/applications/user-feedback).
 
-### 1. Return trace ID to frontend
+```bash
+npm install ai @ai-sdk/openai @ai-sdk/react @langfuse/tracing @langfuse/otel @langfuse/vercel-ai-sdk @langfuse/client @opentelemetry/api @opentelemetry/sdk-trace-node
+```
 
-Your backend sends the trace ID so frontend can link feedback to the trace.
+`@langfuse/vercel-ai-sdk` requires AI SDK 7 and Node.js 22 or later. On AI SDK v6, follow the [legacy setup](/integrations/frameworks/vercel-ai-sdk) instead of registering the integration; steps 2–4 stay the same.
+
+### 1. Set up tracing
+
+Set `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL`, then register the span processor and the AI SDK 7 integration in [`instrumentation.ts`](https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation):
+
+```typescript
+// instrumentation.ts
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { LangfuseVercelAiSdkIntegration } from "@langfuse/vercel-ai-sdk";
+import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
+import { registerTelemetry } from "ai";
+
+// Next.js bundles instrumentation.ts separately from route handlers. Keep one
+// processor per process so routes flush the processor that register() attached.
+const globalForLangfuse = globalThis as typeof globalThis & {
+  langfuseSpanProcessor?: LangfuseSpanProcessor;
+};
+
+export const langfuseSpanProcessor = (globalForLangfuse.langfuseSpanProcessor ??=
+  new LangfuseSpanProcessor());
+
+export function register() {
+  const tracerProvider = new NodeTracerProvider({
+    spanProcessors: [langfuseSpanProcessor],
+  });
+  tracerProvider.register();
+
+  registerTelemetry(new LangfuseVercelAiSdkIntegration());
+}
+```
+
+### 2. Use the trace ID as the message ID
+
+Wrap each response in an observation, end it when the stream finishes, and return its trace ID as the message ID:
 
 ```typescript
 // app/api/chat/route.ts
-import { getActiveTraceId } from "@langfuse/tracing";
+import { openai } from "@ai-sdk/openai";
+import { propagateAttributes, startActiveObservation } from "@langfuse/tracing";
+import { isSpanContextValid } from "@opentelemetry/api";
+import {
+  convertToModelMessages,
+  generateId,
+  streamText,
+  type UIMessage,
+} from "ai";
+import { after } from "next/server";
 
-export const POST = observe(async (req: Request) => {
-  const result = streamText({
-    model: openai('gpt-4o-mini'),
-    messages: convertToModelMessages(messages),
-  });
-  return result.toUIMessageStreamResponse({
-    generateMessageId: () => getActiveTraceId() || "",
-  });
-});
+import { langfuseSpanProcessor } from "@/instrumentation";
+
+export async function POST(req: Request) {
+  const { messages, chatId }: { messages: UIMessage[]; chatId: string } =
+    await req.json();
+
+  return startActiveObservation(
+    "handle-chat-message",
+    async (span) => {
+      span.update({ input: messages.at(-1) });
+
+      // Without active tracing (e.g. no Langfuse keys locally) the trace ID is
+      // invalid; fall back to a random ID so messages never share an ID.
+      const traceId = isSpanContextValid(span.otelSpan.spanContext())
+        ? span.traceId
+        : undefined;
+
+      return propagateAttributes({ sessionId: chatId }, async () => {
+        const result = streamText({
+          model: openai("gpt-4o-mini"),
+          messages: await convertToModelMessages(messages),
+          // End the observation after the stream, not when the handler returns
+          onFinish: ({ text }) => {
+            span.update({ output: text });
+            span.end();
+          },
+          onError: ({ error }) => {
+            span.update({ level: "ERROR", statusMessage: String(error) });
+            span.end();
+          },
+        });
+
+        // Serverless: export spans before the function is frozen
+        after(async () => await langfuseSpanProcessor.forceFlush());
+
+        return result.toUIMessageStreamResponse({
+          generateMessageId: () => traceId ?? generateId(),
+        });
+      });
+    },
+    { endOnExit: false },
+  );
+}
 ```
 
-### 2. Collect feedback in frontend
+In the browser, `useChat` exposes this ID as `message.id` on each assistant message.
 
-Use the Langfuse Browser SDK to send feedback as a score. The browser SDK only requires your public key; never expose a Langfuse secret key in frontend code.
+### 3. Record feedback as a score
+
+<Tabs items={["Server route (recommended)", "Browser SDK"]}>
+
+<Tab>
+
+Send the rating to your own API route, which validates it and records the score with your secret key. This keeps Langfuse keys out of the browser and lets you add authentication or rate limiting.
+
+```typescript
+// app/api/feedback/route.ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+export async function POST(req: Request) {
+  const { messageId, value, comment } = await req.json();
+
+  if (typeof messageId !== "string" || (value !== 0 && value !== 1)) {
+    return Response.json({ error: "Invalid feedback" }, { status: 400 });
+  }
+  // Messages created without an active trace have no trace to attach to
+  if (!/^[0-9a-f]{32}$/.test(messageId)) {
+    return Response.json({ ok: true, skipped: true });
+  }
+
+  langfuse.score.create({
+    id: `user-feedback-${messageId}`, // a changed rating updates the same score
+    traceId: messageId,
+    name: "user-feedback",
+    value, // 1 = thumbs up, 0 = thumbs down
+    dataType: "BOOLEAN",
+    comment,
+  });
+  await langfuse.flush();
+
+  return Response.json({ ok: true });
+}
+```
+
+```typescript
+// in your chat component
+const sendFeedback = (messageId: string, value: 0 | 1, comment?: string) =>
+  fetch("/api/feedback", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messageId, value, comment }),
+  });
+```
+
+</Tab>
+
+<Tab>
+
+Send the score directly from the browser with the Langfuse browser SDK. It only needs your public key; never expose a Langfuse secret key in frontend code.
 
 ```typescript
 import { LangfuseBrowserClient } from "@langfuse/browser";
@@ -70,15 +202,18 @@ const langfuse = new LangfuseBrowserClient({
   publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY!,
   baseUrl: process.env.NEXT_PUBLIC_LANGFUSE_BASE_URL,
 });
+
 function FeedbackButtons({ messageId }: { messageId: string }) {
-  const handleFeedback = async (value: number, comment?: string) => {
+  const handleFeedback = async (value: 0 | 1, comment?: string) => {
+    // Messages created without an active trace have no trace to attach to
+    if (!/^[0-9a-f]{32}$/.test(messageId)) return;
     await langfuse.score({
-      traceId: messageId,
       id: `user-feedback-${messageId}`,
+      traceId: messageId,
       name: "user-feedback",
-      value: value, // 1 for positive, 0 for negative
+      value, // 1 = thumbs up, 0 = thumbs down
       dataType: "BOOLEAN",
-      comment: comment,
+      comment,
     });
   };
   return (
@@ -90,9 +225,13 @@ function FeedbackButtons({ messageId }: { messageId: string }) {
 }
 ```
 
-### 3. View feedback in Langfuse
+</Tab>
 
-Feedback appears as scores on traces. You can filter by `user-feedback < 1` to find low-rated responses.
+</Tabs>
+
+### 4. View feedback in Langfuse
+
+Feedback appears as the `user-feedback` score on each trace. Filter by `user-feedback < 1` to find low-rated responses, add them to an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues) for review, and track the score over time in [Score Analytics](/docs/evaluation/scores/score-analytics).
 
 <Frame className="flex-1">![Feedback Analysis](/images/docs/observability/user-feedback-score.png)</Frame>
 
@@ -134,8 +273,8 @@ See [LLM-as-a-Judge Evaluators](/docs/evaluation/evaluation-methods/llm-as-a-jud
 
 The [user-feedback example](https://github.com/langfuse/langfuse-examples/tree/main/applications/user-feedback) shows a complete Next.js implementation with:
 
-- OpenTelemetry tracing
-- Thumbs up/down with optional comments
+- AI SDK 7 and OpenTelemetry tracing
+- Thumbs up/down with optional comments, recorded through a server-side feedback route
 - Session tracking across conversations
 
 ## Related
