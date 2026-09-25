@@ -1,0 +1,372 @@
+---
+title: "Evaluate agent trajectories in experiments"
+seoTitle: "Evaluate Agent Trajectories: Tool Calls, Duplicates, Step Budgets"
+description: "Check which tools an OpenAI Agents SDK or LangGraph agent actually called: duplicate side effects, forbidden tools, required tools, step budgets, and tool errors, run over a golden dataset and gated in CI."
+tags: [guide, evaluation]
+---
+
+# Evaluate agent trajectories in experiments
+
+A tool-calling agent can write a perfect reply while doing the wrong thing: refunding an order twice, calling a tool it must never call, or looping through ten steps where two would do. Checking the final message does not catch this. You need to check the **trajectory**: which tools ran, with which arguments, and what they returned.
+
+This guide shows how to do that in [Langfuse experiments](/docs/evaluation/experiments/experiments-via-sdk) for agents built with the [OpenAI Agents SDK](/integrations/frameworks/openai-agents) and [LangGraph](/integrations/frameworks/langgraph):
+
+1. Extract the tool trajectory from the agent's run result.
+2. Score it with reusable code checks.
+3. Run the checks over a golden dataset.
+4. Fail pull requests when a check regresses.
+
+**Why experiments:** the experiment task and evaluators run in your code, so they see the complete run: every tool call, its arguments, and its result. That is what these checks need. For live production traffic, see [Trajectories in production](#production).
+
+Install the SDKs for your framework:
+
+```bash
+pip install langfuse openai-agents  # OpenAI Agents SDK
+pip install langfuse langgraph langchain  # LangGraph (langchain provides the Langfuse CallbackHandler)
+```
+
+## 1. Extract the trajectory [#extract]
+
+Add the following to a `trajectory.py` module. Each extractor turns a run result into an ordered list of tool steps with arguments, results, and whether the call failed. Handoffs in the Agents SDK count as steps.
+
+```python title="trajectory.py"
+import json
+from collections import Counter
+from dataclasses import asdict, dataclass
+from typing import Any
+
+from langfuse import Evaluation
+
+
+@dataclass
+class ToolStep:
+    name: str
+    args: dict
+    result: Any = None
+    error: bool = False
+
+
+def _parse(value: Any) -> Any:
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except ValueError:
+            return value
+    return value
+
+
+def _is_error(result: Any) -> bool:
+    if isinstance(result, dict):
+        return "error" in result
+    return isinstance(result, str) and result.lower().startswith(("error", "an error occurred"))
+
+
+def trajectory_from_agents_sdk(result) -> list[ToolStep]:
+    """Tool calls and handoffs from an OpenAI Agents SDK RunResult, in order, with results."""
+    from agents.items import HandoffCallItem, ToolCallItem, ToolCallOutputItem
+
+    steps, by_call_id = [], {}
+    for item in result.new_items:
+        if isinstance(item, (ToolCallItem, HandoffCallItem)):
+            raw = item.raw_item
+            step = ToolStep(name=raw.name, args=_parse(raw.arguments) or {})
+            by_call_id[raw.call_id] = step
+            steps.append(step)
+        elif isinstance(item, ToolCallOutputItem):
+            raw = item.raw_item
+            call_id = raw["call_id"] if isinstance(raw, dict) else raw.call_id
+            if step := by_call_id.get(call_id):
+                step.result = _parse(item.output)
+                step.error = _is_error(step.result)
+    return steps
+
+
+def trajectory_from_langgraph(messages) -> list[ToolStep]:
+    """Tool calls from a LangGraph message history, in order, with results."""
+    from langchain_core.messages import AIMessage, ToolMessage
+
+    steps, by_call_id = [], {}
+    for message in messages:
+        if isinstance(message, AIMessage):
+            for call in message.tool_calls:
+                step = ToolStep(name=call["name"], args=call["args"])
+                by_call_id[call["id"]] = step
+                steps.append(step)
+        elif isinstance(message, ToolMessage):
+            if step := by_call_id.get(message.tool_call_id):
+                step.result = _parse(message.content)
+                step.error = message.status == "error" or _is_error(step.result)
+    return steps
+```
+
+`_is_error` treats a tool result as failed when it is a dict with an `error` key or an error string. Adjust it to how your tools report failures.
+
+## 2. Add reusable checks [#checks]
+
+Each check returns a Langfuse [`Evaluation`](/docs/evaluation/experiments/experiments-via-sdk), so it becomes a score on the experiment item. Add them to the same module:
+
+```python title="trajectory.py"
+def no_duplicate_side_effects(steps, tools, keys, use_results=True) -> Evaluation:
+    """Fail if a side-effecting tool ran more than once for the same key values.
+
+    With use_results, failed calls don't count, so a retry after an error is allowed.
+    """
+    actions = Counter(
+        (step.name, tuple(step.args.get(key) for key in keys))
+        for step in steps
+        if step.name in tools and not (use_results and step.error)
+    )
+    duplicates = [f"{name}{list(values)} x{count}" for (name, values), count in actions.items() if count > 1]
+    return Evaluation(
+        name="no_duplicate_side_effects",
+        value=not duplicates,
+        data_type="BOOLEAN",
+        comment="; ".join(duplicates) or "no duplicate actions",
+    )
+
+
+def forbidden_tools(steps, forbidden) -> Evaluation:
+    called = sorted({step.name for step in steps if step.name in forbidden})
+    return Evaluation(
+        name="no_forbidden_tools",
+        value=not called,
+        data_type="BOOLEAN",
+        comment=f"called {called}" if called else "none called",
+    )
+
+
+def required_tools(steps, required) -> Evaluation:
+    missing = sorted(set(required) - {step.name for step in steps})
+    return Evaluation(
+        name="required_tools_called",
+        value=not missing,
+        data_type="BOOLEAN",
+        comment=f"missing {missing}" if missing else "all called",
+    )
+
+
+def step_budget(steps, max_steps) -> Evaluation:
+    return Evaluation(
+        name="within_step_budget",
+        value=len(steps) <= max_steps,
+        data_type="BOOLEAN",
+        comment=f"{len(steps)} tool calls (budget {max_steps})",
+    )
+
+
+def tool_error_rate(steps) -> Evaluation:
+    errors = sum(step.error for step in steps)
+    return Evaluation(
+        name="tool_error_rate",
+        value=errors / len(steps) if steps else 0.0,
+        comment=f"{errors} of {len(steps)} tool calls failed",
+    )
+
+
+def serialize(steps) -> list[dict]:
+    """Make a trajectory part of the task output so evaluators and the Langfuse UI see it."""
+    return [asdict(step) for step in steps]
+```
+
+| Check                       | Catches                                                                                                 |
+| --------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `no_duplicate_side_effects` | The same refund, cancellation, or email sent twice. `keys` define what makes two calls the same action. |
+| `forbidden_tools`           | Tools the request must never trigger, e.g. `cancel_order` for an order that already shipped.            |
+| `required_tools`            | Answers the agent made up without calling the tool that knows the answer.                               |
+| `step_budget`               | Loops and wasteful trajectories that cost latency and tokens.                                           |
+| `tool_error_rate`           | Malformed arguments and calls the agent had to recover from.                                            |
+
+With `use_results=True`, `no_duplicate_side_effects` ignores failed calls, so a retry after an error passes while a second call after a successful (or pending) one fails. Set `use_results=False` if every call must be unique.
+
+## 3. Run the checks over a golden dataset [#dataset]
+
+Create a [dataset](/docs/evaluation/experiments/datasets) of reviewed requests. The expected output describes what the trajectory must and must not contain:
+
+```python
+import json
+
+from langfuse import get_client
+
+langfuse = get_client()
+langfuse.create_dataset(name="order-agent-golden")
+
+# golden.jsonl, one reviewed request per line, e.g.
+# {"input": {"request": "The lamp from BC-70831 arrived broken. Refund it."},
+#  "expected_output": {"required_tools": ["issue_refund"], "must_not_call": ["cancel_order"], "max_steps": 8}}
+with open("golden.jsonl") as f:
+    for line in f:
+        row = json.loads(line)
+        langfuse.create_dataset_item(
+            dataset_name="order-agent-golden",
+            input=row["input"],
+            expected_output=row["expected_output"],
+        )
+```
+
+Write a task that runs your agent and returns the reply together with the trajectory. Tasks must be `async` here, because experiments run tasks inside an event loop, where the Agents SDK's `Runner.run_sync` does not work.
+
+<Tabs items={["OpenAI Agents SDK", "LangGraph"]}>
+
+<Tab>
+
+```python title="evaluation.py"
+from agents import Runner
+
+from my_app.agents import order_agent  # your agent
+from trajectory import serialize, trajectory_from_agents_sdk
+
+
+async def run_agent(*, item, **kwargs):
+    result = await Runner.run(order_agent, item.input["request"])
+    return {
+        "reply": result.final_output,
+        "trajectory": serialize(trajectory_from_agents_sdk(result)),
+    }
+```
+
+To see each item's full agent trace in Langfuse, instrument the SDK as described in the [OpenAI Agents SDK integration](/integrations/frameworks/openai-agents).
+
+</Tab>
+
+<Tab>
+
+```python title="evaluation.py"
+from langchain_core.messages import HumanMessage
+from langfuse.langchain import CallbackHandler
+
+from my_app.graph import graph  # your compiled graph
+from trajectory import serialize, trajectory_from_langgraph
+
+
+async def run_agent(*, item, **kwargs):
+    state = await graph.ainvoke(
+        {"messages": [HumanMessage(item.input["request"])]},
+        config={"callbacks": [CallbackHandler()]},  # links the full graph trace to the item
+    )
+    return {
+        "reply": state["messages"][-1].content,
+        "trajectory": serialize(trajectory_from_langgraph(state["messages"])),
+    }
+```
+
+</Tab>
+
+</Tabs>
+
+Then add an item evaluator that applies the checks, and run evaluators that report how many items passed. Append this to `evaluation.py`:
+
+```python title="evaluation.py"
+from langfuse import Evaluation
+
+from trajectory import (
+    ToolStep,
+    forbidden_tools,
+    no_duplicate_side_effects,
+    required_tools,
+    step_budget,
+    tool_error_rate,
+)
+
+SIDE_EFFECT_TOOLS = ["issue_refund", "cancel_order"]
+
+
+def trajectory_checks(*, output, expected_output, **kwargs):
+    steps = [ToolStep(**step) for step in output["trajectory"]]
+    expected = expected_output or {}
+    return [
+        no_duplicate_side_effects(steps, tools=SIDE_EFFECT_TOOLS, keys=["order_id"], use_results=True),
+        forbidden_tools(steps, expected.get("must_not_call", [])),
+        required_tools(steps, expected.get("required_tools", [])),
+        step_budget(steps, max_steps=expected.get("max_steps", 8)),
+        tool_error_rate(steps),
+    ]
+
+
+def pass_rate(check_name):
+    """Run evaluator: share of items that passed a boolean check."""
+
+    def evaluator(*, item_results, **kwargs):
+        values = [e.value for r in item_results for e in r.evaluations if e.name == check_name]
+        return Evaluation(name=f"{check_name}_rate", value=sum(values) / len(values) if values else 0.0)
+
+    return evaluator
+
+
+RUN_EVALUATORS = [pass_rate("no_duplicate_side_effects"), pass_rate("no_forbidden_tools")]
+```
+
+Run the experiment on the dataset:
+
+```python
+from langfuse import get_client
+
+from evaluation import RUN_EVALUATORS, run_agent, trajectory_checks
+
+dataset = get_client().get_dataset("order-agent-golden")
+result = dataset.run_experiment(
+    name="order agent trajectories",
+    task=run_agent,
+    evaluators=[trajectory_checks],
+    run_evaluators=RUN_EVALUATORS,
+)
+print(result.format())
+```
+
+Each item gets the five scores, with the offending calls in the score comment. [Compare experiments](/docs/evaluation/experiments/compare-experiments) to see which items regressed after a prompt, model, or tool change.
+
+<Callout type="info">
+  Tool behavior varies between runs. A duplicate that happens in one run out of five rarely shows up in a single run, so run the dataset several times before trusting a clean result, for example by calling `run_experiment` in a loop with a distinct `run_name` per repeat.
+</Callout>
+
+## 4. Gate pull requests [#ci]
+
+Run the same experiment in CI with the [`langfuse/experiment-action`](/docs/evaluation/experiments/experiments-ci-cd) and raise `RegressionError` when a check's pass rate drops below 100%:
+
+```python title="experiments/order-agent-trajectories.py"
+from langfuse import RegressionError, RunnerContext
+
+from evaluation import RUN_EVALUATORS, run_agent, trajectory_checks
+
+
+def experiment(context: RunnerContext):
+    result = context.run_experiment(
+        name="PR gate: order agent trajectories",
+        task=run_agent,
+        evaluators=[trajectory_checks],
+        run_evaluators=RUN_EVALUATORS,
+    )
+    for evaluation in result.run_evaluations:
+        if evaluation.value < 1.0:
+            raise RegressionError(
+                result=result,
+                metric=evaluation.name,
+                value=evaluation.value,
+                threshold=1.0,
+            )
+    return result
+```
+
+Point the action at the script and the dataset:
+
+```yaml
+- uses: langfuse/experiment-action@<release tag>
+  with:
+    langfuse_public_key: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+    langfuse_secret_key: ${{ secrets.LANGFUSE_SECRET_KEY }}
+    langfuse_base_url: https://cloud.langfuse.com
+    experiment_path: experiments/order-agent-trajectories
+    dataset_name: order-agent-golden
+    github_token: ${{ github.token }}
+```
+
+See [Experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd) for the complete workflow, permissions, and the pull request comment.
+
+## Trajectories in production [#production]
+
+[Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) in Langfuse run on individual observations of live traces and see the observation they target, including the tool calls that one model call requested, but not its sibling tool executions. To check a whole trajectory on production traffic, record a compact tool summary (name, key arguments, result status) in the metadata of the agent's root observation and target an evaluator at that observation, as in the [trajectory check via metadata](/resources/engineering/code-evaluator-examples) example.
+
+## Related
+
+- [AI agent evaluation](/resources/engineering/ai-agent-evaluation) covers trajectory, tool use, task completion, and multi-turn quality.
+- [10 code evaluator examples](/resources/engineering/code-evaluator-examples) include more paste-ready checks.
+- [Evaluating OpenAI Agents](/guides/cookbook/example_evaluating_openai_agents) walks through tracing and online and offline evaluation for the Agents SDK.

@@ -114,6 +114,8 @@ The qualitative half is reading trajectories, and that is faster with a visual. 
 
 When you find a bad trajectory, codify it: add the input to a dataset, and write the property that was violated ("must not call the payment tool twice") as a code evaluator that runs in every future experiment.
 
+For a complete recipe with the OpenAI Agents SDK and LangGraph, including checks for duplicate side effects, forbidden and required tools, step budgets, and tool errors, run over a golden dataset and gated in CI, see [Evaluate agent trajectories in experiments](/resources/engineering/agent-trajectory-evaluation).
+
 ## Evaluating multi-turn conversations
 
 Multi-turn evaluation scores the conversation, not the individual request, because users experience sessions. In Langfuse, every trace can carry a session ID, and scores attach directly to sessions, so conversation-level judgments live at the level they describe.
