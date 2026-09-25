@@ -23,7 +23,7 @@ This guide outlines the key differences between **[Langfuse](/)** and **[Braintr
 
 **Choose Langfuse** if you want to own the platform: Evals on production traces at scale on ClickHouse, open source since 2016, with dashboards, alerts, and full-text search. LLM-as-a-judge and code evaluators run online and in experiments on the same observations, and any observation can be added to a dataset in one click. Run the whole application yourself or on Langfuse Cloud, export the data to your warehouse or query it in SQL when self-hosted, and pay one meter that prices an evaluation score like a trace. On a 500k-trace month [roughly half the price](#worked-example) of Braintrust Pro at list prices with 3 years of history instead of 30 days. Proven at 21 of the Fortune 50. You accept a less packaged workbench.
 
-**Choose Braintrust** if you  want a closed, vendor-managed workbench for experiment review, sentiment and issue classification of logs, repeated trials with statistical summaries in experiment review, or a data plane that the vendor operates inside your own cloud account (Enterprise). You accept lock-in: traces in a proprietary store reachable only through Braintrust's APIs, a UI and login that always run on Braintrust's cloud, and processed-GB, per-score, and retention meters with a 180-day ceiling below Enterprise.
+**Choose Braintrust** if you want a closed, vendor-managed workbench for experiment review, sentiment and issue classification of logs, repeated trials with statistical summaries in experiment review, or a data plane that the vendor operates inside your own cloud account (Enterprise). You accept lock-in: traces in a proprietary store reachable only through Braintrust's APIs, a UI and login that always run on Braintrust's cloud, and processed-GB, per-score, and retention meters with a 180-day ceiling below Enterprise.
 
 ---
 
@@ -299,14 +299,14 @@ Yes. autoevals is an open-source library, and Langfuse's experiment SDKs include
 <Summary>How does Braintrust pricing compare to Langfuse?</Summary>
 
 The meters differ: Langfuse counts traces, observations, and scores as units (Core starts at $29/month with unlimited users); Braintrust bills processed data per GB, plus per-score charges, retention, and model credits for AI features. On the rates in our [editable public model](/pricing-comparison-sheet), 500k traces / 10 spans / 5 KB per span / 1 score per trace / 12-month retention is **$621** Langfuse Pro vs **$1,122** Braintrust Pro at published rates (Braintrust Pro caps retention at 180 days, so a full year in practice requires Enterprise). Which is cheaper depends on payload size, score density, retention, and volume; details in the [worked example](#worked-example).
-  
+
 </Details>
   
 <Details id="does-braintrust-offer-a-baa">
-<Summary>Does Braintrust offer a BAA for HIPAA?</Summary>  
+<Summary>Does Braintrust offer a BAA for HIPAA?</Summary>
 
 Braintrust lists Business Associate Agreements as [available on Enterprise plans](https://www.braintrust.dev/pricing); the Starter and Pro plans do not include one. Langfuse signs a BAA from the Pro plan in its dedicated [HIPAA region](/security/hipaa), and eligible early-stage teams can combine it with the [startup program](/startups). Details in [Enterprise security](#enterprise-security).
-  
+
 </Details>
 
 <Details id="how-do-i-migrate-from-braintrust">
