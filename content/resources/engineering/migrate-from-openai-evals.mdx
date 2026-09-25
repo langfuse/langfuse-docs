@@ -28,7 +28,7 @@ The shutdown forces a move, but the choice of destination is still yours. OpenAI
 - **Dashboard workflow without code.** OpenAI Evals let you pick a dataset, write a prompt, add graders, and compare runs in the browser. [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui) in Langfuse work the same way: select a dataset, one or more prompt versions, and evaluators, then compare runs side by side. Product managers and domain experts keep working in the UI.
 - **Evals on production traffic.** Evals with a `logs` or `stored_completions` data source graded real API traffic. Langfuse [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) run on live traces as they arrive, with filters and sampling. The same evaluators also score offline experiments.
 - **Eval results next to production traces.** Every experiment item creates a full [trace](/docs/observability/data-model), so a failing row is inspectable with the same tooling you use for production incidents, including tokens, latency, and cost.
-- **Prompts move too.** OpenAI is also shutting down the Reusable Prompts API (`/v1/prompts`) on November 30, 2026. Langfuse [prompt management](/docs/prompt-management) versions your prompts, deploys them with labels, and links each prompt version to the traces and scores it produced.
+- **Prompts move too.** OpenAI is also shutting down the Reusable Prompts API (`/v1/prompts`) on November 30, 2026. Langfuse [prompt management](/docs/prompt-management) versions your prompts, deploys them with labels, and links each prompt version to the traces and scores it produced. See our guide to [migrating OpenAI reusable prompts](/resources/engineering/migrate-from-openai-prompts).
 - **Any model, any provider.** Langfuse evaluators and experiments work with OpenAI, Anthropic, Google, open-weight models, and your own application code, not only OpenAI models.
 - **Self-hostable.** Langfuse is open source. [Self-hosting Langfuse](/self-hosting) gives you the full platform (UI, API, storage) in your own infrastructure, so your eval history does not depend on a vendor's product roadmap again.
 
@@ -64,15 +64,15 @@ Some things work differently. OpenAI Evals generated completions for you from a 
 
 ## Supported data types [#supported-data-types]
 
-| Data                                                    | Move?    | Path                                                                          |
-| ------------------------------------------------------- | -------- | ----------------------------------------------------------------------------- |
-| Eval rows (`jsonl` data source via `file_id` or inline) | Yes      | Export script → dataset items                                                 |
-| Eval definitions (`testing_criteria`)                   | Recreate | Export for reference, then rebuild as evaluators                              |
-| Run templates (`input_messages`, `model`, sampling)     | Yes      | Chat prompts in prompt management, with model settings in `config`            |
-| Reusable prompts (`/v1/prompts`)                        | Yes      | Copy content into prompt management; `{{variable}}` syntax works as-is        |
-| Evals on `logs` / `stored_completions`                  | Recreate | Trace production calls with Langfuse, then attach evaluators to live traces   |
-| Historical run results (`output_items`)                 | Archive  | Export to JSON; optionally attach as dataset item metadata; re-run a baseline |
-| Fine-tuning graders (reinforcement fine-tuning)         | No       | Out of scope; this guide covers eval workflows only                           |
+| Data                                                    | Move?    | Path                                                                                 |
+| ------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------ |
+| Eval rows (`jsonl` data source via `file_id` or inline) | Yes      | Export script → dataset items                                                        |
+| Eval definitions (`testing_criteria`)                   | Recreate | Export for reference, then rebuild as evaluators                                     |
+| Run templates (`input_messages`, `model`, sampling)     | Yes      | Chat prompts in prompt management, with model settings in `config`                   |
+| Reusable prompts (`/v1/prompts`)                        | Yes      | See the [reusable prompts guide](/resources/engineering/migrate-from-openai-prompts) |
+| Evals on `logs` / `stored_completions`                  | Recreate | Trace production calls with Langfuse, then attach evaluators to live traces          |
+| Historical run results (`output_items`)                 | Archive  | Export to JSON; optionally attach as dataset item metadata; re-run a baseline        |
+| Fine-tuning graders (reinforcement fine-tuning)         | No       | Out of scope; this guide covers eval workflows only                                  |
 
 ## The example eval [#example-eval]
 
@@ -148,7 +148,7 @@ Snippets below show both the Python SDK v4 (`pip install langfuse`) and the JS/T
 
 ## Step 1: Export evals, runs, and data [#export]
 
-Export first, while the OpenAI Evals API is still available. This script walks every eval in your OpenAI project, saves its definition and runs, and collects the dataset rows. It reads the rows from each run's output items (`datasource_item`), which works regardless of whether the run used an uploaded file, inline content, or stored completions, and deduplicates them by `datasource_item_id`.
+Export first, while the OpenAI Evals API is still available. This script walks every eval in your OpenAI project and saves its definition, its runs with per-item results, and the dataset rows. It reads rows from each run's source (an uploaded file or inline content) and from the run's output items, which also covers stored completions. It then downloads every file uploaded with the `evals` purpose, so rows of evals that never ran are archived too.
 
 ```python
 # export_openai_evals.py
@@ -159,7 +159,18 @@ from openai import OpenAI
 
 client = OpenAI()
 out_dir = Path("openai-evals-export")
-out_dir.mkdir(exist_ok=True)
+(out_dir / "files").mkdir(parents=True, exist_ok=True)
+
+
+def source_rows(run):
+    source = run.data_source.source
+    if source.type == "file_content":
+        return [row.item for row in source.content]
+    if source.type == "file_id":
+        lines = client.files.content(source.id).text.splitlines()
+        return [json.loads(line)["item"] for line in lines if line.strip()]
+    return []  # stored completions and responses: rows come from output items
+
 
 for ev in client.evals.list():  # auto-paginates
     runs, rows = [], {}
@@ -170,8 +181,8 @@ for ev in client.evals.list():  # auto-paginates
             for item in client.evals.runs.output_items.list(run.id, eval_id=ev.id)
         ]
         runs.append({"run": run.model_dump(), "output_items": items})
-        for item in items:
-            rows.setdefault(item["datasource_item_id"], item["datasource_item"])
+        for row in source_rows(run) + [item["datasource_item"] for item in items]:
+            rows.setdefault(json.dumps(row, sort_keys=True), row)  # deduplicate
 
     (out_dir / f"{ev.id}.json").write_text(
         json.dumps(
@@ -185,13 +196,19 @@ for ev in client.evals.list():  # auto-paginates
         )
     )
     print(f"{ev.name}: {len(rows)} rows, {len(runs)} runs")
+
+# evals without runs have no rows attached; their data lives in uploaded files
+for file in client.files.list(purpose="evals"):
+    (out_dir / "files" / f"{file.id}.jsonl").write_bytes(
+        client.files.content(file.id).content
+    )
 ```
 
-Keep the export folder in version control or object storage. It is your archive of historical scores and the source for the next steps. If a run's source is an uploaded file (`"source": {"type": "file_id"}`) and you also want rows that never ran, download the original JSONL with `client.files.content(file_id)`.
+Keep the export folder in version control or object storage. It is your archive of historical scores and the source for the next steps. If an eval has no runs, its `rows` list is empty: import the matching file from `openai-evals-export/files/` instead, where each line holds one row under the `item` key.
 
 ## Step 2: Turn eval rows into a dataset [#datasets]
 
-Each exported row becomes a dataset item. Fields your prompt template reads (here, `question`) map to `input`, and fields graders use as a reference (here, `must_mention`) move to `expected_output`. Deriving the item ID from the row content makes the import idempotent: re-running the script updates items in place instead of duplicating them.
+Each exported row becomes a dataset item. Fields your prompt template reads (here, `question`) map to `input`, and fields graders use as a reference (here, `must_mention`) move to `expected_output`. The import is safe to re-run: creating a dataset with an existing name updates it, and deriving the item ID from the row content means re-runs update items in place instead of duplicating them.
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
@@ -267,7 +284,7 @@ for (const row of exported.rows as Array<{
 </Tab>
 </LangTabs>
 
-The exported `item_schema` also carries over: Langfuse datasets accept an optional JSON schema for `input` and `expected_output`, so malformed items are rejected at creation time, just like rows that did not match `item_schema`. If you prefer not to write code for this step, you can also [upload a CSV](/docs/evaluation/experiments/datasets) of the rows in the Langfuse UI.
+To keep the validation that `item_schema` gave you, add a [JSON schema](/docs/evaluation/experiments/datasets#schema-enforcement) for `input` and `expected_output` to the dataset (`input_schema` and `expected_output_schema` on `create_dataset`, or in the dataset settings in the UI). Langfuse then rejects malformed items at creation time. Split the exported `item_schema` accordingly: here, `question` belongs to the input schema and `must_mention` to the expected output schema. If you prefer not to write code for this step, you can also [upload a CSV](/docs/evaluation/experiments/datasets) of the rows in the Langfuse UI.
 
 Confirm in the Langfuse UI that the dataset's item count matches the row count printed by the export script and that `expected_output` is populated on each item.
 
@@ -338,7 +355,7 @@ await langfuse.prompt.create({
   Unlike the dataset import, prompt creation is not idempotent: every call creates a new prompt version. Run the export once, not as a retried batch job.
 </Callout>
 
-This example stores the model settings in `config` using OpenAI's parameter names. Langfuse returns `config` as-is, so your application reads it back and passes it to the model call. For prompts that live in OpenAI's Reusable Prompts API (`/v1/prompts`), which shuts down on the same date, copy their content into Langfuse the same way. Confirm in the Langfuse UI that the prompt renders with its variables intact and carries the `production` label.
+This example stores the model settings in `config` using OpenAI's parameter names. Langfuse returns `config` as-is, so your application reads it back and passes it to the model call. For prompts that live in OpenAI's Reusable Prompts API (`/v1/prompts`), which shuts down on the same date, follow the [reusable prompts migration guide](/resources/engineering/migrate-from-openai-prompts). Confirm in the Langfuse UI that the prompt renders with its variables intact and carries the `production` label. To compare a prompt variant in Step 5, create a second version (edit the prompt in the UI or call `create_prompt` again with your changes) and assign it the `candidate` label.
 
 ## Step 4: Port graders to evaluators [#evaluators]
 
@@ -494,23 +511,30 @@ from langfuse import get_client
 from langfuse.openai import OpenAI
 
 langfuse = get_client()
-dataset = langfuse.get_dataset("support-agent-regression")
+openai_client = OpenAI()
 
-for label in ["production", "candidate"]:
-    prompt = langfuse.get_prompt("support-agent", type="chat", label=label)
 
-    def task(*, item, prompt=prompt, **kwargs):
+def make_task(prompt):
+    def task(*, item, **kwargs):
         # swap this for your application logic to evaluate the full pipeline
-        response = OpenAI().chat.completions.create(
+        response = openai_client.chat.completions.create(
             model=prompt.config.get("model", "gpt-4.1"),
             messages=prompt.compile(question=item.input["question"]),
-            langfuse_prompt=prompt,  # links the trace to the prompt version
+            langfuse_prompt=prompt,  # links the generation to the prompt version
         )
         return response.choices[0].message.content
 
+    return task
+
+
+dataset = langfuse.get_dataset("support-agent-regression")
+
+for label in ["production", "candidate"]:  # "candidate" was created in Step 3
+    prompt = langfuse.get_prompt("support-agent", type="chat", label=label)
+
     result = dataset.run_experiment(
         name=f"support-agent ({label})",
-        task=task,
+        task=make_task(prompt),
         evaluators=[mentions_required_phrase, helpfulness],
     )
     print(result.format())
@@ -526,17 +550,37 @@ langfuse.flush()  # flush pending spans before a short-lived script exits
 import OpenAI from "openai";
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
-import { LangfuseClient } from "@langfuse/client";
+import {
+  LangfuseClient,
+  type ChatPromptClient,
+  type ExperimentTaskParams,
+} from "@langfuse/client";
 import { observeOpenAI } from "@langfuse/openai";
 
-const openai = observeOpenAI(new OpenAI());
 const otelSdk = new NodeSDK({ spanProcessors: [new LangfuseSpanProcessor()] });
 otelSdk.start();
 
 const langfuse = new LangfuseClient();
+
+function makeTask(prompt: ChatPromptClient) {
+  // swap this for your application logic to evaluate the full pipeline
+  return async (item: ExperimentTaskParams) => {
+    const response = await observeOpenAI(new OpenAI(), {
+      langfusePrompt: prompt, // links the generation to the prompt version
+    }).chat.completions.create({
+      model: (prompt.config as { model?: string }).model ?? "gpt-4.1",
+      messages: prompt.compile({
+        question: (item.input as { question: string }).question,
+      }) as OpenAI.ChatCompletionMessageParam[],
+    });
+    return response.choices[0].message.content ?? "";
+  };
+}
+
 const dataset = await langfuse.dataset.get("support-agent-regression");
 
 for (const label of ["production", "candidate"]) {
+  // "candidate" was created in Step 3
   const prompt = await langfuse.prompt.get("support-agent", {
     type: "chat",
     label,
@@ -544,16 +588,7 @@ for (const label of ["production", "candidate"]) {
 
   const result = await dataset.runExperiment({
     name: `support-agent (${label})`,
-    // swap this for your application logic to evaluate the full pipeline
-    task: async (item) => {
-      const response = await openai.chat.completions.create({
-        model: (prompt.config as { model?: string }).model ?? "gpt-4.1",
-        messages: prompt.compile({
-          question: (item.input as { question: string }).question,
-        }) as OpenAI.ChatCompletionMessageParam[],
-      });
-      return response.choices[0].message.content ?? "";
-    },
+    task: makeTask(prompt),
     evaluators: [mentionsRequiredPhrase, helpfulness],
   });
   console.log(await result.format());
@@ -577,27 +612,35 @@ If you started OpenAI eval runs from CI and checked `result_counts` or per-crite
 
 ```python
 # experiments/support-agent-gate.py
-# task, mentions_required_phrase, and helpfulness as defined in steps 4 and 5
-from langfuse import Evaluation, RegressionError, RunnerContext
+# make_task, mentions_required_phrase, and helpfulness as defined in steps 4 and 5
+from langfuse import Evaluation, RegressionError, RunnerContext, get_client
 
 THRESHOLD = 0.9
-PASS_SCORE = 5  # from the score_model grader's pass_threshold
+# minimum score per evaluator; helpfulness uses the score_model grader's pass_threshold
+MIN_SCORES = {"mentions_required_phrase": 1, "helpfulness": 5}
+
+
+def item_passed(evaluations):
+    scores = {e.name: e.value for e in evaluations}
+    # an item passes only if every required score exists and meets its minimum,
+    # so a failed or missing evaluator never counts as a pass
+    return all(
+        isinstance(scores.get(name), (int, float)) and scores[name] >= minimum
+        for name, minimum in MIN_SCORES.items()
+    )
+
 
 def pass_rate(*, item_results, **kwargs):
     # replaces: result_counts.passed / result_counts.total
-    passed = [
-        all(
-            e.value >= (PASS_SCORE if e.name == "helpfulness" else 1)
-            for e in item.evaluations
-        )
-        for item in item_results
-    ]
+    passed = [item_passed(item.evaluations) for item in item_results]
     return Evaluation(name="pass_rate", value=sum(passed) / len(passed) if passed else 0.0)
 
+
 def experiment(context: RunnerContext):
+    prompt = get_client().get_prompt("support-agent", type="chat", label="production")
     result = context.run_experiment(
         name="PR gate: support agent",
-        task=task,
+        task=make_task(prompt),
         evaluators=[mentions_required_phrase, helpfulness],
         run_evaluators=[pass_rate],
     )
@@ -623,15 +666,30 @@ def experiment(context: RunnerContext):
 
 ```ts
 // experiments/support-agent-gate.ts
-// task, mentionsRequiredPhrase, and helpfulness as defined in steps 4 and 5
+// makeTask, mentionsRequiredPhrase, and helpfulness as defined in steps 4 and 5
 import {
+  LangfuseClient,
   RegressionError,
   type Evaluation,
   type RunnerContext,
 } from "@langfuse/client";
 
 const THRESHOLD = 0.9;
-const PASS_SCORE = 5; // from the score_model grader's pass_threshold
+// minimum score per evaluator; helpfulness uses the score_model grader's pass_threshold
+const MIN_SCORES: Record<string, number> = {
+  mentions_required_phrase: 1,
+  helpfulness: 5,
+};
+
+function itemPassed(evaluations: Evaluation[]): boolean {
+  const scores = new Map(evaluations.map((e) => [e.name, e.value]));
+  // an item passes only if every required score exists and meets its minimum,
+  // so a failed or missing evaluator never counts as a pass
+  return Object.entries(MIN_SCORES).every(([name, minimum]) => {
+    const value = scores.get(name);
+    return typeof value === "number" && value >= minimum;
+  });
+}
 
 async function passRate({
   itemResults,
@@ -639,11 +697,7 @@ async function passRate({
   itemResults: Array<{ evaluations: Evaluation[] }>;
 }): Promise<Evaluation> {
   // replaces: result_counts.passed / result_counts.total
-  const passed = itemResults.map((item) =>
-    item.evaluations.every(
-      (e) => Number(e.value) >= (e.name === "helpfulness" ? PASS_SCORE : 1),
-    ),
-  );
+  const passed = itemResults.map((item) => itemPassed(item.evaluations));
 
   return {
     name: "pass_rate",
@@ -654,9 +708,13 @@ async function passRate({
 }
 
 export async function experiment(context: RunnerContext) {
+  const prompt = await new LangfuseClient().prompt.get("support-agent", {
+    type: "chat",
+    label: "production",
+  });
   const result = await context.runExperiment({
     name: "PR gate: support agent",
-    task,
+    task: makeTask(prompt),
     evaluators: [mentionsRequiredPhrase, helpfulness],
     runEvaluators: [passRate],
   });
@@ -687,6 +745,7 @@ export async function experiment(context: RunnerContext) {
   with:
     langfuse_public_key: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
     langfuse_secret_key: ${{ secrets.LANGFUSE_SECRET_KEY }}
+    langfuse_base_url: https://cloud.langfuse.com # or your region / self-hosted URL
     experiment_path: experiments/support-agent-gate.py # or .ts
     dataset_name: support-agent-regression
     github_token: ${{ github.token }}
