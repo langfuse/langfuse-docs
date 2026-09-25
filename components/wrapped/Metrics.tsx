@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useInView, useMotionValue, useSpring, motion } from "framer-motion";
 import {
   ListTree,
@@ -17,12 +17,10 @@ import {
   XAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
   LabelList,
 } from "recharts";
-import { WrappedSection } from "./components/WrappedSection";
 import { WrappedGrid, WrappedGridItem } from "./components/WrappedGrid";
-import { SectionHeading } from "./components/SectionHeading";
+import { cn } from "@/lib/utils";
 
 interface MetricCardProps {
   value: number | string;
@@ -59,12 +57,12 @@ function MetricCard({
   };
 
   return (
-    <div className="p-6 lg:p-8">
+    <div className="p-5 lg:p-6">
       <div
-        className={`font-bold font-mono ${
+        className={`font-medium font-analog tabular-nums text-text-primary ${
           isFullWidth
-            ? "text-3xl sm:text-4xl lg:text-5xl"
-            : "text-2xl sm:text-3xl lg:text-4xl"
+            ? "text-[28px] sm:text-[36px] lg:text-[44px] leading-[110%]"
+            : "text-[28px] sm:text-[32px] leading-[115%]"
         }`}
       >
         {isNumeric ? (
@@ -84,10 +82,10 @@ function MetricCard({
           value
         )}
       </div>
-      <div className="mt-2 flex items-center gap-2 text-base font-normal">
+      <div className="mt-2 flex items-center gap-2 text-[14px] font-normal text-text-secondary">
         {Icon && (
-          <div className="shrink-0 rounded-lg border bg-muted/50 flex items-center justify-center w-6 h-6">
-            <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+          <div className="shrink-0 rounded-[2px] border border-line-structure bg-surface-1 flex items-center justify-center w-6 h-6">
+            <Icon className="w-3.5 h-3.5 text-text-tertiary" />
           </div>
         )}
         <span>{fullLabel}</span>
@@ -272,231 +270,262 @@ const formatGrowth = (value: number) => {
   return `${Math.round(value)}%`;
 };
 
+function SizedChart({
+  children,
+  className,
+}: {
+  children: (size: { width: number; height: number }) => React.ReactNode;
+  className?: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState<{ width: number; height: number } | null>(
+    null,
+  );
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const update = () => {
+      const { width, height } = el.getBoundingClientRect();
+      if (width > 1 && height > 1) {
+        setSize({
+          width: Math.floor(width),
+          height: Math.floor(height),
+        });
+      }
+    };
+
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "w-full min-w-0 h-[220px] sm:h-[280px] lg:h-[360px]",
+        className,
+      )}
+    >
+      {size ? children(size) : null}
+    </div>
+  );
+}
+
 export function Metrics() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { once: true, margin: "-100px" });
 
   return (
-    <WrappedSection>
-      <SectionHeading
-        title="You all have been busy..."
-        subtitle="Key metrics from our platform in 2025"
-      />
-      <div ref={containerRef}>
-        <WrappedGrid className="!grid-cols-1 sm:!grid-cols-2 lg:!grid-cols-3 !border-t-0 -mt-[1px]">
-          {metrics
-            .map((metric, index) => {
-              const delay = index * 0.1; // Stagger delay
+    <div ref={containerRef}>
+      <WrappedGrid className="!grid-cols-1 sm:!grid-cols-2 lg:!grid-cols-3">
+        {metrics
+          .map((metric, index) => {
+            const delay = index * 0.1; // Stagger delay
 
-              const animationProps = {
+            const animationProps = {
+              initial: { opacity: 0, y: 20, scale: 0.95 },
+              animate: isInView
+                ? { opacity: 1, y: 0, scale: 1 }
+                : { opacity: 0, y: 20, scale: 0.95 },
+              transition: {
+                duration: 0.5,
+                delay: delay,
+                ease: [0.22, 1, 0.36, 1],
+              },
+            };
+
+            const items = [
+              <WrappedGridItem key={index} colSpan={metric.isFullWidth ? 3 : 1}>
+                <motion.div {...animationProps}>
+                  <MetricCard {...metric} />
+                </motion.div>
+              </WrappedGridItem>,
+            ];
+
+            // Insert Consumption graph after Prompts created (index 2)
+            if (index === 2) {
+              const graphAnimationProps = {
                 initial: { opacity: 0, y: 20, scale: 0.95 },
                 animate: isInView
                   ? { opacity: 1, y: 0, scale: 1 }
                   : { opacity: 0, y: 20, scale: 0.95 },
                 transition: {
                   duration: 0.5,
-                  delay: delay,
+                  delay: (index + 1) * 0.1,
                   ease: [0.22, 1, 0.36, 1],
                 },
               };
-
-              const items = [
-                <WrappedGridItem
-                  key={index}
-                  colSpan={metric.isFullWidth ? 3 : 1}
-                >
-                  <motion.div {...animationProps}>
-                    <MetricCard {...metric} />
+              items.push(
+                <WrappedGridItem key="consumption" colSpan={3}>
+                  <motion.div {...graphAnimationProps}>
+                    <div className="p-6">
+                      <div className="flex flex-col lg:flex-row lg:items-start lg:gap-8">
+                        <div className="w-full lg:w-1/4 mb-4 lg:mb-0">
+                          <h3 className="text-[22px] sm:text-[28px] font-medium font-analog text-text-primary">
+                            Consumption
+                          </h3>
+                          <p className="mt-2 text-[13px] text-text-tertiary">
+                            Consumption between January and December 2025.
+                            Ingestions of traces, observations and evals.
+                          </p>
+                        </div>
+                        <SizedChart className="lg:w-3/4">
+                          {({ width, height }) => (
+                            <BarChart
+                              width={width}
+                              height={height}
+                              data={growthData}
+                              margin={{
+                                top: 5,
+                                right: 30,
+                                left: 20,
+                                bottom: 5,
+                              }}
+                            >
+                              <CartesianGrid
+                                strokeDasharray="3 3"
+                                className="stroke-line-structure"
+                              />
+                              <XAxis
+                                dataKey="month"
+                                className="text-xs"
+                                tick={{ fill: "var(--text-tertiary)" }}
+                              />
+                              <Tooltip
+                                contentStyle={{
+                                  backgroundColor: "var(--surface-bg)",
+                                  border: "1px solid var(--line-structure)",
+                                  borderRadius: "2px",
+                                  padding: "0.5rem",
+                                }}
+                                formatter={(value: number) => [
+                                  `${formatGrowth(value)}`,
+                                  "Traffic relative to Dec 25",
+                                ]}
+                                labelStyle={{
+                                  color: "var(--text-primary)",
+                                }}
+                              />
+                              <Bar
+                                dataKey="growth"
+                                fill="var(--text-primary)"
+                                radius={[2, 2, 0, 0]}
+                              >
+                                <LabelList
+                                  dataKey="growth"
+                                  position="inside"
+                                  formatter={formatGrowth}
+                                  fill="var(--surface-bg)"
+                                  style={{
+                                    fontWeight: 600,
+                                    fontSize: "0.75rem",
+                                  }}
+                                />
+                              </Bar>
+                            </BarChart>
+                          )}
+                        </SizedChart>
+                      </div>
+                    </div>
                   </motion.div>
                 </WrappedGridItem>,
-              ];
+              );
+            }
 
-              // Insert Consumption graph after Prompts created (index 2)
-              if (index === 2) {
-                const graphAnimationProps = {
-                  initial: { opacity: 0, y: 20, scale: 0.95 },
-                  animate: isInView
-                    ? { opacity: 1, y: 0, scale: 1 }
-                    : { opacity: 0, y: 20, scale: 0.95 },
-                  transition: {
-                    duration: 0.5,
-                    delay: (index + 1) * 0.1,
-                    ease: [0.22, 1, 0.36, 1],
-                  },
-                };
-                items.push(
-                  <WrappedGridItem
-                    key="consumption"
-                    colSpan={3}
-                    className="hidden lg:block"
-                  >
-                    <motion.div {...graphAnimationProps}>
-                      <div className="p-6">
-                        <div className="flex flex-col lg:flex-row lg:items-start lg:gap-8">
-                          <div className="w-full lg:w-1/4 mb-4 lg:mb-0">
-                            <h3 className="text-2xl sm:text-3xl font-bold font-mono">
-                              Consumption
-                            </h3>
-                            <p className="mt-2 text-sm text-muted-foreground">
-                              {" "}
-                              Consumption between January and December 2025.
-                              Ingestions of traces, observations and evals.
-                            </p>
-                          </div>
-                          <div className="w-full lg:w-3/4 aspect-[21/9] lg:aspect-auto lg:h-[400px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                              <BarChart
-                                data={growthData}
-                                margin={{
-                                  top: 5,
-                                  right: 30,
-                                  left: 20,
-                                  bottom: 5,
-                                }}
-                              >
-                                <CartesianGrid
-                                  strokeDasharray="3 3"
-                                  className="stroke-muted"
-                                />
-                                <XAxis
-                                  dataKey="month"
-                                  className="text-xs"
-                                  tick={{ fill: "currentColor" }}
-                                />
-                                <Tooltip
-                                  contentStyle={{
-                                    backgroundColor: "hsl(var(--card))",
-                                    border: "1px solid hsl(var(--border))",
-                                    borderRadius: "0.5rem",
-                                    padding: "0.5rem",
-                                  }}
-                                  formatter={(value: number) => [
-                                    `${formatGrowth(value)}`,
-                                    "Traffic relative to Dec 25",
-                                  ]}
-                                  labelStyle={{
-                                    color: "hsl(var(--foreground))",
-                                  }}
-                                />
-                                <Bar
-                                  dataKey="growth"
-                                  fill="hsl(var(--primary))"
-                                  radius={[4, 4, 0, 0]}
-                                >
-                                  <LabelList
-                                    dataKey="growth"
-                                    position="inside"
-                                    formatter={formatGrowth}
-                                    fill="hsl(var(--card))"
-                                    style={{
-                                      fontWeight: 600,
-                                      fontSize: "0.75rem",
-                                    }}
-                                  />
-                                </Bar>
-                              </BarChart>
-                            </ResponsiveContainer>
-                          </div>
+            // Insert Monthly Package Downloads graph after the last 3 metrics (index 5 - Peak Tracing)
+            if (index === 5) {
+              const graphAnimationProps = {
+                initial: { opacity: 0, y: 20, scale: 0.95 },
+                animate: isInView
+                  ? { opacity: 1, y: 0, scale: 1 }
+                  : { opacity: 0, y: 20, scale: 0.95 },
+                transition: {
+                  duration: 0.5,
+                  delay: (index + 1) * 0.1,
+                  ease: [0.22, 1, 0.36, 1],
+                },
+              };
+              items.push(
+                <WrappedGridItem key="downloads" colSpan={3}>
+                  <motion.div {...graphAnimationProps}>
+                    <div className="p-6">
+                      <div className="flex flex-col lg:flex-row lg:items-start lg:gap-8">
+                        <div className="w-full lg:w-1/4 mb-4 lg:mb-0">
+                          <h3 className="text-[22px] sm:text-[28px] font-medium font-analog text-text-primary">
+                            Monthly package downloads
+                          </h3>
                         </div>
-                      </div>
-                    </motion.div>
-                  </WrappedGridItem>,
-                );
-              }
-
-              // Insert Monthly Package Downloads graph after the last 3 metrics (index 5 - Peak Tracing)
-              if (index === 5) {
-                const graphAnimationProps = {
-                  initial: { opacity: 0, y: 20, scale: 0.95 },
-                  animate: isInView
-                    ? { opacity: 1, y: 0, scale: 1 }
-                    : { opacity: 0, y: 20, scale: 0.95 },
-                  transition: {
-                    duration: 0.5,
-                    delay: (index + 1) * 0.1,
-                    ease: [0.22, 1, 0.36, 1],
-                  },
-                };
-                items.push(
-                  <WrappedGridItem
-                    key="downloads"
-                    colSpan={3}
-                    className="hidden lg:block"
-                  >
-                    <motion.div {...graphAnimationProps}>
-                      <div className="p-6">
-                        <div className="flex flex-col lg:flex-row lg:items-start lg:gap-8">
-                          <div className="w-full lg:w-1/4 mb-4 lg:mb-0">
-                            <h3 className="text-2xl sm:text-3xl font-bold font-mono">
-                              Monthly Package Downloads
-                            </h3>
-                          </div>
-                          <div className="w-full lg:w-3/4 aspect-[21/9] lg:aspect-auto lg:h-[400px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                              <BarChart
-                                data={downloadData}
-                                margin={{
-                                  top: 5,
-                                  right: 30,
-                                  left: 20,
-                                  bottom: 5,
+                        <SizedChart className="lg:w-3/4">
+                          {({ width, height }) => (
+                            <BarChart
+                              width={width}
+                              height={height}
+                              data={downloadData}
+                              margin={{
+                                top: 5,
+                                right: 30,
+                                left: 20,
+                                bottom: 5,
+                              }}
+                            >
+                              <CartesianGrid
+                                strokeDasharray="3 3"
+                                className="stroke-line-structure"
+                              />
+                              <XAxis
+                                dataKey="month"
+                                className="text-xs"
+                                tick={{ fill: "var(--text-tertiary)" }}
+                              />
+                              <Tooltip
+                                contentStyle={{
+                                  backgroundColor: "var(--surface-bg)",
+                                  border: "1px solid var(--line-structure)",
+                                  borderRadius: "2px",
+                                  padding: "0.5rem",
                                 }}
+                                formatter={(value: number) => [
+                                  `${formatDownloads(value)}`,
+                                  "Downloads",
+                                ]}
+                                labelStyle={{
+                                  color: "var(--text-primary)",
+                                }}
+                              />
+                              <Bar
+                                dataKey="downloads"
+                                fill="var(--text-primary)"
+                                radius={[2, 2, 0, 0]}
                               >
-                                <CartesianGrid
-                                  strokeDasharray="3 3"
-                                  className="stroke-muted"
-                                />
-                                <XAxis
-                                  dataKey="month"
-                                  className="text-xs"
-                                  tick={{ fill: "currentColor" }}
-                                />
-                                <Tooltip
-                                  contentStyle={{
-                                    backgroundColor: "hsl(var(--card))",
-                                    border: "1px solid hsl(var(--border))",
-                                    borderRadius: "0.5rem",
-                                    padding: "0.5rem",
-                                  }}
-                                  formatter={(value: number) => [
-                                    `${formatDownloads(value)}`,
-                                    "Downloads",
-                                  ]}
-                                  labelStyle={{
-                                    color: "hsl(var(--foreground))",
-                                  }}
-                                />
-                                <Bar
+                                <LabelList
                                   dataKey="downloads"
-                                  fill="hsl(var(--primary))"
-                                  radius={[4, 4, 0, 0]}
-                                >
-                                  <LabelList
-                                    dataKey="downloads"
-                                    position="inside"
-                                    formatter={formatDownloads}
-                                    fill="hsl(var(--card))"
-                                    style={{
-                                      fontWeight: 600,
-                                      fontSize: "0.75rem",
-                                    }}
-                                  />
-                                </Bar>
-                              </BarChart>
-                            </ResponsiveContainer>
-                          </div>
-                        </div>
+                                  position="inside"
+                                  formatter={formatDownloads}
+                                  fill="var(--surface-bg)"
+                                  style={{
+                                    fontWeight: 600,
+                                    fontSize: "0.75rem",
+                                  }}
+                                />
+                              </Bar>
+                            </BarChart>
+                          )}
+                        </SizedChart>
                       </div>
-                    </motion.div>
-                  </WrappedGridItem>,
-                );
-              }
+                    </div>
+                  </motion.div>
+                </WrappedGridItem>,
+              );
+            }
 
-              return items;
-            })
-            .flat()}
-        </WrappedGrid>
-      </div>
-    </WrappedSection>
+            return items;
+          })
+          .flat()}
+      </WrappedGrid>
+    </div>
   );
 }

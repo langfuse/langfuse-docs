@@ -21,9 +21,9 @@ This guide outlines the key differences between **[Langfuse](/)** and **[LangSmi
 - **Open data, no lock-in.** Langfuse runs on ClickHouse, [open source and in production for a decade](#storage), and gets data out through [high-volume APIs, scheduled exports, and standard SQL when you self-host](#open-platform). LangSmith Cloud moved traces to SmithDB, a proprietary engine launched in May 2026, and gates bulk export to Enterprise.
 - **Same-day switch.** [Repoint your OpenTelemetry exporter or swap the LangChain environment variables](#switching-from-langsmith) for the Langfuse callback handler; datasets copy over via SDK. Most teams see first traces in Langfuse the same day.
 
-**Choose Langfuse** if the quality layer should outlive your framework choice. LangChain sells the runtime; Langfuse sells only the layer around it, so nothing in the product pulls you toward one agent stack. Self-hosting is MIT-licensed on every plan rather than an Enterprise contract, and one meter covers unlimited users, so reviewers and product managers cost nothing to add. Proven at 21 of the Fortune 50, and on the [worked example](#worked-example) roughly 6x cheaper than LangSmith Plus at list prices, with 3 years of history against a 180-day ceiling. You accept that Langfuse does not run your agents; it traces whichever runtime you pick.
+**Choose Langfuse** if the quality layer should outlive your framework choice. Self-hosting is MIT-licensed on every plan rather than an Enterprise contract, and one meter covers unlimited users, so reviewers and product managers cost nothing to add. Evaluator scores bill as regular units with no separate evaluator fee. On the [worked example](#worked-example) roughly 6x cheaper than LangSmith Plus at list prices, with 3 years of history against a 180-day ceiling. Proven at 21 of the Fortune 50. You accept that Langfuse does not run your agents; it traces whichever runtime you pick.
 
-**Choose LangSmith** if you are all in on LangChain and LangGraph and want one vendor to deploy the agent, observe it, and propose fixes from a single managed platform. You accept lock-in: a seat fee on every invited user, traces in a closed store with bulk export gated to Enterprise, a 180-day SaaS retention ceiling, and self-hosting only on an Enterprise contract.
+**Choose LangSmith** if you are all in on LangChain and LangGraph and want a managed SaaS covering observability, evals, and agent deployment infrastructure in one closed platform. You accept lock-in: a seat fee on every invited user, traces in a closed store with bulk export gated to Enterprise, a 180-day SaaS retention ceiling, and self-hosting only on an Enterprise contract.
 
 ---
 
@@ -128,7 +128,7 @@ Langfuse takes the opposite position on purpose: MIT-licensed, with neither a ru
 
 ## Evaluation and experiments [#evaluation-and-experiments]
 
-Both platforms cover offline and online evaluation. Langfuse runs LLM-as-a-judge and deterministic code evaluators inside the platform and gates CI/CD pipelines on experiment results. Evaluators are part of the platform price and run the same on Cloud and self-hosted, and online scoring does not auto-promote traces into a paid retention tier the way [LangSmith online evaluators do by default](https://docs.langchain.com/langsmith/usage-and-billing#data-retention-auto-upgrades).
+Both platforms cover offline and online evaluation. Langfuse runs LLM-as-a-judge and deterministic code evaluators inside the platform and gates CI/CD pipelines on experiment results. Evaluator scores bill as regular units with no separate evaluator fee, evaluators run the same on Cloud and self-hosted, and online scoring does not auto-promote traces into a paid retention tier the way [LangSmith online evaluators do by default](https://docs.langchain.com/langsmith/usage-and-billing#data-retention-auto-upgrades) (LangSmith lets you opt out per evaluator).
 
 LangSmith pairs its evals with two managed, separately metered services. [Tuned Evaluators](https://www.langchain.com/blog/introducing-langsmith-tuned-evaluators-starting-with-perceived-error) (August 2026) attach LangChain-trained judges to tracing projects, starting with Perceived Error; they are in public beta on Plus and Cloud Enterprise, US Cloud only, each successful evaluation bills 0.01 LCU at $1.50/LCU, and the scored trace auto-upgrades to paid extended retention. LangSmith Engine clusters production failures on a 6-hour schedule and is also metered in LCUs; the [August 2026 Engine release](https://www.langchain.com/blog/new-in-langsmith-engine-2x-better-issue-detection) reports over 2x better issue detection on LangChain's internal benchmarks, self-hosted availability, and a Reduced Analysis mode to contain LCU cost. Engine runs only on LangChain-managed inference: no bring-your-own-key, US-only, and [even self-hosted Engine sends trace and code content to LangChain's cloud](https://docs.langchain.com/langsmith/engine-self-hosted); air-gapped installs cannot run it. Langfuse instead gives you [evaluators](/docs/evaluation/core-concepts#evaluators-and-rules) on your own model keys, [alerts](/docs/observability/features/alerts) to Slack or webhooks, an [Assistant](/docs/langfuse-assistant) that clusters failures on demand, and an [MCP server](/docs/observability/features/agentic-access) so the coding agent you already use ships the fix.
 
@@ -199,7 +199,7 @@ Both products publish SOC 2 Type II, ISO 27001, GDPR, and HIPAA. Langfuse signs 
 
 ## Which should you choose [#which-should-you-choose]
 
-Choose **Langfuse** if you want **an independent, open-source platform that adapts to your stack**: OpenTelemetry-based instrumentation for any framework, MIT self-hosting with SSO and org RBAC included, observability data in an open database you can query directly, and unit pricing with no seat fees.
+Choose **Langfuse** if you want **an independent, open-source platform that adapts to your stack**: OpenTelemetry-based instrumentation for any framework, MIT self-hosting with SSO and org RBAC included, LLM-as-a-judge and code evaluators with CI/CD gates on the same traces, observability data in an open database you can query directly, and unit pricing with no seat fees.
 
 Choose **LangSmith** if you are committed to LangChain and LangGraph and want **one vendor to host the agent runtime, observe it, and propose fixes**: zero-config instrumentation and managed deployment for their frameworks, Fleet for no-code agents, and Engine's scheduled issue detection with proposed fixes.
 
@@ -255,49 +255,86 @@ Start on [Langfuse Cloud](https://cloud.langfuse.com) (Hobby: 50k units/mo, no c
 
 ## FAQ [#faq]
 
-### Is Langfuse the best LangSmith alternative? [#is-langfuse-the-best-langsmith-alternative]
+<FaqDetails>
+
+<Details id="is-langfuse-the-best-langsmith-alternative">
+<Summary>Is Langfuse the best LangSmith alternative?</Summary>
 
 Yes, if you want an independent open-source platform to trace, evaluate, and improve agents without adopting LangChain's runtime suite. See [Which should you choose](#which-should-you-choose).
 
-### Does Langfuse cover the same product areas as LangSmith? [#does-langfuse-cover-the-same-product-areas]
+</Details>
+
+<Details id="does-langfuse-cover-the-same-product-areas">
+<Summary>Does Langfuse cover the same product areas as LangSmith?</Summary>
 
 For the AI engineering workflow, yes. [Tracing](/docs/observability/overview), [prompt management](/docs/prompt-management/overview), [evaluation](/docs/evaluation/overview), and [experiments](/docs/evaluation/experiments/datasets) are natively integrated in one Langfuse project, from prototype to production scale. What Langfuse deliberately does not do is host or run your agents; it works with [any runtime you choose](#integrations) instead.
 
-### How does LangSmith pricing compare to Langfuse? [#how-does-langsmith-pricing-compare-to-langfuse]
+</Details>
+
+<Details id="how-does-langsmith-pricing-compare-to-langfuse">
+<Summary>How does LangSmith pricing compare to Langfuse?</Summary>
 
 LangSmith Plus is $39/seat/month with 10,000 base traces included, plus per-trace usage and optional retention upgrades (as of September 2026). Langfuse Cloud Hobby includes 50,000 units/month, Core starts at $29/month, and the MIT distribution is free to self-host. On the rates in our [editable public model](/pricing-comparison-sheet), 500k traces / 10 spans / 1 score / 5 users / 12-month retention is **$621** Langfuse Pro vs **$3,895** LangSmith Plus (the LangSmith figure uses the extended-retention rate; LangSmith SaaS caps retention at 180 days, below the example's 12 months). We bill every span; they bill the trace, so span depth changes the crossover. Details in the [pricing section](#pricing).
 
-### Does Langfuse have production alerting? [#does-langfuse-have-alerting]
+</Details>
+
+<Details id="does-langfuse-have-alerting">
+<Summary>Does Langfuse have production alerting?</Summary>
 
 Yes. [Langfuse Alerts](/docs/observability/features/alerts) watch any observation or score metric with filters and aggregations, support separate warning and alert thresholds with no-data handling, and deliver to Slack, webhooks, or GitHub Actions. They are available on Langfuse Cloud and self-hosted v4+. Third-party comparisons claiming Langfuse has no alerting are out of date.
 
-### Does Langfuse run deterministic evaluators on production traffic? [#does-langfuse-run-code-evaluators]
+</Details>
+
+<Details id="does-langfuse-run-code-evaluators">
+<Summary>Does Langfuse run deterministic evaluators on production traffic?</Summary>
 
 Yes. [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) run custom Python or TypeScript logic on live observations and on experiments, and they are generally available. Self-hosted deployments configure a [code evaluator dispatcher](/self-hosting/configuration/code-evaluators).
 
-### Is LangSmith open source? [#is-langsmith-open-source]
+</Details>
+
+<Details id="is-langsmith-open-source">
+<Summary>Is LangSmith open source?</Summary>
 
 No. The LangSmith platform (backend, UI, storage, including [SmithDB](https://www.langchain.com/blog/introducing-smithdb), launched 2026) is closed source. LangChain, LangGraph, and the LangSmith client SDKs are MIT open source. Langfuse is MIT and [self-hostable](/self-hosting) on [ClickHouse](#storage), open source since 2016.
 
-### Does LangSmith require LangChain? [#does-langsmith-require-langchain]
+</Details>
+
+<Details id="does-langsmith-require-langchain">
+<Summary>Does LangSmith require LangChain?</Summary>
 
 No. LangSmith accepts OpenTelemetry and non-LangChain SDKs ([docs](https://docs.langchain.com/langsmith/trace-with-opentelemetry)). The lowest-friction path is still LangChain and LangGraph. Managed Deep Agents, Fleet, and LangSmith Deployment are scoped to their suite.
 
-### Can I self-host LangSmith? [#can-i-self-host-langsmith]
+</Details>
+
+<Details id="can-i-self-host-langsmith">
+<Summary>Can I self-host LangSmith?</Summary>
 
 On the Enterprise plan. As of LangSmith Self-Hosted v0.16, SmithDB, Engine, and Sandboxes are available to self-hosted customers, with SmithDB in public beta behind a waitlist. The LLM Gateway is [not in the v0.16 stable release](https://docs.langchain.com/langsmith/llm-gateway); self-hosted access is by request. Tuned Evaluators are [US Cloud only](https://www.langchain.com/pricing) and do not run in self-hosted or BYOC deployments.
 
-### Does LangSmith offer a BAA for HIPAA? [#does-langsmith-offer-a-baa]
+</Details>
+
+<Details id="does-langsmith-offer-a-baa">
+<Summary>Does LangSmith offer a BAA for HIPAA?</Summary>  
 
 LangSmith states that it is [HIPAA compliant](https://docs.langchain.com/langsmith/regions-faq) but does not publish which plan includes a Business Associate Agreement; ask their sales team. Langfuse signs a BAA from the Pro plan ($199/month) in its dedicated [HIPAA region](/security/hipaa).
 
-### How do I migrate from LangSmith to Langfuse? [#how-do-i-migrate-from-langsmith]
+</Details>
+
+<Details id="how-do-i-migrate-from-langsmith">
+<Summary>How do I migrate from LangSmith to Langfuse?</Summary>
 
 Follow the [step-by-step migration guide](/resources/engineering/migrate-from-langsmith). LangSmith's OpenTelemetry mode can fan traces out to Langfuse and LangSmith in parallel while you verify, LangChain and LangGraph apps add the [Langfuse callback handler](/integrations/frameworks/langchain), and datasets and Prompt Hub prompts copy over via the SDK. Most teams see first traces the same day. See [Switching from LangSmith](#switching-from-langsmith).
 
-### What is SmithDB? [#what-is-smithdb]
+</Details>
+
+<Details id="what-is-smithdb">
+<Summary>What is SmithDB?</Summary>
 
 SmithDB is LangSmith's proprietary trace database ([launched May 13, 2026](https://www.langchain.com/blog/introducing-smithdb)), written in Rust on Apache DataFusion and Vortex, with trace data on object storage. LangChain reports up to 15× faster core experiences. Langfuse runs on ClickHouse, open source since 2016, with an observations-first data model, so Cloud and self-hosted share the same architecture. See [Storage: ClickHouse vs SmithDB](#storage).
+
+</Details>
+
+</FaqDetails>
 
 <Callout type="info">
   This comparison is out of date? Please [raise a pull request](https://github.com/langfuse/langfuse-docs/blob/main/content/compare/langsmith.mdx) with up-to-date information.

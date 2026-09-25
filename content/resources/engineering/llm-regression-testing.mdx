@@ -252,22 +252,41 @@ Choose Promptfoo when you want a self-contained local harness and have no observ
 
 ## FAQ
 
-### How many dataset items does a CI regression gate need? [#how-many-items]
+<FaqDetails>
+
+<Details id="how-many-items">
+<Summary>How many dataset items does a CI regression gate need?</Summary>
 
 Enough to cover your known failure modes, and small enough to run on every pull request: tens to low hundreds of items is the practical range for a PR gate. Below roughly 20 items, one flaky output moves an average score by 5 percentage points or more, which makes thresholds noisy. Keep a larger full regression set for release branches or nightly runs, where latency and evaluation cost matter less.
 
-### How do I keep LLM judges from making CI flaky? [#flaky-judges]
+</Details>
+
+<Details id="flaky-judges">
+<Summary>How do I keep LLM judges from making CI flaky?</Summary>
 
 Make the judge as deterministic as you can: pin the judge model version, use a binary pass/fail verdict with an explicit rubric instead of a 1-to-10 scale, and request structured JSON output. Averaging over the whole dataset dampens single-item noise, and setting the threshold with a margin below your baseline (for example 0.8 when the baseline is 0.88) absorbs normal variance. For checks that must never flake, use deterministic code evaluators as the blocking gate and treat judge metrics as warnings until they prove stable.
 
-### How do I test a model upgrade before rolling it out? [#model-upgrades]
+</Details>
+
+<Details id="model-upgrades">
+<Summary>How do I test a model upgrade before rolling it out?</Summary>
 
 Run the same regression experiment with the new model against the same golden dataset, ideally pinned to the same dataset version, and compare the runs in the experiment comparison view. Record the model name in the experiment metadata so runs stay attributable. This works for provider-forced upgrades too: when a model you depend on is deprecated, the gate tells you whether the replacement clears your thresholds before production does.
 
-### When should a regression block the merge instead of warning? [#block-vs-warn]
+</Details>
+
+<Details id="block-vs-warn">
+<Summary>When should a regression block the merge instead of warning?</Summary>
 
 Block on deterministic metrics with clear pass criteria, such as format validity, required-content checks, and safety patterns, plus any judge metric that has been stable across enough runs to trust. Warn on judge metrics you are still calibrating: run them in the experiment and post them to the PR comment, but keep them out of the `RegressionError` thresholds (or set `should_fail_on_regression: false` in a separate advisory workflow). Promote a metric from warning to blocking once its baseline has held steady and false alarms have stopped.
 
-### Can I migrate from Promptfoo to Langfuse regression gates? [#migrate-from-promptfoo]
+</Details>
+
+<Details id="migrate-from-promptfoo">
+<Summary>Can I migrate from Promptfoo to Langfuse regression gates?</Summary>
 
 Yes. The concepts map directly: Promptfoo test cases become Langfuse dataset items, assertions become evaluator functions, and the CI invocation becomes `langfuse/experiment-action`. See the step-by-step guide to [migrating from Promptfoo](/resources/engineering/migrate-from-promptfoo) for the concept mapping and code before-and-after.
+
+</Details>
+
+</FaqDetails>

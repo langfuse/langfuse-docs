@@ -193,26 +193,48 @@ The interesting traces are the ones where the judge and the user disagree: a thu
 
 ## FAQ
 
-### How do I collect user feedback on LLM responses? [#collect-user-feedback]
+<FaqDetails>
+
+<Details id="collect-user-feedback">
+<Summary>How do I collect user feedback on LLM responses?</Summary>
 
 Attach each signal as a score to the trace that produced the response. Explicit ratings go from the frontend through the Langfuse browser SDK, which needs only your public key and a trace ID your backend returns with the response; implicit signals such as edited drafts or closed tickets are written from the backend with `create_score`. Use a stable score ID so a changed rating overwrites the old one.
 
-### How do I find traces with negative user feedback? [#find-negative-feedback]
+</Details>
+
+<Details id="find-negative-feedback">
+<Summary>How do I find traces with negative user feedback?</Summary>
 
 Filter the traces or observations table by score name and value, for example a boolean `response_rating` equal to false, combined with a time range, trace name, or user ID. Score filters match by name regardless of the level the score sits on. From the filtered table you can select rows and add them to a dataset or an annotation queue in one action.
 
-### What should the expected output of a feedback-derived item be? [#expected-output]
+</Details>
+
+<Details id="expected-output">
+<Summary>What should the expected output of a feedback-derived item be?</Summary>
 
 The answer a domain expert would have given, not the answer the user disliked. Langfuse stores such answers as corrected outputs on any trace or observation, persisted as scores with `dataType: "CORRECTION"`, which you can fetch via the scores API or have reviewers add in an annotation queue. If no reference exists, leave the expected output empty and use reference-free checks.
 
-### Can I run experiments on a dataset that keeps changing? [#dataset-versioning]
+</Details>
+
+<Details id="dataset-versioning">
+<Summary>Can I run experiments on a dataset that keeps changing?</Summary>
 
 Yes. Every add, update, delete, or archive of a dataset item creates a timestamped dataset version. The SDK's `get_dataset` accepts a `version` timestamp and `langfuse/experiment-action` accepts `dataset_version`, so an experiment or CI gate runs against the dataset as it was at that time while new feedback flows into the latest version.
 
-### How do I use user feedback to calibrate an LLM-as-a-judge? [#calibrate-judge]
+</Details>
+
+<Details id="calibrate-judge">
+<Summary>How do I use user feedback to calibrate an LLM-as-a-judge?</Summary>
 
 Give the judge a score type that mirrors the feedback signal, run it on the same traces, and compare the two scores in Score Analytics, which reports Cohen's Kappa, F1, and overall agreement on matched traces plus a confusion matrix. Disagreements are the calibration set: read them, tighten the judge rubric, and re-run.
 
-### Should user feedback go into the same dataset as hand-written test cases? [#separate-datasets]
+</Details>
+
+<Details id="separate-datasets">
+<Summary>Should user feedback go into the same dataset as hand-written test cases?</Summary>
 
 Usually not. Feedback-derived items drift with your traffic, while hand-written cases encode requirements that may never appear in production. Keep them in separate datasets, side by side in a folder, so CI gates on a small, stable set while the larger feedback set runs on a schedule.
+
+</Details>
+
+</FaqDetails>

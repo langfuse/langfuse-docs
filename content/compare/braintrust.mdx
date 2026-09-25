@@ -23,7 +23,7 @@ This guide outlines the key differences between **[Langfuse](/)** and **[Braintr
 
 **Choose Langfuse** if you want to own the platform: run the whole application yourself or on Langfuse Cloud, export the data to your warehouse or query it in SQL when self-hosted, and pay one meter that prices an evaluation score like a trace. On a 500k-trace month [roughly half the price](#worked-example) of Braintrust Pro at list prices with 3 years of history instead of 30 days. Proven at 21 of the Fortune 50. You accept a less packaged workbench, and operating the stack yourself when you self-host; nothing about your traces, scores, or exports depends on Braintrust's cloud.
 
-**Choose Braintrust** if you need packaged workbench: zero-setup sentiment and issue classification of production logs, repeated trials with statistical summaries in experiment review, or a data plane that the vendor operates inside your own cloud account (Enterprise). You accept lock-in: traces in a proprietary store reachable only through Braintrust's APIs, a UI and login that always run on Braintrust's cloud, and processed-GB, per-score, and retention meters with a 180-day ceiling below Enterprise.
+**Choose Braintrust** if you  want a closed, vendor-managed workbench for experiment review, sentiment and issue classification of logs, repeated trials with statistical summaries in experiment review, or a data plane that the vendor operates inside your own cloud account (Enterprise). You accept lock-in: traces in a proprietary store reachable only through Braintrust's APIs, a UI and login that always run on Braintrust's cloud, and processed-GB, per-score, and retention meters with a 180-day ceiling below Enterprise.
 
 ---
 
@@ -113,7 +113,7 @@ See [Langfuse pricing](/pricing) for current rates, [start free](https://cloud.l
 
 ## Observability and monitoring [#observability-and-monitoring]
 
-Langfuse starts from production tracing: complete traces at high volume with [token and cost tracking](/docs/observability/features/token-and-cost-tracking) and [Pulse](/changelog/2026-07-28-langfuse-pulse) outlier detection on the same observations table, SDK-level [sampling](/docs/observability/features/sampling) to cap ingestion volume at the source, and [masking](/docs/observability/features/masking) that redacts sensitive fields before they leave your process.
+Langfuse evaluations run on your real production traces: Langfuse records complete traces at high volume with [token and cost tracking](/docs/observability/features/token-and-cost-tracking) and [Pulse](/changelog/2026-07-28-langfuse-pulse) outlier detection on the same observations table, and SDK-level [sampling](/docs/observability/features/sampling) caps ingestion volume at the source, and [masking](/docs/observability/features/masking) that redacts sensitive fields before they leave your process.
 
 Braintrust's Observe covers trace inspection, monitoring, and [Topics](https://www.braintrust.dev/docs/observe/topics), a daily pipeline that classifies logs by intent, sentiment, and issues. Topics' model calls are served from Braintrust-hosted endpoints in every deployment mode, including BYOC and self-hosted, with zero data retention at the model host. Trace text crosses your deployment boundary even when the data plane runs in your cloud. [Patterns, Debugger, and an expanded Loop](https://www.braintrust.dev/blog/active-observability-loop-patterns-debugger), Braintrust's automated analysis of production traces, have been in public preview since September 3, 2026, with pricing to follow before general availability. Telemetry arrives via SDK wrappers or [OTLP traces](https://www.braintrust.dev/docs/integrations/sdk-integrations/opentelemetry). Langfuse ingests [OpenTelemetry](/integrations/native/opentelemetry) natively and ships [100+ framework and provider integrations](/integrations), with the SDKs sending telemetry asynchronously outside the request path.
 
@@ -195,7 +195,7 @@ Langfuse publishes [SOC 2 Type II, ISO 27001, GDPR, and HIPAA](/security) and si
 
 ## Which should you choose [#which-should-you-choose]
 
-Choose **Langfuse** if your deciding constraints are infrastructure and scale: the whole platform needs to run in your environment, you want trace data in your own warehouse or queryable in SQL when self-hosting, or production volume makes a per-request meter the safer budget. The full evaluation stack (judges, code evaluators, experiments, annotation) comes with it in the same project.
+Choose **Langfuse** if you want evaluation and observability on the same production data: judges, code evaluators, experiments, and annotation run in the same project as your traces, the whole platform can run in your environment, and self-hosted deployments can query trace data directly in SQL. At production volume, a per-request meter is also the safer budget.
 
 Choose **Braintrust** if your deciding constraint is a vendor-managed review workbench: repeated trials with statistical summaries, zero-setup classification of production logs through Topics, and, on Enterprise, a data plane Braintrust operates inside your own cloud account.
 
@@ -208,7 +208,7 @@ The same reasons recur in migration conversations. Cost leads, and it is the met
 - **Size-metered ingestion.** Cost follows payload size on the [GB meter](#pricing), not request count, so high-volume applications with many simple traces feel it hardest.
 - **Scores are their own meter.** Every score is a metered charge, so evaluation coverage becomes a budget decision ([worked example](#worked-example)).
 - **Retention is short and metered.** Keeping data past the included window bills per GB monthly and [caps at 180 days on Pro](#pricing), so multi-year lookback needs an Enterprise contract.
-- **Packaged workflows, not composable primitives.** Braintrust's discovery features run on the vendor's schedule and the vendor's models, and several are still in public preview without published pricing. Teams that want to compose their own quality pipeline from [APIs, OpenTelemetry, and exports](#open-platform) find Langfuse's primitives easier to fit into existing infrastructure.
+- **Packaged workflows, not composable primitives.** Braintrust's discovery features run on the vendor's schedule and the vendor's models, and several are still in public preview without published pricing. Teams whose main need is production tracing end up paying for an experiment-review package they use as a logging system. Langfuse runs [production tracing](#observability-and-monitoring) and [evaluation](#evaluation-and-experiments) on the same observations table and the same unit meter. Teams that want to compose their own quality pipeline from [APIs, OpenTelemetry, and exports](#open-platform) find Langfuse's primitives easier to fit into existing infrastructure.
 - **Getting data out takes work.** Bulk export from Braintrust means cursor pagination in 1,000-record pages or the CLI; automated cloud-storage export is Enterprise-gated, and there is no direct database access. Langfuse pairs [high-volume read APIs and blob-storage export](#open-platform) with direct SQL on ClickHouse when self-hosting.
 - **Compliance means Enterprise.** A BAA for HIPAA, SAML SSO, and automated export all require a Braintrust Enterprise contract. Langfuse signs a [BAA from Pro](#enterprise-security) and includes SSO in the free self-hosted distribution.
 - **Full self-hosting is not offered.** Braintrust's self-hosted option covers the data plane only, requires Enterprise, and keeps a runtime dependency on Braintrust's cloud for UI and auth. When something breaks in closed software, only the vendor can diagnose and fix it. On Langfuse, [running the whole application yourself](#open-source-and-distribution) is a first-class deployment mode, open source down to ClickHouse ([open source since 2016](https://clickhouse.com/blog/open-source-10)). Brainstore is a [proprietary engine launched in 2025](https://www.braintrust.dev/blog/brainstore).
@@ -251,41 +251,72 @@ Start on [Langfuse Cloud](https://cloud.langfuse.com) (Hobby: 50k units/mo, no c
 
 ## FAQ [#faq]
 
-### Is Langfuse the best Braintrust alternative? [#is-langfuse-the-best-braintrust-alternative]
+<FaqDetails>
+
+<Details id="is-langfuse-the-best-braintrust-alternative">
+<Summary>Is Langfuse the best Braintrust alternative?</Summary>
 
 Yes, if you want an open-source platform where production observability, evaluation, and prompt management run on infrastructure you can inspect, query, and self-host. See [Which should you choose](#which-should-you-choose).
 
-### Is Braintrust open source? [#is-braintrust-open-source]
+</Details>
+
+<Details id="is-braintrust-open-source">
+<Summary>Is Braintrust open source?</Summary>
 
 No. The Braintrust platform, control plane, and [Brainstore](https://www.braintrust.dev/blog/brainstore) storage engine (launched 2025) are closed source; the SDKs and the [autoevals](https://github.com/braintrustdata/autoevals) evaluator library are open source. Langfuse is MIT-licensed and [self-hostable](/self-hosting) on [ClickHouse](#storage), open source since 2016.
 
-### Can I self-host Braintrust? [#can-i-self-host-braintrust]
+</Details>
+
+<Details id="can-i-self-host-braintrust">
+<Summary>Can I self-host Braintrust?</Summary>
 
 Partially. On the Enterprise plan, the data plane (traces, datasets, prompts) can run in your AWS, GCP, or Azure account, while the control plane (UI, authentication, platform management) is always operated by Braintrust. Langfuse self-hosts the entire application on every tier; see [Open source and distribution](#open-source-and-distribution).
 
-### Is Langfuse only an observability tool? [#is-langfuse-only-an-observability-tool]
+</Details>
+
+<Details id="is-langfuse-only-an-observability-tool">
+<Summary>Is Langfuse only an observability tool?</Summary>
 
 No. Tracing, prompt management, LLM-as-a-judge and code evaluators, datasets, experiments, annotation queues, dashboards, and alerts ship as one integrated platform in the same project. See the [clarifications page](/resources/engineering/clarifications) for dated, linked facts.
 
-### Can product managers work in Langfuse without engineering handoffs? [#can-product-managers-work-in-langfuse]
+</Details>
+
+<Details id="can-product-managers-work-in-langfuse">
+<Summary>Can product managers work in Langfuse without engineering handoffs?</Summary>
 
 Yes. Non-engineers iterate in the [playground](/docs/prompt-management/features/playground), edit and deploy prompt versions via [labels](/docs/prompt-management/features/prompt-version-control) that applications fetch at runtime (no redeploy), run [experiments from the UI](/docs/evaluation/experiments/experiments-via-ui), and review outputs in [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues). Read the [Canva](/users/canva) case study: a marketing manager set up a dedicated LLM-as-a-judge evaluator without engineering help.
 
-### Can I keep my autoevals scorers? [#can-i-keep-my-autoevals-scorers]
+</Details>
+
+<Details id="can-i-keep-my-autoevals-scorers">
+<Summary>Can I keep my autoevals scorers?</Summary>
 
 Yes. autoevals is an open-source library, and Langfuse's experiment SDKs include converters that run autoevals scorers unchanged. See the [migration guide](/resources/engineering/migrate-from-braintrust#keep-autoevals).
 
-### How does Braintrust pricing compare to Langfuse? [#how-does-braintrust-pricing-compare-to-langfuse]
+</Details>
+
+<Details id="how-does-braintrust-pricing-compare-to-langfuse">
+<Summary>How does Braintrust pricing compare to Langfuse?</Summary>
 
 The meters differ: Langfuse counts traces, observations, and scores as units (Core starts at $29/month with unlimited users); Braintrust bills processed data per GB, plus per-score charges, retention, and model credits for AI features. On the rates in our [editable public model](/pricing-comparison-sheet), 500k traces / 10 spans / 5 KB per span / 1 score per trace / 12-month retention is **$621** Langfuse Pro vs **$1,122** Braintrust Pro at published rates (Braintrust Pro caps retention at 180 days, so a full year in practice requires Enterprise). Which is cheaper depends on payload size, score density, retention, and volume; details in the [worked example](#worked-example).
-
-### Does Braintrust offer a BAA for HIPAA? [#does-braintrust-offer-a-baa]
+  
+</Details>
+  
+<Details id="does-braintrust-offer-a-baa">
+<Summary>Does Braintrust offer a BAA for HIPAA?</Summary>  
 
 Braintrust lists Business Associate Agreements as [available on Enterprise plans](https://www.braintrust.dev/pricing); the Starter and Pro plans do not include one. Langfuse signs a BAA from the Pro plan in its dedicated [HIPAA region](/security/hipaa), and eligible early-stage teams can combine it with the [startup program](/startups). Details in [Enterprise security](#enterprise-security).
+  
+</Details>
 
-### How do I migrate from Braintrust to Langfuse? [#how-do-i-migrate-from-braintrust]
+<Details id="how-do-i-migrate-from-braintrust">
+<Summary>How do I migrate from Braintrust to Langfuse?</Summary>
 
 Run both in parallel, swap the SDK wrappers or repoint your OpenTelemetry exporter, import datasets via API, and keep your autoevals scorers. Most teams see first traces the same day; history stays in Braintrust. Follow the [migration guide](/resources/engineering/migrate-from-braintrust) or see [Switching from Braintrust](#switching-from-braintrust).
+
+</Details>
+
+</FaqDetails>
 
 <Callout type="info">
   This comparison is out of date? Please [raise a pull request](https://github.com/langfuse/langfuse-docs/blob/main/content/compare/braintrust.mdx) with up-to-date information.

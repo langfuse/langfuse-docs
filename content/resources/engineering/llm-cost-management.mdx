@@ -217,6 +217,13 @@ highest-spend segments show you where to start. The recurring levers:
 - **Cap loops and retries.** Sort traces by cost to find outliers; runaway agent loops and
   retry storms show up as single traces costing hundreds of times the median.
 
+For sustained, high-volume production workloads, it is also worth evaluating dedicated
+inference capacity. Providers such as
+[Morph](https://www.morphllm.com/dedicated-inference) offer reserved capacity with managed
+model serving, trading per-token pricing for a fixed reservation. Compare the reservation
+against your measured usage, including idle time, to see whether it fits your traffic
+pattern.
+
 ## LLM cost management in Langfuse [#llm-cost-management-in-langfuse]
 
 Langfuse covers the four layers as follows:
@@ -240,7 +247,10 @@ total daily cost. Everything else can follow once those numbers are trusted.
 
 ## FAQ [#faq]
 
-### How do we track LLM costs for Amazon Bedrock inference profiles? [#faq-bedrock-inference-profiles]
+<FaqDetails>
+
+<Details id="faq-bedrock-inference-profiles">
+<Summary>How do we track LLM costs for Amazon Bedrock inference profiles?</Summary>
 
 Bedrock calls report the inference profile ID or ARN as the model string, for example a
 region-prefixed identifier rather than the plain model name, so built-in price lists will
@@ -249,7 +259,10 @@ matches the exact string your traces report, with the per-token prices from your
 pricing. User-defined models take priority over Langfuse-maintained ones, so the mapping
 applies to all new generations.
 
-### How do we track the cost of paid tool calls or third-party APIs? [#faq-tool-call-costs]
+</Details>
+
+<Details id="faq-tool-call-costs">
+<Summary>How do we track the cost of paid tool calls or third-party APIs?</Summary>
 
 In Langfuse, cost is tracked on observations of type `generation` and `embedding`, and both
 usage types and cost details accept arbitrary keys. For a paid tool call (a search API, a
@@ -258,14 +271,20 @@ server-side code execution), either record it as its own generation-type observa
 calling model's definition. Both approaches roll the tool cost into the same per-user and
 per-session aggregates as token spend.
 
-### Can we see LLM cost per user or per session? [#faq-per-user-session-cost]
+</Details>
+
+<Details id="faq-per-user-session-cost">
+<Summary>Can we see LLM cost per user or per session?</Summary>
 
 Yes, provided you propagate the identifiers at trace time. In Langfuse, cost is broken down
 by user, session, model, and prompt version in the UI and dashboards once `user_id` and
 `session_id` are set on your observations, and the Metrics API returns the same aggregates
 filtered by user or session for external systems.
 
-### Why does our tracked LLM cost differ from the provider invoice? [#faq-cost-mismatch]
+</Details>
+
+<Details id="faq-cost-mismatch">
+<Summary>Why does our tracked LLM cost differ from the provider invoice?</Summary>
 
 Work through four causes in order. First, ingested vs. inferred: costs computed from token
 counts and a price list drift when the price list is wrong, so prefer ingesting the
@@ -275,7 +294,10 @@ unmatched or mismatched model name prices calls at zero or at the wrong rate. Fo
 timing: Langfuse calculates inferred cost at ingestion with the prices known then, so later
 price changes apply only to new generations.
 
-### Can we get an alert before LLM spend spikes? [#faq-llm-spend-alerts]
+</Details>
+
+<Details id="faq-llm-spend-alerts">
+<Summary>Can we get an alert before LLM spend spikes?</Summary>
 
 Yes. Langfuse alerts evaluate cost metrics such as summed observation cost over windows
 from an hour to a week, with warning and alert thresholds and notifications to Slack,
@@ -283,9 +305,16 @@ webhooks, or GitHub Actions. Filters restrict an alert to a model, environment, 
 user segment, so you can alert separately on production spend and on a single expensive
 feature. For hard enforcement rather than notification, set budgets at your gateway.
 
-### We fixed a model price. Why are old traces still wrong? [#faq-price-updates]
+</Details>
+
+<Details id="faq-price-updates">
+<Summary>We fixed a model price. Why are old traces still wrong?</Summary>
 
 Langfuse infers cost at ingestion time using the model definition available at that moment,
 and an updated definition applies to new generations only. This is deliberate: historical
 cost reflects what the calls actually cost under the prices in effect. Verify the fix by
 checking a fresh trace, not by re-reading old ones.
+
+</Details>
+
+</FaqDetails>

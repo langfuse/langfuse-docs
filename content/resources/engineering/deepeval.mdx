@@ -151,17 +151,30 @@ Use DeepEval with Langfuse when your team has already standardized on DeepEval m
 
 ## FAQ [#faq]
 
-### Can DeepEval run inside a Langfuse code evaluator?
+<FaqDetails>
+
+<Details id="can-deepeval-run-inside-a-langfuse-code-evaluator">
+<Summary>Can DeepEval run inside a Langfuse code evaluator?</Summary>
 
 No. Langfuse [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) provide the language standard library only, and third-party packages are not available in the evaluator runtime (as of July 2026). Run DeepEval in your own Python process and send the results to Langfuse via `create_score` or experiment evaluators.
 
-### Do I need to replace DeepEval to use Langfuse evaluations?
+</Details>
+
+<Details id="do-i-need-to-replace-deepeval-to-use-langfuse-evaluations">
+<Summary>Do I need to replace DeepEval to use Langfuse evaluations?</Summary>
 
 No. DeepEval results land in the same score data model that Langfuse-managed evaluators use. You can keep DeepEval as your metric library and use Langfuse for storing, charting, and comparing the results.
 
-### How do DeepEval results appear in Langfuse?
+</Details>
+
+<Details id="how-do-deepeval-results-appear-in-langfuse">
+<Summary>How do DeepEval results appear in Langfuse?</Summary>
 
 Each metric result becomes a score with a name, a numeric value, and an optional comment. Storing DeepEval's `reason` output in the comment keeps the metric's explanation visible next to the trace. Scores attached to experiment runs show up in the experiment comparison view.
+
+</Details>
+
+</FaqDetails>
 
 ## More examples [#more-examples]
 

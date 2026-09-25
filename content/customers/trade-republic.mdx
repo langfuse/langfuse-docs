@@ -1,0 +1,70 @@
+---
+title: "How Trade Republic migrates live LLM workflows to agentic harnesses with Langfuse"
+seoTitle: "How Trade Republic migrates live LLM workflows to agentic harnesses with Langfuse"
+date: September 18, 2026
+description: "Trade Republic's Ops Tools team on self-hosted Langfuse, and how homework and exam datasets make migrating production LLM processes to ReAct agents safer."
+ogImage:
+tag: customer-story
+customerLogo: "/images/customers/trade-republic/trade-republic-light.png"
+customerLogoDark: "/images/customers/trade-republic/trade-republic-dark.png"
+customerQuote: "We're using the open-source self-hosted version of Langfuse and we don't see any limitations there. We're super happy with it."
+customerQuoteHighlight: "don't see any limitations"
+customerQuoteTag: "Video story"
+quoteAuthor: "Paolo Tamagnini"
+quoteRole: "Senior Data Scientist"
+quoteCompany: "Trade Republic"
+ctaLabel: "Watch"
+showInCustomerIndex: true
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { CustomerQuote } from "@/components/customers/CustomerQuote";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+
+<BlogHeader
+  title="How Trade Republic migrates live LLM workflows to agentic harnesses with Langfuse"
+  description="Trade Republic's Ops Tools team on self-hosted Langfuse, and how homework and exam datasets make migrating production LLM processes to ReAct agents safer."
+  customerLogo="/images/customers/trade-republic/trade-republic-light.png"
+  date="September 18, 2026"
+/>
+
+<iframe
+  width="100%"
+  src="https://www.youtube-nocookie.com/embed/spDdtN__nQQ?rel=0"
+  title="How Trade Republic migrates live LLM workflows to agentic harnesses with Langfuse"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerPolicy="strict-origin-when-cross-origin"
+  className="aspect-video w-full rounded border mt-2"
+  allowFullScreen
+></iframe>
+
+<p className="text-sm text-primary/60 mt-2 mb-8">
+  <a href="https://www.youtube.com/watch?v=spDdtN__nQQ">Watch on YouTube</a>
+</p>
+
+## Highlights from the talk [#highlights-from-the-talk]
+
+[Trade Republic](https://traderepublic.com/) is one of Europe's largest fintechs and a fully licensed bank, with over 10 million customers and €150 billion in assets under management. In this talk, Paolo Tamagnini (Senior Data Scientist, Ops Tools) explains how the team uses [self-hosted](/self-hosting) Langfuse to migrate production LLM processes - sequenced prompts with predetermined flows - into more modern ReAct agent architectures with tools.
+
+They started with Langfuse about two years ago on Postgres, then upgraded to ClickHouse when they moved to a newer version, and rolled it out from a single team to more teams while clearing bank compliance requirements.
+
+<CustomerQuote
+  quote="We're using the open-source self-hosted version of Langfuse and we don't see any limitations there. We're super happy with it."
+  name="Paolo Tamagnini"
+  role="Senior Data Scientist"
+  company="Trade Republic"
+/>
+
+Many of their early "LLM processes" were easy for product teams to sketch in Figma and inspect in Langfuse: summarize an incident, classify it, score severity, trigger an action. That pattern worked well with earlier models. As reasoning models improved, they wanted agentic setups where a single prompt calls tools instead of a fixed chain of isolated prompts - but the workflows were already in production, so a naive rewrite was too risky.
+
+Their answer is Langfuse plus the evaluation flywheel: [trace](/docs/observability/overview) every run, [score](/docs/evaluation/scores/overview) good and bad examples (human annotation, deterministic checks, or [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)), fix failures (including via coding agents connected through the Langfuse MCP or CLI), and store cases in [datasets](/docs/evaluation/experiments/datasets). For architecture migrations they split data into a homework set (for iterating prompts and tools) and an exam set (held-out topics so coding agents cannot few-shot memorize the fix). An LLM judge compares the deployed workflow against the ReAct agent; only when both sets pass do they ship.
+
+<CustomerQuote
+  quote="You start with the homework set… you have your already deployed workflow and your ReAct agent, you make them compete, and a custom LLM judge scores the trace. Then you need the exam dataset to see if the issue was actually fixed - because coding agents are smart and can simply few-shot the homework."
+  name="Paolo Tamagnini"
+  role="Senior Data Scientist"
+  company="Trade Republic"
+/>
+
+<CustomerStoryCTA />

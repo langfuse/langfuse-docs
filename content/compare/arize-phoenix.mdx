@@ -235,37 +235,65 @@ Move live instrumentation and durable assets. Trace history usually stays behind
 
 ## FAQ [#faq]
 
-### Is Langfuse an alternative to Arize AI? [#langfuse-arize-alternative]
+<FaqDetails>
+
+<Details id="langfuse-arize-alternative">
+<Summary>Is Langfuse an alternative to Arize AI?</Summary>
 
 Yes. Langfuse is an open-source alternative to both Arize AX and Arize Phoenix. It covers tracing, evaluations, prompt management, and experiments in one MIT-licensed product. See [Which should you choose](#which-should-you-choose).
 
-### What is the difference between Arize AX and Arize Phoenix? [#arize-ax-vs-phoenix]
+</Details>
+
+<Details id="arize-ax-vs-phoenix">
+<Summary>What is the difference between Arize AX and Arize Phoenix?</Summary>
 
 Arize AX is the managed platform on Arize's proprietary [adb](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database) database, launched in 2025; Phoenix is a source-available (Elastic License 2.0) tool you run on SQLite or Postgres. They do not share a storage engine, so Phoenix is not a self-hosted AX. Details in [Open source and distribution](#open-source-and-distribution) and [History and data plane](#history-and-data-plane).
 
-### Is Arize Phoenix open source? [#is-phoenix-open-source]
+</Details>
+
+<Details id="is-phoenix-open-source">
+<Summary>Is Arize Phoenix open source?</Summary>
 
 Phoenix is source-available under the [Elastic License 2.0](https://github.com/Arize-ai/phoenix/blob/main/LICENSE), which is not an OSI-approved open-source license and restricts offering Phoenix as a hosted service. Langfuse is [MIT-licensed](https://github.com/langfuse/langfuse).
 
-### How does Arize AX pricing compare to Langfuse? [#arize-pricing]
+</Details>
+
+<Details id="arize-pricing">
+<Summary>How does Arize AX pricing compare to Langfuse?</Summary>
 
 Arize AX Pro is **$50/month** with 50,000 spans and 10 GB included, then $0.0008 per span and $3 per GB (September 2026). Langfuse bills units from **$29/month**. At 500k traces / 10 spans / 1 score per trace, that is **$621** on Langfuse Pro with 3-year history vs. **$4,055** on AX Pro with 30-day retention. Details in the [worked example](#worked-example).
 
-### Can I self-host Arize AX? [#self-host-arize]
+</Details>
+
+<Details id="self-host-arize">
+<Summary>Can I self-host Arize AX?</Summary>
 
 Arize AX self-hosted deployments are listed as Enterprise-only on the [Arize pricing page](https://arize.com/pricing/). Phoenix self-hosts freely under the Elastic License. Langfuse [self-hosts](/self-hosting) the MIT product (tracing, evals, prompts, experiments) on every tier.
 
-### What does the Dynatrace acquisition mean for Arize users? [#dynatrace-acquisition]
+</Details>
+
+<Details id="dynatrace-acquisition">
+<Summary>What does the Dynatrace acquisition mean for Arize users?</Summary>
 
 Dynatrace [announced](https://www.dynatrace.com/news/press-release/dynatrace-to-acquire-arize/) a definitive agreement to acquire Arize for $915 million on August 13, 2026, expected to close later in the quarter or early in Dynatrace's third fiscal quarter, subject to regulatory review. The announcement does not name Phoenix or state a continuity commitment for a standalone open-source product. Arize AX and Phoenix remain available today.
 
-### Did joining ClickHouse change the Langfuse product? [#clickhouse-acquisition]
+</Details>
+
+<Details id="clickhouse-acquisition">
+<Summary>Did joining ClickHouse change the Langfuse product?</Summary>
 
 No. Langfuse already ran on ClickHouse. The [announcement](/blog/joining-clickhouse) states the MIT license, self-hosting, Cloud endpoints, and roadmap stay the same, with more capacity to ship. Cloud Core and Pro remain self-serve; OSS self-host has no sales motion. Details in [History and data plane](#history-and-data-plane) and [clarifications](/resources/engineering/clarifications#clickhouse).
 
-### How do I migrate from Arize to Langfuse? [#migrate-from-arize]
+</Details>
+
+<Details id="migrate-from-arize">
+<Summary>How do I migrate from Arize to Langfuse?</Summary>
 
 Keep your OpenInference instrumentation and point it at Langfuse's OTLP endpoint, then recreate datasets, prompts, and evaluators. See [Switching from Arize](#switching-from-arize).
+
+</Details>
+
+</FaqDetails>
 
 <Callout type="info">
   This comparison is out of date? Please [raise a pull request](https://github.com/langfuse/langfuse-docs/blob/main/content/compare/arize-phoenix.mdx) with up-to-date information.

@@ -21,8 +21,18 @@ interface EventDefinitions {
       | "image_generator"
       | "sentiment_classifier"
       | "voice_agent"
-      | "rock_paper_scissors";
+      | "rock_paper_scissors"
+      | "jev_evals_blog";
     trace_url: string;
+  };
+  "demo:sentiment_analyze_submitted": {
+    source: "jev_evals_blog" | "sentiment_classifier";
+    /** Both engines run side-by-side on the blog compare widget. */
+    mode: "compare" | "single";
+    engine?: "jev" | "llm";
+    from_example: boolean;
+    text_char_count: number;
+    classification_count?: number;
   };
   "home:start_free_clicked": {
     source: "home_hero";
@@ -34,6 +44,10 @@ interface EventDefinitions {
   };
   "home:onboard_with_ai_clicked": {
     source: "home_hero";
+    path: string;
+  };
+  "home:watch_demo_clicked": {
+    source: "home_feature_tabs";
     path: string;
   };
 }

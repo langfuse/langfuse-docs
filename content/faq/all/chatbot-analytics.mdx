@@ -199,12 +199,12 @@ Use [custom dashboards](/docs/metrics/features/custom-dashboards) in Langfuse to
 
 Choosing the right chatbot analytics tools depends on what you need to measure and how your chatbot is built. Here are the main categories:
 
-- **LLM Observability Platforms** — Tools like [Langfuse](/), [LangSmith](https://smith.langchain.com/), and [Arize Phoenix](https://phoenix.arize.com/) provide deep tracing and monitoring of LLM-powered chatbots, capturing every model call, retrieval step, and tool interaction.
+- **LLM Observability and Evaluation Platforms** — Tools like [Langfuse](/), [LangSmith](https://smith.langchain.com/), and [Arize Phoenix](https://phoenix.arize.com/) trace, monitor, and evaluate LLM-powered chatbots, capturing every model call, retrieval step, and tool interaction and scoring them with LLM-as-a-judge, code evaluators, and human annotation.
 - **Product Analytics** — Tools like [PostHog](https://posthog.com/) and Mixpanel help track user behavior patterns, funnel analysis, and engagement metrics. Langfuse integrates with [PostHog](/integrations/analytics/posthog) for combined LLM + product analytics.
-- **Evaluation Frameworks** — Tools like [Ragas](https://docs.ragas.io/) and [Promptfoo](https://www.promptfoo.dev/) help assess response quality through automated evaluation pipelines.
+- **Evaluation Frameworks** — Tools like [Ragas](https://docs.ragas.io/) and [Promptfoo](https://www.promptfoo.dev/) help assess response quality through automated evaluation pipelines. Langfuse integrates with [Ragas](/integrations/frameworks/ragas) to store and analyze its scores next to your traces.
 - **Feedback Collection** — Built-in feedback widgets and [user feedback capture](/docs/observability/features/user-feedback) to gather direct user ratings and comments.
 
-For most teams, an LLM observability platform like Langfuse serves as the foundation, with additional tools added as specific analytics needs arise.
+For most teams, a platform like Langfuse that traces and evaluates the same production conversations covers the core, with additional tools added as specific analytics needs arise.
 
 ## Choosing a Chatbot Analytics Platform
 
@@ -224,6 +224,8 @@ When evaluating a chatbot analytics platform, consider these key capabilities:
 - Have a look at [this guide](/blog/qa-chatbot-for-langfuse-docs) to see how we built and instrumented a chatbot for the Langfuse docs.
 
 ## FAQ
+
+<FaqDetails>
 
 <Details>
 <Summary>What is chatbot analytics?</Summary>
@@ -252,3 +254,5 @@ Measure chatbot performance across multiple dimensions: (1) **Quality** — use 
 Start by analyzing your chatbot analytics to identify problem areas. Use conversation tracing to inspect low-quality responses and understand why they failed. Set up automated evaluations to score responses on key dimensions (helpfulness, accuracy, tone). Build a dataset of problematic conversations and run experiments to test prompt improvements before deploying them to production. Continuously monitor production performance and feed edge cases back into your test dataset.
 
 </Details>
+
+</FaqDetails>
