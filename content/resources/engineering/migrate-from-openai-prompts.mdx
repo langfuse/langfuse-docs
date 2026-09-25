@@ -305,16 +305,6 @@ Once every call site uses Langfuse, delete the `pmpt_` references from your code
 - [ ] No request references a `pmpt_` ID before November 30, 2026
 - [ ] Team members who edited prompts in the OpenAI dashboard have Langfuse project access
 
-## Limitations and gaps [#limitations]
-
-Know these before you start:
-
-- **No automated export.** OpenAI offers no API to read prompt objects, so each prompt is copied from the dashboard. Budget time for teams with many prompts.
-- **Version numbers are renumbered.** Langfuse numbers versions in creation order; keep the OpenAI version in the commit message if you need the mapping.
-- **Your code resolves the prompt.** The Responses API expanded prompt objects server-side. With Langfuse, your code fetches and compiles the prompt and passes `config` to the model call, a two-line change per call site.
-- **Variables are strings.** Image and file variables become message placeholders.
-- **Dashboard-only settings need a home.** Any setting you configured in the OpenAI prompt editor must be copied into `config` explicitly, or it is lost.
-
 ## FAQ [#faq]
 
 <FaqDetails>
