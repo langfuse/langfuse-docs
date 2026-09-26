@@ -67,6 +67,14 @@ Langfuse comes with a **list of predefined popular models and their tokenizers**
 
 You can manage prices in **Project Settings > Models**, add your own [custom model definitions](#custom-model-definitions), or request official support for new models via [GitHub](/issue).
 
+<Callout type="info">
+  Self-hosting? You can turn model definitions off for the whole instance with
+  [`LANGFUSE_MODEL_DEFINITIONS_ENABLED=false`](/self-hosting/configuration#model-definitions).
+  Langfuse then infers nothing: no cost calculation, no tokenizer, and no
+  Models settings. Usage and cost you send with your generations are still
+  recorded and displayed.
+</Callout>
+
 <Frame>
   ![Model Definitions table in Langfuse Project Settings, showing match
   patterns, prices per unit, and tokenizers per
@@ -567,6 +575,7 @@ If you don't see cost on your generations, check the following:
 
 - **Usage or cost must be present.** Langfuse can only infer cost if usage is ingested or a tokenizer is available for the model. If neither cost nor usage is ingested and the model has no tokenizer, no cost is calculated.
 - **The model must match a definition.** Inferred cost requires a model definition whose `match_pattern` matches the generation's `model` value. If no model matches, add a [custom model definition](#custom-model-definitions).
+- **Self-hosted instances can switch inference off.** If your instance runs with `LANGFUSE_MODEL_DEFINITIONS_ENABLED=false`, Langfuse records only the usage and cost you send, and the Models settings are hidden. See [configuration](/self-hosting/configuration#model-definitions).
 - **Model definition changes only apply to new generations.** If you change or add a model definition, the updated costs are applied only to generations logged afterward.
 - **Only `generation` and `embedding` observations track cost.** Other observation types do not carry usage or cost.
 - **Reasoning models require ingested usage.** Langfuse cannot infer cost for reasoning models such as the OpenAI o1 family without token counts. See [cost inference for reasoning models](#cost-inference-for-reasoning-models).
