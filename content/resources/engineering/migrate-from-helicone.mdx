@@ -404,21 +404,37 @@ Know these before you commit to the cutover:
 
 ## FAQ [#faq]
 
-### Can I keep Helicone running during the transition? [#keep-helicone]
+<FaqDetails>
+
+<Details id="keep-helicone">
+<Summary>Can I keep Helicone running during the transition?</Summary>
 
 Yes. The Langfuse SDK wraps the client inside your application while Helicone's gateway sits in the request path, so both capture the same call once, independently. Keep the gateway `base_url` during your validation window, compare the two systems, then point `base_url` back at the provider. The [Helicone integration page](/integrations/gateways/helicone) covers running the two together in more detail.
 
-### I use Helicone's EU region. Anything different? [#eu-region]
+</Details>
+
+<Details id="eu-region">
+<Summary>I use Helicone's EU region. Anything different?</Summary>
 
 Use `eu.api.helicone.ai` for the prompt and request export APIs and `--region eu` on the export CLI. On the Langfuse side, pick the region when creating your project; `LANGFUSE_BASE_URL` is `https://cloud.langfuse.com` (EU) or `https://us.cloud.langfuse.com` (US), or your own domain when [self-hosting](/self-hosting).
 
-### Do I still need a gateway at all? [#need-gateway]
+</Details>
+
+<Details id="need-gateway">
+<Summary>Do I still need a gateway at all?</Summary>
 
 Not for observability: Langfuse SDKs capture traces client-side and export them in the background, off the request path. If you used Helicone's gateway for routing or failover, keep a gateway for that job ([LiteLLM Proxy](/integrations/gateways/litellm) integrates natively with Langfuse); if the gateway was only there for logging, drop it.
 
-### What happens to my Helicone dashboards and saved views? [#dashboards]
+</Details>
+
+<Details id="dashboards">
+<Summary>What happens to my Helicone dashboards and saved views?</Summary>
 
 Rebuild them on live data: the observations table supports the same filtering (by user, metadata, model) via the [filter search bar](/docs/observability/features/filter-search-bar), and [custom dashboards](/docs/metrics/features/custom-dashboards) cover cost, latency, and usage breakdowns. The [Metrics API](/docs/metrics/features/metrics-api) serves programmatic consumers.
+
+</Details>
+
+</FaqDetails>
 
 ## Get help with the migration [#get-help]
 

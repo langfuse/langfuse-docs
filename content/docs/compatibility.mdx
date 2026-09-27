@@ -197,22 +197,41 @@ Deprecated. Upgrade via the [SDK upgrade paths](/docs/observability/sdk/upgrade-
 
 ## Frequently asked questions [#faq]
 
-### I'm on Langfuse Cloud, which versions do I need to care about? [#faq-cloud]
+<FaqDetails>
+
+<Details id="faq-cloud">
+<Summary>I'm on Langfuse Cloud, which versions do I need to care about?</Summary>
 
 Only your SDK version and the API endpoints you call. Langfuse Cloud always runs the latest server version, so self-hosted server minimums never apply to you. Keep your SDKs on the GA major version (Python v4, JS/TS v5) and migrate away from deprecated endpoints before the v4 cutover on <V4CutoverDate />.
 
-### I self-host Langfuse v3 and upgraded to Python SDK v4 / JS SDK v5, what works? [#faq-new-sdk-old-server]
+</Details>
+
+<Details id="faq-new-sdk-old-server">
+<Summary>I self-host Langfuse v3 and upgraded to Python SDK v4 / JS SDK v5, what works?</Summary>
 
 Tracing, prompt management, datasets, and scores work fully (server ≥ 3.63.0). The default `api.observations` and `api.metrics` resources call v2 endpoints that require Langfuse v4; use the `api.legacy.*` resources until you upgrade your server to v4. The [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) has the full picture per server version.
 
-### My data takes minutes to show up in the UI, why? [#faq-delay]
+</Details>
+
+<Details id="faq-delay">
+<Summary>My data takes minutes to show up in the UI, why?</Summary>
 
 On the v4 data model, data from Python SDK < 4.7.0, JS SDK < 5.4.0, or OTel exporters without the `x-langfuse-ingestion-version: 4` header can be delayed by up to 15 minutes. Upgrade to Python SDK ≥ 4.7.0 / JS SDK ≥ 5.4.0 (or set the header) for real-time data.
 
-### When do old SDKs stop working on Langfuse Cloud? [#faq-cloud-cutover]
+</Details>
+
+<Details id="faq-cloud-cutover">
+<Summary>When do old SDKs stop working on Langfuse Cloud?</Summary>
 
 Python SDK v2 and JS/TS SDK v3 (and older) send traces via the legacy batch ingestion API, which is removed on Langfuse Cloud as of <V4CutoverDate />. Upgrade to the GA SDK majors now; see the [SDK upgrade paths](/docs/observability/sdk/upgrade-path).
 
-### Does upgrading my self-hosted server break my SDKs? [#faq-server-upgrade]
+</Details>
+
+<Details id="faq-server-upgrade">
+<Summary>Does upgrading my self-hosted server break my SDKs?</Summary>
 
 Each server major supports the current and previous SDK major of each language. Upgrading v3 → v4 keeps Python SDK v3+/v4 and JS SDK v4/v5 working (older SDKs lose real-time visibility; Python v2 / JS v3 trace ingestion is not supported on v4). Check the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) before upgrading.
+
+</Details>
+
+</FaqDetails>

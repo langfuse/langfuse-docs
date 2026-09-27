@@ -417,6 +417,12 @@ The Langfuse SDKs provide wrappers around OTel spans ([`LangfuseSpan`](https://p
   />
 </Cards>
 
+## Browser and frontend applications [#browser]
+
+The tracing SDKs are meant for server-side code: they authenticate with a secret key, which must never ship to a browser or mobile app. Instrument the backend that calls your LLM provider, and pass the resulting trace ID to the frontend when the UI needs to refer to it.
+
+From the frontend itself, use [`@langfuse/browser`](/docs/evaluation/evaluation-methods/scores-via-sdk#browser-score-ingestion) to attach [user feedback](/docs/observability/features/user-feedback) and other client-side scores to that trace. It needs only the public key and sends scores directly to the ingestion API; it does not create traces or observations. To trace LLM calls that originate in the browser, route them through your backend or a proxy you control and trace there.
+
 ## Other languages
 
 Langfuse maintains SDKs for Python and JavaScript/TypeScript. For other languages, you can use our [OpenTelemetry endpoint](/integrations/native/opentelemetry) to instrument your application and use the [public API](/docs/api-and-data-platform/features/public-api) to use Langfuse prompt management, evaluation, and querying.

@@ -122,6 +122,29 @@ MAX_CHARS_PER_DOC = 1200
 MAX_DOCS = 5
 
 
+def _truncate(text: str, limit: int) -> str:
+    """Cut at the last word or line boundary before ``limit``."""
+    if len(text) <= limit:
+        return text
+    cut = text[:limit]
+    boundary = max(cut.rfind("\n"), cut.rfind(" "))
+    if boundary > 0:
+        cut = cut[:boundary]
+    return cut.rstrip(" ,;:-") + " …"
+
+
+def _clean_excerpt(text: str, limit: int) -> str:
+    """Plain, readable text for the model: drop images and link URLs, keep
+    line breaks, collapse repeated whitespace, and cut at a word boundary."""
+    # images carry nothing a spoken answer can use
+    text = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", text)
+    # [label](url) -> label; the model speaks, it does not click
+    text = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", text)
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"\n\s*\n+", "\n", text).strip()
+    return _truncate(text, limit)
+
+
 def _compact_docs_tool_result(ctx: mcp.MCPToolResultContext) -> str:
     """Reduce a Langfuse docs MCP result to what a voice answer needs."""
     raw = "\n".join(
@@ -138,15 +161,18 @@ def _compact_docs_tool_result(ctx: mcp.MCPToolResultContext) -> str:
                 if not isinstance(doc, dict):
                     continue
                 source = doc.get("source") or {}
-                body = " ".join(
+                body = "\n".join(
                     part.get("text", "")
                     for part in source.get("content", [])
                     if isinstance(part, dict)
                 )
-                body = re.sub(r"\s+", " ", body).strip()[:MAX_CHARS_PER_DOC]
+                body = _clean_excerpt(body, MAX_CHARS_PER_DOC)
                 parts.append(f"## {doc.get('title', '')} ({doc.get('url', '')})\n{body}")
-            raw = "\n\n".join(parts) or raw
-    return raw[:MAX_TOOL_RESULT_CHARS]
+            if parts:
+                # each part is already clean; only cap the total so the blank
+                # line between documents survives
+                return _truncate("\n\n".join(parts), MAX_TOOL_RESULT_CHARS)
+    return _clean_excerpt(raw, MAX_TOOL_RESULT_CHARS)
 
 
 # client_session_timeout_seconds defaults to 5s, which the RAG-backed

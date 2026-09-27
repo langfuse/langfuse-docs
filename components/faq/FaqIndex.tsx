@@ -1,6 +1,6 @@
 import { faqSource } from "@/lib/source";
-import { Cards } from "@/components/docs";
-import { MessageCircleQuestion } from "lucide-react";
+import { FaqLinks } from "./FaqPreview";
+import { FaqDetails } from "./FaqDetails";
 import { Link } from "@/components/ui/link";
 import { getFaqTags, isFaqArticle } from "@/lib/faq-tags";
 
@@ -38,7 +38,7 @@ export const FaqIndex = () => {
   );
 
   return (
-    <>
+    <FaqDetails>
       {Object.entries(categorizedPages)
         .sort(([tagA], [tagB]) => {
           if (tagA === "Other") return 1;
@@ -50,19 +50,7 @@ export const FaqIndex = () => {
             <h3 className="font-semibold tracking-tight text-slate-900 dark:text-slate-100 text-2xl">
               {formatTag(tag)}
             </h3>
-            <Cards num={1}>
-              {pages.slice(0, PREVIEW_PAGES_PER_TAG).map((page) => (
-                <Cards.Card
-                  href={page.url}
-                  key={page.url}
-                  title={page.data.title}
-                  icon={<MessageCircleQuestion />}
-                  arrow
-                >
-                  {""}
-                </Cards.Card>
-              ))}
-            </Cards>
+            <FaqLinks pages={pages.slice(0, PREVIEW_PAGES_PER_TAG)} />
             <p className="mt-4">
               <Link
                 href={`/faq/tag/${encodeURIComponent(tag)}`}
@@ -75,6 +63,6 @@ export const FaqIndex = () => {
             </p>
           </div>
         ))}
-    </>
+    </FaqDetails>
   );
 };

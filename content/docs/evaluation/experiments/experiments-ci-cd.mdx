@@ -15,6 +15,19 @@ The workflow is:
 4. Raise `RegressionError` when a score violates your threshold.
 5. Create a GitHub Actions workflow that runs the script with [langfuse/experiment-action](https://github.com/langfuse/experiment-action).
 
+## Choose your release policy [#release-policy]
+
+Decide what should block a release before writing the gate:
+
+| Policy                               | Block the release when                                  | Known failures                                                                     |
+| ------------------------------------ | ------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Every required case must pass        | Any required case fails an absolute quality requirement | Block until fixed, or explicitly remove from the required set after review         |
+| No approved passing case may regress | A case that passed in the approved baseline now fails   | May remain only if that baseline was explicitly accepted; improvements are allowed |
+
+You can combine these policies: require critical cases to pass and protect the remaining approved passing cases against regressions. Missing cases, duplicate case IDs, task failures, and missing or invalid evaluator results must fail the gate rather than count as passes.
+
+A failing run does not become an approved baseline just because it is the first or latest run. Review known failures explicitly. If inputs, expected outputs, the required case set, or evaluator definitions change, review and update the baseline before comparing releases. Keep the baseline artifact and its version identifiers in your repository. See [Compare against an approved baseline](#approved-baseline) for an implementation.
+
 ## GitHub Actions workflow
 
 Create a workflow with the [trigger](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow) you need, for example `pull_request` or `release`.
@@ -526,238 +539,153 @@ Missing evaluations, duplicate identifiers, and changed case sets raise script e
 
 ## Other CI/CD systems [#other-cicd-systems]
 
-Integrate the experiment runner with testing frameworks like Pytest and Vitest to run automated evaluations in your CI pipeline. Use evaluators to create assertions that fail tests based on experiment results.
+Keep your existing application and grader in Pytest or Vitest. These examples load local JSON cases, call your application, publish its outputs and check results to Langfuse, and require every case to pass. They do not require a hosted dataset or a separate LLM judge.
+
+Configure [Langfuse credentials and SDK dependencies](/resources/engineering/evaluate-existing-application#setup). Replace the application and grader imports with your own modules. Here, `run_application(input)` / `runApplication(input)` returns a non-null output and `grade(output, expected_output)` returns a boolean. If your suite uses `run_checks()`, adapt its named checks into evaluator results and require every required check to be present and passing.
+
+Save your cases in this format, keeping IDs stable between releases:
+
+```json title="cases.json"
+[
+  {
+    "id": "standard-refund",
+    "input": { "question": "What is the standard refund window?" },
+    "expected_output": { "refund_days": 30 }
+  }
+]
+```
+
+Set `APP_VERSION` to the application commit or release under test. The examples hash the case file and record a grader version; update that version whenever the grader changes. The application may make model calls according to its own configuration. To publish an already completed run without calling the application or grader again, see [Publish saved check results](/resources/engineering/evaluate-existing-application#saved-check-results).
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
-{/* PYTHON SDK */}
 
-```python title="test_geography_experiment.py"
-import pytest
-from langfuse import get_client, Evaluation
-from langfuse.openai import OpenAI
+```python title="test_application_experiment.py"
+import hashlib
+import json
+import os
+from pathlib import Path
 
-# Test data for European capitals
-test_data = [
-    {"input": "What is the capital of France?", "expected_output": "Paris"},
-    {"input": "What is the capital of Germany?", "expected_output": "Berlin"},
-    {"input": "What is the capital of Spain?", "expected_output": "Madrid"},
-]
+from langfuse import Evaluation, get_client
+from my_app import run_application  # Replace with your application's import.
+from my_checks import grade  # Reuse your existing boolean grader.
 
-def geography_task(*, item, **kwargs):
-    """Task function that answers geography questions"""
-    question = item["input"]
-    response = OpenAI().chat.completions.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": question}]
-    )
-    return response.choices[0].message.content
 
-def accuracy_evaluator(*, input, output, expected_output, **kwargs):
-    """Evaluator that checks if the expected answer is in the output"""
-    if expected_output and expected_output.lower() in output.lower():
-        return Evaluation(name="accuracy", value=1.0)
+def test_application_checks():
+    case_file = Path("cases.json").read_bytes()
+    cases = json.loads(case_file)
+    ids = [case["id"] for case in cases]
+    assert ids and all(ids) and len(set(ids)) == len(ids), "Invalid case IDs"
 
-    return Evaluation(name="accuracy", value=0.0)
+    def task(*, item, **kwargs):
+        return run_application(item["input"])
 
-def average_accuracy_evaluator(*, item_results, **kwargs):
-    """Run evaluator that calculates average accuracy across all items"""
-    accuracies = [
-        evaluation.value for result in item_results
-        for evaluation in result.evaluations if evaluation.name == "accuracy"
-    ]
+    def evaluator(*, output, expected_output, **kwargs):
+        passed = grade(output, expected_output)
+        if type(passed) is not bool:
+            raise ValueError("grade must return a boolean")
+        return Evaluation(name="existing_checks", value=int(passed))
 
-    if not accuracies:
-        return Evaluation(name="avg_accuracy", value=None)
-
-    avg = sum(accuracies) / len(accuracies)
-
-    return Evaluation(name="avg_accuracy", value=avg, comment=f"Average accuracy: {avg:.2%}")
-
-@pytest.fixture
-def langfuse_client():
-    """Initialize Langfuse client for testing"""
-    return get_client()
-
-def test_geography_accuracy_passes(langfuse_client):
-    """Test that passes when accuracy is above threshold"""
-    result = langfuse_client.run_experiment(
-        name="Geography Test - Should Pass",
-        data=test_data,
-        task=geography_task,
-        evaluators=[accuracy_evaluator],
-        run_evaluators=[average_accuracy_evaluator]
-    )
-
-    # Access the run evaluator result directly
-    avg_accuracy = next(
-        (
-            evaluation.value
-            for evaluation in result.run_evaluations
-            if evaluation.name == "avg_accuracy"
-        ),
-        None,
-    )
-
-    # Assert minimum accuracy threshold
-    assert isinstance(avg_accuracy, (int, float)) and avg_accuracy >= 0.8, (
-        f"Average accuracy {avg_accuracy} below threshold 0.8"
-    )
-
-def test_geography_accuracy_fails(langfuse_client):
-    """Example test that demonstrates failure conditions"""
-    # Use a weaker model or harder questions to demonstrate test failure
-    def failing_task(*, item, **kwargs):
-        # Simulate a task that gives wrong answers
-        return "I don't know"
-
-    result = langfuse_client.run_experiment(
-        name="Geography Test - Should Fail",
-        data=test_data,
-        task=failing_task,
-        evaluators=[accuracy_evaluator],
-        run_evaluators=[average_accuracy_evaluator]
-    )
-
-    # Access the run evaluator result directly
-    avg_accuracy = next(
-        (
-            evaluation.value
-            for evaluation in result.run_evaluations
-            if evaluation.name == "avg_accuracy"
-        ),
-        None,
-    )
-
-    # This test will fail because the task gives wrong answers
-    with pytest.raises(AssertionError):
-        assert isinstance(avg_accuracy, (int, float)) and avg_accuracy >= 0.8, (
-            f"Expected test to fail with low accuracy: {avg_accuracy}"
+    langfuse = get_client()
+    try:
+        result = langfuse.run_experiment(
+            name="Application checks",
+            data=[{
+                "input": case["input"],
+                "expected_output": case["expected_output"],
+                "metadata": {"case_id": case["id"]},
+            } for case in cases],
+            task=task,
+            evaluators=[evaluator],
+            metadata={
+                "application_version": os.environ["APP_VERSION"],
+                "cases_sha256": hashlib.sha256(case_file).hexdigest(),
+                "evaluator_version": "existing-checks-v1",
+            },
         )
+        print(result.format())  # Includes the experiment link.
+        returned_ids = [item.item["metadata"]["case_id"] for item in result.item_results]
+        assert sorted(returned_ids) == sorted(ids), "Incomplete results"
+        for item in result.item_results:
+            assert item.output is not None, "Missing application output"
+            scores = [e for e in item.evaluations if e.name == "existing_checks"]
+            assert len(scores) == 1 and scores[0].value == 1, (
+                f"Failed or missing check: {item.item['metadata']['case_id']}"
+            )
+    finally:
+        langfuse.flush()
 ```
+
+Run `pytest -s test_application_experiment.py` with Pytest installed. The `-s` flag keeps the experiment link visible in CI logs.
 
 </Tab>
 <Tab>
-{/* JS/TS SDK */}
 
-```typescript title="test/geography-experiment.test.ts"
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { OpenAI } from "openai";
-import { NodeSDK } from "@opentelemetry/sdk-node";
-import { LangfuseClient, ExperimentItem } from "@langfuse/client";
-import { observeOpenAI } from "@langfuse/openai";
+```typescript title="test/application-experiment.test.ts"
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { it, expect } from "vitest";
+import { LangfuseClient } from "@langfuse/client";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { runApplication } from "../src/app"; // Replace with your application's import.
+import { grade } from "../src/checks"; // Reuse your existing boolean grader.
 
-// Test data for European capitals
-const testData: ExperimentItem[] = [
-  { input: "What is the capital of France?", expectedOutput: "Paris" },
-  { input: "What is the capital of Germany?", expectedOutput: "Berlin" },
-  { input: "What is the capital of Spain?", expectedOutput: "Madrid" },
-];
+it("passes every required application check", async () => {
+  const caseFile = readFileSync("cases.json");
+  const cases: { id: string; input: unknown; expected_output: unknown }[] =
+    JSON.parse(caseFile.toString("utf8"));
+  const ids = cases.map((item) => item.id);
+  expect(ids.length).toBeGreaterThan(0);
+  expect(ids.every(Boolean)).toBe(true);
+  expect(new Set(ids).size).toBe(ids.length);
+  const applicationVersion = process.env.APP_VERSION;
+  if (!applicationVersion) throw new Error("Set APP_VERSION");
 
-let otelSdk: NodeSDK;
-let langfuse: LangfuseClient;
-
-beforeAll(async () => {
-  // Initialize OpenTelemetry
-  otelSdk = new NodeSDK({ spanProcessors: [new LangfuseSpanProcessor()] });
-  otelSdk.start();
-
-  // Initialize Langfuse client
-  langfuse = new LangfuseClient();
-});
-
-afterAll(async () => {
-  // Clean shutdown
-  await otelSdk.shutdown();
-});
-
-const geographyTask = async (item: ExperimentItem) => {
-  const question = item.input;
-  const response = await observeOpenAI(new OpenAI()).chat.completions.create({
-    model: "gpt-4",
-    messages: [{ role: "user", content: question }],
-  });
-
-  return response.choices[0].message.content;
-};
-
-const accuracyEvaluator = async ({ input, output, expectedOutput }) => {
-  if (
-    expectedOutput &&
-    output.toLowerCase().includes(expectedOutput.toLowerCase())
-  ) {
-    return { name: "accuracy", value: 1 };
-  }
-  return { name: "accuracy", value: 0 };
-};
-
-const averageAccuracyEvaluator = async ({ itemResults }) => {
-  // Calculate average accuracy across all items
-  const accuracies = itemResults
-    .flatMap((result) => result.evaluations)
-    .filter((evaluation) => evaluation.name === "accuracy")
-    .map((evaluation) => evaluation.value as number);
-
-  if (accuracies.length === 0) {
-    return { name: "avg_accuracy", value: null };
-  }
-
-  const avg = accuracies.reduce((sum, val) => sum + val, 0) / accuracies.length;
-  return {
-    name: "avg_accuracy",
-    value: avg,
-    comment: `Average accuracy: ${(avg * 100).toFixed(1)}%`,
-  };
-};
-
-describe("Geography Experiment Tests", () => {
-  it("should pass when accuracy is above threshold", async () => {
+  const otel = new NodeSDK({ spanProcessors: [new LangfuseSpanProcessor()] });
+  otel.start();
+  try {
+    const langfuse = new LangfuseClient();
     const result = await langfuse.experiment.run({
-      name: "Geography Test - Should Pass",
-      data: testData,
-      task: geographyTask,
-      evaluators: [accuracyEvaluator],
-      runEvaluators: [averageAccuracyEvaluator],
+      name: "Application checks",
+      data: cases.map((item) => ({
+        input: item.input,
+        expectedOutput: item.expected_output,
+        metadata: { case_id: item.id },
+      })),
+      task: async (item) => runApplication(item.input),
+      evaluators: [async ({ output, expectedOutput }) => {
+        const passed = await grade(output, expectedOutput);
+        if (typeof passed !== "boolean") throw new Error("grade must return a boolean");
+        return { name: "existing_checks", value: Number(passed) };
+      }],
+      metadata: {
+        application_version: applicationVersion,
+        cases_sha256: createHash("sha256").update(caseFile).digest("hex"),
+        evaluator_version: "existing-checks-v1",
+      },
     });
-
-    // Access the run evaluator result directly
-    const avgAccuracy = result.runEvaluations.find(
-      (evaluation) => evaluation.name === "avg_accuracy",
-    )?.value as number;
-
-    // Assert minimum accuracy threshold
-    expect(avgAccuracy).toBeGreaterThanOrEqual(0.8);
-  }, 30_000); // 30 second timeout for API calls
-
-  it("should fail when accuracy is below threshold", async () => {
-    // Task that gives wrong answers to demonstrate test failure
-    const failingTask = async (item: ExperimentItem) => {
-      return "I don't know";
-    };
-
-    const result = await langfuse.experiment.run({
-      name: "Geography Test - Should Fail",
-      data: testData,
-      task: failingTask,
-      evaluators: [accuracyEvaluator],
-      runEvaluators: [averageAccuracyEvaluator],
-    });
-
-    // Access the run evaluator result directly
-    const avgAccuracy = result.runEvaluations.find(
-      (evaluation) => evaluation.name === "avg_accuracy",
-    )?.value as number;
-
-    // This test will fail because the task gives wrong answers
-    expect(() => {
-      expect(avgAccuracy).toBeGreaterThanOrEqual(0.8);
-    }).toThrow();
-  }, 30_000);
-});
+    console.log(await result.format()); // Includes the experiment link.
+    expect(result.itemResults.map((item) =>
+      (item.item.metadata as { case_id: string }).case_id,
+    ).sort())
+      .toEqual([...ids].sort());
+    for (const item of result.itemResults) {
+      expect(item.output).not.toBeNull();
+      expect(item.output).not.toBeUndefined();
+      const scores = item.evaluations.filter((score) => score.name === "existing_checks");
+      expect(scores).toHaveLength(1);
+      expect(scores[0].value).toBe(1);
+    }
+  } finally {
+    await otel.shutdown();
+  }
+}, 60_000); // Adjust for the runtime of your application and case set.
 ```
+
+Run `npx vitest run test/application-experiment.test.ts` with Vitest installed.
 
 </Tab>
 </LangTabs>
 
-These examples show how to use the experiment runner's evaluation results to create meaningful test assertions in your CI pipeline. Tests can fail when accuracy drops below acceptable thresholds, ensuring model quality standards are maintained automatically.
+These assertions implement the **every required case must pass** policy. For a suite with explicitly accepted failures, use the [approved-baseline gate](#approved-baseline) instead. A test that expects the gate's assertion to throw would turn a real regression into a passing CI job.

@@ -80,12 +80,41 @@ Langfuse Cloud is the option where none of this is your problem: same architectu
 
 ## FAQ [#faq]
 
-**Can ClickHouse handle traces from agent workloads?**<br />Yes. Langfuse runs entirely on ClickHouse in production, storing petabytes of tracing data for thousands of teams, including agent traces with thousands of observations each. Deep agent traces are the reason we moved to an observations-first wide-table model in 2026, which made large-project table loads drop from seconds to tens of milliseconds.
+<FaqDetails>
 
-**Why did Langfuse move from Postgres to ClickHouse?**<br />Trace observability at scale is an analytical workload: high-throughput ingestion plus aggregations over billions of large rows. Postgres hit IOPS and scan limits as our largest users grew, and ClickHouse's columnar storage and batch-insert design matched the workload. We made the switch in Langfuse v3 in December 2024.
+<Details>
+<Summary>Can ClickHouse handle traces from agent workloads?</Summary>
 
-**Do I have to operate ClickHouse myself to use Langfuse?**<br />No. Langfuse Cloud is fully managed. If you self-host, you can bring managed ClickHouse (ClickHouse Cloud or BYOC) or run it yourself via the ClickHouse Kubernetes Operator or Helm; Langfuse supports ClickHouse 24.3 and above.
+Yes. Langfuse runs entirely on ClickHouse in production, storing petabytes of tracing data for thousands of teams, including agent traces with thousands of observations each. Deep agent traces are the reason we moved to an observations-first wide-table model in 2026, which made large-project table loads drop from seconds to tens of milliseconds.
 
-**Does Langfuse support full-text search across trace content?**<br />Yes. Full-text search covers inputs, outputs, and metadata of traces and observations, backed by ClickHouse text indexes so queries skip non-matching data instead of scanning payloads. Search is token-based: it matches whole words and contiguous phrases rather than arbitrary substrings.
+</Details>
 
-**How much infrastructure does self-hosted Langfuse need to start?**<br />The minimum production footprint is modest: 2 CPU / 4 GiB each for the web and worker containers and Postgres, 1 CPU / 1.5 GiB for Redis, 2 CPU / 8 GiB for ClickHouse, plus S3-compatible blob storage. A single ClickHouse shard scales to multiple terabytes of tracing data.
+<Details>
+<Summary>Why did Langfuse move from Postgres to ClickHouse?</Summary>
+
+Trace observability at scale is an analytical workload: high-throughput ingestion plus aggregations over billions of large rows. Postgres hit IOPS and scan limits as our largest users grew, and ClickHouse's columnar storage and batch-insert design matched the workload. We made the switch in Langfuse v3 in December 2024.
+
+</Details>
+
+<Details>
+<Summary>Do I have to operate ClickHouse myself to use Langfuse?</Summary>
+
+No. Langfuse Cloud is fully managed. If you self-host, you can bring managed ClickHouse (ClickHouse Cloud or BYOC) or run it yourself via the ClickHouse Kubernetes Operator or Helm; Langfuse supports ClickHouse 24.3 and above.
+
+</Details>
+
+<Details>
+<Summary>Does Langfuse support full-text search across trace content?</Summary>
+
+Yes. Full-text search covers inputs, outputs, and metadata of traces and observations, backed by ClickHouse text indexes so queries skip non-matching data instead of scanning payloads. Search is token-based: it matches whole words and contiguous phrases rather than arbitrary substrings.
+
+</Details>
+
+<Details>
+<Summary>How much infrastructure does self-hosted Langfuse need to start?</Summary>
+
+The minimum production footprint is modest: 2 CPU / 4 GiB each for the web and worker containers and Postgres, 1 CPU / 1.5 GiB for Redis, 2 CPU / 8 GiB for ClickHouse, plus S3-compatible blob storage. A single ClickHouse shard scales to multiple terabytes of tracing data.
+
+</Details>
+
+</FaqDetails>

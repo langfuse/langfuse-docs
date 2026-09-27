@@ -41,6 +41,7 @@ const pathsWithoutFooterWidgets = [
   "/careers",
   "/press",
   "/partners",
+  "/watch-demo",
   "/enterprise",
   "/chat-agents",
   "/coding-agents",

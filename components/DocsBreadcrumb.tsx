@@ -39,6 +39,19 @@ function resolveFirstUrl(node: AnyNode): string | undefined {
 }
 
 /**
+ * Integration categories have their own sections on the integrations overview,
+ * but no index page in their folder. Link the category crumb to its overview
+ * anchor using the active page URL, which contains the category slug.
+ */
+function resolveFolderUrl(
+  node: PageTree.Folder,
+  category?: string,
+): string | undefined {
+  if (category) return `/integrations#${category}`;
+  return node.index?.url ?? resolveFirstUrl(node);
+}
+
+/**
  * Link target for the leading (section) crumb. Prefer the section's landing
  * page — the shallowest internal child page, e.g. `/docs` over `/docs/demo` —
  * so the root crumb points at the section index regardless of `meta.json`
@@ -75,6 +88,15 @@ export function DocsBreadcrumb() {
 
   const items = useMemo<Crumb[]>(() => {
     const result: Crumb[] = [];
+    const sectionUrl = resolveSectionUrl(
+      root as PageTree.Root | PageTree.Folder,
+    );
+    const activePage = path[path.length - 1];
+    const integrationCategory =
+      sectionUrl === "/integrations" && activePage?.type === "page"
+        ? activePage.url.match(/^\/integrations\/([^/]+)\//)?.[1]
+        : undefined;
+    let firstFolder = true;
 
     for (let i = 0; i < path.length; i++) {
       const node = path[i];
@@ -83,11 +105,13 @@ export function DocsBreadcrumb() {
       } else if (node.type === "folder") {
         // The active root folder is rendered as the leading crumb below.
         if (node.root) continue;
+        const category = firstFolder ? integrationCategory : undefined;
+        firstFolder = false;
         // Fumadocs collapses a folder and its index page into a single crumb.
         if (i === path.length - 1 || node.index !== path[i + 1]) {
           result.push({
             name: node.name,
-            url: node.index?.url ?? resolveFirstUrl(node),
+            url: resolveFolderUrl(node, category),
           });
         }
       }
@@ -97,7 +121,7 @@ export function DocsBreadcrumb() {
     // which does not distribute over the union and is not assignable to Root | Folder.
     result.unshift({
       name: root.name,
-      url: resolveSectionUrl(root as PageTree.Root | PageTree.Folder),
+      url: sectionUrl,
     });
     return result;
   }, [path, root]);

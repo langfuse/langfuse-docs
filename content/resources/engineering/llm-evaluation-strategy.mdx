@@ -166,26 +166,48 @@ One distinction worth drawing: a self-repair loop inside the application, where 
 
 ## FAQ
 
-### How many quality dimensions should an evaluation strategy start with? [#how-many-dimensions]
+<FaqDetails>
+
+<Details id="how-many-dimensions">
+<Summary>How many quality dimensions should an evaluation strategy start with?</Summary>
 
 Start with three to five, each derived from a failure mode you have observed in real traces. Every dimension carries ongoing cost: an evaluator to maintain, a threshold to defend, and alerts to triage. Expand the list when a new failure mode appears in production, not preemptively.
 
-### Can multiple people review and score the same trace? [#multiple-reviewers]
+</Details>
+
+<Details id="multiple-reviewers">
+<Summary>Can multiple people review and score the same trace?</Summary>
 
 Yes. Annotation queues in Langfuse support assigning multiple reviewers, and the same traces can be routed to separate queues with different score configs, for example an engineering triage queue and a compliance review queue with its own sub-score criteria. Each score records who created it, so parallel reviews stay attributable.
 
-### Can we score traces retroactively? [#retroactive-scoring]
+</Details>
+
+<Details id="retroactive-scoring">
+<Summary>Can we score traces retroactively?</Summary>
 
 Yes, in two ways. Humans can annotate any historical trace, observation, or session at any time, and automated evaluators can backfill scores over historical observations by selecting them in the traces table and running an evaluation on the selection (this requires the evaluator's Langfuse v4 preview setting). This means a newly defined criterion can be measured against past traffic instead of starting from zero.
 
-### When can automated thresholds replace human review? [#automated-thresholds]
+</Details>
+
+<Details id="automated-thresholds">
+<Summary>When can automated thresholds replace human review?</Summary>
 
 After calibration, and usually partially rather than completely. Have humans and your LLM judge score the same items, measure agreement per dimension, and refine the rubric until agreement is stable. Then reduce human coverage to judge-flagged items, disagreements, and a verification sample; how much residual review you keep for high-stakes flows is a policy decision your measurements should inform.
 
-### How do we evaluate multi-turn conversations rather than single responses? [#multi-turn]
+</Details>
+
+<Details id="multi-turn">
+<Summary>How do we evaluate multi-turn conversations rather than single responses?</Summary>
 
 Scores in Langfuse can attach to sessions, not just traces and observations, and annotation queues accept sessions, so human reviewers can score a whole conversation. For automated judges, target an observation that records the full conversation context you want judged, since evaluators read the data present on their target.
 
-### What is the difference between offline and online evaluation? [#offline-vs-online]
+</Details>
+
+<Details id="offline-vs-online">
+<Summary>What is the difference between offline and online evaluation?</Summary>
 
 Offline evaluation runs your application against a fixed dataset in experiments, before changes ship, and is where baselines and CI gates live. Online evaluation scores live production traffic, sampled to control cost, and is where drift, regressions, and unexpected inputs surface. A complete strategy needs both, connected by datasets that grow from production failures.
+
+</Details>
+
+</FaqDetails>

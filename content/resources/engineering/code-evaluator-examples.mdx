@@ -225,18 +225,34 @@ Two practical notes from the [runtime constraints](/docs/evaluation/evaluation-m
 
 ## FAQ
 
-### Can code evaluators run on production traces or only in experiments?
+<FaqDetails>
+
+<Details id="can-code-evaluators-run-on-production-traces-or-only-in-experiments">
+<Summary>Can code evaluators run on production traces or only in experiments?</Summary>
 
 Both. On production traces the `ctx.experiment` context is empty, so expected-output checks (examples 1, 7, 10) apply to experiments, while assertion-style checks (2, 3, 5, 6, 8, 9) run anywhere.
 
-### Can one evaluator return several scores?
+</Details>
+
+<Details id="can-one-evaluator-return-several-scores">
+<Summary>Can one evaluator return several scores?</Summary>
 
 Yes. `EvaluationResult` takes a list of scores, as in examples 5 and 9. Grouping related checks in one evaluator keeps execution overhead and configuration surface small.
 
-### Do code evaluator runs cost anything?
+</Details>
+
+<Details id="do-code-evaluator-runs-cost-anything">
+<Summary>Do code evaluator runs cost anything?</Summary>
 
 There is no LLM cost, since no model is called. Stored scores count as regular [billable units](/docs/administration/billable-units), the same as any score.
 
-### How do I debug an evaluator that is not producing scores?
+</Details>
+
+<Details id="how-do-i-debug-an-evaluator-that-is-not-producing-scores">
+<Summary>How do I debug an evaluator that is not producing scores?</Summary>
 
 See the [debugging section](/docs/evaluation/evaluation-methods/code-evaluators#debug-code-evaluator-executions) of the reference: execution logs show exceptions and returned values per run. The most common failures are type assumptions (output is a dict, not a string) and targeting an observation whose fields are empty.
+
+</Details>
+
+</FaqDetails>
