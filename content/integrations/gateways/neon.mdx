@@ -15,7 +15,7 @@ In this guide, we'll show you how to integrate [Langfuse](/) with [Neon AI Gatew
 Since Neon AI Gateway uses the OpenAI API schema, we can use Langfuse's native integration with the OpenAI SDK, available in both [Python](/integrations/model-providers/openai-py) and [TypeScript](/integrations/model-providers/openai-js).
 
 <Callout type="info">
-  Neon AI Gateway is in beta. It requires a paid Neon plan and a project in the AWS US East (Ohio) region (`aws-us-east-2`).
+  Neon AI Gateway is generally available. It requires a paid Neon plan and is not available in every region; see [Regions](https://neon.com/docs/introduction/regions) for current coverage.
 </Callout>
 
 ## Get started
@@ -137,7 +137,7 @@ A Neon credential is valid on the branch it was created on and on every branch d
 
 Neon returns token usage but no cost field, and `GET /v1/models` currently reports `pricing` as `null`. Langfuse therefore has no cost to ingest for these generations, so cost is not tracked automatically. To see spend in Langfuse, define the Neon model IDs as [custom model definitions](/docs/observability/features/token-and-cost-tracking#custom-model-definitions) with prices from the [Neon model catalog](https://neon.com/docs/ai-gateway/models), which is also published as the [`neon` provider on models.dev](https://models.dev/providers/neon).
 
-Note that inference is free during the Neon beta, so any prices you configure describe what the models will cost once billing begins.
+Configure prices from the [Neon model catalog](https://neon.com/docs/ai-gateway/models). Inference uses prepaid credits at the provider per-token rate with no markup.
 
 ## Response content shape
 
