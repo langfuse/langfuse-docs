@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { AdoptersExplorer, type Adopter } from "./AdoptersExplorer";
 import { AdoptersTicker } from "./AdoptersTicker";
 import adobeLogo from "../home/img/adobe.svg";
+import boschLogo from "../home/img/bosch.svg";
 import canvaLogo from "../home/img/canva.svg";
 import circlebackLogo from "../home/img/circleback.svg";
 import ciscoLogo from "../home/img/cisco.svg";
@@ -32,6 +33,7 @@ const ADOPTERS_TABLE_PATH = join(
 
 const COMPANY_LOGOS: Record<string, NonNullable<Adopter["logo"]>> = {
   Adobe: { src: adobeLogo },
+  "Bosch Power Tools": { src: boschLogo },
   Canva: { src: canvaLogo },
   Circleback: { src: circlebackLogo },
   Cisco: { src: ciscoLogo },
@@ -59,6 +61,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   Apple: "Consumer electronics and software company",
   Base44: "AI app-building platform",
   Bayer: "Pharmaceutical and life sciences company",
+  "Bosch Power Tools": "Power tools and measuring technology company",
   Canva: "Visual communication and design platform",
   Circleback: "AI meeting assistant with transcription and notes",
   Cisco: "Networking and cybersecurity company",
