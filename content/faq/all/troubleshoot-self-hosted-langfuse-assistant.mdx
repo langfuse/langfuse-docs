@@ -22,11 +22,15 @@ The worker could not connect to the MCP server. Confirm it can reach `/api/publi
 
 ## The UI reports that the model is not configured
 
-Set `LANGFUSE_AI_PROVIDER` and `LANGFUSE_AI_MODEL` on both services. Also set `LANGFUSE_AI_API_KEY` for `anthropic` or `openai`, then recreate both services.
+Set `LANGFUSE_AI_PROVIDER` and `LANGFUSE_AI_MODEL` on both services. Also set `LANGFUSE_AI_API_KEY` for `anthropic` or `openai`, then recreate both services. Bedrock and Vertex authenticate through the cloud credential chain and do not use `LANGFUSE_AI_API_KEY`.
 
 ## Bedrock returns access denied or model not found
 
 Check the Region, model access, and invoke permissions in [Configure the model](/self-hosting/configuration/langfuse-assistant#configure-the-model). An AWS Marketplace subscription error means an administrator must activate the model for the account first.
+
+## Vertex returns permission denied or model not found
+
+Check application default credentials, location, and predict permission in [Configure the model](/self-hosting/configuration/langfuse-assistant#configure-the-model). A partner-model terms error means an administrator must enable the Claude model in Model Garden first. Confirm the Vertex AI API is enabled on the GCP project that the credentials resolve to.
 
 ## An OpenAI-compatible gateway returns 404
 

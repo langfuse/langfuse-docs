@@ -14,7 +14,7 @@ import {
   ThumbsUpIcon,
   ThumbsDownIcon,
 } from "lucide-react";
-import { DemoTraceLink } from "@/components/demoTraceLink";
+// import { DemoTraceLink } from "@/components/demoTraceLink"; // temporarily disabled
 
 type GeneratedImage = {
   base64: string;
@@ -200,12 +200,14 @@ export const ImageGenerator = ({
                 />
               </div>
 
+              {/* Temporarily disabled: trace link (traces are not shared publicly right now)
               <div className="flex justify-center">
                 <DemoTraceLink
                   traceUrl={currentImage.traceUrl}
                   source="image_generator"
                 />
               </div>
+              */}
 
               {/* Actions */}
               <div className="flex items-center gap-2 justify-center">

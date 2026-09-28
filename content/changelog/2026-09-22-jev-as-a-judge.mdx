@@ -1,0 +1,56 @@
+---
+date: 2026-09-22
+title: Jev as a judge
+description: Use TypeSafe's Jev decision model as a judge in Langfuse evaluators. Ask typed questions about every observation and get calibrated scores at a fraction of the cost and latency of an LLM judge.
+author: Hassieb
+canonical: /docs/evaluation/evaluation-methods/jev-as-a-judge
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, Newspaper } from "lucide-react";
+
+<ChangelogHeader />
+
+You can now use TypeSafe's [Jev](https://docs.typesafe.ai/introduction) as a judge in Langfuse. Jev is a System One model: it does not generate text. You give it a state and typed questions, and it returns typed answers with probabilities. In Langfuse, each question becomes a score on the observation, next to your [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators).
+
+Score every support conversation for e.g. topic, frustration, and whether the request was out of scope, in one call. Flag PII or policy violations on live traffic fast enough to alert on them. Rate answer completeness on a rubric across an entire experiment run without watching the bill.
+
+## Why Jev as a judge
+
+- **Cheaper.** Jev is priced by input tokens only, at $0.042 per million. A judgment over a typical conversation costs a fraction of a cent, so you can score more observation instead of sampling.
+- **Faster.** Answers come back in well under a second. Online evaluators keep pace with production traffic, which shortens the time between a bad output and an [alert](/docs/observability/features/alerts#evaluator-alerts).
+- **Calibrated.** Every answer carries a probability distribution and a confidence value, stored in the score metadata.
+- **Many questions, one call.** All questions in an evaluator are answered in parallel against the same state. Adding a second or tenth question barely changes latency or cost.
+
+Jev does not replace LLM judges. It has no rationale to give and only answers questions whose possible answers you define upfront. When you need written reasoning or open-ended quality assessment, keep using LLM-as-a-Judge. Many teams will run both: Jev on every observation, an LLM judge on a sample or on what Jev flags.
+
+## Three question types
+
+| Type         | Jev returns                                            | Langfuse score                  | Good for                                                         |
+| ------------ | ------------------------------------------------------ | ------------------------------- | ---------------------------------------------------------------- |
+| **Choice**   | One option out of a set you define, with probabilities | Categorical                     | Topic detection, intent, failure mode, routing checks            |
+| **Score**    | A position on ordered levels you describe              | Numeric (expected level)        | Frustration, severity, completeness rubrics                      |
+| **Yes / no** | The probability that a statement is true               | Numeric (`P(true)` from 0 to 1) | Out-of-scope requests, PII, policy violations, user disagreement |
+
+## Get started
+
+1. Add a **TypeSafe** connection under **Settings → LLM Connections**. You only need a TypeSafe API key.
+2. On the [Evaluators page](https://cloud.langfuse.com/project/~/evals), click **New evaluator** and choose **New decision model evaluator**, or start from one of the Jev templates: **Assign Input Topic**, **Flag Out-of-Scope Request**, or **Rate Customer Frustration**.
+3. Define your questions, map observation fields into the state, test on sample observations, and attach the evaluator to a rule.
+
+In the Langfuse UI, Jev evaluators are called **decision-model evaluators**. Jev is the first decision model we support.
+
+<Cards num={2}>
+  <Card
+    title="Jev as a judge docs"
+    href="/docs/evaluation/evaluation-methods/jev-as-a-judge"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Using TypeSafe's Jev for evals"
+    href="/blog/2026-09-18-using-typesafes-jev-for-evals"
+    icon={<Newspaper />}
+    arrow
+  />
+</Cards>

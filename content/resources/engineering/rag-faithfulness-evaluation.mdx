@@ -230,22 +230,41 @@ The native route on this page is the better fit when you want the judge prompt t
 
 ## FAQ
 
-### What is the difference between RAG faithfulness and hallucination detection? [#faithfulness-vs-hallucination]
+<FaqDetails>
+
+<Details id="faithfulness-vs-hallucination">
+<Summary>What is the difference between RAG faithfulness and hallucination detection?</Summary>
 
 Faithfulness is scoped to RAG: it checks the answer against the specific context retrieved for that request, and an answer that is true but unsupported by the context still fails. Hallucination detection is the broader failure class: fabricated content in any LLM output, with or without retrieval, checked against whatever source of truth applies. In a RAG system, a faithfulness score is usually the most actionable hallucination signal because the comparison target is documents you control. For the broader problem, see [hallucination detection](/resources/engineering/hallucination-detection).
 
-### Does faithfulness evaluation require ground-truth answers? [#reference-free-vs-ground-truth]
+</Details>
+
+<Details id="reference-free-vs-ground-truth">
+<Summary>Does faithfulness evaluation require ground-truth answers?</Summary>
 
 No. Faithfulness compares the answer to the retrieved context, both of which exist for every request, so it is reference-free. This is why the dataset in the example above has no `expected_output` and why faithfulness can run on sampled production traffic. Reference-based metrics like answer correctness require a ground-truth answer per item and only run where you have labeled data; a complete RAG evaluation usually combines both kinds.
 
-### Which model should I use as the faithfulness judge? [#judge-model-choice]
+</Details>
+
+<Details id="judge-model-choice">
+<Summary>Which model should I use as the faithfulness judge?</Summary>
 
 Use a model that is strong at instruction following and supports structured output, and prefer a stronger model than the one generating the answers, since claim verification against long contexts is a demanding reading task. Pin temperature to 0 for repeatability. Calibrate once by having a person label 20 to 50 answers and comparing against the judge's verdicts; if agreement is low, fix the rubric wording before swapping models, because rubric ambiguity is the more common cause.
 
-### Should faithfulness be a binary or a graded score? [#binary-vs-graded]
+</Details>
+
+<Details id="binary-vs-graded">
+<Summary>Should faithfulness be a binary or a graded score?</Summary>
 
 Make the individual judge decisions binary and let the numeric score emerge from aggregation. Each claim is either supported by the context or it is not, and binary decisions are where LLM judges are most consistent. The aggregated share of supported claims gives you a 0-to-1 metric for dashboards and thresholds, without asking the judge to produce a graded rating whose steps are undefined.
 
-### Do I need Ragas to evaluate faithfulness? [#ragas-required]
+</Details>
+
+<Details id="ragas-required">
+<Summary>Do I need Ragas to evaluate faithfulness?</Summary>
 
 No. Faithfulness is a metric, not a library feature: any LLM judge with a claim-extraction prompt implements it, as the experiment code on this page does with the Langfuse SDK alone. Ragas provides a maintained implementation of that judge along with other RAG metrics, and its scores can be pushed into Langfuse through the integration. Choose based on where you want the judge to live: in your own prompt under version control, or in a library you import.
+
+</Details>
+
+</FaqDetails>

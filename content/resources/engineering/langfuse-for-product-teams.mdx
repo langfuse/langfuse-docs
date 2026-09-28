@@ -171,7 +171,10 @@ engineering involvement.
 
 ## FAQ [#faq]
 
-### Can non-technical team members use Langfuse? [#non-technical-users]
+<FaqDetails>
+
+<Details id="non-technical-users">
+<Summary>Can non-technical team members use Langfuse?</Summary>
 
 Yes, for review and analysis work. Once engineers instrument the application with session and
 user identifiers, product managers and domain experts can replay conversations, score and
@@ -179,7 +182,10 @@ annotate them in annotation queues, build dashboards, and ask the Langfuse Assis
 questions in plain language, all without writing code. Initial instrumentation, score config
 creation, and user feedback wiring are engineering tasks.
 
-### How do product managers review AI conversations in Langfuse? [#review-conversations]
+</Details>
+
+<Details id="review-conversations">
+<Summary>How do product managers review AI conversations in Langfuse?</Summary>
 
 Through the sessions view: all traces sharing a `sessionId` are grouped into one session with
 a top-to-bottom replay of the conversation. Reviewers read the transcript, open individual
@@ -187,7 +193,10 @@ turns for detail, add scores via the Annotate drawer, and leave comments for tea
 systematic review, conversations are added to an annotation queue and worked through against
 predefined scoring dimensions.
 
-### Can I score LLM outputs without writing code? [#score-without-code]
+</Details>
+
+<Details id="score-without-code">
+<Summary>Can I score LLM outputs without writing code?</Summary>
 
 Yes. Scores can be created entirely in the Langfuse UI, either ad hoc via the Annotate button
 on any trace, observation, or session, or systematically through annotation queues with
@@ -195,7 +204,10 @@ predefined score configs. Scores added in the UI land in the same data model as 
 evaluations, so they appear in dashboards, score analytics, and filters alongside
 LLM-as-a-Judge results and user feedback.
 
-### Can I analyze what users ask my AI product? [#analyze-user-questions]
+</Details>
+
+<Details id="analyze-user-questions">
+<Summary>Can I analyze what users ask my AI product?</Summary>
 
 Yes, and it is a two-part answer. For ad-hoc exploration, the Langfuse Assistant and the MCP
 server let a reasoning model read conversations and report themes. For recurring charts such
@@ -204,9 +216,16 @@ back as categorical scores; the guide on
 [chatbot analytics](/resources/engineering/chatbot-intent-analytics) covers four working
 patterns for this.
 
-### Does this work on self-hosted Langfuse? [#self-hosted]
+</Details>
+
+<Details id="self-hosted">
+<Summary>Does this work on self-hosted Langfuse?</Summary>
 
 Mostly. Session review, annotation queues, manual scoring, user feedback, custom dashboards,
 and score analytics are available on self-hosted deployments. The [Langfuse Assistant](/docs/langfuse-assistant)
 and [Ask AI](/docs/observability/features/filter-search-bar#ask-ai) in the filter search bar
 are available on self-hosted deployments with an [instance Langfuse AI model](/self-hosting/configuration/langfuse-assistant).
+
+</Details>
+
+</FaqDetails>

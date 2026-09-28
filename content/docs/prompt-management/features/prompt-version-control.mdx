@@ -95,6 +95,7 @@ Some notes on fetching prompts:
 
 - The `latest` label points to the most recently created version.
 - When using a prompt without specifying a label, Langfuse will serve the version with the `production` label.
+- If no version carries the requested label, the request fails with `404 Not Found`. Langfuse never silently falls back to `production` or `latest`; see [how label resolution works](#label-resolution).
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
@@ -143,6 +144,21 @@ const prompt = await langfuse.prompt.get("movie-critic", {
 </Tab>
 
 </LangTabs>
+
+### How label resolution works [#label-resolution]
+
+The SDKs fetch prompts from `GET /api/public/v2/prompts/{name}`, so these rules apply whether you call the API directly or use `get_prompt` / `prompt.get`:
+
+| You pass                      | Langfuse returns                                                                                                            |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Neither `label` nor `version` | The version labeled `production`. If no version has that label, the request fails with `404`.                               |
+| `label="staging"`             | The version that currently carries `staging`. If no version does, `404` — there is no fallback to `production` or `latest`. |
+| `version=3`                   | Version 3, regardless of its labels.                                                                                        |
+| Both `label` and `version`    | A `400` error: the two are mutually exclusive.                                                                              |
+
+Because a missing label is an error rather than a fallback, a typo in a label name or an environment whose label was never assigned surfaces immediately as a failed fetch, not as the wrong prompt being served. The SDKs handle this with a [fallback prompt](/docs/prompt-management/features/guaranteed-availability) if you configure one; otherwise the error propagates to your code.
+
+To check which labels exist without fetching a specific version, list prompts: `GET /api/public/v2/prompts` returns every prompt with its `labels` array, and `GET /api/public/v2/prompts?label=staging` returns only prompts that have a version carrying that label. Labels are also visible on the prompt's version table in the UI.
 
 ## Operational workflows
 

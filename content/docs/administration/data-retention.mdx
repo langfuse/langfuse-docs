@@ -39,6 +39,8 @@ Project owners and administrators can change the setting in **Project Settings â
 
 Data retention can also be configured via the [Organization Management API](/docs/administration/scim-and-org-api).
 
+Retention is a per-project setting. There is no organization- or team-level retention policy: to apply the same window across many projects, set it on each project, in the UI or via the Organization Management API. On self-hosted instances, `LANGFUSE_INIT_PROJECT_RETENTION` sets the retention of the project created at startup.
+
 ## Details
 
 On a nightly basis, Langfuse selects traces, observations, scores, and media assets that are older than the configured retention period and deletes them, except for media associated with saved dataset items (see [Dataset media](#dataset-media)).

@@ -109,18 +109,34 @@ There is no automatic LLM instrumentation ecosystem for Ruby yet, so the manual 
 
 ## FAQ
 
-### Does this work with self-hosted Langfuse?
+<FaqDetails>
+
+<Details id="does-this-work-with-self-hosted-langfuse">
+<Summary>Does this work with self-hosted Langfuse?</Summary>
 
 Yes. Replace the endpoint host with your deployment's domain; the OTLP endpoint path is the same.
 
-### Can I send traces from multiple languages into one project?
+</Details>
+
+<Details id="can-i-send-traces-from-multiple-languages-into-one-project">
+<Summary>Can I send traces from multiple languages into one project?</Summary>
 
 Yes. The OTLP endpoint does not care which SDK produced the spans; a polyglot system can send Go, Java, and Python spans to the same project. Distributed traces connect across services when you propagate the W3C `traceparent` header between them.
 
-### Why does gRPC not work?
+</Details>
+
+<Details id="why-does-grpc-not-work">
+<Summary>Why does gRPC not work?</Summary>
 
 Langfuse's OTLP endpoint accepts HTTP with protobuf or JSON encoding only. Configure `http/protobuf` explicitly in SDKs that default to gRPC (the Java agent and some collector pipelines).
 
-### Should I use an OpenTelemetry Collector in between?
+</Details>
+
+<Details id="should-i-use-an-opentelemetry-collector-in-between">
+<Summary>Should I use an OpenTelemetry Collector in between?</Summary>
 
 Optional but often useful: a collector lets you fan the same spans out to Langfuse and an APM backend simultaneously, apply sampling, or bridge from environments that cannot reach the internet directly.
+
+</Details>
+
+</FaqDetails>

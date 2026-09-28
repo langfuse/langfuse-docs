@@ -3,7 +3,7 @@ import {
   observe,
   propagateAttributes,
   updateActiveObservation,
-  setActiveTraceAsPublic,
+  // setActiveTraceAsPublic, // temporarily disabled: demo traces are not shared publicly
   getActiveTraceId,
 } from "@langfuse/tracing";
 import { LangfuseMedia } from "@langfuse/core";
@@ -107,7 +107,8 @@ const handler = async (req: Request) => {
             },
             { asType: "generation" },
           );
-          setActiveTraceAsPublic();
+          // Temporarily disabled: demo traces are not shared publicly.
+          // setActiveTraceAsPublic();
           activeSpan?.end();
         });
         let traceUrl = DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL;

@@ -1,0 +1,103 @@
+---
+title: "How Ramp Uses Langfuse to Build AI Agents That Improve Themselves"
+seoTitle: "How Ramp Uses Langfuse to Build Self-Improving AI Agents"
+date: September 18, 2026
+description: "Ramp's engineering team on tracing agents with self-hosted Langfuse, and how Reflect turns traces into merged fixes - 30% faster sessions, 15% fewer tool calls."
+ogImage:
+tag: customer-story
+customerLogo: "/images/customers/ramp/ramp-light.svg"
+customerLogoDark: "/images/customers/ramp/ramp-dark.svg"
+customerQuote: "We wanted something built for agents as users first. And that means API first. An agent should never get stuck waiting for a human because of a deficiency in the API. This is what Langfuse is."
+customerQuoteHighlight: "API first"
+customerQuoteTag: "Video story"
+quoteAuthor: "David Traina"
+quoteRole: "Data Platform"
+quoteCompany: "Ramp"
+ctaLabel: "Watch"
+showInCustomerIndex: true
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { CustomerQuote } from "@/components/customers/CustomerQuote";
+import { CustomerScreenshotCarousel } from "@/components/customers/CustomerScreenshotCarousel";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+
+<BlogHeader
+  title="How Ramp Uses Langfuse to Build AI Agents That Improve Themselves"
+  description="Ramp's engineering team on tracing agents with self-hosted Langfuse, and how Reflect turns traces into merged fixes - 30% faster sessions, 15% fewer tool calls."
+  customerLogo="/images/customers/ramp/ramp-light.svg"
+  date="September 18, 2026"
+/>
+
+<iframe
+  width="100%"
+  src="https://www.youtube-nocookie.com/embed/2P6xL6eVTPo"
+  title="How Ramp uses Langfuse: Observing, debugging, and continuously improving production AI agents"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerPolicy="strict-origin-when-cross-origin"
+  className="aspect-video w-full rounded border mt-2"
+  allowFullScreen
+></iframe>
+
+<p className="text-sm text-primary/60 mt-2 mb-8">
+  <a href="https://www.youtube.com/watch?v=2P6xL6eVTPo">Watch on YouTube</a>
+</p>
+
+## Highlights from the talk [#highlights-from-the-talk]
+
+<CustomerScreenshotCarousel
+  aspectClassName="aspect-video"
+  imageFit="contain"
+  slides={[
+    {
+      src: "/images/customers/ramp/instrumentation-trace.jpg",
+      alt: "Langfuse trace view for Ramp's durable_agent/ap_coworker_agent showing nested turns, tool calls, and generation metrics",
+      label: "AI instrumentation",
+    },
+    {
+      src: "/images/customers/ramp/why-langfuse-api-first.jpg",
+      alt: "Why Langfuse slide highlighting API-first design with an agent querying 600M observations across Ramp Langfuse projects",
+      label: "Why Langfuse",
+    },
+    {
+      src: "/images/customers/ramp/working-with-langfuse-team.jpg",
+      alt: "Slack threads showing Ramp collaborating with the Langfuse team on features, SDK fixes, and session view feedback",
+      label: "Working with the team",
+    },
+    {
+      src: "/images/customers/ramp/reflect-workflow.jpg",
+      alt: "Ramp Reflect workflow diagram from production sessions through Langfuse enrichment to deeper reasoning and human review",
+      label: "Ramp Reflect",
+    },
+    {
+      src: "/images/customers/ramp/reflect-impact.jpg",
+      alt: "Reflect impact on Ramp Research showing a before and after fix path with 31% faster sessions and fewer tool calls and tokens",
+      label: "Reflect's impact",
+    },
+  ]}
+/>
+
+[Ramp](https://ramp.com/) is a smart financial infrastructure company serving 70,000+ businesses across cards, expense management, AP, travel, treasury, procurement, and token spend management - saving customers roughly $2B and 20 million hours. Nearly all of it now runs on agents.
+
+In this talk, Ryan Delgado (Engineering) and David Traina (Data Platform) walk through Ramp's agent portfolio and the observability layer underneath it. Customer-facing agents include Policy Agent, which approves or denies expenses before a manager ever sees them, and Stack, which compresses month-end close from a week and a half to 1-3 days. Internally, Inspect - Ramp's in-house background coding agent - now accounts for ~70% of merged PRs at roughly 1,500 PRs per day, and Ramp Research answers data questions in Slack in 2-3 minutes instead of 3-5 hours.
+
+<CustomerQuote
+  quote="Inspect accounts for about 70% of the merged PRs within Ramp, and we're raising about 1,500 PRs a day across a few different repos."
+  name="Ryan Delgado"
+  role="Engineering"
+  company="Ramp"
+/>
+
+David Traina explains why Ramp chose Langfuse: fully [self-hosted](/self-hosting) on standard infra (S3, Redis, Postgres, ECS, Terraform) with ClickHouse Cloud, fully open source, [OpenTelemetry](/integrations/native/opentelemetry)-native, and API-first so agents - not just humans - can be first-class users.
+
+He then demos Reflect, a Ramp agent that monitors other agents. Reflect scores and clusters Langfuse [traces](/docs/observability/overview), diagnoses recurring failure patterns, and proposes fixes. Applied to 12 agents with 120+ merged suggestions, it cut Ramp Research token usage by 10-20%, tool calls by 15%, and session times by 30%.
+
+<CustomerQuote
+  quote="Reflect works by semantically scoring those traces and grouping similar traces together… it analyzes those traces in aggregate to find patterns, diagnose issues, and propose fixes for a human owner to either accept or reject. We've seen a 10-20% decrease in token usage, 15% fewer tool calls, and 30% faster end-to-end session times."
+  name="David Traina"
+  role="Data Platform"
+  company="Ramp"
+/>
+
+<CustomerStoryCTA />

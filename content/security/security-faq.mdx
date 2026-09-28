@@ -11,182 +11,306 @@ If you don't find a solution to your issue here, try using [Ask AI](/docs/ask-ai
 
 ## Application Security
 
-> **How is data encrypted in transit and at rest?**
+<FaqDetails>
+
+<Details>
+<Summary>How is data encrypted in transit and at rest?</Summary>
 
 TLS 1.2+ protects traffic; all stored data uses AES‑256 encryption. See [encryption documentation](/security/encryption) and [self-hosted encryption](/self-hosting/configuration/encryption) for more details.
 
-> **Can I use my own keys to encrypt data on Langfuse Cloud?**
+</Details>
+
+<Details>
+<Summary>Can I use my own keys to encrypt data on Langfuse Cloud?</Summary>
 
 Customer‑managed keys are not supported. Langfuse Cloud uses AWS‑managed encryption (AES‑256 via KMS) for all services. BYOK/CMEK or HSM integrations are not available.
 
-> **What retention, deletion and export controls exist?**
+</Details>
+
+<Details>
+<Summary>What retention, deletion and export controls exist?</Summary>
 
 Each project can set its own retention window; data older than that is purged nightly, and users/API can trigger immediate deletion or export. See [data retention](/docs/administration/data-retention) and [data deletion](/docs/administration/data-deletion) documentation.
 
-> **How should I evaluate Langfuse Cloud's multi-tenant security model?**
+</Details>
+
+<Details>
+<Summary>How should I evaluate Langfuse Cloud's multi-tenant security model?</Summary>
 
 Multi-tenancy is the standard operating model for modern SaaS products. The relevant security question is whether tenant isolation is explicit, consistently enforced, and independently tested. Langfuse Cloud combines project-scoped data isolation, project-scoped API keys, RBAC authorization, encrypted infrastructure, continuous monitoring, and annual third-party penetration tests. For most teams, this provides a strong balance of security, time to value, product experience, and operational reliability because Langfuse operates the full application and infrastructure stack.
 
 If your internal policy requires infrastructure-level isolation, customer-operated networking, or a customer-controlled database boundary, use [self-hosted Langfuse](/self-hosting) or discuss Enterprise Cloud options with us.
 
-> **Can I deploy Langfuse in a single-tenant environment?**
+</Details>
+
+<Details>
+<Summary>Can I deploy Langfuse in a single-tenant environment?</Summary>
 
 Langfuse Cloud is multi-tenant. For strict infrastructure-level isolation, we recommend self-hosting Langfuse. Self-hosted Enterprise deployments can be paired with your preferred ClickHouse deployment, including ClickHouse Cloud, but your team owns the networking, scaling, upgrades, backups, and operational controls.
 
-> **How is tenant isolation enforced?**
+</Details>
+
+<Details>
+<Summary>How is tenant isolation enforced?</Summary>
 
 Logical data isolation is technically achieved by associating every piece of data with a specific `projectId`. This unique identifier acts as a key to partition data within the database, ensuring that all information, from traces and observations to scores and datasets, is explicitly linked to a single project. Access to other projects' data is prevented through a role-based access control (RBAC) system built on project memberships. Users are granted access to projects through these memberships, each of which defines their role and permissions within that specific project. See [RBAC documentation](/docs/administration/rbac) for more details. The application logic then uses the user's authenticated session to filter all database queries by their authorized project IDs. The tenant boundary is included in Langfuse's annual third-party penetration tests.
 
-> **How does Langfuse Cloud compare with running Langfuse yourself on ClickHouse Cloud?**
+</Details>
+
+<Details>
+<Summary>How does Langfuse Cloud compare with running Langfuse yourself on ClickHouse Cloud?</Summary>
 
 Langfuse Cloud uses ClickHouse Cloud as part of the managed backend, so customers benefit from ClickHouse Cloud's infrastructure security while Langfuse operates the application, control plane, queues/cache, object storage, database integrations, upgrades, backups, and incident response. This is the recommended path when you want the fastest setup and the least operational overhead.
 
 Running self-hosted Langfuse with your own ClickHouse Cloud environment gives your team direct ownership of network topology, database configuration, and infrastructure policies. This can be the right model when a customer policy requires a customer-controlled VPC, private connectivity managed by the customer, or a dedicated database boundary, but it comes with higher cost and operational responsibility.
 
-> **Can customers pin data to specific regions?**
+</Details>
+
+<Details>
+<Summary>Can customers pin data to specific regions?</Summary>
 
 Yes. EU, US, Japan, and HIPAA-ready US regions are available. Langfuse Cloud regions are separated from each other, and self-hosted deployments let you choose any region and infrastructure.
 
+</Details>
+
 ## Identity & Access Management
 
-> **Which authentication options are supported?**
+<Details>
+<Summary>Which authentication options are supported?</Summary>
 
 OIDC SSO, email/password, and SCIM provisioning; MFA or passkeys can be enforced via your IdP. See auth documentation for more details.
 
-> **What authentication methods are used for SDK and API access?**
+</Details>
+
+<Details>
+<Summary>What authentication methods are used for SDK and API access?</Summary>
 
 The REST API uses Basic Auth with a pair of API keys: the public key (username) and secret key (password). These keys are created in the project settings, are hashed before storage and can be rotated. JWTs are not used.
 
-> **How long is a session token valid before it expires?**
+</Details>
+
+<Details>
+<Summary>How long is a session token valid before it expires?</Summary>
 
 Session tokens are valid for 86,400 seconds (24 hours). We use JWT tokens which validate the expiry server-side, ensuring tokens expire on both the server and client.
 
-> **How is least‑privilege enforced?**
+</Details>
+
+<Details>
+<Summary>How is least‑privilege enforced?</Summary>
 
 RBAC lets you scope roles to organization or project. See [RBAC documentation](/docs/administration/rbac) for more details.
 
+</Details>
+
 ## Infrastructure & Network Security
 
-> **Where is Langfuse Cloud hosted and how is the perimeter protected?**
+<Details>
+<Summary>Where is Langfuse Cloud hosted and how is the perimeter protected?</Summary>
 
 Langfuse runs on AWS in isolated VPCs with WAF and AWS Shield for DDoS mitigation.
 
-> **Do supporting services such as Redis introduce additional tenant-isolation concerns?**
+</Details>
+
+<Details>
+<Summary>Do supporting services such as Redis introduce additional tenant-isolation concerns?</Summary>
 
 Langfuse Cloud uses several managed backing services, including Postgres, ClickHouse, Redis/ElastiCache, and S3. These services are not exposed directly to customers and are accessed by Langfuse services using least-privilege credentials inside isolated regional environments. Stored data is encrypted, activity is monitored, and the service providers are covered by vendor risk management and compliance review.
 
 The tenant boundary remains the Langfuse application and data model: product data is scoped by `projectId`, API keys are project-scoped, and every user request is authorized through RBAC. Supporting infrastructure is part of that controlled service architecture rather than a separate customer-operated surface.
 
-> **Does Langfuse Cloud support AWS PrivateLink or private connectivity?**
+</Details>
+
+<Details>
+<Summary>Does Langfuse Cloud support AWS PrivateLink or private connectivity?</Summary>
 
 Public regional endpoints are the default for Langfuse Cloud. AWS PrivateLink can be enabled for Enterprise customers on committed contracts, subject to regional availability and onboarding. [Talk to our sales team](/talk-to-us) to discuss availability for your region. If you need private connectivity in infrastructure fully controlled by your team, self-hosting gives you that control.
 
-> **What security headers are implemented on Langfuse endpoints?**
+</Details>
+
+<Details>
+<Summary>What security headers are implemented on Langfuse endpoints?</Summary>
 
 We enforce CSP (Content Security Policy), HSTS (HTTP Strict Transport Security), and X-Frame-Options on all endpoints including [langfuse.com](https://domsignal.com/test/ea3amc5z08sh6fnovjek392ihxrb66q6) and [cloud.langfuse.com](https://domsignal.com/test/spdnv4cx0949ah3nvz5b5eapab8o2390).
 
-> **How does Langfuse Cloud monitor its environment?**
+</Details>
+
+<Details>
+<Summary>How does Langfuse Cloud monitor its environment?</Summary>
 
 Langfuse uses DataDog and Sentry to monitor its application and environments. All cloud audit logs are automatically written into a separate, locked-down account. In addition, we have automated systems in place to alert us about anomalous usage.
 
-> **What anomaly detection and security alerting capabilities are in place?**
+</Details>
+
+<Details>
+<Summary>What anomaly detection and security alerting capabilities are in place?</Summary>
 
 Automatic anomaly detection is enabled using AWS GuardDuty with alerts for impossible travel and unusual API usage of service accounts and users.
 
-> **How does Langfuse log activities in the cloud platform?**
+</Details>
+
+<Details>
+<Summary>How does Langfuse log activities in the cloud platform?</Summary>
 
 We log failed authentication attempts in application logs and track activities in our infrastructure (AWS, ClickHouse, etc.). Application and system logs are retained in a hot store for 15 days and permanently within cold storage.
 
-> **Does Langfuse use time synchronization for audits?**
+</Details>
+
+<Details>
+<Summary>Does Langfuse use time synchronization for audits?</Summary>
 
 Yes. All services run in AWS cloud, which provides both NTP (Network Time Protocol) and PTP (Precision Time Protocol) clock devices. NTP is used by default.
 
-> **How often does Langfuse rotate its API keys?**
+</Details>
+
+<Details>
+<Summary>How often does Langfuse rotate its API keys?</Summary>
 
 Langfuse uses short-lived API keys where possible. For long-lived API keys we rotate them every 90 days.
 
+</Details>
+
 ## Software Development Lifecycle
 
-> **What secure‑coding and testing practices are in place?**
+<Details>
+<Summary>What secure‑coding and testing practices are in place?</Summary>
 
 Every commit passes our CI pipeline of end-to-end, unit, and security tests.
 
-> **Does Langfuse perform SAST or DAST?**
+</Details>
+
+<Details>
+<Summary>Does Langfuse perform SAST or DAST?</Summary>
 
 We perform SAST (Static Application Security Testing) by scanning our container images with Snyk on commits to main ([example](https://github.com/langfuse/langfuse/actions/runs/19838910104/job/56842732608)). We also run static code scans using CodeQL ([example](https://github.com/langfuse/langfuse/actions/runs/19838910102/job/56842732711)).
 
-> **How does the Software Development Lifecycle Policy look like?**
+</Details>
+
+<Details>
+<Summary>How does the Software Development Lifecycle Policy look like?</Summary>
 
 Our Software Development Life Cycle (SDLC) policy establishes a consistent process to ensure information security is integrated at every stage of development. The process follows defined phases, including planning and design, building the software, evaluating system readiness, and executing a secure deployment. Throughout this lifecycle, we enforce secure engineering principles, provide developers with ongoing training on practices like the OWASP Top 10, and perform vulnerability scanning to protect against threats. To protect data integrity, development and testing environments are strictly segregated from our production environment, and the use of production data for testing is prohibited without explicit authorization under strict controls. We ensure secure data interoperability and portability for our customers by default, using encrypted transport and providing a secure API for data access.
 
+</Details>
+
 ## Incident Response & Business Continuity
 
-> **What is the incident‑response process?**
+<Details>
+<Summary>What is the incident‑response process?</Summary>
 
 24 × 7 monitoring triggers an on‑call engineer; affected customers are notified and post‑mortems are published for larger incidents. See [incident and breach](/security/incident-and-breach) documentation for more details.
 
-> **What's the RTO, RPO and how does Langfuse keep backups?**
+</Details>
+
+<Details>
+<Summary>What's the RTO, RPO and how does Langfuse keep backups?</Summary>
 
 Please check out the [details here](/security/data-regions#business-continuity--availability).
 
-> **How does your disaster recovery plan look like?**
+</Details>
+
+<Details>
+<Summary>How does your disaster recovery plan look like?</Summary>
 
 Our Disaster Recovery Plan outlines the procedures for recovering services following a catastrophic event and is formally activated by leadership when critical systems are projected to be unavailable for an extended period. The recovery phase involves systematically replicating our entire infrastructure in an alternate environment, conducting rigorous testing, and deploying the new environment to production by updating DNS records. The final reconstitution phase aims to restore full operations within 24 hours of the disaster, ensuring a seamless transition and secure handling of all temporary resources.
 
-> **How does your business continuity plan look like?**
+</Details>
+
+<Details>
+<Summary>How does your business continuity plan look like?</Summary>
 
 Our Business Continuity Plan establishes a framework to ensure operational resilience and recovery following a major disruption, built upon a formal Business Impact Analysis that defines a Recovery Time Objective (RTO) and Recovery Point Objective (RPO) for each critical process. For our cloud application, our strategy relies on the resilience of our cloud providers and regular data backups to meet our defined recovery objectives. In the event of a physical worksite disruption, our personnel are equipped to work remotely, ensuring that core business and development operations can continue without interruption. The plan defines a clear line of succession for decision-making authority and is tested at least annually to validate its effectiveness and ensure a rapid response.
 
-> **How does Langfuse manage change management?**
+</Details>
+
+<Details>
+<Summary>How does Langfuse manage change management?</Summary>
 
 The Change Management Policy ensures that all modifications to our infrastructure, code, and production systems are handled in a planned manner to minimize risk and prevent outages. Every change requires submission by an authorized user, automated testing for security and functionality, and formal approval from management before implementation. We use tools like Git to standardize configuration, and no system is deployed without explicit approval from the CTO or appointed leadership.
 
+</Details>
+
 ## Vulnerability & Information Security
 
-> **How is the disclosure program run?**
+<Details>
+<Summary>How is the disclosure program run?</Summary>
 
 Langfuse participates in the [ClickHouse Bugcrowd program](https://bugcrowd.com/engagements/clickhouse) for vulnerability disclosure; CVSS drives remediation SLAs. See [penetration testing](/security/penetration-testing) for more details.
 
-> **How does the information security policy look like?**
+</Details>
+
+<Details>
+<Summary>How does the information security policy look like?</Summary>
 
 Our Information Security Policy is the overarching framework for our entire security program, establishing the core objective of maintaining the Confidentiality, Integrity, and Availability (CIA) of all company and customer data. This policy applies to all employees, contractors, and systems, and it governs a comprehensive suite of more specific policies covering areas like risk management, vendor management, and secure software development. Key requirements for all personnel include mandatory security awareness training upon hiring and annually thereafter, as well as signing confidentiality agreements. The policy mandates daily security practices, including a clean desk standard and strict security configurations for any personal devices used for work, such as mandatory disk encryption and screen locks. The entire security program is reviewed at least annually, and we enforce compliance through continuous monitoring and a formal disciplinary process for violations.
 
-> **How does the vulnerability policy look like?**
+</Details>
+
+<Details>
+<Summary>How does the vulnerability policy look like?</Summary>
 
 We continuously monitor our systems for security weaknesses using automated tools like Snyk and Dependabot, with all findings logged for remediation. Each vulnerability is triaged within 24 hours and assigned a priority level with a strict Service Level Agreement (SLA), requiring critical issues to be fixed within 24 hours. The entire lifecycle is documented, and resolution is achieved through a direct fix, confirmation as a false positive, or an approved exception with mitigating controls. Please refer to [vulnerability management](/security/vulnerability-management) for more information.
 
-> **Can customers run their own pen‑tests?**
+</Details>
+
+<Details>
+<Summary>Can customers run their own pen‑tests?</Summary>
 
 Yes—please run penetration tests in self-hosted deployments.
 
+</Details>
+
 ## Customer Controls & Shared Responsibility for Self-hosted Langfuse
 
-> **Which obligations stay with the customer when I am self-hosting?**
+<Details>
+<Summary>Which obligations stay with the customer when I am self-hosting?</Summary>
 
 Endpoint security, webhook endpoint hardening, backups, monitoring, and IAM hygiene on your side remain your responsibility. See the [self-hosted deployment strategies](/self-hosting/security/deployment-strategies) for more details.
 
-> **How should my backup strategy look like when I am self-hosting?**
+</Details>
+
+<Details>
+<Summary>How should my backup strategy look like when I am self-hosting?</Summary>
 
 We have a full guide around backups available to enable zero dataloss backups. See [the backup guide here](/self-hosting/configuration/backups).
 
-> **Does Langfuse offer a managed Langfuse instance in my VPC?**
+</Details>
+
+<Details>
+<Summary>Does Langfuse offer a managed Langfuse instance in my VPC?</Summary>
 
 While we can offer support in the Enterprise tier, we do not operate installations on customer infrastructure. If self-hosting is not possible, we recommend using Langfuse Cloud.
 
+</Details>
+
 ## AI / LLM‑Specific Concerns
 
-> **Does Langfuse store PII or trade secrets from prompts?**
+<Details>
+<Summary>Does Langfuse store PII or trade secrets from prompts?</Summary>
 
 Langfuse stores the data as-is. You can redact sensitive data via [data masking](/docs/observability/features/masking).
 
-> **Can long‑term retention be disabled?**
+</Details>
+
+<Details>
+<Summary>Can long‑term retention be disabled?</Summary>
 
 Yes. While data is stored indefinitely by default, you can configure custom [data retention](/docs/administration/data-retention) policies per project.
 
-> **Is prompt/trace data ever used for benchmarking or training?**
+</Details>
+
+<Details>
+<Summary>Is prompt/trace data ever used for benchmarking or training?</Summary>
 
 No. Langfuse does not repurpose customer data for external benchmarks or model training. See [AI features](/security/ai-features) for more details on how optional AI-powered features handle data.
 
-> **Do you ever use customer data to train models or analytics?**
+</Details>
+
+<Details>
+<Summary>Do you ever use customer data to train models or analytics?</Summary>
 
 No. Customer traces and prompts are processed only to provide the Langfuse service and are never used to train internal or third-party ML models. See [AI features](/security/ai-features) for more details on how optional AI-powered features handle data.
+
+</Details>
+
+</FaqDetails>

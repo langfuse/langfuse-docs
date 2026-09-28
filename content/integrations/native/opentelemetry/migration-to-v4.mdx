@@ -134,7 +134,7 @@ Send a canary trace containing a root span, one generation, and one additional c
 4. User, session, tags, environment, version, release, trace name, and required metadata are available on every observation where you need to filter or aggregate them.
 5. The generation contains its model, model parameters, token usage, cost, and prompt link where applicable.
 6. Any observation-level evaluator matches the intended observation and receives all mapped variables.
-7. The [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) returns the expected observation rows and fields.
+7. The [Observations API v2](/docs/api-and-data-platform/features/public-api#v2) returns the expected observation rows and fields.
 
 <Callout type="warning">
   Do not dual-send the same logical spans with the same IDs through legacy REST and OTEL into the same project. Validate in a separate project or use distinct canary trace IDs. Otherwise, the v4 data model may contain duplicate observations.

@@ -849,7 +849,7 @@ const sections: Section[] = [
     features: [
       {
         name: "Batch Export via UI",
-        href: "/docs/api-and-data-platform/features/query-via-sdk#ui",
+        href: "/docs/api-and-data-platform/features/export-from-ui",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -873,7 +873,7 @@ const sections: Section[] = [
       },
       {
         name: "Scheduled Batch Export to Blob Storage",
-        href: "/docs/api-and-data-platform/features/query-via-sdk#blob-storage",
+        href: "/docs/api-and-data-platform/features/export-to-blob-storage",
         tiers: {
           cloud: {
             Hobby: false,

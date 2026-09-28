@@ -48,7 +48,7 @@ function LaunchItem({ title, route }: LaunchItemProps) {
   return (
     <Link
       href={route}
-      className="group relative flex items-center py-1.5 -mx-6 lg:-mx-8 px-6 lg:px-8 hover:bg-muted/50 transition-colors text-sm"
+      className="group relative flex items-center py-1.5 -mx-5 lg:-mx-6 px-5 lg:px-6 hover:bg-surface-1 transition-colors text-[13px] text-text-secondary hover:text-text-primary"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -144,16 +144,18 @@ function MonthBox({ month, year, launches, animationProps }: MonthBoxProps) {
   const launchWeekUrl = getLaunchWeekUrl(month);
 
   const content = (
-    <div className="h-full flex flex-col p-6 lg:p-8">
+    <div className="h-full flex flex-col p-5 lg:p-6">
       <div className="flex items-center gap-2 flex-wrap mb-4">
-        <h3 className="text-2xl font-bold font-mono">{monthName}</h3>
-        <span className="text-sm text-muted-foreground">
+        <h3 className="text-[22px] font-medium font-analog text-text-primary">
+          {monthName}
+        </h3>
+        <span className="text-[13px] text-text-tertiary">
           {launches.length} {launches.length === 1 ? "launch" : "launches"}
         </span>
         {launchWeekUrl && (
           <Link
             href={launchWeekUrl}
-            className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+            className="inline-flex items-center px-2 py-1 text-[11px] font-medium rounded-[2px] border border-line-structure bg-surface-1 text-text-secondary hover:text-text-primary hover:border-line-cta transition-colors"
           >
             Launch Week
           </Link>
@@ -233,15 +235,16 @@ export function Launches() {
   return (
     <WrappedSection>
       <SectionHeading
-        title="A Year of Launches..."
-        subtitle="We have shipped a ton of new features this year."
+        id="launches"
+        title="A year of launches"
+        subtitle="We shipped a ton of new features this year."
       >
-        <p className="hidden lg:block text-sm text-muted-foreground">
-          hold hover to ⭐ your favorite launches of the year
+        <p className="hidden lg:block text-[13px] text-text-tertiary">
+          Hold hover to ⭐ your favorite launches of the year
         </p>
       </SectionHeading>
       <div ref={containerRef}>
-        <WrappedGrid className="!grid-cols-1 sm:!grid-cols-1 lg:!grid-cols-3 !border-t-0 -mt-[1px]">
+        <WrappedGrid className="!grid-cols-1 sm:!grid-cols-1 lg:!grid-cols-3 !border-t-0 -mt-px">
           {months.map((monthKey, index) => {
             const [year, month] = monthKey.split("-");
 

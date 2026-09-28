@@ -8,7 +8,7 @@ import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { MicIcon, MicOffIcon, PhoneOffIcon } from "lucide-react";
-import { DemoTraceLink } from "@/components/demoTraceLink";
+// import { DemoTraceLink } from "@/components/demoTraceLink"; // temporarily disabled
 
 type AgentState =
   | "idle"
@@ -281,12 +281,14 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
                 <p className="text-xs text-destructive mb-4">{error}</p>
               )}
 
-              {/* Link to the conversation's trace, shown once the call has ended */}
+              {/* Temporarily disabled: link to the conversation's trace, shown once
+                  the call has ended (traces are not shared publicly right now)
               {traceUrl && agentState === "idle" && (
                 <div className="flex justify-center mb-4">
                   <DemoTraceLink traceUrl={traceUrl} source="voice_agent" />
                 </div>
               )}
+              */}
 
               {/* Store-audio toggle (applies when the next conversation starts) */}
               <div className="flex items-center gap-2 mb-4">
