@@ -1,6 +1,6 @@
 ---
 title: Backup Strategies for Langfuse
-description: Comprehensive guide to backing up your self-hosted Langfuse deployment including ClickHouse, Postgres, and MinIO.
+description: Comprehensive guide to backing up your self-hosted Langfuse deployment including ClickHouse, Postgres, and blob storage (SeaweedFS, MinIO).
 label: "Version: v4"
 sidebarTitle: "Backups"
 ---
@@ -220,25 +220,63 @@ aws s3 cp "$BACKUP_DIR/langfuse-backup-$TIMESTAMP.sql.gz" s3://langfuse-backups/
 find "$BACKUP_DIR" -name "langfuse-backup-*.sql.gz" -mtime +7 -delete
 ```
 
-## MinIO
+## Blob Storage (SeaweedFS / MinIO) [#blob-storage]
 
 <Callout type="info">
 
-**MinIO is Obsolete with Cloud Storage**: If you're using cloud storage services like AWS S3, Azure Blob Storage, or Google Cloud Storage, MinIO is not needed and backup strategies should focus on your cloud storage provider's native backup features.
+**Self-Hosted Blob Storage is Obsolete with Cloud Storage**: If you're using cloud storage services like AWS S3, Azure Blob Storage, or Google Cloud Storage, you do not need SeaweedFS or MinIO, and backup strategies should focus on your cloud storage provider's native backup features.
 
 </Callout>
 
-MinIO is only relevant for self-hosted deployments that don't use cloud storage services.
+[SeaweedFS](/self-hosting/deployment/infrastructure/blobstorage#seaweedfs) and [MinIO](/self-hosting/deployment/infrastructure/blobstorage#minio) are only relevant for self-hosted deployments that don't use cloud storage services.
 For most production deployments, we recommend using managed cloud storage instead.
 
-### When MinIO is Used
+### When Self-Hosted Blob Storage is Used
 
-MinIO is typically used in:
+SeaweedFS or MinIO are typically used in:
 
 - Air-gapped environments
 - On-premises deployments without cloud access
 - Development environments
 - Specific compliance requirements
+
+The Helm chart bundles SeaweedFS from chart version `v2.0.0` onwards, and the Docker Compose setup bundles MinIO.
+
+### SeaweedFS Backup Strategies
+
+#### Sync to External Storage
+
+SeaweedFS exposes an S3-compatible API, so any S3 client can copy the Langfuse bucket to external storage.
+For example, with the MinIO client (`mc`):
+
+```bash
+# Configure source and target
+mc alias set seaweedfs http://langfuse-s3-all-in-one.langfuse.svc.cluster.local:8333 $SEAWEEDFS_ACCESS_KEY $SEAWEEDFS_SECRET_KEY
+mc alias set s3backup https://s3.amazonaws.com $AWS_ACCESS_KEY $AWS_SECRET_KEY
+
+# Copy the bucket
+mc mirror seaweedfs/langfuse s3backup/langfuse-backup/$(date +%Y%m%d)
+```
+
+For the SeaweedFS instance bundled with the Helm chart, the Service is named `<release>-s3-all-in-one`, and the credentials are stored in the `langfuse-s3-auth` Secret under the `accessKey` and `secretKey` keys.
+
+#### Kubernetes SeaweedFS Backups
+
+The bundled SeaweedFS stores its data in the `<release>-s3-all-in-one-data` PVC. Snapshot it with a `VolumeSnapshot`:
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshot
+metadata:
+  name: seaweedfs-backup-$(date +%Y%m%d-%H%M%S)
+  namespace: langfuse
+spec:
+  source:
+    persistentVolumeClaimName: langfuse-s3-all-in-one-data
+  volumeSnapshotClassName: csi-hostpath-snapclass
+EOF
+```
 
 ### MinIO Backup Strategies
 

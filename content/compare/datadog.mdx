@@ -6,6 +6,7 @@ tags: [comparison]
 ---
 
 import { Cloud, MessageSquare } from "lucide-react";
+import CompareClickhouseDatastore from "@/components-mdx/compare-clickhouse-datastore.mdx";
 
 # Langfuse vs. Datadog Agent Observability
 
@@ -13,17 +14,15 @@ This guide outlines the key differences between **[Langfuse](/)** and **[Datadog
 
 ## TL;DR
 
-**Choose Langfuse** if you want:
+- **Open source, yours to run.** Langfuse is [one MIT-licensed product](#open-source-and-distribution), identical on Cloud, self-hosted, and air-gapped. Datadog Agent Observability is SaaS only: no self-hosting, not even on Datadog's own government sites.
+- **An open data plane.** Every trace lands in ClickHouse, [open source and in production for a decade](#history-and-data-plane), the same engine on Cloud and self-hosted; self-hosters query it in SQL, and Cloud exports to your own bucket. Datadog spans live in a closed, Datadog-operated store you reach through its UI and a cursor-paged export API.
+- **3 years of history instead of 15 days, for less.** Datadog keeps traces and spans for [15 days on every plan](#history-and-data-plane); 30 to 90 days is a paid per-span add-on arranged through your account team, and nothing beyond 90 days is published. At 500k traces/month, Langfuse Pro is $621 with 3 years of history where [Datadog Pro is $875 with the 90-day add-on](#worked-example).
+- **The whole improvement loop in the UI, for Python and JS/TS.** [Code evaluators run inside Langfuse on live observations, experiments start from the UI, and CI gates](#evaluation-and-experiments) block regressions; [prompt management](#prompt-management) serves both SDKs. Datadog runs experiments and prompt retrieval from the Python SDK only, and online code evaluations are computed in your code and submitted through its API.
+- **Many teams run both.** Datadog for APM and infrastructure, Langfuse for AI engineering, [from the same OpenTelemetry instrumentation](#coexistence).
 
-**1. MIT-licensed self-hosting.** Cloud and self-hosted run the same product. Tracing, evaluations, prompt management, and experiments are in the free OSS distribution. Used by 21 of the Fortune 50.
+**Choose Langfuse** if you want a platform built for AI engineering rather than an add-on to an APM suite: one MIT-licensed product on Cloud, self-hosted, and air-gapped, proven at 21 of the Fortune 50, with code evaluators, experiments, and prompt versions in one UI, and 3 years of raw traces in ClickHouse you can query, export, and turn into datasets. On the [worked example](#worked-example) that costs less than 90 days of history on Datadog. You accept that correlation with APM, infrastructure, logs, and RUM stays in your ops tool.
 
-**2. Months to years of queryable history.** Core is $29/month with 90 days. Pro includes 3 years on ClickHouse.
-
-**3. Purpose-built AI quality workflows.** Code evaluators on live observations, experiments in the UI and CI, and prompt-version metrics.
-
-**Choose Datadog Agent Observability** if you want APM and LLM tracing in one Datadog deployment. You accept SaaS-only hosting and 15-day default trace retention.
-
-**Many teams run both:** Datadog for APM and infrastructure, Langfuse for AI engineering, from the same OpenTelemetry instrumentation. See [Using Langfuse and Datadog together](#coexistence).
+**Choose Datadog Agent Observability** if you already run Datadog and AI diagnosis must correlate with APM, infrastructure, logs, and RUM in one account, or procurement wants one vendor. You accept SaaS-only hosting, 15-day trace retention with paid add-ons to 90 days, and experiments and prompt retrieval that are Python-only.
 
 ---
 
@@ -44,23 +43,38 @@ Langfuse is open source (MIT). [Self-hosting](/self-hosting) is a first-class de
 
 ## History and data plane [#history-and-data-plane]
 
-Langfuse writes each LLM call, tool execution, and agent step to open-source [ClickHouse](https://clickhouse.com/). Cloud and self-hosted share the same engine as of [Langfuse v4](/docs/v4). High-volume reads use the [Observations](/docs/api-and-data-platform/features/public-api#v2) and [Metrics](/docs/metrics/features/metrics-api) APIs. Self-hosters can query ClickHouse in SQL.
+<CompareClickhouseDatastore />
 
-Datadog Agent Observability retains traces and spans for **15 days** on Free, Pro, month-to-month, and annual plans. Add-ons extend traces to 30, 60, or 90 days and experiments to 6, 9, or 12 months. Datasets are versioned separately and [kept for 3 years](https://www.datadoghq.com/products/ai/agent-observability/). There is no published 365-day tier for Agent Observability traces.
+Langfuse works directly with ClickHouse's core team as [part of ClickHouse](/blog/joining-clickhouse). Every LLM call, tool execution, and agent step is written once to a wide, immutable observations table ([v4 GA](/docs/v4)) built for high-throughput ingestion and fast analytical reads, which is how Pro keeps 3 years of raw traces queryable. High-volume reads use the [Observations](/docs/api-and-data-platform/features/public-api#v2) and [Metrics](/docs/metrics/features/metrics-api) APIs, [scheduled exports](/docs/api-and-data-platform/features/export-to-blob-storage) land Parquet in your own bucket, and self-hosters query ClickHouse in SQL.
 
-|                          | Langfuse                                                                                               | Datadog Agent Observability                                                 |
-| ------------------------ | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
-| Storage engine           | **ClickHouse** (Apache 2.0)                                                                            | Datadog-operated SaaS store                                                 |
-| Default trace retention  | 30 days Hobby, **90 days Core**, **3 years** [Pro and Enterprise](/pricing)                            | **15 days** on Free, Pro, M2M, and annual                                   |
-| Extended trace retention | Included in the plan window; [project retention policies](/docs/administration/data-retention) on Pro+ | Paid add-on to 30, 60, or 90 days. Rates in [Pricing](#pricing)             |
-| Experiment retention     | Same window as traces                                                                                  | 15 days on-demand; 90 days on committed plans; add-ons to 6 / 9 / 12 months |
-| Dataset retention        | Same project data plane                                                                                | 3 years, versioned separately                                               |
+Datadog Agent Observability stores spans in Datadog's closed store. You reach them through the Trace Explorer, dashboards on derived metrics, and an [Export API](https://docs.datadoghq.com/llm_observability/investigate/export_api/) that pages up to 5,000 spans per request; there is no direct database access and no self-hosted deployment of the store.
+
+Datadog Agent Observability [retains traces and spans for **15 days**](https://docs.datadoghq.com/llm_observability/data_governance/#data-retention) on every plan, including evaluation scores attached to them. A paid add-on extends this to 30, 60, or 90 days and experiments to 6, 9, or 12 months; add-ons are not available on the free tier and are arranged through your account team rather than enabled in the UI. Nothing beyond 90 days is published. Aggregated `ml_obs.*` metrics are kept for 15 months, so long-term dashboards survive after the underlying spans expire, but the raw traces you would replay or turn into a dataset do not.
+
+|                          | Langfuse                                                                                                  | Datadog Agent Observability                                                                        |
+| ------------------------ | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Data store               | **ClickHouse**, [launched 2016 (OSS)](https://clickhouse.com/blog/open-source-10), Apache 2.0             | Datadog-operated proprietary store, SaaS only                                                      |
+| Maturity                 | ~10 years open source; [2,000+ contributors](https://clickhouse.com/blog/open-source-10); SQL hiring pool | Closed; internals not published                                                                    |
+| Cloud / self-host        | Same ClickHouse engine on Cloud and self-hosted                                                           | No self-hosted option                                                                              |
+| Getting data out         | SQL on ClickHouse when self-hosting; Observations and Metrics APIs; scheduled export to your bucket       | Export API, cursor-paged, up to 5,000 spans per request                                            |
+| Default trace retention  | 30 days Hobby, **90 days Core**, **3 years** [Pro and Enterprise](/pricing)                               | **15 days** on Free, Pro, M2M, and annual                                                          |
+| Extended trace retention | Included in the plan window; [project retention policies](/docs/administration/data-retention) on Pro+    | Paid add-on to 30, 60, or 90 days via your account team; not on Free. Rates in [Pricing](#pricing) |
+| Experiment retention     | Same window as traces                                                                                     | 15 days on Free and on-demand; 90 days on committed plans; add-ons to 6 / 9 / 12 months            |
+| Dataset retention        | Same project data plane                                                                                   | Current version 3 years; previous versions 90 days, reset when used                                |
+| Aggregated metrics       | Computed from the retained traces, 3 years on Pro                                                         | `ml_obs.*` metrics kept 15 months after the spans expire                                           |
 
 ---
 
 ## Pricing [#pricing]
 
-Langfuse bills [units](/docs/administration/billable-units): one unit is a trace, an observation, or a score. Datadog Agent Observability bills LLM inference spans (one call to an LLM provider). Tool, workflow, agent, embedding, and retrieval spans are free on Datadog's [published pricing](https://www.datadoghq.com/pricing/list/). Span mix changes the crossover; the [editable pricing model](/pricing-comparison-sheet) takes it as an input so you can find yours.
+<Callout type="info">
+  **Run your own numbers.** The [Langfuse vs Datadog pricing
+  model](/pricing-comparison-sheet) is an editable Google Sheet with every list
+  price in this section. Set traces, observations per trace, LLM calls per
+  trace, scores, and retention to see where the costs cross over.
+</Callout>
+
+Langfuse bills [units](/docs/administration/billable-units): one unit is a trace, an observation, or a score. Datadog Agent Observability bills LLM inference spans (one call to an LLM provider). Tool, workflow, agent, embedding, and retrieval spans are free on Datadog's [published pricing](https://www.datadoghq.com/pricing/list/), and retention beyond 15 days is a second meter charged on every LLM span.
 
 |             | Langfuse                                                             | Datadog Agent Observability                                                              |
 | ----------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
@@ -81,9 +95,14 @@ Langfuse bills [units](/docs/administration/billable-units): one unit is a trace
 | **Langfuse Pro (3-year retention)** | $199.00 | $422.00 | $0.00     | **$621.00**     |
 | **Datadog Pro (90-day retention)**  | $160.00 | $315.00 | $400.00   | **$875.00**     |
 
-Public annual list prices. Edit the inputs yourself: [Langfuse vs Datadog pricing model](/pricing-comparison-sheet). Langfuse: 6,000,000 units, 100k included → $199 base + $72 (100k–1M at $8/100k) + $350 (1M–6M at $7/100k) = **$621**, 3-year history included. Datadog: 1,000,000 LLM spans → $160 base + 90 × $3.50 ($315) + 90-day retention add-on 100 × $4.00 ($400) = **$875**. Month-to-month Pro is $200 + $4.20/10k.
+Public annual list prices:
 
-[See pricing](/pricing) · [Start Free](https://cloud.langfuse.com) · [Talk to us](/talk-to-us)
+- **Langfuse Pro:** 6,000,000 units (traces + observations + scores), 100k included → $199 base + $72 (100k–1M at $8/100k) + $350 (1M–6M at $7/100k) = **$621**, 3-year history included.
+- **Datadog Pro:** 1,000,000 LLM spans → $160 base + $315 (900,000 spans beyond the included 100k, at $3.50/10k) + $400 (90-day retention add-on at $4.00 per 10k spans, applied to all 1,000,000) = **$875**. With the default 15-day retention and no add-on, Datadog is $475. Month-to-month Pro is $200 + $4.20/10k.
+
+The crossover depends on your span mix and how much history you need: Datadog bills only LLM-provider calls, Langfuse bills every observation. Different volumes or fewer LLM calls per trace? The [editable sheet](/pricing-comparison-sheet) reproduces this math from your inputs.
+
+See [Langfuse pricing](/pricing) for current rates, [start free](https://cloud.langfuse.com), or [talk to us](/talk-to-us) about Enterprise volumes.
 
 ---
 
@@ -95,14 +114,14 @@ Datadog Agent Observability correlates an LLM span with APM, infrastructure, log
 
 Langfuse records a [trace](/docs/observability/data-model) per request, with typed [observations](/docs/observability/features/observation-types) for LLM calls, tools, and retrieval. Multi-turn chats group into [sessions](/docs/observability/features/sessions). Agent runs render as [agent graphs](/docs/observability/features/agent-graphs). [Cost](/docs/observability/features/token-and-cost-tracking) is attributed on each generation.
 
-| Feature              | Langfuse                                                                                                                                           | Datadog Agent Observability                                                                                                                         |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| SDKs                 | [Python and JS/TS](/docs/observability/sdk/overview) on OpenTelemetry; other languages via the [OTLP endpoint](/integrations/native/opentelemetry) | [Python, Node.js, and Java](https://docs.datadoghq.com/llm_observability/instrument/sdk/); HTTP API for other languages                             |
-| Auto-instrumentation | [100+ integrations](/integrations), including OpenAI, LangChain, LlamaIndex, Vercel AI SDK, LiteLLM, CrewAI                                        | [Supported LLM providers and agent frameworks](https://docs.datadoghq.com/llm_observability/instrument/auto_instrumentation/)                       |
-| OpenTelemetry        | OTel-native SDKs + OTLP endpoint                                                                                                                   | [OTLP intake](https://docs.datadoghq.com/llm_observability/instrument/otel_instrumentation/) for GenAI semantic conventions 1.37+ and OpenInference |
-| Platform context     | Sessions, users, environments, releases, agent graphs                                                                                              | Correlation with Datadog APM, infrastructure, logs, and RUM                                                                                         |
-| Production insights  | [Dashboards](/docs/metrics/features/custom-dashboards), [Pulse](/docs/observability/features/pulse), filter search                                 | [Patterns](https://docs.datadoghq.com/llm_observability/investigate/patterns/) (topic clustering of production traffic)                             |
-| Sensitive data       | [SDK and OTel masking](/docs/observability/features/masking)                                                                                       | Sensitive Data Scanner included with Agent Observability usage                                                                                      |
+| Feature              | Langfuse                                                                                                                                                                                                              | Datadog Agent Observability                                                                                                                                                            |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SDKs                 | [Python and JS/TS](/docs/observability/sdk/overview) on OpenTelemetry; other languages via the [OTLP endpoint](/integrations/native/opentelemetry)                                                                    | [Python, Node.js, and Java](https://docs.datadoghq.com/llm_observability/instrument/sdk/); HTTP API for other languages                                                                |
+| Auto-instrumentation | [100+ integrations](/integrations), including OpenAI, LangChain, LlamaIndex, Vercel AI SDK, LiteLLM, CrewAI                                                                                                           | [Supported LLM providers and agent frameworks](https://docs.datadoghq.com/llm_observability/instrument/auto_instrumentation/)                                                          |
+| OpenTelemetry        | OTel-native SDKs + OTLP endpoint                                                                                                                                                                                      | [OTLP intake](https://docs.datadoghq.com/llm_observability/instrument/otel_instrumentation/) for GenAI semantic conventions 1.37+ and OpenInference                                    |
+| Platform context     | Sessions, users, environments, releases, agent graphs                                                                                                                                                                 | Correlation with Datadog APM, infrastructure, logs, and RUM                                                                                                                            |
+| Production insights  | [Dashboards](/docs/metrics/features/custom-dashboards), [Pulse](/docs/observability/features/pulse) outliers, [alerts](/docs/observability/features/alerts), [Assistant](/docs/langfuse-assistant) on all Cloud plans | [Patterns](https://docs.datadoghq.com/llm_observability/investigate/patterns/) topic clustering (sampled to 10k spans or 5k traces per run), Insights anomalies, Bits Evals in preview |
+| Sensitive data       | [SDK and OTel masking](/docs/observability/features/masking) before data leaves your process                                                                                                                          | SDK span processors before send; Sensitive Data Scanner after ingest                                                                                                                   |
 
 ---
 
@@ -110,28 +129,29 @@ Langfuse records a [trace](/docs/observability/data-model) per request, with typ
 
 [Langfuse evaluations](/docs/evaluation/overview) include [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge), [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) on live observations and experiments, custom scores via SDK/API, [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), and dataset experiments on Cloud and self-hosted. [CI/CD gates](/docs/evaluation/experiments/experiments-ci-cd) fail a pipeline on experiment results.
 
-Datadog provides [LLM-as-a-judge evaluators](https://docs.datadoghq.com/llm_observability/investigate/evaluations/) from a template or your own prompt, annotation queues, end-user feedback, and external evaluations via API. [Experiments](https://docs.datadoghq.com/llm_observability/improve/experiments/setup/) are started from the Python SDK with function- or class-based evaluators; datasets and run comparison live in the UI. Eval LLM calls bill as LLM spans.
+Datadog provides [LLM-as-a-judge evaluators](https://docs.datadoghq.com/llm_observability/investigate/evaluations/) from a template or your own prompt at span, trace, and session scope, annotation queues, end-user feedback, and external evaluations submitted through the Python or Node.js SDK or the API. [Experiments](https://docs.datadoghq.com/llm_observability/improve/experiments/setup/) are started from the Python SDK with function- or class-based evaluators; datasets and run comparison live in the UI. Both platforms run judges on your own connected model accounts. Eval LLM calls bill as LLM spans on Datadog and scores bill as units on Langfuse.
 
-| Feature                         | Langfuse                                                                               | Datadog Agent Observability                                                    |
-| ------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| LLM-as-a-judge                  | [Yes](/docs/evaluation/evaluation-methods/llm-as-a-judge) (observations + experiments) | Templates or your own prompt                                                   |
-| Deterministic online code evals | [Yes](/docs/evaluation/evaluation-methods/code-evaluators), native                     | External via API or third-party frameworks; function evaluators in experiments |
-| Experiments                     | [UI + SDK](/docs/evaluation/experiments/experiments-via-sdk), versioned datasets       | Python SDK datasets and experiments                                            |
-| CI/CD gates                     | [GitHub Action](/docs/evaluation/experiments/experiments-ci-cd)                        | Via SDK / custom                                                               |
-| Annotation queues               | [UI + API](/docs/evaluation/evaluation-methods/annotation-queues)                      | Yes                                                                            |
-| Where evals run                 | Cloud or self-hosted                                                                   | Datadog SaaS                                                                   |
+| Feature                         | Langfuse                                                                                                                                                                                                       | Datadog Agent Observability                                                       |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| LLM-as-a-judge                  | [Yes](/docs/evaluation/evaluation-methods/llm-as-a-judge) on observations and experiments                                                                                                                      | Templates or your own prompt; span, trace, or session scope                       |
+| Session-level evaluation        | [Score the session](/resources/engineering/evaluating-sessions-conversations) via SDK or annotation; run a judge on the observation that carries the full conversation                                         | Managed judge runs once, 30 minutes after the last span; later spans are excluded |
+| Deterministic online code evals | [Yes](/docs/evaluation/evaluation-methods/code-evaluators), Python or TypeScript run inside Langfuse                                                                                                           | Run in your code, submit via SDK or API; function evaluators in experiments       |
+| Experiments                     | [UI](/docs/evaluation/experiments/experiments-via-ui) and [SDK](/docs/evaluation/experiments/experiments-via-sdk) in Python and JS/TS, [baseline comparison](/docs/evaluation/experiments/compare-experiments) | Python SDK; datasets and run comparison in the UI                                 |
+| CI/CD gates                     | [GitHub Action](/docs/evaluation/experiments/experiments-ci-cd)                                                                                                                                                | Via SDK / custom                                                                  |
+| Annotation queues               | [UI + API](/docs/evaluation/evaluation-methods/annotation-queues)                                                                                                                                              | Yes                                                                               |
+| Where evals run                 | Cloud or self-hosted, including air-gapped                                                                                                                                                                     | Datadog SaaS                                                                      |
 
 ---
 
 ## Prompt management [#prompt-management]
 
-Edit the prompt in the UI. The running app fetches it. In Langfuse, pass the fetched prompt into the generation to [link it](/docs/prompt-management/features/link-to-traces), so each version gets cost, latency, and scores. Datadog [Prompt Tracking](https://docs.datadoghq.com/llm_observability/instrument/prompt_tracking/) records which prompt a span used and does not serve it.
+Edit the prompt in the UI. The running app fetches it. In Langfuse, pass the fetched prompt into the generation to [link it](/docs/prompt-management/features/link-to-traces), so each version gets cost, latency, and scores. Datadog's Prompt Management registry serves prompts to Python applications only; Prompt Tracking records which prompt a span used without serving it.
 
 |                             | Langfuse                                                                                                         | Datadog Agent Observability                                                                                                  |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | Who fetches                 | [Python and JS/TS](/docs/prompt-management/get-started), then [cached](/docs/prompt-management/features/caching) | Python (`ddtrace>=4.13`), [`LLMObs.get_prompt()`](https://docs.datadoghq.com/llm_observability/configure/prompt_management/) |
 | How you aim a version       | [Labels](/docs/prompt-management/features/prompt-version-control) (`production`, `staging`, custom)              | `DD_ENV`, numeric `version`, Feature Flags targeting                                                                         |
-| One prompt includes another | [Prompt references](/docs/prompt-management/features/composability)                                              | Concatenate in application code                                                                                              |
+| One prompt includes another | [Prompt references](/docs/prompt-management/features/composability)                                              | Not supported; concatenate in application code                                                                               |
 | Where it runs               | Cloud or self-host                                                                                               | Datadog SaaS                                                                                                                 |
 
 ---
@@ -154,15 +174,15 @@ To keep Langfuse spans out of Datadog, pass an [isolated TracerProvider](/docs/o
 
 ## Which should you choose [#which-should-you-choose]
 
-**Langfuse** when you want MIT self-hosting, years of queryable history, or purpose-built [AI engineering workflows](/academy/ai-engineering-loop). **Datadog Agent Observability** for APM and LLM tracing in one Datadog deployment. **Both** when SRE keeps Datadog and the AI team uses Langfuse. See [Using Langfuse and Datadog together](#coexistence).
+**Langfuse** when you want a platform built for AI engineering rather than an add-on to an APM suite: MIT self-hosting on an open ClickHouse store, 3 years of raw history, and the [AI engineering loop](/academy/ai-engineering-loop) in the UI for Python and JS/TS. **Datadog Agent Observability** when you already run Datadog and AI diagnosis must correlate with APM, infrastructure, logs, and RUM in one account. **Both** when SRE keeps Datadog and the AI team uses Langfuse. See [Using Langfuse and Datadog together](#coexistence).
 
 ---
 
 ## Why teams move away from Datadog Agent Observability [#why-teams-move-away]
 
-- **SaaS only.** Datadog Agent Observability [cannot be self-hosted](#open-source-and-distribution) and is unavailable on Datadog gov sites.
-- **Quality loop is Python-SDK-first.** Datadog documents prompt fetch and experiment runs for Python. Online code evals go through the API or another framework. Langfuse runs [code evaluators and UI and CI experiments](#evaluation-and-experiments) on Cloud and self-host.
-- **15-day default traces.** Datadog Agent Observability includes 15 days. A 90-day window is a paid add-on on the AI SKU, with no published year-long tier. In the [worked example](#worked-example), that is $875/month vs $621 on Langfuse Pro with 3-year history.
+- **SaaS only.** Datadog Agent Observability [cannot be self-hosted](#open-source-and-distribution) and is not offered on Datadog's government sites. Langfuse runs the same application self-hosted, including air-gapped, and moves to Cloud later without a migration.
+- **15 days of raw traces.** Datadog keeps traces and spans for [15 days on every plan](#history-and-data-plane). Longer retention is a paid add-on to 90 days, arranged through your account team, with nothing published beyond that. Failures older than the window cannot be replayed or turned into dataset items. Langfuse Pro keeps 3 years on [ClickHouse](#history-and-data-plane), and in the [worked example](#worked-example) still costs less than Datadog Pro with the 90-day add-on.
+- **The improve loop is Python-first.** Datadog documents experiment runs and prompt retrieval for the Python SDK; online code evaluations are computed in your code and submitted through the SDK or API. Langfuse runs [code evaluators inside the platform, experiments from the UI, and CI gates](#evaluation-and-experiments) for Python and JS/TS, on Cloud and self-hosted.
 
 ---
 
@@ -218,7 +238,7 @@ Yes. Keep Datadog APM and add Langfuse for LLM traces and the AI quality loop. S
 <Details id="datadog-llm-observability-pricing">
 <Summary>How does Datadog Agent Observability pricing compare to Langfuse?</Summary>
 
-Datadog Agent Observability bills LLM inference spans (Pro **$160/month** billed annually for 100k spans, September 2026). Langfuse bills units from **$29/month**. On the rates in our [editable public model](/pricing-comparison-sheet), 500k traces / 10 observations / 2 LLM calls / 1 score per trace is **$621** Langfuse Pro with 3-year history vs **$875** Datadog Pro with the 90-day retention add-on. Details in the [worked example](#worked-example).
+Datadog Agent Observability bills LLM inference spans (Pro **$160/month** billed annually for 100k spans, September 2026) plus a per-span retention add-on beyond 15 days. Langfuse bills units from **$29/month**, retention included. On the rates in our [editable public model](/pricing-comparison-sheet), 500k traces / 10 observations / 2 LLM calls / 1 score per trace is **$621** Langfuse Pro with 3-year history vs **$875** Datadog Pro with the 90-day retention add-on, or $475 at Datadog's default 15 days. Details in the [worked example](#worked-example).
 
 </Details>
 
@@ -232,7 +252,7 @@ No. Agent Observability is Datadog-hosted SaaS. Langfuse [self-hosts](/self-host
 <Details id="clickhouse-acquisition">
 <Summary>Did joining ClickHouse change the Langfuse product?</Summary>
 
-No. Langfuse already ran on ClickHouse. The [announcement](/blog/joining-clickhouse) states the MIT license, self-hosting, Cloud endpoints, and roadmap stay the same, with more capacity to ship. Cloud Core and Pro remain self-serve; OSS self-host has no sales motion. Details in [clarifications](/resources/engineering/clarifications#clickhouse).
+No. Langfuse already ran on ClickHouse. The [announcement](/blog/joining-clickhouse) states the MIT license, self-hosting, Cloud endpoints, and roadmap stay the same, with more capacity to ship. Cloud Core and Pro remain self-serve; OSS self-host has no sales motion. Details in [History and data plane](#history-and-data-plane) and [clarifications](/resources/engineering/clarifications#clickhouse).
 
 </Details>
 

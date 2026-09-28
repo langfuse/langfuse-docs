@@ -39,6 +39,8 @@ The judge model then returns a structured score and reasoning that can be tracke
 - **Human‑like:** Captures nuance (e.g. helpfulness, toxicity, relevance) better than simple metrics, especially when rubric‑guided.
 - **Repeatable:** With a fixed rubric, you can rerun the same prompts to get consistent scores.
 
+A judge is a prompt you wrote, so check that it scores cases the way your reviewers would before you rely on it: [calibrate it against labeled examples](/guides/llm-as-a-judge-calibration-skill), or compare its scores with human annotation scores on the same data in [Score Analytics](/docs/evaluation/scores/score-analytics#human-vs-ai-annotation-agreement).
+
 ## How to use LLM-as-a-Judge?
 
 LLM-as-a-Judge evaluators can run on **Observations** (individual operations) or **Experiments** (controlled test datasets). Observation-level evaluators are the recommended target for live production data; trace-level evaluators are deprecated (see below). Your choice depends on whether you're testing in development or monitoring production, and what level of granularity you need.
@@ -356,7 +358,7 @@ LLM-as-a-Judge is an evaluation methodology where a large language model (the "j
 <Details>
 <Summary>How accurate is LLM-as-a-Judge compared to human evaluation?</Summary>
 
-Research shows that strong LLM judges (such as GPT-5 class models) achieve 80-90% agreement with human evaluators on many quality dimensions, which is comparable to inter-annotator agreement between humans. Accuracy improves significantly with well-designed rubrics and clear evaluation criteria. For best results, calibrate your LLM-as-a-Judge setup against a small set of human-annotated examples.
+Research shows that strong LLM judges (such as GPT-5 class models) achieve 80-90% agreement with human evaluators on many quality dimensions, which is comparable to inter-annotator agreement between humans. Accuracy improves significantly with well-designed rubrics and clear evaluation criteria. For best results, [calibrate your LLM-as-a-Judge setup](/guides/llm-as-a-judge-calibration-skill) against a small set of human-annotated examples, and use [Score Analytics](/docs/evaluation/scores/score-analytics#human-vs-ai-annotation-agreement) to measure agreement between judge and human scores.
 
 </Details>
 
@@ -389,6 +391,7 @@ Yes. LLM-as-a-Judge is particularly effective for RAG pipelines. You can evaluat
 - [Writing good evaluators](/academy/evaluate/writing-evaluators) explains how to design judge prompts you can trust.
 - [Choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) helps you decide which quality checks are worth automating.
 - [Calibrate your LLM-as-a-judge](/guides/llm-as-a-judge-calibration-skill) to check whether your judge agrees with how you would label cases.
+- [Score Analytics](/docs/evaluation/scores/score-analytics#human-vs-ai-annotation-agreement) measures agreement between judge scores and human annotation scores, for example with Cohen's Kappa and a confusion matrix.
 
 ## GitHub Discussions
 
