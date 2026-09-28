@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { AdoptersExplorer, type Adopter } from "./AdoptersExplorer";
 import { AdoptersTicker } from "./AdoptersTicker";
 import adobeLogo from "../home/img/adobe.svg";
+import boschLogo from "../home/img/bosch.svg";
 import canvaLogo from "../home/img/canva.svg";
 import circlebackLogo from "../home/img/circleback.svg";
 import ciscoLogo from "../home/img/cisco.svg";
@@ -32,6 +33,7 @@ const ADOPTERS_TABLE_PATH = join(
 
 const COMPANY_LOGOS: Record<string, NonNullable<Adopter["logo"]>> = {
   Adobe: { src: adobeLogo },
+  "Bosch Power Tools": { src: boschLogo },
   Canva: { src: canvaLogo },
   Circleback: { src: circlebackLogo },
   Cisco: { src: ciscoLogo },
