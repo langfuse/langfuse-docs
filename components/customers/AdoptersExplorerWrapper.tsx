@@ -59,6 +59,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   Apple: "Consumer electronics and software company",
   Base44: "AI app-building platform",
   Bayer: "Pharmaceutical and life sciences company",
+  "Bosch Power Tools": "Power tools and measuring technology company",
   Canva: "Visual communication and design platform",
   Circleback: "AI meeting assistant with transcription and notes",
   Cisco: "Networking and cybersecurity company",
