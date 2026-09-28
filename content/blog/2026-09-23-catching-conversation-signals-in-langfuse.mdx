@@ -1,5 +1,5 @@
 ---
-title: "Extract signals from millions of chat agent traces with Jev"
+title: "Catching conversation signals in Langfuse"
 date: 2026/09/23
 description: "Score every chat agent conversation for frustration, corrections, follow-ups, and resolution — in one Jev pass, at a fraction of LLM-as-a-judge cost."
 tag: engineering
@@ -11,7 +11,7 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
 <BlogHeader
-  title="Extract signals from millions of chat agent traces with Jev"
+  title="Catching conversation signals in Langfuse"
   description="Score every chat agent conversation for frustration, corrections, follow-ups, and resolution — in one Jev pass, at a fraction of LLM-as-a-judge cost."
   date="September 23, 2026"
   authors={["annabellschafer"]}
@@ -31,7 +31,7 @@ There are different types of signals in chat applications that can be used to mo
 Especially **conversation signals** help you steer your attention to the relevant traces from production as soon as manual review is not feasible anymore. They tell you something is going wrong. See the table below for a typical list of conversation signals.
 
 <Frame fullWidth className="w-full my-8">
-  ![Table of conversation signals including rephrase, correction, human hand-off, repeat, error quote, frustration, and success confirmation](/images/blog/2026-09-23-extract-signals-with-jev/conversation-signals-table.png)
+  ![Table of conversation signals including rephrase, correction, human hand-off, repeat, error quote, frustration, and success confirmation](/images/blog/2026-09-23-catching-conversation-signals-in-langfuse/conversation-signals-table.png)
 </Frame>
 
 Established approaches to catch these signals were especially centered around [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge). With scale, the caused costs were primarily contained through [sampling](/docs/observability/features/sampling). Jev-like models now allow a full pass on all production traces.
@@ -51,7 +51,7 @@ This means the same conversation can concurrently be evaluated for follow-up que
 Let us look at an example conversation in a support resolution. The user wants to rebook a flight. Over the course of the interaction she has to first correct the AI, then ask a follow up question, but then finally gets the request resolved. Multiple things are true here. The conversation outcome was successful. Nevertheless, the AI made a mistake first, and was apparently not effective enough in their answers to not cause a follow-up by a user.
 
 <Frame fullWidth className="w-full my-8">
-  ![Annotated rebooking chat where the user corrects the agent, asks a follow-up about bags and seat, then confirms the booking is resolved](/images/blog/2026-09-23-extract-signals-with-jev/rebooking-conversation.png)
+  ![Annotated rebooking chat where the user corrects the agent, asks a follow-up about bags and seat, then confirms the booking is resolved](/images/blog/2026-09-23-catching-conversation-signals-in-langfuse/rebooking-conversation.png)
 </Frame>
 
 With Jev, these signals can be caught concurrently in one pass, at the fraction of the cost of using frontier LLM models. All dimensions can be modelled as individual [noul questions](https://docs.typesafe.ai/primitives/noul), to get separate verdicts on the different conversation signals.
@@ -71,7 +71,7 @@ Go to the [Evaluator tab](https://cloud.langfuse.com/project/~/evals) and click 
 Choose the ‘User Conversation Signal’ template.
 
 <Frame fullWidth className="w-full my-8">
-  ![Configure evaluator dialog with Decision model selected and seven User Conversation Signal questions listed](/images/blog/2026-09-23-extract-signals-with-jev/template-questions.png)
+  ![Configure evaluator dialog with Decision model selected and seven User Conversation Signal questions listed](/images/blog/2026-09-23-catching-conversation-signals-in-langfuse/template-questions.png)
 </Frame>
 
 ### Add your TypeSafe connection
@@ -83,7 +83,7 @@ Add your [Jev connection](/docs/evaluation/evaluation-methods/jev-as-a-judge#add
 Choose the observations to run on and test.
 
 <Frame fullWidth className="w-full my-8">
-  ![Test the evaluator panel showing sample observations and Decision Model Output probabilities for user conversation signal questions](/images/blog/2026-09-23-extract-signals-with-jev/test-evaluator.png)
+  ![Test the evaluator panel showing sample observations and Decision Model Output probabilities for user conversation signal questions](/images/blog/2026-09-23-catching-conversation-signals-in-langfuse/test-evaluator.png)
 </Frame>
 
 ### Save and set rule for evaluators to run on

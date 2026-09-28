@@ -29,9 +29,9 @@ Over the past years we forced this out of LLMs with structured outputs and JSON 
 <Callout type="info">
   Jev is available as a judge in Langfuse. See [Jev as a
   judge](/docs/evaluation/evaluation-methods/jev-as-a-judge) for setup, or
-  [Extract signals from chat agent
-  traces](/blog/2026-09-23-extract-signals-with-jev) for a production template
-  that scores conversation signals on every trace.
+  [Catching conversation signals in
+  Langfuse](/blog/2026-09-23-catching-conversation-signals-in-langfuse) for a
+  production template that scores conversation signals on every trace.
 </Callout>
 
 ## What Jev is good for [#what-jev-is-good-for]
@@ -250,7 +250,7 @@ TypeSafe publishes a [per-version page listing what Jev is bad at](https://docs.
 
 Jev is available as a judge directly in Langfuse. Add a TypeSafe connection, define a state and typed questions in the evaluator UI, and each question writes a score to matching observations — at up to 40 to 400x lower cost than LLM-as-a-judge on production traffic.
 
-Access runs through a [waitlist](https://typesafe.ai), and Jev is also live on [OpenRouter](https://openrouter.ai/typesafe/jev-1.13) and the [Vercel AI Gateway](https://vercel.com/ai-gateway/models/jev). Follow the step-by-step setup in [Jev as a judge](/docs/evaluation/evaluation-methods/jev-as-a-judge), or start from a ready-made production template in [Extract signals from chat agent traces](/blog/2026-09-23-extract-signals-with-jev). You can also explore our setup in the [demo project](https://langfuse.com/cloud/demo/evals/).
+Access runs through a [waitlist](https://typesafe.ai), and Jev is also live on [OpenRouter](https://openrouter.ai/typesafe/jev-1.13) and the [Vercel AI Gateway](https://vercel.com/ai-gateway/models/jev). Follow the step-by-step setup in [Jev as a judge](/docs/evaluation/evaluation-methods/jev-as-a-judge), or start from a ready-made production template in [Catching conversation signals in Langfuse](/blog/2026-09-23-catching-conversation-signals-in-langfuse). You can also explore our setup in the [demo project](https://langfuse.com/cloud/demo/evals/).
 
 Prefer a custom pipeline outside the evaluator UI? Pull observations via the [API](/docs/api-and-data-platform/features/query-via-sdk), score them with the TypeSafe SDKs, and write results back as [scores](/docs/evaluation/evaluation-methods/scores-via-sdk). To trace System One calls from your app, see [Observability for TypeSafe Jev](/integrations/model-providers/typesafe) ([JS/TS](/integrations/model-providers/typesafe-js)).
 
