@@ -1,20 +1,22 @@
 ---
 title: "Using TypeSafe's Jev for evals"
 date: 2026/09/18
-description: "A specialized decision model for routing, classification, and eval verdicts — and how to score Langfuse traces with it."
+description: "A specialized decision model for routing, classification, and eval verdicts — and how to score production traces with Jev-as-a-judge in Langfuse."
 tag: engineering
-author: Annabell
+author: Annabell, Hassieb
 highlight: true
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 import { SentimentClassifierCompare } from "@/components/sentimentClassifier/compare";
+import { Book, Newspaper, Plug } from "lucide-react";
 
 <BlogHeader
   title="Using TypeSafe's Jev for evals"
-  description="A specialized decision model for routing, classification, and eval verdicts — and how to score Langfuse traces with it."
+  description="A specialized decision model for routing, classification, and eval verdicts — and how to score production traces with Jev-as-a-judge in Langfuse."
   date="September 18, 2026"
-  authors={["annabellschafer"]}
+  authors={["annabellschafer", "hassiebpakzad"]}
 />
 
 [TypeSafe](https://typesafe.ai) launched [Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev) mid-September 2026. It makes decisions, cannot write a single sentence, and is 20 to 200x faster and 40 to 400x cheaper than frontier models according to TypeSafe.
@@ -24,6 +26,14 @@ You send a state, a string or JSON, plus typed questions. You get typed answers 
 Decisions matter a lot for AI agents and AI-powered workflows. AI decides between different categories, whether something is true or not, which tool or path to take. And in the case of evals, AI classifies or simply decides if an output is right or wrong.
 
 Over the past years we forced this out of LLMs with structured outputs and JSON schemas, and still paid generation prices for a yes/no. Jev is deliberately built for that job instead of adapted to it. The flipside: it will not write code, summaries, or tell you why it answered the way it did.
+
+<Callout type="info">
+  Jev is available as a judge in Langfuse. See [Jev as a
+  judge](/docs/evaluation/evaluation-methods/jev-as-a-judge) for setup, or
+  [Catching conversation signals in
+  Langfuse](/blog/2026-09-23-catching-conversation-signals-in-langfuse) for a
+  production template that scores conversation signals on every trace.
+</Callout>
 
 ## What Jev is good for [#what-jev-is-good-for]
 
@@ -237,199 +247,29 @@ TypeSafe publishes a [per-version page listing what Jev is bad at](https://docs.
 
 **Context rot, and the limit is unclear.** Their docs say it plainly: "Jev suffers from context rot". Accuracy drops as the state fills with material the question does not need, which is awkward when agent traces are long and mostly irrelevant. This refocuses importance on designing the input context, much like in the old days. The [models page](https://docs.typesafe.ai/models) says 64k per request and 32k for state plus the longest question, while [OpenRouter lists 32K](https://openrouter.ai/typesafe/jev-1.13). Verify before you design around it.
 
-## How to use Jev to evaluate your Langfuse traces [#how-to-use-jev-to-evaluate-your-langfuse-traces]
+## Setting up Jev for production scoring in Langfuse [#setup]
 
-Access runs through a [waitlist](https://typesafe.ai), and Jev is also live on [OpenRouter](https://openrouter.ai/typesafe/jev-1.13) and the [Vercel AI Gateway](https://vercel.com/ai-gateway/models/jev), which is the quicker route if you do not want to open a new vendor relationship to run a test. There are [Python](https://docs.typesafe.ai/sdk/python) and [JavaScript](https://docs.typesafe.ai/sdk/javascript) SDKs, and an [agent skill](https://docs.typesafe.ai/agent-skill) that gives a coding agent full API context. To trace those System One calls in Langfuse, see [Observability for TypeSafe Jev](/integrations/model-providers/typesafe) ([JS/TS](/integrations/model-providers/typesafe-js)). The cookbooks have worked implementations for [guardrails](https://docs.typesafe.ai/cookbooks/llm_guardrails), [RAG passage screening](https://docs.typesafe.ai/cookbooks/classifying_rag_passages), [citation checks](https://docs.typesafe.ai/cookbooks/citation_check) and [confidence-gated classification](https://docs.typesafe.ai/cookbooks/classification_using_confidence).
+Jev is available as a judge directly in Langfuse. Add a TypeSafe connection, define a state and typed questions in the evaluator UI, and each question writes a score to matching observations — at up to 40 to 400x lower cost than LLM-as-a-judge on production traffic. Access runs through a [waitlist](https://typesafe.ai), and Jev is also live on [OpenRouter](https://openrouter.ai/typesafe/jev-1.13) and the [Vercel AI Gateway](https://vercel.com/ai-gateway/models/jev).
 
-<Callout type="info">
-  **Update:** Jev is now available as a judge directly in Langfuse. Add a
-  TypeSafe connection, define a state and typed questions in the evaluator UI,
-  and each question writes a score to matching observations. See [Jev as a
-  judge](/docs/evaluation/evaluation-methods/jev-as-a-judge) and the
-  [changelog](/changelog/2026-09-22-jev-as-a-judge).
-</Callout>
+<Cards num={1}>
+  <Card
+    title="Jev as a judge docs"
+    href="/docs/evaluation/evaluation-methods/jev-as-a-judge"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Catching conversation signals in Langfuse"
+    href="/blog/2026-09-23-catching-conversation-signals-in-langfuse"
+    icon={<Newspaper />}
+    arrow
+  />
+  <Card
+    title="Observability for TypeSafe Jev"
+    href="/integrations/model-providers/typesafe"
+    icon={<Plug />}
+    arrow
+  />
+</Cards>
 
-If you prefer to run Jev from your own code, you can pull observations via the [API](/docs/api-and-data-platform/features/query-via-sdk), determine a score with Jev, and write the result back as a [score](/docs/evaluation/evaluation-methods/scores-via-sdk).
-
-```python
-#!/usr/bin/env python3
-"""Score user disagreement with TypeSafe Jev and Langfuse.
-
-Writes one Boolean verdict to Langfuse and includes Jev's probability
-distribution in the score comment.
-
-This example assumes each candidate generation has an input shaped like:
-
-    {"messages": [{"role": "user", "content": "..."}, ...]}
-
-Generations without that chat shape are skipped. Consecutive generations that
-share the same latest user message (typical of tool loops) collapse into one
-turn, and only that turn's final generation is scored against the next distinct
-user message.
-
-Install and configure:
-
-    pip install -U langfuse typesafe-sdk
-
-    export LANGFUSE_PUBLIC_KEY="pk-lf-..."
-    export LANGFUSE_SECRET_KEY="sk-lf-..."
-    export LANGFUSE_BASE_URL="https://cloud.langfuse.com"
-    export TYPESAFE_API_KEY="..."
-    export TRACE_ID="..."
-
-    python score_user_disagreement_v2.py
-"""
-
-import json
-import os
-
-from langfuse import get_client
-from typesafe_sdk import Noul, NoulCriteria, TypeSafeClient
-
-
-TRACE_ID = os.environ["TRACE_ID"]
-MODEL = "jev-1.13.0"  # Pin the model because the verdict uses a fixed threshold.
-THRESHOLD = 0.7
-
-langfuse = get_client()
-
-
-USER_DISAGREEMENT = Noul(
-    instructions=(
-        "Does `last_user_message` clearly communicate that the user believes "
-        "the assistant's prior response or approach was mistaken or proceeding "
-        "in the wrong direction? Evaluate the user's expressed perception, not "
-        "objective correctness."
-    ),
-    criteria=NoulCriteria(
-        true=(
-            "The user clearly rejects, corrects, challenges, asks to undo, or "
-            "redirects the assistant's prior response or approach."
-        ),
-        false=(
-            "The user does not clearly reject the prior response. This includes "
-            "neutral, additive, or ambiguous follow-ups."
-        ),
-    ),
-)
-
-
-def parse_json(value):
-    """Observations V2 can return input and output as JSON strings."""
-    if isinstance(value, str):
-        try:
-            return json.loads(value)
-        except json.JSONDecodeError:
-            pass
-    return value
-
-
-def latest_user_message(observation):
-    """Return the newest user message, or None when there is no user message."""
-    observation_input = parse_json(observation.input)
-    if not isinstance(observation_input, dict):
-        return None
-
-    messages = observation_input.get("messages")
-    if not isinstance(messages, list):
-        return None
-
-    for message in reversed(messages):
-        if isinstance(message, dict) and message.get("role") == "user":
-            return message.get("content")
-    return None
-
-
-def fetch_generations(trace_id):
-    """Page through every GENERATION on the trace, newest-first pages included."""
-    observations = []
-    cursor = None
-    while True:
-        response = langfuse.api.observations.get_many(
-            trace_id=trace_id,
-            type="GENERATION",
-            fields="core,basic,io",
-            limit=100,
-            cursor=cursor,
-        )
-        if not response.data:
-            break
-        observations.extend(response.data)
-        cursor = getattr(response.meta, "cursor", None) if response.meta else None
-        if not cursor:
-            break
-    return observations
-
-
-def collapse_to_turns(generations):
-    """Keep the last generation in each consecutive run of the same user message.
-
-    Agent traces often have several generations per user turn (a tool decision,
-    then a synthesis call). Those share the same latest user message, so pairing
-    adjacent generations would score an internal step against that same message.
-    """
-    turns = []
-    for observation, user_message in generations:
-        if turns and turns[-1][1] == user_message:
-            turns[-1] = (observation, user_message)
-        else:
-            turns.append((observation, user_message))
-    return turns
-
-
-def main():
-    generations = [
-        (observation, user_message)
-        for observation in fetch_generations(TRACE_ID)
-        if (user_message := latest_user_message(observation)) is not None
-    ]
-    generations.sort(key=lambda item: item[0].start_time)
-    turns = collapse_to_turns(generations)
-
-    # TypeSafeClient reads TYPESAFE_API_KEY and TYPESAFE_BASE_URL from the
-    # environment. The context manager closes the HTTP client after the run.
-    with TypeSafeClient(model=MODEL) as jev:
-        # The next distinct user message is the reaction to this turn's reply.
-        for (reply, _), (_, reaction_message) in zip(turns, turns[1:]):
-            result = jev.system_one(
-                state={
-                    "conversation_history": parse_json(reply.input),
-                    "assistant_reply": parse_json(reply.output),
-                    "last_user_message": reaction_message,
-                },
-                questions={"user_disagreement": USER_DISAGREEMENT},
-            )
-
-            # A Noul is P(true), so P(false) is its complement.
-            p_disagreement = float(result.nouls["user_disagreement"].noul)
-            p_no_disagreement = 1.0 - p_disagreement
-
-            langfuse.create_score(
-                score_id=f"{reply.id}-user-disagreement",
-                trace_id=reply.trace_id,
-                observation_id=reply.id,
-                name="user_disagreement",
-                value=1 if p_disagreement >= THRESHOLD else 0,
-                data_type="BOOLEAN",
-                # Pin timestamp to the observation so reruns overwrite this score.
-                timestamp=reply.start_time,
-                comment=(
-                    f"TypeSafe {result.model}; "
-                    f"P(disagreement)={p_disagreement:.2f}; "
-                    f"P(no disagreement)={p_no_disagreement:.2f}; "
-                    f"threshold={THRESHOLD}"
-                ),
-            )
-
-            print(
-                f"{reply.id}: P(disagreement)={p_disagreement:.2f}, "
-                f"P(no disagreement)={p_no_disagreement:.2f}"
-            )
-
-    # Flush buffered score events before this short-lived script exits.
-    langfuse.flush()
-
-
-if __name__ == "__main__":
-    main()
-```
+<CustomerStoryCTA />
