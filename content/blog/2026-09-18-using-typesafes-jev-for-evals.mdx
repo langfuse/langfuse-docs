@@ -242,53 +242,7 @@ TypeSafe publishes a [per-version page listing what Jev is bad at](https://docs.
 
 Jev is available as a judge directly in Langfuse. Add a TypeSafe connection, define a state and typed questions in the evaluator UI, and each question writes a score to matching observations — at up to 40 to 400x lower cost than LLM-as-a-judge on production traffic.
 
-Access runs through a [waitlist](https://typesafe.ai), and Jev is also live on [OpenRouter](https://openrouter.ai/typesafe/jev-1.13) and the [Vercel AI Gateway](https://vercel.com/ai-gateway/models/jev). Full setup details live in [Jev as a judge](/docs/evaluation/evaluation-methods/jev-as-a-judge). For a ready-made production template, see [Extract signals from chat agent traces](/blog/2026-09-23-extract-signals-with-jev).
-
-You can also check out our setup in the [demo project](https://langfuse.com/cloud/demo/evals/).
-
-<Steps>
-
-### Set up a model connection
-
-[Sign up for TypeSafe](https://console.typesafe.ai/) and create an [API key](https://console.typesafe.ai/settings/keys). Add that key as an [LLM connection](/docs/administration/llm-connection) in your Langfuse project settings.
-
-### Navigate to the evaluator section and click on New evaluator
-
-Open the [Evaluators page](https://cloud.langfuse.com/project/~/evals) and click **New evaluator**.
-
-### Choose Decision Model
-
-### Define your question and choose your output type
-
-You can add multiple questions against the same state. In the editor, a Noul is labeled **Yes / no**.
-
-<Frame fullWidth>
-  ![Jev evaluator questions for a production monitor, with Yes / no selected for user_frustrated and Choice and Score questions listed below](/images/blog/2026-09-22-running-evals-with-jev/questions.png)
-</Frame>
-
-### Specify details for choices (optional)
-
-For a yes/no question, open **Refine what yes and no mean**. For a choice, name each option and the condition that makes it the right verdict.
-
-### Define state
-
-<Frame fullWidth>
-  ![Build the state step mapping input from Input and output from Output on a sample observation](/images/blog/2026-09-22-running-evals-with-jev/build-the-state.png)
-</Frame>
-
-### Test on a sample observation
-
-<Frame fullWidth>
-  ![Test with sample observations filtered to root observations named handle-chatbot-message, with a Decision Model Output of 0.02 for user_frustrated](/images/blog/2026-09-22-running-evals-with-jev/test-observation.png)
-</Frame>
-
-### Set live runs based on the specified rule
-
-<Frame fullWidth>
-  ![Evaluator saved dialog reusing filters isRootObservation true and name handle-chatbot-message, with sampling at 100 percent](/images/blog/2026-09-22-running-evals-with-jev/evaluator-saved.png)
-</Frame>
-
-</Steps>
+Access runs through a [waitlist](https://typesafe.ai), and Jev is also live on [OpenRouter](https://openrouter.ai/typesafe/jev-1.13) and the [Vercel AI Gateway](https://vercel.com/ai-gateway/models/jev). Follow the step-by-step setup in [Jev as a judge](/docs/evaluation/evaluation-methods/jev-as-a-judge), or start from a ready-made production template in [Extract signals from chat agent traces](/blog/2026-09-23-extract-signals-with-jev). You can also explore our setup in the [demo project](https://langfuse.com/cloud/demo/evals/).
 
 Prefer a custom pipeline outside the evaluator UI? Pull observations via the [API](/docs/api-and-data-platform/features/query-via-sdk), score them with the TypeSafe SDKs, and write results back as [scores](/docs/evaluation/evaluation-methods/scores-via-sdk). To trace System One calls from your app, see [Observability for TypeSafe Jev](/integrations/model-providers/typesafe) ([JS/TS](/integrations/model-providers/typesafe-js)).
 
