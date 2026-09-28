@@ -8,7 +8,7 @@ import { Text } from "@/components/ui/text";
 const ASSISTANT_VIDEO_SRC =
   "https://static.langfuse.com/docs-videos/in-app-agent.mp4";
 
-const ASSISTANT_HREF = "/docs/langfuse-assistant";
+const ASSISTANT_HREF = "/docs/langfuse-halo";
 
 type ToolItem = {
   title: string;
@@ -129,7 +129,7 @@ function AssistantVideo() {
       muted
       loop
       playsInline
-      aria-label="The Langfuse Assistant investigating project data in the Langfuse app"
+      aria-label="Langfuse Halo investigating project data in the Langfuse app"
       className="aspect-video h-auto w-full rounded-[2px] border border-line-structure object-cover shadow-sm"
     />
   );
@@ -150,7 +150,7 @@ function AssistantFeature() {
 
         <div className="flex max-w-[58ch] flex-col gap-3">
           <h3 className="text-left font-sans text-[17px] font-medium text-text-primary">
-            Langfuse Assistant
+            Langfuse Halo
           </h3>
           <Text className="text-left">
             Automate the AI engineering loop: investigate production data,
@@ -211,9 +211,9 @@ export const DeveloperTools = () => {
             </span>
           </Heading>
           <Text className="max-w-[56ch] text-left">
-            Work in the app or from your IDE. The Assistant investigates
-            production and takes approved actions; SKILL.md, CLI, and MCP
-            connect coding agents to Langfuse.
+            Work in the app or from your IDE. Halo investigates production and
+            takes approved actions; SKILL.md, CLI, and MCP connect coding agents
+            to Langfuse.
           </Text>
         </div>
 

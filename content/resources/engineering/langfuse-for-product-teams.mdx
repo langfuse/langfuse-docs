@@ -16,7 +16,7 @@ rest of the team can self-serve.
 **TL;DR:** After engineers propagate a `sessionId` and `userId` with each trace, everything
 in this guide is point-and-click: replay whole conversations in the session view, score and
 annotate them through annotation queues, chart user feedback and quality scores in custom
-dashboards, and ask questions about your data in plain language via the Langfuse Assistant.
+dashboards, and ask questions about your data in plain language via Langfuse Halo.
 
 ## What product teams need from LLM observability [#what-product-teams-need]
 
@@ -30,7 +30,7 @@ Langfuse covers each of these needs with a UI feature that requires no code:
 | Which conversations need expert review?    | Annotation queues                     |
 | What do users think of the answers?        | User feedback captured as scores      |
 | Is quality trending up or down?            | Custom dashboards and score analytics |
-| What changed this week, in plain language? | Langfuse Assistant                    |
+| What changed this week, in plain language? | Langfuse Halo                         |
 
 You can try all of the read-only workflows with live data in the public
 [example project](/docs/demo) before your own instrumentation exists.
@@ -112,9 +112,9 @@ LLM judge agrees with your human annotators on the same conversations.
 
 ## Asking questions in natural language [#natural-language]
 
-### Langfuse Assistant in the UI [#langfuse-assistant]
+### Langfuse Halo in the UI [#langfuse-assistant]
 
-The [Langfuse Assistant](/docs/langfuse-assistant) is an in-product assistant that answers
+[Langfuse Halo](/docs/langfuse-halo) is an in-product assistant that answers
 questions about your project data in plain language, directly in the Langfuse UI. You
 can ask things like "Which traces had the highest latency yesterday?", "What's my token spend
 this week, broken down by model?", or "Open the traces table filtered to errors from today".
@@ -125,7 +125,7 @@ Langfuse AI model](/self-hosting/configuration/langfuse-assistant).
 
 On the traces and observations tables, an [Ask AI](/docs/observability/features/filter-search-bar#ask-ai)
 button additionally builds filters from a plain-language description ("enterprise customers
-in the membership-support queue") without knowing the field names. Like the Assistant, it is
+in the membership-support queue") without knowing the field names. Like Halo, it is
 off by default until an organization owner or admin
 [enables it](/security/ai-features).
 
@@ -166,7 +166,7 @@ The rest of the setup checklist:
 - Optionally seed one or two dashboards and saved views so the team starts from a curated
   picture instead of an empty table.
 
-After this, the review, annotation, dashboard, and Assistant workflows run without further
+After this, the review, annotation, dashboard, and Halo workflows run without further
 engineering involvement.
 
 ## FAQ [#faq]
@@ -178,7 +178,7 @@ engineering involvement.
 
 Yes, for review and analysis work. Once engineers instrument the application with session and
 user identifiers, product managers and domain experts can replay conversations, score and
-annotate them in annotation queues, build dashboards, and ask the Langfuse Assistant
+annotate them in annotation queues, build dashboards, and ask Langfuse Halo
 questions in plain language, all without writing code. Initial instrumentation, score config
 creation, and user feedback wiring are engineering tasks.
 
@@ -209,7 +209,7 @@ LLM-as-a-Judge results and user feedback.
 <Details id="analyze-user-questions">
 <Summary>Can I analyze what users ask my AI product?</Summary>
 
-Yes, and it is a two-part answer. For ad-hoc exploration, the Langfuse Assistant and the MCP
+Yes, and it is a two-part answer. For ad-hoc exploration, Langfuse Halo and the MCP
 server let a reasoning model read conversations and report themes. For recurring charts such
 as intent distribution over time, run an intent classification pipeline that writes labels
 back as categorical scores; the guide on
@@ -222,7 +222,7 @@ patterns for this.
 <Summary>Does this work on self-hosted Langfuse?</Summary>
 
 Mostly. Session review, annotation queues, manual scoring, user feedback, custom dashboards,
-and score analytics are available on self-hosted deployments. The [Langfuse Assistant](/docs/langfuse-assistant)
+and score analytics are available on self-hosted deployments. [Langfuse Halo](/docs/langfuse-halo)
 and [Ask AI](/docs/observability/features/filter-search-bar#ask-ai) in the filter search bar
 are available on self-hosted deployments with an [instance Langfuse AI model](/self-hosting/configuration/langfuse-assistant).
 

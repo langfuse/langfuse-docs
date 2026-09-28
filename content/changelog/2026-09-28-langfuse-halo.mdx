@@ -1,0 +1,35 @@
+---
+date: 2026-09-28
+title: Meet Langfuse Halo
+description: Investigate project data, analyze observations with code, and create datasets, dashboards, and prompts with Langfuse Halo.
+author: Nimar
+canonical: /docs/langfuse-halo
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+Investigate your project data and turn findings into approved actions with **[Langfuse Halo](/docs/langfuse-halo)**, the new name for the Langfuse Assistant. Ask in plain language, directly in your Langfuse project:
+
+- "Find what the slowest 100 traces from yesterday have in common."
+- "Create a dataset from the failed generations of last week."
+- "Build a dashboard of error rate and p95 latency for the last 7 days."
+
+Halo queries traces, observations, sessions, and metrics, searches Langfuse documentation, and picks up context from the page you are viewing. It can create or update datasets, dashboards, widgets, prompts, and score configs. It can also help configure and test evaluators, set up evaluation rules, and organize annotation queues. For larger investigations, Halo fetches observations and analyzes them with code in an isolated sandbox.
+
+Runs continue in the background, independently of your browser. Keep using Langfuse or start another conversation while Halo works. You get a notification when a run finishes, fails, or needs your input or approval, and you can return to saved conversations.
+
+Actions that change data or configuration pause for your approval. Choose **Always approve** for a tool to reuse that approval within the current conversation. Halo stays within your existing project permissions.
+
+Halo is available on all Langfuse Cloud plans. An organization owner or admin can enable **AI Features** in organization settings. On self-hosted deployments, Halo is in public beta from `v4.28.0` and requires an instance-wide Langfuse AI model and a worker. File and code-execution tools additionally require the optional sandbox. See the [self-hosted setup guide](/self-hosting/configuration/langfuse-assistant) and [AI feature security](/security/ai-features) for configuration and data-handling details.
+
+<Cards num={1}>
+  <Card
+    title="Langfuse Halo docs"
+    href="/docs/langfuse-halo"
+    icon={<Book />}
+    arrow
+  />
+</Cards>
