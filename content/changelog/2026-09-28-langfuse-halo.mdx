@@ -1,7 +1,7 @@
 ---
 date: 2026-09-28
 title: Meet Langfuse Halo
-description: Investigate project data, analyze observations with code, and create datasets, dashboards, and prompts with Langfuse Halo.
+description: Halo helps you make sense of your data in Langufse, builds dashboards or recommends next steps for your agentic applications.
 author: Nimar
 canonical: /docs/langfuse-halo
 ---
@@ -11,19 +11,26 @@ import { Book } from "lucide-react";
 
 <ChangelogHeader />
 
-Investigate your project data and turn findings into approved actions with **[Langfuse Halo](/docs/langfuse-halo)**, the new name for the Langfuse Assistant. Ask in plain language, directly in your Langfuse project:
+In June, we launched Langfuse Assistant to query your Langfuse project data. In July, the assistant could make changes to your langfuse project and since August, the assistant can run in the background. Finally, since the beginning of September, the assistant got a sandbox to scale data analysis to thousands of traces.
 
+The assistant is not a simple assistant anymore, but can do work and watch over your traces. It evolved to become Langfuse Halo.
+
+Halo is a native way to interact with Langfuse:
 - "Find what the slowest 100 traces from yesterday have in common."
 - "Create a dataset from the failed generations of last week."
 - "Build a dashboard of error rate and p95 latency for the last 7 days."
+- and a _lot_ more.
 
-Halo queries traces, observations, sessions, and metrics, searches Langfuse documentation, and picks up context from the page you are viewing. It can create or update datasets, dashboards, widgets, prompts, and score configs. It can also help configure and test evaluators, set up evaluation rules, and organize annotation queues. For larger investigations, Halo fetches observations and analyzes them with code in an isolated sandbox.
+Halo queries trace data, metrics, Langfuse documentation, and picks up context from the page you are viewing.
+It can create/update datasets, dashboards, widgets, prompts, score configs and any other data.
 
-Runs continue in the background, independently of your browser. Keep using Langfuse or start another conversation while Halo works. You get a notification when a run finishes, fails, or needs your input or approval, and you can return to saved conversations.
+You can trigger long running analysis in Halo and it reliably runs in a sandbox in the background. You're notified by your browser when it requires approval or concludes the analysis.
 
-Actions that change data or configuration pause for your approval. Choose **Always approve** for a tool to reuse that approval within the current conversation. Halo stays within your existing project permissions.
+Actions that change data or configuration pause for your approval. Choose **Always approve** for a tool to reuse that approval within the current conversation. Halo stays within your personal permissions.
 
-Halo is available on all Langfuse Cloud plans. An organization owner or admin can enable **AI Features** in organization settings. On self-hosted deployments, Halo is in public beta from `v4.28.0` and requires an instance-wide Langfuse AI model and a worker. File and code-execution tools additionally require the optional sandbox. See the [self-hosted setup guide](/self-hosting/configuration/langfuse-assistant) and [AI feature security](/security/ai-features) for configuration and data-handling details.
+Activate Langfuse Halo for your organization in the [AI feature](/security/ai-features) settings.
+
+Langfuse Halo is fully supported in self-hosted setups since `v4.28.0`, see: **[Self-hosted Langfuse Halo](/docs/self-hosting/configuration/langfuse-halo)**
 
 <Cards num={1}>
   <Card
