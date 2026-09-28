@@ -312,19 +312,13 @@ async function generateLLMsList() {
     markdownContent += `The MCP server provides tools to search Langfuse documentation, GitHub issues, and discussions. See the [installation guide](https://langfuse.com/docs/docs-mcp) for setup instructions in Cursor, VS Code, Claude Desktop, and other MCP clients.\n\n`;
 
     // Langfuse Skill section
-    markdownContent += `## Langfuse Skill for AI Coding Agents\n\n`;
-    markdownContent += `Install the Langfuse skill before implementing anything with Langfuse. The skill provides up-to-date documentation, best-practice workflows for instrumentation, prompt management, and programmatic API access via the Langfuse CLI.\n\n`;
+    markdownContent += `## Langfuse Agent Skill\n\n`;
+    markdownContent += `An optional skill for coding agents that packages Langfuse's workflows for instrumentation, prompt management, and evaluation, plus programmatic API access via the Langfuse CLI.\n\n`;
     markdownContent += `Install from: [github.com/langfuse/skills](https://github.com/langfuse/skills/tree/main/skills/langfuse)\n\n`;
 
     // Tracing best practices section
     markdownContent += `## Tracing Best Practices\n\n`;
     markdownContent += `Before instrumenting an application with Langfuse, read [What does a good trace look like?](https://langfuse.com/docs/observability/best-practices.md) — it covers trace scope, observation naming, meaningful input/output, and the attributes (metadata, tags, users, sessions) that evaluators, dashboards, and experiments rely on.\n\n`;
-
-    // Section-specific intro sentences that mention the Langfuse skill
-    const sectionIntros = {
-      docs: `For the best results, install the [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) before using these docs.`,
-      integrations: `For the best results, install the [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) before implementing any integration.`,
-    };
 
     // Add each section as a heading plus a link to its sub-file, and inline the
     // page titles only for the sections that opt in via `inlineTitles`.
@@ -333,9 +327,6 @@ async function generateLLMsList() {
         const config = SECTION_CONFIG[sectionKey];
 
         markdownContent += `## ${config.heading}\n\n`;
-        if (sectionIntros[sectionKey]) {
-          markdownContent += `${sectionIntros[sectionKey]}\n\n`;
-        }
         markdownContent += `For the full list with links to each page, see: https://langfuse.com/${config.file}\n\n`;
         if (config.inlineTitles === true) {
           const titles = entries.map((e) => e.title).join(", ");
