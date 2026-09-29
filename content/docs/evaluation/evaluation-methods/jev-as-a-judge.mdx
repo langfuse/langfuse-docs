@@ -88,6 +88,7 @@ Go to the [Evaluators page](https://cloud.langfuse.com/project/~/evals) and clic
 - **Assign Input Topic** (Choice): classify the user's primary goal into a topic taxonomy you define.
 - **Flag Out-of-Scope Request** (Yes / no): flag requests that fall outside the assistant's role.
 - **Rate Customer Frustration** (Score): rate the user's frustration on four levels.
+- **User Conversation Signal** (Yes / no × 7): score a chat for rephrases, corrections, human hand-off requests, repeats, error quotes, frustration, and success confirmation in one call. See the [blog post](/blog/2026-09-23-catching-conversation-signals-in-langfuse).
 
 Templates prefill the state and the questions; you only need to pick your TypeSafe connection.
 
@@ -188,7 +189,8 @@ Create an account at [typesafe.ai](https://typesafe.ai) and generate a key in th
 
 ## Related resources
 
-- [Using TypeSafe's Jev for evals](/blog/2026-09-18-using-typesafes-jev-for-evals): background on Jev, its strengths and weaknesses for evals, and early benchmark results.
+- [Catching conversation signals in Langfuse](/blog/2026-09-23-catching-conversation-signals-in-langfuse): score production chat for frustration, corrections, follow-ups, and resolution with the User Conversation Signal template.
+- [Using TypeSafe's Jev for evals](/blog/2026-09-18-using-typesafes-jev-for-evals): what Jev is good for, early benchmarks, and a walkthrough of Jev-as-a-judge in Langfuse.
 - [Observability for TypeSafe Jev](/integrations/model-providers/typesafe): trace Jev calls made from your own application.
 - [Writing good evaluators](/academy/evaluate/writing-evaluators): how to define criteria that hold up.
 - [TypeSafe documentation](https://docs.typesafe.ai/introduction): question primitives, model versions, and known limitations.
