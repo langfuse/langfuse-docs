@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import type { CustomerStory } from "./CustomerCarousel";
 import { companyName } from "./customerStoryLabels";
 import { TextHighlight } from "@/components/ui/text-highlight";
@@ -83,6 +82,82 @@ function CustomerLogo({
   );
 }
 
+function QuoteSlide({
+  story,
+  isActive,
+}: {
+  story: CustomerStory;
+  isActive: boolean;
+}) {
+  const company = companyName(story);
+  const quote = story.frontMatter.customerQuote!;
+  const quoteHighlight = story.frontMatter.customerQuoteHighlight;
+  const quoteTag = story.frontMatter.customerQuoteTag;
+  const quoteAuthor = story.frontMatter.quoteAuthor;
+  const quoteRole = story.frontMatter.quoteRole;
+  const logo = story.frontMatter.customerLogo;
+  const logoDark = story.frontMatter.customerLogoDark;
+
+  return (
+    <div
+      className={cn(
+        "col-start-1 row-start-1 flex flex-col transition-opacity duration-300 ease-out motion-reduce:transition-none",
+        isActive ? "z-10 opacity-100" : "pointer-events-none z-0 opacity-0",
+      )}
+      aria-hidden={!isActive}
+      inert={!isActive}
+    >
+      <div className="mb-5 flex h-10 items-center">
+        {logo ? (
+          <div className="relative h-10 w-40">
+            <CustomerLogo
+              logo={logo}
+              logoDark={logoDark}
+              company={company}
+              sizes="160px"
+            />
+          </div>
+        ) : (
+          <p className="font-analog text-[28px] font-medium leading-none tracking-tight text-text-primary sm:text-[34px]">
+            {company}
+          </p>
+        )}
+      </div>
+      <blockquote className="m-0 max-w-[38rem] border-0 p-0 font-analog text-[26px] font-medium leading-[1.15] tracking-[-0.02em] text-text-primary sm:text-[34px] lg:text-[40px]">
+        <HighlightedQuote quote={quote} highlight={quoteHighlight} />
+      </blockquote>
+      {quoteTag && (
+        <span className="mt-4 inline-flex w-fit bg-[#FBFF7A] px-2 py-1 font-mono text-[11px] uppercase tracking-[0.1em] text-text-primary">
+          {quoteTag}
+        </span>
+      )}
+
+      {(quoteAuthor || quoteRole) && (
+        <div className="mt-5 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px]">
+          {quoteAuthor && (
+            <span className="font-medium text-text-primary">{quoteAuthor}</span>
+          )}
+          {quoteRole && <span className="text-text-tertiary">{quoteRole}</span>}
+        </div>
+      )}
+
+      <div className="mt-auto flex justify-end pt-10">
+        <Link
+          href={story.route}
+          tabIndex={isActive ? undefined : -1}
+          aria-label={`${story.frontMatter.ctaLabel === "Watch" ? "Watch" : "Read"} ${company} customer story`}
+          className="inline-flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.08em] text-text-secondary no-underline transition-colors after:absolute after:inset-0 after:z-10 after:cursor-pointer after:content-[''] hover:text-text-primary focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-ring"
+        >
+          {story.frontMatter.ctaLabel === "Watch"
+            ? "Watch the talk"
+            : "Read the story"}
+          <span aria-hidden>→</span>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 export function CustomerStoriesHero({
   stories: allStories,
 }: {
@@ -113,16 +188,6 @@ export function CustomerStoriesHero({
 
   if (stories.length === 0) return null;
 
-  const story = stories[active];
-  const company = companyName(story);
-  const quote = story.frontMatter.customerQuote!;
-  const quoteHighlight = story.frontMatter.customerQuoteHighlight;
-  const quoteTag = story.frontMatter.customerQuoteTag;
-  const quoteAuthor = story.frontMatter.quoteAuthor;
-  const quoteRole = story.frontMatter.quoteRole;
-  const logo = story.frontMatter.customerLogo;
-  const logoDark = story.frontMatter.customerLogoDark;
-
   return (
     <section
       className="relative overflow-hidden border-y border-line-structure bg-surface-bg text-text-primary"
@@ -133,81 +198,19 @@ export function CustomerStoriesHero({
     >
       <div className="relative grid gap-8 px-6 py-10 sm:px-8 lg:min-h-[580px] lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)] lg:gap-10 lg:py-12">
         <div className="relative flex min-w-0 flex-col">
-          <div className="mb-8 flex items-start justify-between gap-4">
-            <h1 className="m-0 font-mono text-[11px] font-normal uppercase tracking-[0.14em] text-text-tertiary">
-              Customer stories
-            </h1>
-            <div className="flex shrink-0 items-center gap-3 font-mono text-[11px] uppercase tracking-[0.08em] text-text-tertiary">
-              <span>
-                {String(active + 1).padStart(2, "0")} /{" "}
-                {String(stories.length).padStart(2, "0")}
-              </span>
-              <span className="hidden text-text-disabled sm:inline">·</span>
-              <span className="hidden sm:inline">
-                {paused ? "paused" : "auto-plays"}
-              </span>
-            </div>
+          <h1 className="mt-0 mb-8 font-mono text-[11px] font-normal uppercase tracking-[0.14em] text-text-tertiary">
+            Customer stories
+          </h1>
+
+          <div className="grid flex-1">
+            {stories.map((story, i) => (
+              <QuoteSlide
+                key={story.route}
+                story={story}
+                isActive={i === active}
+              />
+            ))}
           </div>
-
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={story.route}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.28, ease: "easeOut" }}
-              className="flex flex-1 flex-col"
-            >
-              <div className="mb-5 flex h-10 items-center">
-                {logo ? (
-                  <div className="relative h-10 w-40">
-                    <CustomerLogo
-                      logo={logo}
-                      logoDark={logoDark}
-                      company={company}
-                      sizes="160px"
-                    />
-                  </div>
-                ) : (
-                  <p className="font-analog text-[28px] font-medium leading-none tracking-tight text-text-primary sm:text-[34px]">
-                    {company}
-                  </p>
-                )}
-              </div>
-              <blockquote className="m-0 max-w-[38rem] border-0 p-0 font-analog text-[26px] font-medium leading-[1.15] tracking-[-0.02em] text-text-primary sm:text-[34px] lg:text-[40px]">
-                <HighlightedQuote quote={quote} highlight={quoteHighlight} />
-              </blockquote>
-              {quoteTag && (
-                <span className="mt-4 inline-flex w-fit bg-[#FBFF7A] px-2 py-1 font-mono text-[11px] uppercase tracking-[0.1em] text-text-primary">
-                  {quoteTag}
-                </span>
-              )}
-
-              {(quoteAuthor || quoteRole) && (
-                <div className="mt-5 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px]">
-                  {quoteAuthor && (
-                    <span className="font-medium text-text-primary">
-                      {quoteAuthor}
-                    </span>
-                  )}
-                  {quoteRole && (
-                    <span className="text-text-tertiary">{quoteRole}</span>
-                  )}
-                </div>
-              )}
-
-              <div className="mt-auto flex justify-end pt-10">
-                <Link
-                  href={story.route}
-                  aria-label={`Read ${company} customer story`}
-                  className="inline-flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.08em] text-text-secondary no-underline transition-colors after:absolute after:inset-0 after:z-10 after:cursor-pointer after:content-[''] hover:text-text-primary focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-ring"
-                >
-                  Read the story
-                  <span aria-hidden>→</span>
-                </Link>
-              </div>
-            </motion.div>
-          </AnimatePresence>
         </div>
 
         <div className="hidden min-w-0 flex-col justify-center border-l border-line-structure pl-6 lg:flex">

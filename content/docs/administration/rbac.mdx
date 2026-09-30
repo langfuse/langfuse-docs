@@ -84,15 +84,16 @@ export function RolePermissionTable({ roleScopes }) {
             "organization:delete",
             "organizationMembers:CUD",
             "organizationMembers:read",
+            "orgAuditLogs:read",
             "langfuseCloudBilling:CRUD",
           ],
           ADMIN: [
             "projects:create",
             "projects:transfer_org",
-            "organization:CRUD_apiKeys",
             "organization:update",
             "organizationMembers:CUD",
             "organizationMembers:read",
+            "orgAuditLogs:read",
           ],
           MEMBER: ["organizationMembers:read"],
           VIEWER: [],
@@ -154,7 +155,7 @@ export function RolePermissionTable({ roleScopes }) {
             "annotationQueueAssignments:CUD",
             "promptExperiments:CUD",
             "promptExperiments:read",
-            "auditLogs:read",
+            "projectAuditLogs:read",
             "dashboards:read",
             "dashboards:CUD",
             "TableViewPresets:CUD",
@@ -211,7 +212,7 @@ export function RolePermissionTable({ roleScopes }) {
             "annotationQueueAssignments:CUD",
             "promptExperiments:CUD",
             "promptExperiments:read",
-            "auditLogs:read",
+            "projectAuditLogs:read",
             "dashboards:read",
             "dashboards:CUD",
             "TableViewPresets:CUD",
@@ -292,6 +293,21 @@ export function RolePermissionTable({ roleScopes }) {
   </AccordionItem>
 </Accordion>
 
+### How to read the scopes [#reading-scopes]
+
+Each scope is `resource:action`. `read` grants viewing; `CUD` (create, update, delete) grants changes. The project-level `Admin` role has every project scope of `Owner` except `project:delete`. A few practical consequences of the tables above:
+
+| You want a user to be able to…                                                                                    | Minimum role                                                                                           |
+| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| View traces, dashboards, prompts, datasets, and evaluators                                                        | `Viewer` on the project (`project:read`, `dashboards:read`, `prompts:read`, …)                         |
+| Export data from the UI or via [Blob Storage export](/docs/api-and-data-platform/features/export-to-blob-storage) | `Member` (`batchExports:create`, `batchExports:read`)                                                  |
+| Create scores, datasets, prompts, or evaluators                                                                   | `Member`                                                                                               |
+| Create or delete project API keys, LLM connections, or integrations                                               | `Admin` (`apiKeys:CUD`, `llmApiKeys:create`, `integrations:CRUD`)                                      |
+| Delete traces or a project                                                                                        | `Admin` for traces (`traces:delete`); `Owner` for the project (`project:delete`)                       |
+| Create organization API keys, delete the organization, or manage billing                                          | Organization `Owner` (`organization:CRUD_apiKeys`, `organization:delete`, `langfuseCloudBilling:CRUD`) |
+
+A user's effective role in a project is their [project-level role](#project-level-roles) if one is assigned, otherwise their organization role. Assigning the project role `None` means "do not override the organization role" for that project. Projects in which the effective role lacks `project:read` are hidden from the user entirely, which is why a `Viewer` or `None` organization member may see `Forbidden` on project endpoints until a project role is granted.
+
 ## Managing users
 
 ### Add a new user to an organization
@@ -300,7 +316,7 @@ In the organization settings, you can add users via their email address and assi
 
 ### Changing user roles
 
-Any user with the `members:CUD` permission can change the role of a user in the organization settings. This will affect the user's permissions across all projects in the organization. Users can only assign roles that are lower or equal to their own role.
+Any user with the `organizationMembers:CUD` permission can change the role of a user in the organization settings. This will affect the user's permissions across all projects in the organization. Users can only assign roles that are lower or equal to their own role.
 
 ## Managing Projects
 
@@ -310,11 +326,11 @@ Any user with the `projects:create` permission can create a new project within a
 
 ### Transfer a project to another organization
 
-Only users with the `projects:transfer_organization` permission can transfer a project to another organization. This will remove the project from the current organization and add it to the new one. Access to the project will depend on the roles configured in the new organization.
+Only users with the `projects:transfer_org` permission can transfer a project to another organization. This will remove the project from the current organization and add it to the new one. Access to the project will depend on the roles configured in the new organization.
 
 During this process, no data will be lost, all project settings, data, and configurations will be transferred to the new organization. The project remains fully operational as API keys, settings (except for access management), and data will remain unchanged and associated with the project. All features (e.g. tracing, prompt management) will continue to work without any interruption.
 
-## Project-level roles
+## Project-level roles [#project-level-roles]
 
 <AvailabilityBanner
   availability={{
@@ -331,6 +347,15 @@ Users by default inherit the role of the organization they are part of. For more
 If a project-level role is assigned, it will override the organization-level role for that project.
 
 If you want to give a user access to only certain projects within an organization, you can set their role to `None` on the organization level and then assign them a role on the project level.
+
+## API keys [#api-keys]
+
+API keys authenticate calls to the [public API](/docs/api-and-data-platform/features/public-api) and the SDKs. They are not tied to a user:
+
+- **Project API keys** (`pk-lf-…` / `sk-lf-…`) are scoped to one project and are created in **Project Settings → API Keys**. Managing them requires the `apiKeys:CUD` scope (`Owner` or `Admin` on the project); `Member` can see the list.
+- **Organization API keys** are scoped to the whole organization and used with the [Organization Management API](/docs/administration/scim-and-org-api). Managing them requires the `organization:CRUD_apiKeys` scope (organization `Owner`).
+
+**The secret key is shown exactly once, when the key is created.** Langfuse stores only a one-way hash of the secret, so it cannot be displayed again or recovered by support. The settings page shows only the public key and a masked preview (`sk-lf-...1234`) of each secret. If you lose a secret key, create a new key and delete the old one; there is no separate "rotate" operation, and rotation is exactly that pair of steps. Deleting a key invalidates it immediately, so switch your application to the new key before deleting the old one. Optionally set an expiry date on a key and use the **Last used** column to find keys that are safe to remove.
 
 ## Related Resources
 

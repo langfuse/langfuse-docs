@@ -58,18 +58,34 @@ Start with Layer 1 this week, add Layer 4 the same week (it is one evaluator), a
 
 ## FAQ
 
-### Should I mask before or after the model call?
+<FaqDetails>
+
+<Details id="should-i-mask-before-or-after-the-model-call">
+<Summary>Should I mask before or after the model call?</Summary>
 
 Both concerns exist independently. Masking for observability (Layers 1 and 2) controls what is stored in Langfuse; filtering for the provider (Layer 3) controls what the model sees. A prompt can legitimately contain PII the model needs while your stored traces redact it.
 
-### Does masking break the ability to debug traces?
+</Details>
+
+<Details id="does-masking-break-the-ability-to-debug-traces">
+<Summary>Does masking break the ability to debug traces?</Summary>
 
 Field-level redaction preserves structure, so traces stay readable ("card `****`" still shows _that_ a card was discussed). Aggressive whole-text scrubbing hurts debuggability; prefer targeted redaction plus short retention over blanking everything.
 
-### Can I mask data that third-party frameworks emit?
+</Details>
+
+<Details id="can-i-mask-data-that-third-party-frameworks-emit">
+<Summary>Can I mask data that third-party frameworks emit?</Summary>
 
 Yes. The `mask_otel_spans` option applies your masking function to spans from third-party OpenTelemetry instrumentation exported through the Langfuse Python SDK, closing the gap where framework-generated spans bypassed application-level masking. See the [masking docs](/docs/observability/features/masking) for behavior details.
 
-### Is prompt-level instruction ("do not repeat personal data") a masking strategy?
+</Details>
+
+<Details id="is-prompt-level-instruction-do-not-repeat-personal-data-a-masking-strategy">
+<Summary>Is prompt-level instruction ("do not repeat personal data") a masking strategy?</Summary>
 
 No. Instructions influence model behavior; they do not control what your systems store or transmit. Treat them as a UX nicety, never as a privacy control.
+
+</Details>
+
+</FaqDetails>

@@ -150,22 +150,41 @@ For the automated version of the middle row, a CI gate that fails when a candida
 
 ## FAQ
 
-### How should we name and organize hundreds of prompts? [#organize-hundreds-of-prompts]
+<FaqDetails>
+
+<Details id="organize-hundreds-of-prompts">
+<Summary>How should we name and organize hundreds of prompts?</Summary>
 
 Name each prompt for its feature and step, and use slashes to create folders: `support/triage/classify-intent`, `support/triage/draft-reply`, `onboarding/welcome/summarize-account`. Keep one prompt per LLM call site, store model and parameters in the prompt's config so they version with the text, and move shared instruction blocks into referenced prompts so a policy change is one edit.
 
-### What happens when a product manager edits a prompt in the UI? [#pm-edit-flow]
+</Details>
+
+<Details id="pm-edit-flow">
+<Summary>What happens when a product manager edits a prompt in the UI?</Summary>
 
 Saving creates a new immutable version that receives the `latest` label. Production is unaffected until someone moves the `production` label to the new version, in the UI or with `update_prompt`. Once moved, running application instances serve the new version on their next fetch after the cache TTL expires, 60 seconds by default, with no redeploy; rolling back is moving the label back.
 
-### Can we restrict who is allowed to deploy prompts to production? [#restrict-production-deploys]
+</Details>
+
+<Details id="restrict-production-deploys">
+<Summary>Can we restrict who is allowed to deploy prompts to production?</Summary>
 
 Yes. Project admins and owners can mark the `production` label as protected, after which `member` and `viewer` roles cannot move or delete it while still being able to create versions and label them `staging`. As of September 2026, protected labels are included in the Pro plan with the Teams add-on, in Enterprise, and in the self-hosted Enterprise Edition; audit logs on Enterprise and self-hosted EE record every label change with user attribution.
 
-### How do we move prompts between staging and production projects? [#move-prompts-between-projects]
+</Details>
+
+<Details id="move-prompts-between-projects">
+<Summary>How do we move prompts between staging and production projects?</Summary>
 
 Use bulk export and import on the Prompts page: export the prompts as JSON from the source project and import the file into the destination, where each prompt is created as a new version. The `latest` and `production` labels are omitted on import, so you relabel deliberately after checking the result. Alternatively, sync through the GitHub integration or the API, or keep one project and separate staging from production traffic with tracing environments, which prompts are shared across, when your team can share access.
 
-### What happens to our application if Langfuse is unreachable? [#langfuse-unreachable]
+</Details>
+
+<Details id="langfuse-unreachable">
+<Summary>What happens to our application if Langfuse is unreachable?</Summary>
 
 Running instances keep serving their cached prompts; stale entries are returned immediately while revalidation fails quietly in the background, so requests are not affected. Only a new instance with an empty cache is exposed, and `get_prompt` raises there after retries. Cover that case with a `fallback=` prompt or by prefetching prompts on startup, as described in the guaranteed availability docs.
+
+</Details>
+
+</FaqDetails>

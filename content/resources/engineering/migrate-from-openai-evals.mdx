@@ -1,0 +1,838 @@
+---
+title: Migrate from OpenAI Evals to Langfuse
+description: "Step-by-step guide to migrate from the OpenAI Evals platform to Langfuse before the November 2026 shutdown: export evals and runs, turn data sources into datasets, port graders to evaluators, and move prompt templates."
+tags: [migration, guide]
+---
+
+import { Cloud, MessageSquare } from "lucide-react";
+
+# Migrate from OpenAI Evals to Langfuse
+
+This guide walks through moving existing [OpenAI Evals](https://platform.openai.com/docs/guides/evals) to [Langfuse](/) datasets and experiments: exporting your evals and run data first, then graders, prompt templates, evals on production logs, and the CI gate.
+
+**TL;DR:** OpenAI Evals maps cleanly onto Langfuse concepts. The rows behind an eval's `data_source_config` become dataset items, `testing_criteria` graders become evaluators (`string_check` and `python` graders become code evaluators, `label_model` and `score_model` graders become LLM-as-a-judge evaluators), the run's `input_messages` template becomes a managed chat prompt, and evals on `logs` become LLM-as-a-judge evaluators on live production traces. You can recreate the dashboard workflow without code through [experiments in the Langfuse UI](/docs/evaluation/experiments/experiments-via-ui), or mirror the API workflow with the Langfuse SDKs. Export everything you want to keep before the OpenAI Evals API shuts down.
+
+<Callout type="warning">
+  OpenAI [announced](https://developers.openai.com/api/docs/deprecations) on June 3, 2026 that the Evals platform is being shut down. Existing evals become read-only on **October 31, 2026**, and the Evals dashboard and API are scheduled to shut down on **November 30, 2026**. The export script in [Step 1](#export) needs the API, so run it before the shutdown date.
+</Callout>
+
+<Cards num={2}>
+  <Card title="Get started free" href="https://cloud.langfuse.com" icon={<Cloud />} />
+  <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
+</Cards>
+
+## Why teams choose Langfuse [#why-langfuse]
+
+The shutdown forces a move, but the choice of destination is still yours. OpenAI's own guide points to Promptfoo, a declarative CLI that runs evals from a YAML file. That is a good fit if you want a local test harness. Langfuse is the better fit if you used OpenAI Evals as a platform, with results in a dashboard and evals running on production logs:
+
+- **Dashboard workflow without code.** OpenAI Evals let you pick a dataset, write a prompt, add graders, and compare runs in the browser. [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui) in Langfuse work the same way: select a dataset, one or more prompt versions, and evaluators, then compare runs side by side. Product managers and domain experts keep working in the UI.
+- **Evals on production traffic.** Evals with a `logs` or `stored_completions` data source graded real API traffic. Langfuse [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) run on live traces as they arrive, with filters and sampling. The same evaluators also score offline experiments.
+- **Eval results next to production traces.** Every experiment item creates a full [trace](/docs/observability/data-model), so a failing row is inspectable with the same tooling you use for production incidents, including tokens, latency, and cost.
+- **Prompts move too.** OpenAI is also shutting down the Reusable Prompts API (`/v1/prompts`) on November 30, 2026. Langfuse [prompt management](/docs/prompt-management) versions your prompts, deploys them with labels, and links each prompt version to the traces and scores it produced. See our guide to [migrating OpenAI reusable prompts](/resources/engineering/migrate-from-openai-prompts).
+- **Any model, any provider.** Langfuse evaluators and experiments work with OpenAI, Anthropic, Google, open-weight models, and your own application code, not only OpenAI models.
+- **Self-hostable.** Langfuse is open source. [Self-hosting Langfuse](/self-hosting) gives you the full platform (UI, API, storage) in your own infrastructure, so your eval history does not depend on a vendor's product roadmap again.
+
+Some things work differently. OpenAI Evals generated completions for you from a template and a model name. In Langfuse, the experiment task is your own code, which means the eval exercises your real retrieval, tools, and glue logic, but you write that function yourself (UI experiments still run a prompt and model directly). OpenAI's `text_similarity` metrics (`bleu`, `rouge_*`, `meteor`, and so on) are not built-in evaluator types; they become a library call inside an evaluator function.
+
+## Concept mapping [#concept-mapping]
+
+| OpenAI Evals                                                       | Langfuse                                                                                                                                                                           | Notes                                                      |
+| ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Eval (`/v1/evals`)                                                 | [Dataset](/docs/evaluation/experiments/datasets) plus a set of evaluators                                                                                                          | One eval usually becomes one dataset                       |
+| `data_source_config` with `type: "custom"` and `item_schema`       | Dataset items (`input`, `expected_output`, `metadata`), with an optional JSON schema on the dataset                                                                                | Each JSONL row becomes one item                            |
+| `{{item.field}}` used as a reference in graders                    | `expected_output` on the dataset item                                                                                                                                              | Ground truth moves into the item                           |
+| `data_source_config` with `type: "logs"` or `"stored_completions"` | [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) or [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) on live traces                      | Production logs are graded continuously instead of per run |
+| `testing_criteria` (graders)                                       | Evaluators (SDK evaluator functions, code evaluators, or LLM-as-a-judge)                                                                                                           | See the [grader mapping](#grader-mapping)                  |
+| Run with `input_messages` template, `model`, `sampling_params`     | [Chat prompt](/docs/prompt-management) with the model and parameters in its `config`                                                                                               | `{{item.question}}` becomes `{{question}}`                 |
+| Eval run (`/v1/evals/{id}/runs`)                                   | [Experiment run](/docs/evaluation/experiments/data-model) via the [UI](/docs/evaluation/experiments/experiments-via-ui) or [SDK](/docs/evaluation/experiments/experiments-via-sdk) | Runs on the same dataset are compared side by side         |
+| Run output items (`sample`, `results`)                             | Experiment item traces with [scores](/docs/evaluation/scores/overview)                                                                                                             | Each result links to the full trace                        |
+| `pass_threshold`, `passing_labels`, `result_counts`                | Run-level evaluators, plus `RegressionError` in [CI](/docs/evaluation/experiments/experiments-ci-cd)                                                                               | Pass rates become a run-level score you can gate on        |
+| Evals dashboard                                                    | Datasets, experiment comparison, and [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) in the Langfuse UI                                                 | Human review is built in                                   |
+
+## Grader mapping [#grader-mapping]
+
+| OpenAI grader                                                 | Langfuse equivalent                                                                                                                          |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `string_check` (`eq`, `ne`, `like`, `ilike`)                  | A few lines in an SDK evaluator function, or a UI [code evaluator](/docs/evaluation/evaluation-methods/code-evaluators) with a boolean score |
+| `text_similarity` with `fuzzy_match`                          | Evaluator function using `difflib` or `rapidfuzz`, or the autoevals `Levenshtein` scorer                                                     |
+| `text_similarity` with `cosine`                               | autoevals `EmbeddingSimilarity` via `create_evaluator_from_autoevals`                                                                        |
+| `text_similarity` with `bleu`, `gleu`, `meteor`, or `rouge_*` | Evaluator function calling a library such as `nltk` or `rouge-score`                                                                         |
+| `label_model` (`labels`, `passing_labels`)                    | LLM-as-a-judge evaluator with a categorical score                                                                                            |
+| `score_model` (`range`, `pass_threshold`)                     | LLM-as-a-judge evaluator with a numeric score                                                                                                |
+| `python` (`grade(sample, item)`)                              | UI code evaluator (Python or TypeScript) or an SDK evaluator function; the grading logic ports almost verbatim                               |
+| `multi` (`calculate_output` over several graders)             | Run-level evaluator that combines item scores, or one evaluator that returns the combined value                                              |
+
+## Supported data types [#supported-data-types]
+
+| Data                                                    | Move?    | Path                                                                                 |
+| ------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------ |
+| Eval rows (`jsonl` data source via `file_id` or inline) | Yes      | Export script → dataset items                                                        |
+| Eval definitions (`testing_criteria`)                   | Recreate | Export for reference, then rebuild as evaluators                                     |
+| Run templates (`input_messages`, `model`, sampling)     | Yes      | Chat prompts in prompt management, with model settings in `config`                   |
+| Reusable prompts (`/v1/prompts`)                        | Yes      | See the [reusable prompts guide](/resources/engineering/migrate-from-openai-prompts) |
+| Evals on `logs` / `stored_completions`                  | Recreate | Trace production calls with Langfuse, then attach evaluators to live traces          |
+| Historical run results (`output_items`)                 | Archive  | Export to JSON; optionally attach as dataset item metadata; re-run a baseline        |
+| Fine-tuning graders (reinforcement fine-tuning)         | No       | Out of scope; this guide covers eval workflows only                                  |
+
+## The example eval [#example-eval]
+
+The steps below migrate this eval, created with the OpenAI Python SDK. It has a custom data source with two fields, a `string_check` grader that checks the answer mentions a required phrase, and a `score_model` grader that rates helpfulness.
+
+```python
+# before: OpenAI Evals
+from openai import OpenAI
+
+client = OpenAI()
+
+support_eval = client.evals.create(
+    name="support-agent-regression",
+    data_source_config={
+        "type": "custom",
+        "item_schema": {
+            "type": "object",
+            "properties": {
+                "question": {"type": "string"},
+                "must_mention": {"type": "string"},
+            },
+            "required": ["question", "must_mention"],
+        },
+        "include_sample_schema": True,
+    },
+    testing_criteria=[
+        {
+            "type": "string_check",
+            "name": "mentions_required_phrase",
+            "input": "{{sample.output_text}}",
+            "reference": "{{item.must_mention}}",
+            "operation": "ilike",
+        },
+        {
+            "type": "score_model",
+            "name": "helpfulness",
+            "model": "gpt-4.1",
+            "input": [
+                {
+                    "role": "system",
+                    "content": "Rate how helpful the answer is from 1 (useless) to 7 (excellent). Reply with the number only.",
+                },
+                {
+                    "role": "user",
+                    "content": "Question: {{item.question}}\nAnswer: {{sample.output_text}}",
+                },
+            ],
+            "range": [1, 7],
+            "pass_threshold": 5,
+        },
+    ],
+)
+
+client.evals.runs.create(
+    support_eval.id,
+    name="gpt-4.1 baseline",
+    data_source={
+        "type": "completions",
+        "model": "gpt-4.1",
+        "input_messages": {
+            "type": "template",
+            "template": [
+                {"role": "developer", "content": "You are a polite support agent for Acme."},
+                {"role": "user", "content": "{{item.question}}"},
+            ],
+        },
+        "source": {"type": "file_id", "id": "file-abc123"},
+    },
+)
+```
+
+Snippets below show both the Python SDK v4 (`pip install langfuse`) and the JS/TS SDK v5 (`npm install @langfuse/client`). Both read `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` from the environment.
+
+## Step 1: Export evals, runs, and data [#export]
+
+Export first, while the OpenAI Evals API is still available. This script walks every eval in your OpenAI project and saves its definition, its runs with per-item results, and the dataset rows. It reads rows from each run's source (an uploaded file or inline content) and from the run's output items, which also covers stored completions. It then downloads every file uploaded with the `evals` purpose, so rows of evals that never ran are archived too.
+
+```python
+# export_openai_evals.py
+import json
+from pathlib import Path
+
+from openai import OpenAI
+
+client = OpenAI()
+out_dir = Path("openai-evals-export")
+(out_dir / "files").mkdir(parents=True, exist_ok=True)
+
+
+def source_rows(run):
+    source = run.data_source.source
+    if source.type == "file_content":
+        return [row.item for row in source.content]
+    if source.type == "file_id":
+        lines = client.files.content(source.id).text.splitlines()
+        return [json.loads(line)["item"] for line in lines if line.strip()]
+    return []  # stored completions and responses: rows come from output items
+
+
+for ev in client.evals.list():  # auto-paginates
+    runs, rows = [], {}
+
+    for run in client.evals.runs.list(ev.id):
+        items = [
+            item.model_dump()
+            for item in client.evals.runs.output_items.list(run.id, eval_id=ev.id)
+        ]
+        runs.append({"run": run.model_dump(), "output_items": items})
+        for row in source_rows(run) + [item["datasource_item"] for item in items]:
+            rows.setdefault(json.dumps(row, sort_keys=True), row)  # deduplicate
+
+    (out_dir / f"{ev.id}.json").write_text(
+        json.dumps(
+            {
+                "eval": ev.model_dump(),  # includes data_source_config and testing_criteria
+                "rows": list(rows.values()),
+                "runs": runs,  # includes input_messages, model, and per-item results
+            },
+            indent=2,
+            default=str,
+        )
+    )
+    print(f"{ev.name}: {len(rows)} rows, {len(runs)} runs")
+
+# evals without runs have no rows attached; their data lives in uploaded files
+for file in client.files.list(purpose="evals"):
+    (out_dir / "files" / f"{file.id}.jsonl").write_bytes(
+        client.files.content(file.id).content
+    )
+```
+
+Keep the export folder in version control or object storage. It is your archive of historical scores and the source for the next steps. If an eval has no runs, its `rows` list is empty: import the matching file from `openai-evals-export/files/` instead, where each line holds one row under the `item` key.
+
+## Step 2: Turn eval rows into a dataset [#datasets]
+
+Each exported row becomes a dataset item. Fields your prompt template reads (here, `question`) map to `input`, and fields graders use as a reference (here, `must_mention`) move to `expected_output`. The import is safe to re-run: creating a dataset with an existing name updates it, and deriving the item ID from the row content means re-runs update items in place instead of duplicating them.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+{/* Python SDK */}
+
+```python
+import hashlib
+import json
+from pathlib import Path
+
+from langfuse import get_client
+
+langfuse = get_client()
+
+export = json.loads(Path("openai-evals-export/eval_abc123.json").read_text())
+dataset_name = export["eval"]["name"]  # "support-agent-regression"
+
+langfuse.create_dataset(
+    name=dataset_name,
+    description="Migrated from OpenAI Evals",
+    metadata={"openai_eval_id": export["eval"]["id"]},
+)
+
+for row in export["rows"]:
+    langfuse.create_dataset_item(
+        dataset_name=dataset_name,
+        # deterministic ID = stable retry key, so re-runs don't duplicate items
+        id=hashlib.sha256(json.dumps(row, sort_keys=True).encode()).hexdigest()[:16],
+        input={"question": row["question"]},
+        expected_output=row["must_mention"],
+    )
+```
+
+</Tab>
+<Tab>
+{/* JS/TS SDK */}
+
+```ts
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+const exported = JSON.parse(
+  readFileSync("openai-evals-export/eval_abc123.json", "utf8"),
+);
+const datasetName: string = exported.eval.name; // "support-agent-regression"
+
+await langfuse.api.datasets.create({
+  name: datasetName,
+  description: "Migrated from OpenAI Evals",
+  metadata: { openaiEvalId: exported.eval.id },
+});
+
+for (const row of exported.rows as Array<{
+  question: string;
+  must_mention: string;
+}>) {
+  await langfuse.dataset.createItem({
+    datasetName,
+    // deterministic ID = stable retry key, so re-runs don't duplicate items
+    id: createHash("sha256")
+      .update(JSON.stringify(row))
+      .digest("hex")
+      .slice(0, 16),
+    input: { question: row.question },
+    expectedOutput: row.must_mention,
+  });
+}
+```
+
+</Tab>
+</LangTabs>
+
+To keep the validation that `item_schema` gave you, add a [JSON schema](/docs/evaluation/experiments/datasets#schema-enforcement) for `input` and `expected_output` to the dataset (`input_schema` and `expected_output_schema` on `create_dataset`, or in the dataset settings in the UI). Langfuse then rejects malformed items at creation time. Split the exported `item_schema` accordingly: here, `question` belongs to the input schema and `must_mention` to the expected output schema. If you prefer not to write code for this step, you can also [upload a CSV](/docs/evaluation/experiments/datasets) of the rows in the Langfuse UI.
+
+Confirm in the Langfuse UI that the dataset's item count matches the row count printed by the export script and that `expected_output` is populated on each item.
+
+## Step 3: Move prompt templates into Langfuse [#prompts]
+
+The run's `input_messages` template becomes a [chat prompt](/docs/prompt-management). Langfuse uses the same `{{variable}}` syntax, so the only change is dropping the `item.` namespace: `{{item.question}}` becomes `{{question}}`. The run's `model` and `sampling_params` move into the prompt's `config`.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+{/* Python SDK */}
+
+```python
+import re
+
+run = export["runs"][0]["run"]  # the run whose prompt you want to keep
+template = run["data_source"]["input_messages"]["template"]
+
+messages = [
+    {
+        "role": m["role"],
+        "content": re.sub(r"\{\{\s*item\.(\w+)\s*\}\}", r"{{\1}}", m["content"]),
+    }
+    for m in template
+]
+
+langfuse.create_prompt(
+    name="support-agent",
+    type="chat",
+    prompt=messages,  # [{"role": "developer", ...}, {"role": "user", "content": "{{question}}"}]
+    config={
+        "model": run["data_source"]["model"],
+        **(run["data_source"].get("sampling_params") or {}),
+    },
+    labels=["production"],
+    commit_message="Migrated from OpenAI Evals",
+)
+```
+
+</Tab>
+<Tab>
+{/* JS/TS SDK */}
+
+```ts
+const run = exported.runs[0].run; // the run whose prompt you want to keep
+const template: Array<{ role: string; content: string }> =
+  run.data_source.input_messages.template;
+
+await langfuse.prompt.create({
+  name: "support-agent",
+  type: "chat",
+  prompt: template.map((m) => ({
+    role: m.role,
+    content: m.content.replace(/\{\{\s*item\.(\w+)\s*\}\}/g, "{{$1}}"),
+  })),
+  config: {
+    model: run.data_source.model,
+    ...(run.data_source.sampling_params ?? {}),
+  },
+  labels: ["production"],
+  commitMessage: "Migrated from OpenAI Evals",
+});
+```
+
+</Tab>
+</LangTabs>
+
+<Callout type="warning">
+  Unlike the dataset import, prompt creation is not idempotent: every call creates a new prompt version. Run the export once, not as a retried batch job.
+</Callout>
+
+This example stores the model settings in `config` using OpenAI's parameter names. Langfuse returns `config` as-is, so your application reads it back and passes it to the model call. For prompts that live in OpenAI's Reusable Prompts API (`/v1/prompts`), which shuts down on the same date, follow the [reusable prompts migration guide](/resources/engineering/migrate-from-openai-prompts). Confirm in the Langfuse UI that the prompt renders with its variables intact and carries the `production` label. To compare a prompt variant in Step 5, create a second version (edit the prompt in the UI or call `create_prompt` again with your changes) and assign it the `candidate` label.
+
+## Step 4: Port graders to evaluators [#evaluators]
+
+Each grader in `testing_criteria` becomes an evaluator. You have two options, and you can mix them:
+
+- **Managed evaluators in the Langfuse UI.** Create an [LLM-as-a-judge evaluator](/docs/evaluation/evaluation-methods/llm-as-a-judge) for model graders and a [code evaluator](/docs/evaluation/evaluation-methods/code-evaluators) for deterministic graders. Langfuse runs them for you on UI experiments, SDK experiments, and live traces. This is the closest match to configuring graders in the OpenAI dashboard.
+- **Evaluator functions in the experiment SDK.** Plain functions that receive the item's `input`, `output`, and `expected_output` and return an `Evaluation`. Use these when the eval runs from code or CI.
+
+### Managed evaluators in the UI [#managed-evaluators]
+
+For the `score_model` grader, create an LLM-as-a-judge evaluator with a **numeric** score and paste the grader's prompt. Rename the template variables to Langfuse's: `{{item.question}}` becomes `{{input}}` and `{{sample.output_text}}` becomes `{{output}}`, which you map to the experiment item's input and the trace output. A `label_model` grader becomes the same kind of evaluator with a **categorical** score, where the grader's `labels` are the categories.
+
+For the `string_check` and `python` graders, create a code evaluator. The `python` grader's `grade(sample, item)` logic moves into an `evaluate(ctx)` function, where `sample["output_text"]` becomes `ctx.observation.output` and the reference field becomes `ctx.experiment.item_expected_output`:
+
+```python
+# Langfuse code evaluator (replaces the string_check grader)
+def evaluate(ctx: EvaluationContext) -> EvaluationResult:
+    expected = ctx.experiment.item_expected_output if ctx.experiment else None
+    passed = bool(expected) and str(expected).lower() in str(ctx.observation.output).lower()
+
+    return EvaluationResult(
+        scores=[
+            Score(
+                name="mentions_required_phrase",
+                value=passed,
+                data_type="BOOLEAN",
+            )
+        ]
+    )
+```
+
+Code evaluators run in a sandbox with the language's standard library only (see the [runtime constraints](/docs/evaluation/evaluation-methods/code-evaluators#runtime-constraints)). A `python` grader that imports `numpy` or similar packages belongs in an SDK evaluator function instead.
+
+### Evaluator functions in the SDK [#sdk-evaluators]
+
+The same two graders as experiment SDK evaluators:
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+{/* Python SDK */}
+
+```python
+import re
+
+from langfuse import Evaluation
+from langfuse.openai import OpenAI  # traced drop-in replacement
+
+def mentions_required_phrase(*, output, expected_output, **kwargs):
+    # replaces: string_check with operation "ilike"
+    passed = (expected_output or "").lower() in (output or "").lower()
+    return Evaluation(name="mentions_required_phrase", value=1.0 if passed else 0.0)
+
+def helpfulness(*, input, output, **kwargs):
+    # replaces: score_model with range [1, 7]
+    response = OpenAI().chat.completions.create(
+        model="gpt-4.1",
+        messages=[
+            {
+                "role": "system",
+                "content": "Rate how helpful the answer is from 1 (useless) to 7 (excellent). Reply with the number only.",
+            },
+            {
+                "role": "user",
+                "content": f"Question: {input['question']}\nAnswer: {output}",
+            },
+        ],
+    )
+    text = response.choices[0].message.content or ""
+    match = re.search(r"\d+", text)
+    return Evaluation(
+        name="helpfulness",
+        value=float(match.group()) if match else 0.0,
+        comment=text,
+    )
+```
+
+</Tab>
+<Tab>
+{/* JS/TS SDK */}
+
+```ts
+import OpenAI from "openai";
+import { observeOpenAI } from "@langfuse/openai"; // traced client wrapper
+import type { Evaluation } from "@langfuse/client";
+
+const openai = observeOpenAI(new OpenAI());
+
+async function mentionsRequiredPhrase({
+  output,
+  expectedOutput,
+}: {
+  output: string;
+  expectedOutput?: string;
+}): Promise<Evaluation> {
+  // replaces: string_check with operation "ilike"
+  const passed = (output ?? "")
+    .toLowerCase()
+    .includes((expectedOutput ?? "").toLowerCase());
+  return { name: "mentions_required_phrase", value: passed ? 1 : 0 };
+}
+
+async function helpfulness({
+  input,
+  output,
+}: {
+  input: { question: string };
+  output: string;
+}): Promise<Evaluation> {
+  // replaces: score_model with range [1, 7]
+  const response = await openai.chat.completions.create({
+    model: "gpt-4.1",
+    messages: [
+      {
+        role: "system",
+        content:
+          "Rate how helpful the answer is from 1 (useless) to 7 (excellent). Reply with the number only.",
+      },
+      {
+        role: "user",
+        content: `Question: ${input.question}\nAnswer: ${output}`,
+      },
+    ],
+  });
+  const text = response.choices[0].message.content ?? "";
+  const match = text.match(/\d+/);
+  return {
+    name: "helpfulness",
+    value: match ? Number(match[0]) : 0,
+    comment: text,
+  };
+}
+```
+
+</Tab>
+</LangTabs>
+
+For `text_similarity` graders, you rarely need to write the scorer yourself. The [autoevals](https://github.com/braintrustdata/autoevals) library ships `EmbeddingSimilarity` (the `cosine` metric) and `Levenshtein` (close to `fuzzy_match`), plus model-graded scorers such as `Factuality` and `ClosedQA`. Langfuse converts any of them into an evaluator with `create_evaluator_from_autoevals` (imported from `langfuse.experiment` in Python, `createEvaluatorFromAutoevals` from `@langfuse/client` in JS/TS; see the [experiment SDK docs](/docs/evaluation/experiments/experiments-via-sdk)). For `bleu`, `meteor`, or `rouge_*`, call `nltk` or `rouge-score` inside an evaluator function.
+
+`pass_threshold` from a `score_model` grader does not need its own setting: keep the raw score per item and compute the pass rate in a run-level evaluator, as shown in [Step 6](#ci).
+
+## Step 5: Run the experiment [#experiments]
+
+**Without code.** Open the dataset in the Langfuse UI, start an [experiment via UI](/docs/evaluation/experiments/experiments-via-ui), and select the `support-agent` prompt (label `production`), a model, and the evaluators from Step 4. Langfuse runs the prompt on every item, applies the evaluators, and shows the results next to earlier runs. This replaces creating a run with a `completions` data source in the OpenAI dashboard.
+
+**From code.** The experiment runner loops your application over the dataset, traces every execution, and applies the evaluators. Where OpenAI Evals only called a model with the template, the Langfuse task function is your own code, so the eval can cover retrieval, tools, and multi-step agents:
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+{/* Python SDK */}
+
+```python
+from langfuse import get_client
+from langfuse.openai import OpenAI
+
+langfuse = get_client()
+openai_client = OpenAI()
+
+
+def make_task(prompt):
+    def task(*, item, **kwargs):
+        # swap this for your application logic to evaluate the full pipeline
+        response = openai_client.chat.completions.create(
+            model=prompt.config.get("model", "gpt-4.1"),
+            messages=prompt.compile(question=item.input["question"]),
+            langfuse_prompt=prompt,  # links the generation to the prompt version
+        )
+        return response.choices[0].message.content
+
+    return task
+
+
+dataset = langfuse.get_dataset("support-agent-regression")
+
+for label in ["production", "candidate"]:  # "candidate" was created in Step 3
+    prompt = langfuse.get_prompt("support-agent", type="chat", label=label)
+
+    result = dataset.run_experiment(
+        name=f"support-agent ({label})",
+        task=make_task(prompt),
+        evaluators=[mentions_required_phrase, helpfulness],
+    )
+    print(result.format())
+
+langfuse.flush()  # flush pending spans before a short-lived script exits
+```
+
+</Tab>
+<Tab>
+{/* JS/TS SDK */}
+
+```ts
+import OpenAI from "openai";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import {
+  LangfuseClient,
+  type ChatPromptClient,
+  type ExperimentTaskParams,
+} from "@langfuse/client";
+import { observeOpenAI } from "@langfuse/openai";
+
+const otelSdk = new NodeSDK({ spanProcessors: [new LangfuseSpanProcessor()] });
+otelSdk.start();
+
+const langfuse = new LangfuseClient();
+
+function makeTask(prompt: ChatPromptClient) {
+  // swap this for your application logic to evaluate the full pipeline
+  return async (item: ExperimentTaskParams) => {
+    const response = await observeOpenAI(new OpenAI(), {
+      langfusePrompt: prompt, // links the generation to the prompt version
+    }).chat.completions.create({
+      model: (prompt.config as { model?: string }).model ?? "gpt-4.1",
+      messages: prompt.compile({
+        question: (item.input as { question: string }).question,
+      }) as OpenAI.ChatCompletionMessageParam[],
+    });
+    return response.choices[0].message.content ?? "";
+  };
+}
+
+const dataset = await langfuse.dataset.get("support-agent-regression");
+
+for (const label of ["production", "candidate"]) {
+  // "candidate" was created in Step 3
+  const prompt = await langfuse.prompt.get("support-agent", {
+    type: "chat",
+    label,
+  });
+
+  const result = await dataset.runExperiment({
+    name: `support-agent (${label})`,
+    task: makeTask(prompt),
+    evaluators: [mentionsRequiredPhrase, helpfulness],
+  });
+  console.log(await result.format());
+}
+
+await otelSdk.shutdown(); // flush pending spans before the script exits
+```
+
+</Tab>
+</LangTabs>
+
+To compare models instead of prompt versions, loop over model names and pass each one into the model call, just like creating several runs with different `model` values in OpenAI Evals. Each run appears side by side in the dataset's experiment comparison view. Open it and confirm each run shows scores from both evaluators and every item links to a trace with tokens and cost. Compare the scores with the latest run in your export: they should be close, though judge-based scores are rarely identical across runs.
+
+## Step 6: Keep failing CI on regressions [#ci]
+
+If you started OpenAI eval runs from CI and checked `result_counts` or per-criteria pass rates, the Langfuse equivalent is the [langfuse/experiment-action](/docs/evaluation/experiments/experiments-ci-cd) GitHub Action. Your experiment script raises `RegressionError` when a metric violates its threshold, the action fails the job, and it posts a PR comment with run-level scores, an item-level table, and a link to the experiment in Langfuse.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+{/* Python SDK */}
+
+```python
+# experiments/support-agent-gate.py
+# make_task, mentions_required_phrase, and helpfulness as defined in steps 4 and 5
+from langfuse import Evaluation, RegressionError, RunnerContext, get_client
+
+THRESHOLD = 0.9
+# minimum score per evaluator; helpfulness uses the score_model grader's pass_threshold
+MIN_SCORES = {"mentions_required_phrase": 1, "helpfulness": 5}
+
+
+def item_passed(evaluations):
+    scores = {e.name: e.value for e in evaluations}
+    # an item passes only if every required score exists and meets its minimum,
+    # so a failed or missing evaluator never counts as a pass
+    return all(
+        isinstance(scores.get(name), (int, float)) and scores[name] >= minimum
+        for name, minimum in MIN_SCORES.items()
+    )
+
+
+def pass_rate(*, item_results, **kwargs):
+    # replaces: result_counts.passed / result_counts.total
+    passed = [item_passed(item.evaluations) for item in item_results]
+    return Evaluation(name="pass_rate", value=sum(passed) / len(passed) if passed else 0.0)
+
+
+def experiment(context: RunnerContext):
+    prompt = get_client().get_prompt("support-agent", type="chat", label="production")
+    result = context.run_experiment(
+        name="PR gate: support agent",
+        task=make_task(prompt),
+        evaluators=[mentions_required_phrase, helpfulness],
+        run_evaluators=[pass_rate],
+    )
+
+    rate = next(
+        (e.value for e in result.run_evaluations if e.name == "pass_rate"), None
+    )
+
+    if not isinstance(rate, (int, float)) or rate < THRESHOLD:
+        raise RegressionError(
+            result=result,
+            metric="pass_rate",
+            value=float(rate) if isinstance(rate, (int, float)) else 0.0,
+            threshold=THRESHOLD,
+        )
+
+    return result
+```
+
+</Tab>
+<Tab>
+{/* JS/TS SDK */}
+
+```ts
+// experiments/support-agent-gate.ts
+// makeTask, mentionsRequiredPhrase, and helpfulness as defined in steps 4 and 5
+import {
+  LangfuseClient,
+  RegressionError,
+  type Evaluation,
+  type RunnerContext,
+} from "@langfuse/client";
+
+const THRESHOLD = 0.9;
+// minimum score per evaluator; helpfulness uses the score_model grader's pass_threshold
+const MIN_SCORES: Record<string, number> = {
+  mentions_required_phrase: 1,
+  helpfulness: 5,
+};
+
+function itemPassed(evaluations: Evaluation[]): boolean {
+  const scores = new Map(evaluations.map((e) => [e.name, e.value]));
+  // an item passes only if every required score exists and meets its minimum,
+  // so a failed or missing evaluator never counts as a pass
+  return Object.entries(MIN_SCORES).every(([name, minimum]) => {
+    const value = scores.get(name);
+    return typeof value === "number" && value >= minimum;
+  });
+}
+
+async function passRate({
+  itemResults,
+}: {
+  itemResults: Array<{ evaluations: Evaluation[] }>;
+}): Promise<Evaluation> {
+  // replaces: result_counts.passed / result_counts.total
+  const passed = itemResults.map((item) => itemPassed(item.evaluations));
+
+  return {
+    name: "pass_rate",
+    value: passed.length
+      ? passed.filter(Boolean).length / passed.length
+      : 0,
+  };
+}
+
+export async function experiment(context: RunnerContext) {
+  const prompt = await new LangfuseClient().prompt.get("support-agent", {
+    type: "chat",
+    label: "production",
+  });
+  const result = await context.runExperiment({
+    name: "PR gate: support agent",
+    task: makeTask(prompt),
+    evaluators: [mentionsRequiredPhrase, helpfulness],
+    runEvaluators: [passRate],
+  });
+
+  const rate = result.runEvaluations.find(
+    (evaluation) => evaluation.name === "pass_rate",
+  )?.value;
+
+  if (typeof rate !== "number" || rate < THRESHOLD) {
+    throw new RegressionError({
+      result,
+      metric: "pass_rate",
+      value: typeof rate === "number" ? rate : 0,
+      threshold: THRESHOLD,
+    });
+  }
+
+  return result;
+}
+```
+
+</Tab>
+</LangTabs>
+
+```yaml
+# .github/workflows/eval-gate.yml (excerpt)
+- uses: langfuse/experiment-action@v1.0.10
+  with:
+    langfuse_public_key: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+    langfuse_secret_key: ${{ secrets.LANGFUSE_SECRET_KEY }}
+    langfuse_base_url: https://cloud.langfuse.com # or your region / self-hosted URL
+    experiment_path: experiments/support-agent-gate.py # or .ts
+    dataset_name: support-agent-regression
+    github_token: ${{ github.token }}
+```
+
+The action supports pinning a `dataset_version` for reproducible runs and exposes a normalized `result_json` output for downstream steps. Verify the gate by breaking the prompt on a branch and confirming the workflow fails and the PR comment shows the regressed metric. For more on regression gates, thresholds, and flaky judges, see our guide to [LLM regression testing](/resources/engineering/llm-regression-testing).
+
+## Step 7: Replace evals on production logs [#production-logs]
+
+Evals with a `logs` or `stored_completions` data source graded completions your application had already sent to OpenAI. In Langfuse, you trace those calls and attach evaluators to the live traces:
+
+1. **Trace your OpenAI calls.** Replace `from openai import OpenAI` with `from langfuse.openai import OpenAI` in Python, or wrap the client with `observeOpenAI` in JS/TS (see the [OpenAI integration](/integrations/model-providers/openai-py)). Every call becomes a trace with input, output, model, tokens, and cost. Metadata you passed to OpenAI for filtering, such as `usecase=chatbot`, can go into Langfuse trace metadata or tags.
+2. **Attach evaluators to live data.** Reuse the LLM-as-a-judge and code evaluators from Step 4 and point them at production observations instead of experiments. Filters (for example by trace name, tag, or metadata) replace the data source's `metadata` filter, and a sampling rate keeps judge costs under control.
+3. **Close the loop.** Add interesting or failing production traces to the regression dataset from Step 2 with one click, or route them to an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues) for human review. This is how the dataset keeps growing after the migration.
+
+Unlike a `logs` eval, which scored a snapshot of logs each time you created a run, live evaluators score new traces continuously, so quality trends show up on dashboards without starting runs by hand. To score historical traces, [backfill](/docs/evaluation/evaluation-methods/llm-as-a-judge) the evaluator over a past time range.
+
+## Validation checklist [#validation-checklist]
+
+- [ ] Export script ran before November 30, 2026, and the JSON files are archived
+- [ ] Dataset item count matches the exported row count for every eval
+- [ ] Reference fields (for example `{{item.must_mention}}`) moved into `expected_output`
+- [ ] Every grader in `testing_criteria` has a corresponding evaluator (code, autoevals, or LLM-as-a-judge)
+- [ ] Prompts resolve from Langfuse by name and label, with `{{item.*}}` variables renamed and rendering correctly
+- [ ] Baseline experiment completed, and its scores are close to the latest exported OpenAI run
+- [ ] Judge evaluators spot-checked against a handful of known-good and known-bad outputs
+- [ ] CI gate fails on a deliberately broken prompt
+- [ ] Production OpenAI calls are traced, and live evaluators replace any `logs` evals
+- [ ] Team members who used the OpenAI Evals dashboard have Langfuse project access
+
+## Limitations and gaps [#limitations]
+
+Know these before you commit to the cutover:
+
+- **Historical runs are not imported as experiments.** Archive the export; anchor future comparisons on a fresh baseline experiment in Langfuse.
+- **`text_similarity` metrics are library calls, not built-ins.** `bleu`, `gleu`, `meteor`, and `rouge_*` need a library call inside an SDK evaluator function.
+- **Per-grader `pass_threshold` and `passing_labels` have no dedicated setting.** Keep the raw scores and compute pass rates in a run-level evaluator or in CI.
+- **Code evaluators use the standard library only.** Python graders that import third-party packages need to run as SDK evaluator functions.
+- **The model call moves into your code for SDK experiments.** UI experiments still run a prompt and model directly; SDK experiments call your task function, which is more flexible but is code you own.
+- **Scores will not match exactly.** Judge models and similarity implementations differ slightly, so expect small differences against the exported OpenAI results.
+
+## FAQ [#faq]
+
+<FaqDetails>
+
+<Details id="shutdown-dates">
+<Summary>When does OpenAI Evals shut down?</Summary>
+
+According to the [OpenAI deprecations page](https://developers.openai.com/api/docs/deprecations), existing evals become read-only on October 31, 2026, and the Evals dashboard and API are scheduled to shut down on November 30, 2026. Export your evals, runs, and data before the shutdown; after that date the API is no longer available to read them.
+
+</Details>
+
+<Details id="no-code">
+<Summary>Can I use Langfuse without writing code, like the OpenAI Evals dashboard?</Summary>
+
+Yes. Upload the dataset as a CSV, create prompts and LLM-as-a-judge or code evaluators in the UI, and run experiments via UI to compare prompt versions and models side by side. Code is only needed if you want experiments to call your full application, or to run evals from CI.
+
+</Details>
+
+<Details id="grader-parity">
+<Summary>Do Langfuse evaluators cover all OpenAI grader types?</Summary>
+
+Yes, though not as a one-to-one catalog. `label_model` and `score_model` graders become LLM-as-a-judge evaluators with categorical or numeric scores. `string_check` and `python` graders become code evaluators or SDK evaluator functions. `text_similarity` graders become autoevals scorers (`EmbeddingSimilarity`, `Levenshtein`) or library calls for metrics such as `bleu` and `rouge_l`. `multi` graders become a run-level or combined evaluator.
+
+</Details>
+
+<Details id="non-openai-models">
+<Summary>Do I have to use OpenAI models with Langfuse?</Summary>
+
+No. Experiments, prompts, and evaluators work with any model provider, and LLM-as-a-judge evaluators run on any model you configure as an [LLM connection](/docs/administration/llm-connection). Many teams use the migration to compare OpenAI models with models from other providers on the same dataset.
+
+</Details>
+
+<Details id="promptfoo">
+<Summary>How does this compare to migrating to Promptfoo?</Summary>
+
+OpenAI's guide recommends Promptfoo, a YAML-based CLI that runs evals locally or in CI. Langfuse also runs evals in CI, and adds a shared UI for datasets and experiments, evaluators on live production traces, prompt management, and tracing, so results stay next to your production data. If you already use Promptfoo, it can fetch prompts from Langfuse, and our [Promptfoo migration guide](/resources/engineering/migrate-from-promptfoo) covers moving a Promptfoo suite into Langfuse.
+
+</Details>
+
+</FaqDetails>
+
+## Get help with the migration [#get-help]
+
+Start on [Langfuse Cloud](https://cloud.langfuse.com) or [self-host](/self-hosting). If you want help planning the migration before the November 30, 2026 shutdown, [talk to us](/talk-to-us).
+
+<Cards num={2}>
+  <Card title="Get started free" href="https://cloud.langfuse.com" icon={<Cloud />} />
+  <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
+</Cards>

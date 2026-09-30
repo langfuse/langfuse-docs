@@ -19,6 +19,15 @@ interface Window {
   };
 }
 
+// TypeScript 7 no longer treats included `.mdx` files as typed modules.
+// Keep a default-export shape for direct MDX imports (e.g. page footers).
+declare module "*.mdx" {
+  const MDXComponent: import("react").ComponentType<
+    Record<string, unknown> & { children?: import("react").ReactNode }
+  >;
+  export default MDXComponent;
+}
+
 // ---------------------------------------------------------------------------
 // fumadocs-mdx collection module declarations
 // TypeScript cannot resolve the `?collection=<name>` query-parameter suffix as

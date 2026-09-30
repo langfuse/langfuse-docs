@@ -35,6 +35,7 @@ export default async function SectionDocPage(props: PageProps) {
   );
   const effectiveSlug = isMarketing ? [section] : slug;
   const isUseCase = USE_CASE_SECTIONS.has(section);
+  const isWrapped = section === "wrapped";
 
   if (!SECTION_SLUGS.includes(section)) notFound();
   if (DEDICATED_APP_SECTIONS.has(section)) notFound();
@@ -56,7 +57,7 @@ export default async function SectionDocPage(props: PageProps) {
 
   let bodyClient = <MDX components={getMDXComponents()} />;
 
-  if (section === "wrapped") {
+  if (isWrapped) {
     bodyClient = (
       <WrappedDataProvider
         data={{
@@ -82,6 +83,16 @@ export default async function SectionDocPage(props: PageProps) {
       >
         {bodyClient}
       </WrappedDataProvider>
+    );
+  }
+
+  // Custom landing pages (Wrapped) sit in HomeLayout like the homepage:
+  // no docs prose chrome, copy toolbar, or extra content-column padding.
+  if (isWrapped) {
+    return (
+      <DocBodyChrome withProse={false} showCopyButton={false}>
+        {bodyClient}
+      </DocBodyChrome>
     );
   }
 

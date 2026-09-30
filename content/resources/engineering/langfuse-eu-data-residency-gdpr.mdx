@@ -68,22 +68,41 @@ For an EU team, the EU region satisfies a residency requirement and self-hosting
 
 ## FAQ
 
-### Is Langfuse Cloud data processed outside the EU? [#processed-outside-eu]
+<FaqDetails>
+
+<Details id="processed-outside-eu">
+<Summary>Is Langfuse Cloud data processed outside the EU?</Summary>
 
 For the EU region, primary storage in Postgres, ClickHouse, and S3 is in Ireland (AWS `eu-west-1`), and the only cross-region copy is a daily Postgres backup to `eu-central-1`, which the documentation describes as the same legal jurisdiction. Tracing data and media are not replicated anywhere. The documentation does not state where sub-processors or support personnel operate; those details are in the DPA and the published sub-processor list.
 
-### Can I move an existing US project to the EU region? [#move-us-to-eu]
+</Details>
+
+<Details id="move-us-to-eu">
+<Summary>Can I move an existing US project to the EU region?</Summary>
 
 Not in place. Regions are completely separated, including user accounts, so switching means creating a new account in the EU region and migrating data. The documentation links a data migration cookbook with Python scripts that transfer traces, prompts, and datasets between projects.
 
-### Is Langfuse GDPR compliant? [#is-langfuse-gdpr-compliant]
+</Details>
+
+<Details id="is-langfuse-gdpr-compliant">
+<Summary>Is Langfuse GDPR compliant?</Summary>
 
 The documentation states that Langfuse is committed to complying with the GDPR and describes Langfuse Cloud as GDPR compliant. The commitments it documents are a Data Processing Agreement, a DSAR process through privacy@clickhouse.com, a published sub-processor list, no model training on customer data, and return or destruction of client data within 30 days of contract end. Compliance of your deployment also depends on what you send and how you configure masking, retention, and deletion.
 
-### How do I delete one user's data from Langfuse? [#delete-user-data]
+</Details>
+
+<Details id="delete-user-data">
+<Summary>How do I delete one user's data from Langfuse?</Summary>
 
 Attach a `userId` to your traces; the documentation recommends this so deletion requests can be handled efficiently. Then filter the traces table by that user ID, select all matching items, and choose Delete, or call `DELETE /api/public/traces` with the trace IDs. Deleting a trace removes its observations and scores across all storage layers, and the data is usually gone within 15 minutes; query again to verify, because there is no notification.
 
-### How do I keep PII out of traces in the first place? [#keep-pii-out]
+</Details>
+
+<Details id="keep-pii-out">
+<Summary>How do I keep PII out of traces in the first place?</Summary>
 
 Configure a masking function in the SDK so redaction happens before data leaves your application: `mask_otel_spans` in Python, which also covers spans from third-party OpenTelemetry instrumentation exported by the Langfuse client, or the `mask` option on `LangfuseSpanProcessor` in JS/TS. Self-hosted Enterprise deployments can add server-side ingestion masking as a safety net. Pair either with a project retention window so anything that slips through has a bounded lifetime.
+
+</Details>
+
+</FaqDetails>

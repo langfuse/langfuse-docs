@@ -490,32 +490,79 @@ Append `&secure=true&skip_verify=true` to the URL if your deployment sets `CLICK
 
 {/* Seeded from https://github.com/orgs/langfuse/discussions/12518 and https://github.com/orgs/langfuse/discussions/14157 */}
 
-**Do I need to do anything special if I ran the Langfuse v4 preview on a v3-tagged image?**
+<FaqDetails>
+
+<Details>
+<Summary>Do I need to do anything special if I ran the Langfuse v4 preview on a v3-tagged image?</Summary>
+
 No. If you adopted the `events` tables early by running the Langfuse v4 preview (a v3-tagged image with the preview environment variables), the v4 migrations detect the existing tables and skip their creation. Your deployment upgrades like any other; keep the environment variables you set for the preview until you complete the [cutover](#cutover).
 
-**Is it safe to upgrade the SDKs before the server?**
+</Details>
+
+<Details>
+<Summary>Is it safe to upgrade the SDKs before the server?</Summary>
+
 Yes. Python SDK v4 and JS/TS SDK v5 are fully compatible with Langfuse v3 servers. Two caveats: `client.api.observations.*` and `client.api.metrics.*` point to the new v2 endpoints which are not available on v3 servers (use `client.api.legacy.*` in the meantime), and trace input/output must be set explicitly if you depart from the default root-span behavior.
 
-**Can I stay on the `legacy` or `dual` write mode long-term?**
+</Details>
+
+<Details>
+<Summary>Can I stay on the `legacy` or `dual` write mode long-term?</Summary>
+
 No. They are transition modes that will be removed in an upcoming major version: `legacy` forgoes all v4 performance improvements, and `dual` doubles the write load and storage costs. Complete the [cutover](#cutover) once your producers are migrated.
 
-**Do I need new infrastructure components?**
+</Details>
+
+<Details>
+<Summary>Do I need new infrastructure components?</Summary>
+
 No. The infrastructure is identical to v3 (web/worker, PostgreSQL, ClickHouse, Redis, S3); only the minimum/recommended versions changed, see [step 1](#step-1).
 
-**How do I fetch a trace by ID now?**
+</Details>
+
+<Details>
+<Summary>How do I fetch a trace by ID now?</Summary>
+
 Use the [Observations API v2](/docs/api-and-data-platform/features/public-api#v2) with a `traceId` filter. Providing a time range in addition is recommended for performance, but not required.
 
-**What happens to trace-level scores and comments?**
+</Details>
+
+<Details>
+<Summary>What happens to trace-level scores and comments?</Summary>
+
 They are attached to the root observation of the trace and remain visible in the UI and APIs.
 
-**Why is historic data missing right after enabling the backfill?**
+</Details>
+
+<Details>
+<Summary>Why do my traces seem to have disappeared after the upgrade?</Summary>
+
+Two things look like missing data but usually are not. First, the traces table is now an observations table that opens filtered to `Is Root Observation = true`, which shows one row per trace; if you cleared or changed that filter, you see every observation instead, and a trace can appear to be gone when its root observation does not match your filters. Second, data ingested before the upgrade only exists in the old tables until the [historic backfill](#historic-backfill) has rewritten it into the new `events` tables. On the default `events_only` write mode the backfill starts automatically, newest first, and can take from minutes to days depending on volume. Track its progress on the background migrations page.
+
+</Details>
+
+<Details>
+<Summary>Why is historic data missing right after enabling the backfill?</Summary>
+
 The [historic backfill](#historic-backfill) rewrites data gradually, newest first. Depending on your data volume, it can take from minutes to days until all historic data is visible.
 
-**Why does data from some SDKs appear with a ~15 minute delay?**
+</Details>
+
+<Details>
+<Summary>Why does data from some SDKs appear with a ~15 minute delay?</Summary>
+
 Data from SDKs older than Python 4.7.0 / JS/TS 5.4.0 (and OTel exporters without `x-langfuse-ingestion-version: 4`) flows through the [dual-write pipeline](#dual-write), which processes micro-batches with a delay. Upgrading to those minimums (or setting the header) removes the delay.
 
-**Langfuse does not start after I set the migration variables.**
+</Details>
+
+<Details>
+<Summary>Langfuse does not start after I set the migration variables.</Summary>
+
 Langfuse validates the migration configuration on startup and exits on invalid combinations (for example, `events_only` write mode together with `dual_write` OTel behavior or with `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN=false`). Double-check values and exact variable names, including the uppercase `V4`.
+
+</Details>
+
+</FaqDetails>
 
 ## Support
 

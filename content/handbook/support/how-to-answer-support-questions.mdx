@@ -495,7 +495,7 @@ Langfuse uses S3-compatible storage for raw event uploads and media. Issues here
 **Triage steps:**
 
 1. Verify `LANGFUSE_S3_EVENT_UPLOAD_*` env vars are set and the bucket exists.
-2. Verify the IAM principal has `s3:PutObject`, `s3:GetObject`, `s3:ListBucket`. For MinIO, set `LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE=true`.
+2. Verify the IAM principal has `s3:PutObject`, `s3:GetObject`, `s3:ListBucket`. For SeaweedFS or MinIO, set `LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE=true`.
 3. For "blob storage export failed" notifications, check the bucket policy and lifecycle rule didn't recently change.
 4. For media uploads, also set `LANGFUSE_S3_MEDIA_UPLOAD_*`.
 

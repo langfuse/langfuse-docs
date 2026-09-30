@@ -56,10 +56,10 @@ export const references = [
 
 Once you have [traces](/academy/tracing), you will want to know whether what your agent did was good. You can either set up [online evaluators](/academy/evaluate) that measure specific aspects of a trace, or you can capture [signals of judgment from your users](/docs/observability/features/user-feedback).
 
-Unlike traditional online evaluation, capturing signals does not directly evaluate the quality of the agent's work. Instead, it captures things a user did or said that indicate the user perceives the agent's work as very good or very bad: a thumbs down, a retry, a request for a human, a draft sent unedited.
+Unlike traditional online evaluation, capturing signals does not directly evaluate the quality of the agent's work. Instead, it captures things a user did or said that indicate whether the user perceives the agent's work as good or bad: a thumbs down, a retry, a request for a human, etc.
 
 <Callout type="info">
-**Signals measure perceived quality at the moment of use.** For example, a user can approve a hallucination they could not verify.
+**Signals measure perceived quality at the moment of use.**
 </Callout>
 
 ## Why this is important [#why-this-is-important]
@@ -68,9 +68,11 @@ This is a **cheap and scalable way to get quality judgments on production traffi
 
 While through traditional evaluation you encode what you believe is important, user signals will also **surface behaviors you didn't anticipate but might be worth taking a look at**. This makes them especially valuable in staying on top of how users experience your agent's work.
 
+![Comparison of evaluation methods by scalability and value of discovering new cases](/images/blog/trace-evaluation-methods/scalability-discovery-tradeoff.png)
+
 ## Four kinds of signals [#four-kinds]
 
-Every signal falls into one of four kinds: explicit ratings, behavioral signals, conversation signals, and outcome signals.
+So what kinds of signals are we talking about? We can divide user feedback signals into four kinds: explicit ratings, behavioral signals, conversation signals, and outcome signals.
 
 ### Explicit ratings [#explicit-ratings]
 
@@ -89,7 +91,7 @@ _In Meta's production assistant, about 0.1% of model messages receive a positive
 
 ### Behavioral signals [#behavioral-signals]
 
-Behavioral signals are **actions users take on the output**: accepting, copying, editing, regenerating, skipping, abandoning. They occur inside the normal workflow, so coverage is high; on a copilot-style product, every suggestion produces one.
+Behavioral signals are **actions users take on the output**: accepting, copying, editing, regenerating, skipping, abandoning. They occur inside the normal workflow, so coverage is high: on a copilot-style product, every suggestion produces one.
 
 | Behavioral signal                                  |
 | -------------------------------------------------- |
@@ -111,7 +113,7 @@ Behavioral signals are **actions users take on the output**: accepting, copying,
 In a conversational product, the **user's next message often tells you what they thought of the agent's output**: a rephrased question, a correction, a request for a human, or a thank you all say something about the quality of the output they received.
 
 <Callout type="info">
-Separate steering from correction. In the [music DJ example](/academy/examples/music-streaming-dj), "play something calmer" is normal use of the feature and "I said calmer" is a compliance failure; only the second belongs in failure counts.
+Separate steering from correction. In this [music DJ example](/academy/examples/music-streaming-dj), "play something calmer" is normal use of the feature and "I said calmer" is an indication the agent didn't deliver what the user wanted; only the latter is an actual failure.
 </Callout>
 
 | Conversation signal                                                         |
@@ -130,6 +132,8 @@ _Amazon used rephrase and follow-up patterns to curate training data for Alexa's
 
 Outcome signals tell you what the environment did with the output: a draft was sent unedited, a ticket was closed, etc. **They are the strongest kind because they are grounded in the environment rather than in someone's opinion.**
 
+They are also often the most complex to implement.
+
 | Outcome signal                                                                                         |
 | ------------------------------------------------------------------------------------------------------ |
 | Diff between a drafted reply and what was actually sent, classified as none, tone, corrected, or added |
@@ -141,7 +145,7 @@ Outcome signals tell you what the environment did with the output: a draft was s
 
 ## How to interpret signals [#how-to-interpret-signals]
 
-Once relevant signals are implemented, every trace sits in one of three groups: labeled negative, labeled positive, or unlabeled, with unlabeled being the large majority.
+Once relevant signals are implemented, you can look at your traces as labeled for that signal: labeled negative, labeled positive, or unlabeled.
 
 | Group            | What to do with it                                                             |
 | ---------------- | ------------------------------------------------------------------------------ |
@@ -159,7 +163,7 @@ Which polarity is dense depends on the channel. Thumbs may skew positive while c
 
 ### Who labels is not random [#biases]
 
-Often, you won't get a signal from the entire population of users, and there will be biases in labeled/unlabeled data groups. You can split these kinds of biases into:
+Signals can be very useful, but you should also watch out for inherent biases. Often, you won't get a signal from the entire population of users. You can split these kinds of biases into:
 
 - **Self-selection.** People rate what they feel strongly about.
   - When Yahoo! Music surveyed its listeners, 65% said their opinion of a song decides whether they rate it at all, and songs they loved or hated were rated far more often than songs they felt neutral about.<Ref refs={references} id="marlin-mar" />
@@ -170,12 +174,22 @@ Often, you won't get a signal from the entire population of users, and there wil
 
 ### Which signal should you optimize for? [#which-signal]
 
-Prefer signals closest to what the product is for. Otherwise you might start optimizing for behavior you don't want.
+Signals are slightly different from explicit metrics and quality evaluators. Don't replace your [goal metrics](/academy/evaluate/choosing-what-to-evaluate) purely with signals. As for what to optimize for, prefer signals closest to what the product is for. Otherwise you might start optimizing for behavior you don't want.
 
 Two examples of this:
 
 - YouTube ranked recommendations by clicks and got clickbait; ranking by expected watch time fixed it, because watch time is closer to what the product is for.<Ref refs={references} id="covington-youtube" />
 - When OpenAI added a reward signal built from ChatGPT thumbs data, the model turned sycophantic: user feedback favored agreeable answers and weakened the signal that had been holding sycophancy in check, while offline evaluations and A/B tests looked fine and only expert testers noticed the model felt off.<Ref refs={references} id="openai-sycophancy" />
+
+## Apply this to your application
+
+The [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill) can inspect your application and existing scores, propose the signals worth capturing, and help implement the ones you choose.
+
+<AgentPromptCallout
+  prompt={`I want to capture useful user feedback signals for my LLM application.
+Install the Langfuse skill (https://github.com/langfuse/skills/tree/main/skills/langfuse), help me identify what user signals I should capture.`}
+  lede="Paste this prompt into your coding agent. The Langfuse skill inspects your application and proposes signals grounded in the workflow your users already follow."
+/>
 
 ## What comes next
 

@@ -83,28 +83,44 @@ without leaving the editor.
 
 ## FAQ
 
-### Can I track which Claude Code skills or rules are used?
+<FaqDetails>
+
+<Details id="can-i-track-which-claude-code-skills-or-rules-are-used">
+<Summary>Can I track which Claude Code skills or rules are used?</Summary>
 
 Indirectly. Skill invocations that run as tool calls appear in traces, and full-text search
 over session content finds skill mentions. The assembled context itself (which skills were
 loaded) is not captured, see limits above.
 
-### Does this work with self-hosted Langfuse?
+</Details>
+
+<Details id="does-this-work-with-self-hosted-langfuse">
+<Summary>Does this work with self-hosted Langfuse?</Summary>
 
 Yes. The integrations target the standard ingestion and OTLP endpoints. Check each
 integration page for minimum version requirements: the Claude Code integration requires a
 current Langfuse version, and older self-hosted deployments (v1/v2) predate the OTLP
 endpoint.
 
-### What does tracing a coding agent cost in Langfuse units?
+</Details>
+
+<Details id="what-does-tracing-a-coding-agent-cost-in-langfuse-units">
+<Summary>What does tracing a coding agent cost in Langfuse units?</Summary>
 
 The same as any trace: sessions produce one trace per turn or per session (integration-
 dependent), with observations for model calls and tool executions. High-volume agent use is
 observable in your [billable units page](/docs/administration/billable-units) before it becomes a billing
 surprise.
 
-### Can developers opt out?
+</Details>
+
+<Details id="can-developers-opt-out">
+<Summary>Can developers opt out?</Summary>
 
 Yes, hooks live in the developer's local config. For team rollouts, make tracing part of the
 standard dotfiles/setup and be explicit about what is captured. The Copilot integration's
 metadata-only default is a good template for a privacy-conservative baseline.
+
+</Details>
+
+</FaqDetails>
