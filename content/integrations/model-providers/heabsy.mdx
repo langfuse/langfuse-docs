@@ -76,6 +76,10 @@ response = client.chat.completions.create(
 )
 
 print(response.choices[0].message.content)
+
+# In short-lived scripts, flush queued events before the process exits
+from langfuse import get_client
+get_client().flush()
 ```
 
 Open [Langfuse](https://cloud.langfuse.com) to see the traced request, including model, tokens and latency.
