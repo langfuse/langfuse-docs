@@ -15,13 +15,12 @@ import PublicMetricsDashboard from "@/components-mdx/public-metrics-dashboard.md
 Customers choose Langfuse because we are...
 
 - The most used open-source AI Engineering platform [since 2024](/blog/2024-11-most-used-oss-llmops)
-- Built for production & scale on ClickHouse, and now [part of the ClickHouse team](/blog/joining-clickhouse)
-- Offering a complete toolbox for complex agents and multi-step workflows
+- [Part of ClickHouse](/blog/joining-clickhouse), whose open-source analytics database has been used in production for over a decade. This makes Langfuse scalable, reliable, and cost-effective for production workloads, with [strong financial backing](https://clickhouse.com/company/our-story)
 - Incrementally adoptable, start with one feature and expand to the full platform over time
 - Model and framework agnostic, with [100+ integrations](/integrations) and [OpenTelemetry](/integrations/native/opentelemetry) support
 - API-first, with skills for your coding agents and a UI people love using
 - Serious about security and data control, with easy [self-hosting](/self-hosting) on your own infrastructure
-- One message away, and quick to ship
+- Built with our community, with a transparent roadmap and open discussions on GitHub
 
 <CredibilitySentence style="list" />
 <EnterpriseLogos />
@@ -40,11 +39,14 @@ Langfuse is [open source](/handbook/chapters/open-source), including the UI and 
 
 ## Built for scale on ClickHouse [#built-for-scale]
 
-We run on ClickHouse, [open source and in production for a decade](https://clickhouse.com/blog/open-source-10), with 2,000+ contributors.
+Observability is a data-intensive task. We run on ClickHouse, which is becoming a standard for observability. [Anthropic](https://clickhouse.com/blog/how-anthropic-is-using-clickhouse-to-scale-observability-for-ai-era) and [OpenAI](https://clickhouse.com/blog/why-openai-uses-clickhouse-for-petabyte-scale-observability) rely on it for their large-scale workloads.
 
-- Langfuse Cloud already stores [petabytes of tracing data](/resources/engineering/clickhouse-at-agent-scale).
-- With [Langfuse v4](/changelog/2026-08-17-langfuse-v4), long-range dashboards in large projects load at least 10× faster than in v3.
-- Cloud and self-hosted use the same engine. Self-hosters can inspect it and query their data with standard SQL.
+For Langfuse, this brings four benefits:
+
+- Scalable: Langfuse Cloud already stores [petabytes of tracing data](/resources/engineering/clickhouse-at-agent-scale).
+- Fast: By optimizing Langfuse around ClickHouse, we increased performance by up to 165× for some queries ([technical blog](/blog/2026-03-10-simplify-langfuse-for-scale)).
+- Cost-effective: We are significantly cheaper than other solutions. [Learn more](/compare).
+- Reliable: ClickHouse is open source and has been used in production for [over 10 years](https://clickhouse.com/blog/open-source-10).
 
 ## Built for complex agents [#built-for-complex-use-cases]
 
@@ -65,7 +67,7 @@ The pieces work together. You turn a production trace into a test case, compare 
 - [Evaluation](/docs/evaluation/overview): run experiments on datasets and score production outputs with human review, LLM judges, or code.
 - [Metrics](/docs/metrics/overview) and [data](/docs/api-and-data-platform/overview): dashboards, alerts, and exports for quality, cost, and latency.
 
-At [Slite](/users/slite), connecting tracing and evaluations helped move experiments from quarterly to weekly.
+> At [Slite](/users/slite), connecting tracing and evaluations helped move experiments from quarterly to weekly.
 
 We share how to put it all together in [Langfuse Academy](/academy).
 
@@ -83,7 +85,7 @@ You pick the models and frameworks. We'll fit in.
 - Native [OpenTelemetry](/integrations/native/opentelemetry) support lets you reuse your tracing instrumentation.
 - Prefer to self-host? Start locally with Docker Compose, or deploy on your infrastructure with Helm and Terraform templates.
 
-At [Hugging Face](/users/hugging-face), Niels Rogge was up and running in minutes. [Khan Academy](/users/khan-academy) used our API to build a client for its Go services.
+> At [Hugging Face](/users/hugging-face), Niels Rogge was up and running in minutes. [Khan Academy](/users/khan-academy) used our API to build a client for its Go services.
 
 ## Developer-first, down to the details [#developer-first]
 
@@ -94,7 +96,7 @@ We care about making Langfuse enjoyable to use every day.
 - Your coding agent is welcome, too: use our [Agent Skill](/docs/api-and-data-platform/features/agent-skill), [CLI](/docs/api-and-data-platform/features/cli), or [MCP server](/docs/api-and-data-platform/features/mcp-server).
 - Ask the [Assistant](/docs/langfuse-assistant) to investigate traces or create datasets and dashboards. It asks before making changes (Cloud; self-hosted public beta).
 
-[Ravenna](/users/ravenna) chose Langfuse for its clean, well-built product. At [Canva](/users/canva), a marketing manager built a tone-of-voice evaluator without engineering help.
+> [Ravenna](/users/ravenna) chose Langfuse for its clean, well-built product. At [Canva](/users/canva), a marketing manager built a tone-of-voice evaluator without engineering help.
 
 ## Security and compliance [#security-and-compliance]
 
@@ -116,21 +118,15 @@ We care about making Langfuse enjoyable to use every day.
 - We publish [compatibility policies and migration paths](/docs/compatibility). Self-hosters choose when to upgrade.
 - Enterprise plans include uptime and support SLAs.
 
-[Thoughtworks' Technology Radar](https://www.thoughtworks.com/en-us/radar/platforms/langfuse) has featured Langfuse three times, most recently in April 2026. Our [adoption and community metrics](#public-metrics) are public, too.
+> [Thoughtworks' Technology Radar](https://www.thoughtworks.com/en-us/radar/platforms/langfuse) has featured Langfuse three times, most recently in April 2026. Our [adoption and community metrics](#public-metrics) are public, too.
 
 ## We build with our users [#close-to-the-team]
 
-You can talk directly to the [team building Langfuse](/about) about your setup, ideas, or where you're stuck. [Magic Patterns](/users/magic-patterns-ai-design-tools) felt supported from day one.
+You can talk directly to the [team building Langfuse](/about) about your setup, ideas, or where you're stuck.
 
-We like [shipping](/changelog). Canva noticed:
+> The [Canva team](/users/canva) said: "Other vendors came back with Figma prototypes. Meanwhile, Langfuse shipped two features. That's when we knew."
 
-> "Other vendors came back with Figma prototypes. Meanwhile, Langfuse shipped two features. That's when we knew."
-
-— The [Canva team](/users/canva), on choosing Langfuse
-
----
-
-Still weighing your options? Our [comparisons](/compare) cover LangSmith, Braintrust, Arize / Phoenix, and Datadog.
+## Get started
 
 <Cards num={2}>
   <Card
@@ -140,6 +136,10 @@ Still weighing your options? Our [comparisons](/compare) cover LangSmith, Braint
   />
   <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
 </Cards>
+
+## Comparison to other platforms [#compare]
+
+Still weighing your options? Our [comparisons](/compare) cover LangSmith, Braintrust, Arize / Phoenix, and Datadog.
 
 ## Public metrics [#public-metrics]
 
