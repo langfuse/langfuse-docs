@@ -63,9 +63,9 @@ Fixes:
 There is no way to unlink or change the sign-in method of an existing Cloud account, including by Langfuse support. To switch, for example from email/password to Google:
 
 1. Sign in with your current method (reset your password if needed).
-2. If you are the only owner of an organization, make another member an owner first.
+2. If you are the only owner of an organization, make another member an owner first. If you are the only member, invite a second email address you control (for example a `+alias` of your address) as Owner and accept the invitation, so that this account can re-invite you later.
 3. [Delete your account](/faq/all/delete-account-langfuse) in Account Settings.
-4. Sign up again with the new method and ask an admin to re-invite you.
+4. Sign up again with the new method and ask an owner or admin to re-invite you.
 
 Removing a user from an organization does **not** delete their account. Re-inviting a removed user without deleting the account keeps the old sign-in method and the same error.
 
@@ -95,16 +95,17 @@ To sign in with Enterprise SSO, enter your email address and click **Continue**.
 
 Common errors and their causes:
 
-| Symptom                                                    | Likely cause                                                                                                                                    |
-| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AADSTS50105` or "user is not assigned to the application" | The user is not assigned to the Langfuse app in the IdP. Your IdP admin must assign them.                                                       |
-| `AADSTS7000215 invalid_client`                             | In Entra ID, the client secret **ID** was entered instead of the secret **value**.                                                              |
-| `AADSTS7000222` (secret expired)                           | The client secret expired. Create a new one and update it in **Organization Settings > SSO**.                                                   |
-| `AADSTS700016` (application not found)                     | The client ID does not match an app registration in your tenant.                                                                                |
-| Okta `redirect_uri` parameter must be a Login redirect URI | The callback URL in your IdP app does not match. Copy it exactly from **Organization Settings > SSO**.                                          |
-| `invalid_client` / client authentication failed            | The token endpoint authentication method does not match. Use `client_secret_basic`.                                                             |
-| `OAuthCallback` or "No email found in user object"         | The IdP does not return an `email` claim. Make sure the `openid` and `email` scopes are granted and the user profile includes an email address. |
-| Signed in successfully, but "Access Denied" or no projects | The user has no organization membership or role. Invite them or check your [SCIM](/docs/administration/scim-and-org-api) role provisioning.     |
+| Symptom                                                    | Likely cause                                                                                                                                                                                                                |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AADSTS50105` or "user is not assigned to the application" | The user is not assigned to the Langfuse app in the IdP. Your IdP admin must assign them.                                                                                                                                   |
+| `AADSTS7000215 invalid_client`                             | In Entra ID, the client secret **ID** was entered instead of the secret **value**.                                                                                                                                          |
+| `AADSTS7000222` (secret expired)                           | The client secret expired. Create a new one and update it in **Organization Settings > SSO**.                                                                                                                               |
+| `AADSTS700016` (application not found)                     | The client ID does not match an app registration in your tenant.                                                                                                                                                            |
+| Okta `redirect_uri` parameter must be a Login redirect URI | The callback URL in your IdP app does not match. Copy it exactly from **Organization Settings > SSO**.                                                                                                                      |
+| `invalid_client` / client authentication failed            | The token endpoint authentication method does not match. Use `client_secret_basic`.                                                                                                                                         |
+| "No email found in user object"                            | The IdP does not return an `email` claim. Make sure the `openid` and `email` scopes are granted and the user profile includes an email address.                                                                             |
+| `OAuthCallback`                                            | A generic failure when the IdP redirects back to Langfuse. Check the callback URL, client ID, client secret, and token endpoint authentication method. On self-hosted instances, also check [`NEXTAUTH_URL`](#self-hosted). |
+| Signed in successfully, but "Access Denied" or no projects | The user has no organization membership or role. Invite them or check your [SCIM](/docs/administration/scim-and-org-api) role provisioning.                                                                                 |
 
 Things to know when setting up SSO on Langfuse Cloud:
 
