@@ -1,0 +1,159 @@
+---
+title: I cannot sign in to Langfuse
+description: "Troubleshoot Langfuse sign-in problems: wrong data region, OAuthAccountNotLinked and other provider errors, password resets, invitations, Enterprise SSO lockouts, and self-hosted auth configuration."
+tags: [platform, auth, administration, self-hosting]
+---
+
+# How to troubleshoot sign-in issues in Langfuse
+
+Most sign-in problems come down to three things: the wrong data region, the wrong email address, or the wrong sign-in method. Work through the checks below in order. Each section names the error you are likely to see.
+
+## 1. Check the data region [#data-region]
+
+Langfuse Cloud regions are fully separate deployments. **Your account, organizations, and projects exist only in the region where you created them.** The same email address can have an independent account in every region.
+
+| Region | URL                                                                    |
+| ------ | ---------------------------------------------------------------------- |
+| EU     | [`https://cloud.langfuse.com`](https://cloud.langfuse.com)             |
+| US     | [`https://us.cloud.langfuse.com`](https://us.cloud.langfuse.com)       |
+| Japan  | [`https://jp.cloud.langfuse.com`](https://jp.cloud.langfuse.com)       |
+| HIPAA  | [`https://hipaa.cloud.langfuse.com`](https://hipaa.cloud.langfuse.com) |
+
+Symptoms of the wrong region:
+
+- "Invalid credentials" even though the password is correct.
+- Password reset says no account exists for your email.
+- You sign in successfully but land on the onboarding screen or in an empty organization.
+- An invitation link shows a blank page or does nothing.
+
+Fixes:
+
+- Try each region. Browser autocomplete often opens the wrong one. Note that `cloud.langfuse.com` is the **EU** region, not US.
+- If you have API keys, the `LANGFUSE_BASE_URL` (or `LANGFUSE_HOST`) in your SDK configuration shows which region your project is in.
+- Open invitation links while signed in to the region the invitation came from.
+
+Accounts cannot be moved or merged between regions. To use another region, sign up there separately. To move data, see [migrating data between Langfuse instances](/faq/all/migrate-data-between-langfuse-instances).
+
+## 2. Check the email address [#email-address]
+
+Langfuse identifies users by email address. A different email, including an alias such as `first.last+team@…`, is a different user.
+
+- Make sure you sign in with the exact address that received the invitation. Google or GitHub may sign you in with a different address than you expect.
+- Check for typos in addresses saved by your browser or password manager. If sign-in works in a private window but not in your normal browser, autofill is often the cause.
+- If you changed your primary email at GitHub or Google, or your company changed its email domain, the new address is a new Langfuse user. See [changing your email address](#email-change).
+
+Once signed in, click your name in the bottom left of the Langfuse UI to see the email address on record.
+
+## 3. Use the sign-in method that created your account [#sign-in-method]
+
+If you see this message, or `error=OAuthAccountNotLinked` in the URL:
+
+> Please sign in with the same provider (e.g. Google, GitHub, Azure AD, etc.) that you used to create this account.
+
+Your account exists, but it was created with a different method than the one you just used. For security reasons, Langfuse Cloud does not link Google, GitHub, Microsoft, and email/password accounts automatically. ClickHouse Cloud sign-in is the exception and [links accounts](/docs/administration/authentication-and-sso#clickhouse-cloud) by email.
+
+Fixes:
+
+- **Try the other methods.** Many users believe they signed up with Google but actually used email/password, or the other way around.
+- **Reset your password.** Use "Forgot password" on the sign-in page of the correct region. This also works for accounts created with a social login: it adds a password to the account, so you can always sign in with email/password.
+- The message also tells you to check the region. If the region is correct, the cause is the sign-in method.
+
+### Switch to a different sign-in method [#switch-sign-in-method]
+
+There is no way to unlink or change the sign-in method of an existing Cloud account, including by Langfuse support. To switch, for example from email/password to Google:
+
+1. Sign in with your current method (reset your password if needed).
+2. If you are the only owner of an organization, make another member an owner first.
+3. [Delete your account](/faq/all/delete-account-langfuse) in Account Settings.
+4. Sign up again with the new method and ask an admin to re-invite you.
+
+Removing a user from an organization does **not** delete their account. Re-inviting a removed user without deleting the account keeps the old sign-in method and the same error.
+
+To move a whole team to a single identity provider (for example, to enforce MFA), use [Enterprise SSO](/docs/administration/authentication-and-sso#sso) with enforcement instead. Existing users on a verified domain are migrated to the SSO provider automatically, without deleting accounts.
+
+## 4. Password reset problems [#password-reset]
+
+- The "Forgot password" link is next to the password field on the sign-in page. Make sure you are on the correct region.
+- Check spam, promotions, and quarantine folders for the reset email.
+- If the reset says no account exists, go back to [the region check](#data-region) and [the email check](#email-address).
+- If reset emails never arrive, contact support. Addresses that bounced in the past can be blocked from receiving email until support unblocks them.
+
+See also: [I have forgotten my password](/faq/all/forgot-password).
+
+## 5. Invitation issues [#invitations]
+
+- You must sign in with the exact invited email address, in the region the invitation came from. Signing up from the sign-up page with another address creates a separate, empty account.
+- If the invitation email does not arrive, signing in with the invited address in the correct region still shows the pending invitation.
+- Users provisioned via [SCIM](/docs/administration/scim-and-org-api) do not receive invitation emails. They sign in directly.
+- SSO only authenticates users. It does not add them to an organization. Users need an invitation or SCIM provisioning to see projects.
+
+See also: [Inviting co-workers to Langfuse](/faq/all/inviting-in-langfuse) and [I cannot see my organization](/faq/all/cannot-see-organization).
+
+## 6. Enterprise SSO issues [#enterprise-sso]
+
+To sign in with Enterprise SSO, enter your email address and click **Continue**. Do not click a social login button. Langfuse redirects you to your identity provider (IdP) based on your email domain.
+
+Common errors and their causes:
+
+| Symptom                                                    | Likely cause                                                                                                                                    |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AADSTS50105` or "user is not assigned to the application" | The user is not assigned to the Langfuse app in the IdP. Your IdP admin must assign them.                                                       |
+| `AADSTS7000215 invalid_client`                             | In Entra ID, the client secret **ID** was entered instead of the secret **value**.                                                              |
+| `AADSTS7000222` (secret expired)                           | The client secret expired. Create a new one and update it in **Organization Settings > SSO**.                                                   |
+| `AADSTS700016` (application not found)                     | The client ID does not match an app registration in your tenant.                                                                                |
+| Okta `redirect_uri` parameter must be a Login redirect URI | The callback URL in your IdP app does not match. Copy it exactly from **Organization Settings > SSO**.                                          |
+| `invalid_client` / client authentication failed            | The token endpoint authentication method does not match. Use `client_secret_basic`.                                                             |
+| `OAuthCallback` or "No email found in user object"         | The IdP does not return an `email` claim. Make sure the `openid` and `email` scopes are granted and the user profile includes an email address. |
+| Signed in successfully, but "Access Denied" or no projects | The user has no organization membership or role. Invite them or check your [SCIM](/docs/administration/scim-and-org-api) role provisioning.     |
+
+Things to know when setting up SSO on Langfuse Cloud:
+
+- Langfuse supports **OIDC only**. SAML is not supported. In Entra ID, create an app registration for OIDC, not an enterprise application with SAML.
+- Verify your own email domain (for example `example.com`), not your IdP's domain. Each domain needs its own verification record.
+- Changes can take up to about 10 minutes to become active.
+- Saving an SSO configuration enforces it for the domain. Active sessions stay signed in, so users may need to sign out and back in before SSO applies.
+
+### Avoid locking yourself out [#sso-lockout]
+
+There are no break-glass accounts on an SSO-enforced domain. A wrong client ID, an expired secret, or an owner who does not exist in the IdP locks out everyone on that domain.
+
+- Keep your current session open after saving the configuration, and test sign-in in a private window. Revert from the open session if the test fails. See [preventing lockout](/docs/administration/authentication-and-sso#prevent-lockout).
+- Before enforcing SSO, make sure at least one owner can sign in through the IdP. A shared mailbox without an IdP account cannot.
+- An owner whose email is on a different, non-enforced domain can still sign in if the SSO configuration breaks.
+- Rotate client secrets before they expire.
+
+If your organization is locked out, contact support from an email address on the affected domain.
+
+## 7. Self-hosted instances [#self-hosted]
+
+Langfuse support cannot access your instance or reset passwords there. Contact your instance administrator, and check the following:
+
+- **`NEXTAUTH_URL`** must match the external URL users open in the browser, including behind a load balancer, proxy, or CDN. A mismatch causes `OAuthCallback` errors or "State cookie was missing" in the logs.
+- **Password reset** requires [transactional emails](/self-hosting/configuration/transactional-emails) (`SMTP_CONNECTION_URL` and `EMAIL_FROM_ADDRESS`). Without them, an admin can reset passwords via the database as described in the [self-hosted authentication docs](/self-hosting/security/authentication-and-sso#auth-email-password).
+- **"Invalid credentials" for a valid password** can mean `AUTH_DISABLE_USERNAME_PASSWORD=true` is set or your domain is listed in `AUTH_DOMAINS_WITH_SSO_ENFORCEMENT`.
+- **Provider errors** for users who existed before SSO was added: set `AUTH_<PROVIDER>_ALLOW_ACCOUNT_LINKING=true` to link accounts with the same email.
+- **`AUTH_DISABLE_SIGNUP=true`** also blocks first-time SSO users. Create users first, for example via SCIM or [headless initialization](/self-hosting/administration/headless-initialization).
+- **Environment variable names** must match exactly, for example `AUTH_OKTA_CHECKS`. Okta's issuer is your Okta domain, without `/oauth2/default` unless you use a custom authorization server.
+
+See the [self-hosted authentication and SSO troubleshooting](/self-hosting/security/authentication-and-sso#troubleshooting) section for more provider-specific settings.
+
+## 8. Changing your email address [#email-change]
+
+Langfuse does not support changing the email address of an existing account. To move to a new address:
+
+1. Invite the new email address to your organizations with the same role (for example Owner).
+2. Sign in with the new address and accept the invitations.
+3. Remove the old address from the organizations, or [delete the old account](/faq/all/delete-account-langfuse).
+
+API keys belong to projects, not users, so they keep working.
+
+## Still cannot sign in? [#contact-support]
+
+1. Check the [status page](https://status.langfuse.com) for ongoing incidents.
+2. Clear cookies for the Langfuse domain or try a private window.
+3. Contact [support](/support) with:
+   - The region URL you are signing in to
+   - The email address and the sign-in method you used
+   - A screenshot of the error, including the full URL (it contains the error code)
+   - The time of the attempt
+   - For SSO issues, a [HAR file](/faq/all/sso-har-file-export) of the sign-in attempt
