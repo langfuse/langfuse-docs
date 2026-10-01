@@ -9,11 +9,10 @@ type ResourcePage = ReturnType<typeof resourcesSource.getPages>[number];
  * "Articles" bucket and render last.
  */
 const CATEGORY_LABELS: Record<string, string> = {
-  comparison: "Comparisons",
   migration: "Migrations",
 };
 
-const CATEGORY_ORDER = ["comparison", "migration"];
+const CATEGORY_ORDER = ["migration"];
 const OTHER_KEY = "other";
 const OTHER_LABEL = "Articles";
 

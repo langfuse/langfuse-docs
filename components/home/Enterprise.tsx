@@ -39,7 +39,7 @@ const openApis = [
   { label: "90B+ observations processed per month" },
   {
     label: `${formatCompanyCount()} companies using Langfuse`,
-    href: "/why",
+    href: "/handbook/chapters/why",
   },
   { label: "99.9% uptime" },
 ];

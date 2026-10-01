@@ -58,7 +58,7 @@ Framework integrations typically set these types automatically. If you're instru
 
 ### Is it nested correctly?
 
-A tool call should nest under the `agent` or `span` that orchestrates the step, as a sibling of the `generation` that requested it, so the tree shows which step each action belongs to instead of leaving tool calls dangling at the trace root.
+A tool call should nest under the `agent` or `span` [observation](/docs/observability/data-model#observations-traces-and-sessions) that orchestrates the step, as a sibling of the `generation` that requested it, so the tree shows which step each action belongs to instead of leaving tool calls dangling at the trace root.
 
 <Callout type="info">
 
@@ -69,6 +69,7 @@ Framework integrations usually get this right automatically. If you're instrumen
 **Beware of aggregating LLM calls.** You should see a <Fan size={16} className="text-muted-magenta inline" /> `generation` for each model invocation in an agent loop, interleaved with the <Wrench size={16} className="text-orange-600 inline" /> `tool` calls it requested. Avoid wrapping the whole loop in one parent generation that only records the final output. This would make it impossible to:
 
 - see what the agent decided after each tool result
+- see the [thinking](#capture-thinking) behind each decision
 - see which tool call has blown up your agent's context window (useful when optimizing cost)
 
 <div className="grid grid-cols-1 md:grid-cols-2 mt-4 gap-4">
@@ -83,7 +84,7 @@ Framework integrations usually get this right automatically. If you're instrumen
 
 <div>
 
-**Each model invocation as its own generation.** You can see reasoning, tokens, cost after every step.
+**Each model invocation as its own generation.** You can see thinking, tokens, and cost after every step.
 
 ![Agent loop with interleaved generations](/images/docs/faq/good-trace-agent-interleaved-generations.png)
 
@@ -91,13 +92,17 @@ Framework integrations usually get this right automatically. If you're instrumen
 
 </div>
 
+### Is thinking captured? [#capture-thinking]
+
+Reasoning models produce **thinking** (also called **reasoning**) before they answer or call a tool. You should always capture thinking on each `generation` in the tree. Thinking data is instrumental in debugging why the agent made certain decisions, like calling a specific tool/endpoint/etc.
+
 ### Is there noise you don't need?
 
-Not every observation in the tree is useful for understanding what your application did. HTTP spans, database queries, and framework internals often add clutter without giving you meaningful insight. If you see observations like these polluting your trace tree, you can [filter them out](/faq/all/unwanted-http-database-spans).
+Not every observation in the tree is useful for understanding what your application did. HTTP [observations](/docs/observability/data-model#observations-traces-and-sessions), database queries, and framework internals often add clutter without giving you meaningful insight. If you see observations like these polluting your trace tree, you can [filter them out](/faq/all/unwanted-http-database-spans).
 
 <div className="max-w-[50%]">
 
-![Noisy spans in a trace tree](/images/docs/faq/good-trace-noisy-spans.png)
+![Noisy observations in a trace tree](/images/docs/faq/good-trace-noisy-spans.png)
 
 </div>
 

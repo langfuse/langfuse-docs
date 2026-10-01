@@ -110,26 +110,42 @@ consistent by passing user and session identifiers through both layers.
 
 ## FAQ
 
-### Is Langfuse an LLM gateway?
+<FaqDetails>
+
+<Details id="is-langfuse-an-llm-gateway">
+<Summary>Is Langfuse an LLM gateway?</Summary>
 
 No. Langfuse is an [LLM observability and evaluation platform](/docs): it traces, evaluates,
 and analyzes what your application does, but your requests never pass through Langfuse on
 the way to a provider. It complements whichever gateway you choose, and works without one.
 
-### Does an LLM gateway add latency?
+</Details>
+
+<Details id="does-an-llm-gateway-add-latency">
+<Summary>Does an LLM gateway add latency?</Summary>
 
 Yes, one network hop plus processing time; how much depends on the gateway and deployment
 (a sidecar LiteLLM adds less than a cross-region hosted hop). Response caching can make
 repeated requests faster than going direct. Measure with your own traffic before and after.
 
-### Do I need a gateway to get LLM observability?
+</Details>
+
+<Details id="do-i-need-a-gateway-to-get-llm-observability">
+<Summary>Do I need a gateway to get LLM observability?</Summary>
 
 No. Tracing instruments your application code and works with direct provider SDK calls.
 Gateway logs add a useful traffic-level view, but application-level traces carry the context
 (agent steps, retrievals, tool calls) that debugging and evaluation need.
 
-### Can I use multiple gateways?
+</Details>
+
+<Details id="can-i-use-multiple-gateways">
+<Summary>Can I use multiple gateways?</Summary>
 
 Teams sometimes run a self-hosted gateway inside the VPC for sensitive workloads and a hosted
 one for experimentation. It works, but every extra layer multiplies configuration and
 debugging surface, so consolidate unless there is a hard requirement.
+
+</Details>
+
+</FaqDetails>

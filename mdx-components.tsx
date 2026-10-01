@@ -55,12 +55,14 @@ import { EvaluatorBlock as EvaluatorBlockJa } from "@/components/academy/japan/E
 import { JudgePromptExample as JudgePromptExampleJa } from "@/components/academy/japan/JudgePromptExample";
 import { TraceViewDiagram as TraceViewDiagramJa } from "@/components/academy/japan/TraceViewDiagram";
 import { Details, Summary } from "@/components/Details";
+import { FaqDetails } from "@/components/faq/FaqDetails";
 
 // Lazy-load Video so @vidstack/react (~800 KB) is NOT bundled on every MDX page.
 // It only downloads on pages that actually render a <Video> tag.
+// next/dynamic() returns ComponentType (class or function); MDX expects a function.
 const Video = dynamic(() =>
   import("@/components/Video").then((m) => ({ default: m.Video })),
-);
+) as typeof import("@/components/Video").Video;
 
 const BLOCK_TAGS = new Set([
   "div",
@@ -154,6 +156,9 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     TraceViewDiagramJa,
     details: Details,
     summary: Summary,
+    Details,
+    Summary,
+    FaqDetails,
     ...components,
   };
 }

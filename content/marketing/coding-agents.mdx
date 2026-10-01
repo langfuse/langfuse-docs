@@ -1,0 +1,210 @@
+---
+title: Track and optimize coding agent usage
+seoTitle: Track and optimize coding agent usage
+description: Govern coding agent spend centrally. See cost by team and developer, trace every session, and improve token efficiency with Langfuse — via a gateway or agent hooks.
+contentWidth: full
+---
+
+{/* Markdown for agents and .md consumers lives in md-override/coding-agents.md. Keep both files in sync. */}
+
+import {
+  CodingAgentPathDial,
+  CodingAgentPathPanel,
+  CodingAgentPathSwitcher,
+} from "@/components/coding-agents/CodingAgentPathDial";
+import {
+  codingAgentsGatewayInsights,
+  codingAgentsGatewayIntegrationGroups,
+  codingAgentsHooksInsights,
+  codingAgentsHooksIntegrationGroups,
+} from "@/components/coding-agents/content";
+import { RelevantIntegrations } from "@/components/chat-agents/RelevantIntegrations";
+import { ValueInsightsAccordion } from "@/components/chat-agents/ValueInsightsAccordion";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+import { SpendByTaskMock } from "@/components/coding-agents/SpendByTaskMock";
+import { BookOpen, Network, Radar, Sparkles } from "lucide-react";
+
+<h1 className="sr-only">Track and optimize coding agent usage</h1>
+
+<div className="not-prose mt-6 overflow-hidden border border-line-structure bg-surface-bg">
+  <CodingAgentPathDial>
+    <section data-use-case-section="hero" className="grid border-b border-line-structure lg:grid-cols-[1.2fr_0.8fr]">
+      <div className="min-w-0 border-b border-line-structure px-6 py-7 sm:px-10 sm:py-8 lg:border-b-0 lg:border-r">
+        <p className="font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
+          Use case / coding agents
+        </p>
+        <h2 className="mt-2 text-[38px] leading-[0.95] text-text-primary sm:text-[48px]">
+          <span className="block">Track and optimize</span>
+          <span className="block">coding agent</span>
+          <span className="mt-1 inline-block bg-surface-cta-primary px-1.5 whitespace-nowrap">
+            usage
+          </span>
+        </h2>
+        <p className="mt-4 max-w-[56ch] text-[14px] leading-[1.45] text-text-secondary">
+          Coding agents make engineers faster, but they also make AI spend
+          unpredictable. Govern it centrally. See spend by team and by
+          developer. Trace sessions to improve token efficiency.
+        </p>
+        <div className="mt-6 flex flex-wrap gap-2">
+          <a
+            href="/cloud"
+            className="border border-line-cta bg-text-primary px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-surface-bg transition-opacity hover:opacity-90"
+          >
+            Start free
+          </a>
+          <a
+            href="/talk-to-us"
+            className="border border-line-structure bg-surface-bg px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary"
+          >
+            Talk to sales
+          </a>
+        </div>
+      </div>
+
+      <div className="flex min-w-0 items-center bg-surface-1 px-4 py-4 sm:px-6 sm:py-5">
+        <SpendByTaskMock />
+      </div>
+    </section>
+
+    <CodingAgentPathSwitcher />
+
+    <CodingAgentPathPanel value="gateway" label="Via gateways">
+      <section data-use-case-section="benefits" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
+        <div className="flex items-center gap-4 pb-4">
+          <h2 className="text-[34px] leading-[1] text-text-primary sm:text-[46px]">
+            Govern AI spend from a central place
+          </h2>
+        </div>
+
+        <ValueInsightsAccordion
+          items={codingAgentsGatewayInsights}
+          caption=""
+          locked
+        />
+
+        <h3 className="mx-auto mt-10 max-w-6xl text-[28px] leading-tight text-text-primary sm:text-[34px]">
+          A gateway as the routing layer
+        </h3>
+        <a
+          href="/images/coding-agents/gateway-architecture.png"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Open the coding agent gateway diagram at full size"
+          className="mx-auto mt-4 block max-w-6xl cursor-zoom-in"
+        >
+          <img
+            src="/images/coding-agents/gateway-architecture.png"
+            alt="Coding agents send requests through an LLM gateway to model providers, while asynchronous OpenTelemetry traces go to Langfuse."
+            width="1862"
+            height="845"
+            loading="lazy"
+            className="h-auto w-full"
+          />
+        </a>
+      </section>
+    </CodingAgentPathPanel>
+
+    <CodingAgentPathPanel value="hooks" label="Via hooks">
+      <section data-use-case-section="benefits" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
+        <div className="flex items-center gap-4 pb-4">
+          <h2 className="text-[34px] leading-[1] text-text-primary sm:text-[46px]">
+            Dive deep into session details
+          </h2>
+        </div>
+
+        <ValueInsightsAccordion
+          items={codingAgentsHooksInsights}
+          caption=""
+          locked
+        />
+      </section>
+    </CodingAgentPathPanel>
+
+    <CodingAgentPathPanel value="gateway" label="Gateway integrations">
+      <section data-use-case-section="integrations" className="border-t border-line-structure px-5 py-8 sm:px-10 sm:py-10">
+        <RelevantIntegrations
+          headingLine1="Any gateway,"
+          headingLine2="one place for LLM calls"
+          description="Route coding-agent traffic through LiteLLM or OpenRouter today. Langfuse Gateway is coming soon: virtual keys, access control, and tracing built in."
+          groups={codingAgentsGatewayIntegrationGroups}
+          browseLabel="Need another gateway?"
+          browseHref="/integrations#gateways"
+          browseCta="Browse gateway integrations →"
+        />
+      </section>
+    </CodingAgentPathPanel>
+
+    <CodingAgentPathPanel value="hooks" label="Hooks integrations">
+      <section data-use-case-section="integrations" className="border-t border-line-structure px-5 py-8 sm:px-10 sm:py-10">
+        <RelevantIntegrations
+          headingLine1="Your coding agent,"
+          headingLine2="fully traced"
+          description="Claude Code, Codex, OpenCode, and more. Log tool calls, token spend, and skill usage without changing how engineers work."
+          groups={codingAgentsHooksIntegrationGroups}
+          browseLabel="Need another coding agent?"
+          browseHref="/integrations#developer-tools"
+          browseCta="Browse developer tools →"
+        />
+      </section>
+    </CodingAgentPathPanel>
+
+    <section data-use-case-section="resources" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-16">
+      <h2 className="mt-2 text-center text-[40px] leading-[1] text-text-primary">
+        Learn how to trace and govern coding agents
+      </h2>
+      <p className="mx-auto mt-2 max-w-[60ch] text-center text-[13px] text-text-tertiary">
+        Start with hooks or a gateway, then use traces to cut wasted tokens and
+        turn repeated work into shared skills.
+      </p>
+      <div className="mx-auto mt-8 max-w-4xl">
+        <Cards num={2} className="sm:grid-cols-1 lg:grid-cols-2">
+          <CodingAgentPathPanel value="hooks" className="contents">
+            <Card
+              title="Tracing coding agents with Langfuse"
+              href="/resources/engineering/coding-agent-tracing"
+              icon={<Radar />}
+              description="Setup patterns for Claude Code, Codex, Copilot, Cursor, and more — plus cost tracking and team governance."
+              contentClassName="items-start p-4 sm:p-5"
+              contentWrapperClassName="gap-2"
+            />
+          </CodingAgentPathPanel>
+          <Card
+            title="What is an LLM gateway?"
+            href="/resources/engineering/llm-gateway"
+            icon={<Network />}
+            description="When a gateway is the right enforcement layer for model access, budgets, and tracing."
+            contentClassName="items-start p-4 sm:p-5"
+            contentWrapperClassName="gap-2"
+          />
+          <Card
+            title="Evaluating AI agent skills"
+            href="/blog/2026-02-26-evaluate-ai-agent-skills"
+            icon={<Sparkles />}
+            description="Measure whether skills actually improve quality and reduce wasted context."
+            contentClassName="items-start p-4 sm:p-5"
+            contentWrapperClassName="gap-2"
+          />
+          <Card
+            title="Optimizing an AI skill with Autoresearch"
+            href="/blog/2026-03-24-optimizing-ai-skill-with-autoresearch"
+            icon={<BookOpen />}
+            description="Iterate on skills with traces and experiments so token spend actually drops."
+            contentClassName="items-start p-4 sm:p-5"
+            contentWrapperClassName="gap-2"
+          />
+        </Cards>
+      </div>
+    </section>
+
+    <section data-use-case-section="closing_cta" className="border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
+      <div className="mx-auto max-w-5xl">
+        <CustomerStoryCTA
+          title="Ready to govern coding agent usage?"
+          description="Use a gateway or hooks to trace sessions, attribute spend, and improve token efficiency with Langfuse."
+          contactLabel="Talk to sales"
+        />
+      </div>
+    </section>
+
+  </CodingAgentPathDial>
+</div>

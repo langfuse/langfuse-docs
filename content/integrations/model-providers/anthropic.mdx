@@ -16,14 +16,14 @@ Anthropic provides advanced language models like Claude, known for their safety,
 
 This notebook demonstrates **two** different ways to use Anthropic models with Langfuse:
 
-1. **OpenTelemetry Instrumentation:** Use the [`AnthropicInstrumentor`](https://pypi.org/project/opentelemetry-instrumentation-anthropic/) library to wrap Anthropic SDK calls and send OpenTelemetry spans to Langfuse.
+1. **OpenTelemetry Instrumentation (recommended):** Use the [`opentelemetry-instrumentation-anthropic`](https://pypi.org/project/opentelemetry-instrumentation-anthropic/) package to wrap Anthropic SDK calls and send OpenTelemetry spans to Langfuse.
 2. **OpenAI SDK:** Use Anthropic's OpenAI-compatible endpoints via [Langfuse's OpenAI SDK wrapper](https://langfuse.com/integrations/model-providers/openai-py).
 
 > **What is Anthropic?**\
 > Anthropic is an AI safety company that develops Claude, a family of large language models designed to be helpful, harmless, and honest. Claude models excel at complex reasoning, analysis, and creative tasks.
 
 > **What is Langfuse?**\
-> [Langfuse](https://langfuse.com) is an open source platform for LLM observability and monitoring. It helps you trace and monitor your AI applications by capturing metadata, prompt details, token usage, latency, and more.
+> [Langfuse](https://langfuse.com) is an open source platform for LLM observability and monitoring. It helps you trace and monitor your AI applications by capturing metadata, prompt details, token usage, latency, and more. Use [Langfuse Cloud](https://langfuse.com/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](https://langfuse.com/self-hosting) it.
 
 <Steps>
 ## Step 1: Install Dependencies

@@ -1,9 +1,6 @@
 import { integrationsSource } from "@/lib/source";
 import { Cards } from "@/components/docs";
-import {
-  nativeIntegrationsMeta,
-  dataPlatformIntegrationsMeta,
-} from "@/lib/integrations-meta";
+import { nativeIntegrationsMeta } from "@/lib/integrations-meta";
 import { cn } from "@/lib/utils";
 
 function additionalLinksFromMeta(metaConfig: Record<string, any>) {
@@ -35,12 +32,12 @@ const categoryConfig: Record<
         title: "API",
       },
       {
-        route: "/docs/sdk/python/sdk-v3",
+        route: "/docs/observability/sdk/overview",
         frontMatter: { title: "Python SDK" },
         title: "Python SDK",
       },
       {
-        route: "/docs/sdk/typescript/guide",
+        route: "/docs/observability/sdk/overview",
         frontMatter: { title: "JS/TS SDK" },
         title: "JS/TS SDK",
       },
@@ -120,11 +117,10 @@ const categoryConfig: Record<
     description:
       "Analytics tools that can visualize Langfuse traces and metrics",
   },
-  data: {
-    title: "Data Platform",
+  clickhouse: {
+    title: "ClickHouse Products",
     description:
-      "Use Langfuse data and metrics in your own application and data platform",
-    additionalLinks: additionalLinksFromMeta(dataPlatformIntegrationsMeta),
+      "Use Langfuse with ClickStack, warehouse exports, and the Agentic Data Stack",
   },
   "developer-tools": {
     title: "Developer Tools",

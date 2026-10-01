@@ -328,7 +328,7 @@ These are additional configuration variables. Replace `<PROVIDER>` with the prov
 | `AUTH_<PROVIDER>_CHECKS`                       | Configure the authentication checks. Supported values: `nonce`, `none`, `pkce`, `state`. Multiple values can be provided as comma-separated list.                                                                                                                                             |
 | `AUTH_<PROVIDER>_ID_TOKEN_SIGNED_RESPONSE_ALG` | Configure algorithm that is used to sign ID Token by provider. Supported values: `RS256`, `RS384`, `RS512`, `ES256`, `ES384`, `ES512`, `PS256`, `PS384`, `PS512`, `HS256`, `HS384`, `HS512`. This setting is ignored by providers: GitHub, WorkOS                                             |
 
-## Troubleshooting
+## Troubleshooting [#troubleshooting]
 
 - Make sure that `NEXTAUTH_URL` environment variable is [configured correctly](/self-hosting/configuration) if you want to use any authentication method other than email/password.
 - Error: _"Please sign in with the same provider that you used to create this account"._ This error occurs when you try to sign in with a different provider than the one you used to create your account. To fix this, you need to sign in with the same provider that you used to create your account or allow for account linking/takeover by setting `AUTH_<PROVIDER>_ALLOW_ACCOUNT_LINKING=true` (env depends on the provider, see above).

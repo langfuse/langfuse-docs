@@ -51,9 +51,9 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 | [Token and cost tracking](/docs/observability/features/token-and-cost-tracking)                             | Yes                         | Yes                                        |
 | [Native framework integrations](/integrations)                                                              | Yes                         | Yes                                        |
 | [SDKs (Python, JavaScript)](/docs/observability/sdk/overview)                                               | Yes                         | Yes                                        |
-| [OpenTelemetry (Java, Go, custom)](/docs/opentelemetry/get-started)                                         | Yes                         | Yes                                        |
+| [OpenTelemetry (Java, Go, custom)](/integrations/native/opentelemetry)                                      | Yes                         | Yes                                        |
 | [Proxy-based logging (via LiteLLM)](/integrations/gateways/litellm)                                         | Yes                         | Yes                                        |
-| [Custom via API](/api-and-data-platform/features/public-api)                                                | Yes                         | Yes                                        |
+| [Custom via API](/docs/api-and-data-platform/features/public-api)                                           | Yes                         | Yes                                        |
 | Included usage                                                                                              | Unlimited                   | Unlimited                                  |
 | [Multi-modal](/docs/observability/features/multi-modality)                                                  | Yes                         | Yes                                        |
 | **Langfuse AI**                                                                                             |                             |                                            |
@@ -65,19 +65,19 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 | [Prompt composability](/docs/prompt-management/features/composability)                                      | Yes                         | Yes                                        |
 | [Prompt caching (server and client)](/docs/prompt-management/features/caching)                              | Yes                         | Yes                                        |
 | [Playground](/docs/prompt-management/features/playground)                                                   | Yes                         | Yes                                        |
-| [Prompt experiments](/docs/evaluation/dataset-runs/native-run)                                              | Yes                         | Yes                                        |
+| [Prompt experiments](/docs/evaluation/experiments/experiments-via-ui)                                       | Yes                         | Yes                                        |
 | [Webhooks & Slack](/docs/prompt-management/features/webhooks-slack-integrations)                            | Yes                         | Yes                                        |
 | [Protected deployment labels](/docs/prompt-management/get-started#protected-prompt-labels)                  | --                          | Yes                                        |
 | **Evaluation (online and offline)**                                                                         |                             |                                            |
-| [Datasets](/docs/evaluation/dataset-runs/datasets)                                                          | Yes                         | Yes                                        |
+| [Datasets](/docs/evaluation/experiments/datasets)                                                           | Yes                         | Yes                                        |
 | [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk)                                     | Yes                         | Yes                                        |
 | [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui)                                       | Yes                         | Yes                                        |
-| [Evaluation scores (custom)](/docs/evaluation/evaluation-methods/custom-scores)                             | Yes                         | Yes                                        |
-| [User feedback tracking](/faq/all/user-feedback)                                                            | Yes                         | Yes                                        |
+| [Evaluation scores (custom)](/docs/evaluation/evaluation-methods/scores-via-sdk)                            | Yes                         | Yes                                        |
+| [User feedback tracking](/docs/observability/features/user-feedback)                                        | Yes                         | Yes                                        |
 | [External evaluation pipelines](/guides/cookbook/example_external_evaluation_pipelines)                     | Yes                         | Yes                                        |
 | [LLM-as-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge)                               | Yes                         | Yes                                        |
-| [Human annotation](/docs/scores/annotation)                                                                 | Yes                         | Yes                                        |
-| [Human annotation queues](/docs/evaluation/evaluation-methods/annotation#annotation-queues)                 | Yes                         | Yes                                        |
+| [Human annotation](/docs/evaluation/evaluation-methods/scores-via-ui)                                       | Yes                         | Yes                                        |
+| [Human annotation queues](/docs/evaluation/evaluation-methods/annotation-queues)                            | Yes                         | Yes                                        |
 | **Metrics**                                                                                                 |                             |                                            |
 | [Custom dashboards](/docs/metrics/features/custom-dashboards)                                               | Yes                         | Yes                                        |
 | [Alerts](/docs/observability/features/alerts)                                                               | Langfuse v4+                | Langfuse v4+                               |
@@ -88,10 +88,10 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 | [Extensive public API](/docs/api-and-data-platform/features/public-api)                                     | Yes                         | Yes                                        |
 | [Metrics & Observations APIs (v2)](/docs/metrics/features/metrics-api#v2)                                   | Langfuse v4+                | Langfuse v4+                               |
 | **Exports**                                                                                                 |                             |                                            |
-| [Batch export via UI](/docs/api-and-data-platform/features/query-via-sdk#ui)                                | Yes                         | Yes                                        |
+| [Batch export via UI](/docs/api-and-data-platform/features/export-from-ui)                                  | Yes                         | Yes                                        |
 | [PostHog integration](/integrations/analytics/posthog)                                                      | Yes                         | Yes                                        |
 | [Mixpanel integration](/integrations/analytics/mixpanel)                                                    | Yes                         | Yes                                        |
-| [Scheduled export to blob storage](/docs/api-and-data-platform/features/query-via-sdk#blob-storage)         | Yes                         | Yes                                        |
+| [Scheduled export to blob storage](/docs/api-and-data-platform/features/export-to-blob-storage)             | Yes                         | Yes                                        |
 | **Deployment**                                                                                              |                             |                                            |
 | ClickHouse deployment model                                                                                 | Self-managed ClickHouse OSS | Bundled: ClickHouse Cloud / BYOC / Private |
 | [Deployment templates](/self-hosting)                                                                       | Yes                         | Yes                                        |
@@ -141,6 +141,9 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 
 ## Frequently Asked Questions
 
+**How does Langfuse pricing compare to LangSmith, Braintrust, Arize, and Datadog?**
+On a representative workload, Langfuse Cloud is cheaper than [LangSmith](/compare/langsmith), [Braintrust](/compare/braintrust), [Arize](/compare/arize-phoenix), and [Datadog Agent Observability](/compare/datadog). Open the [editable pricing comparison sheet](/pricing-comparison-sheet) to fill in your own assumptions and check the numbers for your workload. For product-by-product differences, see the [comparison pages](/compare). Langfuse is also [open source](/why), based on [OpenTelemetry](/integrations/native/opentelemetry) for interoperability, [self-hostable](/self-hosting) at the same scale as Langfuse Cloud, and model- and framework-agnostic.
+
 **Can I purchase Langfuse through AWS Marketplace?**
 Yes. Self-hosted Enterprise can be billed via AWS Marketplace or invoice. [Talk to us](/talk-to-us?deployment=self-hosted) to request a private offer.
 
@@ -152,3 +155,5 @@ Open Source includes all core platform features under the MIT license with commu
 
 **Where is the data stored?**
 Self-hosted Langfuse stores data in your own infrastructure. You control data residency and can deploy in any region. See [security documentation](/security) for details.
+
+[Ask anything else](/docs/ask-ai)

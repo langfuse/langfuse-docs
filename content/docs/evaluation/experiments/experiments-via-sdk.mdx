@@ -36,7 +36,7 @@ The experiment runner automatically handles:
 - **Error isolation** so individual failures don't stop the experiment
 - **Dataset integration** for easy comparison and tracking
 
-The experiment runner SDK supports both datasets hosted on Langfuse and datasets hosted locally. If you are using a dataset hosted on Langfuse for your experiment, the SDK will automatically create a dataset run for you that you can inspect and compare in the Langfuse UI. For locally hosted datasets not on Langfuse, only traces and scores (if evaluations are used) are tracked in Langfuse.
+The experiment runner SDK supports both datasets hosted on Langfuse and local data. With Langfuse v4 and the current SDKs, both appear under **Experiments** and can be compared in the UI. Hosted datasets additionally provide shared test cases and historical dataset versions. See [Compare experiments](/docs/evaluation/experiments/compare-experiments).
 
 ### Basic Usage
 
@@ -124,7 +124,7 @@ const myTask: ExperimentTask = async (item) => {
     ],
   });
 
-  return response;
+  return response.choices[0].message.content;
 };
 
 // Run the experiment
@@ -147,7 +147,7 @@ await otelSdk.shutdown();
 </Tab>
 </LangTabs>
 
-When running experiments on local data, only traces are created in Langfuse - no dataset runs are generated. Each task execution creates an individual trace for observability and debugging.
+With Langfuse v4 and the current SDKs, local-data experiments appear in **Experiments** without a hosted dataset. Each task execution also creates a trace for debugging. Local data means the inputs originate in your process; experiment data is still sent to your configured Langfuse instance.
 
 ### Usage with Langfuse Datasets
 
@@ -215,7 +215,7 @@ await otelSdk.shutdown();
 
 When using Langfuse datasets, dataset runs are automatically created in Langfuse and are available for comparison in the UI. This enables tracking experiment performance over time and comparing different approaches on the same dataset.
 
-Experiments always run on the latest dataset version at experiment time. Support for running experiments on specific dataset versions will be added to the SDK shortly.
+By default, fetching a dataset returns its latest version. Pass a version timestamp when fetching it to run against that historical state, including items that have since been updated or deleted. See [Run experiments on versioned datasets](/docs/evaluation/experiments/datasets#run-experiments-on-versioned-datasets).
 
 ### Advanced Features
 

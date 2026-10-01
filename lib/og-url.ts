@@ -27,6 +27,13 @@ export function buildPageUrl(path: string): string {
   return `${BASE_URL}${path}`;
 }
 
+/** Canonicals identify documents, never an in-document fragment. */
+export function buildCanonicalUrl(path: string): string {
+  const url = new URL(path, BASE_URL);
+  url.hash = "";
+  return url.toString();
+}
+
 export function buildOgImageUrl({
   title,
   description,

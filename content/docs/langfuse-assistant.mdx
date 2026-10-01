@@ -12,9 +12,15 @@ sidebarTitle: Assistant
     core: "full",
     pro: "full",
     enterprise: "full",
-    selfHosted: "not-available",
+    selfHosted: "public-beta",
   }}
 />
+
+<Callout type="info">
+  **Self-hosted:** the Assistant is in public beta from version `>=v4.28.0` and
+  needs an instance-wide Langfuse AI model and a worker queue consumer. See
+  [self-hosted setup](/self-hosting/configuration/langfuse-assistant).
+</Callout>
 
 The Langfuse Assistant is an in-product assistant for exploring your Langfuse project data and taking actions in Langfuse with your approval. You can ask about traces, observations, sessions, and metrics, or ask it to create datasets, dashboards, and other resources. Every run happens in the background. You get a notification when the Assistant is done or needs your input or approval.
 
@@ -71,7 +77,7 @@ The Assistant follows the same data handling model as other Langfuse AI features
 
 Key points:
 
-- Model requests are handled in the same AWS region as your [Langfuse data region](/security/data-regions).
+- On Langfuse Cloud, model requests use Langfuse-managed Amazon Bedrock in your [Langfuse data region](/security/data-regions). On self-hosted deployments, requests use the instance Langfuse AI model you configure.
 - Assistant access is scoped to the authenticated user and current project.
 - Actions that can change data require your approval and remain limited to the permissions of the signed-in user.
 - AI feature tracing for product and service improvement can be enabled or disabled separately by organization admins and owners.
@@ -92,6 +98,7 @@ The Assistant may misunderstand a question or return incomplete results. Verify 
 
 ## Related resources [#related-resources]
 
+- [Self-hosted Assistant setup](/self-hosting/configuration/langfuse-assistant)
 - [AI Feature Security](/security/ai-features)
 - [Langfuse MCP Server](/docs/api-and-data-platform/features/mcp-server)
 - [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill)

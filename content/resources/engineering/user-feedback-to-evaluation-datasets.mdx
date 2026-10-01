@@ -76,7 +76,7 @@ A dataset item is an input, an optional expected output, optional metadata, and 
 
 ### From the UI, one or many at a time
 
-On any observation of a production trace (span, event, or generation), `+ Add to dataset` opens the item form prefilled from that observation, so you can write the expected output while the context is open. For volume, go to the observations table, apply the score filter, select the failing rows with the checkboxes, and click **Actions** then **Add to dataset**. Pick or create a dataset, then configure the field mapping: use a field as-is, extract a value with a JSON path expression, or compose an object from several fields. Preview and confirm.
+On any [observation](/docs/observability/data-model#observations-traces-and-sessions) of a production trace, `+ Add to dataset` opens the item form prefilled from that observation, so you can write the expected output while the context is open. For volume, go to the observations table, apply the score filter, select the failing rows with the checkboxes, and click **Actions** then **Add to dataset**. Pick or create a dataset, then configure the field mapping: use a field as-is, extract a value with a JSON path expression, or compose an object from several fields. Preview and confirm.
 
 The batch runs in the background with partial success: items that fail validation against the dataset's schema are logged while valid items are still added, and progress is visible under **Settings** then **Batch Actions**. The observation output in these items is the answer the user disliked, so do not map it to the expected output. Leave `expectedOutput` empty and use reference-free checks, or fill it in with corrections as described below.
 
@@ -95,7 +95,7 @@ langfuse.create_dataset_item(
     expected_output={"reply": agent_final_reply},
     # link to a trace
     source_trace_id=trace_id,
-    # optional: link to a specific span, event, or generation
+    # optional: link to a specific observation
     source_observation_id=observation_id,
 )
 ```
@@ -193,26 +193,48 @@ The interesting traces are the ones where the judge and the user disagree: a thu
 
 ## FAQ
 
-### How do I collect user feedback on LLM responses? [#collect-user-feedback]
+<FaqDetails>
+
+<Details id="collect-user-feedback">
+<Summary>How do I collect user feedback on LLM responses?</Summary>
 
 Attach each signal as a score to the trace that produced the response. Explicit ratings go from the frontend through the Langfuse browser SDK, which needs only your public key and a trace ID your backend returns with the response; implicit signals such as edited drafts or closed tickets are written from the backend with `create_score`. Use a stable score ID so a changed rating overwrites the old one.
 
-### How do I find traces with negative user feedback? [#find-negative-feedback]
+</Details>
+
+<Details id="find-negative-feedback">
+<Summary>How do I find traces with negative user feedback?</Summary>
 
 Filter the traces or observations table by score name and value, for example a boolean `response_rating` equal to false, combined with a time range, trace name, or user ID. Score filters match by name regardless of the level the score sits on. From the filtered table you can select rows and add them to a dataset or an annotation queue in one action.
 
-### What should the expected output of a feedback-derived item be? [#expected-output]
+</Details>
+
+<Details id="expected-output">
+<Summary>What should the expected output of a feedback-derived item be?</Summary>
 
 The answer a domain expert would have given, not the answer the user disliked. Langfuse stores such answers as corrected outputs on any trace or observation, persisted as scores with `dataType: "CORRECTION"`, which you can fetch via the scores API or have reviewers add in an annotation queue. If no reference exists, leave the expected output empty and use reference-free checks.
 
-### Can I run experiments on a dataset that keeps changing? [#dataset-versioning]
+</Details>
+
+<Details id="dataset-versioning">
+<Summary>Can I run experiments on a dataset that keeps changing?</Summary>
 
 Yes. Every add, update, delete, or archive of a dataset item creates a timestamped dataset version. The SDK's `get_dataset` accepts a `version` timestamp and `langfuse/experiment-action` accepts `dataset_version`, so an experiment or CI gate runs against the dataset as it was at that time while new feedback flows into the latest version.
 
-### How do I use user feedback to calibrate an LLM-as-a-judge? [#calibrate-judge]
+</Details>
+
+<Details id="calibrate-judge">
+<Summary>How do I use user feedback to calibrate an LLM-as-a-judge?</Summary>
 
 Give the judge a score type that mirrors the feedback signal, run it on the same traces, and compare the two scores in Score Analytics, which reports Cohen's Kappa, F1, and overall agreement on matched traces plus a confusion matrix. Disagreements are the calibration set: read them, tighten the judge rubric, and re-run.
 
-### Should user feedback go into the same dataset as hand-written test cases? [#separate-datasets]
+</Details>
+
+<Details id="separate-datasets">
+<Summary>Should user feedback go into the same dataset as hand-written test cases?</Summary>
 
 Usually not. Feedback-derived items drift with your traffic, while hand-written cases encode requirements that may never appear in production. Keep them in separate datasets, side by side in a folder, so CI gates on a small, stable set while the larger feedback set runs on a schedule.
+
+</Details>
+
+</FaqDetails>
