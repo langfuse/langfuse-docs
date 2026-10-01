@@ -131,7 +131,7 @@ Langfuse support cannot access your instance or reset passwords there. Contact y
 - **`NEXTAUTH_URL`** must match the external URL users open in the browser, including behind a load balancer, proxy, or CDN. A mismatch causes `OAuthCallback` errors or "State cookie was missing" in the logs.
 - **Password reset** requires [transactional emails](/self-hosting/configuration/transactional-emails) (`SMTP_CONNECTION_URL` and `EMAIL_FROM_ADDRESS`). Without them, an admin can reset passwords via the database as described in the [self-hosted authentication docs](/self-hosting/security/authentication-and-sso#auth-email-password).
 - **"Invalid credentials" for a valid password** can mean `AUTH_DISABLE_USERNAME_PASSWORD=true` is set or your domain is listed in `AUTH_DOMAINS_WITH_SSO_ENFORCEMENT`.
-- **Provider errors** for users who existed before SSO was added: set `AUTH_<PROVIDER>_ALLOW_ACCOUNT_LINKING=true` to link accounts with the same email.
+- **Provider errors** for users who existed before SSO was added: if your IdP guarantees verified email addresses, set `AUTH_<PROVIDER>_ALLOW_ACCOUNT_LINKING=true` to link accounts with the same email. Do not enable account linking when the IdP does not guarantee verified emails.
 - **`AUTH_DISABLE_SIGNUP=true`** also blocks first-time SSO users. Create users first, for example via SCIM or [headless initialization](/self-hosting/administration/headless-initialization).
 - **Environment variable names** must match exactly, for example `AUTH_OKTA_CHECKS`. Okta's issuer is your Okta domain, without `/oauth2/default` unless you use a custom authorization server.
 
