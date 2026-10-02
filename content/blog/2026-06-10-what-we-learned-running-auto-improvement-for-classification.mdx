@@ -1,0 +1,112 @@
+---
+title: "97% on train, 82% on test: auto-improvement loops have a validation gap"
+date: 2026/06/10
+description: "We let Claude Fable 5 run an auto-improvement loop on a classification dataset. Train accuracy jumped fast. The useful result was what the loop exposed in the dataset."
+tag: engineering
+author: Annabell
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { Frame } from "@/components/Frame";
+
+<BlogHeader
+  title="97% on train, 82% on test: auto-improvement loops have a validation gap"
+  description="We let Claude Fable 5 run an auto-improvement loop on a classification dataset. Train accuracy jumped fast. The useful result was what the loop exposed in the dataset."
+  date="June 10, 2026"
+  authors={["annabellschafer"]}
+/>
+
+Loop-shaped workflows are having a moment. `@steipete` put it plainly: you should not be prompting coding agents anymore, you should be designing loops that prompt your agents. He is talking about coding agents, but the same design problem shows up in narrower production loops too.
+
+<Frame>
+  ![Peter Steinberger post about designing loops that prompt your agents](/images/blog/2026-06-10-auto-improvement-classification/peter-steinberger-design-loops.png)
+</Frame>
+
+We recently argued in [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering) that missing human judgment in parts of the loop leads to suboptimal agents. This experiment is a concrete example.
+
+We designed a loop and gave Claude Fable 5 a classification task: improve a prompt on a train split until it hit 95% accuracy or stalled out. The loop worked in the narrow sense. Train accuracy went from 78% to 97% in four runs. But held-out test performance barely moved. Across the prompt variants we ran on test, the same 11 errors kept coming back. The useful result was not the train gain. It was the diagnosis: the limiting factor was no longer the prompt. It was the dataset.
+
+At first glance, the dataset looked good enough to run with. Only after the loop optimized against it, and after we read the failures manually, did the weak spots become obvious: no validation split, too few repeated boundary cases, and labels that were less clean than they first appeared.
+
+## The setup
+
+Our task was to classify arXiv papers into one of 10 categories from title, authors, and abstract, using this [Kaggle dataset](https://www.kaggle.com/datasets/sumitm004/arxiv-scientific-research-papers-dataset). We picked classification because exact-match accuracy gives you a crisp target function.
+
+In this setup, Claude Fable 5 was the optimizer model running the loop. `gpt-4o-mini` was the task model being optimized for classification<sup id="fnref-model-choice"><a href="#fn-model-choice">1</a></sup>.
+
+- a train split with 200 labeled examples and a held-out test split with 100 in [**Langfuse Datasets**](/docs/evaluation/experiments/datasets)
+- a prompt in [**Prompt Management**](/docs/prompt-management/get-started)
+- a small runner built with [**Langfuse Experiments via the SDK**](/docs/evaluation/experiments/experiments-via-sdk)
+- no dedicated validation split between train and test
+
+The starting prompt was minimal, consisting only of a list of labels with instructions to pick one. After each run, the agent reviewed the errors, wrote [comments](/docs/observability/features/comments) on the [Langfuse trace](/docs/observability/data-model#traces), published a new [prompt version](/docs/prompt-management/features/prompt-version-control), and ran again.
+
+_Suggested platform screenshot: the Langfuse workbench for this loop, showing the dataset, prompt, and experiment setup together._
+
+<Frame fullWidth>
+  ![Diagram of the autonomous training loop: start from a base prompt, run the train split, score rows, comment on errors, revise the prompt, and then run the held-out test split once](/images/blog/2026-06-10-auto-improvement-classification/fable-classification-loop-diagram.png)
+</Frame>
+
+## Round 1: fast optimization
+
+The first round moved quickly:
+
+| Prompt | Train | Test | Gap |
+| --- | ---: | ---: | ---: |
+| v1 - flat label list | 78.0% | - | - |
+| v2 - general definitions | 90.5% | **84.0%** | 6.5 |
+| v3 - sharpened boundary rules | 90.0% | - | - |
+| v4 - train-derived precedents | **97.0%** | 82.0% | **15.0** |
+
+The first real improvement came from `v2`, which added broad label descriptions and boundary rules. That version also ended up being the best test performer. The failure mode started in `v4`: once the agent encoded concrete precedents from the training failures, train accuracy jumped to 97%, but test performance dropped to 82%. The prompt that looked best on train no longer generalized best.
+
+_Suggested platform screenshot: the Langfuse runs overview comparing prompt versions and scores across the experiment history._
+
+## Round 2: better discipline, same outcome
+
+So we restarted from the more general prompt and changed the rules: no single-paper precedents, only class-level principles.
+
+| Prompt | Train | Test | Gap |
+| --- | ---: | ---: | ---: |
+| v2 - general definitions, round 1 | 90.5% | **84.0%** | 6.5 |
+| v5 - reasoning field, round 2 | 84.0% | - | - |
+| v9 - general principles, round 2 | 94.0% | 81.0% | 13.0 |
+
+Only selected prompts were run on the held-out test split.
+
+The more disciplined second round still did not produce better held-out results. Adding a `reasoning` field did not help either: in our runs, it seemed to make the model justify surface cues rather than resolve the actual category boundary.
+
+By the end, Fable's own analysis suggested that many of the remaining errors sat on fuzzy boundaries like Information Retrieval vs. Databases, Human-Computer Interaction vs. Computers and Society, and subject vs. representation for audio papers. It stopped before hitting the 95% target. Pushing further likely would have required more and more case-specific rules, not broader principles that generalized.
+
+On paper, the final prompt of round 2 landed at 81.0% on test, versus 84.0% for `v2`. The more important result was that the same 11 test errors showed up across all three prompt variants we ran on the held-out set. The loop kept changing the prompt, but it was not changing which cases were hard.
+
+The best-performing prompt on test was still `v2` from the first round. That version simply added broad descriptions to the label-only baseline, and it generalized best.
+
+_Suggested platform screenshot: one recurring hard example in Langfuse, with the trace and annotation showing why the boundary case stayed unresolved._
+
+## What the dataset was missing
+
+The loop did not fail because auto-improvement is useless. It failed because the dataset was not ready to support the kind of optimization we asked of it. In hindsight, it needed three things:
+
+**1. A real validation split.** We had train for fitting and test for the final check, but nothing in between. A validation split would have been a third set used to choose between prompt versions before touching the final test set.
+
+**2. More repeated edge cases.** The hard errors clustered around a few label boundaries. A stronger dataset would have contained more examples of those same edge types, so new rules had to prove themselves across several similar cases instead of one anecdote.
+
+**3. Clearer policy for ambiguous papers.** Some of the remaining examples are arguable even for a human. If the dataset wants one exact label, it needs sharper tie-break rules and better canonical examples. If that is not realistic, it may need an `unsure` or multi-label policy instead.
+
+That is why this run is worth sharing before rerunning it on a better dataset. The loop did exactly what we needed from it. It surfaced, quickly, that the next bottleneck was not another prompt tweak. It was judgment we had not yet encoded into the dataset.
+
+## What to automate, what to keep human
+
+None of this means "do not automate the loop." It means that the mechanical parts can be automated well before the judgment parts can.
+
+- **Agent-owned:** running experiments, scoring, per-error annotation, drafting hypothesis-driven prompt revisions, diffing errors across runs, flagging plateaus
+- **Human-owned:** the target function, including the validation and held-out test data nobody optimizes against, dataset composition, when to restart with different constraints, and when to stop
+
+As we argued in [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering), the mechanics are not the hard part anymore. This run shows what the hard part actually is: the target function, the dataset, and the judgment calls nobody optimizes against unless a human puts them there.
+
+This is exactly what Langfuse is good for: [datasets](/docs/evaluation/experiments/datasets), [prompt versioning](/docs/prompt-management/features/prompt-version-control), [experiments](/docs/evaluation/core-concepts#experiments), and [trace comments](/docs/observability/features/comments) give the agent a workbench and an audit trail.
+
+<Callout type="info">
+  <span id="fn-model-choice"><sup>1</sup> We used <code>gpt-4o-mini</code> because one realistic production strategy for a narrow, repetitive classification task like this is to tune a cheaper model rather than default to a frontier model. A stronger model likely would have performed better out of the box, but that would have tested a different tradeoff.</span>
+</Callout>
