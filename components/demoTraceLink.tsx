@@ -6,9 +6,12 @@ import type { DemoTraceSource } from "@/lib/demo-trace";
 import { cn } from "@/lib/utils";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 
+/** Analytics sources for the Open-trace CTA, including blog compare widgets. */
+export type DemoTraceLinkSource = DemoTraceSource | "jev_evals_blog";
+
 type DemoTraceLinkProps = {
   traceUrl?: string | null;
-  source: DemoTraceSource;
+  source: DemoTraceLinkSource;
   className?: string;
 };
 

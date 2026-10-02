@@ -7,7 +7,7 @@ import { Loader } from "@/components/ai-elements/loader";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 import { scoreDemoNegativeUserFeedback } from "@/components/demoLangfuseBrowserClients";
 import { DemoTraceLink } from "@/components/demoTraceLink";
-import { buildDemoTraceUrl } from "@/lib/demo-trace";
+import { buildDemoTraceUrl, DEMO_PROJECT_PATH } from "@/lib/demo-trace";
 import { SendIcon } from "lucide-react";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 import {
@@ -24,8 +24,6 @@ import { CompareMetricBoxes } from "./metricBoxes";
 import { CLASSIFIER_SEQUENCE, type ClassifierDefinition } from "./criteria";
 import { sumUsage, type SentimentUsage } from "./cost";
 import type { ClassifierAnswer } from "./types";
-
-const PUBLIC_SAMPLE_PROJECT_TRACES_URL = "/cloud/demo/traces";
 
 type EngineState = {
   result: ClassifierRunResult;
@@ -404,12 +402,22 @@ export const SentimentClassifierCompare = ({
                       />
                     </div>
                   ))}
-                  {!compact && (
+                  <div
+                    className={cn(
+                      "border-t border-line-structure",
+                      compact ? "pt-1.5" : "pt-3",
+                    )}
+                  >
                     <DemoTraceLink
                       traceUrl={buildDemoTraceUrl({ traceId: jev.traceId })}
-                      source="sentiment_classifier"
+                      source="jev_evals_blog"
+                      className={
+                        compact
+                          ? "w-full justify-center text-xs"
+                          : "w-full justify-center"
+                      }
                     />
-                  )}
+                  </div>
                 </div>
               )}
             </div>
@@ -503,13 +511,13 @@ export const SentimentClassifierCompare = ({
         >
           Traces in the{" "}
           <a
-            href={PUBLIC_SAMPLE_PROJECT_TRACES_URL}
+            href={DEMO_PROJECT_PATH}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => {
               capture("demo:view_trace_in_langfuse_clicked", {
                 source: "jev_evals_blog",
-                trace_url: PUBLIC_SAMPLE_PROJECT_TRACES_URL,
+                trace_url: DEMO_PROJECT_PATH,
               });
             }}
             className="underline underline-offset-2 text-text-links hover:text-primary"
