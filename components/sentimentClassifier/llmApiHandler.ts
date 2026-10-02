@@ -14,6 +14,7 @@ import { rateLimit } from "@/lib/rateLimit";
 import {
   LUNA_PRICE_USD_PER_MTOK,
   addUsage,
+  computeCostDetails,
   computeCostUsd,
   emptyUsage,
   type SentimentUsage,
@@ -185,9 +186,11 @@ const handler = async (req: Request) => {
                 : {}),
               total: usage.totalTokens,
             },
-            costDetails: {
-              total: usage.costUsd,
-            },
+            costDetails: computeCostDetails(
+              usage.inputTokens,
+              usage.outputTokens,
+              LUNA_PRICE_USD_PER_MTOK,
+            ),
           },
           { asType: "generation" },
         );

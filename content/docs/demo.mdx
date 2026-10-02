@@ -6,6 +6,10 @@ description: Try Langfuse in action with a live example project for free. Intera
 # Example Project
 
 import { ArrowRight, ArrowUpRight } from "lucide-react";
+import {
+  buildDemoProjectUrl,
+  buildDemoTracesListUrl,
+} from "@/lib/demo-trace";
 
 The Langfuse example project is a **live, shared project** that lets you explore Langfuse's features with real data before setting up your own account.
 
@@ -32,7 +36,7 @@ The Langfuse example project is a **live, shared project** that lets you explore
   </div>
 
   <a
-    href="https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces"
+    href={buildDemoTracesListUrl()}
     target="_blank"
     rel="noopener noreferrer"
     className="group flex min-h-[128px] flex-col justify-between rounded-[2px] border border-line-structure bg-surface-bg p-4 transition-colors hover:border-line-cta hover:bg-surface-1"
@@ -55,7 +59,7 @@ The Langfuse example project is a **live, shared project** that lets you explore
   </div>
 
   <a
-    href="https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi"
+    href={buildDemoProjectUrl()}
     target="_blank"
     rel="noopener noreferrer"
     className="group flex min-h-[128px] flex-col justify-center rounded-[2px] border border-line-structure bg-surface-bg p-4 transition-colors hover:border-line-cta hover:bg-surface-1"
