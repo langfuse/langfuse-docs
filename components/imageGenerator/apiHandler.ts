@@ -10,7 +10,7 @@ import { after } from "next/server";
 import { context, trace } from "@opentelemetry/api";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
-import { buildDemoTraceUrl, DEMO_TRACES_PATH } from "@/lib/demo-trace";
+import { buildDemoTraceUrl } from "@/lib/demo-trace";
 
 let _openai: OpenAI | null = null;
 const getOpenAI = () => (_openai ??= new OpenAI());
@@ -106,7 +106,7 @@ const handler = async (req: Request) => {
           activeSpan?.end();
         });
 
-        let traceUrl = DEMO_TRACES_PATH;
+        let traceUrl = buildDemoTraceUrl();
         try {
           await flush();
           traceUrl = buildDemoTraceUrl({

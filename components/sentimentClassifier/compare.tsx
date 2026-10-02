@@ -7,7 +7,7 @@ import { Loader } from "@/components/ai-elements/loader";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 import { scoreDemoNegativeUserFeedback } from "@/components/demoLangfuseBrowserClients";
 import { DemoTraceLink } from "@/components/demoTraceLink";
-import { buildDemoTraceUrl, DEMO_PROJECT_PATH } from "@/lib/demo-trace";
+import { buildDemoProjectUrl, buildDemoTraceUrl } from "@/lib/demo-trace";
 import { SendIcon } from "lucide-react";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 import {
@@ -72,7 +72,10 @@ const LlmTaskSlot = ({
           onFeedback={onFeedback}
         />
         <DemoTraceLink
-          traceUrl={buildDemoTraceUrl({ traceId: slot.traceId })}
+          traceUrl={buildDemoTraceUrl({
+            traceId: slot.traceId,
+            campaign: "blog",
+          })}
           source="sentiment_classifier"
           className={compact ? "text-xs" : undefined}
         />
@@ -408,7 +411,10 @@ export const SentimentClassifierCompare = ({
                     )}
                   >
                     <DemoTraceLink
-                      traceUrl={buildDemoTraceUrl({ traceId: jev.traceId })}
+                      traceUrl={buildDemoTraceUrl({
+                        traceId: jev.traceId,
+                        campaign: "blog",
+                      })}
                       source="jev_evals_blog"
                       className={
                         compact
@@ -510,13 +516,13 @@ export const SentimentClassifierCompare = ({
         >
           Traces in the{" "}
           <a
-            href={DEMO_PROJECT_PATH}
+            href={buildDemoProjectUrl({ campaign: "blog" })}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => {
+            onClick={(event) => {
               capture("demo:view_trace_in_langfuse_clicked", {
                 source: "jev_evals_blog",
-                trace_url: DEMO_PROJECT_PATH,
+                trace_url: event.currentTarget.href,
               });
             }}
             className="underline underline-offset-2 text-text-links hover:text-primary"
