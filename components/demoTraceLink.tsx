@@ -7,9 +7,16 @@ import type { DemoTraceSource } from "@/lib/demo-public-trace";
 import { cn } from "@/lib/utils";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 
+/** Analytics sources for the View-trace CTA, including demos outside the public-trace API. */
+export type DemoTraceLinkSource =
+  | DemoTraceSource
+  | "qa_chatbot"
+  | "sentiment_classifier"
+  | "jev_evals_blog";
+
 type DemoTraceLinkProps = {
   traceUrl?: string | null;
-  source: DemoTraceSource;
+  source: DemoTraceLinkSource;
   label?: string;
   className?: string;
 };

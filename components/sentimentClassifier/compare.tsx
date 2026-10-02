@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Loader } from "@/components/ai-elements/loader";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 import { scoreDemoNegativeUserFeedback } from "@/components/demoLangfuseBrowserClients";
+import { DemoTraceLink } from "@/components/demoTraceLink";
 import { SendIcon } from "lucide-react";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 import {
@@ -483,31 +484,31 @@ export const SentimentClassifierCompare = ({
           />
         )}
 
+        {jev?.traceId ? (
+          <div
+            className={cn(
+              "flex justify-center border-t border-line-structure",
+              compact ? "pt-2" : "pt-3",
+            )}
+          >
+            <DemoTraceLink
+              traceUrl={buildDemoTraceUrl(jev.traceId)}
+              source="jev_evals_blog"
+              className={compact ? "px-3 py-1.5 text-xs gap-2" : undefined}
+            />
+          </div>
+        ) : null}
+
         <p
           className={cn(
-            "text-[11px] text-muted-foreground border-t border-line-structure",
-            compact ? "pt-2" : "pt-3",
+            "text-[11px] text-muted-foreground",
+            jev?.traceId
+              ? compact
+                ? "pt-2"
+                : "pt-3"
+              : cn("border-t border-line-structure", compact ? "pt-2" : "pt-3"),
           )}
         >
-          {jev?.traceId ? (
-            <>
-              <a
-                href={buildDemoTraceUrl(jev.traceId)}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => {
-                  capture("demo:view_trace_in_langfuse_clicked", {
-                    source: "jev_evals_blog",
-                    trace_url: buildDemoTraceUrl(jev.traceId),
-                  });
-                }}
-                className="underline underline-offset-2 text-text-links hover:text-primary"
-              >
-                View this Jev trace
-              </a>
-              {" · "}
-            </>
-          ) : null}
           Traces in the{" "}
           <a
             href={DEMO_PROJECT_URL}
