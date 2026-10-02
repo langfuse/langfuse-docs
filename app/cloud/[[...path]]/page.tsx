@@ -139,17 +139,6 @@ export default function CloudRegionSelectorPage() {
     [pathname],
   );
 
-  // Demo traces are exported to EU/US/JP (and internal), not HIPAA.
-  const isDemoPath =
-    cloudSubpath === "/demo" || cloudSubpath.startsWith("/demo/");
-  const selectableRegions = useMemo(
-    () =>
-      isDemoPath
-        ? cloudRegionSelectorOrder.filter((key) => key !== "hipaa")
-        : cloudRegionSelectorOrder,
-    [isDemoPath],
-  );
-
   const handleRegionSelect = useCallback(
     (region: CloudRegionKey, event: MouseEvent<HTMLAnchorElement>) => {
       const isModifiedClick =
@@ -206,7 +195,7 @@ export default function CloudRegionSelectorPage() {
 
         <CornerBox className="w-full">
           <div className="divide-y divide-line-structure">
-            {selectableRegions.map((regionKey) => {
+            {cloudRegionSelectorOrder.map((regionKey) => {
               const region = cloudRegions[regionKey];
               const card = regionCards[regionKey];
               const host = getCloudHost(region.url);
