@@ -33,7 +33,7 @@ export const DemoTraceLink = ({
         });
       }}
       className={cn(
-        "inline-flex items-center gap-2 whitespace-nowrap rounded-[2px] border border-line-structure bg-surface-cta-primary px-4 py-2 text-sm font-semibold text-text-primary no-underline transition-colors hover:border-line-structure hover:bg-surface-cta-primary/90 hover:text-text-primary",
+        "inline-flex items-center gap-2 whitespace-nowrap rounded-[2px] border border-line-structure bg-surface-bg px-4 py-2 text-sm font-semibold text-text-primary no-underline transition-colors hover:border-line-cta hover:bg-surface-1 hover:text-text-primary",
         className,
       )}
     >
