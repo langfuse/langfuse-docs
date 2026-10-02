@@ -15,8 +15,16 @@ description: >-
 
 # Customer story setup (MD -> MDX)
 
-Turns a plain **Markdown draft** into **`content/customers/<slug>.mdx`** in the
-same pattern as `content/customers/canva.mdx` and `cresta.mdx`.
+Turns a plain **Markdown draft** into **`content/customers/<slug>.mdx`**.
+
+For an end-to-end publish from a draft, interview notes, or a text document
+(images, concept links, adopters row, social posts, and the PR), use
+[`publish-customer-story`](../publish-customer-story/SKILL.md). That skill's
+link map wins over the sparse list below. This file is the MDX field reference.
+
+Before writing, read the two newest **written** stories in
+`content/customers/` (not the video stories that lead with a YouTube embed).
+Match their layout.
 
 ## Before writing any file: collect missing input
 
@@ -108,8 +116,9 @@ available-internal-links** rule so links resolve.
 7. **Closing**: `<ImpactChart items={[{ area, impact }, ...]} />` (optional)
    then `<CustomerStoryCTA />`.
 
-**Reference implementations:** `content/customers/canva.mdx`,
-`content/customers/cresta.mdx`.
+**Reference implementations:** the two newest written stories in
+`content/customers/` (skip pages whose frontmatter sets
+`customerQuoteTag: "Video story"`).
 
 ---
 

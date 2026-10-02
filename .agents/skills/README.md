@@ -44,5 +44,24 @@ Use for:
   `data/authors.json`
 - collecting customer-story logos, screenshots, and other required assets
 
+For the full publish flow (images, concept links, adopters row, social drafts,
+and the PR), use `publish-customer-story` instead.
+
 Open:
 [`customer-story-setup/SKILL.md`](customer-story-setup/SKILL.md)
+
+### publish-customer-story
+
+Use for:
+
+- turning a text draft into a `/users/<slug>` story that matches current
+  written customer stories
+- placing shared images and searching for the company logo
+- linking Langfuse concepts to Academy or docs
+- adding the company to the adopters table
+- recommending homepage, use-case, and industry placement without editing
+  those pages
+- drafting the LinkedIn and X posts and babysitting the PR until it is green
+
+Open:
+[`publish-customer-story/SKILL.md`](publish-customer-story/SKILL.md)
