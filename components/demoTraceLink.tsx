@@ -33,7 +33,8 @@ export const DemoTraceLink = ({
         });
       }}
       className={cn(
-        "inline-flex items-center gap-1.5 text-sm font-medium text-text-primary no-underline transition-colors hover:text-text-secondary",
+        // not-prose: docs prose styles must not paint this as a yellow CTA chip
+        "not-prose inline-flex items-center gap-1.5 border-0 bg-transparent p-0 text-sm font-medium text-text-primary no-underline shadow-none transition-colors hover:bg-transparent hover:text-text-secondary",
         className,
       )}
     >
