@@ -42,6 +42,8 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 
 ## Feature Comparison (Self-Hosted)
 
+[Langfuse Halo](/docs/langfuse-halo) is available in public beta from `v4.28.0` with an [instance-wide Langfuse AI model](/self-hosting/configuration/langfuse-assistant).
+
 | Feature                                                                                                     | Open Source                 | Enterprise                                 |
 | ----------------------------------------------------------------------------------------------------------- | --------------------------- | ------------------------------------------ |
 | **LLM Application & Agent Tracing**                                                                         |                             |                                            |
@@ -57,7 +59,7 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 | Included usage                                                                                              | Unlimited                   | Unlimited                                  |
 | [Multi-modal](/docs/observability/features/multi-modality)                                                  | Yes                         | Yes                                        |
 | **Langfuse AI**                                                                                             |                             |                                            |
-| [Langfuse Assistant (in-app agent)](/docs/langfuse-assistant)                                               | --                          | --                                         |
+| [Langfuse Halo](/docs/langfuse-halo)                                                                        | Public beta (v4.28.0+)      | Public beta (v4.28.0+)                     |
 | **Prompt Management**                                                                                       |                             |                                            |
 | [Prompt versioning](/docs/prompt-management/get-started)                                                    | Yes                         | Yes                                        |
 | Prompt fetching                                                                                             | Unlimited                   | Unlimited                                  |

@@ -90,6 +90,8 @@ Trusted by: Ramp, GoDaddy, [Khan Academy](/users/khan-academy), [Merck Group](/u
 
 ## Feature Comparison (Cloud)
 
+[Langfuse Halo](/docs/langfuse-halo) is available on all Cloud plans to explore project data and take actions with your approval. It is also available in public beta on self-hosted deployments from `v4.28.0` with an [instance-wide Langfuse AI model](/self-hosting/configuration/langfuse-assistant).
+
 | Feature                                                                                         | Hobby               | Core                | Pro                 | Enterprise                   |
 | ----------------------------------------------------------------------------------------------- | ------------------- | ------------------- | ------------------- | ---------------------------- |
 | **LLM Application & Agent Tracing**                                                             |                     |                     |                     |                              |
@@ -109,8 +111,8 @@ Trusted by: Ramp, GoDaddy, [Khan Academy](/users/khan-academy), [Merck Group](/u
 | Access to historical data                                                                       | 30 days             | 90 days             | 3 years             | 3 years                      |
 | [Ingestion throughput](/faq/all/api-limits)                                                     | 1,000 req/min       | 4,000 req/min       | 20,000 req/min      | Custom                       |
 | **Langfuse AI**                                                                                 |                     |                     |                     |                              |
-| [Langfuse Assistant (in-app agent)](/docs/langfuse-assistant)                                   | Yes                 | Yes                 | Yes                 | Yes                          |
-| Langfuse Assistant usage limits                                                                 | Low                 | Medium              | High                | High                         |
+| [Langfuse Halo](/docs/langfuse-halo)                                                            | Yes                 | Yes                 | Yes                 | Yes                          |
+| Langfuse Halo usage limits                                                                      | Low                 | Medium              | High                | High                         |
 | **Prompt Management**                                                                           |                     |                     |                     |                              |
 | [Prompt versioning](/docs/prompt-management/get-started)                                        | Yes                 | Yes                 | Yes                 | Yes                          |
 | Prompt fetching                                                                                 | Unlimited           | Unlimited           | Unlimited           | Unlimited                    |

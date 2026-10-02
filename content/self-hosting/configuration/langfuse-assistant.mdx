@@ -1,50 +1,50 @@
 ---
-title: Langfuse Assistant (self-hosted)
-description: Configure the model, worker MCP access, and optional sandbox for the self-hosted Langfuse Assistant.
+title: Langfuse Halo (self-hosted)
+description: Configure the model, worker MCP access, and optional sandbox for self-hosted Langfuse Halo.
 label: "Version: v4"
-sidebarTitle: "Langfuse Assistant"
+sidebarTitle: "Langfuse Halo"
 ---
 
 import { Steps, Step } from "@/components/docs";
 
-# Langfuse Assistant
+# Langfuse Halo [#langfuse-assistant]
 
-This guide covers the infrastructure setup for the self-hosted Langfuse Assistant. For an introduction to the feature, see [Langfuse Assistant](/docs/langfuse-assistant).
+This guide covers the infrastructure setup for self-hosted Langfuse Halo. For an introduction to the feature, see [Langfuse Halo](/docs/langfuse-halo).
 
 ## Availability and requirements [#requirements]
 
 <Callout type="info">
-  The Langfuse Assistant is in public beta on self-hosted deployments from
+  Langfuse Halo is in public beta on self-hosted deployments from
   version `>=v4.28.0`. It is not covered by SemVer, and its configuration may
   change between releases. [Subscribe to Langfuse OSS
   updates](/self-hosting/oss-newsletter) to hear when it leaves beta.
 </Callout>
 
-To use the Assistant, provide access to a supported model provider: Amazon Bedrock, the Anthropic Messages API, an OpenAI-compatible endpoint, or Google Vertex AI (now Gemini Enterprise Agent Platform). Langfuse uses one instance-wide provider and model configuration, applied to both web and worker. Vertex support is available from `>=v4.39.0`.
+To use Halo, provide access to a supported model provider: Amazon Bedrock, the Anthropic Messages API, an OpenAI-compatible endpoint, or Google Vertex AI (now Gemini Enterprise Agent Platform). Langfuse uses one instance-wide provider and model configuration, applied to both web and worker. Vertex support is available from `>=v4.39.0`.
 
 ## Choose your setup [#choose-your-setup]
 
-We recommend the AWS Lambda MicroVM sandbox. It enables file and code-execution tools, which let the Assistant process large sets of traces and observations with code instead of loading every item into the model context.
+We recommend the AWS Lambda MicroVM sandbox. It enables file and code-execution tools, which let Halo process large sets of traces and observations with code instead of loading every item into the model context.
 
 | Setup                                | Platform     | Available tools                           | Operational cost                                     |
 | ------------------------------------ | ------------ | ----------------------------------------- | ---------------------------------------------------- |
 | AWS Lambda MicroVM (**recommended**) | AWS          | Langfuse tools, files, and code execution | AWS resources, image builds, and upgrade maintenance |
 | Without a sandbox                    | Any platform | Langfuse tools                            | No additional infrastructure                         |
 
-Without a sandbox, file and code-execution tools are disabled. The Assistant can use only its built-in tools, including Langfuse tools exposed through MCP. Choose this setup for non-AWS deployments or when you do not want to operate the additional AWS infrastructure.
+Without a sandbox, file and code-execution tools are disabled. Halo can use only its built-in tools, including Langfuse tools exposed through MCP. Choose this setup for non-AWS deployments or when you do not want to operate the additional AWS infrastructure.
 
 ## Infrastructure overview [#what-runs-where]
 
-Assistant runs are durable jobs. The web service admits and enqueues them, and the worker claims and executes them. Web also calls the model directly for [Ask AI](/docs/observability/features/filter-search-bar#ask-ai) and conversation titles.
+Halo runs are durable jobs. The web service admits and enqueues them, and the worker claims and executes them. Web also calls the model directly for [Ask AI](/docs/observability/features/filter-search-bar#ask-ai) and conversation titles.
 
 | Component                                                    | Status                       | Responsibility                                                                             |
 | ------------------------------------------------------------ | ---------------------------- | ------------------------------------------------------------------------------------------ |
 | <span className="whitespace-nowrap">Langfuse Web</span>      | Existing                     | Enqueues runs, hosts the MCP server, and uses the model for Ask AI and conversation titles |
-| <span className="whitespace-nowrap">Langfuse Worker</span>   | Existing                     | Executes Assistant runs and, when configured, starts the sandbox                           |
+| <span className="whitespace-nowrap">Langfuse Worker</span>   | Existing                     | Executes Halo runs and, when configured, starts the sandbox                                |
 | <span className="whitespace-nowrap">Langfuse AI model</span> | New, required dependency     | Serves model requests from web and worker                                                  |
 | <span className="whitespace-nowrap">Execution sandbox</span> | New, optional infrastructure | Isolates file and code execution from the worker                                           |
 
-## Set up the Assistant [#setup-overview]
+## Set up Halo [#setup-overview]
 
 The steps below use environment variables, which apply to every deployment. The Langfuse Helm chart and the AWS Terraform module expose the same settings as first-class values and place them on the right service for you. See [Deployment recipes](#deployment-recipes).
 
@@ -59,10 +59,10 @@ The steps below use environment variables, which apply to every deployment. The 
 Set `LANGFUSE_AI_PROVIDER` and `LANGFUSE_AI_MODEL` on both web and worker. `LANGFUSE_AI_SMALL_MODEL` is optional:
 
 - `LANGFUSE_AI_PROVIDER` selects `bedrock`, `anthropic`, `openai`, or `vertex`.
-- `LANGFUSE_AI_MODEL` sets the primary model used by the Assistant.
+- `LANGFUSE_AI_MODEL` sets the primary model used by Halo.
 - `LANGFUSE_AI_SMALL_MODEL` sets an optional model for supplementary calls, such as conversation titles. If unset, these calls use `LANGFUSE_AI_MODEL`, which means paying the primary model's price for them. Langfuse Cloud pairs Claude Opus 5 with Claude Haiku 4.5.
 
-**Recommended model: Claude Opus 5.** The Assistant's system prompt and tool loop are developed against it. Other models work, but tool calling and instruction following may vary.
+**Recommended model: Claude Opus 5.** Halo's system prompt and tool loop are developed against it. Other models work, but tool calling and instruction following may vary.
 
 An incomplete provider configuration counts as unconfigured. The UI then reports that the model is not configured.
 
@@ -162,7 +162,7 @@ LANGFUSE_AI_SMALL_MODEL=gemini-3.7-flash
 LANGFUSE_AI_VERTEX_LOCATION=global
 ```
 
-Vertex (now [Gemini Enterprise Agent Platform](https://docs.cloud.google.com/gemini-enterprise-agent-platform/vertex-ai-name-changes)) authenticates through Google [application default credentials](https://cloud.google.com/docs/authentication/application-default-credentials) rather than `LANGFUSE_AI_API_KEY`. Langfuse reads the GCP project from those credentials, so there is no project-id env. Project-scoped LLM connections in the UI do not apply to the Assistant or Ask AI.
+Vertex (now [Gemini Enterprise Agent Platform](https://docs.cloud.google.com/gemini-enterprise-agent-platform/vertex-ai-name-changes)) authenticates through Google [application default credentials](https://cloud.google.com/docs/authentication/application-default-credentials) rather than `LANGFUSE_AI_API_KEY`. Langfuse reads the GCP project from those credentials, so there is no project-id env. Project-scoped LLM connections in the UI do not apply to Halo or Ask AI.
 
 Before configuring Langfuse, enable the Vertex AI API on the GCP project. For Claude, also enable the model in Model Garden. The first use of a partner model requires an administrator to accept the terms. See [Grant user access to partner models](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/partner-models/use-partner-models#grant-user-access-to-partner-models), and confirm each model works.
 
@@ -180,7 +180,7 @@ Langfuse resolves credentials through application default credentials. Prefer a 
 
 ### Configure MCP [#langfuse-mcp]
 
-The Assistant reaches Langfuse data through this instance's native [Langfuse MCP server](/docs/api-and-data-platform/features/mcp-server#set-up). There is no separate MCP process to install.
+Halo reaches Langfuse data through this instance's native [Langfuse MCP server](/docs/api-and-data-platform/features/mcp-server#set-up). There is no separate MCP process to install.
 
 The worker uses `LANGFUSE_MCP_BASE_URL` when set, otherwise `NEXTAUTH_URL`, and appends `/api/public/mcp`. Keep `NEXTAUTH_URL` set to the public Langfuse URL. Langfuse also uses it for links in emails, Slack notifications, and integration settings.
 
@@ -196,7 +196,7 @@ After applying the variables, confirm that the worker can resolve the hostname a
 
 We recommend completing this step for production deployments on AWS. The sandbox enables file and code execution for large-scale analysis while isolating that code from the Langfuse worker. It requires AWS resources in your account, an image built from the Langfuse release, and worker configuration.
 
-Without a sandbox, the Assistant still works with Langfuse tools, but file and code-execution tools are unavailable.
+Without a sandbox, Halo still works with Langfuse tools, but file and code-execution tools are unavailable.
 
 <Callout type="warning">
   There is no non-AWS sandbox yet. Tell us what support you need in [GitHub
@@ -312,27 +312,27 @@ LANGFUSE_IN_APP_AGENT_SANDBOX_AWS_LAMBDA_MICROVM_EGRESS_NETWORK_CONNECTOR_ARN=ar
 
 <Step>
 
-### Enable and verify the Assistant [#turn-on-the-assistant]
+### Enable and verify Halo [#turn-on-the-assistant]
 
-After the model and MCP connection work, and after any optional sandbox setup, enable the Assistant on web and worker:
+After the model and MCP connection work, and after any optional sandbox setup, enable Halo on web and worker:
 
 ```bash
 LANGFUSE_IN_APP_AGENT_ENABLED=true
 ```
 
-Unset or `false` hides the Assistant even when **AI Features** is enabled for the organization. Workers with this variable consume the Assistant run queue. Leave it unset on ingestion-only workers.
+Unset or `false` hides Halo even when **AI Features** is enabled for the organization. Workers with this variable consume the Halo run queue. Leave it unset on ingestion-only workers.
 
 Then:
 
 1. Sign in as an organization owner or administrator.
 2. Open organization **Settings** and enable **AI Features**.
-3. Open the Langfuse Assistant in a project.
+3. Open Langfuse Halo in a project.
 4. Ask it to summarize a recent trace and confirm the run moves from queued to running to complete.
 5. If you configured a sandbox, ask it to write a file.
 
 <Callout type="info">
   Self-hosted deployment telemetry reports `assistantRuns`, the number of
-  Assistant runs started in the reporting window. It does not include Assistant
+  Halo runs started in the reporting window. It does not include Halo
   conversations, prompts, or project data. Langfuse OSS deployments can opt out
   by setting `TELEMETRY_ENABLED=false` on all application containers. Enterprise
   self-hosted telemetry is required for license compliance. See [Self-hosted
@@ -367,7 +367,7 @@ Recreate both services after changing `.env`. A restart does not re-interpolate 
 
 ### Kubernetes
 
-The [Langfuse Helm chart](/self-hosting/deployment/kubernetes-helm) exposes the Assistant under `langfuse.aiFeatures` from chart `v2.1.0`. The chart renders each variable on the services that read it, so you do not split them between web and worker yourself. For Bedrock, attach the workload role with `langfuse.serviceAccount.annotations`. For Vertex on GKE, attach a Workload Identity service account the same way.
+The [Langfuse Helm chart](/self-hosting/deployment/kubernetes-helm) exposes Halo under `langfuse.aiFeatures` from chart `v2.1.0`. The chart renders each variable on the services that read it, so you do not split them between web and worker yourself. For Bedrock, attach the workload role with `langfuse.serviceAccount.annotations`. For Vertex on GKE, attach a Workload Identity service account the same way.
 
 ```yaml filename="values.yaml"
 langfuse:
@@ -401,7 +401,7 @@ For settings the chart does not expose, use `langfuse.additionalEnv`, which appl
 
 ### AWS (Terraform)
 
-The [Langfuse Terraform module for AWS](https://github.com/langfuse/langfuse-terraform-aws) supports the Assistant from `v1.2.0`. It configures the model, grants Bedrock invoke on the Langfuse IAM role, and optionally creates the sandbox. The module deploys the Helm chart, so it fills in the values above for you.
+The [Langfuse Terraform module for AWS](https://github.com/langfuse/langfuse-terraform-aws) supports Halo from `v1.2.0`. It configures the model, grants Bedrock invoke on the Langfuse IAM role, and optionally creates the sandbox. The module deploys the Helm chart, so it fills in the values above for you.
 
 ```hcl
 module "langfuse" {
@@ -443,24 +443,24 @@ Add provider-specific `LANGFUSE_AI_*` variables to both services. Set `LANGFUSE_
 
 [Rebuild and republish](#build-the-microvm-image) the MicroVM image whenever you upgrade Langfuse. Build it from the same Langfuse release so its tools stay aligned with the worker. Keep the build artifact and AWS resources as part of the deployment.
 
-### Trace the Assistant in your own instance [#trace-the-assistant-in-your-own-instance]
+### Trace Halo in your own instance [#trace-the-assistant-in-your-own-instance]
 
-To record Assistant runs as traces, set `LANGFUSE_AI_FEATURES_PROJECT_ID` on web and worker to the ID of a project on the same Langfuse deployment:
+To record Halo runs as traces, set `LANGFUSE_AI_FEATURES_PROJECT_ID` on web and worker to the ID of a project on the same Langfuse deployment:
 
 ```bash
 LANGFUSE_AI_FEATURES_PROJECT_ID=<project-id>
 ```
 
-Assistant turns and Ask AI completions then appear as traces in that project, tagged with the source project. Langfuse writes them through its internal ingestion path, so no API keys or outbound requests are required. Leave the variable unset to record nothing.
+Halo turns and Ask AI completions then appear as traces in that project, tagged with the source project. Langfuse writes them through its internal ingestion path, so no API keys or outbound requests are required. Leave the variable unset to record nothing.
 
 <Callout type="warning">
-  Use a dedicated project. Assistant traces contain prompts, tool calls, model
+  Use a dedicated project. Halo traces contain prompts, tool calls, model
   output, and data read from other projects. Anyone with access to the target
   project can read that data.
 </Callout>
 
 ### Full configuration reference
 
-See [Langfuse Assistant environment variables](/self-hosting/configuration#langfuse-assistant) for defaults, limits, and optional settings.
+See [Langfuse Halo environment variables](/self-hosting/configuration#langfuse-assistant) for defaults, limits, and optional settings.
 
-For common setup failures, see [Troubleshoot the self-hosted Langfuse Assistant](/faq/all/troubleshoot-self-hosted-langfuse-assistant).
+For common setup failures, see [Troubleshoot self-hosted Langfuse Halo](/faq/all/troubleshoot-self-hosted-langfuse-assistant).
