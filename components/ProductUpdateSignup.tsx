@@ -42,7 +42,8 @@ export function ProductUpdateSignup(props: {
     }
   }
 
-  const sizeH = props.small ? "h-[26px]" : "h-[32px]";
+  // Button defaults to size="small" (26px). Keep the input on that same control height.
+  const sizeH = "h-[26px]";
 
   return (
     <form
@@ -57,13 +58,13 @@ export function ProductUpdateSignup(props: {
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className={cn("flex-1 min-w-0 rounded-r-none z-10", sizeH)}
+        className={cn("flex-1 min-w-0 rounded-r-none z-10 py-0", sizeH)}
       />
       <Button
         type="submit"
         variant="secondary"
         disabled={isSubmitting}
-        size={props.small ? "small" : undefined}
+        size="small"
         wrapperClassName={cn("w-auto shrink-0", props.compact && "-ml-1")}
         className="w-auto"
       >
