@@ -15,7 +15,8 @@ import { context, trace } from "@opentelemetry/api";
 import { after } from "next/server";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
-import { buildDemoTraceUrl, demoProjectLangfuseClient } from "@/lib/demo-trace";
+import { demoProjectLangfuseClient } from "@/lib/demo-project-langfuse-client";
+import { buildDemoTraceUrl } from "@/lib/demo-trace";
 import {
   MAX_HISTORY_ROUNDS,
   MOVES,
@@ -242,6 +243,7 @@ const handler = async (req: Request) => {
         let reasoningText = "";
         let plainText = "";
         let sawReasoningSummary = false;
+        let flushed = false;
 
         try {
           try {
@@ -438,6 +440,10 @@ const handler = async (req: Request) => {
               fallbackReason,
             },
           });
+          // Flush spans before exposing the Open-trace URL so Cloud has the
+          // run ready when the visitor clicks through.
+          await finalize();
+          flushed = true;
           write({
             type: "result",
             round,
@@ -458,7 +464,9 @@ const handler = async (req: Request) => {
           });
           close();
         } finally {
-          after(finalize);
+          if (!flushed) {
+            after(finalize);
+          }
         }
       };
 

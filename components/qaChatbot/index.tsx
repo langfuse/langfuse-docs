@@ -223,14 +223,14 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                         const lastTextPartIndex =
                           textPartIndices[textPartIndices.length - 1];
                         const isLastTextPart = i === lastTextPartIndex;
-                        // Check if message is complete: not submitted/streaming and no parts are streaming
+                        // Per-message completeness: earlier replies keep their
+                        // Open-trace link while a later turn is streaming.
                         const hasStreamingParts = message.parts.some(
                           (p) => "state" in p && p.state === "streaming",
                         );
-                        const isMessageComplete =
-                          status !== "submitted" &&
-                          status !== "streaming" &&
-                          !hasStreamingParts;
+                        const isMessageComplete = !hasStreamingParts;
+                        const isChatIdle =
+                          status !== "submitted" && status !== "streaming";
                         const traceUrl = TRACE_ID_PATTERN.test(message.id)
                           ? buildDemoTraceUrl({ traceId: message.id })
                           : null;
@@ -259,7 +259,8 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                               isLastMessage &&
                               isNotFirstMessage &&
                               isLastTextPart &&
-                              isMessageComplete && (
+                              isMessageComplete &&
+                              isChatIdle && (
                                 <Actions className="mt-2">
                                   <Action
                                     onClick={() => regenerate()}

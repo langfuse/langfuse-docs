@@ -71,12 +71,11 @@ const LlmTaskSlot = ({
           feedback={feedback}
           onFeedback={onFeedback}
         />
-        {!compact && (
-          <DemoTraceLink
-            traceUrl={buildDemoTraceUrl({ traceId: slot.traceId })}
-            source="sentiment_classifier"
-          />
-        )}
+        <DemoTraceLink
+          traceUrl={buildDemoTraceUrl({ traceId: slot.traceId })}
+          source="sentiment_classifier"
+          className={compact ? "text-xs" : undefined}
+        />
       </div>
     );
   }

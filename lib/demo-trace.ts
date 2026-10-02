@@ -1,11 +1,3 @@
-import { LangfuseClient } from "@langfuse/client";
-
-export const demoProjectLangfuseClient = new LangfuseClient({
-  baseUrl: process.env.NEXT_PUBLIC_EU_LANGFUSE_BASE_URL,
-  publicKey: process.env.NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY,
-  secretKey: process.env.EU_LANGFUSE_SECRET_KEY,
-});
-
 /** Region-aware path into the shared Langfuse Cloud demo project. */
 export const DEMO_PROJECT_PATH = "/cloud/demo";
 
