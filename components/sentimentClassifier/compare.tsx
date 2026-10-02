@@ -23,8 +23,7 @@ import { CLASSIFIER_SEQUENCE, type ClassifierDefinition } from "./criteria";
 import { sumUsage, type SentimentUsage } from "./cost";
 import type { ClassifierAnswer } from "./types";
 
-const PUBLIC_SAMPLE_PROJECT_TRACES_URL =
-  "https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces";
+const PUBLIC_SAMPLE_PROJECT_TRACES_URL = "/cloud/demo/traces";
 
 type EngineState = {
   result: ClassifierRunResult;

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 
-import type { DemoTraceSource } from "@/lib/demo-public-trace";
+import type { DemoTraceSource } from "@/lib/demo-trace";
 import { cn } from "@/lib/utils";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 
