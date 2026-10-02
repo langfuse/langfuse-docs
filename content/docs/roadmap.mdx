@@ -12,50 +12,44 @@ Langfuse is [open source](/open-source), and we want to be transparent about whe
   dates. Priorities may evolve as we learn from users and the community.
 </Callout>
 
-## Current focus areas [#roadmap]
+Every quarter, we organize a Langfuse Townhall where we demo all the latest features and discuss what's next. Watch latest recording below or [subscribe to our event calendar](https://langfuse.com/events) to be notified about the next Townhall.
 
-Our goal is to make Langfuse the best open platform for understanding, evaluating, and improving AI agents (see [Why Langfuse?](/why)).
+**TODO: INSERT YOUTUBE VIDEO OF LAST TOWNHALL HERE**
 
-### Langfuse Gateway [#langfuse-gateway]
+## 🚧 In Progress / near-term [#roadmap]
 
-Bring model access, observability, and governance into one Langfuse-native control plane.
+### New Capabilities
 
-- Provide a thin, bring-your-own-key gateway with virtual keys and access controls across Langfuse Cloud and self-hosted deployments.
-- Connect requests directly to Langfuse tracing and cost tracking, with clear visibility into model usage and spend.
+- **Langfuse Gateway**
+  - Provide a thin, bring-your-own-key gateway with virtual keys and access controls across Langfuse Cloud and self-hosted deployments.
+  - Connect requests directly to Langfuse tracing and cost tracking, with clear visibility into model usage and spend.
+- **Proactive issue detection**
+  - Help teams find the problems that matter without manually reviewing every trace.
+  - Group interactions into recurring topics, behaviors, and failure modes, and surface the most important issues with useful summaries and examples.
+- **Agent Transcripts**
+  - Simplified chat-UI to make long-running agents more readable in UI
+  - Standardized data model exposed across API, MCP, evals, and other features
+- **In-app agent improvements**
+  - Solve for complex workflows like "LLM-as-a-judge calibration" end-to-end with extended sandbox capabilities
+- **Multi-span/trajectory evals**
+- **Security/auth improvements**
+  - Custom and standardized RBAC model across user-roles and api-based access
+  - User-owned and service-account API keys
+  - OAuth for MCP server
+    - MCP currently uses API keys, thus has system-wide scope
+    - OAuth will allow to use user-level access rights for MCP
+  - Support for Groups synced from IDPs for easier access management
+- **Org-level dashboards**
+  - Aggregated overview of cost, quality and other metrics across all projects of an organization
+- **Vibe-codeable/custom trace viewers**
 
-### Proactive issue detection
+### Self-hosting improvements
 
-Help teams find the problems that matter without manually reviewing every trace.
+- Increase batching of S3 events in ingest to reduce cost
+- Move to Rust for ingestion pipeline to recude latency and cost
+- Hardened Langfuse Government
 
-- Build a consistent representation of agent traces, including long-running and multi-span interactions.
-- Group interactions into recurring topics, behaviors, and failure modes, and surface the most important issues with useful summaries and examples.
-- Make it easier to turn production issues into datasets, evaluations, experiments, and improvement workflows.
-
-### Better evals and experiments
-
-Extend evaluation and experimentation workflows for increasingly complex agent systems.
-
-- Improve the evaluator foundation and use AI to generate code-based evaluators for specific use cases.
-- Evaluate complete agent trajectories and other multi-span interactions.
-- Make it easier to compare prompts, models, and runtime changes, including experiments on production traffic.
-
-### Scale and enterprise controls
-
-Expand the capabilities teams use to operate Langfuse at increasing scale in the cloud or on their own infrastructure.
-
-- Unify query behavior and improve ingestion reliability, performance, and scale for large agent workloads.
-- Make model pricing and regional matching more accurate, and clearly flag missing price definitions.
-- Improve API key management, role-based access controls, self-hosting, security, and compliance.
-
-### A clearer agent-engineering workflow
-
-Make Langfuse easier to adopt and more coherent across the full improvement loop.
-
-- Create clearer onboarding, home, agent, score, and experiment views.
-- Make Langfuse capabilities available through MCP so external agents can use them in their workflows.
-- Connect tracing, datasets, evaluations, and experiments with fewer manual steps.
-
-## Recently released [#releases]
+## ✅ Recently released [#releases]
 
 import { changelogSource } from "@/lib/source";
 import { Link } from "@/components/ui/link";
