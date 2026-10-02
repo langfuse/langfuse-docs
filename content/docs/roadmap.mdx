@@ -12,50 +12,54 @@ Langfuse is [open source](/open-source), and we want to be transparent about whe
   dates. Priorities may evolve as we learn from users and the community.
 </Callout>
 
-## Current focus areas [#roadmap]
+Each quarter, we host a Langfuse town hall to demo new features and discuss what's next. Watch the latest recording below or [subscribe to our event calendar](https://langfuse.com/events) for updates on the next one.
 
-Our goal is to make Langfuse the best open platform for understanding, evaluating, and improving AI agents (see [Why Langfuse?](/why)).
+<iframe
+  width="100%"
+  className="aspect-video rounded mt-5"
+  src="https://www.youtube-nocookie.com/embed/h2PvNRhDTcU?rel=0"
+  title="Langfuse Town Hall: V4 Data Model Upgrade, Faster Queries, New UI and Roadmap"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerPolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
 
-### Langfuse Gateway [#langfuse-gateway]
+## 🚧 In progress and coming next [#roadmap]
 
-Bring model access, observability, and governance into one Langfuse-native control plane.
+### New capabilities
 
-- Provide a thin, bring-your-own-key gateway with virtual keys and access controls across Langfuse Cloud and self-hosted deployments.
-- Connect requests directly to Langfuse tracing and cost tracking, with clear visibility into model usage and spend.
+- **Langfuse Gateway**
+  - Provide a thin, bring-your-own-key gateway with virtual keys and access controls across Langfuse Cloud and self-hosted deployments.
+  - Connect requests directly to Langfuse tracing and cost tracking, with clear visibility into model usage and spend.
+- **Proactive issue detection**
+  - Develop Topics to identify recurring user intents, behaviors, and failure patterns across traces at scale.
+  - Surface clusters, outliers, and representative examples so teams can find issues without reviewing every trace.
+- **Agent transcripts**
+  - Extend a shared transcript representation across traces and sessions to make long-running agent interactions easier to read.
+  - Use transcripts as a foundation for Topics and other improvement workflows.
+- **In-app agent improvements**
+  - Help users complete workflows such as LLM-as-a-judge calibration with more capable sandbox tools.
+- **Multi-span and trajectory evaluations**
+  - Evaluate complete agent interactions using the observations-first data model.
+- **Skill management**
+  - Manage and version agent skills, then trace how agents use them.
+- **Security and authentication improvements**
+  - Add granular permissions to API keys, including gateway-specific access.
+  - Support user-owned and service-account API keys.
+  - Add OAuth authentication to the MCP server so it can respect user-level permissions.
+- **Organization-level dashboards**
+  - Provide an aggregated view of cost, quality, and other metrics across an organization's projects.
+- **Custom trace viewers**
+  - Build and adapt trace viewers with coding agents.
 
-### Proactive issue detection
+### Self-hosting improvements
 
-Help teams find the problems that matter without manually reviewing every trace.
+- Batch more S3 ingestion events to reduce cost.
+- Move ingestion work to Rust in stages to reduce latency and cost.
+- Extend [Hardening for Government](/self-hosting/configuration/hardening#hardening-for-government) with FIPS-compatible deployment support and hardened images.
 
-- Build a consistent representation of agent traces, including long-running and multi-span interactions.
-- Group interactions into recurring topics, behaviors, and failure modes, and surface the most important issues with useful summaries and examples.
-- Make it easier to turn production issues into datasets, evaluations, experiments, and improvement workflows.
-
-### Better evals and experiments
-
-Extend evaluation and experimentation workflows for increasingly complex agent systems.
-
-- Improve the evaluator foundation and use AI to generate code-based evaluators for specific use cases.
-- Evaluate complete agent trajectories and other multi-span interactions.
-- Make it easier to compare prompts, models, and runtime changes, including experiments on production traffic.
-
-### Scale and enterprise controls
-
-Expand the capabilities teams use to operate Langfuse at increasing scale in the cloud or on their own infrastructure.
-
-- Unify query behavior and improve ingestion reliability, performance, and scale for large agent workloads.
-- Make model pricing and regional matching more accurate, and clearly flag missing price definitions.
-- Improve API key management, role-based access controls, self-hosting, security, and compliance.
-
-### A clearer agent-engineering workflow
-
-Make Langfuse easier to adopt and more coherent across the full improvement loop.
-
-- Create clearer onboarding, home, agent, score, and experiment views.
-- Make Langfuse capabilities available through MCP so external agents can use them in their workflows.
-- Connect tracing, datasets, evaluations, and experiments with fewer manual steps.
-
-## Recently released [#releases]
+## ✅ Recently released [#releases]
 
 import { changelogSource } from "@/lib/source";
 import { Link } from "@/components/ui/link";
