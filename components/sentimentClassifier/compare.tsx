@@ -399,6 +399,22 @@ export const SentimentClassifierCompare = ({
                       />
                     </div>
                   ))}
+                  <div
+                    className={cn(
+                      "border-t border-line-structure",
+                      compact ? "pt-1.5" : "pt-3",
+                    )}
+                  >
+                    <DemoTraceLink
+                      traceUrl={buildDemoTraceUrl(jev.traceId)}
+                      source="jev_evals_blog"
+                      className={
+                        compact
+                          ? "w-full justify-center px-3 py-1.5 text-xs gap-2"
+                          : "w-full justify-center"
+                      }
+                    />
+                  </div>
                 </div>
               )}
             </div>
@@ -484,29 +500,10 @@ export const SentimentClassifierCompare = ({
           />
         )}
 
-        {jev?.traceId ? (
-          <div
-            className={cn(
-              "flex justify-center border-t border-line-structure",
-              compact ? "pt-2" : "pt-3",
-            )}
-          >
-            <DemoTraceLink
-              traceUrl={buildDemoTraceUrl(jev.traceId)}
-              source="jev_evals_blog"
-              className={compact ? "px-3 py-1.5 text-xs gap-2" : undefined}
-            />
-          </div>
-        ) : null}
-
         <p
           className={cn(
-            "text-[11px] text-muted-foreground",
-            jev?.traceId
-              ? compact
-                ? "pt-2"
-                : "pt-3"
-              : cn("border-t border-line-structure", compact ? "pt-2" : "pt-3"),
+            "text-[11px] text-muted-foreground border-t border-line-structure",
+            compact ? "pt-2" : "pt-3",
           )}
         >
           Traces in the{" "}
