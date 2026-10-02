@@ -33,28 +33,30 @@ Each quarter, we host a Langfuse town hall to demo new features and discuss what
   - Provide a thin, bring-your-own-key gateway with virtual keys and access controls across Langfuse Cloud and self-hosted deployments.
   - Connect requests directly to Langfuse tracing and cost tracking, with clear visibility into model usage and spend.
 - **Proactive issue detection**
-  - Help teams find the problems that matter without manually reviewing every trace.
-  - Group interactions into recurring topics, behaviors, and failure modes, and surface the most important issues with useful summaries and examples.
+  - Develop Topics to identify recurring user intents, behaviors, and failure patterns across traces at scale.
+  - Surface clusters, outliers, and representative examples so teams can find issues without reviewing every trace.
 - **Agent transcripts**
-  - A chat view that makes long-running agents easier to read
-  - Standardized data model exposed across API, MCP, evals, and other features
+  - Extend a shared transcript representation across traces and sessions to make long-running agent interactions easier to read.
+  - Use transcripts as a foundation for Topics and other improvement workflows.
 - **In-app agent improvements**
-  - Solve for complex workflows like "LLM-as-a-judge calibration" end-to-end with extended sandbox capabilities
-- **Multi-span/trajectory evals**
+  - Help users complete workflows such as LLM-as-a-judge calibration with more capable sandbox tools.
+- **Multi-span and trajectory evaluations**
+  - Evaluate complete agent interactions using the observations-first data model.
+- **Skill management**
+  - Manage and version agent skills, then trace how agents use them.
 - **Security/auth improvements**
-  - Custom and standardized RBAC model across user-roles and api-based access
+  - Add granular permissions to API keys, including gateway-specific access.
   - User-owned and service-account API keys
   - OAuth for the MCP server with user-level permissions
-  - Support for Groups synced from IDPs for easier access management
 - **Org-level dashboards**
   - Aggregated overview of cost, quality and other metrics across all projects of an organization
 - **Vibe-codeable/custom trace viewers**
 
 ### Self-hosting improvements
 
-- Increase batching of S3 events in ingest to reduce cost
-- Move to Rust for the ingestion pipeline to reduce latency and cost
-- Hardened Langfuse Government
+- Batch more S3 ingestion events to reduce cost.
+- Move ingestion work to Rust in stages to reduce latency and cost.
+- Extend [Hardening for Government](/self-hosting/configuration/hardening#hardening-for-government) with FIPS-compatible deployment support and hardened images.
 
 ## ✅ Recently released [#releases]
 
