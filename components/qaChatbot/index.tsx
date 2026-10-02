@@ -40,9 +40,13 @@ import {
   ToolInput,
 } from "@/components/ai-elements/tool";
 import { scoreDemoNegativeUserFeedback } from "@/components/demoLangfuseBrowserClients";
+import { DemoTraceLink } from "@/components/demoTraceLink";
+import { buildDemoTraceUrl } from "@/lib/demo-trace";
 import { FeedbackDialog } from "./FeedbackPopover";
 import { cn } from "@/lib/utils";
 import type { UIMessage } from "ai";
+
+const TRACE_ID_PATTERN = /^[0-9a-f]{32}$/i;
 
 type ChatMessage = UIMessage;
 
@@ -227,6 +231,9 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                           status !== "submitted" &&
                           status !== "streaming" &&
                           !hasStreamingParts;
+                        const traceUrl = TRACE_ID_PATTERN.test(message.id)
+                          ? buildDemoTraceUrl({ traceId: message.id })
+                          : null;
                         // Add spacing if next part is a different type (for consistent spacing between different types)
                         const nextPart = message.parts[i + 1];
                         const hasNextPartDifferentType =
@@ -237,6 +244,17 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                             className={hasNextPartDifferentType ? "mb-4" : ""}
                           >
                             <Response>{part.text}</Response>
+                            {message.role === "assistant" &&
+                              isNotFirstMessage &&
+                              isLastTextPart &&
+                              isMessageComplete &&
+                              traceUrl && (
+                                <DemoTraceLink
+                                  traceUrl={traceUrl}
+                                  source="qa_chatbot"
+                                  className="mt-3"
+                                />
+                              )}
                             {message.role === "assistant" &&
                               isLastMessage &&
                               isNotFirstMessage &&

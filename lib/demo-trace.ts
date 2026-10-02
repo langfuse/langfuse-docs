@@ -13,9 +13,11 @@ export const DEMO_PROJECT_PATH = "/cloud/demo";
 export const DEMO_TRACES_PATH = `${DEMO_PROJECT_PATH}/traces`;
 
 export type DemoTraceSource =
+  | "qa_chatbot"
   | "image_generator"
   | "voice_agent"
-  | "rock_paper_scissors";
+  | "rock_paper_scissors"
+  | "sentiment_classifier";
 
 /**
  * Build a link to a specific demo-project trace.

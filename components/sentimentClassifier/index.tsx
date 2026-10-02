@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { Loader } from "@/components/ai-elements/loader";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 import { scoreDemoNegativeUserFeedback } from "@/components/demoLangfuseBrowserClients";
+import { DemoTraceLink } from "@/components/demoTraceLink";
+import { buildDemoTraceUrl } from "@/lib/demo-trace";
 import { SendIcon } from "lucide-react";
 import {
   EXAMPLE_TEXTS,
@@ -149,6 +151,11 @@ export const SentimentClassifier = ({
                   }}
                 />
               )}
+
+              <DemoTraceLink
+                traceUrl={buildDemoTraceUrl({ traceId: result.traceId })}
+                source="sentiment_classifier"
+              />
             </div>
           )}
         </div>
