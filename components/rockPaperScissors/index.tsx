@@ -399,7 +399,6 @@ export const RockPaperScissors = ({
                       <DemoTraceLink
                         traceUrl={result.traceUrl}
                         source="rock_paper_scissors"
-                        label="Show trace"
                       />
                     </div>
                   </div>
