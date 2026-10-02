@@ -23,8 +23,11 @@ import { CLASSIFIER_SEQUENCE, type ClassifierDefinition } from "./criteria";
 import { sumUsage, type SentimentUsage } from "./cost";
 import type { ClassifierAnswer } from "./types";
 
-const PUBLIC_SAMPLE_PROJECT_TRACES_URL =
-  "https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces";
+/** Region-picker path into the Langfuse Cloud demo project. */
+const DEMO_PROJECT_URL = "/cloud/demo";
+
+const buildDemoTraceUrl = (traceId: string) =>
+  `${DEMO_PROJECT_URL}/traces/${traceId}`;
 
 type EngineState = {
   result: ClassifierRunResult;
@@ -486,15 +489,34 @@ export const SentimentClassifierCompare = ({
             compact ? "pt-2" : "pt-3",
           )}
         >
+          {jev?.traceId ? (
+            <>
+              <a
+                href={buildDemoTraceUrl(jev.traceId)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => {
+                  capture("demo:view_trace_in_langfuse_clicked", {
+                    source: "jev_evals_blog",
+                    trace_url: buildDemoTraceUrl(jev.traceId),
+                  });
+                }}
+                className="underline underline-offset-2 text-text-links hover:text-primary"
+              >
+                View this Jev trace
+              </a>
+              {" · "}
+            </>
+          ) : null}
           Traces in the{" "}
           <a
-            href={PUBLIC_SAMPLE_PROJECT_TRACES_URL}
+            href={DEMO_PROJECT_URL}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => {
               capture("demo:view_trace_in_langfuse_clicked", {
                 source: "jev_evals_blog",
-                trace_url: PUBLIC_SAMPLE_PROJECT_TRACES_URL,
+                trace_url: DEMO_PROJECT_URL,
               });
             }}
             className="underline underline-offset-2 text-text-links hover:text-primary"
