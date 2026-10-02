@@ -35,8 +35,9 @@ const ASK_AI_BAR_HIDDEN_PATHS: ReadonlyArray<RegExp> = [
   /^\/cookie-policy(\/|$)/,
   // App proxy
   /^\/cloud(\/|$)/,
-  // Custom-designed regional / annual landing pages
+  // Custom-designed regional / industry landing pages
   /^\/japan(\/|$)/,
+  /^\/government(\/|$)/,
   /^\/cn(\/|$)/,
   /^\/kr(\/|$)/,
   /^\/wrapped(\/|$)/,
