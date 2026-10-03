@@ -138,6 +138,24 @@ The Assistant is available from `>=v4.28.0`. It stays hidden until `LANGFUSE_IN_
 
 </div>
 
+## Model definitions [#model-definitions]
+
+Langfuse infers usage and cost for a generation by matching its `model` against a model definition, which carries prices per usage type and, for some models, a tokenizer. Set `LANGFUSE_MODEL_DEFINITIONS_ENABLED=false` on the web and worker containers to switch that off for the whole instance.
+
+| Variable                             | Required / Default | Description                                                                                                                                                    |
+| ------------------------------------ | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_MODEL_DEFINITIONS_ENABLED` | `true`             | Set to `false` to stop Langfuse resolving model definitions. Affects seeding, ingestion, the UI and the API. Set it on both the web and the worker containers. |
+
+With it disabled:
+
+- The worker no longer seeds or updates the Langfuse-maintained price list on startup.
+- Ingestion no longer matches a model, so no cost is calculated and the tokenizer never runs.
+- **Project Settings > Models** is hidden, and the model definition endpoints under `/api/public/models`, the equivalent MCP tools, and the in-app model views return `403`.
+
+Usage and cost that you [send with your generations](/docs/observability/features/token-and-cost-tracking#ingest) are unaffected: Langfuse stops inferring them, not recording them. Cost already stored on existing observations is left as it is, so the switch applies to new data only.
+
+Disable it when cost is reconciled outside Langfuse, when your gateway already attaches authoritative usage and cost to every generation, or when your models are self-hosted and a Langfuse-maintained match pattern would otherwise price them against an unrelated public model.
+
 ## Additional Features
 
 There are additional features that can be enabled and configured via environment variables.

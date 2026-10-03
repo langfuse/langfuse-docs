@@ -1,0 +1,40 @@
+---
+date: 2026-09-18
+title: Turn off model definitions on self-hosted instances
+description: Run Langfuse without pricing lookups or the tokenizer, and keep the usage and cost you send with your generations.
+canonical: /self-hosting/configuration#model-definitions
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+Self-hosted instances can now run without model definitions. Set `LANGFUSE_MODEL_DEFINITIONS_ENABLED=false` on the web and worker containers, and Langfuse stops inferring usage and cost entirely.
+
+This fits deployments where Langfuse should not be the one doing the pricing:
+
+- Your gateway already attaches authoritative `usage` and `cost` to every generation, so inference only duplicates it.
+- Your models are self-hosted or fine-tuned, and a Langfuse-maintained match pattern would otherwise price them against an unrelated public model.
+- Cost is reconciled in a system outside Langfuse, and you want tracing without the pricing surface at all.
+
+With the switch off, the worker stops seeding the Langfuse-maintained price list on startup, ingestion no longer matches a model, no cost is calculated, and the tokenizer never runs. **Project Settings > Models** is hidden, and the model definition endpoints under `/api/public/models` and the equivalent MCP tools return `403`.
+
+Usage and cost that you send with your generations are untouched — they are your data, and Langfuse still records and displays them. Cost already stored on existing observations stays as it is, so the switch applies to new data only.
+
+It defaults to `true`, so nothing changes until you set it.
+
+<Cards num={2}>
+  <Card
+    title="Configuration"
+    href="/self-hosting/configuration#model-definitions"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Token & cost tracking"
+    href="/docs/observability/features/token-and-cost-tracking"
+    icon={<Book />}
+    arrow
+  />
+</Cards>
