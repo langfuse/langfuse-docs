@@ -31,39 +31,49 @@ export function CTACard({
           </div>
           {children && (
             <div className="flex w-fit flex-col items-start gap-3 sm:flex-row">
-              {showArrow
-                ? React.Children.map(children, (child) => {
-                    if (React.isValidElement(child) && child.type === Button) {
-                      if (
-                        child.props.asChild &&
-                        React.isValidElement(child.props.children)
-                      ) {
-                        // asChild: inject arrow inside the <a> so Slot renders <a> with button classes
-                        const linkChild = child.props
-                          .children as React.ReactElement;
-                        return React.cloneElement(child, {
-                          children: React.cloneElement(linkChild, {
-                            children: (
-                              <span className="flex gap-2 items-center">
-                                {linkChild.props.children}
-                                <ArrowRight className="w-4 h-4" />
-                              </span>
-                            ),
-                          }),
-                        } as any);
-                      }
-                      return React.cloneElement(child, {
-                        children: (
-                          <span className="flex gap-2 items-center">
-                            {child.props.children}
-                            <ArrowRight className="w-4 h-4" />
-                          </span>
-                        ),
-                      } as any);
-                    }
-                    return child;
-                  })
-                : children}
+              {React.Children.map(children, (child) => {
+                if (!React.isValidElement(child) || child.type !== Button) {
+                  return child;
+                }
+
+                const className = cn(
+                  "w-auto px-4",
+                  (child.props as { className?: string }).className,
+                );
+
+                if (!showArrow) {
+                  return React.cloneElement(child, { className } as any);
+                }
+
+                if (
+                  child.props.asChild &&
+                  React.isValidElement(child.props.children)
+                ) {
+                  // asChild: inject arrow inside the <a> so Slot renders <a> with button classes
+                  const linkChild = child.props.children as React.ReactElement;
+                  return React.cloneElement(child, {
+                    className,
+                    children: React.cloneElement(linkChild, {
+                      children: (
+                        <span className="flex items-center gap-2">
+                          {linkChild.props.children}
+                          <ArrowRight className="h-4 w-4" />
+                        </span>
+                      ),
+                    }),
+                  } as any);
+                }
+
+                return React.cloneElement(child, {
+                  className,
+                  children: (
+                    <span className="flex items-center gap-2">
+                      {child.props.children}
+                      <ArrowRight className="h-4 w-4" />
+                    </span>
+                  ),
+                } as any);
+              })}
             </div>
           )}
         </div>
