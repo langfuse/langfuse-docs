@@ -5,6 +5,7 @@ const INDEX_HREF = "/users";
 const INDEX_LABEL = "Customer stories";
 
 const SLUG_LABELS: Record<string, string> = {
+  dkb: "DKB",
   merckgroup: "Merck",
   sumup: "SumUp",
   "magic-patterns-ai-design-tools": "Magic Patterns",
