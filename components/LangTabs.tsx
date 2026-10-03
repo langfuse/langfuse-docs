@@ -8,9 +8,15 @@ import {
 } from "fumadocs-ui/components/tabs";
 import { cn } from "@/lib/utils";
 import { CornerBox } from "./ui";
+import {
+  isLanguageTabGroup,
+  normalizeTabLabel,
+  tabValueFromHash,
+  toTabId,
+  toTabValue,
+} from "@/lib/lang-tabs";
 
 const KEY = "synced-tabs:language";
-const normalize = (s: string) => s.trim().toLowerCase();
 
 type Store = {
   getSnapshot: () => string | null;
@@ -56,10 +62,6 @@ if (typeof window !== "undefined") {
   });
 }
 
-function toValue(s: string): string {
-  return s.toLowerCase().replace(/\s/g, "-");
-}
-
 export function LangTab({
   className,
   forceMount = true,
@@ -84,6 +86,7 @@ export function LangTabs(props: {
   children: React.ReactNode;
   defaultIndex?: number;
   onChange?: (next: number) => void;
+  updateAnchor?: boolean;
 }) {
   const { items, children, defaultIndex = 0, onChange } = props;
 
@@ -101,8 +104,15 @@ export function LangTabs(props: {
     });
   }, [items]);
 
+  const persistLanguage = isLanguageTabGroup(labels);
+  const updateAnchor = props.updateAnchor ?? persistLanguage;
+
   const values = useMemo(
-    () => labels.map((l, i) => (l ? toValue(l) : String(i))),
+    () => labels.map((l, i) => (l ? toTabValue(l) : String(i))),
+    [labels],
+  );
+  const ids = useMemo(
+    () => labels.map((l, i) => (l ? toTabId(l) : `tab-${i}`)),
     [labels],
   );
   const storedLabel = useSyncExternalStore(
@@ -117,21 +127,37 @@ export function LangTabs(props: {
   );
 
   useEffect(() => {
+    if (!persistLanguage) return;
     if (storedLabel == null && initialLabel) store.set(initialLabel);
-  }, [storedLabel, initialLabel]);
+  }, [persistLanguage, storedLabel, initialLabel]);
 
-  const [internalValue, setInternalValue] = React.useState(
-    values[defaultIndex] ?? values[0],
-  );
+  const [internalValue, setInternalValue] = React.useState(() => {
+    if (typeof window !== "undefined") {
+      const fromHash = tabValueFromHash(window.location.hash, ids, values);
+      if (fromHash) return fromHash;
+    }
+    return values[defaultIndex] ?? values[0];
+  });
 
   const containerRef = useRef<HTMLDivElement>(null);
   const pendingOffsetRef = useRef<number | null>(null);
 
   useEffect(() => {
+    const fromHash =
+      typeof window !== "undefined"
+        ? tabValueFromHash(window.location.hash, ids, values)
+        : undefined;
+    if (fromHash) {
+      setInternalValue(fromHash);
+      return;
+    }
+    if (!persistLanguage) return;
     const target = storedLabel ?? initialLabel;
     if (target) {
       const idx = labels.findIndex(
-        (l) => typeof l === "string" && normalize(l) === normalize(target),
+        (l) =>
+          typeof l === "string" &&
+          normalizeTabLabel(l) === normalizeTabLabel(target),
       );
       if (idx !== -1) {
         setInternalValue(values[idx]);
@@ -143,7 +169,15 @@ export function LangTabs(props: {
         return;
       }
     }
-  }, [storedLabel, initialLabel, labels, items.length, values]);
+  }, [
+    persistLanguage,
+    storedLabel,
+    initialLabel,
+    labels,
+    items.length,
+    values,
+    ids,
+  ]);
 
   useEffect(() => {
     if (pendingOffsetRef.current !== null && containerRef.current) {
@@ -173,8 +207,10 @@ export function LangTabs(props: {
     setInternalValue(v);
     const idx = values.indexOf(v);
     const label = idx !== -1 ? labels[idx] : null;
-    if (typeof label === "string") store.set(label);
-    else store.set(v);
+    if (persistLanguage) {
+      if (typeof label === "string") store.set(label);
+      else store.set(v);
+    }
     if (typeof onChange === "function" && idx !== -1) onChange(idx);
   };
 
@@ -182,8 +218,9 @@ export function LangTabs(props: {
     <div ref={containerRef}>
       <CornerBox>
         <FumadocsTabs
-          key={internalValue}
-          defaultValue={internalValue}
+          value={internalValue}
+          onValueChange={handleValueChange}
+          updateAnchor={updateAnchor}
           className="flex overflow-hidden flex-col my-0 rounded-none border-none"
         >
           <FumadocsTabsList
@@ -195,7 +232,6 @@ export function LangTabs(props: {
               <FumadocsTabsTrigger
                 key={i}
                 value={values[i]}
-                onClick={() => handleValueChange(values[i])}
                 className="inline-flex items-center gap-2 whitespace-nowrap rounded-none border-b border-transparent pb-2 pt-1.5 text-xs text-text-tertiary transition-colors font-[430] hover:text-foreground cursor-pointer disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-line-cta data-[state=active]:text-text-primary data-[state=active]:font-medium"
               >
                 {typeof item === "string" ? item : (item?.label ?? String(i))}
@@ -204,10 +240,12 @@ export function LangTabs(props: {
           </FumadocsTabsList>
           {React.Children.map(children, (child, i) => {
             if (!React.isValidElement(child)) return child;
+            const childProps = child.props as { id?: string };
             return React.cloneElement(
-              child as React.ReactElement<{ value: string }>,
+              child as React.ReactElement<{ value: string; id?: string }>,
               {
                 value: values[i] ?? String(i),
+                id: childProps.id ?? ids[i],
               },
             );
           })}
