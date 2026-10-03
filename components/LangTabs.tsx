@@ -7,11 +7,11 @@ import React, {
   useSyncExternalStore,
 } from "react";
 import {
-  Tabs as FumadocsTabs,
-  Tab as FumadocsTab,
+  TabsContent as FumadocsTabsContent,
   TabsList as FumadocsTabsList,
   TabsTrigger as FumadocsTabsTrigger,
 } from "fumadocs-ui/components/tabs";
+import { Tabs as FumadocsTabs } from "fumadocs-ui/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { CornerBox } from "./ui";
 import {
@@ -71,13 +71,17 @@ if (typeof window !== "undefined") {
 export function LangTab({
   className,
   forceMount = true,
+  value,
   ...props
-}: React.ComponentProps<typeof FumadocsTab>) {
+}: Omit<React.ComponentProps<typeof FumadocsTabsContent>, "value"> & {
+  value?: string;
+}) {
   return (
-    <FumadocsTab
+    <FumadocsTabsContent
       // Fumadocs 16.12+ unmounts inactive tabs by default. Keep previous
       // behavior so TOC/hash links and mermaid/code in other tabs still work.
       forceMount={forceMount}
+      value={value ?? ""}
       className={cn(
         "pt-4 text-sm bg-transparent rounded-none prose-no-margin bg-stripe-pattern",
         className,
