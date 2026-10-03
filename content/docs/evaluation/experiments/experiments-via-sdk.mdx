@@ -693,4 +693,4 @@ Once configured, team members can trigger remote experiments via the `Run` butto
 
 </Steps>
 
-**Typical workflow**: Your webhook receives the request, fetches the dataset from Langfuse, runs your application against the dataset items, evaluates the results, and ingests the scores back into Langfuse as a new Experiment run.
+**Typical workflow**: Your webhook receives the request, fetches the dataset from Langfuse, runs your application against the dataset items, evaluates the results, and ingests the scores back into Langfuse as a new Experiment run. The trigger does not attach Langfuse-managed evaluators. Score in your endpoint, where you already have each item's expected output — an observation-level rule cannot map that field, so a similarity judge on those traces will score `0`.
