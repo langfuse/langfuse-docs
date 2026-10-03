@@ -8,7 +8,7 @@ category: Integrations
 
 # Observability for Grokified with Langfuse
 
-This guide shows you how to integrate Grokified with Langfuse. Grokified's chat completions API is OpenAI-compatible, so you can use the Langfuse OpenAI drop-in replacement to trace all parts of your application.
+This guide shows you how to integrate Grokified with Langfuse. Grokified's chat completions API is OpenAI-compatible, so you can use the Langfuse OpenAI drop-in replacement to trace model calls. Use Langfuse's low-level SDK or `@observe()` decorator to trace other parts of your application.
 
 > **What is Grokified?** [Grokified](https://grokified.com) is an OpenAI-compatible API for Grok models at 50% of the list price. It is a separate service from the direct Grok API described in the [direct Grok integration](/integrations/model-providers/xai-grok): it has its own API keys and its own base URL, `https://api.grokified.com/v1`. The [API docs](https://grokified.com/docs) list every model.
 
@@ -58,7 +58,7 @@ client = openai.OpenAI(
 ```
 
 <Callout type="info" emoji="ℹ️">
-**Note:** The OpenAI drop-in replacement is fully compatible with the [Low-Level Langfuse Python SDKs](https://langfuse.com/docs/sdk/python/low-level-sdk) and [`@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators) to trace all parts of your application.
+**Note:** The OpenAI drop-in replacement is fully compatible with the [Low-Level Langfuse Python SDKs](https://langfuse.com/docs/sdk/python/low-level-sdk) and [`@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators) to trace other parts of your application alongside model calls.
 
 </Callout>
 
