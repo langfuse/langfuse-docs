@@ -1,5 +1,11 @@
 "use client";
-import React, { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useSyncExternalStore,
+} from "react";
 import {
   Tabs as FumadocsTabs,
   Tab as FumadocsTab,
@@ -128,25 +134,25 @@ export function LangTabs(props: {
 
   useEffect(() => {
     if (!persistLanguage) return;
+    if (tabValueFromHash(window.location.hash, ids, values)) return;
     if (storedLabel == null && initialLabel) store.set(initialLabel);
-  }, [persistLanguage, storedLabel, initialLabel]);
+  }, [persistLanguage, storedLabel, initialLabel, ids, values]);
 
-  const [internalValue, setInternalValue] = React.useState(() => {
-    if (typeof window !== "undefined") {
-      const fromHash = tabValueFromHash(window.location.hash, ids, values);
-      if (fromHash) return fromHash;
-    }
-    return values[defaultIndex] ?? values[0];
-  });
+  const [internalValue, setInternalValue] = React.useState(
+    values[defaultIndex] ?? values[0],
+  );
 
   const containerRef = useRef<HTMLDivElement>(null);
   const pendingOffsetRef = useRef<number | null>(null);
 
+  // Apply hash after hydration so SSR markup matches the first client render.
+  useLayoutEffect(() => {
+    const fromHash = tabValueFromHash(window.location.hash, ids, values);
+    if (fromHash) setInternalValue(fromHash);
+  }, [ids, values]);
+
   useEffect(() => {
-    const fromHash =
-      typeof window !== "undefined"
-        ? tabValueFromHash(window.location.hash, ids, values)
-        : undefined;
+    const fromHash = tabValueFromHash(window.location.hash, ids, values);
     if (fromHash) {
       setInternalValue(fromHash);
       return;
@@ -245,7 +251,7 @@ export function LangTabs(props: {
               child as React.ReactElement<{ value: string; id?: string }>,
               {
                 value: values[i] ?? String(i),
-                id: childProps.id ?? ids[i],
+                id: childProps.id ?? (updateAnchor ? ids[i] : undefined),
               },
             );
           })}
