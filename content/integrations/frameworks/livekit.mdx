@@ -228,6 +228,115 @@ After running the agent, navigate to your [Langfuse Trace Table](https://cloud.l
 
 </Steps>
 
+## Record and Attach Conversation Audio [#record-audio]
+
+Traces capture transcripts and timings; the recording captures how the conversation
+actually sounded. LiveKit Agents (Python, v1.6+) can record each session as a stereo OGG
+file (user on the left channel, agent on the right), and Langfuse renders attached
+[audio files](/docs/observability/features/multi-modality) with an audio player on the
+trace.
+
+The pattern has three parts:
+
+1. **Wrap the conversation in a Langfuse root observation.** LiveKit creates its
+   `agent_session` span without an explicit OTel context, so a span that is current when
+   `session.start()` runs becomes its parent. Keep it open past the entrypoint with
+   `end_on_exit=False`.
+2. **Record the session** by passing `record={"audio": True}` to `session.start()`. LiveKit
+   writes the recording to `ctx.session_directory / "audio.ogg"`; the file is complete once
+   the session has closed.
+3. **Attach the recording in an `on_session_end` callback.** The root observation is still
+   open there, so the file lands directly in the top-level observation's metadata (and lifts
+   to the trace metadata).
+
+```python filename="agent.py"
+from langfuse import get_client
+from langfuse.media import LangfuseMedia
+
+from livekit.agents import AgentServer, AgentSession, JobContext, cli
+
+server = AgentServer()
+
+# Root observations per room, shared between the entrypoint and on_session_end
+_conversation_spans = {}
+
+
+async def on_session_end(ctx: JobContext) -> None:
+    root_span = _conversation_spans.pop(ctx.room.name, None)
+    if root_span is None:
+        return
+
+    try:
+        # Written by record={"audio": True}; complete once the session closed
+        audio_path = ctx.session_directory / "audio.ogg"
+        if audio_path.exists():
+            recording = LangfuseMedia(
+                content_bytes=audio_path.read_bytes(),
+                content_type="audio/ogg",
+            )
+            # Uploads the file (deduplicated by content hash) and renders an
+            # audio player on the root observation in the Langfuse UI
+            root_span.update(metadata={"recording": recording})
+    finally:
+        root_span.end()
+
+    get_client().flush()
+
+
+@server.rtc_session(on_session_end=on_session_end)
+async def entrypoint(ctx: JobContext):
+    # Shared TracerProvider + Langfuse client from the setup step above
+    setup_langfuse(metadata={"langfuse.session.id": ctx.room.name})
+
+    session = AgentSession(...)
+
+    # The wrapper observation becomes the parent of LiveKit's agent_session
+    # span and stays open until on_session_end attaches the recording.
+    with get_client().start_as_current_observation(
+        name="voice-conversation",
+        end_on_exit=False,  # ended in on_session_end
+    ) as root_span:
+        _conversation_spans[ctx.room.name] = root_span
+
+        await session.start(
+            agent=MyAgent(),
+            room=ctx.room,
+            # Write a stereo OGG recording to ctx.session_directory
+            record={"audio": True},
+        )
+
+
+if __name__ == "__main__":
+    cli.run_app(server)
+```
+
+A few things to know:
+
+- **Recording requires a linked microphone.** LiveKit only starts the recorder when the
+  participant's audio input is linked at session start. If no recording exists (e.g., the
+  caller never published a microphone track), the `finally` block still closes the root
+  observation and the trace stays intact.
+- **`record` is granular.** `record={"audio": True}` leaves LiveKit's other recording
+  features (`traces`, `logs`, `transcript`, uploaded to LiveKit Cloud when connected to it)
+  at their defaults; pass them explicitly (e.g., `record={"audio": True, "traces": False}`)
+  to control each one.
+- **Recordings are deduplicated.** Langfuse media IDs are derived from the file's SHA-256,
+  so re-attaching the same file never uploads twice.
+
+<Callout type="info">
+  **Multi-project setups:** if you register multiple Langfuse clients (e.g., one per data
+  region) on the same `TracerProvider`, spans created through a Langfuse client are only
+  exported to that client's project. In that case, create the wrapper span with a plain
+  OpenTelemetry tracer (`trace_provider.get_tracer(...)`) and set the media reference as a
+  span attribute (`langfuse.observation.metadata.recording`) instead. The
+  [voice demo agent](https://github.com/langfuse/langfuse-docs/blob/main/components/voiceAgent/livekit-agent/agent.py)
+  that powers the demo on this site implements this variant, including per-region media
+  uploads and the full transcript on the root observation.
+</Callout>
+
+For a broader overview of voice-agent tracing patterns, see
+[Trace voice agents in Langfuse](/resources/engineering/voice-agent-tracing).
+
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";
 
 <LearnMore />
