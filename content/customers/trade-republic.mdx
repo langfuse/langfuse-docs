@@ -3,12 +3,12 @@ title: "How Trade Republic migrates live LLM workflows to agentic harnesses with
 seoTitle: "How Trade Republic migrates live LLM workflows to agentic harnesses with Langfuse"
 date: September 18, 2026
 description: "Trade Republic's Ops Tools team on self-hosted Langfuse, and how homework and exam datasets make migrating production LLM processes to ReAct agents safer."
-ogImage:
+ogImage: /images/customers/trade-republic/ogImage.png
 tag: customer-story
 customerLogo: "/images/customers/trade-republic/trade-republic-light.png"
 customerLogoDark: "/images/customers/trade-republic/trade-republic-dark.png"
-customerQuote: "You move processes into code that less technical people can inspect in Langfuse — easier than looking at logs and terminals."
-customerQuoteHighlight: "easier than looking at logs"
+customerQuote: "You can connect Claude Code to your Langfuse MCP - or the CLI directly - and it starts fixing and trying until it is fixed."
+customerQuoteHighlight: "until it is fixed"
 customerQuoteTag: "Video story"
 quoteAuthor: "Paolo Tamagnini"
 quoteRole: "Senior Data Scientist"
@@ -50,7 +50,7 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 They started with Langfuse about two years ago on Postgres, then upgraded to ClickHouse when they moved to a newer version, and rolled it out from a single team to more teams while clearing bank compliance requirements.
 
 <CustomerQuote
-  quote="We're still a bank, so we had to follow very strict compliance — and we were able to go through it. We're using the open-source self-hosted version of Langfuse and we don't see any limitations there."
+  quote="We're still a bank, so we had to follow very strict compliance - and we were able to go through it. We're using the open-source self-hosted version of Langfuse and we don't see any limitations there."
   name="Paolo Tamagnini"
   role="Senior Data Scientist"
   company="Trade Republic"
@@ -58,7 +58,16 @@ They started with Langfuse about two years ago on Postgres, then upgraded to Cli
 
 Many of their early "LLM processes" were easy for product teams to sketch in Figma and inspect in Langfuse: summarize an incident, classify it, score severity, trigger an action. That pattern worked well with earlier models. As reasoning models improved, they wanted agentic setups where a single prompt calls tools instead of a fixed chain of isolated prompts - but the workflows were already in production, so a naive rewrite was too risky.
 
-Their answer is Langfuse plus the evaluation flywheel: [trace](/docs/observability/overview) every run, [score](/docs/evaluation/scores/overview) good and bad examples (human annotation, deterministic checks, or [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)), fix failures (including via coding agents connected through the Langfuse MCP or CLI), and store cases in [datasets](/docs/evaluation/experiments/datasets). For architecture migrations they split data into a homework set (for iterating prompts and tools) and an exam set (held-out topics so coding agents cannot few-shot memorize the fix). An LLM judge compares the deployed workflow against the ReAct agent; only when both sets pass do they ship.
+Their answer is Langfuse plus the evaluation flywheel: [trace](/docs/observability/overview) every run, [score](/docs/evaluation/scores/overview) good and bad examples (human annotation, deterministic checks, or [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)), fix failures (including via coding agents connected through the Langfuse MCP or CLI), and store cases in [datasets](/docs/evaluation/experiments/datasets).
+
+<CustomerQuote
+  quote="You can connect Claude Code to your Langfuse MCP - or the CLI directly - and it starts fixing and trying until it is fixed."
+  name="Paolo Tamagnini"
+  role="Senior Data Scientist"
+  company="Trade Republic"
+/>
+
+For architecture migrations they split data into a homework set (for iterating prompts and tools) and an exam set (held-out topics so coding agents cannot few-shot memorize the fix). An LLM judge compares the deployed workflow against the ReAct agent; only when both sets pass do they ship.
 
 <CustomerQuote
   quote="You start with the homework set… you have your already deployed workflow and your ReAct agent, you make them compete, and a custom LLM judge scores the trace. Then you need the exam dataset to see if the issue was actually fixed - because coding agents are smart and can simply few-shot the homework."
