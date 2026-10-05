@@ -1,7 +1,7 @@
 ---
 title: Request Headers
 seoTitle: "Langfuse AI Gateway request headers (alpha)"
-description: Optional langfuse-* request headers that set the user, session, tags, metadata, environment, and trace name of AI Gateway generations.
+description: Optional langfuse-* request headers that set the user, session, tags, metadata, environment, and trace name of AI Gateway generations, and the request, trace, and observation IDs returned in response headers.
 noindex: true
 ---
 
@@ -49,6 +49,33 @@ For supported coding agents, the gateway also infers context from the agent's ow
 - The original agent IDs are kept in metadata under `agent.*`: `agent.name`, `agent.session_id`, `agent.id` for subagents, `agent.parent_session_id`, and several Codex turn fields.
 - The provider's request ID is stored in the metadata key `langfuse.gateway.upstream.request.id`. Filter on it to find a single call.
 
-{/* TODO: document the `langfuse-request-id` response header once it ships. */}
-
 See [trace shape per agent](/docs/ai-gateway/coding-agents#trace-shape) for how sessions and traces are grouped.
+
+## Response headers [#response-headers]
+
+The gateway adds these headers to its responses:
+
+| Header                    | When                                                                                                         | Value                                                                  |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| `langfuse-request-id`     | Every response, including authentication failures, gateway errors, and streams (sent with the first headers) | The gateway request ID, a UUIDv7                                       |
+| `langfuse-trace-id`       | Responses to calls that produce a generation                                                                 | The generation's trace ID, after `traceparent` and agent turn grouping |
+| `langfuse-observation-id` | Responses to calls that produce a generation                                                                 | The generation's observation ID                                        |
+
+- Calls that produce a generation are `POST /openai/v1/responses`, `/openai/v1/responses/compact`, `/openai/v1/chat/completions`, and `/anthropic/v1/messages`. The trace and observation IDs are also set on `502` and `504` responses for provider failures, which still record a generation. Model listings, `count_tokens`, and requests rejected before they reach the provider (for example, with a `401`) omit them.
+- Recording is best-effort, so in rare cases a returned trace ID has no stored trace.
+- Gateway error bodies also carry the request ID as a top-level `request_id` field, in the native error format of each namespace. Errors returned by the provider keep their original body.
+- The request ID is stored on the generation as the metadata key `langfuse.gateway.request.id`. Filter on it to find the call.
+- Your own `x-request-id` header never replaces the gateway request ID. It is stored separately as `langfuse.gateway.client.request.id`, and is not forwarded to the provider.
+- The provider's own request ID header (OpenAI `x-request-id`, Anthropic `request-id`) is still relayed unchanged.
+
+To see the headers, add `-i` to a `curl` call:
+
+```sh
+curl -si "$LANGFUSE_GATEWAY_HOST/openai/v1/chat/completions" \
+  -H "Authorization: Bearer $LANGFUSE_GATEWAY_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"gpt-4.1-mini","messages":[{"role":"user","content":"Say hello"}]}' \
+  | grep -i '^langfuse-'
+```
+
+When you report a problem, include the `langfuse-request-id`. See [reporting an issue](/docs/ai-gateway/troubleshooting-and-faq#reporting-an-issue).

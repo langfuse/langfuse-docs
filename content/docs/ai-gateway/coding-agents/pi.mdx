@@ -76,7 +76,7 @@ pi -p --provider langfuse-openai --model gpt-5-mini "Summarize README.md"
 
 - **Sessions on the Anthropic route require `"compat": { "sendSessionAffinityHeaders": true }`.** Without it, pi sends no session ID to Anthropic and the generations have no session. The OpenAI route always sends the session ID.
 - The Anthropic `baseUrl` has **no** `/v1`. The OpenAI `baseUrl` **includes** `/v1`.
-- Use `"api": "openai-responses"`. `openai-completions` uses Chat Completions, which is not supported yet, and gets a `404`.
+- Use `"api": "openai-responses"`. `openai-completions` uses [Chat Completions](/docs/ai-gateway/chat-completions), which the gateway serves but which has not been verified with pi.
 - List every model you use under `models`. Otherwise, pi warns "Using custom model id" and guesses the context window and reasoning support.
 
 ## Verify [#verify]

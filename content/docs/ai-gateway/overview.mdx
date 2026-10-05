@@ -27,18 +27,16 @@ You can enrich traces with a user, tags, metadata, an environment, and more thro
 
 ## Supported routes [#supported-routes]
 
-| Namespace       | Endpoints                                                      | Recorded                    |
-| --------------- | -------------------------------------------------------------- | --------------------------- |
-| `/openai/v1`    | `POST /responses`, `POST /responses/compact`, `GET /models`    | Responses and compact calls |
-| `/anthropic/v1` | `POST /messages`, `POST /messages/count_tokens`, `GET /models` | Messages calls              |
+| Namespace       | Endpoints                                                                             | Recorded                                                                            |
+| --------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `/openai/v1`    | `POST /responses`, `POST /responses/compact`, `POST /chat/completions`, `GET /models` | Responses, compact, and [Chat Completions](/docs/ai-gateway/chat-completions) calls |
+| `/anthropic/v1` | `POST /messages`, `POST /messages/count_tokens`, `GET /models`                        | Messages calls                                                                      |
 
 Model listings and `count_tokens` are proxied but not recorded. Websockets and realtime APIs are not served.
 
-<Callout type="info">
-  **Coming soon:** Chat Completions (`POST /openai/v1/chat/completions`). Until
-  it ships, clients must use the OpenAI Responses API or the Anthropic Messages
-  API.
-</Callout>
+The OpenAI routes authenticate with `Authorization: Bearer <gateway key>`. The Anthropic route accepts the key as `Authorization: Bearer` or `x-api-key`.
+
+Every response carries a `langfuse-request-id` header, and recorded calls also return the trace and observation IDs. See [response headers](/docs/ai-gateway/request-headers#response-headers).
 
 ## Capture modes [#capture-modes]
 
@@ -53,4 +51,5 @@ The capture mode is set per organization in **Organization settings → AI Gatew
 
 - [Get started](/docs/ai-gateway/get-started): enable the gateway, create a key, and run a sanity check.
 - [Coding agents](/docs/ai-gateway/coding-agents): route Claude Code, Codex, OpenCode, or pi through the gateway.
+- [Chat Completions](/docs/ai-gateway/chat-completions): use the OpenAI SDKs and other Chat Completions clients.
 - [Troubleshooting and FAQ](/docs/ai-gateway/troubleshooting-and-faq): error codes, known limitations, and alpha limits.

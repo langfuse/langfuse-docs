@@ -51,7 +51,7 @@ Use `opencode.json` in the project root or `~/.config/opencode/opencode.json`:
 ```
 
 - The Anthropic `baseURL` **includes `/v1`**, because OpenCode appends only `/messages`. Claude Code and pi are the opposite.
-- Use the built-in `openai` provider, which speaks the Responses API. `@ai-sdk/openai-compatible` providers use Chat Completions, which is not supported yet, and get a `404`.
+- Use the built-in `openai` provider, which speaks the Responses API. `@ai-sdk/openai-compatible` providers use [Chat Completions](/docs/ai-gateway/chat-completions), which the gateway serves but which has not been verified with OpenCode.
 - To set a session per run, add `"langfuse-session-id": "{env:LF_SESSION}"`. An unset variable sends an empty value, which is ignored.
 - Headers apply to every call from that provider, including title generation and subagents. See [request headers](/docs/ai-gateway/request-headers).
 

@@ -87,9 +87,10 @@ curl -s "$LANGFUSE_GATEWAY_HOST/anthropic/v1/models?limit=1000" \
   -H "anthropic-version: 2023-06-01" | head -c 300
 ```
 
-A model list means that the key, the allowlist, and the provider connection work. For errors, see [Troubleshooting](/docs/ai-gateway/troubleshooting-and-faq#troubleshooting).
+A model list means that the key, the allowlist, and the provider connection work. For errors, see [Troubleshooting](/docs/ai-gateway/troubleshooting-and-faq#troubleshooting), and quote the `langfuse-request-id` response header (add `-i` to `curl` to print it) when you report a problem.
 
 ## Next steps [#next-steps]
 
 - [Configure your coding agent](/docs/ai-gateway/coding-agents): Claude Code, Codex, OpenCode, or pi.
+- [Call Chat Completions](/docs/ai-gateway/chat-completions) from the OpenAI SDKs or any compatible client.
 - [Add request headers](/docs/ai-gateway/request-headers) to set the user, tags, metadata, and environment.

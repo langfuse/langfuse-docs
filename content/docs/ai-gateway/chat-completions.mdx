@@ -1,0 +1,72 @@
+---
+title: Chat Completions
+seoTitle: "OpenAI Chat Completions through the Langfuse AI Gateway (alpha)"
+description: Send OpenAI Chat Completions requests through the Langfuse AI Gateway and record each call as a Langfuse generation, including streamed usage.
+noindex: true
+---
+
+import AiGatewayAlphaCallout from "@/components-mdx/ai-gateway-alpha-callout.mdx";
+
+# Chat Completions
+
+<AiGatewayAlphaCallout />
+
+The gateway serves the OpenAI Chat Completions API at `POST /openai/v1/chat/completions`. Any client that speaks Chat Completions, such as the OpenAI SDKs or frameworks built on them, works by changing the base URL and the API key. Each call is recorded as a generation named `openai.chat-completions`.
+
+**Requires** an `OPENAI` provider connection. See [Get started](/docs/ai-gateway/get-started).
+
+## Authentication [#authentication]
+
+Send the gateway key as `Authorization: Bearer <gateway key>`. The OpenAI routes only accept the Bearer header; `x-api-key` is only read on the Anthropic route.
+
+## Examples [#examples]
+
+```sh
+curl "$LANGFUSE_GATEWAY_HOST/openai/v1/chat/completions" \
+  -H "Authorization: Bearer $LANGFUSE_GATEWAY_KEY" \
+  -H "Content-Type: application/json" \
+  -H "langfuse-user-id: <you>@example.com" \
+  -H "langfuse-tags: chat-completions" \
+  -d '{"model":"gpt-4.1-mini","messages":[{"role":"user","content":"Say hello"}]}'
+```
+
+```python
+import os
+
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://staging.langfuse.com/openai/v1",
+    api_key=os.environ["LANGFUSE_GATEWAY_KEY"],
+    default_headers={"langfuse-user-id": "<you>@example.com"},
+)
+
+completion = client.chat.completions.create(
+    model="gpt-4.1-mini",
+    messages=[{"role": "user", "content": "Say hello"}],
+)
+print(completion.choices[0].message.content)
+```
+
+All [request headers](/docs/ai-gateway/request-headers) work on this route.
+
+## Streaming usage [#streaming-usage]
+
+OpenAI only reports usage for a streamed Chat Completions request when the request sets `stream_options.include_usage`. So that every streamed call still gets token usage and cost, the gateway adds `"include_usage": true` to the request it sends upstream when a request has `"stream": true` and does not already set it.
+
+- The recorded input and model parameters are your original request, without the added option.
+- The response stream is relayed unchanged. Your client therefore receives OpenAI's final usage chunk even if it did not ask for usage: an extra event with an **empty `choices` array** and a `usage` object, just before `data: [DONE]`. The other chunks carry `"usage": null`.
+- Make sure your client tolerates a chunk without choices. The OpenAI SDKs pass it through like any other chunk, so code that reads `chunk.choices[0]` on every chunk needs a guard.
+- Requests that already ask for usage, non-streamed requests, and compressed request bodies are forwarded unchanged.
+
+## What gets recorded [#what-gets-recorded]
+
+- **Model parameters:** scalar parameters such as `temperature`, `top_p`, `max_tokens`, `max_completion_tokens`, `seed`, `reasoning_effort`, and `stream` are recorded in both [capture modes](/docs/ai-gateway/overview#capture-modes). In `FULL` mode, `stop`, `response_format`, `tool_choice`, `stream_options`, and similar structured options are added.
+- **Input** (`FULL` mode): `messages`, `tools`, legacy `functions`, and unknown fields.
+- **Output** (`FULL` mode): the native `choices` list. Streamed choices are rebuilt from their deltas, including tool call arguments.
+- **Metadata** (`FULL` mode): `metadata`, `prompt_cache_key`, `safety_identifier`, and `user` from the request are stored under `langfuse.gateway.request.*`.
+- Usage, cost, latency, and time to first token, as on the other routes.
+
+## Coding agents [#coding-agents]
+
+The [coding agent guides](/docs/ai-gateway/coding-agents) use the Responses API, which is the verified path for Codex, OpenCode, and pi. The gateway now also serves their Chat Completions modes (`@ai-sdk/openai-compatible` providers in OpenCode, `"api": "openai-completions"` in pi), but these have not been verified with the agents yet, including session detection.

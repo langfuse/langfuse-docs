@@ -25,7 +25,7 @@ model_provider = "langfuse"
 name = "Langfuse AI Gateway"
 base_url = "https://staging.langfuse.com/openai/v1"
 env_key = "LANGFUSE_GATEWAY_KEY"   # sent as Authorization: Bearer
-wire_api = "responses"             # "chat" is not supported yet
+wire_api = "responses"             # the verified wire API
 http_headers = { "langfuse-tags" = "codex,<team>", "langfuse-environment" = "local", "langfuse-metadata" = "repo:<repo>" }
 env_http_headers = { "langfuse-user-id" = "LF_USER_ID" }   # header value read from $LF_USER_ID
 ```
