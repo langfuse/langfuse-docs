@@ -37,12 +37,12 @@ Schedule exports to Amazon S3, S3-compatible storage, Google Cloud Storage, or A
 
 <span id="export-modes" />
 
-| Setting             | Choices and behavior                                                                                                                                                                                                                                        |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Provider and access | **AWS S3**, **S3 Compatible Storage**, or **Azure Blob Storage**. Google Cloud Storage is reached through S3 Compatible Storage: set the endpoint to `https://storage.googleapis.com` and authenticate with an HMAC key pair rather than a service account. |
-| Format              | Parquet (default), CSV, JSON, or JSONL. Text formats can be gzip-compressed; Parquet uses its own encoding and compression.                                                                                                                                 |
-| Schedule            | Every 20 minutes, hourly, daily, or weekly. Each run exports one time window.                                                                                                                                                                               |
-| Export Mode         | **Full history** starts at the project's earliest data; **From setup date** starts when the integration is enabled; **From custom date** starts at a selected date. Changing this setting resets the sync position and re-scans from that point.            |
+| Setting             | Choices and behavior                                                                                                                                                                                                                                           |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Provider and access | **Amazon S3**, **S3 Compatible Storage**, or **Azure Blob Storage**. Google Cloud Storage is reached through S3 Compatible Storage: set the endpoint to `https://storage.googleapis.com` and authenticate with an HMAC key pair rather than a service account. |
+| Format              | Parquet (default), CSV, JSON, or JSONL. Text formats can be gzip-compressed; Parquet uses its own encoding and compression.                                                                                                                                    |
+| Schedule            | Every 20 minutes, hourly, daily, or weekly. Each run exports one time window.                                                                                                                                                                                  |
+| Export Mode         | **Full history** starts at the project's earliest data; **From setup date** starts when the integration is enabled; **From custom date** starts at a selected date. Changing this setting resets the sync position and re-scans from that point.               |
 
 <span id="monitor-and-reconfigure" /><span id="export-status" />
 
