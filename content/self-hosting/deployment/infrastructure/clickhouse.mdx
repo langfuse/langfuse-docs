@@ -423,9 +423,9 @@ ClickHouse supports disk encryption for data at rest, providing an additional la
 
 ### Automatic Encryption with Blob Storage
 
-When using [blob storage as disk](#blob-storage-as-disk) (AWS S3, Azure Blob Storage, Google Cloud Storage), data is automatically encrypted at rest using the cloud provider's default encryption:
+When using [blob storage as disk](#blob-storage-as-disk) (Amazon S3, Azure Blob Storage, Google Cloud Storage), data is automatically encrypted at rest using the cloud provider's default encryption:
 
-- **AWS S3**: Uses AES-256 encryption by default
+- **Amazon S3**: Uses AES-256 encryption by default
 - **Azure Blob Storage**: Uses AES-256 encryption by default
 - **Google Cloud Storage**: Uses AES-256 encryption by default
 
@@ -477,7 +477,7 @@ kubectl create secret generic clickhouse-encryption-key \
 
 ## Blob Storage as Disk
 
-ClickHouse supports blob storages (AWS S3, Azure Blob Storage, Google Cloud Storage) as disks.
+ClickHouse supports blob storages (Amazon S3, Azure Blob Storage, Google Cloud Storage) as disks.
 This is useful for auto-scaling storages that live outside the container orchestrator and increases availability und durability of the data.
 For a full overview of the feature, see the [ClickHouse External Disks documentation](https://clickhouse.com/docs/en/operations/storing-data).
 

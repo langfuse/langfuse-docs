@@ -14,7 +14,7 @@ import {
   ThumbsUpIcon,
   ThumbsDownIcon,
 } from "lucide-react";
-// import { DemoTraceLink } from "@/components/demoTraceLink"; // temporarily disabled
+import { DemoTraceLink } from "@/components/demoTraceLink";
 
 type GeneratedImage = {
   base64: string;
@@ -114,9 +114,9 @@ export const ImageGenerator = ({
   };
 
   return (
-    <div className={cn("h-[62vh]", className)} {...props}>
-      <div className="flex flex-col h-full rounded-[2px] border border-line-structure bg-surface-bg corner-box-corners p-5 relative overflow-hidden">
-        <div className="flex-1 overflow-y-auto relative z-10 space-y-4">
+    <div className={cn(className)} {...props}>
+      <div className="relative flex flex-col rounded-[2px] border border-line-structure bg-surface-bg corner-box-corners p-5">
+        <div className="relative z-10 space-y-4">
           {/* Prompt input */}
           <form onSubmit={handleFormSubmit} className="space-y-3">
             <div className="flex gap-2">
@@ -200,14 +200,12 @@ export const ImageGenerator = ({
                 />
               </div>
 
-              {/* Temporarily disabled: trace link (traces are not shared publicly right now)
               <div className="flex justify-center">
                 <DemoTraceLink
                   traceUrl={currentImage.traceUrl}
                   source="image_generator"
                 />
               </div>
-              */}
 
               {/* Actions */}
               <div className="flex items-center gap-2 justify-center">

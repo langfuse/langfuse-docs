@@ -301,10 +301,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       variant: resolvedVariant,
       size: resolvedSize,
       className: cn(
-        className,
         isTextVariant && wrapperClassName,
         !isTextVariant && buttonPaddingClasses,
         iconOnlySizeClass,
+        className,
       ),
     });
 
