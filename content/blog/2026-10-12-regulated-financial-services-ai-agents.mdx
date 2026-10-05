@@ -1,0 +1,107 @@
+---
+title: How regulated financial services institutions improve AI agents with Langfuse
+date: 2026/10/12
+description: How DKB, Trade Republic, and one of the world's largest banks screen, migrate, and gate AI agents in production, and the pattern they share.
+tag: guide
+author: Annabell
+highlight: true
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="How regulated financial services institutions improve AI agents with Langfuse"
+  description="How DKB, Trade Republic, and one of the world's largest banks screen, migrate, and gate AI agents in production, and the pattern they share."
+  date="October 12, 2026"
+  authors={["annabellschafer"]}
+/>
+
+Banks are no longer just answering FAQs with LLMs. Their agents now look up account data, block lost cards, change transfer limits, and draft client communications. That raises the bar. In a regulated institution, a wrong answer isn't just a bug. It can be a compliance incident, and every change to the system needs evidence behind it.
+
+Over the past year we've worked closely with financial institutions running AI agents in production. Three of them show how this works across the lifecycle of an agent:
+
+- **DKB** screens every production conversation of its banking assistant.
+- **Trade Republic** migrates live LLM workflows to agentic architectures without breaking them.
+- **One of the five largest banks in the world** needed automated deployment gates that produce evidence for model risk review.
+
+Different teams and different problems, but all three run the same loop.
+
+## Why AI agents are harder in a bank [#why-ai-agents-are-harder-in-a-bank]
+
+Four constraints come up again and again:
+
+1. **Data can't leave.** Customer conversations are among the most sensitive data a bank has. Tooling must be self-hostable, and open source helps get it through security review.
+2. **Some answers are off limits.** A banking assistant must never give investment advice, promise returns, or leak non-public information. One prohibited phrase is one too many.
+3. **Systems change faster than approval processes.** Model risk processes were designed for credit models that change twice a year. LLM systems change every time a prompt is promoted or a model is swapped.
+4. **The people who judge quality aren't engineers.** Whether an answer is correct for a brokerage or credit question is a call for banking specialists, not the ML team.
+
+## In production: screen every conversation (DKB) [#in-production-screen-every-conversation-dkb]
+
+[DKB](/users/dkb), one of Germany's largest direct banks, serves around 6 million customers. Its in-app assistant has grown from a Q&A tool into a fully agentic assistant handling 10,000 to 20,000 conversations a day.
+
+DKB runs Langfuse [self-hosted](/self-hosting). Every interaction is traced, and an [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) screens every answer: Does it stray into investment advice? Is it grounded in the knowledge base? Does the customer seem satisfied? Anything flagged lands in [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) organized by service area, where customer service specialists rate severity and escalate critical cases first.
+
+For DKB, this isn't optional tooling:
+
+> "If I disabled the screening tomorrow, we would have to stop all our agent activity."
+> — David Hinrichs, Senior Machine Learning Scientist at DKB
+
+The specialists don't just review. When they spot a recurring pattern, they add examples to a [dataset](/docs/evaluation/experiments/datasets), which feeds the evaluations DKB runs as regression tests before every release.
+
+[Read the full DKB story →](/users/dkb)
+
+## When changing the system: homework and exam datasets (Trade Republic) [#when-changing-the-system-homework-and-exam-datasets-trade-republic]
+
+[Trade Republic](/users/trade-republic) is one of Europe's largest fintechs and a fully licensed bank, with over 10 million customers and €150 billion in assets. Its Ops Tools team has run self-hosted Langfuse for two years, starting with a single team and expanding to more, with every rollout and version upgrade going through bank compliance.
+
+Their challenge: many production LLM processes were built in the GPT-3.5 era as fixed chains of prompts. Take incident management: summarize the message, classify the incident, score its severity, trigger an action. Product teams sketch these processes in Figma and inspect them in Langfuse, so they're easy to understand. But as they grow, they get complex. With today's reasoning models, the team wants to replace them with a single ReAct agent that calls tools. The workflows are already in production, though, so a rewrite risks breaking something that works.
+
+Their answer is the evaluation flywheel, with the data split in two:
+
+- A **homework set** for iterating. The deployed workflow and the new agent compete on the same inputs, and a custom LLM judge scores the traces in Langfuse. A coding agent connected through the Langfuse MCP or CLI reads the traces, finds the issue (a missing tool, a vague tool description) and proposes a fix.
+- An **exam set** of held-out topics, to check that the fix holds.
+
+> "You need the exam dataset to see if the issue was actually fixed, because coding agents are smart and can simply few-shot the homework."
+> — Paolo Tamagnini, Senior Data Scientist at Trade Republic
+
+Only when both sets pass does the agent ship. The result is less code and fewer prompts, since the glue code between steps disappears, with the datasets as the safety net. Paolo's one caveat: watch prompt caching. An agent can make many more calls than a fixed workflow, and editing the prompt mid-trace breaks the cache and drives up cost.
+
+[Watch the Trade Republic talk →](/users/trade-republic)
+
+## Before deployment: gates that produce evidence [#before-deployment-gates-that-produce-evidence]
+
+One of the five largest banks in the world already required evidence before anything reached production: test results, review sign-offs, documentation. Producing it by hand took weeks, and by the time an approval landed, the prompt or model it tested had often already changed.
+
+So we scripted the evidence. The pipeline runs a model or a full multi-step agent against golden financial datasets, scores every output with domain-specific evaluators, and produces a PASS/FAIL verdict. Agents get multi-dimensional gates. For example, an advisory-drafting agent must hit 100% on compliance: a single prohibited phrase fails the whole run. Every run, trace, score, and prompt version behind a verdict is stored in Langfuse, where a reviewer can inspect it. Promoting a new prompt version re-runs the gate in CI and blocks the release if it fails.
+
+The pipeline doesn't make anything compliant on its own. Approvals and sign-off stay with people. What it does is produce the evidence that frameworks like the EU AI Act, DORA, PRA SS1/23, and US model risk guidance expect, in minutes instead of weeks.
+
+[Read the deep dive and get the code →](/blog/2026-07-15-llm-certification-financial-services)
+
+Doneyli De Jesus, who built the pipeline, is presenting it at AI Engineer NYC: [Building Deployment Gates for AI Agents in Financial Services](https://ai.engineer/nyc/2026/schedule?session=f7cd2f57-654a-4bbc-874b-ffa66a8ab3ed), Wednesday, October 14, 2:55–3:13 PM ET, McCarthy stage.
+
+## The shared pattern [#the-shared-pattern]
+
+Put the three side by side and it's the same loop, seen from different stages:
+
+1. **Trace everything, self-hosted.** All three teams run Langfuse on their own infrastructure. Customer data never leaves the bank.
+2. **Screen production automatically.** LLM judges and deterministic checks flag compliance and quality issues across every conversation, not just samples.
+3. **Put domain experts in the loop.** Banking specialists review flagged cases in annotation queues. They judge what engineers can't.
+4. **Turn failures into datasets.** Reviewed production failures become test cases, so the next release is tested against exactly what went wrong.
+5. **Gate every change.** Prompt, model, and architecture changes only ship when evals pass, and every run is kept as evidence.
+
+The result is that change stops being the risk. These teams ship new prompts, models, and agent architectures regularly because every change is tested against real failures and leaves an audit trail behind it.
+
+## Get started [#get-started]
+
+- [Self-host Langfuse](/self-hosting) on your own infrastructure
+- Set up [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) and [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) for production screening
+- Build regression tests with [datasets and experiments](/docs/evaluation/experiments/datasets)
+- Clone the [deployment gate repository](https://github.com/doneyli/langfuse-llm-certification-finance) for a working starting point
+- See more on [Langfuse for financial services](/financial-services)
+
+## Meet us at AI Engineer NYC [#meet-us-at-ai-engineer-nyc]
+
+- **Workshop, Monday, October 12, 2:20–3:20 PM ET, Sutton:** [Langfuse Workshop — the AI engineering loop, end to end](https://ai.engineer/nyc/2026/schedule?session=f20b8d60-8a75-4ab3-a2fb-42159024e65f). Trace, evaluate, and improve an AI application in one hands-on hour. [Register →](https://ai.engineer/nyc/2026/tickets)
+- **Talk, Wednesday, October 14, 2:55–3:13 PM ET, McCarthy:** Doneyli De Jesus on [building deployment gates for LLMs and AI agents in financial services](https://ai.engineer/nyc/2026/schedule?session=f7cd2f57-654a-4bbc-874b-ffa66a8ab3ed).
+- **Meet the team:** we're at [booth 9](https://clickhouse.com/company/events/202610-AMER-AI-Engineer-New-York) all week and happy to walk you through a live deployment gate demo. [Book a time with us →](/talk-to-us)
