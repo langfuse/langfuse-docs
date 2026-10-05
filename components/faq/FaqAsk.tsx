@@ -28,6 +28,10 @@ const transport = new DefaultChatTransport({
           ?.parts.filter((part) => part.type === "text")
           .map((part) => part.text)
           .join("") ?? "",
+      page: {
+        url: location.href,
+        title: document.title,
+      },
     },
   }),
 });
