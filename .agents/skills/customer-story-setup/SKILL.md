@@ -68,7 +68,7 @@ description if useful):
 1. **Folder**: **`public/images/customers/<slug>/`**
 2. For each asset: **filename**, **purpose**, **where it appears** (section + suggested alt text)
 3. Remind: customer posts use **`<Frame fullWidth>`** around markdown images, e.g. `![Alt](mdc:/images/customers/<slug>/file.png)` per site conventions
-4. **Size each image by aspect ratio** (run `sips -g pixelWidth -g pixelHeight <file>` to get dimensions):
+4. **Size each image by aspect ratio.** From the repo root, run `python3 .agents/skills/publish-customer-story/image-size.py <file>`. It prints `width height` for PNG, JPEG, GIF, WebP, and SVG on macOS and Linux. Then:
    - **Portrait / square** (ratio <= 1:1) -> `<div className="flex justify-center"><Frame fullWidth className="w-1/2">...</Frame></div>`
    - **Landscape** (~1.5:1) -> `<div className="flex justify-center"><Frame fullWidth className="w-2/3">...</Frame></div>`
    - **Panoramic** (> 2:1) -> `<Frame fullWidth className="w-full">...</Frame>` (no centering wrapper needed)

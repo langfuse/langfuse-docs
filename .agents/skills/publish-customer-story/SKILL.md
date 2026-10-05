@@ -76,10 +76,17 @@ Shared images arrive with the draft (chat attachments or files the user points a
    - Screenshots and diagrams: lowercase kebab-case that describes the screen (`slite-agent-triage.png`, `rest-sleep-log.png`). Never `image1.png` or `Screenshot …`.
 4. Reference them the way the newest written story does (path `/images/customers/<slug>/…` in markdown images and component `src`).
 5. Several product shots introducing one section become the carousel component the newest story uses. A single diagram or UI shot uses `<Frame>`.
-6. Size with `sips -g pixelWidth -g pixelHeight <file>`:
+6. Measure width and height, then set the width class from `width / height`. From the repo root:
+
+   ```bash
+   python3 .agents/skills/publish-customer-story/image-size.py <file>
+   ```
+
+   The command prints `width height`. It reads PNG, JPEG, GIF, WebP, and SVG (`viewBox`, or `width` and `height` on the root element) with the Python standard library, on macOS and Linux.
    - Portrait or square (ratio ≤ 1:1): centered `w-1/2`
    - Landscape (~1.5:1): centered `w-2/3`
    - Panoramic (> 2:1): `w-full`
+
 7. No `.gif` files. Ask for a still or an `.mp4` on `static.langfuse.com/docs-videos`.
 
 ## Logo
