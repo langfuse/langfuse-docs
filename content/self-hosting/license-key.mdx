@@ -43,7 +43,9 @@ See the [telemetry documentation](/self-hosting/security/telemetry) for the exac
 <Details id="how-to-remove-a-license-key">
 <Summary>How do I remove my Enterprise license key?</Summary>
 
-Please make sure you no longer rely on any of the Enterprise features listed above before removing the key. Otherwise, their behavior may change unexpectedly. For example:
+To remove the key, remove `LANGFUSE_EE_LICENSE_KEY` from both Langfuse containers (web and worker) and restart the deployment. All core OSS features continue to work without a license key.
+
+Before doing so, make sure you no longer rely on any of the Enterprise features listed above. Otherwise, removing the key may cause unwanted behavior. For example:
 
 - **Project roles and protected prompt labels:** Existing settings remain in effect, but their Enterprise UI controls become unavailable. Clear unwanted settings first. If you clear a project role for a user whose organization role is `NONE`, they lose access to that project.
 - **Data retention:** Existing policies keep deleting expired data. Set retention to indefinite on projects where deletion should stop.
@@ -51,8 +53,6 @@ Please make sure you no longer rely on any of the Enterprise features listed abo
 - **Audit logs:** The viewer and read API become unavailable. Export any logs you will need.
 - **Provisioning and administration:** The Organization Management API, SCIM, and Instance Management API return `403`. Replace dependent automation before removal; existing resources remain.
 - **UI and organization creation:** UI customizations revert to defaults, and the organization creator allowlist stops restricting eligible users.
-
-To remove the key, remove `LANGFUSE_EE_LICENSE_KEY` from both Langfuse containers (web and worker) and restart the deployment. All core OSS features continue to work without a license key.
 
 </Details>
 
