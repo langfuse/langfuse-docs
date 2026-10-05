@@ -1,7 +1,7 @@
 ---
 title: "S3 / Blob Storage Configuration (Self-Hosted)"
 sidebarTitle: Blob Storage (S3)
-description: "Configure S3 or S3-compatible blob storage for self-hosted Langfuse. Store raw events, multi-modal inputs, and batch exports with AWS S3, Google Cloud Storage, Azure Blob Storage, SeaweedFS, MinIO, or compatible services."
+description: "Configure S3 or S3-compatible blob storage for self-hosted Langfuse. Store raw events, multi-modal inputs, and batch exports with Amazon S3, Google Cloud Storage, Azure Blob Storage, SeaweedFS, MinIO, or compatible services."
 label: "Version: v4"
 ---
 
@@ -108,7 +108,7 @@ To configure batch exports in your environment, configure the following environm
 
 #### S3 Compatibility
 
-The following settings apply to all S3 use-cases (events, media, batch exports) and help with S3-compatible stores that are not fully compatible with the AWS S3 API.
+The following settings apply to all S3 use-cases (events, media, batch exports) and help with S3-compatible stores that are not fully compatible with the Amazon S3 API.
 
 | Variable                                        | Required / Default | Description                                                                                                                                                                                                                                                                          |
 | ----------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -157,7 +157,7 @@ Ensure that both entities have the necessary permissions to access the bucket:
 }
 ```
 
-The same IAM role or user also works for the project-level [Blob Storage Export integration](/docs/api-and-data-platform/features/export-to-blob-storage#set-up-an-export). On self-hosted deployments, leave **Access Key ID** and **Secret Access Key** blank in that integration's AWS S3 settings to use the IAM role instead of static credentials. This fallback only applies to the AWS S3 provider; it is not available on Langfuse Cloud or for Azure Blob Storage / S3 Compatible Storage.
+The same IAM role or user also works for the project-level [Blob Storage Export integration](/docs/api-and-data-platform/features/export-to-blob-storage#set-up-an-export). On self-hosted deployments, leave **Access Key ID** and **Secret Access Key** blank in that integration's Amazon S3 settings to use the IAM role instead of static credentials. This fallback only applies to the Amazon S3 provider; it is not available on Langfuse Cloud or for Azure Blob Storage / S3 Compatible Storage.
 
 <Callout type="info">
 
