@@ -85,16 +85,16 @@ To make the case, he ran Langfuse on a test system with synthetic data. The reac
 
 ## One workspace for two kinds of expertise
 
-David describes Langfuse as a kind of "shared space" between DKB's technical and customer service teams. "We have the AI expertise, but we don't necessarily have the banking customer service expertise," he says. "There's a lot of regulation, a lot of very specific things you need to get right. Langfuse really is a place where we bring the two halves together."
+David describes Langfuse as a kind of "shared space" between DKB's technical and customer service teams. As Laurenz Hemmen, a Machine Learning Scientist at DKB, puts it: "We have the AI expertise, but we don't necessarily have the banking customer service expertise. There's a lot of regulation, a lot of very specific things you need to get right. Langfuse really is a place where we bring the two halves together."
 
 <CustomerQuote
   quote="We have the AI expertise, but we don't necessarily have the banking customer service expertise. There's a lot of regulation, a lot of very specific things you need to get right. Langfuse really is a place where we bring the two halves together."
-  name="David Hinrichs"
-  role="Senior Machine Learning Scientist"
+  name="Laurenz Hemmen"
+  role="Machine Learning Scientist"
   company="DKB"
 />
 
-It starts with [tracing](/docs/observability/overview). Every interaction flows in, and during fresh rollouts the team watches traces arrive live. DKB's architecture includes an unusual wrinkle, since some of its customers are also employees, and the bank isn't permitted to auto-review colleagues' conversations. To work around this, the team runs two production Langfuse instances, with one acting as an ingress, and the other, where the automated screening runs, excluding them.
+It starts with [tracing](/docs/observability/overview). Every interaction flows in, and during fresh rollouts the team watches traces arrive live. DKB's architecture includes an unusual wrinkle, since some of its customers are also employees, and the bank isn't permitted to auto-review colleagues' conversations. Conversations involving customers under 18 are excluded from automated screening as well. To work around this, the team runs two production Langfuse instances, with one acting as an ingress, and the other, where the automated screening runs, excluding those conversations.
 
 <div className="flex justify-center">
   <Frame fullWidth className="w-1/2">
@@ -113,6 +113,13 @@ Anything flagged goes to customer service experts working directly in Langfuse. 
 </div>
 
 Those experts are also proactive about finding new areas for improvement. "They send me links to traces and say, 'I noticed a lot of people asking this kind of question. Can we teach the chatbot to guide them that way?'" David says. When they find an archetypical example, they add it to a [dataset](/docs/evaluation/experiments/datasets) he can pull to confirm a pattern and adjust a system prompt. Those [datasets](/docs/evaluation/experiments/datasets) feed the behavioral [evaluations](/docs/evaluation/overview) DKB runs in its deployment pipeline, alongside broader checks that answers stay concise, factual, and free of "AI slop smell." "There's a lot of discovery of future potential that wouldn't be possible without this common ground," he says.
+
+<CustomerQuote
+  quote="The whole pipeline to improve our chat agent happens almost entirely in Langfuse. We screen conversations, review flagged sessions, turn clusters of unwanted behavior into datasets, and run those evals as regression tests before every release."
+  name="Laurenz Hemmen"
+  role="Machine Learning Scientist"
+  company="DKB"
+/>
 
 ## Deeper insights, deeper collaboration
 
