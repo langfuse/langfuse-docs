@@ -1,0 +1,89 @@
+---
+title: Get Started
+seoTitle: "Get started with the Langfuse AI Gateway (alpha)"
+description: Enable the Langfuse AI Gateway for your organization, add provider connections, create a gateway API key, and verify that requests reach the gateway.
+noindex: true
+---
+
+import AiGatewayAlphaCallout from "@/components-mdx/ai-gateway-alpha-callout.mdx";
+
+# Get started with the AI Gateway
+
+<AiGatewayAlphaCallout />
+
+This page takes you from zero to a working gateway key. Afterwards, configure your [coding agent](/docs/ai-gateway/coding-agents).
+
+<Callout type="info">
+  **Getting access (placeholder):** to get your organization allowlisted, a
+  gateway API key, and the gateway host, contact **`<TODO: AI Gateway owner /
+  Slack channel>`**. Never paste a gateway key into a repository, a ticket, or a
+  shared config file.
+</Callout>
+
+## Prerequisites [#prerequisites]
+
+<Steps>
+
+### Organization on the allowlist
+
+The gateway only works for allowlisted organizations. Otherwise, every call returns `403` and the settings pages say "AI Gateway is not enabled for this organization".
+
+### Configure the gateway
+
+Go to **Organization settings → AI Gateway** and choose:
+
+- the **ingestion project**, where generations are recorded
+- the [capture mode](/docs/ai-gateway/overview#capture-modes): `FULL` (input and output) or `USAGE` (usage and cost only)
+
+Both are set per organization, not per key.
+
+### Add provider connections
+
+Go to **Organization settings → AI Gateway providers** and add:
+
+- an `OPENAI` connection for Codex and the OpenAI routes of OpenCode and pi
+- an `ANTHROPIC` connection for Claude Code and the Anthropic routes of OpenCode and pi
+
+These connections are separate from project [LLM connections](/docs/administration/llm-connection) and always use the vendor's base URL.
+
+### Create a gateway API key
+
+Go to **Organization settings → AI Gateway API keys** and create a key. You need the `OWNER` or `ADMIN` role.
+
+- Keys are scoped to the organization and look like regular `sk-lf-…` secret keys.
+- Prefer one key per person. The key's metadata is copied onto every generation (for example `user: <key note>`).
+
+### Get access to the ingestion project
+
+To see your traces, you need access to the project selected as the ingestion project.
+
+</Steps>
+
+## Export the key [#export-the-key]
+
+Export the gateway host and key once. All coding agent guides use these variables.
+
+```sh
+export LANGFUSE_GATEWAY_HOST="https://<ai-gateway-host>"   # placeholder, see "Getting access"
+export LANGFUSE_GATEWAY_KEY="<your-gateway-key>"
+```
+
+## Sanity check [#sanity-check]
+
+List models through both routes before you configure a coding agent:
+
+```sh
+curl -s "$LANGFUSE_GATEWAY_HOST/openai/v1/models" \
+  -H "Authorization: Bearer $LANGFUSE_GATEWAY_KEY" | head -c 300
+
+curl -s "$LANGFUSE_GATEWAY_HOST/anthropic/v1/models?limit=1000" \
+  -H "x-api-key: $LANGFUSE_GATEWAY_KEY" \
+  -H "anthropic-version: 2023-06-01" | head -c 300
+```
+
+A model list means that the key, the allowlist, and the provider connection work. For errors, see [Troubleshooting](/docs/ai-gateway/troubleshooting-and-faq#troubleshooting).
+
+## Next steps [#next-steps]
+
+- [Configure your coding agent](/docs/ai-gateway/coding-agents): Claude Code, Codex, OpenCode, or pi.
+- [Add request headers](/docs/ai-gateway/request-headers) to set the user, tags, metadata, and environment.

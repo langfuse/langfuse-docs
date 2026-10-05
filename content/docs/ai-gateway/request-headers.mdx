@@ -1,0 +1,54 @@
+---
+title: Request Headers
+seoTitle: "Langfuse AI Gateway request headers (alpha)"
+description: Optional langfuse-* request headers that set the user, session, tags, metadata, environment, and trace name of AI Gateway generations.
+noindex: true
+---
+
+import AiGatewayAlphaCallout from "@/components-mdx/ai-gateway-alpha-callout.mdx";
+
+# Request headers
+
+<AiGatewayAlphaCallout />
+
+Any client can send these optional headers to enrich the traces the gateway records. They work in both `FULL` and `USAGE` [capture modes](/docs/ai-gateway/overview#capture-modes). Each [coding agent guide](/docs/ai-gateway/coding-agents) shows where to configure them.
+
+## Headers [#headers]
+
+| Header                 | Format                      | Effect                                                                                                                                              |
+| ---------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `langfuse-user-id`     | string                      | Trace [user](/docs/observability/features/users). **Never inferred**, so set it if you want per-user views.                                         |
+| `langfuse-session-id`  | string                      | Overrides the agent's own [session](/docs/observability/features/sessions).                                                                         |
+| `langfuse-environment` | string                      | [Environment](/docs/observability/features/environments) of the trace. Invalid values fall back to `default`.                                       |
+| `langfuse-tags`        | comma-separated             | [Tags](/docs/observability/features/tags), trimmed and deduplicated.                                                                                |
+| `langfuse-metadata`    | comma-separated `key:value` | Top-level [metadata](/docs/observability/features/metadata). Splits at the first colon, values stay strings. Percent-encode literal commas (`%2C`). |
+| `langfuse-trace-name`  | string                      | Overrides the default trace name (the agent name).                                                                                                  |
+
+Example:
+
+```text
+langfuse-user-id: jane@example.com
+langfuse-environment: ci
+langfuse-tags: claude-code,platform-team
+langfuse-metadata: repo:langfuse-docs,branch:main
+```
+
+## Rules [#rules]
+
+- **Do not set a static `langfuse-session-id` in a config file.** It overrides the per-session ID of each agent and merges all your sessions into one. Set it per run from an environment variable, and only when you want to group runs on purpose.
+- A static `langfuse-trace-name` renames every trace. Use it for scripted or CI runs.
+- Explicit headers take precedence over values the gateway infers from the agent. Empty values are ignored.
+- `langfuse-environment` must match the [environment format](/docs/observability/features/environments): lowercase letters, numbers, `-` and `_`, at most 40 characters, and not starting with `langfuse`. Any other value is recorded as `default`, and the request still succeeds.
+- Context headers are capped at 8 KiB in total and 1 KiB per field. Invalid values are dropped without failing the request.
+
+## Inferred agent context [#inferred-agent-context]
+
+For supported coding agents, the gateway also infers context from the agent's own headers and request body:
+
+- The session ID becomes the Langfuse session, prefixed with the agent name (for example `claude-code:<session uuid>`).
+- The original agent IDs are kept in metadata under `agent.*`: `agent.name`, `agent.session_id`, `agent.id` for subagents, `agent.parent_session_id`, and several Codex turn fields.
+- The provider's request ID is stored in the metadata key `langfuse.gateway.upstream.request.id`. Filter on it to find a single call.
+
+{/* TODO: document the `langfuse-request-id` response header once it ships. */}
+
+See [trace shape per agent](/docs/ai-gateway/coding-agents#trace-shape) for how sessions and traces are grouped.

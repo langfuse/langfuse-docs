@@ -1,0 +1,56 @@
+---
+title: Overview
+seoTitle: "Langfuse AI Gateway (alpha)"
+description: The Langfuse AI Gateway relays native OpenAI and Anthropic API calls through Langfuse and records every model call as a generation, with no SDK or code changes.
+noindex: true
+---
+
+import AiGatewayAlphaCallout from "@/components-mdx/ai-gateway-alpha-callout.mdx";
+
+# AI Gateway
+
+<AiGatewayAlphaCallout />
+
+The Langfuse AI Gateway is a relay for native provider APIs. Your application or coding agent talks to Langfuse instead of OpenAI or Anthropic. The gateway forwards each request unchanged, using your organization's provider connection, and records the call in Langfuse. You get full traces of every model call without installing an SDK or changing code: you only change the base URL and the API key.
+
+## What gets recorded [#what-gets-recorded]
+
+Every model call becomes a Langfuse **generation** with:
+
+- the model (the dated response model when the provider returns one), matched to model prices
+- the full input (system prompt, tool definitions, messages, tool calls and results) and the streamed output (text, reasoning or thinking, and tool calls with parsed arguments)
+- token usage, including cached and reasoning tokens, plus cost, latency, and time to first token
+- level `ERROR` with the provider's status and message for failed calls, and `WARNING` for client cancellations
+- sessions, grouped automatically from each coding agent's own session ID
+
+You can enrich traces with a user, tags, metadata, an environment, and more through optional [request headers](/docs/ai-gateway/request-headers).
+
+## Supported routes [#supported-routes]
+
+| Namespace       | Endpoints                                                      | Recorded                    |
+| --------------- | -------------------------------------------------------------- | --------------------------- |
+| `/openai/v1`    | `POST /responses`, `POST /responses/compact`, `GET /models`    | Responses and compact calls |
+| `/anthropic/v1` | `POST /messages`, `POST /messages/count_tokens`, `GET /models` | Messages calls              |
+
+Model listings and `count_tokens` are proxied but not recorded. Websockets and realtime APIs are not served.
+
+<Callout type="info">
+  **Coming soon:** Chat Completions (`POST /openai/v1/chat/completions`). Until
+  it ships, clients must use the OpenAI Responses API or the Anthropic Messages
+  API.
+</Callout>
+
+## Capture modes [#capture-modes]
+
+The capture mode is set per organization in **Organization settings → AI Gateway**:
+
+- `FULL` records input, output, usage, and cost.
+- `USAGE` records usage and cost only, without input or output.
+
+[Request headers](/docs/ai-gateway/request-headers) work in both modes.
+
+## Next steps [#next-steps]
+
+- [Get started](/docs/ai-gateway/get-started): enable the gateway, create a key, and run a sanity check.
+- [Coding agents](/docs/ai-gateway/coding-agents): route Claude Code, Codex, OpenCode, or pi through the gateway.
+- [Troubleshooting and FAQ](/docs/ai-gateway/troubleshooting-and-faq): error codes, known limitations, and alpha limits.

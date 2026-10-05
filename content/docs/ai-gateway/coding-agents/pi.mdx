@@ -1,0 +1,122 @@
+---
+title: pi
+seoTitle: "Trace the pi coding agent with the Langfuse AI Gateway (alpha)"
+description: Route the pi coding agent through the Langfuse AI Gateway to trace every model call, tool call, token, and cost.
+noindex: true
+---
+
+import AiGatewayAlphaCallout from "@/components-mdx/ai-gateway-alpha-callout.mdx";
+
+# pi
+
+<AiGatewayAlphaCallout />
+
+**Requires** pi 0.87 or later and an `ANTHROPIC` and/or `OPENAI` provider connection. Verified with pi 0.87.1.
+
+Install pi from the `@earendil-works/pi-coding-agent` package. The older `@mariozechner/…` package is deprecated.
+
+```sh
+npm install -g @earendil-works/pi-coding-agent
+```
+
+## Setup [#setup]
+
+Add gateway providers to `~/.pi/agent/models.json` (or `$PI_CODING_AGENT_DIR/models.json`). `$VAR` interpolation works in `apiKey` and in headers.
+
+```json
+{
+  "providers": {
+    "langfuse-anthropic": {
+      "baseUrl": "https://<ai-gateway-host>/anthropic",
+      "api": "anthropic-messages",
+      "apiKey": "$LANGFUSE_GATEWAY_KEY",
+      "compat": { "sendSessionAffinityHeaders": true },
+      "headers": {
+        "langfuse-user-id": "$LF_USER_ID",
+        "langfuse-tags": "pi,<team>",
+        "langfuse-environment": "local"
+      },
+      "models": [
+        {
+          "id": "claude-sonnet-4-6",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "contextWindow": 200000,
+          "maxTokens": 64000
+        }
+      ]
+    },
+    "langfuse-openai": {
+      "baseUrl": "https://<ai-gateway-host>/openai/v1",
+      "api": "openai-responses",
+      "apiKey": "$LANGFUSE_GATEWAY_KEY",
+      "headers": {
+        "langfuse-user-id": "$LF_USER_ID",
+        "langfuse-tags": "pi,<team>",
+        "langfuse-environment": "local"
+      },
+      "models": [
+        {
+          "id": "gpt-5-mini",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "contextWindow": 400000,
+          "maxTokens": 128000
+        }
+      ]
+    }
+  }
+}
+```
+
+```sh
+pi --provider langfuse-anthropic --model claude-sonnet-4-6
+pi -p --provider langfuse-openai --model gpt-5-mini "Summarize README.md"
+```
+
+- **Sessions on the Anthropic route require `"compat": { "sendSessionAffinityHeaders": true }`.** Without it, pi sends no session ID to Anthropic and the generations have no session. The OpenAI route always sends the session ID.
+- The Anthropic `baseUrl` has **no** `/v1`. The OpenAI `baseUrl` **includes** `/v1`.
+- Use `"api": "openai-responses"`. `openai-completions` uses Chat Completions, which is not supported yet, and gets a `404`.
+- List every model you use under `models`. Otherwise, pi warns "Using custom model id" and guesses the context window and reasoning support.
+
+## Verify [#verify]
+
+1. Run a tool task twice with the same `--session-id <id>`.
+2. In Langfuse, go to **Sessions** and open `pi:<id>`. You should see one generation per model call, each in its own trace, with pi's system prompt, 4 tools (`read`, `bash`, `edit`, `write`), the output, usage, cost, and your user and tags.
+
+## Turn grouping (experimental, optional) [#turn-grouping]
+
+<Callout type="warning">
+  Experimental. This extension works with the current gateway but is not an
+  official, published package yet. A dedicated turn header is planned.
+</Callout>
+
+pi sends no turn ID, so every model call is its own trace. A small [extension](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/extensions.md) can send a W3C `traceparent` with a new trace ID per prompt, which the gateway adopts. Save it as `~/.pi/agent/extensions/langfuse-turn.ts` (or `.pi/extensions/` in a project), or load it for one run with `pi -e ./langfuse-turn.ts`:
+
+```ts
+import { randomBytes } from "node:crypto";
+
+export default function (pi: any) {
+  let traceId: string | undefined;
+
+  // One trace per user prompt (agent run).
+  pi.on("agent_start", () => {
+    traceId = randomBytes(16).toString("hex");
+  });
+
+  pi.on("before_provider_headers", (event: any) => {
+    if (!traceId) return;
+    const spanId = randomBytes(8).toString("hex");
+    event.headers["traceparent"] = `00-${traceId}-${spanId}-01`;
+  });
+}
+```
+
+- All model calls of a prompt, including retries and follow-up messages within the run, land in one trace. The generations appear as top-level observations, because the parent span does not exist in Langfuse.
+- Calls after the run ends, such as auto-compaction, join the prompt that triggered them.
+
+## Gotchas [#gotchas]
+
+- Headers are static per provider. Vary them with `$VAR`, or define several providers.
+- On Anthropic, thinking tokens are counted inside output tokens. OpenAI reasoning tokens are shown separately.
+- pi's default prompt (about 2,000 tokens) is cached on Sonnet but is below the minimum cacheable size of Haiku 4.5.

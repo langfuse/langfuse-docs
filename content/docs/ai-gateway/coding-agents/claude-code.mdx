@@ -1,0 +1,84 @@
+---
+title: Claude Code
+seoTitle: "Trace Claude Code with the Langfuse AI Gateway (alpha)"
+description: Route Claude Code through the Langfuse AI Gateway to trace every model call, tool call, token, and cost, and optionally group each prompt into one trace.
+noindex: true
+---
+
+import AiGatewayAlphaCallout from "@/components-mdx/ai-gateway-alpha-callout.mdx";
+
+# Claude Code
+
+<AiGatewayAlphaCallout />
+
+**Requires** Claude Code 2.1 or later and an `ANTHROPIC` provider connection. Verified with Claude Code 2.1.282.
+
+<Callout type="info">
+  This page routes Claude Code's model calls through the AI Gateway. For tracing
+  Claude Code with hooks instead, see the [Claude Code
+  integration](/integrations/developer-tools/claude-code).
+</Callout>
+
+## Setup [#setup]
+
+Export the gateway variables from [Get started](/docs/ai-gateway/get-started#export-the-key), then:
+
+```sh
+export ANTHROPIC_BASE_URL="$LANGFUSE_GATEWAY_HOST/anthropic"   # no /v1: Claude Code appends /v1/messages
+export ANTHROPIC_AUTH_TOKEN="$LANGFUSE_GATEWAY_KEY"             # sent as Authorization: Bearer
+unset ANTHROPIC_API_KEY                                         # a different value here causes a 401
+export CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1             # optional: /model lists gateway models
+export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1               # optional
+export ANTHROPIC_CUSTOM_HEADERS=$'langfuse-user-id: <you>@example.com\nlangfuse-tags: claude-code,<team>\nlangfuse-environment: local\nlangfuse-metadata: repo:<repo>'
+claude
+```
+
+To make the setup persistent, use `~/.claude/settings.json`:
+
+```json
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://<ai-gateway-host>/anthropic",
+    "ANTHROPIC_AUTH_TOKEN": "<your-gateway-key>",
+    "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
+    "ANTHROPIC_CUSTOM_HEADERS": "langfuse-user-id: <you>@example.com\nlangfuse-tags: claude-code\nlangfuse-environment: local"
+  }
+}
+```
+
+- `ANTHROPIC_CUSTOM_HEADERS` takes newline-separated `Name: value` pairs. See [request headers](/docs/ai-gateway/request-headers).
+- Model IDs pass through unchanged, for example `--model claude-sonnet-4-6` or `claude-haiku-4-5-20251001`.
+
+## Verify [#verify]
+
+1. Run `claude -p --output-format json "Reply with: hello gateway"` and note the `session_id`.
+2. In Langfuse, go to **Sessions** and open `claude-code:<session_id>`. You should see one `anthropic.messages` generation with a 3-block system prompt, about 20 tools, the output, usage including cache writes, cost, time to first token, and your user and tags.
+
+## Turn grouping (beta) [#turn-grouping]
+
+By default, every model call is its own trace. Claude Code can send a W3C `traceparent` header whose trace ID is its `claude_code.interaction` span, one per user prompt. The gateway adopts that trace ID, so every model call of a prompt lands in **one trace**, including subagent calls and retries.
+
+This uses Claude Code's beta [OpenTelemetry tracing](https://code.claude.com/docs/en/monitoring-usage). All four settings are required:
+
+```sh
+export CLAUDE_CODE_ENABLE_TELEMETRY=1
+export CLAUDE_CODE_ENHANCED_TELEMETRY_BETA=1
+export CLAUDE_CODE_PROPAGATE_TRACEPARENT=1
+export OTEL_TRACES_EXPORTER=otlp
+export OTEL_EXPORTER_OTLP_ENDPOINT="<your-otel-collector>"
+```
+
+- Claude Code only sends `traceparent` when tracing is actually active. With `OTEL_TRACES_EXPORTER` unset or set to `none`, nothing is sent and each call stays its own trace.
+- `OTEL_TRACES_EXPORTER=console` also works, but it prints span dumps to stdout, which makes the interactive UI unusable.
+- **Do not point this OTLP export at Langfuse.** Claude Code's `claude_code.llm_request` spans would be recorded as a second generation next to the gateway's generation for every call. Use your own collector.
+- Because Claude Code's own spans are not in Langfuse, the gateway generations of a prompt appear as top-level observations of the shared trace.
+- A resumed session starts a new trace per prompt, in the same session.
+
+## Gotchas [#gotchas]
+
+- There is no user unless you send `langfuse-user-id`. Claude Code's own `metadata.user_id` only lands in `langfuse.gateway.request.metadata`.
+- When a model call fails, Claude Code retries once without streaming, so a failed prompt shows **two** `ERROR` generations.
+- Subagent calls carry `agent.id` but no link to their parent, unless you enable [turn grouping](#turn-grouping).
+- Thinking text is often empty (`thinking.display: "omitted"`), so time to first token is close to latency. Thinking tokens are counted inside output tokens.
+- A `HEAD /anthropic/api/hello` 404 at startup is Claude Code's connectivity probe. It is harmless and not recorded.
+- Long sessions can exceed the 5 MiB input capture limit. See [known limitations](/docs/ai-gateway/troubleshooting-and-faq#known-limitations).
