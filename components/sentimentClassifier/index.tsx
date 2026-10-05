@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { Loader } from "@/components/ai-elements/loader";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 import { scoreDemoNegativeUserFeedback } from "@/components/demoLangfuseBrowserClients";
+import { DemoTraceLink } from "@/components/demoTraceLink";
+import { buildDemoTraceUrl } from "@/lib/demo-trace";
 import { SendIcon } from "lucide-react";
 import {
   EXAMPLE_TEXTS,
@@ -64,9 +66,9 @@ export const SentimentClassifier = ({
   const jevModel = result?.result.model;
 
   return (
-    <div className={cn("h-[62vh]", className)} {...props}>
-      <div className="flex flex-col h-full rounded-[2px] border border-line-structure bg-surface-bg corner-box-corners p-5 relative overflow-hidden">
-        <div className="flex-1 overflow-y-auto relative z-10 space-y-4">
+    <div className={cn(className)} {...props}>
+      <div className="relative flex flex-col rounded-[2px] border border-line-structure bg-surface-bg corner-box-corners p-5">
+        <div className="relative z-10 space-y-4">
           <div className="space-y-3">
             <textarea
               value={input}
@@ -149,6 +151,11 @@ export const SentimentClassifier = ({
                   }}
                 />
               )}
+
+              <DemoTraceLink
+                traceUrl={buildDemoTraceUrl({ traceId: result.traceId })}
+                source="sentiment_classifier"
+              />
             </div>
           )}
         </div>

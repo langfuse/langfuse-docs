@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 import { Loader } from "@/components/ai-elements/loader";
-// import { DemoTraceLink } from "@/components/demoTraceLink"; // temporarily disabled
+import { DemoTraceLink } from "@/components/demoTraceLink";
 import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId";
 import {
   Select,
@@ -396,13 +396,10 @@ export const RockPaperScissors = ({
                       >
                         New round
                       </button>
-                      {/* Temporarily disabled: trace link (traces are not shared publicly right now)
                       <DemoTraceLink
                         traceUrl={result.traceUrl}
                         source="rock_paper_scissors"
-                        label="Show trace"
                       />
-                      */}
                     </div>
                   </div>
                 </div>
