@@ -116,6 +116,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   "Seven Eleven Japan": "Convenience retailer",
   Slite: "Knowledge management platform",
   SumUp: "Payments and point-of-sale company",
+  Swisscom: "Swiss communications, IT, and entertainment company",
   TELUS: "Telecommunications company",
   "The Weather Company": "Weather intelligence company",
   "Trade Republic": "European fintech bank",
