@@ -164,7 +164,8 @@ function AskForm({
       className={cn(
         "not-prose flex flex-col",
         !linked && !details && "py-5",
-        details && "px-4 py-2",
+        // Idle details: padding lives on the button so the full card is the hit target.
+        details && phase !== "idle" && "px-4 py-2",
       )}
     >
       {phase === "idle" ? (
@@ -172,7 +173,8 @@ function AskForm({
           type="button"
           onClick={() => setPhase("editing")}
           className={cn(
-            "inline-flex self-start items-baseline gap-1 text-left cursor-text rounded-[2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            "inline-flex items-baseline gap-1 text-left cursor-text rounded-[2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            details ? "w-full px-4 py-2" : "self-start",
             linked
               ? linkVariants({ variant: "underline" })
               : "text-text-primary",
