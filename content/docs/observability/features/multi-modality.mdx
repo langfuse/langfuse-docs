@@ -169,59 +169,7 @@ Supported formats:
 </Tab>
 </Tabs>
 
-#### Private media in S3 (Feature Preview) [#external-s3-media]
-
-Langfuse can render private S3 objects without copying them into Langfuse-managed storage. Add a canonical `s3://<bucket>/<key>` reference with a supported file extension:
-
-```md
-![Alt text](s3://my-private-bucket/langfuse-media/image.png)
-```
-
-You are responsible for uploading the object to the external bucket before referencing it.
-
-To enable this preview:
-
-1. Enable **External media storage** in your personal or organization **Feature Previews** settings.
-2. Open **Project Settings > Integrations > Blob Storage**, then create or select an **Amazon S3** or **S3 Compatible Storage** integration. Azure Blob Storage is not supported.
-3. Enable **External media storage**. Optionally set a media prefix to restrict which object keys Langfuse can sign. Leaving it blank allows access to any object in the bucket.
-4. Save the integration, then use **Test** with an example `s3://` URI. The test checks both server-side object access and browser CORS access.
-
-<Callout type="warning" title="Grant read access to the media objects">
-
-The integration credentials require `s3:GetObject` for every object that Langfuse should render. Scope the permission to the configured media prefix:
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::my-private-bucket/langfuse-media/*"
-    }
-  ]
-}
-```
-
-`s3:ListBucket` is not required for external media rendering. If you also enable scheduled exports on the same integration, grant `s3:PutObject` for the export prefix separately.
-
-</Callout>
-
-Langfuse generates short-lived signed URLs, but the browser still reads the object directly from your bucket. Configure bucket CORS to allow `GET` requests, including range requests, from the exact origin where you use the Langfuse UI. For example, an Amazon S3 bucket used from the EU Langfuse Cloud region can use:
-
-```json
-[
-  {
-    "AllowedHeaders": ["Range"],
-    "AllowedMethods": ["GET"],
-    "AllowedOrigins": ["https://cloud.langfuse.com"],
-    "ExposeHeaders": ["Accept-Ranges", "Content-Length", "Content-Range"],
-    "MaxAgeSeconds": 3000
-  }
-]
-```
-
-Use your actual Langfuse origin instead: `https://us.cloud.langfuse.com`, `https://hipaa.cloud.langfuse.com`, `https://jp.cloud.langfuse.com`, or your self-hosted URL. Add every origin from which users access the project. CORS does not grant object access; the signed URL and the integration's `s3:GetObject` permission enforce access.
+To render media from a private bucket, configure [private media in S3](#external-s3-media).
 
 ### Use media in LLM-as-a-Judge [#llm-as-a-judge]
 
@@ -481,6 +429,60 @@ const resolvedTrace = await langfuse.resolveMediaReferences({
 
 </Tab>
 </LangTabs>
+
+## Private media in S3 (Feature Preview) [#external-s3-media]
+
+Langfuse can render private S3 objects without copying them into Langfuse-managed storage. Add a canonical `s3://<bucket>/<key>` reference with a supported file extension:
+
+```md
+![Alt text](s3://my-private-bucket/langfuse-media/image.png)
+```
+
+You are responsible for uploading the object to the external bucket before referencing it.
+
+To enable this preview:
+
+1. Enable **External media storage** in your personal or organization **Feature Previews** settings.
+2. Open **Project Settings > Integrations > Blob Storage**, then create or select an **Amazon S3** or **S3 Compatible Storage** integration. Azure Blob Storage is not supported.
+3. Enable **External media storage**. Optionally set a media prefix to restrict which object keys Langfuse can sign. Leaving it blank allows access to any object in the bucket.
+4. Save the integration, then use **Test** with an example `s3://` URI. The test checks both server-side object access and browser CORS access.
+
+<Callout type="warning" title="Grant read access to the media objects">
+
+The integration credentials require `s3:GetObject` for every object that Langfuse should render. Scope the permission to the configured media prefix:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::my-private-bucket/langfuse-media/*"
+    }
+  ]
+}
+```
+
+`s3:ListBucket` is not required for external media rendering. If you also enable scheduled exports on the same integration, grant `s3:PutObject` for the export prefix separately.
+
+</Callout>
+
+Langfuse generates short-lived signed URLs, but the browser still reads the object directly from your bucket. Configure bucket CORS to allow `GET` requests, including range requests, from the exact origin where you use the Langfuse UI. For example, an Amazon S3 bucket used from the EU Langfuse Cloud region can use:
+
+```json
+[
+  {
+    "AllowedHeaders": ["Range"],
+    "AllowedMethods": ["GET"],
+    "AllowedOrigins": ["https://cloud.langfuse.com"],
+    "ExposeHeaders": ["Accept-Ranges", "Content-Length", "Content-Range"],
+    "MaxAgeSeconds": 3000
+  }
+]
+```
+
+Use your actual Langfuse origin instead: `https://us.cloud.langfuse.com`, `https://hipaa.cloud.langfuse.com`, `https://jp.cloud.langfuse.com`, or your self-hosted URL. Add every origin from which users access the project. CORS does not grant object access; the signed URL and the integration's `s3:GetObject` permission enforce access.
 
 ## GitHub Discussions
 
