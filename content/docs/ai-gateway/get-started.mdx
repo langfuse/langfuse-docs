@@ -14,9 +14,8 @@ import AiGatewayAlphaCallout from "@/components-mdx/ai-gateway-alpha-callout.mdx
 This page takes you from zero to a working gateway key. Afterwards, configure your [coding agent](/docs/ai-gateway/coding-agents).
 
 <Callout type="info">
-  **Getting access (placeholder):** to get your organization allowlisted, a
-  gateway API key, and the gateway host, contact **`<TODO: AI Gateway owner /
-  Slack channel>`**. Never paste a gateway key into a repository, a ticket, or a
+  **Getting access (placeholder):** to get your organization allowlisted and a
+  gateway API key, contact **`<TODO: AI Gateway owner / Slack channel>`**. Never paste a gateway key into a repository, a ticket, or a
   shared config file.
 </Callout>
 
@@ -64,9 +63,16 @@ To see your traces, you need access to the project selected as the ingestion pro
 Export the gateway host and key once. All coding agent guides use these variables.
 
 ```sh
-export LANGFUSE_GATEWAY_HOST="https://<ai-gateway-host>"   # placeholder, see "Getting access"
+export LANGFUSE_GATEWAY_HOST="https://staging.langfuse.com"   # staging host for this internal preview
 export LANGFUSE_GATEWAY_KEY="<your-gateway-key>"
 ```
+
+<Callout type="info">
+  `https://staging.langfuse.com` is the **staging** host for this internal
+  preview, and all snippets in these docs use it. The production host will
+  differ. The gateway is path-routed: OpenAI under `/openai/v1`, Anthropic under
+  `/anthropic/v1`.
+</Callout>
 
 ## Sanity check [#sanity-check]
 
