@@ -1,18 +1,11 @@
 const LANGFUSE_DOCS_ORIGIN = "https://langfuse.com";
 const MAX_URL_LENGTH = 2000;
-const MAX_TITLE_LENGTH = 300;
 
-export type FaqPageContextInput = {
-  url?: string;
-  title?: string;
-};
-
-export type TrustedFaqPageContext = {
+export type TrustedFaqPageUrl = {
   /** Canonical langfuse.com URL, including a section hash when present. */
   url: string;
   /** langfuse.com URL without query or hash, for getLangfuseDocsPage. */
   docsUrl: string;
-  title?: string;
 };
 
 function parseHttpOrigin(value: string): string | undefined {
@@ -64,27 +57,20 @@ export function trustedPageOrigins(request: Request): Set<string> {
   return origins;
 }
 
-function sanitizeTitle(title: string | undefined): string | undefined {
-  if (!title) return undefined;
-  const cleaned = title.replace(/[\u0000-\u001F\u007F]/g, "").trim();
-  if (!cleaned) return undefined;
-  return cleaned.slice(0, MAX_TITLE_LENGTH);
-}
-
 /**
  * Accept only langfuse.com (or same-origin preview/localhost) page URLs.
  * Rewrites trusted URLs to https://langfuse.com so MCP fetches stay first-party.
  */
-export function sanitizeFaqPageContext(
-  input: FaqPageContextInput | undefined,
+export function sanitizeFaqPageUrl(
+  rawUrl: string | undefined,
   origins: Iterable<string>,
-): TrustedFaqPageContext | undefined {
-  const rawUrl = input?.url?.trim();
-  if (!rawUrl || rawUrl.length > MAX_URL_LENGTH) return undefined;
+): TrustedFaqPageUrl | undefined {
+  const trimmed = rawUrl?.trim();
+  if (!trimmed || trimmed.length > MAX_URL_LENGTH) return undefined;
 
   let parsed: URL;
   try {
-    parsed = new URL(rawUrl);
+    parsed = new URL(trimmed);
   } catch {
     return undefined;
   }
@@ -105,27 +91,15 @@ export function sanitizeFaqPageContext(
   const hash = parsed.hash.startsWith("#") ? parsed.hash : "";
   const url = hash ? `${docsUrl}${hash}` : docsUrl;
 
-  return {
-    url,
-    docsUrl,
-    title: sanitizeTitle(input?.title),
-  };
+  return { url, docsUrl };
 }
 
 /** System-instruction suffix so the FAQ model treats the user as being on this page. */
-export function faqPageContextInstructions(
-  page: TrustedFaqPageContext,
-): string {
-  const lines = [
+export function faqPageContextInstructions(page: TrustedFaqPageUrl): string {
+  return [
     "The user is currently viewing this Langfuse documentation page:",
     `- URL: ${page.url}`,
-  ];
-  if (page.title) {
-    lines.push(`- Browser-reported title: ${page.title}`);
-  }
-  lines.push(
     "When they ask which page they are on, what “this page”, “here”, or “this section” refers to, or what to check before changing something described on this page, treat that URL as the current page.",
     `Prefer the getLangfuseDocsPage tool with pathOrUrl "${page.docsUrl}" when you need this page’s content. Use searchLangfuseDocs for broader questions that are not about this page.`,
-  );
-  return lines.join("\n");
+  ].join("\n");
 }

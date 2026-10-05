@@ -15,7 +15,7 @@ import { context, ROOT_CONTEXT } from "@opentelemetry/api";
 import { z } from "zod";
 import {
   faqPageContextInstructions,
-  sanitizeFaqPageContext,
+  sanitizeFaqPageUrl,
   trustedPageOrigins,
 } from "@/lib/faq-page-context";
 import { flush } from "@/src/instrumentation";
@@ -47,14 +47,8 @@ const promptConfigSchema = z.object({
 
 const bodySchema = z.object({
   question: z.string().trim().min(1).max(500),
-  // Ignore a malformed page object so question-only clients keep working.
-  page: z
-    .object({
-      url: z.string().max(2000).optional(),
-      title: z.string().max(300).optional(),
-    })
-    .optional()
-    .catch(undefined),
+  // Ignore a malformed url so question-only clients keep working.
+  url: z.string().max(2000).optional().catch(undefined),
 });
 const unavailable =
   "I couldn’t get an answer right now. Please try a new question in a moment.";
@@ -78,10 +72,7 @@ export async function POST(req: Request) {
   }
 
   const { question } = parsed.data;
-  const page = sanitizeFaqPageContext(
-    parsed.data.page,
-    trustedPageOrigins(req),
-  );
+  const page = sanitizeFaqPageUrl(parsed.data.url, trustedPageOrigins(req));
   const abortSignal = AbortSignal.any([
     req.signal,
     AbortSignal.timeout(50_000),
@@ -97,7 +88,7 @@ export async function POST(req: Request) {
             tags: ["faq-bot"],
           },
           async () => {
-            const traceInput = page ? { question, page } : question;
+            const traceInput = page ? { question, url: page.url } : question;
             observation.update({ input: traceInput });
             setActiveTraceIO({ input: traceInput });
             let client: Awaited<ReturnType<typeof createMCPClient>> | undefined;
