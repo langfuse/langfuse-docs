@@ -1,0 +1,113 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Observability for Lyceum with Langfuse
+sidebarTitle: Lyceum
+logo: /images/integrations/lyceum_icon.svg
+logoAppearance: dark
+description: Learn how to trace open-source models on Lyceum's OpenAI-compatible serverless inference API with Langfuse using the OpenAI drop-in replacement.
+category: Integrations
+---
+
+# Observability for Lyceum with Langfuse
+
+This guide shows you how to integrate [Lyceum](https://lyceum.technology/) with Langfuse. Lyceum's serverless inference API is compatible with OpenAI's client libraries, so you can use the Langfuse OpenAI drop-in replacement to trace every call your application makes to Lyceum.
+
+> **What is Lyceum?** [Lyceum](https://lyceum.technology/) is a sovereign European AI inference provider for open-source models. Its [serverless inference API](https://docs.lyceum.technology/docs/inference/serverless) serves models such as GLM, DeepSeek, and Kimi from European data centers through an OpenAI-compatible endpoint, billed per token.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source AI engineering platform that helps teams trace API calls, monitor performance, and debug issues in their LLM applications. Use [Langfuse Cloud](https://langfuse.com/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](https://langfuse.com/self-hosting) it.
+
+<Steps>
+## Step 1: Install dependencies
+
+Make sure you have installed the necessary Python packages:
+
+```python
+%pip install openai langfuse -U
+```
+
+## Step 2: Set up environment variables
+
+Get your Langfuse keys from the project settings in [Langfuse Cloud](https://langfuse.com/cloud) or set up [self-hosting](https://langfuse.com/self-hosting). To get a Lyceum API key, open **API keys** in the [Lyceum dashboard](https://dashboard.lyceum.technology/) and select **Create key**. Lyceum keys start with `lk_`, and usage is billed to the organization you pick when you create the key.
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://langfuse.com/cloud
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region (API host)
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+
+# Get your Lyceum API key from https://dashboard.lyceum.technology (API keys > Create key)
+os.environ.setdefault("LYCEUM_API_KEY", "lk_...");
+```
+
+## Step 3: Use the Langfuse OpenAI drop-in replacement
+
+Instead of importing `openai` directly, import it from `langfuse.openai`. Requests made through this client are traced in Langfuse automatically. Point the client at Lyceum's base URL, `https://api.lyceum.technology/openai/v1`, and authenticate with your Lyceum API key.
+
+```python
+# instead of: import openai
+from langfuse.openai import openai
+
+client = openai.OpenAI(
+  api_key=os.environ.get("LYCEUM_API_KEY"),
+  base_url="https://api.lyceum.technology/openai/v1",
+)
+```
+
+## Step 4: Run an example
+
+The following cell calls GLM-5.3 through the traced client. Find other model IDs in the [Model IDs](https://docs.lyceum.technology/docs/inference/serverless#model-ids) table of Lyceum's serverless docs.
+
+```python
+response = client.chat.completions.create(
+  model="z-ai/glm-5.3",
+  messages=[
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "Explain in two sentences why teams trace their LLM calls."},
+  ],
+  name="lyceum-example-trace",  # name of the trace in Langfuse
+)
+
+print(response.choices[0].message.content)
+```
+
+## Step 5: Stream responses
+
+Streaming works with the same client. Lyceum recommends streaming for long or user-facing outputs. With `stream_options={"include_usage": True}`, the final chunk carries token usage, and Langfuse combines the streamed chunks into one generation with the full output and usage.
+
+```python
+stream = client.chat.completions.create(
+  model="z-ai/glm-5.3",
+  messages=[{"role": "user", "content": "Write a haiku about open-source models."}],
+  stream=True,
+  stream_options={"include_usage": True},
+  name="lyceum-streaming-trace",
+)
+
+for chunk in stream:
+  if chunk.choices and chunk.choices[0].delta.content:
+    print(chunk.choices[0].delta.content, end="", flush=True)
+```
+
+## Step 6: See traces in Langfuse
+
+After running the examples, open your Langfuse project to see the traces. Each Lyceum request appears as a generation with:
+
+- Request parameters (model, messages, temperature, and so on)
+- Response content
+- Token usage, including reasoning tokens for reasoning models such as GLM-5.3
+- Latency
+
+![Example trace of a Lyceum request in Langfuse](https://langfuse.com/images/cookbook/integration_lyceum/lyceum-example-trace.png)
+
+_[Public example trace link in Langfuse](https://cloud.langfuse.com/project/cmux6w1ld04g5ad0cotrdhtk2/traces/d65d8b710576aedf5d288b2ae7858a31)_
+
+To track cost as well, add a [custom model definition](https://langfuse.com/docs/observability/features/token-and-cost-tracking#custom-model-definitions) for each Lyceum model you use. [Lyceum's pricing page](https://lyceum.technology/resources/pricing/) lists prices per million tokens, so convert them to a price per token. Set prices for `input`, `input_cached_tokens`, `output`, and `output_reasoning_tokens`, and give `output_reasoning_tokens` the output price, because Lyceum bills reasoning tokens as output tokens.
+
+</Steps>
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
