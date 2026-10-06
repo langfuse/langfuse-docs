@@ -5,13 +5,13 @@ description: Observe and evaluate AI agents across banks, brokers, and fintechs.
 
 # Langfuse for financial services
 
-Financial institutions handle personal and trusted information. AI can accelerate processes and improve service quality, but it has to meet a high bar for reliability and observability. Langfuse gives engineering, platform, and risk teams visibility into production agents — in Langfuse Cloud or on your own infrastructure.
+Observe and evaluate AI agents across your institution. Give engineering, platform, and risk teams visibility into production behavior, with deployment in Langfuse Cloud or your own infrastructure.
 
 - **Standardize observability and evals across teams.** Bring agents across frameworks, models, and gateways into a shared view of traces and evaluations.
-- **Ship reliable agents with deployment quality gates.** Evaluate model and agent changes against datasets before release.
+- **Ship reliable agents with clear deployment quality gates.** Evaluate model and agent changes against datasets before release.
 - **Retain execution history.** Keep traces of AI executions as evidence for supervisory and regulatory reviews.
-- **Flag potential policy violations.** Score outputs against your policies and regulations with evaluators.
-- **Self-host or air-gap.** Deploy with no internet access and lock access to internal users via VPN.
+- **Flag potential policy violations.** With evals that score outputs against your policies and regulations.
+- **Self-host or air-gap.** Deploy with no internet access, lock to internal users via VPN to cater for data sensitivity needs.
 
 [SOC 2 Type II](/security/soc2) · [ISO 27001](/security/iso27001) · [GDPR](/security/gdpr) · [Self-hosting](/self-hosting) · [Hardening for government](/self-hosting/configuration/hardening#hardening-for-government)
 

@@ -6,7 +6,7 @@ export const financialServicesReasons = [
     body: "Bring agents across frameworks, models, and gateways into a shared view of traces and evaluations.",
   },
   {
-    title: "Ship reliable agents with deployment quality gates",
+    title: "Ship reliable agents with clear deployment quality gates",
     body: "Evaluate model and agent changes against datasets before release.",
   },
   {
@@ -15,11 +15,11 @@ export const financialServicesReasons = [
   },
   {
     title: "Flag potential policy violations",
-    body: "Score outputs against your policies and regulations with evaluators.",
+    body: "With evals that score outputs against your policies and regulations.",
   },
   {
     title: "Self-host or air-gap",
-    body: "Deploy with no internet access and lock access to internal users via VPN.",
+    body: "Deploy with no internet access, lock to internal users via VPN to cater for data sensitivity needs.",
   },
 ] as const;
 
