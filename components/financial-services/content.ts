@@ -23,17 +23,48 @@ export const financialServicesReasons = [
   },
 ] as const;
 
-export const financialServicesQuoteRoutes = [
-  "/users/sumup",
-  "/users/ramp",
-  "/users/trade-republic",
-] as const;
-
 export const financialServicesLogoNames = [
   "Trade Republic",
   "SumUp",
   "Ramp",
   "Merck",
+] as const;
+
+export const financialServicesFeaturedStory = {
+  company: "Merck",
+  href: "/users/merckgroup",
+  quote:
+    "Generative AI will only earn enterprise trust when we can see what's happening under the hood. Langfuse enables us to track every prompt, response, cost, and latency in real time, turning black-box models into auditable, optimizable assets.",
+  author: "Walid Mehanna",
+  role: "Chief Data & AI Officer at Merck",
+  stats: [
+    { value: "80+", label: "use cases" },
+    { value: "200+", label: "builders" },
+    {
+      value: "API",
+      label:
+        "provisioning automated against the Langfuse API from an internal portal",
+    },
+  ],
+} as const;
+
+export const financialServicesStoryCards = [
+  {
+    route: "/users/trade-republic",
+    category: "Self-hosted",
+    description:
+      "How a European neobroker runs self-hosted Langfuse in production.",
+  },
+  {
+    route: "/users/ramp",
+    category: "Spend management",
+    description: "How Ramp auto-improves agents on Langfuse.",
+  },
+  {
+    route: "/users/sumup",
+    category: "Payments",
+    description: "How SumUp deflects 50% of support conversations to AI.",
+  },
 ] as const;
 
 export const financialServicesTrustPoints = [

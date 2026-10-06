@@ -91,23 +91,27 @@ No internet access. No vendor access.
 
 ## Customers in financial services
 
-### [SumUp](/users/sumup)
+### [Merck](/users/merckgroup)
 
-> “Building on Langfuse we saved 30% of external BPO cost by deflecting 50% of support conversations to AI.”
+> “Generative AI will only earn enterprise trust when we can see what's happening under the hood. Langfuse enables us to track every prompt, response, cost, and latency in real time, turning black-box models into auditable, optimizable assets.”
 >
-> — Ana Casado, Head of Operations Data and AI, SumUp
+> — Walid Mehanna, Chief Data & AI Officer at Merck
 
-### [Ramp](/users/ramp)
+- **80+** use cases
+- **200+** builders
+- **API** provisioning automated against the Langfuse API from an internal portal
 
-> “We wanted something built for agents as users first. And that means API first. An agent should never get stuck waiting for a human because of a deficiency in the API. This is what Langfuse is.”
->
-> — David Traina, Data Platform, Ramp
+### [How a European neobroker runs self-hosted Langfuse in production.](/users/trade-republic)
 
-### [Trade Republic](/users/trade-republic)
+Customer story · Self-hosted. [Read story](/users/trade-republic)
 
-> “We're using the open-source self-hosted version of Langfuse and we don't see any limitations there. We're super happy with it.”
->
-> — Paolo Tamagnini, Senior Data Scientist, Trade Republic
+### [How Ramp auto-improves agents on Langfuse.](/users/ramp)
+
+Customer story · Spend management. [Read story](/users/ramp)
+
+### [How SumUp deflects 50% of support conversations to AI.](/users/sumup)
+
+Customer story · Payments. [Read story](/users/sumup)
 
 ## Your evaluation needs, covered
 
