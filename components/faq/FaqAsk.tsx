@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { linkVariants } from "@/components/ui/link";
 import { cn } from "@/lib/utils";
+import { FaqRow } from "./FaqRow";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import Markdown from "react-markdown";
@@ -93,13 +94,13 @@ function AskForm({
   const input = useRef<HTMLTextAreaElement>(null);
   const loading = phase === "loading";
   const showDraftCursor = phase === "editing" && !focused && !!question.trim();
+  const boxed = linked || details;
   // Accordion questions inherit Analog from Radix's h3; match it explicitly here.
-  // Linked items keep the surrounding docs typography.
+  // Boxed rows (details + linked previews) inherit the surrounding docs typography.
   // Keep the invitation and editable question identical in every state.
-  const questionTypography =
-    linked || details
-      ? "text-[length:inherit] font-normal leading-[inherit]"
-      : "font-analog text-[15px] font-medium leading-snug";
+  const questionTypography = boxed
+    ? "text-[length:inherit] font-normal leading-[inherit]"
+    : "font-analog text-[15px] font-medium leading-snug";
 
   useEffect(
     () => () => {
@@ -160,9 +161,9 @@ function AskForm({
     <div
       className={cn(
         "not-prose flex flex-col",
-        !linked && !details && "py-5",
-        // Idle details: padding lives on the button so the full card is the hit target.
-        details && phase !== "idle" && "px-4 py-2",
+        !boxed && "py-5",
+        // Idle boxed: padding lives on the button so the full card is the hit target.
+        boxed && phase !== "idle" && "px-4 py-2",
       )}
     >
       {phase === "idle" ? (
@@ -170,11 +171,8 @@ function AskForm({
           type="button"
           onClick={() => setPhase("editing")}
           className={cn(
-            "inline-flex items-baseline gap-1 text-left cursor-text rounded-[2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-            details ? "w-full px-4 py-2" : "self-start",
-            linked
-              ? linkVariants({ variant: "underline" })
-              : "text-text-primary",
+            "inline-flex items-baseline gap-1 text-left cursor-text rounded-[2px] text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            boxed ? "w-full px-4 py-2" : "self-start",
             questionTypography,
           )}
         >
@@ -189,8 +187,7 @@ function AskForm({
           <div className={cn("flex items-start gap-2", questionTypography)}>
             <div
               className={cn(
-                "relative min-w-0 flex-1",
-                linked ? "text-text-links" : "text-text-primary",
+                "relative min-w-0 flex-1 text-text-primary",
                 questionTypography,
               )}
             >
@@ -340,19 +337,11 @@ export function FaqAsk({
   linked?: boolean;
   details?: boolean;
 }) {
-  if (linked) {
+  if (linked || details) {
     return (
-      <li className="my-2">
-        <AskForm linked />
-      </li>
-    );
-  }
-
-  if (details) {
-    return (
-      <div className="relative my-4 border border-line-structure bg-surface-bg corner-box-corners--hover">
-        <AskForm details />
-      </div>
+      <FaqRow>
+        <AskForm linked={linked} details={details} />
+      </FaqRow>
     );
   }
 
