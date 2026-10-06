@@ -43,6 +43,22 @@ declare global {
   }
 }
 
+function resolveFormElement(form: MarketoForm): HTMLFormElement | null {
+  const elem = form.getFormElem() as
+    | HTMLFormElement
+    | {
+        [index: number]: HTMLFormElement;
+        get?: (i: number) => HTMLFormElement;
+      };
+  if (elem instanceof HTMLElement) return elem;
+  if (elem && typeof elem === "object") {
+    return elem[0] ?? elem.get?.(0) ?? null;
+  }
+  return document.getElementById(
+    MARKETO_FORM_ELEMENT_ID,
+  ) as HTMLFormElement | null;
+}
+
 function compactMarketoForm(form: MarketoForm, formElement: HTMLFormElement) {
   const rows = Array.from(
     formElement.querySelectorAll<HTMLElement>(".mktoFormRow"),
@@ -161,7 +177,10 @@ export function MarketoContactForm({
       (form) => {
         setIsFormLoaded(true);
         if (compact) {
-          compactMarketoForm(form, form.getFormElem());
+          const formElement = resolveFormElement(form);
+          if (formElement) {
+            compactMarketoForm(form, formElement);
+          }
         }
 
         form.onSuccess(() => {
