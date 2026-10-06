@@ -94,12 +94,10 @@ export function sanitizeFaqPageUrl(
   return { url, docsUrl };
 }
 
-/** System-instruction suffix so the FAQ model treats the user as being on this page. */
+/** System-instruction suffix so the FAQ model sees the current page URL. */
 export function faqPageContextInstructions(page: TrustedFaqPageUrl): string {
   return [
     "The user is currently viewing this Langfuse documentation page:",
     `- URL: ${page.url}`,
-    "When they ask which page they are on, what “this page”, “here”, or “this section” refers to, or what to check before changing something described on this page, treat that URL as the current page.",
-    `Prefer the getLangfuseDocsPage tool with pathOrUrl "${page.docsUrl}" when you need this page’s content. Use searchLangfuseDocs for broader questions that are not about this page.`,
   ].join("\n");
 }
