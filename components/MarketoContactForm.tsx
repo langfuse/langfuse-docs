@@ -32,6 +32,10 @@ declare global {
 }
 
 function applyRequiredAsterisks(formElement: HTMLElement) {
+  if (typeof formElement.querySelectorAll !== "function") {
+    return;
+  }
+
   formElement
     .querySelectorAll<HTMLElement>(".mktoAsterix")
     .forEach((asterisk) => {
