@@ -190,6 +190,34 @@ Start with deployment gates and execution history, then see how teams like Trade
 - [Trade Republic customer story](/users/trade-republic): How a European neobroker runs self-hosted Langfuse in production. Read or watch on YouTube.
 - [Structured output extraction cookbook](/guides/cookbook/example_structured_output_extraction): Evaluate insurance-claim and document extraction per field, then improve the pipeline with experiments.
 
+## FAQ [#faq]
+
+### Can we deploy Langfuse in our own cloud or an air-gapped environment?
+
+Yes. You can deploy Langfuse in your own cloud, VPC, or on-premises infrastructure. Langfuse supports deployments without public internet access (air-gapped); features such as LLM-as-a-judge evaluations need a model endpoint reachable within your environment. Our team can help you assess the setup for your deployment and security requirements. [Self-hosting](/self-hosting), [networking documentation](/self-hosting/security/networking).
+
+### How can we prevent sensitive data from reaching Langfuse?
+
+Configure SDK masking to remove or replace sensitive inputs, outputs, and metadata before trace data leaves your application. You can also apply masking centrally through an OpenTelemetry Collector within your infrastructure. Combine these controls with project separation and role-based access to determine which teams can access the data you choose to retain. [Masking](/docs/observability/features/masking), [access controls](/docs/administration/rbac).
+
+### Does Langfuse sit in the inference path?
+
+Langfuse's observability integrations collect and export traces in the background while your application continues to call its model provider or gateway. You do not need to route model requests through Langfuse to use observability. If you also use prompt management, SDK caching and fallback prompts help keep your application resilient to connectivity issues. [Background export](/docs/observability/features/queuing-batching), [prompt availability](/docs/prompt-management/features/guaranteed-availability).
+
+### How does Langfuse work with our AI gateway and existing observability tools?
+
+Langfuse integrates with gateways such as Kong and LiteLLM to capture model calls, token usage, cost, and latency. Its OpenTelemetry support lets you add AI tracing and evaluation alongside your existing observability stack. [Gateway integrations](/integrations/gateways/kong-ai-plugin), [LiteLLM](/integrations/gateways/litellm), [existing OpenTelemetry setups](/faq/all/existing-otel-setup).
+
+We're also working on our own Langfuse Gateway, bringing model access controls together with tracing and cost tracking. It is currently in development; follow our [roadmap](/docs/roadmap) for updates.
+
+### How do retention and exports support our evidence requirements?
+
+Configure retention policies per project and schedule exports of observations and evaluation scores to your own Amazon S3, Google Cloud Storage, or Azure Blob Storage. This lets you preserve exported records under your institution's storage and retention policies. Set up exports before data expires, as data deleted by retention policies cannot be recovered. [Data retention](/docs/administration/data-retention), [scheduled exports](/docs/api-and-data-platform/features/export-to-blob-storage).
+
+### How do Langfuse Cloud and Self-Hosted Enterprise differ in pricing and features?
+
+Langfuse Cloud is fully managed, with subscription plans and usage-based pricing. Self-Hosted Enterprise runs in your infrastructure, with enterprise administration features and support under a custom commercial agreement; your team operates the deployment. Both Enterprise options include unlimited users. Talk to us to compare features, support, and total costs for your requirements. [Cloud pricing](/pricing), [Self-Hosted Enterprise pricing](/pricing-self-host).
+
 ## Working on AI in banking, insurance, or capital markets?
 
 Talk through deployment options, compliance needs, and how teams like Trade Republic use Langfuse in production.

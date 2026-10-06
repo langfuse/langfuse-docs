@@ -16,11 +16,13 @@ import { EvalCapabilityGrid } from "@/components/financial-services/EvalCapabili
 import { HeroReasons } from "@/components/financial-services/HeroReasons";
 import { UseCaseGrid } from "@/components/financial-services/UseCaseGrid";
 import {
+  financialServicesFaqs,
   financialServicesInsights,
   financialServicesLogoNames,
   financialServicesQuoteRoutes,
 } from "@/components/financial-services/content";
 import { MarketoContactFormCard } from "@/components/MarketoContactForm";
+import { FAQAccordion } from "@/components/shared/FAQAccordion";
 import { SecurityBadgesGrid } from "@/components/SecurityBadgesGrid";
 import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
 import { BookOpen, Radar, Shield, Workflow } from "lucide-react";
@@ -186,6 +188,19 @@ import { BookOpen, Radar, Shield, Workflow } from "lucide-react";
           contentWrapperClassName="gap-2"
         />
       </Cards>
+    </div>
+  </section>
+
+  <section
+    id="faq"
+    data-use-case-section="faq"
+    className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20"
+  >
+    <div className="grid items-start gap-10 lg:grid-cols-[1fr_2fr] lg:gap-16">
+      <h2 className="text-[34px] leading-[1] text-text-primary sm:text-[46px]">
+        FAQ
+      </h2>
+      <FAQAccordion faqs={financialServicesFaqs} />
     </div>
   </section>
 
