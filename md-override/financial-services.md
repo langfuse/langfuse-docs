@@ -151,13 +151,13 @@ An agent combines identity, fraud and bureau checks into a risk summary and deci
 
 Why an application was approved or referred, decision drift over time, and eval scores per prompt version.
 
-### [Customer support agents](/users/sumup)
+### Customer support agents
 
-An agent resolves merchant and customer requests, escalating edge cases to humans.
+An in-app banking assistant resolves customer requests, escalating edge cases to specialists.
 
 Autonomy rate, good and bad runs scored by evals and reviewers, and the long-tail cases to fix next.
 
-SumUp · 50% deflection
+DKB · 20,000 conversations / day
 
 ### [Coding agents across engineering](/coding-agents)
 

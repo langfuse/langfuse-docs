@@ -313,11 +313,10 @@ export const financialServicesUseCases = [
     area: "Support",
     title: "Customer support agents",
     workflow:
-      "An agent resolves merchant and customer requests, escalating edge cases to humans.",
+      "An in-app banking assistant resolves customer requests, escalating edge cases to specialists.",
     inspect:
       "Autonomy rate, good and bad runs scored by evals and reviewers, and the long-tail cases to fix next.",
-    proof: "SumUp · 50% deflection",
-    href: "/users/sumup",
+    proof: "DKB · 20,000 conversations / day",
     featured: true,
   },
   {
