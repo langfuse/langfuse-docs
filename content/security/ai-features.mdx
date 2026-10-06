@@ -3,9 +3,9 @@ title: AI Features
 description: Information on AI-powered features within Langfuse and their data implications.
 ---
 
-# AI Powered Features Within Langfuse (Beta)
+# AI-powered features within Langfuse [#ai-powered-features-within-langfuse-beta]
 
-Langfuse offers AI-powered features within the product to simplify and speed up your workflows. These features are currently in beta.
+Langfuse offers AI-powered features within the product to simplify and speed up your workflows. Availability and beta status vary by feature and deployment type.
 
 ## Opt-in
 
@@ -18,7 +18,7 @@ The setting applies to all users and projects within the organization.
 
 Non-exhaustive list of available AI features in Langfuse:
 
-- [Langfuse Assistant](/docs/langfuse-assistant) for asking questions about traces, observations, and metrics in plain language. Available on Cloud and on self-hosted deployments with an [instance-wide Langfuse AI model](/self-hosting/configuration/langfuse-assistant).
+- [Langfuse Halo](/docs/langfuse-halo) for asking questions about traces, observations, and metrics in plain language. Available on all Cloud plans and in public beta on self-hosted deployments from `v4.28.0` with an [instance-wide Langfuse AI model](/self-hosting/configuration/langfuse-assistant).
 - [Ask AI](/docs/observability/features/filter-search-bar#ask-ai) in the filter search bar. Available on Cloud and on self-hosted deployments with the same Langfuse AI model.
 - AI-powered generation of evaluator names and descriptions. Available on Langfuse Cloud only.
 
@@ -30,13 +30,13 @@ On Langfuse Cloud, AI features use models hosted on AWS Bedrock in your [data re
 - Data is never shared with third parties, such as the model developer.
 - AWS Bedrock is fully HIPAA, SOC2 and ISO 27001 compliant. See [Bedrock security and compliance](https://aws.amazon.com/bedrock/security-compliance/) and our [security overview](/security) for more details.
 
-On self-hosted deployments, AI features use the Langfuse AI model you configure. You are responsible for that provider's data handling. See [self-hosted Assistant setup](/self-hosting/configuration/langfuse-assistant).
+On self-hosted deployments, AI features use the Langfuse AI model you configure. You are responsible for that provider's data handling. See [self-hosted Halo setup](/self-hosting/configuration/langfuse-assistant).
 
-Self-hosted deployments can also record Assistant turns and Ask AI completions as traces by setting `LANGFUSE_AI_FEATURES_PROJECT_ID`.
+Self-hosted deployments can also record Halo turns and Ask AI completions as traces by setting `LANGFUSE_AI_FEATURES_PROJECT_ID`.
 
 <Callout type="info">
   `LANGFUSE_AI_FEATURES_PROJECT_ID` must reference a project on the same Langfuse
   deployment.
 </Callout>
 
-Nothing is recorded while the variable is unset. When set, traces are written through Langfuse's internal ingestion path and add no outbound requests. Use a dedicated project because these traces contain the prompts, tool calls, and model output of every run. See [Trace the Assistant in your own instance](/self-hosting/configuration/langfuse-assistant#trace-the-assistant-in-your-own-instance).
+Nothing is recorded while the variable is unset. When set, traces are written through Langfuse's internal ingestion path and add no outbound requests. Use a dedicated project because these traces contain the prompts, tool calls, and model output of every run. See [Trace Halo in your own instance](/self-hosting/configuration/langfuse-assistant#trace-the-assistant-in-your-own-instance).

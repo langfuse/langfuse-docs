@@ -84,8 +84,8 @@ In the [v4 data model](/docs/v4), a trace is the logical group of observations t
 
 Click on the **Evaluation** navigation item. The upgrade screen shows the recommended path for your project:
 
-- **In-app upgrade (Langfuse Cloud):** Recommended when only minimal configuration changes need to be reviewed and accepted. The [Langfuse Assistant](/docs/langfuse-assistant) guides you through these changes in the app.
-- **Coding assistant:** Recommended when the upgrade requires broader configuration or instrumentation changes, and for self-hosted deployments where the Langfuse Assistant is unavailable. The UI provides the skill and project context to use in your coding editor.
+- **In-app upgrade:** Recommended when only minimal configuration changes need to be reviewed and accepted. [Langfuse Halo](/docs/langfuse-halo) guides you through these changes in the app. This path works on Langfuse Cloud and on self-hosted deployments where [Halo is configured](/self-hosting/configuration/langfuse-assistant), while the evaluator upgrade screen is available. An organization owner or admin must enable **AI Features** before starting.
+- **Coding assistant:** Recommended when the upgrade requires broader configuration or instrumentation changes, or when Halo is unavailable. The UI provides the skill and project context to use in your coding editor.
 
 In both paths, the agentic flow makes the upgrade conversational: you can inspect the proposed changes, ask questions, and refine them before creating the new evaluators. You do not need to translate or recreate configurations manually.
 
@@ -189,7 +189,7 @@ The default `isRootObservation = true` filter keeps this example focused on the 
 
 1. Upgrade the SDK or OpenTelemetry ingestion path.
 2. Open the evaluator upgrade screen by clicking on the **Evaluation** navigation item.
-3. Follow the recommended Langfuse Assistant or coding assistant path.
+3. Follow the recommended Langfuse Halo or coding assistant path.
 4. Review the newly created observation-level evaluators. Confirm the expected number and placement of scores.
 5. Decide whether to keep the trace-level evaluator active for comparison.
 6. Validate the evaluator results and deactivate the trace-level evaluator when ready.
