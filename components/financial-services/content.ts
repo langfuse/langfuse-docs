@@ -50,20 +50,26 @@ export const financialServicesFeaturedStory = {
 
 export const financialServicesStoryCards = [
   {
+    company: "Trade Republic",
     route: "/users/trade-republic",
     category: "Self-hosted",
     description:
       "How a European neobroker runs self-hosted Langfuse in production.",
   },
   {
+    company: "Ramp",
     route: "/users/ramp",
     category: "Spend management",
     description: "How Ramp auto-improves agents on Langfuse.",
   },
   {
-    route: "/users/sumup",
-    category: "Payments",
-    description: "How SumUp deflects 50% of support conversations to AI.",
+    company: "DKB",
+    route: "/users/dkb",
+    category: "Banking",
+    description: "How DKB automates 20,000 customer conversations daily.",
+    logo: "/images/customers/dkb/dkb-light.svg",
+    logoDark: "/images/customers/dkb/dkb-dark.svg",
+    published: false,
   },
 ] as const;
 

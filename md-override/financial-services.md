@@ -23,7 +23,7 @@ Observe and evaluate AI agents across your institution. Give engineering, platfo
 
 ## In production at
 
-Customers in financial services include Trade Republic, SumUp, Ramp, and Merck.
+Customers in financial services include Trade Republic, SumUp, Ramp, Merck, and DKB.
 
 ## Every run traced, scored and on the record
 
@@ -109,9 +109,9 @@ Customer story · Self-hosted. [Read story](/users/trade-republic)
 
 Customer story · Spend management. [Read story](/users/ramp)
 
-### [How SumUp deflects 50% of support conversations to AI.](/users/sumup)
+### How DKB automates 20,000 customer conversations daily.
 
-Customer story · Payments. [Read story](/users/sumup)
+Customer story · Banking. Read story →
 
 ## Your evaluation needs, covered
 

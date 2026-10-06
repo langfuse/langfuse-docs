@@ -64,17 +64,14 @@ function StoryLogo({
   );
 }
 
+const storyCardClassName =
+  "flex flex-col gap-4 border border-line-structure bg-surface-bg p-5 no-underline";
+const liveStoryCardClassName = `${storyCardClassName} transition-colors hover:border-line-cta`;
+
 export function CustomerStoriesSection() {
   const stories = getCustomerStories();
   const byRoute = new Map(stories.map((story) => [story.route, story]));
   const featured = byRoute.get(financialServicesFeaturedStory.href);
-  const cards = financialServicesStoryCards
-    .map((card) => {
-      const story = byRoute.get(card.route);
-      if (!story) return null;
-      return { ...card, story };
-    })
-    .filter((card): card is NonNullable<typeof card> => Boolean(card));
 
   return (
     <div className="mt-8 flex flex-col gap-2">
@@ -124,30 +121,55 @@ export function CustomerStoriesSection() {
       </Link>
 
       <div className="grid gap-2 md:grid-cols-3">
-        {cards.map(({ route, category, description, story }) => {
-          const company = story.frontMatter.quoteCompany ?? "Customer";
-          return (
-            <Link
-              key={route}
-              href={route}
-              className="flex flex-col gap-4 border border-line-structure bg-surface-bg p-5 no-underline transition-colors hover:border-line-cta"
-            >
+        {financialServicesStoryCards.map((card) => {
+          const story = byRoute.get(card.route);
+          const published = !("published" in card && card.published === false);
+          const isLive = published && Boolean(story);
+          const company =
+            story?.frontMatter.quoteCompany ?? card.company ?? "Customer";
+          const logo =
+            story?.frontMatter.customerLogo ??
+            ("logo" in card ? card.logo : undefined);
+          const logoDark =
+            story?.frontMatter.customerLogoDark ??
+            ("logoDark" in card ? card.logoDark : undefined);
+          const body = (
+            <>
               <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
-                Customer story · {category}
+                Customer story · {card.category}
               </p>
               <StoryLogo
-                logo={story.frontMatter.customerLogo}
-                logoDark={story.frontMatter.customerLogoDark}
+                logo={logo}
+                logoDark={logoDark}
                 company={company}
-                sizes="132px"
-                widthClass="w-[132px]"
+                sizes="148px"
+                widthClass="w-[148px]"
+                heightClass="h-8"
               />
               <p className="text-[14px] leading-[1.45] text-text-primary">
-                {description}
+                {card.description}
               </p>
               <span className="mt-auto pt-1 text-[13px] text-text-secondary">
                 Read story →
               </span>
+            </>
+          );
+
+          if (!isLive) {
+            return (
+              <div key={card.route} className={storyCardClassName}>
+                {body}
+              </div>
+            );
+          }
+
+          return (
+            <Link
+              key={card.route}
+              href={card.route}
+              className={liveStoryCardClassName}
+            >
+              {body}
             </Link>
           );
         })}
