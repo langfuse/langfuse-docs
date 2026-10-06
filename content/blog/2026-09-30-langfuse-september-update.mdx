@@ -1,0 +1,113 @@
+---
+title: "Langfuse September Update"
+description: "Jev-as-a-judge, Langfuse Assistant sandbox, rebuilt experiment results, evaluator backfills and more"
+ogImage: /images/blog/2026-09-30-langfuse-september-update/jev-as-a-judge.png
+tag: update
+date: 2026/09/30
+author: "Marc"
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Langfuse September Update"
+  description="Jev-as-a-judge, Langfuse Assistant sandbox, rebuilt experiment results, evaluator backfills and more"
+  authors={["marcklingen"]}
+  date="September 30, 2026"
+/>
+
+September was about evaluations at scale: Jev-as-a-judge to score every observation for a fraction of a cent, backfills for data you already have, and an Assistant that runs code over thousands of observations.
+
+## Jev-as-a-judge
+
+<Frame>
+  ![Jev-as-a-judge](/images/blog/2026-09-30-langfuse-september-update/jev-as-a-judge.png)
+</Frame>
+
+You can now use TypeSafe's Jev as a judge in Langfuse evaluators. Jev does not generate text. You give it a state and typed questions, and it returns typed answers with probabilities. Each question becomes a score on the observation.
+
+Jev is priced by input tokens only, at $0.042 per million, and answers come back in well under a second. That means you can score every observation instead of a sample, and alerts fire fast enough to matter. Jev does not replace LLM judges: when you need written reasoning, keep using LLM-as-a-Judge, and run both if it helps. New to decision models? Annabell and Hassieb explain how Jev works in [Using TypeSafe's Jev for evals](/blog/2026-09-18-using-typesafes-jev-for-evals).
+
+To get started quickly, use the ready-made User Conversation Signal template. In one pass, it scores a chat for rephrases, corrections, human hand-off requests, repeats, error quotes, frustration, and success confirmation. The [walkthrough](/blog/2026-09-23-catching-conversation-signals-in-langfuse) shows how to set it up.
+
+→ [Read more](/docs/evaluation/evaluation-methods/jev-as-a-judge)
+
+## Langfuse Assistant: analyze thousands of observations
+
+<Frame>
+  ![Langfuse Assistant](/images/blog/2026-09-30-langfuse-september-update/assistant.png)
+</Frame>
+
+The Langfuse Assistant now works through thousands of observations at once. It fetches them and runs code in a sandbox instead of loading every payload into the model context. Ask it to cluster the main error types of the last seven days, count how often each tool was called, or find what the slowest 100 traces have in common. It also builds datasets and dashboards on request.
+
+Every run happens in the background. Keep exploring Langfuse or start a second conversation while the first one is still working. Anything that changes data or configuration still waits for your approval.
+
+→ [Read more](/changelog/2026-09-03-langfuse-assistant)
+
+## Rebuilt experiment results
+
+<Frame>
+  ![Rebuilt experiment results](/images/blog/2026-09-30-langfuse-september-update/experiment-results.png)
+</Frame>
+
+We rebuilt the experiment results view around scores. The results grid leads with score columns, the chart grid is now one compact metric strip, and compared runs are color-coded.
+
+A score-by-run matrix and a worse-than-baseline filter get you from an aggregate to the exact items that regressed and their traces. The comparison run is pre-picked and grouped, and side-by-side comparison of two runs is streamlined.
+
+→ [See how it works](/docs/evaluation/experiments/compare-experiments)
+
+## Evaluator backfills
+
+<Frame>
+  ![Evaluator backfills](/images/blog/2026-09-30-langfuse-september-update/evaluator-backfills.png)
+</Frame>
+
+When you attach an evaluator to a rule, you can also run it on past observations to score observations that arrived before the rule existed. Pick a window from the last 24 hours up to six months, set a maximum item count, and sampling rate. Langfuse shows the matching count and the estimated LLM cost before the run starts. For a one-off run over hand-picked traces, batch evaluation from the observations table is still the right tool.
+
+→ [Read more](/changelog/2026-09-07-evaluator-backfills)
+
+## Langfuse walkthrough video
+
+<Frame>
+  ![Langfuse walkthrough video](/images/blog/2026-09-30-langfuse-september-update/walkthrough-video.png)
+</Frame>
+
+New Introduction to Langfuse: I demo observability, prompt management, and evaluation end-to-end in one video.
+
+→ [Watch demo](/watch-demo)
+
+## Reminder: Langfuse v4 cutover
+
+Langfuse Cloud becomes v4-only on November 16, 2026. Check the Migration Assistant in the sidebar. If it lists required actions for your project, finish them before the cutover. Self-hosted deployments set their own timeline.
+
+→ [Upgrade guide](/faq/all/upgrade-to-langfuse-v4)
+
+## Fixes & improvements
+
+- Feat: Redesigned session timeline with observation actions and public links
+- Feat: Filter and search bar on the Scores and Users tables ([v4.35.0](https://github.com/langfuse/langfuse/releases/tag/v4.35.0))
+- Filters: `has:` and `-has:` operators to filter on metadata key presence ([v4.38.0](https://github.com/langfuse/langfuse/releases/tag/v4.38.0))
+- UI: Persistent trace header with tags; graph is now a view on the tree switch ([v4.38.0](https://github.com/langfuse/langfuse/releases/tag/v4.38.0))
+- UI: Cached input tokens and cost as traces table columns, plus cost source and waterfall in the breakdown tooltip ([v4.36.0](https://github.com/langfuse/langfuse/releases/tag/v4.36.0))
+- UI: 100-row page size on tracing tables ([v4.46.0](https://github.com/langfuse/langfuse/releases/tag/v4.46.0))
+- Evals: Create scores from the annotation sidebar ([v4.43.0](https://github.com/langfuse/langfuse/releases/tag/v4.43.0))
+- Evals: Override the variable mapping in batch evaluations ([v4.28.1](https://github.com/langfuse/langfuse/releases/tag/v4.28.1))
+- Prompts: Automations can filter prompt events by label and by tags ([docs](/docs/prompt-management/features/webhooks-slack-integrations))
+- API: `providedModelName` is now `model` in observation APIs; prompt name prefix filtering; optional `startTime` on `GET /observations/{id}` ([v4.42.0](https://github.com/langfuse/langfuse/releases/tag/v4.42.0))
+- Security: Revoke your own active sessions; filter project members by role ([v4.43.0](https://github.com/langfuse/langfuse/releases/tag/v4.43.0))
+- MCP: Evaluator testing tool and `batchUpsertDatasetItems` ([v4.37.0](https://github.com/langfuse/langfuse/releases/tag/v4.37.0))
+- Self-hosting: Vertex AI for the Assistant and other instance AI features; custom ClickHouse cluster migrations ([docs](/self-hosting/configuration/langfuse-assistant))
+- SDK: Python SDK captures `reasoning_effort` and `verbosity` for OpenAI calls and masks pydantic secret values ([v4.15.6](https://github.com/langfuse/langfuse-python/releases/tag/v4.15.6)); default exporter batches are capped at 64 MiB for more reliable exports ([v4.16.0](https://github.com/langfuse/langfuse-python/releases#release-v4.16.0))
+- and many more!
+
+## Customer story: Ramp
+
+<Frame>
+  ![Customer story: Ramp](/images/blog/2026-09-30-langfuse-september-update/ramp.png)
+</Frame>
+
+Ramp's engineering team traces its coding agents with self-hosted Langfuse. Their Inspect agent accounts for about 70% of merged PRs at Ramp, across roughly 1,500 PRs a day. Reflect, their agent that monitors other agents, scores those traces, groups similar ones, and proposes fixes for a human to accept or reject: 10 to 20% fewer tokens, 15% fewer tool calls, and 30% faster sessions.
+
+> "We wanted something built for agents as users first. And that means API first. An agent should never get stuck waiting for a human because of a deficiency in the API. This is what Langfuse is." – David Traina, Data Platform at Ramp
+
+→ [Watch the story](/users/ramp)

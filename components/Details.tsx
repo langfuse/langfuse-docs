@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Link } from "@/components/ui/link";
 import { ArrowRight } from "lucide-react";
+import { FaqRow, faqRowClass } from "@/components/faq/FaqRow";
 
 import { cn } from "@/lib/utils";
 
@@ -15,11 +16,6 @@ type SummaryProps = React.DetailedHTMLProps<
   React.HTMLAttributes<HTMLElement>,
   HTMLElement
 >;
-
-const detailsFrameClass =
-  "relative my-4 border border-line-structure bg-surface-bg";
-const detailsRowClass =
-  "flex items-center justify-between gap-4 px-4 py-2 text-text-primary";
 
 const DetailsContext = React.createContext<{ isOpen: boolean } | null>(null);
 
@@ -85,12 +81,7 @@ export function Details({
 
   return (
     <DetailsContext.Provider value={{ isOpen }}>
-      <div
-        className={cn(
-          detailsFrameClass,
-          isOpen ? "corner-box-corners" : "corner-box-corners--hover",
-        )}
-      >
+      <FaqRow corners={isOpen ? "solid" : "hover"}>
         <details
           className={cn(
             "group relative overflow-hidden bg-surface-bg [&_summary~*]:px-4 [&_summary~*]:text-text-secondary [&_summary+*]:pt-4 [&_summary~*:last-child]:pb-4 [&_summary~p:first-of-type]:mt-0 [&_summary~p:last-of-type]:mb-0",
@@ -106,7 +97,7 @@ export function Details({
         >
           {children}
         </details>
-      </div>
+      </FaqRow>
     </DetailsContext.Provider>
   );
 }
@@ -117,7 +108,7 @@ export function Summary({ children, className, ...props }: SummaryProps) {
   return (
     <summary
       className={cn(
-        detailsRowClass,
+        faqRowClass,
         "list-none cursor-pointer [&::-webkit-details-marker]:hidden",
         context?.isOpen
           ? "with-stripes border-b border-line-structure"
@@ -144,16 +135,24 @@ export function Summary({ children, className, ...props }: SummaryProps) {
 export function DetailsLink({
   href,
   children,
+  id,
+  newTab = false,
 }: {
   href: string;
   children: React.ReactNode;
+  id?: string;
+  /** Open the answer page in a new tab. Used by embedded FAQ previews, not index listings. */
+  newTab?: boolean;
 }) {
   return (
-    <div className={cn(detailsFrameClass, "corner-box-corners--hover")}>
+    <FaqRow id={id}>
       <Link
         href={href}
+        {...(newTab
+          ? { target: "_blank" as const, rel: "noopener noreferrer" }
+          : {})}
         className={cn(
-          detailsRowClass,
+          faqRowClass,
           "font-normal no-underline hover:bg-surface-1 hover:text-text-primary",
         )}
       >
@@ -163,6 +162,6 @@ export function DetailsLink({
           className="size-3 shrink-0 text-text-tertiary"
         />
       </Link>
-    </div>
+    </FaqRow>
   );
 }
