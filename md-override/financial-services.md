@@ -7,7 +7,7 @@ description: Observe and evaluate AI agents across banks, brokers, and fintechs.
 
 Observe and evaluate AI agents across your institution. Give engineering, platform, and risk teams visibility into production behavior, with deployment in Langfuse Cloud or your own infrastructure.
 
-[Talk to an expert](#book) · [Get started](/cloud)
+[Get started](/cloud)
 
 - **Standardize observability and evals across teams:** Bring agents across frameworks, models, and gateways into a shared view of traces and evaluations.
 - **Ship reliable agents with clear deployment quality gates:** evaluate model and agent changes against datasets before release.
@@ -19,7 +19,7 @@ Observe and evaluate AI agents across your institution. Give engineering, platfo
 
 [Security & compliance](/security)
 
-[Talk to an expert](/talk-to-us) using the form on this page.
+Use the contact form on this page to talk to an expert.
 
 ## In production at
 
