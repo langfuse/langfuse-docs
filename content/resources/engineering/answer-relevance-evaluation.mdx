@@ -4,9 +4,13 @@ description: "Answer relevance evaluation for LLM apps: what the metric measures
 tags: [guide, evaluation]
 ---
 
+import { SignupCTA } from "@/components/SignupCTA";
+
 # Answer relevance evaluation for LLM applications
 
 Answer relevance measures whether a generated answer addresses the question that was asked. It is one of the core quality metrics for question-answering systems, RAG pipelines, and support chatbots, because the most common failure in these applications is not a wrong fact but a non-answer: the model responds fluently to a related question, covers half of a two-part question, or deflects entirely. Relevance is judged from the question and the answer alone, so it can be computed without ground truth labels.
+
+<SignupCTA className="my-6" />
 
 **TL;DR:** Answer relevance evaluation checks question-answer fit, not factual correctness and not groundedness in retrieved context. Because it needs no reference answer, it works both in offline experiments and on live production traffic. The recipe below defines the metric boundary, walks through judge prompt design for the hard cases (partial answers and refusals), and implements it end to end as a Langfuse experiment with a binary LLM-as-a-judge evaluator, plus the online evaluator setup for production traces.
 

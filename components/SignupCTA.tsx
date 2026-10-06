@@ -8,7 +8,7 @@ type SignupCTAProps = {
 };
 
 export function SignupCTA({
-  message = "Try Langfuse yourself",
+  message = "Start with Langfuse",
   actionLabel = "Sign up",
   href = "/cloud",
   className,
