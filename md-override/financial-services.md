@@ -19,7 +19,9 @@ Observe and evaluate AI agents across your institution. Give engineering, platfo
 
 [Security & compliance](/security)
 
-[Talk to an expert](/talk-to-us) using the form on this page.
+## Book a conversation [#book]
+
+Share a bit about your institution and we will follow up on deployment, compliance, and how teams run Langfuse in production. [Talk to an expert](/talk-to-us) using the form on this page.
 
 ## In production at
 
