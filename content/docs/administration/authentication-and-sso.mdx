@@ -123,7 +123,9 @@ Langfuse does not support exceptions on enforced domains. There are no "break gl
 
 Each SSO domain must be exclusively owned by your organization. Shared domains (for example from subcontractors or consultancies) are not supported. The sign-in identity must also match a domain you verified for SSO. That check prevents account takeover.
 
-Some IdPs, especially Azure AD / Entra, emit `email` on a different domain than the verified one (for example an external alias versus the tenant UPN). For Azure AD / Entra, Langfuse falls back from `email` to `preferred_username` or `upn` when that claim is a valid address on the configured SSO domain. If no claim matches, sign-in is rejected. Configure the IdP so a used claim is on the verified domain, or verify and configure SSO for a domain you control that the IdP emits.
+Some IdPs, especially Azure AD / Entra, emit `email` on a different domain than the verified one (for example an external alias versus the tenant UPN). For Azure AD / Entra, Langfuse falls back from `email` to `preferred_username` or `upn` when that claim is a valid address on the configured SSO domain. If no claim matches, sign-in is rejected.
+
+To fix this, configure the IdP (or verify an additional domain you control) so the claim Langfuse uses is an address on a domain you own and have verified for SSO, such as `user@external.yourdomain.com`, not an unrelated shared or external domain.
 
 ### Vendor Guides
 
