@@ -1,4 +1,3 @@
-import type { InsightItem } from "@/components/chat-agents/ValueInsightsAccordion";
 import type { FAQItem } from "@/components/shared/FAQAccordion";
 
 export const financialServicesReasons = [
@@ -23,43 +22,6 @@ export const financialServicesReasons = [
     body: "Deploy with no internet access and lock access to internal users via VPN.",
   },
 ] as const;
-
-export const financialServicesInsights: InsightItem[] = [
-  {
-    id: "gates",
-    title: "Ship reliable agents through deployment quality gates",
-    description:
-      "Replay prompt, model, and tool changes against golden datasets. Fail the release when accuracy, policy, or hallucination scores regress — before a client sees a wrong figure.",
-    href: "/blog/2026-07-15-llm-certification-financial-services",
-    ctaLabel: "Deployment gates in financial services",
-    imageSrc:
-      "/images/blog/2026-07-15-llm-certification-financial-services/benchmark-results.png",
-    imageAlt:
-      "Gate results comparing Claude models on FinanceBench with pass and fail scores",
-  },
-  {
-    id: "production",
-    title: "Trace production executions and react to usage shifts",
-    description:
-      "See load, behavior, and cost as they change. Inspect every tool call and reasoning step so platform and risk teams know what the system is handling.",
-    href: "/docs/observability/overview",
-    ctaLabel: "Tracing overview",
-    imageSrc: "/images/workflow-automation/execution-trace.png",
-    imageAlt:
-      "Agent execution trace showing model turns, tool calls, and nested steps",
-  },
-  {
-    id: "compliance",
-    title: "Cover compliance with audit trails and PII redaction",
-    description:
-      "Mask sensitive fields before data leaves your application. Keep execution history and developer actions for internal and supervisory review, with SSO and project-level RBAC.",
-    href: "/docs/observability/features/masking",
-    ctaLabel: "Masking and redaction",
-    imageSrc: "/images/workflow-automation/human-review.png",
-    imageAlt:
-      "Human annotation of an incorrect agent step with a written explanation",
-  },
-];
 
 export const financialServicesQuoteRoutes = [
   "/users/sumup",

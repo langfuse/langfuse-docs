@@ -54,30 +54,6 @@ Illustrative credit-onboarding example: application referred to an underwriter. 
 
 Scores: policy_compliance PASS · 1.00; pii_redacted PASS; decision_drift_7d 0.04; human_review queued.
 
-### Ship reliable agents through deployment quality gates
-
-Replay prompt, model, and tool changes against golden datasets. Fail the release when accuracy, policy, or hallucination scores regress — before a client sees a wrong figure.
-
-![Gate results comparing Claude models on FinanceBench with pass and fail scores](/images/blog/2026-07-15-llm-certification-financial-services/benchmark-results.png)
-
-[Deployment gates in financial services](/blog/2026-07-15-llm-certification-financial-services)
-
-### Trace production executions and react to usage shifts
-
-See load, behavior, and cost as they change. Inspect every tool call and reasoning step so platform and risk teams know what the system is handling.
-
-![Agent execution trace showing model turns, tool calls, and nested steps](/images/workflow-automation/execution-trace.png)
-
-[Tracing overview](/docs/observability/overview)
-
-### Cover compliance with audit trails and PII redaction
-
-Mask sensitive fields before data leaves your application. Keep execution history and developer actions for internal and supervisory review, with SSO and project-level RBAC.
-
-![Human annotation of an incorrect agent step with a written explanation](/images/workflow-automation/human-review.png)
-
-[Masking and redaction](/docs/observability/features/masking)
-
 ## Run it where your data is allowed to live
 
 Langfuse Cloud in the EU, US, or Japan, self-hosted in your VPC, or fully air-gapped. Same product, same APIs.
