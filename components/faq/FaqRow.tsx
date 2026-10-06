@@ -13,13 +13,16 @@ export function FaqRow({
   children,
   className,
   corners = "hover",
+  id,
 }: {
   children: ReactNode;
   className?: string;
   corners?: "hover" | "solid";
+  id?: string;
 }) {
   return (
     <div
+      id={id}
       className={cn(
         faqRowFrameClass,
         corners === "solid"

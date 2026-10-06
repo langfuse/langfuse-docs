@@ -135,16 +135,22 @@ export function Summary({ children, className, ...props }: SummaryProps) {
 export function DetailsLink({
   href,
   children,
+  id,
+  newTab = false,
 }: {
   href: string;
   children: React.ReactNode;
+  id?: string;
+  /** Open the answer page in a new tab. Used by embedded FAQ previews, not index listings. */
+  newTab?: boolean;
 }) {
   return (
-    <FaqRow>
+    <FaqRow id={id}>
       <Link
         href={href}
-        target="_blank"
-        rel="noopener noreferrer"
+        {...(newTab
+          ? { target: "_blank" as const, rel: "noopener noreferrer" }
+          : {})}
         className={cn(
           faqRowClass,
           "font-normal no-underline hover:bg-surface-1 hover:text-text-primary",
