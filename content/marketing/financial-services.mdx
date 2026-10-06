@@ -13,7 +13,6 @@ import { CreditOnboardingTraceMock } from "@/components/financial-services/Credi
 import { DeploymentModeSlider } from "@/components/financial-services/DeploymentModeSlider";
 import { EvalCapabilityGrid } from "@/components/financial-services/EvalCapabilityGrid";
 import { HeroReasons } from "@/components/financial-services/HeroReasons";
-import { HeroBookCard } from "@/components/financial-services/HeroBookCard";
 import { TrustPoints } from "@/components/financial-services/TrustPoints";
 import { UseCaseGrid } from "@/components/financial-services/UseCaseGrid";
 import {
@@ -69,8 +68,10 @@ import { BookOpen, Play, Radar } from "lucide-react";
       </p>
     </div>
 
-    <div className="flex min-w-0 items-stretch bg-surface-1 px-4 py-4 sm:px-6 sm:py-5">
-      <HeroBookCard />
+    <div id="book" className="flex min-w-0 items-start bg-surface-1 px-4 py-4 sm:px-6 sm:py-5">
+      <div className="w-full">
+        <MarketoContactFormCard className="mx-0 max-w-none" />
+      </div>
     </div>
 
   </section>
@@ -210,29 +211,6 @@ import { BookOpen, Play, Radar } from "lucide-react";
           contentWrapperClassName="gap-2"
         />
       </Cards>
-    </div>
-  </section>
-
-  <section
-    id="book"
-    data-use-case-section="book"
-    className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20"
-  >
-    <div className="mx-auto grid max-w-5xl items-start gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-14">
-      <div className="flex flex-col gap-3">
-        <p className="font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
-          {"Talk to an expert"}
-        </p>
-        <h2 className="text-[34px] leading-[1.08] text-text-primary sm:text-[42px]">
-          {"Book a conversation"}
-        </h2>
-        <p className="max-w-[42ch] text-[14px] leading-[1.45] text-text-secondary">
-          {
-            "Share a bit about your institution and we will follow up on deployment, compliance, and how teams run Langfuse in production."
-          }
-        </p>
-      </div>
-      <MarketoContactFormCard className="mx-0 max-w-none" compact />
     </div>
   </section>
 
