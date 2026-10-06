@@ -9,13 +9,13 @@ import {
 
 export function DeploymentModeSlider() {
   const [modeId, setModeId] =
-    useState<FinancialServicesDeploymentModeId>("self-host");
+    useState<FinancialServicesDeploymentModeId>("cloud");
   const mode =
     financialServicesDeploymentModes.find((item) => item.id === modeId) ??
-    financialServicesDeploymentModes[1];
+    financialServicesDeploymentModes[0];
 
   return (
-    <div className="mt-8">
+    <div>
       <div
         role="radiogroup"
         aria-label="Deployment mode"
@@ -34,7 +34,7 @@ export function DeploymentModeSlider() {
                 "flex-1 px-3 py-1.5 text-left sm:flex-none",
                 index > 0 && "border-l border-line-structure",
                 active
-                  ? "bg-surface-cta-primary text-text-primary"
+                  ? "bg-surface-1 text-text-primary"
                   : "bg-surface-bg text-text-primary hover:bg-surface-1",
               )}
             >

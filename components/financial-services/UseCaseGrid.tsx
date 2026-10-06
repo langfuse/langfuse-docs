@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { financialServicesUseCases } from "./content";
 
 export function UseCaseGrid() {
@@ -32,8 +33,12 @@ export function UseCaseGrid() {
           </>
         );
 
-        const className =
-          "block h-full border border-line-structure bg-surface-bg p-5";
+        const className = cn(
+          "block h-full border border-line-structure p-5",
+          "featured" in useCase && useCase.featured
+            ? "bg-stripe-pattern"
+            : "bg-surface-bg",
+        );
 
         if ("href" in useCase && useCase.href) {
           return (

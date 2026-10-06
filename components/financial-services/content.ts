@@ -7,19 +7,19 @@ export const financialServicesReasons = [
   },
   {
     title: "Ship reliable agents with clear deployment quality gates",
-    body: "Evaluate model and agent changes against datasets before release.",
+    body: "evaluate model and agent changes against datasets before release.",
   },
   {
     title: "Retain execution history",
-    body: "Keep traces of AI executions as evidence for supervisory and regulatory reviews.",
+    body: "keep traces of AI executions as evidence for supervisory and regulatory reviews.",
   },
   {
     title: "Flag potential policy violations",
-    body: "With evals that score outputs against your policies and regulations.",
+    body: "with evals that score outputs against your policies and regulations.",
   },
   {
     title: "Self-host or air-gap",
-    body: "Deploy with no internet access, lock to internal users via VPN to cater for data sensitivity needs.",
+    body: "deploy with no internet access, lock to internal users via VPN to cater for data sensitivity needs.",
   },
 ] as const;
 
@@ -30,18 +30,37 @@ export const financialServicesQuoteRoutes = [
 ] as const;
 
 export const financialServicesLogoNames = [
-  "Ramp",
-  "Intuit",
+  "Trade Republic",
   "SumUp",
-  "Rocket Money",
+  "Ramp",
+  "Merck",
+] as const;
+
+export const financialServicesTrustPoints = [
+  {
+    title: "Deployment where your data must stay",
+    body: "Langfuse Cloud in the EU, US or Japan, self-hosted in your VPC, or fully air-gapped.",
+  },
+  {
+    title: "Multiple layers of data redaction",
+    body: "Client-side and server-side PII protections before anything is stored.",
+  },
+  {
+    title: "Enterprise access controls",
+    body: "SSO and role-based access control scoped to organizations and projects.",
+  },
+  {
+    title: "Audit logs",
+    body: "Record both LLM activity and developer actions for internal and supervisory review.",
+  },
 ] as const;
 
 export const financialServicesDeploymentModes = [
   {
     id: "cloud" as const,
     label: "Cloud",
-    title: "Managed cloud in the EU, US, or Japan.",
-    flow: ["Your app", "OTel SDK", "Langfuse Cloud"],
+    title: "Managed cloud in the EU, US or Japan.",
+    flow: ["Your app", "OTel SDK", "Langfuse Cloud · EU"],
     specs: [
       { k: "Regions", v: "EU · US · JP" },
       { k: "Certifications", v: "SOC 2 Type II · ISO 27001" },
@@ -181,48 +200,57 @@ export const financialServicesTrace = {
 export const financialServicesEvalCapabilities = [
   {
     title: "Offline evaluation",
-    body: "Golden datasets from production traces, versioned experiments with baseline comparison, and a release gate that fails the pull request on regression.",
+    body: "Golden datasets built from production traces, versioned experiments with baseline comparison, and a release gate that fails the pull request on regression.",
   },
   {
     title: "Online evaluation",
-    body: "Sampling of live traffic, LLM-as-a-judge and code evaluators, and threshold alerts when quality drifts.",
+    body: "Deterministic sampling of live traffic, LLM-as-judge and code evaluators, and threshold alerts to Slack, webhooks, or GitHub Actions when quality drifts.",
   },
   {
     title: "Human review",
-    body: "Annotation queues for subject-matter experts, corrected outputs, and promotion of failures into a regression set.",
+    body: "Annotation queues for subject-matter experts, corrected outputs, and one-click promotion of failures into a permanent regression set.",
   },
   {
     title: "Judge calibration",
-    body: "Score Analytics measures agreement between human labels and model judges so you can defend the judge to model risk.",
+    body: "Score Analytics measures agreement between human labels and model judges (Cohen's Kappa, F1, Pearson, Spearman) so you can defend the judge to model risk.",
   },
   {
     title: "Prompt governance",
     body: "Immutable versions, staging and production labels, protected labels for separation of duties, and full audit history.",
   },
   {
-    title: "Redaction and administration",
-    body: "Masking in the SDK before data leaves your application, project-level RBAC, OIDC SSO, SCIM, and audit logs.",
+    title: "Gateway and model integration",
+    body: "OTLP ingest from your AI gateway, judge models pinned to your own Bedrock, Azure OpenAI, Vertex, or OpenAI connection.",
+  },
+  {
+    title: "Dashboards as code",
+    body: "Dashboards and widgets managed through the API and CLI, versioned in Git, deployed identically to dev, staging, and prod.",
+  },
+] as const;
+
+export const financialServicesEnterpriseRequirements = [
+  {
+    title: "Redaction",
+    body: "Masking in the SDK before data leaves your application, with trace structure preserved for debugging.",
+  },
+  {
+    title: "Administration",
+    body: "Organizations and projects as the data boundary, project-level RBAC, OIDC SSO with domain enforcement, SCIM provisioning, audit logs, and a metrics API for chargebacks.",
+  },
+  {
+    title: "Operations",
+    body: "Documented self-hosting on AWS with Terraform and Helm, a published release cadence, and autoscaling guidance.",
   },
 ] as const;
 
 export const financialServicesUseCases = [
   {
-    area: "Support",
-    title: "Customer support agents",
+    area: "Compliance",
+    title: "Compliance monitoring",
     workflow:
-      "An agent resolves merchant and customer requests, escalating edge cases to humans.",
+      "An agent drafts customer replies and back-office summaries that must follow internal policy.",
     inspect:
-      "Autonomy rate, good and bad runs scored by evals and reviewers, and the long-tail cases to fix next.",
-    proof: "SumUp · 50% deflection",
-    href: "/users/sumup",
-  },
-  {
-    area: "Risk",
-    title: "Credit onboarding and underwriting",
-    workflow:
-      "An agent combines identity, fraud, and bureau checks into a risk summary and decision.",
-    inspect:
-      "Why an application was approved or referred, decision drift over time, and eval scores per prompt version.",
+      "Policy evals on every output, with potential violations flagged for review before release.",
   },
   {
     area: "Compliance",
@@ -241,20 +269,32 @@ export const financialServicesUseCases = [
       "Each reasoning step and tool call, scored for suitability, with history kept for model risk review.",
   },
   {
-    area: "Compliance",
-    title: "Compliance monitoring",
+    area: "Risk",
+    title: "Credit onboarding & underwriting",
     workflow:
-      "An agent drafts customer replies and back-office summaries that must follow internal policy.",
+      "An agent combines identity, fraud and bureau checks into a risk summary and decision.",
     inspect:
-      "Policy evals on every output, with potential violations flagged for review before release.",
+      "Why an application was approved or referred, decision drift over time, and eval scores per prompt version.",
+    featured: true,
+  },
+  {
+    area: "Support",
+    title: "Customer support agents",
+    workflow:
+      "An agent resolves merchant and customer requests, escalating edge cases to humans.",
+    inspect:
+      "Autonomy rate, good and bad runs scored by evals and reviewers, and the long-tail cases to fix next.",
+    proof: "SumUp · 50% deflection",
+    href: "/users/sumup",
+    featured: true,
   },
   {
     area: "Engineering",
     title: "Coding agents across engineering",
     workflow:
-      "Developers use Claude Code, Codex, Cursor, and Copilot across teams and repositories.",
+      "Developers use Claude Code, Codex, Cursor and Copilot across teams and repositories.",
     inspect:
-      "Cost per developer and model, failing tools, and full session replays.",
+      "Cost per developer and model, failing tools, and full session replays. No proxy in the way.",
     href: "/coding-agents",
   },
 ] as const;

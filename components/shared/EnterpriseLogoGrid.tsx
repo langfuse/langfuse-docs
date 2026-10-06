@@ -18,6 +18,7 @@ import rampLogo from "../home/img/ramp.svg";
 import rocketMoneyLogo from "../home/img/rocket-money.svg";
 import samsaraLogo from "../home/img/samsara.svg";
 import sumupLogo from "../home/img/sumup.svg";
+import tradeRepublicLogo from "../home/img/trade-republic.svg";
 import { cn } from "@/lib/utils";
 import { LinkBox } from "@/components/ui/link-box";
 import { wordmarkDisplaySize } from "@/components/shared/wordmark";
@@ -37,6 +38,12 @@ const companies: CompanyLogo[] = [
     name: "Ramp",
     logo: rampLogo,
     customerStoryPath: "/users/ramp",
+  },
+  {
+    name: "Trade Republic",
+    logo: tradeRepublicLogo,
+    customerStoryPath: "/users/trade-republic",
+    hidden: true,
   },
   {
     name: "Canva",
@@ -185,9 +192,7 @@ export const EnterpriseLogoGrid = ({
   const shouldReduceMotion = useReducedMotion();
   const selectedCompanies = names
     ? names
-        .map((name) =>
-          visibleCompanies.find((company) => company.name === name),
-        )
+        .map((name) => companies.find((company) => company.name === name))
         .filter((company): company is CompanyLogo => Boolean(company))
     : visibleCompanies;
 

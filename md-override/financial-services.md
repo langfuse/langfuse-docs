@@ -3,41 +3,27 @@ title: Langfuse for financial services
 description: Observe and evaluate AI agents across banks, brokers, and fintechs. Deployment gates, production traces, audit trails, and self-hosting for regulated teams.
 ---
 
-# Langfuse for financial services
+# Langfuse for Financial Services
 
 Observe and evaluate AI agents across your institution. Give engineering, platform, and risk teams visibility into production behavior, with deployment in Langfuse Cloud or your own infrastructure.
 
-- **Standardize observability and evals across teams.** Bring agents across frameworks, models, and gateways into a shared view of traces and evaluations.
-- **Ship reliable agents with clear deployment quality gates.** Evaluate model and agent changes against datasets before release.
-- **Retain execution history.** Keep traces of AI executions as evidence for supervisory and regulatory reviews.
-- **Flag potential policy violations.** With evals that score outputs against your policies and regulations.
-- **Self-host or air-gap.** Deploy with no internet access, lock to internal users via VPN to cater for data sensitivity needs.
+[Talk to an expert](#book) · [Get started](/cloud)
 
-[SOC 2 Type II](/security/soc2) · [ISO 27001](/security/iso27001) · [GDPR](/security/gdpr) · [Self-hosting](/self-hosting) · [Hardening for government](/self-hosting/configuration/hardening#hardening-for-government)
+- **Standardize observability and evals across teams:** Bring agents across frameworks, models, and gateways into a shared view of traces and evaluations.
+- **Ship reliable agents with clear deployment quality gates:** evaluate model and agent changes against datasets before release.
+- **Retain execution history:** keep traces of AI executions as evidence for supervisory and regulatory reviews.
+- **Flag potential policy violations:** with evals that score outputs against your policies and regulations.
+- **Self-host or air-gap:** deploy with no internet access, lock to internal users via VPN to cater for data sensitivity needs.
+
+[SOC 2 Type II](/security/soc2) · [ISO 27001](/security/iso27001) · [GDPR](/security/gdpr) · [MIT · open source](/handbook/chapters/open-source) · [Government (available in Q4 2026)](/self-hosting/configuration/hardening#hardening-for-government)
+
+[Security & compliance](/security)
 
 [Talk to an expert](/talk-to-us) using the form on this page.
 
-## Customers in financial services
+## In production at
 
-Customers in financial services include Ramp, Intuit, SumUp, and Rocket Money.
-
-### [SumUp](/users/sumup)
-
-> “Building on Langfuse we saved 30% of external BPO cost by deflecting 50% of support conversations to AI.”
->
-> — Ana Casado, Head of Operations Data and AI, SumUp
-
-### [Ramp](/users/ramp)
-
-> “We wanted something built for agents as users first. And that means API first. An agent should never get stuck waiting for a human because of a deficiency in the API. This is what Langfuse is.”
->
-> — David Traina, Data Platform, Ramp
-
-### [Trade Republic](/users/trade-republic)
-
-> “We're using the open-source self-hosted version of Langfuse and we don't see any limitations there. We're super happy with it.”
->
-> — Paolo Tamagnini, Senior Data Scientist, Trade Republic
+Customers in financial services include Trade Republic, SumUp, Ramp, and Merck.
 
 ## Every run traced, scored and on the record
 
@@ -67,13 +53,16 @@ Audit log:
 - 09:20:41 m.weber (risk) viewed trace
 - 09:22:10 annotation added: "refer confirmed"
 
-## Run it where your data is allowed to live
+## Run it where your data is allowed to live.
 
-Langfuse Cloud in the EU, US, or Japan, self-hosted in your VPC, or fully air-gapped. Same product, same APIs.
+1. **Deployment where your data must stay.** Langfuse Cloud in the EU, US or Japan, self-hosted in your VPC, or fully air-gapped.
+2. **Multiple layers of data redaction.** Client-side and server-side PII protections before anything is stored.
+3. **Enterprise access controls.** SSO and role-based access control scoped to organizations and projects.
+4. **Audit logs.** Record both LLM activity and developer actions for internal and supervisory review.
 
 ### Cloud
 
-Managed cloud in the EU, US, or Japan.
+Managed cloud in the EU, US or Japan.
 
 - Regions: EU · US · JP
 - Certifications: SOC 2 Type II · ISO 27001
@@ -98,53 +87,79 @@ No internet access. No vendor access.
 - Users: Internal only, via VPN
 - Updates: Offline image transfer
 
-[ISO 27001](/security/iso27001) · [SOC 2](/security/soc2) · [GDPR](/security/gdpr) · [HIPAA](/security/hipaa)
+## Customers in financial services
 
-See the [security overview](/security), [self-hosting docs](/self-hosting), and [hardening for government](/self-hosting/configuration/hardening#hardening-for-government).
+### [SumUp](/users/sumup)
 
-## Evaluation for financial services
+> “Building on Langfuse we saved 30% of external BPO cost by deflecting 50% of support conversations to AI.”
+>
+> — Ana Casado, Head of Operations Data and AI, SumUp
 
-From testing changes before release to monitoring production quality and incorporating expert feedback — with the security controls and deployment options your institution needs.
+### [Ramp](/users/ramp)
+
+> “We wanted something built for agents as users first. And that means API first. An agent should never get stuck waiting for a human because of a deficiency in the API. This is what Langfuse is.”
+>
+> — David Traina, Data Platform, Ramp
+
+### [Trade Republic](/users/trade-republic)
+
+> “We're using the open-source self-hosted version of Langfuse and we don't see any limitations there. We're super happy with it.”
+>
+> — Paolo Tamagnini, Senior Data Scientist, Trade Republic
+
+## Your evaluation needs, covered.
+
+From testing changes before release to monitoring production quality and incorporating expert feedback—Langfuse brings your evaluation workflows together, with the security controls and deployment options your institution needs.
 
 ### Offline evaluation
 
-Golden datasets from production traces, versioned experiments with baseline comparison, and a release gate that fails the pull request on regression.
+Golden datasets built from production traces, versioned experiments with baseline comparison, and a release gate that fails the pull request on regression.
 
 ### Online evaluation
 
-Sampling of live traffic, LLM-as-a-judge and code evaluators, and threshold alerts when quality drifts.
+Deterministic sampling of live traffic, LLM-as-judge and code evaluators, and threshold alerts to Slack, webhooks, or GitHub Actions when quality drifts.
 
 ### Human review
 
-Annotation queues for subject-matter experts, corrected outputs, and promotion of failures into a regression set.
+Annotation queues for subject-matter experts, corrected outputs, and one-click promotion of failures into a permanent regression set.
 
 ### Judge calibration
 
-Score Analytics measures agreement between human labels and model judges so you can defend the judge to model risk.
+Score Analytics measures agreement between human labels and model judges (Cohen's Kappa, F1, Pearson, Spearman) so you can defend the judge to model risk.
 
 ### Prompt governance
 
 Immutable versions, staging and production labels, protected labels for separation of duties, and full audit history.
 
-### Redaction and administration
+### Gateway and model integration
 
-Masking in the SDK before data leaves your application, project-level RBAC, OIDC SSO, SCIM, and audit logs.
+OTLP ingest from your AI gateway, judge models pinned to your own Bedrock, Azure OpenAI, Vertex, or OpenAI connection.
 
-## What financial services teams build on Langfuse
+### Dashboards as code
 
-### [Customer support agents](/users/sumup)
+Dashboards and widgets managed through the API and CLI, versioned in Git, deployed identically to dev, staging, and prod.
 
-An agent resolves merchant and customer requests, escalating edge cases to humans.
+### Built for your enterprise requirements
 
-Autonomy rate, good and bad runs scored by evals and reviewers, and the long-tail cases to fix next.
+### Redaction
 
-SumUp · 50% deflection
+Masking in the SDK before data leaves your application, with trace structure preserved for debugging.
 
-### Credit onboarding and underwriting
+### Administration
 
-An agent combines identity, fraud, and bureau checks into a risk summary and decision.
+Organizations and projects as the data boundary, project-level RBAC, OIDC SSO with domain enforcement, SCIM provisioning, audit logs, and a metrics API for chargebacks.
 
-Why an application was approved or referred, decision drift over time, and eval scores per prompt version.
+### Operations
+
+Documented self-hosting on AWS with Terraform and Helm, a published release cadence, and autoscaling guidance.
+
+## What financial services teams build on Langfuse.
+
+### Compliance monitoring
+
+An agent drafts customer replies and back-office summaries that must follow internal policy.
+
+Policy evals on every output, with potential violations flagged for review before release.
 
 ### AML investigations
 
@@ -158,26 +173,33 @@ A multi-step agent turns client goals and holdings into a portfolio recommendati
 
 Each reasoning step and tool call, scored for suitability, with history kept for model risk review.
 
-### Compliance monitoring
+### Credit onboarding & underwriting
 
-An agent drafts customer replies and back-office summaries that must follow internal policy.
+An agent combines identity, fraud and bureau checks into a risk summary and decision.
 
-Policy evals on every output, with potential violations flagged for review before release.
+Why an application was approved or referred, decision drift over time, and eval scores per prompt version.
+
+### [Customer support agents](/users/sumup)
+
+An agent resolves merchant and customer requests, escalating edge cases to humans.
+
+Autonomy rate, good and bad runs scored by evals and reviewers, and the long-tail cases to fix next.
+
+SumUp · 50% deflection
 
 ### [Coding agents across engineering](/coding-agents)
 
-Developers use Claude Code, Codex, Cursor, and Copilot across teams and repositories.
+Developers use Claude Code, Codex, Cursor and Copilot across teams and repositories.
 
-Cost per developer and model, failing tools, and full session replays.
+Cost per developer and model, failing tools, and full session replays. No proxy in the way.
 
 ## Learn how to ship reliable agents in financial services
 
 Start with deployment gates and execution history, then see how teams like Trade Republic run Langfuse in production.
 
 - [Building deployment gates for LLMs](/blog/2026-07-15-llm-certification-financial-services): Evaluate model and prompt changes against datasets and policy evals before release.
-- [Academy: customer support chatbot](/academy/examples/customer-support-chatbot): Trace, score, and iterate on a support agent to raise its autonomy rate safely.
+- [Academy: customer support chatbot](/academy/examples/customer-support-chatbot): Trace, score and iterate on a support agent to raise its autonomy rate safely.
 - [Trade Republic customer story](/users/trade-republic): How a European neobroker runs self-hosted Langfuse in production. Read or watch on YouTube.
-- [Structured output extraction cookbook](/guides/cookbook/example_structured_output_extraction): Evaluate insurance-claim and document extraction per field, then improve the pipeline with experiments.
 
 ## FAQ [#faq]
 
@@ -207,7 +229,7 @@ Configure retention policies per project and schedule exports of observations an
 
 Langfuse Cloud is fully managed, with subscription plans and usage-based pricing. Self-Hosted Enterprise runs in your infrastructure, with enterprise administration features and support under a custom commercial agreement; your team operates the deployment. Both Enterprise options include unlimited users. Talk to us to compare features, support, and total costs for your requirements. [Cloud pricing](/pricing), [Self-Hosted Enterprise pricing](/pricing-self-host).
 
-## Working on AI in banking, insurance, or capital markets?
+## Working on AI in banking, insurance or capital markets?
 
 Talk through deployment options, compliance needs, and how teams like Trade Republic use Langfuse in production.
 

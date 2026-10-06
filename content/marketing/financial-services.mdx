@@ -13,6 +13,7 @@ import { CreditOnboardingTraceMock } from "@/components/financial-services/Credi
 import { DeploymentModeSlider } from "@/components/financial-services/DeploymentModeSlider";
 import { EvalCapabilityGrid } from "@/components/financial-services/EvalCapabilityGrid";
 import { HeroReasons } from "@/components/financial-services/HeroReasons";
+import { TrustPoints } from "@/components/financial-services/TrustPoints";
 import { UseCaseGrid } from "@/components/financial-services/UseCaseGrid";
 import {
   financialServicesFaqs,
@@ -21,66 +22,70 @@ import {
 } from "@/components/financial-services/content";
 import { MarketoContactFormCard } from "@/components/MarketoContactForm";
 import { FAQAccordion } from "@/components/shared/FAQAccordion";
-import { SecurityBadgesGrid } from "@/components/SecurityBadgesGrid";
 import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
+import { Button } from "@/components/ui/button";
 import { TextHighlight } from "@/components/ui/text-highlight";
-import { BookOpen, Radar, Shield, Workflow } from "lucide-react";
+import { BookOpen, Play, Radar } from "lucide-react";
 
-<h1 className="sr-only">Langfuse for financial services</h1>
+<h1 className="sr-only">Langfuse for Financial Services</h1>
 
 <div className="not-prose mt-6 overflow-hidden border border-line-structure bg-surface-bg">
   <section data-use-case-section="hero" className="grid border-b border-line-structure lg:grid-cols-[1.05fr_0.95fr]">
     <div className="min-w-0 border-b border-line-structure px-6 py-7 sm:px-10 sm:py-8 lg:border-b-0 lg:border-r">
-      <p className="font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
+      <p className="font-mono text-[11px] uppercase tracking-[0.09em] text-text-tertiary">
         Industries · Financial services
       </p>
-      <h2 className="mt-2 text-[38px] leading-[0.95] text-text-primary sm:text-[48px]">
+      <h2 className="mt-3 text-[38px] leading-[0.95] text-text-primary sm:text-[48px]">
         <span className="block">Langfuse for</span>
-        <span className="mt-1 inline-block bg-surface-cta-primary px-1.5 whitespace-nowrap">
-          financial services
-        </span>
+        <TextHighlight highlightClassName="bg-surface-cta-primary" className="mt-1">
+          Financial Services
+        </TextHighlight>
       </h2>
       <p className="mt-4 max-w-[56ch] text-[14px] leading-[1.45] text-text-secondary">
         Observe and evaluate AI agents across your institution. Give
         engineering, platform, and risk teams visibility into production
         behavior, with deployment in Langfuse Cloud or your own infrastructure.
       </p>
-      <HeroReasons />
-      <div className="mt-6 flex flex-wrap gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-        <a href="/security/soc2" className="hover:text-text-primary">SOC 2 Type II</a>
-        <span aria-hidden="true">·</span>
-        <a href="/security/iso27001" className="hover:text-text-primary">ISO 27001</a>
-        <span aria-hidden="true">·</span>
-        <a href="/security/gdpr" className="hover:text-text-primary">GDPR</a>
-        <span aria-hidden="true">·</span>
-        <a href="/self-hosting" className="hover:text-text-primary">Self-hosting</a>
-        <span aria-hidden="true">·</span>
-        <a href="/self-hosting/configuration/hardening#hardening-for-government" className="hover:text-text-primary">Hardening for government</a>
+      <div className="mt-5 flex flex-wrap items-center gap-2">
+        <Button href="#book" shortcutKey="T" wrapperClassName="w-auto">
+          Talk to an expert
+        </Button>
+        <Button href="/cloud" variant="secondary" shortcutKey="S" wrapperClassName="w-auto">
+          Get started
+        </Button>
       </div>
+      <HeroReasons />
+      <div className="mt-5 flex flex-wrap gap-2">
+        <a href="/security/soc2" className="rounded-full border border-line-structure px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.04em] text-text-tertiary hover:text-text-primary">SOC 2 Type II</a>
+        <a href="/security/iso27001" className="rounded-full border border-line-structure px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.04em] text-text-tertiary hover:text-text-primary">ISO 27001</a>
+        <a href="/security/gdpr" className="rounded-full border border-line-structure px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.04em] text-text-tertiary hover:text-text-primary">GDPR</a>
+        <a href="/handbook/chapters/open-source" className="rounded-full border border-line-structure px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.04em] text-text-tertiary hover:text-text-primary">MIT · open source</a>
+        <a href="/self-hosting/configuration/hardening#hardening-for-government" className="rounded-full border border-line-structure px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.04em] text-text-tertiary hover:text-text-primary">Government (available in Q4 2026)</a>
+      </div>
+      <p className="mt-3">
+        <a href="/security" className="text-[13px] text-text-secondary underline decoration-line-structure underline-offset-4 hover:text-text-primary">
+          Security & compliance →
+        </a>
+      </p>
     </div>
 
-    <div className="flex min-w-0 items-start bg-surface-1 px-4 py-4 sm:px-6 sm:py-5">
+    <div id="book" className="flex min-w-0 items-start bg-surface-1 px-4 py-4 sm:px-6 sm:py-5">
       <div className="w-full">
-        <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
-          Talk to an expert
-        </p>
         <MarketoContactFormCard className="mx-0 max-w-none" />
       </div>
     </div>
 
   </section>
 
-  <section data-use-case-section="customer_stories" className="border-t border-line-structure bg-surface-1 px-5 py-14 sm:px-10 sm:py-18">
-    <p className="text-center font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
-      In production at
-    </p>
-    <h2 className="mt-2 text-center text-[44px] leading-[1] text-text-primary">
-      Customers in financial services
-    </h2>
-    <div className="mx-auto mt-8 max-w-4xl">
-      <EnterpriseLogoGrid names={financialServicesLogoNames} />
+  <section data-use-case-section="logos" className="border-t border-line-structure px-5 py-8 sm:px-10">
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-8">
+      <p className="shrink-0 font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
+        In production at
+      </p>
+      <div className="min-w-0 flex-1">
+        <EnterpriseLogoGrid names={financialServicesLogoNames} small />
+      </div>
     </div>
-    <CustomerQuoteGrid routes={financialServicesQuoteRoutes} />
   </section>
 
   <section data-use-case-section="benefits" className="border-t border-line-structure bg-surface-1 px-5 py-14 sm:px-10 sm:py-20">
@@ -104,39 +109,48 @@ import { BookOpen, Radar, Shield, Workflow } from "lucide-react";
   </section>
 
   <section data-use-case-section="deployment" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
-    <h2 className="text-[34px] leading-[1] text-text-primary sm:text-[46px]">
-      Run it where your data is allowed to live
+    <h2 className="text-[34px] leading-[1.08] text-text-primary sm:text-[42px]">
+      Run it where your data is allowed to live.
     </h2>
-    <p className="mt-4 max-w-[64ch] text-[14px] leading-[1.45] text-text-secondary">
-      Langfuse Cloud in the EU, US, or Japan, self-hosted in your VPC, or fully
-      air-gapped. Same product, same APIs.
-    </p>
-    <DeploymentModeSlider />
-    <div className="mt-10">
-      <SecurityBadgesGrid />
+    <div className="mt-10 grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
+      <TrustPoints />
+      <DeploymentModeSlider />
     </div>
-    <p className="mt-2 text-center text-[13px] text-text-tertiary">
-      See the <a href="/security" className="underline decoration-line-structure underline-offset-4 hover:text-text-primary">security overview</a>,{" "}
-      <a href="/self-hosting" className="underline decoration-line-structure underline-offset-4 hover:text-text-primary">self-hosting docs</a>, and{" "}
-      <a href="/self-hosting/configuration/hardening#hardening-for-government" className="underline decoration-line-structure underline-offset-4 hover:text-text-primary">hardening for government</a>.
+  </section>
+
+  <section data-use-case-section="customer_stories" className="border-t border-line-structure bg-surface-1 px-5 py-14 sm:px-10 sm:py-18">
+    <p className="font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
+      Customers in financial services
     </p>
+    <CustomerQuoteGrid routes={financialServicesQuoteRoutes} />
   </section>
 
   <section data-use-case-section="evaluation" className="border-t border-line-structure bg-surface-1 px-5 py-14 sm:px-10 sm:py-20">
-    <h2 className="text-[34px] leading-[1] text-text-primary sm:text-[46px]">
+    <p className="font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
       Evaluation for financial services
+    </p>
+    <h2 className="mt-2 text-[34px] leading-[1.08] text-text-primary sm:text-[42px]">
+      Your evaluation needs,{" "}
+      <TextHighlight highlightClassName="bg-surface-cta-primary">
+        covered
+      </TextHighlight>
+      .
     </h2>
     <p className="mt-4 max-w-[64ch] text-[14px] leading-[1.45] text-text-secondary">
       From testing changes before release to monitoring production quality and
-      incorporating expert feedback — with the security controls and deployment
-      options your institution needs.
+      incorporating expert feedback—Langfuse brings your evaluation workflows
+      together, with the security controls and deployment options your
+      institution needs.
     </p>
     <EvalCapabilityGrid />
   </section>
 
   <section data-use-case-section="use_cases" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
-    <h2 className="text-[34px] leading-[1] text-text-primary sm:text-[46px]">
-      What financial services teams build on Langfuse
+    <p className="font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
+      Use cases
+    </p>
+    <h2 className="mt-2 text-[34px] leading-[1.08] text-text-primary sm:text-[42px]">
+      What financial services teams build on Langfuse.
     </h2>
     <UseCaseGrid />
   </section>
@@ -163,23 +177,15 @@ import { BookOpen, Radar, Shield, Workflow } from "lucide-react";
           title="Academy: customer support chatbot"
           href="/academy/examples/customer-support-chatbot"
           icon={<BookOpen />}
-          description="Trace, score, and iterate on a support agent to raise its autonomy rate safely."
+          description="Trace, score and iterate on a support agent to raise its autonomy rate safely."
           contentClassName="items-start p-4 sm:p-5"
           contentWrapperClassName="gap-2"
         />
         <Card
           title="Trade Republic customer story"
           href="/users/trade-republic"
-          icon={<Workflow />}
+          icon={<Play />}
           description="How a European neobroker runs self-hosted Langfuse in production. Read or watch on YouTube."
-          contentClassName="items-start p-4 sm:p-5"
-          contentWrapperClassName="gap-2"
-        />
-        <Card
-          title="Structured output extraction cookbook"
-          href="/guides/cookbook/example_structured_output_extraction"
-          icon={<Shield />}
-          description="Evaluate insurance-claim and document extraction per field, then improve the pipeline with experiments."
           contentClassName="items-start p-4 sm:p-5"
           contentWrapperClassName="gap-2"
         />
@@ -203,7 +209,7 @@ import { BookOpen, Radar, Shield, Workflow } from "lucide-react";
   <section data-use-case-section="closing_cta" className="border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
     <div className="mx-auto max-w-5xl">
       <CustomerStoryCTA
-        title="Working on AI in banking, insurance, or capital markets?"
+        title="Working on AI in banking, insurance or capital markets?"
         description="Talk through deployment options, compliance needs, and how teams like Trade Republic use Langfuse in production."
         contactLabel="Talk to an expert"
       />
