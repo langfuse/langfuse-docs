@@ -469,7 +469,42 @@ test("sales completion is emitted only after Marketo success and is deduplicated
       },
     },
   };
-  globalThis.document = { getElementById: () => ({ replaceChildren() {} }) };
+  const requiredAsterisk = {
+    display: null,
+    priority: null,
+    closest: (selector) =>
+      selector === ".mktoRequiredField" ? { required: true } : null,
+    style: {
+      setProperty(name, value, priority) {
+        if (name === "display") {
+          requiredAsterisk.display = value;
+          requiredAsterisk.priority = priority;
+        }
+      },
+    },
+  };
+  const optionalAsterisk = {
+    display: null,
+    priority: null,
+    closest: () => null,
+    style: {
+      setProperty(name, value, priority) {
+        if (name === "display") {
+          optionalAsterisk.display = value;
+          optionalAsterisk.priority = priority;
+        }
+      },
+    },
+  };
+  globalThis.document = {
+    getElementById: () => ({
+      replaceChildren() {},
+      querySelectorAll(selector) {
+        assert.equal(selector, ".mktoAsterix");
+        return [requiredAsterisk, optionalAsterisk];
+      },
+    }),
+  };
   const form = load(compile("components/MarketoContactForm.tsx"), (name) => {
     if (name === "react")
       return {
@@ -496,6 +531,10 @@ test("sales completion is emitted only after Marketo success and is deduplicated
   });
   try {
     form.MarketoContactForm();
+    assert.equal(requiredAsterisk.display, "inline");
+    assert.equal(requiredAsterisk.priority, "important");
+    assert.equal(optionalAsterisk.display, "none");
+    assert.equal(optionalAsterisk.priority, "important");
     assert.equal(captured.length, 0, "Loading a form is not a conversion");
     assert.equal(onSuccess({ Email: "test@example.invalid" }, ""), false);
     assert.equal(onSuccess({}, ""), false);
@@ -506,6 +545,56 @@ test("sales completion is emitted only after Marketo success and is deduplicated
       },
     ]);
     assert.equal(adConversions, 1);
+  } finally {
+    delete globalThis.window;
+    delete globalThis.document;
+  }
+});
+
+test("sales completion still registers when the form stub has no querySelectorAll", () => {
+  const captured = [];
+  let onSuccess;
+  globalThis.window = {
+    MktoForms2: {
+      loadForm(_base, _id, _form, callback) {
+        callback({
+          onSuccess: (fn) => {
+            onSuccess = fn;
+          },
+        });
+      },
+    },
+  };
+  globalThis.document = { getElementById: () => ({ replaceChildren() {} }) };
+  const form = load(compile("components/MarketoContactForm.tsx"), (name) => {
+    if (name === "react")
+      return {
+        useState: (value) => [value, () => {}],
+        useRef: (value) => ({ current: value }),
+        useCallback: (fn) => fn,
+        useEffect: (fn) => fn(),
+      };
+    if (name === "react/jsx-runtime")
+      return {
+        jsx: (type, props) => ({ type, props }),
+        jsxs: (type, props) => ({ type, props }),
+      };
+    if (name === "lucide-react") return { Check: () => null };
+    if (name === "posthog-js")
+      return {
+        capture: (event, props) => captured.push({ event, props }),
+      };
+    if (name === "@/lib/ad-conversions")
+      return { reportTalkToUsConversion: () => {} };
+    if (name === "@/lib/use-case-analytics")
+      return { readUseCaseAttribution: () => attribution };
+    throw Error(name);
+  });
+  try {
+    assert.doesNotThrow(() => form.MarketoContactForm());
+    assert.equal(typeof onSuccess, "function");
+    assert.equal(onSuccess({}, ""), false);
+    assert.equal(captured[0]?.event, "sales:inquiry_completed");
   } finally {
     delete globalThis.window;
     delete globalThis.document;

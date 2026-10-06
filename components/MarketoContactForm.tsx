@@ -31,6 +31,23 @@ declare global {
   }
 }
 
+function applyRequiredAsterisks(formElement: HTMLElement) {
+  if (typeof formElement.querySelectorAll !== "function") {
+    return;
+  }
+
+  formElement
+    .querySelectorAll<HTMLElement>(".mktoAsterix")
+    .forEach((asterisk) => {
+      const isRequired = Boolean(asterisk.closest(".mktoRequiredField"));
+      asterisk.style.setProperty(
+        "display",
+        isRequired ? "inline" : "none",
+        "important",
+      );
+    });
+}
+
 function MarketoSuccessPanel() {
   return (
     <div className="lf-success-panel" role="status" aria-live="polite">
@@ -71,6 +88,11 @@ export function MarketoContactForm() {
       MARKETO_MUNCHKIN_ID,
       MARKETO_FORM_ID,
       (form) => {
+        const renderedForm = document.getElementById(MARKETO_FORM_ELEMENT_ID);
+        if (renderedForm) {
+          applyRequiredAsterisks(renderedForm);
+        }
+
         setIsFormLoaded(true);
 
         form.onSuccess(() => {
