@@ -197,76 +197,43 @@ export const financialServicesTrace = {
   ],
 };
 
-export const financialServicesEvalGroups = [
+export const financialServicesEvalWorkflows = [
   {
-    title: "The evaluation loop",
-    columns: 3 as const,
-    items: [
-      {
-        title: "Offline evaluation",
-        body: "Fail the pull request when a change regresses against your golden dataset.",
-        href: "/docs/evaluation/get-started/offline",
-      },
-      {
-        title: "Online evaluation",
-        body: "Score live traffic and alert Slack or GitHub when quality drifts.",
-        href: "/docs/evaluation/get-started/online",
-      },
-      {
-        title: "Human review",
-        body: "Send failures to domain experts and fold them into the regression set.",
-        href: "/docs/evaluation/evaluation-methods/annotation-queues",
-      },
-    ],
+    title: "Offline evaluation",
+    body: "Fail the pull request when a change regresses against your golden dataset.",
+    href: "/docs/evaluation/get-started/offline",
   },
   {
-    title: "Trust and control",
-    columns: 2 as const,
-    items: [
-      {
-        title: "Judge calibration",
-        body: "Show model risk how closely LLM judges match human labels.",
-        href: "/docs/evaluation/scores/score-analytics",
-      },
-      {
-        title: "Prompt governance",
-        body: "Ship prompts through staging and production labels with a full audit trail.",
-        href: "/docs/prompt-management/features/prompt-version-control",
-      },
-    ],
+    title: "Online evaluation",
+    body: "Score live traffic and alert Slack or GitHub when quality drifts.",
+    href: "/docs/evaluation/get-started/online",
   },
   {
-    title: "In your stack",
-    columns: 2 as const,
-    items: [
-      {
-        title: "Gateway and model integration",
-        body: "Ingest traces from your gateway and pin judges to Bedrock, Azure, or Vertex.",
-        href: "/docs/administration/llm-connection",
-      },
-      {
-        title: "Dashboards as code",
-        body: "Version dashboards in Git and deploy the same widgets to every environment.",
-        href: "/docs/metrics/features/custom-dashboards",
-      },
-    ],
+    title: "Human review",
+    body: "Send failures to domain experts and fold them into the regression set.",
+    href: "/docs/evaluation/evaluation-methods/annotation-queues",
   },
 ] as const;
 
-export const financialServicesEnterpriseRequirements = [
+export const financialServicesEvalSupporting = [
   {
-    title: "Redaction",
-    body: "Mask PII in the SDK before anything leaves your application.",
+    title: "Judge calibration",
+    href: "/docs/evaluation/scores/score-analytics",
+  },
+  {
+    title: "prompt governance",
+    href: "/docs/prompt-management/features/prompt-version-control",
+  },
+  {
+    title: "redaction",
     href: "/docs/observability/features/masking",
   },
   {
-    title: "Administration",
-    body: "SSO and role-based access scoped to organizations and projects.",
+    title: "access controls",
     href: "/docs/administration/rbac",
   },
   {
-    title: "Operations",
-    body: "Self-host on AWS with Terraform and Helm, on your release cadence.",
+    title: "self-hosting",
     href: "/self-hosting",
   },
 ] as const;

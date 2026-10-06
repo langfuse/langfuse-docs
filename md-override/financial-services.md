@@ -27,7 +27,7 @@ Customers in financial services include Trade Republic, SumUp, Ramp, and Merck.
 
 ## Every run traced, scored and on the record
 
-See load, behavior and usage shifts early. Evals score outputs against your policies, and execution history is retained for supervisory and model risk review. See why this application was referred for review.
+See load, behavior and usage shifts early, on [dashboards you version in Git](/docs/metrics/features/custom-dashboards). Evals score outputs against your policies, and execution history is retained for supervisory and model risk review. See why this application was referred for review.
 
 Illustrative example. Outcome: application referred to an underwriter. Human review queued.
 
@@ -54,6 +54,8 @@ Audit log:
 - 09:22:10 annotation added: "refer confirmed"
 
 ## Run it where your data is allowed to live.
+
+Ingest traces from your [AI gateway](/integrations/native/opentelemetry) and pin judges to [Bedrock, Azure, or Vertex](/docs/administration/llm-connection).
 
 1. **Deployment where your data must stay.** Langfuse Cloud in the EU, US or Japan, self-hosted in your VPC, or fully air-gapped.
 2. **Multiple layers of data redaction.** Client-side and server-side PII protections before anything is stored.
@@ -109,9 +111,7 @@ No internet access. No vendor access.
 
 ## Your evaluation needs, covered
 
-From testing changes before release to monitoring production quality and incorporating expert feedback—Langfuse brings your evaluation workflows together, with the security controls and deployment options your institution needs.
-
-### The evaluation loop
+Test changes, monitor production, and bring expert feedback into your evaluation workflow.
 
 **Offline evaluation.** Fail the pull request when a change regresses against your golden dataset. [Offline evaluation](/docs/evaluation/get-started/offline)
 
@@ -119,25 +119,7 @@ From testing changes before release to monitoring production quality and incorpo
 
 **Human review.** Send failures to domain experts and fold them into the regression set. [Human review](/docs/evaluation/evaluation-methods/annotation-queues)
 
-### Trust and control
-
-**Judge calibration.** Show model risk how closely LLM judges match human labels. [Judge calibration](/docs/evaluation/scores/score-analytics)
-
-**Prompt governance.** Ship prompts through staging and production labels with a full audit trail. [Prompt governance](/docs/prompt-management/features/prompt-version-control)
-
-### In your stack
-
-**Gateway and model integration.** Ingest traces from your gateway and pin judges to Bedrock, Azure, or Vertex. [Gateway and model integration](/docs/administration/llm-connection)
-
-**Dashboards as code.** Version dashboards in Git and deploy the same widgets to every environment. [Dashboards as code](/docs/metrics/features/custom-dashboards)
-
-### Built for your enterprise requirements
-
-**Redaction.** Mask PII in the SDK before anything leaves your application. [Redaction](/docs/observability/features/masking)
-
-**Administration.** SSO and role-based access scoped to organizations and projects. [Administration](/docs/administration/rbac)
-
-**Operations.** Self-host on AWS with Terraform and Helm, on your release cadence. [Operations](/self-hosting)
+Also: [Judge calibration](/docs/evaluation/scores/score-analytics), [prompt governance](/docs/prompt-management/features/prompt-version-control), [redaction](/docs/observability/features/masking), [access controls](/docs/administration/rbac), and [self-hosting](/self-hosting).
 
 ## What financial services teams build on Langfuse.
 
