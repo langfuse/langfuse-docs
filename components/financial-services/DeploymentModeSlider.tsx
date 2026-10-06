@@ -69,7 +69,7 @@ export function DeploymentModeSlider() {
             </span>
           ))}
         </p>
-        <dl className="mt-4 grid gap-2 sm:grid-cols-2">
+        <dl className="mt-4 grid gap-2">
           {mode.specs.map((spec) => (
             <div
               key={spec.k}
