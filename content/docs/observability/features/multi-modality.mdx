@@ -175,6 +175,13 @@ Supported formats:
 
 The LLM-as-a-Judge model and provider must support the media type. Self-hosted deployments can [configure how evaluator media is sent to model providers](/self-hosting/configuration#llm-as-a-judge-media).
 
+<Callout type="warning" title="Amazon Bedrock on Langfuse Cloud">
+  The AWS Bedrock Converse API does not accept media sent as signed HTTP URLs.
+  Instead, use an [OpenAI- or Anthropic-compatible Bedrock
+  endpoint](https://docs.aws.amazon.com/bedrock/latest/userguide/models-api-compatibility.html)
+  with an OpenAI or Anthropic connection and a custom base URL.
+</Callout>
+
 ### Custom attachments
 
 If you want to have more control or your media is not base64 encoded, you can upload arbitrary media attachments to Langfuse via the SDKs using the new `LangfuseMedia` class. Wrap media with LangfuseMedia before including it in trace inputs, outputs, metadata, or dataset items. See the multi-modal documentation for examples.
