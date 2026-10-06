@@ -44,7 +44,7 @@ That combination is hard to cover with a tracing tool bolted onto a separate eva
 
 DKB runs Langfuse [self-hosted](/self-hosting). Every interaction is traced, and an [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) screens every answer: Does it stray into investment advice? Is it grounded in the knowledge base? Does the customer seem satisfied? Anything flagged lands in [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) organized by service area, where customer service specialists rate severity and escalate critical cases first.
 
-<Frame fullWidth>
+<Frame fullWidth transparent className="border-0">
   ![DKB screening funnel: 10–20k production conversations a day are traced, screened by an LLM judge, reviewed in annotation queues, rated by severity, then either escalated or added as dataset items](/images/blog/2026-10-12-regulated-financial-services-ai-agents/dkb-screening-funnel.png)
 </Frame>
 
@@ -68,7 +68,7 @@ Their answer is the evaluation flywheel, with the data split in two:
 - A **homework set** for iterating. The deployed workflow and the new agent compete on the same inputs, and a custom LLM judge scores the traces in Langfuse. A coding agent connected through the Langfuse MCP or CLI reads the traces, finds the issue (a missing tool, a vague tool description) and proposes a fix.
 - An **exam set** of held-out topics, to check that the fix holds.
 
-<Frame fullWidth>
+<Frame fullWidth transparent className="border-0">
   ![Trade Republic migration: a fixed prompt chain versus an agent with tools, both scored on a homework set and a held-out exam set before release](/images/blog/2026-10-12-regulated-financial-services-ai-agents/trade-republic-fixed-chains-to-agents.png)
 </Frame>
 
@@ -93,7 +93,7 @@ The pipeline doesn't make anything compliant on its own. Approvals and sign-off 
 
 Put the three side by side and it's the same [AI engineering loop](/academy/ai-engineering-loop), seen from different stages. Langfuse is built to run that loop end to end on infrastructure the bank controls:
 
-<Frame fullWidth>
+<Frame fullWidth transparent className="border-0">
   ![The AI engineering loop for financial services: trace and monitor online, then build datasets, experiment, and evaluate offline, with a pass-checks, human sign-off, and deploy path back to production](/images/blog/2026-10-12-regulated-financial-services-ai-agents/ai-engineering-loop-financial-services.png)
 </Frame>
 
