@@ -8,6 +8,7 @@ highlight: true
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
+import { Frame } from "@/components/Frame";
 
 <BlogHeader
   title="How regulated financial services institutions improve AI agents with Langfuse"
@@ -83,6 +84,10 @@ The pipeline doesn't make anything compliant on its own. Approvals and sign-off 
 ## The shared pattern [#the-shared-pattern]
 
 Put the three side by side and it's the same [AI engineering loop](/academy/ai-engineering-loop), seen from different stages. Langfuse is built to run that loop end to end on infrastructure the bank controls:
+
+<Frame fullWidth>
+  ![The AI engineering loop for financial services: trace and monitor online, then build datasets, experiment, and evaluate offline, with a pass-checks, human sign-off, and deploy path back to production](/images/blog/2026-10-12-regulated-financial-services-ai-agents/ai-engineering-loop-financial-services.png)
+</Frame>
 
 1. **Trace everything, self-hosted.** All three teams run Langfuse on their own infrastructure. Customer data never leaves the bank, and open source helps the stack clear security review.
 2. **Screen production automatically.** [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) and deterministic checks flag compliance and quality issues across every conversation, and store the scores alongside the traces.
