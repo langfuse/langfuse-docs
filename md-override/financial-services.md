@@ -201,6 +201,8 @@ Configure retention policies per project and schedule exports of observations an
 
 Langfuse Cloud is fully managed, with subscription plans and usage-based pricing. Self-Hosted Enterprise runs in your infrastructure, with enterprise administration features and support under a custom commercial agreement; your team operates the deployment. Both Enterprise options include unlimited users. Talk to us to compare features, support, and total costs for your requirements. [Cloud pricing](/pricing), [Self-Hosted Enterprise pricing](/pricing-self-host).
 
+[Ask anything else](/docs/ask-ai)
+
 ## Working on AI in banking, insurance or capital markets?
 
 Talk through deployment options, compliance needs, and how teams like Trade Republic use Langfuse in production.
