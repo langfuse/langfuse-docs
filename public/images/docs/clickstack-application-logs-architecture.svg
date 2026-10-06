@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="810" viewBox="0 0 960 810" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+    </marker>
+    <style>
+      .title { font-size: 17px; font-weight: 600; fill: #0f172a; }
+      .sub { font-size: 15px; fill: #475569; }
+      .mono { font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 14px; fill: #0f172a; }
+      .group { font-size: 14px; font-weight: 600; letter-spacing: 0.06em; fill: #64748b; }
+      .edge { font-size: 14px; fill: #475569; }
+      .box { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; }
+      .line { stroke: #475569; stroke-width: 2; fill: none; }
+      .step { fill: #f1f5f9; stroke: #e2e8f0; stroke-width: 1; }
+      .stepnum { font-size: 13px; font-weight: 700; fill: #ffffff; }
+      .steptitle { font-size: 16px; font-weight: 600; fill: #0f172a; }
+      .steptext { font-size: 15px; fill: #334155; }
+    </style>
+  </defs>
+
+  <rect width="960" height="810" fill="#ffffff"/>
+
+  <!-- Kubernetes cluster group -->
+  <rect x="20" y="20" width="920" height="537" rx="14" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <text x="40" y="50" class="group">KUBERNETES CLUSTER</text>
+
+  <!-- 1. Langfuse pods -->
+  <rect x="40" y="75" width="195" height="135" rx="10" class="box" stroke="#0f172a"/>
+  <text x="137.5" y="108" text-anchor="middle" class="title">Langfuse</text>
+  <text x="137.5" y="136" text-anchor="middle" class="mono">langfuse-web</text>
+  <text x="137.5" y="156" text-anchor="middle" class="mono">langfuse-worker</text>
+  <rect x="80.5" y="172" width="114" height="24" rx="12" fill="#e0f2fe"/>
+  <text x="137.5" y="189" text-anchor="middle" class="edge" fill="#0369a1">stdout · JSON</text>
+
+  <!-- 2. Node log files -->
+  <rect x="268" y="75" width="195" height="135" rx="10" class="box"/>
+  <text x="365.5" y="108" text-anchor="middle" class="title">Container log files</text>
+  <text x="365.5" y="138" text-anchor="middle" class="mono">/var/log/pods/</text>
+  <text x="365.5" y="158" text-anchor="middle" class="mono">langfuse_*/*/*.log</text>
+  <text x="365.5" y="190" text-anchor="middle" class="sub">on each node</text>
+
+  <!-- 3. OTel agent -->
+  <rect x="496" y="75" width="195" height="135" rx="10" class="box" stroke="#7c3aed" stroke-width="2"/>
+  <text x="593.5" y="108" text-anchor="middle" class="title">OpenTelemetry agent</text>
+  <text x="593.5" y="138" text-anchor="middle" class="sub">DaemonSet</text>
+  <text x="593.5" y="160" text-anchor="middle" class="sub">contrib image</text>
+  <text x="593.5" y="190" text-anchor="middle" class="sub">one pod per node</text>
+
+  <!-- 4. ClickStack collector -->
+  <rect x="724" y="75" width="195" height="135" rx="10" class="box"/>
+  <text x="821.5" y="108" text-anchor="middle" class="title">ClickStack collector</text>
+  <text x="821.5" y="138" text-anchor="middle" class="sub">Deployment (gateway)</text>
+  <text x="821.5" y="160" text-anchor="middle" class="sub">Receives OTLP/HTTP</text>
+  <text x="821.5" y="190" text-anchor="middle" class="sub">on port 4318</text>
+
+  <!-- Arrows in cluster -->
+  <line x1="235" y1="142" x2="266" y2="142" class="line" marker-end="url(#arrow)"/>
+  <line x1="463" y1="142" x2="494" y2="142" class="line" marker-end="url(#arrow)"/>
+  <line x1="691" y1="142" x2="722" y2="142" class="line" marker-end="url(#arrow)"/>
+
+  <!-- Agent processing details -->
+  <line x1="593.5" y1="210" x2="593.5" y2="245" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <rect x="40" y="245" width="640" height="292" rx="10" fill="#ffffff" stroke="#c4b5fd" stroke-width="1.5"/>
+  <text x="58" y="276" class="title">What the agent does to each log line</text>
+
+  <g>
+    <rect x="55" y="292" width="297" height="110" rx="8" class="step"/>
+    <circle cx="80" cy="320" r="12" fill="#7c3aed"/>
+    <text x="80" y="324.5" text-anchor="middle" class="stepnum">1</text>
+    <text x="100" y="326" class="steptitle">Filter</text>
+    <text x="70" y="356" class="steptext">Keep only logs from the langfuse</text>
+    <text x="70" y="378" class="steptext">namespace</text>
+  </g>
+  <g>
+    <rect x="368" y="292" width="297" height="110" rx="8" class="step"/>
+    <circle cx="393" cy="320" r="12" fill="#7c3aed"/>
+    <text x="393" y="324.5" text-anchor="middle" class="stepnum">2</text>
+    <text x="413" y="326" class="steptitle">Enrich</text>
+    <text x="383" y="356" class="steptext">Attach Kubernetes pod metadata:</text>
+    <text x="383" y="378" class="steptext">namespace, pod, deployment, labels</text>
+  </g>
+  <g>
+    <rect x="55" y="414" width="297" height="110" rx="8" class="step"/>
+    <circle cx="80" cy="442" r="12" fill="#7c3aed"/>
+    <text x="80" y="446.5" text-anchor="middle" class="stepnum">3</text>
+    <text x="100" y="448" class="steptitle">Parse JSON</text>
+    <text x="70" y="478" class="mono">level</text>
+    <text x="118" y="478" class="steptext">→ severity,</text>
+    <text x="198" y="478" class="mono">message</text>
+    <text x="262" y="478" class="steptext">→ body</text>
+    <text x="70" y="500" class="steptext">other keys → log attributes</text>
+  </g>
+  <g>
+    <rect x="368" y="414" width="297" height="110" rx="8" class="step"/>
+    <circle cx="393" cy="442" r="12" fill="#7c3aed"/>
+    <text x="393" y="446.5" text-anchor="middle" class="stepnum">4</text>
+    <text x="413" y="448" class="steptitle">Name the service</text>
+    <text x="383" y="478" class="mono">service.name</text>
+    <text x="490" y="478" class="steptext">set from the</text>
+    <text x="383" y="500" class="steptext">deployment name</text>
+  </g>
+
+  <!-- ClickHouse Cloud group -->
+  <rect x="20" y="585" width="920" height="205" rx="14" fill="#fefce8" stroke="#ca8a04" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <text x="40" y="615" class="group">CLICKHOUSE CLOUD</text>
+
+  <rect x="660" y="640" width="260" height="130" rx="10" class="box" stroke="#ca8a04" stroke-width="2"/>
+  <text x="790" y="672" text-anchor="middle" class="title">Logs service</text>
+  <text x="790" y="698" text-anchor="middle" class="sub">Separate from the service</text>
+  <text x="790" y="718" text-anchor="middle" class="sub">in CLICKHOUSE_URL</text>
+  <rect x="728" y="732" width="124" height="24" rx="4" fill="#fef9c3"/>
+  <text x="790" y="749" text-anchor="middle" class="mono">otel.otel_logs</text>
+
+  <rect x="360" y="640" width="240" height="130" rx="10" class="box"/>
+  <text x="480" y="684" text-anchor="middle" class="title">ClickStack UI</text>
+  <text x="480" y="712" text-anchor="middle" class="sub">Search, filter, and read</text>
+  <text x="480" y="732" text-anchor="middle" class="sub">Langfuse logs</text>
+
+  <line x1="660" y1="705" x2="602" y2="705" class="line" marker-end="url(#arrow)"/>
+  <text x="631" y="694" text-anchor="middle" class="edge">query</text>
+
+  <text x="40" y="686" class="sub" font-style="italic">Langfuse traces are not sent here.</text>
+  <text x="40" y="708" class="sub" font-style="italic">They stay on the</text>
+  <text x="40" y="730" class="sub" font-style="italic">CLICKHOUSE_URL service.</text>
+  <!-- Collector to ClickHouse -->
+  <line x1="790" y1="210" x2="790" y2="638" class="line" marker-end="url(#arrow)"/>
+  <text x="802" y="400" class="edge">insert</text>
+</svg>
