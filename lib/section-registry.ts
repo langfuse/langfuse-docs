@@ -159,6 +159,7 @@ export const USE_CASE_SECTIONS = new Set<string>([
   "chat-agents",
   "coding-agents",
   "workflow-automation",
+  "financial-services",
 ]);
 
 /** Build a unified config that includes both doc sections and marketing entries. */

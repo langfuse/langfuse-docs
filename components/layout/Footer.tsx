@@ -43,6 +43,7 @@ const menuItems: {
       { name: "Chat agents", href: "/chat-agents" },
       { name: "Coding agents", href: "/coding-agents" },
       { name: "Workflow automation", href: "/workflow-automation" },
+      { name: "Financial services", href: "/financial-services" },
       {
         name: "Playground",
         href: "/docs/prompt-management/features/playground",

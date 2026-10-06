@@ -15,6 +15,7 @@ import {
   Presentation,
   ScrollText,
   Workflow,
+  Landmark,
   type LucideIcon,
 } from "lucide-react";
 
@@ -55,6 +56,11 @@ export const useCaseLinks: NavPanelLink[] = [
   { name: "Chat agents", href: "/chat-agents", icon: Bot },
   { name: "Coding agents", href: "/coding-agents", icon: Code2 },
   { name: "Workflow automation", href: "/workflow-automation", icon: Workflow },
+  {
+    name: "Financial services",
+    href: "/financial-services",
+    icon: Landmark,
+  },
 ];
 
 export const simpleLinks = [

@@ -5,6 +5,7 @@ import { Check } from "lucide-react";
 import { reportTalkToUsConversion } from "@/lib/ad-conversions";
 import posthog from "posthog-js";
 import { readUseCaseAttribution } from "@/lib/use-case-analytics";
+import { cn } from "@/lib/utils";
 
 const MARKETO_BASE_URL = "https://discover.clickhouse.com";
 const MARKETO_MUNCHKIN_ID = "238-FPC-317";
@@ -152,6 +153,23 @@ export function MarketoContactForm() {
           />
         </>
       )}
+    </div>
+  );
+}
+
+export function MarketoContactFormCard({
+  className,
+}: {
+  className?: string;
+} = {}) {
+  return (
+    <div
+      className={cn(
+        "relative mx-auto w-full max-w-md border border-line-structure bg-stripe-pattern p-4 corner-box-corners",
+        className,
+      )}
+    >
+      <MarketoContactForm />
     </div>
   );
 }
