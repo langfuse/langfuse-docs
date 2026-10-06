@@ -24,8 +24,8 @@ export function CreditOnboardingTraceMock() {
 
   return (
     <div className="corner-box-corners relative w-full overflow-hidden border border-line-structure bg-surface-bg shadow-sm">
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-line-structure bg-surface-bg px-4 py-4">
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+      <div className="flex flex-col gap-4 border-b border-line-structure bg-surface-bg px-5 py-5">
+        <div className="flex flex-col gap-2">
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center rounded-full border border-line-structure bg-surface-bg px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.04em] text-text-tertiary">
               Illustrative example
@@ -34,14 +34,12 @@ export function CreditOnboardingTraceMock() {
               Outcome
             </span>
           </div>
-          <p className="text-[17px] font-medium leading-snug text-text-primary">
+          <p className="max-w-[36rem] text-[17px] font-medium leading-snug text-text-primary">
             {financialServicesTrace.outcome}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-0.5 font-mono text-[11px] text-text-tertiary">
-            Why:
-          </span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-mono text-[11px] text-text-tertiary">Why:</span>
           {financialServicesTrace.reasons.map((reason, index) => (
             <button
               key={reason.label}
@@ -51,7 +49,7 @@ export function CreditOnboardingTraceMock() {
                 setWhyIndex(index);
               }}
               className={cn(
-                "rounded-[2px] border px-2.5 py-1 font-mono text-[11px] leading-none",
+                "rounded-[2px] border px-2.5 py-1.5 font-mono text-[11px] leading-none",
                 whyIndex === index
                   ? "border-line-cta bg-surface-cta-primary text-text-primary"
                   : "border-line-structure bg-surface-bg text-text-secondary hover:border-line-cta",
