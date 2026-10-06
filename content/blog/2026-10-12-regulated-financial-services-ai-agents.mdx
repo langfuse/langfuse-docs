@@ -9,6 +9,7 @@ highlight: true
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
 import { Frame } from "@/components/Frame";
+import { CustomerQuote } from "@/components/customers/CustomerQuote";
 
 <BlogHeader
   title="How regulated financial services institutions improve AI agents with Langfuse"
@@ -50,8 +51,12 @@ DKB runs Langfuse [self-hosted](/self-hosting). Every interaction is traced, and
 
 For DKB, this isn't optional tooling:
 
-> "If I disabled the screening tomorrow, we would have to stop all our agent activity."
-> — David Hinrichs, Senior Machine Learning Scientist at DKB
+<CustomerQuote
+  quote="If I disabled the screening tomorrow, we would have to stop all our agent activity."
+  name="David Hinrichs"
+  role="Senior Machine Learning Scientist"
+  company="DKB"
+/>
 
 The specialists don't just review. When they spot a recurring pattern, they add examples to a [dataset](/docs/evaluation/experiments/datasets), which feeds the evaluations DKB runs as regression tests before every release. Screening, human review, and release checks all sit in the same self-hosted Langfuse project.
 
@@ -72,8 +77,12 @@ Their answer is the evaluation flywheel, with the data split in two:
   ![Trade Republic migration: a fixed prompt chain versus an agent with tools, both scored on a homework set and a held-out exam set before release](/images/blog/2026-10-12-regulated-financial-services-ai-agents/trade-republic-fixed-chains-to-agents.png)
 </Frame>
 
-> "You need the exam dataset to see if the issue was actually fixed, because coding agents are smart and can simply few-shot the homework."
-> — Paolo Tamagnini, Senior Data Scientist at Trade Republic
+<CustomerQuote
+  quote="You need the exam dataset to see if the issue was actually fixed, because coding agents are smart and can simply few-shot the homework."
+  name="Paolo Tamagnini"
+  role="Senior Data Scientist"
+  company="Trade Republic"
+/>
 
 Only when both sets pass does the agent ship. The result is less code and fewer prompts, since the glue code between steps disappears, with the datasets as the safety net. Langfuse is where the old and new systems compete, where judges score them, and where the coding agent reads the failures. The migration stays evidence-based instead of a leap of faith. Paolo's one caveat: watch prompt caching. An agent can make many more calls than a fixed workflow, and editing the prompt mid-trace breaks the cache and drives up cost.
 
