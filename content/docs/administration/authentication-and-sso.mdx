@@ -126,6 +126,16 @@ Enforcing SSO does not end sessions that are already active. Your current browse
 
 Langfuse does not support exceptions on enforced domains. There are no "break glass" accounts that can keep using email/password sign-in once SSO enforcement is enabled for a domain. If you are interested in this functionality, please upvote this [GitHub discussion](https://github.com/orgs/langfuse/discussions/14532).
 
+#### What if the IdP email claim does not match the verified SSO domain? [#sso-email-domain]
+
+Langfuse requires the authenticated identity to match a domain your organization has verified for SSO. This prevents account takeover: only an identity provider configured for a domain you control can sign users in on that domain.
+
+Some identity providers return an `email` claim on a different domain than the one you verified. This is common with Azure AD / Entra when the profile email is an external alias, while the account in your tenant uses a UPN on the verified domain.
+
+For Azure AD / Entra, Langfuse falls back from `email` to `preferred_username` or `upn` when one of those is a valid email address on the configured SSO domain. Sign-in then uses that matching address.
+
+If none of those claims match the verified SSO domain, Langfuse rejects the sign-in. Configure the IdP so a claim Langfuse uses carries an address on the verified domain, or verify and configure SSO for a domain you control that the IdP emits.
+
 ### Vendor Guides
 
 #### Okta [#okta]
