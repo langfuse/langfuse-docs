@@ -111,47 +111,33 @@ No internet access. No vendor access.
 
 From testing changes before release to monitoring production quality and incorporating expert feedback—Langfuse brings your evaluation workflows together, with the security controls and deployment options your institution needs.
 
-### Offline evaluation
+### The evaluation loop
 
-Golden datasets built from production traces, versioned experiments with baseline comparison, and a release gate that fails the pull request on regression.
+**Offline evaluation.** Fail the pull request when a change regresses against your golden dataset. [Offline evaluation](/docs/evaluation/get-started/offline)
 
-### Online evaluation
+**Online evaluation.** Score live traffic and alert Slack or GitHub when quality drifts. [Online evaluation](/docs/evaluation/get-started/online)
 
-Deterministic sampling of live traffic, LLM-as-judge and code evaluators, and threshold alerts to Slack, webhooks, or GitHub Actions when quality drifts.
+**Human review.** Send failures to domain experts and fold them into the regression set. [Human review](/docs/evaluation/evaluation-methods/annotation-queues)
 
-### Human review
+### Trust and control
 
-Annotation queues for subject-matter experts, corrected outputs, and one-click promotion of failures into a permanent regression set.
+**Judge calibration.** Show model risk how closely LLM judges match human labels. [Judge calibration](/docs/evaluation/scores/score-analytics)
 
-### Judge calibration
+**Prompt governance.** Ship prompts through staging and production labels with a full audit trail. [Prompt governance](/docs/prompt-management/features/prompt-version-control)
 
-Score Analytics measures agreement between human labels and model judges (Cohen's Kappa, F1, Pearson, Spearman) so you can defend the judge to model risk.
+### In your stack
 
-### Prompt governance
+**Gateway and model integration.** Ingest traces from your gateway and pin judges to Bedrock, Azure, or Vertex. [Gateway and model integration](/docs/administration/llm-connection)
 
-Immutable versions, staging and production labels, protected labels for separation of duties, and full audit history.
-
-### Gateway and model integration
-
-OTLP ingest from your AI gateway, judge models pinned to your own Bedrock, Azure OpenAI, Vertex, or OpenAI connection.
-
-### Dashboards as code
-
-Dashboards and widgets managed through the API and CLI, versioned in Git, deployed identically to dev, staging, and prod.
+**Dashboards as code.** Version dashboards in Git and deploy the same widgets to every environment. [Dashboards as code](/docs/metrics/features/custom-dashboards)
 
 ### Built for your enterprise requirements
 
-### Redaction
+**Redaction.** Mask PII in the SDK before anything leaves your application. [Redaction](/docs/observability/features/masking)
 
-Masking in the SDK before data leaves your application, with trace structure preserved for debugging.
+**Administration.** SSO and role-based access scoped to organizations and projects. [Administration](/docs/administration/rbac)
 
-### Administration
-
-Organizations and projects as the data boundary, project-level RBAC, OIDC SSO with domain enforcement, SCIM provisioning, audit logs, and a metrics API for chargebacks.
-
-### Operations
-
-Documented self-hosting on AWS with Terraform and Helm, a published release cadence, and autoscaling guidance.
+**Operations.** Self-host on AWS with Terraform and Helm, on your release cadence. [Operations](/self-hosting)
 
 ## What financial services teams build on Langfuse.
 
