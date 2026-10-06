@@ -107,7 +107,7 @@ No internet access. No vendor access.
 >
 > — Paolo Tamagnini, Senior Data Scientist, Trade Republic
 
-## Your evaluation needs, covered.
+## Your evaluation needs, covered
 
 From testing changes before release to monitoring production quality and incorporating expert feedback—Langfuse brings your evaluation workflows together, with the security controls and deployment options your institution needs.
 
