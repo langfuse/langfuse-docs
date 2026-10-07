@@ -24,5 +24,14 @@ export default function SectionLayout({ children, params }: LayoutProps) {
     notFound();
   }
 
-  return <HomeLayout>{children}</HomeLayout>;
+  const isFinancialServices = section === "financial-services";
+
+  return (
+    <HomeLayout
+      showLeftSidebar={!isFinancialServices}
+      showAside={!isFinancialServices}
+    >
+      {children}
+    </HomeLayout>
+  );
 }
