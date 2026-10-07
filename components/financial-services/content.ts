@@ -187,46 +187,66 @@ export const financialServicesTrace = {
   ],
 };
 
-export const financialServicesEvalCapabilities = [
+export const financialServicesEvalColumns = [
   {
-    title: "Offline evaluation",
-    body: "golden datasets built from production traces, versioned experiments with baseline comparison, and a release gate that fails the pull request on regression.",
+    title: "Evaluate AI quality",
+    summary:
+      "Test before release. Monitor production. Review with your experts.",
+    items: [
+      {
+        title: "Offline evaluation",
+        body: "Golden datasets built from production traces, versioned experiments with baseline comparison, and a release gate that fails the pull request on regression.",
+      },
+      {
+        title: "Online evaluation",
+        body: "Deterministic sampling of live traffic, LLM-as-judge and code evaluators, and threshold alerts to Slack, webhooks, or GitHub Actions when quality drifts.",
+      },
+      {
+        title: "Human review",
+        body: "Annotation queues for subject-matter experts, corrected outputs, and one-click promotion of failures into a permanent regression set.",
+      },
+      {
+        title: "Judge calibration",
+        body: "Score Analytics measures agreement between human labels and model judges (Cohen's Kappa, F1, Pearson, Spearman) so you can defend the judge to model risk.",
+      },
+    ],
   },
   {
-    title: "Online evaluation",
-    body: "deterministic sampling of live traffic, LLM-as-judge and code evaluators, and threshold alerts to Slack, webhooks, or GitHub Actions when quality drifts.",
+    title: "Govern AI systems",
+    summary: "Control changes, protect sensitive data, and manage access.",
+    items: [
+      {
+        title: "Prompt governance",
+        body: "Immutable versions, staging and production labels, protected labels for separation of duties, and full audit history.",
+      },
+      {
+        title: "Redaction",
+        body: "Masking in the SDK before data leaves your application, with trace structure preserved for debugging.",
+      },
+      {
+        title: "Administration",
+        body: "Organizations and projects as the data boundary, project-level RBAC, OIDC SSO with domain enforcement, SCIM provisioning, audit logs, and a metrics API for chargebacks.",
+      },
+    ],
   },
   {
-    title: "Human review",
-    body: "annotation queues for subject-matter experts, corrected outputs, and one-click promotion of failures into a permanent regression set.",
-  },
-  {
-    title: "Judge calibration",
-    body: "Score Analytics measures agreement between human labels and model judges (Cohen's Kappa, F1, Pearson, Spearman) so you can defend the judge to model risk.",
-  },
-  {
-    title: "Prompt governance",
-    body: "immutable versions, staging and production labels, protected labels for separation of duties, and full audit history.",
-  },
-  {
-    title: "Gateway and model integration",
-    body: "OTLP ingest from your AI gateway, judge models pinned to your own Bedrock, Azure OpenAI, Vertex, or OpenAI connection.",
-  },
-  {
-    title: "Redaction",
-    body: "masking in the SDK before data leaves your application, with trace structure preserved for debugging.",
-  },
-  {
-    title: "Administration",
-    body: "organizations and projects as the data boundary, project-level RBAC, OIDC SSO with domain enforcement, SCIM provisioning, audit logs, and a metrics API for chargebacks.",
-  },
-  {
-    title: "Dashboards as code",
-    body: "dashboards and widgets managed through the API and CLI, versioned in Git, deployed identically to dev, staging, and prod.",
-  },
-  {
-    title: "Operations",
-    body: "documented self-hosting on AWS with Terraform and Helm, a published release cadence, and autoscaling guidance.",
+    title: "Use your own stack",
+    summary:
+      "Connect your models and manage deployment in your infrastructure.",
+    items: [
+      {
+        title: "Gateway & models",
+        body: "OTLP ingest from your AI gateway, judge models pinned to your own Bedrock, Azure OpenAI, Vertex, or OpenAI connection.",
+      },
+      {
+        title: "Dashboards as code",
+        body: "Dashboards and widgets managed through the API and CLI, versioned in Git, deployed identically to dev, staging, and prod.",
+      },
+      {
+        title: "Operations",
+        body: "Documented self-hosting on AWS with Terraform and Helm, a published release cadence, and autoscaling guidance.",
+      },
+    ],
   },
 ] as const;
 

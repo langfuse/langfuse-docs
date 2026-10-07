@@ -1,23 +1,39 @@
-import { Check } from "lucide-react";
-import { financialServicesEvalCapabilities } from "./content";
+import { Plus } from "lucide-react";
+import { financialServicesEvalColumns } from "./content";
 
 export function EvalCapabilityGrid() {
   return (
-    <ul className="mt-8 grid list-none gap-x-10 gap-y-5 p-0 md:grid-cols-2">
-      {financialServicesEvalCapabilities.map((item) => (
-        <li key={item.title} className="flex gap-3">
-          <Check
-            className="mt-0.5 h-4 w-4 shrink-0 text-text-primary"
-            strokeWidth={2.5}
-            aria-hidden
-          />
-          <p className="m-0 text-[14px] leading-[1.45] text-text-secondary">
-            <span className="font-medium text-text-primary">{item.title}</span>
-            {": "}
-            {item.body}
+    <div className="mt-10 grid gap-10 lg:grid-cols-3 lg:gap-8">
+      {financialServicesEvalColumns.map((column) => (
+        <div key={column.title} className="min-w-0">
+          <h3 className="text-[22px] leading-[1.15] text-text-primary sm:text-[24px]">
+            {column.title}
+          </h3>
+          <p className="mt-2 max-w-[34ch] text-[13px] leading-[1.45] text-text-secondary">
+            {column.summary}
           </p>
-        </li>
+          <div className="mt-5 border-t border-line-structure">
+            {column.items.map((item) => (
+              <details
+                key={item.title}
+                className="group border-b border-line-structure"
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 py-3.5 text-left text-[14px] font-medium leading-[1.3] text-text-primary marker:content-none [&::-webkit-details-marker]:hidden">
+                  <span>{item.title}</span>
+                  <Plus
+                    className="h-4 w-4 shrink-0 text-text-tertiary transition-transform duration-200 group-open:rotate-45"
+                    strokeWidth={1.75}
+                    aria-hidden
+                  />
+                </summary>
+                <p className="m-0 pb-4 pr-8 text-[13px] leading-[1.45] text-text-secondary">
+                  {item.body}
+                </p>
+              </details>
+            ))}
+          </div>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }
