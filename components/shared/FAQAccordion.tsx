@@ -170,13 +170,42 @@ export function FAQAccordion({
               </span>
             </AccordionPrimitive.Trigger>
           </AccordionPrimitive.Header>
-          <AccordionPrimitive.Content className="group overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
-            <Text
-              size="s"
-              className="pr-8 pb-5 text-sm text-left font-normal lg:leading-[150%] tracking-[-0.07px] text-text-tertiary"
-            >
-              {renderAnswerWithLinks(faq.answer)}
-            </Text>
+          {/*
+            `forceMount` keeps every answer in the server-rendered HTML so the
+            copy is crawlable without JS (#3989). Radix only renders Content
+            children while the panel is open, so without this the page ships
+            one answer and a list of question titles.
+
+            Collapsing is therefore ours to do, via a `grid-template-rows`
+            0fr -> 1fr transition rather than Radix's height keyframes. Two
+            reasons: a CSS transition does not fire on first render, so the
+            collapsed state holds from the very first paint with no flash of
+            expanded answers before hydration; and the keyframes animate from
+            `--radix-accordion-content-height`, which is unset in SSR HTML.
+
+            The transition has to sit on this inner wrapper, not on Content:
+            Radix's own layout effect measures the panel and leaves
+            `transition-duration: 0s` on the Content node's inline style, which
+            silently cancels any transition declared there.
+
+            `inert` keeps collapsed answers out of the accessibility tree and
+            the tab order — the job the dropped `hidden` attribute used to do.
+          */}
+          <AccordionPrimitive.Content
+            forceMount
+            inert={openItem !== faq.question}
+            className="group overflow-hidden"
+          >
+            <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-200 ease-out group-data-[state=open]:grid-rows-[1fr]">
+              <div className="overflow-hidden">
+                <Text
+                  size="s"
+                  className="pr-8 pb-5 text-sm text-left font-normal lg:leading-[150%] tracking-[-0.07px] text-text-tertiary"
+                >
+                  {renderAnswerWithLinks(faq.answer)}
+                </Text>
+              </div>
+            </div>
           </AccordionPrimitive.Content>
         </AccordionPrimitive.Item>
       ))}
