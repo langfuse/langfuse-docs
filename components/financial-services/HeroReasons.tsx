@@ -2,7 +2,7 @@ import { financialServicesReasons } from "./content";
 
 export function HeroReasons() {
   return (
-    <ul className="mt-6">
+    <ul className="mt-8">
       {financialServicesReasons.map((reason, index) => (
         <li
           key={reason.title}
