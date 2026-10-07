@@ -23,13 +23,6 @@ export const financialServicesReasons = [
   },
 ] as const;
 
-export const financialServicesLogoNames = [
-  "Trade Republic",
-  "SumUp",
-  "Ramp",
-  "Merck",
-] as const;
-
 export const financialServicesFeaturedStory = {
   company: "Merck",
   href: "/users/merckgroup",

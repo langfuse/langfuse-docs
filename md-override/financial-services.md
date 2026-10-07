@@ -23,9 +23,29 @@ Observe and evaluate AI agents across your institution. Give engineering, platfo
 
 Use the contact form on this page to talk to an expert.
 
-## In production at
+## Customers in regulated industries
 
-Customers in financial services include Trade Republic, SumUp, Ramp, Merck, and DKB.
+### [Merck](/users/merckgroup)
+
+> “Generative AI will only earn enterprise trust when we can see what's happening under the hood. Langfuse enables us to track every prompt, response, cost, and latency in real time, turning black-box models into auditable, optimizable assets.”
+>
+> — Walid Mehanna, Chief Data & AI Officer at Merck
+
+- **80+** use cases
+- **200+** builders
+- **API** provisioning automated against the Langfuse API from an internal portal
+
+### [How a European neobroker runs self-hosted Langfuse in production.](/users/trade-republic)
+
+Customer story · Self-hosted. [Read story](/users/trade-republic)
+
+### [How Ramp auto-improves agents on Langfuse.](/users/ramp)
+
+Customer story · Spend management. [Read story](/users/ramp)
+
+### How DKB automates 20,000 customer conversations daily.
+
+Customer story · Banking. Read story →
 
 ## Every run traced, scored and on the record
 
@@ -77,30 +97,6 @@ No internet access. No vendor access.
 - Langfuse support access: None
 - Users: Internal only, via VPN
 - Updates: Offline image transfer
-
-## Customers in regulated industries
-
-### [Merck](/users/merckgroup)
-
-> “Generative AI will only earn enterprise trust when we can see what's happening under the hood. Langfuse enables us to track every prompt, response, cost, and latency in real time, turning black-box models into auditable, optimizable assets.”
->
-> — Walid Mehanna, Chief Data & AI Officer at Merck
-
-- **80+** use cases
-- **200+** builders
-- **API** provisioning automated against the Langfuse API from an internal portal
-
-### [How a European neobroker runs self-hosted Langfuse in production.](/users/trade-republic)
-
-Customer story · Self-hosted. [Read story](/users/trade-republic)
-
-### [How Ramp auto-improves agents on Langfuse.](/users/ramp)
-
-Customer story · Spend management. [Read story](/users/ramp)
-
-### How DKB automates 20,000 customer conversations daily.
-
-Customer story · Banking. Read story →
 
 ## Full coverage of your evaluation needs
 

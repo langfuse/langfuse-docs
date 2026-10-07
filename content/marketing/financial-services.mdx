@@ -15,13 +15,9 @@ import { EvalCapabilityGrid } from "@/components/financial-services/EvalCapabili
 import { HeroReasons } from "@/components/financial-services/HeroReasons";
 import { TrustPoints } from "@/components/financial-services/TrustPoints";
 import { UseCaseGrid } from "@/components/financial-services/UseCaseGrid";
-import {
-  financialServicesFaqs,
-  financialServicesLogoNames,
-} from "@/components/financial-services/content";
+import { financialServicesFaqs } from "@/components/financial-services/content";
 import { MarketoContactFormCard } from "@/components/MarketoContactForm";
 import { FAQAccordion } from "@/components/shared/FAQAccordion";
-import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
 import { Button } from "@/components/ui/button";
 import { TextHighlight } from "@/components/ui/text-highlight";
 import { BookOpen, Play, Radar } from "lucide-react";
@@ -76,15 +72,11 @@ import { BookOpen, Play, Radar } from "lucide-react";
 
   </section>
 
-  <section data-use-case-section="logos" className="border-t border-line-structure px-5 py-8 sm:px-10">
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-8">
-      <p className="shrink-0 font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
-        {"In production at"}
-      </p>
-      <div className="min-w-0 flex-1">
-        <EnterpriseLogoGrid names={financialServicesLogoNames} small />
-      </div>
-    </div>
+  <section data-use-case-section="customer_stories" className="border-t border-line-structure bg-surface-1 px-5 py-14 sm:px-10 sm:py-18">
+    <p className="font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
+      {"Customers in regulated industries"}
+    </p>
+    <CustomerStoriesSection />
   </section>
 
   <section data-use-case-section="benefits" className="border-t border-line-structure bg-surface-1 px-5 py-14 sm:px-10 sm:py-20">
@@ -114,13 +106,6 @@ import { BookOpen, Play, Radar } from "lucide-react";
       <TrustPoints />
       <DeploymentModeSlider />
     </div>
-  </section>
-
-  <section data-use-case-section="customer_stories" className="border-t border-line-structure bg-surface-1 px-5 py-14 sm:px-10 sm:py-18">
-    <p className="font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
-      {"Customers in regulated industries"}
-    </p>
-    <CustomerStoriesSection />
   </section>
 
   <section data-use-case-section="evaluation" className="border-t border-line-structure bg-surface-1 px-5 py-14 sm:px-10 sm:py-20">
