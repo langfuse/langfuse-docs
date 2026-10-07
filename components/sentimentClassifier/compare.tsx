@@ -599,7 +599,6 @@ export const SentimentClassifierCompare = ({
             jevError={Boolean(jevError)}
             decisionsError={Boolean(decisionsError)}
             lunaError={llmAnyFailed}
-            compact={compact}
           />
         )}
 

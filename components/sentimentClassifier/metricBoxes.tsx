@@ -89,9 +89,9 @@ type CompareMetricBoxesProps = {
   jevError: boolean;
   decisionsError: boolean;
   lunaError: boolean;
-  compact?: boolean;
 };
 
+/** Total latency and cost per model — same cards for one or many classifications. */
 export const CompareMetricBoxes = ({
   jevLatencyMs,
   decisionsLatencyMs,
@@ -105,7 +105,6 @@ export const CompareMetricBoxes = ({
   jevError,
   decisionsError,
   lunaError,
-  compact = false,
 }: CompareMetricBoxesProps) => {
   const latency: EngineMetric[] = [
     {
@@ -153,53 +152,6 @@ export const CompareMetricBoxes = ({
       error: lunaError,
     },
   ];
-
-  if (compact) {
-    const latencySummary = summaryFor(latency, "faster");
-    const costSummary = summaryFor(cost, "cheaper");
-    return (
-      <div className="rounded-[2px] border border-line-structure px-2.5 py-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
-        <span className="text-text-secondary">
-          <span className="font-medium text-text-primary">Latency</span>{" "}
-          {latency.map((engine, index) => (
-            <span key={engine.id}>
-              {index > 0 && <span className="text-muted-foreground"> · </span>}
-              {engine.id === "jev"
-                ? "Jev"
-                : engine.id === "decisions"
-                  ? "Decisions"
-                  : "Luna"}{" "}
-              <MetricValue metric={engine} format={formatLatencyMs} />
-            </span>
-          ))}
-          {latencySummary && (
-            <span className="ml-1.5 font-medium text-text-primary">
-              {latencySummary}
-            </span>
-          )}
-        </span>
-        <span className="text-text-secondary">
-          <span className="font-medium text-text-primary">Cost</span>{" "}
-          {cost.map((engine, index) => (
-            <span key={engine.id}>
-              {index > 0 && <span className="text-muted-foreground"> · </span>}
-              {engine.id === "jev"
-                ? "Jev"
-                : engine.id === "decisions"
-                  ? "Decisions"
-                  : "Luna"}{" "}
-              <MetricValue metric={engine} format={formatCostUsd} />
-            </span>
-          ))}
-          {costSummary && (
-            <span className="ml-1.5 font-medium text-text-primary">
-              {costSummary}
-            </span>
-          )}
-        </span>
-      </div>
-    );
-  }
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
