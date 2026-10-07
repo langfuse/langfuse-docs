@@ -44,8 +44,6 @@ Bureau score 642 · Summary: refer · Human review queued
 
 ## Run it where your data is allowed to live.
 
-Ingest traces from your [AI gateway](/integrations/native/opentelemetry) and pin judges to [Bedrock, Azure, or Vertex](/docs/administration/llm-connection).
-
 1. **Deployment where your data must stay.** Langfuse Cloud in the EU, US or Japan, self-hosted in your VPC, or fully air-gapped.
 2. **Multiple layers of data redaction.** Client-side and server-side PII protections before anything is stored.
 3. **Enterprise access controls.** SSO and role-based access control scoped to organizations and projects.
