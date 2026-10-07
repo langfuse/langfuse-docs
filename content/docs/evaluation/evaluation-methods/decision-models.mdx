@@ -65,29 +65,9 @@ Some tips for each type:
 
 <Steps>
 
-<span id="use-an-openai-decision-model" />
+### Connect credentials [#connect-credentials]
 
-### Connect OpenAI [#connect-openai]
-
-Go to **Settings → LLM Connections** and add an **OpenAI** connection with your API key, or use an existing OpenAI connection. The connection must have access to `gpt-6-luna`, the OpenAI decision model currently supported by Langfuse.
-
-Langfuse calls the OpenAI Decisions API through this connection. The same connection can continue to serve supported text-generation models in the playground, experiments, and LLM-as-a-Judge evaluators.
-
-<span id="add-a-typesafe-connection" />
-
-### Connect TypeSafe Jev [#connect-typesafe-jev]
-
-Go to **Settings → LLM Connections** in your project and add a connection with the adapter **typesafe**. Then choose the **upstream** that serves Jev and paste its API key:
-
-| Upstream          | API key                                                                             | Billing                   |
-| ----------------- | ----------------------------------------------------------------------------------- | ------------------------- |
-| TypeSafe          | A key from the [TypeSafe console](https://console.typesafe.ai/settings/keys)        | Billed by TypeSafe        |
-| Vercel AI Gateway | An [AI Gateway API key](https://vercel.com/docs/ai-gateway/authentication-and-byok) | Billed through AI Gateway |
-| OpenRouter        | An [OpenRouter API key](https://openrouter.ai/settings/keys)                        | Billed through OpenRouter |
-
-Vercel AI Gateway and OpenRouter expose TypeSafe's API, so evaluators behave the same on every upstream. The connection offers the `jev-1.13.0` and `jev-latest` models by default. No base URL or additional headers are required. Switching an existing connection to another upstream requires the API key for the new upstream.
-
-TypeSafe connections are only offered to decision-model evaluators. They do not show up in the playground, in prompt experiments, or in LLM-as-a-Judge model pickers, because Jev cannot generate text.
+Go to **Settings → LLM Connections** and add an OpenAI or TypeSafe connection, or use an existing compatible connection. See the provider-specific setup sections below for details.
 
 ### Create a decision-model evaluator
 
@@ -105,16 +85,13 @@ Templates prefill the model input and questions; you only need to select a compa
 Add one question per criterion. For each question:
 
 1. Pick the [type](#question-types): Choice, Score, or Yes / no.
-2. Write the question. For OpenAI, use plain text. For Jev, refer to state keys in backticks, for example ``Does `input` ask for something outside the scope described in `output`?``, and use the field chips to insert a key.
-3. Define the allowed answers: options with descriptions for Choice, ordered levels for Score, or optional `true` / `false` criteria for Yes / no. OpenAI Score levels require a label and can include an optional description; Jev Score levels require a description.
+2. Write the question. The instruction format depends on the selected provider.
+3. Define the allowed answers: options with descriptions for Choice, ordered levels for Score, or optional `true` / `false` criteria for Yes / no.
 4. Set the score name. Langfuse suggests one from the question; each question writes a score under this name.
 
 ### Map the model input
 
-- **OpenAI:** map the observation data you want to evaluate to the single general state, `input`. Questions evaluate this state as a whole and cannot reference fields within it. The preview shows the input and questions sent to the model.
-- **TypeSafe Jev:** click **Add field** to build a JSON state with one or more named keys, then map them to observation input, output, metadata, tool calls, **Expected Output**, or **Experiment Item Metadata**. Reference these keys in question instructions with backticks.
-
-For Jev, a field named exactly like an observation field (for example `input`) binds to it automatically. Renaming a field rewrites its references in your questions. Langfuse warns when the state gets close to TypeSafe's limit of roughly 32k tokens.
+Map the observation data that the model should evaluate. The input structure depends on the selected provider; see the provider-specific setup sections below.
 
 ### Test the evaluator
 
@@ -130,6 +107,34 @@ After saving, you can:
 </Steps>
 
 ✨ Done! Each question now writes a score to matching observations. Filter, chart, and alert on these scores like on any other score in Langfuse.
+
+<span id="use-an-openai-decision-model" />
+
+## Set up OpenAI [#connect-openai]
+
+Add an **OpenAI** connection with your API key, or select an existing one with access to `gpt-6-luna`. Langfuse calls the OpenAI Decisions API through this connection.
+
+Map the observation data to the single general state, `input`. Questions evaluate this state as a whole and use plain-text instructions without field references. Score levels require a label and can include an optional description.
+
+The preview shows the input and questions sent to OpenAI. If OpenAI refuses any question, the evaluator run fails without writing scores.
+
+<span id="add-a-typesafe-connection" />
+
+## Set up TypeSafe Jev [#connect-typesafe-jev]
+
+Add a connection with the adapter **typesafe**, choose the upstream that serves Jev, and paste its API key:
+
+| Upstream          | API key                                                                             | Billing                   |
+| ----------------- | ----------------------------------------------------------------------------------- | ------------------------- |
+| TypeSafe          | A key from the [TypeSafe console](https://console.typesafe.ai/settings/keys)        | Billed by TypeSafe        |
+| Vercel AI Gateway | An [AI Gateway API key](https://vercel.com/docs/ai-gateway/authentication-and-byok) | Billed through AI Gateway |
+| OpenRouter        | An [OpenRouter API key](https://openrouter.ai/settings/keys)                        | Billed through OpenRouter |
+
+Vercel AI Gateway and OpenRouter expose TypeSafe's API, so the evaluator behaves the same with each upstream. No base URL or additional headers are required. The connection offers `jev-1.13.0` and `jev-latest` by default.
+
+Build the JSON state by adding named fields and mapping them to observation input, output, metadata, tool calls, **Expected Output**, or **Experiment Item Metadata**. Reference these fields in question instructions using backticks. Jev Score levels require a description.
+
+TypeSafe connections are only available to decision-model evaluators because Jev cannot generate text.
 
 ## Scores written by decision models [#scores]
 
