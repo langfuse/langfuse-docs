@@ -162,6 +162,12 @@ export const USE_CASE_SECTIONS = new Set<string>([
   "financial-services",
 ]);
 
+/**
+ * Sections that hide both HomeLayout sidebars and use wide gutters instead.
+ * Keep slug membership here — do not hardcode section names in layouts.
+ */
+export const NO_SIDEBAR_SECTIONS = new Set<string>(["financial-services"]);
+
 /** Build a unified config that includes both doc sections and marketing entries. */
 const marketingEntries: Record<string, SectionMeta> = Object.fromEntries(
   MARKETING_SLUGS.map((slug) => [

@@ -1,7 +1,11 @@
 import { use } from "react";
 import { notFound } from "next/navigation";
 import { HomeLayout } from "@/components/layout";
-import { SECTION_SLUGS, DEDICATED_APP_SECTIONS } from "@/lib/section-registry";
+import {
+  SECTION_SLUGS,
+  DEDICATED_APP_SECTIONS,
+  NO_SIDEBAR_SECTIONS,
+} from "@/lib/section-registry";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -24,13 +28,10 @@ export default function SectionLayout({ children, params }: LayoutProps) {
     notFound();
   }
 
-  const isFinancialServices = section === "financial-services";
+  const hideSidebars = NO_SIDEBAR_SECTIONS.has(section);
 
   return (
-    <HomeLayout
-      showLeftSidebar={!isFinancialServices}
-      showAside={!isFinancialServices}
-    >
+    <HomeLayout showLeftSidebar={!hideSidebars} showAside={!hideSidebars}>
       {children}
     </HomeLayout>
   );
