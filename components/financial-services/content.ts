@@ -83,6 +83,10 @@ export const financialServicesTrustPoints = [
     title: "Audit logs",
     body: "Record both LLM activity and developer actions for internal and supervisory review.",
   },
+  {
+    title: "Never in the inference path",
+    body: "Langfuse observes your model and tool calls; it does not proxy them.",
+  },
 ] as const;
 
 export const financialServicesDeploymentModes = [
