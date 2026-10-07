@@ -1,9 +1,7 @@
 import { faqSource } from "@/lib/source";
 import { DetailsLink } from "@/components/Details";
 import { FaqDetails } from "./FaqDetails";
-import { Link } from "@/components/ui/link";
 import { getFaqTags, isFaqArticle } from "@/lib/faq-tags";
-import { FaqAsk } from "./FaqAsk";
 
 type FaqPage = ReturnType<typeof faqSource.getPages>[number];
 
@@ -26,54 +24,43 @@ export const getFilteredFaqPages = (
 
 export const FaqPreview = ({
   tags,
-  renderAsRows = false,
 }: {
   tags: string[];
+  /** @deprecated All FAQ previews render as boxed rows. */
   renderAsRows?: boolean;
 }) => {
   const faqPages = getFaqPages();
   const filteredFaqPages = getFilteredFaqPages(faqPages, tags);
-  return <FaqList pages={filteredFaqPages} renderAsRows={renderAsRows} />;
+  return <FaqList pages={filteredFaqPages} />;
 };
 
-export const FaqList = ({
+export const FaqList = ({ pages }: { pages: FaqPage[] }) => (
+  <FaqDetails>
+    <FaqLinks pages={pages} newTab anchors />
+  </FaqDetails>
+);
+
+const faqAnchorId = (url: string) => url.replace("/faq/all/", "");
+
+export const FaqLinks = ({
   pages,
-  renderAsRows = false,
+  newTab = false,
+  anchors = false,
 }: {
   pages: FaqPage[];
-  renderAsRows?: boolean;
-}) => {
-  if (renderAsRows) {
-    return (
-      <FaqDetails>
-        <FaqLinks pages={pages} />
-      </FaqDetails>
-    );
-  }
-  return (
-    <>
-      <ul className="list-disc list pl-6 mt-5">
-        {pages.map((page) => (
-          <li
-            className="my-2"
-            id={page.url.replace("/faq/all/", "")}
-            key={page.url.replace("/faq/all/", "")}
-          >
-            <Link href={page.url} variant="underline">
-              <span>{page.data.title}</span>
-            </Link>
-          </li>
-        ))}
-        <FaqAsk linked />
-      </ul>
-    </>
-  );
-};
-
-export const FaqLinks = ({ pages }: { pages: FaqPage[] }) => (
+  /** Embedded doc previews open answers in a new tab; FAQ index listings stay in-tab. */
+  newTab?: boolean;
+  /** Restore `/faq/tag/<tag>#<slug>` anchors. Off on the index, where a page can appear under several tags. */
+  anchors?: boolean;
+}) => (
   <>
     {pages.map((page) => (
-      <DetailsLink href={page.url} key={page.url}>
+      <DetailsLink
+        href={page.url}
+        id={anchors ? faqAnchorId(page.url) : undefined}
+        newTab={newTab}
+        key={page.url}
+      >
         {page.data.title}
       </DetailsLink>
     ))}

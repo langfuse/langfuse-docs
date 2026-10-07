@@ -978,13 +978,32 @@
   line-height: 1.25rem !important;
 }
 
-.lf-marketo-form .mktoAsterix {
-  display: inline !important;
+/* Marketo always emits .mktoAsterix in every label, then hides it unless
+   the field wrap has .mktoRequiredField (from the form descriptor's
+   IsRequired: true). Do not force-show every asterisk — that marks
+   optional fields such as Phone as required.
+
+   Selectors must beat the Marketo ThemeStyleOverride
+   `.lf-marketo-form .mktoAsterix { display: contents !important }` which
+   is injected after page CSS. The form id is always present; `.mktoForm`
+   is not reliably on the <form> when Forms2 finishes loading. */
+.lf-marketo-form form[id^="mktoForm_"] .mktoAsterix {
+  display: none !important;
   float: none !important;
   line-height: inherit !important;
   padding-left: 0 !important;
   padding-right: 0.25rem !important;
   color: hsl(var(--destructive)) !important;
+}
+
+.lf-marketo-form form[id^="mktoForm_"] .mktoRequiredField .mktoAsterix {
+  display: inline !important;
+}
+
+/* ThemeStyleOverride also injects " *" via ::after on required labels.
+   Suppress it so required fields do not show two marks. */
+.lf-marketo-form form[id^="mktoForm_"] .mktoRequiredField .mktoLabel::after {
+  content: none !important;
 }
 
 .lf-marketo-form input[type="text"],

@@ -15,6 +15,7 @@ This also works if you:
 1. Reference media files via external URLs.
 2. Customize the handling of media files in the SDKs via the `LangfuseMedia` class.
 3. Integrate via the Langfuse API directly.
+4. Reference media in your own S3 or S3-compatible bucket.
 
 Learn more on how to get started and how this works under the hood below.
 
@@ -36,7 +37,7 @@ Multi-modal attachments are available today. You need to configure your own obje
 
 The maximum size of a single attachment is controlled by `LANGFUSE_S3_MEDIA_MAX_CONTENT_LENGTH` (in bytes, default `1000000000`, i.e. 1 GB); the media API rejects larger uploads with `File size must be less than … bytes`. Uploading files to dataset items through the browser is additionally capped at 100 MB.
 
-## Supported media formats
+## Supported media formats [#supported-media-formats]
 
 Langfuse supports a wide range of media types, including:
 
@@ -169,11 +170,17 @@ Supported formats:
 </Tab>
 </Tabs>
 
+To render media from your own S3 or S3-compatible bucket, see the [External S3 media guide](#external-s3-media).
+
 ### Use media in LLM-as-a-Judge [#llm-as-a-judge]
 
 [LLM-as-a-Judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge#multi-modal-evaluation) can score media stored in observations. Map a prompt variable to an observation input, output, or metadata field that contains Langfuse media. Langfuse resolves the media reference and sends the attachment to the selected LLM-as-a-Judge model together with the prompt text.
 
 The LLM-as-a-Judge model and provider must support the media type. Self-hosted deployments can [configure how evaluator media is sent to model providers](/self-hosting/configuration#llm-as-a-judge-media).
+
+<Callout type="warning" title="Amazon Bedrock">
+  AWS Bedrock currently doesn't support media sent as signed HTTP URLs.
+</Callout>
 
 ### Custom attachments
 
@@ -427,6 +434,107 @@ const resolvedTrace = await langfuse.resolveMediaReferences({
 
 </Tab>
 </LangTabs>
+
+## External S3 media [#external-s3-media]
+
+External Media Storage lets Langfuse display media that remains in your Amazon S3 or S3-compatible bucket. Add an `s3://<bucket>/<key>` URI to an observation's input, output, or metadata. Langfuse resolves the URI through the project's storage integration when the media is displayed.
+
+<Callout type="info" title="Feature preview">
+  An organization admin must enable **External Media Storage** under
+  **Organization Settings → Feature Previews** before you can configure this
+  integration.
+</Callout>
+
+Each project supports one External Media Storage integration:
+
+1. [Configure your bucket's CORS policy](#external-s3-media-cors) so browsers at your Langfuse origin can read signed object URLs.
+2. Open **Project Settings → Integrations → External Media Storage**.
+3. Select **Amazon S3** or **S3 Compatible Storage**, then enter the bucket, region, access key ID, and secret access key. For S3-compatible storage, also enter the endpoint and enable path-style URLs if your provider requires them.
+4. Optionally set a media prefix to restrict access to one path. Grant the credentials read access only to the configured bucket and prefix.
+5. Save the integration, then use **Test** with an `s3://` URI to verify object access and browser CORS.
+
+### Configure bucket CORS [#external-s3-media-cors]
+
+Allow `GET` and `HEAD` requests from your Langfuse origin, including the `Range` request header used to test and stream media. You can paste the JSON example into the [Amazon S3 CORS settings](https://docs.aws.amazon.com/AmazonS3/latest/userguide/enabling-cors-examples.html); other S3-compatible providers may use JSON or XML.
+
+<Tabs items={["Amazon S3 (JSON)", "S3-compatible (XML)"]}>
+<Tab>
+
+```json
+[
+  {
+    "AllowedHeaders": ["Range"],
+    "AllowedMethods": ["GET", "HEAD"],
+    "AllowedOrigins": ["https://cloud.langfuse.com"],
+    "ExposeHeaders": [
+      "Accept-Ranges",
+      "Content-Length",
+      "Content-Range",
+      "ETag"
+    ],
+    "MaxAgeSeconds": 3600
+  }
+]
+```
+
+</Tab>
+<Tab>
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<CORSConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+  <CORSRule>
+    <AllowedOrigin>https://cloud.langfuse.com</AllowedOrigin>
+    <AllowedMethod>GET</AllowedMethod>
+    <AllowedMethod>HEAD</AllowedMethod>
+    <AllowedHeader>Range</AllowedHeader>
+    <ExposeHeader>Accept-Ranges</ExposeHeader>
+    <ExposeHeader>Content-Length</ExposeHeader>
+    <ExposeHeader>Content-Range</ExposeHeader>
+    <ExposeHeader>ETag</ExposeHeader>
+    <MaxAgeSeconds>3600</MaxAgeSeconds>
+  </CORSRule>
+</CORSConfiguration>
+```
+
+</Tab>
+</Tabs>
+
+Replace the example origin with your self-hosted Langfuse origin, or use the exact [Langfuse Cloud region](/security/data-regions) where your project is hosted:
+
+- US: [`https://us.cloud.langfuse.com`](https://us.cloud.langfuse.com)
+- EU: [`https://cloud.langfuse.com`](https://cloud.langfuse.com)
+- Japan: [`https://jp.cloud.langfuse.com`](https://jp.cloud.langfuse.com)
+- HIPAA: [`https://hipaa.cloud.langfuse.com`](https://hipaa.cloud.langfuse.com)
+
+Only allow the origins you use. Do not use a wildcard origin for a bucket that contains private media.
+
+Langfuse recognizes S3 media references in these formats:
+
+```text
+s3://media-bucket/path/image.png
+```
+
+```md
+![Product image](s3://media-bucket/path/image.png)
+```
+
+```json
+{
+  "type": "image_url",
+  "image_url": {
+    "url": "s3://media-bucket/path/image.png"
+  }
+}
+```
+
+The URI must match the integration's bucket and optional prefix, and the object key must include a [supported media file extension](#supported-media-formats). Query parameters and fragments are not supported.
+
+<Callout type="warning" title="Self-hosted internal endpoints">
+  S3-compatible endpoints are protected by strict SSRF validation. To connect a
+  self-hosted Langfuse deployment to a trusted internal endpoint, configure the
+  [external media storage allowlist variables](/self-hosting/configuration/hardening#outbound-url-allowlists).
+</Callout>
 
 ## GitHub Discussions
 
