@@ -1085,6 +1085,92 @@
   opacity: 0.9;
 }
 
+.lf-marketo-form--compact {
+  min-height: 0;
+}
+
+.lf-marketo-form--compact .mktoFormRow {
+  margin-bottom: 0.65rem !important;
+}
+
+.lf-marketo-form--compact .mktoLabel {
+  padding-bottom: 0.25rem !important;
+  font-size: 0.8125rem !important;
+}
+
+.lf-marketo-form--compact input[type="text"],
+.lf-marketo-form--compact input[type="email"],
+.lf-marketo-form--compact input[type="tel"],
+.lf-marketo-form--compact input[type="url"],
+.lf-marketo-form--compact input[type="number"],
+.lf-marketo-form--compact select,
+.lf-marketo-form--compact textarea {
+  min-height: 2.25rem !important;
+  padding: 0.4rem 0.65rem !important;
+}
+
+.lf-marketo-form--compact textarea {
+  min-height: 4.5rem !important;
+}
+
+.lf-marketo-form--compact .mktoButtonRow {
+  margin-top: 0.75rem !important;
+}
+
+.lf-marketo-name-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+  margin-bottom: 0.65rem;
+}
+
+@media (min-width: 480px) {
+  .lf-marketo-name-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.lf-marketo-name-row .mktoFormRow {
+  margin-bottom: 0 !important;
+}
+
+.lf-marketo-more {
+  margin: 0.25rem 0 0.75rem;
+  border: 1px solid var(--line-structure);
+  background: var(--surface-bg);
+}
+
+.lf-marketo-more > summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0.7rem 0.85rem;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.lf-marketo-more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.lf-marketo-more > summary::after {
+  content: "+";
+  float: right;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+.lf-marketo-more[open] > summary::after {
+  content: "–";
+}
+
+.lf-marketo-more-body {
+  border-top: 1px solid var(--line-structure);
+  padding: 0.85rem 0.85rem 0.35rem;
+}
+
 .lf-success-panel {
   display: flex;
   min-height: 18rem;
