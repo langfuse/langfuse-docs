@@ -25,21 +25,18 @@ One decision-model evaluator consists of:
 
 This lets you score one observation against several criteria at once, for example topic, frustration, and out-of-scope in one evaluator.
 
-## Choose a decision model
+## OpenAI vs. TypeSafe Jev
 
-| Provider | Model                                | Input                          | Question instructions                   | Use when                                                                                               |
-| -------- | ------------------------------------ | ------------------------------ | --------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| OpenAI   | `gpt-6-luna`                         | One mapped `input` value       | Plain text                              | You already use an OpenAI connection or want to use the OpenAI Decisions API                           |
-| TypeSafe | `jev-latest` or a pinned Jev version | A JSON state with named fields | Can reference state fields in backticks | You want Jev's low-cost, low-latency typed decisions or need several independently mapped state fields |
+- **OpenAI:** evaluates one general state named `input`. Questions use plain text and cannot reference individual parts of the state.
+- **TypeSafe Jev:** evaluates a JSON state with named fields. Questions can explicitly reference those fields using backticks, for example: ``Compare `output` with `expectedOutput`.``
 
-TypeSafe reports that Jev is 40 to 400x cheaper and 20 to 200x faster than comparable frontier models on classification tasks. OpenAI decision models use your existing OpenAI connection. Both return structured answers with probabilities where available.
+Both support Choice, Score, and Yes / no questions.
 
-<Callout type="info">
-  **Key difference:** OpenAI questions evaluate one general `input` state and
-  cannot reference individual parts of it. With Jev, you define named fields in
-  the state and explicitly reference them in question instructions using
-  backticks, for example: ``Compare `output` with `expectedOutput`.``
-</Callout>
+## Why use Jev as a judge?
+
+Jev is a System One model designed specifically for typed decisions. It gives you explicit control over a multi-field JSON state and how each question refers to that state.
+
+You can use `jev-latest` to follow new releases or pin a version such as `jev-1.13.0` when an evaluation threshold should remain stable. Jev is available directly from TypeSafe or through Vercel AI Gateway and OpenRouter.
 
 ## Question types [#question-types]
 
