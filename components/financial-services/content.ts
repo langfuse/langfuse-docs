@@ -195,18 +195,22 @@ export const financialServicesEvalColumns = [
       {
         title: "Offline evaluation",
         body: "Golden datasets built from production traces, versioned experiments with baseline comparison, and a release gate that fails the pull request on regression.",
+        href: "/docs/evaluation/get-started/offline",
       },
       {
         title: "Online evaluation",
         body: "Deterministic sampling of live traffic, LLM-as-judge and code evaluators, and threshold alerts to Slack, webhooks, or GitHub Actions when quality drifts.",
+        href: "/docs/evaluation/get-started/online",
       },
       {
         title: "Human review",
         body: "Annotation queues for subject-matter experts, corrected outputs, and one-click promotion of failures into a permanent regression set.",
+        href: "/docs/evaluation/evaluation-methods/annotation-queues",
       },
       {
         title: "Judge calibration",
         body: "Score Analytics measures agreement between human labels and model judges (Cohen's Kappa, F1, Pearson, Spearman) so you can defend the judge to model risk.",
+        href: "/docs/evaluation/scores/score-analytics",
       },
     ],
   },
@@ -217,14 +221,17 @@ export const financialServicesEvalColumns = [
       {
         title: "Prompt governance",
         body: "Immutable versions, staging and production labels, protected labels for separation of duties, and full audit history.",
+        href: "/docs/prompt-management/features/prompt-version-control",
       },
       {
         title: "Redaction",
         body: "Masking in the SDK before data leaves your application, with trace structure preserved for debugging.",
+        href: "/docs/observability/features/masking",
       },
       {
         title: "Administration",
         body: "Organizations and projects as the data boundary, project-level RBAC, OIDC SSO with domain enforcement, SCIM provisioning, audit logs, and a metrics API for chargebacks.",
+        href: "/docs/administration/rbac",
       },
     ],
   },
@@ -236,14 +243,17 @@ export const financialServicesEvalColumns = [
       {
         title: "Gateway & models",
         body: "OTLP ingest from your AI gateway, judge models pinned to your own Bedrock, Azure OpenAI, Vertex, or OpenAI connection.",
+        href: "/docs/administration/llm-connection",
       },
       {
         title: "Dashboards as code",
         body: "Dashboards and widgets managed through the API and CLI, versioned in Git, deployed identically to dev, staging, and prod.",
+        href: "/docs/metrics/features/custom-dashboards",
       },
       {
         title: "Operations",
         body: "Documented self-hosting on AWS with Terraform and Helm, a published release cadence, and autoscaling guidance.",
+        href: "/self-hosting",
       },
     ],
   },

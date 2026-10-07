@@ -26,9 +26,17 @@ export function EvalCapabilityGrid() {
                     aria-hidden
                   />
                 </summary>
-                <p className="m-0 pb-4 pr-8 text-[13px] leading-[1.45] text-text-secondary">
-                  {item.body}
-                </p>
+                <div className="space-y-2 pb-4 pr-8">
+                  <p className="m-0 text-[13px] leading-[1.45] text-text-secondary">
+                    {item.body}
+                  </p>
+                  <a
+                    href={item.href}
+                    className="inline-block text-[13px] text-text-primary underline decoration-line-structure underline-offset-4 hover:text-text-primary"
+                  >
+                    {"Docs →"}
+                  </a>
+                </div>
               </details>
             ))}
           </div>

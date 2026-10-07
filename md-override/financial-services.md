@@ -105,26 +105,26 @@ Platform and risk teams in financial services are looking for a complete observa
 
 Test before release. Monitor production. Review with your experts.
 
-- **Offline evaluation:** Golden datasets built from production traces, versioned experiments with baseline comparison, and a release gate that fails the pull request on regression.
-- **Online evaluation:** Deterministic sampling of live traffic, LLM-as-judge and code evaluators, and threshold alerts to Slack, webhooks, or GitHub Actions when quality drifts.
-- **Human review:** Annotation queues for subject-matter experts, corrected outputs, and one-click promotion of failures into a permanent regression set.
-- **Judge calibration:** Score Analytics measures agreement between human labels and model judges (Cohen's Kappa, F1, Pearson, Spearman) so you can defend the judge to model risk.
+- **[Offline evaluation](/docs/evaluation/get-started/offline):** Golden datasets built from production traces, versioned experiments with baseline comparison, and a release gate that fails the pull request on regression.
+- **[Online evaluation](/docs/evaluation/get-started/online):** Deterministic sampling of live traffic, LLM-as-judge and code evaluators, and threshold alerts to Slack, webhooks, or GitHub Actions when quality drifts.
+- **[Human review](/docs/evaluation/evaluation-methods/annotation-queues):** Annotation queues for subject-matter experts, corrected outputs, and one-click promotion of failures into a permanent regression set.
+- **[Judge calibration](/docs/evaluation/scores/score-analytics):** Score Analytics measures agreement between human labels and model judges (Cohen's Kappa, F1, Pearson, Spearman) so you can defend the judge to model risk.
 
 ### Govern AI systems
 
 Control changes, protect sensitive data, and manage access.
 
-- **Prompt governance:** Immutable versions, staging and production labels, protected labels for separation of duties, and full audit history.
-- **Redaction:** Masking in the SDK before data leaves your application, with trace structure preserved for debugging.
-- **Administration:** Organizations and projects as the data boundary, project-level RBAC, OIDC SSO with domain enforcement, SCIM provisioning, audit logs, and a metrics API for chargebacks.
+- **[Prompt governance](/docs/prompt-management/features/prompt-version-control):** Immutable versions, staging and production labels, protected labels for separation of duties, and full audit history.
+- **[Redaction](/docs/observability/features/masking):** Masking in the SDK before data leaves your application, with trace structure preserved for debugging.
+- **[Administration](/docs/administration/rbac):** Organizations and projects as the data boundary, project-level RBAC, OIDC SSO with domain enforcement, SCIM provisioning, audit logs, and a metrics API for chargebacks.
 
 ### Use your own stack
 
 Connect your models and manage deployment in your infrastructure.
 
-- **Gateway & models:** OTLP ingest from your AI gateway, judge models pinned to your own Bedrock, Azure OpenAI, Vertex, or OpenAI connection.
-- **Dashboards as code:** Dashboards and widgets managed through the API and CLI, versioned in Git, deployed identically to dev, staging, and prod.
-- **Operations:** Documented self-hosting on AWS with Terraform and Helm, a published release cadence, and autoscaling guidance.
+- **[Gateway & models](/docs/administration/llm-connection):** OTLP ingest from your AI gateway, judge models pinned to your own Bedrock, Azure OpenAI, Vertex, or OpenAI connection.
+- **[Dashboards as code](/docs/metrics/features/custom-dashboards):** Dashboards and widgets managed through the API and CLI, versioned in Git, deployed identically to dev, staging, and prod.
+- **[Operations](/self-hosting):** Documented self-hosting on AWS with Terraform and Helm, a published release cadence, and autoscaling guidance.
 
 ## What financial services teams build on Langfuse.
 
