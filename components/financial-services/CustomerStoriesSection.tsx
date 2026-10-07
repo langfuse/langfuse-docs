@@ -74,7 +74,7 @@ export function CustomerStoriesSection() {
   const featured = byRoute.get(financialServicesFeaturedStory.href);
 
   return (
-    <div className="mt-8 flex flex-col gap-2">
+    <div className="flex flex-col gap-2">
       <Link
         href={financialServicesFeaturedStory.href}
         aria-label="Read the Merck customer story"
