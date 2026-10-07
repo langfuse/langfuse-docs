@@ -32,6 +32,15 @@ function SideGutter() {
   );
 }
 
+function AsideEdge() {
+  return (
+    <div
+      aria-hidden
+      className="hidden lg:block w-px shrink-0 bg-line-structure"
+    />
+  );
+}
+
 export function ContentColumns({
   children,
   showAside = true,
@@ -41,6 +50,11 @@ export function ContentColumns({
   className,
   footerClassName,
 }: ContentColumnsProps) {
+  // Wide gutters only when both sidebars are off (e.g. financial-services).
+  // Pages that only hide the aside keep the previous 1px structural edge.
+  const rightFallback =
+    showLeftSidebar === false ? <SideGutter /> : <AsideEdge />;
+
   return (
     <div
       id="home-layout"
@@ -54,7 +68,7 @@ export function ContentColumns({
         {children}
         <Footer className={footerClassName} />
       </HomeMainArea>
-      {showAside ? (rightSidebar ?? <HomeAside />) : <SideGutter />}
+      {showAside ? (rightSidebar ?? <HomeAside />) : rightFallback}
       <AISearchPanel />
     </div>
   );

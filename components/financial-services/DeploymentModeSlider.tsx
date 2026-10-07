@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useRef, useState, type KeyboardEvent } from "react";
 import { cn } from "@/lib/utils";
 import {
   financialServicesDeploymentModes,
@@ -10,17 +10,54 @@ import {
 export function DeploymentModeSlider() {
   const [modeId, setModeId] =
     useState<FinancialServicesDeploymentModeId>("cloud");
+  const groupRef = useRef<HTMLDivElement>(null);
+  const labelId = useId();
   const mode =
     financialServicesDeploymentModes.find((item) => item.id === modeId) ??
     financialServicesDeploymentModes[0];
 
+  const selectMode = (id: FinancialServicesDeploymentModeId) => {
+    setModeId(id);
+  };
+
+  const onRadioKeyDown = (
+    event: KeyboardEvent<HTMLButtonElement>,
+    index: number,
+  ) => {
+    const last = financialServicesDeploymentModes.length - 1;
+    let nextIndex: number | null = null;
+
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      nextIndex = index === last ? 0 : index + 1;
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      nextIndex = index === 0 ? last : index - 1;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = last;
+    }
+
+    if (nextIndex === null) return;
+
+    event.preventDefault();
+    const next = financialServicesDeploymentModes[nextIndex];
+    selectMode(next.id);
+    const buttons =
+      groupRef.current?.querySelectorAll<HTMLButtonElement>('[role="radio"]');
+    buttons?.[nextIndex]?.focus();
+  };
+
   return (
     <div>
       <div
+        ref={groupRef}
         role="radiogroup"
-        aria-label="Deployment mode"
+        aria-labelledby={labelId}
         className="inline-flex w-full overflow-hidden rounded-[1px] border border-line-structure sm:w-fit"
       >
+        <span id={labelId} className="sr-only">
+          Deployment mode
+        </span>
         {financialServicesDeploymentModes.map((item, index) => {
           const active = item.id === modeId;
           return (
@@ -29,7 +66,9 @@ export function DeploymentModeSlider() {
               type="button"
               role="radio"
               aria-checked={active}
-              onClick={() => setModeId(item.id)}
+              tabIndex={active ? 0 : -1}
+              onClick={() => selectMode(item.id)}
+              onKeyDown={(event) => onRadioKeyDown(event, index)}
               className={cn(
                 "flex-1 px-3 py-1.5 text-left sm:flex-none",
                 index > 0 && "border-l border-line-structure",

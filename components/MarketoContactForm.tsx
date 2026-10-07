@@ -181,15 +181,6 @@ export function MarketoContactForm({
   const formLoadedRef = useRef(false);
   const conversionReportedRef = useRef(false);
 
-  useEffect(() => {
-    if (!useCase) return;
-    rememberUseCaseAttribution({
-      use_case: useCase,
-      section,
-      action: "form_submit",
-    });
-  }, [useCase, section]);
-
   const loadMarketoForm = useCallback(() => {
     if (formLoadedRef.current || !window.MktoForms2) {
       return;
@@ -225,6 +216,13 @@ export function MarketoContactForm({
         form.onSuccess(() => {
           if (conversionReportedRef.current) return false;
           conversionReportedRef.current = true;
+          if (useCase) {
+            rememberUseCaseAttribution({
+              use_case: useCase,
+              section,
+              action: "form_submit",
+            });
+          }
           const attribution = readUseCaseAttribution();
           try {
             posthog.capture("sales:inquiry_completed", {
