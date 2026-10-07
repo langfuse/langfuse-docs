@@ -78,7 +78,7 @@ No internet access. No vendor access.
 - Users: Internal only, via VPN
 - Updates: Offline image transfer
 
-## Customers in financial services
+## Customers in regulated industries
 
 ### [Merck](/users/merckgroup)
 
