@@ -20,14 +20,20 @@ export function CreditOnboardingTraceMock() {
 
       <div className="space-y-2.5 px-4 py-4">
         {financialServicesTrace.spans.map((span) => (
-          <div key={span.name} className="flex items-center gap-3">
+          <div key={span.name} className="flex items-center gap-2 sm:gap-3">
             <p
               className={cn(
-                "w-[9.5rem] shrink-0 truncate font-mono text-[11px] leading-none text-text-secondary",
-                span.indent && "pl-3",
+                "w-[3.25rem] shrink-0 font-mono text-[10px] uppercase leading-none tracking-[0.04em] text-text-tertiary",
+                span.indent && "pl-2",
               )}
             >
-              <span className="mr-1.5 text-text-tertiary">{span.type}</span>
+              {span.type}
+            </p>
+            <p
+              className={cn(
+                "w-[8.75rem] shrink-0 truncate font-mono text-[11px] leading-none text-text-secondary sm:w-[10.5rem]",
+              )}
+            >
               {span.name}
             </p>
             <div className="relative flex min-h-3 min-w-0 flex-1 items-center">
