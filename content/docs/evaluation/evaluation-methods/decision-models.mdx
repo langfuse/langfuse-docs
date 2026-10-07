@@ -19,7 +19,7 @@ Use a decision model when the verdict is narrow and typed: a label, a level on a
 
 One decision-model evaluator consists of:
 
-1. **Model input**: observation data mapped to the format the provider expects. OpenAI receives one `input`; Jev receives a JSON state with one or more named fields.
+1. **Model input**: observation data mapped to the format the provider expects. OpenAI receives one general state named `input`; Jev receives a JSON state with one or more named fields.
 2. **One or more questions**: each question has a type, instructions, and allowed answers. The model answers all questions in one call.
 3. **One score per question**: the typed answer becomes a Langfuse score with the score name you set on the question. Probabilities and confidence are stored in the score metadata where the provider returns them.
 
@@ -33,6 +33,13 @@ This lets you score one observation against several criteria at once, for exampl
 | TypeSafe | `jev-latest` or a pinned Jev version | A JSON state with named fields | Can reference state fields in backticks | You want Jev's low-cost, low-latency typed decisions or need several independently mapped state fields |
 
 TypeSafe reports that Jev is 40 to 400x cheaper and 20 to 200x faster than comparable frontier models on classification tasks. OpenAI decision models use your existing OpenAI connection. Both return structured answers with probabilities where available.
+
+<Callout type="info">
+  **Key difference:** OpenAI questions evaluate one general `input` state and
+  cannot reference individual parts of it. With Jev, you define named fields in
+  the state and explicitly reference them in question instructions using
+  backticks, for example: ``Compare `output` with `expectedOutput`.``
+</Callout>
 
 ## Question types [#question-types]
 
@@ -107,8 +114,8 @@ Add one question per criterion. For each question:
 
 ### Map the model input
 
-- **OpenAI:** map the observation data you want to evaluate to the single `input` field. The preview shows this input and the questions sent to the model.
-- **TypeSafe Jev:** click **Add field** to build a JSON state with one or more named keys, then map them to observation input, output, metadata, tool calls, **Expected Output**, or **Experiment Item Metadata**.
+- **OpenAI:** map the observation data you want to evaluate to the single general state, `input`. Questions evaluate this state as a whole and cannot reference fields within it. The preview shows the input and questions sent to the model.
+- **TypeSafe Jev:** click **Add field** to build a JSON state with one or more named keys, then map them to observation input, output, metadata, tool calls, **Expected Output**, or **Experiment Item Metadata**. Reference these keys in question instructions with backticks.
 
 For Jev, a field named exactly like an observation field (for example `input`) binds to it automatically. Renaming a field rewrites its references in your questions. Langfuse warns when the state gets close to TypeSafe's limit of roughly 32k tokens.
 
