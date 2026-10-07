@@ -23,6 +23,15 @@ type ContentColumnsProps = {
  * Pass `leftSidebar` / `rightSidebar` to swap the default sidebars.
  * Set `showLeftSidebar={false}` to drop the left column and give the page more width.
  */
+function SideGutter() {
+  return (
+    <div
+      aria-hidden
+      className="hidden shrink-0 bg-transparent lg:block w-8 xl:w-12 2xl:w-16"
+    />
+  );
+}
+
 export function ContentColumns({
   children,
   showAside = true,
@@ -40,26 +49,12 @@ export function ContentColumns({
         className,
       )}
     >
-      {showLeftSidebar ? (
-        (leftSidebar ?? <HomeSidebar />)
-      ) : (
-        <div
-          aria-hidden
-          className="hidden lg:block w-px shrink-0 bg-line-structure"
-        />
-      )}
+      {showLeftSidebar ? (leftSidebar ?? <HomeSidebar />) : <SideGutter />}
       <HomeMainArea>
         {children}
         <Footer className={footerClassName} />
       </HomeMainArea>
-      {showAside ? (
-        (rightSidebar ?? <HomeAside />)
-      ) : (
-        <div
-          aria-hidden
-          className="hidden lg:block w-px shrink-0 bg-line-structure"
-        />
-      )}
+      {showAside ? (rightSidebar ?? <HomeAside />) : <SideGutter />}
       <AISearchPanel />
     </div>
   );
