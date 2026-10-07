@@ -113,7 +113,7 @@ Customer story · Spend management. [Read story](/users/ramp)
 
 Customer story · Banking. Read story →
 
-## Your evaluation needs, covered
+## Full coverage of evaluation needs
 
 Test changes, monitor production, and bring expert feedback into your evaluation workflow.
 
