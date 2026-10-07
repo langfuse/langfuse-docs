@@ -32,11 +32,11 @@ This lets you score one observation against several criteria at once, for exampl
 
 Both support Choice, Score, and Yes / no questions.
 
-## Why use Jev as a judge?
+## Why use a decision model?
 
-Jev is a System One model designed specifically for typed decisions. It gives you explicit control over a multi-field JSON state and how each question refers to that state.
+Decision models are designed for narrow, typed decisions where you can define the possible answers upfront. They return structured scores and probabilities without generating a free-form response.
 
-You can use `jev-latest` to follow new releases or pin a version such as `jev-1.13.0` when an evaluation threshold should remain stable. Jev is available directly from TypeSafe or through Vercel AI Gateway and OpenRouter.
+Use them for classification, rubric levels, and yes/no checks that you want to apply consistently across many observations. One evaluator can answer several questions about the same input in a single call.
 
 ## Question types [#question-types]
 
@@ -130,7 +130,7 @@ Add a connection with the adapter **typesafe**, choose the upstream that serves 
 | Vercel AI Gateway | An [AI Gateway API key](https://vercel.com/docs/ai-gateway/authentication-and-byok) | Billed through AI Gateway |
 | OpenRouter        | An [OpenRouter API key](https://openrouter.ai/settings/keys)                        | Billed through OpenRouter |
 
-Vercel AI Gateway and OpenRouter expose TypeSafe's API, so the evaluator behaves the same with each upstream. No base URL or additional headers are required. The connection offers `jev-1.13.0` and `jev-latest` by default.
+Vercel AI Gateway and OpenRouter expose TypeSafe's API, so the evaluator behaves the same with each upstream. No base URL or additional headers are required. Use `jev-latest` to follow new releases or pin a version such as `jev-1.13.0` when an evaluation threshold should remain stable.
 
 Build the JSON state by adding named fields and mapping them to observation input, output, metadata, tool calls, **Expected Output**, or **Experiment Item Metadata**. Reference these fields in question instructions using backticks. Jev Score levels require a description.
 
