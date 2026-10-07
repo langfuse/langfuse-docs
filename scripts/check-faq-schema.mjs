@@ -22,7 +22,7 @@ const BASE_URL =
 // scripts/seo-discovery.test.js.
 const EXPECTED = [
   ["/security/privacy-faq", 8],
-  ["/security/compliance-faq", 13],
+  ["/security/compliance-faq", 12],
   ["/security/security-faq", 40],
   ["/enterprise", 9],
 ];
