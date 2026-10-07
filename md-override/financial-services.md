@@ -64,11 +64,11 @@ Bureau score 642 · Summary: refer · Human review queued
 
 ## Run Langfuse where your data is allowed to live
 
-1. **Deployment where your data must stay.** Langfuse Cloud in the EU, US or Japan, self-hosted in your VPC, or fully air-gapped.
-2. **Multiple layers of data redaction.** Client-side and server-side PII protections before anything is stored.
-3. **Enterprise access controls.** SSO and role-based access control scoped to organizations and projects.
-4. **Audit logs.** Record both LLM activity and developer actions for internal and supervisory review.
-5. **Never in the inference path.** Langfuse observes your model and tool calls; it does not proxy them.
+1. **Never in the inference path.** Langfuse observes your model and tool calls; it does not proxy them.
+2. **Deployment where your data must stay.** Langfuse Cloud in the EU, US or Japan, self-hosted in your VPC, or fully air-gapped.
+3. **Multiple layers of data redaction.** Client-side and server-side PII protections before anything is stored.
+4. **Enterprise access controls.** SSO and role-based access control scoped to organizations and projects.
+5. **Audit logs.** Record both LLM activity and developer actions for internal and supervisory review.
 
 ### Cloud
 

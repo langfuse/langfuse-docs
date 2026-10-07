@@ -68,6 +68,10 @@ export const financialServicesStoryCards = [
 
 export const financialServicesTrustPoints = [
   {
+    title: "Never in the inference path",
+    body: "Langfuse observes your model and tool calls; it does not proxy them.",
+  },
+  {
     title: "Deployment where your data must stay",
     body: "Langfuse Cloud in the EU, US or Japan, self-hosted in your VPC, or fully air-gapped.",
   },
@@ -82,10 +86,6 @@ export const financialServicesTrustPoints = [
   {
     title: "Audit logs",
     body: "Record both LLM activity and developer actions for internal and supervisory review.",
-  },
-  {
-    title: "Never in the inference path",
-    body: "Langfuse observes your model and tool calls; it does not proxy them.",
   },
 ] as const;
 
