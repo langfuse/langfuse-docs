@@ -31,12 +31,11 @@ export const financialServicesFeaturedStory = {
   author: "Walid Mehanna",
   role: "Chief Data & AI Officer at Merck",
   stats: [
-    { value: "80+", label: "use cases" },
-    { value: "200+", label: "builders" },
+    { value: "1", label: "central platform team" },
+    { value: "80+", label: "use cases built on Langfuse" },
     {
-      value: "API",
-      label:
-        "provisioning automated against the Langfuse API from an internal portal",
+      value: "200+",
+      label: "users, engineers, PMs and domain experts",
     },
   ],
 } as const;

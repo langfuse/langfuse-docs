@@ -29,9 +29,9 @@ Use the contact form on this page to talk to an expert.
 >
 > — Walid Mehanna, Chief Data & AI Officer at Merck
 
-- **80+** use cases
-- **200+** builders
-- **API** provisioning automated against the Langfuse API from an internal portal
+- **1** central platform team
+- **80+** use cases built on Langfuse
+- **200+** users, engineers, PMs and domain experts
 
 ### [How a European neobroker runs self-hosted Langfuse in production.](/users/trade-republic)
 
