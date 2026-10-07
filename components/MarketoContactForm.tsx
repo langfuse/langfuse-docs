@@ -4,7 +4,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
 import { reportTalkToUsConversion } from "@/lib/ad-conversions";
 import posthog from "posthog-js";
-import { readUseCaseAttribution } from "@/lib/use-case-analytics";
+import {
+  readUseCaseAttribution,
+  rememberUseCaseAttribution,
+  type UseCase,
+} from "@/lib/use-case-analytics";
 import { cn } from "@/lib/utils";
 
 const MARKETO_BASE_URL = "https://discover.clickhouse.com";
@@ -147,14 +151,27 @@ function MarketoSuccessPanel() {
 
 export function MarketoContactForm({
   compact = false,
+  useCase,
+  section = "hero",
 }: {
   compact?: boolean;
+  useCase?: UseCase;
+  section?: string;
 } = {}) {
   const [isFormLoaded, setIsFormLoaded] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [hasError, setHasError] = useState(false);
   const formLoadedRef = useRef(false);
   const conversionReportedRef = useRef(false);
+
+  useEffect(() => {
+    if (!useCase) return;
+    rememberUseCaseAttribution({
+      use_case: useCase,
+      section,
+      action: "form_submit",
+    });
+  }, [useCase, section]);
 
   const loadMarketoForm = useCallback(() => {
     if (formLoadedRef.current || !window.MktoForms2) {
@@ -190,7 +207,18 @@ export function MarketoContactForm({
           try {
             posthog.capture("sales:inquiry_completed", {
               form_id: MARKETO_FORM_ID,
+              page_path:
+                typeof window !== "undefined"
+                  ? window.location.pathname
+                  : undefined,
               ...(attribution ?? {}),
+              ...(useCase
+                ? {
+                    use_case: useCase,
+                    section: attribution?.section ?? section,
+                    action: attribution?.action ?? "form_submit",
+                  }
+                : {}),
             });
           } catch {
             // Analytics must not prevent showing a successful submission.
@@ -202,7 +230,7 @@ export function MarketoContactForm({
         });
       },
     );
-  }, [compact]);
+  }, [compact, section, useCase]);
 
   useEffect(() => {
     const handleScriptError = () => setHasError(true);
@@ -269,9 +297,13 @@ export function MarketoContactForm({
 export function MarketoContactFormCard({
   className,
   compact = false,
+  useCase,
+  section = "hero",
 }: {
   className?: string;
   compact?: boolean;
+  useCase?: UseCase;
+  section?: string;
 } = {}) {
   return (
     <div
@@ -281,7 +313,11 @@ export function MarketoContactFormCard({
         className,
       )}
     >
-      <MarketoContactForm compact={compact} />
+      <MarketoContactForm
+        compact={compact}
+        useCase={useCase}
+        section={section}
+      />
     </div>
   );
 }

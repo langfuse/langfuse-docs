@@ -19,9 +19,9 @@ Observe and evaluate AI agents across your institution. Give engineering, platfo
 
 [Security & compliance](/security)
 
-## Talk to an expert
+## Talk to a financial services expert at Langfuse
 
-Use the contact form on this page to talk to an expert.
+Use the contact form on this page to talk to a financial services expert at Langfuse.
 
 ### [Merck](/users/merckgroup)
 
