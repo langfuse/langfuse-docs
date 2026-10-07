@@ -45,7 +45,7 @@ Customer story · Spend management. [Read story](/users/ramp)
 
 Customer story · Banking. Read story →
 
-## Every run traced, scored and on the record
+## Every AI execution traced, scored and on the record
 
 See load, behavior and usage shifts early, on [dashboards you version in Git](/docs/metrics/features/custom-dashboards). Evals score outputs against your policies, and execution history is retained for supervisory and model risk review. See why this application was referred for review.
 
