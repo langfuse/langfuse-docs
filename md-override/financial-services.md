@@ -152,7 +152,7 @@ DKB · 20,000 conversations / day
 
 ### [Govern coding agents across the whole engineering organization](/coding-agents)
 
-Trace Claude Code, Codex, Cursor, OpenCode, and GitHub Copilot with per-developer setup in minutes and no proxy or gateway in the way. See cost per developer, project, and model, analyze which tools run, fail, or precede abandoned sessions, reconstruct any session end to end, and search across sessions.
+Trace Claude Code, Codex, Cursor, OpenCode, and GitHub Copilot — no proxy required. See cost per developer and model, replay failed sessions, and search across the org.
 
 ## Learn how to ship reliable agents in financial services
 
