@@ -136,10 +136,6 @@ Raise autonomy rate of AI support agents: the share of cases resolved without hu
 
 DKB · 20,000 conversations / day
 
-### Voice AI / customer intake
-
-Use Langfuse to decrease latency and monitor voice agent quality and resolution.
-
 ### [Govern coding agents across the whole engineering organization](/coding-agents)
 
 Trace Claude Code, Codex, Cursor, GitHub Copilot, and the OpenAI Agents SDK with per-developer setup in minutes and no proxy or gateway in the way. See cost per developer, project, and model, analyze which tools run, fail, or precede abandoned sessions, reconstruct any session end to end, and search across sessions to find who used a given API or pattern.

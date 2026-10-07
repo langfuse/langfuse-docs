@@ -266,12 +266,6 @@ export const financialServicesUseCases = [
     featured: true,
   },
   {
-    area: "Support",
-    title: "Voice AI / customer intake",
-    description:
-      "Use Langfuse to decrease latency and monitor voice agent quality and resolution.",
-  },
-  {
     area: "Engineering",
     title: "Govern coding agents across the whole engineering organization",
     description:
