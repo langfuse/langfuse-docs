@@ -43,7 +43,7 @@ Customer story · Spend management. [Read story](/users/ramp)
 
 ### How DKB automates 20,000 customer conversations daily.
 
-Customer story · Banking. Read story →
+Customer story · Banking. Coming soon
 
 ## Every AI execution traced, scored and on the record
 

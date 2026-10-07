@@ -150,7 +150,7 @@ export function CustomerStoriesSection() {
                 {card.description}
               </p>
               <span className="mt-auto pt-1 text-[13px] text-text-secondary">
-                Read story →
+                {isLive ? "Read story →" : "Coming soon"}
               </span>
             </>
           );
