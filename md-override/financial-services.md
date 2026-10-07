@@ -43,23 +43,6 @@ Customer story · Spend management. [Read story](/users/ramp)
 
 Customer story · Banking. Coming soon
 
-## Every AI execution traced, scored and on the record
-
-See load, behavior and usage shifts early, on [dashboards you version in Git](/docs/metrics/features/custom-dashboards). Evals score outputs against your policies, and execution history is retained for supervisory and model risk review. See why this application was referred for review.
-
-Illustrative · credit-onboarding
-
-Application referred to an underwriter
-
-Bureau score 642 · Summary: refer · Human review queued
-
-- credit-onboarding-agent (agent)
-- identity.verify (tool)
-- fraud.screen (tool)
-- credit_bureau.lookup (tool)
-- risk-summary (llm)
-- policy-compliance (eval)
-
 ## Run Langfuse where your data is allowed to live
 
 1. **[Never in the inference path](/docs/observability/features/queuing-batching).** Langfuse observes your model and tool calls; it does not proxy them.
