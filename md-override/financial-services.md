@@ -29,29 +29,18 @@ Customers in financial services include Trade Republic, SumUp, Ramp, Merck, and 
 
 See load, behavior and usage shifts early, on [dashboards you version in Git](/docs/metrics/features/custom-dashboards). Evals score outputs against your policies, and execution history is retained for supervisory and model risk review. See why this application was referred for review.
 
-Illustrative example. Outcome: application referred to an underwriter. Human review queued.
+Illustrative · credit-onboarding
 
-Why: Bureau score 642 < 650 · 1 delinquency in 24m · Summary: refer · Policy check: pass
+Application referred to an underwriter
 
-credit-onboarding / traces / tr_8f2c41e9 · 8.42s · $0.031 · 14.2k tokens
+Bureau score 642 · Summary: refer · Human review queued
 
-- credit-onboarding-agent (agent, 8.42s)
-- identity.verify (tool, 1.31s)
-- fraud.screen (tool, 1.86s)
-- credit_bureau.lookup (tool, 3.54s)
-- risk-summary (llm, 2.37s)
-- policy-compliance (eval, 0.61s)
-- pii-redaction (eval, 0.04s)
-
-Scores: policy_compliance PASS · 1.00; pii_redacted PASS; decision_drift_7d 0.04; human_review queued.
-
-Audit log:
-
-- 09:14:02 trace tr_8f2c41e9 ingested
-- 09:14:03 eval policy-compliance → PASS
-- 09:14:03 eval pii-redaction → PASS
-- 09:20:41 m.weber (risk) viewed trace
-- 09:22:10 annotation added: "refer confirmed"
+- credit-onboarding-agent (agent)
+- identity.verify (tool)
+- fraud.screen (tool)
+- credit_bureau.lookup (tool)
+- risk-summary (llm)
+- policy-compliance (eval)
 
 ## Run it where your data is allowed to live.
 
