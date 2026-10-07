@@ -17,8 +17,7 @@ Use Jev as a judge when the verdict you need is narrow and typed (a label, a lev
 
 <Callout type="info">
   In the Langfuse UI, Jev evaluators are called **decision-model evaluators**.
-  The type is named after the model class so that other decision models can be
-  added later. Jev is currently the only supported decision model.
+  You can run them with TypeSafe Jev or OpenAI's `gpt-6-luna`.
 </Callout>
 
 ## How Jev as a judge works
@@ -66,6 +65,14 @@ Some tips for each type:
 ## Set up step-by-step [#set-up-step-by-step]
 
 <Steps>
+
+### Use an OpenAI decision model [#use-an-openai-decision-model]
+
+Select an existing OpenAI connection and choose `gpt-6-luna`. OpenAI decision models support the same Choice, Score, and Yes / no question types as Jev, with one Langfuse score written per question.
+
+OpenAI receives one `input` value, so map the observation data you want to evaluate to that field. Write questions as plain text without Jev-style state-key references. Score levels require a label and can include an optional description.
+
+OpenAI answers include probabilities where available. Langfuse stores these details in `metadata.openai`; if OpenAI refuses any question, the evaluator run fails without writing scores.
 
 ### Add a TypeSafe connection [#add-a-typesafe-connection]
 
