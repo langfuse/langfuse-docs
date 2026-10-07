@@ -14,7 +14,10 @@ const socialLinks = [
     href: "https://github.com/langfuse/langfuse",
     icon: IconGithub,
   },
-  { name: "Discord", href: "/discord", icon: IconDiscord },
+  // Absolute URL: `/discord` is a same-origin redirect to Discord. Soft
+  // navigation via next/link follows the 307 with an RSC request to
+  // discord.gg, which fails and blanks the page ("This page couldn't load").
+  { name: "Discord", href: "https://discord.gg/7NXusRtqYU", icon: IconDiscord },
   { name: "X", href: "https://x.com/langfuse", icon: IconX },
   {
     name: "YouTube",
