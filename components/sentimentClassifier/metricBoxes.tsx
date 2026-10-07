@@ -3,10 +3,10 @@
 import { Loader } from "@/components/ai-elements/loader";
 import { formatCostUsd, formatLatencyMs } from "./cost";
 import type { SentimentUsage } from "./cost";
-import { summaryFor, type EngineMetric } from "./compareMetrics";
+import { summaryLinesVsLuna, type EngineMetric } from "./compareMetrics";
 
 export type { EngineMetric } from "./compareMetrics";
-export { summaryFor } from "./compareMetrics";
+export { summaryFor, summaryLinesVsLuna } from "./compareMetrics";
 
 type MetricBoxProps = {
   title: string;
@@ -51,7 +51,7 @@ const MetricBox = ({
   format,
   cheaperOrFaster,
 }: MetricBoxProps) => {
-  const summary = summaryFor(engines, cheaperOrFaster);
+  const summaryLines = summaryLinesVsLuna(engines, cheaperOrFaster);
 
   return (
     <div className="rounded-[2px] border border-line-structure p-4 space-y-3">
@@ -67,10 +67,16 @@ const MetricBox = ({
           </div>
         ))}
       </div>
-      {summary && (
-        <p className="text-xs font-medium text-text-primary border-t border-line-structure pt-3">
-          {summary}
-        </p>
+      {summaryLines && (
+        <div className="space-y-1 text-xs font-medium text-text-primary border-t border-line-structure pt-3">
+          {summaryLines.map((line) => (
+            <p key={line}>
+              {line.includes("about the same")
+                ? `${line} as Luna`
+                : `${line} than Luna`}
+            </p>
+          ))}
+        </div>
       )}
     </div>
   );

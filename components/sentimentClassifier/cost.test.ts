@@ -38,7 +38,7 @@ test("OpenAI Decisions cost is attributed to input tokens only", () => {
   );
 });
 
-test("summaryFor picks the clear three-way winner", () => {
+test("summaryFor compares both decision engines against Luna", () => {
   const engines: EngineMetric[] = [
     {
       id: "jev",
@@ -62,7 +62,21 @@ test("summaryFor picks the clear three-way winner", () => {
       error: false,
     },
   ];
-  assert.equal(summaryFor(engines, "cheaper"), "TypeSafe Jev 2.5× cheaper");
+  assert.equal(
+    summaryFor(engines, "cheaper"),
+    "TypeSafe Jev 400× cheaper · OpenAI Decisions 160× cheaper",
+  );
+  assert.equal(
+    summaryFor(
+      [
+        { ...engines[0], value: 400 },
+        { ...engines[1], value: 410 },
+        { ...engines[2], value: 2600 },
+      ],
+      "faster",
+    ),
+    "TypeSafe Jev 6.5× faster · OpenAI Decisions 6.3× faster",
+  );
   assert.equal(
     summaryFor(
       engines.map((engine) => ({ ...engine, loading: true, value: null })),
