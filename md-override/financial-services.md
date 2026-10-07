@@ -23,8 +23,6 @@ Observe and evaluate AI agents across your institution. Give engineering, platfo
 
 Use the contact form on this page to talk to an expert.
 
-## Customers in regulated industries
-
 ### [Merck](/users/merckgroup)
 
 > “Generative AI will only earn enterprise trust when we can see what's happening under the hood. Langfuse enables us to track every prompt, response, cost, and latency in real time, turning black-box models into auditable, optimizable assets.”
