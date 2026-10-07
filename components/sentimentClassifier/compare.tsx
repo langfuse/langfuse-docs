@@ -6,7 +6,10 @@ import { cn } from "@/lib/utils";
 import { Loader } from "@/components/ai-elements/loader";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 import { scoreDemoNegativeUserFeedback } from "@/components/demoLangfuseBrowserClients";
-import { DemoTraceLink } from "@/components/demoTraceLink";
+import {
+  DemoTraceLink,
+  type DemoTraceLinkSource,
+} from "@/components/demoTraceLink";
 import { buildDemoProjectUrl, buildDemoTraceUrl } from "@/lib/demo-trace";
 import { SendIcon } from "lucide-react";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
@@ -141,7 +144,7 @@ const DecisionEnginePanel = ({
   compact: boolean;
   feedback: boolean | null;
   onFeedback: (value: boolean) => void;
-  source: string;
+  source: DemoTraceLinkSource;
 }) => (
   <div
     className={cn(
@@ -229,10 +232,16 @@ const DecisionEnginePanel = ({
   </div>
 );
 
+type SentimentClassifierCompareProps = HTMLAttributes<HTMLDivElement> & {
+  /** PostHog / Open-trace analytics source for this embed. */
+  analyticsSource?: DemoTraceLinkSource;
+};
+
 export const SentimentClassifierCompare = ({
   className,
+  analyticsSource = "jev_evals_blog",
   ...props
-}: HTMLAttributes<HTMLDivElement>) => {
+}: SentimentClassifierCompareProps) => {
   const capture = usePostHogClientCapture();
   const [input, setInput] = useState("");
   const [taskCount, setTaskCount] = useState(1);
@@ -299,7 +308,7 @@ export const SentimentClassifierCompare = ({
     const tasks = selected.map((definition) => definition.id);
 
     capture("demo:sentiment_analyze_submitted", {
-      source: "jev_evals_blog",
+      source: analyticsSource,
       mode: "compare",
       from_example: typeof text === "string",
       text_char_count: textToAnalyze.trim().length,
@@ -488,7 +497,7 @@ export const SentimentClassifierCompare = ({
               compact={compact}
               feedback={jevFeedback}
               onFeedback={setJevFeedback}
-              source="jev_evals_blog"
+              source={analyticsSource}
             />
 
             <DecisionEnginePanel
@@ -506,7 +515,7 @@ export const SentimentClassifierCompare = ({
               compact={compact}
               feedback={decisionsFeedback}
               onFeedback={setDecisionsFeedback}
-              source="jev_evals_blog"
+              source={analyticsSource}
             />
 
             <div
@@ -607,7 +616,7 @@ export const SentimentClassifierCompare = ({
             rel="noopener noreferrer"
             onClick={(event) => {
               capture("demo:view_trace_in_langfuse_clicked", {
-                source: "jev_evals_blog",
+                source: analyticsSource,
                 trace_url: event.currentTarget.href,
               });
             }}

@@ -8,6 +8,7 @@ ogImage: /images/changelog/2026-10-07-openai-decision-model-evaluators.png
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { SentimentClassifierCompare } from "@/components/sentimentClassifier/compare";
 import { Book } from "lucide-react";
 
 <ChangelogHeader />
@@ -15,6 +16,12 @@ import { Book } from "lucide-react";
 You can now use OpenAI's `gpt-6-luna` in [decision-model evaluators](/docs/evaluation/evaluation-methods/decision-models#connect-openai). Select an existing OpenAI connection, ask choice, score, or yes/no questions, and write one Langfuse score per answer.
 
 OpenAI decision models evaluate the observation input through the OpenAI Decisions API. This makes them useful for high-volume classification, rubric scoring, and binary checks alongside TypeSafe Jev.
+
+Race OpenAI Decisions against TypeSafe Jev and GPT-5.6 Luna (high reasoning) on the same text. Cost and latency land side by side after each run, and every engine opens its Langfuse trace.
+
+<div className="not-prose my-6">
+  <SentimentClassifierCompare analyticsSource="openai_decisions_changelog" />
+</div>
 
 <Cards num={1}>
   <Card
