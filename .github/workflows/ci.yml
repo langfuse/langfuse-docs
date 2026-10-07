@@ -135,6 +135,9 @@ jobs:
       - name: Check markdown and source links
         run: pnpm link-check
 
+      - name: Check FAQPage JSON-LD on built pages
+        run: pnpm faq-schema-check
+
       - name: Stop production server
         if: always()
         run: kill "$SERVER_PID" || true
