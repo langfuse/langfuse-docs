@@ -27,9 +27,10 @@ This lets you score one observation against several criteria at once, for exampl
 
 ## Why use a decision model?
 
-Decision models are designed for narrow, typed decisions where you can define the possible answers upfront. They return structured scores and probabilities without generating a free-form response.
-
-Use them for classification, rubric levels, and yes/no checks that you want to apply consistently across many observations. One evaluator can answer several questions about the same input in a single call.
+- **Cheaper.** Both Jev and `gpt-6-luna` are priced by input tokens only. [TypeSafe reports](https://typesafe.ai/blog/introducing-system-one-models-and-jev) that Jev is 40 to 400x cheaper than frontier models on classification tasks. [OpenAI prices `gpt-6-luna` at $0.10 per million input tokens](https://developers.openai.com/api/docs/guides/decisions#pricing-and-availability), with no output-token charge.
+- **Faster.** Decision models skip free-form generation. [TypeSafe reports](https://typesafe.ai/blog/introducing-system-one-models-and-jev) that Jev is 20 to 200x faster than comparable LLMs, while [OpenAI reports that the Decisions API is about 10x faster than the Responses API](https://developers.openai.com/api/docs/guides/decisions).
+- **Calibrated.** Yes / no answers return a probability, while Choice and Score answers include a probability distribution and confidence value where available.
+- **Consistent.** Decision models return typed values from a fixed answer space instead of sampling a free-form response. This makes them a good fit for regression tests and criteria you track over time.
 
 ## OpenAI vs. TypeSafe Jev
 
