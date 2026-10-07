@@ -129,41 +129,41 @@ Also: [Judge calibration](/docs/evaluation/scores/score-analytics), [prompt gove
 
 ### Compliance monitoring
 
-An agent drafts customer replies and back-office summaries that must follow internal policy.
+Run evals that check AI outputs against loaded regulations and policies. Catch non-compliant responses across back-office and customer-facing flows before they ship.
 
-Policy evals on every output, with potential violations flagged for review before release.
+### AML (anti-money laundering)
 
-### AML investigations
-
-An agent gathers transaction history and drafts a case summary for an analyst.
-
-Which tools ran, what data they returned, and how cost and latency vary per case.
+Support anomaly detection and investigation workflows — reduce cost of service and risk with better observability of agent/tool behavior.
 
 ### AI-powered advisory
 
-A multi-step agent turns client goals and holdings into a portfolio recommendation.
-
-Each reasoning step and tool call, scored for suitability, with history kept for model risk review.
+Observe multi-step advisory flows, score outcomes, and keep an audit trail suitable for model risk review.
 
 ### Credit onboarding & underwriting
 
-An agent combines identity, fraud and bureau checks into a risk summary and decision.
+Trace agents that combine identity, fraud and credit-bureau checks into a risk summary. Score decisions, flag drift, and keep the auditable trail that credit and model risk teams require.
 
-Why an application was approved or referred, decision drift over time, and eval scores per prompt version.
+### Customer support agents in Financial Services
 
-### Customer support agents
-
-An in-app banking assistant resolves customer requests, escalating edge cases to specialists.
-
-Autonomy rate, good and bad runs scored by evals and reviewers, and the long-tail cases to fix next.
+Raise autonomy rate of AI support agents: the share of cases resolved without human intervention. Trace edge cases, score good/bad runs, and iterate so agents cover more of the long tail safely.
 
 DKB · 20,000 conversations / day
 
-### [Coding agents across engineering](/coding-agents)
+### Voice AI / customer intake
 
-Developers use Claude Code, Codex, Cursor and Copilot across teams and repositories.
+Use Langfuse to decrease latency and monitor voice agent quality and resolution.
 
-Cost per developer and model, failing tools, and full session replays. No proxy in the way.
+### [Govern coding agents across the whole engineering organization](/coding-agents)
+
+Trace Claude Code, Codex, Cursor, GitHub Copilot, and the OpenAI Agents SDK with per-developer setup in minutes and no proxy or gateway in the way. See cost per developer, project, and model, analyze which tools run, fail, or precede abandoned sessions, reconstruct any session end to end, and search across sessions to find who used a given API or pattern.
+
+### Research & enterprise knowledge search
+
+Build long-running agents for stock/portfolio research and B2B knowledge work. Optimize tool selection, knowledge-base coverage, and output quality: speed up, quality up, cost down.
+
+### Internal process optimization
+
+Instrument internal copilots and workflow agents so operations teams can improve quality while controlling cost and risk.
 
 ## Learn how to ship reliable agents in financial services
 

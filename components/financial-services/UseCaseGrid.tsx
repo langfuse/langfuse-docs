@@ -19,16 +19,7 @@ export function UseCaseGrid() {
               {useCase.title}
             </h3>
             <p className="mt-3 text-[13px] leading-[1.45] text-text-secondary">
-              <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
-                Workflow
-              </span>
-              <span className="mt-1 block">{useCase.workflow}</span>
-            </p>
-            <p className="mt-3 text-[13px] leading-[1.45] text-text-secondary">
-              <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
-                Inspect & evaluate
-              </span>
-              <span className="mt-1 block">{useCase.inspect}</span>
+              {useCase.description}
             </p>
           </>
         );

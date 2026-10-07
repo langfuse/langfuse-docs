@@ -279,54 +279,60 @@ export const financialServicesUseCases = [
   {
     area: "Compliance",
     title: "Compliance monitoring",
-    workflow:
-      "An agent drafts customer replies and back-office summaries that must follow internal policy.",
-    inspect:
-      "Policy evals on every output, with potential violations flagged for review before release.",
+    description:
+      "Run evals that check AI outputs against loaded regulations and policies. Catch non-compliant responses across back-office and customer-facing flows before they ship.",
   },
   {
     area: "Compliance",
-    title: "AML investigations",
-    workflow:
-      "An agent gathers transaction history and drafts a case summary for an analyst.",
-    inspect:
-      "Which tools ran, what data they returned, and how cost and latency vary per case.",
+    title: "AML (anti-money laundering)",
+    description:
+      "Support anomaly detection and investigation workflows — reduce cost of service and risk with better observability of agent/tool behavior.",
   },
   {
     area: "Investing",
     title: "AI-powered advisory",
-    workflow:
-      "A multi-step agent turns client goals and holdings into a portfolio recommendation.",
-    inspect:
-      "Each reasoning step and tool call, scored for suitability, with history kept for model risk review.",
+    description:
+      "Observe multi-step advisory flows, score outcomes, and keep an audit trail suitable for model risk review.",
   },
   {
     area: "Risk",
     title: "Credit onboarding & underwriting",
-    workflow:
-      "An agent combines identity, fraud and bureau checks into a risk summary and decision.",
-    inspect:
-      "Why an application was approved or referred, decision drift over time, and eval scores per prompt version.",
+    description:
+      "Trace agents that combine identity, fraud and credit-bureau checks into a risk summary. Score decisions, flag drift, and keep the auditable trail that credit and model risk teams require.",
     featured: true,
   },
   {
     area: "Support",
-    title: "Customer support agents",
-    workflow:
-      "An in-app banking assistant resolves customer requests, escalating edge cases to specialists.",
-    inspect:
-      "Autonomy rate, good and bad runs scored by evals and reviewers, and the long-tail cases to fix next.",
+    title: "Customer support agents in Financial Services",
+    description:
+      "Raise autonomy rate of AI support agents: the share of cases resolved without human intervention. Trace edge cases, score good/bad runs, and iterate so agents cover more of the long tail safely.",
     proof: "DKB · 20,000 conversations / day",
     featured: true,
   },
   {
+    area: "Support",
+    title: "Voice AI / customer intake",
+    description:
+      "Use Langfuse to decrease latency and monitor voice agent quality and resolution.",
+  },
+  {
     area: "Engineering",
-    title: "Coding agents across engineering",
-    workflow:
-      "Developers use Claude Code, Codex, Cursor and Copilot across teams and repositories.",
-    inspect:
-      "Cost per developer and model, failing tools, and full session replays. No proxy in the way.",
+    title: "Govern coding agents across the whole engineering organization",
+    description:
+      "Trace Claude Code, Codex, Cursor, GitHub Copilot, and the OpenAI Agents SDK with per-developer setup in minutes and no proxy or gateway in the way. See cost per developer, project, and model, analyze which tools run, fail, or precede abandoned sessions, reconstruct any session end to end, and search across sessions to find who used a given API or pattern.",
     href: "/coding-agents",
+  },
+  {
+    area: "Research",
+    title: "Research & enterprise knowledge search",
+    description:
+      "Build long-running agents for stock/portfolio research and B2B knowledge work. Optimize tool selection, knowledge-base coverage, and output quality: speed up, quality up, cost down.",
+  },
+  {
+    area: "Operations",
+    title: "Internal process optimization",
+    description:
+      "Instrument internal copilots and workflow agents so operations teams can improve quality while controlling cost and risk.",
   },
 ] as const;
 
