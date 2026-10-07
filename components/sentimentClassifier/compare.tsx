@@ -56,6 +56,7 @@ const LlmTaskSlot = ({
   compact,
   feedback,
   onFeedback,
+  analyticsSource,
 }: {
   definition: ClassifierDefinition;
   slot: LlmSlot | undefined;
@@ -64,24 +65,28 @@ const LlmTaskSlot = ({
   compact: boolean;
   feedback?: boolean | null;
   onFeedback?: (value: boolean) => void;
+  analyticsSource: DemoTraceLinkSource;
 }) => {
   if (slot?.status === "success") {
     return (
-      <div className={compact ? "space-y-1.5" : "space-y-3"}>
+      <div className={compact ? "min-w-0" : "space-y-3"}>
         <SentimentResultPanel
           answer={slot.answer}
           compact={compact}
           feedback={feedback}
           onFeedback={onFeedback}
         />
-        <DemoTraceLink
-          traceUrl={buildDemoTraceUrl({
-            traceId: slot.traceId,
-            campaign: "blog",
-          })}
-          source="sentiment_classifier"
-          className={compact ? "text-xs" : undefined}
-        />
+        {/* Compact multi-classification: one shared Open-trace footer on the column. */}
+        {!compact && (
+          <DemoTraceLink
+            traceUrl={buildDemoTraceUrl({
+              traceId: slot.traceId,
+              campaign: "blog",
+            })}
+            source={analyticsSource}
+            className={undefined}
+          />
+        )}
       </div>
     );
   }
@@ -148,17 +153,17 @@ const DecisionEnginePanel = ({
 }) => (
   <div
     className={cn(
-      "rounded-[2px] border border-line-structure",
+      "rounded-[2px] border border-line-structure min-w-0 overflow-hidden",
       compact ? "p-2 space-y-1.5" : "p-3 space-y-2",
     )}
   >
-    <div className="flex items-start justify-between gap-2">
-      <div>
+    <div className="flex items-start justify-between gap-2 min-w-0">
+      <div className="min-w-0">
         <h3 className="text-sm font-semibold text-text-primary">{title}</h3>
         <p className="text-[11px] text-muted-foreground">{subtitle}</p>
       </div>
       {model && (
-        <span className="text-[11px] text-muted-foreground font-mono">
+        <span className="text-[11px] text-muted-foreground font-mono shrink-0 truncate max-w-[40%]">
           {model}
         </span>
       )}
@@ -480,7 +485,10 @@ export const SentimentClassifierCompare = ({
 
         {(hasResults || loading) && (
           <div
-            className={cn("grid md:grid-cols-3", compact ? "gap-2" : "gap-3")}
+            className={cn(
+              "grid md:grid-cols-3 min-w-0",
+              compact ? "gap-2" : "gap-3",
+            )}
           >
             <DecisionEnginePanel
               title="TypeSafe Jev"
@@ -520,12 +528,12 @@ export const SentimentClassifierCompare = ({
 
             <div
               className={cn(
-                "rounded-[2px] border border-line-structure",
+                "rounded-[2px] border border-line-structure min-w-0 overflow-hidden",
                 compact ? "p-2 space-y-1.5" : "p-3 space-y-2",
               )}
             >
-              <div className="flex items-start justify-between gap-2">
-                <div>
+              <div className="flex items-start justify-between gap-2 min-w-0">
+                <div className="min-w-0">
                   <h3 className="text-sm font-semibold text-text-primary">
                     GPT-5.6 Luna
                   </h3>
@@ -542,15 +550,16 @@ export const SentimentClassifierCompare = ({
                 )}
               </div>
               {llmSlots && (
-                <div className={compact ? "space-y-1" : "space-y-4"}>
+                <div className={compact ? "space-y-1 min-w-0" : "space-y-4"}>
                   {selected.map((definition, index) => (
                     <div
                       key={definition.id}
-                      className={
+                      className={cn(
+                        "min-w-0",
                         !compact && index > 0
                           ? "border-t border-line-structure pt-4"
-                          : undefined
-                      }
+                          : undefined,
+                      )}
                     >
                       <LlmTaskSlot
                         definition={definition}
@@ -558,6 +567,7 @@ export const SentimentClassifierCompare = ({
                         index={index}
                         total={selected.length}
                         compact={compact}
+                        analyticsSource={analyticsSource}
                         feedback={
                           compact ||
                           firstLlmSuccess?.answer.id !== definition.id
@@ -579,6 +589,18 @@ export const SentimentClassifierCompare = ({
                       />
                     </div>
                   ))}
+                  {compact && firstLlmSuccess && (
+                    <div className="border-t border-line-structure pt-1.5">
+                      <DemoTraceLink
+                        traceUrl={buildDemoTraceUrl({
+                          traceId: firstLlmSuccess.traceId,
+                          campaign: "blog",
+                        })}
+                        source={analyticsSource}
+                        className="w-full justify-center text-xs"
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
