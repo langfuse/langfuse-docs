@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 type ContentColumnsProps = {
   children: ReactNode;
   showAside?: boolean;
+  showLeftSidebar?: boolean;
   leftSidebar?: ReactNode;
   rightSidebar?: ReactNode;
   className?: string;
@@ -20,10 +21,12 @@ type ContentColumnsProps = {
  * Three-column layout: left sidebar | content | right sidebar.
  * Used inside PageChrome (or any wrapper that provides the outer chrome).
  * Pass `leftSidebar` / `rightSidebar` to swap the default sidebars.
+ * Set `showLeftSidebar={false}` to drop the left column and give the page more width.
  */
 export function ContentColumns({
   children,
   showAside = true,
+  showLeftSidebar = true,
   leftSidebar,
   rightSidebar,
   className,
@@ -37,7 +40,14 @@ export function ContentColumns({
         className,
       )}
     >
-      {leftSidebar ?? <HomeSidebar />}
+      {showLeftSidebar ? (
+        (leftSidebar ?? <HomeSidebar />)
+      ) : (
+        <div
+          aria-hidden
+          className="hidden lg:block w-px shrink-0 bg-line-structure"
+        />
+      )}
       <HomeMainArea>
         {children}
         <Footer className={footerClassName} />
@@ -66,6 +76,7 @@ type HomeLayoutProps = ContentColumnsProps & {
 export function HomeLayout({
   children,
   showAside = true,
+  showLeftSidebar = true,
   leftSidebar,
   rightSidebar,
   className,
@@ -76,6 +87,7 @@ export function HomeLayout({
     <PageChrome forceLight={forceLight}>
       <ContentColumns
         showAside={showAside}
+        showLeftSidebar={showLeftSidebar}
         leftSidebar={leftSidebar}
         rightSidebar={rightSidebar}
         className={className}
