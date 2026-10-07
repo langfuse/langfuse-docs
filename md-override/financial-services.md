@@ -124,7 +124,7 @@ Support anomaly detection and investigation workflows — reduce cost of service
 
 ### AI-powered advisory
 
-Observe multi-step advisory flows, score outcomes, and keep an audit trail suitable for model risk review.
+Observe and improve multi-step advisory flows, score outcomes, and keep an audit trail suitable for model risk review. Evaluate your system on representative cases before it runs in production.
 
 ### Credit onboarding & underwriting
 
@@ -138,7 +138,7 @@ DKB · 20,000 conversations / day
 
 ### [Govern coding agents across the whole engineering organization](/coding-agents)
 
-Trace Claude Code, Codex, Cursor, GitHub Copilot, and the OpenAI Agents SDK with per-developer setup in minutes and no proxy or gateway in the way. See cost per developer, project, and model, analyze which tools run, fail, or precede abandoned sessions, reconstruct any session end to end, and search across sessions to find who used a given API or pattern.
+Trace Claude Code, Codex, Cursor, OpenCode, and GitHub Copilot with per-developer setup in minutes and no proxy or gateway in the way. See cost per developer, project, and model, analyze which tools run, fail, or precede abandoned sessions, reconstruct any session end to end, and search across sessions.
 
 ## Learn how to ship reliable agents in financial services
 

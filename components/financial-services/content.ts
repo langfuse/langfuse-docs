@@ -234,24 +234,28 @@ export const financialServicesUseCases = [
   {
     area: "Compliance",
     title: "Compliance monitoring",
+    icon: "shield-check" as const,
     description:
       "Run evals that check AI outputs against loaded regulations and policies. Catch non-compliant responses across back-office and customer-facing flows before they ship.",
   },
   {
     area: "Compliance",
     title: "AML (anti-money laundering)",
+    icon: "search" as const,
     description:
       "Support anomaly detection and investigation workflows — reduce cost of service and risk with better observability of agent/tool behavior.",
   },
   {
     area: "Investing",
     title: "AI-powered advisory",
+    icon: "line-chart" as const,
     description:
-      "Observe multi-step advisory flows, score outcomes, and keep an audit trail suitable for model risk review.",
+      "Observe and improve multi-step advisory flows, score outcomes, and keep an audit trail suitable for model risk review. Evaluate your system on representative cases before it runs in production.",
   },
   {
     area: "Risk",
     title: "Credit onboarding & underwriting",
+    icon: "clipboard-check" as const,
     description:
       "Trace agents that combine identity, fraud and credit-bureau checks into a risk summary. Score decisions, flag drift, and keep the auditable trail that credit and model risk teams require.",
     featured: true,
@@ -259,6 +263,7 @@ export const financialServicesUseCases = [
   {
     area: "Support",
     title: "Customer support agents in Financial Services",
+    icon: "messages-square" as const,
     description:
       "Raise autonomy rate of AI support agents: the share of cases resolved without human intervention. Trace edge cases, score good/bad runs, and iterate so agents cover more of the long tail safely.",
     proof: "DKB · 20,000 conversations / day",
@@ -267,8 +272,9 @@ export const financialServicesUseCases = [
   {
     area: "Engineering",
     title: "Govern coding agents across the whole engineering organization",
+    icon: "code-2" as const,
     description:
-      "Trace Claude Code, Codex, Cursor, GitHub Copilot, and the OpenAI Agents SDK with per-developer setup in minutes and no proxy or gateway in the way. See cost per developer, project, and model, analyze which tools run, fail, or precede abandoned sessions, reconstruct any session end to end, and search across sessions to find who used a given API or pattern.",
+      "Trace Claude Code, Codex, Cursor, OpenCode, and GitHub Copilot with per-developer setup in minutes and no proxy or gateway in the way. See cost per developer, project, and model, analyze which tools run, fail, or precede abandoned sessions, reconstruct any session end to end, and search across sessions.",
     href: "/coding-agents",
   },
 ] as const;
