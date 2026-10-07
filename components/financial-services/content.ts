@@ -138,62 +138,6 @@ export const financialServicesDeploymentModes = [
 export type FinancialServicesDeploymentModeId =
   (typeof financialServicesDeploymentModes)[number]["id"];
 
-export const financialServicesTrace = {
-  label: "credit-onboarding",
-  outcome: "Application referred to an underwriter",
-  detail: "Bureau score 642 · Summary: refer · Human review queued",
-  spans: [
-    {
-      name: "credit-onboarding-agent",
-      type: "agent" as const,
-      indent: false,
-      offset: "0%",
-      width: "100%",
-      highlight: false,
-    },
-    {
-      name: "identity.verify",
-      type: "tool" as const,
-      indent: true,
-      offset: "2%",
-      width: "16%",
-      highlight: false,
-    },
-    {
-      name: "fraud.screen",
-      type: "tool" as const,
-      indent: true,
-      offset: "18%",
-      width: "22%",
-      highlight: false,
-    },
-    {
-      name: "credit_bureau.lookup",
-      type: "tool" as const,
-      indent: true,
-      offset: "20%",
-      width: "40%",
-      highlight: false,
-    },
-    {
-      name: "risk-summary",
-      type: "llm" as const,
-      indent: true,
-      offset: "62%",
-      width: "28%",
-      highlight: true,
-    },
-    {
-      name: "policy-compliance",
-      type: "eval" as const,
-      indent: true,
-      offset: "90%",
-      width: "10%",
-      highlight: false,
-    },
-  ],
-};
-
 export const financialServicesEvalColumns = [
   {
     title: "Evaluate AI quality",
