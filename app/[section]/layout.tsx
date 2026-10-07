@@ -24,9 +24,5 @@ export default function SectionLayout({ children, params }: LayoutProps) {
     notFound();
   }
 
-  return (
-    <HomeLayout showLeftSidebar={section !== "financial-services"}>
-      {children}
-    </HomeLayout>
-  );
+  return <HomeLayout>{children}</HomeLayout>;
 }
