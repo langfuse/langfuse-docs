@@ -269,18 +269,6 @@ export const financialServicesUseCases = [
       "Trace Claude Code, Codex, Cursor, GitHub Copilot, and the OpenAI Agents SDK with per-developer setup in minutes and no proxy or gateway in the way. See cost per developer, project, and model, analyze which tools run, fail, or precede abandoned sessions, reconstruct any session end to end, and search across sessions to find who used a given API or pattern.",
     href: "/coding-agents",
   },
-  {
-    area: "Research",
-    title: "Research & enterprise knowledge search",
-    description:
-      "Build long-running agents for stock/portfolio research and B2B knowledge work. Optimize tool selection, knowledge-base coverage, and output quality: speed up, quality up, cost down.",
-  },
-  {
-    area: "Operations",
-    title: "Internal process optimization",
-    description:
-      "Instrument internal copilots and workflow agents so operations teams can improve quality while controlling cost and risk.",
-  },
 ] as const;
 
 export const financialServicesFaqs: FAQItem[] = [
