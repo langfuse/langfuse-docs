@@ -15,7 +15,7 @@ Observe and evaluate AI agents across your institution. Give engineering, platfo
 - **Flag potential policy violations:** with evals that score outputs against your policies and regulations.
 - **Self-host or air-gap:** deploy with no internet access, lock to internal users via VPN to cater for data sensitivity needs.
 
-[ISO 27001](/security/iso27001) · [SOC 2](/security/soc2) · [GDPR](/security/gdpr) · [HIPAA](/security/hipaa) · [MIT · open source](/handbook/chapters/open-source) · [Government (available in Q4 2026)](/self-hosting/configuration/hardening#hardening-for-government) · [Security & compliance](/security)
+[ISO 27001](/security/iso27001) · [SOC 2](/security/soc2) · [GDPR](/security/gdpr) · [MIT · open source](/handbook/chapters/open-source) · [Government (available in Q4 2026)](/self-hosting/configuration/hardening#hardening-for-government) · [Security & compliance](/security)
 
 ## Talk to a financial services expert at Langfuse
 

@@ -16,9 +16,11 @@ import HipaaSVG from "./home/security/hipaa.svg";
  */
 export function SecurityBadgesGrid({
   compact = false,
+  showHipaa = true,
   className,
 }: {
   compact?: boolean;
+  showHipaa?: boolean;
   className?: string;
 } = {}) {
   const imageClass = compact
@@ -71,15 +73,17 @@ export function SecurityBadgesGrid({
           }
         />
       </Link>
-      <Link href="/security/hipaa" className="shrink-0">
-        <Image
-          src={HipaaSVG}
-          alt="HIPAA"
-          width={compact ? 48 : 59}
-          height={compact ? 32 : 40}
-          className={hipaaClass}
-        />
-      </Link>
+      {showHipaa ? (
+        <Link href="/security/hipaa" className="shrink-0">
+          <Image
+            src={HipaaSVG}
+            alt="HIPAA"
+            width={compact ? 48 : 59}
+            height={compact ? 32 : 40}
+            className={hipaaClass}
+          />
+        </Link>
+      ) : null}
     </div>
   );
 }
