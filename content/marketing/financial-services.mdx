@@ -17,6 +17,7 @@ import { TrustPoints } from "@/components/financial-services/TrustPoints";
 import { UseCaseGrid } from "@/components/financial-services/UseCaseGrid";
 import { financialServicesFaqs } from "@/components/financial-services/content";
 import { MarketoContactFormCard } from "@/components/MarketoContactForm";
+import { SecurityBadgesGrid } from "@/components/SecurityBadgesGrid";
 import { FAQAccordion } from "@/components/shared/FAQAccordion";
 import { Button } from "@/components/ui/button";
 import { TextHighlight } from "@/components/ui/text-highlight";
@@ -47,18 +48,26 @@ import { BookOpen, Play, Radar } from "lucide-react";
         </Button>
       </div>
       <HeroReasons />
-      <div className="mt-5 flex flex-wrap gap-2">
-        <a href="/security/soc2" className="rounded-full border border-line-structure px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.04em] text-text-tertiary hover:text-text-primary">SOC 2 Type II</a>
-        <a href="/security/iso27001" className="rounded-full border border-line-structure px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.04em] text-text-tertiary hover:text-text-primary">ISO 27001</a>
-        <a href="/security/gdpr" className="rounded-full border border-line-structure px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.04em] text-text-tertiary hover:text-text-primary">GDPR</a>
-        <a href="/handbook/chapters/open-source" className="rounded-full border border-line-structure px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.04em] text-text-tertiary hover:text-text-primary">MIT · open source</a>
-        <a href="/self-hosting/configuration/hardening#hardening-for-government" className="rounded-full border border-line-structure px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.04em] text-text-tertiary hover:text-text-primary">Government (available in Q4 2026)</a>
+      <div className="mt-5">
+        <SecurityBadgesGrid compact />
       </div>
-      <p className="mt-3">
-        <a href="/security" className="text-[13px] text-text-secondary underline decoration-line-structure underline-offset-4 hover:text-text-primary">
+      <div className="mt-4 flex flex-wrap gap-x-3 gap-y-1 text-[13px] text-text-secondary">
+        <a href="/handbook/chapters/open-source" className="underline decoration-line-structure underline-offset-4 hover:text-text-primary">
+          {"MIT · open source"}
+        </a>
+        <span aria-hidden className="text-text-tertiary">
+          {"·"}
+        </span>
+        <a href="/self-hosting/configuration/hardening#hardening-for-government" className="underline decoration-line-structure underline-offset-4 hover:text-text-primary">
+          {"Government (available in Q4 2026)"}
+        </a>
+        <span aria-hidden className="text-text-tertiary">
+          {"·"}
+        </span>
+        <a href="/security" className="underline decoration-line-structure underline-offset-4 hover:text-text-primary">
           {"Security & compliance →"}
         </a>
-      </p>
+      </div>
     </div>
 
     <div id="book" className="flex min-w-0 items-start bg-surface-1 px-4 py-4 sm:px-6 sm:py-5">
