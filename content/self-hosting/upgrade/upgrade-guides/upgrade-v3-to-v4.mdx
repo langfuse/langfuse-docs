@@ -205,7 +205,11 @@ GRANT SELECT ON system.query_log* TO 'user';
 
 -- Merge control on the intermediate table used by the historic backfill
 GRANT SYSTEM SYNC REPLICA, SYSTEM MERGES, ALTER SETTINGS ON default.observations_pid_tid_sorting TO 'user';
+```
 
+Which of the three is used depends on the table engine — `SYSTEM MERGES` on self-managed MergeTree, `ALTER SETTINGS` on replicated and SharedMergeTree (ClickHouse Cloud), `SYSTEM SYNC REPLICA` on replicated engines — so granting all three keeps the backfill working on any deployment.
+
+```sql
 -- Clustered deployments (CLICKHOUSE_CLUSTER_ENABLED=true) only
 GRANT READ ON REMOTE TO 'user';
 GRANT CLUSTER ON *.* TO 'user';
