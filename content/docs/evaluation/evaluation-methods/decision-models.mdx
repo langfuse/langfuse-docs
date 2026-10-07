@@ -15,6 +15,8 @@ Decision models answer **typed questions** about an input instead of generating 
 
 Use a decision model when the verdict is narrow and typed: a label, a level on a rubric, or a yes/no probability. Use [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) when you need written reasoning or the possible answers are too open-ended to define upfront.
 
+<span id="how-jev-as-a-judge-works" />
+
 ## How decision-model evaluators work
 
 One decision-model evaluator consists of:
@@ -24,6 +26,8 @@ One decision-model evaluator consists of:
 3. **One score per question**: the typed answer becomes a Langfuse score with the score name you set on the question. Probabilities and confidence are stored in the score metadata where the provider returns them.
 
 This lets you score one observation against several criteria at once, for example topic, frustration, and out-of-scope in one evaluator.
+
+<span id="why-use-jev-as-a-judge" />
 
 ## Why use a decision model?
 
@@ -70,6 +74,8 @@ Some tips for each type:
 
 Go to **Settings → LLM Connections** and add an [OpenAI connection](#connect-openai) or a [TypeSafe Jev connection](#connect-typesafe-jev), or use an existing compatible connection.
 
+<span id="create-a-jev-evaluator" />
+
 ### Create a decision-model evaluator
 
 Go to the [Evaluators page](https://cloud.langfuse.com/project/~/evals) and click **New evaluator**. In the template gallery, click **New decision model evaluator** to start from scratch, then select your OpenAI or TypeSafe connection and model. You can also pick one of the templates:
@@ -89,6 +95,8 @@ Add one question per criterion. For each question:
 2. Write the question. The instruction format depends on the selected provider.
 3. Define the allowed answers: options with descriptions for Choice, ordered levels for Score, or optional `true` / `false` criteria for Yes / no.
 4. Set the score name. Langfuse suggests one from the question; each question writes a score under this name.
+
+<span id="build-the-state" />
 
 ### Map the model input
 
