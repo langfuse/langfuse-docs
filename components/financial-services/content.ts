@@ -69,22 +69,27 @@ export const financialServicesTrustPoints = [
   {
     title: "Never in the inference path",
     body: "Langfuse observes your model and tool calls; it does not proxy them.",
+    href: "/docs/observability/features/queuing-batching",
   },
   {
     title: "Deployment where your data must stay",
     body: "Langfuse Cloud in the EU, US or Japan, self-hosted in your VPC, or fully air-gapped.",
+    href: "/security/data-regions",
   },
   {
     title: "Multiple layers of data redaction",
     body: "Client-side and server-side PII protections before anything is stored.",
+    href: "/docs/observability/features/masking",
   },
   {
     title: "Enterprise access controls",
     body: "SSO and role-based access control scoped to organizations and projects.",
+    href: "/docs/administration/rbac",
   },
   {
     title: "Audit logs",
     body: "Record both LLM activity and developer actions for internal and supervisory review.",
+    href: "/docs/administration/audit-logs",
   },
 ] as const;
 
@@ -93,6 +98,7 @@ export const financialServicesDeploymentModes = [
     id: "cloud" as const,
     label: "Cloud",
     title: "Managed cloud in the EU, US or Japan.",
+    href: "/security/data-regions",
     flow: ["Your app", "OTel SDK", "Langfuse Cloud · EU"],
     specs: [
       { k: "Regions", v: "EU · US · JP" },
@@ -105,6 +111,7 @@ export const financialServicesDeploymentModes = [
     id: "self-host" as const,
     label: "Self-host",
     title: "Run Langfuse in your own VPC.",
+    href: "/self-hosting",
     flow: ["Your app", "OTel SDK", "Langfuse · your VPC"],
     specs: [
       { k: "Infra", v: "Kubernetes · Docker" },
@@ -117,6 +124,7 @@ export const financialServicesDeploymentModes = [
     id: "air-gapped" as const,
     label: "Air-gapped",
     title: "No internet access. No vendor access.",
+    href: "/self-hosting/security/networking",
     flow: ["Your app", "OTel SDK", "Langfuse · isolated"],
     specs: [
       { k: "Outbound traffic", v: "None" },

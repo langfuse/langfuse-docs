@@ -64,13 +64,13 @@ Bureau score 642 · Summary: refer · Human review queued
 
 ## Run Langfuse where your data is allowed to live
 
-1. **Never in the inference path.** Langfuse observes your model and tool calls; it does not proxy them.
-2. **Deployment where your data must stay.** Langfuse Cloud in the EU, US or Japan, self-hosted in your VPC, or fully air-gapped.
-3. **Multiple layers of data redaction.** Client-side and server-side PII protections before anything is stored.
-4. **Enterprise access controls.** SSO and role-based access control scoped to organizations and projects.
-5. **Audit logs.** Record both LLM activity and developer actions for internal and supervisory review.
+1. **[Never in the inference path](/docs/observability/features/queuing-batching).** Langfuse observes your model and tool calls; it does not proxy them.
+2. **[Deployment where your data must stay](/security/data-regions).** Langfuse Cloud in the EU, US or Japan, self-hosted in your VPC, or fully air-gapped.
+3. **[Multiple layers of data redaction](/docs/observability/features/masking).** Client-side and server-side PII protections before anything is stored.
+4. **[Enterprise access controls](/docs/administration/rbac).** SSO and role-based access control scoped to organizations and projects.
+5. **[Audit logs](/docs/administration/audit-logs).** Record both LLM activity and developer actions for internal and supervisory review.
 
-### Cloud
+### [Cloud](/security/data-regions)
 
 Managed cloud in the EU, US or Japan.
 
@@ -79,7 +79,7 @@ Managed cloud in the EU, US or Japan.
 - Data residency: Pinned to region
 - Support: Enterprise SLA
 
-### Self-host
+### [Self-host](/self-hosting)
 
 Run Langfuse in your own VPC.
 
@@ -88,7 +88,7 @@ Run Langfuse in your own VPC.
 - Access: SSO · VPN-only
 - License: MIT core + Enterprise
 
-### Air-gapped
+### [Air-gapped](/self-hosting/security/networking)
 
 No internet access. No vendor access.
 

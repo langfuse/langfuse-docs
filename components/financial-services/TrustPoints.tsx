@@ -16,7 +16,13 @@ export function TrustPoints() {
               {point.title}
             </p>
             <p className="mt-1 text-[14px] leading-[1.45] text-text-secondary">
-              {point.body}
+              {point.body}{" "}
+              <a
+                href={point.href}
+                className="text-text-primary underline decoration-line-structure underline-offset-4 hover:text-text-primary"
+              >
+                {"Docs →"}
+              </a>
             </p>
           </div>
         </li>

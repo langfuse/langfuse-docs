@@ -80,6 +80,12 @@ export function DeploymentModeSlider() {
             </div>
           ))}
         </dl>
+        <a
+          href={mode.href}
+          className="mt-4 inline-block text-[13px] text-text-primary underline decoration-line-structure underline-offset-4 hover:text-text-primary"
+        >
+          {"Docs →"}
+        </a>
       </div>
     </div>
   );
