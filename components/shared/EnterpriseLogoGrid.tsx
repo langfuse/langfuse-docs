@@ -16,8 +16,8 @@ import merckLogo from "../home/img/merck.svg";
 import pigmentLogo from "../home/img/pigment.svg";
 import rampLogo from "../home/img/ramp.svg";
 import rocketMoneyLogo from "../home/img/rocket-money.svg";
-import samsaraLogo from "../home/img/samsara.svg";
 import sumupLogo from "../home/img/sumup.svg";
+import swisscomLogo from "../home/img/swisscom.svg";
 import { cn } from "@/lib/utils";
 import { LinkBox } from "@/components/ui/link-box";
 import { wordmarkDisplaySize } from "@/components/shared/wordmark";
@@ -81,8 +81,8 @@ const companies: CompanyLogo[] = [
     customerStoryPath: "/users/merckgroup",
   },
   {
-    name: "Samsara",
-    logo: samsaraLogo,
+    name: "Swisscom",
+    logo: swisscomLogo,
   },
   {
     name: "freee",
