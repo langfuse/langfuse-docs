@@ -25,18 +25,18 @@ One decision-model evaluator consists of:
 
 This lets you score one observation against several criteria at once, for example topic, frustration, and out-of-scope in one evaluator.
 
+## Why use a decision model?
+
+Decision models are designed for narrow, typed decisions where you can define the possible answers upfront. They return structured scores and probabilities without generating a free-form response.
+
+Use them for classification, rubric levels, and yes/no checks that you want to apply consistently across many observations. One evaluator can answer several questions about the same input in a single call.
+
 ## OpenAI vs. TypeSafe Jev
 
 - **OpenAI:** evaluates one general state named `input`. Questions use plain text and cannot reference individual parts of the state.
 - **TypeSafe Jev:** evaluates a JSON state with named fields. Questions can explicitly reference those fields using backticks, for example: ``Compare `output` with `expectedOutput`.``
 
 Both support Choice, Score, and Yes / no questions.
-
-## Why use a decision model?
-
-Decision models are designed for narrow, typed decisions where you can define the possible answers upfront. They return structured scores and probabilities without generating a free-form response.
-
-Use them for classification, rubric levels, and yes/no checks that you want to apply consistently across many observations. One evaluator can answer several questions about the same input in a single call.
 
 ## Question types [#question-types]
 
