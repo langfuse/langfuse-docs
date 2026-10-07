@@ -187,44 +187,46 @@ export const financialServicesTrace = {
   ],
 };
 
-export const financialServicesEvalWorkflows = [
+export const financialServicesEvalCapabilities = [
   {
     title: "Offline evaluation",
-    body: "Fail the pull request when a change regresses against your golden dataset.",
-    href: "/docs/evaluation/get-started/offline",
+    body: "golden datasets built from production traces, versioned experiments with baseline comparison, and a release gate that fails the pull request on regression.",
   },
   {
     title: "Online evaluation",
-    body: "Score live traffic and alert Slack or GitHub when quality drifts.",
-    href: "/docs/evaluation/get-started/online",
+    body: "deterministic sampling of live traffic, LLM-as-judge and code evaluators, and threshold alerts to Slack, webhooks, or GitHub Actions when quality drifts.",
   },
   {
     title: "Human review",
-    body: "Send failures to domain experts and fold them into the regression set.",
-    href: "/docs/evaluation/evaluation-methods/annotation-queues",
+    body: "annotation queues for subject-matter experts, corrected outputs, and one-click promotion of failures into a permanent regression set.",
   },
-] as const;
-
-export const financialServicesEvalSupporting = [
   {
     title: "Judge calibration",
-    href: "/docs/evaluation/scores/score-analytics",
+    body: "Score Analytics measures agreement between human labels and model judges (Cohen's Kappa, F1, Pearson, Spearman) so you can defend the judge to model risk.",
   },
   {
-    title: "prompt governance",
-    href: "/docs/prompt-management/features/prompt-version-control",
+    title: "Prompt governance",
+    body: "immutable versions, staging and production labels, protected labels for separation of duties, and full audit history.",
   },
   {
-    title: "redaction",
-    href: "/docs/observability/features/masking",
+    title: "Gateway and model integration",
+    body: "OTLP ingest from your AI gateway, judge models pinned to your own Bedrock, Azure OpenAI, Vertex, or OpenAI connection.",
   },
   {
-    title: "access controls",
-    href: "/docs/administration/rbac",
+    title: "Redaction",
+    body: "masking in the SDK before data leaves your application, with trace structure preserved for debugging.",
   },
   {
-    title: "self-hosting",
-    href: "/self-hosting",
+    title: "Administration",
+    body: "organizations and projects as the data boundary, project-level RBAC, OIDC SSO with domain enforcement, SCIM provisioning, audit logs, and a metrics API for chargebacks.",
+  },
+  {
+    title: "Dashboards as code",
+    body: "dashboards and widgets managed through the API and CLI, versioned in Git, deployed identically to dev, staging, and prod.",
+  },
+  {
+    title: "Operations",
+    body: "documented self-hosting on AWS with Terraform and Helm, a published release cadence, and autoscaling guidance.",
   },
 ] as const;
 

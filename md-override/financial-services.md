@@ -97,17 +97,20 @@ No internet access. No vendor access.
 - Users: Internal only, via VPN
 - Updates: Offline image transfer
 
-## Full coverage of your evaluation needs
+## Built for AI evaluation needs of financial institutions
 
-Test changes, monitor production, and bring expert feedback into your evaluation workflow.
+Platform and risk teams in financial services are looking for a complete observability and eval suite. Langfuse covers the full surface, and we are open about where the work lives in your pipeline rather than in our UI.
 
-**Offline evaluation.** Fail the pull request when a change regresses against your golden dataset. [Offline evaluation](/docs/evaluation/get-started/offline)
-
-**Online evaluation.** Score live traffic and alert Slack or GitHub when quality drifts. [Online evaluation](/docs/evaluation/get-started/online)
-
-**Human review.** Send failures to domain experts and fold them into the regression set. [Human review](/docs/evaluation/evaluation-methods/annotation-queues)
-
-Also: [Judge calibration](/docs/evaluation/scores/score-analytics), [prompt governance](/docs/prompt-management/features/prompt-version-control), [redaction](/docs/observability/features/masking), [access controls](/docs/administration/rbac), and [self-hosting](/self-hosting).
+- **Offline evaluation:** golden datasets built from production traces, versioned experiments with baseline comparison, and a release gate that fails the pull request on regression.
+- **Online evaluation:** deterministic sampling of live traffic, LLM-as-judge and code evaluators, and threshold alerts to Slack, webhooks, or GitHub Actions when quality drifts.
+- **Human review:** annotation queues for subject-matter experts, corrected outputs, and one-click promotion of failures into a permanent regression set.
+- **Judge calibration:** Score Analytics measures agreement between human labels and model judges (Cohen's Kappa, F1, Pearson, Spearman) so you can defend the judge to model risk.
+- **Prompt governance:** immutable versions, staging and production labels, protected labels for separation of duties, and full audit history.
+- **Gateway and model integration:** OTLP ingest from your AI gateway, judge models pinned to your own Bedrock, Azure OpenAI, Vertex, or OpenAI connection.
+- **Redaction:** masking in the SDK before data leaves your application, with trace structure preserved for debugging.
+- **Administration:** organizations and projects as the data boundary, project-level RBAC, OIDC SSO with domain enforcement, SCIM provisioning, audit logs, and a metrics API for chargebacks.
+- **Dashboards as code:** dashboards and widgets managed through the API and CLI, versioned in Git, deployed identically to dev, staging, and prod.
+- **Operations:** documented self-hosting on AWS with Terraform and Helm, a published release cadence, and autoscaling guidance.
 
 ## What financial services teams build on Langfuse.
 

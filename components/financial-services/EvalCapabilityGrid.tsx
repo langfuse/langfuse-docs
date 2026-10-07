@@ -1,46 +1,23 @@
-import {
-  financialServicesEvalSupporting,
-  financialServicesEvalWorkflows,
-} from "./content";
+import { Check } from "lucide-react";
+import { financialServicesEvalCapabilities } from "./content";
 
 export function EvalCapabilityGrid() {
   return (
-    <div className="mt-8">
-      <div className="grid gap-5 md:grid-cols-3">
-        {financialServicesEvalWorkflows.map((item) => (
-          <a
-            key={item.title}
-            href={item.href}
-            className="flex h-full flex-col gap-3 border border-line-structure bg-surface-bg p-6 no-underline transition-colors hover:border-line-cta"
-          >
-            <h3 className="text-[18px] leading-[1.2] text-text-primary">
-              {item.title}
-            </h3>
-            <p className="text-[13px] leading-[1.45] text-text-secondary">
-              {item.body}
-            </p>
-          </a>
-        ))}
-      </div>
-      <p className="mt-6 max-w-[72ch] text-[13px] leading-[1.55] text-text-secondary">
-        Also:{" "}
-        {financialServicesEvalSupporting.map((item, index) => {
-          const isLast = index === financialServicesEvalSupporting.length - 1;
-          const isPenultimate =
-            index === financialServicesEvalSupporting.length - 2;
-          return (
-            <span key={item.href}>
-              <a
-                href={item.href}
-                className="text-text-primary underline decoration-line-structure underline-offset-4 hover:text-text-primary"
-              >
-                {item.title}
-              </a>
-              {isLast ? "." : isPenultimate ? ", and " : ", "}
-            </span>
-          );
-        })}
-      </p>
-    </div>
+    <ul className="mt-8 grid list-none gap-x-10 gap-y-5 p-0 md:grid-cols-2">
+      {financialServicesEvalCapabilities.map((item) => (
+        <li key={item.title} className="flex gap-3">
+          <Check
+            className="mt-0.5 h-4 w-4 shrink-0 text-text-primary"
+            strokeWidth={2.5}
+            aria-hidden
+          />
+          <p className="m-0 text-[14px] leading-[1.45] text-text-secondary">
+            <span className="font-medium text-text-primary">{item.title}</span>
+            {": "}
+            {item.body}
+          </p>
+        </li>
+      ))}
+    </ul>
   );
 }
