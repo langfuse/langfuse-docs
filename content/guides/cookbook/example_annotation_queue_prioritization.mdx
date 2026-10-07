@@ -839,7 +839,7 @@ Four API calls do the work: ensure a boolean [score config](https://api.referenc
 
 **The API does not reject duplicates.** Adding a trace that is already in the queue creates a second item, so `push_selection` lists the queue's items first and skips known ids. That check, together with the `review_policy` exclusion in Step 3, is what keeps a trace from being queued twice.
 
-**Record the decision first.** Each selected trace receives a categorical score named `review_policy` whose value is the quota that selected it, with metadata naming the queue, every policy that would also have chosen it, and the signal values it was chosen on. Step 6 reads that record back, so the human labels can be attributed to policies and compared with what the judges said at selection time, long after this run's memory is gone. The record goes through the synchronous scores endpoint, before the queue item, because `create_score` batches in the background, never raises on a failed send, and drops scores of unsampled traces when `LANGFUSE_SAMPLE_RATE` is below 1; it cannot promise that a queued trace has its record. If the cell stops partway, rerun it. It skips the traces this session already pushed, so an item a reviewer removed in the meantime stays removed, and writes the rest; the score id is derived from the trace id, so a rewritten record replaces the old one. After a kernel restart, a record without its item is reported in Step 3 and not added back, because it looks the same as an item a reviewer removed. Add the trace by hand to review it anyway.
+**Record the decision first.** Each selected trace receives a categorical score named `review_policy` whose value is the quota that selected it, with metadata naming the queue, every policy that would also have chosen it, and the signal values it was chosen on. Step 6 reads that record back, so the human labels can be attributed to policies and compared with what the judges said at selection time, long after this run's memory is gone. The record goes through the synchronous scores endpoint, before the queue item, because `create_score` batches in the background, never raises on a failed send, and drops scores of unsampled traces when `LANGFUSE_SAMPLE_RATE` is below 1; it cannot promise that a queued trace has its record. If the cell stops partway, rerun it. It resumes where it stopped: a decision this session already wrote is not written again, and an item a reviewer removed in the meantime stays removed. The score id is derived from the trace id, but Langfuse replaces a score with the same id only within the same UTC day, so a decision repeated on a later day leaves a second record; Step 6 keeps the latest. After a kernel restart, a record without its item is reported in Step 3 and not added back, because it looks the same as an item a reviewer removed. Add the trace by hand to review it anyway.
 
 
 ```python
@@ -888,21 +888,22 @@ def ensure_queue(name: str, score_config_ids: list[str]):
 
 
 def decision_score_id(trace_id: str) -> str:
-    """The review_policy score's id, fixed per trace so a second write replaces the first."""
+    """The review_policy score's id, fixed per trace: a retry on the same day replaces it."""
     return str(uuid5(NAMESPACE_URL, f"{POLICY_SCORE}/{trace_id}"))
 
 
-# Traces this session has already pushed. A rerun of Step 5 skips them, so an item a reviewer
-# removed in the meantime stays removed and only the unfinished rows are written again.
-pushed_this_session: set[str] = set()
+# What this session has written. A rerun of Step 5 resumes where it stopped: it never writes a
+# decision twice, and never puts back an item a reviewer removed in the meantime.
+decided_this_session: set[str] = set()
+queued_this_session: set[str] = set()
 
 
 def push_selection(selections: dict[str, pd.DataFrame], pushed: str, queue_id: str) -> int:
     """Record each decision, then add the trace to the queue, in rank order.
 
     The decision goes through the synchronous scores endpoint, which raises on failure, so no
-    trace enters the queue without one. Rerunning after a failure skips the traces this session
-    already pushed and writes the rest; a rewritten decision replaces the old one by id.
+    trace enters the queue without one. Rerunning after a failure resumes where it stopped and
+    skips the writes this session already made.
     """
     selection = selections[pushed]
     membership = {policy: set(frame["trace_id"]) for policy, frame in selections.items()}
@@ -910,34 +911,36 @@ def push_selection(selections: dict[str, pd.DataFrame], pushed: str, queue_id: s
     present = queued_trace_ids(queue_id)
     added = 0
     for row in selection.sort_values("rank").itertuples(index=False):
-        if row.trace_id in pushed_this_session:
+        if row.trace_id in queued_this_session:
             continue
-        langfuse.api.scores.create(
-            id=decision_score_id(row.trace_id),
-            trace_id=row.trace_id,
-            name=POLICY_SCORE,
-            value=row.source,
-            data_type="CATEGORICAL",
-            comment=f"rank {row.rank} of {len(selection)}; severity {row.severity_score:.2f}",
-            metadata={
-                "queue_id": queue_id,
-                "pushed": pushed,
-                "rank": int(row.rank),
-                "severity_score": float(row.severity_score),
-                "policies": [p for p, ids in membership.items() if row.trace_id in ids],
-                # The signals as selection saw them; Step 6 compares these with the human labels.
-                "signals": {
-                    name: None if pd.isna(value) else float(value)
-                    for name, value in signals.loc[row.trace_id].items()
+        if row.trace_id not in decided_this_session:
+            langfuse.api.scores.create(
+                id=decision_score_id(row.trace_id),
+                trace_id=row.trace_id,
+                name=POLICY_SCORE,
+                value=row.source,
+                data_type="CATEGORICAL",
+                comment=f"rank {row.rank} of {len(selection)}; severity {row.severity_score:.2f}",
+                metadata={
+                    "queue_id": queue_id,
+                    "pushed": pushed,
+                    "rank": int(row.rank),
+                    "severity_score": float(row.severity_score),
+                    "policies": [p for p, ids in membership.items() if row.trace_id in ids],
+                    # The signals as selection saw them; Step 6 compares them with the labels.
+                    "signals": {
+                        name: None if pd.isna(value) else float(value)
+                        for name, value in signals.loc[row.trace_id].items()
+                    },
                 },
-            },
-        )
+            )
+            decided_this_session.add(row.trace_id)
         if row.trace_id not in present:
             langfuse.api.annotation_queues.create_queue_item(
                 queue_id, object_id=row.trace_id, object_type="TRACE"
             )
             added += 1
-        pushed_this_session.add(row.trace_id)
+        queued_this_session.add(row.trace_id)
     return added
 ```
 
@@ -997,7 +1000,9 @@ if LIVE:
     # From the stored decision: the policies that chose each reviewed trace, and the signals
     # the trace had when they chose it.
     decisions = fetch_scores(name=POLICY_SCORE)
-    decisions = decisions[decisions["trace_id"].isin(reviewed_ids)].drop_duplicates("trace_id")
+    decisions = decisions[decisions["trace_id"].isin(reviewed_ids)]
+    # A decision repeated on a later day is a second record; the latest one wins.
+    decisions = decisions.sort_values("timestamp", ascending=False).drop_duplicates("trace_id")
     unattributed = reviewed_ids - set(decisions["trace_id"])
     if unattributed:
         print(f"{len(unattributed)} reviewed traces have no review_policy record; left out below")
