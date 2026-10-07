@@ -64,7 +64,7 @@ Bureau score 642 · Summary: refer · Human review queued
 - risk-summary (llm)
 - policy-compliance (eval)
 
-## Run it where your data is allowed to live.
+## Run Langfuse where your data is allowed to live
 
 1. **Deployment where your data must stay.** Langfuse Cloud in the EU, US or Japan, self-hosted in your VPC, or fully air-gapped.
 2. **Multiple layers of data redaction.** Client-side and server-side PII protections before anything is stored.
