@@ -10,7 +10,7 @@ import {
   DemoTraceLink,
   type DemoTraceLinkSource,
 } from "@/components/demoTraceLink";
-import { buildDemoProjectUrl, buildDemoTraceUrl } from "@/lib/demo-trace";
+import { buildDemoTraceUrl, buildDemoTracesListUrl } from "@/lib/demo-trace";
 import { SendIcon } from "lucide-react";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 import {
@@ -56,7 +56,6 @@ const LlmTaskSlot = ({
   compact,
   feedback,
   onFeedback,
-  analyticsSource,
 }: {
   definition: ClassifierDefinition;
   slot: LlmSlot | undefined;
@@ -65,7 +64,6 @@ const LlmTaskSlot = ({
   compact: boolean;
   feedback?: boolean | null;
   onFeedback?: (value: boolean) => void;
-  analyticsSource: DemoTraceLinkSource;
 }) => {
   if (slot?.status === "success") {
     return (
@@ -76,17 +74,6 @@ const LlmTaskSlot = ({
           feedback={feedback}
           onFeedback={onFeedback}
         />
-        {/* Compact multi-classification: one shared Open-trace footer on the column. */}
-        {!compact && (
-          <DemoTraceLink
-            traceUrl={buildDemoTraceUrl({
-              traceId: slot.traceId,
-              campaign: "blog",
-            })}
-            source={analyticsSource}
-            className={undefined}
-          />
-        )}
       </div>
     );
   }
@@ -567,7 +554,6 @@ export const SentimentClassifierCompare = ({
                         index={index}
                         total={selected.length}
                         compact={compact}
-                        analyticsSource={analyticsSource}
                         feedback={
                           compact ||
                           firstLlmSuccess?.answer.id !== definition.id
@@ -589,15 +575,24 @@ export const SentimentClassifierCompare = ({
                       />
                     </div>
                   ))}
-                  {compact && firstLlmSuccess && (
-                    <div className="border-t border-line-structure pt-1.5">
+                  {firstLlmSuccess && (
+                    <div
+                      className={cn(
+                        "border-t border-line-structure",
+                        compact ? "pt-1.5" : "pt-3",
+                      )}
+                    >
                       <DemoTraceLink
                         traceUrl={buildDemoTraceUrl({
                           traceId: firstLlmSuccess.traceId,
                           campaign: "blog",
                         })}
                         source={analyticsSource}
-                        className="w-full justify-center text-xs"
+                        className={
+                          compact
+                            ? "w-full justify-center text-xs"
+                            : "w-full justify-center"
+                        }
                       />
                     </div>
                   )}
@@ -630,9 +625,8 @@ export const SentimentClassifierCompare = ({
             compact ? "pt-2" : "pt-3",
           )}
         >
-          Traces in the{" "}
           <a
-            href={buildDemoProjectUrl({ campaign: "blog" })}
+            href={buildDemoTracesListUrl({ campaign: "blog" })}
             target="_blank"
             rel="noopener noreferrer"
             onClick={(event) => {
@@ -643,8 +637,9 @@ export const SentimentClassifierCompare = ({
             }}
             className="underline underline-offset-2 text-text-links hover:text-primary"
           >
-            public sample project
-          </a>
+            View traces
+          </a>{" "}
+          in the public sample project
           {compact
             ? ". "
             : " (`Sentiment-Classifier-Jev`, `Sentiment-Classifier-OpenAI-Decisions`, `Sentiment-Classifier-GPT`). Jev and OpenAI Decisions return a decision only; Luna adds reasoning. "}
