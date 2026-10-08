@@ -178,7 +178,36 @@ export type ResponseProps = HTMLAttributes<HTMLDivElement> & {
   parseIncompleteMarkdown?: boolean;
 };
 
+/** Recursively collect text from react-markdown code/pre children. */
+function extractTextFromNode(node: ReactNode): string {
+  if (node == null || typeof node === "boolean") return "";
+  if (typeof node === "string" || typeof node === "number") {
+    return String(node);
+  }
+  if (Array.isArray(node)) {
+    return node.map(extractTextFromNode).join("");
+  }
+  if (isValidElement(node)) {
+    const element = node as ReactElement<{ children?: ReactNode }>;
+    return extractTextFromNode(element.props?.children);
+  }
+  return "";
+}
+
+function extractCodeLanguage(children: ReactNode): string | undefined {
+  if (!isValidElement(children)) return undefined;
+  const className = (children.props as { className?: string })?.className;
+  if (typeof className !== "string") return undefined;
+  const match = /language-([^\s]+)/.exec(className);
+  return match?.[1];
+}
+
 const components: Options["components"] = {
+  p: ({ node, children, className, ...props }) => (
+    <p className={cn("whitespace-pre-line", className)} {...props}>
+      {children}
+    </p>
+  ),
   ol: ({ node, children, className, ...props }) => (
     <ol className={cn("ml-4 list-outside list-decimal", className)} {...props}>
       {children}
@@ -321,26 +350,20 @@ const components: Options["components"] = {
     );
   },
   pre: ({ node, className, children }) => {
-    let language = "javascript";
+    // Language lives on the nested <code class="language-…">, not on <pre>.
+    let language = extractCodeLanguage(children) ?? "text";
 
-    const languageClass = node?.properties?.className?.find((name) =>
-      name.startsWith("language-"),
-    );
+    const languageClass = Array.isArray(node?.properties?.className)
+      ? node.properties.className.find(
+          (name): name is string =>
+            typeof name === "string" && name.startsWith("language-"),
+        )
+      : undefined;
     if (languageClass) {
       language = languageClass.slice("language-".length);
     }
 
-    // Extract code content from children safely
-    let code = "";
-    if (isValidElement(children)) {
-      const element = children as ReactElement<{ children?: ReactNode }>;
-      const inner = element.props?.children;
-      if (typeof inner === "string") {
-        code = inner;
-      }
-    } else if (typeof children === "string") {
-      code = children;
-    }
+    const code = extractTextFromNode(children);
 
     return (
       <CodeBlock
@@ -348,10 +371,7 @@ const components: Options["components"] = {
         code={code}
         language={language}
       >
-        <CodeBlockCopyButton
-          onCopy={() => console.log("Copied code to clipboard")}
-          onError={() => console.error("Failed to copy code to clipboard")}
-        />
+        <CodeBlockCopyButton />
       </CodeBlock>
     );
   },

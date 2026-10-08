@@ -14,6 +14,10 @@ import { getActiveTraceId } from "@langfuse/tracing";
 import { after } from "next/server";
 import { flush } from "@/src/instrumentation";
 import { trace } from "@opentelemetry/api";
+import {
+  QA_CHATBOT_PROMPT_NAME,
+  withQaChatbotCodeFormatting,
+} from "@/components/qaChatbot/shared/flow_config";
 
 const langfuseClient = new LangfuseClient({
   baseUrl: process.env.NEXT_PUBLIC_EU_LANGFUSE_BASE_URL,
@@ -49,7 +53,7 @@ export const handler = async (req: Request) => {
       updateActiveObservation({ input: inputText }, { asType: "agent" });
       setActiveTraceIO({ input: inputText });
 
-      const prompt = await tracedGetPrompt("langfuse-docs-assistant-chat", {
+      const prompt = await tracedGetPrompt(QA_CHATBOT_PROMPT_NAME, {
         type: "chat",
       });
 
@@ -58,11 +62,15 @@ export const handler = async (req: Request) => {
         | "medium"
         | "high"
         | undefined;
-      const textVerbosity = prompt.config.textVerbosity as
+      // `low` tends to emit dense prose without markdown fences, which the
+      // chatbot UI cannot syntax-highlight. Floor at medium for readable code.
+      const configuredTextVerbosity = prompt.config.textVerbosity as
         | "low"
         | "medium"
         | "high"
         | undefined;
+      const textVerbosity =
+        configuredTextVerbosity === "low" ? "medium" : configuredTextVerbosity;
       const reasoningEffort = prompt.config.reasoningEffort as
         | "low"
         | "medium"
@@ -78,10 +86,12 @@ export const handler = async (req: Request) => {
       }));
 
       const compiledPrompt = prompt.compile({}, { chat_history: chatHistory });
-      const systemPrompt = compiledPrompt
-        .filter((message) => message.role === "system")
-        .map((message) => message.content)
-        .join("\n\n");
+      const systemPrompt = withQaChatbotCodeFormatting(
+        compiledPrompt
+          .filter((message) => message.role === "system")
+          .map((message) => message.content)
+          .join("\n\n"),
+      );
       const modelMessages = compiledPrompt.filter(
         (message) => message.role !== "system",
       );
@@ -110,7 +120,7 @@ export const handler = async (req: Request) => {
             reasoningEffort,
           } satisfies OpenAIResponsesProviderOptions,
         },
-        instructions: systemPrompt || undefined,
+        instructions: systemPrompt,
         messages: modelMessages,
         tools: tools as Parameters<typeof streamText>[0]["tools"],
         stopWhen: stepCountIs(10),
