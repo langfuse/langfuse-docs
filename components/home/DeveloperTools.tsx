@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { HomeSection } from "@/components/home/HomeSection";
 import { CornerBox, Heading, Link, TextHighlight } from "@/components/ui";
 import { Text } from "@/components/ui/text";
+import IconHalo from "@/components/icons/halo";
 
 const ASSISTANT_VIDEO_SRC =
   "https://static.langfuse.com/docs-videos/in-app-agent.mp4";
@@ -149,7 +150,8 @@ function AssistantFeature() {
         </div>
 
         <div className="flex max-w-[58ch] flex-col gap-3">
-          <h3 className="text-left font-sans text-[17px] font-medium text-text-primary">
+          <h3 className="flex items-center gap-2 text-left font-sans text-[17px] font-medium text-text-primary">
+            <IconHalo className="size-5 shrink-0 text-text-primary" />
             Langfuse Assistant
           </h3>
           <Text className="text-left">
