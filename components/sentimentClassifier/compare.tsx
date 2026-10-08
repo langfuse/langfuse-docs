@@ -224,9 +224,15 @@ const DecisionEnginePanel = ({
   </div>
 );
 
+/** Sources allowed on `demo:sentiment_analyze_submitted` (see PostHog events). */
+export type SentimentCompareAnalyticsSource =
+  | "jev_evals_blog"
+  | "sentiment_classifier"
+  | "openai_decisions_changelog";
+
 type SentimentClassifierCompareProps = HTMLAttributes<HTMLDivElement> & {
   /** PostHog / Open-trace analytics source for this embed. */
-  analyticsSource?: DemoTraceLinkSource;
+  analyticsSource?: SentimentCompareAnalyticsSource;
 };
 
 export const SentimentClassifierCompare = ({

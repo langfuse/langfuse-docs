@@ -15,54 +15,25 @@ import {
   type SentimentUsage,
 } from "./cost";
 import { parseClassifierIds, type ClassifierDefinition } from "./criteria";
-import type { ClassifierAnswer, ClassifierRunResult } from "./types";
+import type { ClassifierRunResult } from "./types";
+import {
+  DECISIONS_MODEL,
+  buildDecisionsRequest,
+  mapDecisionsAnswers,
+} from "./decisionsMapping";
 
 export type { ClassifierRunResult as DecisionsSentimentResult };
+export {
+  buildDecisionsRequest,
+  mapDecisionsAnswers,
+  asChoiceAnswer,
+} from "./decisionsMapping";
 
-const DECISIONS_MODEL = "gpt-6-luna";
 const DECISIONS_ENDPOINT = "https://api.openai.com/v1/decisions";
-
-type DecisionChoiceOption = {
-  value: string;
-  description: string;
-};
-
-type DecisionChoiceQuestion = {
-  type: "choice";
-  name: string;
-  instructions: string;
-  choices: DecisionChoiceOption[];
-};
-
-type DecisionChoiceProbability = {
-  value: string;
-  probability: number;
-};
-
-type DecisionChoiceAnswer = {
-  type: "choice";
-  name: string;
-  choice: string;
-  confidence: number;
-  probabilities: DecisionChoiceProbability[];
-};
-
-type DecisionRefusalAnswer = {
-  type: "refusal";
-  name?: string;
-};
-
-type DecisionAnswer =
-  | DecisionChoiceAnswer
-  | DecisionRefusalAnswer
-  | {
-      type: string;
-      name?: string;
-    };
 
 type DecisionsApiResponse = {
   model?: string;
-  answers?: DecisionAnswer[];
+  answers?: Parameters<typeof mapDecisionsAnswers>[1];
   usage?: {
     input_tokens?: number;
     output_tokens?: number;
@@ -71,56 +42,6 @@ type DecisionsApiResponse = {
     completion_tokens?: number;
   };
   error?: { message?: string; type?: string };
-};
-
-const buildDecisionsRequest = (
-  text: string,
-  selected: ClassifierDefinition[],
-) => ({
-  model: DECISIONS_MODEL,
-  input: text,
-  questions: selected.map(
-    (definition): DecisionChoiceQuestion => ({
-      type: "choice",
-      name: definition.id,
-      instructions: definition.instructions,
-      choices: Object.entries(definition.criteria).map(
-        ([value, description]) => ({
-          value,
-          description,
-        }),
-      ),
-    }),
-  ),
-});
-
-const asChoiceAnswer = (
-  answer: DecisionAnswer | undefined,
-  id: string,
-): DecisionChoiceAnswer => {
-  if (!answer) {
-    throw new Error(
-      `OpenAI Decisions API did not return an answer for "${id}".`,
-    );
-  }
-  if (answer.type === "refusal") {
-    throw new Error(
-      `OpenAI Decisions API refused to answer "${id}"${
-        answer.name ? ` (${answer.name})` : ""
-      }.`,
-    );
-  }
-  if (
-    answer.type !== "choice" ||
-    typeof (answer as DecisionChoiceAnswer).choice !== "string" ||
-    typeof (answer as DecisionChoiceAnswer).confidence !== "number" ||
-    !Array.isArray((answer as DecisionChoiceAnswer).probabilities)
-  ) {
-    throw new Error(
-      `OpenAI Decisions API did not return a choice answer for "${id}".`,
-    );
-  }
-  return answer as DecisionChoiceAnswer;
 };
 
 const parseUsage = (usage: DecisionsApiResponse["usage"]): SentimentUsage => {
@@ -233,31 +154,7 @@ const handler = async (req: Request) => {
           process.env.OPENAI_API_KEY!,
         );
         const usage = parseUsage(response.usage);
-        const answersByName = new Map(
-          (response.answers ?? []).map((answer) => [answer.name ?? "", answer]),
-        );
-
-        const answers: ClassifierAnswer[] = selected.map((definition) => {
-          const answer = asChoiceAnswer(
-            answersByName.get(definition.id),
-            definition.id,
-          );
-          const probabilities = Object.fromEntries(
-            Object.keys(definition.criteria).map((label) => {
-              const match = answer.probabilities.find(
-                (item) => item.value === label,
-              );
-              return [label, match?.probability ?? 0];
-            }),
-          );
-          return {
-            id: definition.id,
-            name: definition.name,
-            value: answer.choice,
-            confidence: answer.confidence,
-            probabilities,
-          };
-        });
+        const answers = mapDecisionsAnswers(selected, response.answers);
 
         const result: ClassifierRunResult = {
           model: response.model ?? DECISIONS_MODEL,
