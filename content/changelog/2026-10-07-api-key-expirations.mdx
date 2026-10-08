@@ -1,0 +1,31 @@
+---
+date: 2026-10-07
+title: Set expiration dates for API keys
+description: Choose when project and organization API keys expire to support regular rotation and temporary integrations.
+author: Mark Salpeter
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+You can now set an expiration date when creating a project or organization API key. Expired keys can no longer authenticate requests, giving you control over how long credentials remain usable.
+
+- Give a temporary integration a key that expires when the work is complete.
+- Set a 90-day lifetime for production keys to support your team's rotation schedule.
+
+## Get started
+
+Open **Project Settings → API Keys** or **Organization Settings → API Keys** and create a new key. Choose **30 days**, **60 days**, **90 days**, **1 year**, or a **custom date** in the expiration selector.
+
+**No expiration** remains the default, and existing keys keep working without a new expiration date. To rotate a key, create a replacement and update your application before the old key expires.
+
+<Cards num={1}>
+  <Card
+    title="API key management"
+    href="/docs/administration/rbac#api-keys"
+    icon={<Book />}
+    arrow
+  />
+</Cards>

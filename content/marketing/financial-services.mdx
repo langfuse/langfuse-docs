@@ -1,0 +1,189 @@
+---
+title: Langfuse for financial services
+seoTitle: Langfuse for financial services
+description: Observe and evaluate AI agents across banks, brokers, and fintechs. Deployment gates, production traces, audit trails, and self-hosting for regulated teams.
+contentWidth: full
+---
+
+{/* Markdown for agents and .md consumers lives in md-override/financial-services.md. Keep both files in sync. */}
+
+import { CustomerStoriesSection } from "@/components/financial-services/CustomerStoriesSection";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+import { DeploymentModeSlider } from "@/components/financial-services/DeploymentModeSlider";
+import { EvalCapabilityGrid } from "@/components/financial-services/EvalCapabilityGrid";
+import { HeroReasons } from "@/components/financial-services/HeroReasons";
+import { TrustPoints } from "@/components/financial-services/TrustPoints";
+import { UseCaseGrid } from "@/components/financial-services/UseCaseGrid";
+import { financialServicesFaqs } from "@/components/financial-services/content";
+import { MarketoContactFormCard } from "@/components/MarketoContactForm";
+import { SecurityBadgesGrid } from "@/components/SecurityBadgesGrid";
+import { FAQAccordion } from "@/components/shared/FAQAccordion";
+import { Button } from "@/components/ui/button";
+import { TextHighlight } from "@/components/ui/text-highlight";
+import { BookOpen, Play, Radar } from "lucide-react";
+
+<h1 className="sr-only">Langfuse for Financial Services</h1>
+
+<div className="not-prose mt-6 overflow-hidden border border-line-structure bg-surface-bg">
+  <section data-use-case-section="hero" className="grid border-b border-line-structure lg:grid-cols-[2fr_1fr]">
+    <div className="min-w-0 border-b border-line-structure px-6 pb-7 pt-10 sm:px-10 sm:pb-8 sm:pt-12 lg:border-b-0 lg:border-r">
+      <p className="font-mono text-[11px] uppercase tracking-[0.09em] text-text-tertiary">
+        {"Industries · Financial services"}
+      </p>
+      <h2 className="mt-3 text-[38px] leading-[0.95] text-text-primary sm:text-[48px]">
+        <span className="block">{"Langfuse for"}</span>
+        <TextHighlight highlightClassName="bg-surface-cta-primary" className="mt-1">
+          {"Financial Services"}
+        </TextHighlight>
+      </h2>
+      <p className="mt-4 max-w-[56ch] text-[14px] leading-[1.45] text-text-secondary">
+        {
+          "Observe and evaluate AI agents across your institution. Give engineering, platform, and risk teams visibility into production behavior, with deployment in Langfuse Cloud or your own infrastructure."
+        }
+      </p>
+      <div className="mt-6">
+        <Button href="/cloud" className="w-auto" wrapperClassName="w-fit">
+          Get started
+        </Button>
+      </div>
+      <HeroReasons />
+      <div className="mt-5">
+        <SecurityBadgesGrid compact showHipaa={false} />
+      </div>
+      <div className="mt-4 flex flex-wrap gap-x-3 gap-y-1 text-[13px] text-text-secondary">
+        <a href="/handbook/chapters/open-source" className="underline decoration-line-structure underline-offset-4 hover:text-text-primary">
+          {"MIT · open source"}
+        </a>
+        <span aria-hidden className="text-text-tertiary">
+          {"·"}
+        </span>
+        <a href="/self-hosting/configuration/hardening#hardening-for-government" className="underline decoration-line-structure underline-offset-4 hover:text-text-primary">
+          {"Government (available in Q4 2026)"}
+        </a>
+        <span aria-hidden className="text-text-tertiary">
+          {"·"}
+        </span>
+        <a href="/security" className="underline decoration-line-structure underline-offset-4 hover:text-text-primary">
+          {"Security & compliance →"}
+        </a>
+      </div>
+    </div>
+
+    <div id="book" className="flex min-w-0 items-start bg-surface-1 px-4 pb-4 pt-10 sm:px-6 sm:pb-5 sm:pt-12">
+      <div className="w-full">
+        <h2 className="mb-3 text-center text-[22px] leading-tight text-text-primary sm:text-[24px]">
+          {"Talk to a financial services expert at Langfuse"}
+        </h2>
+        <MarketoContactFormCard
+          className="mx-0 max-w-none"
+          compact
+          useCase="financial_services"
+          section="hero"
+        />
+      </div>
+    </div>
+
+  </section>
+
+  <section data-use-case-section="customer_stories" className="border-t border-line-structure bg-surface-1 px-5 py-6 sm:px-10 sm:py-[30px]">
+    <CustomerStoriesSection />
+  </section>
+
+  <section data-use-case-section="deployment" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
+    <h2 className="text-[34px] leading-[1.08] text-text-primary sm:text-[42px]">
+      {"Run Langfuse where your data is allowed to live"}
+    </h2>
+    <div className="mt-10 grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
+      <TrustPoints />
+      <DeploymentModeSlider />
+    </div>
+  </section>
+
+  <section data-use-case-section="evaluation" className="border-t border-line-structure bg-surface-1 px-5 py-14 sm:px-10 sm:py-20">
+    <h2 className="text-[34px] leading-[1.08] text-text-primary sm:text-[42px]">
+      {"Built for AI "}
+      <TextHighlight highlightClassName="bg-surface-cta-primary">
+        {"evaluation needs"}
+      </TextHighlight>
+      {" of financial institutions"}
+    </h2>
+    <p className="mt-4 max-w-[64ch] text-[14px] leading-[1.45] text-text-secondary">
+      {
+        "Platform and risk teams in financial services are looking for a complete observability and eval suite. Langfuse covers the full surface, and we are open about where the work lives in your pipeline rather than in our UI."
+      }
+    </p>
+    <EvalCapabilityGrid />
+  </section>
+
+  <section data-use-case-section="use_cases" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
+    <p className="font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
+      {"Use cases"}
+    </p>
+    <h2 className="mt-2 text-[34px] leading-[1.08] text-text-primary sm:text-[42px]">
+      {"What financial services teams build on Langfuse."}
+    </h2>
+    <UseCaseGrid />
+  </section>
+
+  <section data-use-case-section="resources" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-16">
+    <h2 className="mt-2 text-center text-[40px] leading-[1] text-text-primary">
+      {"Learn how to ship reliable agents in financial services"}
+    </h2>
+    <p className="mx-auto mt-2 max-w-[60ch] text-center text-[13px] text-text-tertiary">
+      {
+        "Start with deployment gates and execution history, then see how teams like Trade Republic run Langfuse in production."
+      }
+    </p>
+    <div className="mx-auto mt-8 max-w-4xl">
+      <Cards num={2} className="sm:grid-cols-1 lg:grid-cols-2">
+        <Card
+          title="Building deployment gates for LLMs"
+          href="/blog/2026-07-15-llm-certification-financial-services"
+          icon={<Radar />}
+          description="Evaluate model and prompt changes against datasets and policy evals before release."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
+        <Card
+          title="Academy: customer support chatbot"
+          href="/academy/examples/customer-support-chatbot"
+          icon={<BookOpen />}
+          description="Trace, score and iterate on a support agent to raise its autonomy rate safely."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
+        <Card
+          title="Trade Republic customer story"
+          href="/users/trade-republic"
+          icon={<Play />}
+          description="How a European neobroker runs self-hosted Langfuse in production. Read or watch on YouTube."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
+      </Cards>
+    </div>
+  </section>
+
+  <section
+    id="faq"
+    data-use-case-section="faq"
+    className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20"
+  >
+    <div className="grid items-start gap-10 lg:grid-cols-[1fr_2fr] lg:gap-16">
+      <h2 className="text-[34px] leading-[1] text-text-primary sm:text-[46px]">
+        {"FAQ"}
+      </h2>
+      <FAQAccordion faqs={financialServicesFaqs} askMode="ask-ai" />
+    </div>
+  </section>
+
+  <section data-use-case-section="closing_cta" className="border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
+    <div className="mx-auto max-w-5xl">
+      <CustomerStoryCTA
+        title="Working on AI in banking, insurance or capital markets?"
+        description="Talk through deployment options, compliance needs, and how teams like Trade Republic use Langfuse in production."
+        contactLabel="Talk to an expert"
+      />
+    </div>
+  </section>
+</div>

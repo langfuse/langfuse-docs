@@ -4,6 +4,9 @@ sidebarTitle: Authentication & SSO
 description: Overview of Single Sign-On (SSO) methods in Langfuse
 ---
 
+import { Details, Summary } from "@/components/Details";
+import { FaqDetails } from "@/components/faq/FaqDetails";
+
 # Authentication & SSO
 
 By default, Langfuse supports email/password, social logins (Sign in with Google, GitHub, Microsoft), and authentication via ClickHouse Cloud.
@@ -61,14 +64,7 @@ Details:
   }}
 />
 
-Langfuse supports **Enterprise SSO** (e.g. Okta, Authentik, OneLogin, Azure AD, Keycloak, WorkOS, JumpCloud etc.) via OIDC.
-
-<Callout type="info">
-
-Langfuse supports multiple domains per customer organization, but each domain must be exclusively owned by your organization.
-Shared domains (e.g., from subcontractors or consultancies) are not supported.
-
-</Callout>
+Langfuse supports **Enterprise SSO** (e.g. Okta, Authentik, OneLogin, Azure AD, Keycloak, WorkOS, JumpCloud etc.) via OIDC only. SAML is not supported.
 
 Details:
 
@@ -80,17 +76,13 @@ Details:
   ![SSO Sign-in Flow](/images/security/sso-signin.png)
 </Frame>
 
-<Callout type="info">
-
-Langfuse supports authentication via **OIDC only**. SAML is not supported.
-
-</Callout>
-
 ### Configure Enterprise SSO on Langfuse Cloud [#configure-enterprise-sso]
 
 Organization admins can configure Enterprise SSO directly in **Organization Settings > SSO**.
 
-#### 1) Verify Domain
+<Steps>
+
+### Verify Domain
 
 1. Navigate to **Organization Settings > SSO**.
 2. In the **Verify Domain** section, click **Add Domain** and enter the domain you want to verify.
@@ -105,7 +97,7 @@ If verification fails, confirm the record name/value match exactly, remove surro
 
 </Callout>
 
-#### 2) Configure SSO
+### Configure SSO
 
 1. In the **SSO Configuration** section, click **Configure SSO** next to the verified domain you want to set up.
 2. Copy the callback URL provided by Langfuse and whitelist it in your IdP application's redirect/callback URL allowlist.
@@ -118,13 +110,36 @@ GitHub and GitHub Enterprise do not expose a standard OIDC discovery endpoint. L
 
 </Callout>
 
-#### Prevent lockout when enforcing SSO [#prevent-lockout]
+</Steps>
+
+<FaqDetails>
+
+<Details id="prevent-lockout">
+<Summary>Prevent lockout when enforcing SSO</Summary>
 
 Enforcing SSO does not end sessions that are already active. Your current browser session stays signed in, even after enforcement is enabled. Use this to verify the setup safely: enable enforcement, then test the SSO login in a separate browser or a private/incognito window. If sign-in does not work as expected, revert the configuration from your still-active session before it affects other users.
 
-#### Break-Glass Users
+</Details>
+
+<Details>
+<Summary>Break-Glass Users</Summary>
 
 Langfuse does not support exceptions on enforced domains. There are no "break glass" accounts that can keep using email/password sign-in once SSO enforcement is enabled for a domain. If you are interested in this functionality, please upvote this [GitHub discussion](https://github.com/orgs/langfuse/discussions/14532).
+
+</Details>
+
+<Details id="sso-email-domain">
+<Summary>What if the IdP email claim does not match the verified SSO domain?</Summary>
+
+Each SSO domain must be exclusively owned by your organization. Shared domains (for example from subcontractors or consultancies) are not supported. The sign-in identity must also match a domain you verified for SSO. That check prevents account takeover.
+
+Some IdPs, especially Azure AD / Entra, emit `email` on a different domain than the verified one (for example an external alias versus the tenant UPN). For Azure AD / Entra, Langfuse falls back from `email` to `preferred_username` or `upn` when that claim is a valid address on the configured SSO domain. If no claim matches, sign-in is rejected.
+
+To fix this, configure the IdP (or verify an additional domain you control) so the claim Langfuse uses is an address on a domain you own and have verified for SSO, such as `user@external.yourdomain.com`, not an unrelated shared or external domain.
+
+</Details>
+
+</FaqDetails>
 
 ### Vendor Guides
 
