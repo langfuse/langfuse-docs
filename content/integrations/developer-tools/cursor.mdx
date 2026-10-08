@@ -6,30 +6,215 @@ description: Monitor and trace your Cursor AI agent interactions with Langfuse f
 category: Integrations
 ---
 
-# Trace Cursor Agents with Langfuse
+# Cursor tracing with Langfuse
 
-This guide shows you how to trace [Cursor](https://cursor.com) AI agent interactions with Langfuse for monitoring, debugging, and analyzing your AI-assisted coding sessions.
+> **What is Cursor?** [Cursor](https://cursor.com) is an AI code editor. Its agent plans changes, edits files, runs shell commands, calls MCP tools, and can spawn subagents. It also runs in the Cursor CLI and as Cloud Agents.
 
-> **What is Cursor?** [**Cursor**](https://cursor.com) is an AI-powered code editor built on top of VS Code. It features AI agents that can help you write, edit, debug, and understand code through natural language interactions. Cursor agents can execute shell commands, read and edit files, and use MCP (Model Context Protocol) tools to assist developers.
+> **What is Langfuse?** [Langfuse](https://langfuse.com/) is the open-source AI engineering platform. It helps teams collaboratively trace agentic applications, manage prompts, debug issues, evaluate quality, and monitor costs in production. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it.
 
-> **What is Langfuse?** [**Langfuse**](https://langfuse.com) is the open-source AI engineering platform. It helps teams collaboratively debug, analyze, and iterate on their LLM applications with features like tracing, prompt management, and evaluation. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it.
+<Callout type="info" title="Install via the Cursor Marketplace">
+The easiest way to set this up is the [Langfuse Observability Plugin for Cursor](https://github.com/langfuse/cursor-observability-plugin). Install it from the Cursor Marketplace, then add your Langfuse keys (full steps below). Requires Node.js 22+ and Langfuse Cloud or self-hosted Langfuse v3.95.0 or newer.
 
-## What This Integration Does
+{/* TODO: link the Cursor Marketplace listing here once the plugin is approved. */}
 
-With this integration, you can automatically trace all Cursor agent activity to Langfuse:
+</Callout>
 
-- **User Prompts**: Capture every prompt and instruction sent to the agent
-- **Agent Responses**: Record all agent responses and reasoning
-- **File Operations**: Track file reads and edits with detailed statistics
-- **Shell Commands**: Monitor shell command execution and outputs
-- **MCP Tool Calls**: Log all MCP tool invocations and results
-- **Session Tracking**: Group traces by conversation and workspace for easy filtering
-- **Performance Metrics**: Capture latencies, token usage, and execution times
+<Callout type="warning" title="Already using the community cursor-langfuse hooks?">
+This page used to describe [naoufalelh/cursor-langfuse](https://github.com/naoufalelh/cursor-langfuse), a community project. Replace it with this plugin instead of running both. Cursor runs every registered hook, so with both installed each action is traced twice. To switch:
 
-## How It Works
+1. In each project that uses it, remove the entries that run `node .cursor/hooks/hook-handler.js` from `.cursor/hooks.json`, and delete the copied `.cursor/hooks/` handler folder. Keep any other hooks you have there.
+2. Copy the keys from that project's `.env` into `~/.cursor/langfuse.json` (see [Set your Langfuse credentials](#set-credentials)). This plugin does not read `.env` files.
+3. Install this plugin and restart Cursor.
 
-Source: [naoufalelh/cursor-langfuse](https://github.com/naoufalelh/cursor-langfuse)
+Your existing traces stay in Langfuse. New traces have a different shape: one `Cursor Turn` trace per prompt, with the session set to the Cursor conversation instead of the workspace folder. Update saved filters and dashboards that relied on the old names, tags, or `cursor-<folder>` sessions.
 
-<div className="p-6 mt-6 border bg-muted/30 rounded-lg overflow-auto max-h-[70vh]">
-  <GitHubReadme url="https://raw.githubusercontent.com/naoufalelh/cursor-langfuse/refs/heads/main/README.md" />
-</div>
+</Callout>
+
+## What can this integration trace?
+
+Using [Cursor hooks](https://cursor.com/docs/hooks), this integration reads what Cursor reports during each agent turn, together with Cursor's own transcript, and sends it to Langfuse. You can monitor:
+
+- **Agent turns**: one trace per prompt (`Cursor Turn`), from your message to the final answer. Aborted and failed turns are flagged with a `WARNING` or `ERROR` level.
+- **Model generations**: one `LLM` observation per assistant message, with the conversation history as input, and the assistant text, thinking, and requested tool calls as output. The model and its parameters (thinking, context, effort) are recorded.
+- **Token usage and cost**: input, output, cache-read, and cache-write tokens for each turn. Cursor reports usage once per turn rather than per model call, so it is recorded on the turn's last `LLM` observation, and the trace total is the number to read. Langfuse prices it with its [model definitions](/docs/observability/features/token-and-cost-tracking); a model without a definition shows tokens but no cost.
+- **Tool calls**: every tool Cursor runs (`Shell`, `Read`, `Write`, `StrReplace`, `Grep`, `Glob`, MCP tools, and more) with input, output, duration, and working directory. Failed, timed-out, and denied calls are flagged, and file edits carry the diff hunks Cursor reports.
+- **Subagents**: `Task` subagents are nested under the tool call that spawned them, including their own generations when Cursor provides the transcript.
+- **Context compaction**: an event with the context size before Cursor compacted it.
+- **Skills**: a `skill:<name>` tag on every trace where the agent read a `SKILL.md` or ran a script from a skill.
+- **Sessions and users**: all turns from one Cursor conversation are grouped into a session, and the user defaults to the signed-in Cursor account.
+
+## How it works
+
+Cursor runs a separate process for each hook and pipes it a JSON payload. The plugin keeps that work small and does the heavy lifting once per turn:
+
+1. Every hook appends its event to a per-conversation log on disk and answers immediately, so it never slows the agent down. The hooks that can block an action always answer `allow`.
+2. The `stop` hook runs when the turn ends. It merges the event log with Cursor's transcript: the transcript provides message boundaries and history, the hooks provide timing, tool outputs, failures, subagents, and token usage.
+3. The turn is converted into a Langfuse trace with the [Langfuse TypeScript SDK](/docs/observability/sdk/overview). All turns of one conversation share a [`session_id`](/docs/observability/features/sessions).
+4. Trace IDs are derived from the conversation, so a turn that is exported twice updates the same trace instead of creating a duplicate.
+
+Tracing is on as soon as both API keys are present. The plugin fails open, so if anything goes wrong it logs the cause and never blocks your Cursor session.
+
+## Quick start
+
+<Steps>
+
+### Set up Langfuse
+
+1. Sign up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-host Langfuse](/self-hosting).
+2. Create a new project and copy your API keys from the project settings.
+
+### Install the plugin from the Cursor Marketplace
+
+Make sure Node.js 22 or newer is available on the `PATH` of the app that launches Cursor. Then open **Customize**, go to **Plugins**, choose **Browse Marketplace**, search for **Langfuse Observability**, and install it.
+
+{/* TODO: confirm the exact marketplace navigation and add the listing link once the plugin is approved. */}
+
+The plugin ships its own hook definitions, so there is nothing else to register. To install with npm instead, for example for Cloud Agents or the Cursor CLI, see [Install with npm](#install-with-npm).
+
+### Set your Langfuse credentials [#set-credentials]
+
+Create `~/.cursor/langfuse.json`. Only the two keys are required. `baseUrl` defaults to 🇪🇺 EU (`https://cloud.langfuse.com`); for 🇺🇸 US use `https://us.cloud.langfuse.com` and for 🇯🇵 Japan use `https://jp.cloud.langfuse.com`.
+
+```json
+{
+  "publicKey": "pk-lf-...",
+  "secretKey": "sk-lf-...",
+  "baseUrl": "https://cloud.langfuse.com"
+}
+```
+
+Or use environment variables. Note that Cursor launched from the Dock or Finder does not read your shell profile, so prefer the config file unless you start Cursor from a shell:
+
+```bash
+export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+export LANGFUSE_BASE_URL="https://cloud.langfuse.com" # 🇪🇺 EU; US and Japan URLs above
+```
+
+Configuration is resolved as defaults, then `~/.cursor/langfuse.json`, then `<project>/.cursor/langfuse.json`, then environment variables, with environment variables taking precedence. `LANGFUSE_CURSOR_*` variables override the matching `LANGFUSE_*` variables, so you can scope credentials to Cursor.
+
+### Restart Cursor and verify
+
+Restart Cursor, or run **Developer: Reload Window**, so it loads the plugin's hooks. Then send a prompt in Cursor's agent, ideally one that makes the agent read a file or run a command. The plugin logs each exported turn to `~/.cursor/langfuse/hook.log`, so a line like `Exported turn 1 ... as trace <id>` confirms that the trace was sent.
+
+### View traces in Langfuse
+
+Open your Langfuse project to see the captured traces. Search for `Cursor Turn` and widen the time range if needed. The structure mirrors how Cursor's agent works:
+
+- **Turn trace** (`Cursor Turn`): one trace per turn, captured as an [agent observation](/docs/observability/features/observation-types).
+- **Generations** (`LLM`): one per assistant message, with the input it received, the output, and the requested tool calls.
+- **Tool observations** (`Shell`, `Read`, `Write`, `Grep`, …): each tool call with its input, output, and error status. MCP tools appear under their MCP name, and a call that loads a skill appears as `skill:<name>`.
+- **Subagents** (`Cursor Subagent`, with `LLM Subagent` generations): nested under the tool call that spawned them.
+- **Context compaction**: an event marking when Cursor compacted the context.
+- **Sessions**: all turns from the same Cursor conversation are grouped via [`session_id`](/docs/observability/features/sessions). Open the Sessions tab to replay a full conversation.
+
+</Steps>
+
+## Install with npm
+
+The npm package installs the same hooks without the marketplace. Use it for Cloud Agents, the Cursor CLI, or a repository whose teammates should all be traced:
+
+```bash
+npm install -g @langfuse/cursor-observability-plugin
+langfuse-cursor-hook setup --public-key pk-lf-... --secret-key sk-lf-... --hooks
+```
+
+For the US or Japan region, add `--base-url`, for example `--base-url https://us.cloud.langfuse.com`. Use one install path per machine, so that the hooks do not fire twice.
+
+`setup` first verifies your keys against the Langfuse API and tells you which project they belong to, so a wrong key or region fails immediately. It then writes `~/.cursor/langfuse.json` (readable only by you) and, because of `--hooks`, registers the 18 agent hooks in `~/.cursor/hooks.json`, merging with hooks from other tools. Add `--project .` to write the repository's `.cursor/hooks.json` instead, which is what Cloud Agents and the CLI read.
+
+Check the result with `langfuse-cursor-hook status`. It prints the resolved configuration, whether the connection works, how many hooks are registered, and the last exported traces.
+
+## Configuration options
+
+Every option is a key in `langfuse.json` and has an environment variable. Each variable also accepts a `LANGFUSE_CURSOR_` prefix (for example `LANGFUSE_CURSOR_PUBLIC_KEY`), which takes precedence over the standard variable.
+
+| Variable                               | Config key           | Description                                                                                                                                                                  | Required            |
+| -------------------------------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `LANGFUSE_PUBLIC_KEY`                  | `publicKey`          | Your Langfuse public key (`pk-lf-...`)                                                                                                                                       | Yes                 |
+| `LANGFUSE_SECRET_KEY`                  | `secretKey`          | Your Langfuse secret key (`sk-lf-...`)                                                                                                                                       | Yes                 |
+| `LANGFUSE_BASE_URL`                    | `baseUrl`            | Langfuse host. EU: `https://cloud.langfuse.com`, US: `https://us.cloud.langfuse.com`, Japan: `https://jp.cloud.langfuse.com`                                                 | No (defaults to EU) |
+| `LANGFUSE_TRACING_ENABLED`             | `enabled`            | Set to `false` to stop tracing without removing the keys                                                                                                                     | No                  |
+| `LANGFUSE_TRACING_ENVIRONMENT`         | `environment`        | [Environment](/docs/observability/features/environments) label for the traces (e.g. `development`). Use it to keep coding-agent traces separate from production traffic.     | No                  |
+| `LANGFUSE_RELEASE`                     | `release`            | Release label for the traces                                                                                                                                                 | No                  |
+| `LANGFUSE_USER_ID`                     | `userId`             | User attached to every trace. Defaults to the email of the signed-in Cursor account.                                                                                         | No                  |
+| `LANGFUSE_TAGS`                        | `tags`               | Extra tags for all traces (JSON array or comma-separated). The `cursor` tag is always added.                                                                                 | No                  |
+| `LANGFUSE_CURSOR_METADATA`             | `metadata`           | JSON object of metadata to attach to all traces                                                                                                                              | No                  |
+| `LANGFUSE_CURSOR_SKILL_TAGS`           | `skillTags`          | Tag traces with `skill:<name>` for every skill loaded in the turn (default `true`)                                                                                           | No                  |
+| `LANGFUSE_CURSOR_TRACE_SEED`           | `traceSeed`          | Seed that makes trace IDs predictable, so a caller can derive a run's trace ID before the trace exists. Use a unique seed per conversation, otherwise conversations collide. | No                  |
+| `LANGFUSE_CURSOR_TRACEPARENT`          | `traceparent`        | W3C `traceparent` of an existing trace, to attach Cursor's turns under a span of your own workflow                                                                           | No                  |
+| `LANGFUSE_CURSOR_MAX_CHARS`            | `maxChars`           | Truncate captured strings to this many characters (default `20000`)                                                                                                          | No                  |
+| `LANGFUSE_CURSOR_CAPTURE_TOOL_OUTPUT`  | `captureToolOutput`  | Store shell output, MCP results, and other tool outputs (default `true`)                                                                                                     | No                  |
+| `LANGFUSE_CURSOR_CAPTURE_FILE_CONTENT` | `captureFileContent` | Store the file contents Cursor reads, instead of only their length (default `false`)                                                                                         | No                  |
+| `LANGFUSE_CURSOR_DEBUG`                | `debug`              | Set to `true` for verbose logging to `hook.log`                                                                                                                              | No                  |
+| `LANGFUSE_CURSOR_FAIL_ON_ERROR`        | `failOnError`        | Set to `true` to report upload errors as hook failures instead of failing open. Useful while testing.                                                                        | No                  |
+
+Config keys in `langfuse.json` also accept snake_case (for example `public_key`).
+
+### Turn tracing off
+
+- **One project**: create `<project>/.cursor/langfuse.json` with `{ "enabled": false }`.
+- **Everywhere, keeping the keys**: add `"enabled": false` to `~/.cursor/langfuse.json`.
+- **The current shell**: `export LANGFUSE_TRACING_ENABLED=false`.
+
+## Cursor CLI and Cloud Agents
+
+Tracing covers the Cursor IDE agent, the Cursor CLI, and Cloud Agents, but Cursor runs fewer hooks outside the IDE:
+
+| Surface              | What you get                                                                                                                                                                                 |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cursor IDE agent     | Everything described above.                                                                                                                                                                  |
+| Cursor CLI (`agent`) | Interactive mode runs the full lifecycle. Headless `agent -p` runs only session and tool hooks, so the run is exported as one turn when the session ends, without the prompt or token usage. |
+| Cloud Agents         | Project hooks from `.cursor/hooks.json` only. `~/.cursor` is not available, the session and MCP hooks do not run, and hooks start only once the agent has a writable environment.            |
+
+To trace Cloud Agents:
+
+1. Install the hook binary in the agent environment, for example in `.cursor/environment.json`:
+
+   ```json
+   { "install": "npm install -g @langfuse/cursor-observability-plugin" }
+   ```
+
+2. Register the project hooks and commit them. The keys file stays local, so do not commit it:
+
+   ```bash
+   langfuse-cursor-hook setup --project . --hooks --public-key pk-lf-... --secret-key sk-lf-...
+   git add .cursor/hooks.json
+   ```
+
+3. Add `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` as **Secrets** in the Cursor Cloud Agents dashboard. They are injected as environment variables when an agent starts.
+
+## Troubleshooting
+
+### No traces appearing in Langfuse
+
+Nearly every failure explains itself in `~/.cursor/langfuse/hook.log`. Send one message, then look at the newest lines:
+
+1. **No log file at all**: the hooks never ran. Check the **Hooks** tab in Cursor's Customize view. A common cause is `node` missing from the `PATH` of the process that launched Cursor. Install Node.js system-wide, or start Cursor from a shell that has it (`cursor .`). If you installed with npm and switched Node versions, run `setup --hooks` again.
+2. **`Tracing off: Langfuse config incomplete`**: the keys did not reach the hook. Cursor launched from the Dock or Finder does not read your shell profile, so put the keys in `~/.cursor/langfuse.json` instead of exporting them.
+3. **`Tracing off: kill switch`**: `LANGFUSE_TRACING_ENABLED=false` is set somewhere in the environment Cursor inherited.
+4. **`Export of turn N failed`**: delivery failed after the turn was assembled. Check that `baseUrl` matches the region of your keys, that the keys are valid, and that your network or proxy can reach Langfuse. Set `LANGFUSE_CURSOR_DEBUG=true` for the full error, and `LANGFUSE_CURSOR_FAIL_ON_ERROR=true` to make failures visible while testing.
+5. **`Exported turn N ... as trace <id>` but nothing in Langfuse**: ingestion is asynchronous, so wait a few seconds, then confirm the keys belong to the project you are viewing.
+6. **`transcript not readable`**: Cursor did not hand over a transcript (CLI mode, or transcripts disabled). The turn is still traced from the hook events, but conversation history and exact message boundaries are missing.
+
+### Authentication errors
+
+Verify your API keys are correct and that the base URL matches the region your keys belong to:
+
+- **EU region**: `https://cloud.langfuse.com`
+- **US region**: `https://us.cloud.langfuse.com`
+- **Japan region**: `https://jp.cloud.langfuse.com`
+
+If you installed with npm, `langfuse-cursor-hook setup` checks the keys before writing anything, so a rejected key tells you right away.
+
+### Data privacy
+
+When enabled, the plugin uploads prompts, assistant messages, thinking text, tool inputs and outputs (shell output, MCP results, file edits), subagent tasks and summaries, model names and parameters, token usage, workspace paths, and the email of the Cursor account. The contents of files that Cursor reads are not stored unless `captureFileContent` is on, tool outputs can be switched off with `captureToolOutput`, and your Langfuse keys are masked from every payload before upload. Do not enable tracing for work you do not want stored in Langfuse.
+
+## Resources
+
+- [Langfuse Cursor Plugin (GitHub)](https://github.com/langfuse/cursor-observability-plugin)
+- [Cursor hooks documentation](https://cursor.com/docs/hooks)
+- [Langfuse Sessions](/docs/observability/features/sessions)
+- [Langfuse TypeScript SDK](/docs/observability/sdk/overview)
+- [Tracing coding agents with Langfuse](/resources/engineering/coding-agent-tracing)
