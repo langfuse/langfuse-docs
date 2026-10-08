@@ -58,7 +58,8 @@ export const financialServicesStoryCards = [
     company: "DKB",
     route: "/users/dkb",
     category: "Banking",
-    description: "How DKB automates 20,000 customer conversations daily.",
+    description:
+      "How DKB, Germany's largest digital bank, automates 20,000 customer conversations daily.",
     logo: "/images/customers/dkb/dkb-light.svg",
     logoDark: "/images/customers/dkb/dkb-dark.svg",
     published: false,
@@ -99,7 +100,7 @@ export const financialServicesDeploymentModes = [
     label: "Cloud",
     title: "Managed cloud in the EU, US or Japan.",
     href: "/security/data-regions",
-    flow: ["Your app", "OTel SDK", "Langfuse Cloud · EU"],
+    flow: ["Your app", "OTel SDK", "Langfuse Cloud"],
     specs: [
       { k: "Regions", v: "EU · US · JP" },
       { k: "Certifications", v: "SOC 2 Type II · ISO 27001" },
@@ -247,7 +248,7 @@ export const financialServicesUseCases = [
     icon: "messages-square" as const,
     description:
       "Raise autonomy rate of AI support agents: the share of cases resolved without human intervention. Trace edge cases, score good/bad runs, and iterate so agents cover more of the long tail safely.",
-    proof: "DKB · 20,000 conversations / day",
+    proof: "DKB, Germany's largest digital bank · 20,000 conversations / day",
     featured: true,
   },
   {
