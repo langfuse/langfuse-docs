@@ -21,7 +21,7 @@ Observe and evaluate AI agents across your institution. Give engineering, platfo
 
 Use the contact form on this page to talk to a financial services expert at Langfuse.
 
-Used by **21** of Fortune 50 · **90B+** observations/month · **100,000+** engineers building on Langfuse.
+Used by **21** of the Fortune 50 · **90B+** observations/month · **100,000+** engineers building on Langfuse.
 
 ### [Merck](/users/merckgroup)
 

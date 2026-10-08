@@ -76,8 +76,8 @@ export function CustomerStoriesSection() {
 
   return (
     <div className="flex flex-col">
-      <div className="mb-8 sm:mb-10">
-        <HeroStatsStrip />
+      <div className="mb-6 sm:mb-7">
+        <HeroStatsStrip textSize="m" density="compact" />
       </div>
       <div className="flex flex-col gap-2">
         <Link
