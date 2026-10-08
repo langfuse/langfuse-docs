@@ -83,6 +83,10 @@ response = client.chat.completions.create(
 )
 
 print(response.choices[0].message.content)
+
+# Ensure all traces are sent to Langfuse before the script exits
+from langfuse import get_client
+get_client().flush()
 ```
 
 ## Step 5: See Traces in Langfuse
