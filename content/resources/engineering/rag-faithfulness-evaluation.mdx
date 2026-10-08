@@ -4,9 +4,13 @@ description: "RAG faithfulness evaluation explained: what the faithfulness metri
 tags: [guide, evaluation]
 ---
 
+import { SignupCTA } from "@/components/SignupCTA";
+
 # How to evaluate RAG faithfulness with LLM-as-a-judge
 
 **TL;DR:** Faithfulness measures whether a RAG answer is grounded in the retrieved context: extract the factual claims the answer makes, check each claim against the retrieved documents, and score the share of supported claims. It is reference-free, so it needs no ground-truth answers, which makes it the RAG metric you can run on any dataset and on live traffic. This page defines the metric, shows how to design a faithfulness judge prompt, and implements it end to end with the Langfuse Python SDK: as an offline experiment with `run_experiment`, and as a managed LLM-as-a-judge evaluator on production traces.
+
+<SignupCTA className="my-6" />
 
 ## What RAG faithfulness measures
 
