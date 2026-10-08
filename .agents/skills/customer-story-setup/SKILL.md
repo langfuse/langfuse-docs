@@ -82,8 +82,8 @@ Ask whether to add **sparse** internal links. **Default policy:** only link
 - [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)
 - [Prompt version control](/docs/prompt-management/features/prompt-version-control)
 
-Do **not** pepper every noun with links. Use paths from **`llms-docs.txt` /
-available-internal-links** rule so links resolve.
+Do **not** pepper every noun with links. Find valid internal paths by
+searching `content/` for the target page so links resolve.
 
 ---
 

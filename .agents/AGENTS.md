@@ -81,7 +81,7 @@ CI runs `node scripts/check-h1-headings.js`. It fails if any `.md`/`.mdx` file c
 
 These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The full build is ~10 minutes locally — don't run it for routine edits. Instead, before pushing:
 
-- Check internal links you added/changed point to real pages or anchors.
+- Find valid internal paths by searching `content/` (and `md-override/` when the route has an override). Check that links you add or change point to real pages or anchors.
 - For anchor links (`...#some-id`), make sure the target page defines the anchor explicitly with `[#some-id]` at the end of the heading line.
 - If you renamed or moved a page, also update any references and add a redirect in `next.config.mjs` if needed.
 
@@ -142,6 +142,7 @@ Please check the following:
 - We never use `.gif` files, only `.mp4` files uploaded to `static.langfuse.com/docs-videos` to optimize for size and performance.
 - When deep-linking to a section via a link that uses the `#` anchor, make sure the anchor is explicitly defined in the source page via `[#anchor]` at the end of the header line, e.g. `## Get Started [#get-started]`.
 - For every edited page or route, check `md-override/` for a corresponding Markdown source. When one exists, verify the rendered page and override remain synchronized; a top-of-file comment is helpful but not required for this rule to apply.
+- When adding internal docs links, search `content/` for the target page so the path exists.
 - When linking to a Langfuse app page from docs, use `https://cloud.langfuse.com/project/~/[path]` — the `~` sentinel redirects to the reader's last-used project and region automatically.
 - External `/users` adopters-table references must include a Wayback `[Archive](...)` link. Request a Save Page Now snapshot when none exists; do not omit the archive.
 
