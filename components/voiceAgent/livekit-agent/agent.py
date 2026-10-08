@@ -472,6 +472,8 @@ async def entrypoint(ctx: JobContext):
     # the only kind that all regions' processors export.
     tracer = trace_provider.get_tracer("voice-agent")
     root_span = tracer.start_span("voice-conversation")
+    # Agent root, with LiveKit's LLM calls nested underneath as generations.
+    root_span.set_attribute("langfuse.observation.type", "agent")
     conversation = _conversations[ctx.room.name] = _ConversationContext(
         root_span=root_span,
         tracer=tracer,

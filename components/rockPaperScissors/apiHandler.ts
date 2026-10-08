@@ -185,9 +185,12 @@ const handler = async (req: Request) => {
       // reviewer needs at a glance.
       const traceInput = { round, userMove, opponent, history };
       setActiveTraceIO({ input: traceInput });
-      updateActiveObservation({
-        input: { round, opponent, userMove },
-      });
+      updateActiveObservation(
+        {
+          input: { round, opponent, userMove },
+        },
+        { asType: "agent" },
+      );
 
       // The human commits first. The model never sees this value.
       startObservation(
@@ -431,15 +434,18 @@ const handler = async (req: Request) => {
             visibleReasoning: plainText || undefined,
           };
           setActiveTraceIO({ output: traceOutput });
-          updateActiveObservation({
-            output: {
-              userMove,
-              modelMove: committedMove,
-              outcome,
-              predictedUserMove,
-              fallbackReason,
+          updateActiveObservation(
+            {
+              output: {
+                userMove,
+                modelMove: committedMove,
+                outcome,
+                predictedUserMove,
+                fallbackReason,
+              },
             },
-          });
+            { asType: "agent" },
+          );
           // Flush spans before exposing the Open-trace URL so Cloud has the
           // run ready when the visitor clicks through.
           await finalize();
@@ -491,6 +497,7 @@ const handler = async (req: Request) => {
 export const POST = observe(handler, {
   name: "play-round",
   endOnExit: false, // ended once the stream has finished
+  asType: "agent",
 });
 
 export const maxDuration = 30;
