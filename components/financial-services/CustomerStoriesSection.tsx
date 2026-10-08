@@ -1,21 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getCustomerStories } from "@/lib/getCustomerStories";
-import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
 import { FORTUNE_50_COMPANIES } from "@/lib/usage-stats";
 import {
   financialServicesFeaturedStory,
   financialServicesStoryCards,
 } from "./content";
-
-const financialServicesLogoNames = [
-  "Merck",
-  "Ramp",
-  "Trade Republic",
-  "SumUp",
-  "Intuit",
-  "Pigment",
-] as const;
 
 function StoryLogo({
   logo,
@@ -86,21 +76,11 @@ export function CustomerStoriesSection() {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="border border-line-structure bg-surface-bg px-5 py-4 sm:px-6">
-        <p className="m-0 text-[14px] leading-[1.45] text-text-secondary">
-          Used by{" "}
-          <span className="font-medium text-text-primary">
-            {FORTUNE_50_COMPANIES} of the Fortune 50
-          </span>
-        </p>
-        <div className="mt-3">
-          <EnterpriseLogoGrid
-            small
-            names={financialServicesLogoNames}
-            className="!px-0 !py-0"
-          />
-        </div>
-      </div>
+      <p className="m-0 px-1 font-mono text-[11px] uppercase tracking-[0.09em] text-text-tertiary">
+        Used by{" "}
+        <span className="text-text-primary">{FORTUNE_50_COMPANIES}</span> of the
+        Fortune 50
+      </p>
       <Link
         href={financialServicesFeaturedStory.href}
         aria-label="Read the Merck customer story"
