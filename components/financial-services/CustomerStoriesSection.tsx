@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getCustomerStories } from "@/lib/getCustomerStories";
-import { FORTUNE_50_COMPANIES } from "@/lib/usage-stats";
+import { HeroStatsStrip } from "@/components/home/HeroStatsStrip";
 import {
   financialServicesFeaturedStory,
   financialServicesStoryCards,
@@ -76,13 +76,9 @@ export function CustomerStoriesSection() {
 
   return (
     <div className="flex flex-col">
-      <p className="m-0 mb-8 text-center font-sans text-[24px] leading-[1.3] tracking-[-0.02em] text-text-secondary sm:mb-10 sm:text-[28px]">
-        Used by{" "}
-        <span className="font-semibold text-text-primary">
-          {FORTUNE_50_COMPANIES}
-        </span>{" "}
-        of the Fortune 50
-      </p>
+      <div className="mb-8 sm:mb-10">
+        <HeroStatsStrip />
+      </div>
       <div className="flex flex-col gap-2">
         <Link
           href={financialServicesFeaturedStory.href}
