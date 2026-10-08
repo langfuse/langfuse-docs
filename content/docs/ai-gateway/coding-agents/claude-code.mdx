@@ -1,29 +1,55 @@
 ---
-title: Claude Code
-seoTitle: "Trace Claude Code with the Langfuse AI Gateway (alpha)"
-description: Route Claude Code through the Langfuse AI Gateway to trace every model call, tool call, token, and cost, and optionally group each prompt into one trace.
+title: Claude Desktop and Claude Code
+seoTitle: "Trace Claude Desktop and Claude Code with the Langfuse AI Gateway (alpha)"
+description: Route Claude Desktop or Claude Code through the Langfuse AI Gateway to trace model calls, tokens, costs, and Claude Code sessions.
 noindex: true
 ---
 
 import AiGatewayAlphaCallout from "@/components-mdx/ai-gateway-alpha-callout.mdx";
 
-# Claude Code
+# Claude Desktop and Claude Code
 
 <AiGatewayAlphaCallout />
 
-**Requires** Claude Code 2.1 or later and an `ANTHROPIC` provider connection. Verified with Claude Code 2.1.282.
+Use the Langfuse AI Gateway with the Claude Desktop app or the Claude Code CLI. Both require an `ANTHROPIC` provider connection.
 
 <Callout type="info">
-  This page routes Claude Code's model calls through the AI Gateway. For tracing
+  This page routes Claude's model calls through the AI Gateway. For tracing
   Claude Code with hooks instead, see the [Claude Code
   integration](/integrations/developer-tools/claude-code).
 </Callout>
 
-## Setup [#setup]
+## Claude Desktop [#claude-desktop]
+
+Configure the gateway in the Claude Desktop UI:
+
+1. If the **Developer** menu is unavailable, open **Help → Troubleshooting** and enable Developer Mode.
+2. Open **Developer → Configure Third-Party Inference**.
+3. Under **Connection**, set **Inference provider** to **Gateway**.
+4. Set **Gateway base URL** to `https://staging.langfuse.com/anthropic`. Do not add `/v1`; Claude Desktop appends it.
+5. Set **Credential kind** to **Static API key**, enter your Langfuse gateway key under **Gateway API key**, and select **Bearer** as the **Gateway auth scheme**.
+6. Under **Custom headers**, add `langfuse-user-id` with your email or handle as the value, for example `<you>@example.com`.
+7. Test the connection, select **Apply Changes**, then select **Save & Restart**.
+
+For more information about these settings, see the [Claude Desktop third-party inference guide](https://claude.com/docs/third-party/claude-desktop/in-app-configuration).
+
+<Callout type="warning">
+  MCP servers connected through Claude Desktop are associated with your
+  claude.ai subscription. They are unavailable while Claude Desktop uses
+  third-party gateway credentials. Switch back to your Claude account to use
+  those subscription-backed connectors.
+</Callout>
+
+## Claude Code CLI [#claude-code-cli]
+
+**Requires** Claude Code 2.1 or later. Verified with Claude Code 2.1.282.
+
+### Setup [#setup]
 
 Export the gateway variables from [Get started](/docs/ai-gateway/get-started#export-the-key), then:
 
 ```sh
+claude /logout                                              # remove existing subscription credentials
 export ANTHROPIC_BASE_URL="$LANGFUSE_GATEWAY_HOST/anthropic"   # no /v1: Claude Code appends /v1/messages
 export ANTHROPIC_AUTH_TOKEN="$LANGFUSE_GATEWAY_KEY"             # sent as Authorization: Bearer
 unset ANTHROPIC_API_KEY                                         # a different value here causes a 401
@@ -48,13 +74,20 @@ To make the setup persistent, use `~/.claude/settings.json`:
 
 - `ANTHROPIC_CUSTOM_HEADERS` takes newline-separated `Name: value` pairs. See [request headers](/docs/ai-gateway/request-headers).
 - Model IDs pass through unchanged, for example `--model claude-sonnet-4-6` or `claude-haiku-4-5-20251001`.
+- MCP servers configured locally through the CLI remain available because Claude Code stores them in `.claude.json`.
 
-## Verify [#verify]
+<Callout type="warning">
+  Log out before starting Claude Code with gateway credentials. An existing
+  Claude login can send both `Authorization` and `x-api-key` credentials and
+  cause `401 Conflicting gateway credentials in the Authorization and x-api-key headers`.
+</Callout>
+
+### Verify [#verify]
 
 1. Run `claude -p --output-format json "Reply with: hello gateway"` and note the `session_id`.
 2. In Langfuse, go to **Sessions** and open `claude-code:<session_id>`. You should see one `anthropic.messages` generation with a 3-block system prompt, about 20 tools, the output, usage including cache writes, cost, time to first token, and your user and tags.
 
-## Turn grouping (beta) [#turn-grouping]
+### Turn grouping (beta) [#turn-grouping]
 
 By default, every model call is its own trace. Claude Code can send a W3C `traceparent` header whose trace ID is its `claude_code.interaction` span, one per user prompt. The gateway adopts that trace ID, so every model call of a prompt lands in **one trace**, including subagent calls and retries.
 
@@ -74,7 +107,7 @@ export OTEL_EXPORTER_OTLP_ENDPOINT="<your-otel-collector>"
 - Because Claude Code's own spans are not in Langfuse, the gateway generations of a prompt appear as top-level observations of the shared trace.
 - A resumed session starts a new trace per prompt, in the same session.
 
-## Gotchas [#gotchas]
+### Gotchas [#gotchas]
 
 - There is no user unless you send `langfuse-user-id`. Claude Code's own `metadata.user_id` only lands in `langfuse.gateway.request.metadata`.
 - When a model call fails, Claude Code retries once without streaming, so a failed prompt shows **two** `ERROR` generations.
