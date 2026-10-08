@@ -9,6 +9,7 @@ import boschLogo from "../home/img/bosch.svg";
 import canvaLogo from "../home/img/canva.svg";
 import circlebackLogo from "../home/img/circleback.svg";
 import ciscoLogo from "../home/img/cisco.svg";
+import enbwLogo from "../home/img/enbw.svg";
 import expediaLogo from "../home/img/expedia.svg";
 import freeeLogo from "../home/img/freee.svg";
 import huggingFaceLogo from "../home/img/huggingface.svg";
@@ -21,6 +22,7 @@ import rampLogo from "../home/img/ramp.svg";
 import rocketMoneyLogo from "../home/img/rocket-money.svg";
 import samsaraLogo from "../home/img/samsara.svg";
 import sumUpLogo from "../home/img/sumup.svg";
+import swisscomLogo from "../home/img/swisscom.svg";
 import telusLogo from "../home/img/telus.svg";
 import tradeRepublicLogo from "../home/img/trade-republic.svg";
 import twilioLogo from "../home/img/twilio.svg";
@@ -37,6 +39,7 @@ const COMPANY_LOGOS: Record<string, NonNullable<Adopter["logo"]>> = {
   Canva: { src: canvaLogo },
   Circleback: { src: circlebackLogo },
   Cisco: { src: ciscoLogo },
+  EnBW: { src: enbwLogo },
   "Expedia Group": { src: expediaLogo },
   freee: { src: freeeLogo },
   "Hugging Face": { src: huggingFaceLogo },
@@ -50,6 +53,7 @@ const COMPANY_LOGOS: Record<string, NonNullable<Adopter["logo"]>> = {
   Samsara: { src: samsaraLogo },
   Slite: { src: "/images/customers/slite/slite-light.png" },
   SumUp: { src: sumUpLogo },
+  Swisscom: { src: swisscomLogo },
   TELUS: { src: telusLogo },
   "Trade Republic": { src: tradeRepublicLogo },
   Twilio: { src: twilioLogo },
@@ -72,6 +76,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   "Dep for Environment, Food & Rural Affairs": "UK government department",
   Draftbit: "Visual mobile app development platform",
   Ecosia: "Search engine and technology company",
+  EnBW: "German energy and utilities company",
   Equinix: "Digital infrastructure and data center company",
   "Expedia Group": "Travel technology company",
   Fletch: "Security and threat intelligence platform",
@@ -93,6 +98,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   Kombo: "Unified HR and payroll API platform",
   "La Suite numérique":
     "Digital collaboration suite for the French public sector",
+  LayerX: "Back-office AI software company",
   Lemonade: "Insurance technology company",
   "Magic Patterns": "AI-powered UI design tool",
   "McKinsey & Company": "Management consulting firm",
@@ -113,6 +119,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   "Seven Eleven Japan": "Convenience retailer",
   Slite: "Knowledge management platform",
   SumUp: "Payments and point-of-sale company",
+  Swisscom: "Swiss communications, IT, and entertainment company",
   TELUS: "Telecommunications company",
   "The Weather Company": "Weather intelligence company",
   "Trade Republic": "European fintech bank",
@@ -143,6 +150,7 @@ const COMPANIES_WITH_DOCUMENTED_USE_CASES = new Set([
   "Kensho",
   "KINTO Technologies",
   "La Suite numérique",
+  "LayerX",
   "McKinsey & Company",
   "Mitsubishi Heavy Industries",
   "Moderna",

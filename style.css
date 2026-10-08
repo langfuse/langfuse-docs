@@ -978,13 +978,32 @@
   line-height: 1.25rem !important;
 }
 
-.lf-marketo-form .mktoAsterix {
-  display: inline !important;
+/* Marketo always emits .mktoAsterix in every label, then hides it unless
+   the field wrap has .mktoRequiredField (from the form descriptor's
+   IsRequired: true). Do not force-show every asterisk — that marks
+   optional fields such as Phone as required.
+
+   Selectors must beat the Marketo ThemeStyleOverride
+   `.lf-marketo-form .mktoAsterix { display: contents !important }` which
+   is injected after page CSS. The form id is always present; `.mktoForm`
+   is not reliably on the <form> when Forms2 finishes loading. */
+.lf-marketo-form form[id^="mktoForm_"] .mktoAsterix {
+  display: none !important;
   float: none !important;
   line-height: inherit !important;
   padding-left: 0 !important;
   padding-right: 0.25rem !important;
   color: hsl(var(--destructive)) !important;
+}
+
+.lf-marketo-form form[id^="mktoForm_"] .mktoRequiredField .mktoAsterix {
+  display: inline !important;
+}
+
+/* ThemeStyleOverride also injects " *" via ::after on required labels.
+   Suppress it so required fields do not show two marks. */
+.lf-marketo-form form[id^="mktoForm_"] .mktoRequiredField .mktoLabel::after {
+  content: none !important;
 }
 
 .lf-marketo-form input[type="text"],
@@ -1064,6 +1083,92 @@
 
 .lf-marketo-form .mktoButton:hover {
   opacity: 0.9;
+}
+
+.lf-marketo-form--compact {
+  min-height: 0;
+}
+
+.lf-marketo-form--compact .mktoFormRow {
+  margin-bottom: 0.65rem !important;
+}
+
+.lf-marketo-form--compact .mktoLabel {
+  padding-bottom: 0.25rem !important;
+  font-size: 0.8125rem !important;
+}
+
+.lf-marketo-form--compact input[type="text"],
+.lf-marketo-form--compact input[type="email"],
+.lf-marketo-form--compact input[type="tel"],
+.lf-marketo-form--compact input[type="url"],
+.lf-marketo-form--compact input[type="number"],
+.lf-marketo-form--compact select,
+.lf-marketo-form--compact textarea {
+  min-height: 2.25rem !important;
+  padding: 0.4rem 0.65rem !important;
+}
+
+.lf-marketo-form--compact textarea {
+  min-height: 4.5rem !important;
+}
+
+.lf-marketo-form--compact .mktoButtonRow {
+  margin-top: 0.75rem !important;
+}
+
+.lf-marketo-name-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+  margin-bottom: 0.65rem;
+}
+
+@media (min-width: 480px) {
+  .lf-marketo-name-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.lf-marketo-name-row .mktoFormRow {
+  margin-bottom: 0 !important;
+}
+
+.lf-marketo-more {
+  margin: 0.25rem 0 0.75rem;
+  border: 1px solid var(--line-structure);
+  background: var(--surface-bg);
+}
+
+.lf-marketo-more > summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0.7rem 0.85rem;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.lf-marketo-more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.lf-marketo-more > summary::after {
+  content: "+";
+  float: right;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+.lf-marketo-more[open] > summary::after {
+  content: "–";
+}
+
+.lf-marketo-more-body {
+  border-top: 1px solid var(--line-structure);
+  padding: 0.85rem 0.85rem 0.35rem;
 }
 
 .lf-success-panel {

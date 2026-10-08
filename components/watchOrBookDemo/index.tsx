@@ -1,6 +1,6 @@
 "use client";
 
-import { MarketoContactForm } from "@/components/MarketoContactForm";
+import { MarketoContactFormCard } from "@/components/MarketoContactForm";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import { getGitHubStars } from "@/lib/github-stars";
 import { Link } from "@/components/ui/link";
@@ -195,11 +195,7 @@ function DiscoverYourselfContent() {
 }
 
 function ContactFormSection() {
-  return (
-    <div className="relative w-full max-w-md mx-auto p-4 bg-stripe-pattern corner-box-corners border border-line-structure">
-      <MarketoContactForm />
-    </div>
-  );
+  return <MarketoContactFormCard />;
 }
 
 export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {

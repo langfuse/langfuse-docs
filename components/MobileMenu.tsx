@@ -6,7 +6,12 @@ import Link from "next/link";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { productLinks, resourcesLinks, useCaseLinks } from "@/lib/nav-links";
+import {
+  industryLinks,
+  productLinks,
+  resourcesLinks,
+  useCaseLinks,
+} from "@/lib/nav-links";
 import type { SectionNavData } from "@/lib/nav-tree";
 
 export function MobileMenu({
@@ -17,7 +22,7 @@ export function MobileMenu({
   const [open, setOpen] = useState(false);
   const [productOpen, setProductOpen] = useState(false);
   const [resourcesOpen, setResourcesOpen] = useState(false);
-  const [useCasesOpen, setUseCasesOpen] = useState(false);
+  const [solutionsOpen, setSolutionsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -139,13 +144,29 @@ export function MobileMenu({
                     ))}
                   </CollapsibleRow>
 
-                  {/* Use cases */}
+                  {/* Solutions */}
                   <CollapsibleRow
-                    label="Use cases"
-                    open={useCasesOpen}
-                    onToggle={() => setUseCasesOpen((v) => !v)}
+                    label="Solutions"
+                    open={solutionsOpen}
+                    onToggle={() => setSolutionsOpen((v) => !v)}
                   >
+                    <p className="px-0 pt-1 pb-1 font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
+                      Use cases
+                    </p>
                     {useCaseLinks.map((link) => (
+                      <Link
+                        key={link.name}
+                        href={link.href}
+                        onClick={close}
+                        className="block px-0 py-2.5 text-sm text-text-secondary hover:text-text-primary transition-colors"
+                      >
+                        {link.name}
+                      </Link>
+                    ))}
+                    <p className="px-0 pt-3 pb-1 font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
+                      Industries
+                    </p>
+                    {industryLinks.map((link) => (
                       <Link
                         key={link.name}
                         href={link.href}
