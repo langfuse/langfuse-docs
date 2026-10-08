@@ -97,11 +97,7 @@ const menuItems: {
 ];
 
 const bottomLinks = [
-  // Absolute: `/terms` 307s off-site; soft-nav via next/link then crashes RSC.
-  {
-    name: "Terms",
-    href: "https://clickhouse.com/legal/clickhouse-general-terms-and-conditions",
-  },
+  { name: "Terms", href: "/terms" },
   { name: "Privacy", href: "/privacy" },
   { name: "Imprint", href: "/imprint" },
   { name: "Cookie Policy", href: "/cookie-policy" },

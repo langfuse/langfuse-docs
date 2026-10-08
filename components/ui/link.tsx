@@ -58,33 +58,6 @@ function isExternal(href: string): boolean {
   );
 }
 
-/**
- * Same-origin short paths that 307/302 off-site (see lib/redirects.js).
- * Soft-navigating them with next/link issues an RSC fetch against the
- * external Location and can land on "This page couldn't load".
- */
-const EXTERNAL_REDIRECT_HREFS: Record<string, string> = {
-  "/discord": "https://discord.gg/7NXusRtqYU",
-  "/terms":
-    "https://clickhouse.com/legal/clickhouse-general-terms-and-conditions",
-  "/dpa": "https://clickhouse.com/legal/agreements/data-processing-addendum",
-  "/security/dpa":
-    "https://clickhouse.com/legal/agreements/data-processing-addendum",
-  "/toms": "https://clickhouse.com/legal/agreements/security-addendum",
-  "/security/toms": "https://clickhouse.com/legal/agreements/security-addendum",
-  "/ph": "https://www.producthunt.com/products/langfuse",
-  "/issue": "https://github.com/langfuse/langfuse/issues/new/choose",
-  "/new-issue": "https://github.com/langfuse/langfuse/issues/new/choose",
-  "/issues": "https://github.com/langfuse/langfuse/issues",
-  "/billing-portal": "https://billing.stripe.com/p/login/6oE9BXd4u8PR2aYaEE",
-  "/stickers": "https://forms.gle/Af5BHpWUMZSCT4kg8?_imcp=1",
-  "/sticker": "https://forms.gle/Af5BHpWUMZSCT4kg8?_imcp=1",
-};
-
-function resolveHref(href: string): string {
-  return EXTERNAL_REDIRECT_HREFS[href] ?? href;
-}
-
 export function Link({
   href,
   variant,
@@ -105,13 +78,11 @@ export function Link({
     );
   }
 
-  const resolvedHref = resolveHref(href);
-
   // External URL — use <a> with safe defaults
-  if (isExternal(resolvedHref)) {
+  if (isExternal(href)) {
     return (
       <a
-        href={resolvedHref}
+        href={href}
         target={target ?? "_blank"}
         rel={rel ?? "noopener noreferrer"}
         className={classes}
@@ -125,7 +96,7 @@ export function Link({
   // Internal URL — use Next.js Link for client-side navigation
   return (
     <NextLink
-      href={resolvedHref}
+      href={href}
       target={target}
       rel={rel}
       className={classes}
