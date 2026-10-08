@@ -4,7 +4,6 @@ import {
   RootProvider,
   type RootProviderProps,
 } from "fumadocs-ui/provider/next";
-import { ExternalRedirectHardNav } from "@/components/ExternalRedirectHardNav";
 
 /**
  * Wraps Fumadocs' `RootProvider` to silence the React 19 / Next.js 16
@@ -38,7 +37,6 @@ export function AppRootProvider({
         scriptProps: { ...theme?.scriptProps, ...scriptProps },
       }}
     >
-      <ExternalRedirectHardNav />
       {children}
     </RootProvider>
   );

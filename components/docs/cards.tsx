@@ -13,7 +13,6 @@ import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Text } from "@/components/ui/text";
 import { CornerBox } from "@/components/ui/corner-box";
-import { resolveExternalRedirect } from "@/lib/external-redirects";
 
 interface CardsProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Number of columns (1 | 2 | 3). Defaults to 2. */
@@ -38,25 +37,18 @@ export function Card({
   children,
   contentClassName,
   contentWrapperClassName,
-  href,
   ...props
 }: CardProps) {
-  // Off-site shortlinks (/issues, /gh-support, …) must not soft-nav via
-  // fumadocs-core/link — rewrite to the absolute destination first.
-  const resolvedHref = href
-    ? (resolveExternalRedirect(href) ?? href)
-    : undefined;
-  const E = resolvedHref ? Link : "div";
+  const E = props.href ? Link : "div";
   const showArrow = arrow ?? Boolean(title);
   return (
     <E
       {...props}
-      href={resolvedHref}
       data-card
       className={cn("block @max-lg:col-span-full", props.className)}
     >
       <CornerBox
-        hoverStripes={!!resolvedHref}
+        hoverStripes={!!props.href}
         className={cn(
           "flex flex-row items-center p-2 sm:p-3 gap-2.5 text-text-primary w-full h-full",
           contentClassName,
@@ -81,7 +73,7 @@ export function Card({
             >
               {title}
             </Text>
-            {resolvedHref && showArrow ? (
+            {props.href && showArrow ? (
               <ChevronRight
                 aria-hidden="true"
                 className="size-4 shrink-0 text-text-secondary"
