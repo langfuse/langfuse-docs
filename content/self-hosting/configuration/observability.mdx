@@ -15,4 +15,15 @@ If you want to include Langfuse into your own tracing setup, you can configure t
 | `OTEL_SERVICE_NAME`           | `web/worker`            | Name of the service within your APM tool.                                                         |
 | `OTEL_TRACE_SAMPLING_RATIO`   | `1`                     | The sampling ratio for traces. A value of `1` means all traces are sent. Must be between 0 and 1. |
 
-These variables export Langfuse traces. They do not ship the stdout logs from `langfuse-web` and `langfuse-worker`. To collect those logs and read them in ClickStack, see [Application logs](/self-hosting/configuration/application-logs).
+## FAQ [#faq]
+
+<FaqDetails>
+
+<Details id="do-these-variables-export-application-logs">
+<Summary>Do these OTEL variables export application logs?</Summary>
+
+No. These variables export Langfuse traces. They do not ship the stdout logs of `langfuse-web` and `langfuse-worker`. To send those logs to ClickStack, see [Export self-hosted Langfuse logs to ClickStack](/guides/export-self-hosted-langfuse-logs-to-clickstack).
+
+</Details>
+
+</FaqDetails>
