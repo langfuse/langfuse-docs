@@ -2,6 +2,7 @@ import NextLink from "next/link";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import type { AnchorHTMLAttributes } from "react";
+import { resolveExternalRedirect } from "@/lib/external-redirects";
 
 /**
  * Unified link component wrapping next/link.
@@ -17,6 +18,10 @@ import type { AnchorHTMLAttributes } from "react";
  *
  * External URLs (http/https/mailto/tel) automatically get target="_blank"
  * and rel="noopener noreferrer" unless overridden.
+ *
+ * Same-origin short paths that 307/302 off-site (lib/redirects.js) are
+ * rewritten to their absolute destination so soft-nav never RSC-fetches an
+ * external Location ("This page couldn't load").
  */
 const linkVariants = cva(
   "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
@@ -58,31 +63,8 @@ function isExternal(href: string): boolean {
   );
 }
 
-/**
- * Same-origin short paths that 307/302 off-site (see lib/redirects.js).
- * Soft-navigating them with next/link issues an RSC fetch against the
- * external Location and can land on "This page couldn't load".
- */
-const EXTERNAL_REDIRECT_HREFS: Record<string, string> = {
-  "/discord": "https://discord.gg/7NXusRtqYU",
-  "/terms":
-    "https://clickhouse.com/legal/clickhouse-general-terms-and-conditions",
-  "/dpa": "https://clickhouse.com/legal/agreements/data-processing-addendum",
-  "/security/dpa":
-    "https://clickhouse.com/legal/agreements/data-processing-addendum",
-  "/toms": "https://clickhouse.com/legal/agreements/security-addendum",
-  "/security/toms": "https://clickhouse.com/legal/agreements/security-addendum",
-  "/ph": "https://www.producthunt.com/products/langfuse",
-  "/issue": "https://github.com/langfuse/langfuse/issues/new/choose",
-  "/new-issue": "https://github.com/langfuse/langfuse/issues/new/choose",
-  "/issues": "https://github.com/langfuse/langfuse/issues",
-  "/billing-portal": "https://billing.stripe.com/p/login/6oE9BXd4u8PR2aYaEE",
-  "/stickers": "https://forms.gle/Af5BHpWUMZSCT4kg8?_imcp=1",
-  "/sticker": "https://forms.gle/Af5BHpWUMZSCT4kg8?_imcp=1",
-};
-
 function resolveHref(href: string): string {
-  return EXTERNAL_REDIRECT_HREFS[href] ?? href;
+  return resolveExternalRedirect(href) ?? href;
 }
 
 export function Link({
