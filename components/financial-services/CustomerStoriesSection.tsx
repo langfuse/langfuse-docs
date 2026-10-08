@@ -75,110 +75,116 @@ export function CustomerStoriesSection() {
   const featured = byRoute.get(financialServicesFeaturedStory.href);
 
   return (
-    <div className="flex flex-col gap-2">
-      <p className="m-0 px-1 font-mono text-[11px] uppercase tracking-[0.09em] text-text-tertiary">
+    <div className="flex flex-col">
+      <p className="m-0 mb-8 text-center font-sans text-[24px] leading-[1.3] tracking-[-0.02em] text-text-secondary sm:mb-10 sm:text-[28px]">
         Used by{" "}
-        <span className="text-text-primary">{FORTUNE_50_COMPANIES}</span> of the
-        Fortune 50
+        <span className="font-semibold text-text-primary">
+          {FORTUNE_50_COMPANIES}
+        </span>{" "}
+        of the Fortune 50
       </p>
-      <Link
-        href={financialServicesFeaturedStory.href}
-        aria-label="Read the Merck customer story"
-        className="grid border border-line-structure bg-surface-bg no-underline transition-colors hover:border-line-cta lg:grid-cols-[minmax(0,1.35fr)_minmax(220px,0.65fr)]"
-      >
-        <div className="flex flex-col gap-5 border-b border-line-structure p-6 sm:p-8 lg:border-b-0 lg:border-r">
-          <StoryLogo
-            logo={featured?.frontMatter.customerLogo}
-            logoDark={featured?.frontMatter.customerLogoDark}
-            company={financialServicesFeaturedStory.company}
-            sizes="160px"
-            widthClass="w-40"
-            heightClass="h-8"
-          />
-          <blockquote className="m-0 border-0 p-0 text-[22px] font-medium leading-[1.22] text-text-primary sm:text-[26px]">
-            “{financialServicesFeaturedStory.quote}”
-          </blockquote>
-          <p className="m-0 text-[13px] leading-[1.45] text-text-secondary">
-            <span className="font-medium text-text-primary">
-              {financialServicesFeaturedStory.author}
-            </span>
-            , {financialServicesFeaturedStory.role}
-          </p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1">
-          {financialServicesFeaturedStory.stats.map((stat, index) => (
-            <div
-              key={stat.value}
-              className={
-                index === 0
-                  ? "flex flex-col justify-center gap-1 px-6 py-5 sm:px-6 lg:px-7 lg:py-6"
-                  : "flex flex-col justify-center gap-1 border-t border-dashed border-line-divider-dash px-6 py-5 sm:border-t-0 sm:border-l lg:border-l-0 lg:border-t lg:px-7 lg:py-6"
-              }
-            >
-              <p className="m-0 font-medium text-[28px] leading-none tracking-tight text-text-primary sm:text-[32px]">
-                {stat.value}
-              </p>
-              <p className="m-0 text-[13px] leading-[1.4] text-text-secondary">
-                {stat.label}
-              </p>
-            </div>
-          ))}
-        </div>
-      </Link>
-
-      <div className="grid gap-2 md:grid-cols-3">
-        {financialServicesStoryCards.map((card) => {
-          const story = byRoute.get(card.route);
-          const published = !("published" in card && card.published === false);
-          const isLive = published && Boolean(story);
-          const company =
-            story?.frontMatter.quoteCompany ?? card.company ?? "Customer";
-          const logo =
-            story?.frontMatter.customerLogo ??
-            ("logo" in card ? card.logo : undefined);
-          const logoDark =
-            story?.frontMatter.customerLogoDark ??
-            ("logoDark" in card ? card.logoDark : undefined);
-          const body = (
-            <>
-              <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
-                Customer story · {card.category}
-              </p>
-              <StoryLogo
-                logo={logo}
-                logoDark={logoDark}
-                company={company}
-                sizes="148px"
-                widthClass="w-[148px]"
-                heightClass="h-8"
-              />
-              <p className="text-[14px] leading-[1.45] text-text-primary">
-                {card.description}
-              </p>
-              <span className="mt-auto pt-1 text-[13px] text-text-secondary">
-                {isLive ? "Read story →" : "Coming soon"}
+      <div className="flex flex-col gap-2">
+        <Link
+          href={financialServicesFeaturedStory.href}
+          aria-label="Read the Merck customer story"
+          className="grid border border-line-structure bg-surface-bg no-underline transition-colors hover:border-line-cta lg:grid-cols-[minmax(0,1.35fr)_minmax(220px,0.65fr)]"
+        >
+          <div className="flex flex-col gap-5 border-b border-line-structure p-6 sm:p-8 lg:border-b-0 lg:border-r">
+            <StoryLogo
+              logo={featured?.frontMatter.customerLogo}
+              logoDark={featured?.frontMatter.customerLogoDark}
+              company={financialServicesFeaturedStory.company}
+              sizes="160px"
+              widthClass="w-40"
+              heightClass="h-8"
+            />
+            <blockquote className="m-0 border-0 p-0 text-[22px] font-medium leading-[1.22] text-text-primary sm:text-[26px]">
+              “{financialServicesFeaturedStory.quote}”
+            </blockquote>
+            <p className="m-0 text-[13px] leading-[1.45] text-text-secondary">
+              <span className="font-medium text-text-primary">
+                {financialServicesFeaturedStory.author}
               </span>
-            </>
-          );
-
-          if (!isLive) {
-            return (
-              <div key={card.route} className={storyCardClassName}>
-                {body}
+              , {financialServicesFeaturedStory.role}
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1">
+            {financialServicesFeaturedStory.stats.map((stat, index) => (
+              <div
+                key={stat.value}
+                className={
+                  index === 0
+                    ? "flex flex-col justify-center gap-1 px-6 py-5 sm:px-6 lg:px-7 lg:py-6"
+                    : "flex flex-col justify-center gap-1 border-t border-dashed border-line-divider-dash px-6 py-5 sm:border-t-0 sm:border-l lg:border-l-0 lg:border-t lg:px-7 lg:py-6"
+                }
+              >
+                <p className="m-0 font-medium text-[28px] leading-none tracking-tight text-text-primary sm:text-[32px]">
+                  {stat.value}
+                </p>
+                <p className="m-0 text-[13px] leading-[1.4] text-text-secondary">
+                  {stat.label}
+                </p>
               </div>
-            );
-          }
+            ))}
+          </div>
+        </Link>
 
-          return (
-            <Link
-              key={card.route}
-              href={card.route}
-              className={liveStoryCardClassName}
-            >
-              {body}
-            </Link>
-          );
-        })}
+        <div className="grid gap-2 md:grid-cols-3">
+          {financialServicesStoryCards.map((card) => {
+            const story = byRoute.get(card.route);
+            const published = !(
+              "published" in card && card.published === false
+            );
+            const isLive = published && Boolean(story);
+            const company =
+              story?.frontMatter.quoteCompany ?? card.company ?? "Customer";
+            const logo =
+              story?.frontMatter.customerLogo ??
+              ("logo" in card ? card.logo : undefined);
+            const logoDark =
+              story?.frontMatter.customerLogoDark ??
+              ("logoDark" in card ? card.logoDark : undefined);
+            const body = (
+              <>
+                <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+                  Customer story · {card.category}
+                </p>
+                <StoryLogo
+                  logo={logo}
+                  logoDark={logoDark}
+                  company={company}
+                  sizes="148px"
+                  widthClass="w-[148px]"
+                  heightClass="h-8"
+                />
+                <p className="text-[14px] leading-[1.45] text-text-primary">
+                  {card.description}
+                </p>
+                <span className="mt-auto pt-1 text-[13px] text-text-secondary">
+                  {isLive ? "Read story →" : "Coming soon"}
+                </span>
+              </>
+            );
+
+            if (!isLive) {
+              return (
+                <div key={card.route} className={storyCardClassName}>
+                  {body}
+                </div>
+              );
+            }
+
+            return (
+              <Link
+                key={card.route}
+                href={card.route}
+                className={liveStoryCardClassName}
+              >
+                {body}
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
