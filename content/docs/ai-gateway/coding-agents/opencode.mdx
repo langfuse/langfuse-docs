@@ -11,7 +11,7 @@ import AiGatewayAlphaCallout from "@/components-mdx/ai-gateway-alpha-callout.mdx
 
 <AiGatewayAlphaCallout />
 
-**Requires** OpenCode 1.18 or later and an `ANTHROPIC` and/or `OPENAI` provider connection. Verified with OpenCode 1.18.32.
+**Requires** OpenCode 2.0 or later and an `ANTHROPIC` and/or `OPENAI` provider connection. Verified with OpenCode 2.0.25.
 
 ## Setup [#setup]
 
@@ -42,7 +42,8 @@ Use `opencode.json` in the project root or `~/.config/opencode/opencode.json`:
         "headers": {
           "langfuse-user-id": "{env:LF_USER_ID}",
           "langfuse-tags": "opencode,<team>",
-          "langfuse-environment": "local"
+          "langfuse-environment": "local",
+          "Authorization": "Bearer {env:LANGFUSE_GATEWAY_KEY}"
         }
       }
     }
@@ -89,4 +90,5 @@ export const LangfuseTurn: Plugin = async () => ({
 - Subagents (`task` tool) get their **own** session. The parent session ID is stored in `agent.parent_session_id`.
 - If a model is missing from OpenCode's catalog, OpenCode fails locally with `UnknownError: Unexpected server error` and sends nothing. Declare the model under `provider.<id>.models`.
 - Make sure that no `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or stored `opencode auth` credential is sent instead of the gateway key.
+- OpenCode's background service keeps the environment variables from when it started. After exporting or changing `LANGFUSE_GATEWAY_KEY`, run `opencode service restart` before retrying.
 - OpenCode retries OpenAI `404` errors up to six times with backoff, so a wrong model ID can show six `ERROR` generations.
