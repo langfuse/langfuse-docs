@@ -1,0 +1,223 @@
+---
+title: Decision model evaluators
+sidebarTitle: Decision model evaluators
+description: Use OpenAI or TypeSafe decision models to ask typed questions about observations and write structured evaluation scores.
+---
+
+# Decision model evaluators
+
+<Callout type="info">
+  Decision-model evaluators are **experimental**. The
+  setup is stable, but details of the UI and score format may still change.
+</Callout>
+
+Decision models answer **typed questions** about an input instead of generating free-form text. In Langfuse, you can run decision-model evaluators with OpenAI's `gpt-6-luna` or [TypeSafe Jev](https://docs.typesafe.ai/introduction). Each Choice, Score, or Yes / no question becomes one [score](/docs/evaluation/scores/overview) on the observation.
+
+Use a decision model when the verdict is narrow and typed: a label, a level on a rubric, or a yes/no probability. Use [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) when you need written reasoning or the possible answers are too open-ended to define upfront.
+
+<span id="how-jev-as-a-judge-works" />
+
+## How decision-model evaluators work
+
+One decision-model evaluator consists of:
+
+1. **Model input**: observation data mapped to the format the provider expects. OpenAI receives one general state named `input`; Jev receives a JSON state with one or more named fields.
+2. **One or more questions**: each question has a type, instructions, and allowed answers. The model answers all questions in one call.
+3. **One score per question**: the typed answer becomes a Langfuse score with the score name you set on the question. Probabilities and confidence are stored in the score metadata where the provider returns them.
+
+This lets you score one observation against several criteria at once, for example topic, frustration, and out-of-scope in one evaluator.
+
+<span id="why-use-jev-as-a-judge" />
+
+## Why use a decision model?
+
+- **Cheaper.** Both Jev and `gpt-6-luna` are priced by input tokens only. [TypeSafe reports](https://typesafe.ai/blog/introducing-system-one-models-and-jev) that Jev is 40 to 400x cheaper than frontier models on classification tasks. [OpenAI prices `gpt-6-luna` at $0.10 per million input tokens](https://developers.openai.com/api/docs/guides/decisions#pricing-and-availability), with no output-token charge.
+- **Faster.** Decision models skip free-form generation. [TypeSafe reports](https://typesafe.ai/blog/introducing-system-one-models-and-jev) that Jev is 20 to 200x faster than comparable LLMs, while [OpenAI reports that the Decisions API is about 10x faster than the Responses API](https://developers.openai.com/api/docs/guides/decisions).
+- **Calibrated.** Yes / no answers return a probability, while Choice and Score answers include a probability distribution and confidence value where available.
+- **Consistent.** Decision models return typed values from a fixed answer space instead of sampling a free-form response. This makes them a good fit for regression tests and criteria you track over time.
+
+## OpenAI vs. TypeSafe Jev
+
+- **OpenAI:** evaluates one general state named `input`. Questions use plain text and cannot reference individual parts of the state.
+- **TypeSafe Jev:** evaluates a JSON state with named fields. Questions can explicitly reference those fields using backticks, for example: ``Compare `output` with `expectedOutput`.``
+
+Both support Choice, Score, and Yes / no questions.
+
+## Question types [#question-types]
+
+Decision models answer three kinds of questions. Each maps to one Langfuse score.
+
+| Question type | What the model returns                                                                                            | Langfuse score                                                  | Example                                                                   |
+| ------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| **Choice**    | One option out of a fixed set you define (2 to 255), with probabilities and confidence where available            | Categorical score with the selected option as value             | "Which team should handle this ticket?" → `billing`, `technical`, `sales` |
+| **Score**     | A position on ordered levels you describe (2 to 10), with probabilities and confidence where available            | Numeric score with the expected level, from `0` to `levels - 1` | "How frustrated is the customer?" → `0` calm ... `3` angry                |
+| **Yes / no**  | The probability that a statement is true (TypeSafe calls this a [Noul](https://docs.typesafe.ai/primitives/noul)) | Numeric score with `P(true)` between `0` and `1`                | "Does the message request a refund?" → `0.93`                             |
+
+Some tips for each type:
+
+- **Choice** works well for routing and classification: topic detection, intent, failure mode, which tool should have been called. Give every option a short description and include an escape hatch such as `other` or `unclear`.
+- **Score** works well for rubrics: severity, frustration, answer completeness. Describe every level in plain language and order them from low to high. The score is the probability-weighted level, so `1.7` means "between level 1 and level 2, closer to 2".
+- **Yes / no** works well for guardrails and flags: out-of-scope request, PII in the output, user disagreement, policy violation. Optionally describe what counts as `true` and what counts as `false`. Because you get a probability instead of a hard label, you can pick a threshold that fits your risk tolerance, or use three bands: act, review, ignore.
+
+<Callout type="info">
+  Keep each question **atomic**: one decision
+  per question. If you find yourself asking "is the answer correct and
+  polite?", split it into two questions. Both are answered in the same call
+  anyway.
+</Callout>
+
+## Set up step-by-step [#set-up-step-by-step]
+
+<Steps>
+
+### Connect credentials [#connect-credentials]
+
+Go to **Settings → LLM Connections** and add an [OpenAI connection](#connect-openai) or a [TypeSafe Jev connection](#connect-typesafe-jev), or use an existing compatible connection.
+
+<span id="create-a-jev-evaluator" />
+
+### Create a decision-model evaluator
+
+Go to the [Evaluators page](https://cloud.langfuse.com/project/~/evals) and click **New evaluator**. In the template gallery, click **New decision model evaluator** to start from scratch, then select your OpenAI or TypeSafe connection and model. You can also pick one of the templates:
+
+- **Assign Input Topic** (Choice): classify the user's primary goal into a topic taxonomy you define.
+- **Flag Out-of-Scope Request** (Yes / no): flag requests that fall outside the assistant's role.
+- **Rate Customer Frustration** (Score): rate the user's frustration on four levels.
+- **User Conversation Signal** (Yes / no × 7): score a chat for rephrases, corrections, human hand-off requests, repeats, error quotes, frustration, and success confirmation in one call. See the [blog post](/blog/2026-09-23-catching-conversation-signals-in-langfuse).
+
+Templates prefill the model input and questions; you only need to select a compatible connection.
+
+### Define the questions
+
+Add one question per criterion. For each question:
+
+1. Pick the [type](#question-types): Choice, Score, or Yes / no.
+2. Write the question. The instruction format depends on the selected provider.
+3. Define the allowed answers: options with descriptions for Choice, ordered levels for Score, or optional `true` / `false` criteria for Yes / no.
+4. Set the score name. Langfuse suggests one from the question; each question writes a score under this name.
+
+<span id="build-the-state" />
+
+### Map the model input
+
+Map the observation data that the model should evaluate. The input structure depends on the selected provider; see the provider-specific setup sections below.
+
+### Test the evaluator
+
+On the right, filter to representative sample observations, select one, and run the evaluator. The test panel shows one row per question with its probability distribution and confidence where available, along with the estimated cost. Use **Raw output** to inspect the provider request. Iterate until the results look right on your samples.
+
+### Save the evaluator
+
+After saving, you can:
+
+- Create a [rule](/docs/evaluation/core-concepts#evaluators-and-rules) from the filters you used to select test samples, or attach the evaluator to an existing rule to run it on incoming observations.
+- Continue without a rule. You can still use the evaluator for [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation) or [prompt experiments](/docs/evaluation/experiments/experiments-via-ui).
+
+</Steps>
+
+✨ Done! Each question now writes a score to matching observations. Filter, chart, and alert on these scores like on any other score in Langfuse.
+
+<span id="use-an-openai-decision-model" />
+
+## Set up OpenAI [#connect-openai]
+
+Add an **OpenAI** connection with your API key, or select an existing one with access to `gpt-6-luna`. Langfuse calls the OpenAI Decisions API through this connection.
+
+Map the observation data to the single general state, `input`. Questions evaluate this state as a whole and use plain-text instructions without field references. Score levels require a label and can include an optional description.
+
+The preview shows the input and questions sent to OpenAI. If OpenAI refuses any question, the evaluator run fails without writing scores.
+
+<span id="add-a-typesafe-connection" />
+
+## Set up TypeSafe Jev [#connect-typesafe-jev]
+
+Add a connection with the adapter **typesafe**, choose the upstream that serves Jev, and paste its API key:
+
+| Upstream          | API key                                                                             | Billing                   |
+| ----------------- | ----------------------------------------------------------------------------------- | ------------------------- |
+| TypeSafe          | A key from the [TypeSafe console](https://console.typesafe.ai/settings/keys)        | Billed by TypeSafe        |
+| Vercel AI Gateway | An [AI Gateway API key](https://vercel.com/docs/ai-gateway/authentication-and-byok) | Billed through AI Gateway |
+| OpenRouter        | An [OpenRouter API key](https://openrouter.ai/settings/keys)                        | Billed through OpenRouter |
+
+Vercel AI Gateway and OpenRouter expose TypeSafe's API, so the evaluator behaves the same with each upstream. No base URL or additional headers are required. Use `jev-latest` to follow new releases or pin a version such as `jev-1.13.0` when an evaluation threshold should remain stable.
+
+Build the JSON state by adding named fields and mapping them to observation input, output, metadata, tool calls, **Expected Output**, or **Experiment Item Metadata**. Reference these fields in question instructions using backticks. Jev Score levels require a description.
+
+TypeSafe connections are only available to decision-model evaluators because Jev cannot generate text.
+
+## Scores written by decision models [#scores]
+
+Each question writes one score to the evaluated observation. The score value is always the answer itself; probabilities and confidence never change the value but are stored alongside it so you can inspect and filter on them:
+
+| Field                           | Content                                                                                                                                                                                                                            |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                          | The score name you set on the question.                                                                                                                                                                                            |
+| `value` / `dataType`            | Choice: the selected option as a `CATEGORICAL` score. Score: the expected level as a `NUMERIC` score. Yes / no: `P(true)` as a `NUMERIC` score between `0` and `1`.                                                                |
+| `comment`                       | A short human-readable summary, for example `ready (p=0.91); confidence 0.82; runner-up needs_revision (0.09)` for a Choice, `1.26 ≈ level 1 "Frustrated but civil"; confidence 0.61` for a Score, or `P(true)=0.97` for Yes / no. |
+| `metadata.openai` / `.typesafe` | The provider-specific answer details: `questionId`, `type`, the resolved `model`, and, where available, `probabilities`, `confidence`, and the Score level legend.                                                                 |
+
+Decision models return a typed verdict rather than a written rationale, so the comment summarizes the distribution. When a score looks wrong, inspect the mapped input and your criteria, then tighten the question or add an option.
+
+## Debug decision-model executions [#debug-executions]
+
+Every evaluator run creates an execution trace in the internal environment `langfuse-llm-as-a-judge`, named `Execute evaluator: <evaluator name>`. The trace contains a single generation with the exact request (state and questions), the returned answers, token usage, and cost. Every score written by the run links to this trace.
+
+Internal environments are hidden from the default tracing view. Filter the tracing table by `environment = langfuse-llm-as-a-judge` or open the execution trace from a score.
+
+## Limits [#limits]
+
+| Constraint              | Limit / guidance                                                                                                                                                                                                                 |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Questions per evaluator | 1 to 50, all answered in one call.                                                                                                                                                                                               |
+| Choice options          | 2 to 255 options with unique values.                                                                                                                                                                                             |
+| Score levels            | 2 to 10 ordered levels.                                                                                                                                                                                                          |
+| Input size              | TypeSafe accepts roughly 32k tokens for the state plus the longest question. Keep either provider's input focused on data needed for the decision.                                                                               |
+| Rationale               | Decision models return typed verdicts, not written reasoning. Use an LLM judge if you need an explanation.                                                                                                                       |
+| Refusals                | OpenAI can refuse a question; one refusal fails the run without writing scores. Jev always picks an answer, so add an `other` or `unclear` Choice option when the input may be insufficient.                                     |
+| Data handling           | Input and questions are sent through the selected OpenAI or TypeSafe connection. Review your provider and upstream terms before evaluating sensitive data, and use [masking](/docs/observability/features/masking) where needed. |
+
+## FAQ
+
+import { Details, Summary } from "@/components/Details";
+
+<Details>
+<Summary>When should I use a decision model instead of an LLM judge?</Summary>
+
+Use a decision model when the possible answers are known before the call: routing, classification, rubric levels, or guardrail flags. Use an LLM judge when you need written reasoning or the criteria are open-ended. Combining both works well: run a decision model broadly, then use an LLM judge on a sample or on flagged cases.
+
+</Details>
+
+<Details>
+<Summary>Why is my Yes / no score a number and not a boolean?</Summary>
+
+Decision models return the probability that the statement is true, not a hard label. Langfuse stores that probability as a numeric score between `0` and `1` so you keep the calibration. Choose the threshold that fits your use case when you filter or alert, for example `>= 0.7`. If you need a boolean, use a Choice question with the two options `yes` and `no`, which writes a categorical score.
+
+</Details>
+
+<Details>
+<Summary>Can I use decision-model evaluators in experiments and batch evaluation?</Summary>
+
+Yes. Decision-model evaluators run on incoming observations through rules, on historical observations through [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation), and on [experiments](/docs/evaluation/experiments/experiments-via-ui). Map the experiment fields your questions need into the provider input.
+
+</Details>
+
+<Details>
+<Summary>Where do I get a TypeSafe API key?</Summary>
+
+Create an account at [typesafe.ai](https://typesafe.ai) and generate a key in the [TypeSafe console](https://console.typesafe.ai/settings/keys). Access currently runs through a waitlist on TypeSafe's side. If you already use Vercel AI Gateway or OpenRouter, you do not need a TypeSafe account: pick that upstream in the connection and use its API key instead. See [Connect TypeSafe Jev](#connect-typesafe-jev).
+
+</Details>
+
+## Related resources
+
+- [Catching conversation signals in Langfuse](/blog/2026-09-23-catching-conversation-signals-in-langfuse): score production chat for frustration, corrections, follow-ups, and resolution with the User Conversation Signal template.
+- [Using TypeSafe's Jev for evals](/blog/2026-09-18-using-typesafes-jev-for-evals): what Jev is good for, early benchmarks, and a walkthrough of Jev-as-a-judge in Langfuse.
+- [Observability for TypeSafe Jev](/integrations/model-providers/typesafe): trace Jev calls made from your own application.
+- [Writing good evaluators](/academy/evaluate/writing-evaluators): how to define criteria that hold up.
+- [TypeSafe documentation](https://docs.typesafe.ai/introduction): question primitives, model versions, and known limitations.
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-evals"]} />

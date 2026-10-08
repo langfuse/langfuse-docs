@@ -495,7 +495,7 @@ Langfuse uses S3-compatible storage for raw event uploads and media. Issues here
 **Triage steps:**
 
 1. Verify `LANGFUSE_S3_EVENT_UPLOAD_*` env vars are set and the bucket exists.
-2. Verify the IAM principal has `s3:PutObject`, `s3:GetObject`, `s3:ListBucket`. For MinIO, set `LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE=true`.
+2. Verify the IAM principal has `s3:PutObject`, `s3:GetObject`, `s3:ListBucket`. For SeaweedFS or MinIO, set `LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE=true`.
 3. For "blob storage export failed" notifications, check the bucket policy and lifecycle rule didn't recently change.
 4. For media uploads, also set `LANGFUSE_S3_MEDIA_UPLOAD_*`.
 
@@ -935,13 +935,13 @@ Best,
 
 <summary>BAA / HIPAA</summary>
 
-HIPAA is available on a dedicated cloud region: `hipaa.cloud.langfuse.com`. Customers must [complete and sign the BAA via DocuSign](https://powerforms.docusign.net/39437499-4b13-4604-b373-2b1f2ae6f6fd?env=eu&acct=33986eaf-fde8-48d4-8d61-cf8c0f573e98&accountId=33986eaf-fde8-48d4-8d61-cf8c0f573e98) before they process PHI.
+HIPAA is available on a dedicated cloud region: `hipaa.cloud.langfuse.com`. Customers must [complete and sign the BAA via Ironclad](https://ironcladapp.com/public-launch/6aa89377853bdf7f289e7139) before they process PHI.
 
 **Triage steps:**
 
 1. Confirm the customer is using or about to use `hipaa.cloud.langfuse.com` (not the standard US/EU regions).
 2. **Account migration:** customers moving from EU/US must create a fresh account on `hipaa.cloud.langfuse.com`. Past trace data can be moved via the [data migration cookbook](/guides/cookbook/example_data_migration).
-3. For HIPAA-related legal requirements, direct the customer to [complete and sign the BAA via DocuSign](https://powerforms.docusign.net/39437499-4b13-4604-b373-2b1f2ae6f6fd?env=eu&acct=33986eaf-fde8-48d4-8d61-cf8c0f573e98&accountId=33986eaf-fde8-48d4-8d61-cf8c0f573e98). Do not tell customers that the BAA applies automatically.
+3. For HIPAA-related legal requirements, direct the customer to [complete and sign the BAA via Ironclad](https://ironcladapp.com/public-launch/6aa89377853bdf7f289e7139). Do not tell customers that the BAA applies automatically.
 4. For HIPAA-region IP allowlisting (egress from Langfuse to customer infra, e.g. for LLM-as-a-judge): static IPs are `35.82.248.193`, `34.211.191.155`, `52.43.164.18` (us-west-2). Full list at [langfuse.com/security/networking](https://langfuse.com/security/networking). **Ingress** to `hipaa.cloud.langfuse.com` sits behind AWS ALBs without static IPs, we cannot publish a stable ingress IP range.
 
 **Reply template:**
@@ -949,7 +949,7 @@ HIPAA is available on a dedicated cloud region: `hipaa.cloud.langfuse.com`. Cust
 ```text
 Hi {name},
 
-For HIPAA usage you'll need to be on hipaa.cloud.langfuse.com (separate region from us./cloud.) and on a HIPAA-eligible plan (Pro or higher). Please complete and sign the BAA before processing PHI: https://powerforms.docusign.net/39437499-4b13-4604-b373-2b1f2ae6f6fd?env=eu&acct=33986eaf-fde8-48d4-8d61-cf8c0f573e98&accountId=33986eaf-fde8-48d4-8d61-cf8c0f573e98
+For HIPAA usage you'll need to be on hipaa.cloud.langfuse.com (separate region from us./cloud.) and on a HIPAA-eligible plan (Pro or higher). Please complete and sign the BAA before processing PHI: https://ironcladapp.com/public-launch/6aa89377853bdf7f289e7139
 
 A note for completeness: HIPAA accounts are provisioned fresh on hipaa.cloud.langfuse.com. If your team is currently on us.cloud or cloud., past trace data can be moved via our data migration cookbook: https://langfuse.com/guides/cookbook/example_data_migration.
 

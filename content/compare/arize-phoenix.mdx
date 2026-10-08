@@ -13,23 +13,21 @@ import CompareClickhouseDatastore from "@/components-mdx/compare-clickhouse-data
 
 This guide compares **[Langfuse](/)**, **[Arize Phoenix](https://phoenix.arize.com)**, and **[Arize AX](https://arize.com/products/ax/)**. All Arize facts were checked against public Arize sources in September 2026.
 
-Phoenix and AX are different products. Phoenix is source-available (Elastic License 2.0) on SQLite or PostgreSQL. AX is proprietary on [adb](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database) ([public launch June 2025](https://arize.com/docs/ax/release-notes/history/2025/06-2025)). Langfuse is one [MIT-licensed](https://github.com/langfuse/langfuse) codebase on [ClickHouse](https://clickhouse.com/) ([open source since 2016](https://clickhouse.com/blog/open-source-10)), identical on Cloud and self-hosted.
-
-On August 13, 2026, Dynatrace [announced a definitive agreement to acquire Arize](https://www.dynatrace.com/news/press-release/dynatrace-to-acquire-arize/). The transaction has not closed; this page compares AX and Phoenix as they ship today. See [the FAQ](#dynatrace-acquisition).
+On August 13, 2026, Dynatrace [announced a definitive agreement to acquire Arize](https://www.dynatrace.com/news/press-release/dynatrace-to-acquire-arize/). The transaction has not closed; this page compares AX and Phoenix as they ship today.
 
 ## TL;DR
 
-**Choose Langfuse** if you want:
+- **One open product.** Langfuse is [one MIT-licensed product](#open-source-and-distribution), identical on Cloud, self-hosted, and air-gapped. Arize splits this in two: Phoenix (source-available, Elastic License 2.0) and the proprietary AX platform. Their own guidance puts the most sensitive workloads on Phoenix, not AX.
+- **A battle-tested data plane.** Langfuse runs on ClickHouse, [open source and in production for a decade](#history-and-data-plane) with 2,000+ contributors, and self-hosters query it in SQL. AX Cloud stores traces in adb, a closed database that first shipped in June 2025. Phoenix stays on SQLite or Postgres, which [Arize's own docs say to outgrow by moving to AX](#history-and-data-plane).
+- **~6.5x cheaper, with 3 years of history.** At 500k traces/month, Langfuse Pro is $621 where [AX Pro is $4,055 with 30-day retention](#worked-example), because AX meters spans plus ingested GB. Langfuse meters one unit (a trace, observation, or score) with no seat fees.
+- **The full eval loop on every plan.** [Code evaluators and CI gates](#evaluation-and-experiments) run on all Langfuse plans and self-hosted. AX gates custom code evaluators behind Enterprise.
+- **Same-day switch.** Existing OpenInference instrumentation [keeps working over OTLP](#switching-from-arize); most teams see first traces in Langfuse the same day.
 
-**1. The same product in production.** Tracing, evaluations, prompt management, and experiments in the MIT distribution. Cloud and self-host share the codebase. Used by 21 of the Fortune 50.
+**Choose Langfuse** if you want the same MIT-licensed product at any scale, for everyday and highly sensitive workloads alike: identical on Cloud, self-hosted, and air-gapped, and proven at 21 of the Fortune 50. On a 500k-trace month it is [~6.5x cheaper](#worked-example) than AX at list prices, with 3 years of history instead of 30 days. When self-hosting, you accept a ClickHouse, Postgres, and Redis stack rather than a single container; that is what the scale and history run on.
 
-**2. An open data plane.** Every span lands in ClickHouse, open source since 2016 with 2,000+ contributors. Self-hosters query it in SQL. Cloud and self-host share the same engine.
+**Choose Arize Phoenix** if you want one container on SQLite (Postgres when you outgrow it), OpenInference as the native instrumentor, and client-side evaluators as code you run yourself. You accept Elastic License 2.0, one tenant per instance, and a different product when you need managed production.
 
-**3. One meter, years of history, code evals on every plan.** A unit is a trace, an observation, or a score. Pro includes 3-year retention. Custom code evaluators are not an Enterprise gate.
-
-**Choose Arize Phoenix** if you want one container on SQLite (Postgres when you outgrow it), OpenInference as the native instrumentor, and client-side evaluators as code you run yourself. You accept Elastic License 2.0 and a different product when you need managed production.
-
-**Choose Arize AX** if you already run classical ML on Arize, or you want Signal, Alyx, and session-level LLM judges on a managed platform. You accept span + ingested-GB billing, 30-day Pro retention, and custom code evaluators on Enterprise.
+**Choose Arize AX** if you already run classical ML on Arize, or you want one managed platform covering classical ML and GenAI. You accept span + ingested-GB billing, 30-day Pro retention, and custom code evaluators on Enterprise.
 
 ---
 
@@ -37,7 +35,9 @@ On August 13, 2026, Dynatrace [announced a definitive agreement to acquire Arize
 
 Langfuse is [MIT-licensed](https://github.com/langfuse/langfuse) across tracing, evaluations, prompt management, and experiments. [Self-hosting](/self-hosting) runs the same codebase and ClickHouse architecture as Langfuse Cloud, so you can move between Cloud and self-host without rewriting the application layer. [Enterprise governance modules](/pricing-self-host), including audit logs, project-level RBAC, SCIM, protected labels, and retention policies, need an Enterprise license when self-hosted.
 
-Arize ships two products. [Phoenix](https://docs.arize.com/phoenix) is source-available under the [Elastic License 2.0](https://github.com/Arize-ai/phoenix/blob/main/LICENSE) (not an OSI-approved open-source license) and [self-hosts](https://docs.arize.com/phoenix/deployment) on SQLite or PostgreSQL. [Arize AX](https://arize.com/products/ax/) is proprietary; self-hosting is an [Enterprise option](https://arize.com/pricing/). Phoenix and AX do not share a storage engine: Phoenix uses Postgres/SQLite, while AX runs on [adb](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database), Arize's proprietary OLAP database ([public launch June 25, 2025](https://arize.com/docs/ax/release-notes/history/2025/06-2025)).
+Arize ships two products. [Phoenix](https://docs.arize.com/phoenix) is source-available under the [Elastic License 2.0](https://github.com/Arize-ai/phoenix/blob/main/LICENSE) (not an OSI-approved open-source license) and [self-hosts](https://docs.arize.com/phoenix/deployment) on SQLite or PostgreSQL. Phoenix is also [single-tenant by design](https://arize.com/docs/phoenix/self-hosting/architecture): one instance is one tenant, multi-team isolation means running separate instances, and project-scoped access control within an instance is planned for later in 2026. [Arize AX](https://arize.com/products/ax/) is proprietary; self-hosting is an [Enterprise option](https://arize.com/pricing/). Phoenix and AX do not share a storage engine: Phoenix uses Postgres/SQLite, while AX runs on [adb](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database), Arize's proprietary OLAP database ([public launch June 25, 2025](https://arize.com/docs/ax/release-notes/history/2025/06-2025)).
+
+The split matters most in regulated environments. Arize's [guidance for banks](https://arize.com/blog/why-banks-adopt-the-arize-ecosystem/) is to run Phoenix inside isolated and air-gapped business units and converge on AX as the central platform: the workloads with the strictest requirements land on the lighter product. Langfuse self-hosting [runs fully air-gapped](/self-hosting/security/networking) with the same complete product as Cloud, so high-risk work gets the same tracing, evals, and governance as everything else.
 
 Dynatrace's [acquisition announcement](https://www.dynatrace.com/news/press-release/dynatrace-to-acquire-arize/) describes Arize as "OSS-native" and highlights its open-source community, but it does not name Phoenix or state a license or continuity commitment for a standalone open-source product.
 
@@ -54,7 +54,7 @@ Dynatrace's [acquisition announcement](https://www.dynatrace.com/news/press-rele
 
 ## History and data plane [#history-and-data-plane]
 
-Phoenix starts as one container on SQLite. A production Langfuse self-host runs ClickHouse, Postgres, Redis, and blob storage. [Docker Compose](/self-hosting/deployment/docker-compose) brings that stack up on one VM. Helm and Terraform are the high-availability paths. Agent traces are deep trees with large payloads and high-cardinality group-bys, so Langfuse left Postgres in v3. [How Langfuse runs ClickHouse at agent scale](/resources/engineering/clickhouse-at-agent-scale) is the design write-up. Joining ClickHouse in January 2026 put the team that builds that engine and the team that runs it on Langfuse Cloud in one company. The [public commitment](/blog/joining-clickhouse) keeps the MIT license, self-hosting, Cloud endpoints, and the same roadmap.
+Phoenix starts as one container on SQLite, with Postgres recommended for production. Arize's own [architecture docs](https://arize.com/docs/phoenix/self-hosting/architecture) state that "high-volume ingestion, sub-second queries at scale, and OLAP workloads beyond what SQLite or PostgreSQL are designed for" run on adb; the scale path out of Phoenix is Arize AX. A production Langfuse self-host runs ClickHouse, Postgres, Redis, and blob storage. [Docker Compose](/self-hosting/deployment/docker-compose) brings that stack up on one VM. Helm and Terraform are the high-availability paths. Agent traces are deep trees with large payloads and high-cardinality group-bys, so Langfuse left Postgres in v3. [How Langfuse runs ClickHouse at agent scale](/resources/engineering/clickhouse-at-agent-scale) is the design write-up. Joining ClickHouse in January 2026 put the team that builds that engine and the team that runs it on Langfuse Cloud in one company. The [public commitment](/blog/joining-clickhouse) keeps the MIT license, self-hosting, Cloud endpoints, and the same roadmap.
 
 High-volume reads use the [Observations](/docs/api-and-data-platform/features/public-api#v2) and [Metrics](/docs/metrics/features/metrics-api) APIs; self-hosters can query ClickHouse in SQL.
 
@@ -78,7 +78,14 @@ The [Arize pricing page](https://arize.com/pricing/) lists **15 days** of retent
 
 ## Pricing [#pricing]
 
-Langfuse Cloud bills [units](/docs/administration/billable-units): one unit is a trace, an observation, or a score, with no seat fees. Arize AX bills on two meters: span volume and ingested GB. On AX Pro, spans beyond the included 50,000 cost **$0.0008 each** and ingestion beyond 10 GB costs **$3/GB**, shown as tooltips on the [Arize pricing page](https://arize.com/pricing/). Phoenix self-hosted has no platform usage fee; you run the infrastructure. The [editable pricing model](/pricing-comparison-sheet) takes your volumes as inputs so you can find your own crossover.
+<Callout type="info">
+  **Run your own numbers.** The [Langfuse vs Arize AX pricing
+  model](/pricing-comparison-sheet) is an editable Google Sheet with every list
+  price in this section. Set traces, spans per trace, span size, and scores to
+  see where the costs cross over.
+</Callout>
+
+Langfuse Cloud bills [units](/docs/administration/billable-units): one unit is a trace, an observation, or a score, with no seat fees. Arize AX bills on two meters: span volume and ingested GB. On AX Pro, spans beyond the included 50,000 cost **$0.0008 each** and ingestion beyond 10 GB costs **$3/GB**, shown as tooltips on the [Arize pricing page](https://arize.com/pricing/). Phoenix self-hosted has no platform usage fee; you run the infrastructure.
 
 |            | Langfuse                                                             | Arize AX                                                        |
 | ---------- | -------------------------------------------------------------------- | --------------------------------------------------------------- |
@@ -99,9 +106,14 @@ Langfuse Cloud bills [units](/docs/administration/billable-units): one unit is a
 | **Langfuse Pro (3-year retention)** | $199.00 | $422.00   | $0.00                          | **$621.00**     |
 | **Arize AX Pro (30-day retention)** | $50.00  | $4,005.00 | No public price beyond 30 days | **$4,055.00**   |
 
-Public list prices; edit the inputs yourself in the [pricing model](/pricing-comparison-sheet). Langfuse: 6,000,000 units (traces + observations + scores), 100k included → $199 base + $72 (100k–1M at $8/100k) + $350 (1M–6M at $7/100k) = **$621**, 3-year history included. Arize AX: 5,000,000 spans and 25 GB → $50 base + 4,950,000 × $0.0008 ($3,960) + 15 GB × $3 ($45) = **$4,055**. Arize does not publish a price for retention beyond AX Pro's 30 days, so none is included.
+Public list prices:
 
-[See pricing](/pricing) · [Start Free](https://cloud.langfuse.com) · [Talk to us](/talk-to-us)
+- **Langfuse Pro:** 6,000,000 units (traces + observations + scores), 100k included → $199 base + $72 (100k–1M at $8/100k) + $350 (1M–6M at $7/100k) = **$621**, 3-year history included.
+- **Arize AX Pro:** 5,000,000 spans and 25 GB → $50 base + $3,960 (4,950,000 spans beyond the included 50k, at $0.0008) + $45 (15 GB beyond the included 10, at $3/GB) = **$4,055**. Arize does not publish a price for retention beyond 30 days, so none is included.
+
+Different volumes? The [editable sheet](/pricing-comparison-sheet) reproduces this math from your inputs.
+
+See [Langfuse pricing](/pricing) for current rates, [start free](https://cloud.langfuse.com), or [talk to us](/talk-to-us) about Enterprise volumes.
 
 ---
 
@@ -176,7 +188,7 @@ Langfuse lists a [GDPR DPA](/dpa) on all Cloud plans, and [SOC 2 Type II and ISO
 
 **Arize Phoenix** if you want a single container on SQLite or Postgres, OpenInference as the native instrumentor, and client-side evaluators you run yourself.
 
-**Arize AX** if one managed platform must cover classical ML and GenAI, or you want Signal, Alyx, and session-level judges and will take span+GB billing with 30-day Pro retention.
+**Arize AX** if one managed platform must cover classical ML and GenAI, or you want its Alyx assistant, Signal issue detection, and session-level judges, and will take span+GB billing with 30-day Pro retention.
 
 ---
 
@@ -184,7 +196,7 @@ Langfuse lists a [GDPR DPA](/dpa) on all Cloud plans, and [SOC 2 Type II and ISO
 
 - **Every span and every GB bills.** Arize AX meters span volume and ingestion together; at 500k traces/month the [worked example](#worked-example) lands at $4,055 on AX Pro vs. $621 on Langfuse Pro, which meters units only.
 - **Parts of the quality loop are Enterprise-gated.** Custom code evaluators are Enterprise-only on Arize AX. Langfuse runs [code evaluators and CI experiments](#evaluation-and-experiments) on every plan and self-hosted.
-- **Self-hosting below Enterprise means a different product.** Arize AX self-hosting is Enterprise-only; the free path is Phoenix, a separate product on a different storage engine under the Elastic License. Langfuse [self-hosts the same codebase](#open-source-and-distribution) as Cloud, MIT-licensed.
+- **Self-hosting below Enterprise means a different product.** Arize AX self-hosting is Enterprise-only; the free path is Phoenix, a separate product on a different storage engine under the Elastic License. Arize's own [guidance for regulated teams](#open-source-and-distribution) routes isolated and air-gapped workloads to Phoenix, so the highest-risk work lands on the lighter stack and the team maintains two products. Langfuse [self-hosts the same codebase](#open-source-and-distribution) as Cloud, MIT-licensed, including fully air-gapped.
 - **AX Cloud uses a closed store that launched in 2025.** [adb](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database) is proprietary (public launch June 2025). Langfuse runs on [ClickHouse](#history-and-data-plane), open source since 2016, with the same architecture on Cloud and self-hosted.
 - **30 days of history below Enterprise.** Arize AX includes 15 days on Free and 30 on Pro, with no public price for more. Langfuse Pro includes [3-year retention](#history-and-data-plane).
 

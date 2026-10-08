@@ -5,9 +5,11 @@ import { join } from "node:path";
 import { AdoptersExplorer, type Adopter } from "./AdoptersExplorer";
 import { AdoptersTicker } from "./AdoptersTicker";
 import adobeLogo from "../home/img/adobe.svg";
+import boschLogo from "../home/img/bosch.svg";
 import canvaLogo from "../home/img/canva.svg";
 import circlebackLogo from "../home/img/circleback.svg";
 import ciscoLogo from "../home/img/cisco.svg";
+import enbwLogo from "../home/img/enbw.svg";
 import expediaLogo from "../home/img/expedia.svg";
 import freeeLogo from "../home/img/freee.svg";
 import huggingFaceLogo from "../home/img/huggingface.svg";
@@ -20,6 +22,7 @@ import rampLogo from "../home/img/ramp.svg";
 import rocketMoneyLogo from "../home/img/rocket-money.svg";
 import samsaraLogo from "../home/img/samsara.svg";
 import sumUpLogo from "../home/img/sumup.svg";
+import swisscomLogo from "../home/img/swisscom.svg";
 import telusLogo from "../home/img/telus.svg";
 import tradeRepublicLogo from "../home/img/trade-republic.svg";
 import twilioLogo from "../home/img/twilio.svg";
@@ -32,9 +35,11 @@ const ADOPTERS_TABLE_PATH = join(
 
 const COMPANY_LOGOS: Record<string, NonNullable<Adopter["logo"]>> = {
   Adobe: { src: adobeLogo },
+  "Bosch Power Tools": { src: boschLogo },
   Canva: { src: canvaLogo },
   Circleback: { src: circlebackLogo },
   Cisco: { src: ciscoLogo },
+  EnBW: { src: enbwLogo },
   "Expedia Group": { src: expediaLogo },
   freee: { src: freeeLogo },
   "Hugging Face": { src: huggingFaceLogo },
@@ -48,6 +53,7 @@ const COMPANY_LOGOS: Record<string, NonNullable<Adopter["logo"]>> = {
   Samsara: { src: samsaraLogo },
   Slite: { src: "/images/customers/slite/slite-light.png" },
   SumUp: { src: sumUpLogo },
+  Swisscom: { src: swisscomLogo },
   TELUS: { src: telusLogo },
   "Trade Republic": { src: tradeRepublicLogo },
   Twilio: { src: twilioLogo },
@@ -59,6 +65,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   Apple: "Consumer electronics and software company",
   Base44: "AI app-building platform",
   Bayer: "Pharmaceutical and life sciences company",
+  "Bosch Power Tools": "Power tools and measuring technology company",
   Canva: "Visual communication and design platform",
   Circleback: "AI meeting assistant with transcription and notes",
   Cisco: "Networking and cybersecurity company",
@@ -69,6 +76,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   "Dep for Environment, Food & Rural Affairs": "UK government department",
   Draftbit: "Visual mobile app development platform",
   Ecosia: "Search engine and technology company",
+  EnBW: "German energy and utilities company",
   Equinix: "Digital infrastructure and data center company",
   "Expedia Group": "Travel technology company",
   Fletch: "Security and threat intelligence platform",
@@ -110,6 +118,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   "Seven Eleven Japan": "Convenience retailer",
   Slite: "Knowledge management platform",
   SumUp: "Payments and point-of-sale company",
+  Swisscom: "Swiss communications, IT, and entertainment company",
   TELUS: "Telecommunications company",
   "The Weather Company": "Weather intelligence company",
   "Trade Republic": "European fintech bank",

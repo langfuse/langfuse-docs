@@ -3,7 +3,7 @@ date: 2026-09-22
 title: Jev as a judge
 description: Use TypeSafe's Jev decision model as a judge in Langfuse evaluators. Ask typed questions about every observation and get calibrated scores at a fraction of the cost and latency of an LLM judge.
 author: Hassieb
-canonical: /docs/evaluation/evaluation-methods/jev-as-a-judge
+canonical: /docs/evaluation/evaluation-methods/decision-models
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
@@ -35,7 +35,7 @@ Jev does not replace LLM judges. It has no rationale to give and only answers qu
 ## Get started
 
 1. Add a **TypeSafe** connection under **Settings → LLM Connections**. You only need a TypeSafe API key.
-2. On the [Evaluators page](https://cloud.langfuse.com/project/~/evals), click **New evaluator** and choose **New decision model evaluator**, or start from one of the Jev templates: **Assign Input Topic**, **Flag Out-of-Scope Request**, or **Rate Customer Frustration**.
+2. On the [Evaluators page](https://cloud.langfuse.com/project/~/evals), click **New evaluator** and choose **New decision model evaluator**, or start from one of the Jev templates: **Assign Input Topic**, **Flag Out-of-Scope Request**, **Rate Customer Frustration**, or **User Conversation Signal**.
 3. Define your questions, map observation fields into the state, test on sample observations, and attach the evaluator to a rule.
 
 In the Langfuse UI, Jev evaluators are called **decision-model evaluators**. Jev is the first decision model we support.
@@ -43,13 +43,13 @@ In the Langfuse UI, Jev evaluators are called **decision-model evaluators**. Jev
 <Cards num={2}>
   <Card
     title="Jev as a judge docs"
-    href="/docs/evaluation/evaluation-methods/jev-as-a-judge"
+    href="/docs/evaluation/evaluation-methods/decision-models"
     icon={<Book />}
     arrow
   />
   <Card
-    title="Using TypeSafe's Jev for evals"
-    href="/blog/2026-09-18-using-typesafes-jev-for-evals"
+    title="Catching conversation signals in Langfuse"
+    href="/blog/2026-09-23-catching-conversation-signals-in-langfuse"
     icon={<Newspaper />}
     arrow
   />

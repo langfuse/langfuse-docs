@@ -7,7 +7,8 @@ import { DocBodyChrome } from "@/components/DocBodyChrome";
 import { MainContentWrapper } from "@/components/MainContentWrapper";
 import { PostArticleHeader } from "@/components/PostArticleHeader";
 import { compareCrumbs } from "@/lib/post-crumbs";
-import { ContentColumns } from "@/components/layout";
+import { ContentColumns, HomeAside } from "@/components/layout";
+import { compareSections } from "@/lib/compare-landing-data";
 
 type PageProps = {
   params: Promise<{ slug?: string[] }>;
@@ -18,6 +19,17 @@ export default async function ComparePage({ params }: PageProps) {
   const result = await loadPage(compareSource, slug);
   if (!result) notFound();
   const { page, MDX } = result;
+  if (slug.length === 0) {
+    return (
+      <ContentColumns
+        rightSidebar={<HomeAside toc={compareSections} />}
+        footerClassName="px-4 sm:px-8 md:max-w-none md:px-8 xl:max-w-none"
+      >
+        <MDX components={getMDXComponents()} />
+      </ContentColumns>
+    );
+  }
+
   const currentLabel = String(
     page.data.shortTitle ?? page.data.sidebarTitle ?? page.data.title ?? "",
   );
