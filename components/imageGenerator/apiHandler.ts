@@ -2,13 +2,12 @@ import OpenAI from "openai";
 import {
   observe,
   propagateAttributes,
-  startActiveObservation,
   updateActiveObservation,
   getActiveTraceId,
 } from "@langfuse/tracing";
 import { LangfuseMedia } from "@langfuse/core";
 import { after } from "next/server";
-import { trace } from "@opentelemetry/api";
+import { context, trace } from "@opentelemetry/api";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
 import { buildDemoTraceUrl } from "@/lib/demo-trace";
@@ -48,40 +47,45 @@ const handler = async (req: Request) => {
       const traceId = getActiveTraceId();
       const activeSpan = trace.getActiveSpan();
       const rootObservationId = activeSpan?.spanContext().spanId;
+      const runWithActiveSpan = <T>(fn: () => T) =>
+        activeSpan
+          ? context.with(trace.setSpan(context.active(), activeSpan), fn)
+          : fn();
 
-      updateActiveObservation({ input: prompt }, { asType: "agent" });
+      runWithActiveSpan(() => {
+        updateActiveObservation({ input: prompt });
+      });
 
       try {
-        const { imageData, imageMedia } = await startActiveObservation(
-          "generate-image",
-          async (generation) => {
-            const result = await getOpenAI().images.generate({
-              model: "gpt-image-2.5-flare",
-              prompt,
-              size: "1024x1024",
-              quality: "low",
-            });
+        const result = await getOpenAI().images.generate({
+          model: "gpt-image-2.5-flare",
+          prompt,
+          size: "1024x1024",
+          quality: "low",
+        });
 
-            const imageData = result.data?.[0]?.b64_json;
-            if (!imageData) {
-              throw new Error("No image data returned");
+        const imageData = result.data?.[0]?.b64_json;
+        if (!imageData) {
+          throw new Error("No image data returned");
+        }
+
+        const imageMedia = new LangfuseMedia({
+          contentBytes: Buffer.from(imageData, "base64"),
+          contentType: "image/png",
+          source: "bytes",
+        });
+
+        const usage = (result as any).usage as
+          | {
+              input_tokens?: number;
+              output_tokens?: number;
+              total_tokens?: number;
             }
+          | undefined;
 
-            const imageMedia = new LangfuseMedia({
-              contentBytes: Buffer.from(imageData, "base64"),
-              contentType: "image/png",
-              source: "bytes",
-            });
-
-            const usage = (result as any).usage as
-              | {
-                  input_tokens?: number;
-                  output_tokens?: number;
-                  total_tokens?: number;
-                }
-              | undefined;
-
-            generation.update({
+        runWithActiveSpan(() => {
+          updateActiveObservation(
+            {
               input: prompt,
               output: imageMedia,
               model: "gpt-image-2.5-flare",
@@ -96,15 +100,11 @@ const handler = async (req: Request) => {
                   total: usage.total_tokens ?? 0,
                 },
               }),
-            });
-
-            return { imageData, imageMedia };
-          },
-          { asType: "generation" },
-        );
-
-        updateActiveObservation({ output: imageMedia }, { asType: "agent" });
-        activeSpan?.end();
+            },
+            { asType: "generation" },
+          );
+          activeSpan?.end();
+        });
 
         let traceUrl = buildDemoTraceUrl();
         try {
@@ -142,7 +142,7 @@ const handler = async (req: Request) => {
 
 export const POST = observe(handler, {
   name: "image-generator",
-  asType: "agent",
+  asType: "generation",
   captureOutput: false,
   endOnExit: false,
 });

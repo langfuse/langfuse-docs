@@ -3,7 +3,6 @@ import {
   observe,
   propagateAttributes,
   setActiveTraceIO,
-  startActiveObservation,
   getActiveTraceId,
   updateActiveObservation,
 } from "@langfuse/tracing";
@@ -107,92 +106,75 @@ const handler = async (req: Request) => {
       const request = buildSystemOneRequest(text, selected);
 
       setActiveTraceIO({ input: request });
-      updateActiveObservation({ input: request }, { asType: "agent" });
+      updateActiveObservation({ input: request }, { asType: "generation" });
 
       try {
-        const result = await startActiveObservation(
-          "classify-text",
-          async (generation) => {
-            const response = await getClient().systemOne(request);
-            const inputTokens = response.usage.input_tokens;
-            const outputTokens = response.usage.output_tokens;
-            const usage: SentimentUsage = {
-              inputTokens,
-              outputTokens,
-              totalTokens: inputTokens + outputTokens,
-              costUsd: computeCostUsd(
-                inputTokens,
-                outputTokens,
-                JEV_PRICE_USD_PER_MTOK,
-              ),
-            };
+        const response = await getClient().systemOne(request);
+        const inputTokens = response.usage.input_tokens;
+        const outputTokens = response.usage.output_tokens;
+        const usage: SentimentUsage = {
+          inputTokens,
+          outputTokens,
+          totalTokens: inputTokens + outputTokens,
+          costUsd: computeCostUsd(
+            inputTokens,
+            outputTokens,
+            JEV_PRICE_USD_PER_MTOK,
+          ),
+        };
 
-            const answers: ClassifierAnswer[] = selected.map((definition) => {
-              const answer = asChoiceAnswer(
-                response.answers[definition.id],
-                definition.id,
-              );
-              const probabilities = Object.fromEntries(
-                Object.keys(definition.criteria).map((label) => [
-                  label,
-                  answer.probabilities[label] ?? 0,
-                ]),
-              );
-              return {
-                id: definition.id,
-                name: definition.name,
-                value: answer.choice,
-                confidence: answer.confidence,
-                probabilities,
-              };
-            });
+        const answers: ClassifierAnswer[] = selected.map((definition) => {
+          const answer = asChoiceAnswer(
+            response.answers[definition.id],
+            definition.id,
+          );
+          const probabilities = Object.fromEntries(
+            Object.keys(definition.criteria).map((label) => [
+              label,
+              answer.probabilities[label] ?? 0,
+            ]),
+          );
+          return {
+            id: definition.id,
+            name: definition.name,
+            value: answer.choice,
+            confidence: answer.confidence,
+            probabilities,
+          };
+        });
 
-            const classified: ClassifierRunResult = {
-              model: response.model,
-              usage,
-              answers,
-            };
-
-            generation.update({
-              input: request,
-              output: classified,
-              model: response.model,
-              metadata: {
-                provider: "typesafe",
-                questionType: "choice",
-                questionCount: selected.length,
-                costUsd: usage.costUsd,
-              },
-              usageDetails: {
-                input: inputTokens,
-                output: outputTokens,
-                total: usage.totalTokens,
-              },
-              // Jev bills input tokens only (output price is $0); record that split
-              // so the Langfuse cost breakdown shows Input cost, not only Total.
-              costDetails: computeCostDetails(
-                inputTokens,
-                outputTokens,
-                JEV_PRICE_USD_PER_MTOK,
-              ),
-            });
-
-            return classified;
-          },
-          { asType: "generation" },
-        );
+        const result: ClassifierRunResult = {
+          model: response.model,
+          usage,
+          answers,
+        };
 
         setActiveTraceIO({ output: result });
         updateActiveObservation(
           {
+            input: request,
             output: result,
+            model: response.model,
             metadata: {
               provider: "typesafe",
+              questionType: "choice",
               questionCount: selected.length,
-              costUsd: result.usage.costUsd,
+              costUsd: usage.costUsd,
             },
+            usageDetails: {
+              input: inputTokens,
+              output: outputTokens,
+              total: usage.totalTokens,
+            },
+            // Jev bills input tokens only (output price is $0); record that split
+            // so the Langfuse cost breakdown shows Input cost, not only Total.
+            costDetails: computeCostDetails(
+              inputTokens,
+              outputTokens,
+              JEV_PRICE_USD_PER_MTOK,
+            ),
           },
-          { asType: "agent" },
+          { asType: "generation" },
         );
 
         after(async () => await flush());
@@ -218,7 +200,7 @@ const handler = async (req: Request) => {
 
 export const POST = observe(handler, {
   name: "sentiment-classifier",
-  asType: "agent",
+  asType: "generation",
   // Keep the result we set via updateActiveObservation; otherwise observe
   // would capture the HTTP Response object, which serializes to {}.
   captureOutput: false,

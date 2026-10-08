@@ -5,7 +5,6 @@ import {
   observe,
   propagateAttributes,
   setActiveTraceIO,
-  startActiveObservation,
   getActiveTraceId,
   updateActiveObservation,
 } from "@langfuse/tracing";
@@ -42,84 +41,43 @@ const schemaFor = (definition: ClassifierDefinition) => {
   });
 };
 
-const classifyOne = (definition: ClassifierDefinition, text: string) => {
-  const prompt = `Classify the following text:\n\n${text}`;
-  const system = llmSystemPrompt(definition);
-
-  return startActiveObservation(
-    "classify-text",
-    async (generation) => {
-      generation.update({
-        input: [
-          { role: "system", content: system },
-          { role: "user", content: prompt },
-        ],
-        model: LLM_MODEL,
-        modelParameters: { reasoningEffort: LLM_REASONING_EFFORT },
-        metadata: { task: definition.id },
-      });
-
-      // Telemetry stays off so this generation is the only record of the call.
-      // The AI SDK span would not receive the custom Luna cost split below.
-      const result = await generateObject({
-        model: openai(LLM_MODEL),
-        schema: schemaFor(definition),
-        system,
-        prompt,
-        providerOptions: {
-          openai: {
-            reasoningEffort: LLM_REASONING_EFFORT,
-          },
-        },
-        telemetry: {
-          isEnabled: false,
-        },
-      });
-
-      const inputTokens = result.usage.inputTokens ?? 0;
-      const outputTokens = result.usage.outputTokens ?? 0;
-      const reasoningTokens =
-        result.usage.outputTokenDetails?.reasoningTokens ?? 0;
-      const usage: SentimentUsage = {
-        inputTokens,
-        outputTokens,
-        reasoningTokens,
-        totalTokens: inputTokens + outputTokens,
-        costUsd: computeCostUsd(
-          inputTokens,
-          outputTokens,
-          LUNA_PRICE_USD_PER_MTOK,
-        ),
-      };
-
-      const answer: ClassifierAnswer = {
-        id: definition.id,
-        name: definition.name,
-        value: result.object.value,
-        confidence: result.object.confidence,
-        explanation: result.object.explanation,
-        keyPhrases: result.object.keyPhrases,
-      };
-
-      generation.update({
-        output: result.object,
-        usageDetails: {
-          input: inputTokens,
-          output: outputTokens,
-          ...(reasoningTokens ? { reasoning: reasoningTokens } : {}),
-          total: usage.totalTokens,
-        },
-        costDetails: computeCostDetails(
-          inputTokens,
-          outputTokens,
-          LUNA_PRICE_USD_PER_MTOK,
-        ),
-      });
-
-      return { answer, usage };
+const classifyOne = async (definition: ClassifierDefinition, text: string) => {
+  const result = await generateObject({
+    model: openai(LLM_MODEL),
+    schema: schemaFor(definition),
+    system: llmSystemPrompt(definition),
+    prompt: `Classify the following text:\n\n${text}`,
+    providerOptions: {
+      openai: {
+        reasoningEffort: LLM_REASONING_EFFORT,
+      },
     },
-    { asType: "generation" },
-  );
+    telemetry: {
+      isEnabled: false,
+    },
+  });
+
+  const inputTokens = result.usage.inputTokens ?? 0;
+  const outputTokens = result.usage.outputTokens ?? 0;
+  const reasoningTokens = result.usage.outputTokenDetails?.reasoningTokens ?? 0;
+  const usage: SentimentUsage = {
+    inputTokens,
+    outputTokens,
+    reasoningTokens,
+    totalTokens: inputTokens + outputTokens,
+    costUsd: computeCostUsd(inputTokens, outputTokens, LUNA_PRICE_USD_PER_MTOK),
+  };
+
+  const answer: ClassifierAnswer = {
+    id: definition.id,
+    name: definition.name,
+    value: result.object.value,
+    confidence: result.object.confidence,
+    explanation: result.object.explanation,
+    keyPhrases: result.object.keyPhrases,
+  };
+
+  return { answer, usage };
 };
 
 const handler = async (req: Request) => {
@@ -191,7 +149,7 @@ const handler = async (req: Request) => {
       };
 
       setActiveTraceIO({ input });
-      updateActiveObservation({ input }, { asType: "agent" });
+      updateActiveObservation({ input }, { asType: "generation" });
 
       try {
         const runs = await Promise.all(
@@ -213,13 +171,28 @@ const handler = async (req: Request) => {
         setActiveTraceIO({ output: payload });
         updateActiveObservation(
           {
+            input,
             output: payload,
+            model: LLM_MODEL,
             metadata: {
               reasoningEffort: LLM_REASONING_EFFORT,
               costUsd: usage.costUsd,
             },
+            usageDetails: {
+              input: usage.inputTokens,
+              output: usage.outputTokens,
+              ...(usage.reasoningTokens
+                ? { reasoning: usage.reasoningTokens }
+                : {}),
+              total: usage.totalTokens,
+            },
+            costDetails: computeCostDetails(
+              usage.inputTokens,
+              usage.outputTokens,
+              LUNA_PRICE_USD_PER_MTOK,
+            ),
           },
-          { asType: "agent" },
+          { asType: "generation" },
         );
 
         after(async () => await flush());
@@ -245,7 +218,7 @@ const handler = async (req: Request) => {
 
 export const POST = observe(handler, {
   name: "sentiment-classifier",
-  asType: "agent",
+  asType: "generation",
   // Keep the result we set via updateActiveObservation; otherwise observe
   // would capture the HTTP Response object, which serializes to {}.
   captureOutput: false,
