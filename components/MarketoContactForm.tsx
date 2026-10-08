@@ -23,6 +23,7 @@ const COMPACT_VISIBLE_FIELDS = new Set([
   "LastName",
   "Email",
   "Company",
+  "Phone",
   "Event_Notes__c",
 ]);
 
