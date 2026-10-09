@@ -11,8 +11,8 @@ The Python SDK v5 targets **Langfuse v4** only. It removes the Public API method
 Most applications that already follow the [observations-first model](/docs/observability/data-model) only need to check a few call sites. Start with the [migration checklist](#migration-checklist) and use the sections below for details.
 
 <Callout type="warning">
-  Python SDK v5 requires Langfuse Cloud or a self-hosted Langfuse v4 deployment.
-  If you self-host Langfuse v3, stay on Python SDK v4. See the [self-hosted
+  Python SDK v5 requires Langfuse Cloud or self-hosted Langfuse **v4.XX.0 or
+  later**. On older v4 servers such as 4.55.x, plain string metadata values like `"123"` or `"true"` are stored as numbers or booleans. If you self-host Langfuse v3, stay on Python SDK v4. See the [self-hosted
   compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) and
   [Versions & Compatibility](/docs/compatibility).
 </Callout>
@@ -143,7 +143,7 @@ with langfuse.start_as_current_observation(as_type="span", name="request") as sp
 
 ### Propagated metadata is serialized as JSON
 
-`propagate_attributes(metadata=...)` now serializes non-string values as compact JSON instead of with `str()`. Strings are unchanged.
+`propagate_attributes(metadata=...)` now serializes non-string values as compact JSON instead of with `str()`. Strings are unchanged. Self-hosted servers need v4.XX.0 or later to keep string values that look like numbers or booleans as strings.
 
 | Value               | v4              | v5                     |
 | ------------------- | --------------- | ---------------------- |
@@ -343,7 +343,7 @@ The SDK's `langfuse.create_score(...)`, `span.score(...)`, and `span.score_trace
 
 ## Migration Checklist [#migration-checklist]
 
-1. Confirm you're on Langfuse Cloud or self-hosted Langfuse v4. Stay on Python SDK v4 for Langfuse v3.
+1. Confirm you're on Langfuse Cloud or self-hosted Langfuse v4.XX.0 or later. Stay on Python SDK v4 for Langfuse v3.
 2. Upgrade to Python 3.11+, `openai>=1.0`, and `langchain-core>=1` if you use those integrations.
 3. If a proxy rejects compressed requests, set `otel_compression="none"` or `LANGFUSE_OTEL_COMPRESSION=none`.
 4. Search for `blocked_instrumentation_scopes` → replace with `should_export_span` composed with `is_default_export_span`.
