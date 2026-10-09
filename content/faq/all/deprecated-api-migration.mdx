@@ -11,7 +11,7 @@ import { V4CutoverDate } from "@/components/V4CutoverDate";
 
 This page maps every deprecated Langfuse REST endpoint and the Python and JS/TS SDK methods that call it to their supported replacements. It includes parameter mappings, semantic differences, and before/after examples. Many of these changes follow from the [observations-first data model](/docs/v4): traces and observations are no longer separate entities, and reads are consolidated onto fewer, faster endpoints.
 
-If you access these endpoints through a Langfuse SDK, each section includes the methods in Python SDK v4 and JS/TS SDK v5 that call them. Deprecated Public API methods remain callable in these SDK majors, so replacing them is separate from upgrading the SDK itself. If you still need to upgrade, first follow [Python v3 to v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS v4 to v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5), then return here to replace deprecated API methods.
+If you access these endpoints through a Langfuse SDK, each section includes the methods in Python SDK v4 and JS/TS SDK v5 that call them. Deprecated Public API methods remain callable in these SDK majors, so replacing them is separate from upgrading the SDK itself. If you still need to upgrade, first follow [Python v3 to v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS v4 to v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5), then return here to replace deprecated API methods. [Python SDK v5](/docs/observability/sdk/upgrade-path/python-v4-to-v5) and [JS/TS SDK v6](/docs/observability/sdk/upgrade-path/js-v5-to-v6) remove these methods, so replace them before upgrading to those majors.
 
 Still need the deprecated endpoints? They are documented in the [reference section below](#endpoints).
 
@@ -392,7 +392,7 @@ If you already know both the dataset ID and experiment name, `list_items` / `lis
 | JS/TS v5  | `datasetItem.link(...)`                                                                                      | Use `client.experiment.run(...)` or `dataset.runExperiment(...)`                                                                                  |
 | JS/TS v5  | Dataset-backed `client.experiment.run(...)`, `dataset.runExperiment(...)`, or `context.runExperiment(...)`   | No user-side code change currently removes this call; the SDK creates the legacy link internally. Keep using the runner and keep the SDK updated. |
 
-The experiment runner is the supported abstraction for creating experiment data. Current runners still call `POST /dataset-run-items` internally for Langfuse dataset items; moving direct callers to the runner makes the application inherit the SDK-side migration when it becomes available.
+The experiment runner is the supported abstraction for creating experiment data. Runners in Python SDK v4 and JS/TS SDK v5 still call `POST /dataset-run-items` internally for Langfuse dataset items. Runners in Python SDK v5 and JS/TS SDK v6 record experiments through OpenTelemetry attributes instead, so moving direct callers to the runner lets the application inherit this migration by upgrading the SDK.
 
 #### Delete methods [#dataset-delete-sdk-methods]
 
