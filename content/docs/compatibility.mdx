@@ -48,8 +48,8 @@ Every Langfuse component (server, SDKs, and APIs) moves through these lifecycle 
 | Component       | GA version | Package / repo                                                                                                                                                                                                                                                                          | Notes                                                                                                                                               |
 | --------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Server          | v4         | [langfuse/langfuse](https://github.com/langfuse/langfuse/releases) <a href="https://github.com/langfuse/langfuse/releases"><img className="inline" src="https://img.shields.io/github/v/release/langfuse/langfuse?style=flat-square&label=release" alt="Langfuse server release" /></a> | [Observations-first data model](/docs/v4#what-changed); self-hosted v3 receives security patches through January 31, 2027, then reaches end of life |
-| Python SDK      | v4         | [`langfuse`](https://pypi.org/project/langfuse/) <a href="https://pypi.org/project/langfuse/"><img className="inline" src="https://img.shields.io/pypi/v/langfuse?style=flat-square&label=pypi" alt="PyPI langfuse" /></a>                                                              | OpenTelemetry-based since v3. Requires Python 3.9+.                                                                                                 |
-| JS/TS SDK       | v5         | [`@langfuse/*`](https://www.npmjs.com/package/@langfuse/tracing) <a href="https://www.npmjs.com/package/@langfuse/tracing"><img className="inline" src="https://img.shields.io/npm/v/@langfuse/tracing?style=flat-square&label=npm" alt="NPM @langfuse/tracing" /></a>                  | OpenTelemetry-based since v4. Requires Node.js 20+.                                                                                                 |
+| Python SDK      | v5         | [`langfuse`](https://pypi.org/project/langfuse/) <a href="https://pypi.org/project/langfuse/"><img className="inline" src="https://img.shields.io/pypi/v/langfuse?style=flat-square&label=pypi" alt="PyPI langfuse" /></a>                                                              | OpenTelemetry-based since v3. Requires Python 3.11+ and Langfuse v4.                                                                                |
+| JS/TS SDK       | v6         | [`@langfuse/*`](https://www.npmjs.com/package/@langfuse/tracing) <a href="https://www.npmjs.com/package/@langfuse/tracing"><img className="inline" src="https://img.shields.io/npm/v/@langfuse/tracing?style=flat-square&label=npm" alt="NPM @langfuse/tracing" /></a>                  | OpenTelemetry-based since v4. Requires Node.js 22+ and Langfuse v4.                                                                                 |
 | Other languages | n/a        | [OpenTelemetry](/integrations/native/opentelemetry)                                                                                                                                                                                                                                     | Any OTel SDK to the Langfuse OTel endpoint                                                                                                          |
 
 ## Feature availability matrix [#sdk-server]
@@ -81,11 +81,13 @@ Self-hosting Langfuse? Use the [self-hosted compatibility matrix](/self-hosting/
 | Feature                                                                                                 | Langfuse Cloud v3 (Deprecated as of {V4_CUTOVER_DATE_SHORT})    | Langfuse Cloud v4 (GA)                                          |
 | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------------------------- |
 | **Python** · [Upgrade guide](/docs/observability/sdk/upgrade-path)                                      |                                                                 |                                                                 |
+| Python SDK v5                                                                                           | <CompatBadge variant="none">Unsupported</CompatBadge>           | <CompatBadge variant="full">Full</CompatBadge>                  |
 | Python SDK v4                                                                                           | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="full">Full</CompatBadge>                  |
 | Python SDK v3                                                                                           | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      |
 | Python SDK v2                                                                                           | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      |
 | Python SDK v1                                                                                           | <CompatBadge variant="none">Unsupported</CompatBadge>           | <CompatBadge variant="none">Unsupported</CompatBadge>           |
 | **JS/TS** · [Upgrade guide](/docs/observability/sdk/upgrade-path)                                       |                                                                 |                                                                 |
+| JS/TS SDK v6                                                                                            | <CompatBadge variant="none">Unsupported</CompatBadge>           | <CompatBadge variant="full">Full</CompatBadge>                  |
 | JS/TS SDK v5                                                                                            | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="full">Full</CompatBadge>                  |
 | JS/TS SDK v4                                                                                            | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      |
 | JS/TS SDK v3 / v2                                                                                       | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      |
@@ -108,6 +110,16 @@ Self-hosting Langfuse? Use the [self-hosted compatibility matrix](/self-hosting/
 | Observation-level evaluators                                                                            | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="full">Full</CompatBadge>                  |
 | Trace-level evaluators                                                                                  | <CompatBadge variant="full">Full</CompatBadge>                  | <CompatBadge variant="deprecated">Deprecated</CompatBadge>      |
 
+<CompatDetail name="Python SDK v5">
+
+GA. Requires Langfuse v4. The SDK sends spans with the v4 ingestion header and uses only the v4 Public API (Observations API v2, Metrics API v2, Scores API v3, Experiments API). The deprecated read APIs are not included. See the [Python v4 → v5 upgrade guide](/docs/observability/sdk/upgrade-path/python-v4-to-v5).
+
+</CompatDetail>
+<CompatDetail name="JS/TS SDK v6">
+
+GA. Requires Langfuse v4. The SDK sends spans with the v4 ingestion header and uses only the v4 Public API (Observations API v2, Metrics API v2, Scores API v3, Experiments API). The deprecated read APIs are not included. See the [JS/TS v5 → v6 upgrade guide](/docs/observability/sdk/upgrade-path/js-v5-to-v6).
+
+</CompatDetail>
 <CompatDetail name="Python SDK v3">
 
 Deprecated. Upgrade to [Python SDK v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4).
@@ -202,14 +214,14 @@ Deprecated. Upgrade via the [SDK upgrade paths](/docs/observability/sdk/upgrade-
 <Details id="faq-cloud">
 <Summary>I'm on Langfuse Cloud, which versions do I need to care about?</Summary>
 
-Only your SDK version and the API endpoints you call. Langfuse Cloud always runs the latest server version, so self-hosted server minimums never apply to you. Keep your SDKs on the GA major version (Python v4, JS/TS v5) and migrate away from deprecated endpoints before the v4 cutover on <V4CutoverDate />.
+Only your SDK version and the API endpoints you call. Langfuse Cloud always runs the latest server version, so self-hosted server minimums never apply to you. Keep your SDKs on the GA major version (Python v5, JS/TS v6) and migrate away from deprecated endpoints before the v4 cutover on <V4CutoverDate />.
 
 </Details>
 
 <Details id="faq-new-sdk-old-server">
 <Summary>I self-host Langfuse v3 and upgraded to Python SDK v4 / JS SDK v5, what works?</Summary>
 
-Tracing, prompt management, datasets, and scores work fully (server ≥ 3.63.0). The default `api.observations` and `api.metrics` resources call v2 endpoints that require Langfuse v4; use the `api.legacy.*` resources until you upgrade your server to v4. The [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) has the full picture per server version.
+Tracing, prompt management, datasets, and scores work fully (server ≥ 3.63.0). The default `api.observations` and `api.metrics` resources call v2 endpoints that require Langfuse v4; use the `api.legacy.*` resources until you upgrade your server to v4. Python SDK v5 and JS/TS SDK v6 require Langfuse v4, so stay on Python SDK v4 / JS SDK v5 until you upgrade your server. The [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) has the full picture per server version.
 
 </Details>
 
@@ -230,7 +242,7 @@ Python SDK v2 and JS/TS SDK v3 (and older) send traces via the legacy batch inge
 <Details id="faq-server-upgrade">
 <Summary>Does upgrading my self-hosted server break my SDKs?</Summary>
 
-Each server major supports the current and previous SDK major of each language. Upgrading v3 → v4 keeps Python SDK v3+/v4 and JS SDK v4/v5 working (older SDKs lose real-time visibility; Python v2 / JS v3 trace ingestion is not supported on v4). Check the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) before upgrading.
+Each server major supports the current and previous SDK major of each language. Upgrading v3 → v4 keeps Python SDK v3+/v4 and JS SDK v4/v5 working (older SDKs lose real-time visibility; Python v2 / JS v3 trace ingestion is not supported on v4). After upgrading to v4, you can also upgrade to Python SDK v5 and JS SDK v6, which require Langfuse v4. Check the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) before upgrading.
 
 </Details>
 
