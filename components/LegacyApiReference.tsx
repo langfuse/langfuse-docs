@@ -69,6 +69,7 @@ export function LegacyApiReference({ specUrl }: { specUrl: string }) {
           showDeveloperTools: "never",
           telemetry: false,
           agent: { disabled: true },
+          mcp: { disabled: true },
           servers: [
             {
               url: "https://cloud.langfuse.com",
