@@ -26,7 +26,7 @@ npm install @langfuse/client@6 @langfuse/tracing@6 @langfuse/otel@6
 
 `baseUrl`, `LANGFUSE_BASE_URL`, and `LANGFUSE_BASEURL` keep working as before. You don't need to change them.
 
-## Breaking Changes
+## Breaking changes
 
 ### Node.js 22 and ES2022 required
 
@@ -138,7 +138,10 @@ await startActiveObservation("request", async () => {
 **v6:**
 
 ```typescript
-import { startActiveObservation } from "@langfuse/tracing";
+import {
+  startActiveObservation,
+  updateActiveObservation,
+} from "@langfuse/tracing";
 
 await startActiveObservation("request", async (span) => {
   const result = await callLlm(query);
@@ -331,7 +334,8 @@ import { LangfuseClient } from "@langfuse/client";
 
 const langfuse = new LangfuseClient();
 const dataset = await langfuse.dataset.get("qa-set");
-const fromStartTime = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
+// No experiment item starts before its dataset was created, so this covers every run.
+const fromStartTime = dataset.createdAt;
 
 const traceIds = new Set<string>();
 let cursor: string | undefined;
@@ -397,7 +401,7 @@ The SDK's `langfuse.score.create(...)`, `langfuse.score.observation(...)`, and `
 
 - **Scores never throw.** Score methods validate input on the client. Scores with an empty name or a non-finite or non-string value are logged at error level and dropped.
 
-## Migration Checklist [#migration-checklist]
+## Migration checklist [#migration-checklist]
 
 1. Confirm you're on Langfuse Cloud or self-hosted Langfuse v4.55.0 or later. Stay on JS/TS SDK v5 for Langfuse v3.
 2. Upgrade to Node.js 22+ and, if you use the LangChain integration, `@langchain/core@^1`.

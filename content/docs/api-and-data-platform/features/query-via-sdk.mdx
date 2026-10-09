@@ -48,8 +48,12 @@ The `api.legacy.*` resources call the deprecated endpoints. Langfuse Cloud serve
 [Migration of deprecated APIs](/faq/all/deprecated-api-migration) for
 replacements and the endpoint reference.
 
-Python SDK v5 and JS/TS SDK v6 remove `api.legacy.*` and the deprecated
-`api.scores` v2 reads, and require Langfuse v4. See the [Python v4 →
+Python SDK v5 and JS/TS SDK v6 remove the legacy read resources
+(`api.legacy.observations_v1` / `api.legacy.metrics_v1` in Python,
+`api.legacy.observationsV1` / `api.legacy.metricsV1` in JS/TS) and the
+deprecated `api.scores` v2 reads, and require Langfuse v4. The
+`api.legacy.score_v1.create` / `api.legacy.scoreV1.create` score-write alias
+remains. See the [Python v4 →
 v5](/docs/observability/sdk/upgrade-path/python-v4-to-v5) and [JS/TS v5 →
 v6](/docs/observability/sdk/upgrade-path/js-v5-to-v6) upgrade guides.
 

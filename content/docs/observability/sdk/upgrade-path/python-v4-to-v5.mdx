@@ -20,7 +20,7 @@ Most applications that already follow the [observations-first model](/docs/obser
 
 `host` and the `LANGFUSE_HOST` environment variable keep working as before. You don't need to change them.
 
-## Breaking Changes
+## Breaking changes
 
 ### Python 3.11 and OpenAI SDK 1.x required
 
@@ -208,13 +208,12 @@ langfuse.delete_dataset_run(dataset_name="qa-set", run_name="baseline")
 **v5:**
 
 ```python
-from datetime import datetime, timedelta, timezone
-
 from langfuse import get_client
 
 langfuse = get_client()
 dataset = langfuse.get_dataset("qa-set")
-since = datetime.now(timezone.utc) - timedelta(days=30)
+# No experiment item starts before its dataset was created, so this covers every run.
+since = dataset.created_at
 
 # List experiments (dataset runs) for a dataset
 experiments = langfuse.api.experiments.list(dataset_id=dataset.id, from_start_time=since)
@@ -370,7 +369,7 @@ langfuse.api.scores.create(
 
 The SDK's `langfuse.create_score(...)`, `span.score(...)`, and `span.score_trace(...)` are unchanged.
 
-## Migration Checklist [#migration-checklist]
+## Migration checklist [#migration-checklist]
 
 1. Confirm you're on Langfuse Cloud or self-hosted Langfuse v4.55.0 or later. Stay on Python SDK v4 for Langfuse v3.
 2. Upgrade to Python 3.11+, `openai>=1.0`, and `langchain-core>=1` if you use those integrations.
