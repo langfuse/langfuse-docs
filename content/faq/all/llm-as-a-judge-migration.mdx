@@ -71,7 +71,9 @@ In the [v4 data model](/docs/v4), a trace is the logical group of observations t
   supplying these values with the deprecated trace I/O methods
   (`set_current_trace_io()` or `span.set_trace_io()` in Python,
   `setActiveTraceIO()` or `span.setTraceIO()` in JS/TS) until the new
-  observation-level evaluators are validated, then remove the calls. See [Why
+  observation-level evaluators are validated, then remove the calls. Python
+  SDK v5 and JS/TS SDK v6 remove these methods and take trace input and output
+  from the root observation instead. See [Why
   are the input and output of a trace
   empty?](/faq/all/empty-trace-input-and-output) for details.
 </Callout>

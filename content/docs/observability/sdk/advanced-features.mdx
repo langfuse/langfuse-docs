@@ -90,16 +90,20 @@ langfuse = Langfuse(should_export_span=is_langfuse_span)
 
 Available Python helpers: `is_default_export_span`, `is_langfuse_span`, `is_genai_span`, `is_known_llm_instrumentor`, `KNOWN_LLM_INSTRUMENTATION_SCOPE_PREFIXES`.
 
-`blocked_instrumentation_scopes` still works for backward compatibility, but is deprecated and planned for removal in a future version. Prefer expressing deny rules in `should_export_span`.
-
-Deprecated compatibility example:
+To block specific instrumentation scopes, express the deny rule in `should_export_span` (`blocked_instrumentation_scopes` was removed in Python SDK v5):
 
 ```python
 from langfuse import Langfuse
+from langfuse.span_filter import is_default_export_span
+
+blocked_scopes = {"sqlalchemy", "psycopg"}
 
 langfuse = Langfuse(
-    should_export_span=lambda span: True,
-    blocked_instrumentation_scopes=["sqlalchemy", "psycopg"],
+    should_export_span=lambda span: (
+        span.instrumentation_scope is None
+        or span.instrumentation_scope.name not in blocked_scopes
+    )
+    and is_default_export_span(span)
 )
 ```
 

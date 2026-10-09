@@ -71,7 +71,7 @@ import { propagateAttributes } from "@langfuse/tracing";
 import { z } from "zod";
 
 const langfuseClient = new LangfuseClient();
-const langfusePrompt = await langfuseClient.getPrompt("weather-chat/default");
+const langfusePrompt = await langfuseClient.prompt.get("weather-chat/default");
 
 const { text } = await propagateAttributes(
   {

@@ -26,22 +26,14 @@ prompt = langfuse.get_prompt("movie-critic", fetch_timeout_seconds=3)
 
 ```ts
 // Number of retries when fetching prompts from the server. Default is 2.
-const promptWithMaxRetries = await langfuse.getPrompt(
-  "movie-critic",
-  undefined,
-  {
-    maxRetries: 5,
-  }
-);
+const promptWithMaxRetries = await langfuse.prompt.get("movie-critic", {
+  maxRetries: 5,
+});
 
 // Timeout per call to the Langfuse API in milliseconds. Default is 10 seconds.
-const promptWithFetchTimeout = await langfuse.getPrompt(
-  "movie-critic",
-  undefined,
-  {
-    fetchTimeoutMs: 5000,
-  }
-);
+const promptWithFetchTimeout = await langfuse.prompt.get("movie-critic", {
+  fetchTimeoutMs: 5000,
+});
 ```
 
 </Tab>

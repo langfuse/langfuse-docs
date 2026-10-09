@@ -24,7 +24,7 @@ The Python SDK supports two masking hooks. For new Python SDK setups, prefer `ma
 | Method            | Status      | When it runs                                                                                                                  | What it covers                                                                                                              |
 | ----------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `mask_otel_spans` | Recommended | At export stage, after Langfuse decides which OpenTelemetry spans this client should export and after Langfuse media handling | Raw OpenTelemetry span attributes from Langfuse SDK spans and third-party instrumentations exported by this Langfuse client |
-| `mask`            | Legacy      | Synchronously when Langfuse SDK attributes are created                                                                        | Data set through Langfuse SDK APIs such as `start_observation()`, `update()`, and `set_trace_io()`                          |
+| `mask`            | Legacy      | Synchronously when Langfuse SDK attributes are created                                                                        | Data set through Langfuse SDK APIs such as `start_observation()` and `update()`                                             |
 
 Use `mask_otel_spans` to patch OpenTelemetry span attributes before the Langfuse client exports them. The hook receives read-only snapshots of one OpenTelemetry export batch and returns sparse patches for the spans that should change.
 
@@ -93,7 +93,7 @@ If `mask_otel_spans` raises an exception or returns an invalid `MaskOtelSpansRes
 
 ### Legacy `mask` behavior
 
-The `mask` parameter is the legacy Python SDK masking hook. It runs synchronously when Langfuse SDK attributes are created and applies only to data set through Langfuse SDK APIs such as `start_observation()`, `update()`, and `set_trace_io()`. It does not inspect final raw OpenTelemetry span attributes from third-party instrumentations.
+The `mask` parameter is the legacy Python SDK masking hook. It runs synchronously when Langfuse SDK attributes are created and applies only to data set through Langfuse SDK APIs such as `start_observation()` and `update()`. It does not inspect final raw OpenTelemetry span attributes from third-party instrumentations.
 
 Use `mask` only when you specifically need to transform data at Langfuse SDK attribute creation time.
 
