@@ -1,0 +1,48 @@
+---
+date: 2026-10-09
+title: Python SDK v5 and JS/TS SDK v6
+description: New SDK majors built for Langfuse v4, with experiments recorded through OpenTelemetry, compressed span export, and a client trimmed to the current Public API.
+author: Hassieb
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+Python SDK v5 and JS/TS SDK v6 are built for Langfuse v4. They send spans with the v4 ingestion header for real-time processing, compress span batches with gzip, and record experiments entirely through OpenTelemetry. The generated API clients only include the current Public API, so autocomplete no longer suggests endpoints that Langfuse v4 deprecated.
+
+- Re-run an experiment with the same name on the same dataset and the results land in the same experiment, with a direct `experimentUrl` / `experiment_url` to the comparison view.
+- Pass numbers, booleans, lists, or objects as propagated metadata. Both SDKs serialize them as JSON.
+- Send large traces with less bandwidth, since span batches are gzip-compressed by default.
+
+## Upgrade
+
+Both majors require Langfuse Cloud or a self-hosted Langfuse v4 deployment. If you self-host Langfuse v3, stay on Python SDK v4 and JS/TS SDK v5.
+
+Python SDK v5 requires Python 3.11+ and `langchain-core>=1` for the LangChain integration. JS/TS SDK v6 requires Node.js 22+ and `@langchain/core@^1` for the LangChain integration.
+
+```bash
+pip install --upgrade "langfuse>=5"
+```
+
+```bash
+npm install @langfuse/client@6 @langfuse/tracing@6 @langfuse/otel@6
+```
+
+The migration guides list every breaking change with before/after code, including removed Public API methods, the experiments API replacing dataset run helpers, and trace input/output set on the root observation.
+
+<Cards num={2}>
+  <Card
+    title="Python v4 → v5"
+    href="/docs/observability/sdk/upgrade-path/python-v4-to-v5"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="JS/TS v5 → v6"
+    href="/docs/observability/sdk/upgrade-path/js-v5-to-v6"
+    icon={<Book />}
+    arrow
+  />
+</Cards>
