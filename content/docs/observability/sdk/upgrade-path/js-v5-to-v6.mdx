@@ -353,11 +353,16 @@ if ("id" in response) {
 
 The SDK's `langfuse.score.create(...)`, `langfuse.score.observation(...)`, and `langfuse.score.trace(...)` are unchanged.
 
-### Other behavior changes
+### Other behavior changes [#other-behavior-changes]
 
-{/* TODO: Fill in the final JS/TS SDK v6 timeout defaults for prompt and media calls. They will match the Python SDK defaults; the change and its values are pending in langfuse-js. */}
+- **Timeouts.** v6 uses the same request timeouts as the Python SDK v5:
+  - **5-second default** for prompt fetch, prompt create/update/delete, `media.get`, and the media upload API calls. All of these used 60 seconds in v5. Override prompt fetch per call with `fetchTimeoutMs`. Otherwise, set `timeout` (in seconds) or `LANGFUSE_TIMEOUT` on `LangfuseClient`. Media uploads triggered by tracing use the `timeout` of `LangfuseSpanProcessor`, and uploads from `dataset.createItem` use the client `timeout`. A `timeout` that isn't a finite positive number falls back to 5 seconds with a warning.
+  - **Media content download** in `media.resolveReferences`: aborted when no data arrives for 5 seconds. This is an inactivity timeout, not a cap on the total download time; a download that keeps receiving data is never cut off. v5 had no timeout here.
+  - **Score ingestion**: 5 seconds with one retry on timeout. v5 used 60 seconds plus retries.
+  - **Unchanged**: the media blob upload itself has no timeout, and dataset calls still use 60 seconds.
 
-- **Timeouts.** Prompt and media calls use the same timeout defaults as the Python SDK. Exact values: TODO.
+  If prompt or media calls regularly take longer than 5 seconds, raise `timeout`.
+
 - **Scores never throw.** Score methods validate input on the client. Scores with an empty name or a non-finite or non-string value are logged at error level and dropped.
 
 ## Migration Checklist [#migration-checklist]
@@ -374,4 +379,4 @@ The SDK's `langfuse.score.create(...)`, `langfuse.score.observation(...)`, and `
 10. Search for `datasetRunUrl` → use `experimentUrl`.
 11. Search for `api.trace.get`, `api.trace.list`, `api.sessions`, `api.legacy.observationsV1`, `api.legacy.metricsV1`, `api.scores.getMany`, `api.scores.getById`, `api.datasetRunItems`, `api.datasets.getRun`, `api.datasets.deleteRun` → see the [SDK method quick reference](/faq/all/deprecated-api-migration#sdk-method-quick-reference).
 12. Search for code that reads the response of `api.scores.create(` → narrow the union type.
-13. Review the `timeout` setting for prompt and media calls. {/* TODO: add the final default once langfuse-js lands the change. */}
+13. Prompt, media, and score calls now time out after 5 seconds (previously 60). If they regularly take longer, raise `timeout` / `LANGFUSE_TIMEOUT`, or pass `fetchTimeoutMs` to `prompt.get`.
