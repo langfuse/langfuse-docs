@@ -355,7 +355,9 @@ The SDK's `langfuse.score.create(...)`, `langfuse.score.observation(...)`, and `
 
 ### Other behavior changes
 
-- **Timeouts.** The `timeout` option and `LANGFUSE_TIMEOUT` (default 5 seconds) now apply to score ingestion, prompt get/create/update/delete, `api.media.get`, and media downloads in `media.resolveReferences`. Previously these calls used the 60-second API default. An invalid value falls back to 5 seconds with a warning. A score batch that times out is retried once. Dataset calls and the project lookup still use 60 seconds. If your prompt or media calls regularly take longer than 5 seconds, raise `timeout`.
+{/* TODO: Fill in the final JS/TS SDK v6 timeout defaults for prompt and media calls. They will match the Python SDK defaults; the change and its values are pending in langfuse-js. */}
+
+- **Timeouts.** Prompt and media calls use the same timeout defaults as the Python SDK. Exact values: TODO.
 - **Scores never throw.** Score methods validate input on the client. Scores with an empty name or a non-finite or non-string value are logged at error level and dropped.
 
 ## Migration Checklist [#migration-checklist]
@@ -372,4 +374,4 @@ The SDK's `langfuse.score.create(...)`, `langfuse.score.observation(...)`, and `
 10. Search for `datasetRunUrl` → use `experimentUrl`.
 11. Search for `api.trace.get`, `api.trace.list`, `api.sessions`, `api.legacy.observationsV1`, `api.legacy.metricsV1`, `api.scores.getMany`, `api.scores.getById`, `api.datasetRunItems`, `api.datasets.getRun`, `api.datasets.deleteRun` → see the [SDK method quick reference](/faq/all/deprecated-api-migration#sdk-method-quick-reference).
 12. Search for code that reads the response of `api.scores.create(` → narrow the union type.
-13. Review the `timeout` setting if prompt or media calls take longer than 5 seconds.
+13. Review the `timeout` setting for prompt and media calls. {/* TODO: add the final default once langfuse-js lands the change. */}
