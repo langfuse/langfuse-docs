@@ -72,6 +72,7 @@ langfuse = Langfuse(mask_otel_spans=mask_otel_spans)
 - Patches are sparse. Omit spans that do not need changes.
 - `OtelSpanPatch` deletes `delete_attributes` first and then applies `set_attributes`, so `set_attributes` wins when the same key appears in both.
 - `set_attributes` values must be valid OpenTelemetry attribute values: strings, booleans, integers, floats, or homogeneous sequences of those scalar types.
+- In Python SDK v5, metadata attributes (`langfuse.observation.metadata.<key>` and `langfuse.trace.metadata.<key>`) hold JSON-encoded values, for example `'"prod"'` for the string `prod`. Decode them with `json.loads()` and set replacements JSON-encoded, for example `json.dumps("REDACTED")`.
 - The hook can only change span attributes. It cannot change the span name, IDs, parent relationship, resource attributes, events, links, or instrumentation scope.
 - The hook affects only spans exported by this Langfuse client. If the same OpenTelemetry spans are sent to another exporter, that exporter receives its own unmodified copy.
 

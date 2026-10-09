@@ -11,8 +11,9 @@ The Python SDK v5 targets **Langfuse v4** only. It removes the Public API method
 Most applications that already follow the [observations-first model](/docs/observability/data-model) only need to check a few call sites. Start with the [migration checklist](#migration-checklist) and use the sections below for details.
 
 <Callout type="warning">
-  Python SDK v5 requires Langfuse Cloud or self-hosted Langfuse **v4.XX.0 or
-  later**. On older v4 servers such as 4.55.x, plain string metadata values like `"123"` or `"true"` are stored as numbers or booleans. If you self-host Langfuse v3, stay on Python SDK v4. See the [self-hosted
+  Python SDK v5 requires Langfuse Cloud or self-hosted Langfuse **v4.55.0 or
+  later**. Older servers store JSON-encoded string metadata values with their
+  quotes (see [Metadata values are JSON-encoded](#metadata-json-encoding)). If you self-host Langfuse v3, stay on Python SDK v4. See the [self-hosted
   compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) and
   [Versions & Compatibility](/docs/compatibility).
 </Callout>
@@ -141,22 +142,50 @@ with langfuse.start_as_current_observation(as_type="span", name="request") as sp
 
 `set_current_trace_as_public()` and `span.set_trace_as_public()` are unchanged. If you still use [trace-level LLM-as-a-judge evaluators](/faq/all/llm-as-a-judge-migration), migrate them to observation-level evaluators.
 
-### Propagated metadata is serialized as JSON
+### Metadata values are JSON-encoded [#metadata-json-encoding]
 
-`propagate_attributes(metadata=...)` now serializes non-string values as compact JSON instead of with `str()`. Strings are unchanged. Self-hosted servers need v4.XX.0 or later to keep string values that look like numbers or booleans as strings.
+v5 JSON-encodes every metadata value before writing it to the span, strings included. This applies to observation metadata (`metadata=` on `start_observation()`, `start_as_current_observation()`, `update()`, and `@observe`) and to propagated trace metadata from `propagate_attributes(metadata=...)`. Values are compact JSON with non-ASCII characters kept as-is.
+
+Observation metadata is written as one attribute per top-level key (`langfuse.observation.metadata.<key>`):
+
+| Value             | v4 attribute value              | v5 attribute value         |
+| ----------------- | ------------------------------- | -------------------------- |
+| `"prod"`          | `prod`                          | `"prod"`                   |
+| `"123"`           | `123` (string)                  | `"123"`                    |
+| `5`               | `5` (integer attribute)         | `5`                        |
+| `True`            | `true` (boolean attribute)      | `true`                     |
+| `{"a": {"b": 1}}` | `{"a": {"b": 1}}`               | `{"a":{"b":1}}`            |
+| `2**70`           | Key dropped by the OTLP encoder | `"1180591620717411303424"` |
+| `None`            | Not written                     | Not written                |
+
+Propagated trace metadata (`langfuse.trace.metadata.<key>`) previously passed strings through and used `str()` for everything else:
 
 | Value               | v4              | v5                     |
 | ------------------- | --------------- | ---------------------- |
-| `True`              | `"True"`        | `"true"`               |
-| `None`              | `"None"`        | `"null"`               |
-| `["a", 1]`          | `"['a', 1]"`    | `'["a",1]'`            |
-| `{"k": "v"}`        | `"{'k': 'v'}"`  | `'{"k":"v"}'`          |
-| `1.0`               | `"1.0"`         | `"1.0"`                |
-| `datetime(...)`     | `str(datetime)` | ISO 8601 string        |
+| `"prod"`            | `prod`          | `"prod"`               |
+| `True`              | `True`          | `true`                 |
+| `None`              | `None`          | `null`                 |
+| `["a", 1]`          | `['a', 1]`      | `["a",1]`              |
+| `{"k": "v"}`        | `{'k': 'v'}`    | `{"k":"v"}`            |
+| `datetime(...)`     | `str(datetime)` | ISO 8601 JSON string   |
 | `("a", "b")`, `set` | Python repr     | JSON array             |
-| `float("nan")`      | `"nan"`         | Dropped with a warning |
+| `float("nan")`      | `nan`           | Dropped with a warning |
 
-Non-ASCII characters are kept as-is and large integers keep all digits. The 200-character limit applies to the serialized value. If you filter or group by metadata values that were previously Python reprs (for example `"True"`), update those filters, dashboards, or downstream consumers.
+The 200-character limit for propagated values applies to the encoded value, including the quotes around strings.
+
+How Langfuse v4.55.0 and later reads the encoded values:
+
+- **Strings** are decoded and stored without quotes, so `"prod"` still reads as `prod`.
+- **Numbers and booleans keep their type** instead of becoming strings.
+- **Nested objects become filterable dotted paths.** `{"a": {"b": 1}}` can be filtered as `a.b = 1` instead of matching a JSON string.
+- **Dotted-key collisions: the first value wins.** If metadata contains both a literal `"a.b"` key and a nested `{"a": {"b": ...}}`, only the first value is kept for the `a.b` path.
+
+Self-hosted servers older than v4.55.0 don't decode the values and store string values with their quotes (`"prod"` including the quotes), so filters on string values stop matching.
+
+Check these places when you upgrade:
+
+- **Saved filters, dashboards, and downstream consumers** that match the old shape, such as a Python repr like `"True"` or a whole nested object as a JSON string, stop matching for new traces. Update them to the new values or dotted paths. Existing data keeps its stored shape.
+- **Raw span-attribute readers**, such as custom span exporters and [`mask_otel_spans`](/docs/observability/features/masking) callbacks, now see JSON strings: `'"prod"'` instead of `'prod'`, and `"5"` / `"true"` strings instead of integer and boolean attributes. Decode them with `json.loads()`, and write replacement values JSON-encoded (for example `json.dumps("REDACTED")`).
 
 ### Dataset run helpers removed [#dataset-run-helpers-removed]
 
@@ -343,12 +372,12 @@ The SDK's `langfuse.create_score(...)`, `span.score(...)`, and `span.score_trace
 
 ## Migration Checklist [#migration-checklist]
 
-1. Confirm you're on Langfuse Cloud or self-hosted Langfuse v4.XX.0 or later. Stay on Python SDK v4 for Langfuse v3.
+1. Confirm you're on Langfuse Cloud or self-hosted Langfuse v4.55.0 or later. Stay on Python SDK v4 for Langfuse v3.
 2. Upgrade to Python 3.11+, `openai>=1.0`, and `langchain-core>=1` if you use those integrations.
 3. If a proxy rejects compressed requests, set `otel_compression="none"` or `LANGFUSE_OTEL_COMPRESSION=none`.
 4. Search for `blocked_instrumentation_scopes` → replace with `should_export_span` composed with `is_default_export_span`.
 5. Search for `set_current_trace_io` / `set_trace_io` → set `input`/`output` on the root observation.
-6. Check filters, dashboards, and consumers that read propagated metadata values written by `str()`.
+6. Metadata values are JSON-encoded: update saved filters, dashboards, and consumers that match the old metadata shape, and decode metadata attributes in custom exporters and `mask_otel_spans` callbacks.
 7. Search for `get_dataset_run`, `get_dataset_runs`, `delete_dataset_run` → use `api.experiments.list` / `list_items` and `api.trace.delete_multiple`.
 8. Search for `dataset_run_id` / `dataset_run_url` → use `experiment_id` / `experiment_url`.
 9. Search for `run_batched_evaluation` → remove `scope`, rename `fetch_trace_fields` to `fields`, update the mapper and filter.

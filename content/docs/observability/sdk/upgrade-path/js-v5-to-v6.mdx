@@ -11,8 +11,9 @@ The JS/TS SDK v6 targets **Langfuse v4** only. It removes the Public API methods
 Most applications that already follow the [observations-first model](/docs/observability/data-model) only need to check a few call sites. Start with the [migration checklist](#migration-checklist) and use the sections below for details.
 
 <Callout type="warning">
-  JS/TS SDK v6 requires Langfuse Cloud or self-hosted Langfuse **v4.XX.0 or
-  later**. On older v4 servers such as 4.55.x, plain string metadata values like `"123"` or `"true"` are stored as numbers or booleans. If you self-host Langfuse v3, stay on JS/TS SDK v5. See the [self-hosted
+  JS/TS SDK v6 requires Langfuse Cloud or self-hosted Langfuse **v4.55.0 or
+  later**. Older servers store JSON-encoded string metadata values with their
+  quotes (see [Metadata values are JSON-encoded](#metadata-json-encoding)). If you self-host Langfuse v3, stay on JS/TS SDK v5. See the [self-hosted
   compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) and
   [Versions & Compatibility](/docs/compatibility).
 </Callout>
@@ -149,21 +150,52 @@ await startActiveObservation("request", async (span) => {
 
 `setActiveTraceAsPublic()` and `span.setTraceAsPublic()` are unchanged. If you still use [trace-level LLM-as-a-judge evaluators](/faq/all/llm-as-a-judge-migration), migrate them to observation-level evaluators.
 
-### Propagated metadata accepts any JSON value
+### Metadata values are JSON-encoded [#metadata-json-encoding]
 
-`propagateAttributes({ metadata })` now accepts `Record<string, unknown>` instead of `Record<string, string>`. Non-string values were dropped in v5; v6 serializes them with `JSON.stringify`. Strings are unchanged. Self-hosted servers need v4.XX.0 or later to keep string values that look like numbers or booleans as strings.
+v6 JSON-encodes every metadata value before writing it to the span, strings included. This applies to observation metadata (`metadata` on `startObservation()`, `startActiveObservation()`, `update()`, `observe()`, and the Vercel AI SDK integration) and to propagated trace metadata from `propagateAttributes({ metadata })`.
 
-| Value                                                      | v5         | v6                       |
-| ---------------------------------------------------------- | ---------- | ------------------------ |
-| `"gpt-4o"`                                                 | `"gpt-4o"` | `"gpt-4o"`               |
-| `42`                                                       | Dropped    | `"42"`                   |
-| `null`                                                     | Dropped    | `"null"`                 |
-| `[1, "a"]`                                                 | Dropped    | `'[1,"a"]'`              |
-| `{ k: "v" }`                                               | Dropped    | `'{"k":"v"}'`            |
-| `12345678901234567890n`                                    | Dropped    | `"12345678901234567890"` |
-| `NaN`, `Infinity`, `undefined`, functions, circular values | Dropped    | Dropped with a warning   |
+Observation metadata is written as one attribute per top-level key (`langfuse.observation.metadata.<key>`):
 
-The 200-character limit applies after serialization. Metadata passed to the LangChain `CallbackHandler` follows the same rules. If you relied on non-string values being dropped, remove them before calling `propagateAttributes`.
+| Value               | v5 attribute value | v6 attribute value      |
+| ------------------- | ------------------ | ----------------------- |
+| `"prod"`            | `prod`             | `"prod"`                |
+| `"3"`               | `3`                | `"3"`                   |
+| `3`                 | `3`                | `3`                     |
+| `true`              | `true`             | `true`                  |
+| `""`                | Not written        | `""`                    |
+| `{ a: { b: 1 } }`   | `{"a":{"b":1}}`    | `{"a":{"b":1}}`         |
+| `2n ** 60n`         | Not written        | `"1152921504606846976"` |
+| `NaN`, `Infinity`   | `null`             | `"NaN"`, `"Infinity"`   |
+| `null`, `undefined` | Not written        | Not written (debug log) |
+
+`propagateAttributes({ metadata })` now accepts `Record<string, unknown>` instead of `Record<string, string>`. v5 passed strings through and dropped every other value:
+
+| Value                                                      | v5       | v6                     |
+| ---------------------------------------------------------- | -------- | ---------------------- |
+| `"gpt-4o"`                                                 | `gpt-4o` | `"gpt-4o"`             |
+| `42`                                                       | Dropped  | `42`                   |
+| `null`                                                     | Dropped  | `null`                 |
+| `[1, "a"]`                                                 | Dropped  | `[1,"a"]`              |
+| `{ k: "v" }`                                               | Dropped  | `{"k":"v"}`            |
+| `12345678901234567890n`                                    | Dropped  | `12345678901234567890` |
+| `NaN`, `Infinity`, `undefined`, functions, circular values | Dropped  | Dropped with a warning |
+
+The 200-character limit for propagated values applies to the encoded value, including the quotes around strings. Metadata passed to the LangChain `CallbackHandler` follows the same rules.
+
+How Langfuse v4.55.0 and later reads the encoded values:
+
+- **Strings** are decoded and stored without quotes, so `"prod"` still reads as `prod`.
+- **Numbers and booleans keep their type** instead of becoming strings.
+- **Nested objects become filterable dotted paths.** `{ a: { b: 1 } }` can be filtered as `a.b = 1` instead of matching a JSON string.
+- **Dotted-key collisions: the first value wins.** If metadata contains both a literal `"a.b"` key and a nested `{ a: { b: ... } }`, only the first value is kept for the `a.b` path.
+
+Self-hosted servers older than v4.55.0 don't decode the values and store string values with their quotes (`"prod"` including the quotes), so filters on string values stop matching.
+
+Check these places when you upgrade:
+
+- **Saved filters, dashboards, and downstream consumers** that match the old shape, such as a whole nested object as a JSON string, stop matching for new traces. Update them to the new values or dotted paths. Existing data keeps its stored shape.
+- **Raw span-attribute readers**, such as custom span processors and exporters, now see JSON strings in `langfuse.observation.metadata.*` and `langfuse.trace.metadata.*`: `'"prod"'` instead of `'prod'`. Decode them with `JSON.parse()`. The `mask` function of `LangfuseSpanProcessor` receives decoded observation metadata values, and its result is re-encoded.
+- If you relied on non-string propagated values being dropped, remove them before calling `propagateAttributes`.
 
 ### Request placeholder before `requestOptions`
 
@@ -367,13 +399,13 @@ The SDK's `langfuse.score.create(...)`, `langfuse.score.observation(...)`, and `
 
 ## Migration Checklist [#migration-checklist]
 
-1. Confirm you're on Langfuse Cloud or self-hosted Langfuse v4.XX.0 or later. Stay on JS/TS SDK v5 for Langfuse v3.
+1. Confirm you're on Langfuse Cloud or self-hosted Langfuse v4.55.0 or later. Stay on JS/TS SDK v5 for Langfuse v3.
 2. Upgrade to Node.js 22+ and, if you use the LangChain integration, `@langchain/core@^1`.
 3. Upgrade all `@langfuse/*` packages to v6 together.
 4. If a proxy rejects compressed requests, set `compression: "none"` or `LANGFUSE_OTEL_COMPRESSION=none`.
 5. Search for `getPrompt`, `createPrompt`, `updatePrompt`, `getDataset`, `fetchTrace`, `fetchObservation`, `fetchSessions`, `getDatasetRun`, `createDataset`, `getDatasetItem`, `createDatasetItem`, `fetchMedia`, `resolveMediaReferences` on `LangfuseClient` → use the replacements in the alias table.
 6. Search for `setActiveTraceIO` / `setTraceIO` / `createTraceAttributes` → set `input`/`output` on the root observation.
-7. Check `propagateAttributes` and `CallbackHandler` metadata for non-string values that were previously dropped.
+7. Metadata values are JSON-encoded: update saved filters, dashboards, and consumers that match the old metadata shape, decode metadata attributes in custom span processors and exporters, and check `propagateAttributes` and `CallbackHandler` metadata for non-string values that were previously dropped.
 8. Search for generated API calls that pass `requestOptions` to a method in the placeholder list → insert `{}` before `requestOptions`.
 9. Search for `item.link(` → use `dataset.runExperiment()`.
 10. Search for `datasetRunUrl` → use `experimentUrl`.
