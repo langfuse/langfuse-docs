@@ -1,0 +1,96 @@
+---
+title: OpenCode
+seoTitle: "Trace OpenCode with the Langfuse AI Gateway (alpha)"
+description: Route OpenCode's Anthropic and OpenAI providers through the Langfuse AI Gateway to trace every model call, tool call, token, and cost.
+noindex: true
+---
+
+import AiGatewayAlphaCallout from "@/components-mdx/ai-gateway-alpha-callout.mdx";
+
+# OpenCode
+
+<AiGatewayAlphaCallout />
+
+**Requires** OpenCode 2.0 or later and an `ANTHROPIC` and/or `OPENAI` provider connection. Verified with OpenCode 2.0.25.
+
+## Setup [#setup]
+
+Use `opencode.json` in the project root or `~/.config/opencode/opencode.json`:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "anthropic/claude-sonnet-4-6",
+  "small_model": "anthropic/claude-haiku-4-5-20251001",
+  "provider": {
+    "anthropic": {
+      "options": {
+        "baseURL": "https://staging.langfuse.com/anthropic/v1",
+        "apiKey": "{env:LANGFUSE_GATEWAY_KEY}",
+        "headers": {
+          "langfuse-user-id": "{env:LF_USER_ID}",
+          "langfuse-tags": "opencode,<team>",
+          "langfuse-environment": "local",
+          "langfuse-metadata": "repo:<repo>",
+          "Authorization": "Bearer {env:LANGFUSE_GATEWAY_KEY}"
+        }
+      }
+    },
+    "openai": {
+      "options": {
+        "baseURL": "https://staging.langfuse.com/openai/v1",
+        "apiKey": "{env:LANGFUSE_GATEWAY_KEY}",
+        "headers": {
+          "langfuse-user-id": "{env:LF_USER_ID}",
+          "langfuse-tags": "opencode,<team>",
+          "langfuse-environment": "local",
+          "Authorization": "Bearer {env:LANGFUSE_GATEWAY_KEY}"
+        }
+      }
+    }
+  }
+}
+```
+
+- The Anthropic `baseURL` **includes `/v1`**, because OpenCode appends only `/messages`. Claude Code and pi are the opposite.
+- Use the built-in `openai` provider, which speaks the Responses API. `@ai-sdk/openai-compatible` providers use [Chat Completions](/docs/ai-gateway/chat-completions), which the gateway serves but which has not been verified with OpenCode.
+- To set a session per run, add `"langfuse-session-id": "{env:LF_SESSION}"`. An unset variable sends an empty value, which is ignored.
+- Headers apply to every call from that provider, including title generation and subagents. See [request headers](/docs/ai-gateway/request-headers).
+
+## Verify [#verify]
+
+1. Run `opencode run --format json "Reply with exactly: pong" | grep -o '"sessionID":"[^"]*"' | head -1`.
+2. In Langfuse, go to **Sessions** and open `opencode:<sessionID>`. You should see **two** generations, each in its own trace: a title call on `small_model` (0 tools) and the answer on `model` (10 tools on Anthropic, 9 on OpenAI).
+
+## Turn grouping (experimental, optional) [#turn-grouping]
+
+<Callout type="warning">
+  Experimental. This plugin works with the current gateway but is not an
+  official, published package yet.
+</Callout>
+
+With the stock `anthropic` and `openai` providers, every model call is its own trace. A small [plugin](https://opencode.ai/docs/plugins/) can send OpenCode's user message ID as the turn key, which the gateway already understands. Save it as `.opencode/plugin/langfuse-turn.ts` in your project or as `~/.config/opencode/plugin/langfuse-turn.ts`:
+
+```ts
+import type { Plugin } from "@opencode-ai/plugin";
+
+export const LangfuseTurn: Plugin = async () => ({
+  "chat.headers": async (input, output) => {
+    output.headers["x-opencode-request"] = input.message.id;
+  },
+});
+```
+
+- All model calls of a prompt, including retries and parallel tool calls, land in one trace. The title call joins the first turn.
+- Subagents (`task` tool) get their own trace, because they have their own session and user message.
+- Auto-compaction and a message typed while the agent is busy start a new trace.
+
+## Gotchas [#gotchas]
+
+- Title calls look like agent steps (same session, trace name, and generation name). Tell them apart by the small model and zero tools. Some title calls are stored as `WARNING` "Client cancelled the response", because OpenCode aborts them.
+- Subagents (`task` tool) get their **own** session. The parent session ID is stored in `agent.parent_session_id`.
+- If a model is missing from OpenCode's catalog, OpenCode fails locally with `UnknownError: Unexpected server error` and sends nothing. Declare the model under `provider.<id>.models`.
+- Make sure that no `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or stored `opencode auth` credential is sent instead of the gateway key.
+- Keep the explicit `Authorization` header on both providers. It works around an [OpenCode credential-resolution issue](https://github.com/anomalyco/opencode/issues/52502) that can send an invalid credential when `apiKey` references an environment variable.
+- OpenCode's background service keeps the environment variables from when it started. After exporting or changing `LANGFUSE_GATEWAY_KEY`, run `opencode service restart` before retrying.
+- OpenCode retries OpenAI `404` errors up to six times with backoff, so a wrong model ID can show six `ERROR` generations.

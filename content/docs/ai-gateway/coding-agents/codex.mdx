@@ -1,0 +1,76 @@
+---
+title: Codex
+seoTitle: "Trace OpenAI Codex with the Langfuse AI Gateway (alpha)"
+description: Route the OpenAI Codex CLI through the Langfuse AI Gateway to trace every turn, model round, tool call, token, and cost.
+noindex: true
+---
+
+import AiGatewayAlphaCallout from "@/components-mdx/ai-gateway-alpha-callout.mdx";
+
+# Codex
+
+<AiGatewayAlphaCallout />
+
+**Requires** Codex CLI 0.157 or later and an `OPENAI` provider connection. Verified with Codex 0.157.0.
+
+## Setup [#setup]
+
+### 1. Store the key in Codex's `.env` [#store-the-key]
+
+Codex loads `$CODEX_HOME/.env` (`~/.codex/.env` when `CODEX_HOME` is not set) every time it starts, in the TUI and in `codex exec`. Store the gateway key there once instead of exporting it in every shell:
+
+```sh
+CODEX_DIR="${CODEX_HOME:-$HOME/.codex}"
+mkdir -p -m 700 "$CODEX_DIR"
+touch "$CODEX_DIR/.env" && chmod 600 "$CODEX_DIR/.env"
+cat >> "$CODEX_DIR/.env" <<'EOF'
+LANGFUSE_GATEWAY_KEY=<your-gateway-key>
+LF_USER_ID=<you>@example.com
+EOF
+```
+
+Replace the placeholders with your gateway key and email. The file is only readable by you (`chmod 600`). Never commit it or copy it into a project.
+
+- Values in this file **override** variables with the same name exported in your shell.
+- Codex ignores keys in this file that start with `CODEX_`, so `CODEX_HOME` itself must be set in your shell profile. If it is set, it must point to an existing directory.
+- Only Codex reads this file. To run the [sanity check](/docs/ai-gateway/get-started#sanity-check) with `curl`, export the key in that shell as well.
+
+### 2. Add the gateway provider [#add-the-provider]
+
+Add a provider to `~/.codex/config.toml` (or a project's `.codex/config.toml`). `env_key` and `env_http_headers` read the variables that Codex loaded from `.env`:
+
+```toml
+model = "gpt-5.4-mini"
+model_provider = "langfuse"
+
+[model_providers.langfuse]
+name = "Langfuse AI Gateway"
+base_url = "https://staging.langfuse.com/openai/v1"
+env_key = "LANGFUSE_GATEWAY_KEY"   # sent as Authorization: Bearer
+wire_api = "responses"             # the verified wire API
+http_headers = { "langfuse-tags" = "codex,<team>", "langfuse-environment" = "local", "langfuse-metadata" = "repo:<repo>" }
+env_http_headers = { "langfuse-user-id" = "LF_USER_ID" }   # header value read from $LF_USER_ID
+```
+
+Then start Codex as usual with `codex`. No `export` is needed.
+
+Use `env_http_headers` for any header you want to vary per run, for example `"langfuse-session-id" = "LF_SESSION"`, and set that variable per run (`LF_SESSION=<id> codex`). Keep per-run variables such as `LF_SESSION` out of `.env`: a value there overrides the shell and would merge all your sessions into one. See [request headers](/docs/ai-gateway/request-headers).
+
+## Verify [#verify]
+
+1. Run `codex exec --json "Reply with exactly: PONG"`. The `thread.started` event prints the thread ID, which is also the rollout file name under `~/.codex/sessions`.
+2. In Langfuse, go to **Sessions** and open `codex:<thread id>`. You should see one trace named `codex` per turn, with one `openai.responses` generation per model round. Each generation shows the instructions (about 15 KB), 10 tools, the history, the reasoning summary, the output, cached and reasoning tokens, and cost.
+3. The trace's input and output are copied from the turn's **last** round.
+4. Compaction calls appear in the same trace with `agent.request_kind=compaction`.
+
+## Turn grouping [#turn-grouping]
+
+Codex sends its own turn ID, so the gateway groups all model rounds of a turn into one trace with no extra setup.
+
+## Gotchas [#gotchas]
+
+- Codex sends `store: false` and replays the **whole conversation** on every round. Each generation's input is the full history, so long sessions can exceed the 5 MiB input capture limit, and the input is then dropped. See [known limitations](/docs/ai-gateway/troubleshooting-and-faq#known-limitations).
+- A global `model_reasoning_effort` makes non-reasoning models (`gpt-4.1*`) fail with a `400`. Some small models (`gpt-5.4-nano`) reject Codex's `tool_search` tool.
+- Codex retries failed requests (`request_max_retries`, `stream_max_retries`). Each retry is its own generation in the same trace.
+- Cancelled or failed Codex calls currently show inflated, estimated usage and cost. Ignore cost on `ERROR` and `WARNING` generations until the fix ships.
+- Keep websocket features off for this provider. The gateway serves HTTP server-sent events only.

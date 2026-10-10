@@ -1,0 +1,57 @@
+---
+title: Overview
+seoTitle: "Use coding agents with the Langfuse AI Gateway (alpha)"
+description: Route Claude Code, Codex, OpenCode, and pi through the Langfuse AI Gateway to trace every model call, tool call, token, and cost of your coding agent sessions.
+noindex: true
+---
+
+import AiGatewayAlphaCallout from "@/components-mdx/ai-gateway-alpha-callout.mdx";
+
+# Coding agents
+
+<AiGatewayAlphaCallout />
+
+Point your coding agent at the AI Gateway to record every model call of every session in Langfuse: prompts, tool definitions, tool calls and results, reasoning, tokens, cost, and latency. No plugin or hook is required. You only change the agent's base URL and API key.
+
+Before you start, complete [Get started](/docs/ai-gateway/get-started) and export `LANGFUSE_GATEWAY_HOST` and `LANGFUSE_GATEWAY_KEY`. For Codex, store the key in [`~/.codex/.env`](/docs/ai-gateway/coding-agents/codex#store-the-key) instead.
+
+- [Claude Desktop and Claude Code](/docs/ai-gateway/coding-agents/claude-code) (Anthropic route)
+- [Codex](/docs/ai-gateway/coding-agents/codex) (OpenAI route)
+- [OpenCode](/docs/ai-gateway/coding-agents/opencode) (Anthropic and OpenAI routes)
+- [pi](/docs/ai-gateway/coding-agents/pi) (Anthropic and OpenAI routes)
+
+## Base URLs at a glance [#base-urls]
+
+The path each agent expects differs. Most `404` errors come from a wrong path.
+
+| Agent       | Anthropic base URL                    | OpenAI base URL                    |
+| ----------- | ------------------------------------- | ---------------------------------- |
+| Claude Code | `$LANGFUSE_GATEWAY_HOST/anthropic`    | n/a                                |
+| Codex       | n/a                                   | `$LANGFUSE_GATEWAY_HOST/openai/v1` |
+| OpenCode    | `$LANGFUSE_GATEWAY_HOST/anthropic/v1` | `$LANGFUSE_GATEWAY_HOST/openai/v1` |
+| pi          | `$LANGFUSE_GATEWAY_HOST/anthropic`    | `$LANGFUSE_GATEWAY_HOST/openai/v1` |
+
+Use the OpenAI **Responses** API on the OpenAI route: it is the verified path for every agent. The gateway also serves [Chat Completions](/docs/ai-gateway/chat-completions), but the agents' Chat Completions modes have not been verified yet.
+
+## Trace shape [#trace-shape]
+
+| Agent       | Session                      | Default trace grouping                            | Turn grouping                                                                                | Trace name    | Generation name                           |
+| ----------- | ---------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------- | ----------------------------------------- |
+| Claude Code | `claude-code:<session uuid>` | one trace per model call                          | [opt-in](/docs/ai-gateway/coding-agents/claude-code#turn-grouping) (beta telemetry env vars) | `claude-code` | `anthropic.messages`                      |
+| Codex       | `codex:<thread id>`          | **one trace per turn** (all tool rounds together) | built in                                                                                     | `codex`       | `openai.responses`                        |
+| OpenCode    | `opencode:<ses_…>`           | one trace per model call                          | [experimental plugin](/docs/ai-gateway/coding-agents/opencode#turn-grouping)                 | `opencode`    | `anthropic.messages` / `openai.responses` |
+| pi          | `pi:<session id>`            | one trace per model call                          | [experimental extension](/docs/ai-gateway/coding-agents/pi#turn-grouping)                    | `pi`          | `anthropic.messages` / `openai.responses` |
+
+- A **turn** is one user prompt plus every model call the agent makes until it stops. Without turn grouping, a prompt with four tool steps shows up as four traces in the same session. **Use the Sessions view** to follow a conversation.
+- Resuming or continuing (`--resume`, `-c`, `codex resume`, `--session-id`) keeps the same session.
+- Original agent IDs are kept in metadata under `agent.*`. See [inferred agent context](/docs/ai-gateway/request-headers#inferred-agent-context).
+
+## Recommended headers [#recommended-headers]
+
+Set at least a user and a tag in each agent's config, so you can filter your own traffic:
+
+- `langfuse-user-id`: your email or handle
+- `langfuse-tags`: the agent and your team, for example `claude-code,platform-team`
+- `langfuse-environment`: for example `local` or `ci`
+
+See [request headers](/docs/ai-gateway/request-headers) for all options.

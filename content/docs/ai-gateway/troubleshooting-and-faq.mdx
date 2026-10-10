@@ -1,0 +1,77 @@
+---
+title: Troubleshooting and FAQ
+seoTitle: "Langfuse AI Gateway troubleshooting (alpha)"
+description: Fix common Langfuse AI Gateway errors and review the known limitations of the alpha.
+noindex: true
+---
+
+import AiGatewayAlphaCallout from "@/components-mdx/ai-gateway-alpha-callout.mdx";
+
+# Troubleshooting and FAQ
+
+<AiGatewayAlphaCallout />
+
+## Troubleshooting [#troubleshooting]
+
+| Symptom                                                                              | Meaning                                                                                                                                     | Fix                                                                                                                                                                                                                                                                                |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **401** `Invalid gateway credential`                                                 | The key is missing, unknown, expired, or disabled.                                                                                          | Check that `LANGFUSE_GATEWAY_KEY` is exported in the shell that runs the agent, and that the key is still active. For Codex, check `$CODEX_HOME/.env` (default `~/.codex/.env`): it [overrides](/docs/ai-gateway/coding-agents/codex#store-the-key) a value exported in the shell. |
+| **401** on an OpenAI route with only `x-api-key` set                                 | The OpenAI routes read the key only from `Authorization: Bearer`.                                                                           | Send `Authorization: Bearer <gateway key>`. `x-api-key` works only on the Anthropic route.                                                                                                                                                                                         |
+| **401** `Conflicting gateway credentials in the Authorization and x-api-key headers` | Both headers were sent with different values. Typical case: Claude Code with a leftover `ANTHROPIC_API_KEY` next to `ANTHROPIC_AUTH_TOKEN`. | Run `unset ANTHROPIC_API_KEY`, or give both the same value. For pi, don't add a manual `Authorization` header next to `apiKey`.                                                                                                                                                    |
+| **401** with a provider-looking key                                                  | The agent sends a stored provider credential instead of the gateway key (for example `opencode auth` or `OPENAI_API_KEY`).                  | Remove the stored credential or environment variable.                                                                                                                                                                                                                              |
+| **403** `Gateway access forbidden`                                                   | The organization is not on the allowlist, or its ingestion project is missing or unusable.                                                  | Ask for the organization to be allowlisted (see [Get started](/docs/ai-gateway/get-started)), and check **Organization settings → AI Gateway**.                                                                                                                                    |
+| **404** `No eligible provider connection`                                            | No enabled provider connection exists for this API format, for example a Claude Code call without an `ANTHROPIC` connection.                | Add or enable the connection in **Organization settings → AI Gateway providers**.                                                                                                                                                                                                  |
+| **404** with an empty body on every call                                             | Wrong path.                                                                                                                                 | Claude Code and pi use `…/anthropic`. OpenCode uses `…/anthropic/v1`. Everything on OpenAI uses `…/openai/v1`. Chat Completions is served at `…/openai/v1/chat/completions`. See [base URLs](/docs/ai-gateway/coding-agents#base-urls).                                            |
+| **404** `not_found_error` / `model_not_found`                                        | The provider doesn't know the model, or your connection has no access to it.                                                                | Check the ID with `/models` (see the [sanity check](/docs/ai-gateway/get-started#sanity-check)). The call is still recorded as `ERROR`.                                                                                                                                            |
+| **400** `Unsupported parameter: 'reasoning.effort'` (Codex)                          | A global `model_reasoning_effort` was sent to a non-reasoning model.                                                                        | Remove it, or use a reasoning model.                                                                                                                                                                                                                                               |
+| **400** `Tool 'tool_search' is not supported with <model>` (Codex)                   | The small model rejects Codex's tools.                                                                                                      | Use a larger model.                                                                                                                                                                                                                                                                |
+| **413** `Request body exceeds gateway limit`                                         | The request is larger than 10 MiB (large contexts or screenshots).                                                                          | Compact the conversation or start a new session.                                                                                                                                                                                                                                   |
+| Stream cut after 10 minutes                                                          | The gateway has a 600-second overall limit per call.                                                                                        | Known alpha limit. Split very long generations.                                                                                                                                                                                                                                    |
+| **503** right away                                                                   | Gateway concurrency is exhausted.                                                                                                           | Retry. Report it if it persists.                                                                                                                                                                                                                                                   |
+| Client crashes on the last chunk of a streamed Chat Completions response             | The gateway requests streaming usage upstream, so the stream ends with a usage chunk whose `choices` array is empty.                        | Skip chunks without choices. See [streaming usage](/docs/ai-gateway/chat-completions#streaming-usage).                                                                                                                                                                             |
+| No session on pi Anthropic traces                                                    | pi doesn't send its session ID to Anthropic by default.                                                                                     | Add `"compat": { "sendSessionAffinityHeaders": true }`. See [pi](/docs/ai-gateway/coding-agents/pi#setup).                                                                                                                                                                         |
+| Traces in `default` despite `langfuse-environment`                                   | The value doesn't match the environment format, so it fell back to `default`.                                                               | Use lowercase letters, numbers, `-` and `_`, at most 40 characters, not starting with `langfuse`.                                                                                                                                                                                  |
+| Six `ERROR` generations over about 70 seconds (OpenCode)                             | OpenCode retries OpenAI `404` errors with backoff. Anthropic `404` errors are not retried.                                                  | Fix the model ID. The duplicates are client retries.                                                                                                                                                                                                                               |
+| Two `ERROR` generations per failed prompt (Claude Code)                              | Claude Code retries once without streaming.                                                                                                 | Expected.                                                                                                                                                                                                                                                                          |
+| All your sessions merged into one                                                    | A static `langfuse-session-id` in the config.                                                                                               | Remove it, or set it from a per-run environment variable.                                                                                                                                                                                                                          |
+| Every Claude Code call is still its own trace with turn grouping enabled             | Claude Code only sends `traceparent` when tracing is active.                                                                                | Set all of `CLAUDE_CODE_ENABLE_TELEMETRY`, `CLAUDE_CODE_ENHANCED_TELEMETRY_BETA`, `CLAUDE_CODE_PROPAGATE_TRACEPARENT`, and a real `OTEL_TRACES_EXPORTER` (not `none`). See [turn grouping](/docs/ai-gateway/coding-agents/claude-code#turn-grouping).                              |
+
+## Reporting an issue [#reporting-an-issue]
+
+Quote the **gateway request ID** when you report a problem. It identifies one call across the gateway logs and the recorded generation.
+
+- Every response carries it in the `langfuse-request-id` header, including errors and streams. Print it with `curl -si … | grep -i '^langfuse-'`.
+- Gateway error bodies also contain it as a top-level `request_id` field.
+- If a generation was recorded, include the `langfuse-trace-id` header too, or the trace URL.
+- In Langfuse, the same ID is stored on the generation as the metadata key `langfuse.gateway.request.id`.
+
+Most coding agents don't show response headers. To get the request ID for an agent's call, open the generation in Langfuse and copy `langfuse.gateway.request.id` from its metadata, or reproduce the call with `curl`. See [response headers](/docs/ai-gateway/request-headers#response-headers).
+
+## Known limitations [#known-limitations]
+
+- **Input over 5 MiB is dropped silently.** When a request body exceeds 5 MiB, the generation has no input and no marker. Output, usage, cost, and session are still recorded. Very long Codex and Claude Code sessions can hit this.
+- **Cost bugs, fixes in progress:**
+  - Failed and cancelled calls on the OpenAI route get estimated usage and cost. Long cancelled Codex calls showed about $6 each.
+  - OpenAI `cache_write_tokens` are priced at $0.
+  - Anthropic 1-hour cache writes are priced at the 5-minute rate, 37.5% too low.
+- **One trace per model call by default** for Claude Code, OpenCode, and pi. Only Codex groups a turn into one trace out of the box. Use the Sessions view, or set up turn grouping for [Claude Code](/docs/ai-gateway/coding-agents/claude-code#turn-grouping), [OpenCode](/docs/ai-gateway/coding-agents/opencode#turn-grouping), or [pi](/docs/ai-gateway/coding-agents/pi#turn-grouping).
+- **Generic names.** Generations are named after the API format (`anthropic.messages`, `openai.responses`), and trace names default to the agent name.
+- **Duplicate metadata.** `attributes.user.id`, `attributes.session.id`, and `attributes.langfuse.trace.*` appear in metadata next to the canonical fields.
+- **OpenCode:** title calls can't be told apart from agent steps, and subagents get a separate session.
+- **Limits:** 10 MiB request body and 600 seconds per call. There is no per-key or per-organization rate limit.
+- **Not served:** websockets and realtime APIs.
+- **Untested:** Anthropic server tools (web search and fetch) and interactive Codex `/compact`.
+
+## FAQ [#faq]
+
+### Does the gateway change my requests? [#does-the-gateway-change-requests]
+
+No. The gateway forwards the native provider request without rewriting it, using your organization's provider connection. It reads the request and response to record the generation.
+
+### Can I use the gateway in USAGE mode and still set users and tags? [#usage-mode-headers]
+
+Yes. [Request headers](/docs/ai-gateway/request-headers) work in both `FULL` and `USAGE` capture modes.
+
+### Which provider credentials are used? [#which-credentials]
+
+The organization's AI Gateway provider connections. Your coding agent only needs the gateway key; it never sees the provider key.
