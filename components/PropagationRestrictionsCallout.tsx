@@ -62,6 +62,13 @@ export function PropagationRestrictionsCallout({
       <ul className="mt-2 mb-4 pl-6 leading-7 list-disc">
         <li>
           Values must be <strong>strings ≤200 characters</strong>
+          {includesMetadata || isGeneric ? (
+            <>
+              . Metadata values can also be numbers, booleans, lists, or objects
+              in Python SDK v5 and JS/TS SDK v6; the limit applies to the
+              JSON-encoded value
+            </>
+          ) : null}
         </li>
         {(includesMetadata || isGeneric) && (
           <li>

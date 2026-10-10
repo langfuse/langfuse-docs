@@ -315,6 +315,7 @@ Langfuse v4 expects instrumentation that propagates shared attributes (like `use
 - any native [OpenTelemetry integration](/integrations/native/opentelemetry)
 
 These SDK versions are fully compatible with Langfuse v3 servers, so this step can start before, during, or after the server upgrade.
+Python SDK v5 and JS/TS SDK v6 require Langfuse v4. Upgrade to them only after the server upgrade ([Python v4 → v5](/docs/observability/sdk/upgrade-path/python-v4-to-v5), [JS/TS v5 → v6](/docs/observability/sdk/upgrade-path/js-v5-to-v6)).
 For real-time visibility on the v4 data model, use Python SDK ≥ 4.7.0, JS/TS SDK ≥ 5.4.0, or send `x-langfuse-ingestion-version: 4` on direct OpenTelemetry exporters. Older patch versions of Python v4 / JS v5 still ingest, but can appear with a ~15 minute delay until you reach those minimums.
 Every migrated producer that meets the real-time thresholds writes into the new tables directly (no delay) and reduces the load of the dual-write phase.
 
@@ -502,7 +503,7 @@ No. If you adopted the `events` tables early by running the Langfuse v4 preview 
 <Details>
 <Summary>Is it safe to upgrade the SDKs before the server?</Summary>
 
-Yes. Python SDK v4 and JS/TS SDK v5 are fully compatible with Langfuse v3 servers. Two caveats: `client.api.observations.*` and `client.api.metrics.*` point to the new v2 endpoints which are not available on v3 servers (use `client.api.legacy.*` in the meantime), and trace input/output must be set explicitly if you depart from the default root-span behavior.
+Yes. Python SDK v4 and JS/TS SDK v5 are fully compatible with Langfuse v3 servers. Two caveats: `client.api.observations.*` and `client.api.metrics.*` point to the new v2 endpoints which are not available on v3 servers (use `client.api.legacy.*` in the meantime), and trace input/output must be set explicitly if you depart from the default root-span behavior. Python SDK v5 and JS/TS SDK v6 require Langfuse v4, so upgrade to them only after the server.
 
 </Details>
 

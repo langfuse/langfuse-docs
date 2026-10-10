@@ -48,6 +48,15 @@ The `api.legacy.*` resources call the deprecated endpoints. Langfuse Cloud serve
 [Migration of deprecated APIs](/faq/all/deprecated-api-migration) for
 replacements and the endpoint reference.
 
+Python SDK v5 and JS/TS SDK v6 remove the legacy read resources
+(`api.legacy.observations_v1` / `api.legacy.metrics_v1` in Python,
+`api.legacy.observationsV1` / `api.legacy.metricsV1` in JS/TS) and the
+deprecated `api.scores` v2 reads, and require Langfuse v4. The
+`api.legacy.score_v1.create` / `api.legacy.scoreV1.create` score-write alias
+remains. See the [Python v4 →
+v5](/docs/observability/sdk/upgrade-path/python-v4-to-v5) and [JS/TS v5 →
+v6](/docs/observability/sdk/upgrade-path/js-v5-to-v6) upgrade guides.
+
 </Callout>
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
@@ -118,7 +127,7 @@ Scores:
 # Scores API v3 (Python SDK 4.8.1+; recommended)
 scores = langfuse.api.scores_v3.get_many_v3(id="ScoreId")
 
-# Scores API v2 (deprecated, sunset date: Nov 16, 2026)
+# Scores API v2 (deprecated, sunset date: Nov 16, 2026; removed in Python SDK v5)
 scores = langfuse.api.scores.get_many(score_ids="ScoreId")
 ```
 
@@ -231,7 +240,7 @@ Scores:
 // Scores API v3 (JS/TS SDK 5.5.0+; recommended)
 const scoresV3 = await langfuse.api.scoresV3.getManyV3();
 
-// Scores API v2 (deprecated, sunset date: Nov 16, 2026)
+// Scores API v2 (deprecated, sunset date: Nov 16, 2026; removed in JS/TS SDK v6)
 const scores = await langfuse.api.scores.getMany();
 ```
 

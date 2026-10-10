@@ -7,7 +7,7 @@ tags: [prompt-management]
 
 # How to configure retries and timeouts when fetching prompts?
 
-By default, the Langfuse SDKs retry failed prompt-fetch operations twice and apply a 20-second timeout. You can override both settings if you need stricter (or more lenient) parameters.
+By default, the Langfuse SDKs retry failed prompt-fetch operations twice and apply a 5-second timeout, the client-wide default (`timeout` / `LANGFUSE_TIMEOUT`). You can override both settings per call if you need stricter (or more lenient) parameters.
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
@@ -16,7 +16,7 @@ By default, the Langfuse SDKs retry failed prompt-fetch operations twice and app
 # Number of retries when fetching prompts from the server. Default is 2.
 prompt = langfuse.get_prompt("movie-critic", max_retries=3)
 
-# Timeout per call to the Langfuse API in seconds. Default is 20.
+# Timeout per call to the Langfuse API in seconds. Defaults to the client timeout (5 seconds).
 prompt = langfuse.get_prompt("movie-critic", fetch_timeout_seconds=3)
 ```
 
@@ -26,26 +26,20 @@ prompt = langfuse.get_prompt("movie-critic", fetch_timeout_seconds=3)
 
 ```ts
 // Number of retries when fetching prompts from the server. Default is 2.
-const promptWithMaxRetries = await langfuse.getPrompt(
-  "movie-critic",
-  undefined,
-  {
-    maxRetries: 5,
-  }
-);
+const promptWithMaxRetries = await langfuse.prompt.get("movie-critic", {
+  maxRetries: 5,
+});
 
-// Timeout per call to the Langfuse API in milliseconds. Default is 10 seconds.
-const promptWithFetchTimeout = await langfuse.getPrompt(
-  "movie-critic",
-  undefined,
-  {
-    fetchTimeoutMs: 5000,
-  }
-);
+// Timeout per call to the Langfuse API in milliseconds. Defaults to the client timeout (5 seconds).
+const promptWithFetchTimeout = await langfuse.prompt.get("movie-critic", {
+  fetchTimeoutMs: 5000,
+});
 ```
 
 </Tab>
 
 </LangTabs>
+
+To change the default for all calls, set `timeout` (in seconds) when initializing the client, or set the `LANGFUSE_TIMEOUT` environment variable. JS/TS SDK v5 used 60 seconds for prompt calls unless `fetchTimeoutMs` was set. JS/TS SDK v6 uses the 5-second client default, like the Python SDK. See the [JS/TS v5 → v6 upgrade guide](/docs/observability/sdk/upgrade-path/js-v5-to-v6#other-behavior-changes) for all timeout defaults.
 
 The examples above demonstrate how to fine-tune reliability parameters for prompt retrieval. Adjust the values to balance resilience and latency according to your application’s requirements.
