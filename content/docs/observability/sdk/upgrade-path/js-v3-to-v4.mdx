@@ -14,9 +14,88 @@ Please follow each section below to upgrade your application from v3 to v4.
 
 If you encounter any questions or issues while upgrading, please raise an [issue](/issues) on GitHub.
 
+## Overview of changes
+
+The v4 SDK is a major rewrite built on top of [OpenTelemetry](https://opentelemetry.io/). Instead of a single `langfuse` package that both created traces and talked to the API, v4 splits responsibilities across a set of modular packages:
+
+| v3 package / import                            | v4 package                                 | Used for                                                    |
+| ---------------------------------------------- | ------------------------------------------ | ----------------------------------------------------------- |
+| `langfuse` (tracing: `langfuse.trace()`, etc.) | `@langfuse/tracing` + `@langfuse/otel`     | Creating traces and observations via OpenTelemetry          |
+| `langfuse` (prompts, scores, datasets)         | `@langfuse/client`                         | Non-tracing features (prompt management, scoring, datasets) |
+| `langfuse` (`observeOpenAI`)                   | `@langfuse/openai`                         | OpenAI SDK integration                                      |
+| `langfuse-langchain`                           | `@langfuse/langchain`                      | LangChain.js integration                                    |
+| `langfuse-vercel` (`LangfuseExporter`)         | `@langfuse/otel` (`LangfuseSpanProcessor`) | Vercel AI SDK integration                                   |
+
+The most important conceptual change: **tracing now requires an OpenTelemetry setup**. You register the [`LangfuseSpanProcessor`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html) with an OpenTelemetry `NodeSDK` once at startup, and then create observations with functions from `@langfuse/tracing` anywhere in your application.
+
+See the [SDK v4 docs](/docs/observability/sdk/overview) for full details on each package.
+
+## Installation
+
+Replace the v3 packages with the modular v4 packages.
+
+**v3:**
+
+```bash
+npm install langfuse langfuse-langchain
+```
+
+**v4:**
+
+```bash
+# Tracing (OpenTelemetry-based)
+npm install @langfuse/tracing @langfuse/otel @opentelemetry/sdk-node
+
+# Add only the packages you use:
+npm install @langfuse/client      # prompt management, scoring, datasets
+npm install @langfuse/openai      # OpenAI integration
+npm install @langfuse/langchain   # LangChain integration
+```
+
 ## Initialization
 
 The Langfuse base URL environment variable is now `LANGFUSE_BASE_URL` and no longer `LANGFUSE_BASEURL`. For backward compatibility however, the latter will still work in v4 but not in future versions.
+
+In v3 you instantiated a single `Langfuse` client that handled everything. In v4 you set up OpenTelemetry once by registering the [`LangfuseSpanProcessor`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html), typically in a dedicated `instrumentation.ts` file that is imported at the very top of your application's entry point.
+
+**v3:**
+
+```typescript
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse({
+  publicKey: process.env.LANGFUSE_PUBLIC_KEY,
+  secretKey: process.env.LANGFUSE_SECRET_KEY,
+  baseUrl: process.env.LANGFUSE_BASEURL,
+});
+```
+
+**v4:**
+
+```typescript filename="instrumentation.ts"
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+// Export the processor so you can flush it later (see "Shutdown and flushing")
+export const langfuseSpanProcessor = new LangfuseSpanProcessor();
+
+export const sdk = new NodeSDK({
+  spanProcessors: [langfuseSpanProcessor],
+});
+
+sdk.start();
+```
+
+Import this file at the top of your app's entry point so it runs before any traced code:
+
+```typescript filename="index.ts"
+import "./instrumentation";
+// ... rest of your application
+```
+
+<Callout type="info">
+**Next.js users:** Use the OpenTelemetry setup via `NodeSDK` shown above rather than `registerOTel` from `@vercel/otel`. The [`@vercel/otel` package does not yet support the OpenTelemetry JS SDK v2](https://github.com/vercel/otel/issues/154) that `@langfuse/tracing` and `@langfuse/otel` are based on. See the [Platform-specific notes](#platform-specific-notes) below.
+</Callout>
 
 ## Tracing
 
@@ -28,7 +107,91 @@ The v4 SDK tracing is a major rewrite based on OpenTelemetry and introduces seve
     - The **`@langfuse/tracing`** and **`@langfuse/otel`** packages are for tracing.
     - The **`@langfuse/client`** package and the [`LangfuseClient`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_client.LangfuseClient.html) class are now only for non-tracing features like scoring, prompt management, and datasets.
 
-See the [SDK v4 docs](/docs/observability/sdk/overview) for details on each.
+The methods that created traces and observations on the client are replaced by standalone functions:
+
+| v3                                            | v4                                                                                  |
+| --------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `langfuse.trace({ name })`                    | `startObservation("name")` or `startActiveObservation("name", async (span) => ...)` |
+| `trace.span({ name })`                        | `span.startObservation("name")`                                                     |
+| `trace.generation({ name, model })`           | `span.startObservation("name", { model }, { asType: "generation" })`                |
+| `obj.end({ output })` / `obj.update({ ... })` | `obj.update({ output }).end()` / `obj.update({ ... })`                              |
+
+**v3:**
+
+```typescript
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+const trace = langfuse.trace({ name: "user-request" });
+
+const generation = trace.generation({
+  name: "llm-call",
+  model: "gpt-4o",
+  input: [{ role: "user", content: "What is the capital of France?" }],
+});
+
+generation.end({ output: "Paris is the capital of France." });
+```
+
+**v4:**
+
+```typescript
+import { startActiveObservation, startObservation } from "@langfuse/tracing";
+
+await startActiveObservation("user-request", async (span) => {
+  span.update({ input: { query: "What is the capital of France?" } });
+
+  const generation = startObservation(
+    "llm-call",
+    {
+      model: "gpt-4o",
+      input: [{ role: "user", content: "What is the capital of France?" }],
+    },
+    { asType: "generation" },
+  );
+
+  generation.update({ output: { content: "Paris is the capital of France." } }).end();
+});
+```
+
+See the [instrumentation docs](/docs/observability/sdk/instrumentation) for the three available instrumentation styles ([context manager](/docs/observability/sdk/instrumentation#context-manager), [observe wrapper](/docs/observability/sdk/instrumentation#observe-wrapper), and [manual observations](/docs/observability/sdk/instrumentation#manual-observations)).
+
+## Shutdown and flushing
+
+Because the SDK exports spans in the background, you must flush before short-lived processes (scripts, serverless functions, workers) exit, otherwise traces can be lost. In v3 this was `langfuse.shutdownAsync()` / `langfuse.flushAsync()`. In v4 you call [`shutdown()`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html) on the OpenTelemetry `NodeSDK`, or [`forceFlush()`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html#forceflush) on the exported `LangfuseSpanProcessor`.
+
+**v3:**
+
+```typescript
+await langfuse.shutdownAsync();
+// or, to flush without shutting down:
+await langfuse.flushAsync();
+```
+
+**v4:**
+
+```typescript
+import { sdk } from "./instrumentation";
+
+// Graceful shutdown (e.g. at the end of a script)
+await sdk.shutdown();
+```
+
+For serverless functions that should keep running, flush the processor instead of shutting down the whole SDK:
+
+```typescript filename="handler.ts" /forceFlush/
+import { langfuseSpanProcessor } from "./instrumentation";
+
+export async function handler(event, context) {
+  // ... your application logic ...
+
+  // Flush before the function freezes/exits
+  await langfuseSpanProcessor.forceFlush();
+}
+```
+
+See [client lifecycle & flushing](/docs/observability/sdk/instrumentation#client-lifecycle--flushing) for serverless and Vercel Cloud Function patterns.
 
 ## [Prompt Management](/docs/prompt-management/overview)
 
@@ -59,6 +222,40 @@ See the [SDK v4 docs](/docs/observability/sdk/overview) for details on each.
   const prompt = await langfuse.prompt.get("my-prompt", { version: "1.0" });
   ```
 
+## Scoring
+
+Scoring moves from the tracing client to the [`LangfuseClient`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_client.LangfuseClient.html) in `@langfuse/client`, and the method is now namespaced under `langfuse.score.create()`.
+
+**v3:**
+
+```typescript
+import { Langfuse } from "langfuse";
+
+const langfuse = new Langfuse();
+
+langfuse.score({
+  traceId: "trace_id_here",
+  name: "accuracy",
+  value: 0.9,
+});
+```
+
+**v4:**
+
+```typescript
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+await langfuse.score.create({
+  traceId: "trace_id_here",
+  name: "accuracy",
+  value: 0.9,
+});
+```
+
+See [custom scores documentation](/docs/evaluation/evaluation-methods/custom-scores) for new scoring methods.
+
 ## OpenAI integration
 
 - **Import**: The import of the OpenAI integration is now:
@@ -68,6 +265,57 @@ See the [SDK v4 docs](/docs/observability/sdk/overview) for details on each.
   ```
 
 - You can set the `environment` and `release` now via the `LANGFUSE_TRACING_ENVIRONMENT` and `LANGFUSE_TRACING_RELEASE` environment variables.
+
+Note that `observeOpenAI` relies on the OpenTelemetry setup from the [Initialization](#initialization) section, so make sure your `instrumentation.ts` is imported before any OpenAI calls.
+
+## Anthropic SDK
+
+There is no dedicated Langfuse package for the Anthropic SDK. In v4 you instrument it with the OpenTelemetry-native [`AnthropicInstrumentation`](https://github.com/Arize-ai/openinference/tree/main/js/packages/openinference-instrumentation-anthropic) from OpenInference, registered alongside the `LangfuseSpanProcessor`.
+
+```bash
+npm install @anthropic-ai/sdk @arizeai/openinference-instrumentation-anthropic @langfuse/otel @opentelemetry/sdk-node
+```
+
+```typescript filename="instrumentation.ts"
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { AnthropicInstrumentation } from "@arizeai/openinference-instrumentation-anthropic";
+import Anthropic from "@anthropic-ai/sdk";
+
+const instrumentation = new AnthropicInstrumentation();
+instrumentation.manuallyInstrument(Anthropic);
+
+export const langfuseSpanProcessor = new LangfuseSpanProcessor();
+
+export const sdk = new NodeSDK({
+  spanProcessors: [langfuseSpanProcessor],
+  instrumentations: [instrumentation],
+});
+
+sdk.start();
+```
+
+After this setup, all `anthropic.messages.create(...)` calls are traced automatically. See the [Anthropic JS/TS integration](/integrations/model-providers/anthropic-js) for a full example.
+
+## [Langchain integration](/integrations/frameworks/langchain)
+
+- **Import**: The import of the Langchain integration is now:
+
+  ```typescript
+  import { CallbackHandler } from "@langfuse/langchain";
+  ```
+
+- You can set the `environment` and `release` now via the `LANGFUSE_TRACING_ENVIRONMENT` and `LANGFUSE_TRACING_RELEASE` environment variables.
+
+The `CallbackHandler` is still passed via the `callbacks` array on invocation, and it relies on the OpenTelemetry setup from the [Initialization](#initialization) section.
+
+```typescript
+import { CallbackHandler } from "@langfuse/langchain";
+
+const langfuseHandler = new CallbackHandler();
+
+await chain.invoke({ input: "..." }, { callbacks: [langfuseHandler] });
+```
 
 ## Vercel AI SDK
 
@@ -81,15 +329,11 @@ Please note that provided tool definitions to the LLM are now mapped to `metadat
 
 </Callout>
 
-## [Langchain integration](/integrations/frameworks/langchain)
+## Other framework integrations
 
-- **Import**: The import of the Langchain integration is now:
+Because v4 is built on OpenTelemetry, you can use **any** OpenTelemetry instrumentation for your stack (for example LlamaIndexTS or other OpenInference instrumentations) by registering it on the `NodeSDK` next to the `LangfuseSpanProcessor`, exactly as shown for the [Anthropic SDK](#anthropic-sdk) above. The spans those libraries emit are automatically picked up and sent to Langfuse — no Langfuse-specific wrapper is required.
 
-  ```typescript
-  import { CallbackHandler } from "@langfuse/langchain";
-  ```
-
-- You can set the `environment` and `release` now via the `LANGFUSE_TRACING_ENVIRONMENT` and `LANGFUSE_TRACING_RELEASE` environment variables.
+See the [integrations overview](/integrations) for the list of supported libraries.
 
 ## `langfuseClient.getTraceUrl`
 
@@ -99,28 +343,71 @@ Please note that provided tool definitions to the LLM are now mapped to `metadat
   const traceUrl = await langfuseClient.getTraceUrl(traceId);
   ```
 
-## Scoring
-
-- **Import**: The import of the Langfuse client is now:
-
-  ```typescript
-  import { LangfuseClient } from "@langfuse/client";
-  ```
-
-- **Usage**: The usage of the Langfuse client is now:
-
-  ```typescript
-  const langfuse = new LangfuseClient();
-
-  await langfuse.score.create({
-    traceId: "trace_id_here",
-    name: "accuracy",
-    value: 0.9,
-  });
-  ```
-
-See [custom scores documentation](/docs/evaluation/evaluation-methods/custom-scores) for new scoring methods.
-
 ## Datasets
 
 See [datasets documentation](/docs/evaluation/dataset-runs/remote-run#setup--run-via-sdk) for new dataset methods.
+
+## Platform-specific notes [#platform-specific-notes]
+
+### Next.js edge runtime
+
+The v4 tracing setup uses the OpenTelemetry `NodeSDK` and depends on Node.js APIs (such as `crypto`) that are **not available in the Next.js edge runtime**. Run any traced code (and the instrumentation setup) on the **Node.js runtime**.
+
+- In Next.js, register the SDK from `instrumentation.ts` and guard it so it only runs on the Node.js runtime:
+
+  ```typescript filename="instrumentation.ts"
+  export async function register() {
+    if (process.env.NEXT_RUNTIME === "nodejs") {
+      await import("./instrumentation.node");
+    }
+  }
+  ```
+
+  Put the `NodeSDK` / `LangfuseSpanProcessor` setup from the [Initialization](#initialization) section in `instrumentation.node.ts`.
+
+- For route handlers or pages that perform traced LLM calls, opt into the Node.js runtime:
+
+  ```typescript
+  export const runtime = "nodejs";
+  ```
+
+### Cloudflare Workers and other non-Node runtimes
+
+Cloudflare Workers and similar runtimes are not full Node.js environments. To use the v4 SDK there:
+
+- Enable the [`nodejs_compat`](https://developers.cloudflare.com/workers/runtime-apis/nodejs/) compatibility flag so the required Node.js APIs are available.
+- Configure the processor for short-lived execution and flush explicitly before the request finishes, since there is no long-running process to drain the buffer:
+
+  ```typescript /exportMode: "immediate"/ /forceFlush/
+  import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+  export const langfuseSpanProcessor = new LangfuseSpanProcessor({
+    exportMode: "immediate",
+  });
+
+  // In your fetch handler, keep the worker alive until the flush completes:
+  // ctx.waitUntil(langfuseSpanProcessor.forceFlush());
+  ```
+
+### Self-hosted minimum versions
+
+If you self-host Langfuse, the OTel-based v4 SDK requires a recent platform version:
+
+- **Minimum:** [Langfuse platform ≥ 3.63.0](https://github.com/langfuse/langfuse/releases/tag/v3.63.0) for the OTel-based SDKs.
+- **Recommended:** [Langfuse platform ≥ 3.95.0](https://github.com/langfuse/langfuse/releases/tag/v3.95.0) so all v4 features work correctly.
+
+Upgrade your deployment (e.g. by pulling the latest Docker images and redeploying) before rolling out the v4 SDK. See the [self-hosting upgrade guide](/self-hosting/upgrade) for details.
+
+## Migration checklist
+
+1. Replace the `langfuse` / `langfuse-langchain` / `langfuse-vercel` packages with the modular `@langfuse/*` packages you need.
+2. Add an OpenTelemetry setup (`instrumentation.ts`) that registers the `LangfuseSpanProcessor`, and import it at your app's entry point.
+3. Rename `LANGFUSE_BASEURL` to `LANGFUSE_BASE_URL`.
+4. Replace `langfuse.trace()` / `.span()` / `.generation()` with `startObservation` / `startActiveObservation` from `@langfuse/tracing`.
+5. Move scoring, prompt management, and datasets to `LangfuseClient` from `@langfuse/client`.
+6. Replace `langfuse.shutdownAsync()` / `flushAsync()` with `sdk.shutdown()` or `langfuseSpanProcessor.forceFlush()`.
+7. Update integration imports (`@langfuse/openai`, `@langfuse/langchain`) and swap `LangfuseExporter` for `LangfuseSpanProcessor` for the Vercel AI SDK.
+8. If you run on Next.js edge, Cloudflare Workers, or another non-Node runtime, apply the [platform-specific notes](#platform-specific-notes).
+9. If self-hosting, confirm your platform version meets the [minimum requirements](#self-hosted-minimum-versions).
+   </content>
+   </invoke>
