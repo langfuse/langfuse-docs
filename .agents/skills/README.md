@@ -46,3 +46,20 @@ Use for:
 
 Open:
 [`customer-story-setup/SKILL.md`](customer-story-setup/SKILL.md)
+
+### integration-docs
+
+Use for:
+
+- writing or reviewing the langfuse.com page for a coding agent or IDE
+  (`content/integrations/developer-tools/*.mdx`)
+- the traced-surface list, supported-version matrix, troubleshooting rows, or
+  privacy disclosure on one of those pages
+- reconciling such a page with the plugin repo's own `README.md`
+
+These pages are hand-authored and outside the notebook pipeline. For a
+model-provider, framework or gateway page use `langfuse-integration-page`.
+Named to match the `integration-*` skills in `langfuse/langfuse`.
+
+Open:
+[`integration-docs/SKILL.md`](integration-docs/SKILL.md)
