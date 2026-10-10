@@ -19,8 +19,10 @@ Adds or updates one row in the public adopters table on `/users`.
 
 **Do not write a customer story in this skill.** If the user wants a full
 `/users/<slug>` case study, use
-[`customer-story-setup`](../customer-story-setup/SKILL.md) first, then come
-back here to link it.
+[`publish-customer-story`](../publish-customer-story/SKILL.md). It calls this
+skill for the adopters row.
+[`customer-story-setup`](../customer-story-setup/SKILL.md) is the MDX field
+reference when you are only converting markup.
 
 ## Canonical file
 
@@ -167,7 +169,7 @@ Do **not** add a homepage logo in this skill. That needs a tight wordmark SVG
 ## Out of scope
 
 - Creating `content/customers/<slug>.mdx` or editing `content/customers/meta.json`
-  → `customer-story-setup`
+  → `publish-customer-story`
 - Designing or replacing homepage logos
 - Inventing public citations or claiming a user story that does not exist
 
