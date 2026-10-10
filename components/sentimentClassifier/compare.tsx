@@ -6,8 +6,11 @@ import { cn } from "@/lib/utils";
 import { Loader } from "@/components/ai-elements/loader";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 import { scoreDemoNegativeUserFeedback } from "@/components/demoLangfuseBrowserClients";
-import { DemoTraceLink } from "@/components/demoTraceLink";
-import { buildDemoProjectUrl, buildDemoTraceUrl } from "@/lib/demo-trace";
+import {
+  DemoTraceLink,
+  type DemoTraceLinkSource,
+} from "@/components/demoTraceLink";
+import { buildDemoTraceUrl, buildDemoTracesListUrl } from "@/lib/demo-trace";
 import { SendIcon } from "lucide-react";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 import {
@@ -64,20 +67,12 @@ const LlmTaskSlot = ({
 }) => {
   if (slot?.status === "success") {
     return (
-      <div className={compact ? "space-y-1.5" : "space-y-3"}>
+      <div className={compact ? "min-w-0" : "space-y-3"}>
         <SentimentResultPanel
           answer={slot.answer}
           compact={compact}
           feedback={feedback}
           onFeedback={onFeedback}
-        />
-        <DemoTraceLink
-          traceUrl={buildDemoTraceUrl({
-            traceId: slot.traceId,
-            campaign: "blog",
-          })}
-          source="sentiment_classifier"
-          className={compact ? "text-xs" : undefined}
         />
       </div>
     );
@@ -118,18 +113,147 @@ const LlmTaskSlot = ({
   );
 };
 
+const DecisionEnginePanel = ({
+  title,
+  subtitle,
+  model,
+  loadingLabel,
+  loading,
+  error,
+  state,
+  compact,
+  feedback,
+  onFeedback,
+  source,
+}: {
+  title: string;
+  subtitle: string;
+  model?: string;
+  loadingLabel: string;
+  loading: boolean;
+  error: string | null;
+  state: EngineState | null;
+  compact: boolean;
+  feedback: boolean | null;
+  onFeedback: (value: boolean) => void;
+  source: DemoTraceLinkSource;
+}) => (
+  <div
+    className={cn(
+      "rounded-[2px] border border-line-structure min-w-0 overflow-hidden",
+      compact ? "p-2 space-y-1.5" : "p-3 space-y-2",
+    )}
+  >
+    <div className="flex items-start justify-between gap-2 min-w-0">
+      <div className="min-w-0">
+        <h3 className="text-sm font-semibold text-text-primary">{title}</h3>
+        <p className="text-[11px] text-muted-foreground">{subtitle}</p>
+      </div>
+      {model && (
+        <span className="text-[11px] text-muted-foreground font-mono shrink-0 truncate max-w-[40%]">
+          {model}
+        </span>
+      )}
+    </div>
+    {loading && !state && !error && (
+      <div
+        className={cn(
+          "flex items-center gap-2 text-muted-foreground",
+          compact ? "text-xs py-1" : "text-sm py-3",
+        )}
+      >
+        <Loader size={compact ? 12 : 14} />
+        {loadingLabel}
+      </div>
+    )}
+    {error && (
+      <div className="p-2 rounded-lg bg-destructive/10 text-destructive text-xs">
+        {error}
+      </div>
+    )}
+    {state && (
+      <div className={compact ? "space-y-1" : "space-y-4"}>
+        {state.result.answers.map((answer, index) => (
+          <div
+            key={answer.id}
+            className={
+              !compact && index > 0
+                ? "border-t border-line-structure pt-4"
+                : undefined
+            }
+          >
+            <SentimentResultPanel
+              answer={answer}
+              compact={compact}
+              feedback={compact || index !== 0 ? undefined : feedback}
+              onFeedback={
+                compact || index !== 0
+                  ? undefined
+                  : (value) => {
+                      onFeedback(value);
+                      scoreDemoNegativeUserFeedback({
+                        traceId: state.traceId,
+                        value,
+                      });
+                    }
+              }
+            />
+          </div>
+        ))}
+        <div
+          className={cn(
+            "border-t border-line-structure",
+            compact ? "pt-1.5" : "pt-3",
+          )}
+        >
+          <DemoTraceLink
+            traceUrl={buildDemoTraceUrl({
+              traceId: state.traceId,
+              campaign: "blog",
+            })}
+            source={source}
+            className={
+              compact
+                ? "w-full justify-center text-xs"
+                : "w-full justify-center"
+            }
+          />
+        </div>
+      </div>
+    )}
+  </div>
+);
+
+/** Sources allowed on `demo:sentiment_analyze_submitted` (see PostHog events). */
+export type SentimentCompareAnalyticsSource =
+  | "jev_evals_blog"
+  | "sentiment_classifier"
+  | "openai_decisions_changelog";
+
+type SentimentClassifierCompareProps = HTMLAttributes<HTMLDivElement> & {
+  /** PostHog / Open-trace analytics source for this embed. */
+  analyticsSource?: SentimentCompareAnalyticsSource;
+};
+
 export const SentimentClassifierCompare = ({
   className,
+  analyticsSource = "jev_evals_blog",
   ...props
-}: HTMLAttributes<HTMLDivElement>) => {
+}: SentimentClassifierCompareProps) => {
   const capture = usePostHogClientCapture();
   const [input, setInput] = useState("");
   const [taskCount, setTaskCount] = useState(1);
   const [jevLoading, setJevLoading] = useState(false);
   const [jev, setJev] = useState<EngineState | null>(null);
   const [jevError, setJevError] = useState<string | null>(null);
+  const [decisionsLoading, setDecisionsLoading] = useState(false);
+  const [decisions, setDecisions] = useState<EngineState | null>(null);
+  const [decisionsError, setDecisionsError] = useState<string | null>(null);
   const [llmSlots, setLlmSlots] = useState<LlmSlots | null>(null);
   const [jevFeedback, setJevFeedback] = useState<boolean | null>(null);
+  const [decisionsFeedback, setDecisionsFeedback] = useState<boolean | null>(
+    null,
+  );
   const [llmFeedback, setLlmFeedback] = useState<boolean | null>(null);
 
   const selected = classifiersForCount(taskCount);
@@ -154,13 +278,16 @@ export const SentimentClassifierCompare = ({
   const lunaLatencyMs = llmAllSucceeded
     ? Math.max(...llmSuccesses.map((slot) => slot.latencyMs))
     : null;
-  const loading = jevLoading || llmPending;
+  const loading = jevLoading || decisionsLoading || llmPending;
 
   const clearRun = () => {
     setJev(null);
     setJevError(null);
+    setDecisions(null);
+    setDecisionsError(null);
     setLlmSlots(null);
     setJevFeedback(null);
+    setDecisionsFeedback(null);
     setLlmFeedback(null);
   };
 
@@ -179,7 +306,7 @@ export const SentimentClassifierCompare = ({
     const tasks = selected.map((definition) => definition.id);
 
     capture("demo:sentiment_analyze_submitted", {
-      source: "jev_evals_blog",
+      source: analyticsSource,
       mode: "compare",
       from_example: typeof text === "string",
       text_char_count: textToAnalyze.trim().length,
@@ -188,6 +315,7 @@ export const SentimentClassifierCompare = ({
 
     clearRun();
     setJevLoading(true);
+    setDecisionsLoading(true);
 
     const pendingSlots = Object.fromEntries(
       selected.map((definition) => [definition.id, { status: "loading" }]),
@@ -208,6 +336,22 @@ export const SentimentClassifierCompare = ({
           });
         }
         setJevLoading(false);
+      },
+    );
+
+    const decisionsStarted = performance.now();
+    void classifySentiment("decisions", textToAnalyze, userId, tasks).then(
+      (outcome) => {
+        if (outcome.ok === false) {
+          setDecisionsError(outcome.error);
+        } else {
+          setDecisions({
+            result: outcome.data.result,
+            traceId: outcome.data.traceId,
+            latencyMs: performance.now() - decisionsStarted,
+          });
+        }
+        setDecisionsLoading(false);
       },
     );
 
@@ -241,7 +385,9 @@ export const SentimentClassifierCompare = ({
     }
   };
 
-  const hasResults = Boolean(jev || jevError || llmSlots);
+  const hasResults = Boolean(
+    jev || jevError || decisions || decisionsError || llmSlots,
+  );
   const showMetrics = hasResults || loading;
   const firstLlmSuccess = llmSuccesses[0];
 
@@ -304,7 +450,7 @@ export const SentimentClassifierCompare = ({
               ) : (
                 <SendIcon className="size-3.5" />
               )}
-              Analyze both
+              Race all three
             </button>
           </div>
         </div>
@@ -332,109 +478,55 @@ export const SentimentClassifierCompare = ({
 
         {(hasResults || loading) && (
           <div
-            className={cn("grid md:grid-cols-2", compact ? "gap-2" : "gap-3")}
+            className={cn(
+              "grid md:grid-cols-3 min-w-0",
+              compact ? "gap-2" : "gap-3",
+            )}
           >
-            <div
-              className={cn(
-                "rounded-[2px] border border-line-structure",
-                compact ? "p-2 space-y-1.5" : "p-3 space-y-2",
-              )}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <h3 className="text-sm font-semibold text-text-primary">
-                    TypeSafe Jev
-                  </h3>
-                  <p className="text-[11px] text-muted-foreground">
-                    {selected.length === 1
-                      ? "1 request · 1 question"
-                      : `1 request · ${selected.length} questions`}
-                  </p>
-                </div>
-                {jev?.result.model && (
-                  <span className="text-[11px] text-muted-foreground font-mono">
-                    {jev.result.model}
-                  </span>
-                )}
-              </div>
-              {jevLoading && !jev && !jevError && (
-                <div
-                  className={cn(
-                    "flex items-center gap-2 text-muted-foreground",
-                    compact ? "text-xs py-1" : "text-sm py-3",
-                  )}
-                >
-                  <Loader size={compact ? 12 : 14} />
-                  {ENGINE_CONFIG.jev.loading}
-                </div>
-              )}
-              {jevError && (
-                <div className="p-2 rounded-lg bg-destructive/10 text-destructive text-xs">
-                  {jevError}
-                </div>
-              )}
-              {jev && (
-                <div className={compact ? "space-y-1" : "space-y-4"}>
-                  {jev.result.answers.map((answer, index) => (
-                    <div
-                      key={answer.id}
-                      className={
-                        !compact && index > 0
-                          ? "border-t border-line-structure pt-4"
-                          : undefined
-                      }
-                    >
-                      <SentimentResultPanel
-                        answer={answer}
-                        compact={compact}
-                        feedback={
-                          compact || index !== 0 ? undefined : jevFeedback
-                        }
-                        onFeedback={
-                          compact || index !== 0
-                            ? undefined
-                            : (value) => {
-                                setJevFeedback(value);
-                                scoreDemoNegativeUserFeedback({
-                                  traceId: jev.traceId,
-                                  value,
-                                });
-                              }
-                        }
-                      />
-                    </div>
-                  ))}
-                  <div
-                    className={cn(
-                      "border-t border-line-structure",
-                      compact ? "pt-1.5" : "pt-3",
-                    )}
-                  >
-                    <DemoTraceLink
-                      traceUrl={buildDemoTraceUrl({
-                        traceId: jev.traceId,
-                        campaign: "blog",
-                      })}
-                      source="jev_evals_blog"
-                      className={
-                        compact
-                          ? "w-full justify-center text-xs"
-                          : "w-full justify-center"
-                      }
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
+            <DecisionEnginePanel
+              title="TypeSafe Jev"
+              subtitle={
+                selected.length === 1
+                  ? "1 request · 1 question"
+                  : `1 request · ${selected.length} questions`
+              }
+              model={jev?.result.model}
+              loadingLabel={ENGINE_CONFIG.jev.loading}
+              loading={jevLoading}
+              error={jevError}
+              state={jev}
+              compact={compact}
+              feedback={jevFeedback}
+              onFeedback={setJevFeedback}
+              source={analyticsSource}
+            />
+
+            <DecisionEnginePanel
+              title="OpenAI Decisions"
+              subtitle={
+                selected.length === 1
+                  ? "1 request · Decisions API"
+                  : `1 request · ${selected.length} questions`
+              }
+              model={decisions?.result.model}
+              loadingLabel={ENGINE_CONFIG.decisions.loading}
+              loading={decisionsLoading}
+              error={decisionsError}
+              state={decisions}
+              compact={compact}
+              feedback={decisionsFeedback}
+              onFeedback={setDecisionsFeedback}
+              source={analyticsSource}
+            />
 
             <div
               className={cn(
-                "rounded-[2px] border border-line-structure",
+                "rounded-[2px] border border-line-structure min-w-0 overflow-hidden",
                 compact ? "p-2 space-y-1.5" : "p-3 space-y-2",
               )}
             >
-              <div className="flex items-start justify-between gap-2">
-                <div>
+              <div className="flex items-start justify-between gap-2 min-w-0">
+                <div className="min-w-0">
                   <h3 className="text-sm font-semibold text-text-primary">
                     GPT-5.6 Luna
                   </h3>
@@ -451,15 +543,16 @@ export const SentimentClassifierCompare = ({
                 )}
               </div>
               {llmSlots && (
-                <div className={compact ? "space-y-1" : "space-y-4"}>
+                <div className={compact ? "space-y-1 min-w-0" : "space-y-4"}>
                   {selected.map((definition, index) => (
                     <div
                       key={definition.id}
-                      className={
+                      className={cn(
+                        "min-w-0",
                         !compact && index > 0
                           ? "border-t border-line-structure pt-4"
-                          : undefined
-                      }
+                          : undefined,
+                      )}
                     >
                       <LlmTaskSlot
                         definition={definition}
@@ -488,6 +581,27 @@ export const SentimentClassifierCompare = ({
                       />
                     </div>
                   ))}
+                  {firstLlmSuccess && (
+                    <div
+                      className={cn(
+                        "border-t border-line-structure",
+                        compact ? "pt-1.5" : "pt-3",
+                      )}
+                    >
+                      <DemoTraceLink
+                        traceUrl={buildDemoTraceUrl({
+                          traceId: firstLlmSuccess.traceId,
+                          campaign: "blog",
+                        })}
+                        source={analyticsSource}
+                        className={
+                          compact
+                            ? "w-full justify-center text-xs"
+                            : "w-full justify-center"
+                        }
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -497,14 +611,17 @@ export const SentimentClassifierCompare = ({
         {showMetrics && (
           <CompareMetricBoxes
             jevLatencyMs={jev?.latencyMs ?? null}
+            decisionsLatencyMs={decisions?.latencyMs ?? null}
             lunaLatencyMs={lunaLatencyMs}
             jevUsage={jev?.result.usage}
+            decisionsUsage={decisions?.result.usage}
             lunaUsage={lunaUsage}
             jevLoading={jevLoading}
+            decisionsLoading={decisionsLoading}
             lunaLoading={llmPending}
             jevError={Boolean(jevError)}
+            decisionsError={Boolean(decisionsError)}
             lunaError={llmAnyFailed}
-            compact={compact}
           />
         )}
 
@@ -514,24 +631,24 @@ export const SentimentClassifierCompare = ({
             compact ? "pt-2" : "pt-3",
           )}
         >
-          Traces in the{" "}
           <a
-            href={buildDemoProjectUrl({ campaign: "blog" })}
+            href={buildDemoTracesListUrl({ campaign: "blog" })}
             target="_blank"
             rel="noopener noreferrer"
             onClick={(event) => {
               capture("demo:view_trace_in_langfuse_clicked", {
-                source: "jev_evals_blog",
+                source: analyticsSource,
                 trace_url: event.currentTarget.href,
               });
             }}
             className="underline underline-offset-2 text-text-links hover:text-primary"
           >
-            public sample project
-          </a>
+            View traces
+          </a>{" "}
+          in the public sample project
           {compact
             ? ". "
-            : " (`Sentiment-Classifier-Jev`, `Sentiment-Classifier-GPT`). Jev is faster and cheaper and returns a decision only; Luna adds reasoning. "}
+            : " (`Sentiment-Classifier-Jev`, `Sentiment-Classifier-OpenAI-Decisions`, `Sentiment-Classifier-GPT`). Jev and OpenAI Decisions return a decision only; Luna adds reasoning. "}
           {compact ? (
             <>
               The{" "}
