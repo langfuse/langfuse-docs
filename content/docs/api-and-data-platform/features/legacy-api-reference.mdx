@@ -1,0 +1,44 @@
+---
+title: Legacy API reference (v3 / pre-v4 SDKs)
+sidebarTitle: Legacy API reference
+description: Frozen snapshot of the Langfuse public API reference that still includes the endpoints deprecated in Langfuse v4, for self-hosted Langfuse v3 and older SDK versions.
+---
+
+import { LegacyApiReference } from "@/components/LegacyApiReference";
+import { V4_CUTOVER_DATE_SHORT } from "@/lib/v4-migration-dates";
+
+# Legacy API reference (v3 / pre-v4 SDKs) [#legacy-api-reference]
+
+This page is a frozen snapshot of the Langfuse public API reference as of October 9, 2026. It still documents the read endpoints that were deprecated in Langfuse v4 and that are no longer part of the [current API reference](https://api.reference.langfuse.com).
+
+Use this reference if you:
+
+- run self-hosted Langfuse v3, where the v4 replacement APIs are not available (see the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server)),
+- use the Python SDK v4 or earlier, or the JS/TS SDK v5 or earlier, whose generated API clients still expose these endpoints, or
+- maintain an integration that calls these endpoints directly and are migrating it.
+
+For everything else, use the [current API reference](https://api.reference.langfuse.com), which always reflects the latest Langfuse version.
+
+<Callout type="warning">
+
+This snapshot is not updated. On Langfuse Cloud, the deprecated endpoints are sunset as of {V4_CUTOVER_DATE_SHORT}. The [migration guide](/faq/all/deprecated-api-migration) maps each of them to its replacement.
+
+</Callout>
+
+## Endpoints only documented here [#deprecated-endpoints]
+
+- Traces: `GET /api/public/traces` and `GET /api/public/traces/{traceId}`
+- Sessions: `GET /api/public/sessions` and `GET /api/public/sessions/{sessionId}`
+- Observations v1: `GET /api/public/observations` and `GET /api/public/observations/{observationId}`
+- Metrics v1: `GET /api/public/metrics`
+- Scores v2 reads: `GET /api/public/v2/scores` and `GET /api/public/v2/scores/{scoreId}`
+- Dataset run items: `GET /api/public/dataset-run-items` and `POST /api/public/dataset-run-items`
+- Dataset runs: `GET /api/public/datasets/{datasetName}/runs`, `GET /api/public/datasets/{datasetName}/runs/{runName}`, and `DELETE /api/public/datasets/{datasetName}/runs/{runName}`
+
+## OpenAPI spec [#openapi-spec]
+
+Download the frozen spec: [openapi.yml](/openapi/legacy-v3/openapi.yml). It is the `web/public/generated/api/openapi.yml` file from the `main` branch of [langfuse/langfuse](https://github.com/langfuse/langfuse/blob/1744e301ff3706c055439e7b77e17cfd5cb71e23/web/public/generated/api/openapi.yml) at commit `1744e301`.
+
+## Reference [#reference]
+
+<LegacyApiReference specUrl="/openapi/legacy-v3/openapi.yml" />
