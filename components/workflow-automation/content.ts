@@ -77,7 +77,7 @@ export const workflowAutomationIntegrationGroups = [
       { label: "n8n", href: "/integrations/no-code/n8n" },
       { label: "Temporal", href: "/integrations/frameworks/temporal" },
       { label: "Restate", href: "/integrations/frameworks/restate" },
-      { label: "Zapier", href: "/integrations/other/zapier" },
+      { label: "Zapier", href: "/integrations/no-code/zapier" },
     ],
   },
   {
