@@ -135,6 +135,9 @@ jobs:
       - name: Check markdown and source links
         run: pnpm link-check
 
+      - name: Check FAQPage JSON-LD on built pages
+        run: pnpm faq-schema-check
+
       - name: Stop production server
         if: always()
         run: kill "$SERVER_PID" || true
@@ -160,7 +163,7 @@ jobs:
           require-lockfile: true
 
       - name: Run sitemap checker unit tests
-        run: node --test scripts/check-sitemap-links.test.js lib/compare-labels.test.js
+        run: node --test scripts/check-sitemap-links.test.js lib/compare-labels.test.js scripts/seo-discovery.test.js
 
       - name: Build next.js app
         run: pnpm build

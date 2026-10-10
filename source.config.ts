@@ -13,6 +13,7 @@ import remarkGfm from "remark-gfm";
 import { remarkMdxMermaid } from "fumadocs-core/mdx-plugins";
 import { remarkCodeFilename } from "./lib/remark-code-filename.mjs";
 import { remarkHideStepsFromToc } from "./lib/remark-hide-steps-from-toc.mjs";
+import { remarkFaqSchema } from "./lib/remark-faq-schema.mjs";
 import { mdxJsxToMarkdown } from "mdast-util-mdx-jsx";
 import { z } from "zod";
 
@@ -34,6 +35,11 @@ const baseFrontmatterSchema = frontmatterSchema.extend({
   // Optional per-page OG image override (site-relative path, e.g. /images/foo.jpg).
   // When set, used instead of the generated /api/og card.
   ogImage: z.string().nullish(),
+  // Opt in to schema.org FAQPage JSON-LD, built from the page's own
+  // <Details>/<Summary> Q&A by lib/remark-faq-schema.mjs. Only set this on
+  // pages whose answers are written inline — never on FAQ hubs, tag pages or
+  // <FaqPreview /> sections, which only link to answers held elsewhere.
+  faqSchema: z.boolean().nullish(),
 });
 
 // Extended schema for blog pages — adds date, tag, author, ogImage fields
@@ -238,6 +244,7 @@ export default defineConfig({
       remarkMdxMermaid,
       remarkCodeFilename,
       remarkHideStepsFromToc,
+      remarkFaqSchema,
     ],
     providerImportSource: "@/mdx-components",
     // Disable remark-image: many content files reference remote images via https://
