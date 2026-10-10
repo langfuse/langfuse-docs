@@ -59,12 +59,13 @@ docker build -t langfuse/langfuse-worker -f ./worker/Dockerfile .
 See [configuration](/self-hosting/configuration) for more details on the environment variables.
 
 ```bash
+# Generate ENCRYPTION_KEY with: openssl rand -hex 32
 docker run --name langfuse-web \
   -e DATABASE_URL=postgresql://hello \
   -e NEXTAUTH_URL=http://localhost:3000 \
   -e NEXTAUTH_SECRET=mysecret \
   -e SALT=mysalt \
-  -e ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000 \ # generate via: openssl rand -hex 32
+  -e ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000 \
   -e CLICKHOUSE_URL=http://clickhouse:8123 \
   -e CLICKHOUSE_USER=clickhouse \
   -e CLICKHOUSE_PASSWORD=clickhouse \
@@ -86,11 +87,12 @@ docker.langfuse.com/langfuse/langfuse:4
 See [configuration](/self-hosting/configuration) for more details on the environment variables.
 
 ```bash
+# Generate ENCRYPTION_KEY with: openssl rand -hex 32
 docker run --name langfuse-worker \
   -e DATABASE_URL=postgresql://hello \
   -e NEXTAUTH_URL=http://localhost:3000 \
   -e SALT=mysalt \
-  -e ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000 \ # generate via: openssl rand -hex 32
+  -e ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000 \
   -e CLICKHOUSE_URL=http://clickhouse:8123 \
   -e CLICKHOUSE_USER=clickhouse \
   -e CLICKHOUSE_PASSWORD=clickhouse \
