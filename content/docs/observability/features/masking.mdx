@@ -228,7 +228,7 @@ langfuse = Langfuse(mask_otel_spans=mask_otel_spans)
 </Tab>
 <Tab title="JS/TS SDK">
 
-To prevent sensitive data from being sent to Langfuse, you can provide a `mask` function to the `LangfuseSpanProcessor`. This function will be applied to the `input`, `output`, and `metadata` of every observation.
+To prevent sensitive data from being sent to Langfuse, you can provide a `mask` function to the `LangfuseSpanProcessor`. It is applied to the `input`, `output`, and `metadata` that the Langfuse SDK sets (the `langfuse.observation.*` and `langfuse.trace.*` span attributes). It does not see attributes written by other instrumentations, such as the Vercel AI SDK's `ai.prompt*` and `ai.response.*` attributes or `gen_ai.*` attributes, even though Langfuse shows them as input and output. Mask those before export with your own span processor or exporter, or in an OpenTelemetry Collector (see [Masking with OpenTelemetry](#masking-with-opentelemetry)).
 
 The function receives an object `{ data }`, where `data` is the stringified JSON of the attribute's value. It should return the masked data.
 
