@@ -1,7 +1,7 @@
 ---
 title: "S3 / Blob Storage Configuration (Self-Hosted)"
 sidebarTitle: Blob Storage (S3)
-description: "Configure S3 or S3-compatible blob storage for self-hosted Langfuse. Store raw events, multi-modal inputs, and batch exports with AWS S3, Google Cloud Storage, Azure Blob Storage, SeaweedFS, MinIO, or compatible services."
+description: "Configure S3 or S3-compatible blob storage for self-hosted Langfuse. Store raw events, multi-modal inputs, and batch exports with Amazon S3, Google Cloud Storage, Azure Blob Storage, SeaweedFS, MinIO, or compatible services."
 label: "Version: v4"
 ---
 
@@ -108,7 +108,7 @@ To configure batch exports in your environment, configure the following environm
 
 #### S3 Compatibility
 
-The following settings apply to all S3 use-cases (events, media, batch exports) and help with S3-compatible stores that are not fully compatible with the AWS S3 API.
+The following settings apply to all S3 use-cases (events, media, batch exports) and help with S3-compatible stores that are not fully compatible with the Amazon S3 API.
 
 | Variable                                        | Required / Default | Description                                                                                                                                                                                                                                                                          |
 | ----------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -157,7 +157,7 @@ Ensure that both entities have the necessary permissions to access the bucket:
 }
 ```
 
-The same IAM role or user also works for the project-level [Blob Storage Export integration](/docs/api-and-data-platform/features/export-to-blob-storage#set-up-an-export). On self-hosted deployments, leave **Access Key ID** and **Secret Access Key** blank in that integration's AWS S3 settings to use the IAM role instead of static credentials. This fallback only applies to the AWS S3 provider; it is not available on Langfuse Cloud or for Azure Blob Storage / S3 Compatible Storage.
+The same IAM role or user also works for the project-level [Blob Storage Export integration](/docs/api-and-data-platform/features/export-to-blob-storage#set-up-an-export). On self-hosted deployments, leave **Access Key ID** and **Secret Access Key** blank in that integration's Amazon S3 settings to use the IAM role instead of static credentials. This fallback only applies to the Amazon S3 provider; it is not available on Langfuse Cloud or for Azure Blob Storage / S3 Compatible Storage.
 
 <Callout type="info">
 
@@ -578,7 +578,7 @@ Validation behavior:
 - **Connection-time**: the S3 SDK's HTTP handler and the Azure SDK's request policy re-validate the resolved IP just before each request, so a hostname whose DNS answer changes after save is still blocked.
 - **Cloud**: validation is strict and cannot be relaxed.
 - **Self-hosted**: validation activates when at least one of the allowlist environment variables below is configured. This keeps backward compatibility with internal SeaweedFS, MinIO, and Azurite deployments on private networks. The default will become strict in a future major release.
-- The _integration_ offers three providers: **AWS S3**, **S3 Compatible Storage**, and **Azure Blob Storage**. There is no native **GCS** or **OCI** client, so neither can be selected directly. Google Cloud Storage still works as an export target through **S3 Compatible Storage**: create an HMAC key as described under [Compatibility Mode](#google-cloud-storage-compatibility-mode), then set the endpoint to `https://storage.googleapis.com`. That host is validated like any other S3-compatible endpoint. The native object storage integrations configured via environment variables are unaffected.
+- The _integration_ offers three providers: **Amazon S3**, **S3 Compatible Storage**, and **Azure Blob Storage**. There is no native **GCS** or **OCI** client, so neither can be selected directly. Google Cloud Storage still works as an export target through **S3 Compatible Storage**: create an HMAC key as described under [Compatibility Mode](#google-cloud-storage-compatibility-mode), then set the endpoint to `https://storage.googleapis.com`. That host is validated like any other S3-compatible endpoint. The native object storage integrations configured via environment variables are unaffected.
 
 ### Self-hosted allowlist environment variables
 

@@ -5,9 +5,13 @@ description: "AI agent evaluation explained: how to measure trajectory, tool use
 tags: [guide, evaluation]
 ---
 
+import { SignupCTA } from "@/components/SignupCTA";
+
 # AI agent evaluation
 
 AI agent evaluation is the practice of measuring whether an agent accomplishes its task, and whether it gets there in an acceptable way. Unlike a single LLM call, an agent produces a multi-step execution: it plans, calls tools, reacts to tool results, and often spans several conversation turns. Evaluating only the final answer misses most of what can go wrong.
+
+<SignupCTA className="my-6" />
 
 **TL;DR:** Evaluate agents on four dimensions: trajectory (the path of steps the agent took), tool use (whether it called the right tools with the right arguments), task completion (whether the user's goal was met), and multi-turn quality (whether performance holds across a conversation). Run offline evaluations on datasets before shipping changes and online evaluations on sampled production traffic after. Use deterministic code checks for anything decidable, LLM-as-a-judge for semantic judgments, and human annotation to calibrate both. This guide covers each dimension with worked patterns in Langfuse.
 

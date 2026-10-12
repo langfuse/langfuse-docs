@@ -1,6 +1,6 @@
 "use client";
 
-import { MarketoContactForm } from "@/components/MarketoContactForm";
+import { MarketoContactFormCard } from "@/components/MarketoContactForm";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import { getGitHubStars } from "@/lib/github-stars";
 import { Link } from "@/components/ui/link";
@@ -125,7 +125,7 @@ function TalkToUsContent() {
 
       <div className="mt-2">
         <Text className="text-left not-prose">
-          We are looking forward to talk to you,
+          We are looking forward to talking to you,
         </Text>
         <div className="flex flex-col gap-6 mt-4">
           <TeamMemberCard
@@ -195,11 +195,7 @@ function DiscoverYourselfContent() {
 }
 
 function ContactFormSection() {
-  return (
-    <div className="relative w-full max-w-md mx-auto p-4 bg-stripe-pattern corner-box-corners border border-line-structure">
-      <MarketoContactForm />
-    </div>
-  );
+  return <MarketoContactFormCard />;
 }
 
 export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {

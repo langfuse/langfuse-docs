@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 type ContentColumnsProps = {
   children: ReactNode;
   showAside?: boolean;
+  showLeftSidebar?: boolean;
   leftSidebar?: ReactNode;
   rightSidebar?: ReactNode;
   className?: string;
@@ -20,15 +21,40 @@ type ContentColumnsProps = {
  * Three-column layout: left sidebar | content | right sidebar.
  * Used inside PageChrome (or any wrapper that provides the outer chrome).
  * Pass `leftSidebar` / `rightSidebar` to swap the default sidebars.
+ * Set `showLeftSidebar={false}` to drop the left column and give the page more width.
  */
+function SideGutter() {
+  return (
+    <div
+      aria-hidden
+      className="hidden shrink-0 bg-transparent lg:block w-8 xl:w-12 2xl:w-16"
+    />
+  );
+}
+
+function AsideEdge() {
+  return (
+    <div
+      aria-hidden
+      className="hidden lg:block w-px shrink-0 bg-line-structure"
+    />
+  );
+}
+
 export function ContentColumns({
   children,
   showAside = true,
+  showLeftSidebar = true,
   leftSidebar,
   rightSidebar,
   className,
   footerClassName,
 }: ContentColumnsProps) {
+  // Wide gutters only when both sidebars are off (e.g. financial-services).
+  // Pages that only hide the aside keep the previous 1px structural edge.
+  const rightFallback =
+    showLeftSidebar === false ? <SideGutter /> : <AsideEdge />;
+
   return (
     <div
       id="home-layout"
@@ -37,19 +63,12 @@ export function ContentColumns({
         className,
       )}
     >
-      {leftSidebar ?? <HomeSidebar />}
+      {showLeftSidebar ? (leftSidebar ?? <HomeSidebar />) : <SideGutter />}
       <HomeMainArea>
         {children}
         <Footer className={footerClassName} />
       </HomeMainArea>
-      {showAside ? (
-        (rightSidebar ?? <HomeAside />)
-      ) : (
-        <div
-          aria-hidden
-          className="hidden lg:block w-px shrink-0 bg-line-structure"
-        />
-      )}
+      {showAside ? (rightSidebar ?? <HomeAside />) : rightFallback}
       <AISearchPanel />
     </div>
   );
@@ -66,6 +85,7 @@ type HomeLayoutProps = ContentColumnsProps & {
 export function HomeLayout({
   children,
   showAside = true,
+  showLeftSidebar = true,
   leftSidebar,
   rightSidebar,
   className,
@@ -76,6 +96,7 @@ export function HomeLayout({
     <PageChrome forceLight={forceLight}>
       <ContentColumns
         showAside={showAside}
+        showLeftSidebar={showLeftSidebar}
         leftSidebar={leftSidebar}
         rightSidebar={rightSidebar}
         className={className}
