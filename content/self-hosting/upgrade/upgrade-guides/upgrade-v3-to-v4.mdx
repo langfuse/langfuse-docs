@@ -182,7 +182,7 @@ Deployments that connect to an external ClickHouse are not affected.
 
 </Callout>
 
-If you plan to use the [automated backfill](#historic-data) for historic data in step 3, also make sure the ClickHouse disks can handle roughly **3x the current data volume**: data is copied into the `events` tables and, for the `observations` table, additionally into an intermediate format that is cleaned up at the end.
+If you plan to use the [automated backfill](#historic-data) for historic data in step 3, also make sure the ClickHouse disks can handle roughly **3x the current data volume**: data is copied into the `events` tables and, for the `observations` table, additionally into an intermediate scratch table (`observations_pid_tid_sorting`). The scratch table is only removed once you opt into the [cleanup step](#cleanup) with `LANGFUSE_BACKGROUND_MIGRATION_V4_DROP_PID_TID_SORTING_TABLES=true`; until then, the extra copy of `observations` stays on disk.
 
 ### ClickHouse user permissions [#clickhouse-permissions]
 
@@ -348,6 +348,8 @@ Data ingested before the dual write became active only exists in the old tables.
 
 Set `LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL=true` (or remove the `false` override) and redeploy. A chain of [background migrations](#historic-backfill) rewrites all historic traces, observations, and dataset run items into the new tables: without downtime, gradually, newest first. Requires the ~3x disk headroom from [step 1](#step-1).
 
+The backfill does not remove its scratch table on its own. Steps 1–4 of the chain are gated by `LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL`; the final step that drops the scratch table is gated separately by `LANGFUSE_BACKGROUND_MIGRATION_V4_DROP_PID_TID_SORTING_TABLES` (default `false`). Once the backfill has finished and the historic data looks right in the new experience, set it to `true` as described in [clean up storage](#cleanup).
+
 </Tab>
 
 <Tab>
@@ -373,11 +375,23 @@ Once all producers run compatible SDKs **and** historic data is covered (backfil
 
 This stops all writes into the old `traces`/`observations` tables and reduces load, storage, and S3 costs. From this point, the [deprecated endpoints](#api-changes) return `404`, incompatible SDKs are rejected, and [trace-level evaluators](#evaluations) stop running. This is the point of commitment.
 
-### Clean up storage (optional) [#cleanup]
+If you ran the automated backfill, the migration is not fully complete yet: the backfill scratch table still holds a full copy of `observations` until you [drop it](#cleanup).
 
-Two optional cleanups reduce your ClickHouse footprint after the migration:
+### Clean up storage [#cleanup]
 
-**Drop the backfill scratch table.** If you ran the backfill, set `LANGFUSE_BACKGROUND_MIGRATION_V4_DROP_PID_TID_SORTING_TABLES=true` after confirming the result to drop the intermediate scratch table and free the disk space.
+Two cleanups reduce your ClickHouse footprint after the migration:
+
+**Drop the backfill scratch table (recommended if you ran the backfill).** The backfill leaves a full copy of `observations` in the `observations_pid_tid_sorting` scratch table, and it is not removed automatically. Once the backfill has finished and you have confirmed the historic data in the new experience, set `LANGFUSE_BACKGROUND_MIGRATION_V4_DROP_PID_TID_SORTING_TABLES=true` and redeploy the worker. The final background migration then drops the table and frees the disk space. Without this, the ~3x disk usage from [step 1](#step-1) is permanent rather than a temporary peak.
+
+The background migrations page shows this step as idle rather than failed while the variable is unset, so check for leftover scratch tables directly in ClickHouse:
+
+```sql
+SELECT name, total_rows
+FROM system.tables
+WHERE database = currentDatabase() AND name LIKE '%pid_tid_sorting%';
+```
+
+An empty result means the cleanup has run.
 
 **Truncate the old tables.** After the [cutover](#cutover), the `traces` and `observations` tables receive no writes and are not read by any v4 feature; they only consume disk space. If you no longer need them as an archive, reclaim the space:
 
@@ -414,7 +428,7 @@ On Langfuse v4, the new behavior is the default. These variables exist to retain
 | `LANGFUSE_MIGRATION_V4_NATIVE_OTEL_BEHAVIOUR`                  | `dual_write` / `direct` (default)           | `dual_write` retains server-side attribute propagation for OTel producers that have not adopted client-side propagation yet.                                                                                          |
 | `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN`                   | `true` (default) / `false`                  | Gates the v4 read paths (UI toggle and v2 APIs). Set `false` to keep the v3 read experience while on `legacy` or `dual`; must remain `true` with `events_only`.                                                       |
 | `LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL`    | `true` (default) / `false`                  | Set `false` to defer the backfill (required while on `legacy`) or to skip it permanently for the retention-based rollover.                                                                                            |
-| `LANGFUSE_BACKGROUND_MIGRATION_V4_DROP_PID_TID_SORTING_TABLES` | `false` (default) / `true`                  | Set `true` after a successful backfill to drop intermediate scratch tables and free disk space.                                                                                                                       |
+| `LANGFUSE_BACKGROUND_MIGRATION_V4_DROP_PID_TID_SORTING_TABLES` | `false` (default) / `true`                  | Set `true` after a successful backfill to drop intermediate scratch tables and free disk space. Without it, the final backfill step never runs and the scratch table stays on disk.                                   |
 
 ## How the dual write works [#dual-write]
 
@@ -448,7 +462,7 @@ The backfill is an ordered chain. Each step only starts after its predecessor fi
 ### What you will observe
 
 - Historic data appears **gradually, newest first**, as each batch completes, not all at once. For a period you may see only recent (dual-written) data while older data is still being rewritten.
-- There is no downtime and no impact on new ingestion, though a large backfill adds load and temporary storage (the scratch table, up to ~3x data volume) to your ClickHouse cluster until step 5 cleans it up.
+- There is no downtime and no impact on new ingestion, though a large backfill adds load and temporary storage (the scratch table, up to ~3x data volume) to your ClickHouse cluster until step 5 cleans it up. Step 5 only runs once you set `LANGFUSE_BACKGROUND_MIGRATION_V4_DROP_PID_TID_SORTING_TABLES=true`; until then it stays idle and the logs report `No background migrations to run` after step 4.
 - The migrations are resumable: they can be interrupted (e.g. by a deployment) and continue where they left off.
 - Because the new tables use a `ReplacingMergeTree`, re-runs and overlaps with the dual write are de-duplicated; the most recently written version wins.
 
