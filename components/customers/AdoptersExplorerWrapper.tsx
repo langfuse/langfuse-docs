@@ -98,6 +98,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   Kombo: "Unified HR and payroll API platform",
   "La Suite numérique":
     "Digital collaboration suite for the French public sector",
+  LayerX: "Back-office AI software company",
   Lemonade: "Insurance technology company",
   "Magic Patterns": "AI-powered UI design tool",
   "McKinsey & Company": "Management consulting firm",
@@ -149,6 +150,7 @@ const COMPANIES_WITH_DOCUMENTED_USE_CASES = new Set([
   "Kensho",
   "KINTO Technologies",
   "La Suite numérique",
+  "LayerX",
   "McKinsey & Company",
   "Mitsubishi Heavy Industries",
   "Moderna",
