@@ -21,7 +21,7 @@ The easiest way to set this up is the [Langfuse Observability Plugin for Cursor]
 This page used to describe [naoufalelh/cursor-langfuse](https://github.com/naoufalelh/cursor-langfuse), a community project. Replace it with this plugin instead of running both. Cursor runs every registered hook, so with both installed each action is traced twice. To switch:
 
 1. In each project that uses it, remove the entries that run `node .cursor/hooks/hook-handler.js` from `.cursor/hooks.json`, and delete the copied `.cursor/hooks/` handler folder. Keep any other hooks you have there.
-2. Copy the keys from that project's `.env` into `~/.cursor/langfuse.json`, and set `baseUrl` to the host for that project's region (see [Set your Langfuse credentials](#set-credentials)). This plugin does not read `.env` files.
+2. Copy the keys from that project's `.env`. When every project uses the same Langfuse project, put `publicKey`, `secretKey`, and `baseUrl` in `~/.cursor/langfuse.json`. When they differ, put all three in `<project>/.cursor/langfuse.json` instead. That file overrides the global one for that project, and its `baseUrl` is used only with that file's own keys. Set the host from [Set your Langfuse credentials](#set-credentials). Do not commit `<project>/.cursor/langfuse.json`. This plugin does not read `.env` files.
 3. Install this plugin and restart Cursor.
 
 Your existing traces stay in Langfuse. New traces have a different shape: one `Cursor Turn` trace per prompt, with the session set to the Cursor conversation instead of the workspace folder. Update saved filters and dashboards that relied on the old names, tags, or `cursor-<folder>` sessions.
@@ -62,7 +62,7 @@ The plugin ships its own hook definitions, so there is nothing else to register.
 
 Start a new agent chat. If `~/.cursor/langfuse.json` is missing, the plugin creates it (mode 600, readable only by you) with empty strings. The first reply links that file. Your prompt still runs. In a chat that is already open, run `/langfuse-setup`. It creates the same file. Existing keys stay.
 
-Paste the three values into the file. Keep the secret key out of the chat. Leave the strings empty until they are real keys. `pk-lf-...` counts as a key, and the setup message stops.
+Paste the public key, secret key, and host into that file. Keep the secret key out of the chat.
 
 | Account     | `baseUrl`                          |
 | ----------- | ---------------------------------- |
@@ -72,11 +72,13 @@ Paste the three values into the file. Keep the secret key out of the chat. Leave
 | Japan       | `https://jp.cloud.langfuse.com`    |
 | Self-hosted | Your Langfuse v4 instance URL      |
 
+The file the plugin creates looks like this. Replace each empty string. A public key starts with `pk-lf-`, a secret key starts with `sk-lf-`, and `baseUrl` is a host from the table. Leave a field empty until the value is real. `pk-lf-...` counts as a key, so saving that placeholder turns tracing on and the setup message stops.
+
 ```json
 {
-  "publicKey": "pk-lf-...",
-  "secretKey": "sk-lf-...",
-  "baseUrl": "https://cloud.langfuse.com"
+  "publicKey": "",
+  "secretKey": "",
+  "baseUrl": ""
 }
 ```
 
