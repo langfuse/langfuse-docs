@@ -8,10 +8,44 @@ import { DocBodyChrome } from "@/components/DocBodyChrome";
 import { DocsAndPageFooter } from "@/components/DocsAndPageFooter";
 import { DocsBreadcrumb } from "@/components/DocsBreadcrumb";
 import { getMDXComponents } from "@/mdx-components";
+import { CONTENT_DIR_TO_URL_PREFIX } from "@/lib/content-dir-map.js";
 
 type BodyChromeProps = Omit<ComponentProps<typeof DocBodyChrome>, "children">;
 
-type LoadedPage = { data: any };
+type LoadedPage = { data: any; url?: string; path?: string };
+
+/**
+ * Content directory (e.g. `content/academy`) a page was loaded from, inferred
+ * from its URL via the single source of truth in lib/content-dir-map.js.
+ * Collections nested inside another directory (academy/japan) pass
+ * `contentDir` explicitly instead.
+ */
+const inferContentDir = (url: string | undefined): string | undefined => {
+  if (!url) return undefined;
+  let best: { dir: string; prefix: string } | undefined;
+  for (const [dir, prefix] of Object.entries(CONTENT_DIR_TO_URL_PREFIX)) {
+    if (!prefix) continue;
+    const base = `/${prefix}`;
+    if (url !== base && !url.startsWith(`${base}/`)) continue;
+    if (!best || prefix.length > best.prefix.length) best = { dir, prefix };
+  }
+  return best ? `content/${best.dir}` : undefined;
+};
+
+/**
+ * Repo-relative source file of the page, e.g. `content/academy/experiments/index.mdx`.
+ * Fumadocs exposes `page.path` relative to the collection directory, which is
+ * what lets folder index pages resolve to their real file for the
+ * "Edit this page on GitHub" link.
+ */
+const getRepoSourcePath = (
+  page: LoadedPage,
+  contentDir?: string,
+): string | undefined => {
+  const dir = contentDir ?? inferContentDir(page.url);
+  if (!dir || !page.path) return undefined;
+  return `${dir}/${page.path}`;
+};
 
 const getIsoDate = (value: unknown): string | undefined => {
   if (value == null) return undefined;
@@ -32,11 +66,14 @@ const getIsoDate = (value: unknown): string | undefined => {
  */
 export async function DocsChromePage({
   page,
+  contentDir,
   bodyChromeProps,
   topPrefix,
   bottomSuffix,
 }: {
   page: LoadedPage;
+  /** Collection directory override for collections nested in another one, e.g. `content/academy/japan`. */
+  contentDir?: string;
   /** Extra props forwarded to `DocBodyChrome` (e.g. `versionLabel` on self-hosting). */
   bodyChromeProps?: BodyChromeProps;
   /** Optional node rendered inside DocBodyChrome, before the MDX body. */
@@ -52,6 +89,7 @@ export async function DocsChromePage({
 
   const toc: TOCItemType[] = loaded.toc ?? [];
   const lastModified = getIsoDate(data.lastModified);
+  const sourcePath = getRepoSourcePath(page, contentDir);
   const MDX = loaded.body as ComponentType<{
     components?: Record<string, ComponentType>;
   }>;
@@ -62,7 +100,9 @@ export async function DocsChromePage({
       lastUpdate={lastModified}
       breadcrumb={{ component: <DocsBreadcrumb /> }}
       tableOfContent={{
-        footer: <DocsTocFooter lastModified={lastModified} />,
+        footer: (
+          <DocsTocFooter lastModified={lastModified} sourcePath={sourcePath} />
+        ),
       }}
       footer={{ component: <DocsAndPageFooter /> }}
     >
