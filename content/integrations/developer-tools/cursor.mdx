@@ -13,18 +13,7 @@ category: Integrations
 > **What is Langfuse?** [Langfuse](https://langfuse.com/) is the open-source AI engineering platform. It helps teams collaboratively trace agentic applications, manage prompts, debug issues, evaluate quality, and monitor costs in production. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it.
 
 <Callout type="info" title="Install via the Cursor Marketplace">
-The easiest way to set this up is the [Langfuse Observability Plugin for Cursor](https://github.com/langfuse/cursor-observability-plugin). Install **Langfuse Observability** from the Cursor Marketplace, then save your project keys and region host (steps below). Requires Node.js 22 or newer, and Langfuse Cloud or self-hosted Langfuse v4.
-
-</Callout>
-
-<Callout type="warning" title="Already using the community cursor-langfuse hooks?">
-This page used to describe [naoufalelh/cursor-langfuse](https://github.com/naoufalelh/cursor-langfuse), a community project. Replace it with this plugin instead of running both. Cursor runs every registered hook, so with both installed each action is traced twice. To switch:
-
-1. In each project that uses it, remove the entries that run `node .cursor/hooks/hook-handler.js` from `.cursor/hooks.json`, and delete the copied `.cursor/hooks/` handler folder. Keep any other hooks you have there.
-2. Copy the keys from that project's `.env`. When every project uses the same Langfuse project, put `publicKey`, `secretKey`, and `baseUrl` in `~/.cursor/langfuse.json`. When they differ, put all three in `<project>/.cursor/langfuse.json` instead. That file overrides the global one for that project, and its `baseUrl` is used only with that file's own keys. Set the host from [Set your Langfuse credentials](#set-credentials). Do not commit `<project>/.cursor/langfuse.json`. This plugin does not read `.env` files.
-3. Install this plugin and restart Cursor.
-
-Your existing traces stay in Langfuse. New traces have a different shape: one `Cursor Turn` trace per prompt, with the session set to the Cursor conversation instead of the workspace folder. Update saved filters and dashboards that relied on the old names, tags, or `cursor-<folder>` sessions.
+The easiest way to set this up is the [Langfuse Observability Plugin for Cursor](https://github.com/langfuse/cursor-observability-plugin). Install **Langfuse Observability** from the Cursor Marketplace, then save your project keys and region host (steps below). Requires Node.js 22 or newer, and Langfuse Cloud or self-hosted Langfuse v4. [Already using the community hooks?](#switch-from-community-hooks)
 
 </Callout>
 
@@ -214,6 +203,16 @@ The base URL has to match the region the keys belong to. Hosts are in the [regio
 ### Data privacy
 
 When tracing is on, the plugin uploads prompts, assistant messages, thinking text, tool inputs and outputs (shell output, MCP results, file edits), subagent tasks and summaries, model names and parameters, token usage, workspace paths, and the Cursor account email. Contents of files Cursor reads are stored only when both `captureFileContent` and `captureToolOutput` are on. Other tool outputs stay out when `captureToolOutput` is off. Langfuse keys are masked before upload. Turn tracing off for work you do not want stored in Langfuse.
+
+## Switch from the community hooks [#switch-from-community-hooks]
+
+This page used to describe [naoufalelh/cursor-langfuse](https://github.com/naoufalelh/cursor-langfuse), a community project. Replace it with this plugin instead of running both. Cursor runs every registered hook, so with both installed each action is traced twice. To switch:
+
+1. In each project that uses it, remove the entries that run `node .cursor/hooks/hook-handler.js` from `.cursor/hooks.json`, and delete the copied `.cursor/hooks/` handler folder. Keep any other hooks you have there.
+2. Copy the keys from that project's `.env`. When every project uses the same Langfuse project, put `publicKey`, `secretKey`, and `baseUrl` in `~/.cursor/langfuse.json`. When they differ, put all three in `<project>/.cursor/langfuse.json` instead. That file overrides the global one for that project, and its `baseUrl` is used only with that file's own keys. Set the host from [Set your Langfuse credentials](#set-credentials). Do not commit `<project>/.cursor/langfuse.json`. This plugin does not read `.env` files.
+3. Install this plugin and restart Cursor.
+
+Your existing traces stay in Langfuse. New traces have a different shape: one `Cursor Turn` trace per prompt, with the session set to the Cursor conversation instead of the workspace folder. Update saved filters and dashboards that relied on the old names, tags, or `cursor-<folder>` sessions.
 
 ## Resources
 
