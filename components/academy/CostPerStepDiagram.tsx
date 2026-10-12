@@ -9,6 +9,10 @@ import { useLayoutEffect, useRef } from "react";
 
 const INNER_W = 1200;
 const INNER_H = 820;
+// Below this width the figure scrolls horizontally instead of shrinking further,
+// so the text stays readable on phones.
+const MIN_W = 840;
+const MIN_SCALE = MIN_W / INNER_W;
 
 type Row = { label: string; value: string | null };
 type Card = { left: number; top: number; rows: Row[]; total: string };
@@ -55,23 +59,29 @@ const CARDS: Card[] = [
 function estimateInitialScale(): number {
   if (typeof window === "undefined") return 0.65;
   const vw = document.documentElement.clientWidth;
-  return Math.min(1, Math.max(0.3, (vw - 32) / INNER_W));
+  return Math.min(1, Math.max(MIN_SCALE, (vw - 32) / INNER_W));
 }
 
 export function CostPerStepDiagram() {
   const wrapRef = useRef<HTMLDivElement>(null);
+  const sizerRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const estScale = estimateInitialScale();
 
   useLayoutEffect(() => {
     const wrap = wrapRef.current;
+    const sizer = sizerRef.current;
     const inner = innerRef.current;
-    if (!wrap || !inner) return;
+    if (!wrap || !sizer || !inner) return;
 
     const fit = () => {
-      const scale = Math.min(1, wrap.clientWidth / INNER_W);
+      const scale = Math.max(
+        MIN_SCALE,
+        Math.min(1, wrap.clientWidth / INNER_W),
+      );
       inner.style.transform = `scale(${scale})`;
-      wrap.style.height = `${INNER_H * scale}px`;
+      sizer.style.width = `${INNER_W * scale}px`;
+      sizer.style.height = `${INNER_H * scale}px`;
     };
 
     fit();
@@ -93,109 +103,119 @@ export function CostPerStepDiagram() {
       className="cost-per-step not-prose"
       aria-label="Cost per LLM call for one agent task: five calls costing 5, 7, 10, 15, and 20, total 57. A 20% cheaper model with the same behavior brings the total to 45.6. Eliminating steps 2 and 3 brings it to 40."
     >
-      <div
-        ref={wrapRef}
-        suppressHydrationWarning
-        className="cost-per-step__wrap"
-        style={{ height: INNER_H * estScale }}
-      >
+      <div ref={wrapRef} className="cost-per-step__wrap">
         <div
-          ref={innerRef}
+          ref={sizerRef}
           suppressHydrationWarning
-          className="cost-per-step__canvas"
-          style={{ transform: `scale(${estScale})` }}
+          className="cost-per-step__sizer"
+          style={{ width: INNER_W * estScale, height: INNER_H * estScale }}
         >
-          <svg
-            width={INNER_W}
-            height={INNER_H}
-            viewBox={`0 0 ${INNER_W} ${INNER_H}`}
-            className="cost-per-step__lines"
-            aria-hidden="true"
+          <div
+            ref={innerRef}
+            suppressHydrationWarning
+            className="cost-per-step__canvas"
+            style={{ transform: `scale(${estScale})` }}
           >
-            <defs>
-              <marker
-                id="cost-per-step-arrow"
-                viewBox="0 0 10 10"
-                refX="9"
-                refY="5"
-                markerWidth="12"
-                markerHeight="12"
-                orient="auto"
-                markerUnits="userSpaceOnUse"
-              >
-                <path
-                  d="M1,1 L9,5 L1,9"
-                  fill="none"
-                  stroke="var(--text-secondary)"
-                  strokeWidth="1.25"
-                />
-              </marker>
-            </defs>
-            <line
-              x1="392"
-              y1="340"
-              x2="826"
-              y2="186"
-              stroke="var(--text-secondary)"
-              strokeWidth="1.25"
-              strokeDasharray="5 5"
-              markerEnd="url(#cost-per-step-arrow)"
-            />
-            <line
-              x1="392"
-              y1="404"
-              x2="826"
-              y2="576"
-              stroke="var(--text-secondary)"
-              strokeWidth="1.25"
-              strokeDasharray="5 5"
-              markerEnd="url(#cost-per-step-arrow)"
-            />
-            <text className="cost-per-step__note" fill="var(--text-secondary)">
-              <tspan x="470" y="224">
-                20% cheaper model
-              </tspan>
-              <tspan x="470" y="248">
-                with same behavior
-              </tspan>
-            </text>
-            <text className="cost-per-step__note" fill="var(--text-secondary)">
-              <tspan x="630" y="452">
-                eliminate steps
-              </tspan>
-              <tspan x="630" y="476">
-                2 and 3
-              </tspan>
-            </text>
-          </svg>
-
-          {CARDS.map((card) => (
-            <div
-              key={`${card.left}-${card.top}`}
-              className="cost-per-step__group"
-              style={{ left: card.left, top: card.top }}
+            <svg
+              width={INNER_W}
+              height={INNER_H}
+              viewBox={`0 0 ${INNER_W} ${INNER_H}`}
+              className="cost-per-step__lines"
+              aria-hidden="true"
             >
-              <div className="cost-per-step__card corner-box-corners">
-                {card.rows.map((row) => (
-                  <div
-                    key={row.label}
-                    className={`cost-per-step__row${
-                      row.value === null ? " cost-per-step__row--removed" : ""
-                    }`}
-                  >
-                    <span className="cost-per-step__label">{row.label}</span>
-                    <span className="cost-per-step__value">
-                      {row.value ?? ""}
-                    </span>
-                  </div>
-                ))}
+              <defs>
+                <marker
+                  id="cost-per-step-arrow"
+                  viewBox="0 0 10 10"
+                  refX="9"
+                  refY="5"
+                  markerWidth="12"
+                  markerHeight="12"
+                  orient="auto"
+                  markerUnits="userSpaceOnUse"
+                >
+                  <path
+                    d="M1,1 L9,5 L1,9"
+                    fill="none"
+                    stroke="var(--text-secondary)"
+                    strokeWidth="1.25"
+                  />
+                </marker>
+              </defs>
+              <line
+                x1="392"
+                y1="340"
+                x2="826"
+                y2="186"
+                stroke="var(--text-secondary)"
+                strokeWidth="1.25"
+                strokeDasharray="5 5"
+                markerEnd="url(#cost-per-step-arrow)"
+              />
+              <line
+                x1="392"
+                y1="404"
+                x2="826"
+                y2="576"
+                stroke="var(--text-secondary)"
+                strokeWidth="1.25"
+                strokeDasharray="5 5"
+                markerEnd="url(#cost-per-step-arrow)"
+              />
+              <text
+                className="cost-per-step__note"
+                fill="var(--text-secondary)"
+              >
+                <tspan x="470" y="224">
+                  20% cheaper model
+                </tspan>
+                <tspan x="470" y="248">
+                  with same behavior
+                </tspan>
+              </text>
+              <text
+                className="cost-per-step__note"
+                fill="var(--text-secondary)"
+              >
+                <tspan x="630" y="452">
+                  eliminate steps
+                </tspan>
+                <tspan x="630" y="476">
+                  2 and 3
+                </tspan>
+              </text>
+            </svg>
+
+            {CARDS.map((card) => (
+              <div
+                key={`${card.left}-${card.top}`}
+                className="cost-per-step__group"
+                style={{ left: card.left, top: card.top }}
+              >
+                <div className="cost-per-step__card corner-box-corners">
+                  {card.rows.map((row) => (
+                    <div
+                      key={row.label}
+                      className={`cost-per-step__row${
+                        row.value === null ? " cost-per-step__row--removed" : ""
+                      }`}
+                    >
+                      <span className="cost-per-step__label">{row.label}</span>
+                      <span className="cost-per-step__value">
+                        {row.value ?? ""}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="cost-per-step__total">
+                  <span className="cost-per-step__total-label">Total</span>
+                  <span className="cost-per-step__total-value">
+                    {card.total}
+                  </span>
+                </div>
               </div>
-              <div className="cost-per-step__total">
-                <span className="cost-per-step__total-label">Total</span>
-                <span className="cost-per-step__total-value">{card.total}</span>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 
@@ -206,8 +226,13 @@ export function CostPerStepDiagram() {
         }
 
         .cost-per-step__wrap {
-          position: relative;
           width: 100%;
+          overflow-x: auto;
+          overflow-y: hidden;
+        }
+
+        .cost-per-step__sizer {
+          position: relative;
           overflow: hidden;
         }
 

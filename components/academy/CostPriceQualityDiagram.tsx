@@ -46,12 +46,17 @@ function PriceQualityFigure({ specialized }: { specialized: boolean }) {
     : "Output quality against model price. You start with an expensive model on the quality plateau and try cheaper models until quality is about to drop.";
 
   return (
-    <figure className="not-prose my-6">
+    <figure className="not-prose my-6" style={{ overflowX: "auto" }}>
       <svg
         viewBox="0 0 1200 680"
         role="img"
         aria-label={label}
-        style={{ display: "block", width: "100%", height: "auto" }}
+        style={{
+          display: "block",
+          width: "100%",
+          minWidth: 640,
+          height: "auto",
+        }}
       >
         <defs>
           <marker

@@ -61,12 +61,17 @@ const labelStyle = {
 /** The same two tasks handled without and with sub-agents. */
 export function CostSubAgentsDiagram() {
   return (
-    <figure className="not-prose my-6">
+    <figure className="not-prose my-6" style={{ overflowX: "auto" }}>
       <svg
         viewBox="0 0 1200 370"
         role="img"
         aria-label="The same two tasks handled without and with sub-agents. Without sub-agents, one agent carries the growing context of task A and task B through every LLM call. With sub-agents, the main agent hands task A and task B to sub-agents that start from a small context, so the large context is never re-read."
-        style={{ display: "block", width: "100%", height: "auto" }}
+        style={{
+          display: "block",
+          width: "100%",
+          minWidth: 640,
+          height: "auto",
+        }}
       >
         <defs>
           <filter

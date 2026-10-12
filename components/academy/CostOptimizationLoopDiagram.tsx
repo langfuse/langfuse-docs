@@ -10,6 +10,10 @@ import { useLayoutEffect, useRef } from "react";
 
 const INNER_W = 1200;
 const INNER_H = 400;
+// Below this width the figure scrolls horizontally instead of shrinking further,
+// so the text stays readable on phones.
+const MIN_W = 720;
+const MIN_SCALE = MIN_W / INNER_W;
 
 type Segment = string | { text: string; href: string };
 
@@ -33,7 +37,7 @@ const STEPS: Array<{ left: number; segments: Segment[] }> = [
     segments: [
       "have ",
       { text: "datasets", href: "/academy/datasets" },
-      " that are representative of real world",
+      " that are representative of the real world",
     ],
   },
   { left: 742, segments: ["try cost improvements and run against datasets"] },
@@ -56,23 +60,29 @@ const ARROWS: Array<[number, number]> = [
 function estimateInitialScale(): number {
   if (typeof window === "undefined") return 0.65;
   const vw = document.documentElement.clientWidth;
-  return Math.min(1, Math.max(0.3, (vw - 32) / INNER_W));
+  return Math.min(1, Math.max(MIN_SCALE, (vw - 32) / INNER_W));
 }
 
 export function CostOptimizationLoopDiagram() {
   const wrapRef = useRef<HTMLDivElement>(null);
+  const sizerRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const estScale = estimateInitialScale();
 
   useLayoutEffect(() => {
     const wrap = wrapRef.current;
+    const sizer = sizerRef.current;
     const inner = innerRef.current;
-    if (!wrap || !inner) return;
+    if (!wrap || !sizer || !inner) return;
 
     const fit = () => {
-      const scale = Math.min(1, wrap.clientWidth / INNER_W);
+      const scale = Math.max(
+        MIN_SCALE,
+        Math.min(1, wrap.clientWidth / INNER_W),
+      );
       inner.style.transform = `scale(${scale})`;
-      wrap.style.height = `${INNER_H * scale}px`;
+      sizer.style.width = `${INNER_W * scale}px`;
+      sizer.style.height = `${INNER_H * scale}px`;
     };
 
     fit();
@@ -94,96 +104,98 @@ export function CostOptimizationLoopDiagram() {
       className="cost-loop not-prose"
       aria-label="The cost optimization loop: trace cost and tokens on your LLM calls, monitor cost and tokens per feature over time, have datasets that are representative of the real world, try cost improvements and run them against the datasets, evaluate cost and output quality. If cost is down and quality is still good, deploy the cost improvement and start again."
     >
-      <div
-        ref={wrapRef}
-        suppressHydrationWarning
-        className="cost-loop__wrap"
-        style={{ height: INNER_H * estScale }}
-      >
+      <div ref={wrapRef} className="cost-loop__wrap">
         <div
-          ref={innerRef}
+          ref={sizerRef}
           suppressHydrationWarning
-          className="cost-loop__canvas"
-          style={{ transform: `scale(${estScale})` }}
+          className="cost-loop__sizer"
+          style={{ width: INNER_W * estScale, height: INNER_H * estScale }}
         >
-          <svg
-            width={INNER_W}
-            height={INNER_H}
-            viewBox={`0 0 ${INNER_W} ${INNER_H}`}
-            className="cost-loop__lines"
-            aria-hidden="true"
+          <div
+            ref={innerRef}
+            suppressHydrationWarning
+            className="cost-loop__canvas"
+            style={{ transform: `scale(${estScale})` }}
           >
-            <defs>
-              <marker
-                id="cost-loop-arrow"
-                viewBox="0 0 10 10"
-                refX="9"
-                refY="5"
-                markerWidth="12"
-                markerHeight="12"
-                orient="auto"
-                markerUnits="userSpaceOnUse"
+            <svg
+              width={INNER_W}
+              height={INNER_H}
+              viewBox={`0 0 ${INNER_W} ${INNER_H}`}
+              className="cost-loop__lines"
+              aria-hidden="true"
+            >
+              <defs>
+                <marker
+                  id="cost-loop-arrow"
+                  viewBox="0 0 10 10"
+                  refX="9"
+                  refY="5"
+                  markerWidth="12"
+                  markerHeight="12"
+                  orient="auto"
+                  markerUnits="userSpaceOnUse"
+                >
+                  <path
+                    d="M1,1 L9,5 L1,9"
+                    fill="none"
+                    stroke="var(--text-secondary)"
+                    strokeWidth="1.25"
+                  />
+                </marker>
+              </defs>
+              <g
+                stroke="var(--text-secondary)"
+                strokeWidth="1.25"
+                markerEnd="url(#cost-loop-arrow)"
               >
-                <path
-                  d="M1,1 L9,5 L1,9"
-                  fill="none"
-                  stroke="var(--text-secondary)"
-                  strokeWidth="1.25"
-                />
-              </marker>
-            </defs>
-            <g
-              stroke="var(--text-secondary)"
-              strokeWidth="1.25"
-              markerEnd="url(#cost-loop-arrow)"
-            >
-              {ARROWS.map(([x1, x2]) => (
-                <line key={x1} x1={x1} y1="132" x2={x2} y2="132" />
-              ))}
-            </g>
-            <path
-              d="M1068,230 L1068,330 L132,330 L132,232"
-              fill="none"
-              stroke="var(--text-secondary)"
-              strokeWidth="1.25"
-              markerEnd="url(#cost-loop-arrow)"
-            />
-            <text
-              textAnchor="end"
-              className="cost-loop__note"
-              fill="var(--text-secondary)"
-            >
-              <tspan x="1052" y="268">
-                cost down &amp;
-              </tspan>
-              <tspan x="1052" y="292">
-                quality still good?
-              </tspan>
-            </text>
-          </svg>
+                {ARROWS.map(([x1, x2]) => (
+                  <line key={x1} x1={x1} y1="132" x2={x2} y2="132" />
+                ))}
+              </g>
+              <path
+                d="M1068,230 L1068,330 L132,330 L132,232"
+                fill="none"
+                stroke="var(--text-secondary)"
+                strokeWidth="1.25"
+                markerEnd="url(#cost-loop-arrow)"
+              />
+              <text
+                textAnchor="end"
+                className="cost-loop__note"
+                fill="var(--text-secondary)"
+              >
+                <tspan x="1052" y="268">
+                  cost down &amp;
+                </tspan>
+                <tspan x="1052" y="292">
+                  quality still good?
+                </tspan>
+              </text>
+            </svg>
 
-          {STEPS.map((step) => (
-            <div
-              key={step.left}
-              className="cost-loop__step"
-              style={{ left: step.left }}
-            >
-              <p>
-                {step.segments.map((segment, i) =>
-                  typeof segment === "string" ? (
-                    <span key={i}>{segment}</span>
-                  ) : (
-                    <Link key={i} href={segment.href}>
-                      {segment.text}
-                    </Link>
-                  ),
-                )}
-              </p>
+            {STEPS.map((step) => (
+              <div
+                key={step.left}
+                className="cost-loop__step"
+                style={{ left: step.left }}
+              >
+                <p>
+                  {step.segments.map((segment, i) =>
+                    typeof segment === "string" ? (
+                      <span key={i}>{segment}</span>
+                    ) : (
+                      <Link key={i} href={segment.href}>
+                        {segment.text}
+                      </Link>
+                    ),
+                  )}
+                </p>
+              </div>
+            ))}
+
+            <div className="cost-loop__deploy">
+              <span>deploy cost improvement</span>
             </div>
-          ))}
-
-          <div className="cost-loop__deploy">
-            <span>deploy cost improvement</span>
           </div>
         </div>
       </div>
@@ -195,8 +207,13 @@ export function CostOptimizationLoopDiagram() {
         }
 
         .cost-loop__wrap {
-          position: relative;
           width: 100%;
+          overflow-x: auto;
+          overflow-y: hidden;
+        }
+
+        .cost-loop__sizer {
+          position: relative;
           overflow: hidden;
         }
 

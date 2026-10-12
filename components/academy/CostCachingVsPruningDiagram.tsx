@@ -75,12 +75,17 @@ const legendStyle = {
 /** Caching keeps the shared prefix but makes it cheap; pruning removes tokens. */
 export function CostCachingVsPruningDiagram() {
   return (
-    <figure className="not-prose my-6">
+    <figure className="not-prose my-6" style={{ overflowX: "auto" }}>
       <svg
         viewBox="0 0 1200 440"
         role="img"
         aria-label="Caching versus pruning. With caching, every LLM call still reads the full context, but from the second call on the shared prefix is served as cheaper cached tokens and only the new part is uncached. With pruning, the context of each call is made smaller, so there are fewer tokens to read at all."
-        style={{ display: "block", width: "100%", height: "auto" }}
+        style={{
+          display: "block",
+          width: "100%",
+          minWidth: 640,
+          height: "auto",
+        }}
       >
         <defs>
           <pattern
