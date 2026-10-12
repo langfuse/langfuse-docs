@@ -1,20 +1,19 @@
 import { cn } from "@/lib/utils";
 import React, { forwardRef } from "react";
+import { HomeSection } from "@/components/home/HomeSection";
 
 export const WrappedSection = forwardRef<
   HTMLElement,
-  { children: React.ReactNode; className?: string }
+  { children: React.ReactNode; className?: string; id?: string }
 >((props, ref) => {
   return (
-    <section
+    <HomeSection
       ref={ref}
-      className={cn(
-        "py-20 lg:py-32 mx-auto max-w-7xl px-5 sm:px-7 xl:px-10",
-        props.className,
-      )}
+      id={props.id}
+      className={cn("pt-16 lg:pt-24", props.className)}
     >
       {props.children}
-    </section>
+    </HomeSection>
   );
 });
 

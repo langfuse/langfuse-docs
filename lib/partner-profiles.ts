@@ -1,18 +1,4 @@
-export type PartnerProfile = {
-  name: string;
-  url: string;
-  logo?: {
-    src: string;
-    alt: string;
-    width: number;
-    height: number;
-  };
-  regions: readonly string[];
-  capabilities: readonly string[];
-  summary: string;
-};
-
-export const langfusePartnerProfiles: readonly PartnerProfile[] = [
+export const langfusePartnerProfiles = [
   {
     name: "GAO",
     url: "https://www.gao-ai.com/",

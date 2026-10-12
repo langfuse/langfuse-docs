@@ -16,12 +16,6 @@ export type Adopter = {
   useCase?: string;
   logo?: {
     src: string | StaticImageData;
-    crop?: {
-      x: number;
-      y: number;
-      width: number;
-      height: number;
-    };
   };
   tableSummary: string;
   referenceLabel: string;
@@ -109,39 +103,14 @@ function traceName(adopter: Adopter) {
 function AdopterLogo({ adopter }: { adopter: Adopter }) {
   if (!adopter.logo) return null;
 
-  const { src, crop } = adopter.logo;
-  if (!crop) {
-    return (
-      <span className="relative mb-1.5 block h-7 w-36 shrink-0 opacity-80 grayscale brightness-0 contrast-125 transition-opacity group-hover:opacity-100 dark:invert">
-        <Image
-          src={src}
-          alt=""
-          fill
-          sizes="144px"
-          className="object-contain object-left"
-          unoptimized
-        />
-      </span>
-    );
-  }
-
-  const frameHeight = 28;
-  const scale = Math.min(132 / crop.width, 24 / crop.height);
-
   return (
-    <span className="relative mb-1.5 block h-7 w-36 shrink-0 overflow-hidden opacity-80 grayscale brightness-0 contrast-125 transition-opacity group-hover:opacity-100 dark:invert">
+    <span className="relative mb-1.5 block h-7 w-36 shrink-0 opacity-80 grayscale brightness-0 contrast-125 transition-opacity group-hover:opacity-100 dark:invert">
       <Image
-        src={src}
+        src={adopter.logo.src}
         alt=""
-        width={140}
-        height={40}
-        className="absolute max-w-none"
-        style={{
-          width: 140 * scale,
-          height: 40 * scale,
-          left: -crop.x * scale,
-          top: (frameHeight - crop.height * scale) / 2 - crop.y * scale,
-        }}
+        fill
+        sizes="144px"
+        className="object-contain object-left"
         unoptimized
       />
     </span>
@@ -418,11 +387,6 @@ export function AdoptersExplorer({
         ) : (
           <AdoptersTable adopters={adopters} />
         )}
-        <p className="mb-0 mt-4 max-w-[78ch] text-[12px] leading-[1.5] text-text-tertiary">
-          This list is assembled from public sources and may differ from current
-          usage. Please make sure you are not sharing information covered by an
-          NDA when suggesting an update.
-        </p>
       </div>
 
       <div className="mx-4 mb-8 flex flex-col gap-6 border border-text-primary bg-text-primary px-5 py-7 text-surface-bg sm:mx-8 sm:flex-row sm:items-center sm:justify-between sm:px-7 lg:mx-10">

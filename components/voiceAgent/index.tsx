@@ -8,6 +8,8 @@ import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { MicIcon, MicOffIcon, PhoneOffIcon } from "lucide-react";
+import { DemoTraceLink } from "@/components/demoTraceLink";
+import { buildDemoTraceUrl } from "@/lib/demo-trace";
 
 type AgentState =
   | "idle"
@@ -28,6 +30,7 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
   const [transcripts, setTranscripts] = useState<
     { role: "user" | "assistant"; text: string }[]
   >([]);
+  const [traceUrl, setTraceUrl] = useState<string | null>(null);
   const roomRef = useRef<any>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
 
@@ -45,6 +48,7 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
     setAgentState("connecting");
     setError(null);
     setTranscripts([]);
+    setTraceUrl(null);
 
     try {
       // Get token from our API
@@ -105,6 +109,14 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
               ...prev,
               { role: data.role, text: data.text },
             ]);
+          } else if (
+            data.type === "trace" &&
+            typeof data.traceId === "string" &&
+            /^[0-9a-f]{32}$/i.test(data.traceId)
+          ) {
+            // Sent by the agent once the conversation's root span exists; the
+            // link is shown after the call ends, when the trace is complete.
+            setTraceUrl(buildDemoTraceUrl({ traceId: data.traceId }));
           }
         } catch {
           // ignore invalid messages
@@ -196,8 +208,7 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
                 >
                   LiveKit Agents
                 </a>{" "}
-                and traces real-time STT → LLM → TTS voice pipelines in
-                Langfuse.
+                and traces real-time speech-to-speech voice agents in Langfuse.
               </p>
               {error && (
                 <p className="text-xs text-muted-foreground">{error}</p>
@@ -267,6 +278,13 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
                 <p className="text-xs text-destructive mb-4">{error}</p>
               )}
 
+              {/* Link to the conversation's trace, shown once the call has ended */}
+              {traceUrl && agentState === "idle" && (
+                <div className="flex justify-center mb-4">
+                  <DemoTraceLink traceUrl={traceUrl} source="voice_agent" />
+                </div>
+              )}
+
               {/* Store-audio toggle (applies when the next conversation starts) */}
               <div className="flex items-center gap-2 mb-4">
                 <Switch
@@ -309,8 +327,9 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
               {/* Info when idle */}
               {agentState === "idle" && transcripts.length === 0 && (
                 <p className="text-xs text-muted-foreground text-center max-w-sm mt-2">
-                  Start a voice conversation with the AI agent. The full STT →
-                  LLM → TTS pipeline is traced in Langfuse via{" "}
+                  Start a voice conversation with the AI agent. It runs on
+                  OpenAI GPT-Live, and every turn, tool call, and the recording
+                  is traced in Langfuse via{" "}
                   <a
                     href="/integrations/frameworks/livekit"
                     className="text-text-links decoration-text-links underline decoration-1 underline-offset-2 hover:text-primary hover:decoration-primary"

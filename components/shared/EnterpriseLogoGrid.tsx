@@ -6,7 +6,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import canvaLogo from "../home/img/canva.svg";
 import circlebackLogo from "../home/img/circleback.svg";
 import ciscoLogo from "../home/img/cisco.svg";
-// import expediaGroupLogo from "../home/img/expedia.svg";
+import expediaGroupLogo from "../home/img/expedia.svg";
 import freeeLogo from "../home/img/freee.svg";
 import huggingfaceLogo from "../home/img/huggingface.svg";
 import intuitLogo from "../home/img/intuit.svg";
@@ -18,11 +18,13 @@ import rampLogo from "../home/img/ramp.svg";
 import rocketMoneyLogo from "../home/img/rocket-money.svg";
 import samsaraLogo from "../home/img/samsara.svg";
 import sumupLogo from "../home/img/sumup.svg";
-import twilioLogo from "../home/img/twilio.svg";
+import tradeRepublicLogo from "../home/img/trade-republic.svg";
 import { cn } from "@/lib/utils";
 import { LinkBox } from "@/components/ui/link-box";
+import { wordmarkDisplaySize } from "@/components/shared/wordmark";
 
 const MARQUEE_DURATION_SEC = 40;
+const LOGO_DISPLAY_HEIGHT = 56;
 
 type CompanyLogo = {
   name: string;
@@ -35,6 +37,13 @@ const companies: CompanyLogo[] = [
   {
     name: "Ramp",
     logo: rampLogo,
+    customerStoryPath: "/users/ramp",
+  },
+  {
+    name: "Trade Republic",
+    logo: tradeRepublicLogo,
+    customerStoryPath: "/users/trade-republic",
+    hidden: true,
   },
   {
     name: "Canva",
@@ -42,8 +51,8 @@ const companies: CompanyLogo[] = [
     customerStoryPath: "/users/canva",
   },
   {
-    name: "Twilio",
-    logo: twilioLogo,
+    name: "Expedia Group",
+    logo: expediaGroupLogo,
   },
   {
     name: "Pigment",
@@ -97,10 +106,6 @@ const companies: CompanyLogo[] = [
     name: "Cisco",
     logo: ciscoLogo,
   },
-  // {
-  //   name: "Expedia Group",
-  //   logo: expediaGroupLogo,
-  // },
   {
     name: "Rocket Money",
     logo: rocketMoneyLogo,
@@ -111,54 +116,43 @@ const LogoImage = ({
   logo,
   name,
   hoverable = true,
-  compact = false,
 }: {
   logo: StaticImageData;
   name: string;
   hoverable?: boolean;
-  compact?: boolean;
 }) => {
-  if (compact) {
-    return (
-      <div className="overflow-hidden h-[40px] -mx-5 flex items-center">
-        <Image
-          src={logo}
-          alt={`${name} logo`}
-          className={cn(
-            "h-[56px] w-auto scale-125",
-            hoverable
-              ? "hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] transition-[filter] duration-200"
-              : "",
-          )}
-          sizes="(max-width: 768px) 30vw"
-          priority={false}
-        />
-      </div>
-    );
-  }
+  const { width, height } = wordmarkDisplaySize(logo, LOGO_DISPLAY_HEIGHT);
 
   return (
     <Image
       src={logo}
       alt={`${name} logo`}
+      width={logo.width}
+      height={logo.height}
+      unoptimized
       className={cn(
-        "h-[56px] max-w-full object-cover",
+        "h-auto w-auto max-w-full",
         hoverable
           ? "hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] transition-[filter] duration-200"
           : "",
       )}
-      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-      priority={false}
+      style={{ height, width }}
     />
   );
 };
 
 const visibleCompanies = companies.filter((c) => !c.hidden);
 
-function LogoMarqueeItems({ duplicate = false }: { duplicate?: boolean }) {
+function LogoMarqueeItems({
+  companies: items,
+  duplicate = false,
+}: {
+  companies: CompanyLogo[];
+  duplicate?: boolean;
+}) {
   return (
-    <>
-      {visibleCompanies.map((company) => {
+    <div className="flex items-center gap-8 pr-8">
+      {items.map((company) => {
         const hasStory = Boolean(company.customerStoryPath);
         return (
           <div
@@ -175,25 +169,32 @@ function LogoMarqueeItems({ duplicate = false }: { duplicate?: boolean }) {
               hoverable={false}
               logo={company.logo}
               name={company.name}
-              compact
             />
           </div>
         );
       })}
-    </>
+    </div>
   );
 }
 
 interface EnterpriseLogoGridProps {
   className?: string;
   small?: boolean;
+  /** When set, only these company names are shown, in this order. */
+  names?: readonly string[];
 }
 
 export const EnterpriseLogoGrid = ({
   className = "",
   small = false,
+  names,
 }: EnterpriseLogoGridProps) => {
   const shouldReduceMotion = useReducedMotion();
+  const selectedCompanies = names
+    ? names
+        .map((name) => companies.find((company) => company.name === name))
+        .filter((company): company is CompanyLogo => Boolean(company))
+    : visibleCompanies;
 
   return (
     <>
@@ -207,7 +208,7 @@ export const EnterpriseLogoGrid = ({
           aria-label="Enterprise customers using Langfuse"
         >
           <div className="flex items-center w-max py-2">
-            <LogoMarqueeItems />
+            <LogoMarqueeItems companies={selectedCompanies} />
           </div>
         </div>
       ) : (
@@ -227,8 +228,8 @@ export const EnterpriseLogoGrid = ({
               ease: "linear",
             }}
           >
-            <LogoMarqueeItems />
-            <LogoMarqueeItems duplicate />
+            <LogoMarqueeItems companies={selectedCompanies} />
+            <LogoMarqueeItems companies={selectedCompanies} duplicate />
           </motion.div>
         </div>
       )}
@@ -236,21 +237,22 @@ export const EnterpriseLogoGrid = ({
       {/* Desktop: grid layout */}
       <div
         className={cn(
-          "hidden sm:grid sm:grid-cols-6 auto-rows-fr px-2 py-2",
+          "hidden sm:grid sm:grid-cols-6 px-2 py-2",
           small && "sm:grid-cols-3",
+          selectedCompanies.length <= 4 && "sm:grid-cols-4",
           className,
         )}
         role="grid"
         aria-label="Enterprise customers using Langfuse"
       >
-        {visibleCompanies.map((company) => {
+        {selectedCompanies.map((company) => {
           const hasStory = Boolean(company.customerStoryPath);
 
           return (
             <LinkBox
               key={company.name}
               href={company.customerStoryPath}
-              className="-mr-px -mb-px flex items-center justify-center !p-0"
+              className="-mr-px -mb-px relative flex h-14 items-center justify-center !p-0"
               aria-label={
                 hasStory
                   ? `Read ${company.name} user story`
@@ -259,7 +261,7 @@ export const EnterpriseLogoGrid = ({
               role="gridcell"
             >
               {hasStory && (
-                <div className="absolute w-full h-full flex items-end justify-center -mt-1 pointer-events-none">
+                <div className="absolute inset-x-0 bottom-0 flex justify-center pointer-events-none">
                   <div
                     className={cn(
                       "tooltip-label z-50 inline-flex h-[12px] items-center justify-center gap-[3px] overflow-hidden rounded-none border-0 bg-primary/10 px-1 py-0.5 font-mono text-[10px] leading-none text-primary-foreground shadow-none outline-hidden group-hover:bg-primary transition",

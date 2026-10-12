@@ -178,8 +178,8 @@ export async function sendFeedbackToSlack(
 
   const response = await fetch(webhookUrl, {
     method: "POST",
-    // Edge runtime only supports "follow" | "manual"; with "manual" a redirect
-    // surfaces as a non-ok response and is rejected below.
+    // Do not follow redirects: a redirect would surface as a non-ok response
+    // and is rejected below.
     redirect: "manual",
     signal: AbortSignal.timeout(FEEDBACK_SLACK_TIMEOUT_MS),
     headers: { "Content-Type": "application/json" },

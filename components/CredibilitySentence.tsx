@@ -3,8 +3,8 @@ import {
   DOCKER_PULLS,
   FORTUNE_50_COMPANIES,
   FORTUNE_500_COMPANIES,
-  SDK_INSTALLS_PER_MONTH,
   formatCompanyCount,
+  formatSdkInstallsPerMonth,
 } from "./home/Usage";
 
 export const CredibilitySentence = ({
@@ -37,7 +37,7 @@ export const CredibilitySentence = ({
           </li>
           <li>
             <Metric className={metricClassName}>
-              {(SDK_INSTALLS_PER_MONTH / 1_000_000).toFixed(0)}M+
+              {formatSdkInstallsPerMonth()}
             </Metric>{" "}
             SDK installs per month
           </li>
@@ -68,8 +68,7 @@ export const CredibilitySentence = ({
       </Metric>
       ,{" "}
       <Metric className={metricClassName}>
-        {(SDK_INSTALLS_PER_MONTH / 1_000_000).toFixed(0)}M+ SDK installs per
-        month
+        {formatSdkInstallsPerMonth()} SDK installs per month
       </Metric>
       , and{" "}
       <Metric className={metricClassName}>

@@ -1,4 +1,8 @@
 import { getGitHubStars } from "@/lib/github-stars";
+import {
+  FORTUNE_50_COMPANIES,
+  formatObservationsPerMonth,
+} from "@/lib/usage-stats";
 import { cn } from "@/lib/utils";
 
 function formatCompact(value: number): string {
@@ -14,8 +18,8 @@ function formatCompact(value: number): string {
 }
 
 const stats = [
-  { value: "90B+", label: "Observations / month" },
-  { value: "21", label: "of the Fortune 50" },
+  { value: formatObservationsPerMonth(), label: "Observations / month" },
+  { value: String(FORTUNE_50_COMPANIES), label: "of the Fortune 50" },
   {
     value: formatCompact(getGitHubStars()),
     label: "GitHub stars",

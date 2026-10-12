@@ -1,8 +1,10 @@
 import {
   Activity,
   BarChart2,
+  Bot,
   BookOpen,
   Bookmark,
+  Code2,
   FlaskConical,
   GraduationCap,
   HelpCircle,
@@ -12,6 +14,8 @@ import {
   Newspaper,
   Presentation,
   ScrollText,
+  Workflow,
+  Landmark,
   type LucideIcon,
 } from "lucide-react";
 
@@ -46,6 +50,20 @@ export const resourcesLinks: NavPanelLink[] = [
   { name: "Example Project", href: "/docs/demo", icon: Bookmark },
   { name: "Walkthroughs", href: "/guides", icon: GraduationCap },
   { name: "Support", href: "/support", icon: HelpCircle },
+];
+
+export const useCaseLinks: NavPanelLink[] = [
+  { name: "Chat agents", href: "/chat-agents", icon: Bot },
+  { name: "Coding agents", href: "/coding-agents", icon: Code2 },
+  { name: "Workflow automation", href: "/workflow-automation", icon: Workflow },
+];
+
+export const industryLinks: NavPanelLink[] = [
+  {
+    name: "Financial Services Industry",
+    href: "/financial-services",
+    icon: Landmark,
+  },
 ];
 
 export const simpleLinks = [

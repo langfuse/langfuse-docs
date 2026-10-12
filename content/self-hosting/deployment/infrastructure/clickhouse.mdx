@@ -423,9 +423,9 @@ ClickHouse supports disk encryption for data at rest, providing an additional la
 
 ### Automatic Encryption with Blob Storage
 
-When using [blob storage as disk](#blob-storage-as-disk) (AWS S3, Azure Blob Storage, Google Cloud Storage), data is automatically encrypted at rest using the cloud provider's default encryption:
+When using [blob storage as disk](#blob-storage-as-disk) (Amazon S3, Azure Blob Storage, Google Cloud Storage), data is automatically encrypted at rest using the cloud provider's default encryption:
 
-- **AWS S3**: Uses AES-256 encryption by default
+- **Amazon S3**: Uses AES-256 encryption by default
 - **Azure Blob Storage**: Uses AES-256 encryption by default
 - **Google Cloud Storage**: Uses AES-256 encryption by default
 
@@ -477,7 +477,7 @@ kubectl create secret generic clickhouse-encryption-key \
 
 ## Blob Storage as Disk
 
-ClickHouse supports blob storages (AWS S3, Azure Blob Storage, Google Cloud Storage) as disks.
+ClickHouse supports blob storages (Amazon S3, Azure Blob Storage, Google Cloud Storage) as disks.
 This is useful for auto-scaling storages that live outside the container orchestrator and increases availability und durability of the data.
 For a full overview of the feature, see the [ClickHouse External Disks documentation](https://clickhouse.com/docs/en/operations/storing-data).
 
@@ -640,18 +640,31 @@ This will store ClickHouse data within the Azurite bucket.
 
 ## FAQ
 
-### How do I migrate from self-managed ClickHouse to Cloud or BYOC? [#migrate-oss-to-cloud]
+<FaqDetails>
+
+<Details id="migrate-oss-to-cloud">
+<Summary>How do I migrate from self-managed ClickHouse to Cloud or BYOC?</Summary>
 
 See [How do I migrate Langfuse from ClickHouse OSS to Cloud or BYOC?](/faq/all/self-hosting-migrate-clickhouse-oss-to-cloud). Run the latest Langfuse OSS release first, keep that version unchanged, pause ingestion, copy ClickHouse with a ClickHouse-supported method, then point Langfuse at the new service.
 
-### Is ClickHouse required for self-hosting Langfuse?
+</Details>
+
+<Details id="is-clickhouse-required-for-self-hosting-langfuse">
+<Summary>Is ClickHouse required for self-hosting Langfuse?</Summary>
 
 Yes, ClickHouse is currently a required component for self-hosting Langfuse. There is no alternative OLAP database supported at this time. Langfuse cannot be self-hosted without using ClickHouse as the main storage solution for traces, observations, and scores.
 
 All self-hosted deployments must include a ClickHouse instance.
 
-### How do I manage ClickHouse storage growth?
+</Details>
+
+<Details id="how-do-i-manage-clickhouse-storage-growth">
+<Summary>How do I manage ClickHouse storage growth?</Summary>
 
 Langfuse has a built-in [Data Retention](/docs/administration/data-retention) feature that automatically deletes traces, observations, scores, and media assets older than a configured number of days. This runs nightly and handles cleanup across both ClickHouse and blob storage. You do not need to set ClickHouse TTLs manually.
 
 If ClickHouse disk usage keeps growing despite retention being configured, the cause is often system log tables (`trace_log`, `text_log`, `opentelemetry_span_log`, etc.) that ship without a TTL. See [Scaling › ClickHouse system log tables](/self-hosting/configuration/scaling#clickhouse-system-log-tables) for how to disable or cap them.
+
+</Details>
+
+</FaqDetails>

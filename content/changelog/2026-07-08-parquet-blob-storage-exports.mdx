@@ -17,7 +17,7 @@ Scheduled blob storage exports to S3, GCS, and Azure can now be written as **Apa
 
 Select **Parquet** under **Project Settings → Integrations → Blob Storage**, or set it programmatically: the `fileType` field on [`GET`/`PUT /api/public/integrations/blob-storage`](https://api.reference.langfuse.com/#tag/blobstorageintegrations) now accepts `PARQUET` alongside `CSV`, `JSON`, and `JSONL`. Existing integrations keep their configured format.
 
-Parquet observation exports do not include the per-unit model price columns (`input_price`, `output_price`, `total_price`). These columns snapshot model definition prices at export time and may be deprecated in the future — use `cost_details` and `total_cost` for cost data, which are included in every file type. Trace and score exports are identical across all file types. See the [Export Field Reference](/docs/api-and-data-platform/features/blob-storage-export-fields#parquet-exports) for details.
+Parquet observation exports do not include the per-unit model price columns (`input_price`, `output_price`, `total_price`). These columns snapshot model definition prices at export time and may be deprecated in the future — use `cost_details` and `total_cost` for cost data, which are included in every file type. Trace and score exports are identical across all file types. See the [export field reference](/docs/api-and-data-platform/features/export-to-blob-storage#parquet-exports) for details.
 
 ## Learn more
 
@@ -25,5 +25,5 @@ import { FileCode } from "lucide-react";
 
 <Cards num={2}>
   <Card title="Export to Blob Storage" href="/docs/api-and-data-platform/features/export-to-blob-storage" icon={<FileCode />} arrow />
-  <Card title="Export Field Reference" href="/docs/api-and-data-platform/features/blob-storage-export-fields" icon={<FileCode />} arrow />
+  <Card title="Export Field Reference" href="/docs/api-and-data-platform/features/export-to-blob-storage#export-field-reference" icon={<FileCode />} arrow />
 </Cards>

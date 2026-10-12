@@ -114,9 +114,9 @@ export const ImageGenerator = ({
   };
 
   return (
-    <div className={cn("h-[62vh]", className)} {...props}>
-      <div className="flex flex-col h-full rounded-[2px] border border-line-structure bg-surface-bg corner-box-corners p-5 relative overflow-hidden">
-        <div className="flex-1 overflow-y-auto relative z-10 space-y-4">
+    <div className={cn(className)} {...props}>
+      <div className="relative flex flex-col rounded-[2px] border border-line-structure bg-surface-bg corner-box-corners p-5">
+        <div className="relative z-10 space-y-4">
           {/* Prompt input */}
           <form onSubmit={handleFormSubmit} className="space-y-3">
             <div className="flex gap-2">
@@ -248,8 +248,8 @@ export const ImageGenerator = ({
         </div>
 
         <p className="mt-4 text-xs text-muted-foreground text-center relative z-10 italic">
-          Powered by GPT-Image-1. Limited to 3 generations per minute. All
-          interactions are traced in the public example project.
+          Powered by GPT-Image-2.5 Flare. Limited to 3 generations per minute.
+          All interactions are traced in the public example project.
         </p>
       </div>
     </div>

@@ -3,7 +3,6 @@ import {
   observe,
   propagateAttributes,
   updateActiveObservation,
-  setActiveTraceAsPublic,
   getActiveTraceId,
 } from "@langfuse/tracing";
 import { LangfuseMedia } from "@langfuse/core";
@@ -11,10 +10,7 @@ import { after } from "next/server";
 import { context, trace } from "@opentelemetry/api";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
-import {
-  buildDemoTraceRedirectUrl,
-  DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL,
-} from "@/lib/demo-public-trace";
+import { buildDemoTraceUrl } from "@/lib/demo-trace";
 
 let _openai: OpenAI | null = null;
 const getOpenAI = () => (_openai ??= new OpenAI());
@@ -62,7 +58,7 @@ const handler = async (req: Request) => {
 
       try {
         const result = await getOpenAI().images.generate({
-          model: "gpt-image-1",
+          model: "gpt-image-2.5-flare",
           prompt,
           size: "1024x1024",
           quality: "low",
@@ -92,7 +88,7 @@ const handler = async (req: Request) => {
             {
               input: prompt,
               output: imageMedia,
-              model: "gpt-image-1",
+              model: "gpt-image-2.5-flare",
               modelParameters: {
                 size: "1024x1024",
                 quality: "low",
@@ -107,18 +103,18 @@ const handler = async (req: Request) => {
             },
             { asType: "generation" },
           );
-          setActiveTraceAsPublic();
           activeSpan?.end();
         });
-        let traceUrl = DEMO_PUBLIC_IMAGE_GENERATION_TRACE_FALLBACK_URL;
+
+        let traceUrl = buildDemoTraceUrl();
         try {
           await flush();
-          traceUrl = buildDemoTraceRedirectUrl({
+          traceUrl = buildDemoTraceUrl({
             traceId,
             observationId: rootObservationId,
           });
         } catch (error) {
-          console.warn("Failed to publish demo trace link", error);
+          console.warn("Failed to build demo trace link", error);
         }
 
         return new Response(

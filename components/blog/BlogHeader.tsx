@@ -3,17 +3,17 @@ import {
   CustomerStoryBackNav,
   companyLabelFromLogo,
 } from "@/components/customers/CustomerStoryBackNav";
-import { Authors, allAuthors } from "../Authors";
+import { Authors } from "../Authors";
 
 export const BlogHeader = ({
-  authors,
+  authors = [],
   title,
   description,
   date,
   image,
   customerLogo,
 }: {
-  authors: string[];
+  authors?: string[];
   title: string;
   description?: string;
   date?: string;
@@ -37,13 +37,13 @@ export const BlogHeader = ({
         )}
         <span className="text-primary/60">{date}</span>
         {customerLogo && (
-          <div className="not-prose bg-white rounded-lg p-4 shadow-sm border my-0">
+          <div className="not-prose my-0">
             <Image
               src={customerLogo}
               alt={`${title} logo`}
-              width={160}
-              height={40}
-              className="h-10 w-auto object-contain my-0"
+              width={220}
+              height={56}
+              className="h-12 w-auto object-contain my-0"
             />
           </div>
         )}
@@ -53,7 +53,7 @@ export const BlogHeader = ({
         <p className="mt-2 text-primary/60 text-xl text-balance">
           {description}
         </p>
-        <Authors authors={authors} />
+        {authors.length > 0 ? <Authors authors={authors} /> : null}
       </div>
     </div>
   );

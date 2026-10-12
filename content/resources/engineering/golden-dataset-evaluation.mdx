@@ -235,18 +235,34 @@ Once the manual loop works, move it into CI so every pull request that touches a
 
 ## FAQ
 
-### How large should a golden dataset be? [#dataset-size]
+<FaqDetails>
+
+<Details id="dataset-size">
+<Summary>How large should a golden dataset be?</Summary>
 
 Large enough to cover your failure modes, small enough that you actually run it. Start with 20 to 50 reviewed items covering your most important behaviors, which already catches gross regressions. Grow toward 100 to 1000 items for a full regression set that mirrors the production distribution, and keep a subset of tens to low hundreds for per-PR CI gates. Coverage of distinct failure modes matters more than raw count: 100 diverse items beat 1000 near-duplicates.
 
-### Does every item need a ground-truth expected output? [#ground-truth]
+</Details>
+
+<Details id="ground-truth">
+<Summary>Does every item need a ground-truth expected output?</Summary>
 
 No. The expected output exists to serve reference-based evaluators (exact match, similarity, fact coverage), and it can be a literal answer, a gold reference response, or a list of criteria the output must satisfy. Items checked only by reference-free evaluators, such as format validity, safety, or tone, need no expected output at all. Many golden datasets mix both kinds, and a single item's expected output field can hold several reference types as JSON.
 
-### How do we detect and handle dataset drift? [#dataset-drift]
+</Details>
+
+<Details id="dataset-drift">
+<Summary>How do we detect and handle dataset drift?</Summary>
 
 Dataset drift means your golden dataset no longer resembles production traffic, so passing it stops predicting production quality. The clearest symptom is divergence between strong experiment scores and weakening production signals such as user feedback or online evaluator scores. Counter it structurally: continuously add sampled recent traces and fresh failures, record an `added` date in item metadata so you can measure the age distribution of the set, and retire items for behaviors that no longer exist. Dataset versioning keeps older comparisons valid while the set evolves.
 
-### Can we share a golden dataset across projects? [#share-across-projects]
+</Details>
+
+<Details id="share-across-projects">
+<Summary>Can we share a golden dataset across projects?</Summary>
 
 Datasets in Langfuse are scoped to a single project, and there is currently no built-in cross-project sharing (as of July 2026). To reuse a dataset elsewhere, export the items from the UI as CSV or JSON, or copy them programmatically via the SDK, recreating items with `create_dataset_item` in the target project. The [data migration cookbook](/guides/cookbook/example_data_migration) includes a complete script that copies datasets, items, and runs between projects while preserving item IDs.
+
+</Details>
+
+</FaqDetails>

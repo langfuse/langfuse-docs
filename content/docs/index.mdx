@@ -1,11 +1,14 @@
 ---
 title: Overview
+seoTitle: Open Source AI Engineering Platform
 description: Langfuse is an open-source AI engineering platform (GitHub) that helps teams collaboratively debug, analyze, and iterate on their AI agent applications. All platform features are natively integrated to accelerate the development workflow.
 ---
 
+import { SignupCTA } from "@/components/SignupCTA";
+
 # Langfuse Overview
 
-Langfuse is an open-source AI engineering platform ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their AI agent applications. All platform features are natively integrated to accelerate the development workflow. Langfuse is open, self-hostable, and extensible ([_why langfuse?_](/why)).
+Langfuse is an open-source AI engineering platform ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their AI agent applications. All platform features are natively integrated to accelerate the development workflow. Langfuse is open, self-hostable, and extensible ([_why Langfuse?_](/why)).
 
 import { FeatureOverview } from "@/components/FeatureOverview";
 import {
@@ -17,6 +20,8 @@ import {
 
 <FeatureOverview />
 
+<SignupCTA className="my-6" />
+
 ## Observability [#observability]
 
 [Observability](/docs/observability/overview) is essential for understanding and debugging AI agent applications. Unlike traditional software, AI agent applications involve complex, non-deterministic interactions that can be challenging to monitor and debug. Langfuse provides comprehensive tracing capabilities that help you understand exactly what's happening in your application.
@@ -27,9 +32,11 @@ import {
 - Capture traces via our native SDKs for Python/JS, 100+ library/framework integrations, OpenTelemetry, or via an LLM Gateway such as LiteLLM
 - Based on OpenTelemetry to increase compatibility and reduce vendor lock-in
 
-<Callout type="info" emoji="🚀" title="Want to see it in action?">
+Want to see an example? Play with the [interactive demo](/docs/demo).
 
-[Create a free account](/cloud) and explore Langfuse Observability in the [interactive example project](/docs/demo).
+<Callout type="info" emoji="🎥" title="Want to learn more?">
+
+[Watch end-to-end walkthrough](/watch-demo) of Langfuse Observability and how to integrate it with your application.
 
 </Callout>
 
@@ -47,9 +54,9 @@ import TracingOverview from "@/components-mdx/tracing-overview-gifs.mdx";
 - Test prompts interactively in the [LLM Playground](/docs/prompt-management/features/playground)
 - Run [Experiments](/docs/evaluation/features/prompt-experiments) against datasets to test new prompt versions directly within Langfuse
 
-<Callout type="info" emoji="🚀">
+<Callout type="info" emoji="🎥">
 
-Want to see it in action? [**Create a free account**](/cloud) and explore Langfuse Prompt Management in the [interactive example project](/docs/demo).
+Want to learn more? [**Watch end-to-end walkthrough**](/watch-demo) of Langfuse Prompt Management and how to integrate it with your application.
 
 </Callout>
 
@@ -62,14 +69,15 @@ import PromptOverview from "@/components-mdx/prompt-overview-gifs.mdx";
 
 [Evaluation](/docs/evaluation/overview) is crucial for ensuring the quality and reliability of your LLM applications. Langfuse provides flexible evaluation tools that adapt to your specific needs, whether you're testing in development or monitoring production performance.
 
+- [Evaluate Production Traffic](/docs/evaluation/get-started/online) to score live production traces
 - Get started with different [evaluation methods](/docs/evaluation/overview): LLM-as-a-judge, code evaluators, user feedback, manual labeling, or custom pipelines
 - Identify issues early by running evaluations on production traces
 - Create and manage [Datasets](/docs/evaluation/features/datasets) for systematic testing in development that ensure your application performs reliably across different scenarios
 - Run [Experiments](/docs/evaluation/core-concepts#experiments) to systematically test your LLM application
 
-<Callout type="info" emoji="🚀">
+<Callout type="info" emoji="🎥">
 
-Want to see it in action? [**Create a free account**](/cloud) and explore Langfuse Evaluation in the [interactive example project](/docs/demo).
+Want to learn more? [**Watch end-to-end walkthrough**](/watch-demo) of Langfuse Evaluation and how to use it to improve your LLM application.
 
 </Callout>
 
@@ -112,7 +120,7 @@ Get up and running with Langfuse in minutes. Choose the path that best fits your
   <Card
     icon={<ThumbsUp size="24" />}
     title="Setup Evaluations"
-    href="/docs/evaluation/overview"
+    href="/docs/evaluation/get-started/online"
     arrow
   />
 </Cards>

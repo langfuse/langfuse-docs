@@ -1,0 +1,116 @@
+---
+title: "Langfuse August Update"
+description: "Langfuse v4, new evaluator setup flow, multi-modal evaluators, CLI 1.0, responsive timeline and more"
+ogImage: /images/blog/2026-08-31-langfuse-august-update/langfuse-v4.png
+tag: update
+date: 2026/08/31
+author: "Marc"
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Langfuse August Update"
+  description="Langfuse v4, new evaluator setup flow, multi-modal evaluators, CLI 1.0, responsive timeline and more"
+  authors={["marcklingen"]}
+  date="August 31, 2026"
+/>
+
+Most of August went into evaluations: a new setup flow, evaluators that can grade images and audio, templates, alerts, and a stable API. Plus v4 and CLI 1.0. Here's what's new:
+
+- **Langfuse v4 is live**: a redesigned data model on Cloud and self-hosted. Table loads drop from seconds to milliseconds, and dashboards in large projects load at least 10x faster.
+- **New evaluator setup**: test LLM-as-a-Judge and code evaluators on real observations, map variables by clicking instead of writing JSONPath, and preview cost before running online.
+- **Multi-modal evaluators**: grade images, audio, video, PDFs, and files captured in your traces, with multi-message evaluator prompts.
+- **Langfuse CLI 1.0**: 10x+ faster startup, typed flags instead of hand-written JSON, `--all` pagination, zero runtime dependencies.
+
+## Langfuse v4 is live
+
+<Frame>
+  ![Langfuse v4 is live](/images/blog/2026-08-31-langfuse-august-update/langfuse-v4.png)
+</Frame>
+
+Langfuse v4 is live on Langfuse Cloud and generally available for self-hosted deployments. It is a re-architecture of our data model and is up to 165× more performant in UI and on APIs. It also enables new features such as full-text search, a new filter search bar, alerts, code evaluators, and the Langfuse Assistant.
+
+Most projects need no migration. If the Migration Assistant in the sidebar shows actions for your project, please complete them before November 16, 2026.
+
+→ [Read more](/changelog/2026-08-17-langfuse-v4)
+
+## Evaluator setup flow
+
+<Frame>
+  ![Evaluator setup flow](/images/blog/2026-08-31-langfuse-august-update/evaluator-setup-flow.png)
+</Frame>
+
+We rebuilt the evaluator setup experience for LLM-as-a-Judge and code evaluators. Test an evaluator against real observations and refine the prompt, model, or score definition before saving. Map variables by clicking through a real observation instead of writing JSONPath.
+
+Rules now define which incoming observations get evaluated, so you can reuse one rule's filters and sampling across evaluators. Before you go live, you see the matching volume from the past seven days and the estimated cost.
+
+We also updated the evaluator template gallery with prebuilt templates for conversational, topic detection, exact-match, and coding-agent evals.
+
+→ [Read more](/changelog/2026-08-22-reusable-evaluators-and-rules)
+
+## Multi-modal evaluators
+
+<Frame>
+  ![Multi-modal evaluators](/images/blog/2026-08-31-langfuse-august-update/multi-modal-evaluators.png)
+</Frame>
+
+Evaluators can now assess images, audio, video, PDFs, and text files captured in your traces. Grade a voice agent on the audio itself, check whether a generated PDF matches the brief, or score the screenshots a support agent sends back.
+
+Evaluator prompts also take multiple messages now: put the criteria in a system message, the content to evaluate in a user message, and an example result in an assistant message.
+
+→ [Read more](/changelog/2026-09-01-multi-message-prompts-and-multimodal-inputs)
+
+## Langfuse CLI 1.0
+
+<Frame>
+  ![Langfuse CLI 1.0](/images/blog/2026-08-31-langfuse-august-update/langfuse-cli.png)
+</Frame>
+
+We rewrote the Langfuse CLI from the ground up. Invocations start 10x+ faster, endpoints take typed flags instead of a hand-written JSON body, and `--all` walks every page of a list. It ships with zero runtime dependencies, exits with machine-readable codes your agents can act on, and auto-detects the API version of any Langfuse server from v3 onward.
+
+→ [Read more](/changelog/2026-08-21-langfuse-cli-v1)
+
+## Responsive timeline
+
+<Frame>
+  ![Responsive timeline](/images/blog/2026-08-31-langfuse-august-update/responsive-timeline.png)
+</Frame>
+
+Agent traces keep getting bigger. The new trace Timeline fits the whole run on one screen, whether it has twelve spans or twelve hundred. Color carries the observation type, so a tool fan-out or a wall of embeddings is recognizable before you read a label. Scroll to pan, pinch or ⌘-scroll to zoom, and double-click any observation to fly to it.
+
+→ [Read more](/changelog/2026-08-28-responsive-timeline)
+
+## New integrations
+
+- [ElevenLabs Agents](/integrations/no-code/elevenlabs)
+- [Tavily](/integrations/other/tavily)
+- [Pi Coding Agent](/integrations/developer-tools/pi-agent)
+
+## Fixes & improvements
+
+- Feat: Turn the Scores table into a chart and save it as a dashboard widget ([changelog](/changelog/2026-08-19-turn-scores-into-charts))
+- Feat: Restore any previous evaluator version as a draft ([changelog](/changelog/2026-08-27-restore-evaluator-versions))
+- Feat: Create score and cost alerts directly from evaluator pages ([changelog](/changelog/2026-09-02-evaluator-alerts))
+- Feat: Bulk import and export prompts as JSON to move them between projects ([changelog](/changelog/2026-08-06-bulk-import-export-prompts))
+- Feat: Create annotation queues straight from the trace or events table
+- Feat: Organization admins can enable feature previews for all members ([changelog](/changelog/2026-08-25-organization-feature-previews))
+- Evals: Evaluators with the same filters and sampling rate now evaluate the same observations, so results are directly comparable ([changelog](/changelog/2026-08-05-deterministic-evaluator-sampling))
+- Cost: OpenAI Fast mode pricing is applied automatically, and pricing tiers can match on model parameters or metadata ([changelog](/changelog/2026-08-18-openai-fast-mode-cost-tracking))
+- API: Stable, ID-based endpoints for evaluators and evaluation rules under `/api/public/v2` ([changelog](/changelog/2026-08-27-stable-evaluator-api))
+- Data: Dashboards and widgets are included in the core-data S3 export
+- Self-hosting: Ask AI now works on self-hosted, not just Cloud
+- Self-hosting: API reference at `/api/docs` for air-gapped deployments ([changelog](/changelog/2026-09-01-self-hosted-api-reference))
+- Self-hosting: Switch between your Langfuse deployments from the sidebar ([changelog](/changelog/2026-08-11-self-hosted-instance-switcher))
+- and many more!
+
+## Upcoming events
+
+Langfuse at Open House, ClickHouse's user conference, in four more cities. Sign up to meet the team in person:
+
+- [New York](https://clickhouse.com/openhouse/nyc-2026) — September 10
+- [Bengaluru](https://clickhouse.com/openhouse/bangalore-2026) — September 22
+- [Singapore](https://clickhouse.com/openhouse/singapore-2026) — September 24
+- [London](https://clickhouse.com/openhouse/london-2026) — September 30
+
+→ [See all events](/events)

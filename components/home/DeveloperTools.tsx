@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { HomeSection } from "@/components/home/HomeSection";
 import { CornerBox, Heading, Link, TextHighlight } from "@/components/ui";
 import { Text } from "@/components/ui/text";
@@ -96,6 +97,44 @@ function ToolCard({ tool, index }: { tool: ToolItem; index: number }) {
   );
 }
 
+function AssistantVideo() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          void el.play().catch(() => {
+            // Autoplay can still be rejected; the muted loop is best-effort.
+          });
+        } else {
+          el.pause();
+        }
+      },
+      { rootMargin: "100px", threshold: 0.25 },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <video
+      ref={videoRef}
+      src={ASSISTANT_VIDEO_SRC}
+      preload="none"
+      muted
+      loop
+      playsInline
+      aria-label="The Langfuse Assistant investigating project data in the Langfuse app"
+      className="aspect-video h-auto w-full rounded-[2px] border border-line-structure object-cover shadow-sm"
+    />
+  );
+}
+
 function AssistantFeature() {
   return (
     <CornerBox className="flex flex-col overflow-hidden">
@@ -150,15 +189,7 @@ function AssistantFeature() {
       </div>
 
       <div className="border-t border-line-structure bg-surface-1 p-3 sm:p-4">
-        <video
-          src={ASSISTANT_VIDEO_SRC}
-          autoPlay
-          muted
-          loop
-          playsInline
-          aria-label="The Langfuse Assistant investigating project data in the Langfuse app"
-          className="aspect-video h-auto w-full rounded-[2px] border border-line-structure object-cover shadow-sm"
-        />
+        <AssistantVideo />
       </div>
     </CornerBox>
   );

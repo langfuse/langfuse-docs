@@ -8,7 +8,7 @@ import {
   remarkRewriteGitHubReadmeUrls,
   resolveReadmeUrl,
   shouldRewriteReadmeUrl,
-} from "./github-readme.ts";
+} from "./github-readme";
 
 const K8S_RAW =
   "https://raw.githubusercontent.com/langfuse/langfuse-k8s/refs/heads/main/README.md";
