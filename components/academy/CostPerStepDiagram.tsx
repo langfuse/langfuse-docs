@@ -9,10 +9,6 @@ import { useLayoutEffect, useRef } from "react";
 
 const INNER_W = 1200;
 const INNER_H = 820;
-// Below this width the figure scrolls horizontally instead of shrinking further,
-// so the text stays readable on phones.
-const MIN_W = 840;
-const MIN_SCALE = MIN_W / INNER_W;
 
 type Row = { label: string; value: string | null };
 type Card = { left: number; top: number; rows: Row[]; total: string };
@@ -59,7 +55,7 @@ const CARDS: Card[] = [
 function estimateInitialScale(): number {
   if (typeof window === "undefined") return 0.65;
   const vw = document.documentElement.clientWidth;
-  return Math.min(1, Math.max(MIN_SCALE, (vw - 32) / INNER_W));
+  return Math.min(1, Math.max(0.3, (vw - 32) / INNER_W));
 }
 
 export function CostPerStepDiagram() {
@@ -75,10 +71,7 @@ export function CostPerStepDiagram() {
     if (!wrap || !sizer || !inner) return;
 
     const fit = () => {
-      const scale = Math.max(
-        MIN_SCALE,
-        Math.min(1, wrap.clientWidth / INNER_W),
-      );
+      const scale = Math.min(1, wrap.clientWidth / INNER_W);
       inner.style.transform = `scale(${scale})`;
       sizer.style.width = `${INNER_W * scale}px`;
       sizer.style.height = `${INNER_H * scale}px`;
@@ -227,8 +220,7 @@ export function CostPerStepDiagram() {
 
         .cost-per-step__wrap {
           width: 100%;
-          overflow-x: auto;
-          overflow-y: hidden;
+          overflow: hidden;
         }
 
         .cost-per-step__sizer {
