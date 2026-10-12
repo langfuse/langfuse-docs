@@ -1,0 +1,193 @@
+---
+title: Integrating Langfuse with Laravel
+sidebarTitle: Laravel
+logo: /images/integrations/laravel_icon.svg
+description: Learn how to trace Laravel AI, Prism, and Neuron AI calls in Langfuse with the community-maintained Laravel Langfuse package, and use prompt management and scores from PHP.
+---
+
+# Integrating Langfuse with Laravel
+
+This guide shows how to integrate [Langfuse](/) with [Laravel](https://laravel.com) applications using the community-maintained package [`axyr/laravel-langfuse`](https://github.com/axyr/laravel-langfuse).
+
+**Laravel**: PHP web framework. AI features are typically built with the first-party [Laravel AI SDK](https://laravel.com/docs/ai-sdk), [Prism](https://github.com/prism-php/prism), or [Neuron AI](https://github.com/neuron-core/neuron-ai).
+
+**Langfuse**: Open source AI engineering platform for observability, evals and prompt management.
+
+The package provides:
+
+- Zero-code auto-instrumentation for Laravel AI, Prism, and Neuron AI (generations, tool calls, token usage, errors)
+- A manual tracing API for traces, spans, generations, events, and scores
+- [Prompt management](/docs/prompt-management/overview) with caching and automatic prompt-to-generation linking
+- [Users](/docs/observability/features/users), [sessions](/docs/observability/features/sessions), and [environments](/docs/observability/features/environments)
+- Request middleware, queued batching, Octane support, and testing fakes
+
+Traces are sent to the [Langfuse OpenTelemetry endpoint](/integrations/native/opentelemetry) as OTLP/JSON. No OpenTelemetry SDK or PHP extension is required.
+
+<Callout type="info">
+  This package is maintained by the community. For issues and feature
+  requests, use the [GitHub
+  repository](https://github.com/axyr/laravel-langfuse). Example applications
+  are available for
+  [Laravel AI](https://github.com/axyr/laravel-langfuse-ai-examples),
+  [Prism](https://github.com/axyr/laravel-langfuse-prism-examples), and
+  [Neuron AI](https://github.com/axyr/laravel-langfuse-neuron-ai-examples).
+</Callout>
+
+<Steps>
+
+## Install the package
+
+Requires PHP 8.2+ and Laravel 12 or 13.
+
+```bash
+composer require axyr/laravel-langfuse
+```
+
+Tracing works with Langfuse Cloud and self-hosted Langfuse 3.22.0+.
+
+## Configure Langfuse
+
+Sign up for [Langfuse Cloud](https://cloud.langfuse.com) or [self-host Langfuse](/self-hosting), create API keys in the project settings, and add them to `.env`:
+
+```dotenv
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_SECRET_KEY=sk-lf-...
+LANGFUSE_BASE_URL=https://cloud.langfuse.com # 🇪🇺 EU region
+# LANGFUSE_BASE_URL=https://us.cloud.langfuse.com # 🇺🇸 US region
+# LANGFUSE_BASE_URL=http://localhost:3000 # Self-hosted
+```
+
+Optionally publish the configuration file:
+
+```bash
+php artisan vendor:publish --tag=langfuse-config
+```
+
+## Enable auto-instrumentation
+
+Enable the integration for the AI library you use:
+
+```dotenv
+LANGFUSE_LARAVEL_AI_ENABLED=true # Laravel AI SDK (also enables Prism tracing)
+LANGFUSE_PRISM_ENABLED=true      # Prism
+LANGFUSE_NEURON_AI_ENABLED=true  # Neuron AI
+```
+
+**Laravel AI**: every agent `prompt()` or `stream()` call creates a trace with a generation (model, input, output, token usage), and each tool invocation creates a `tool` observation. No code changes needed.
+
+**Prism**: every `text()`, `structured()`, and `stream()` call creates a generation with model parameters, token usage, and errors. No code changes needed.
+
+**Neuron AI**: register the observer on your agent. Inference calls become generations, tool calls become `tool` observations, and RAG retrieval becomes a `retriever` observation.
+
+```php
+use Axyr\Langfuse\NeuronAi\NeuronAiObserver;
+use NeuronAI\Agent\Agent;
+
+class MyAgent extends Agent
+{
+    protected function setup(): void
+    {
+        $this->observe(NeuronAiObserver::make());
+    }
+}
+```
+
+## Run your application
+
+Trigger an AI call, for example with a Laravel AI agent:
+
+```php
+$response = (new SupportAgent)->prompt('Where is my order?');
+```
+
+Observations are batched and flushed automatically at the end of the request. Open your Langfuse project to see the trace.
+
+</Steps>
+
+## Group calls per request
+
+Add the `LangfuseMiddleware` to create one trace per HTTP request. All LLM calls made during that request nest under it, and the authenticated user is set as the trace `userId`.
+
+```php
+use Axyr\Langfuse\Http\Middleware\LangfuseMiddleware;
+
+Route::middleware(LangfuseMiddleware::class)->group(function () {
+    Route::post('/chat', ChatController::class);
+});
+```
+
+In queue workers and Artisan commands, call `Langfuse::shutdown()` when the job is done to end open observations and flush them. Set `LANGFUSE_QUEUE=langfuse` to send batches asynchronously through a Laravel queue.
+
+## Users and sessions
+
+Traces are tagged with a `userId` and `sessionId` automatically:
+
+- **`userId`** is the authenticated user. For Laravel AI it is the conversation participant passed to `forUser()`, which also works for queued agent runs.
+- **`sessionId`** is the Laravel AI conversation id for agents that use `RemembersConversations`.
+
+```php
+$response = (new SupportAgent)->forUser($user)->prompt('Hi');
+// userId = $user->getKey(), sessionId = $response->conversationId
+```
+
+Values set explicitly on a trace always take precedence.
+
+## Manual tracing
+
+Use the facade to trace work that is not covered by the auto-instrumentation:
+
+```php
+use Axyr\Langfuse\Dto\GenerationBody;
+use Axyr\Langfuse\Dto\TraceBody;
+use Axyr\Langfuse\Dto\Usage;
+use Axyr\Langfuse\LangfuseFacade as Langfuse;
+
+$trace = Langfuse::trace(new TraceBody(name: 'chat-request', userId: 'user-42'));
+
+$generation = $trace->generation(new GenerationBody(
+    name: 'chat',
+    model: 'gpt-4o',
+    input: [['role' => 'user', 'content' => 'Hello!']],
+));
+
+$generation->end(
+    output: 'Hi there!',
+    usage: new Usage(input: 12, output: 8, total: 20),
+);
+
+$trace->end(output: 'Hi there!');
+```
+
+Call `Langfuse::setCurrentTrace($trace)` to make auto-instrumented calls nest under your own trace.
+
+## Prompt management
+
+Fetch and compile prompts managed in Langfuse. Prompts are cached with stale-while-revalidate, and a fallback can be provided for when the API is unavailable:
+
+```php
+$prompt = Langfuse::prompt('movie-critic', label: 'production');
+$compiled = $prompt->compile(['movie' => 'Dune 2']);
+```
+
+When a prompt is fetched with `Langfuse::prompt()`, the next auto-instrumented generation is linked to that prompt version, so metrics per prompt version work without extra code.
+
+## Scores
+
+Attach [scores](/docs/evaluation/scores/overview) to traces or observations:
+
+```php
+use Axyr\Langfuse\Dto\ScoreBody;
+use Axyr\Langfuse\Enums\ScoreDataType;
+
+$trace->score(new ScoreBody(
+    name: 'user-satisfaction',
+    value: 4.5,
+    dataType: ScoreDataType::NUMERIC,
+));
+```
+
+## Learn more
+
+- [Package documentation](https://github.com/axyr/laravel-langfuse/tree/main/docs): configuration, batching, testing fakes, and the read API for datasets and experiments
+- [Packagist](https://packagist.org/packages/axyr/laravel-langfuse)
+- [Langfuse OpenTelemetry endpoint](/integrations/native/opentelemetry)
