@@ -27,7 +27,7 @@ Schedule exports to Amazon S3, S3-compatible storage, Google Cloud Storage, or A
 ### Create the integration
 
 1. Open **Project Settings > Integrations > Blob Storage**.
-2. Select your provider and enter its bucket, path, and credentials. Self-hosters can find per-vendor bucket and credential setup on the [blob storage deployment page](/self-hosting/deployment/infrastructure/blobstorage).
+2. Select your provider and enter its bucket, path, and credentials. Use dedicated credentials that can only write to the export path; see [Grant bucket access](#bucket-permissions). Self-hosters can find per-vendor bucket and credential setup on the [blob storage deployment page](/self-hosting/deployment/infrastructure/blobstorage).
 3. Choose the file format, schedule, export mode, and field groups.
 4. Enable the integration and save. The first run starts shortly afterward.
 
@@ -37,12 +37,12 @@ Schedule exports to Amazon S3, S3-compatible storage, Google Cloud Storage, or A
 
 <span id="export-modes" />
 
-| Setting             | Choices and behavior                                                                                                                                                                                                                                           |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Provider and access | **Amazon S3**, **S3 Compatible Storage**, or **Azure Blob Storage**. Google Cloud Storage is reached through S3 Compatible Storage: set the endpoint to `https://storage.googleapis.com` and authenticate with an HMAC key pair rather than a service account. |
-| Format              | Parquet (default), CSV, JSON, or JSONL. Text formats can be gzip-compressed; Parquet uses its own encoding and compression.                                                                                                                                    |
-| Schedule            | Every 20 minutes, hourly, daily, or weekly. Each run exports one time window.                                                                                                                                                                                  |
-| Export Mode         | **Full history** starts at the project's earliest data; **From setup date** starts when the integration is enabled; **From custom date** starts at a selected date. Changing this setting resets the sync position and re-scans from that point.               |
+| Setting             | Choices and behavior                                                                                                                                                                                                                                                                            |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Provider and access | **Amazon S3**, **S3 Compatible Storage**, **Azure Blob Storage**, or **Google Cloud Storage**. Google Cloud Storage authenticates with a service account JSON key. You can also reach it through S3 Compatible Storage with the endpoint `https://storage.googleapis.com` and an HMAC key pair. |
+| Format              | Parquet (default), CSV, JSON, or JSONL. Text formats can be gzip-compressed; Parquet uses its own encoding and compression.                                                                                                                                                                     |
+| Schedule            | Every 20 minutes, hourly, daily, or weekly. Each run exports one time window.                                                                                                                                                                                                                   |
+| Export Mode         | **Full history** starts at the project's earliest data; **From setup date** starts when the integration is enabled; **From custom date** starts at a selected date. Changing this setting resets the sync position and re-scans from that point.                                                |
 
 <span id="monitor-and-reconfigure" /><span id="export-status" />
 
@@ -77,6 +77,81 @@ Langfuse writes exports to your bucket using this structure:
 └── manifests/
     └── {timestamp}.json
 ```
+
+### Grant bucket access [#bucket-permissions]
+
+Create a dedicated identity for the export, such as an IAM user or a service account, and grant it only the permissions below. Do not reuse credentials that have access to other buckets or other data. Every object the integration creates or deletes, including the **Validate** test file, sits beneath the configured prefix, so you can scope access to that prefix. A prefix must end with `/` (for example, `langfuse/`). If you leave the prefix empty, scope access to the whole bucket instead.
+
+| Permission              | Required                     | Used for                                                                                                             |
+| ----------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Write objects           | Yes                          | Upload data files, manifests, and the **Validate** test file. Large files use multipart uploads on S3.               |
+| Abort multipart uploads | Recommended                  | Clean up incomplete parts when an upload fails                                                                       |
+| Delete objects          | Recommended; required on GCS | Remove the legacy-export deprecation notice from `{prefix}{project-id}/` after the project switches to enriched data |
+| Read objects            | Optional                     | Open the **Validate** test file through the signed link Langfuse returns                                             |
+
+Langfuse never lists the bucket or reads exported files. Without the recommended permissions, exports still run: a failed abort or delete is logged and skipped. Without read access, only the validation link fails to open.
+
+<Tabs items={["Amazon S3", "Google Cloud Storage", "Azure Blob Storage"]}>
+
+<Tab>
+
+Attach this policy to a dedicated IAM user, then use that user's access key in the integration. Replace `YOUR_BUCKET` and `YOUR_PREFIX/`, or use `arn:aws:s3:::YOUR_BUCKET/*` if the prefix is empty:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "LangfuseBlobExport",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:AbortMultipartUpload",
+        "s3:DeleteObject",
+        "s3:GetObject"
+      ],
+      "Resource": "arn:aws:s3:::YOUR_BUCKET/YOUR_PREFIX/*"
+    }
+  ]
+}
+```
+
+`s3:PutObject` covers the multipart operations `CreateMultipartUpload`, `UploadPart`, and `CompleteMultipartUpload`. Remove `s3:GetObject` if you do not need the validation link.
+
+On self-hosted deployments, you can attach the same policy to the IAM role Langfuse runs as and leave the access key fields blank; see the [blob storage deployment page](/self-hosting/deployment/infrastructure/blobstorage). If the bucket uses default encryption with a customer-managed KMS key, also grant `kms:GenerateDataKey` and `kms:Decrypt` on that key; multipart uploads need both.
+
+</Tab>
+
+<Tab>
+
+Create a dedicated service account and a custom role with these permissions:
+
+- `storage.objects.create`
+- `storage.objects.delete`: Google Cloud Storage also requires this to overwrite an object, which happens when a failed run is retried.
+- `storage.objects.get` (optional, for the validation link)
+- `storage.multipartUploads.create` and `storage.multipartUploads.abort`: only when you connect through S3 Compatible Storage with an HMAC key, which uses multipart uploads.
+
+Grant the role on the bucket rather than the project. To limit the service account to the prefix, add an [IAM condition](https://cloud.google.com/storage/docs/access-control/iam#conditions) to the binding:
+
+```text
+resource.name.startsWith("projects/_/buckets/YOUR_BUCKET/objects/YOUR_PREFIX/")
+```
+
+IAM conditions require [uniform bucket-level access](https://cloud.google.com/storage/docs/uniform-bucket-level-access). Then create a JSON key for the service account and paste it into the integration. When you use S3 Compatible Storage, create an [HMAC key](https://cloud.google.com/storage/docs/authentication/hmackeys) for the same service account instead. Self-hosted deployments that export with their default credentials need the same role on the deployment's own service account.
+
+</Tab>
+
+<Tab>
+
+The Azure integration authenticates with a storage account name and account key. An account key grants full access to every container in that storage account and cannot be scoped to a container or prefix. To limit what these credentials can reach, create a dedicated storage account that holds only the export container.
+
+Langfuse creates the container if it does not exist.
+
+</Tab>
+
+</Tabs>
+
+On Amazon S3 and S3-compatible storage, consider adding a lifecycle rule that deletes incomplete multipart uploads after a few days. Parts left behind by a failed abort keep accruing storage costs.
 
 ### Field selection [#export-field-groups]
 
