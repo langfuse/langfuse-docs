@@ -87,15 +87,14 @@ Create a dedicated identity for the export, such as an IAM user or a service acc
 | Write objects           | Yes                          | Upload data files, manifests, and the **Validate** test file. Large files use multipart uploads on S3.               |
 | Abort multipart uploads | Recommended                  | Clean up incomplete parts when an upload fails                                                                       |
 | Delete objects          | Recommended; required on GCS | Remove the legacy-export deprecation notice from `{prefix}{project-id}/` after the project switches to enriched data |
-| Read objects            | Optional                     | Open the **Validate** test file through the signed link Langfuse returns                                             |
 
-Langfuse never lists the bucket or reads exported files. Without the recommended permissions, exports still run: a failed abort or delete is logged and skipped. Without read access, only the validation link fails to open.
+Langfuse never lists or reads from the bucket, so it needs no read permissions. Without the recommended permissions, exports still run: a failed abort or delete is logged and skipped.
 
 <Tabs items={["Amazon S3", "Google Cloud Storage", "Azure Blob Storage"]}>
 
 <Tab>
 
-Attach this policy to a dedicated IAM user, then use that user's access key in the integration. Replace `YOUR_BUCKET` and `YOUR_PREFIX/`, or use `arn:aws:s3:::YOUR_BUCKET/*` if the prefix is empty:
+Create an IAM user that is used only for this export and attach the policy below as an inline policy. Replace `YOUR_BUCKET` and `YOUR_PREFIX/`, or use `arn:aws:s3:::YOUR_BUCKET/*` if the prefix is empty:
 
 ```json
 {
@@ -107,8 +106,7 @@ Attach this policy to a dedicated IAM user, then use that user's access key in t
       "Action": [
         "s3:PutObject",
         "s3:AbortMultipartUpload",
-        "s3:DeleteObject",
-        "s3:GetObject"
+        "s3:DeleteObject"
       ],
       "Resource": "arn:aws:s3:::YOUR_BUCKET/YOUR_PREFIX/*"
     }
@@ -116,7 +114,7 @@ Attach this policy to a dedicated IAM user, then use that user's access key in t
 }
 ```
 
-`s3:PutObject` covers the multipart operations `CreateMultipartUpload`, `UploadPart`, and `CompleteMultipartUpload`. Remove `s3:GetObject` if you do not need the validation link.
+`s3:PutObject` covers the multipart operations `CreateMultipartUpload`, `UploadPart`, and `CompleteMultipartUpload`.
 
 On self-hosted deployments, you can attach the same policy to the IAM role Langfuse runs as and leave the access key fields blank; see the [blob storage deployment page](/self-hosting/deployment/infrastructure/blobstorage). If the bucket uses default encryption with a customer-managed KMS key, also grant `kms:GenerateDataKey` and `kms:Decrypt` on that key; multipart uploads need both.
 
@@ -128,7 +126,6 @@ Create a dedicated service account and a custom role with these permissions:
 
 - `storage.objects.create`
 - `storage.objects.delete`: Google Cloud Storage also requires this to overwrite an object, which happens when a failed run is retried.
-- `storage.objects.get` (optional, for the validation link)
 - `storage.multipartUploads.create` and `storage.multipartUploads.abort`: only when you connect through S3 Compatible Storage with an HMAC key, which uses multipart uploads.
 
 Grant the role on the bucket rather than the project. To limit the service account to the prefix, add an [IAM condition](https://cloud.google.com/storage/docs/access-control/iam#conditions) to the binding:
