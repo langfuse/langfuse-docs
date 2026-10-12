@@ -116,7 +116,7 @@ Create an IAM user that is used only for this export and attach the policy below
 
 `s3:PutObject` covers the multipart operations `CreateMultipartUpload`, `UploadPart`, and `CompleteMultipartUpload`.
 
-On self-hosted deployments, you can attach the same policy to the IAM role Langfuse runs as and leave the access key fields blank; see the [blob storage deployment page](/self-hosting/deployment/infrastructure/blobstorage). If the bucket uses default encryption with a customer-managed KMS key, also grant `kms:GenerateDataKey` and `kms:Decrypt` on that key; multipart uploads need both.
+On self-hosted deployments, you can instead leave the access key fields blank to export as the IAM role Langfuse runs as; see the [blob storage deployment page](/self-hosting/deployment/infrastructure/blobstorage). This is not least-privilege: that role also has read and write access to the platform's event, media, and batch-export buckets, and any project member who can configure the integration can point an export at any bucket the role reaches. Prefer a dedicated IAM user unless every project on the deployment is trusted. If the bucket uses default encryption with a customer-managed KMS key, also grant `kms:GenerateDataKey` and `kms:Decrypt` on that key; multipart uploads need both.
 
 </Tab>
 
@@ -134,7 +134,7 @@ Grant the role on the bucket rather than the project. To limit the service accou
 resource.name.startsWith("projects/_/buckets/YOUR_BUCKET/objects/YOUR_PREFIX/")
 ```
 
-IAM conditions require [uniform bucket-level access](https://cloud.google.com/storage/docs/uniform-bucket-level-access). Then create a JSON key for the service account and paste it into the integration. When you use S3 Compatible Storage, create an [HMAC key](https://cloud.google.com/storage/docs/authentication/hmackeys) for the same service account instead. Self-hosted deployments that export with their default credentials need the same role on the deployment's own service account.
+IAM conditions require [uniform bucket-level access](https://cloud.google.com/storage/docs/uniform-bucket-level-access). Then create a JSON key for the service account and paste it into the integration. When you use S3 Compatible Storage, create an [HMAC key](https://cloud.google.com/storage/docs/authentication/hmackeys) for the same service account instead. On self-hosted deployments, you can instead enable **Use Application Default Credentials (ADC)** to export as the deployment's own service account. That service account is shared with the rest of the deployment, so it is not a dedicated identity; exports can only target buckets an operator lists in `LANGFUSE_BLOB_STORAGE_GCS_ALLOWED_BUCKETS` (see the [blob storage deployment page](/self-hosting/deployment/infrastructure/blobstorage#gcs-export-credentials)). Grant the role above to that service account on each allowed bucket.
 
 </Tab>
 
