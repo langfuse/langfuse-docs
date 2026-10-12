@@ -21,6 +21,8 @@ Observe and evaluate AI agents across your institution. Give engineering, platfo
 
 Use the contact form on this page to talk to a financial services expert at Langfuse.
 
+Used by **21** of the Fortune 50 · **90B+** observations/month · **100,000+** engineers building on Langfuse.
+
 ### [Merck](/users/merckgroup)
 
 > “Generative AI will only earn enterprise trust when we can see what's happening under the hood. Langfuse enables us to track every prompt, response, cost, and latency in real time, turning black-box models into auditable, optimizable assets.”
@@ -39,7 +41,7 @@ Customer story · Self-hosted. [Read story](/users/trade-republic)
 
 Customer story · Spend management. [Read story](/users/ramp)
 
-### How DKB automates 20,000 customer conversations daily.
+### How DKB, Germany's largest digital bank, automates 20,000 customer conversations daily.
 
 Customer story · Banking. Coming soon
 
@@ -129,7 +131,7 @@ Trace agents that combine identity, fraud and credit-bureau checks into a risk s
 
 Raise autonomy rate of AI support agents: the share of cases resolved without human intervention. Trace edge cases, score good/bad runs, and iterate so agents cover more of the long tail safely.
 
-DKB · 20,000 conversations / day
+DKB, Germany's largest digital bank · 20,000 conversations / day
 
 ### [Govern coding agents across the whole engineering organization](/coding-agents)
 

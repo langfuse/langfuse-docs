@@ -628,6 +628,7 @@ test("compact Marketo form collapses deferred rows and remembers use-case only o
   const firstNameInput = { name: "FirstName", type: "text" };
   const lastNameInput = { name: "LastName", type: "text" };
   const emailInput = { name: "Email", type: "email" };
+  const phoneInput = { name: "Phone", type: "tel" };
   const firstNameRow = {
     parentElement: {
       insertBefore(nameRow, before) {
@@ -646,13 +647,17 @@ test("compact Marketo form collapses deferred rows and remembers use-case only o
     querySelectorAll: () => [emailInput],
     querySelector: () => null,
   };
+  const phoneRow = {
+    querySelectorAll: () => [phoneInput],
+    querySelector: () => null,
+  };
   const buttonRow = { parentElement: { insertBefore() {} } };
   const formElement = {
     replaceChildren() {},
     querySelectorAll(selector) {
       if (selector === ".mktoAsterix") return [];
       if (selector === ".mktoFormRow") {
-        return [firstNameRow, lastNameRow, emailRow, deferredRow];
+        return [firstNameRow, lastNameRow, emailRow, phoneRow, deferredRow];
       }
       return [];
     },

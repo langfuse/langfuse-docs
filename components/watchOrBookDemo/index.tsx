@@ -125,7 +125,7 @@ function TalkToUsContent() {
 
       <div className="mt-2">
         <Text className="text-left not-prose">
-          We are looking forward to talk to you,
+          We are looking forward to talking to you,
         </Text>
         <div className="flex flex-col gap-6 mt-4">
           <TeamMemberCard
