@@ -6,7 +6,7 @@ category: SDKs
 
 # JS/TS v5 → v6
 
-For most users, v6 is a small upgrade. If you trace with `startActiveObservation()`, `observe()`, or an integration, and you create scores and fetch prompts through the managers (`langfuse.prompt`, `langfuse.score`, `langfuse.dataset`), your code keeps working as is. v6 needs Node.js 22+ and Langfuse Cloud or self-hosted Langfuse v4.55.0 or later.
+For most users, v6 is a small upgrade. If you trace with `startActiveObservation()`, `observe()`, or an integration, and you create scores and fetch prompts through the managers (`langfuse.prompt`, `langfuse.score`, `langfuse.dataset`), your code keeps working as is. v6 needs Node.js 22+ and Langfuse Cloud or self-hosted Langfuse v4.59.0 or later.
 
 Most removals in v6 were already marked `@deprecated` in v5. If your editor or a lint rule such as `@typescript-eslint/no-deprecated` flags no deprecated Langfuse APIs in your v5 code, you're most likely unaffected apart from the [minimum versions](#minimum-versions), [`requestOptions` on argument-less API methods](#request-placeholder), and direct [`api.scores` calls](#scores-api). v5 didn't log deprecation warnings at runtime, so plain JavaScript code gets no warning.
 
@@ -24,7 +24,7 @@ You only need to change something if one of these applies to you.
 
 **New in v6:**
 
-- **You self-host Langfuse v3, or v4 older than v4.55.0**, or run Node.js older than 22, or use `@langchain/core` older than 1.0 → [Minimum versions](#minimum-versions)
+- **You self-host Langfuse v3, or v4 older than v4.59.0**, or run Node.js older than 22, or use `@langchain/core` older than 1.0 → [Minimum versions](#minimum-versions)
 - **You pass `requestOptions` to a generated API method without query parameters or a body**, such as `api.datasets.get(name, { timeoutInSeconds })` → [Request placeholder before `requestOptions`](#request-placeholder)
 - **You read the response of `api.scores.create` or call `api.legacy.scoreV1.*` directly** → [`api.scores` response and delete](#scores-api)
 - **A proxy between your app and Langfuse rejects gzip-compressed requests** → [Under the hood](#under-the-hood)
@@ -44,11 +44,11 @@ These are new in v6. Ordered by how many users they affect.
 
 ### Minimum versions [#minimum-versions]
 
-**Affects:** self-hosted Langfuse v3 or older than v4.55.0, Node.js older than 22, and the LangChain integration on LangChain 0.x.
+**Affects:** self-hosted Langfuse v3 or older than v4.59.0, Node.js older than 22, and the LangChain integration on LangChain 0.x.
 
 | Requirement | v6                                         | If not met                                                                      |
 | ----------- | ------------------------------------------ | ------------------------------------------------------------------------------- |
-| Langfuse    | Cloud, or self-hosted **v4.55.0 or later** | Score batches are rejected and the scores dropped                               |
+| Langfuse    | Cloud, or self-hosted **v4.59.0 or later** | Unsupported. Upgrade Langfuse first, or stay on the previous SDK major          |
 | Node.js     | `>=22`, packages compiled to ES2022        | Unsupported. Bundles for older runtimes must target ES2022 or transpile the SDK |
 | LangChain   | `@langchain/core@^1.0.0` (was `>=0.3.8`)   | Peer dependency conflict when installing `@langfuse/langchain@6`                |
 
@@ -341,7 +341,7 @@ See [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) for 
 These need no code changes.
 
 - **Experiment links.** `result.experimentUrl` links directly to the experiment comparison view. `LangfuseClient` also exposes `getProjectId()` and `getExperimentUrl(experimentId)`.
-- **Typed metadata filters.** On Langfuse v4.55.0 and later, numeric and boolean metadata keeps its type, and nested objects can be filtered by dotted path, such as `a.b = 1`. `propagateAttributes({ metadata })` accepts any JSON-serializable value.
+- **Typed metadata filters.** Numeric and boolean metadata keeps its type, and nested objects can be filtered by dotted path, such as `a.b = 1`. `propagateAttributes({ metadata })` accepts any JSON-serializable value.
 - **Batch score creation.** `api.scores.create()` accepts an array of `CreateScoreRequest` objects.
 - **Experiment records.** Run evaluations are sent for local-data runs too. Dataset versions (`datasetVersion`) are recorded on items as `langfuse.experiment.item.version`.
 
@@ -349,7 +349,7 @@ These need no code changes.
 
 None of these need code changes. Each one has a setting if you need different behavior.
 
-- **Scores are sent in batches of up to 100 to `POST /api/public/scores`** instead of the legacy ingestion endpoint. `langfuse.score.create()`, `.observation()`, `.trace()`, `flush()`, `shutdown()`, and the batching settings work as before. If the server accepts only part of a batch (HTTP 207), the SDK logs `Langfuse rejected N of M scores in batch:` with the server's errors and doesn't retry the rejected scores. Servers older than v4.55.0 reject score batches, and those scores are dropped. Each score carries the time it was queued as its timestamp. The server records it from Langfuse v4.59.0. v4.55.0 to v4.58.x record the time they received the score. `LangfuseBrowserClient.score()` also sends each score to `POST /api/public/scores`, with public-key authentication.
+- **Scores are sent in batches of up to 100 to `POST /api/public/scores`** instead of the legacy ingestion endpoint. `langfuse.score.create()`, `.observation()`, `.trace()`, `flush()`, `shutdown()`, and the batching settings work as before. If the server accepts only part of a batch (HTTP 207), the SDK logs `Langfuse rejected N of M scores in batch:` with the server's errors and doesn't retry the rejected scores. Each score carries the time it was queued as its timestamp. `LangfuseBrowserClient.score()` also sends each score to `POST /api/public/scores`, with public-key authentication.
 - **Score methods never throw.** Input is validated on the client. Scores with an empty name or a non-finite or non-string value are logged at error level and dropped.
 - **Span batches are gzip-compressed on Node.js and Bun.** If a proxy rejects compressed requests, pass `new LangfuseSpanProcessor({ compression: "none" })` or set `LANGFUSE_OTEL_COMPRESSION=none`. The setting is read in this order: `compression`, `LANGFUSE_OTEL_COMPRESSION`, `OTEL_EXPORTER_OTLP_TRACES_COMPRESSION`, `OTEL_EXPORTER_OTLP_COMPRESSION`, then the `gzip` default. Values are `gzip` or `none`. Environment variables are case-insensitive, and an invalid value falls through to the next setting. Browser and edge runtimes ignore it.
 - **Spans carry `x-langfuse-ingestion-version: 4`**, which enables real-time processing on Langfuse v4. To opt out, pass `additionalHeaders: { "x-langfuse-ingestion-version": "3" }` to `LangfuseSpanProcessor`. `additionalHeaders` override default headers case-insensitively.

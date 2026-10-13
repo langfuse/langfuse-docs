@@ -6,7 +6,7 @@ category: SDKs
 
 # Python v4 → v5
 
-For most users, v5 is a small upgrade. If you trace with `@observe`, `start_as_current_observation()`, or an integration, and you create scores and fetch prompts, your code keeps working as is. v5 needs Python 3.11+ and Langfuse Cloud or self-hosted Langfuse v4.55.0 or later.
+For most users, v5 is a small upgrade. If you trace with `@observe`, `start_as_current_observation()`, or an integration, and you create scores and fetch prompts, your code keeps working as is. v5 needs Python 3.11+ and Langfuse Cloud or self-hosted Langfuse v4.59.0 or later.
 
 Most removals in v5 were already deprecated in v4. If your code runs on v4 without a `DeprecationWarning` from `langfuse`, you're most likely unaffected apart from the [minimum versions](#minimum-versions), direct [`api.scores` calls](#scores-api), and [`run_batched_evaluation()`](#batched-evaluation). Python hides `DeprecationWarning` by default outside `__main__`, so check with `python -W default::DeprecationWarning` or under pytest.
 
@@ -22,7 +22,7 @@ You only need to change something if one of these applies to you.
 
 **New in v5:**
 
-- **You self-host Langfuse v3, or v4 older than v4.55.0**, or run Python 3.10, `openai<1`, or `langchain-core<1` → [Minimum versions](#minimum-versions)
+- **You self-host Langfuse v3, or v4 older than v4.59.0**, or run Python 3.10, `openai<1`, or `langchain-core<1` → [Minimum versions](#minimum-versions)
 - **You call `api.scores.create` or `api.legacy.score_v1.*` directly** → [`api.scores` takes request objects](#scores-api)
 - **You call `run_batched_evaluation()`** → [Batched evaluation reads observations only](#batched-evaluation)
 - **A proxy between your app and Langfuse rejects gzip-compressed requests** → [Under the hood](#under-the-hood)
@@ -42,11 +42,11 @@ These are new in v5. Ordered by how many users they affect.
 
 ### Minimum versions [#minimum-versions]
 
-**Affects:** self-hosted Langfuse v3 or older than v4.55.0, Python 3.10, and the OpenAI and LangChain integrations on older libraries.
+**Affects:** self-hosted Langfuse v3 or older than v4.59.0, Python 3.10, and the OpenAI and LangChain integrations on older libraries.
 
 | Requirement | v5                                         | If not met                                                                               |
 | ----------- | ------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| Langfuse    | Cloud, or self-hosted **v4.55.0 or later** | Score batches are rejected and the scores dropped                                        |
+| Langfuse    | Cloud, or self-hosted **v4.59.0 or later** | Unsupported. Upgrade Langfuse first, or stay on the previous SDK major                   |
 | Python      | `>=3.11`                                   | `pip install langfuse` resolves to the latest v4 release                                 |
 | OpenAI      | `openai>=1.0`                              | The `langfuse.openai` integration no longer supports pre-1.0 SDKs                        |
 | LangChain   | `langchain-core>=1`                        | `ModuleNotFoundError` when importing `langfuse.langchain` with an older `langchain-core` |
@@ -305,7 +305,7 @@ langfuse = Langfuse(
 These need no code changes.
 
 - **Experiment links.** `result.experiment_id` and `result.experiment_url` link directly to the experiment comparison view.
-- **Typed metadata filters.** On Langfuse v4.55.0 and later, numeric and boolean metadata keeps its type, and nested objects can be filtered by dotted path, such as `a.b = 1`.
+- **Typed metadata filters.** Numeric and boolean metadata keeps its type, and nested objects can be filtered by dotted path, such as `a.b = 1`.
 - **Batch score creation.** `api.scores.create()` accepts a list of `CreateScoreRequest` objects.
 - **Experiment records.** Run evaluations are stored for local-data runs too. Dataset versions are recorded on items as `langfuse.experiment.item.version`.
 - **Lighter LangChain dependency.** The `CallbackHandler` needs only `langchain-core`.
@@ -314,7 +314,7 @@ These need no code changes.
 
 None of these need code changes. Each one has a setting if you need different behavior.
 
-- **Scores are sent in batches to `POST /api/public/scores`** instead of the legacy ingestion endpoint. `create_score()`, `span.score()`, `span.score_trace()`, `flush_at`, and `flush_interval` work as before. If the server accepts only part of a batch (HTTP 207), the SDK logs the accepted and rejected counts and the errors, and doesn't retry the rejected scores. Other 4xx responses are logged and not retried. Network errors, 429, and 5xx are retried with backoff. Servers older than v4.55.0 reject score batches, and those scores are dropped. Custom score timestamps (`timestamp=` on `create_score`) need Langfuse v4.59.0 or later. v4.55.0 to v4.58.x record the time they received the score.
+- **Scores are sent in batches to `POST /api/public/scores`** instead of the legacy ingestion endpoint. `create_score()`, `span.score()`, `span.score_trace()`, `flush_at`, and `flush_interval` work as before. If the server accepts only part of a batch (HTTP 207), the SDK logs the accepted and rejected counts and the errors, and doesn't retry the rejected scores. Other 4xx responses are logged and not retried. Network errors, 429, and 5xx are retried with backoff.
 - **Span batches are gzip-compressed.** If a proxy rejects compressed requests, set `Langfuse(otel_compression="none")` or `LANGFUSE_OTEL_COMPRESSION=none`. The setting is read in this order: `otel_compression`, `LANGFUSE_OTEL_COMPRESSION`, `OTEL_EXPORTER_OTLP_TRACES_COMPRESSION`, `OTEL_EXPORTER_OTLP_COMPRESSION`, then the `gzip` default. Values are `gzip` or `none` (case-insensitive), and an invalid value falls through to the next setting. A custom `span_exporter` is not changed.
 - **Spans carry `x-langfuse-ingestion-version: 4`**, which enables real-time processing on Langfuse v4. To opt out, pass `additional_headers={"x-langfuse-ingestion-version": "3"}`. A custom `span_exporter` doesn't get this header automatically.
 - **The default span filter's GenAI check requires the `gen_ai.` prefix**, dot included, so attributes like `gen_ai_custom` no longer count.
