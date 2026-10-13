@@ -8,6 +8,8 @@ category: SDKs
 
 For most users, v5 is a small upgrade. If you trace with `@observe`, `start_as_current_observation()`, or an integration, and you create scores and fetch prompts, your code keeps working as is. v5 needs Python 3.11+ and Langfuse Cloud or self-hosted Langfuse v4.55.0 or later.
 
+Most removals in v5 were already deprecated in v4. If your code runs on v4 without a `DeprecationWarning` from `langfuse`, you're most likely unaffected apart from the [minimum versions](#minimum-versions), direct [`api.scores` calls](#scores-api), and [`run_batched_evaluation()`](#batched-evaluation). Python hides `DeprecationWarning` by default outside `__main__`, so check with `python -W default::DeprecationWarning` or under pytest.
+
 ```bash
 pip install --upgrade "langfuse>=5"
 ```
@@ -16,21 +18,27 @@ pip install --upgrade "langfuse>=5"
 
 ## Are you affected? [#are-you-affected]
 
-You only need to change something if one of these applies to you:
+You only need to change something if one of these applies to you.
+
+**New in v5:**
 
 - **You self-host Langfuse v3, or v4 older than v4.55.0**, or run Python 3.10, `openai<1`, or `langchain-core<1` → [Minimum versions](#minimum-versions)
-- **You call `langfuse.api.*` directly**, for example `api.trace.get`, `api.sessions`, `api.legacy.*`, `api.scores.get_many`, or `api.scores.create` → [Removed Public API methods](#removed-public-api-methods)
+- **You call `api.scores.create` or `api.legacy.score_v1.*` directly** → [`api.scores` takes request objects](#scores-api)
+- **You call `run_batched_evaluation()`** → [Batched evaluation reads observations only](#batched-evaluation)
+- **A proxy between your app and Langfuse rejects gzip-compressed requests** → [Under the hood](#under-the-hood)
+
+**Previously deprecated in v4, now removed:**
+
+- **You call deprecated `langfuse.api.*` methods**, for example `api.trace.get`, `api.sessions`, `api.legacy.*`, or `api.scores.get_many` → [Deprecated Public API methods removed](#removed-public-api-methods)
 - **You call `set_current_trace_io()` or `span.set_trace_io()`** → [Trace input/output setters removed](#trace-io-setters-removed)
 - **You call `get_dataset_runs()`, `get_dataset_run()`, or `delete_dataset_run()`** → [Dataset run helpers removed](#dataset-run-helpers-removed)
-- **You call `run_batched_evaluation()`** → [Batched evaluation reads observations only](#batched-evaluation)
 - **You pass `blocked_instrumentation_scopes`** → [`blocked_instrumentation_scopes` removed](#blocked-instrumentation-scopes)
-- **A proxy between your app and Langfuse rejects gzip-compressed requests** → [Under the hood](#under-the-hood)
 
 If none of these apply, upgrade and you're done.
 
 ## Breaking changes [#breaking-changes]
 
-Ordered by how many users they affect.
+These are new in v5. Ordered by how many users they affect.
 
 ### Minimum versions [#minimum-versions]
 
@@ -51,34 +59,19 @@ pip install --upgrade "langfuse>=5" "langchain-core>=1"
 
 The LangChain `CallbackHandler` imports only from `langchain_core` now, so the `langchain` meta-package is no longer needed. Its import path and usage are unchanged.
 
-### Removed Public API methods [#removed-public-api-methods]
+### `api.scores` takes request objects [#scores-api]
 
-**Affects:** code that calls `langfuse.api.*` directly.
+**Affects:** code that calls `langfuse.api.scores.create(...)` or `langfuse.api.legacy.score_v1.*` directly. `create_score()`, `span.score()`, and `span.score_trace()` are unchanged.
 
-**Breaks:** `AttributeError` for removed resources and methods, and `TypeError` for the old `api.scores.create` keyword arguments.
+**Breaks:** `TypeError` for the old `api.scores.create` keyword arguments, and `AttributeError` for `api.legacy.score_v1`.
 
-The generated client no longer includes the endpoints that Langfuse v4 deprecated, and there is no `api.legacy` namespace anymore. For full replacement guidance, see the [SDK method quick reference](/faq/all/deprecated-api-migration#sdk-method-quick-reference).
-
-| Removed                                                           | Replacement                                                 |
-| ----------------------------------------------------------------- | ----------------------------------------------------------- |
-| `api.trace.get(...)`, `api.trace.list(...)`                       | `api.observations.get_many(trace_id=..., ...)`              |
-| `api.sessions.*`                                                  | `api.observations.get_many(session_id=..., ...)`            |
-| `api.legacy.observations_v1.*`                                    | `api.observations.get_many(...)`                            |
-| `api.legacy.metrics_v1.metrics(...)`                              | `api.metrics.metrics(...)`                                  |
-| `api.legacy.score_v1.create(...)`                                 | `api.scores.create(request=CreateScoreRequest(...))`        |
-| `api.legacy.score_v1.delete(score_id=...)`                        | `api.scores.delete(score_id=...)`                           |
-| `api.scores.get_many(...)`, `api.scores.get_by_id(...)`           | `api.scores_v3.get_many_v3(...)`                            |
-| `api.dataset_run_items.*`                                         | `api.experiments.list_items(...)` or the experiment runner  |
-| `api.datasets.get_run(...)`, `.get_runs(...)`, `.delete_run(...)` | [Dataset run helpers removed](#dataset-run-helpers-removed) |
-
-`api.trace` keeps `delete` and `delete_multiple`. `api.datasets` keeps `list`, `get`, and `create`.
-
-`api.scores.create()` now takes a single `CreateScoreRequest` or a list of them, and returns `CreateScoresResponse`, a union of the single-score and batch responses.
+- `api.scores.create()` now takes a single `CreateScoreRequest` or a list of them as `request=`, and returns `CreateScoresResponse`, a union of the single-score and batch responses.
+- `api.legacy.score_v1.delete(score_id=...)` moves to `api.scores.delete(score_id=...)`.
+- `api.legacy.score_v1.create(...)` was already a deprecated alias of `api.scores.create` in v4. Use `api.scores.create(request=CreateScoreRequest(...))`.
 
 **v4:**
 
 ```python
-trace = langfuse.api.trace.get("trace-id")
 langfuse.api.scores.create(name="accuracy", value=0.9, trace_id="trace-id")
 langfuse.api.legacy.score_v1.delete(score_id="score-id")
 ```
@@ -91,11 +84,95 @@ from langfuse.api import CreateScoreRequest
 
 langfuse = get_client()
 
-observations = langfuse.api.observations.get_many(trace_id="trace-id", fields="core,basic,io")
 langfuse.api.scores.create(
     request=CreateScoreRequest(name="accuracy", value=0.9, trace_id="trace-id")
 )
 langfuse.api.scores.delete(score_id="score-id")
+```
+
+### Batched evaluation reads observations only [#batched-evaluation]
+
+**Affects:** code that calls `langfuse.run_batched_evaluation()`.
+
+**Breaks (new in v5, no prior deprecation):** `TypeError` for `scope`, `fetch_trace_fields`, and `_additional_trace_tags`, and `ValueError` when resuming with a v4 token or with a different filter. The function now reads from the v2 observations API and evaluates observations only.
+
+- `scope` is removed. To evaluate whole traces, filter for the observations that represent them, for example by `name` or `type`.
+- `fetch_trace_fields` is renamed to `fields` (default `"core,basic,io,metadata"`). Available field groups: `core`, `basic`, `time`, `io`, `metadata`, `model`, `usage`, `prompt`, `metrics`, `trace_context`.
+- The mapper receives `item=ObservationV2`. `input` and `output` are raw strings.
+- `filter` must be a v2 filter JSON array.
+- `_additional_trace_tags` is removed.
+- Resume tokens from v4 can't be reused, and resuming with a different filter raises a `ValueError`.
+
+**v4:**
+
+```python
+def trace_mapper(*, item):
+    return EvaluatorInputs(input=item.input, output=item.output, expected_output=None)
+
+langfuse.run_batched_evaluation(
+    scope="traces",
+    mapper=trace_mapper,
+    filter='{"tags": ["production"]}',
+    fetch_trace_fields="core,io",
+    evaluators=[accuracy],
+)
+```
+
+**v5:**
+
+```python
+from langfuse import EvaluatorInputs, get_client
+
+langfuse = get_client()
+
+def observation_mapper(*, item, **kwargs):
+    return EvaluatorInputs(
+        input=item.input,
+        output=item.output,
+        expected_output=None,
+        metadata={"trace_id": item.trace_id},
+    )
+
+langfuse.run_batched_evaluation(
+    mapper=observation_mapper,
+    filter='[{"type": "string", "column": "type", "operator": "=", "value": "GENERATION"}]',
+    fields="core,basic,io,model",
+    evaluators=[accuracy],
+)
+```
+
+## Previously deprecated, now removed [#previously-deprecated]
+
+v4 already marked each of these as deprecated and named the replacement. If you moved to the replacement, nothing changes.
+
+### Deprecated Public API methods removed [#removed-public-api-methods]
+
+**Affects:** code that calls the endpoints below through `langfuse.api.*`.
+
+**Previously deprecated in v4, now removed.** Each of these methods raised a `DeprecationWarning` in v4 that named its replacement. In v5 they raise `AttributeError`, and there is no `api.legacy` namespace anymore. For full replacement guidance, see the [SDK method quick reference](/faq/all/deprecated-api-migration#sdk-method-quick-reference).
+
+| Removed                                                           | Replacement                                                 |
+| ----------------------------------------------------------------- | ----------------------------------------------------------- |
+| `api.trace.get(...)`, `api.trace.list(...)`                       | `api.observations.get_many(trace_id=..., ...)`              |
+| `api.sessions.*`                                                  | `api.observations.get_many(session_id=..., ...)`            |
+| `api.legacy.observations_v1.*`                                    | `api.observations.get_many(...)`                            |
+| `api.legacy.metrics_v1.metrics(...)`                              | `api.metrics.metrics(...)`                                  |
+| `api.scores.get_many(...)`, `api.scores.get_by_id(...)`           | `api.scores_v3.get_many_v3(...)`                            |
+| `api.dataset_run_items.*`                                         | `api.experiments.list_items(...)` or the experiment runner  |
+| `api.datasets.get_run(...)`, `.get_runs(...)`, `.delete_run(...)` | [Dataset run helpers removed](#dataset-run-helpers-removed) |
+
+`api.trace` keeps `delete` and `delete_multiple`. `api.datasets` keeps `list`, `get`, and `create`.
+
+**v4:**
+
+```python
+trace = langfuse.api.trace.get("trace-id")
+```
+
+**v5:**
+
+```python
+observations = langfuse.api.observations.get_many(trace_id="trace-id", fields="core,basic,io")
 ```
 
 Removed types include `Trace`, `TraceWithDetails`, `TraceWithFullDetails`, `Traces`, `Observation`, `ObservationsView`, `ObservationsViews`, `Session`, `SessionWithTraces`, `PaginatedSessions`, `DatasetRun`, `DatasetRunItem`, `DatasetRunWithItems`, `PaginatedDatasetRuns`, `PaginatedDatasetRunItems`, `CreateDatasetRunItemRequest`, `DeleteDatasetRunResponse`, the `ScoreV1` family, `GetScoresResponse*`, the v1 `MetricsResponse`, and the `sdk-log` ingestion event. `langfuse.model` no longer re-exports `DatasetRun`, `Observation`, or `TraceWithFullDetails`.
@@ -104,7 +181,7 @@ Removed types include `Trace`, `TraceWithDetails`, `TraceWithFullDetails`, `Trac
 
 **Affects:** code that calls `set_current_trace_io()` or `span.set_trace_io()`, or sets the trace-level `input`/`output` attributes.
 
-**Breaks:** `AttributeError`. These were deprecated in v4. Trace input and output now come from the root observation.
+**Previously deprecated in v4, now removed.** Both methods raised a `DeprecationWarning` in v4 that pointed to `propagate_attributes()` for trace attributes. In v5 they raise `AttributeError`. Trace input and output now come from the root observation.
 
 **v4:**
 
@@ -138,7 +215,7 @@ with langfuse.start_as_current_observation(as_type="span", name="request") as sp
 
 **Affects:** code that calls `get_dataset_runs()`, `get_dataset_run()`, or `delete_dataset_run()`.
 
-**Breaks:** `AttributeError`. Use the experiments API instead. "Dataset run" and "experiment" mean the same thing.
+**Previously deprecated in v4, now removed.** The endpoints behind these helpers were deprecated in v4, and the [deprecated API migration guide](/faq/all/deprecated-api-migration#dataset-runs) lists the experiments API as their replacement. In v5 they raise `AttributeError`. "Dataset run" and "experiment" mean the same thing.
 
 | Removed                                                       | Replacement                                                               |
 | ------------------------------------------------------------- | ------------------------------------------------------------------------- |
@@ -190,62 +267,11 @@ for i in range(0, len(ids), 1000):
 
 There is no experiment-delete API. Deleting the traces also deletes their observations and scores. See [Dataset runs → Experiments](/faq/all/deprecated-api-migration#dataset-runs) for details.
 
-### Batched evaluation reads observations only [#batched-evaluation]
-
-**Affects:** code that calls `langfuse.run_batched_evaluation()`.
-
-**Breaks:** `TypeError` for `scope`, `fetch_trace_fields`, and `_additional_trace_tags`, and `ValueError` when resuming with a v4 token or with a different filter. The function now reads from the v2 observations API and evaluates observations only.
-
-- `scope` is removed. To evaluate whole traces, filter for the observations that represent them, for example by `name` or `type`.
-- `fetch_trace_fields` is renamed to `fields` (default `"core,basic,io,metadata"`). Available field groups: `core`, `basic`, `time`, `io`, `metadata`, `model`, `usage`, `prompt`, `metrics`, `trace_context`.
-- The mapper receives `item=ObservationV2`. `input` and `output` are raw strings.
-- `filter` must be a v2 filter JSON array.
-- `_additional_trace_tags` is removed.
-- Resume tokens from v4 can't be reused, and resuming with a different filter raises a `ValueError`.
-
-**v4:**
-
-```python
-def trace_mapper(*, item):
-    return EvaluatorInputs(input=item.input, output=item.output, expected_output=None)
-
-langfuse.run_batched_evaluation(
-    scope="traces",
-    mapper=trace_mapper,
-    filter='{"tags": ["production"]}',
-    fetch_trace_fields="core,io",
-    evaluators=[accuracy],
-)
-```
-
-**v5:**
-
-```python
-from langfuse import EvaluatorInputs, get_client
-
-langfuse = get_client()
-
-def observation_mapper(*, item, **kwargs):
-    return EvaluatorInputs(
-        input=item.input,
-        output=item.output,
-        expected_output=None,
-        metadata={"trace_id": item.trace_id},
-    )
-
-langfuse.run_batched_evaluation(
-    mapper=observation_mapper,
-    filter='[{"type": "string", "column": "type", "operator": "=", "value": "GENERATION"}]',
-    fields="core,basic,io,model",
-    evaluators=[accuracy],
-)
-```
-
 ### `blocked_instrumentation_scopes` removed [#blocked-instrumentation-scopes]
 
 **Affects:** code that passes `blocked_instrumentation_scopes` to `Langfuse(...)`.
 
-**Breaks:** `TypeError`. The parameter was deprecated in v4. Use `should_export_span` and compose it with the default filter.
+**Previously deprecated in v4, now removed.** v4 raised a `DeprecationWarning` that pointed to `should_export_span`. In v5 the parameter raises `TypeError`. Compose `should_export_span` with the default filter.
 
 **v4:**
 

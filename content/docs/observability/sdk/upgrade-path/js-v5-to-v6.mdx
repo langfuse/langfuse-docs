@@ -8,6 +8,8 @@ category: SDKs
 
 For most users, v6 is a small upgrade. If you trace with `startActiveObservation()`, `observe()`, or an integration, and you create scores and fetch prompts through the managers (`langfuse.prompt`, `langfuse.score`, `langfuse.dataset`), your code keeps working as is. v6 needs Node.js 22+ and Langfuse Cloud or self-hosted Langfuse v4.55.0 or later.
 
+Most removals in v6 were already marked `@deprecated` in v5. If your editor or a lint rule such as `@typescript-eslint/no-deprecated` flags no deprecated Langfuse APIs in your v5 code, you're most likely unaffected apart from the [minimum versions](#minimum-versions), [`requestOptions` on argument-less API methods](#request-placeholder), and direct [`api.scores` calls](#scores-api). v5 didn't log deprecation warnings at runtime, so plain JavaScript code gets no warning.
+
 All `@langfuse/*` packages are released together. Upgrade them to the same major version:
 
 ```bash
@@ -18,21 +20,27 @@ npm install @langfuse/client@6 @langfuse/tracing@6 @langfuse/otel@6
 
 ## Are you affected? [#are-you-affected]
 
-You only need to change something if one of these applies to you:
+You only need to change something if one of these applies to you.
+
+**New in v6:**
 
 - **You self-host Langfuse v3, or v4 older than v4.55.0**, or run Node.js older than 22, or use `@langchain/core` older than 1.0 → [Minimum versions](#minimum-versions)
-- **You call top-level `LangfuseClient` methods** such as `getPrompt()`, `getDataset()`, or `fetchTrace()` → [Deprecated `LangfuseClient` aliases removed](#client-aliases-removed)
-- **You call `langfuse.api.*` directly**, for example `api.trace.get`, `api.sessions`, `api.legacy.*`, `api.scores.getMany`, or the response of `api.scores.create` → [Removed Public API methods](#removed-public-api-methods)
 - **You pass `requestOptions` to a generated API method without query parameters or a body**, such as `api.datasets.get(name, { timeoutInSeconds })` → [Request placeholder before `requestOptions`](#request-placeholder)
+- **You read the response of `api.scores.create` or call `api.legacy.scoreV1.*` directly** → [`api.scores` response and delete](#scores-api)
+- **A proxy between your app and Langfuse rejects gzip-compressed requests** → [Under the hood](#under-the-hood)
+
+**Previously deprecated in v5, now removed:**
+
+- **You call top-level `LangfuseClient` methods** such as `getPrompt()`, `getDataset()`, or `fetchTrace()` → [Deprecated `LangfuseClient` aliases removed](#client-aliases-removed)
+- **You call deprecated `langfuse.api.*` methods**, for example `api.trace.get`, `api.sessions`, `api.legacy.*`, or `api.scores.getMany` → [Deprecated Public API methods removed](#removed-public-api-methods)
 - **You call `setActiveTraceIO()`, `span.setTraceIO()`, or `createTraceAttributes()`** → [Trace input/output setters removed](#trace-io-setters-removed)
 - **You call `item.link()` on dataset items** → [Dataset item `link()` removed](#dataset-item-link-removed)
-- **A proxy between your app and Langfuse rejects gzip-compressed requests** → [Under the hood](#under-the-hood)
 
 If none of these apply, upgrade and you're done.
 
 ## Breaking changes [#breaking-changes]
 
-Ordered by how many users they affect.
+These are new in v6. Ordered by how many users they affect.
 
 ### Minimum versions [#minimum-versions]
 
@@ -52,142 +60,11 @@ npm install @langfuse/langchain@6 @langchain/core@^1
 
 The `CallbackHandler` API and trace output are unchanged.
 
-### Deprecated `LangfuseClient` aliases removed [#client-aliases-removed]
-
-**Affects:** code that calls the top-level convenience methods on `LangfuseClient`.
-
-**Breaks:** a TypeScript compile error, or `TypeError: ... is not a function` in JavaScript. Use the managers or the `api` client instead.
-
-| Removed                                | Replacement                                                   |
-| -------------------------------------- | ------------------------------------------------------------- |
-| `langfuse.getPrompt(...)`              | `langfuse.prompt.get(...)`                                    |
-| `langfuse.createPrompt(...)`           | `langfuse.prompt.create(...)`                                 |
-| `langfuse.updatePrompt(...)`           | `langfuse.prompt.update(...)`                                 |
-| `langfuse.getDataset(...)`             | `langfuse.dataset.get(...)`                                   |
-| `langfuse.createDatasetItem(...)`      | `langfuse.dataset.createItem(...)`                            |
-| `langfuse.resolveMediaReferences(...)` | `langfuse.media.resolveReferences(...)`                       |
-| `langfuse.createDataset(...)`          | `langfuse.api.datasets.create(...)`                           |
-| `langfuse.getDatasetItem(id)`          | `langfuse.api.datasetItems.get(id)`                           |
-| `langfuse.fetchMedia(id)`              | `langfuse.api.media.get(id)`                                  |
-| `langfuse.fetchTrace(id)`              | `langfuse.api.observations.getMany({ traceId: id, ... })`     |
-| `langfuse.fetchTraces(...)`            | `langfuse.api.observations.getMany({ ... })`                  |
-| `langfuse.fetchObservation(id)`        | `langfuse.api.observations.getMany({ filter: ..., ... })`     |
-| `langfuse.fetchObservations(...)`      | `langfuse.api.observations.getMany(...)`                      |
-| `langfuse.fetchSessions(...)`          | `langfuse.api.observations.getMany({ sessionId, ... })`       |
-| `langfuse.getDatasetRun(...)`          | `langfuse.api.experiments.list(...)` and `.listItems(...)`    |
-| `langfuse.getDatasetRuns(...)`         | `langfuse.api.experiments.list({ datasetId, fromStartTime })` |
-
-**v5:**
-
-```typescript
-const prompt = await langfuse.getPrompt("support-agent");
-const trace = await langfuse.fetchTrace("trace-id");
-```
-
-**v6:**
-
-```typescript
-import { LangfuseClient } from "@langfuse/client";
-
-const langfuse = new LangfuseClient();
-
-const prompt = await langfuse.prompt.get("support-agent");
-const observations = await langfuse.api.observations.getMany({
-  traceId: "trace-id",
-  fields: "core,basic,io",
-});
-```
-
-### Removed Public API methods [#removed-public-api-methods]
-
-**Affects:** code that calls `langfuse.api.*` directly.
-
-**Breaks:** TypeScript compile errors, or `TypeError` / `undefined` at runtime in JavaScript.
-
-The generated client no longer includes the endpoints that Langfuse v4 deprecated, and there is no `api.legacy` namespace anymore. For full replacement guidance, see the [SDK method quick reference](/faq/all/deprecated-api-migration#sdk-method-quick-reference).
-
-| Removed                                              | Replacement                                                          |
-| ---------------------------------------------------- | -------------------------------------------------------------------- |
-| `api.trace.get(...)`, `api.trace.list(...)`          | `api.observations.getMany({ traceId, ... })`                         |
-| `api.sessions.*`                                     | `api.observations.getMany({ sessionId, ... })`                       |
-| `api.legacy.observationsV1.*`                        | `api.observations.getMany(...)`                                      |
-| `api.legacy.metricsV1.metrics(...)`                  | `api.metrics.metrics(...)`                                           |
-| `api.legacy.scoreV1.create(...)`                     | `api.scores.create(...)`                                             |
-| `api.legacy.scoreV1.delete(scoreId)`                 | `api.scores.delete(scoreId)`                                         |
-| `api.scores.getMany(...)`, `api.scores.getById(...)` | `api.scoresV3.getManyV3(...)`                                        |
-| `api.datasetRunItems.*`                              | `api.experiments.listItems(...)` or the experiment runner            |
-| `api.datasets.getRun(...)`, `.getRuns(...)`          | `api.experiments.list(...)` and `.listItems(...)`                    |
-| `api.datasets.deleteRun(...)`                        | List experiment items, then `api.trace.deleteMultiple({ traceIds })` |
-
-Removed types include the trace, session, v1 observation, dataset run, and dataset run item response types, the `ScoreV1` family, `SdkLogEvent`, and the `legacy.CreateScoreRequest`, `legacy.CreateScoreResponse`, and `legacy.CreateScoreSource` re-exports. Use the score types without the `legacy` prefix.
-
-`api.scores.create()` now accepts a single `CreateScoreRequest` or an array, and returns `CreateScoresResponse`, a union of the single-score and batch responses. Single-score calls keep working, but TypeScript code that reads fields from the response needs to narrow the type first.
-
-**v5:**
-
-```typescript
-const { id } = await langfuse.api.scores.create({
-  name: "accuracy",
-  value: 0.9,
-  traceId: "trace-id",
-});
-await langfuse.api.legacy.scoreV1.delete("score-id");
-```
-
-**v6:**
-
-```typescript
-import { LangfuseClient } from "@langfuse/client";
-
-const langfuse = new LangfuseClient();
-
-const response = await langfuse.api.scores.create({
-  name: "accuracy",
-  value: 0.9,
-  traceId: "trace-id",
-});
-if ("id" in response) {
-  console.log(response.id);
-}
-await langfuse.api.scores.delete("score-id");
-```
-
-To delete an experiment's data, page through its items and delete their traces. This also deletes their observations and scores:
-
-```typescript
-import { LangfuseClient } from "@langfuse/client";
-
-const langfuse = new LangfuseClient();
-const dataset = await langfuse.dataset.get("qa-set");
-// No experiment item starts before its dataset was created, so this covers every run.
-const fromStartTime = dataset.createdAt;
-
-const traceIds = new Set<string>();
-let cursor: string | undefined;
-do {
-  const page = await langfuse.api.experiments.listItems({
-    datasetId: dataset.id,
-    experimentName: "baseline",
-    fromStartTime,
-    cursor,
-  });
-  page.data.forEach((item) => traceIds.add(item.traceId));
-  cursor = page.meta.cursor ?? undefined;
-} while (cursor);
-
-const ids = [...traceIds];
-for (let i = 0; i < ids.length; i += 1000) {
-  await langfuse.api.trace.deleteMultiple({ traceIds: ids.slice(i, i + 1000) });
-}
-```
-
-See [Dataset runs → Experiments](/faq/all/deprecated-api-migration#dataset-runs) for details.
-
 ### Request placeholder before `requestOptions` [#request-placeholder]
 
 **Affects:** calls that pass `requestOptions` to a generated API method that takes no query parameters and no body.
 
-**Breaks:** a TypeScript compile error. In plain JavaScript the options are ignored. These methods now take an empty request object before `requestOptions`, so `requestOptions` keeps its position if the endpoint gains query parameters later. Calls without `requestOptions` don't change.
+**Breaks (new in v6, no prior deprecation):** a TypeScript compile error. In plain JavaScript the options are ignored. These methods now take an empty request object before `requestOptions`, so `requestOptions` keeps its position if the endpoint gains query parameters later. Calls without `requestOptions` don't change.
 
 **v5:**
 
@@ -249,11 +126,150 @@ These are all 41 methods whose signature changed. Every other generated method k
 | `unstable.dashboards.deletePlacement(dashboardId, placementId)` | `DELETE /api/public/unstable/dashboards/{dashboardId}/placements/{placementId}` |
 | `unstable.skills.deleteVersion(skillName, skillVersion)`        | `DELETE /api/public/unstable/skills/{skillName}/versions/{skillVersion}`        |
 
+### `api.scores` response and delete [#scores-api]
+
+**Affects:** code that reads the response of `langfuse.api.scores.create(...)` or calls `langfuse.api.legacy.scoreV1.*` directly. `langfuse.score.*` is unchanged.
+
+**Breaks:** TypeScript compile errors, or `TypeError` / `undefined` at runtime in JavaScript.
+
+- `api.scores.create()` now accepts a single `CreateScoreRequest` or an array, and returns `CreateScoresResponse`, a union of the single-score and batch responses. Single-score calls keep working, but TypeScript code that reads fields from the response needs to narrow the type first.
+- `api.legacy.scoreV1.delete(scoreId)` moves to `api.scores.delete(scoreId)`.
+- `api.legacy.scoreV1.create(...)` was already marked `@deprecated` in v5 in favor of `api.scores.create(...)`. The `legacy.CreateScoreRequest`, `legacy.CreateScoreResponse`, and `legacy.CreateScoreSource` re-exports are removed; use the score types without the `legacy` prefix.
+
+**v5:**
+
+```typescript
+const { id } = await langfuse.api.scores.create({
+  name: "accuracy",
+  value: 0.9,
+  traceId: "trace-id",
+});
+await langfuse.api.legacy.scoreV1.delete("score-id");
+```
+
+**v6:**
+
+```typescript
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+const response = await langfuse.api.scores.create({
+  name: "accuracy",
+  value: 0.9,
+  traceId: "trace-id",
+});
+if ("id" in response) {
+  console.log(response.id);
+}
+await langfuse.api.scores.delete("score-id");
+```
+
+## Previously deprecated, now removed [#previously-deprecated]
+
+v5 already marked each of these `@deprecated` and named the replacement. If you moved to the replacement, nothing changes.
+
+### Deprecated `LangfuseClient` aliases removed [#client-aliases-removed]
+
+**Affects:** code that calls the top-level convenience methods on `LangfuseClient`.
+
+**Previously deprecated in v5, now removed.** Every alias was marked `@deprecated` in v5. In v6, TypeScript reports a compile error and JavaScript throws `TypeError: ... is not a function`. Use the managers or the `api` client instead. Some v5 notes pointed to `api.trace.*`, `api.sessions.get`, or `api.datasets.getRun(s)`, which v6 removes too, so use the replacements below.
+
+| Removed                                | Replacement                                                   |
+| -------------------------------------- | ------------------------------------------------------------- |
+| `langfuse.getPrompt(...)`              | `langfuse.prompt.get(...)`                                    |
+| `langfuse.createPrompt(...)`           | `langfuse.prompt.create(...)`                                 |
+| `langfuse.updatePrompt(...)`           | `langfuse.prompt.update(...)`                                 |
+| `langfuse.getDataset(...)`             | `langfuse.dataset.get(...)`                                   |
+| `langfuse.createDatasetItem(...)`      | `langfuse.dataset.createItem(...)`                            |
+| `langfuse.resolveMediaReferences(...)` | `langfuse.media.resolveReferences(...)`                       |
+| `langfuse.createDataset(...)`          | `langfuse.api.datasets.create(...)`                           |
+| `langfuse.getDatasetItem(id)`          | `langfuse.api.datasetItems.get(id)`                           |
+| `langfuse.fetchMedia(id)`              | `langfuse.api.media.get(id)`                                  |
+| `langfuse.fetchTrace(id)`              | `langfuse.api.observations.getMany({ traceId: id, ... })`     |
+| `langfuse.fetchTraces(...)`            | `langfuse.api.observations.getMany({ ... })`                  |
+| `langfuse.fetchObservation(id)`        | `langfuse.api.observations.getMany({ filter: ..., ... })`     |
+| `langfuse.fetchObservations(...)`      | `langfuse.api.observations.getMany(...)`                      |
+| `langfuse.fetchSessions(...)`          | `langfuse.api.observations.getMany({ sessionId, ... })`       |
+| `langfuse.getDatasetRun(...)`          | `langfuse.api.experiments.list(...)` and `.listItems(...)`    |
+| `langfuse.getDatasetRuns(...)`         | `langfuse.api.experiments.list({ datasetId, fromStartTime })` |
+
+**v5:**
+
+```typescript
+const prompt = await langfuse.getPrompt("support-agent");
+const trace = await langfuse.fetchTrace("trace-id");
+```
+
+**v6:**
+
+```typescript
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+const prompt = await langfuse.prompt.get("support-agent");
+const observations = await langfuse.api.observations.getMany({
+  traceId: "trace-id",
+  fields: "core,basic,io",
+});
+```
+
+### Deprecated Public API methods removed [#removed-public-api-methods]
+
+**Affects:** code that calls the endpoints below through `langfuse.api.*`.
+
+**Previously deprecated in v5, now removed.** Each of these methods was marked `@deprecated` in v5, with a note naming its replacement. In v6 they are gone: TypeScript reports a compile error, and JavaScript gets `TypeError` or `undefined`. There is no `api.legacy` namespace anymore. For full replacement guidance, see the [SDK method quick reference](/faq/all/deprecated-api-migration#sdk-method-quick-reference).
+
+| Removed                                              | Replacement                                                          |
+| ---------------------------------------------------- | -------------------------------------------------------------------- |
+| `api.trace.get(...)`, `api.trace.list(...)`          | `api.observations.getMany({ traceId, ... })`                         |
+| `api.sessions.*`                                     | `api.observations.getMany({ sessionId, ... })`                       |
+| `api.legacy.observationsV1.*`                        | `api.observations.getMany(...)`                                      |
+| `api.legacy.metricsV1.metrics(...)`                  | `api.metrics.metrics(...)`                                           |
+| `api.scores.getMany(...)`, `api.scores.getById(...)` | `api.scoresV3.getManyV3(...)`                                        |
+| `api.datasetRunItems.*`                              | `api.experiments.listItems(...)` or the experiment runner            |
+| `api.datasets.getRun(...)`, `.getRuns(...)`          | `api.experiments.list(...)` and `.listItems(...)`                    |
+| `api.datasets.deleteRun(...)`                        | List experiment items, then `api.trace.deleteMultiple({ traceIds })` |
+
+Removed types include the trace, session, v1 observation, dataset run, and dataset run item response types, the `ScoreV1` family, and `SdkLogEvent`.
+
+To delete an experiment's data, page through its items and delete their traces. This also deletes their observations and scores:
+
+```typescript
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+const dataset = await langfuse.dataset.get("qa-set");
+// No experiment item starts before its dataset was created, so this covers every run.
+const fromStartTime = dataset.createdAt;
+
+const traceIds = new Set<string>();
+let cursor: string | undefined;
+do {
+  const page = await langfuse.api.experiments.listItems({
+    datasetId: dataset.id,
+    experimentName: "baseline",
+    fromStartTime,
+    cursor,
+  });
+  page.data.forEach((item) => traceIds.add(item.traceId));
+  cursor = page.meta.cursor ?? undefined;
+} while (cursor);
+
+const ids = [...traceIds];
+for (let i = 0; i < ids.length; i += 1000) {
+  await langfuse.api.trace.deleteMultiple({ traceIds: ids.slice(i, i + 1000) });
+}
+```
+
+See [Dataset runs → Experiments](/faq/all/deprecated-api-migration#dataset-runs) for details.
+
 ### Trace input/output setters removed [#trace-io-setters-removed]
 
 **Affects:** code that calls `setActiveTraceIO()`, `span.setTraceIO()`, or `createTraceAttributes()`, or uses the `LangfuseTraceAttributes` type.
 
-**Breaks:** a TypeScript compile error, or a missing-export / `TypeError` at runtime. These were deprecated in v5. Trace input and output now come from the root observation.
+**Previously deprecated in v5, now removed.** All four were marked `@deprecated` in v5, pointing to `propagateAttributes()` for trace attributes. In v6, TypeScript reports a compile error, and JavaScript gets a missing export or `TypeError`. Trace input and output now come from the root observation.
 
 **v5:**
 
@@ -288,7 +304,7 @@ await startActiveObservation("request", async (span) => {
 
 **Affects:** code that calls `item.link()` or uses the `LinkDatasetItemFunction` type.
 
-**Breaks:** a TypeScript compile error, or `TypeError: item.link is not a function`. `dataset.items` is now a plain `DatasetItem[]`. Use the experiment runner to run your application on a dataset.
+**Previously deprecated in v5, now removed.** `link()` and `LinkDatasetItemFunction` were marked `@deprecated` in v5 in favor of `runExperiment()`. In v6, TypeScript reports a compile error and JavaScript throws `TypeError: item.link is not a function`. `dataset.items` is now a plain `DatasetItem[]`. Use the experiment runner to run your application on a dataset.
 
 **v5:**
 
