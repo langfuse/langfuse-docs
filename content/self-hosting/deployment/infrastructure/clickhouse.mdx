@@ -167,7 +167,7 @@ On ClickHouse Cloud and BYOC, grant only `ALTER SETTINGS`:
 GRANT ALTER SETTINGS ON default.observations_pid_tid_sorting TO 'user';
 ```
 
-ClickHouse Cloud does not support `SYSTEM MERGES`. If you include it, the grant fails with `Not enough privileges` and asks for `SYSTEM MERGES ... WITH GRANT OPTION`. You can ignore that error: on SharedMergeTree, the backfill never runs `SYSTEM MERGES` and uses `ALTER SETTINGS` to freeze merges instead.
+ClickHouse Cloud does not support `SYSTEM MERGES`. If you include it, the grant fails with `Not enough privileges` and asks for `SYSTEM MERGES ... WITH GRANT OPTION`. Re-run the statement without this grant.
 
 The grants can be created before the table exists, i.e. before the backfill starts.
 
