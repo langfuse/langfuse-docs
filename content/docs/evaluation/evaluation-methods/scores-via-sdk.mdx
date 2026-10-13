@@ -345,7 +345,7 @@ await langfuse.flush();
 </Tab>
 <Tab>
 
-You can also create scores directly via the [REST API](https://api.reference.langfuse.com/#tag/legacyscorev1/POST/api/public/scores). Authenticate using HTTP Basic Auth with your Langfuse Public Key as username and Secret Key as password.
+You can also create scores directly via the [REST API](https://api.reference.langfuse.com/#tag/scores/POST/api/public/scores). Authenticate using HTTP Basic Auth with your Langfuse Public Key as username and Secret Key as password.
 
 <Tabs items={["Numeric", "Categorical", "Boolean", "Text"]}>
 <Tab>
@@ -355,14 +355,16 @@ Numeric score values must be provided as float.
 curl -X POST https://cloud.langfuse.com/api/public/scores \
   -u "pk-lf-...":"sk-lf-..." \
   -H "Content-Type: application/json" \
-  -d '{
-    "traceId": "trace_id_here",
-    "observationId": "observation_id_here",
-    "name": "correctness",
-    "value": 0.9,
-    "dataType": "NUMERIC",
-    "comment": "Factually correct"
-  }'
+  -d '[
+    {
+      "traceId": "trace_id_here",
+      "observationId": "observation_id_here",
+      "name": "correctness",
+      "value": 0.9,
+      "dataType": "NUMERIC",
+      "comment": "Factually correct"
+    }
+  ]'
 ```
 
 </Tab>
@@ -373,14 +375,16 @@ Categorical score values must be provided as strings.
 curl -X POST https://cloud.langfuse.com/api/public/scores \
   -u "pk-lf-...":"sk-lf-..." \
   -H "Content-Type: application/json" \
-  -d '{
-    "traceId": "trace_id_here",
-    "observationId": "observation_id_here",
-    "name": "accuracy",
-    "value": "partially correct",
-    "dataType": "CATEGORICAL",
-    "comment": "Some factual errors"
-  }'
+  -d '[
+    {
+      "traceId": "trace_id_here",
+      "observationId": "observation_id_here",
+      "name": "accuracy",
+      "value": "partially correct",
+      "dataType": "CATEGORICAL",
+      "comment": "Some factual errors"
+    }
+  ]'
 ```
 
 </Tab>
@@ -391,14 +395,16 @@ Boolean scores must be provided as a float, where `1` is true and `0` is false. 
 curl -X POST https://cloud.langfuse.com/api/public/scores \
   -u "pk-lf-...":"sk-lf-..." \
   -H "Content-Type: application/json" \
-  -d '{
-    "traceId": "trace_id_here",
-    "observationId": "observation_id_here",
-    "name": "helpfulness",
-    "value": 0,
-    "dataType": "BOOLEAN",
-    "comment": "Incorrect answer"
-  }'
+  -d '[
+    {
+      "traceId": "trace_id_here",
+      "observationId": "observation_id_here",
+      "name": "helpfulness",
+      "value": 0,
+      "dataType": "BOOLEAN",
+      "comment": "Incorrect answer"
+    }
+  ]'
 ```
 
 </Tab>
@@ -409,14 +415,16 @@ Text score values must be provided as strings between 1 and 500 characters.
 curl -X POST https://cloud.langfuse.com/api/public/scores \
   -u "pk-lf-...":"sk-lf-..." \
   -H "Content-Type: application/json" \
-  -d '{
-    "traceId": "trace_id_here",
-    "observationId": "observation_id_here",
-    "name": "reviewer_notes",
-    "value": "The response was helpful but could be more concise.",
-    "dataType": "TEXT",
-    "comment": "Reviewed by QA team"
-  }'
+  -d '[
+    {
+      "traceId": "trace_id_here",
+      "observationId": "observation_id_here",
+      "name": "reviewer_notes",
+      "value": "The response was helpful but could be more concise.",
+      "dataType": "TEXT",
+      "comment": "Reviewed by QA team"
+    }
+  ]'
 ```
 
 </Tab>
@@ -502,13 +510,15 @@ await langfuse.flush();
 curl -X POST https://cloud.langfuse.com/api/public/scores \
   -u "pk-lf-...":"sk-lf-..." \
   -H "Content-Type: application/json" \
-  -d '{
-    "sessionId": "session_id_here",
-    "name": "session_quality",
-    "value": 0.85,
-    "dataType": "NUMERIC",
-    "comment": "Overall conversation quality"
-  }'
+  -d '[
+    {
+      "sessionId": "session_id_here",
+      "name": "session_quality",
+      "value": 0.85,
+      "dataType": "NUMERIC",
+      "comment": "Overall conversation quality"
+    }
+  ]'
 ```
 
 </Tab>
@@ -780,7 +790,7 @@ await langfuse.flush();
 </Tab>
 <Tab>
 
-You can also enforce score configs via the [REST API](https://api.reference.langfuse.com/#tag/legacyscorev1/POST/api/public/scores) by providing a `configId`.
+You can also enforce score configs via the [REST API](https://api.reference.langfuse.com/#tag/scores/POST/api/public/scores) by providing a `configId`.
 
 <Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores", "Text Scores"]}>
 <Tab>
@@ -790,16 +800,18 @@ When ingesting numeric scores, you can provide the value as a float. If you prov
 curl -X POST https://cloud.langfuse.com/api/public/scores \
   -u "pk-lf-...":"sk-lf-..." \
   -H "Content-Type: application/json" \
-  -d '{
-    "id": "unique_id",
-    "traceId": "trace_id_here",
-    "observationId": "observation_id_here",
-    "name": "accuracy",
-    "value": 0.9,
-    "dataType": "NUMERIC",
-    "configId": "78545-6565-3453654-43543",
-    "comment": "Factually correct"
-  }'
+  -d '[
+    {
+      "id": "unique_id",
+      "traceId": "trace_id_here",
+      "observationId": "observation_id_here",
+      "name": "accuracy",
+      "value": 0.9,
+      "dataType": "NUMERIC",
+      "configId": "78545-6565-3453654-43543",
+      "comment": "Factually correct"
+    }
+  ]'
 ```
 
 </Tab>
@@ -810,16 +822,18 @@ Categorical scores are used to evaluate data that falls into specific categories
 curl -X POST https://cloud.langfuse.com/api/public/scores \
   -u "pk-lf-...":"sk-lf-..." \
   -H "Content-Type: application/json" \
-  -d '{
-    "id": "unique_id",
-    "traceId": "trace_id_here",
-    "observationId": "observation_id_here",
-    "name": "correctness",
-    "value": "correct",
-    "dataType": "CATEGORICAL",
-    "configId": "12345-6565-3453654-43543",
-    "comment": "Factually correct"
-  }'
+  -d '[
+    {
+      "id": "unique_id",
+      "traceId": "trace_id_here",
+      "observationId": "observation_id_here",
+      "name": "correctness",
+      "value": "correct",
+      "dataType": "CATEGORICAL",
+      "configId": "12345-6565-3453654-43543",
+      "comment": "Factually correct"
+    }
+  ]'
 ```
 
 </Tab>
@@ -830,16 +844,18 @@ When ingesting boolean scores, you can provide the value as a float. If you prov
 curl -X POST https://cloud.langfuse.com/api/public/scores \
   -u "pk-lf-...":"sk-lf-..." \
   -H "Content-Type: application/json" \
-  -d '{
-    "id": "unique_id",
-    "traceId": "trace_id_here",
-    "observationId": "observation_id_here",
-    "name": "helpfulness",
-    "value": 1,
-    "dataType": "BOOLEAN",
-    "configId": "93547-6565-3453654-43543",
-    "comment": "Factually correct"
-  }'
+  -d '[
+    {
+      "id": "unique_id",
+      "traceId": "trace_id_here",
+      "observationId": "observation_id_here",
+      "name": "helpfulness",
+      "value": 1,
+      "dataType": "BOOLEAN",
+      "configId": "93547-6565-3453654-43543",
+      "comment": "Factually correct"
+    }
+  ]'
 ```
 
 </Tab>
@@ -850,16 +866,18 @@ When ingesting text scores, provide the value as a string (1–500 characters). 
 curl -X POST https://cloud.langfuse.com/api/public/scores \
   -u "pk-lf-...":"sk-lf-..." \
   -H "Content-Type: application/json" \
-  -d '{
-    "id": "unique_id",
-    "traceId": "trace_id_here",
-    "observationId": "observation_id_here",
-    "name": "reviewer_notes",
-    "value": "The response was helpful but could be more concise.",
-    "dataType": "TEXT",
-    "configId": "24680-6565-3453654-43543",
-    "comment": "Reviewed by QA team"
-  }'
+  -d '[
+    {
+      "id": "unique_id",
+      "traceId": "trace_id_here",
+      "observationId": "observation_id_here",
+      "name": "reviewer_notes",
+      "value": "The response was helpful but could be more concise.",
+      "dataType": "TEXT",
+      "configId": "24680-6565-3453654-43543",
+      "comment": "Reviewed by QA team"
+    }
+  ]'
 ```
 
 </Tab>

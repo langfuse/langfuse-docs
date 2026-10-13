@@ -112,13 +112,15 @@ langfuse.score.create({
 curl -X POST https://cloud.langfuse.com/api/public/scores \
   -H "Content-Type: application/json" \
   -H "Authorization: Basic <base64_encoded_credentials>" \
-  -d '{
-    "traceId": "trace-123",
-    "observationId": "obs-456",
-    "name": "output",
-    "value": "The corrected output text here",
-    "dataType": "CORRECTION"
-  }'
+  -d '[
+    {
+      "traceId": "trace-123",
+      "observationId": "obs-456",
+      "name": "output",
+      "value": "The corrected output text here",
+      "dataType": "CORRECTION"
+    }
+  ]'
 ```
 
 </Tab>
