@@ -288,7 +288,7 @@ The deprecated endpoint's filters map to v2 `filters` entries: `traceName` and `
 
 **Deprecated:** `GET /scores` (v1), `GET /scores/{scoreId}`, `GET /v2/scores`, `GET /v2/scores/{scoreId}`. Langfuse Cloud serves these endpoints until <V4CutoverDate />; migrate to v4 before this date. On Langfuse v4, these will return `404`.
 
-**Replacement:** [`GET /v3/scores`](https://api.reference.langfuse.com/#tag/scoresv3/GET/api/public/v3/scores). See the [Scores API v3 announcement](/changelog/2026-06-10-scores-v3-api) for background.
+**Replacement:** [`GET /v3/scores`](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores). See the [Scores API v3 announcement](/changelog/2026-06-10-scores-v3-api) for background.
 
 This migration applies only to score reads. Score writes remain supported through `POST /scores` and the current SDK score helpers. The SDKs batch score writes as `score-create` events through `POST /ingestion`; Langfuse v4 continues to accept those events after the cutover. This also covers evaluations created by the experiment runner and third-party integrations that use the current SDK score helpers. No client update or direct REST workaround is required for these score writes.
 
@@ -302,6 +302,13 @@ This migration applies only to score reads. Score writes remain supported throug
 | JS/TS v5  | `client.api.scores.getById(scoreId)`    | `client.api.scoresV3.getManyV3({ id: scoreId })` |
 
 Scores v3 requires Python SDK `4.8.1+` or JS/TS SDK `5.5.0+`. It always returns a list response, including when filtering by ID.
+
+In Python SDK v5 and JS/TS SDK v6, Scores API v3 reads move into the `scores` namespace next to score creation and deletion. `client.api.scores.get_many(...)` / `client.api.scores.getMany(...)` read `GET /v3/scores` and take the v3 parameters. `client.api.scores_v3` / `client.api.scoresV3` are removed:
+
+| SDK       | Removed                                 | Use instead                       |
+| --------- | --------------------------------------- | --------------------------------- |
+| Python v5 | `client.api.scores_v3.get_many_v3(...)` | `client.api.scores.get_many(...)` |
+| JS/TS v6  | `client.api.scoresV3.getManyV3(...)`    | `client.api.scores.getMany(...)`  |
 
 Python v4 and JS/TS v5 do not expose read wrappers for the v1 `GET /scores` or `GET /scores/{id}` endpoints. Calls to those routes come from direct REST usage or an older SDK. Do not migrate current score-creation helpers merely because they send supported `score-create` events through `/ingestion`.
 
@@ -484,7 +491,7 @@ All paths are relative to `/api/public`.
 | `GET /traces`, `/traces/{id}`                                                       | [Observations API v2, filtered by `traceId`](#traces)                                                                                                                                                                                    | [Reference](https://api.reference.langfuse.com/#tag/observations/GET/api/public/v2/observations)  |
 | `GET /observations`, `/observations/{id}`                                           | [Observations API v2](#observations)                                                                                                                                                                                                     | [Reference](https://api.reference.langfuse.com/#tag/observations/GET/api/public/v2/observations)  |
 | `GET /sessions`, `/sessions/{id}`                                                   | [Observations API v2, filtered by `sessionId`](#sessions)                                                                                                                                                                                | [Reference](https://api.reference.langfuse.com/#tag/observations/GET/api/public/v2/observations)  |
-| `GET /scores`, `/v2/scores` (+ `/{id}`)                                             | [Scores API v3](#scores)                                                                                                                                                                                                                 | [Reference](https://api.reference.langfuse.com/#tag/scoresv3/GET/api/public/v3/scores)            |
+| `GET /scores`, `/v2/scores` (+ `/{id}`)                                             | [Scores API v3](#scores)                                                                                                                                                                                                                 | [Reference](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores)              |
 | `GET /metrics`                                                                      | [Metrics API v2](#metrics)                                                                                                                                                                                                               | [Reference](https://api.reference.langfuse.com/#tag/metrics/GET/api/public/v2/metrics)            |
 | `GET /metrics/daily`                                                                | [Metrics API v2](#daily-metrics-migration)                                                                                                                                                                                               | [Reference](https://api.reference.langfuse.com/#tag/metrics/GET/api/public/v2/metrics)            |
 | `GET /datasets/{name}/runs`, `/datasets/{name}/runs/{runName}`                      | [`GET /experiments`, then `GET /experiment-items`](#dataset-runs)                                                                                                                                                                        | [Reference](https://api.reference.langfuse.com/#tag/experiments/GET/api/public/experiments)       |
