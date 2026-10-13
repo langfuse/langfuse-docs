@@ -1,0 +1,31 @@
+---
+date: 2026-10-13
+title: Use any System One decision model
+description: Point the TypeSafe System One adapter at a custom base URL to run decision-model evaluators with SubQ Snap, Microsoft-Decision-1, or Strands Decider.
+author: Hassieb
+canonical: /docs/evaluation/evaluation-methods/decision-models#connect-system-one-compatible
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+Several vendors now ship decision models that speak TypeSafe's System One API. Langfuse's **TypeSafe (System One)** adapter works with any of them: choose the **Custom** upstream, enter the vendor's base URL, and add the model name under **Custom models**. Your [decision-model evaluators](/docs/evaluation/evaluation-methods/decision-models) then run on that model with the same Choice, Score, and Yes / no questions.
+
+| Vendor                                                                                        | Model                                   | Base URL                                         | Notes                                                                                                                                                         |
+| --------------------------------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Subquadratic SubQ Snap](https://subq.ai/introducing-subq-snap)                               | `subq-snap-preview`                     | `https://api.subq.ai/v1`                         | API key from the SubQ console.                                                                                                                                |
+| [Microsoft-Decision-1](https://commandline.microsoft.com/microsoft-decision-1-model-foundry/) | Your Foundry deployment name            | `<your-foundry-endpoint>/providers/microsoft/v1` | Enter your Foundry key as the API key and add it as an `api-key` extra header.                                                                                |
+| [Strands Decider](https://strandsagents.com/blog/introducing-strands-decider/)                | Any name, for example `strands-decider` | The URL of your `strands-decider serve` instance | Open weights you serve yourself. The server has no authentication, so use any placeholder API key. Requires a self-hosted Langfuse that can reach the server. |
+
+To set one up, go to **Settings → LLM Connections**, add a connection with the **TypeSafe (System One)** adapter, select the **Custom** upstream, and enter the **Custom base URL** without the `/systemone` suffix. Langfuse appends it for you.
+
+<Cards num={1}>
+  <Card
+    title="Connect a System One-compatible model"
+    href="/docs/evaluation/evaluation-methods/decision-models#connect-system-one-compatible"
+    icon={<Book />}
+    arrow
+  />
+</Cards>
