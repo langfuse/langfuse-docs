@@ -75,11 +75,10 @@ export function PropagationRestrictionsCallout({
         {(includesMetadata || isGeneric) && (
           <>
             <li>
-              Metadata values are <strong>JSON-encoded</strong>, strings
-              included, in Python SDK v5 and JS/TS SDK v6. Values can be
-              strings, numbers, booleans, lists, or objects, and the{" "}
-              <strong>encoded value must be ≤200 characters</strong> (the quotes
-              around a string count). Top-level <code>null</code> /{" "}
+              In Python SDK v5 and JS/TS SDK v6, metadata values can be strings,
+              numbers, booleans, lists, or objects, and each{" "}
+              <strong>value must be ≤200 characters as JSON</strong> (a string
+              can have at most 198). Top-level <code>null</code> /{" "}
               <code>None</code> values are dropped with a warning. In Python SDK
               v4 and JS/TS SDK v5, use string values ≤200 characters.
             </li>
