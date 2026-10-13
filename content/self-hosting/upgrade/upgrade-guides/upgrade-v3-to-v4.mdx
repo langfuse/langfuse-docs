@@ -96,13 +96,15 @@ The following legacy endpoints are unavailable on deployments that run the defau
 
 Ingestion, replaced by [OpenTelemetry-based ingestion](/integrations/native/opentelemetry):
 
-| Endpoint                       | Behavior on v4                                                                                         |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| `POST /api/public/ingestion`   | Keeps the `207` status code, but returns `400` for every event type except `score-create` or `sdk-log` |
-| `POST /api/public/traces`      | Returns `404`                                                                                          |
-| `POST /api/public/spans`       | Returns `404`                                                                                          |
-| `POST /api/public/generations` | Returns `404`                                                                                          |
-| `POST /api/public/events`      | Returns `404`                                                                                          |
+| Endpoint                        | Behavior on v4                                                                                                 |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `POST /api/public/ingestion`    | Keeps the `207` status code, but returns `400` for every event type except `score-create`, including `sdk-log` |
+| `POST /api/public/traces`       | Returns `404`                                                                                                  |
+| `POST /api/public/spans`        | Returns `404`                                                                                                  |
+| `PATCH /api/public/spans`       | Returns `404`                                                                                                  |
+| `POST /api/public/generations`  | Returns `404`                                                                                                  |
+| `PATCH /api/public/generations` | Returns `404`                                                                                                  |
+| `POST /api/public/events`       | Returns `404`                                                                                                  |
 
 Reads, replaced by the [Observations API v2](/docs/api-and-data-platform/features/public-api#v2):
 
@@ -114,8 +116,6 @@ Reads, replaced by the [Observations API v2](/docs/api-and-data-platform/feature
 | `GET /api/public/observations/:id` | Returns `404`  |
 | `GET /api/public/sessions`         | Returns `404`  |
 | `GET /api/public/sessions/:id`     | Returns `404`  |
-| `GET /api/public/spans`            | Returns `404`  |
-| `GET /api/public/generations`      | Returns `404`  |
 
 Scores, replaced by the [Scores API v3](https://api.reference.langfuse.com/#tag/scoresv3):
 
