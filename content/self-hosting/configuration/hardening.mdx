@@ -37,7 +37,7 @@ By default, anyone who can reach the Langfuse web container can sign up with ema
 
 ### Disable open sign-up [#disable-signup]
 
-`AUTH_DISABLE_SIGNUP=true` blocks any new account creation, including users who have an open project invite but no account yet. Combine with [headless initialization](/self-hosting/administration/headless-initialization) or invite existing users from inside the app.
+`AUTH_DISABLE_SIGNUP=true` blocks any new account creation, including users who have an open project invite but no account yet. Combine with [headless initialization](/self-hosting/administration/headless-initialization) or invite existing users from inside the app. Nobody signs up on such an instance, so nobody sees the newsletter step that new users get after sign-up either. To get the self-hosting updates, subscribe on the [OSS newsletter](/self-hosting/oss-newsletter) page.
 
 ### Force SSO for specific email domains [#sso-enforcement]
 
@@ -146,7 +146,7 @@ Administrative actions, including blob storage integration validate/run-now and 
 
 ## Telemetry [#telemetry]
 
-Langfuse self-hosted reports anonymized usage telemetry by default. Set `TELEMETRY_ENABLED=false` to opt out; note that instances running with an Enterprise Edition license key always report telemetry. See [Telemetry](/self-hosting/security/telemetry) for the exact fields collected.
+Langfuse self-hosted reports anonymized usage telemetry by default. Set `TELEMETRY_ENABLED=false` to opt out; note that instances running with an Enterprise Edition license key always report telemetry. See [Telemetry](/self-hosting/security/telemetry) for the exact fields collected. `TELEMETRY_ENABLED` doesn't cover the [newsletter step](/self-hosting/security/telemetry#hostnames-browser): to stop new users' browsers from contacting `langfuse.com` for it, set `LANGFUSE_DISABLE_SIGNUP_ONBOARDING=true`.
 
 ## Reporting security issues [#disclosure]
 

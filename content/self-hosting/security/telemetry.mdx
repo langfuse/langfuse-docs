@@ -75,12 +75,13 @@ The list does not include infrastructure you configure yourself: Postgres, Click
 
 ### Browser [#hostnames-browser]
 
-The Langfuse UI loads a few static assets from external hosts. These requests are made by your users' browsers, not by the Langfuse containers:
+The Langfuse UI makes a few requests to external hosts. These requests are made by your users' browsers, not by the Langfuse containers:
 
-| Hostname              | Purpose                                                                                                                         |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `img.shields.io`      | GitHub stars badge in the sidebar. It is no longer loaded once the user dismisses the card.                                     |
-| `static.langfuse.com` | Onboarding videos on empty pages, for example on the traces, sessions, scores, and datasets pages before any data is available. |
+| Hostname              | Purpose                                                                                                                                                                                                                                                                                                                                                                           |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `img.shields.io`      | GitHub stars badge in the sidebar. It is no longer loaded once the user dismisses the card.                                                                                                                                                                                                                                                                                       |
+| `langfuse.com`        | Newsletter step after sign-up, from `>=v4.61.0`. The browser checks that `https://langfuse.com/api/latest-releases` is reachable; only when the user clicks Subscribe does it send their email address, the lists the step offers them, and a fixed `source` tag to `https://langfuse.com/api/productUpdateSignup`. Skip the step with `LANGFUSE_DISABLE_SIGNUP_ONBOARDING=true`. |
+| `static.langfuse.com` | Onboarding videos on empty pages, for example on the traces, sessions, scores, and datasets pages before any data is available.                                                                                                                                                                                                                                                   |
 
 If you configure [transactional emails](/self-hosting/configuration/transactional-emails), the Langfuse logo in these emails is loaded from `static.langfuse.com` by the recipient's email client.
 
