@@ -27,6 +27,7 @@ You only need to change something if one of these applies to you.
 - **You self-host Langfuse v3, or v4 older than v4.59.0**, or run Node.js older than 22, or use `@langchain/core` older than 1.0 → [Minimum versions](#minimum-versions)
 - **You pass `requestOptions` to a generated API method without query parameters or a body**, such as `api.datasets.get(name, { timeoutInSeconds })` → [Request placeholder before `requestOptions`](#request-placeholder)
 - **You read the response of `api.scores.create` or call `api.legacy.scoreV1.*` directly** → [`api.scores` response and delete](#scores-api)
+- **You call `api.scoresV3.getManyV3`** → [Score reads move to `api.scores.getMany`](#scores-reads)
 - **A proxy between your app and Langfuse rejects gzip-compressed requests** → [Under the hood](#under-the-hood)
 
 **Previously deprecated in v5, now removed:**
@@ -165,6 +166,36 @@ if ("id" in response) {
 await langfuse.api.scores.delete("score-id");
 ```
 
+### Score reads move to `api.scores.getMany` [#scores-reads]
+
+**Affects:** code that calls `langfuse.api.scoresV3.getManyV3(...)`.
+
+**Breaks:** TypeScript compile errors, or `TypeError` at runtime in JavaScript, because `api.scoresV3` no longer exists.
+
+Scores API v3 reads moved into the `scores` namespace, next to `create` and `delete`. The arguments, the `GetScoresV3Request` and `GetScoresV3Response` types, and the response are unchanged. The v5 `api.scores.getMany({ scoreIds })` read Scores API v2; in v6, the same method name reads Scores API v3 and filters by `id` instead of `scoreIds`.
+
+**v5:**
+
+```typescript
+const scores = await langfuse.api.scoresV3.getManyV3({
+  traceId: "trace-id",
+  fields: "subject",
+});
+```
+
+**v6:**
+
+```typescript
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+const scores = await langfuse.api.scores.getMany({
+  traceId: "trace-id",
+  fields: "subject",
+});
+```
+
 ## Previously deprecated, now removed [#previously-deprecated]
 
 v5 already marked each of these `@deprecated` and named the replacement. If you moved to the replacement, nothing changes.
@@ -232,7 +263,7 @@ const observations = await langfuse.api.observations.getMany({
 | `api.datasets.getRun(...)`, `.getRuns(...)`               | `api.experiments.list(...)` and `.listItems(...)`                    |
 | `api.datasets.deleteRun(...)`                             | List experiment items, then `api.trace.deleteMultiple({ traceIds })` |
 
-`api.scores.getMany` keeps its name but now reads Scores API v3 (`GET /api/public/v3/scores`) and takes the v3 parameters, for example `id` instead of `scoreIds`. The v5 `api.scoresV3.getManyV3(...)` still works in v6 as a deprecated alias for `api.scores.getMany(...)`: it is marked `@deprecated`, logs a one-time warning, and will be removed in a future major release.
+`api.scores.getMany` keeps its name but now reads Scores API v3; see [Score reads move to `api.scores.getMany`](#scores-reads).
 
 Removed types include the trace, session, v1 observation, dataset run, and dataset run item response types, the `ScoreV1` family, and `SdkLogEvent`.
 

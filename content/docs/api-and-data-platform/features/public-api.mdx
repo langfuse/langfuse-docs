@@ -129,8 +129,8 @@ observations and metrics read resources and `api.legacy.score_v1` /
 `api.legacy.scoreV1` (including `create` and `delete`) are removed, as are the
 `api.scores` v2 reads. In these versions, `api.scores` holds all score
 endpoints: `api.scores.get_many` / `api.scores.getMany` reads Scores API v3,
-next to `create` and `delete`. `api.scores_v3` / `api.scoresV3` remain as
-deprecated aliases. Use `api.observations`, `api.metrics`, and `api.scores`
+next to `create` and `delete`, and `api.scores_v3` / `api.scoresV3` are
+removed. Use `api.observations`, `api.metrics`, and `api.scores`
 instead.
 
 Observations API v2 and Metrics API v2 are available on Langfuse Cloud and
@@ -549,7 +549,7 @@ curl \
   "https://cloud.langfuse.com/api/public/v3/scores?traceId=trace-1,trace-2&fields=details,subject"
 ```
 
-The generated SDK clients expose the same endpoint: `api.scores.get_many` in Python SDK v5+ and `api.scores.getMany` in JS/TS SDK v6+ (`api.scores_v3.get_many_v3` / `api.scoresV3.getManyV3` in earlier versions, kept as deprecated aliases); see [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk). Score creation uses separate SDK helpers (e.g. `create_score` in Python); this client is for reads.
+The generated SDK clients expose the same endpoint: `api.scores.get_many` in Python SDK v5+ and `api.scores.getMany` in JS/TS SDK v6+ (`api.scores_v3.get_many_v3` / `api.scoresV3.getManyV3` in earlier versions); see [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk). Score creation uses separate SDK helpers (e.g. `create_score` in Python); this client is for reads.
 
 ### Experiments API [#experiments]
 

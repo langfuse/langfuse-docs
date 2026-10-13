@@ -24,6 +24,7 @@ You only need to change something if one of these applies to you.
 
 - **You self-host Langfuse v3, or v4 older than v4.59.0**, or run Python 3.10, `openai<1`, or `langchain-core<1` → [Minimum versions](#minimum-versions)
 - **You call `api.scores.create` or `api.legacy.score_v1.*` directly** → [`api.scores` takes request objects](#scores-api)
+- **You call `api.scores_v3.get_many_v3`** → [Score reads move to `api.scores.get_many`](#scores-reads)
 - **You call `run_batched_evaluation()`** → [Batched evaluation reads observations only](#batched-evaluation)
 - **A proxy between your app and Langfuse rejects gzip-compressed requests** → [Under the hood](#under-the-hood)
 
@@ -88,6 +89,30 @@ langfuse.api.scores.create(
     request=CreateScoreRequest(name="accuracy", value=0.9, trace_id="trace-id")
 )
 langfuse.api.scores.delete(score_id="score-id")
+```
+
+### Score reads move to `api.scores.get_many` [#scores-reads]
+
+**Affects:** code that calls `langfuse.api.scores_v3.get_many_v3(...)` or `langfuse.async_api.scores_v3.get_many_v3(...)`.
+
+**Breaks:** `AttributeError`, because `api.scores_v3` no longer exists.
+
+Scores API v3 reads moved into the `scores` namespace, next to `create` and `delete`. The arguments and the `GetScoresV3Response` response are unchanged. The v4 `api.scores.get_many(score_ids=...)` read Scores API v2; in v5, the same method name reads Scores API v3 and filters by `id=` instead of `score_ids=`.
+
+**v4:**
+
+```python
+scores = langfuse.api.scores_v3.get_many_v3(trace_id="trace-id", fields="subject")
+```
+
+**v5:**
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+scores = langfuse.api.scores.get_many(trace_id="trace-id", fields="subject")
 ```
 
 ### Batched evaluation reads observations only [#batched-evaluation]
@@ -163,7 +188,7 @@ v4 already marked each of these as deprecated and named the replacement. If you 
 
 `api.trace` keeps `delete` and `delete_multiple`. `api.datasets` keeps `list`, `get`, and `create`.
 
-`api.scores.get_many` keeps its name but now reads Scores API v3 (`GET /api/public/v3/scores`) and takes the v3 parameters, for example `id=` instead of `score_ids=`. The v4 `api.scores_v3.get_many_v3(...)` still works in v5 as a deprecated alias for `api.scores.get_many(...)`: it emits a `DeprecationWarning` and will be removed in a future major release.
+`api.scores.get_many` keeps its name but now reads Scores API v3; see [Score reads move to `api.scores.get_many`](#scores-reads).
 
 **v4:**
 

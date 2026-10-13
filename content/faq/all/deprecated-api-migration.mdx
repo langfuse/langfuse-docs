@@ -303,9 +303,9 @@ This migration applies only to score reads. Score writes remain supported throug
 
 Scores v3 requires Python SDK `4.8.1+` or JS/TS SDK `5.5.0+`. It always returns a list response, including when filtering by ID.
 
-In Python SDK v5 and JS/TS SDK v6, Scores API v3 reads move into the `scores` namespace next to score creation and deletion. `client.api.scores.get_many(...)` / `client.api.scores.getMany(...)` read `GET /v3/scores` and take the v3 parameters. `client.api.scores_v3.get_many_v3(...)` / `client.api.scoresV3.getManyV3(...)` keep working as deprecated aliases:
+In Python SDK v5 and JS/TS SDK v6, Scores API v3 reads move into the `scores` namespace next to score creation and deletion. `client.api.scores.get_many(...)` / `client.api.scores.getMany(...)` read `GET /v3/scores` and take the v3 parameters. `client.api.scores_v3` / `client.api.scoresV3` are removed:
 
-| SDK       | Deprecated alias                        | Use instead                       |
+| SDK       | Removed                                 | Use instead                       |
 | --------- | --------------------------------------- | --------------------------------- |
 | Python v5 | `client.api.scores_v3.get_many_v3(...)` | `client.api.scores.get_many(...)` |
 | JS/TS v6  | `client.api.scoresV3.getManyV3(...)`    | `client.api.scores.getMany(...)`  |
