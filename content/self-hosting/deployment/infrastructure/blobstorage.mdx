@@ -106,13 +106,13 @@ To configure batch exports in your environment, configure the following environm
 | `BATCH_EXPORT_PAGE_SIZE`                     | `500`              | Optional page size for streaming exports to S3 to avoid memory issues. The page size can be adjusted if needed to optimize performance.                                            |
 | `BATCH_EXPORT_ROW_LIMIT`                     | `1_500_000`        | Maximum amount of rows that can be exported in a single batch export.                                                                                                              |
 
-#### S3 Compatibility
+#### S3 Compatibility [#s3-compatibility]
 
 The following settings apply to all S3 use-cases (events, media, batch exports) and help with S3-compatible stores that are not fully compatible with the Amazon S3 API.
 
-| Variable                                        | Required / Default | Description                                                                                                                                                                                                                                                                          |
-| ----------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `LANGFUSE_S3_DELETE_OBJECTS_CHECKSUM_ALGORITHM` |                    | Checksum algorithm for S3 DeleteObjects requests: `MD5`, `CRC32`, `CRC32C`, `CRC64NVME`, `SHA1`, or `SHA256`. If unset, the AWS SDK default (`CRC32`) is used. Set to `MD5` if your storage provider rejects deletions with a `MissingContentMD5` error (e.g. older MinIO versions). |
+| Variable                                        | Required / Default | Description                                                                                                                                                                                                                                                                                                                                                                |
+| ----------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_S3_DELETE_OBJECTS_CHECKSUM_ALGORITHM` |                    | Checksum algorithm for S3 DeleteObjects requests: `MD5`, `CRC32`, `CRC32C`, `CRC64NVME`, `SHA1`, or `SHA256`. If unset, the AWS SDK default (`CRC32`) is used. Set to `MD5` if your storage provider rejects deletions with a `MissingContentMD5` error (e.g. older MinIO versions). `MD5` cannot be used in [FIPS mode](/self-hosting/configuration/hardening#fips-mode). |
 
 ## Multi-modal LLM-as-a-Judge [#multi-modal-llm-as-a-judge]
 
@@ -348,6 +348,7 @@ Please follow the MinIO documentation or use a cloud provider managed blob store
 
 MinIO versions before `RELEASE.2025-02-03` reject S3 DeleteObjects requests with a `MissingContentMD5` error, which breaks data retention and deletion jobs.
 If you cannot upgrade MinIO, set `LANGFUSE_S3_DELETE_OBJECTS_CHECKSUM_ALGORITHM=MD5` to send the legacy `Content-MD5` header instead.
+This workaround is not available in [FIPS mode](/self-hosting/configuration/hardening#fips-mode), which refuses MD5.
 
 </Callout>
 
@@ -465,6 +466,12 @@ LANGFUSE_S3_EVENT_UPLOAD_PREFIX=events/
 Langfuse provides a native OCI Object Storage integration using the OCI SDK, which supports multiple IAM authentication methods suitable for different deployment environments.
 
 To enable the native OCI integration, set `LANGFUSE_USE_OCI_NATIVE_OBJECT_STORAGE=true` and choose an authentication method via `LANGFUSE_OCI_AUTH_TYPE`.
+
+<Callout type="info">
+
+The OCI SDK hashes every upload part with MD5, so the native integration cannot be used in [FIPS mode](/self-hosting/configuration/hardening#fips-mode). Use OCI's S3-compatible API instead.
+
+</Callout>
 
 | Variable                                 | Required / Default | Description                                                                                                                     |
 | ---------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |

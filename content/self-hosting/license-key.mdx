@@ -22,6 +22,7 @@ Some additional Enterprise features require a license key:
 - [Organization Creators](/self-hosting/administration/organization-creators)
 - [Org Management API and SCIM](/docs/administration/scim-and-org-api)
 - [Instance Management API](/self-hosting/administration/instance-management-api)
+- [FIPS mode](/self-hosting/configuration/hardening#fips-mode)
 
 See [pricing page](/pricing-self-host) for more details on Langfuse Enterprise.
 
@@ -53,6 +54,7 @@ Before doing so, make sure you no longer rely on any of the Enterprise features 
 - **Audit logs:** The viewer and read API become unavailable. Export any logs you will need.
 - **Provisioning and administration:** The Organization Management API, SCIM, and Instance Management API return `403`. Replace dependent automation before removal; existing resources remain.
 - **UI and organization creation:** UI customizations revert to defaults, and the organization creator allowlist stops restricting eligible users.
+- **FIPS mode:** with `LANGFUSE_REQUIRE_FIPS=true`, the web and worker containers refuse to start without a license key. Remove `LANGFUSE_REQUIRE_FIPS` before you remove the key.
 
 </Details>
 

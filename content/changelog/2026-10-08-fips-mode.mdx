@@ -1,0 +1,25 @@
+---
+date: 2026-10-08
+title: Run self-hosted Langfuse on FIPS 140-3 validated modules
+seoTitle: FIPS mode and hardened images for self-hosted Langfuse
+description: Self-Hosted Enterprise deployments can turn on FIPS mode, which runs Langfuse's cryptography on FIPS 140-3 validated modules and refuses to start otherwise. The web and worker images are now built on Iron Bank's hardened Red Hat UBI 9.
+author: Steffen
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Set `LANGFUSE_REQUIRE_FIPS=true` on the web and worker containers, and Langfuse runs its cryptography on FIPS 140-3 validated modules operated in approved mode: TLS to Postgres, ClickHouse, Redis and blob storage, hashing, and application-level encryption. For example:
+
+- Deploy Langfuse in a government or FedRAMP environment that requires validated cryptographic modules.
+- Give your assessor the certificate number, tested environment, and enforcement mechanism for each module.
+- Catch misconfiguration early: startup fails if a host is not in FIPS mode, no Enterprise license is set, or a storage option needs MD5.
+
+FIPS mode uses Red Hat's RHEL 9 OpenSSL FIPS Provider (CMVP [#4857](https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/4857)) for Node.js and the Prisma engines, and the Go Cryptographic Module v1.0.0 (CMVP [#5247](https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/5247)) for the ClickHouse migration CLI. The hosts must run in FIPS mode. Langfuse itself is not FIPS validated: the CMVP validates modules, not products.
+
+From v4.55.0, the `langfuse/langfuse` and `langfuse/langfuse-worker` images are built on Iron Bank's hardened Red Hat UBI 9 images, for every deployment. They ship no package manager, `curl`, or Python, so use `wget` for [container health checks](/self-hosting/configuration/health-readiness-endpoints#container-health-checks), and use multi-stage builds for images that extend Langfuse's.
+
+FIPS mode is available in Self-Hosted Enterprise from v4.55.0; we recommend v4.57.0 or later.
+
+**Learn more:** [FIPS mode](/self-hosting/configuration/hardening#fips-mode) · [Hardened images](/self-hosting/configuration/hardening#hardened-images)
