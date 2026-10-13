@@ -157,7 +157,7 @@ Ensure that both entities have the necessary permissions to access the bucket:
 }
 ```
 
-The same IAM role or user also works for the project-level [Blob Storage Export integration](/docs/api-and-data-platform/features/export-to-blob-storage#set-up-an-export). On self-hosted deployments, leave **Access Key ID** and **Secret Access Key** blank in that integration's Amazon S3 settings to use the IAM role instead of static credentials. This fallback only applies to the Amazon S3 provider; it is not available on Langfuse Cloud or for Azure Blob Storage / S3 Compatible Storage.
+The same IAM role or user also works for the project-level [Blob Storage Export integration](/docs/api-and-data-platform/features/export-to-blob-storage#set-up-an-export). On self-hosted deployments, leave **Access Key ID** and **Secret Access Key** blank in that integration's Amazon S3 settings to use the IAM role instead of static credentials. This fallback only applies to the Amazon S3 provider on self-hosted deployments. Exports then run with the role's full permissions, including access to the platform buckets, and project members choose the target bucket; a [dedicated IAM user scoped to the export prefix](/docs/api-and-data-platform/features/export-to-blob-storage#bucket-permissions) is safer. Google Cloud Storage has its own default-credentials option; see [Blob Storage Export integration](#gcs-export-credentials).
 
 <Callout type="info">
 
@@ -429,6 +429,16 @@ The value applies across all authentication methods (JSON credentials, key file,
 
 </Callout>
 
+#### Blob Storage Export integration [#gcs-export-credentials]
+
+The project-level [Blob Storage Export integration](/docs/api-and-data-platform/features/export-to-blob-storage#set-up-an-export) supports Google Cloud Storage natively, authenticating with a service account JSON key. On self-hosted deployments, project members can instead enable **Use Application Default Credentials (ADC)** to write as the deployment's own GCP identity. Because that identity is shared by every project, ADC exports are limited to buckets you approve:
+
+| Variable                                    | Required / Default | Description                                                                                                                     |
+| ------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_BLOB_STORAGE_GCS_ALLOWED_BUCKETS` |                    | Comma-separated bucket names that ADC exports may write to. Empty disables ADC exports. Exports with a JSON key are unaffected. |
+
+The allowlist is enforced on save, on **Validate**, and on every export run, so removing a bucket disables the integrations that export to it. ADC exports are not available on Langfuse Cloud.
+
 ### Google Cloud Storage (Compatibility Mode) [#google-cloud-storage-compatibility-mode]
 
 [Google Cloud Storage](https://cloud.google.com/storage) is a globally available object storage by Google Cloud.
@@ -578,7 +588,7 @@ Validation behavior:
 - **Connection-time**: the S3 SDK's HTTP handler and the Azure SDK's request policy re-validate the resolved IP just before each request, so a hostname whose DNS answer changes after save is still blocked.
 - **Cloud**: validation is strict and cannot be relaxed.
 - **Self-hosted**: validation activates when at least one of the allowlist environment variables below is configured. This keeps backward compatibility with internal SeaweedFS, MinIO, and Azurite deployments on private networks. The default will become strict in a future major release.
-- The _integration_ offers three providers: **Amazon S3**, **S3 Compatible Storage**, and **Azure Blob Storage**. There is no native **GCS** or **OCI** client, so neither can be selected directly. Google Cloud Storage still works as an export target through **S3 Compatible Storage**: create an HMAC key as described under [Compatibility Mode](#google-cloud-storage-compatibility-mode), then set the endpoint to `https://storage.googleapis.com`. That host is validated like any other S3-compatible endpoint. The native object storage integrations configured via environment variables are unaffected.
+- The _integration_ offers four providers: **Amazon S3**, **S3 Compatible Storage**, **Azure Blob Storage**, and **Google Cloud Storage**. Google Cloud Storage has no endpoint field, so this validation does not apply to it; it is restricted by a [bucket allowlist](#gcs-export-credentials) instead. There is no native **OCI** provider. The native object storage integrations configured via environment variables are unaffected.
 
 ### Self-hosted allowlist environment variables
 
