@@ -140,7 +140,8 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-corrections = langfuse.api.scores_v3.get_many_v3(
+# Python SDK v4: langfuse.api.scores_v3.get_many_v3(...)
+corrections = langfuse.api.scores.get_many(
     data_type="CORRECTION",
     fields="subject,details",
 )
@@ -154,7 +155,8 @@ import { LangfuseClient } from "@langfuse/client";
 
 const langfuse = new LangfuseClient();
 
-const corrections = await langfuse.api.scoresV3.getManyV3({
+// JS/TS SDK v5: langfuse.api.scoresV3.getManyV3(...)
+const corrections = await langfuse.api.scores.getMany({
   dataType: "CORRECTION",
   fields: "subject,details",
 });

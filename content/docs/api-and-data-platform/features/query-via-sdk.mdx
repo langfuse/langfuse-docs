@@ -41,6 +41,9 @@ and metrics APIs are the defaults:
 Scores API v3 is available as `api.scores_v3` in Python SDK `4.8.1+` and
 `api.scoresV3` in JS/TS SDK `5.5.0+`. The `api.scores` v2 reads are deprecated;
 see [Migration of deprecated APIs](/faq/all/deprecated-api-migration#scores).
+In Python SDK v5 and JS/TS SDK v6, Scores API v3 moves to `api.scores.get_many` /
+`api.scores.getMany`; `api.scores_v3` / `api.scoresV3` remain as deprecated
+aliases.
 
 The old v2 aliases were removed in Python SDK v4 and JS/TS SDK v5.
 
@@ -125,10 +128,13 @@ session_observations = langfuse.api.observations.get_many(
 Scores:
 
 ```python
-# Scores API v3 (Python SDK 4.8.1+; recommended)
+# Scores API v3 (Python SDK v5+; recommended)
+scores = langfuse.api.scores.get_many(id="ScoreId")
+
+# Scores API v3 (Python SDK 4.8.1+ on v4; deprecated alias in v5)
 scores = langfuse.api.scores_v3.get_many_v3(id="ScoreId")
 
-# Scores API v2 (deprecated, sunset date: Nov 16, 2026; removed in Python SDK v5)
+# Scores API v2 (Python SDK v4 only; deprecated, sunset date: Nov 16, 2026)
 scores = langfuse.api.scores.get_many(score_ids="ScoreId")
 ```
 
@@ -238,10 +244,13 @@ const sessionObservations = await langfuse.api.observations.getMany({
 Scores:
 
 ```ts
-// Scores API v3 (JS/TS SDK 5.5.0+; recommended)
-const scoresV3 = await langfuse.api.scoresV3.getManyV3();
+// Scores API v3 (JS/TS SDK v6+; recommended)
+const scoresV3 = await langfuse.api.scores.getMany();
 
-// Scores API v2 (deprecated, sunset date: Nov 16, 2026; removed in JS/TS SDK v6)
+// Scores API v3 (JS/TS SDK 5.5.0+ on v5; deprecated alias in v6)
+const scoresV3Alias = await langfuse.api.scoresV3.getManyV3();
+
+// Scores API v2 (JS/TS SDK v5 only; deprecated, sunset date: Nov 16, 2026)
 const scores = await langfuse.api.scores.getMany();
 ```
 

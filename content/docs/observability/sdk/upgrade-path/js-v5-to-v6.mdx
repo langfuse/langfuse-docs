@@ -221,16 +221,18 @@ const observations = await langfuse.api.observations.getMany({
 
 **Previously deprecated in v5, now removed.** Each of these methods was marked `@deprecated` in v5, with a note naming its replacement. In v6 they are gone: TypeScript reports a compile error, and JavaScript gets `TypeError` or `undefined`. There is no `api.legacy` namespace anymore. For full replacement guidance, see the [SDK method quick reference](/faq/all/deprecated-api-migration#sdk-method-quick-reference).
 
-| Removed                                              | Replacement                                                          |
-| ---------------------------------------------------- | -------------------------------------------------------------------- |
-| `api.trace.get(...)`, `api.trace.list(...)`          | `api.observations.getMany({ traceId, ... })`                         |
-| `api.sessions.*`                                     | `api.observations.getMany({ sessionId, ... })`                       |
-| `api.legacy.observationsV1.*`                        | `api.observations.getMany(...)`                                      |
-| `api.legacy.metricsV1.metrics(...)`                  | `api.metrics.metrics(...)`                                           |
-| `api.scores.getMany(...)`, `api.scores.getById(...)` | `api.scoresV3.getManyV3(...)`                                        |
-| `api.datasetRunItems.*`                              | `api.experiments.listItems(...)` or the experiment runner            |
-| `api.datasets.getRun(...)`, `.getRuns(...)`          | `api.experiments.list(...)` and `.listItems(...)`                    |
-| `api.datasets.deleteRun(...)`                        | List experiment items, then `api.trace.deleteMultiple({ traceIds })` |
+| Removed                                                   | Replacement                                                          |
+| --------------------------------------------------------- | -------------------------------------------------------------------- |
+| `api.trace.get(...)`, `api.trace.list(...)`               | `api.observations.getMany({ traceId, ... })`                         |
+| `api.sessions.*`                                          | `api.observations.getMany({ sessionId, ... })`                       |
+| `api.legacy.observationsV1.*`                             | `api.observations.getMany(...)`                                      |
+| `api.legacy.metricsV1.metrics(...)`                       | `api.metrics.metrics(...)`                                           |
+| `api.scores.getMany(...)` (v2), `api.scores.getById(...)` | `api.scores.getMany(...)` (Scores API v3)                            |
+| `api.datasetRunItems.*`                                   | `api.experiments.listItems(...)` or the experiment runner            |
+| `api.datasets.getRun(...)`, `.getRuns(...)`               | `api.experiments.list(...)` and `.listItems(...)`                    |
+| `api.datasets.deleteRun(...)`                             | List experiment items, then `api.trace.deleteMultiple({ traceIds })` |
+
+`api.scores.getMany` keeps its name but now reads Scores API v3 (`GET /api/public/v3/scores`) and takes the v3 parameters, for example `id` instead of `scoreIds`. The v5 `api.scoresV3.getManyV3(...)` still works in v6 as a deprecated alias for `api.scores.getMany(...)`: it is marked `@deprecated`, logs a one-time warning, and will be removed in a future major release.
 
 Removed types include the trace, session, v1 observation, dataset run, and dataset run item response types, the `ScoreV1` family, and `SdkLogEvent`.
 

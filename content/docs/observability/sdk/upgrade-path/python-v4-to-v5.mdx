@@ -157,11 +157,13 @@ v4 already marked each of these as deprecated and named the replacement. If you 
 | `api.sessions.*`                                                  | `api.observations.get_many(session_id=..., ...)`            |
 | `api.legacy.observations_v1.*`                                    | `api.observations.get_many(...)`                            |
 | `api.legacy.metrics_v1.metrics(...)`                              | `api.metrics.metrics(...)`                                  |
-| `api.scores.get_many(...)`, `api.scores.get_by_id(...)`           | `api.scores_v3.get_many_v3(...)`                            |
+| `api.scores.get_many(...)` (v2), `api.scores.get_by_id(...)`      | `api.scores.get_many(...)` (Scores API v3)                  |
 | `api.dataset_run_items.*`                                         | `api.experiments.list_items(...)` or the experiment runner  |
 | `api.datasets.get_run(...)`, `.get_runs(...)`, `.delete_run(...)` | [Dataset run helpers removed](#dataset-run-helpers-removed) |
 
 `api.trace` keeps `delete` and `delete_multiple`. `api.datasets` keeps `list`, `get`, and `create`.
+
+`api.scores.get_many` keeps its name but now reads Scores API v3 (`GET /api/public/v3/scores`) and takes the v3 parameters, for example `id=` instead of `score_ids=`. The v4 `api.scores_v3.get_many_v3(...)` still works in v5 as a deprecated alias for `api.scores.get_many(...)`: it emits a `DeprecationWarning` and will be removed in a future major release.
 
 **v4:**
 

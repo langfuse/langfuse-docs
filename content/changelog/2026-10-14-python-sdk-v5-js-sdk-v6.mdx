@@ -15,7 +15,7 @@ Python SDK v5 and JS/TS SDK v6 are built for Langfuse v4. For most users, upgrad
 - Open experiment results straight from your code: `experimentUrl` / `experiment_url` links to the comparison view.
 - Filter on typed metadata: numbers and booleans keep their type, and nested objects become filterable dotted paths such as `a.b`.
 - Send large traces with less bandwidth: span batches are gzip-compressed and processed in real time on Langfuse v4.
-- Create scores in batches with `api.scores.create`, and work with a generated API client that only includes the current Public API.
+- Create scores in batches with `api.scores.create` and read them from the same namespace with `api.scores.get_many` / `api.scores.getMany` (`api.scores_v3` / `api.scoresV3` remain as deprecated aliases). The generated API client only includes the current Public API.
 
 ## Upgrading
 
