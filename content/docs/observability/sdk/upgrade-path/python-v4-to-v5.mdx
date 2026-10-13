@@ -39,12 +39,12 @@ Ordered by how many users they affect. Changes marked **silent** don't raise an 
 
 **Affects:** self-hosted Langfuse v3 or older than v4.55.0, Python 3.10, and the OpenAI and LangChain integrations on older libraries.
 
-| Requirement | v5                                         | If not met                                                                               |
-| ----------- | ------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| Langfuse    | Cloud, or self-hosted **v4.55.0 or later** | Silent: string metadata is stored with its quotes and score batches are rejected         |
-| Python      | `>=3.11`                                   | Silent: `pip install langfuse` resolves to the latest v4 release                         |
-| OpenAI      | `openai>=1.0`                              | The `langfuse.openai` integration no longer supports pre-1.0 SDKs                        |
-| LangChain   | `langchain-core>=1`                        | `ModuleNotFoundError` when importing `langfuse.langchain` with an older `langchain-core` |
+| Requirement | v5                                         | If not met                                                                                               |
+| ----------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| Langfuse    | Cloud, or self-hosted **v4.55.0 or later** | Silent: string metadata is stored with its quotes, and score batches are rejected and the scores dropped |
+| Python      | `>=3.11`                                   | Silent: `pip install langfuse` resolves to the latest v4 release                                         |
+| OpenAI      | `openai>=1.0`                              | The `langfuse.openai` integration no longer supports pre-1.0 SDKs                                        |
+| LangChain   | `langchain-core>=1`                        | `ModuleNotFoundError` when importing `langfuse.langchain` with an older `langchain-core`                 |
 
 If you self-host Langfuse v3, stay on Python SDK v4. See the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
 
@@ -365,7 +365,7 @@ These need no code changes.
 
 None of these need code changes. Each one has a setting if you need different behavior.
 
-- **Scores are sent in batches to `POST /api/public/scores`** instead of the legacy ingestion endpoint. `create_score()`, `span.score()`, `span.score_trace()`, `flush_at`, and `flush_interval` work as before. If the server accepts only part of a batch (HTTP 207), the SDK logs the accepted and rejected counts and the errors, and doesn't retry the rejected scores. Other 4xx responses are logged and not retried. Network errors, 429, and 5xx are retried with backoff. Custom score timestamps (`timestamp=` on `create_score`) need Langfuse v4.59.0 or later. v4.55.0 to v4.58.x record the time they received the score.
+- **Scores are sent in batches to `POST /api/public/scores`** instead of the legacy ingestion endpoint. `create_score()`, `span.score()`, `span.score_trace()`, `flush_at`, and `flush_interval` work as before. If the server accepts only part of a batch (HTTP 207), the SDK logs the accepted and rejected counts and the errors, and doesn't retry the rejected scores. Other 4xx responses are logged and not retried. Network errors, 429, and 5xx are retried with backoff. Servers older than v4.55.0 reject score batches, and those scores are dropped. Custom score timestamps (`timestamp=` on `create_score`) need Langfuse v4.59.0 or later. v4.55.0 to v4.58.x record the time they received the score.
 - **Span batches are gzip-compressed.** If a proxy rejects compressed requests, set `Langfuse(otel_compression="none")` or `LANGFUSE_OTEL_COMPRESSION=none`. The setting is read in this order: `otel_compression`, `LANGFUSE_OTEL_COMPRESSION`, `OTEL_EXPORTER_OTLP_TRACES_COMPRESSION`, `OTEL_EXPORTER_OTLP_COMPRESSION`, then the `gzip` default. Values are `gzip` or `none` (case-insensitive), and an invalid value falls through to the next setting. A custom `span_exporter` is not changed.
 - **Spans carry `x-langfuse-ingestion-version: 4`**, which enables real-time processing on Langfuse v4. To opt out, pass `additional_headers={"x-langfuse-ingestion-version": "3"}`. A custom `span_exporter` doesn't get this header automatically.
 - **Experiments are recorded through OpenTelemetry.** `run_experiment()` sends experiment and item attributes on its spans instead of calling `POST /api/public/dataset-run-items`.

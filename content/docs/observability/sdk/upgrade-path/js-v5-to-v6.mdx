@@ -42,11 +42,11 @@ Ordered by how many users they affect. Changes marked **silent** don't raise an 
 
 **Affects:** self-hosted Langfuse v3 or older than v4.55.0, Node.js older than 22, and the LangChain integration on LangChain 0.x.
 
-| Requirement | v6                                         | If not met                                                                                                        |
-| ----------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| Langfuse    | Cloud, or self-hosted **v4.55.0 or later** | Silent: string metadata is stored with its quotes, and score batches are rejected with HTTP 400 (logged, dropped) |
-| Node.js     | `>=22`, packages compiled to ES2022        | Unsupported. Bundles for older runtimes must target ES2022 or transpile the SDK                                   |
-| LangChain   | `@langchain/core@^1.0.0` (was `>=0.3.8`)   | Peer dependency conflict when installing `@langfuse/langchain@6`                                                  |
+| Requirement | v6                                         | If not met                                                                                               |
+| ----------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| Langfuse    | Cloud, or self-hosted **v4.55.0 or later** | Silent: string metadata is stored with its quotes, and score batches are rejected and the scores dropped |
+| Node.js     | `>=22`, packages compiled to ES2022        | Unsupported. Bundles for older runtimes must target ES2022 or transpile the SDK                          |
+| LangChain   | `@langchain/core@^1.0.0` (was `>=0.3.8`)   | Peer dependency conflict when installing `@langfuse/langchain@6`                                         |
 
 If you self-host Langfuse v3, stay on JS/TS SDK v5. See the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
 
@@ -411,7 +411,7 @@ These need no code changes.
 
 None of these need code changes. Each one has a setting if you need different behavior.
 
-- **Scores are sent in batches of up to 100 to `POST /api/public/scores`** instead of the legacy ingestion endpoint. `langfuse.score.create()`, `.observation()`, `.trace()`, `flush()`, `shutdown()`, and the batching settings work as before. If the server accepts only part of a batch (HTTP 207), the SDK logs `Langfuse rejected N of M scores in batch:` with the server's errors and doesn't retry the rejected scores. Servers older than v4.55.0 reject the batch with HTTP 400, and the SDK logs that batched score creation needs Langfuse v4.55.0 or later. Each score carries the time it was queued as its timestamp. The server records it from Langfuse v4.59.0. v4.55.0 to v4.58.x record the time they received the score. `LangfuseBrowserClient.score()` also sends each score to `POST /api/public/scores`, with public-key authentication.
+- **Scores are sent in batches of up to 100 to `POST /api/public/scores`** instead of the legacy ingestion endpoint. `langfuse.score.create()`, `.observation()`, `.trace()`, `flush()`, `shutdown()`, and the batching settings work as before. If the server accepts only part of a batch (HTTP 207), the SDK logs `Langfuse rejected N of M scores in batch:` with the server's errors and doesn't retry the rejected scores. Servers older than v4.55.0 reject score batches, and those scores are dropped. Each score carries the time it was queued as its timestamp. The server records it from Langfuse v4.59.0. v4.55.0 to v4.58.x record the time they received the score. `LangfuseBrowserClient.score()` also sends each score to `POST /api/public/scores`, with public-key authentication.
 - **Score methods never throw.** Input is validated on the client. Scores with an empty name or a non-finite or non-string value are logged at error level and dropped.
 - **Span batches are gzip-compressed on Node.js and Bun.** If a proxy rejects compressed requests, pass `new LangfuseSpanProcessor({ compression: "none" })` or set `LANGFUSE_OTEL_COMPRESSION=none`. The setting is read in this order: `compression`, `LANGFUSE_OTEL_COMPRESSION`, `OTEL_EXPORTER_OTLP_TRACES_COMPRESSION`, `OTEL_EXPORTER_OTLP_COMPRESSION`, then the `gzip` default. Values are `gzip` or `none`. Environment variables are case-insensitive, and an invalid value falls through to the next setting. Browser and edge runtimes ignore it.
 - **Spans carry `x-langfuse-ingestion-version: 4`**, which enables real-time processing on Langfuse v4. To opt out, pass `additionalHeaders: { "x-langfuse-ingestion-version": "3" }` to `LangfuseSpanProcessor`. `additionalHeaders` override default headers case-insensitively.
