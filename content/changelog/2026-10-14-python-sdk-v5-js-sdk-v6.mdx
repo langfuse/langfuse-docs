@@ -1,7 +1,7 @@
 ---
 date: 2026-10-14
 title: Python SDK v5 and JS/TS SDK v6
-description: New SDK majors built for Langfuse v4, with experiments recorded through OpenTelemetry, compressed span export, and a client trimmed to the current Public API.
+description: New SDK majors built for Langfuse v4, with experiment links, typed metadata filters, and compressed span export. A small upgrade for most users.
 author: Hassieb
 ---
 
@@ -10,17 +10,14 @@ import { Book } from "lucide-react";
 
 <ChangelogHeader />
 
-Python SDK v5 and JS/TS SDK v6 are built for Langfuse v4. They send spans with the v4 ingestion header for real-time processing, compress span batches with gzip, record experiments entirely through OpenTelemetry, and send scores in batches to `POST /api/public/scores` instead of the legacy ingestion endpoint. The generated API clients only include the current Public API, so autocomplete no longer suggests endpoints that Langfuse v4 deprecated.
+Python SDK v5 and JS/TS SDK v6 are built for Langfuse v4. For most users, upgrading is a version bump: tracing, scoring, prompts, and the integrations work as before.
 
 - Re-run an experiment with the same name on the same dataset and the results land in the same experiment, with a direct `experimentUrl` / `experiment_url` to the comparison view.
-- Filter on typed metadata: both SDKs JSON-encode every metadata value, so numbers and booleans keep their type and nested objects become filterable dotted paths such as `a.b`.
-- Send large traces with less bandwidth, since span batches are gzip-compressed by default.
+- Filter on typed metadata: numbers and booleans keep their type, and nested objects become filterable dotted paths such as `a.b`.
+- Send large traces with less bandwidth: span batches are gzip-compressed and processed in real time on Langfuse v4.
+- Create scores in batches with `api.scores.create`, and work with a generated API client that only includes the current Public API.
 
-## Upgrade
-
-Both majors require Langfuse Cloud or self-hosted Langfuse v4.55.0 or later. If you self-host Langfuse v3, stay on Python SDK v4 and JS/TS SDK v5. Score timestamps set in the SDK need Langfuse v4.59.0 or later; v4.55.0 to v4.58.x record the time they receive the score instead.
-
-Python SDK v5 requires Python 3.11+ and `langchain-core>=1` for the LangChain integration. JS/TS SDK v6 requires Node.js 22+ and `@langchain/core@^1` for the LangChain integration.
+## Upgrading
 
 ```bash
 pip install --upgrade "langfuse>=5"
@@ -30,7 +27,7 @@ pip install --upgrade "langfuse>=5"
 npm install @langfuse/client@6 @langfuse/tracing@6 @langfuse/otel@6
 ```
 
-The migration guides list every breaking change with before/after code, including removed Public API methods, the experiments API replacing dataset run helpers, JSON-encoded metadata values, trace input/output set on the root observation, and `api.scores.create` / `api.scores.delete` replacing `api.legacy.score_v1` / `api.legacy.scoreV1`.
+Both majors need Langfuse Cloud or self-hosted Langfuse v4.55.0 or later, plus Python 3.11+ or Node.js 22+. If you self-host Langfuse v3, stay on Python SDK v4 and JS/TS SDK v5. Each migration guide opens with a short "Are you affected?" list, so you can see in a few seconds whether your code needs changes.
 
 <Cards num={2}>
   <Card

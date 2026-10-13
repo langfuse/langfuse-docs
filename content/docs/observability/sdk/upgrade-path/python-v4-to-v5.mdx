@@ -6,113 +6,148 @@ category: SDKs
 
 # Python v4 → v5
 
-The Python SDK v5 targets **Langfuse v4** only. It removes the Public API methods that Langfuse v4 deprecated, records experiments through OpenTelemetry instead of the dataset-run-items endpoint, sends scores to `POST /api/public/scores` instead of the legacy ingestion endpoint, and sends gzip-compressed span batches with the v4 ingestion header by default.
+For most users, v5 is a small upgrade. If you trace with `@observe`, `start_as_current_observation()`, or an integration, and you create scores and fetch prompts, your code keeps working as is. v5 needs Python 3.11+ and Langfuse Cloud or self-hosted Langfuse v4.55.0 or later.
 
-Most applications that already follow the [observations-first model](/docs/observability/data-model) only need to check a few call sites. Start with the [migration checklist](#migration-checklist) and use the sections below for details.
+```bash
+pip install --upgrade "langfuse>=5"
+```
 
-<Callout type="warning">
-  Python SDK v5 requires Langfuse Cloud or self-hosted Langfuse **v4.55.0 or
-  later**. Older servers store JSON-encoded string metadata values with their
-  quotes (see [Metadata values are JSON-encoded](#metadata-json-encoding)). If you self-host Langfuse v3, stay on Python SDK v4. See the [self-hosted
-  compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) and
-  [Versions & Compatibility](/docs/compatibility).
-</Callout>
+`host` and the `LANGFUSE_HOST` environment variable keep working as before.
 
-`host` and the `LANGFUSE_HOST` environment variable keep working as before. You don't need to change them.
+## Are you affected? [#are-you-affected]
 
-## Breaking changes
+You only need to change something if one of these applies to you:
 
-### Python 3.11 and OpenAI SDK 1.x required
+- **You self-host Langfuse v3, or v4 older than v4.55.0**, or run Python 3.10, `openai<1`, or `langchain-core<1` → [Minimum versions](#minimum-versions)
+- **You filter on metadata, mask it, or read it in a custom span exporter** → [Metadata values are JSON-encoded](#metadata-json-encoding) (silent)
+- **You call `langfuse.api.*` directly**, for example `api.trace.get`, `api.sessions`, `api.legacy.*`, `api.scores.get_many`, or `api.scores.create` → [Removed Public API methods](#removed-public-api-methods)
+- **You call `set_current_trace_io()` or `span.set_trace_io()`** → [Trace input/output setters removed](#trace-io-setters-removed)
+- **You call `get_dataset_runs()`, `get_dataset_run()`, or `delete_dataset_run()`** → [Dataset run helpers removed](#dataset-run-helpers-removed)
+- **You read `dataset_run_id` or `dataset_run_url` from experiment results, or re-run experiments under the same name** → [Experiment results](#experiment-results) (silent)
+- **You call `run_batched_evaluation()`** → [Batched evaluation reads observations only](#batched-evaluation)
+- **You set `sample_rate` below 1 and create scores** → [Scores on sampled-out traces are dropped](#sampled-out-scores) (silent)
+- **You pass `blocked_instrumentation_scopes`** → [`blocked_instrumentation_scopes` removed](#blocked-instrumentation-scopes)
+- **A proxy between your app and Langfuse rejects gzip-compressed requests** → [Under the hood](#under-the-hood)
 
-v5 requires Python `>=3.11`. On Python 3.10, `pip install langfuse` resolves to the latest v4 release.
+If none of these apply, upgrade and you're done.
 
-The OpenAI integration (`from langfuse.openai import openai`) requires `openai>=1.0`. Support for pre-1.0 OpenAI SDKs was removed.
+## Breaking changes [#breaking-changes]
 
-### LangChain v1 required
+Ordered by how many users they affect. Changes marked **silent** don't raise an error. Your code runs, but the result is different.
 
-The LangChain `CallbackHandler` now imports only from `langchain_core` and requires `langchain-core>=1`. You no longer need the `langchain` meta-package to use the handler.
+### Minimum versions [#minimum-versions]
+
+**Affects:** self-hosted Langfuse v3 or older than v4.55.0, Python 3.10, and the OpenAI and LangChain integrations on older libraries.
+
+| Requirement | v5                                         | If not met                                                                               |
+| ----------- | ------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| Langfuse    | Cloud, or self-hosted **v4.55.0 or later** | Silent: string metadata is stored with its quotes and score batches are rejected         |
+| Python      | `>=3.11`                                   | Silent: `pip install langfuse` resolves to the latest v4 release                         |
+| OpenAI      | `openai>=1.0`                              | The `langfuse.openai` integration no longer supports pre-1.0 SDKs                        |
+| LangChain   | `langchain-core>=1`                        | `ModuleNotFoundError` when importing `langfuse.langchain` with an older `langchain-core` |
+
+If you self-host Langfuse v3, stay on Python SDK v4. See the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
 
 ```bash
 pip install --upgrade "langfuse>=5" "langchain-core>=1"
 ```
 
-The import path and usage are unchanged:
+The LangChain `CallbackHandler` imports only from `langchain_core` now, so the `langchain` meta-package is no longer needed. Its import path and usage are unchanged.
 
-```python
-from langfuse.langchain import CallbackHandler
+### Metadata values are JSON-encoded (silent) [#metadata-json-encoding]
 
-handler = CallbackHandler()
-chain.invoke({"input": "..."}, config={"callbacks": [handler]})
-```
+**Affects:** saved filters, dashboards, and downstream consumers that match metadata values; custom span exporters and [`mask_otel_spans`](/docs/observability/features/masking) callbacks that read metadata attributes.
 
-### Spans are gzip-compressed by default
+**Breaks silently:** v5 JSON-encodes every metadata value before writing it to the span, including strings. This covers observation metadata (`metadata=` on `start_observation()`, `start_as_current_observation()`, `update()`, and `@observe`) and propagated trace metadata from `propagate_attributes(metadata=...)`. Values are compact JSON, and non-ASCII characters are kept as-is.
 
-The default OTLP span exporter now sends gzip-compressed batches. Compression is resolved in this order:
+Observation metadata is written as one attribute per top-level key (`langfuse.observation.metadata.<key>`):
 
-1. `otel_compression` argument on `Langfuse(...)`
-2. `LANGFUSE_OTEL_COMPRESSION`
-3. `OTEL_EXPORTER_OTLP_TRACES_COMPRESSION`
-4. `OTEL_EXPORTER_OTLP_COMPRESSION`
-5. `gzip`
+| Value             | v4 attribute value              | v5 attribute value         |
+| ----------------- | ------------------------------- | -------------------------- |
+| `"prod"`          | `prod`                          | `"prod"`                   |
+| `"123"`           | `123` (string)                  | `"123"`                    |
+| `5`               | `5` (integer attribute)         | `5`                        |
+| `True`            | `true` (boolean attribute)      | `true`                     |
+| `{"a": {"b": 1}}` | `{"a": {"b": 1}}`               | `{"a":{"b":1}}`            |
+| `2**70`           | Key dropped by the OTLP encoder | `"1180591620717411303424"` |
+| `None`            | Not written                     | Not written                |
 
-Supported values are `gzip` and `none` (case-insensitive). An invalid value falls through to the next setting. If a proxy between your application and Langfuse can't handle compressed requests, opt out:
+Propagated trace metadata (`langfuse.trace.metadata.<key>`) used to pass strings through and apply `str()` to everything else:
 
-```python
-from langfuse import Langfuse
+| Value               | v4              | v5                     |
+| ------------------- | --------------- | ---------------------- |
+| `"prod"`            | `prod`          | `"prod"`               |
+| `True`              | `True`          | `true`                 |
+| `None`              | `None`          | Dropped with a warning |
+| `["a", 1]`          | `['a', 1]`      | `["a",1]`              |
+| `{"k": "v"}`        | `{'k': 'v'}`    | `{"k":"v"}`            |
+| `datetime(...)`     | `str(datetime)` | ISO 8601 JSON string   |
+| `("a", "b")`, `set` | Python repr     | JSON array             |
+| `float("nan")`      | `nan`           | Dropped with a warning |
 
-langfuse = Langfuse(otel_compression="none")
-```
+The 200-character limit on propagated values applies to the encoded value, and the quotes around a string count toward it.
 
-or set `LANGFUSE_OTEL_COMPRESSION=none`. A custom `span_exporter` is not changed; configure compression on that exporter directly.
+Langfuse v4.55.0 and later decodes the values. Strings are stored without quotes, so `"prod"` still reads as `prod`. Numbers and booleans keep their type. Nested objects become filterable dotted paths, so `{"a": {"b": 1}}` can be filtered as `a.b = 1`. If a literal `"a.b"` key and a nested `{"a": {"b": ...}}` both map to the same path, the first value wins. Self-hosted servers older than v4.55.0 store string values with their quotes, so filters on string values stop matching.
 
-### v4 ingestion header sent by default
+**Migration:**
 
-The default span exporter sends `x-langfuse-ingestion-version: 4`, which enables real-time processing of spans on Langfuse v4. To opt out, override the header:
+- Update saved filters, dashboards, and consumers that match the old shape, such as a Python repr like `"True"` or a whole nested object as a JSON string, to the new values or dotted paths. Existing data keeps its stored shape.
+- In custom exporters and `mask_otel_spans` callbacks, expect JSON strings: `'"prod"'` instead of `'prod'`, and `"5"` / `"true"` strings instead of integer and boolean attributes. Decode them with `json.loads()`, and write replacement values JSON-encoded, for example `json.dumps("REDACTED")`.
 
-```python
-from langfuse import Langfuse
+### Removed Public API methods [#removed-public-api-methods]
 
-langfuse = Langfuse(additional_headers={"x-langfuse-ingestion-version": "3"})
-```
+**Affects:** code that calls `langfuse.api.*` directly.
 
-A custom `span_exporter` does not receive this header automatically. Add it to your exporter if you send spans to Langfuse v4.
+**Breaks:** `AttributeError` for removed resources and methods, and `TypeError` for the old `api.scores.create` keyword arguments.
 
-### `blocked_instrumentation_scopes` removed
+The generated client no longer includes the endpoints that Langfuse v4 deprecated, and there is no `api.legacy` namespace anymore. For full replacement guidance, see the [SDK method quick reference](/faq/all/deprecated-api-migration#sdk-method-quick-reference).
 
-The parameter was deprecated in v4 and now raises a `TypeError`. Use `should_export_span` and compose it with the default filter.
+| Removed                                                           | Replacement                                                 |
+| ----------------------------------------------------------------- | ----------------------------------------------------------- |
+| `api.trace.get(...)`, `api.trace.list(...)`                       | `api.observations.get_many(trace_id=..., ...)`              |
+| `api.sessions.*`                                                  | `api.observations.get_many(session_id=..., ...)`            |
+| `api.legacy.observations_v1.*`                                    | `api.observations.get_many(...)`                            |
+| `api.legacy.metrics_v1.metrics(...)`                              | `api.metrics.metrics(...)`                                  |
+| `api.legacy.score_v1.create(...)`                                 | `api.scores.create(request=CreateScoreRequest(...))`        |
+| `api.legacy.score_v1.delete(score_id=...)`                        | `api.scores.delete(score_id=...)`                           |
+| `api.scores.get_many(...)`, `api.scores.get_by_id(...)`           | `api.scores_v3.get_many_v3(...)`                            |
+| `api.dataset_run_items.*`                                         | `api.experiments.list_items(...)` or the experiment runner  |
+| `api.datasets.get_run(...)`, `.get_runs(...)`, `.delete_run(...)` | [Dataset run helpers removed](#dataset-run-helpers-removed) |
+
+`api.trace` keeps `delete` and `delete_multiple`. `api.datasets` keeps `list`, `get`, and `create`.
+
+`api.scores.create()` now takes a single `CreateScoreRequest` or a list of them, and returns `CreateScoresResponse`, a union of the single-score and batch responses.
 
 **v4:**
 
 ```python
-from langfuse import Langfuse
-
-langfuse = Langfuse(blocked_instrumentation_scopes=["sqlite", "requests"])
+trace = langfuse.api.trace.get("trace-id")
+langfuse.api.scores.create(name="accuracy", value=0.9, trace_id="trace-id")
+langfuse.api.legacy.score_v1.delete(score_id="score-id")
 ```
 
 **v5:**
 
 ```python
-from langfuse import Langfuse
-from langfuse.span_filter import is_default_export_span
+from langfuse import get_client
+from langfuse.api import CreateScoreRequest
 
-blocked = {"sqlite", "requests"}
+langfuse = get_client()
 
-langfuse = Langfuse(
-    should_export_span=lambda span: (
-        is_default_export_span(span)
-        and (
-            span.instrumentation_scope is None
-            or span.instrumentation_scope.name not in blocked
-        )
-    )
+observations = langfuse.api.observations.get_many(trace_id="trace-id", fields="core,basic,io")
+langfuse.api.scores.create(
+    request=CreateScoreRequest(name="accuracy", value=0.9, trace_id="trace-id")
 )
+langfuse.api.scores.delete(score_id="score-id")
 ```
 
-The default filter's GenAI check now requires the `gen_ai.` prefix (with the dot). Attributes such as `gen_ai_custom` no longer cause a span to be exported.
+Removed types include `Trace`, `TraceWithDetails`, `TraceWithFullDetails`, `Traces`, `Observation`, `ObservationsView`, `ObservationsViews`, `Session`, `SessionWithTraces`, `PaginatedSessions`, `DatasetRun`, `DatasetRunItem`, `DatasetRunWithItems`, `PaginatedDatasetRuns`, `PaginatedDatasetRunItems`, `CreateDatasetRunItemRequest`, `DeleteDatasetRunResponse`, the `ScoreV1` family, `GetScoresResponse*`, the v1 `MetricsResponse`, and the `sdk-log` ingestion event. `langfuse.model` no longer re-exports `DatasetRun`, `Observation`, or `TraceWithFullDetails`.
 
-### Trace input/output setters removed
+### Trace input/output setters removed [#trace-io-setters-removed]
 
-`set_current_trace_io()`, `span.set_trace_io()`, and the trace-level `input`/`output` attributes were deprecated in v4 and are removed. Trace input and output now come from the root observation. Set them on the root span instead.
+**Affects:** code that calls `set_current_trace_io()` or `span.set_trace_io()`, or sets the trace-level `input`/`output` attributes.
+
+**Breaks:** `AttributeError`. These were deprecated in v4. Trace input and output now come from the root observation.
 
 **v4:**
 
@@ -142,54 +177,11 @@ with langfuse.start_as_current_observation(as_type="span", name="request") as sp
 
 `set_current_trace_as_public()` and `span.set_trace_as_public()` are unchanged. If you still use [trace-level LLM-as-a-judge evaluators](/faq/all/llm-as-a-judge-migration), migrate them to observation-level evaluators.
 
-### Metadata values are JSON-encoded [#metadata-json-encoding]
-
-v5 JSON-encodes every metadata value before writing it to the span, strings included. This applies to observation metadata (`metadata=` on `start_observation()`, `start_as_current_observation()`, `update()`, and `@observe`) and to propagated trace metadata from `propagate_attributes(metadata=...)`. Values are compact JSON with non-ASCII characters kept as-is.
-
-Observation metadata is written as one attribute per top-level key (`langfuse.observation.metadata.<key>`):
-
-| Value             | v4 attribute value              | v5 attribute value         |
-| ----------------- | ------------------------------- | -------------------------- |
-| `"prod"`          | `prod`                          | `"prod"`                   |
-| `"123"`           | `123` (string)                  | `"123"`                    |
-| `5`               | `5` (integer attribute)         | `5`                        |
-| `True`            | `true` (boolean attribute)      | `true`                     |
-| `{"a": {"b": 1}}` | `{"a": {"b": 1}}`               | `{"a":{"b":1}}`            |
-| `2**70`           | Key dropped by the OTLP encoder | `"1180591620717411303424"` |
-| `None`            | Not written                     | Not written                |
-
-Propagated trace metadata (`langfuse.trace.metadata.<key>`) previously passed strings through and used `str()` for everything else:
-
-| Value               | v4              | v5                     |
-| ------------------- | --------------- | ---------------------- |
-| `"prod"`            | `prod`          | `"prod"`               |
-| `True`              | `True`          | `true`                 |
-| `None`              | `None`          | Dropped with a warning |
-| `["a", 1]`          | `['a', 1]`      | `["a",1]`              |
-| `{"k": "v"}`        | `{'k': 'v'}`    | `{"k":"v"}`            |
-| `datetime(...)`     | `str(datetime)` | ISO 8601 JSON string   |
-| `("a", "b")`, `set` | Python repr     | JSON array             |
-| `float("nan")`      | `nan`           | Dropped with a warning |
-
-The 200-character limit for propagated values applies to the encoded value, including the quotes around strings.
-
-How Langfuse v4.55.0 and later reads the encoded values:
-
-- **Strings** are decoded and stored without quotes, so `"prod"` still reads as `prod`.
-- **Numbers and booleans keep their type** instead of becoming strings.
-- **Nested objects become filterable dotted paths.** `{"a": {"b": 1}}` can be filtered as `a.b = 1` instead of matching a JSON string.
-- **Dotted-key collisions: the first value wins.** If metadata contains both a literal `"a.b"` key and a nested `{"a": {"b": ...}}`, only the first value is kept for the `a.b` path.
-
-Self-hosted servers older than v4.55.0 don't decode the values and store string values with their quotes (`"prod"` including the quotes), so filters on string values stop matching.
-
-Check these places when you upgrade:
-
-- **Saved filters, dashboards, and downstream consumers** that match the old shape, such as a Python repr like `"True"` or a whole nested object as a JSON string, stop matching for new traces. Update them to the new values or dotted paths. Existing data keeps its stored shape.
-- **Raw span-attribute readers**, such as custom span exporters and [`mask_otel_spans`](/docs/observability/features/masking) callbacks, now see JSON strings: `'"prod"'` instead of `'prod'`, and `"5"` / `"true"` strings instead of integer and boolean attributes. Decode them with `json.loads()`, and write replacement values JSON-encoded (for example `json.dumps("REDACTED")`).
-
 ### Dataset run helpers removed [#dataset-run-helpers-removed]
 
-The deprecated dataset run helpers are removed. Use the experiments API instead. "Dataset run" and "experiment" refer to the same concept.
+**Affects:** code that calls `get_dataset_runs()`, `get_dataset_run()`, or `delete_dataset_run()`.
+
+**Breaks:** `AttributeError`. Use the experiments API instead. "Dataset run" and "experiment" mean the same thing.
 
 | Removed                                                       | Replacement                                                               |
 | ------------------------------------------------------------- | ------------------------------------------------------------------------- |
@@ -241,16 +233,15 @@ for i in range(0, len(ids), 1000):
 
 There is no experiment-delete API. Deleting the traces also deletes their observations and scores. See [Dataset runs → Experiments](/faq/all/deprecated-api-migration#dataset-runs) for details.
 
-### Experiment runner records experiments through OpenTelemetry
+### Experiment results (silent) [#experiment-results]
 
-`langfuse.run_experiment()` and `dataset.run_experiment()` no longer call `POST /api/public/dataset-run-items`. Experiment and item attributes are sent on the experiment spans instead. Your experiment code does not need to change, but a few results do:
+**Affects:** code that reads `dataset_run_id` or `dataset_run_url` from `run_experiment()` results, or re-runs experiments under the same `run_name`.
 
-- **Experiment IDs are deterministic.** The experiment ID is derived from the project, dataset, and run name, so running again with the same `run_name` on the same dataset adds to the same experiment. Experiments on local data get a random ID.
-- **New result fields.** `result.experiment_id` and `result.experiment_url` are the primary fields. `dataset_run_id` and `dataset_run_url` (and `ExperimentItemResult.dataset_run_id`) still work but emit a `DeprecationWarning`.
-- **Local runs have an ID too.** `dataset_run_id` is now set for local-data runs, so `if result.dataset_run_id:` no longer distinguishes dataset runs from local runs.
-- **New URL.** `experiment_url` points to `/project/{projectId}/experiments/results?baseline={experimentId}`.
-- **Run evaluations are always stored**, including for local-data runs. They are skipped only when every item trace was sampled out.
-- **Dataset versions** are recorded on items as `langfuse.experiment.item.version`.
+**Breaks silently:** your experiment code keeps running, but some results differ:
+
+- **Re-runs with the same name land in the same experiment.** The experiment ID is derived from the project, dataset, and run name, so running again with the same `run_name` on the same dataset adds to the existing experiment. Experiments on local data get a random ID.
+- **Local runs have an ID too.** `dataset_run_id` is now set for local-data runs, so `if result.dataset_run_id:` no longer tells dataset runs apart from local runs.
+- **`dataset_run_id` and `dataset_run_url` are deprecated.** They still work, as does `ExperimentItemResult.dataset_run_id`, but they emit a `DeprecationWarning`. Use `experiment_id` and `experiment_url`. The URL points to `/project/{projectId}/experiments/results?baseline={experimentId}`.
 
 **v4:**
 
@@ -266,9 +257,11 @@ result = dataset.run_experiment(name="baseline", task=my_task, evaluators=[accur
 print(result.experiment_url)
 ```
 
-### Batched evaluation reads observations only
+### Batched evaluation reads observations only [#batched-evaluation]
 
-`langfuse.run_batched_evaluation()` now reads from the v2 observations API. It evaluates observations only.
+**Affects:** code that calls `langfuse.run_batched_evaluation()`.
+
+**Breaks:** `TypeError` for `scope`, `fetch_trace_fields`, and `_additional_trace_tags`, and `ValueError` when resuming with a v4 token or with a different filter. The function now reads from the v2 observations API and evaluates observations only.
 
 - `scope` is removed. To evaluate whole traces, filter for the observations that represent them, for example by `name` or `type`.
 - `fetch_trace_fields` is renamed to `fields` (default `"core,basic,io,metadata"`). Available field groups: `core`, `basic`, `time`, `io`, `metadata`, `model`, `usage`, `prompt`, `metrics`, `trace_context`.
@@ -315,98 +308,64 @@ langfuse.run_batched_evaluation(
 )
 ```
 
-### Removed Public API methods and types
+### Scores on sampled-out traces are dropped (silent) [#sampled-out-scores]
 
-The generated client under `langfuse.api` no longer includes the endpoints that Langfuse v4 deprecated. For full replacement guidance, see the [SDK method quick reference](/faq/all/deprecated-api-migration#sdk-method-quick-reference).
+**Affects:** applications that set `sample_rate` below 1 and create scores.
 
-| Removed                                                           | Replacement                                                 |
-| ----------------------------------------------------------------- | ----------------------------------------------------------- |
-| `api.trace.get(...)`, `api.trace.list(...)`                       | `api.observations.get_many(trace_id=..., ...)`              |
-| `api.sessions.*`                                                  | `api.observations.get_many(session_id=..., ...)`            |
-| `api.legacy.observations_v1.*`                                    | `api.observations.get_many(...)`                            |
-| `api.legacy.metrics_v1.metrics(...)`                              | `api.metrics.metrics(...)`                                  |
-| `api.scores.get_many(...)`, `api.scores.get_by_id(...)`           | `api.scores_v3.get_many_v3(...)`                            |
-| `api.dataset_run_items.*`                                         | `api.experiments.list_items(...)` or the experiment runner  |
-| `api.datasets.get_run(...)`, `.get_runs(...)`, `.delete_run(...)` | [Dataset run helpers removed](#dataset-run-helpers-removed) |
+**Breaks silently:** a score whose trace is not sampled is no longer sent, matching the trace's observations. In v4 these scores were always sent. Scores without a trace, such as session or dataset run scores, are always sent.
 
-`api.trace` keeps `delete` and `delete_multiple`. `api.datasets` keeps `list`, `get`, and `create`.
+**Migration:** nothing to do if you only need scores for sampled traces. If you need scores for every request, raise `sample_rate`.
 
-Removed types include `Trace`, `TraceWithDetails`, `TraceWithFullDetails`, `Traces`, `Observation`, `ObservationsView`, `ObservationsViews`, `Session`, `SessionWithTraces`, `PaginatedSessions`, `DatasetRun`, `DatasetRunItem`, `DatasetRunWithItems`, `PaginatedDatasetRuns`, `PaginatedDatasetRunItems`, `CreateDatasetRunItemRequest`, `DeleteDatasetRunResponse`, the `ScoreV1` family, `GetScoresResponse*`, the v1 `MetricsResponse`, and the `sdk-log` ingestion event. `langfuse.model` no longer re-exports `DatasetRun`, `Observation`, or `TraceWithFullDetails`.
+### `blocked_instrumentation_scopes` removed [#blocked-instrumentation-scopes]
+
+**Affects:** code that passes `blocked_instrumentation_scopes` to `Langfuse(...)`.
+
+**Breaks:** `TypeError`. The parameter was deprecated in v4. Use `should_export_span` and compose it with the default filter.
 
 **v4:**
 
 ```python
-trace = langfuse.api.trace.get("trace-id")
+from langfuse import Langfuse
+
+langfuse = Langfuse(blocked_instrumentation_scopes=["sqlite", "requests"])
 ```
 
 **v5:**
 
 ```python
-observations = langfuse.api.observations.get_many(trace_id="trace-id", fields="core,basic,io")
-```
+from langfuse import Langfuse
+from langfuse.span_filter import is_default_export_span
 
-### `api.scores.create` takes a request object
+blocked = {"sqlite", "requests"}
 
-`langfuse.api.scores.create()` now accepts a single `CreateScoreRequest` or a list of them, and returns `CreateScoresResponse` (a union of the single-score and batch responses).
-
-**v4:**
-
-```python
-langfuse.api.scores.create(name="accuracy", value=0.9, trace_id="trace-id")
-```
-
-**v5:**
-
-```python
-from langfuse.api import CreateScoreRequest
-
-langfuse.api.scores.create(
-    request=CreateScoreRequest(name="accuracy", value=0.9, trace_id="trace-id")
+langfuse = Langfuse(
+    should_export_span=lambda span: (
+        is_default_export_span(span)
+        and (
+            span.instrumentation_scope is None
+            or span.instrumentation_scope.name not in blocked
+        )
+    )
 )
 ```
 
-### `api.legacy.score_v1` removed
+The default filter's GenAI check also requires the `gen_ai.` prefix now, dot included. Spans whose only GenAI-like attributes look like `gen_ai_custom` are no longer exported **(silent)**.
 
-`langfuse.api.legacy.score_v1` is removed. Create scores with `api.scores.create` (see above) and delete them with `api.scores.delete`.
+## New features [#new-features]
 
-**v4:**
+These need no code changes.
 
-```python
-langfuse.api.legacy.score_v1.create(name="accuracy", value=0.9, trace_id="trace-id")
-langfuse.api.legacy.score_v1.delete(score_id="score-id")
-```
+- **Experiment links.** `result.experiment_id` and `result.experiment_url` link directly to the experiment comparison view.
+- **Typed metadata filters.** On Langfuse v4.55.0 and later, numeric and boolean metadata keeps its type, and nested objects can be filtered by dotted path, such as `a.b = 1`.
+- **Batch score creation.** `api.scores.create()` accepts a list of `CreateScoreRequest` objects.
+- **Experiment records.** Run evaluations are always stored, including for local-data runs, and are skipped only when every item trace was sampled out. Dataset versions are recorded on items as `langfuse.experiment.item.version`.
+- **Lighter LangChain dependency.** The `CallbackHandler` needs only `langchain-core`.
 
-**v5:**
+## Under the hood [#under-the-hood]
 
-```python
-from langfuse.api import CreateScoreRequest
+None of these need code changes. Each one has a setting if you need different behavior.
 
-langfuse.api.scores.create(
-    request=CreateScoreRequest(name="accuracy", value=0.9, trace_id="trace-id")
-)
-langfuse.api.scores.delete(score_id="score-id")
-```
-
-### Scores are sent to `POST /api/public/scores` [#score-transport]
-
-The SDK sends scores in batches to `POST /api/public/scores` instead of as events to the legacy `/api/public/ingestion` endpoint. `langfuse.create_score(...)`, `span.score(...)`, `span.score_trace(...)`, and the `flush_at` / `flush_interval` settings are unchanged.
-
-- **Partial results are not retried.** If the server accepts only part of a batch (HTTP 207), the SDK logs how many scores were accepted and rejected, plus the errors. Rejected scores failed validation, so they are not retried. Other 4xx responses are logged and not retried either. Network errors, 429, and 5xx are retried with backoff.
-- **Scores on sampled-out traces are dropped.** With `sample_rate` below 1, a score whose trace is not sampled is no longer sent, matching the trace's observations. In v4, these scores were always sent. Scores without a trace, such as session or dataset run scores, are always sent.
-- **Custom score timestamps** (`timestamp=` on `create_score`) need Langfuse v4.59.0 or later. Servers from v4.55.0 to v4.58.x accept the score but record the time they received it.
-
-## Migration checklist [#migration-checklist]
-
-1. Confirm you're on Langfuse Cloud or self-hosted Langfuse v4.55.0 or later. Stay on Python SDK v4 for Langfuse v3.
-2. Upgrade to Python 3.11+, `openai>=1.0`, and `langchain-core>=1` if you use those integrations.
-3. If a proxy rejects compressed requests, set `otel_compression="none"` or `LANGFUSE_OTEL_COMPRESSION=none`.
-4. Search for `blocked_instrumentation_scopes` → replace with `should_export_span` composed with `is_default_export_span`.
-5. Search for `set_current_trace_io` / `set_trace_io` → set `input`/`output` on the root observation.
-6. Metadata values are JSON-encoded: update saved filters, dashboards, and consumers that match the old metadata shape, and decode metadata attributes in custom exporters and `mask_otel_spans` callbacks.
-7. Search for `get_dataset_run`, `get_dataset_runs`, `delete_dataset_run` → use `api.experiments.list` / `list_items` and `api.trace.delete_multiple`.
-8. Search for `dataset_run_id` / `dataset_run_url` → use `experiment_id` / `experiment_url`.
-9. Search for `run_batched_evaluation` → remove `scope`, rename `fetch_trace_fields` to `fields`, update the mapper and filter.
-10. Search for `api.trace.get`, `api.trace.list`, `api.sessions`, `api.legacy.observations_v1`, `api.legacy.metrics_v1`, `api.scores.get_many`, `api.scores.get_by_id`, `api.dataset_run_items`, `api.datasets.get_run` → see the [SDK method quick reference](/faq/all/deprecated-api-migration#sdk-method-quick-reference).
-11. Search for `api.scores.create(` → pass `request=CreateScoreRequest(...)`.
-12. Search for `api.legacy.score_v1` → use `api.scores.create` and `api.scores.delete(score_id=...)`.
-13. If you sample traces, expect scores on sampled-out traces to be dropped. If you set custom score timestamps on a self-hosted server, upgrade it to v4.59.0 or later.
+- **Scores are sent in batches to `POST /api/public/scores`** instead of the legacy ingestion endpoint. `create_score()`, `span.score()`, `span.score_trace()`, `flush_at`, and `flush_interval` work as before. If the server accepts only part of a batch (HTTP 207), the SDK logs the accepted and rejected counts and the errors, and doesn't retry the rejected scores. Other 4xx responses are logged and not retried. Network errors, 429, and 5xx are retried with backoff. Custom score timestamps (`timestamp=` on `create_score`) need Langfuse v4.59.0 or later. v4.55.0 to v4.58.x record the time they received the score.
+- **Span batches are gzip-compressed.** If a proxy rejects compressed requests, set `Langfuse(otel_compression="none")` or `LANGFUSE_OTEL_COMPRESSION=none`. The setting is read in this order: `otel_compression`, `LANGFUSE_OTEL_COMPRESSION`, `OTEL_EXPORTER_OTLP_TRACES_COMPRESSION`, `OTEL_EXPORTER_OTLP_COMPRESSION`, then the `gzip` default. Values are `gzip` or `none` (case-insensitive), and an invalid value falls through to the next setting. A custom `span_exporter` is not changed.
+- **Spans carry `x-langfuse-ingestion-version: 4`**, which enables real-time processing on Langfuse v4. To opt out, pass `additional_headers={"x-langfuse-ingestion-version": "3"}`. A custom `span_exporter` doesn't get this header automatically.
+- **Experiments are recorded through OpenTelemetry.** `run_experiment()` sends experiment and item attributes on its spans instead of calling `POST /api/public/dataset-run-items`.

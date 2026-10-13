@@ -6,35 +6,49 @@ category: SDKs
 
 # JS/TS v5 → v6
 
-The JS/TS SDK v6 targets **Langfuse v4** only. It removes the Public API methods and client aliases that were deprecated in v5, records experiments through OpenTelemetry instead of the dataset-run-items endpoint, sends scores to `POST /api/public/scores` instead of the legacy ingestion endpoint, and sends gzip-compressed span batches with the v4 ingestion header by default.
+For most users, v6 is a small upgrade. If you trace with `startActiveObservation()`, `observe()`, or an integration, and you create scores and fetch prompts through the managers (`langfuse.prompt`, `langfuse.score`, `langfuse.dataset`), your code keeps working as is. v6 needs Node.js 22+ and Langfuse Cloud or self-hosted Langfuse v4.55.0 or later.
 
-Most applications that already follow the [observations-first model](/docs/observability/data-model) only need to check a few call sites. Start with the [migration checklist](#migration-checklist) and use the sections below for details.
-
-<Callout type="warning">
-  JS/TS SDK v6 requires Langfuse Cloud or self-hosted Langfuse **v4.55.0 or
-  later**. Older servers store JSON-encoded string metadata values with their
-  quotes (see [Metadata values are JSON-encoded](#metadata-json-encoding)). If you self-host Langfuse v3, stay on JS/TS SDK v5. See the [self-hosted
-  compatibility matrix](/self-hosting/upgrade/versioning#sdk-server) and
-  [Versions & Compatibility](/docs/compatibility).
-</Callout>
-
-All packages (`@langfuse/core`, `@langfuse/client`, `@langfuse/tracing`, `@langfuse/otel`, `@langfuse/openai`, `@langfuse/langchain`) are released together. Upgrade them to the same major version:
+All `@langfuse/*` packages are released together. Upgrade them to the same major version:
 
 ```bash
 npm install @langfuse/client@6 @langfuse/tracing@6 @langfuse/otel@6
 ```
 
-`baseUrl`, `LANGFUSE_BASE_URL`, and `LANGFUSE_BASEURL` keep working as before. You don't need to change them.
+`baseUrl`, `LANGFUSE_BASE_URL`, and `LANGFUSE_BASEURL` keep working as before.
 
-## Breaking changes
+## Are you affected? [#are-you-affected]
 
-### Node.js 22 and ES2022 required
+You only need to change something if one of these applies to you:
 
-All packages declare `engines.node >=22` and are compiled to ES2022. Upgrade to Node.js 22 or later. If you bundle the SDK for older runtimes, make sure your bundler targets ES2022 or transpiles the SDK.
+- **You self-host Langfuse v3, or v4 older than v4.55.0**, or run Node.js older than 22, or use `@langchain/core` older than 1.0 → [Minimum versions](#minimum-versions)
+- **You filter on metadata, mask it, read it in a custom span processor or exporter, or pass non-string values to `propagateAttributes`** → [Metadata values are JSON-encoded](#metadata-json-encoding) (silent)
+- **You call top-level `LangfuseClient` methods** such as `getPrompt()`, `getDataset()`, or `fetchTrace()` → [Deprecated `LangfuseClient` aliases removed](#client-aliases-removed)
+- **You call `langfuse.api.*` directly**, for example `api.trace.get`, `api.sessions`, `api.legacy.*`, `api.scores.getMany`, or the response of `api.scores.create` → [Removed Public API methods](#removed-public-api-methods)
+- **You pass `requestOptions` to a generated API method without query parameters or a body**, such as `api.datasets.get(name, { timeoutInSeconds })` → [Request placeholder before `requestOptions`](#request-placeholder) (silent in JavaScript)
+- **You call `setActiveTraceIO()`, `span.setTraceIO()`, or `createTraceAttributes()`** → [Trace input/output setters removed](#trace-io-setters-removed)
+- **Your prompt or media calls take longer than 5 seconds** → [Shorter default timeouts](#timeouts) (silent)
+- **You call `item.link()` on dataset items** → [Dataset item `link()` removed](#dataset-item-link-removed)
+- **You read `datasetRunUrl` from experiment results, or re-run experiments under the same name** → [Experiment results](#experiment-results) (silent)
+- **You handle errors from `@langfuse/browser`** → [`@langfuse/browser` error types](#browser-error-types)
+- **A proxy between your app and Langfuse rejects gzip-compressed requests** → [Under the hood](#under-the-hood)
 
-### LangChain v1 required
+If none of these apply, upgrade and you're done.
 
-`@langfuse/langchain` now has a peer dependency on `@langchain/core@^1.0.0` (previously `>=0.3.8`). Upgrade LangChain before upgrading the integration:
+## Breaking changes [#breaking-changes]
+
+Ordered by how many users they affect. Changes marked **silent** don't raise an error. Your code runs, but the result is different.
+
+### Minimum versions [#minimum-versions]
+
+**Affects:** self-hosted Langfuse v3 or older than v4.55.0, Node.js older than 22, and the LangChain integration on LangChain 0.x.
+
+| Requirement | v6                                         | If not met                                                                                                        |
+| ----------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| Langfuse    | Cloud, or self-hosted **v4.55.0 or later** | Silent: string metadata is stored with its quotes, and score batches are rejected with HTTP 400 (logged, dropped) |
+| Node.js     | `>=22`, packages compiled to ES2022        | Unsupported. Bundles for older runtimes must target ES2022 or transpile the SDK                                   |
+| LangChain   | `@langchain/core@^1.0.0` (was `>=0.3.8`)   | Peer dependency conflict when installing `@langfuse/langchain@6`                                                  |
+
+If you self-host Langfuse v3, stay on JS/TS SDK v5. See the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
 
 ```bash
 npm install @langfuse/langchain@6 @langchain/core@^1
@@ -42,41 +56,53 @@ npm install @langfuse/langchain@6 @langchain/core@^1
 
 The `CallbackHandler` API and trace output are unchanged.
 
-### Spans are gzip-compressed by default
+### Metadata values are JSON-encoded (silent) [#metadata-json-encoding]
 
-On Node.js and Bun, `LangfuseSpanProcessor` now sends gzip-compressed batches. Compression is resolved in this order:
+**Affects:** saved filters, dashboards, and downstream consumers that match metadata values; custom span processors and exporters that read metadata attributes; code that passes non-string values to `propagateAttributes({ metadata })` or the LangChain `CallbackHandler`.
 
-1. `compression` option on `LangfuseSpanProcessor`
-2. `LANGFUSE_OTEL_COMPRESSION`
-3. `OTEL_EXPORTER_OTLP_TRACES_COMPRESSION`
-4. `OTEL_EXPORTER_OTLP_COMPRESSION`
-5. `gzip`
+**Breaks silently:** v6 JSON-encodes every metadata value before writing it to the span, including strings. This covers observation metadata (`metadata` on `startObservation()`, `startActiveObservation()`, `update()`, `observe()`, and the Vercel AI SDK integration) and propagated trace metadata from `propagateAttributes({ metadata })`.
 
-Supported values are `gzip` and `none`. Environment variables are case-insensitive, and an invalid value falls through to the next setting. Browser and edge runtimes ignore this setting. If a proxy between your application and Langfuse can't handle compressed requests, opt out:
+Observation metadata is written as one attribute per top-level key (`langfuse.observation.metadata.<key>`):
 
-```typescript
-import { LangfuseSpanProcessor } from "@langfuse/otel";
+| Value               | v5 attribute value | v6 attribute value      |
+| ------------------- | ------------------ | ----------------------- |
+| `"prod"`            | `prod`             | `"prod"`                |
+| `"3"`               | `3`                | `"3"`                   |
+| `3`                 | `3`                | `3`                     |
+| `true`              | `true`             | `true`                  |
+| `""`                | Not written        | `""`                    |
+| `{ a: { b: 1 } }`   | `{"a":{"b":1}}`    | `{"a":{"b":1}}`         |
+| `2n ** 60n`         | Not written        | `"1152921504606846976"` |
+| `NaN`, `Infinity`   | `null`             | `"NaN"`, `"Infinity"`   |
+| `null`, `undefined` | Not written        | Not written (debug log) |
 
-const spanProcessor = new LangfuseSpanProcessor({ compression: "none" });
-```
+`propagateAttributes({ metadata })` now accepts `Record<string, unknown>` instead of `Record<string, string>`. v5 passed strings through and dropped every other value, so values that used to be dropped are now sent:
 
-or set `LANGFUSE_OTEL_COMPRESSION=none`.
+| Value                                                      | v5       | v6                     |
+| ---------------------------------------------------------- | -------- | ---------------------- |
+| `"gpt-4o"`                                                 | `gpt-4o` | `"gpt-4o"`             |
+| `42`                                                       | Dropped  | `42`                   |
+| `null`                                                     | Dropped  | Dropped with a warning |
+| `[1, "a"]`                                                 | Dropped  | `[1,"a"]`              |
+| `{ k: "v" }`                                               | Dropped  | `{"k":"v"}`            |
+| `12345678901234567890n`                                    | Dropped  | `12345678901234567890` |
+| `NaN`, `Infinity`, `undefined`, functions, circular values | Dropped  | Dropped with a warning |
 
-### v4 ingestion header sent by default
+The 200-character limit on propagated values applies to the encoded value, and the quotes around a string count toward it. Metadata passed to the LangChain `CallbackHandler` follows the same rules.
 
-`LangfuseSpanProcessor` sends `x-langfuse-ingestion-version: 4`, which enables real-time processing of spans on Langfuse v4. `additionalHeaders` override default headers case-insensitively, so you can opt out:
+Langfuse v4.55.0 and later decodes the values. Strings are stored without quotes, so `"prod"` still reads as `prod`. Numbers and booleans keep their type. Nested objects become filterable dotted paths, so `{ a: { b: 1 } }` can be filtered as `a.b = 1`. If a literal `"a.b"` key and a nested `{ a: { b: ... } }` both map to the same path, the first value wins. Self-hosted servers older than v4.55.0 store string values with their quotes, so filters on string values stop matching.
 
-```typescript
-import { LangfuseSpanProcessor } from "@langfuse/otel";
+**Migration:**
 
-const spanProcessor = new LangfuseSpanProcessor({
-  additionalHeaders: { "x-langfuse-ingestion-version": "3" },
-});
-```
+- Update saved filters, dashboards, and consumers that match the old shape, such as a whole nested object as a JSON string, to the new values or dotted paths. Existing data keeps its stored shape.
+- In custom span processors and exporters, expect JSON strings in `langfuse.observation.metadata.*` and `langfuse.trace.metadata.*`: `'"prod"'` instead of `'prod'`. Decode them with `JSON.parse()`. The `mask` function of `LangfuseSpanProcessor` receives decoded observation metadata values, and its result is re-encoded.
+- If you relied on non-string propagated values being dropped, remove them before calling `propagateAttributes`.
 
-### Deprecated `LangfuseClient` aliases removed
+### Deprecated `LangfuseClient` aliases removed [#client-aliases-removed]
 
-The top-level aliases on `LangfuseClient` are removed. Use the managers or the `api` client instead.
+**Affects:** code that calls the top-level convenience methods on `LangfuseClient`.
+
+**Breaks:** a TypeScript compile error, or `TypeError: ... is not a function` in JavaScript. Use the managers or the `api` client instead.
 
 | Removed                                | Replacement                                                   |
 | -------------------------------------- | ------------------------------------------------------------- |
@@ -118,91 +144,96 @@ const observations = await langfuse.api.observations.getMany({
 });
 ```
 
-`LangfuseClient` also exposes `getProjectId()` and `getExperimentUrl(experimentId)`.
+### Removed Public API methods [#removed-public-api-methods]
 
-### Trace input/output setters removed
+**Affects:** code that calls `langfuse.api.*` directly.
 
-`setActiveTraceIO()`, `span.setTraceIO()`, `createTraceAttributes()`, and the `LangfuseTraceAttributes` type were deprecated in v5 and are removed. Trace input and output now come from the root observation. Set them on the root observation instead.
+**Breaks:** TypeScript compile errors, or `TypeError` / `undefined` at runtime in JavaScript.
+
+The generated client no longer includes the endpoints that Langfuse v4 deprecated, and there is no `api.legacy` namespace anymore. For full replacement guidance, see the [SDK method quick reference](/faq/all/deprecated-api-migration#sdk-method-quick-reference).
+
+| Removed                                              | Replacement                                                          |
+| ---------------------------------------------------- | -------------------------------------------------------------------- |
+| `api.trace.get(...)`, `api.trace.list(...)`          | `api.observations.getMany({ traceId, ... })`                         |
+| `api.sessions.*`                                     | `api.observations.getMany({ sessionId, ... })`                       |
+| `api.legacy.observationsV1.*`                        | `api.observations.getMany(...)`                                      |
+| `api.legacy.metricsV1.metrics(...)`                  | `api.metrics.metrics(...)`                                           |
+| `api.legacy.scoreV1.create(...)`                     | `api.scores.create(...)`                                             |
+| `api.legacy.scoreV1.delete(scoreId)`                 | `api.scores.delete(scoreId)`                                         |
+| `api.scores.getMany(...)`, `api.scores.getById(...)` | `api.scoresV3.getManyV3(...)`                                        |
+| `api.datasetRunItems.*`                              | `api.experiments.listItems(...)` or the experiment runner            |
+| `api.datasets.getRun(...)`, `.getRuns(...)`          | `api.experiments.list(...)` and `.listItems(...)`                    |
+| `api.datasets.deleteRun(...)`                        | List experiment items, then `api.trace.deleteMultiple({ traceIds })` |
+
+Removed types include the trace, session, v1 observation, dataset run, and dataset run item response types, the `ScoreV1` family, `SdkLogEvent`, and the `legacy.CreateScoreRequest`, `legacy.CreateScoreResponse`, and `legacy.CreateScoreSource` re-exports. Use the score types without the `legacy` prefix.
+
+`api.scores.create()` now accepts a single `CreateScoreRequest` or an array, and returns `CreateScoresResponse`, a union of the single-score and batch responses. Single-score calls keep working, but TypeScript code that reads fields from the response needs to narrow the type first.
 
 **v5:**
 
 ```typescript
-import { startActiveObservation, setActiveTraceIO } from "@langfuse/tracing";
-
-await startActiveObservation("request", async () => {
-  const result = await callLlm(query);
-  setActiveTraceIO({ input: query, output: result });
+const { id } = await langfuse.api.scores.create({
+  name: "accuracy",
+  value: 0.9,
+  traceId: "trace-id",
 });
+await langfuse.api.legacy.scoreV1.delete("score-id");
 ```
 
 **v6:**
 
 ```typescript
-import {
-  startActiveObservation,
-  updateActiveObservation,
-} from "@langfuse/tracing";
+import { LangfuseClient } from "@langfuse/client";
 
-await startActiveObservation("request", async (span) => {
-  const result = await callLlm(query);
-  span.update({ input: query, output: result });
-  // or, inside the active root observation:
-  // updateActiveObservation({ input: query, output: result });
+const langfuse = new LangfuseClient();
+
+const response = await langfuse.api.scores.create({
+  name: "accuracy",
+  value: 0.9,
+  traceId: "trace-id",
 });
+if ("id" in response) {
+  console.log(response.id);
+}
+await langfuse.api.scores.delete("score-id");
 ```
 
-`setActiveTraceAsPublic()` and `span.setTraceAsPublic()` are unchanged. If you still use [trace-level LLM-as-a-judge evaluators](/faq/all/llm-as-a-judge-migration), migrate them to observation-level evaluators.
+To delete an experiment's data, page through its items and delete their traces. This also deletes their observations and scores:
 
-### Metadata values are JSON-encoded [#metadata-json-encoding]
+```typescript
+import { LangfuseClient } from "@langfuse/client";
 
-v6 JSON-encodes every metadata value before writing it to the span, strings included. This applies to observation metadata (`metadata` on `startObservation()`, `startActiveObservation()`, `update()`, `observe()`, and the Vercel AI SDK integration) and to propagated trace metadata from `propagateAttributes({ metadata })`.
+const langfuse = new LangfuseClient();
+const dataset = await langfuse.dataset.get("qa-set");
+// No experiment item starts before its dataset was created, so this covers every run.
+const fromStartTime = dataset.createdAt;
 
-Observation metadata is written as one attribute per top-level key (`langfuse.observation.metadata.<key>`):
+const traceIds = new Set<string>();
+let cursor: string | undefined;
+do {
+  const page = await langfuse.api.experiments.listItems({
+    datasetId: dataset.id,
+    experimentName: "baseline",
+    fromStartTime,
+    cursor,
+  });
+  page.data.forEach((item) => traceIds.add(item.traceId));
+  cursor = page.meta.cursor ?? undefined;
+} while (cursor);
 
-| Value               | v5 attribute value | v6 attribute value      |
-| ------------------- | ------------------ | ----------------------- |
-| `"prod"`            | `prod`             | `"prod"`                |
-| `"3"`               | `3`                | `"3"`                   |
-| `3`                 | `3`                | `3`                     |
-| `true`              | `true`             | `true`                  |
-| `""`                | Not written        | `""`                    |
-| `{ a: { b: 1 } }`   | `{"a":{"b":1}}`    | `{"a":{"b":1}}`         |
-| `2n ** 60n`         | Not written        | `"1152921504606846976"` |
-| `NaN`, `Infinity`   | `null`             | `"NaN"`, `"Infinity"`   |
-| `null`, `undefined` | Not written        | Not written (debug log) |
+const ids = [...traceIds];
+for (let i = 0; i < ids.length; i += 1000) {
+  await langfuse.api.trace.deleteMultiple({ traceIds: ids.slice(i, i + 1000) });
+}
+```
 
-`propagateAttributes({ metadata })` now accepts `Record<string, unknown>` instead of `Record<string, string>`. v5 passed strings through and dropped every other value:
+See [Dataset runs → Experiments](/faq/all/deprecated-api-migration#dataset-runs) for details.
 
-| Value                                                      | v5       | v6                     |
-| ---------------------------------------------------------- | -------- | ---------------------- |
-| `"gpt-4o"`                                                 | `gpt-4o` | `"gpt-4o"`             |
-| `42`                                                       | Dropped  | `42`                   |
-| `null`                                                     | Dropped  | Dropped with a warning |
-| `[1, "a"]`                                                 | Dropped  | `[1,"a"]`              |
-| `{ k: "v" }`                                               | Dropped  | `{"k":"v"}`            |
-| `12345678901234567890n`                                    | Dropped  | `12345678901234567890` |
-| `NaN`, `Infinity`, `undefined`, functions, circular values | Dropped  | Dropped with a warning |
+### Request placeholder before `requestOptions` (silent in JavaScript) [#request-placeholder]
 
-The 200-character limit for propagated values applies to the encoded value, including the quotes around strings. Metadata passed to the LangChain `CallbackHandler` follows the same rules.
+**Affects:** calls that pass `requestOptions` to a generated API method that takes no query parameters and no body.
 
-How Langfuse v4.55.0 and later reads the encoded values:
-
-- **Strings** are decoded and stored without quotes, so `"prod"` still reads as `prod`.
-- **Numbers and booleans keep their type** instead of becoming strings.
-- **Nested objects become filterable dotted paths.** `{ a: { b: 1 } }` can be filtered as `a.b = 1` instead of matching a JSON string.
-- **Dotted-key collisions: the first value wins.** If metadata contains both a literal `"a.b"` key and a nested `{ a: { b: ... } }`, only the first value is kept for the `a.b` path.
-
-Self-hosted servers older than v4.55.0 don't decode the values and store string values with their quotes (`"prod"` including the quotes), so filters on string values stop matching.
-
-Check these places when you upgrade:
-
-- **Saved filters, dashboards, and downstream consumers** that match the old shape, such as a whole nested object as a JSON string, stop matching for new traces. Update them to the new values or dotted paths. Existing data keeps its stored shape.
-- **Raw span-attribute readers**, such as custom span processors and exporters, now see JSON strings in `langfuse.observation.metadata.*` and `langfuse.trace.metadata.*`: `'"prod"'` instead of `'prod'`. Decode them with `JSON.parse()`. The `mask` function of `LangfuseSpanProcessor` receives decoded observation metadata values, and its result is re-encoded.
-- If you relied on non-string propagated values being dropped, remove them before calling `propagateAttributes`.
-
-### Request placeholder before `requestOptions`
-
-Generated API methods that take no query parameters and no body now accept an empty request object before `requestOptions`. This keeps `requestOptions` in the same position if the endpoint gains query parameters later. If you pass `requestOptions` to one of these methods, add `{}` before it.
+**Breaks:** TypeScript reports a compile error. **In plain JavaScript the options are silently ignored.** These methods now take an empty request object before `requestOptions`, so `requestOptions` keeps its position if the endpoint gains query parameters later. Calls without `requestOptions` don't change.
 
 **v5:**
 
@@ -217,8 +248,6 @@ await langfuse.api.health.health({ maxRetries: 0 });
 await langfuse.api.datasets.get("qa-set", {}, { timeoutInSeconds: 10 });
 await langfuse.api.health.health({}, { maxRetries: 0 });
 ```
-
-TypeScript reports the old call as a compile error. In plain JavaScript, the options would be silently ignored, so check these call sites manually. Calls without `requestOptions` don't change.
 
 <details>
 <summary>All 41 affected methods</summary>
@@ -267,9 +296,59 @@ TypeScript reports the old call as a compile error. In plain JavaScript, the opt
 
 </details>
 
-### Dataset item `link()` removed
+### Trace input/output setters removed [#trace-io-setters-removed]
 
-`item.link()` and the `LinkDatasetItemFunction` type are removed. `dataset.items` is now a plain `DatasetItem[]`. Use the experiment runner to run your application on a dataset.
+**Affects:** code that calls `setActiveTraceIO()`, `span.setTraceIO()`, or `createTraceAttributes()`, or uses the `LangfuseTraceAttributes` type.
+
+**Breaks:** a TypeScript compile error, or a missing-export / `TypeError` at runtime. These were deprecated in v5. Trace input and output now come from the root observation.
+
+**v5:**
+
+```typescript
+import { startActiveObservation, setActiveTraceIO } from "@langfuse/tracing";
+
+await startActiveObservation("request", async () => {
+  const result = await callLlm(query);
+  setActiveTraceIO({ input: query, output: result });
+});
+```
+
+**v6:**
+
+```typescript
+import {
+  startActiveObservation,
+  updateActiveObservation,
+} from "@langfuse/tracing";
+
+await startActiveObservation("request", async (span) => {
+  const result = await callLlm(query);
+  span.update({ input: query, output: result });
+  // or, inside the active root observation:
+  // updateActiveObservation({ input: query, output: result });
+});
+```
+
+`setActiveTraceAsPublic()` and `span.setTraceAsPublic()` are unchanged. If you still use [trace-level LLM-as-a-judge evaluators](/faq/all/llm-as-a-judge-migration), migrate them to observation-level evaluators.
+
+### Shorter default timeouts (silent) [#timeouts]
+
+**Affects:** prompt and media calls that regularly take longer than 5 seconds.
+
+**Breaks silently:** these calls now time out after 5 seconds instead of 60, matching the Python SDK v5:
+
+- **Prompt fetch, prompt create/update/delete, `media.get`, and the media upload API calls** default to 5 seconds. A `timeout` that isn't a finite positive number falls back to 5 seconds with a warning.
+- **Media content download** in `media.resolveReferences` is aborted when no data arrives for 5 seconds. This is an inactivity timeout, not a cap on the total download time, so a download that keeps receiving data is never cut off. v5 had no timeout here.
+- **Score requests** use 5 seconds with one retry on timeout. v5 used 60 seconds plus retries.
+- **Unchanged:** the media blob upload itself has no timeout, and dataset calls still use 60 seconds.
+
+**Migration:** if prompt or media calls regularly take longer than 5 seconds, raise the limit. Override prompt fetch per call with `fetchTimeoutMs`. Otherwise, set `timeout` (in seconds) or `LANGFUSE_TIMEOUT` on `LangfuseClient`. Media uploads triggered by tracing use the `timeout` of `LangfuseSpanProcessor`, and uploads from `dataset.createItem` use the client `timeout`.
+
+### Dataset item `link()` removed [#dataset-item-link-removed]
+
+**Affects:** code that calls `item.link()` or uses the `LinkDatasetItemFunction` type.
+
+**Breaks:** a TypeScript compile error, or `TypeError: item.link is not a function`. `dataset.items` is now a plain `DatasetItem[]`. Use the experiment runner to run your application on a dataset.
 
 **v5:**
 
@@ -301,159 +380,39 @@ console.log(result.experimentUrl);
 
 See [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) for the full runner API.
 
-### Experiment runner records experiments through OpenTelemetry
+### Experiment results (silent) [#experiment-results]
 
-`langfuse.experiment.run()` and `dataset.runExperiment()` no longer call `POST /api/public/dataset-run-items`. Experiment and item attributes are sent on the experiment spans instead. Your experiment code does not need to change, but a few results do:
+**Affects:** code that reads `datasetRunUrl` or `datasetRunId` from `langfuse.experiment.run()` or `dataset.runExperiment()` results, or re-runs experiments under the same name.
 
-- **Experiment IDs are deterministic.** The experiment ID is derived from the project, dataset, and run name, so running again with the same name on the same dataset adds to the same experiment. Experiments on local data get a random ID. A run over items from several datasets gets one experiment per dataset and logs a warning.
-- **New result field.** `result.experimentUrl` is the primary link. `datasetRunUrl` is deprecated, and `datasetRunId` equals `experimentId`.
-- **Run evaluations are always sent**, including for local-data runs. They are skipped only when nothing was sampled.
-- **Dataset versions** (`datasetVersion`) are recorded on items as `langfuse.experiment.item.version`.
+**Breaks silently:** your experiment code keeps running, but some results differ:
 
-### Removed Public API methods and types
+- **Re-runs with the same name land in the same experiment.** The experiment ID is derived from the project, dataset, and run name, so running again with the same name on the same dataset adds to the existing experiment. Experiments on local data get a random ID. A run over items from several datasets gets one experiment per dataset and logs a warning.
+- **`datasetRunUrl` is deprecated** in favor of `result.experimentUrl`, and `datasetRunId` now equals `experimentId`.
 
-The generated client under `langfuse.api` no longer includes the endpoints that Langfuse v4 deprecated. For full replacement guidance, see the [SDK method quick reference](/faq/all/deprecated-api-migration#sdk-method-quick-reference).
+### `@langfuse/browser` error types [#browser-error-types]
 
-| Removed                                              | Replacement                                                          |
-| ---------------------------------------------------- | -------------------------------------------------------------------- |
-| `api.trace.get(...)`, `api.trace.list(...)`          | `api.observations.getMany({ traceId, ... })`                         |
-| `api.sessions.*`                                     | `api.observations.getMany({ sessionId, ... })`                       |
-| `api.legacy.observationsV1.*`                        | `api.observations.getMany(...)`                                      |
-| `api.legacy.metricsV1.metrics(...)`                  | `api.metrics.metrics(...)`                                           |
-| `api.scores.getMany(...)`, `api.scores.getById(...)` | `api.scoresV3.getManyV3(...)`                                        |
-| `api.datasetRunItems.*`                              | `api.experiments.listItems(...)` or the experiment runner            |
-| `api.datasets.getRun(...)`, `.getRuns(...)`          | `api.experiments.list(...)` and `.listItems(...)`                    |
-| `api.datasets.deleteRun(...)`                        | List experiment items, then `api.trace.deleteMultiple({ traceIds })` |
+**Affects:** code that handles errors from `LangfuseBrowserClient.score()`.
 
-Removed types include the trace, session, v1 observation, dataset run, and dataset run item response types, the `ScoreV1` family, and `SdkLogEvent`.
-
-To delete an experiment's data, page through its items and delete their traces. This also deletes their observations and scores:
-
-```typescript
-import { LangfuseClient } from "@langfuse/client";
-
-const langfuse = new LangfuseClient();
-const dataset = await langfuse.dataset.get("qa-set");
-// No experiment item starts before its dataset was created, so this covers every run.
-const fromStartTime = dataset.createdAt;
-
-const traceIds = new Set<string>();
-let cursor: string | undefined;
-do {
-  const page = await langfuse.api.experiments.listItems({
-    datasetId: dataset.id,
-    experimentName: "baseline",
-    fromStartTime,
-    cursor,
-  });
-  page.data.forEach((item) => traceIds.add(item.traceId));
-  cursor = page.meta.cursor ?? undefined;
-} while (cursor);
-
-const ids = [...traceIds];
-for (let i = 0; i < ids.length; i += 1000) {
-  await langfuse.api.trace.deleteMultiple({ traceIds: ids.slice(i, i + 1000) });
-}
-```
-
-See [Dataset runs → Experiments](/faq/all/deprecated-api-migration#dataset-runs) for details.
-
-### `api.scores.create` accepts batches
-
-`langfuse.api.scores.create()` now accepts a single `CreateScoreRequest` or an array of them, and returns `CreateScoresResponse` (a union of the single-score and batch responses). Single-score calls keep working, but TypeScript code that reads fields from the response needs to narrow the type first.
-
-**v5:**
-
-```typescript
-const { id } = await langfuse.api.scores.create({
-  name: "accuracy",
-  value: 0.9,
-  traceId: "trace-id",
-});
-```
-
-**v6:**
-
-```typescript
-const response = await langfuse.api.scores.create({
-  name: "accuracy",
-  value: 0.9,
-  traceId: "trace-id",
-});
-if ("id" in response) {
-  console.log(response.id);
-}
-```
-
-### `api.legacy.scoreV1` removed
-
-`langfuse.api.legacy.scoreV1` is removed. Create scores with `api.scores.create` (see above) and delete them with `api.scores.delete`.
-
-**v5:**
-
-```typescript
-await langfuse.api.legacy.scoreV1.create({
-  name: "accuracy",
-  value: 0.9,
-  traceId: "trace-id",
-});
-await langfuse.api.legacy.scoreV1.delete("score-id");
-```
-
-**v6:**
-
-```typescript
-await langfuse.api.scores.create({
-  name: "accuracy",
-  value: 0.9,
-  traceId: "trace-id",
-});
-await langfuse.api.scores.delete("score-id");
-```
-
-The `legacy.CreateScoreRequest`, `legacy.CreateScoreResponse`, and `legacy.CreateScoreSource` type re-exports are removed too. Use the types without the `legacy` prefix.
-
-### Scores are sent to `POST /api/public/scores` [#score-transport]
-
-`@langfuse/client` sends scores in batches of up to 100 to `POST /api/public/scores` instead of as events to the legacy `/api/public/ingestion` endpoint. `langfuse.score.create(...)`, `langfuse.score.observation(...)`, `langfuse.score.trace(...)`, `flush()`, `shutdown()`, and the batching settings are unchanged.
-
-- **Partial results are not retried.** If the server accepts only part of a batch (HTTP 207), the SDK logs `Langfuse rejected N of M scores in batch:` with the server's errors. Rejected scores failed validation, so they are not retried.
-- **Older servers reject batches.** Servers older than v4.55.0 reject a batch with HTTP 400. The SDK logs that batched score creation needs Langfuse v4.55.0 or later and drops the batch.
-- **Score timestamps.** Each score carries the time it was queued in the SDK as its timestamp, as with the ingestion endpoint. The server records this timestamp from Langfuse v4.59.0. Servers from v4.55.0 to v4.58.x record the time they received the score instead.
-
-### `@langfuse/browser` score requests
-
-`LangfuseBrowserClient.score()` sends each score to `POST /api/public/scores` with public-key authentication instead of to the ingestion endpoint. It still returns `{ id }`. Error handling changed:
+**Breaks:** TypeScript compile errors for the removed types, and `undefined` for `.errors` in JavaScript **(silent)**. `score()` still returns `{ id }`.
 
 - The `LangfuseIngestionError`, `LangfuseIngestionSuccess`, and `LangfuseIngestionResponse` type exports are removed.
 - `LangfuseBrowserError.errors` is removed. Validation errors arrive as `status` and `response` (`{ message }`).
 
-### Other behavior changes [#other-behavior-changes]
+## New features [#new-features]
 
-- **Timeouts.** v6 uses the same request timeouts as the Python SDK v5:
-  - **5-second default** for prompt fetch, prompt create/update/delete, `media.get`, and the media upload API calls. All of these used 60 seconds in v5. Override prompt fetch per call with `fetchTimeoutMs`. Otherwise, set `timeout` (in seconds) or `LANGFUSE_TIMEOUT` on `LangfuseClient`. Media uploads triggered by tracing use the `timeout` of `LangfuseSpanProcessor`, and uploads from `dataset.createItem` use the client `timeout`. A `timeout` that isn't a finite positive number falls back to 5 seconds with a warning.
-  - **Media content download** in `media.resolveReferences`: aborted when no data arrives for 5 seconds. This is an inactivity timeout, not a cap on the total download time; a download that keeps receiving data is never cut off. v5 had no timeout here.
-  - **Score requests**: 5 seconds with one retry on timeout. v5 used 60 seconds plus retries.
-  - **Unchanged**: the media blob upload itself has no timeout, and dataset calls still use 60 seconds.
+These need no code changes.
 
-  If prompt or media calls regularly take longer than 5 seconds, raise `timeout`.
+- **Experiment links.** `result.experimentUrl` links directly to the experiment comparison view. `LangfuseClient` also exposes `getProjectId()` and `getExperimentUrl(experimentId)`.
+- **Typed metadata filters.** On Langfuse v4.55.0 and later, numeric and boolean metadata keeps its type, and nested objects can be filtered by dotted path, such as `a.b = 1`. `propagateAttributes({ metadata })` accepts any JSON-serializable value.
+- **Batch score creation.** `api.scores.create()` accepts an array of `CreateScoreRequest` objects.
+- **Experiment records.** Run evaluations are always sent, including for local-data runs, and are skipped only when nothing was sampled. Dataset versions (`datasetVersion`) are recorded on items as `langfuse.experiment.item.version`.
 
-- **Scores never throw.** Score methods validate input on the client. Scores with an empty name or a non-finite or non-string value are logged at error level and dropped.
+## Under the hood [#under-the-hood]
 
-## Migration checklist [#migration-checklist]
+None of these need code changes. Each one has a setting if you need different behavior.
 
-1. Confirm you're on Langfuse Cloud or self-hosted Langfuse v4.55.0 or later. Stay on JS/TS SDK v5 for Langfuse v3.
-2. Upgrade to Node.js 22+ and, if you use the LangChain integration, `@langchain/core@^1`.
-3. Upgrade all `@langfuse/*` packages to v6 together.
-4. If a proxy rejects compressed requests, set `compression: "none"` or `LANGFUSE_OTEL_COMPRESSION=none`.
-5. Search for `getPrompt`, `createPrompt`, `updatePrompt`, `getDataset`, `fetchTrace`, `fetchObservation`, `fetchSessions`, `getDatasetRun`, `createDataset`, `getDatasetItem`, `createDatasetItem`, `fetchMedia`, `resolveMediaReferences` on `LangfuseClient` → use the replacements in the alias table.
-6. Search for `setActiveTraceIO` / `setTraceIO` / `createTraceAttributes` → set `input`/`output` on the root observation.
-7. Metadata values are JSON-encoded: update saved filters, dashboards, and consumers that match the old metadata shape, decode metadata attributes in custom span processors and exporters, and check `propagateAttributes` and `CallbackHandler` metadata for non-string values that were previously dropped.
-8. Search for generated API calls that pass `requestOptions` to a method in the placeholder list → insert `{}` before `requestOptions`.
-9. Search for `item.link(` → use `dataset.runExperiment()`.
-10. Search for `datasetRunUrl` → use `experimentUrl`.
-11. Search for `api.trace.get`, `api.trace.list`, `api.sessions`, `api.legacy.observationsV1`, `api.legacy.metricsV1`, `api.scores.getMany`, `api.scores.getById`, `api.datasetRunItems`, `api.datasets.getRun`, `api.datasets.deleteRun` → see the [SDK method quick reference](/faq/all/deprecated-api-migration#sdk-method-quick-reference).
-12. Search for code that reads the response of `api.scores.create(` → narrow the union type.
-13. Search for `api.legacy.scoreV1` → use `api.scores.create` and `api.scores.delete(scoreId)`.
-14. If you use `@langfuse/browser`, search for `LangfuseIngestion*` types and `LangfuseBrowserError.errors` → read `status` and `response` instead.
-15. Prompt, media, and score calls now time out after 5 seconds (previously 60). If they regularly take longer, raise `timeout` / `LANGFUSE_TIMEOUT`, or pass `fetchTimeoutMs` to `prompt.get`.
+- **Scores are sent in batches of up to 100 to `POST /api/public/scores`** instead of the legacy ingestion endpoint. `langfuse.score.create()`, `.observation()`, `.trace()`, `flush()`, `shutdown()`, and the batching settings work as before. If the server accepts only part of a batch (HTTP 207), the SDK logs `Langfuse rejected N of M scores in batch:` with the server's errors and doesn't retry the rejected scores. Servers older than v4.55.0 reject the batch with HTTP 400, and the SDK logs that batched score creation needs Langfuse v4.55.0 or later. Each score carries the time it was queued as its timestamp. The server records it from Langfuse v4.59.0. v4.55.0 to v4.58.x record the time they received the score. `LangfuseBrowserClient.score()` also sends each score to `POST /api/public/scores`, with public-key authentication.
+- **Score methods never throw.** Input is validated on the client. Scores with an empty name or a non-finite or non-string value are logged at error level and dropped.
+- **Span batches are gzip-compressed on Node.js and Bun.** If a proxy rejects compressed requests, pass `new LangfuseSpanProcessor({ compression: "none" })` or set `LANGFUSE_OTEL_COMPRESSION=none`. The setting is read in this order: `compression`, `LANGFUSE_OTEL_COMPRESSION`, `OTEL_EXPORTER_OTLP_TRACES_COMPRESSION`, `OTEL_EXPORTER_OTLP_COMPRESSION`, then the `gzip` default. Values are `gzip` or `none`. Environment variables are case-insensitive, and an invalid value falls through to the next setting. Browser and edge runtimes ignore it.
+- **Spans carry `x-langfuse-ingestion-version: 4`**, which enables real-time processing on Langfuse v4. To opt out, pass `additionalHeaders: { "x-langfuse-ingestion-version": "3" }` to `LangfuseSpanProcessor`. `additionalHeaders` override default headers case-insensitively.
+- **Experiments are recorded through OpenTelemetry.** The experiment runner sends experiment and item attributes on its spans instead of calling `POST /api/public/dataset-run-items`.
