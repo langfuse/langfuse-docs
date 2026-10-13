@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTheme } from "next-themes";
+import { rewriteLegacySpecLinks } from "@/lib/legacy-api-reference-links";
 
 // Pinned so the frozen spec keeps rendering the same way over time.
 const SCALAR_BUNDLE_URL =
@@ -43,29 +44,12 @@ function loadScalarBundle(): Promise<ScalarGlobal> {
   return scalarBundlePromise;
 }
 
-// The spec's descriptions link to the hosted reference by relative path,
-// which does not exist on this site.
-const CURRENT_REFERENCE_LINKS: [string, string][] = [
-  [
-    "](/api-reference#tag/metricsv2/GET/api/public/v2/metrics)",
-    "](https://api.reference.langfuse.com/#tag/metrics/GET/api/public/v2/metrics)",
-  ],
-  [
-    "](/api-reference#tag/observationsv2/GET/api/public/v2/observations)",
-    "](https://api.reference.langfuse.com/#tag/observations/GET/api/public/v2/observations)",
-  ],
-];
-
 async function loadSpec(specUrl: string): Promise<string> {
   const response = await fetch(specUrl);
   if (!response.ok) {
     throw new Error(`Failed to load the OpenAPI spec (${response.status})`);
   }
-  let spec = await response.text();
-  for (const [from, to] of CURRENT_REFERENCE_LINKS) {
-    spec = spec.replaceAll(from, to);
-  }
-  return spec;
+  return rewriteLegacySpecLinks(await response.text());
 }
 
 export function LegacyApiReference({ specUrl }: { specUrl: string }) {
