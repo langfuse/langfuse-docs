@@ -619,7 +619,10 @@ import {
   type Tracer,
   type TracerProvider,
 } from "@opentelemetry/api";
-import { BasicTracerProvider } from "@opentelemetry/sdk-trace-base";
+import {
+  AlwaysOnSampler,
+  BasicTracerProvider,
+} from "@opentelemetry/sdk-trace-base";
 import { setLangfuseTracerProvider } from "@langfuse/tracing";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
 
@@ -661,6 +664,8 @@ export async function withLangfuseProject<T>(
   fn: () => Promise<T>,
 ): Promise<T> {
   const provider = new BasicTracerProvider({
+    // Record spans even if an upstream sampler dropped the parent span
+    sampler: new AlwaysOnSampler(),
     spanProcessors: [new LangfuseSpanProcessor(credentials)],
   });
 
@@ -670,43 +675,46 @@ export async function withLangfuseProject<T>(
       fn,
     );
   } finally {
-    // Flushes all spans of this request, then releases the provider
-    await provider.shutdown();
+    // Flushes all spans of this request, then releases the provider.
+    // A failed export must not fail the request itself.
+    await provider
+      .shutdown()
+      .catch((error) => console.error("Langfuse export failed", error));
   }
 }
 ```
 
-Wrap each request in `withLangfuseProject`. All Langfuse SDK calls inside the callback, including `startObservation`, `startActiveObservation`, `observe`, and the OpenAI integration, are sent to that project:
+Wrap each request in `withLangfuseProject`. Tracing calls inside the callback, including `startObservation`, `startActiveObservation`, `observe`, and the OpenAI integration, are sent to that project. To get a deterministic trace ID per request, for example to link to the trace from your own system, pass a parent span context built with [`createTraceId`](/docs/observability/features/trace-ids-and-distributed-tracing):
 
 ```ts filename="handler.ts"
 import { createTraceId, startActiveObservation } from "@langfuse/tracing";
 import { withLangfuseProject } from "./langfuse-projects";
 
-export async function handleRequest(tenant: {
-  publicKey: string;
-  secretKey: string;
-  baseUrl: string;
-}) {
+export async function handleRequest(
+  requestId: string,
+  tenant: { publicKey: string; secretKey: string; baseUrl: string },
+) {
   await withLangfuseProject(tenant, async () => {
-    await startActiveObservation("handle-request", async (span) => {
-      span.update({ input: { message: "Hello" } });
-      // ... your application logic
-    });
+    await startActiveObservation(
+      "handle-request",
+      async (span) => {
+        span.update({ input: { message: "Hello" } });
+        // ... your application logic
+      },
+      {
+        // Optional: derive the trace ID from your own request ID
+        parentSpanContext: {
+          traceId: await createTraceId(requestId),
+          spanId: "0123456789abcdef",
+          traceFlags: 1,
+        },
+      },
+    );
   });
 }
 ```
 
-To get a deterministic trace ID per request, for example to link to the trace from your own system, pass a parent span context built with [`createTraceId`](/docs/observability/features/trace-ids-and-distributed-tracing):
-
-```ts
-await startActiveObservation("handle-request", async (span) => {}, {
-  parentSpanContext: {
-    traceId: await createTraceId(requestId),
-    spanId: "0123456789abcdef",
-    traceFlags: 1,
-  },
-});
-```
+`withLangfuseProject` waits for the request's spans to be exported before it returns, which adds the export round trip to every request. If your runtime keeps running after the response is sent, you can remove the `await` before `provider.shutdown()` so the export runs in the background.
 
 **Limitations**
 
@@ -727,6 +735,7 @@ Keep these limitations in mind:
 - **Shared work queues can send spans to the wrong project.** Code that runs on a queue shared across requests may execute in the context of whichever request is active when the queue drains. Spans started there are sent to that request's project. Make sure Langfuse spans are started from the request's own async call chain.
 - **LangChain requires `LANGCHAIN_CALLBACKS_BACKGROUND=false`.** By default, LangChain JS runs callbacks on a shared background queue, so the [LangChain `CallbackHandler`](/integrations/frameworks/langchain) can record a run in another concurrent request's project. Set the `LANGCHAIN_CALLBACKS_BACKGROUND=false` environment variable so callbacks run inside the request, and await your chains inside the `withLangfuseProject` callback.
 - **Always pass all credentials.** `LangfuseSpanProcessor` falls back to the `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` environment variables for missing options, and `baseUrl` defaults to `https://cloud.langfuse.com`. Pass `publicKey`, `secretKey`, and `baseUrl` explicitly for every project to avoid sending data to the wrong project or region.
+- **Only tracing is routed.** `LangfuseClient` from `@langfuse/client`, used for scores, prompts, and datasets, authenticates with its own constructor options or the `LANGFUSE_*` environment variables. To score a tenant's traces or fetch the tenant's prompts, create a client with the same credentials inside `withLangfuseProject`: `new LangfuseClient({ publicKey, secretKey, baseUrl })`.
 - **Each request opens its own export pipeline.** Every request creates its own exporter and sends at least one export request when it finishes. Rate limits apply per Langfuse organization, so very high request volumes can hit the [API limits](/faq/all/api-limits).
 
 </Tab>
