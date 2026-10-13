@@ -16,7 +16,7 @@ Python SDK v5 and JS/TS SDK v6 JSON-encode every metadata value. On Langfuse v4.
 
 ## Propagated Metadata
 
-Use `propagate_attributes()` to ensure metadata is automatically applied to all observations within a context. Propagated metadata are key-value pairs with values limited to 200 characters. Python SDK v5 and JS/TS SDK v6 also accept numbers, booleans, lists, and objects, and the limit applies to the JSON-encoded value. Keys are limited to alphanumeric characters only. If a metadata value exceeds 200 characters, it will be dropped.
+Use `propagate_attributes()` to ensure metadata is automatically applied to all observations within a context. Propagated metadata are key-value pairs. Python SDK v5 and JS/TS SDK v6 JSON-encode each value, strings included, so values can be strings, numbers, booleans, lists, or objects. The encoded value must be 200 characters or fewer, including the quotes around a string; longer values are dropped with a warning. Top-level `null` / `None` values are dropped with a warning too. In Python SDK v4 and JS/TS SDK v5, use string values of 200 characters or fewer. Use alphanumeric characters for keys.
 
 <LangTabs items={["Python SDK", "JS/TS SDK", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
 <Tab>
