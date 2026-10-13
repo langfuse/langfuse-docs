@@ -2,7 +2,7 @@
 title: Arize Alternative? Langfuse vs. Arize AX and Arize Phoenix
 shortTitle: Arize / Phoenix
 seoTitle: "Langfuse vs. Arize AX and Arize Phoenix"
-description: Langfuse is the open-source alternative to Arize AX and Phoenix. September 2026 comparison of unit vs span+GB pricing, evals, and the Dynatrace acquisition.
+description: Langfuse is the open-source alternative to Arize AX and Phoenix. October 2026 comparison of unit vs span+GB pricing, evals, and the Dynatrace acquisition.
 tags: [comparison]
 ---
 
@@ -13,9 +13,9 @@ import CompareClickhouseDatastore from "@/components-mdx/compare-clickhouse-data
 
 # Langfuse vs. Arize AX / Arize Phoenix
 
-This guide compares **[Langfuse](/)**, **[Arize Phoenix](https://phoenix.arize.com)**, and **[Arize AX](https://arize.com/products/ax/)**. All Arize facts were checked against public Arize sources in September 2026.
+This guide compares **[Langfuse](/)**, **[Arize Phoenix](https://phoenix.arize.com)**, and **[Arize AX](https://arize.com/products/ax/)**. Arize facts were checked against public Arize sources in October 2026.
 
-On August 13, 2026, Dynatrace [announced a definitive agreement to acquire Arize](https://www.dynatrace.com/news/press-release/dynatrace-to-acquire-arize/). The transaction has not closed; this page compares AX and Phoenix as they ship today.
+Arize is part of Dynatrace following the [acquisition completed on October 1, 2026](https://ir.dynatrace.com/news-events/press-releases/detail/439/dynatrace-completes-acquisition-of-arize-extending-ai-observability-across-the-full-development-lifecycle). This page compares Arize AX and Phoenix as they ship today.
 
 ## TL;DR
 
@@ -41,7 +41,7 @@ Arize ships two products. [Phoenix](https://docs.arize.com/phoenix) is source-av
 
 The split matters most in regulated environments. Arize's [guidance for banks](https://arize.com/blog/why-banks-adopt-the-arize-ecosystem/) is to run Phoenix inside isolated and air-gapped business units and converge on AX as the central platform: the workloads with the strictest requirements land on the lighter product. Langfuse self-hosting [runs fully air-gapped](/self-hosting/security/networking) with the same complete product as Cloud, so high-risk work gets the same tracing, evals, and governance as everything else.
 
-Dynatrace's [acquisition announcement](https://www.dynatrace.com/news/press-release/dynatrace-to-acquire-arize/) describes Arize as "OSS-native" and highlights its open-source community, but it does not name Phoenix or state a license or continuity commitment for a standalone open-source product.
+On [completing the acquisition](https://ir.dynatrace.com/news-events/press-releases/detail/439/dynatrace-completes-acquisition-of-arize-extending-ai-observability-across-the-full-development-lifecycle), Dynatrace stated that "Arize will continue supporting both Phoenix, its open-source platform, and AX, its enterprise platform," and that Arize capabilities will be "integrated into Dynatrace" over time. Those are forward-looking statements about support, not about licensing: Phoenix remains source-available under the Elastic License 2.0.
 
 |                | Langfuse                                                                                                                                                                                  | Arize                                                                                                                                                                                                  |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -87,7 +87,7 @@ The [Arize pricing page](https://arize.com/pricing/) lists **15 days** of retent
   see where the costs cross over.
 </Callout>
 
-Langfuse Cloud bills [units](/docs/administration/billable-units): one unit is a trace, an observation, or a score, with no seat fees. Arize AX bills on two meters: span volume and ingested GB. On AX Pro, spans beyond the included 50,000 cost **$0.0008 each** and ingestion beyond 10 GB costs **$3/GB**, shown as tooltips on the [Arize pricing page](https://arize.com/pricing/). Phoenix self-hosted has no platform usage fee; you run the infrastructure.
+Langfuse Cloud bills [units](/docs/administration/billable-units): one unit is a trace, an observation, or a score, with no seat fees. Arize AX bills on two meters: span volume and ingested GB. On AX Pro, spans beyond the included 50,000 cost **$0.0008 each** and ingestion beyond 10 GB costs **$3/GB**, shown as tooltips on the [Arize pricing page](https://arize.com/pricing/) when checked in October 2026. Phoenix self-hosted has no platform usage fee; you run the infrastructure.
 
 |            | Langfuse                                                             | Arize AX                                                        |
 | ---------- | -------------------------------------------------------------------- | --------------------------------------------------------------- |
@@ -121,7 +121,7 @@ See [Langfuse pricing](/pricing) for current rates, [start free](https://cloud.l
 
 ## Tracing and integrations [#tracing]
 
-Both platforms ingest OpenTelemetry. Langfuse [maps OpenInference attributes](/integrations/other/openinference) natively, so existing OpenInference instrumentors can keep running and export to Langfuse via [OTLP](/integrations/native/opentelemetry).
+Both platforms ingest OpenTelemetry. Langfuse [maps OpenInference attributes](/integrations/other/openinference) natively, so existing OpenInference instrumentors can keep running and export to Langfuse via [OTLP](/integrations/native/opentelemetry). In June 2026 the OpenTelemetry Governance Committee [voted to accept Arize's donation](https://github.com/open-telemetry/community/issues/3467) of the OpenInference instrumentation libraries, to extend OpenTelemetry's own GenAI instrumentation coverage. The grant covers that instrumentation code rather than the OpenInference specification or its semantic conventions, and Arize continues to own and develop OpenInference itself.
 
 Langfuse records a [trace](/docs/observability/data-model) per request with typed [observations](/docs/observability/features/observation-types) for LLM calls, tools, and retrieval. Multi-turn chats group into [sessions](/docs/observability/features/sessions), agent runs render as [agent graphs](/docs/observability/features/agent-graphs), and [cost](/docs/observability/features/token-and-cost-tracking) is attributed per generation. Arize AX offers [agent trajectory visualizations](https://arize.com/docs/ax/instrument/agent-trajectory), session support, and multi-modal tracing on all plans, plus the Alyx assistant and per-plan Signal issue quotas (10/month Free, 25/month Pro, unlimited on Enterprise).
 
@@ -263,7 +263,7 @@ Phoenix is source-available under the [Elastic License 2.0](https://github.com/A
 <Details id="arize-pricing">
 <Summary>How does Arize AX pricing compare to Langfuse?</Summary>
 
-Arize AX Pro is **$50/month** with 50,000 spans and 10 GB included, then $0.0008 per span and $3 per GB (September 2026). Langfuse bills units from **$29/month**. At 500k traces / 10 spans / 1 score per trace, that is **$621** on Langfuse Pro with 3-year history vs. **$4,055** on AX Pro with 30-day retention. Details in the [worked example](#worked-example).
+Arize AX Pro is **$50/month** with 50,000 spans and 10 GB included, then $0.0008 per span and $3 per GB (October 2026). Langfuse bills units from **$29/month**. At 500k traces / 10 spans / 1 score per trace, that is **$621** on Langfuse Pro with 3-year history vs. **$4,055** on AX Pro with 30-day retention. Details in the [worked example](#worked-example).
 
 </Details>
 
@@ -277,7 +277,7 @@ Arize AX self-hosted deployments are listed as Enterprise-only on the [Arize pri
 <Details id="dynatrace-acquisition">
 <Summary>What does the Dynatrace acquisition mean for Arize users?</Summary>
 
-Dynatrace [announced](https://www.dynatrace.com/news/press-release/dynatrace-to-acquire-arize/) a definitive agreement to acquire Arize for $915 million on August 13, 2026, expected to close later in the quarter or early in Dynatrace's third fiscal quarter, subject to regulatory review. The announcement does not name Phoenix or state a continuity commitment for a standalone open-source product. Arize AX and Phoenix remain available today.
+Dynatrace [completed its acquisition of Arize](https://ir.dynatrace.com/news-events/press-releases/detail/439/dynatrace-completes-acquisition-of-arize-extending-ai-observability-across-the-full-development-lifecycle) on October 1, 2026. The deal was [announced](https://www.dynatrace.com/news/press-release/dynatrace-to-acquire-arize/) for $915 million on August 13, 2026. Dynatrace says Arize will continue supporting both Phoenix and AX, and that Arize capabilities will be integrated into Dynatrace over time. Arize AX and Phoenix remain available. Langfuse ingests OpenTelemetry traces, including OpenInference-instrumented ones, so teams can keep their existing instrumentation, whichever platform they choose.
 
 </Details>
 

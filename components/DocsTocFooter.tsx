@@ -13,6 +13,11 @@ import { getDocsFeedbackIssueUrl } from "@/lib/docs-feedback-url";
 
 // ─── Utility functions ────────────────────────────────────────────────────────
 
+const GITHUB_EDIT_BASE = "https://github.com/langfuse/langfuse-docs/edit/main/";
+
+// Fallback that guesses the source file from the URL. It cannot tell a folder
+// index page (`experiments/index.mdx`) from a flat page (`experiments.mdx`), so
+// callers should pass the page's real `sourcePath` whenever they have it.
 const getGithubEditUrl = (path: string): string | null => {
   const cleanPath = path.split("#")[0].split("?")[0];
   const [, section, ...slugParts] = cleanPath.split("/");
@@ -34,7 +39,7 @@ const getGithubEditUrl = (path: string): string | null => {
 
   const slugPath = slugParts.join("/");
   const filePath = `${contentDir}/${slugPath === "" ? "index" : slugPath}.mdx`;
-  return `https://github.com/langfuse/langfuse-docs/edit/main/${filePath}`;
+  return `${GITHUB_EDIT_BASE}${filePath}`;
 };
 
 const getContributors = (path: string): string[] => {
@@ -160,13 +165,20 @@ const processContributor = (username: string): ProcessedContributor => {
 
 type DocsTocFooterProps = {
   lastModified?: string;
+  /** Repo-relative source file, e.g. `content/academy/experiments/index.mdx`. */
+  sourcePath?: string;
 };
 
-export const DocsTocFooter = ({ lastModified }: DocsTocFooterProps) => {
+export const DocsTocFooter = ({
+  lastModified,
+  sourcePath,
+}: DocsTocFooterProps) => {
   const pathname = usePathname() ?? "";
   const currentPath = pathname.split("#")[0].split("?")[0];
   const [showAll, setShowAll] = useState(false);
-  const editUrl = getGithubEditUrl(currentPath);
+  const editUrl = sourcePath
+    ? `${GITHUB_EDIT_BASE}${sourcePath}`
+    : getGithubEditUrl(currentPath);
   const feedbackUrl = getDocsFeedbackIssueUrl(currentPath);
   const lastModifiedDate = useMemo(
     () => (lastModified ? new Date(lastModified) : undefined),

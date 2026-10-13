@@ -570,7 +570,14 @@ response_b = chain.invoke(
 
 <Tab title="JS/TS SDK">
 
-You can configure the SDK to send traces to multiple Langfuse projects. This is useful for multi-tenant applications or for sending traces to different environments. Simply register multiple `LangfuseSpanProcessor` instances, each with its own credentials.
+The JS/TS SDK supports two multi-project patterns:
+
+- **Fixed set of projects**: register one `LangfuseSpanProcessor` per project. This works best when the projects are known at startup, for example one project per environment.
+- **Project per request**: choose the project for each request at runtime, for example in a multi-tenant application where every customer brings their own Langfuse credentials.
+
+### Fixed set of projects [#js-multi-project-static]
+
+Register multiple `LangfuseSpanProcessor` instances, each with its own credentials.
 
 ```ts filename="instrumentation.ts"
 import { NodeSDK } from "@opentelemetry/sdk-node";
@@ -593,6 +600,143 @@ sdk.start();
 ```
 
 This configuration sends every span accepted by each processor's filter to both projects. You can configure a custom `shouldExportSpan` filter for each processor to control which traces go to which project.
+
+Each processor holds its own exporter and buffers for the lifetime of the process, so don't add a processor per tenant when you have many tenants or tenants are created at runtime. Use a project per request instead.
+
+### Project per request [#js-multi-project-per-request]
+
+To pick the Langfuse project at runtime, create a short-lived `TracerProvider` for each request and carry it in the OpenTelemetry context. A single routing provider, registered once with `setLangfuseTracerProvider`, forwards every Langfuse span to the provider in the active context:
+
+- Each request gets its own `LangfuseSpanProcessor` with that project's credentials. When the request finishes, the provider is flushed and shut down, then garbage collected. Nothing accumulates per tenant.
+- The per-request provider is never registered globally. Concurrent requests stay isolated because the context is scoped to the async call chain of each request.
+- Spans started without a request context go to a provider without processors and are dropped instead of being sent to a default project.
+
+```ts filename="langfuse-projects.ts"
+import {
+  context,
+  createContextKey,
+  type Context,
+  type Tracer,
+  type TracerProvider,
+} from "@opentelemetry/api";
+import {
+  AlwaysOnSampler,
+  BasicTracerProvider,
+} from "@opentelemetry/sdk-trace-base";
+import { setLangfuseTracerProvider } from "@langfuse/tracing";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const PROJECT_PROVIDER = createContextKey("langfuse.project-tracer-provider");
+
+// Spans started outside of `withLangfuseProject` are dropped
+const NOOP_PROVIDER = new BasicTracerProvider();
+
+class ProjectRoutingTracerProvider implements TracerProvider {
+  getTracer(name: string, version?: string): Tracer {
+    const resolve = (ctx: Context) =>
+      (
+        (ctx.getValue(PROJECT_PROVIDER) as TracerProvider | undefined) ??
+        NOOP_PROVIDER
+      ).getTracer(name, version);
+
+    return {
+      startSpan: (spanName, options, ctx = context.active()) =>
+        resolve(ctx).startSpan(spanName, options, ctx),
+      startActiveSpan: ((spanName: string, ...args: unknown[]) => {
+        const ctx = args.length >= 3 ? (args[1] as Context) : context.active();
+        const tracer = resolve(ctx);
+        return (tracer.startActiveSpan as (...a: unknown[]) => unknown).call(
+          tracer,
+          spanName,
+          ...args,
+        );
+      }) as Tracer["startActiveSpan"],
+    };
+  }
+}
+
+// Register once at startup. Do not register this provider globally.
+export const projectRoutingTracerProvider = new ProjectRoutingTracerProvider();
+setLangfuseTracerProvider(projectRoutingTracerProvider);
+
+export async function withLangfuseProject<T>(
+  credentials: { publicKey: string; secretKey: string; baseUrl: string },
+  fn: () => Promise<T>,
+): Promise<T> {
+  const provider = new BasicTracerProvider({
+    // Record spans even if an upstream sampler dropped the parent span
+    sampler: new AlwaysOnSampler(),
+    spanProcessors: [new LangfuseSpanProcessor(credentials)],
+  });
+
+  try {
+    return await context.with(
+      context.active().setValue(PROJECT_PROVIDER, provider),
+      fn,
+    );
+  } finally {
+    // Flushes all spans of this request, then releases the provider.
+    // A failed export must not fail the request itself.
+    await provider
+      .shutdown()
+      .catch((error) => console.error("Langfuse export failed", error));
+  }
+}
+```
+
+Wrap each request in `withLangfuseProject`. Tracing calls inside the callback, including `startObservation`, `startActiveObservation`, `observe`, and the OpenAI integration, are sent to that project. To get a deterministic trace ID per request, for example to link to the trace from your own system, pass a parent span context built with [`createTraceId`](/docs/observability/features/trace-ids-and-distributed-tracing):
+
+```ts filename="handler.ts"
+import { createTraceId, startActiveObservation } from "@langfuse/tracing";
+import { withLangfuseProject } from "./langfuse-projects";
+
+export async function handleRequest(
+  requestId: string,
+  tenant: { publicKey: string; secretKey: string; baseUrl: string },
+) {
+  await withLangfuseProject(tenant, async () => {
+    await startActiveObservation(
+      "handle-request",
+      async (span) => {
+        span.update({ input: { message: "Hello" } });
+        // ... your application logic
+      },
+      {
+        // Optional: derive the trace ID from your own request ID
+        parentSpanContext: {
+          traceId: await createTraceId(requestId),
+          spanId: "0123456789abcdef",
+          traceFlags: 1,
+        },
+      },
+    );
+  });
+}
+```
+
+`withLangfuseProject` waits for the request's spans to be exported before it returns, which adds the export round trip to every request. If your runtime keeps running after the response is sent, you can remove the `await` before `provider.shutdown()` so the export runs in the background.
+
+**Limitations**
+
+This pattern relies on the OpenTelemetry async context. `NodeSDK` and `NodeTracerProvider.register()` set up the required `AsyncLocalStorage` context manager. If your application uses neither, register one at startup, otherwise all spans are dropped:
+
+```ts
+import { context } from "@opentelemetry/api";
+import { AsyncLocalStorageContextManager } from "@opentelemetry/context-async-hooks";
+
+context.setGlobalContextManager(new AsyncLocalStorageContextManager().enable());
+```
+
+Keep these limitations in mind:
+
+- **Spans started outside the request context are dropped.** This includes callbacks from long-lived event emitters, sockets, or connection pools that were created outside the request, and spans created from a stored observation handle (`span.startObservation(...)`) outside the request callback. To keep a callback in the request's project, bind it while the request context is active: `emitter.on("data", context.bind(context.active(), handler))`.
+- **Spans that end after the request finishes are lost.** `provider.shutdown()` only exports spans that have already ended. End all observations, including streaming generations and background work, before the `withLangfuseProject` callback returns.
+- **Third-party OpenTelemetry instrumentation is not routed.** Libraries that use the global OpenTelemetry tracer provider don't pass through the routing provider, so their spans are not sent to the request's project. Integrations that accept a `tracer` option, such as the [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk), can be routed by passing a tracer from the routing provider, for example `experimental_telemetry: { isEnabled: true, tracer: projectRoutingTracerProvider.getTracer("ai") }`.
+- **Shared work queues can send spans to the wrong project.** Code that runs on a queue shared across requests may execute in the context of whichever request is active when the queue drains. Spans started there are sent to that request's project. Make sure Langfuse spans are started from the request's own async call chain.
+- **LangChain requires `LANGCHAIN_CALLBACKS_BACKGROUND=false`.** By default, LangChain JS runs callbacks on a shared background queue, so the [LangChain `CallbackHandler`](/integrations/frameworks/langchain) can record a run in another concurrent request's project. Set the `LANGCHAIN_CALLBACKS_BACKGROUND=false` environment variable so callbacks run inside the request, and await your chains inside the `withLangfuseProject` callback.
+- **Always pass all credentials.** `LangfuseSpanProcessor` falls back to the `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` environment variables for missing options, and `baseUrl` defaults to `https://cloud.langfuse.com`. Pass `publicKey`, `secretKey`, and `baseUrl` explicitly for every project to avoid sending data to the wrong project or region.
+- **Only tracing is routed.** `LangfuseClient` from `@langfuse/client`, used for scores, prompts, and datasets, authenticates with its own constructor options or the `LANGFUSE_*` environment variables. To score a tenant's traces or fetch the tenant's prompts, create a client with the same credentials inside `withLangfuseProject`: `new LangfuseClient({ publicKey, secretKey, baseUrl })`.
+- **Each request opens its own export pipeline.** Every request creates its own exporter and sends at least one export request when it finishes. Rate limits apply per Langfuse organization, so very high request volumes can hit the [API limits](/faq/all/api-limits).
 
 </Tab>
 </LangTabs>
