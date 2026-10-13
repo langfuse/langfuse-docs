@@ -315,11 +315,11 @@ GET /api/public/v2/observations
 
 <DataFreshness />
 
-On self-hosted Langfuse v3, use the [v1 Observations API](https://api.reference.langfuse.com/#tag/observations/GET/api/public/observations) instead; see the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
+On self-hosted Langfuse v3, use the v1 Observations API (`GET /api/public/observations`) instead; see the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
 
 </Callout>
 
-The v2 Observations API is redesigned for high-performance retrieval, minimizing the work Langfuse performs per query. See the [v2 Observations API reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations) for the full parameter and response schema.
+The v2 Observations API is redesigned for high-performance retrieval, minimizing the work Langfuse performs per query. See the [v2 Observations API reference](https://api.reference.langfuse.com/#tag/observations/GET/api/public/v2/observations) for the full parameter and response schema.
 
 #### Upgrade from older trace and observation reads [#upgrade-from-older-reads]
 
@@ -410,7 +410,7 @@ curl -G \
   --data-urlencode 'filter=[{"type":"string","column":"name","operator":"does not contain","value":"healthcheck"}]'
 ```
 
-The complete list of columns and operators per type is in the [API reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations) under the `filter` parameter.
+The complete list of columns and operators per type is in the [API reference](https://api.reference.langfuse.com/#tag/observations/GET/api/public/v2/observations) under the `filter` parameter.
 
 #### Cursor-based pagination [#observations-pagination]
 
