@@ -23,7 +23,7 @@ Let's walk through a practical example of using Pydantic AI and integrating it w
 ### Step 1: Install Dependencies
 
 ```python
-%pip install langfuse pydantic-ai -U
+%pip install -U langfuse "pydantic-ai>=1.100.0"
 ```
 
 ### Step 2: Configure Langfuse SDK
@@ -58,34 +58,35 @@ else:
 
 ```
 
-### Step 3: Initialize Pydantic AI Instrumentation
+### Step 3: Configure Pydantic AI instrumentation
 
-Now, we initialize the [Pydantic AI Instrumentation](https://ai.pydantic.dev/logfire/#logfire-with-an-alternative-otel-backend). This automatically captures Pydantic AI operations and exports OpenTelemetry (OTel) spans to Langfuse.
+This example uses the [Instrumentation capability](https://pydantic.dev/docs/ai/capabilities/instrumentation/), available in Pydantic AI 1.100.0 and later. It creates OpenTelemetry (OTel) spans for agent runs, model requests, and tool executions. The Langfuse SDK initialized above exports these spans to Langfuse.
+
+Create the capability below, then attach it to your agent in the next step. The older `Agent(..., instrument=True)` argument is deprecated in recent Pydantic AI v1 releases and removed in v2; use `capabilities=[Instrumentation(...)]` instead. See the [Pydantic AI migration guide](https://pydantic.dev/docs/ai/overview/migration/).
 
 ```python
-from pydantic_ai.agent import Agent
+from pydantic_ai.capabilities import Instrumentation
 
-# Initialize Pydantic AI instrumentation
-Agent.instrument_all()
+instrumentation = Instrumentation()
 ```
 
-### Step 4: Basic Pydantic AI Application
+### Step 4: Basic Pydantic AI application
 
 Finally, run your Pydantic AI agent and generate trace data that will be sent to Langfuse. In the example below, the agent is executed with a dependency value (the winning square) and natural language input. The output from the tool function is then printed.
 
-Make sure to pass `instrument=True` while configuring the `Agent`.
+Attach the `Instrumentation` capability using the agent's `capabilities` argument. You do not need to call `Agent.instrument_all()` for an agent with this capability.
 
 ```python
 from pydantic_ai import Agent, RunContext
 
 roulette_agent = Agent(
-    'openai:gpt-4o',
+    'openai-chat:gpt-4o',
     deps_type=int,
     system_prompt=(
         'Use the `roulette_wheel` function to see if the '
         'customer has won based on the number they provide.'
     ),
-    instrument=True
+    capabilities=[instrumentation]
 )
 
 @roulette_agent.tool
@@ -99,6 +100,9 @@ async def roulette_wheel(ctx: RunContext[int], square: int) -> str:
 success_number = 18
 result = await roulette_agent.run('Put my money on square eighteen', deps=success_number)
 print(result.output)
+
+# Export buffered spans before viewing the trace or exiting the application
+langfuse.flush()
 ```
 
 ### Step 5: View Traces in Langfuse
@@ -110,6 +114,45 @@ After executing the application, navigate to your [Langfuse Trace Table](https:/
 [Example Trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/25f4bdeebaab60e6e1bee7e8469554bc?display=details%3Ftimestamp%3D2025-06-06T14%3A39%3A55.786Z%3Ftimestamp%3D2025-06-06T14%3A37%3A30.656Z%3Ftimestamp%3D2025-06-06T14%3A39%3A55.786Z?timestamp=2025-06-06T14%3A40%3A28.562Z)
 
 </Steps>
+
+## Instrumentation options
+
+### Instrument all agents
+
+To enable tracing across your application, call `Agent.instrument_all()` instead of attaching `Instrumentation` to each agent:
+
+```python
+from pydantic_ai import Agent
+
+# Initialize the Langfuse client before enabling instrumentation.
+Agent.instrument_all()
+agent = Agent('openai-chat:gpt-4o')
+```
+
+`Agent.instrument_all()` remains supported. It sets the instrumentation options for agents that do not explicitly add an `Instrumentation` capability. Choose global instrumentation or configure each agent explicitly; the main example uses the per-agent approach.
+
+### Missing traces with binary content
+
+If text prompts produce traces but adding `BinaryContent` (for example, a PDF) causes traces to disappear, try excluding binary file data from telemetry:
+
+```python
+from pydantic_ai import Agent
+from pydantic_ai.capabilities import Instrumentation
+from pydantic_ai.models.instrumented import InstrumentationSettings
+
+agent = Agent(
+    'openai-chat:gpt-4o',
+    capabilities=[
+        Instrumentation(
+            settings=InstrumentationSettings(include_binary_content=False)
+        )
+    ],
+)
+```
+
+This workaround was [reported by the author of issue #13790](https://github.com/langfuse/langfuse/issues/13790#issuecomment-4517243741). It excludes binary file data from instrumentation events while keeping the media type in telemetry. The binary content is still sent to the model. See [InstrumentationSettings](https://pydantic.dev/docs/ai/api/models/instrumented/) for the available content-capture options.
+
+For global instrumentation, pass the same settings to `Agent.instrument_all(InstrumentationSettings(include_binary_content=False))`.
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";
 
