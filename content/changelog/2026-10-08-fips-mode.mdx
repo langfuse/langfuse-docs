@@ -20,6 +20,6 @@ FIPS mode uses Red Hat's RHEL 9 OpenSSL FIPS Provider (CMVP [#4857](https://csrc
 
 From v4.55.0, the `langfuse/langfuse` and `langfuse/langfuse-worker` images are built on Iron Bank's hardened Red Hat UBI 9 images, for every deployment. They ship no package manager, `curl`, or Python, so use `wget` for [container health checks](/self-hosting/configuration/health-readiness-endpoints#container-health-checks), and use multi-stage builds for images that extend Langfuse's.
 
-FIPS mode is available in Self-Hosted Enterprise from v4.55.0; we recommend v4.57.0 or later.
+FIPS mode is available in Self-Hosted Enterprise from v4.55.0; we recommend v4.57.0 or later, which hashes passwords with PBKDF2-HMAC-SHA256 in FIPS mode. Users whose passwords were set before FIPS mode was turned on reset them with the **forgot password?** link, so configure [transactional emails](/self-hosting/configuration/transactional-emails) first.
 
 **Learn more:** [FIPS mode](/self-hosting/configuration/hardening#fips-mode) · [Hardened images](/self-hosting/configuration/hardening#hardened-images)

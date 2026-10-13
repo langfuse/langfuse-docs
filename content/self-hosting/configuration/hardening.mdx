@@ -34,7 +34,7 @@ We are also working on end-to-end documentation for operating Langfuse and all r
 
 The Cryptographic Module Validation Program (CMVP) validates cryptographic modules, not products. Langfuse holds no FIPS 140-3 certificate of its own. In FIPS mode, the Langfuse containers use the validated modules listed below in approved mode, and check this at startup. Algorithms that are not approved, such as MD5, fail.
 
-FIPS mode is available from Langfuse v4.55.0. Use v4.57.0 or later: that release stops computing bcrypt for new API keys, and it refuses storage options that need MD5 at startup.
+FIPS mode is available from Langfuse v4.55.0. Use v4.57.0 or later: that release hashes passwords with PBKDF2-HMAC-SHA256 instead of bcrypt in FIPS mode, stops computing bcrypt for new API keys, and refuses storage options that need MD5 at startup.
 
 #### Cryptographic modules [#fips-modules]
 
@@ -94,9 +94,18 @@ docker exec <langfuse-web-container> sh -c \
 # Error: ... unsupported
 ```
 
+#### Passwords [#fips-passwords]
+
+In FIPS mode, Langfuse hashes and verifies email/password credentials only with PBKDF2-HMAC-SHA256 (600,000 iterations), and never runs bcrypt. Passwords set before you turned on FIPS mode are stored as bcrypt hashes, which FIPS mode does not verify. Those users cannot sign in until they set a new password:
+
+- Sign-in fails with: `This instance runs in FIPS mode and your password must be reset.`
+- Users set a new password with the **forgot password?** link on the sign-in page. Password reset sends a code by email, so configure [transactional emails](/self-hosting/configuration/transactional-emails) before you turn on FIPS mode, or move users to [SSO](/self-hosting/security/authentication-and-sso).
+- Users who sign in with SSO are not affected.
+
+If you turn FIPS mode off later, PBKDF2 passwords keep working: instances without FIPS mode verify both formats and write bcrypt for new passwords.
+
 #### Known limitations [#fips-limitations]
 
-- **Passwords:** email/password sign-in hashes passwords with bcrypt. bcrypt is not a FIPS-approved algorithm, and it runs in JavaScript outside the validated module. Use [SSO](/self-hosting/security/authentication-and-sso) and set `AUTH_DISABLE_USERNAME_PASSWORD=true` (see [Disable email/password entirely](#disable-password)).
 - **Legacy API keys:** API keys created by early Langfuse versions, before keys were hashed with SHA-256, are checked once with bcrypt on first use and then re-hashed with SHA-256. Rotate such keys to avoid bcrypt entirely.
 
 ### Hardened images [#hardened-images]
