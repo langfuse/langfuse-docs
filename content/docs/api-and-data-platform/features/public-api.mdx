@@ -124,10 +124,11 @@ Scores API v3 is available as `api.scores_v3` in Python SDK `4.8.1+` and
 `api.scoresV3` in JS/TS SDK `5.5.0+`; the `api.scores` v2 reads are deprecated
 ([migration guide](/faq/all/deprecated-api-migration#scores)). Deprecated v1
 resources moved under `api.legacy.*` (Python: `*_v1`, JS/TS: `*V1`). Python
-SDK v5 and JS/TS SDK v6 remove the legacy observations and metrics read
-resources, the `api.scores` v2 reads, and `api.legacy.score_v1` /
-`api.legacy.scoreV1`. Use `api.scores.create` and `api.scores.delete` to
-write and delete scores.
+SDK v5 and JS/TS SDK v6 have no `api.legacy` namespace: the legacy
+observations and metrics read resources and `api.legacy.score_v1` /
+`api.legacy.scoreV1` (including `create` and `delete`) are removed, as are the
+`api.scores` v2 reads. Use `api.observations`, `api.metrics`, `api.scores_v3`
+/ `api.scoresV3`, and `api.scores.create` / `api.scores.delete` instead.
 
 Observations API v2 and Metrics API v2 are available on Langfuse Cloud and
 self-hosted Langfuse v4. On self-hosted Langfuse v3, use the `api.legacy.*`
