@@ -10,10 +10,6 @@ import { useLayoutEffect, useRef } from "react";
 
 const INNER_W = 1200;
 const INNER_H = 400;
-// Below this width the figure scrolls horizontally instead of shrinking further,
-// so the text stays readable on phones.
-const MIN_W = 720;
-const MIN_SCALE = MIN_W / INNER_W;
 
 type Segment = string | { text: string; href: string };
 
@@ -60,7 +56,7 @@ const ARROWS: Array<[number, number]> = [
 function estimateInitialScale(): number {
   if (typeof window === "undefined") return 0.65;
   const vw = document.documentElement.clientWidth;
-  return Math.min(1, Math.max(MIN_SCALE, (vw - 32) / INNER_W));
+  return Math.min(1, Math.max(0.3, (vw - 32) / INNER_W));
 }
 
 export function CostOptimizationLoopDiagram() {
@@ -76,10 +72,7 @@ export function CostOptimizationLoopDiagram() {
     if (!wrap || !sizer || !inner) return;
 
     const fit = () => {
-      const scale = Math.max(
-        MIN_SCALE,
-        Math.min(1, wrap.clientWidth / INNER_W),
-      );
+      const scale = Math.min(1, wrap.clientWidth / INNER_W);
       inner.style.transform = `scale(${scale})`;
       sizer.style.width = `${INNER_W * scale}px`;
       sizer.style.height = `${INNER_H * scale}px`;
@@ -208,8 +201,7 @@ export function CostOptimizationLoopDiagram() {
 
         .cost-loop__wrap {
           width: 100%;
-          overflow-x: auto;
-          overflow-y: hidden;
+          overflow: hidden;
         }
 
         .cost-loop__sizer {

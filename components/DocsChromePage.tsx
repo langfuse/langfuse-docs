@@ -20,11 +20,15 @@ type LoadedPage = { data: any; url?: string; path?: string };
  * Collections nested inside another directory (academy/japan) pass
  * `contentDir` explicitly instead.
  */
+// Content directories that are not checked into this repository (see
+// .gitignore), so no "Edit this page on GitHub" link can point at them.
+const UNTRACKED_CONTENT_DIRS = new Set(["workshop"]);
+
 const inferContentDir = (url: string | undefined): string | undefined => {
   if (!url) return undefined;
   let best: { dir: string; prefix: string } | undefined;
   for (const [dir, prefix] of Object.entries(CONTENT_DIR_TO_URL_PREFIX)) {
-    if (!prefix) continue;
+    if (!prefix || UNTRACKED_CONTENT_DIRS.has(dir)) continue;
     const base = `/${prefix}`;
     if (url !== base && !url.startsWith(`${base}/`)) continue;
     if (!best || prefix.length > best.prefix.length) best = { dir, prefix };
