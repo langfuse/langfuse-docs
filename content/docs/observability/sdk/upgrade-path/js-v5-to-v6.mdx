@@ -6,7 +6,7 @@ category: SDKs
 
 # JS/TS v5 → v6
 
-The JS/TS SDK v6 targets **Langfuse v4** only. It removes the Public API methods and client aliases that were deprecated in v5, records experiments through OpenTelemetry instead of the dataset-run-items endpoint, and sends gzip-compressed span batches with the v4 ingestion header by default.
+The JS/TS SDK v6 targets **Langfuse v4** only. It removes the Public API methods and client aliases that were deprecated in v5, records experiments through OpenTelemetry instead of the dataset-run-items endpoint, sends scores to `POST /api/public/scores` instead of the legacy ingestion endpoint, and sends gzip-compressed span batches with the v4 ingestion header by default.
 
 Most applications that already follow the [observations-first model](/docs/observability/data-model) only need to check a few call sites. Start with the [migration checklist](#migration-checklist) and use the sections below for details.
 
@@ -238,7 +238,6 @@ TypeScript reports the old call as a compile error. In plain JavaScript, the opt
 - `evaluators.get(evaluatorId)`
 - `evaluators.delete(evaluatorId)`
 - `health.health()`
-- `legacy.scoreV1.delete(scoreId)`
 - `llmConnections.delete(id)`
 - `media.get(mediaId)`
 - `models.get(id)`
@@ -257,6 +256,7 @@ TypeScript reports the old call as a compile error. In plain JavaScript, the opt
 - `scim.getUser(userId)`
 - `scim.deleteUser(userId)`
 - `scoreConfigs.getById(configId)`
+- `scores.delete(scoreId)` (replaces `legacy.scoreV1.delete(scoreId)`)
 - `trace.delete(traceId)`
 - `unstable.dashboardWidgets.get(widgetId)`
 - `unstable.dashboardWidgets.delete(widgetId)`
@@ -385,16 +385,55 @@ if ("id" in response) {
 }
 ```
 
-`langfuse.api.legacy.scoreV1.create(...)` keeps the single-score signature and returns `CreateScoreResponse`. It's a deprecated compatibility alias for `api.scores.create`.
+### `api.legacy.scoreV1` removed
 
-The SDK's `langfuse.score.create(...)`, `langfuse.score.observation(...)`, and `langfuse.score.trace(...)` are unchanged.
+`langfuse.api.legacy.scoreV1` is removed. Create scores with `api.scores.create` (see above) and delete them with `api.scores.delete`.
+
+**v5:**
+
+```typescript
+await langfuse.api.legacy.scoreV1.create({
+  name: "accuracy",
+  value: 0.9,
+  traceId: "trace-id",
+});
+await langfuse.api.legacy.scoreV1.delete("score-id");
+```
+
+**v6:**
+
+```typescript
+await langfuse.api.scores.create({
+  name: "accuracy",
+  value: 0.9,
+  traceId: "trace-id",
+});
+await langfuse.api.scores.delete("score-id");
+```
+
+The `legacy.CreateScoreRequest`, `legacy.CreateScoreResponse`, and `legacy.CreateScoreSource` type re-exports are removed too. Use the types without the `legacy` prefix.
+
+### Scores are sent to `POST /api/public/scores` [#score-transport]
+
+`@langfuse/client` sends scores in batches of up to 100 to `POST /api/public/scores` instead of as events to the legacy `/api/public/ingestion` endpoint. `langfuse.score.create(...)`, `langfuse.score.observation(...)`, `langfuse.score.trace(...)`, `flush()`, `shutdown()`, and the batching settings are unchanged.
+
+- **Partial results are not retried.** If the server accepts only part of a batch (HTTP 207), the SDK logs `Langfuse rejected N of M scores in batch:` with the server's errors. Rejected scores failed validation, so they are not retried.
+- **Older servers reject batches.** Servers older than v4.55.0 reject a batch with HTTP 400. The SDK logs that batched score creation needs Langfuse v4.55.0 or later and drops the batch.
+- **Score timestamps.** Each score carries the time it was queued in the SDK as its timestamp, as with the ingestion endpoint. The server records this timestamp from Langfuse v4.59.0. Servers from v4.55.0 to v4.58.x record the time they received the score instead.
+
+### `@langfuse/browser` score requests
+
+`LangfuseBrowserClient.score()` sends each score to `POST /api/public/scores` with public-key authentication instead of to the ingestion endpoint. It still returns `{ id }`. Error handling changed:
+
+- The `LangfuseIngestionError`, `LangfuseIngestionSuccess`, and `LangfuseIngestionResponse` type exports are removed.
+- `LangfuseBrowserError.errors` is removed. Validation errors arrive as `status` and `response` (`{ message }`).
 
 ### Other behavior changes [#other-behavior-changes]
 
 - **Timeouts.** v6 uses the same request timeouts as the Python SDK v5:
   - **5-second default** for prompt fetch, prompt create/update/delete, `media.get`, and the media upload API calls. All of these used 60 seconds in v5. Override prompt fetch per call with `fetchTimeoutMs`. Otherwise, set `timeout` (in seconds) or `LANGFUSE_TIMEOUT` on `LangfuseClient`. Media uploads triggered by tracing use the `timeout` of `LangfuseSpanProcessor`, and uploads from `dataset.createItem` use the client `timeout`. A `timeout` that isn't a finite positive number falls back to 5 seconds with a warning.
   - **Media content download** in `media.resolveReferences`: aborted when no data arrives for 5 seconds. This is an inactivity timeout, not a cap on the total download time; a download that keeps receiving data is never cut off. v5 had no timeout here.
-  - **Score ingestion**: 5 seconds with one retry on timeout. v5 used 60 seconds plus retries.
+  - **Score requests**: 5 seconds with one retry on timeout. v5 used 60 seconds plus retries.
   - **Unchanged**: the media blob upload itself has no timeout, and dataset calls still use 60 seconds.
 
   If prompt or media calls regularly take longer than 5 seconds, raise `timeout`.
@@ -415,4 +454,6 @@ The SDK's `langfuse.score.create(...)`, `langfuse.score.observation(...)`, and `
 10. Search for `datasetRunUrl` → use `experimentUrl`.
 11. Search for `api.trace.get`, `api.trace.list`, `api.sessions`, `api.legacy.observationsV1`, `api.legacy.metricsV1`, `api.scores.getMany`, `api.scores.getById`, `api.datasetRunItems`, `api.datasets.getRun`, `api.datasets.deleteRun` → see the [SDK method quick reference](/faq/all/deprecated-api-migration#sdk-method-quick-reference).
 12. Search for code that reads the response of `api.scores.create(` → narrow the union type.
-13. Prompt, media, and score calls now time out after 5 seconds (previously 60). If they regularly take longer, raise `timeout` / `LANGFUSE_TIMEOUT`, or pass `fetchTimeoutMs` to `prompt.get`.
+13. Search for `api.legacy.scoreV1` → use `api.scores.create` and `api.scores.delete(scoreId)`.
+14. If you use `@langfuse/browser`, search for `LangfuseIngestion*` types and `LangfuseBrowserError.errors` → read `status` and `response` instead.
+15. Prompt, media, and score calls now time out after 5 seconds (previously 60). If they regularly take longer, raise `timeout` / `LANGFUSE_TIMEOUT`, or pass `fetchTimeoutMs` to `prompt.get`.

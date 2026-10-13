@@ -427,7 +427,7 @@ curl -X POST https://cloud.langfuse.com/api/public/scores \
 
 ### Browser score ingestion [#browser-score-ingestion]
 
-Use `@langfuse/browser` when the score is created in frontend code, for example thumbs up/down user feedback, star ratings, or client-side quality signals. The browser SDK only needs a Langfuse public key and sends each score immediately via the ingestion API. Do not expose a secret key in browser code.
+Use `@langfuse/browser` when the score is created in frontend code, for example thumbs up/down user feedback, star ratings, or client-side quality signals. The browser SDK only needs a Langfuse public key and sends each score immediately to `POST /api/public/scores` (JS/TS SDK v5 and earlier use the ingestion API). Do not expose a secret key in browser code.
 
 For backend services, scripts, CI jobs, and evaluation pipelines, use `@langfuse/client` as shown in the JS/TS SDK examples above.
 
@@ -454,7 +454,7 @@ await langfuse.score({
 });
 ```
 
-`score()` returns `{ id }` after ingestion succeeds. No `flush()` call is required.
+`score()` returns `{ id }` after the request succeeds. No `flush()` call is required.
 
 ### Session-level Scores
 

@@ -6,7 +6,7 @@ category: SDKs
 
 # Python v4 → v5
 
-The Python SDK v5 targets **Langfuse v4** only. It removes the Public API methods that Langfuse v4 deprecated, records experiments through OpenTelemetry instead of the dataset-run-items endpoint, and sends gzip-compressed span batches with the v4 ingestion header by default.
+The Python SDK v5 targets **Langfuse v4** only. It removes the Public API methods that Langfuse v4 deprecated, records experiments through OpenTelemetry instead of the dataset-run-items endpoint, sends scores to `POST /api/public/scores` instead of the legacy ingestion endpoint, and sends gzip-compressed span batches with the v4 ingestion header by default.
 
 Most applications that already follow the [observations-first model](/docs/observability/data-model) only need to check a few call sites. Start with the [migration checklist](#migration-checklist) and use the sections below for details.
 
@@ -365,9 +365,35 @@ langfuse.api.scores.create(
 )
 ```
 
-`langfuse.api.legacy.score_v1.create(name=..., value=..., ...)` keeps the v4 keyword signature and returns a single `CreateScoreResponse`. It's a deprecated compatibility alias for `api.scores.create`.
+### `api.legacy.score_v1` removed
 
-The SDK's `langfuse.create_score(...)`, `span.score(...)`, and `span.score_trace(...)` are unchanged.
+`langfuse.api.legacy.score_v1` is removed. Create scores with `api.scores.create` (see above) and delete them with `api.scores.delete`.
+
+**v4:**
+
+```python
+langfuse.api.legacy.score_v1.create(name="accuracy", value=0.9, trace_id="trace-id")
+langfuse.api.legacy.score_v1.delete(score_id="score-id")
+```
+
+**v5:**
+
+```python
+from langfuse.api import CreateScoreRequest
+
+langfuse.api.scores.create(
+    request=CreateScoreRequest(name="accuracy", value=0.9, trace_id="trace-id")
+)
+langfuse.api.scores.delete(score_id="score-id")
+```
+
+### Scores are sent to `POST /api/public/scores` [#score-transport]
+
+The SDK sends scores in batches to `POST /api/public/scores` instead of as events to the legacy `/api/public/ingestion` endpoint. `langfuse.create_score(...)`, `span.score(...)`, `span.score_trace(...)`, and the `flush_at` / `flush_interval` settings are unchanged.
+
+- **Partial results are not retried.** If the server accepts only part of a batch (HTTP 207), the SDK logs how many scores were accepted and rejected, plus the errors. Rejected scores failed validation, so they are not retried. Other 4xx responses are logged and not retried either. Network errors, 429, and 5xx are retried with backoff.
+- **Scores on sampled-out traces are dropped.** With `sample_rate` below 1, a score whose trace is not sampled is no longer sent, matching the trace's observations. In v4, these scores were always sent. Scores without a trace, such as session or dataset run scores, are always sent.
+- **Custom score timestamps** (`timestamp=` on `create_score`) need Langfuse v4.59.0 or later. Servers from v4.55.0 to v4.58.x accept the score but record the time they received it.
 
 ## Migration checklist [#migration-checklist]
 
@@ -382,3 +408,5 @@ The SDK's `langfuse.create_score(...)`, `span.score(...)`, and `span.score_trace
 9. Search for `run_batched_evaluation` → remove `scope`, rename `fetch_trace_fields` to `fields`, update the mapper and filter.
 10. Search for `api.trace.get`, `api.trace.list`, `api.sessions`, `api.legacy.observations_v1`, `api.legacy.metrics_v1`, `api.scores.get_many`, `api.scores.get_by_id`, `api.dataset_run_items`, `api.datasets.get_run` → see the [SDK method quick reference](/faq/all/deprecated-api-migration#sdk-method-quick-reference).
 11. Search for `api.scores.create(` → pass `request=CreateScoreRequest(...)`.
+12. Search for `api.legacy.score_v1` → use `api.scores.create` and `api.scores.delete(score_id=...)`.
+13. If you sample traces, expect scores on sampled-out traces to be dropped. If you set custom score timestamps on a self-hosted server, upgrade it to v4.59.0 or later.
