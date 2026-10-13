@@ -146,13 +146,29 @@ GRANT ON CLUSTER default SELECT ON system.query_log* TO 'user';
 
 ### Historic backfill scratch table [#user-permissions-backfill]
 
-The [v4 historic backfill](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#historic-backfill) freezes merges on its intermediate table while it copies data:
+The [v4 historic backfill](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#historic-backfill) freezes merges on its intermediate table while it copies data.
+The grants it needs depend on the table engine:
+
+| Deployment                                       | Table engine        | Grants used                                              |
+| ------------------------------------------------ | ------------------- | -------------------------------------------------------- |
+| Self-managed, `CLICKHOUSE_CLUSTER_ENABLED=false` | MergeTree           | `SYSTEM MERGES`                                          |
+| Self-managed, `CLICKHOUSE_CLUSTER_ENABLED=true`  | ReplicatedMergeTree | `SYSTEM MERGES`, `ALTER SETTINGS`, `SYSTEM SYNC REPLICA` |
+| [ClickHouse Cloud or BYOC](#cloudbyoc)           | SharedMergeTree     | `ALTER SETTINGS`                                         |
+
+On self-managed ClickHouse, grant all three:
 
 ```sql
 GRANT SYSTEM SYNC REPLICA, SYSTEM MERGES, ALTER SETTINGS ON default.observations_pid_tid_sorting TO 'user';
 ```
 
-Which of the three is used depends on the table engine — `SYSTEM MERGES` on self-managed MergeTree, `ALTER SETTINGS` on replicated and SharedMergeTree engines, `SYSTEM SYNC REPLICA` on replicated engines — so granting all three keeps the backfill working on any deployment.
+On ClickHouse Cloud and BYOC, grant only `ALTER SETTINGS`:
+
+```sql
+GRANT ALTER SETTINGS ON default.observations_pid_tid_sorting TO 'user';
+```
+
+ClickHouse Cloud does not support `SYSTEM MERGES`. If you include it, the grant fails with `Not enough privileges` and asks for `SYSTEM MERGES ... WITH GRANT OPTION`. You can ignore that error: on SharedMergeTree, the backfill never runs `SYSTEM MERGES` and uses `ALTER SETTINGS` to freeze merges instead.
+
 The grants can be created before the table exists, i.e. before the backfill starts.
 
 ### Lightweight updates [#user-permissions-lightweight-updates]
