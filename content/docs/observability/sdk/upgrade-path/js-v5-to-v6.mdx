@@ -21,32 +21,28 @@ npm install @langfuse/client@6 @langfuse/tracing@6 @langfuse/otel@6
 You only need to change something if one of these applies to you:
 
 - **You self-host Langfuse v3, or v4 older than v4.55.0**, or run Node.js older than 22, or use `@langchain/core` older than 1.0 → [Minimum versions](#minimum-versions)
-- **You filter on metadata, mask it, read it in a custom span processor or exporter, or pass non-string values to `propagateAttributes`** → [Metadata values are JSON-encoded](#metadata-json-encoding) (silent)
 - **You call top-level `LangfuseClient` methods** such as `getPrompt()`, `getDataset()`, or `fetchTrace()` → [Deprecated `LangfuseClient` aliases removed](#client-aliases-removed)
 - **You call `langfuse.api.*` directly**, for example `api.trace.get`, `api.sessions`, `api.legacy.*`, `api.scores.getMany`, or the response of `api.scores.create` → [Removed Public API methods](#removed-public-api-methods)
-- **You pass `requestOptions` to a generated API method without query parameters or a body**, such as `api.datasets.get(name, { timeoutInSeconds })` → [Request placeholder before `requestOptions`](#request-placeholder) (silent in JavaScript)
+- **You pass `requestOptions` to a generated API method without query parameters or a body**, such as `api.datasets.get(name, { timeoutInSeconds })` → [Request placeholder before `requestOptions`](#request-placeholder)
 - **You call `setActiveTraceIO()`, `span.setTraceIO()`, or `createTraceAttributes()`** → [Trace input/output setters removed](#trace-io-setters-removed)
-- **Your prompt or media calls take longer than 5 seconds** → [Shorter default timeouts](#timeouts) (silent)
 - **You call `item.link()` on dataset items** → [Dataset item `link()` removed](#dataset-item-link-removed)
-- **You read `datasetRunUrl` from experiment results, or re-run experiments under the same name** → [Experiment results](#experiment-results) (silent)
-- **You handle errors from `@langfuse/browser`** → [`@langfuse/browser` error types](#browser-error-types)
 - **A proxy between your app and Langfuse rejects gzip-compressed requests** → [Under the hood](#under-the-hood)
 
 If none of these apply, upgrade and you're done.
 
 ## Breaking changes [#breaking-changes]
 
-Ordered by how many users they affect. Changes marked **silent** don't raise an error. Your code runs, but the result is different.
+Ordered by how many users they affect.
 
 ### Minimum versions [#minimum-versions]
 
 **Affects:** self-hosted Langfuse v3 or older than v4.55.0, Node.js older than 22, and the LangChain integration on LangChain 0.x.
 
-| Requirement | v6                                         | If not met                                                                                               |
-| ----------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| Langfuse    | Cloud, or self-hosted **v4.55.0 or later** | Silent: string metadata is stored with its quotes, and score batches are rejected and the scores dropped |
-| Node.js     | `>=22`, packages compiled to ES2022        | Unsupported. Bundles for older runtimes must target ES2022 or transpile the SDK                          |
-| LangChain   | `@langchain/core@^1.0.0` (was `>=0.3.8`)   | Peer dependency conflict when installing `@langfuse/langchain@6`                                         |
+| Requirement | v6                                         | If not met                                                                      |
+| ----------- | ------------------------------------------ | ------------------------------------------------------------------------------- |
+| Langfuse    | Cloud, or self-hosted **v4.55.0 or later** | Score batches are rejected and the scores dropped                               |
+| Node.js     | `>=22`, packages compiled to ES2022        | Unsupported. Bundles for older runtimes must target ES2022 or transpile the SDK |
+| LangChain   | `@langchain/core@^1.0.0` (was `>=0.3.8`)   | Peer dependency conflict when installing `@langfuse/langchain@6`                |
 
 If you self-host Langfuse v3, stay on JS/TS SDK v5. See the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
 
@@ -55,48 +51,6 @@ npm install @langfuse/langchain@6 @langchain/core@^1
 ```
 
 The `CallbackHandler` API and trace output are unchanged.
-
-### Metadata values are JSON-encoded (silent) [#metadata-json-encoding]
-
-**Affects:** saved filters, dashboards, and downstream consumers that match metadata values; custom span processors and exporters that read metadata attributes; code that passes non-string values to `propagateAttributes({ metadata })` or the LangChain `CallbackHandler`.
-
-**Breaks silently:** v6 JSON-encodes every metadata value before writing it to the span, including strings. This covers observation metadata (`metadata` on `startObservation()`, `startActiveObservation()`, `update()`, `observe()`, and the Vercel AI SDK integration) and propagated trace metadata from `propagateAttributes({ metadata })`.
-
-Observation metadata is written as one attribute per top-level key (`langfuse.observation.metadata.<key>`):
-
-| Value               | v5 attribute value | v6 attribute value      |
-| ------------------- | ------------------ | ----------------------- |
-| `"prod"`            | `prod`             | `"prod"`                |
-| `"3"`               | `3`                | `"3"`                   |
-| `3`                 | `3`                | `3`                     |
-| `true`              | `true`             | `true`                  |
-| `""`                | Not written        | `""`                    |
-| `{ a: { b: 1 } }`   | `{"a":{"b":1}}`    | `{"a":{"b":1}}`         |
-| `2n ** 60n`         | Not written        | `"1152921504606846976"` |
-| `NaN`, `Infinity`   | `null`             | `"NaN"`, `"Infinity"`   |
-| `null`, `undefined` | Not written        | Not written (debug log) |
-
-`propagateAttributes({ metadata })` now accepts `Record<string, unknown>` instead of `Record<string, string>`. v5 passed strings through and dropped every other value, so values that used to be dropped are now sent:
-
-| Value                                                      | v5       | v6                     |
-| ---------------------------------------------------------- | -------- | ---------------------- |
-| `"gpt-4o"`                                                 | `gpt-4o` | `"gpt-4o"`             |
-| `42`                                                       | Dropped  | `42`                   |
-| `null`                                                     | Dropped  | Dropped with a warning |
-| `[1, "a"]`                                                 | Dropped  | `[1,"a"]`              |
-| `{ k: "v" }`                                               | Dropped  | `{"k":"v"}`            |
-| `12345678901234567890n`                                    | Dropped  | `12345678901234567890` |
-| `NaN`, `Infinity`, `undefined`, functions, circular values | Dropped  | Dropped with a warning |
-
-The 200-character limit on propagated values applies to the encoded value, and the quotes around a string count toward it. Metadata passed to the LangChain `CallbackHandler` follows the same rules.
-
-Langfuse v4.55.0 and later decodes the values. Strings are stored without quotes, so `"prod"` still reads as `prod`. Numbers and booleans keep their type. Nested objects become filterable dotted paths, so `{ a: { b: 1 } }` can be filtered as `a.b = 1`. If a literal `"a.b"` key and a nested `{ a: { b: ... } }` both map to the same path, the first value wins. Self-hosted servers older than v4.55.0 store string values with their quotes, so filters on string values stop matching.
-
-**Migration:**
-
-- Update saved filters, dashboards, and consumers that match the old shape, such as a whole nested object as a JSON string, to the new values or dotted paths. Existing data keeps its stored shape.
-- In custom span processors and exporters, expect JSON strings in `langfuse.observation.metadata.*` and `langfuse.trace.metadata.*`: `'"prod"'` instead of `'prod'`. Decode them with `JSON.parse()`. The `mask` function of `LangfuseSpanProcessor` receives decoded observation metadata values, and its result is re-encoded.
-- If you relied on non-string propagated values being dropped, remove them before calling `propagateAttributes`.
 
 ### Deprecated `LangfuseClient` aliases removed [#client-aliases-removed]
 
@@ -229,11 +183,11 @@ for (let i = 0; i < ids.length; i += 1000) {
 
 See [Dataset runs → Experiments](/faq/all/deprecated-api-migration#dataset-runs) for details.
 
-### Request placeholder before `requestOptions` (silent in JavaScript) [#request-placeholder]
+### Request placeholder before `requestOptions` [#request-placeholder]
 
 **Affects:** calls that pass `requestOptions` to a generated API method that takes no query parameters and no body.
 
-**Breaks:** TypeScript reports a compile error. **In plain JavaScript the options are silently ignored.** These methods now take an empty request object before `requestOptions`, so `requestOptions` keeps its position if the endpoint gains query parameters later. Calls without `requestOptions` don't change.
+**Breaks:** a TypeScript compile error. In plain JavaScript the options are ignored. These methods now take an empty request object before `requestOptions`, so `requestOptions` keeps its position if the endpoint gains query parameters later. Calls without `requestOptions` don't change.
 
 **v5:**
 
@@ -249,52 +203,51 @@ await langfuse.api.datasets.get("qa-set", {}, { timeoutInSeconds: 10 });
 await langfuse.api.health.health({}, { maxRetries: 0 });
 ```
 
-<details>
-<summary>All 41 affected methods</summary>
+These are all 41 methods whose signature changed. Every other generated method keeps its signature.
 
-- `annotationQueues.getQueue(queueId)`
-- `annotationQueues.getQueueItem(queueId, itemId)`
-- `annotationQueues.deleteQueueItem(queueId, itemId)`
-- `blobStorageIntegrations.getBlobStorageIntegrations()`
-- `blobStorageIntegrations.getBlobStorageIntegrationStatus(id)`
-- `blobStorageIntegrations.deleteBlobStorageIntegration(id)`
-- `comments.getById(commentId)`
-- `datasetItems.get(id)`
-- `datasetItems.delete(id)`
-- `datasets.get(datasetName)`
-- `evaluationRules.get(evaluationRuleId)`
-- `evaluationRules.delete(evaluationRuleId)`
-- `evaluators.get(evaluatorId)`
-- `evaluators.delete(evaluatorId)`
-- `health.health()`
-- `llmConnections.delete(id)`
-- `media.get(mediaId)`
-- `models.get(id)`
-- `models.delete(id)`
-- `organizations.getOrganizationMemberships()`
-- `organizations.getProjectMemberships(projectId)`
-- `organizations.getOrganizationProjects()`
-- `organizations.getOrganizationApiKeys()`
-- `projects.get()`
-- `projects.delete(projectId)`
-- `projects.getApiKeys(projectId)`
-- `projects.deleteApiKey(projectId, apiKeyId)`
-- `scim.getServiceProviderConfig()`
-- `scim.getResourceTypes()`
-- `scim.getSchemas()`
-- `scim.getUser(userId)`
-- `scim.deleteUser(userId)`
-- `scoreConfigs.getById(configId)`
-- `scores.delete(scoreId)` (replaces `legacy.scoreV1.delete(scoreId)`)
-- `trace.delete(traceId)`
-- `unstable.dashboardWidgets.get(widgetId)`
-- `unstable.dashboardWidgets.delete(widgetId)`
-- `unstable.dashboards.get(dashboardId)`
-- `unstable.dashboards.delete(dashboardId)`
-- `unstable.dashboards.deletePlacement(dashboardId, placementId)`
-- `unstable.skills.deleteVersion(skillName, skillVersion)`
-
-</details>
+| Method                                                          | Route                                                                           |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `annotationQueues.getQueue(queueId)`                            | `GET /api/public/annotation-queues/{queueId}`                                   |
+| `annotationQueues.getQueueItem(queueId, itemId)`                | `GET /api/public/annotation-queues/{queueId}/items/{itemId}`                    |
+| `annotationQueues.deleteQueueItem(queueId, itemId)`             | `DELETE /api/public/annotation-queues/{queueId}/items/{itemId}`                 |
+| `blobStorageIntegrations.getBlobStorageIntegrations()`          | `GET /api/public/integrations/blob-storage`                                     |
+| `blobStorageIntegrations.getBlobStorageIntegrationStatus(id)`   | `GET /api/public/integrations/blob-storage/{id}`                                |
+| `blobStorageIntegrations.deleteBlobStorageIntegration(id)`      | `DELETE /api/public/integrations/blob-storage/{id}`                             |
+| `comments.getById(commentId)`                                   | `GET /api/public/comments/{commentId}`                                          |
+| `datasetItems.get(id)`                                          | `GET /api/public/dataset-items/{id}`                                            |
+| `datasetItems.delete(id)`                                       | `DELETE /api/public/dataset-items/{id}`                                         |
+| `datasets.get(datasetName)`                                     | `GET /api/public/v2/datasets/{datasetName}`                                     |
+| `evaluationRules.get(evaluationRuleId)`                         | `GET /api/public/v2/evaluation-rules/{evaluationRuleId}`                        |
+| `evaluationRules.delete(evaluationRuleId)`                      | `DELETE /api/public/v2/evaluation-rules/{evaluationRuleId}`                     |
+| `evaluators.get(evaluatorId)`                                   | `GET /api/public/v2/evaluators/{evaluatorId}`                                   |
+| `evaluators.delete(evaluatorId)`                                | `DELETE /api/public/v2/evaluators/{evaluatorId}`                                |
+| `health.health()`                                               | `GET /api/public/health`                                                        |
+| `llmConnections.delete(id)`                                     | `DELETE /api/public/llm-connections/{id}`                                       |
+| `media.get(mediaId)`                                            | `GET /api/public/media/{mediaId}`                                               |
+| `models.get(id)`                                                | `GET /api/public/models/{id}`                                                   |
+| `models.delete(id)`                                             | `DELETE /api/public/models/{id}`                                                |
+| `organizations.getOrganizationMemberships()`                    | `GET /api/public/organizations/memberships`                                     |
+| `organizations.getProjectMemberships(projectId)`                | `GET /api/public/projects/{projectId}/memberships`                              |
+| `organizations.getOrganizationProjects()`                       | `GET /api/public/organizations/projects`                                        |
+| `organizations.getOrganizationApiKeys()`                        | `GET /api/public/organizations/apiKeys`                                         |
+| `projects.get()`                                                | `GET /api/public/projects`                                                      |
+| `projects.delete(projectId)`                                    | `DELETE /api/public/projects/{projectId}`                                       |
+| `projects.getApiKeys(projectId)`                                | `GET /api/public/projects/{projectId}/apiKeys`                                  |
+| `projects.deleteApiKey(projectId, apiKeyId)`                    | `DELETE /api/public/projects/{projectId}/apiKeys/{apiKeyId}`                    |
+| `scim.getServiceProviderConfig()`                               | `GET /api/public/scim/ServiceProviderConfig`                                    |
+| `scim.getResourceTypes()`                                       | `GET /api/public/scim/ResourceTypes`                                            |
+| `scim.getSchemas()`                                             | `GET /api/public/scim/Schemas`                                                  |
+| `scim.getUser(userId)`                                          | `GET /api/public/scim/Users/{userId}`                                           |
+| `scim.deleteUser(userId)`                                       | `DELETE /api/public/scim/Users/{userId}`                                        |
+| `scoreConfigs.getById(configId)`                                | `GET /api/public/score-configs/{configId}`                                      |
+| `scores.delete(scoreId)` (replaces `legacy.scoreV1.delete`)     | `DELETE /api/public/scores/{scoreId}`                                           |
+| `trace.delete(traceId)`                                         | `DELETE /api/public/traces/{traceId}`                                           |
+| `unstable.dashboardWidgets.get(widgetId)`                       | `GET /api/public/unstable/dashboard-widgets/{widgetId}`                         |
+| `unstable.dashboardWidgets.delete(widgetId)`                    | `DELETE /api/public/unstable/dashboard-widgets/{widgetId}`                      |
+| `unstable.dashboards.get(dashboardId)`                          | `GET /api/public/unstable/dashboards/{dashboardId}`                             |
+| `unstable.dashboards.delete(dashboardId)`                       | `DELETE /api/public/unstable/dashboards/{dashboardId}`                          |
+| `unstable.dashboards.deletePlacement(dashboardId, placementId)` | `DELETE /api/public/unstable/dashboards/{dashboardId}/placements/{placementId}` |
+| `unstable.skills.deleteVersion(skillName, skillVersion)`        | `DELETE /api/public/unstable/skills/{skillName}/versions/{skillVersion}`        |
 
 ### Trace input/output setters removed [#trace-io-setters-removed]
 
@@ -330,19 +283,6 @@ await startActiveObservation("request", async (span) => {
 ```
 
 `setActiveTraceAsPublic()` and `span.setTraceAsPublic()` are unchanged. If you still use [trace-level LLM-as-a-judge evaluators](/faq/all/llm-as-a-judge-migration), migrate them to observation-level evaluators.
-
-### Shorter default timeouts (silent) [#timeouts]
-
-**Affects:** prompt and media calls that regularly take longer than 5 seconds.
-
-**Breaks silently:** these calls now time out after 5 seconds instead of 60, matching the Python SDK v5:
-
-- **Prompt fetch, prompt create/update/delete, `media.get`, and the media upload API calls** default to 5 seconds. A `timeout` that isn't a finite positive number falls back to 5 seconds with a warning.
-- **Media content download** in `media.resolveReferences` is aborted when no data arrives for 5 seconds. This is an inactivity timeout, not a cap on the total download time, so a download that keeps receiving data is never cut off. v5 had no timeout here.
-- **Score requests** use 5 seconds with one retry on timeout. v5 used 60 seconds plus retries.
-- **Unchanged:** the media blob upload itself has no timeout, and dataset calls still use 60 seconds.
-
-**Migration:** if prompt or media calls regularly take longer than 5 seconds, raise the limit. Override prompt fetch per call with `fetchTimeoutMs`. Otherwise, set `timeout` (in seconds) or `LANGFUSE_TIMEOUT` on `LangfuseClient`. Media uploads triggered by tracing use the `timeout` of `LangfuseSpanProcessor`, and uploads from `dataset.createItem` use the client `timeout`.
 
 ### Dataset item `link()` removed [#dataset-item-link-removed]
 
@@ -380,24 +320,6 @@ console.log(result.experimentUrl);
 
 See [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) for the full runner API.
 
-### Experiment results (silent) [#experiment-results]
-
-**Affects:** code that reads `datasetRunUrl` or `datasetRunId` from `langfuse.experiment.run()` or `dataset.runExperiment()` results, or re-runs experiments under the same name.
-
-**Breaks silently:** your experiment code keeps running, but some results differ:
-
-- **Re-runs with the same name land in the same experiment.** The experiment ID is derived from the project, dataset, and run name, so running again with the same name on the same dataset adds to the existing experiment. Experiments on local data get a random ID. A run over items from several datasets gets one experiment per dataset and logs a warning.
-- **`datasetRunUrl` is deprecated** in favor of `result.experimentUrl`, and `datasetRunId` now equals `experimentId`.
-
-### `@langfuse/browser` error types [#browser-error-types]
-
-**Affects:** code that handles errors from `LangfuseBrowserClient.score()`.
-
-**Breaks:** TypeScript compile errors for the removed types, and `undefined` for `.errors` in JavaScript **(silent)**. `score()` still returns `{ id }`.
-
-- The `LangfuseIngestionError`, `LangfuseIngestionSuccess`, and `LangfuseIngestionResponse` type exports are removed.
-- `LangfuseBrowserError.errors` is removed. Validation errors arrive as `status` and `response` (`{ message }`).
-
 ## New features [#new-features]
 
 These need no code changes.
@@ -405,7 +327,7 @@ These need no code changes.
 - **Experiment links.** `result.experimentUrl` links directly to the experiment comparison view. `LangfuseClient` also exposes `getProjectId()` and `getExperimentUrl(experimentId)`.
 - **Typed metadata filters.** On Langfuse v4.55.0 and later, numeric and boolean metadata keeps its type, and nested objects can be filtered by dotted path, such as `a.b = 1`. `propagateAttributes({ metadata })` accepts any JSON-serializable value.
 - **Batch score creation.** `api.scores.create()` accepts an array of `CreateScoreRequest` objects.
-- **Experiment records.** Run evaluations are always sent, including for local-data runs, and are skipped only when nothing was sampled. Dataset versions (`datasetVersion`) are recorded on items as `langfuse.experiment.item.version`.
+- **Experiment records.** Run evaluations are sent for local-data runs too. Dataset versions (`datasetVersion`) are recorded on items as `langfuse.experiment.item.version`.
 
 ## Under the hood [#under-the-hood]
 
