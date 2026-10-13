@@ -27,6 +27,14 @@ import { TracingHierarchyDiagram } from "@/components/academy/TracingHierarchyDi
 import { RagTraceViewDiagram } from "@/components/academy/RagTraceViewDiagram";
 import { DatasetFieldsDiagram } from "@/components/academy/DatasetFieldsDiagram";
 import { ErrorAnalysisProcessDiagram } from "@/components/academy/ErrorAnalysisProcessDiagram";
+import {
+  CostPriceVsQualityDiagram,
+  CostSpecializedModelDiagram,
+} from "@/components/academy/CostPriceQualityDiagram";
+import { CostPerStepDiagram } from "@/components/academy/CostPerStepDiagram";
+import { CostOptimizationLoopDiagram } from "@/components/academy/CostOptimizationLoopDiagram";
+import { CostCachingVsPruningDiagram } from "@/components/academy/CostCachingVsPruningDiagram";
+import { CostSubAgentsDiagram } from "@/components/academy/CostSubAgentsDiagram";
 import { AnnotatedLoop } from "@/components/academy/AnnotatedLoop";
 import { DatasetBlock } from "@/components/academy/DatasetBlock";
 import { EvaluatorBlock } from "@/components/academy/EvaluatorBlock";
@@ -130,6 +138,12 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     RagTraceViewDiagram,
     DatasetFieldsDiagram,
     ErrorAnalysisProcessDiagram,
+    CostPriceVsQualityDiagram,
+    CostSpecializedModelDiagram,
+    CostPerStepDiagram,
+    CostOptimizationLoopDiagram,
+    CostCachingVsPruningDiagram,
+    CostSubAgentsDiagram,
     AnnotatedLoop,
     DatasetBlock,
     EvaluatorBlock,
