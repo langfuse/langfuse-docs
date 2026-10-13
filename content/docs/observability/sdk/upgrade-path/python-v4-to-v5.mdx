@@ -66,9 +66,9 @@ The LangChain `CallbackHandler` imports only from `langchain_core` now, so the `
 
 **Breaks:** `TypeError` for the old `api.scores.create` keyword arguments, and `AttributeError` for `api.legacy.score_v1`.
 
-- `api.scores.create()` now takes a single `CreateScoreRequest` or a list of them as `request=`, and returns `CreateScoresResponse`, a union of the single-score and batch responses.
+- `api.scores.create()` now takes a list of `CreateScoreRequest` objects as `request=`, and returns `CreateScoresResponse`: `CreateScoreBatchResponse` when all scores are accepted, or `CreateScoreBatchResults` with accepted/rejected counts and errors.
 - `api.legacy.score_v1.delete(score_id=...)` moves to `api.scores.delete(score_id=...)`.
-- `api.legacy.score_v1.create(...)` was already a deprecated alias of `api.scores.create` in v4. Use `api.scores.create(request=CreateScoreRequest(...))`.
+- `api.legacy.score_v1.create(...)` was already a deprecated alias of `api.scores.create` in v4. Use `api.scores.create(request=[CreateScoreRequest(...)])`.
 
 **v4:**
 
@@ -86,7 +86,7 @@ from langfuse.api import CreateScoreRequest
 langfuse = get_client()
 
 langfuse.api.scores.create(
-    request=CreateScoreRequest(name="accuracy", value=0.9, trace_id="trace-id")
+    request=[CreateScoreRequest(name="accuracy", value=0.9, trace_id="trace-id")]
 )
 langfuse.api.scores.delete(score_id="score-id")
 ```

@@ -129,11 +129,11 @@ These are all 41 methods whose signature changed. Every other generated method k
 
 ### `api.scores` response and delete [#scores-api]
 
-**Affects:** code that reads the response of `langfuse.api.scores.create(...)` or calls `langfuse.api.legacy.scoreV1.*` directly. `langfuse.score.*` is unchanged.
+**Affects:** code that calls `langfuse.api.scores.create(...)` or calls `langfuse.api.legacy.scoreV1.*` directly. `langfuse.score.*` is unchanged.
 
 **Breaks:** TypeScript compile errors, or `TypeError` / `undefined` at runtime in JavaScript.
 
-- `api.scores.create()` now accepts a single `CreateScoreRequest` or an array, and returns `CreateScoresResponse`, a union of the single-score and batch responses. Single-score calls keep working, but TypeScript code that reads fields from the response needs to narrow the type first.
+- `api.scores.create()` now takes an array of `CreateScoreRequest` objects, and returns `CreateScoresResponse`: `CreateScoreBatchResponse` when all scores are accepted, or `CreateScoreBatchResults` with accepted/rejected counts and errors. The response no longer includes the score `id`; set `id` on the request if you need it.
 - `api.legacy.scoreV1.delete(scoreId)` moves to `api.scores.delete(scoreId)`.
 - `api.legacy.scoreV1.create(...)` was already marked `@deprecated` in v5 in favor of `api.scores.create(...)`. The `legacy.CreateScoreRequest`, `legacy.CreateScoreResponse`, and `legacy.CreateScoreSource` re-exports are removed; use the score types without the `legacy` prefix.
 
@@ -155,13 +155,11 @@ import { LangfuseClient } from "@langfuse/client";
 
 const langfuse = new LangfuseClient();
 
-const response = await langfuse.api.scores.create({
-  name: "accuracy",
-  value: 0.9,
-  traceId: "trace-id",
-});
-if ("id" in response) {
-  console.log(response.id);
+const response = await langfuse.api.scores.create([
+  { id: "score-id", name: "accuracy", value: 0.9, traceId: "trace-id" },
+]);
+if ("rejected" in response && response.rejected > 0) {
+  console.error(response.errors);
 }
 await langfuse.api.scores.delete("score-id");
 ```
