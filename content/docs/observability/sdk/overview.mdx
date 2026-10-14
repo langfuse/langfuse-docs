@@ -15,13 +15,13 @@ import { Rocket, Plug, Settings, LifeBuoy, BookOpen } from "lucide-react";
 
 Langfuse offers two SDKs:
 
-- **Python SDK v4** <a href="https://github.com/langfuse/langfuse-python"><img className="inline" alt="GitHub repository langfuse/langfuse-python" src="https://img.shields.io/badge/repo-langfuse--python-blue?style=flat-square&logo=GitHub" /></a> <a href="https://pypi.org/project/langfuse/"><img className="inline" src="https://img.shields.io/pypi/v/langfuse?style=flat-square&label=pypi+langfuse" alt="PyPi langfuse" /></a>
-- **JS/TS SDK v5** <a href="https://github.com/langfuse/langfuse-js"><img className="inline" alt="GitHub repository langfuse/langfuse-js" src="https://img.shields.io/badge/repo-langfuse--js-blue?style=flat-square&logo=GitHub" /></a> <a href="https://www.npmjs.com/package/@langfuse/tracing"><img className="inline" src="https://img.shields.io/npm/v/@langfuse/tracing?style=flat-square&label=npm+@langfuse/tracing" alt="NPM @langfuse/tracing" /></a>
+- **Python SDK v5** <a href="https://github.com/langfuse/langfuse-python"><img className="inline" alt="GitHub repository langfuse/langfuse-python" src="https://img.shields.io/badge/repo-langfuse--python-blue?style=flat-square&logo=GitHub" /></a> <a href="https://pypi.org/project/langfuse/"><img className="inline" src="https://img.shields.io/pypi/v/langfuse?style=flat-square&label=pypi+langfuse" alt="PyPi langfuse" /></a>
+- **JS/TS SDK v6** <a href="https://github.com/langfuse/langfuse-js"><img className="inline" alt="GitHub repository langfuse/langfuse-js" src="https://img.shields.io/badge/repo-langfuse--js-blue?style=flat-square&logo=GitHub" /></a> <a href="https://www.npmjs.com/package/@langfuse/tracing"><img className="inline" src="https://img.shields.io/npm/v/@langfuse/tracing?style=flat-square&label=npm+@langfuse/tracing" alt="NPM @langfuse/tracing" /></a>
 - [**Other Languages**](#other-languages) via OpenTelemetry
 
-Upgrading from Python SDK v3 or JS/TS SDK v4? Follow the [upgrade paths](/docs/observability/sdk/upgrade-path) ([Python v3 → v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4), [JS/TS v4 → v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5)).
+Upgrading from an older SDK major? Follow the [upgrade paths](/docs/observability/sdk/upgrade-path) ([Python v4 → v5](/docs/observability/sdk/upgrade-path/python-v4-to-v5), [JS/TS v5 → v6](/docs/observability/sdk/upgrade-path/js-v5-to-v6), [Python v3 → v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4), [JS/TS v4 → v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5)).
 
-The Langfuse SDKs are the recommended way to create [custom observations and traces](/docs/observability/sdk/instrumentation#custom-instrumentation) and use the Langfuse [prompt-management](/docs/prompt-management/overview) and [evaluation](/docs/evaluation/overview) features. Both SDKs work with [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) and [self-hosted Langfuse](/self-hosting) with the same code; only the credentials and base URL differ.
+The Langfuse SDKs are the recommended way to create [custom observations and traces](/docs/observability/sdk/instrumentation#custom-instrumentation) and use the Langfuse [prompt-management](/docs/prompt-management/overview) and [evaluation](/docs/evaluation/overview) features. Both SDKs work with [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) and [self-hosted Langfuse](/self-hosting) with the same code; only the credentials and base URL differ. Python SDK v5 and JS/TS SDK v6 require Langfuse v4; if you self-host Langfuse v3, use Python SDK v4 or JS/TS SDK v5 (see [compatibility](/docs/compatibility)).
 
 <Callout type="info">
   **Not using a Langfuse SDK?** Send traces via
@@ -192,7 +192,7 @@ You can also pass the credentials [directly to the constructor](#client-setup).
 
 The Python SDK automatically sets up OpenTelemetry when [initializing the client](#client-setup).
 
-By default, the SDK exports Langfuse + GenAI/LLM spans. To customize this, use `should_export_span` (recommended). `blocked_instrumentation_scopes` still works but is deprecated and planned for removal in a future version.
+By default, the SDK exports Langfuse + GenAI/LLM spans. To customize this, use `should_export_span`.
 
 </Tab>
 <Tab title="JS/TS SDK">

@@ -16,7 +16,9 @@ in the new JS/TS major, but this was missed on our side.
 <Callout type="warning">
   Do not use `item.link()` for new experiments. Upgrade the JS/TS SDK and
   run the experiment with the [Experiment runner
-  SDK](/docs/evaluation/experiments/experiments-via-sdk).
+  SDK](/docs/evaluation/experiments/experiments-via-sdk). JS/TS SDK v6 removes
+  `item.link()` (see the [v5 → v6 upgrade
+  guide](/docs/observability/sdk/upgrade-path/js-v5-to-v6)).
 </Callout>
 
 ## Why this happens
@@ -43,7 +45,7 @@ therefore not served in the v4 UI.
 
 This affects the following combination:
 
-- JS/TS SDK `>=5.0.0`
+- JS/TS SDK `5.x`
 - Manual calls to `item.link()`
 - Traces that do not contain `langfuse.experiment.*` attributes
 

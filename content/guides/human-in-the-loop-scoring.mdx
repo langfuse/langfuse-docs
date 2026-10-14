@@ -219,14 +219,16 @@ _See the [JS/TS SDK reference](https://js.reference.langfuse.com)._
 curl -X POST https://cloud.langfuse.com/api/public/scores \
   -u "pk-lf-...":"sk-lf-..." \
   -H "Content-Type: application/json" \
-  -d '{
-    "traceId": "trace_id_here",
-    "name": "support_quality",
-    "value": "acceptable",
-    "dataType": "CATEGORICAL",
-    "configId": "your_config_id",
-    "comment": "Resolved the issue but tone was a bit terse."
-  }'
+  -d '[
+    {
+      "traceId": "trace_id_here",
+      "name": "support_quality",
+      "value": "acceptable",
+      "dataType": "CATEGORICAL",
+      "configId": "your_config_id",
+      "comment": "Resolved the issue but tone was a bit terse."
+    }
+  ]'
 ```
 
 _See the [API reference](https://api.reference.langfuse.com)._
