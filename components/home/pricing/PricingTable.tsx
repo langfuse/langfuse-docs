@@ -1610,7 +1610,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
               {/* Callouts for different tiers - always render container for alignment */}
               <div className="px-0 py-6 h-[30px] flex items-center justify-center">
                 {tier.calloutLink ? (
-                  <div className="text-xs text-center text-muted-foreground whitespace-nowrap">
+                  <div className="text-xs text-center text-muted-foreground text-balance">
                     <Link
                       href={tier.calloutLink.href}
                       className="underline underline-offset-2 decoration-auto text-muted-foreground hover:text-primary"
