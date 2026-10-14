@@ -14,8 +14,6 @@ Most removals in v5 were already deprecated in v4. If your code runs on v4 witho
 pip install --upgrade "langfuse>=5"
 ```
 
-`host` and the `LANGFUSE_HOST` environment variable keep working as before.
-
 ## Are you affected? [#are-you-affected]
 
 You only need to change something if one of these applies to you.
@@ -198,30 +196,6 @@ Use `propagate_attributes()` for other trace attributes. `set_current_trace_as_p
 | `langfuse.get_dataset_run(dataset_name=..., run_name=...)`    | `langfuse.api.experiments.list(...)` and `.list_items(...)`               |
 | `langfuse.delete_dataset_run(dataset_name=..., run_name=...)` | List the experiment items, then `langfuse.api.trace.delete_multiple(...)` |
 
-There is no experiment-delete API. Deleting an experiment's traces also deletes their observations and scores:
-
-```python
-dataset = langfuse.get_dataset("qa-set")
-since = dataset.created_at  # no experiment item is older than its dataset
-
-experiments = langfuse.api.experiments.list(dataset_id=dataset.id, from_start_time=since)
-
-# Collect the traces of one experiment (cursor-paginated), then delete them
-trace_ids, cursor = set(), None
-while True:
-    page = langfuse.api.experiments.list_items(
-        dataset_id=dataset.id, experiment_name="baseline", from_start_time=since, cursor=cursor
-    )
-    trace_ids.update(item.trace_id for item in page.data)
-    cursor = page.meta.cursor
-    if not cursor:
-        break
-
-ids = list(trace_ids)
-for i in range(0, len(ids), 1000):
-    langfuse.api.trace.delete_multiple(trace_ids=ids[i : i + 1000])
-```
-
 See [Dataset runs → Experiments](/faq/all/deprecated-api-migration#dataset-runs) for details.
 
 ### `blocked_instrumentation_scopes` removed [#blocked-instrumentation-scopes]
@@ -262,7 +236,6 @@ These need no code changes unless you depend on the old behavior.
 - **Metadata values are JSON-encoded on the span, strings included.** The `langfuse.observation.metadata.<key>` and `langfuse.trace.metadata.<key>` attributes hold `'"prod"'` for the string `prod` and `'5'` for the number `5`. Langfuse decodes them only for spans from Python SDK v5 or later, which is what keeps value types intact. If `mask_otel_spans` or a custom exporter reads or writes these attributes, decode with `json.loads()` and write replacements with `json.dumps()`. Propagated metadata values can be any JSON value; the 200-character limit applies to the encoded value, so a string can have at most 198 characters. Saved metadata filters written for the old, untyped shape may not match new data.
 - **Experiments are recorded through OpenTelemetry.** `run_experiment()` sends experiment and item attributes on its spans instead of calling `POST /api/public/dataset-run-items`. The runner doesn't special-case sampling: with `sample_rate` below 1, sampled-out items and their scores don't reach Langfuse, while run-level scores are always stored. Use a client with the default `sample_rate=1.0` for complete experiments.
 - **Span batches are gzip-compressed.** If a proxy rejects compressed requests, set `Langfuse(otel_compression="none")` or `LANGFUSE_OTEL_COMPRESSION=none`. The standard `OTEL_EXPORTER_OTLP_TRACES_COMPRESSION` and `OTEL_EXPORTER_OTLP_COMPRESSION` variables are honored too. A custom `span_exporter` is not changed.
-- **Spans carry `x-langfuse-ingestion-version: 4`**, which enables real-time processing on Langfuse v4. To opt out, pass `additional_headers={"x-langfuse-ingestion-version": "3"}`. A custom `span_exporter` doesn't get this header automatically.
 - **The default span filter's GenAI check requires the `gen_ai.` prefix**, dot included, so attributes like `gen_ai_custom` no longer count.
 
 ## Migration checklist [#migration-checklist]
