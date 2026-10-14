@@ -6,9 +6,7 @@ category: SDKs
 
 # Python v4 → v5
 
-For most users, v5 is a small upgrade. If you trace with `@observe`, `start_as_current_observation()`, or an integration, and you create scores and fetch prompts, your code keeps working as is. v5 needs Python 3.11+ and Langfuse Cloud or self-hosted Langfuse v4.59.0 or later.
-
-Most removals in v5 were already deprecated in v4. If your code runs on v4 without a `DeprecationWarning` from `langfuse`, you're most likely unaffected apart from the [minimum versions](#minimum-versions), direct [`api.scores` calls](#scores-api), and [`run_batched_evaluation()`](#batched-evaluation). Python hides `DeprecationWarning` by default outside `__main__`, so check with `python -W default::DeprecationWarning` or under pytest.
+v5 removes APIs that v4 marked as deprecated and makes a few breaking changes of its own. It needs Python 3.11+ and Langfuse Cloud or self-hosted Langfuse v4.59.0 or later. Check [Are you affected?](#are-you-affected); if nothing there applies, upgrade and you're done. Type checkers flag deprecated v4 calls (pyright `reportDeprecated`, mypy `--enable-error-code deprecated`); v4 didn't warn at runtime.
 
 ```bash
 pip install --upgrade "langfuse>=5"
@@ -20,8 +18,9 @@ You only need to change something if one of these applies to you.
 
 **New in v5:**
 
-- **You self-host Langfuse v3, or v4 older than v4.59.0**, or run Python 3.10, `openai<1`, or `langchain-core<1` → [Minimum versions](#minimum-versions)
-- **You call `api.scores.create` or `api.legacy.score_v1.*` directly** → [`api.scores` takes request objects](#scores-api)
+- **You self-host Langfuse v3, or v4 older than v4.59.0** → v5 doesn't support it. Upgrade Langfuse, or stay on Python SDK v4. See [Minimum versions](#minimum-versions).
+- **You run Python 3.10, `openai<1`, or `langchain-core<1`** → [Minimum versions](#minimum-versions)
+- **You call `api.scores.create` or `api.legacy.score_v1.*` directly** → [`api.scores.create` takes a list of scores](#scores-api)
 - **You call `api.scores_v3.get_many_v3`** → [Score reads move to `api.scores.get_many`](#scores-reads)
 - **You call `run_batched_evaluation()`** → [Batched evaluation reads observations only](#batched-evaluation)
 - **You read metadata span attributes in `mask_otel_spans` or a custom exporter**, run experiments with `sample_rate` below 1, or a proxy rejects gzip-compressed requests → [Under the hood](#under-the-hood)
@@ -50,7 +49,9 @@ These are new in v5. Ordered by how many users they affect.
 | OpenAI      | `openai>=1.0`                          | `langfuse.openai` no longer supports pre-1.0 SDKs             |
 | LangChain   | `langchain-core>=1`                    | `ModuleNotFoundError` when importing `langfuse.langchain`     |
 
-If you self-host Langfuse v3, stay on Python SDK v4. See the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
+<Callout type="info">
+  Self-hosting Langfuse v3? [Upgrade to Langfuse v4](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4) to use the new SDKs and get the latest features. Until then, stay on Python SDK v4. See the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
+</Callout>
 
 ```bash
 pip install --upgrade "langfuse>=5" "langchain-core>=1"
@@ -58,13 +59,13 @@ pip install --upgrade "langfuse>=5" "langchain-core>=1"
 
 The LangChain `CallbackHandler` now imports only from `langchain_core`, so you no longer need the `langchain` meta-package. Its import path and usage are unchanged.
 
-### `api.scores` takes request objects [#scores-api]
+### `api.scores.create` takes a list of scores [#scores-api]
 
 **Affects:** direct calls to `langfuse.api.scores.create(...)` or `langfuse.api.legacy.score_v1.*`. `create_score()`, `span.score()`, and `span.score_trace()` are unchanged.
 
 **Breaks:** `TypeError` for the old `api.scores.create` keyword arguments, and `AttributeError` for `api.legacy.score_v1`.
 
-- `api.scores.create()` takes a list of `CreateScoreRequest` objects as `request=`. It returns `CreateScoreBatchResponse` when every score is accepted, or `CreateScoreBatchResults` with accepted/rejected counts and errors.
+- `api.scores.create()` takes a list of `CreateScoreRequest` objects as `request=`. If some scores are rejected, the response includes `accepted`/`rejected` counts and `errors`.
 - `api.legacy.score_v1.create(...)` is gone. Use `api.scores.create(request=[...])`.
 - `api.legacy.score_v1.delete(score_id=...)` moves to `api.scores.delete(score_id=...)`.
 
@@ -88,7 +89,7 @@ langfuse.api.scores.delete(score_id="score-id")
 
 **Breaks:** `AttributeError`, because `api.scores_v3` no longer exists. There is no alias.
 
-Scores API v3 reads now live in the `scores` namespace. Arguments and the `GetScoresV3Response` response are unchanged. The v4 method of the same name, `api.scores.get_many(score_ids=...)`, read Scores API v2. The v5 method reads Scores API v3 and filters by `id=` instead of `score_ids=`.
+`api.scores.get_many` now does what `api.scores_v3.get_many_v3` did, with the same arguments and response. If you called `api.scores.get_many(score_ids=...)` in v4, its response changes too; filter by `id=` instead (comma-separated IDs).
 
 ```python
 # v4
@@ -109,7 +110,7 @@ The function now reads from the v2 observations API and evaluates observations o
 - `scope` is removed. To evaluate whole traces, filter for the observations that represent them, for example by `name` or `type`.
 - `fetch_trace_fields` is renamed to `fields` (default `"core,basic,io,metadata"`). Field groups: `core`, `basic`, `time`, `io`, `metadata`, `model`, `usage`, `prompt`, `metrics`, `trace_context`.
 - `filter` must be a v2 filter JSON array.
-- The mapper receives `item=ObservationV2`, whose `input` and `output` are raw strings.
+- The mapper receives an observation (`item`), whose `input` and `output` are raw strings.
 - `_additional_trace_tags` is removed.
 - v4 resume tokens can't be reused.
 
@@ -140,7 +141,7 @@ v4 already marked each of these as deprecated and named the replacement. If you 
 
 **Affects:** calls to the methods below through `langfuse.api.*`.
 
-**Breaks:** `AttributeError`. Each method raised a `DeprecationWarning` in v4 that named its replacement. The `api.legacy` namespace is gone. For details, see the [SDK method quick reference](/faq/all/deprecated-api-migration#sdk-method-quick-reference).
+**Breaks:** `AttributeError`. Each method was marked deprecated in v4, with its replacement named. The `api.legacy` namespace is gone. For details, see the [SDK method quick reference](/faq/all/deprecated-api-migration#sdk-method-quick-reference).
 
 | Removed                                                           | Replacement                                                                                |
 | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
@@ -148,12 +149,12 @@ v4 already marked each of these as deprecated and named the replacement. If you 
 | `api.sessions.*`                                                  | `api.observations.get_many(session_id=..., ...)`                                           |
 | `api.legacy.observations_v1.*`                                    | `api.observations.get_many(...)`                                                           |
 | `api.legacy.metrics_v1.metrics(...)`                              | `api.metrics.metrics(...)`                                                                 |
-| `api.scores.get_many(...)` (v2), `api.scores.get_by_id(...)`      | `api.scores.get_many(...)` (Scores API v3)                                                 |
+| `api.scores.get_many(score_ids=...)`, `api.scores.get_by_id(...)` | `api.scores.get_many(id=...)`                                                              |
 | `api.dataset_run_items.*`                                         | `api.experiments.list_items(...)` or the experiment runner                                 |
 | `api.datasets.get_run(...)`, `.get_runs(...)`, `.delete_run(...)` | See [Dataset run helpers removed](#dataset-run-helpers-removed)                            |
 | `api.ingestion.batch(...)`                                        | Tracing via OpenTelemetry (the SDK default), `api.scores.create(request=[...])` for scores |
 
-`api.trace` keeps `delete` and `delete_multiple`. `api.datasets` keeps `list`, `get`, and `create`. `api.scores.get_many` keeps its name but now reads Scores API v3; see [Score reads move to `api.scores.get_many`](#scores-reads).
+`api.trace` keeps `delete` and `delete_multiple`. `api.datasets` keeps `list`, `get`, and `create`. `api.scores.get_many` keeps its name but now behaves like `scores_v3.get_many_v3`; see [Score reads move to `api.scores.get_many`](#scores-reads).
 
 ```python
 # v4
@@ -163,13 +164,11 @@ trace = langfuse.api.trace.get("trace-id")
 observations = langfuse.api.observations.get_many(trace_id="trace-id", fields="core,basic,io")
 ```
 
-The request and response types of the removed endpoints are removed too, for example `Trace*`, `Session*`, `Observation`/`ObservationsView*`, `DatasetRun*`, the `ScoreV1` family, `GetScoresResponse*`, the v1 `MetricsResponse`, and the ingestion types (`IngestionEvent`, `TraceBody`, `ObservationBody`). `langfuse.model` no longer re-exports `DatasetRun`, `Observation`, or `TraceWithFullDetails`.
-
 ### Trace input/output setters removed [#trace-io-setters-removed]
 
 **Affects:** calls to `set_current_trace_io()` or `span.set_trace_io()`, or code that sets the trace-level `input`/`output` attributes.
 
-**Breaks:** `AttributeError`. In v4, both methods raised a `DeprecationWarning`. Trace input and output now come from the root observation, so set them there.
+**Breaks:** `AttributeError`. Both methods were documented as deprecated in v4. Trace input and output now come from the root observation, so set them there.
 
 ```python
 # v4
@@ -244,7 +243,7 @@ Work through this list, or paste it into your coding agent. Skip items that don'
 
 - [ ] Use Python 3.11+ and Langfuse Cloud or self-hosted Langfuse v4.59.0+. On self-hosted v3, stay on v4.
 - [ ] `pip install --upgrade "langfuse>=5"`. With integrations: `openai>=1`, `langchain-core>=1`.
-- [ ] `api.scores.create(name=..., value=..., ...)` → `api.scores.create(request=[CreateScoreRequest(...)])`, and handle `CreateScoreBatchResults` for partial rejections.
+- [ ] `api.scores.create(name=..., value=..., ...)` → `api.scores.create(request=[CreateScoreRequest(...)])`, and handle partial rejections (`rejected` > 0).
 - [ ] `api.legacy.score_v1.create(...)` → `api.scores.create(request=[...])`; `api.legacy.score_v1.delete(score_id=...)` → `api.scores.delete(score_id=...)`.
 - [ ] `api.scores_v3.get_many_v3(...)` → `api.scores.get_many(...)` (same for `async_api`).
 - [ ] v2 score reads: `api.scores.get_many(score_ids=...)` → `api.scores.get_many(id=...)`; `api.scores.get_by_id(...)` → `api.scores.get_many(id=...)`.

@@ -6,9 +6,7 @@ category: SDKs
 
 # JS/TS v5 → v6
 
-For most users, v6 is a small upgrade. If you trace with `startActiveObservation()`, `observe()`, or an integration, and you create scores and fetch prompts through the managers (`langfuse.prompt`, `langfuse.score`, `langfuse.dataset`), your code keeps working as is. v6 needs Node.js 22+ and Langfuse Cloud or self-hosted Langfuse v4.59.0 or later.
-
-Most removals in v6 were already marked `@deprecated` in v5. If your editor or a lint rule such as `@typescript-eslint/no-deprecated` flags no deprecated Langfuse APIs in your v5 code, you're most likely unaffected apart from the [minimum versions](#minimum-versions), [`requestOptions` on argument-less API methods](#request-placeholder), and direct [`api.scores` calls](#scores-api). v5 didn't log deprecation warnings at runtime, so plain JavaScript code gets no warning.
+v6 removes APIs that v5 marked `@deprecated` and makes a few breaking changes of its own. It needs Node.js 22+ and Langfuse Cloud or self-hosted Langfuse v4.59.0 or later. Check [Are you affected?](#are-you-affected); if nothing there applies, upgrade and you're done. Your editor or `@typescript-eslint/no-deprecated` flags deprecated v5 calls; v5 didn't warn at runtime.
 
 All `@langfuse/*` packages are released together. Upgrade them to the same major version:
 
@@ -22,9 +20,10 @@ You only need to change something if one of these applies to you.
 
 **New in v6:**
 
-- **You self-host Langfuse v3, or v4 older than v4.59.0**, or run Node.js older than 22, or use `@langchain/core` older than 1.0 → [Minimum versions](#minimum-versions)
+- **You self-host Langfuse v3, or v4 older than v4.59.0** → v6 doesn't support it. Upgrade Langfuse, or stay on JS/TS SDK v5. See [Minimum versions](#minimum-versions).
+- **You run Node.js older than 22, or use `@langchain/core` older than 1.0** → [Minimum versions](#minimum-versions)
 - **You pass `requestOptions` to a generated API method without query parameters or a body**, such as `api.datasets.get(name, { timeoutInSeconds })` → [Request placeholder before `requestOptions`](#request-placeholder)
-- **You call `api.scores.create` or `api.legacy.scoreV1.*` directly** → [`api.scores` request, response, and delete](#scores-api)
+- **You call `api.scores.create` or `api.legacy.scoreV1.*` directly** → [`api.scores.create` takes an array of scores](#scores-api)
 - **You call `api.scoresV3.getManyV3`** → [Score reads move to `api.scores.getMany`](#scores-reads)
 - **You pass a `mask` function or read metadata span attributes in a custom processor**, run experiments with a sampler, or a proxy rejects gzip-compressed requests → [Under the hood](#under-the-hood)
 
@@ -51,7 +50,9 @@ These are new in v6.
 | Node.js     | `>=22`; packages are compiled to ES2022  | Unsupported. Bundles for older runtimes must transpile the SDK   |
 | LangChain   | `@langchain/core@^1.0.0` (was `>=0.3.8`) | Peer dependency conflict when installing `@langfuse/langchain@6` |
 
-If you self-host Langfuse v3, stay on JS/TS SDK v5. See the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
+<Callout type="info">
+  Self-hosting Langfuse v3? [Upgrade to Langfuse v4](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4) to use the new SDKs and get the latest features. Until then, stay on JS/TS SDK v5. See the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
+</Callout>
 
 ```bash
 npm install @langfuse/langchain@6 @langchain/core@^1
@@ -100,13 +101,13 @@ These methods are affected. Every other generated method keeps its signature.
 | `unstable.dashboards`       | `get`, `delete`, `deletePlacement`                                                                         |
 | `unstable.skills`           | `deleteVersion`                                                                                            |
 
-### `api.scores` request, response, and delete [#scores-api]
+### `api.scores.create` takes an array of scores [#scores-api]
 
 **Affects:** direct calls to `langfuse.api.scores.create(...)` or `langfuse.api.legacy.scoreV1.*`. `langfuse.score.*` is unchanged.
 
 **Breaks:** TypeScript compile errors, or `TypeError` / `undefined` at runtime in JavaScript.
 
-- `api.scores.create()` takes an array of `CreateScoreRequest` objects. It returns `CreateScoreBatchResponse` when every score is accepted, or `CreateScoreBatchResults` with accepted/rejected counts and errors. The response no longer contains the score `id`; set `id` on the request if you need it.
+- `api.scores.create()` takes an array of `CreateScoreRequest` objects. If some scores are rejected, the response includes `accepted`/`rejected` counts and `errors`. The response no longer contains the score `id`; set `id` on the request if you need it.
 - `api.legacy.scoreV1.create(...)` is gone. Use `api.scores.create([...])`.
 - `api.legacy.scoreV1.delete(scoreId)` moves to `api.scores.delete(scoreId)`.
 - The `legacy.CreateScoreRequest`, `legacy.CreateScoreResponse`, and `legacy.CreateScoreSource` re-exports are removed; use the types without the `legacy` prefix.
@@ -130,7 +131,7 @@ await langfuse.api.scores.delete("score-id");
 
 **Breaks:** TypeScript compile errors, or `TypeError` at runtime in JavaScript, because `api.scoresV3` no longer exists. There is no alias.
 
-Scores API v3 reads now live in the `scores` namespace. Arguments, the `GetScoresV3Request` and `GetScoresV3Response` types, and the response are unchanged. The v5 method of the same name, `api.scores.getMany({ scoreIds })`, read Scores API v2. The v6 method reads Scores API v3 and filters by `id` instead of `scoreIds`.
+`api.scores.getMany` now does what `api.scoresV3.getManyV3` did, with the same arguments and response. If you called `api.scores.getMany({ scoreIds })` in v5, its response changes too; filter by `id` instead (comma-separated IDs).
 
 ```typescript
 // v5
@@ -185,21 +186,19 @@ const observations = await langfuse.api.observations.getMany({ traceId: "trace-i
 
 **Breaks:** a TypeScript compile error, or `TypeError` / `undefined` in JavaScript. Each method was marked `@deprecated` in v5 with a note naming its replacement. The `api.legacy` namespace is gone. For details, see the [SDK method quick reference](/faq/all/deprecated-api-migration#sdk-method-quick-reference).
 
-| Removed                                                   | Replacement                                                                        |
-| --------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `api.trace.get(...)`, `api.trace.list(...)`               | `api.observations.getMany({ traceId, ... })`                                       |
-| `api.sessions.*`                                          | `api.observations.getMany({ sessionId, ... })`                                     |
-| `api.legacy.observationsV1.*`                             | `api.observations.getMany(...)`                                                    |
-| `api.legacy.metricsV1.metrics(...)`                       | `api.metrics.metrics(...)`                                                         |
-| `api.scores.getMany(...)` (v2), `api.scores.getById(...)` | `api.scores.getMany(...)` (Scores API v3)                                          |
-| `api.datasetRunItems.*`                                   | `api.experiments.listItems(...)` or the experiment runner                          |
-| `api.datasets.getRun(...)`, `.getRuns(...)`               | `api.experiments.list(...)` and `.listItems(...)`                                  |
-| `api.datasets.deleteRun(...)`                             | List experiment items, then `api.trace.deleteMultiple({ traceIds })`               |
-| `api.ingestion.batch(...)`                                | Tracing via OpenTelemetry (the SDK default), `api.scores.create([...])` for scores |
+| Removed                                                       | Replacement                                                                        |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `api.trace.get(...)`, `api.trace.list(...)`                   | `api.observations.getMany({ traceId, ... })`                                       |
+| `api.sessions.*`                                              | `api.observations.getMany({ sessionId, ... })`                                     |
+| `api.legacy.observationsV1.*`                                 | `api.observations.getMany(...)`                                                    |
+| `api.legacy.metricsV1.metrics(...)`                           | `api.metrics.metrics(...)`                                                         |
+| `api.scores.getMany({ scoreIds })`, `api.scores.getById(...)` | `api.scores.getMany({ id })`                                                       |
+| `api.datasetRunItems.*`                                       | `api.experiments.listItems(...)` or the experiment runner                          |
+| `api.datasets.getRun(...)`, `.getRuns(...)`                   | `api.experiments.list(...)` and `.listItems(...)`                                  |
+| `api.datasets.deleteRun(...)`                                 | List experiment items, then `api.trace.deleteMultiple({ traceIds })`               |
+| `api.ingestion.batch(...)`                                    | Tracing via OpenTelemetry (the SDK default), `api.scores.create([...])` for scores |
 
-`api.scores.getMany` keeps its name but now reads Scores API v3; see [Score reads move to `api.scores.getMany`](#scores-reads).
-
-The request and response types of the removed endpoints are removed too: trace, session, v1 observation, dataset run, and dataset run item types, the `ScoreV1` family, and the ingestion types (`IngestionEvent`, `TraceBody`, `ObservationBody`). `ScoreBody` stays.
+`api.scores.getMany` keeps its name but now behaves like `scoresV3.getManyV3`; see [Score reads move to `api.scores.getMany`](#scores-reads).
 
 See [Dataset runs → Experiments](/faq/all/deprecated-api-migration#dataset-runs) for details.
 
@@ -275,7 +274,7 @@ Work through this list, or paste it into your coding agent. Skip items that don'
 - [ ] Use Node.js 22+ and Langfuse Cloud or self-hosted Langfuse v4.59.0+. On self-hosted v3, stay on v5.
 - [ ] Upgrade every `@langfuse/*` package to `@6`. With LangChain: `@langchain/core@^1`.
 - [ ] Generated API methods in the [affected list](#request-placeholder): `method(...pathArgs, requestOptions)` → `method(...pathArgs, {}, requestOptions)`.
-- [ ] `api.scores.create({ ... })` → `api.scores.create([{ ... }])`; set `id` on the request if you need it, and handle `CreateScoreBatchResults` for partial rejections.
+- [ ] `api.scores.create({ ... })` → `api.scores.create([{ ... }])`; set `id` on the request if you need it, and handle partial rejections (`rejected` > 0).
 - [ ] `api.legacy.scoreV1.create(...)` → `api.scores.create([...])`; `api.legacy.scoreV1.delete(id)` → `api.scores.delete(id)`; drop the `legacy.` prefix from score types.
 - [ ] `api.scoresV3.getManyV3(...)` → `api.scores.getMany(...)`.
 - [ ] v2 score reads: `api.scores.getMany({ scoreIds })` → `api.scores.getMany({ id })`; `api.scores.getById(id)` → `api.scores.getMany({ id })`.
