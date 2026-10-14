@@ -38,7 +38,7 @@ This page is also served as plain markdown at `https://langfuse.com/faq/all/depr
 
 All paths are relative to `/api/public`.
 
-`score-create` events sent to `POST /ingestion` by the current SDKs are not deprecated. They remain supported after the v4 cutover.
+`score-create` events sent to `POST /ingestion` by older SDKs (Python v4, JS/TS v5) are not deprecated. They remain supported after the v4 cutover. Python SDK v5 and JS/TS SDK v6 write scores through `POST /scores`.
 
 If you access the public API from shell scripts or coding agents, the [Langfuse CLI](/docs/api-and-data-platform/features/cli) provides commands for all supported endpoints.
 Use at least `@langfuse/cli` version `v1.1.0` to benefit from the new endpoints.
@@ -290,7 +290,7 @@ The deprecated endpoint's filters map to v2 `filters` entries: `traceName` and `
 
 **Replacement:** [`GET /v3/scores`](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores). See the [Scores API v3 announcement](/changelog/2026-06-10-scores-v3-api) for background.
 
-This migration applies only to score reads. Score writes remain supported through `POST /scores` and the current SDK score helpers. The SDKs batch score writes as `score-create` events through `POST /ingestion`; Langfuse v4 continues to accept those events after the cutover. This also covers evaluations created by the experiment runner and third-party integrations that use the current SDK score helpers. No client update or direct REST workaround is required for these score writes.
+This migration applies only to score reads. Score writes remain supported through `POST /scores` and the SDK score helpers. Python SDK v5 and JS/TS SDK v6 send score writes to `POST /scores`; older SDKs (Python v4, JS/TS v5) batch them as `score-create` events through `POST /ingestion`, and Langfuse v4 continues to accept those events after the cutover. This also covers evaluations created by the experiment runner and third-party integrations that use the current SDK score helpers. No client update or direct REST workaround is required for these score writes.
 
 ### SDK methods [#scores-sdk-methods]
 
@@ -310,7 +310,7 @@ In Python SDK v5 and JS/TS SDK v6, Scores API v3 reads move into the `scores` na
 | Python v5 | `client.api.scores_v3.get_many_v3(...)` | `client.api.scores.get_many(...)` |
 | JS/TS v6  | `client.api.scoresV3.getManyV3(...)`    | `client.api.scores.getMany(...)`  |
 
-Python v4 and JS/TS v5 do not expose read wrappers for the v1 `GET /scores` or `GET /scores/{id}` endpoints. Calls to those routes come from direct REST usage or an older SDK. Do not migrate current score-creation helpers merely because they send supported `score-create` events through `/ingestion`.
+Python v4 and JS/TS v5 do not expose read wrappers for the v1 `GET /scores` or `GET /scores/{id}` endpoints. Calls to those routes come from direct REST usage or an older SDK. Do not migrate Python v4 or JS/TS v5 score-creation helpers merely because they send supported `score-create` events through `/ingestion`.
 
 ### Parameter mapping
 
@@ -434,7 +434,7 @@ Use [`GET /experiments`](https://api.reference.langfuse.com/#tag/experiments/GET
 
 For Python and JS/TS, use the [Experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk). It applies the required experiment semantics automatically and is the recommended replacement for `POST /dataset-run-items`.
 
-The experiment runner's `Evaluation` results use the supported SDK score-write path. Although the SDK batches them as `score-create` events through `POST /ingestion`, those events remain accepted after the v4 cutover; the legacy ingestion deprecation applies only to trace and observation events.
+The experiment runner's `Evaluation` results use the supported SDK score-write path. Python SDK v5 and JS/TS SDK v6 send them to `POST /scores`. Older SDKs batch them as `score-create` events through `POST /ingestion`, and those events remain accepted after the v4 cutover; the legacy ingestion deprecation applies only to trace and observation events.
 
 For other languages, send experiment traces to [`POST /otel/v1/traces`](https://api.reference.langfuse.com/#tag/opentelemetry/POST/api/public/otel/v1/traces) and apply the [required experiment attributes](/integrations/native/opentelemetry/experiments).
 
@@ -481,7 +481,7 @@ curl \
 
 Python SDK v5 and JS/TS SDK v6 remove `api.ingestion`. Use the SDK's OpenTelemetry tracing for traces and observations, and `api.scores.create` for scores.
 
-Score writes are unaffected. Direct REST clients can continue using `POST /scores`. Current Python and JS/TS SDKs intentionally batch score writes as `score-create` events through `POST /ingestion`; Langfuse v4 continues to accept that event type after <V4CutoverDate />. No SDK release that reroutes score writes to `POST /scores` is required for compatibility.
+Score writes are unaffected. Direct REST clients can continue using `POST /scores`. Python SDK v5 and JS/TS SDK v6 send score writes to `POST /scores`. Older SDKs (Python v4, JS/TS v5) batch score writes as `score-create` events through `POST /ingestion`; Langfuse v4 continues to accept that event type after <V4CutoverDate />, so upgrading is not required for score compatibility.
 
 ## Deprecated endpoints [#endpoints]
 
