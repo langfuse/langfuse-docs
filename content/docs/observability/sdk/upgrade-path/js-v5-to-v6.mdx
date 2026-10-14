@@ -271,23 +271,23 @@ These need no code changes unless you depend on the old behavior.
 
 Work through this list, or paste it into your coding agent. Skip items that don't apply.
 
-- [ ] Use Node.js 22+ and Langfuse Cloud or self-hosted Langfuse v4.59.0+. On self-hosted v3, stay on v5.
-- [ ] Upgrade every `@langfuse/*` package to `@6`. With LangChain: `@langchain/core@^1`.
-- [ ] Generated API methods in the [affected list](#request-placeholder): `method(...pathArgs, requestOptions)` → `method(...pathArgs, {}, requestOptions)`.
-- [ ] `api.scores.create({ ... })` → `api.scores.create([{ ... }])`; set `id` on the request if you need it, and handle partial rejections (`rejected` > 0).
-- [ ] `api.legacy.scoreV1.create(...)` → `api.scores.create([...])`; `api.legacy.scoreV1.delete(id)` → `api.scores.delete(id)`; drop the `legacy.` prefix from score types.
-- [ ] `api.scoresV3.getManyV3(...)` → `api.scores.getMany(...)`.
-- [ ] v2 score reads: `api.scores.getMany({ scoreIds })` → `api.scores.getMany({ id })`; `api.scores.getById(id)` → `api.scores.getMany({ id })`.
-- [ ] `langfuse.getPrompt` / `createPrompt` / `updatePrompt` → `langfuse.prompt.get` / `create` / `update`.
-- [ ] `langfuse.getDataset` / `createDatasetItem` → `langfuse.dataset.get` / `createItem`; `langfuse.createDataset` / `getDatasetItem` → `langfuse.api.datasets.create` / `langfuse.api.datasetItems.get`.
-- [ ] `langfuse.resolveMediaReferences` → `langfuse.media.resolveReferences`; `langfuse.fetchMedia` → `langfuse.api.media.get`.
-- [ ] `langfuse.fetchTrace(s)` / `fetchObservation(s)` / `fetchSessions`, `api.trace.get` / `api.trace.list` / `api.sessions.*` / `api.legacy.observationsV1.*` → `langfuse.api.observations.getMany(...)`.
-- [ ] `api.legacy.metricsV1.metrics(...)` → `api.metrics.metrics(...)`.
-- [ ] `langfuse.getDatasetRun(s)`, `api.datasets.getRun(s)`, `api.datasetRunItems.*` → `api.experiments.list(...)` / `api.experiments.listItems(...)`.
-- [ ] `api.datasets.deleteRun(...)` → list experiment items, then `api.trace.deleteMultiple({ traceIds })`.
-- [ ] `api.ingestion.batch(...)` → SDK tracing (OpenTelemetry) for traces, `api.scores.create([...])` for scores.
-- [ ] `setActiveTraceIO()` / `span.setTraceIO()` / `createTraceAttributes()` → `span.update({ input, output })` on the root observation.
-- [ ] `item.link(...)` → `dataset.runExperiment({ name, task, evaluators })`.
-- [ ] `mask` functions: handle non-string `data`. Custom processors reading `langfuse.*.metadata.<key>` attributes: `JSON.parse()` the values.
-- [ ] Experiments: don't sample traces while running them.
-- [ ] Proxy rejects gzip: `new LangfuseSpanProcessor({ compression: "none" })` or `LANGFUSE_OTEL_COMPRESSION=none`.
+- Use Node.js 22+ and Langfuse Cloud or self-hosted Langfuse v4.59.0+. On self-hosted v3, stay on v5.
+- Upgrade every `@langfuse/*` package to `@6`. With LangChain: `@langchain/core@^1`.
+- Generated API methods in the [affected list](#request-placeholder): `method(...pathArgs, requestOptions)` → `method(...pathArgs, {}, requestOptions)`.
+- `api.scores.create({ ... })` → `api.scores.create([{ ... }])`; set `id` on the request if you need it, and handle partial rejections (`rejected` > 0).
+- `api.legacy.scoreV1.create(...)` → `api.scores.create([...])`; `api.legacy.scoreV1.delete(id)` → `api.scores.delete(id)`; drop the `legacy.` prefix from score types.
+- `api.scoresV3.getManyV3(...)` → `api.scores.getMany(...)`.
+- v2 score reads: `api.scores.getMany({ scoreIds })` → `api.scores.getMany({ id })`; `api.scores.getById(id)` → `api.scores.getMany({ id })`.
+- `langfuse.getPrompt` / `createPrompt` / `updatePrompt` → `langfuse.prompt.get` / `create` / `update`.
+- `langfuse.getDataset` / `createDatasetItem` → `langfuse.dataset.get` / `createItem`; `langfuse.createDataset` / `getDatasetItem` → `langfuse.api.datasets.create` / `langfuse.api.datasetItems.get`.
+- `langfuse.resolveMediaReferences` → `langfuse.media.resolveReferences`; `langfuse.fetchMedia` → `langfuse.api.media.get`.
+- `langfuse.fetchTrace(s)` / `fetchObservation(s)` / `fetchSessions`, `api.trace.get` / `api.trace.list` / `api.sessions.*` / `api.legacy.observationsV1.*` → `langfuse.api.observations.getMany(...)`.
+- `api.legacy.metricsV1.metrics(...)` → `api.metrics.metrics(...)`.
+- `langfuse.getDatasetRun(s)`, `api.datasets.getRun(s)`, `api.datasetRunItems.*` → `api.experiments.list(...)` / `api.experiments.listItems(...)`.
+- `api.datasets.deleteRun(...)` → list experiment items, then `api.trace.deleteMultiple({ traceIds })`.
+- `api.ingestion.batch(...)` → SDK tracing (OpenTelemetry) for traces, `api.scores.create([...])` for scores.
+- `setActiveTraceIO()` / `span.setTraceIO()` / `createTraceAttributes()` → `span.update({ input, output })` on the root observation.
+- `item.link(...)` → `dataset.runExperiment({ name, task, evaluators })`.
+- `mask` functions: handle non-string `data`. Custom processors reading `langfuse.*.metadata.<key>` attributes: `JSON.parse()` the values.
+- Experiments: don't sample traces while running them.
+- Proxy rejects gzip: `new LangfuseSpanProcessor({ compression: "none" })` or `LANGFUSE_OTEL_COMPRESSION=none`.
