@@ -217,3 +217,11 @@ This makes sense when:
 If your application is single-request/single-response with no continuity between calls, you probably don't need sessions.
 
 ![Sessions view in Langfuse](/images/docs/faq/good-trace-sessions-view.png)
+
+#### How to instrument traces with session IDs [#session-trace]
+
+To get a readable conversation in the session view:
+
+- **Group the turns:** Set the same `session_id` on every trace in the conversation.
+- **Repeat the conversation history:** Record each generation’s input and output as role-labeled messages (`system`, `user`, `assistant`, `tool`). In each later generation’s input, include the earlier messages followed by the new user message. Repeating that history across generations is how the session view connects the turns. Keep it faithful to what the model saw; put unrelated diagnostics in metadata. System messages alone do not connect turns.
+- **Match tool calls to results:** Give each tool call a unique ID and include that same ID with its result.
