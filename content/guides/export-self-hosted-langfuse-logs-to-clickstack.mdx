@@ -1,0 +1,349 @@
+---
+title: Export self-hosted Langfuse logs to ClickStack
+description: Ship stdout logs from self-hosted langfuse-web and langfuse-worker to ClickStack on a dedicated ClickHouse Cloud service.
+sidebarTitle: ClickStack logs
+category: Self-hosting
+---
+
+# Export self-hosted Langfuse logs to ClickStack
+
+Use [ClickStack](https://clickhouse.com/clickstack) to search and filter the stdout logs from a self-hosted Langfuse deployment. This guide collects JSON logs from `langfuse-web` and `langfuse-worker` on Kubernetes and writes them to ClickHouse so ClickStack can query them.
+
+Use a **separate ClickHouse Cloud service** for these logs. Leave the service in `CLICKHOUSE_URL` for traces, observations, and scores. Reusing it would put `otel_logs` and log insert load on the same service Langfuse uses for product data.
+
+This path is not the same as [Observability via OpenTelemetry](/self-hosting/configuration/observability). `OTEL_EXPORTER_OTLP_ENDPOINT` exports Langfuse traces. It does not ship stdout.
+
+Start from Langfuse already running on Kubernetes with the [Helm chart](/self-hosting/deployment/kubernetes-helm). Deploy the ClickStack gateway before the agent. The agent exports to that Service.
+
+## How it works [#how-it-works]
+
+Kubernetes writes each container's stdout to a file on the node. An OpenTelemetry Collector **agent** (contrib image, DaemonSet) tails the `langfuse` namespace files, parses JSON, and forwards OTLP/HTTP. A **ClickStack collector** (gateway Deployment) receives that stream and inserts rows into `otel.otel_logs` using ClickStack's schema.
+
+<Frame fullWidth>
+  ![Langfuse web and worker write JSON logs to stdout. An OpenTelemetry agent DaemonSet reads the container log files, filters to the langfuse namespace, attaches pod metadata, parses level and message, and sets service.name. It sends OTLP/HTTP on port 4318 to the ClickStack collector, which inserts rows into otel.otel_logs on a separate ClickHouse Cloud logs service that ClickStack UI queries.](/images/docs/clickstack-application-logs-architecture.png)
+</Frame>
+
+## Setup [#setup]
+
+### 1. Turn on JSON logs [#json-logs]
+
+`langfuse.logging.format` maps to [`LANGFUSE_LOG_FORMAT`](/self-hosting/configuration). JSON lets the agent map `level` and `message` to ClickStack severity and body. Plain-text lines are still collected, as a single unparsed string. `format: json` applies to both web and worker.
+
+```yaml
+langfuse:
+  logging:
+    level: info
+    format: json
+```
+
+Upgrade with the same values file you used to install Langfuse:
+
+```bash
+helm upgrade langfuse langfuse/langfuse -n langfuse -f <your-values-file>.yaml
+```
+
+Confirm both deployments write JSON:
+
+```bash
+kubectl -n langfuse logs deploy/langfuse-web --tail=5
+kubectl -n langfuse logs deploy/langfuse-worker --tail=5
+```
+
+A line looks like `{"level":"info","message":"..."}`. Plain text usually means the upgrade omitted `-f`.
+
+<Details id="optional-pod-label">
+<Summary>Optional: add a pod label for filtering</Summary>
+
+The agent copies every pod label onto the log record, so you can filter on it in ClickStack. Collection is by namespace, so logs are collected with or without this label.
+
+```yaml
+langfuse:
+  web:
+    pod:
+      labels:
+        observability/logs: clickstack
+  worker:
+    pod:
+      labels:
+        observability/logs: clickstack
+```
+
+</Details>
+
+### 2. Deploy the ClickStack gateway [#clickstack-gateway]
+
+Run the OpenTelemetry Collector Helm chart in Deployment mode with the ClickStack image (`docker.clickhouse.com/clickhouse/clickstack-otel-collector`). On first start it creates `otel_logs` and related tables. It listens for OTLP on gRPC `4317` and HTTP `4318`.
+
+On the **logs** ClickHouse Cloud service, as `default`, create the database and ingest user:
+
+```sql
+CREATE DATABASE otel;
+CREATE USER clickstack_ingest IDENTIFIED WITH sha256_password BY '<password>';
+GRANT SELECT, INSERT, CREATE DATABASE, CREATE TABLE, CREATE VIEW ON otel.* TO clickstack_ingest;
+```
+
+Those grants let the collector create `otel_logs` on first start and write rows. The user is limited to `otel.*`.
+
+Create the Secret from that same logs service. Use the same password as `CREATE USER`. `CLICKHOUSE_ENDPOINT` is the HTTPS URL of the logs service, including port `8443`.
+
+```bash
+kubectl -n langfuse create secret generic clickhouse-cloud \
+  --from-literal=CLICKHOUSE_ENDPOINT='https://<logs-service>.<region>.aws.clickhouse.cloud:8443' \
+  --from-literal=CLICKHOUSE_USER='clickstack_ingest' \
+  --from-literal=CLICKHOUSE_PASSWORD='<password>'
+```
+
+Save `clickstack-gateway-values.yaml`:
+
+```yaml
+mode: deployment
+fullnameOverride: clickstack-otel-collector
+
+image:
+  repository: docker.clickhouse.com/clickhouse/clickstack-otel-collector
+  tag: "2.40.0"
+
+replicaCount: 1
+
+ports:
+  otlp:
+    enabled: true
+  otlp-http:
+    enabled: true
+  jaeger-compact:
+    enabled: false
+  jaeger-thrift:
+    enabled: false
+  jaeger-grpc:
+    enabled: false
+  zipkin:
+    enabled: false
+
+resources:
+  requests: { cpu: 200m, memory: 1Gi }
+  limits: { memory: 2Gi }
+
+extraEnvs:
+  - name: CLICKHOUSE_ENDPOINT
+    valueFrom:
+      secretKeyRef:
+        name: clickhouse-cloud
+        key: CLICKHOUSE_ENDPOINT
+  - name: CLICKHOUSE_USER
+    valueFrom:
+      secretKeyRef:
+        name: clickhouse-cloud
+        key: CLICKHOUSE_USER
+  - name: CLICKHOUSE_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: clickhouse-cloud
+        key: CLICKHOUSE_PASSWORD
+  - name: HYPERDX_OTEL_EXPORTER_CLICKHOUSE_DATABASE
+    value: otel
+```
+
+Install the gateway:
+
+```bash
+helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+helm repo update
+
+helm upgrade --install clickstack-gateway open-telemetry/opentelemetry-collector \
+  --version 0.175.1 \
+  -n langfuse \
+  -f clickstack-gateway-values.yaml
+```
+
+`fullnameOverride: clickstack-otel-collector` is the Service name the agent uses. Pin the image tag; the collector applies its schema on start. For high volume, see ClickHouse's [collector sizing](https://clickhouse.com/docs/clickstack/ingesting-data/collector).
+
+The collector sets a 30-day TTL (`720h`) when it creates `otel_logs`. To choose a different period, add this to `extraEnvs` **before the first install** (hours, for example `168h` or `2160h`):
+
+```yaml
+extraEnvs:
+  # ...the entries above...
+  - name: HYPERDX_OTEL_EXPORTER_LOGS_TTL
+    value: <hours>h
+```
+
+<Details id="change-retention-after-first-start">
+<Summary>Change retention after the first start</Summary>
+
+`HYPERDX_OTEL_EXPORTER_LOGS_TTL` applies only when the tables are created. To change retention later, run this as the admin user on the logs service, with your own interval:
+
+```sql
+ALTER TABLE otel.otel_logs MODIFY TTL toDateTime(Timestamp) + INTERVAL 90 DAY;
+ALTER TABLE otel.otel_logs_kv_rollup_15m MODIFY TTL Timestamp + INTERVAL 90 DAY;
+```
+
+</Details>
+
+### 3. Deploy the OpenTelemetry agent [#otel-agent]
+
+Use the same Helm chart in DaemonSet mode with `otel/opentelemetry-collector-contrib`. One pod per node tails Langfuse container logs and forwards them to the gateway over OTLP/HTTP.
+
+The values include only `/var/log/pods/langfuse_*/*/*.log`, attach Kubernetes metadata, copy `k8s.deployment.name` to `service.name`, parse JSON `level` / `message`, and export to the gateway base URL (the exporter appends `/v1/logs`). They also exclude the agent and gateway collector pods. Both run in `langfuse`, and chart 0.175.1 keeps a user-supplied `exclude` list, so an empty list would override the preset and tail those collectors.
+
+Create the ConfigMap. The key name must match `extraEnvs`.
+
+```bash
+kubectl -n langfuse create configmap otel-config-vars \
+  --from-literal=OTEL_COLLECTOR_ENDPOINT=http://clickstack-otel-collector.langfuse.svc.cluster.local:4318
+```
+
+Save `otel-agent-values.yaml`:
+
+```yaml
+mode: daemonset
+
+image:
+  repository: "otel/opentelemetry-collector-contrib"
+  tag: "0.162.0"
+
+presets:
+  logsCollection:
+    enabled: true
+    includeCollectorLogs: false
+  kubernetesAttributes:
+    enabled: true
+    extractAllPodLabels: true
+    extractAllPodAnnotations: true
+
+extraEnvs:
+  - name: OTEL_COLLECTOR_ENDPOINT
+    valueFrom:
+      configMapKeyRef:
+        name: otel-config-vars
+        key: OTEL_COLLECTOR_ENDPOINT
+
+tolerations:
+  - operator: Exists
+
+resources:
+  requests: { cpu: 100m, memory: 256Mi }
+  limits: { memory: 512Mi }
+
+config:
+  receivers:
+    file_log:
+      include:
+        - /var/log/pods/langfuse_*/*/*.log
+      exclude:
+        - /var/log/pods/langfuse_otel-agent*_*/opentelemetry-collector/*.log
+        - /var/log/pods/langfuse_clickstack-otel-collector*_*/opentelemetry-collector/*.log
+  processors:
+    resource/langfuse:
+      attributes:
+        - key: service.name
+          from_attribute: k8s.deployment.name
+          action: upsert
+    transform/langfuse:
+      error_mode: ignore
+      log_statements:
+        - context: log
+          conditions:
+            - IsMatch(body, "^\\s*\\{")
+          statements:
+            - merge_maps(cache, ParseJSON(body), "upsert")
+            - set(severity_text, cache["level"]) where cache["level"] != nil
+            - set(severity_number, SEVERITY_NUMBER_TRACE) where severity_text == "trace"
+            - set(severity_number, SEVERITY_NUMBER_DEBUG) where severity_text == "debug"
+            - set(severity_number, SEVERITY_NUMBER_INFO) where severity_text == "info"
+            - set(severity_number, SEVERITY_NUMBER_WARN) where severity_text == "warn"
+            - set(severity_number, SEVERITY_NUMBER_ERROR) where severity_text == "error"
+            - set(severity_number, SEVERITY_NUMBER_FATAL) where severity_text == "fatal"
+            - set(body, cache["message"]) where cache["message"] != nil
+            - delete_key(cache, "message")
+            - delete_key(cache, "level")
+            - merge_maps(attributes, cache, "insert")
+  exporters:
+    otlp_http:
+      endpoint: "${env:OTEL_COLLECTOR_ENDPOINT}"
+      compression: gzip
+      sending_queue:
+        enabled: true
+        queue_size: 5000
+      retry_on_failure:
+        enabled: true
+  service:
+    pipelines:
+      logs:
+        processors: [memory_limiter, resource/langfuse, transform/langfuse, batch]
+        exporters: [otlp_http]
+      metrics:
+        exporters: [otlp_http]
+      traces:
+        exporters: [otlp_http]
+```
+
+Pin the contrib version (`0.162.0` or newer). Install the agent:
+
+```bash
+helm upgrade --install otel-agent open-telemetry/opentelemetry-collector \
+  --version 0.175.1 \
+  -n langfuse \
+  -f otel-agent-values.yaml
+```
+
+The DaemonSet must land on every node that runs Langfuse. The example values tolerate every taint so a tainted Langfuse node group is still covered.
+
+<Details id="optional-otlp-auth">
+<Summary>Optional: require an OTLP auth token</Summary>
+
+The gateway accepts OTLP from inside the cluster without authentication. To require a token, store one in a Secret, set it as `OTLP_AUTH_TOKEN` in the gateway's `extraEnvs`, and send the same value from the agent. Add the token to the agent's `extraEnvs` from that Secret, then add the header to the agent exporter:
+
+```yaml
+config:
+  exporters:
+    otlp_http:
+      headers:
+        authorization: Bearer ${env:OTLP_AUTH_TOKEN}
+```
+
+</Details>
+
+### 4. Create the ClickStack Logs source [#clickstack-source]
+
+ClickStack does not query `otel_logs` until you add a Logs source. Set the database to `otel` (the form defaults to `default`).
+
+In ClickStack, open **Team Settings → Sources** and add a Logs source:
+
+| Setting           | Value                                                               |
+| ----------------- | ------------------------------------------------------------------- |
+| Name              | A name you will recognize in log search, such as `Langfuse Logs`.   |
+| Source Data Type  | `Logs`                                                              |
+| Server Connection | The logs ClickHouse Cloud service, not the one in `CLICKHOUSE_URL`. |
+| Database          | `otel`                                                              |
+| Table             | `otel_logs`                                                         |
+
+Leave **Timestamp Column** and **Default Select** on the values ClickStack infers. Save the source. See [ClickStack source settings](https://clickhouse.com/docs/clickstack/managing/config).
+
+<Frame fullWidth>
+  ![ClickStack Logs source: Name Langfuse Logs, Source Data Type Logs, database otel, table otel_logs](/images/docs/clickstack-logs-source.png)
+</Frame>
+
+Open log search and select that source.
+
+<Frame fullWidth>
+  ![ClickStack log search on the Langfuse Logs source, with langfuse-web and langfuse-worker rows showing timestamp, service, level, and body](/images/docs/clickstack-log-search.png)
+</Frame>
+
+ClickStack **Service** is `service.name` (the deployment name). **Severity** is JSON `level`. **Body** is JSON `message`. Other JSON keys are log attributes. Kubernetes metadata is on the resource.
+
+To confirm the path, filter to service `langfuse-web` and severity `error`, then compare with `kubectl logs`. The same rows are in ClickHouse:
+
+```sql
+SELECT Timestamp, ServiceName, SeverityText, Body
+FROM otel.otel_logs
+WHERE ServiceName IN ('langfuse-web', 'langfuse-worker')
+ORDER BY Timestamp DESC
+LIMIT 20
+```
+
+## Troubleshooting [#troubleshooting]
+
+| What you see                                         | What to check                                                                                                                                                          |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `kubectl logs` is still plain text after the upgrade | The upgrade omitted `-f`, or `langfuse.logging.format` is not `json`.                                                                                                  |
+| Agent pods are running and ClickStack is empty       | `otel-config-vars` / `OTEL_COLLECTOR_ENDPOINT` is the gateway base URL (`http://clickstack-otel-collector.langfuse.svc.cluster.local:4318`), in the agent's namespace. |
+| Rows exist in `otel_logs` and Service is empty       | `k8s.deployment.name` was missing, so `service.name` was not set. Confirm the `kubernetesAttributes` preset is enabled.                                                |

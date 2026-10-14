@@ -18,6 +18,7 @@ import rampLogo from "../home/img/ramp.svg";
 import rocketMoneyLogo from "../home/img/rocket-money.svg";
 import samsaraLogo from "../home/img/samsara.svg";
 import sumupLogo from "../home/img/sumup.svg";
+import tradeRepublicLogo from "../home/img/trade-republic.svg";
 import { cn } from "@/lib/utils";
 import { LinkBox } from "@/components/ui/link-box";
 import { wordmarkDisplaySize } from "@/components/shared/wordmark";
@@ -37,6 +38,12 @@ const companies: CompanyLogo[] = [
     name: "Ramp",
     logo: rampLogo,
     customerStoryPath: "/users/ramp",
+  },
+  {
+    name: "Trade Republic",
+    logo: tradeRepublicLogo,
+    customerStoryPath: "/users/trade-republic",
+    hidden: true,
   },
   {
     name: "Canva",
@@ -136,10 +143,16 @@ const LogoImage = ({
 
 const visibleCompanies = companies.filter((c) => !c.hidden);
 
-function LogoMarqueeItems({ duplicate = false }: { duplicate?: boolean }) {
+function LogoMarqueeItems({
+  companies: items,
+  duplicate = false,
+}: {
+  companies: CompanyLogo[];
+  duplicate?: boolean;
+}) {
   return (
     <div className="flex items-center gap-8 pr-8">
-      {visibleCompanies.map((company) => {
+      {items.map((company) => {
         const hasStory = Boolean(company.customerStoryPath);
         return (
           <div
@@ -167,13 +180,21 @@ function LogoMarqueeItems({ duplicate = false }: { duplicate?: boolean }) {
 interface EnterpriseLogoGridProps {
   className?: string;
   small?: boolean;
+  /** When set, only these company names are shown, in this order. */
+  names?: readonly string[];
 }
 
 export const EnterpriseLogoGrid = ({
   className = "",
   small = false,
+  names,
 }: EnterpriseLogoGridProps) => {
   const shouldReduceMotion = useReducedMotion();
+  const selectedCompanies = names
+    ? names
+        .map((name) => companies.find((company) => company.name === name))
+        .filter((company): company is CompanyLogo => Boolean(company))
+    : visibleCompanies;
 
   return (
     <>
@@ -187,7 +208,7 @@ export const EnterpriseLogoGrid = ({
           aria-label="Enterprise customers using Langfuse"
         >
           <div className="flex items-center w-max py-2">
-            <LogoMarqueeItems />
+            <LogoMarqueeItems companies={selectedCompanies} />
           </div>
         </div>
       ) : (
@@ -207,8 +228,8 @@ export const EnterpriseLogoGrid = ({
               ease: "linear",
             }}
           >
-            <LogoMarqueeItems />
-            <LogoMarqueeItems duplicate />
+            <LogoMarqueeItems companies={selectedCompanies} />
+            <LogoMarqueeItems companies={selectedCompanies} duplicate />
           </motion.div>
         </div>
       )}
@@ -218,12 +239,13 @@ export const EnterpriseLogoGrid = ({
         className={cn(
           "hidden sm:grid sm:grid-cols-6 px-2 py-2",
           small && "sm:grid-cols-3",
+          selectedCompanies.length <= 4 && "sm:grid-cols-4",
           className,
         )}
         role="grid"
         aria-label="Enterprise customers using Langfuse"
       >
-        {visibleCompanies.map((company) => {
+        {selectedCompanies.map((company) => {
           const hasStory = Boolean(company.customerStoryPath);
 
           return (

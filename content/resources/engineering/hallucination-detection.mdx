@@ -4,9 +4,13 @@ description: "Hallucination detection for LLM apps: taxonomy, LLM-as-a-judge eva
 tags: [guide, evaluation]
 ---
 
+import { SignupCTA } from "@/components/SignupCTA";
+
 # Hallucination detection for LLM apps
 
 A hallucination is an output that asserts something false or unsupported: a fabricated citation, a confident wrong number, an API method that does not exist. Hallucination detection is the practice of scoring outputs for unsupported claims automatically, so that the failure shows up as a metric on a dashboard instead of a complaint from a user. This page covers what counts as a hallucination, the detection methods that work in practice, and how to design the judge that does the detecting, with Langfuse as the worked implementation.
+
+<SignupCTA className="my-6" />
 
 **TL;DR:** Production hallucination detection runs an LLM-as-a-judge evaluator on a sample of live traffic; the judge is reference-free, checking the output against the input and context recorded on the same observation, so no ground truth is required. Offline detection runs experiments against a dataset with reference answers before each release, where a judge can verify claims against known-correct outputs. Deterministic code pre-screens (missing citations, numbers absent from context) flag risk signals for free and route only flagged traces to the paid judge. Score verdicts as binary hallucinated/clean, with the failing claims listed in the score comment.
 

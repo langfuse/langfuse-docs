@@ -70,6 +70,10 @@ Send a test request and confirm the same trace ID appears in both tools. Logs an
 
 [ClickStack](https://github.com/ClickHouse/ClickStack) is open source. It combines ClickHouse, OpenTelemetry, and the HyperDX interface.
 
+## Monitor self-hosted Langfuse with ClickStack [#monitor-self-hosted-langfuse]
+
+If you self-host Langfuse, you can also send stdout logs from `langfuse-web` and `langfuse-worker` to ClickStack. A node agent tails the container log files and a ClickStack collector writes them to a dedicated ClickHouse Cloud service, separate from `CLICKHOUSE_URL`. See [Export self-hosted Langfuse logs to ClickStack](/guides/export-self-hosted-langfuse-logs-to-clickstack) for the Helm values, collector setup, and Logs source.
+
 ## Roadmap [#roadmap]
 
 We are working on deeper cross-linking and shared instrumentation so you can move between the two workflows without duplicating data.
