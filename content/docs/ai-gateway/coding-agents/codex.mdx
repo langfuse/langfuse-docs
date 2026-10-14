@@ -69,6 +69,7 @@ Codex sends its own turn ID, so the gateway groups all model rounds of a turn in
 
 ## Gotchas [#gotchas]
 
+- After changing gateway credentials, restart the Codex app-server daemon with `codex app-server daemon restart`. The daemon can keep using credentials loaded before the change until it restarts.
 - Codex sends `store: false` and replays the **whole conversation** on every round. Each generation's input is the full history, so long sessions can exceed the 5 MiB input capture limit, and the input is then dropped. See [known limitations](/docs/ai-gateway/troubleshooting-and-faq#known-limitations).
 - A global `model_reasoning_effort` makes non-reasoning models (`gpt-4.1*`) fail with a `400`. Some small models (`gpt-5.4-nano`) reject Codex's `tool_search` tool.
 - Codex retries failed requests (`request_max_retries`, `stream_max_retries`). Each retry is its own generation in the same trace.
