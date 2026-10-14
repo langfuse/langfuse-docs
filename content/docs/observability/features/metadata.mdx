@@ -13,11 +13,13 @@ Observations (see [Langfuse Data Model](/docs/observability/data-model)) can be 
 
 You can filter by metadata keys in the Langfuse UI and API.
 
+With Python SDK v5 and JS/TS SDK v6 on Langfuse v4.59.0 and later, numbers and booleans keep their type and nested objects become filterable dotted paths, such as `a.b`. If two keys map to the same dotted path, the first value wins.
+
 <TagsVsMetadata />
 
 ## Propagated Metadata
 
-Use `propagate_attributes()` to ensure metadata is automatically applied to all observations within a context. Propagated metadata are key-value pairs with values limited to max 200 characters strings. Keys are limited to alphanumeric characters only. If a metadata value exceeds 200 characters, it will be dropped.
+Use `propagate_attributes()` to ensure metadata is automatically applied to all observations within a context. Propagated metadata are key-value pairs. In Python SDK v5 and JS/TS SDK v6, values can be strings, numbers, booleans, lists, or objects. Each value must be 200 characters or fewer as JSON, so a string can have at most 198 characters; longer values are dropped with a warning. Top-level `null` / `None` values are dropped with a warning too. In Python SDK v4 and JS/TS SDK v5, use string values of 200 characters or fewer. Use alphanumeric characters for keys.
 
 <LangTabs items={["Python SDK", "JS/TS SDK", "OpenAI (Python)", "OpenAI (JS/TS)", "Langchain (Python)", "Langchain (JS/TS)", "Flowise"]}>
 <Tab>

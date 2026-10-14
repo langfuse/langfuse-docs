@@ -146,35 +146,47 @@ export const PromptInputButton = ({
 
 export type PromptInputSubmitProps = ComponentProps<typeof Button> & {
   status?: ChatStatus;
+  onStop?: () => void;
 };
 
 export const PromptInputSubmit = ({
   className,
-  variant = "default",
-  size = "icon",
+  variant = "primary",
+  size = "small",
   status,
   children,
+  onStop,
+  onClick,
+  type,
   ...props
 }: PromptInputSubmitProps) => {
-  let Icon = <SendIcon className="size-4" />;
+  const canStop = status === "streaming" && Boolean(onStop);
+  let Icon = <SendIcon className="size-3.5" />;
+  let ariaLabel = "Send";
 
   if (status === "submitted") {
-    Icon = <Loader2Icon className="size-4 animate-spin" />;
+    Icon = <Loader2Icon className="size-3.5 animate-spin" />;
+    ariaLabel = "Sending";
   } else if (status === "streaming") {
-    Icon = <SquareIcon className="size-4" />;
+    Icon = <SquareIcon className="size-3 fill-current" />;
+    ariaLabel = canStop ? "Stop" : "Send";
   } else if (status === "error") {
-    Icon = <XIcon className="size-4" />;
+    Icon = <XIcon className="size-3.5" />;
+    ariaLabel = "Error";
   }
 
   return (
     <Button
-      className={cn("gap-1.5 rounded-lg", className)}
-      size={size}
-      type="submit"
-      variant={variant}
       {...props}
+      className={className}
+      size={size}
+      type={canStop ? "button" : (type ?? "submit")}
+      variant={variant}
+      icon={children ? undefined : Icon}
+      aria-label={children ? undefined : ariaLabel}
+      onClick={canStop ? onStop : onClick}
     >
-      {children ?? Icon}
+      {children}
     </Button>
   );
 };

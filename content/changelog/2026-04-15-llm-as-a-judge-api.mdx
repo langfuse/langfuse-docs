@@ -7,9 +7,17 @@ canonical: /docs/evaluation/evaluation-methods/llm-as-a-judge
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { V4CutoverDate } from "@/components/V4CutoverDate";
 import { Book, Code } from "lucide-react";
 
 <ChangelogHeader />
+
+<Callout type="info">
+  A new [stable API for evaluators and evaluation
+  rules](/changelog/2026-08-27-stable-evaluator-api) is now available under
+  `/api/public/v2`. The unstable API described below remains available until
+  <V4CutoverDate />.
+</Callout>
 
 You can now set up and manage LLM-as-a-Judge evaluation programmatically through the public API, in addition to the Langfuse UI. This lets you define how data is scored and what data gets evaluated entirely in code, so your evaluation setup can live in version control and roll out the same way across projects.
 

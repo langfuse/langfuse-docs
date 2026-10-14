@@ -1,5 +1,6 @@
 ---
 title: Concepts
+seoTitle: Observability Data Model
 description: Langfuse (open source) helps you trace and analyze LLM applications. Learn how traces and observations are structured in Langfuse.
 ---
 
@@ -9,7 +10,7 @@ This page digs into the underlying concepts of how Langfuse structures and captu
 
 Ready to start? Check out the [Get Started guide](/docs/observability/get-started) to ingest your first trace.
 
-## Observations, Traces, and Sessions
+## Observations, Traces, and Sessions [#observations-traces-and-sessions]
 
 Langfuse organizes an application's data into three core concepts: observations, traces, and sessions.
 
@@ -19,7 +20,7 @@ import { ObservationsTableDiagram } from "@/components/ObservationsTableDiagram"
 
 ### Observations & Traces [#observations-and-traces]
 
-`Observations` are the individual steps of your application: LLM calls, tool calls, retrieval steps, and so on. They can be nested to reflect the structure of your application, and Langfuse supports several LLM-specific [observation types](/docs/observability/features/observation-types) such as _generations_ and _events_.
+`Observations` are the individual steps of your application: LLM calls, tool calls, retrieval steps, and so on. They can be nested to reflect the structure of your application, and Langfuse supports several LLM-specific [observation types](/docs/observability/features/observation-types) such as _generations_ and _events_. (Langfuse calls spans observations; `span` is also a specific observation type.)
 
 A `trace` represents a single request or operation, for example one chatbot interaction from the user's question to the final response. It is the logical grouping of all observations that share the same `trace_id`.
 

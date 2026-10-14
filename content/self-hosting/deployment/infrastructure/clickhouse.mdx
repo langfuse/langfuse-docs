@@ -146,13 +146,29 @@ GRANT ON CLUSTER default SELECT ON system.query_log* TO 'user';
 
 ### Historic backfill scratch table [#user-permissions-backfill]
 
-The [v4 historic backfill](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#historic-backfill) freezes merges on its intermediate table while it copies data:
+The [v4 historic backfill](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#historic-backfill) freezes merges on its intermediate table while it copies data.
+The grants it needs depend on the table engine:
+
+| Deployment                                       | Table engine        | Grants used                                              |
+| ------------------------------------------------ | ------------------- | -------------------------------------------------------- |
+| Self-managed, `CLICKHOUSE_CLUSTER_ENABLED=false` | MergeTree           | `SYSTEM MERGES`                                          |
+| Self-managed, `CLICKHOUSE_CLUSTER_ENABLED=true`  | ReplicatedMergeTree | `SYSTEM MERGES`, `ALTER SETTINGS`, `SYSTEM SYNC REPLICA` |
+| [ClickHouse Cloud or BYOC](#cloudbyoc)           | SharedMergeTree     | `ALTER SETTINGS`                                         |
+
+On self-managed ClickHouse, grant all three:
 
 ```sql
 GRANT SYSTEM SYNC REPLICA, SYSTEM MERGES, ALTER SETTINGS ON default.observations_pid_tid_sorting TO 'user';
 ```
 
-Which of the three is used depends on the table engine — `SYSTEM MERGES` on self-managed MergeTree, `ALTER SETTINGS` on replicated and SharedMergeTree engines, `SYSTEM SYNC REPLICA` on replicated engines — so granting all three keeps the backfill working on any deployment.
+On ClickHouse Cloud and BYOC, grant only `ALTER SETTINGS`:
+
+```sql
+GRANT ALTER SETTINGS ON default.observations_pid_tid_sorting TO 'user';
+```
+
+ClickHouse Cloud does not support `SYSTEM MERGES`. If you include it, the grant fails with `Not enough privileges` and asks for `SYSTEM MERGES ... WITH GRANT OPTION`. Re-run the statement without this grant.
+
 The grants can be created before the table exists, i.e. before the backfill starts.
 
 ### Lightweight updates [#user-permissions-lightweight-updates]
@@ -404,21 +420,18 @@ CLICKHOUSE_PASSWORD=clickhouse
 CLICKHOUSE_CLUSTER_ENABLED=false
 ```
 
-## Migrating to a New Instance
+## Migrating to a New Instance [#migrating-to-a-new-instance]
 
-You may want to move Langfuse to a different ClickHouse instance, e.g. when switching providers or moving from a single-node to a clustered setup.
-We recommend the following approach:
+You may want to move Langfuse to a different ClickHouse instance, for example when switching from self-managed ClickHouse OSS to [Cloud or BYOC](#cloudbyoc), changing providers, or moving from a single-node to a clustered setup.
 
-1. Point Langfuse to the new ClickHouse instance so that incoming data is captured there.
-2. Create a backup of the existing instance to blob storage and restore it into the new instance.
+The recommended path is: run the latest Langfuse OSS release first and keep that version unchanged, pause ingestion, copy the ClickHouse database with a ClickHouse-supported method, then point Langfuse at the new service. See [How do I migrate Langfuse from ClickHouse OSS to Cloud or BYOC?](/faq/all/self-hosting-migrate-clickhouse-oss-to-cloud) for the Langfuse-side checklist.
 
-A zero-downtime switch where data is written to both instances concurrently is technically possible, but we have not tested it and it is not recommended by ClickHouse.
-Please reach out to Langfuse Support if you want to explore this option.
+Use the ClickHouse documentation for the data copy itself:
 
-Refer to the ClickHouse migration guides for backup and restore instructions:
+- [ClickHouse to ClickHouse via remoteSecure](https://clickhouse.com/docs/get-started/migrate/oss-to-cloud/clickhouse-to-cloud)
+- [ClickHouse to ClickHouse via backup and restore](https://clickhouse.com/docs/get-started/migrate/oss-to-cloud/oss-to-cloud-backup-restore)
 
-- [ClickHouse to ClickHouse via remoteSecure](https://clickhouse.com/docs/cloud/migration/clickhouse-to-cloud)
-- [ClickHouse to ClickHouse via backup and restore](https://clickhouse.com/docs/cloud/migration/oss-to-cloud-backup-restore)
+A zero-downtime switch where data is written to both instances concurrently is technically possible, but we have not tested it and it is not recommended. Contact [support](/support) if you want to explore this option.
 
 ## Encryption
 
@@ -426,9 +439,9 @@ ClickHouse supports disk encryption for data at rest, providing an additional la
 
 ### Automatic Encryption with Blob Storage
 
-When using [blob storage as disk](#blob-storage-as-disk) (AWS S3, Azure Blob Storage, Google Cloud Storage), data is automatically encrypted at rest using the cloud provider's default encryption:
+When using [blob storage as disk](#blob-storage-as-disk) (Amazon S3, Azure Blob Storage, Google Cloud Storage), data is automatically encrypted at rest using the cloud provider's default encryption:
 
-- **AWS S3**: Uses AES-256 encryption by default
+- **Amazon S3**: Uses AES-256 encryption by default
 - **Azure Blob Storage**: Uses AES-256 encryption by default
 - **Google Cloud Storage**: Uses AES-256 encryption by default
 
@@ -480,7 +493,7 @@ kubectl create secret generic clickhouse-encryption-key \
 
 ## Blob Storage as Disk
 
-ClickHouse supports blob storages (AWS S3, Azure Blob Storage, Google Cloud Storage) as disks.
+ClickHouse supports blob storages (Amazon S3, Azure Blob Storage, Google Cloud Storage) as disks.
 This is useful for auto-scaling storages that live outside the container orchestrator and increases availability und durability of the data.
 For a full overview of the feature, see the [ClickHouse External Disks documentation](https://clickhouse.com/docs/en/operations/storing-data).
 
@@ -643,14 +656,31 @@ This will store ClickHouse data within the Azurite bucket.
 
 ## FAQ
 
-### Is ClickHouse required for self-hosting Langfuse?
+<FaqDetails>
+
+<Details id="migrate-oss-to-cloud">
+<Summary>How do I migrate from self-managed ClickHouse to Cloud or BYOC?</Summary>
+
+See [How do I migrate Langfuse from ClickHouse OSS to Cloud or BYOC?](/faq/all/self-hosting-migrate-clickhouse-oss-to-cloud). Run the latest Langfuse OSS release first, keep that version unchanged, pause ingestion, copy ClickHouse with a ClickHouse-supported method, then point Langfuse at the new service.
+
+</Details>
+
+<Details id="is-clickhouse-required-for-self-hosting-langfuse">
+<Summary>Is ClickHouse required for self-hosting Langfuse?</Summary>
 
 Yes, ClickHouse is currently a required component for self-hosting Langfuse. There is no alternative OLAP database supported at this time. Langfuse cannot be self-hosted without using ClickHouse as the main storage solution for traces, observations, and scores.
 
 All self-hosted deployments must include a ClickHouse instance.
 
-### How do I manage ClickHouse storage growth?
+</Details>
+
+<Details id="how-do-i-manage-clickhouse-storage-growth">
+<Summary>How do I manage ClickHouse storage growth?</Summary>
 
 Langfuse has a built-in [Data Retention](/docs/administration/data-retention) feature that automatically deletes traces, observations, scores, and media assets older than a configured number of days. This runs nightly and handles cleanup across both ClickHouse and blob storage. You do not need to set ClickHouse TTLs manually.
 
 If ClickHouse disk usage keeps growing despite retention being configured, the cause is often system log tables (`trace_log`, `text_log`, `opentelemetry_span_log`, etc.) that ship without a TTL. See [Scaling › ClickHouse system log tables](/self-hosting/configuration/scaling#clickhouse-system-log-tables) for how to disable or cap them.
+
+</Details>
+
+</FaqDetails>

@@ -942,12 +942,26 @@ ul[data-gh-discussions-list] {
   border-radius: 4px;
   background: var(--surface-2);
   color: var(--text-primary);
-  font-variant-numeric: ordinal;
   font-variant-ligatures: none;
   font-feature-settings:
     "liga" 0,
     "calt" 0;
   padding: 0 0.25rem;
+}
+
+/* Geist Mono ligates `--` into a single long dash whose ink covers the
+   preceding space, so `langfuse api prompts create --type text` renders as
+   `create--type`. The space is still in the layout and copies correctly, but
+   nothing is painted in it. Fenced code blocks live inside a `not-prose`
+   figure, so the inline-code rule above never reaches them. */
+pre,
+pre code,
+.shiki,
+.shiki code {
+  font-variant-ligatures: none;
+  font-feature-settings:
+    "liga" 0,
+    "calt" 0;
 }
 
 .prose

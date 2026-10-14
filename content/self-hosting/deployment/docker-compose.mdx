@@ -11,6 +11,8 @@ This guide will walk you through deploying Langfuse locally or on a VM using Doc
 We will use the [`docker-compose.yml`](https://github.com/langfuse/langfuse/blob/main/docker-compose.yml) file.
 This is the simplest way to run Langfuse to give it a try.
 
+If you would rather not run any infrastructure, use [Langfuse Cloud](/cloud): hosted by Langfuse, with a free tier and no infrastructure to run. The SDKs and integrations work identically against Langfuse Cloud and a self-hosted instance.
+
 If you use a cloud provider like AWS, GCP, or Azure, you will need permissions to deploy virtual machines.
 
 For high-availability and high-throughput, we recommend using Kubernetes ([deployment guide](/self-hosting/deployment/kubernetes-helm)).
@@ -73,6 +75,8 @@ At this point you can proceed to the next step.
 ### Done
 
 And you are ready to go! Open `http://localhost:3000` in your browser to access the Langfuse UI.
+
+There is no default login. Langfuse does not ship with a built-in admin account or password. Click **Sign up** on the login page to create the first user, then create your organization and project in the UI. To pre-create the organization, project, API keys, and first user without the UI, use [headless initialization](/self-hosting/administration/headless-initialization).
 
 </Steps>
 
@@ -161,6 +165,8 @@ At this point you can proceed to the next step.
 
 And you are ready to go! Open `http://<instance-ip>:3000` in your browser to access the Langfuse UI.
 
+There is no default login. Langfuse does not ship with a built-in admin account or password. Click **Sign up** on the login page to create the first user, then create your organization and project in the UI. To pre-create the organization, project, API keys, and first user without the UI, use [headless initialization](/self-hosting/administration/headless-initialization).
+
 Depending on your configuration, you might need to open an SSH tunnel to your VM to access the IP. Please refer to your cloud provider's documentation for how to do this.
 
 </Steps>
@@ -168,6 +174,12 @@ Depending on your configuration, you might need to open an SSH tunnel to your VM
 </Tab>
 
 </Tabs>
+
+## Docker log rotation
+
+The default `docker-compose.yml` inherits the [Docker daemon's logging configuration](https://docs.docker.com/engine/logging/configure/). Docker's default `json-file` driver does not rotate logs unless configured, which can exhaust disk space. Set its [`max-size` and `max-file` options](https://docs.docker.com/engine/logging/drivers/json-file/), or keep your chosen logging backend and configure retention there. Do not rotate or truncate Docker-managed JSON log files with external tools.
+
+After changing daemon logging defaults, restart Docker and recreate existing containers to apply them; restarting containers alone is insufficient. Plan for interruption and preserve data volumes. These settings cover container stdout/stderr, not database data volumes or ClickHouse's internal log files.
 
 ## Features
 
@@ -196,6 +208,17 @@ docker compose down
 Adding the `-v` flag will also remove the volumes.
 
 Ensure to stop the VM instance in your cloud provider interface to avoid unnecessary costs.
+
+## Changing the exposed ports [#ports]
+
+The default `docker-compose.yml` publishes two services on the host: the Langfuse UI on port `3000` (`langfuse-web`, mapping `3000:3000`) and MinIO on port `9090` (mapping `9090:9000`). If one of these ports is already taken on your machine, change the host side of the mapping (the left value) and leave the container side unchanged, for example `3001:3000` for the UI.
+
+When you change a port, also update the URLs that point at it:
+
+- `NEXTAUTH_URL` must match the URL users open in the browser, for example `http://localhost:3001`. Langfuse uses it for authentication callbacks and for links in the UI and in emails.
+- `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT` on `langfuse-web` defaults to `http://localhost:9090` and must point at the new MinIO host port, because browsers upload and download media through this URL.
+
+Ports that are bound to `127.0.0.1` (the worker on `3030`, MinIO console on `9091`, and the databases) are only reachable from the host itself and usually do not need to change.
 
 ## Troubleshooting
 

@@ -32,18 +32,33 @@ The `api` namespace is auto-generated from the Public API (OpenAPI). Method name
 
 <Callout type="warning">
 
-From Python SDK v4 and JS/TS SDK v5 onward, the high-performance data APIs
-are the defaults:
+From Python SDK v4 and JS/TS SDK v5 onward, the high-performance observations
+and metrics APIs are the defaults:
 
 - `api.observations` (formerly `api.observations_v_2` / `api.observationsV2`)
-- `api.scores_v3` / `api.scoresV3` — the v3 scores reads; `api.scores` (v2 reads) is deprecated, see [Migration of deprecated APIs](/faq/all/deprecated-api-migration#scores)
 - `api.metrics` (formerly `api.metrics_v_2` / `api.metricsV2`)
+
+Scores API v3 is available as `api.scores_v3` in Python SDK `4.8.1+` and
+`api.scoresV3` in JS/TS SDK `5.5.0+`. The `api.scores` v2 reads are deprecated;
+see [Migration of deprecated APIs](/faq/all/deprecated-api-migration#scores).
+In Python SDK v5 and JS/TS SDK v6, Scores API v3 moves to `api.scores.get_many` /
+`api.scores.getMany`, and `api.scores_v3` / `api.scoresV3` are removed.
 
 The old v2 aliases were removed in Python SDK v4 and JS/TS SDK v5.
 
 The `api.legacy.*` resources call the deprecated endpoints. Langfuse Cloud serves these endpoints until <V4CutoverDate />. See
 [Migration of deprecated APIs](/faq/all/deprecated-api-migration) for
 replacements and the endpoint reference.
+
+Python SDK v5 and JS/TS SDK v6 require Langfuse v4 and have no `api.legacy`
+namespace. They remove all three legacy resources: `api.legacy.observations_v1`
+/ `api.legacy.observationsV1` (use `api.observations`),
+`api.legacy.metrics_v1` / `api.legacy.metricsV1` (use `api.metrics`), and
+`api.legacy.score_v1` / `api.legacy.scoreV1`, including its `create` and
+`delete` methods (use `api.scores.create` and `api.scores.delete`). They also
+remove the deprecated `api.scores` v2 reads. See the [Python v4 →
+v5](/docs/observability/sdk/upgrade-path/python-v4-to-v5) and [JS/TS v5 →
+v6](/docs/observability/sdk/upgrade-path/js-v5-to-v6) upgrade guides.
 
 </Callout>
 
@@ -88,7 +103,7 @@ query = """
 }
 """
 
-metrics = langfuse.api.metrics.get(query = query)
+metrics = langfuse.api.metrics.metrics(query = query)
 ```
 
 ### Other resources
@@ -112,10 +127,13 @@ session_observations = langfuse.api.observations.get_many(
 Scores:
 
 ```python
-# Scores API v3 (recommended)
+# Scores API v3 (Python SDK v5+; recommended)
+scores = langfuse.api.scores.get_many(id="ScoreId")
+
+# Scores API v3 (Python SDK 4.8.1+ on v4)
 scores = langfuse.api.scores_v3.get_many_v3(id="ScoreId")
 
-# Scores API v2 (deprecated, sunset date: Nov 16, 2026)
+# Scores API v2 (Python SDK v4 only; deprecated, sunset date: Nov 16, 2026)
 scores = langfuse.api.scores.get_many(score_ids="ScoreId")
 ```
 
@@ -131,7 +149,7 @@ Datasets:
 # Namespaces:
 # - langfuse.api.datasets.*
 # - langfuse.api.dataset_items.*
-# - langfuse.api.experiments.*
+# - langfuse.api.experiments.* (Python SDK 4.13.1+)
 ```
 
 #### Async equivalents
@@ -143,10 +161,10 @@ observations = await langfuse.async_api.observations.get_many(
     limit=100,
     fields="core,basic,usage",
 )
-metrics = await langfuse.async_api.metrics.get(query = query)
+metrics = await langfuse.async_api.metrics.metrics(query = query)
 ```
 
-For row-level observation filters, field selection, and cursor pagination, see the [Observations API v2 documentation](/docs/api-and-data-platform/features/observations-api#v2).
+For row-level observation filters, field selection, and cursor pagination, see the [Observations API v2 documentation](/docs/api-and-data-platform/features/public-api#v2).
 
 </Tab>
 <Tab title="JS/TS SDK">
@@ -180,7 +198,7 @@ const observations = await langfuse.api.observations.getMany({
 
 Use `traceId` to retrieve the observations that belong to a single trace. Use `parentObservationId` in the response to reconstruct an observation tree when needed.
 
-For row-level observation filters, field selection, and cursor pagination, see the [Observations API v2 documentation](/docs/api-and-data-platform/features/observations-api#v2).
+For row-level observation filters, field selection, and cursor pagination, see the [Observations API v2 documentation](/docs/api-and-data-platform/features/public-api#v2).
 
 ### Metrics
 
@@ -196,7 +214,7 @@ const query = {
   toTimestamp: "2025-05-13T00:00:00Z",
 };
 
-const metrics = await langfuse.api.metrics.get({
+const metrics = await langfuse.api.metrics.metrics({
   query: JSON.stringify(query),
 });
 ```
@@ -225,10 +243,13 @@ const sessionObservations = await langfuse.api.observations.getMany({
 Scores:
 
 ```ts
-// Scores API v3 (recommended)
-const scoresV3 = await langfuse.api.scoresV3.getManyV3();
+// Scores API v3 (JS/TS SDK v6+; recommended)
+const scoresV3 = await langfuse.api.scores.getMany();
 
-// Scores API v2 (deprecated, sunset date: Nov 16, 2026)
+// Scores API v3 (JS/TS SDK 5.5.0+ on v5)
+const scoresV3Legacy = await langfuse.api.scoresV3.getManyV3();
+
+// Scores API v2 (JS/TS SDK v5 only; deprecated, sunset date: Nov 16, 2026)
 const scores = await langfuse.api.scores.getMany();
 ```
 
@@ -244,7 +265,7 @@ Datasets:
 // Namespaces:
 // - langfuse.api.datasets.*
 // - langfuse.api.datasetItems.*
-// - langfuse.api.experiments.*
+// - langfuse.api.experiments.* (JS/TS SDK 5.10.0+)
 ```
 
 Explore more entities via Intellisense on `langfuse.api`.
@@ -254,7 +275,7 @@ Explore more entities via Intellisense on `langfuse.api`.
 
 ## Related Resources
 
-- To move existing trace or observation reads to v2, see [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2).
+- To move existing trace or observation reads to v2, see [Observations API v2](/docs/api-and-data-platform/features/public-api#v2).
 - To move existing score reads to v3, see [Migration of deprecated APIs](/faq/all/deprecated-api-migration#scores).
 - To move existing metrics queries to v2, see [Metrics API v2](/docs/metrics/features/metrics-api#v2).
 - For large-scale data exports (e.g., all traces for fine-tuning or analytics), consider using the [Blob Storage Export](/docs/api-and-data-platform/features/export-to-blob-storage) to automatically sync data to S3, GCS, or Azure on a schedule instead of paginating through the API.

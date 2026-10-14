@@ -54,15 +54,15 @@ function AnimatedMetric({ targetValue }: { targetValue: number }) {
 
 function MetricCard({ value, label, suffix, icon: Icon }: MetricCardProps) {
   return (
-    <div className="p-6 lg:p-8">
-      <div className="font-bold font-mono text-2xl sm:text-3xl lg:text-4xl">
+    <div className="p-5 lg:p-6">
+      <div className="font-medium font-analog text-[28px] sm:text-[32px] tabular-nums text-text-primary">
         <AnimatedMetric targetValue={value} />
         {suffix}
       </div>
-      <div className="mt-2 flex items-center gap-2 text-base font-normal">
+      <div className="mt-2 flex items-center gap-2 text-[14px] font-normal text-text-secondary">
         {Icon && (
-          <div className="shrink-0 rounded-lg border bg-muted/50 flex items-center justify-center w-6 h-6">
-            <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+          <div className="shrink-0 rounded-[2px] border border-line-structure bg-surface-1 flex items-center justify-center w-6 h-6">
+            <Icon className="w-3.5 h-3.5 text-text-tertiary" />
           </div>
         )}
         <span>{label}</span>
@@ -101,12 +101,13 @@ export function OSS() {
   return (
     <WrappedSection>
       <SectionHeading
-        title="To the Builders..."
-        subtitle="Big thanks to all contributors of 2025!"
+        id="open-source"
+        title="To the builders"
+        subtitle="Big thanks to all contributors of 2025."
       />
       <div
         ref={containerRef}
-        className="relative group border-l border-r border-b border-border -mt-[1px] p-6 lg:p-8"
+        className="relative group border border-line-structure bg-surface-bg -mt-px p-5 lg:p-6"
       >
         <HoverStars />
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -127,7 +128,7 @@ export function OSS() {
               <motion.div key={contributor.login} {...animationProps}>
                 <Link
                   href={contributor.url}
-                  className="inline-flex items-center gap-1 rounded-full border px-1 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-sm hover:bg-muted transition-colors"
+                  className="inline-flex items-center gap-1 rounded-full border border-line-structure px-1 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-[13px] text-text-secondary hover:bg-surface-1 hover:text-text-primary transition-colors"
                 >
                   {contributor.avatarUrl ? (
                     <img
@@ -137,7 +138,7 @@ export function OSS() {
                       loading="lazy"
                     />
                   ) : (
-                    <span className="h-3 w-3 sm:h-6 sm:w-6 rounded-full bg-muted" />
+                    <span className="h-3 w-3 sm:h-6 sm:w-6 rounded-full bg-surface-1" />
                   )}
                   <span className="font-medium">@{contributor.login}</span>
                 </Link>
@@ -146,7 +147,7 @@ export function OSS() {
           })}
         </div>
       </div>
-      <WrappedGrid className="!grid-cols-1 sm:!grid-cols-2 lg:!grid-cols-4 !border-t-0 -mt-[1px]">
+      <WrappedGrid className="!grid-cols-1 sm:!grid-cols-2 lg:!grid-cols-4 !border-t-0 -mt-px">
         {ossMetrics.map((metric, index) => (
           <WrappedGridItem key={index}>
             <MetricCard {...metric} />

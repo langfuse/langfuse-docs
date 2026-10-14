@@ -15,7 +15,7 @@ Langfuse v4 moves to an observations-first data model built on a new, wide, and 
 This eliminates joins and deduplication at read time and optimizes for the most performant ClickHouse access patterns.
 Initial table loads for large amounts of data go from seconds to milliseconds, and dashboard load times for large projects improve by 10x or more over longer time ranges.
 
-The new data model also unlocks a set of new features for self-hosted deployments: [full-text search](/docs/observability/features/full-text-search) across inputs, outputs, and metadata, the [filter search bar](/docs/observability/features/filter-search-bar), [alerts](/docs/observability/features/alerts), and the significantly faster [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2).
+The new data model also unlocks a set of new features for self-hosted deployments: [full-text search](/docs/observability/features/full-text-search) across inputs, outputs, and metadata, the [filter search bar](/docs/observability/features/filter-search-bar), [alerts](/docs/observability/features/alerts), and the significantly faster [Observations API v2](/docs/api-and-data-platform/features/public-api#v2) and [Metrics API v2](/docs/metrics/features/metrics-api#v2).
 
 Langfuse Cloud has been running on this data model since early 2026. Read the [technical deep dive](/blog/2026-03-10-simplify-langfuse-for-scale) and the [overview of the new experience](/docs/v4) for more background.
 
@@ -96,15 +96,17 @@ The following legacy endpoints are unavailable on deployments that run the defau
 
 Ingestion, replaced by [OpenTelemetry-based ingestion](/integrations/native/opentelemetry):
 
-| Endpoint                       | Behavior on v4                                                                                         |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| `POST /api/public/ingestion`   | Keeps the `207` status code, but returns `400` for every event type except `score-create` or `sdk-log` |
-| `POST /api/public/traces`      | Returns `404`                                                                                          |
-| `POST /api/public/spans`       | Returns `404`                                                                                          |
-| `POST /api/public/generations` | Returns `404`                                                                                          |
-| `POST /api/public/events`      | Returns `404`                                                                                          |
+| Endpoint                        | Behavior on v4                                                                                                 |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `POST /api/public/ingestion`    | Keeps the `207` status code, but returns `400` for every event type except `score-create`, including `sdk-log` |
+| `POST /api/public/traces`       | Returns `404`                                                                                                  |
+| `POST /api/public/spans`        | Returns `404`                                                                                                  |
+| `PATCH /api/public/spans`       | Returns `404`                                                                                                  |
+| `POST /api/public/generations`  | Returns `404`                                                                                                  |
+| `PATCH /api/public/generations` | Returns `404`                                                                                                  |
+| `POST /api/public/events`       | Returns `404`                                                                                                  |
 
-Reads, replaced by the [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2):
+Reads, replaced by the [Observations API v2](/docs/api-and-data-platform/features/public-api#v2):
 
 | Endpoint                           | Behavior on v4 |
 | ---------------------------------- | -------------- |
@@ -114,10 +116,8 @@ Reads, replaced by the [Observations API v2](/docs/api-and-data-platform/feature
 | `GET /api/public/observations/:id` | Returns `404`  |
 | `GET /api/public/sessions`         | Returns `404`  |
 | `GET /api/public/sessions/:id`     | Returns `404`  |
-| `GET /api/public/spans`            | Returns `404`  |
-| `GET /api/public/generations`      | Returns `404`  |
 
-Scores, replaced by the [Scores API v3](https://api.reference.langfuse.com/#tag/scoresv3):
+Scores, replaced by the [Scores API v3](https://api.reference.langfuse.com/#tag/scores):
 
 | Endpoint                        | Behavior on v4 |
 | ------------------------------- | -------------- |
@@ -203,13 +203,23 @@ GRANT SELECT(database, name, engine) ON system.tables TO 'user';
 GRANT SELECT ON system.processes TO 'user';
 GRANT SELECT ON system.query_log* TO 'user';
 
--- Merge control on the intermediate table used by the historic backfill
+-- Merge control on the intermediate table used by the historic backfill.
+-- On ClickHouse Cloud and BYOC, grant only ALTER SETTINGS (see below).
 GRANT SYSTEM SYNC REPLICA, SYSTEM MERGES, ALTER SETTINGS ON default.observations_pid_tid_sorting TO 'user';
 
 -- Clustered deployments (CLICKHOUSE_CLUSTER_ENABLED=true) only
 GRANT READ ON REMOTE TO 'user';
 GRANT CLUSTER ON *.* TO 'user';
 ```
+
+On ClickHouse Cloud and BYOC, ClickHouse does not support `SYSTEM MERGES`, and granting it fails with `Not enough privileges`.
+The historic backfill does not need it there: on SharedMergeTree, it freezes merges with `ALTER SETTINGS` and skips `SYSTEM SYNC REPLICA`. Grant only:
+
+```sql
+GRANT ALTER SETTINGS ON default.observations_pid_tid_sorting TO 'user';
+```
+
+See [historic backfill scratch table](/self-hosting/deployment/infrastructure/clickhouse#user-permissions-backfill) for which grants each table engine uses.
 
 If you enable [lightweight updates](/self-hosting/configuration/scaling#clickhouse-deletion-timeouts) via `CLICKHOUSE_USE_LIGHTWEIGHT_UPDATE=true`, the user also needs the `enable_lightweight_update` setting.
 See [user permissions](/self-hosting/deployment/infrastructure/clickhouse#user-permissions) for the complete list, including the grants that already applied on v3.
@@ -315,6 +325,7 @@ Langfuse v4 expects instrumentation that propagates shared attributes (like `use
 - any native [OpenTelemetry integration](/integrations/native/opentelemetry)
 
 These SDK versions are fully compatible with Langfuse v3 servers, so this step can start before, during, or after the server upgrade.
+Python SDK v5 and JS/TS SDK v6 require Langfuse v4. Upgrade to them only after the server upgrade ([Python v4 → v5](/docs/observability/sdk/upgrade-path/python-v4-to-v5), [JS/TS v5 → v6](/docs/observability/sdk/upgrade-path/js-v5-to-v6)).
 For real-time visibility on the v4 data model, use Python SDK ≥ 4.7.0, JS/TS SDK ≥ 5.4.0, or send `x-langfuse-ingestion-version: 4` on direct OpenTelemetry exporters. Older patch versions of Python v4 / JS v5 still ingest, but can appear with a ~15 minute delay until you reach those minimums.
 Every migrated producer that meets the real-time thresholds writes into the new tables directly (no delay) and reduces the load of the dual-write phase.
 
@@ -490,32 +501,79 @@ Append `&secure=true&skip_verify=true` to the URL if your deployment sets `CLICK
 
 {/* Seeded from https://github.com/orgs/langfuse/discussions/12518 and https://github.com/orgs/langfuse/discussions/14157 */}
 
-**Do I need to do anything special if I ran the Langfuse v4 preview on a v3-tagged image?**
+<FaqDetails>
+
+<Details>
+<Summary>Do I need to do anything special if I ran the Langfuse v4 preview on a v3-tagged image?</Summary>
+
 No. If you adopted the `events` tables early by running the Langfuse v4 preview (a v3-tagged image with the preview environment variables), the v4 migrations detect the existing tables and skip their creation. Your deployment upgrades like any other; keep the environment variables you set for the preview until you complete the [cutover](#cutover).
 
-**Is it safe to upgrade the SDKs before the server?**
-Yes. Python SDK v4 and JS/TS SDK v5 are fully compatible with Langfuse v3 servers. Two caveats: `client.api.observations.*` and `client.api.metrics.*` point to the new v2 endpoints which are not available on v3 servers (use `client.api.legacy.*` in the meantime), and trace input/output must be set explicitly if you depart from the default root-span behavior.
+</Details>
 
-**Can I stay on the `legacy` or `dual` write mode long-term?**
+<Details>
+<Summary>Is it safe to upgrade the SDKs before the server?</Summary>
+
+Yes. Python SDK v4 and JS/TS SDK v5 are fully compatible with Langfuse v3 servers. Two caveats: `client.api.observations.*` and `client.api.metrics.*` point to the new v2 endpoints which are not available on v3 servers (use `client.api.legacy.*` in the meantime), and trace input/output must be set explicitly if you depart from the default root-span behavior. Python SDK v5 and JS/TS SDK v6 require Langfuse v4, so upgrade to them only after the server.
+
+</Details>
+
+<Details>
+<Summary>Can I stay on the `legacy` or `dual` write mode long-term?</Summary>
+
 No. They are transition modes that will be removed in an upcoming major version: `legacy` forgoes all v4 performance improvements, and `dual` doubles the write load and storage costs. Complete the [cutover](#cutover) once your producers are migrated.
 
-**Do I need new infrastructure components?**
+</Details>
+
+<Details>
+<Summary>Do I need new infrastructure components?</Summary>
+
 No. The infrastructure is identical to v3 (web/worker, PostgreSQL, ClickHouse, Redis, S3); only the minimum/recommended versions changed, see [step 1](#step-1).
 
-**How do I fetch a trace by ID now?**
-Use the [Observations API v2](/docs/api-and-data-platform/features/observations-api#v2) with a `traceId` filter. Providing a time range in addition is recommended for performance, but not required.
+</Details>
 
-**What happens to trace-level scores and comments?**
+<Details>
+<Summary>How do I fetch a trace by ID now?</Summary>
+
+Use the [Observations API v2](/docs/api-and-data-platform/features/public-api#v2) with a `traceId` filter. Providing a time range in addition is recommended for performance, but not required.
+
+</Details>
+
+<Details>
+<Summary>What happens to trace-level scores and comments?</Summary>
+
 They are attached to the root observation of the trace and remain visible in the UI and APIs.
 
-**Why is historic data missing right after enabling the backfill?**
+</Details>
+
+<Details>
+<Summary>Why do my traces seem to have disappeared after the upgrade?</Summary>
+
+Two things look like missing data but usually are not. First, the traces table is now an observations table that opens filtered to `Is Root Observation = true`, which shows one row per trace; if you cleared or changed that filter, you see every observation instead, and a trace can appear to be gone when its root observation does not match your filters. Second, data ingested before the upgrade only exists in the old tables until the [historic backfill](#historic-backfill) has rewritten it into the new `events` tables. On the default `events_only` write mode the backfill starts automatically, newest first, and can take from minutes to days depending on volume. Track its progress on the background migrations page.
+
+</Details>
+
+<Details>
+<Summary>Why is historic data missing right after enabling the backfill?</Summary>
+
 The [historic backfill](#historic-backfill) rewrites data gradually, newest first. Depending on your data volume, it can take from minutes to days until all historic data is visible.
 
-**Why does data from some SDKs appear with a ~15 minute delay?**
+</Details>
+
+<Details>
+<Summary>Why does data from some SDKs appear with a ~15 minute delay?</Summary>
+
 Data from SDKs older than Python 4.7.0 / JS/TS 5.4.0 (and OTel exporters without `x-langfuse-ingestion-version: 4`) flows through the [dual-write pipeline](#dual-write), which processes micro-batches with a delay. Upgrading to those minimums (or setting the header) removes the delay.
 
-**Langfuse does not start after I set the migration variables.**
+</Details>
+
+<Details>
+<Summary>Langfuse does not start after I set the migration variables.</Summary>
+
 Langfuse validates the migration configuration on startup and exits on invalid combinations (for example, `events_only` write mode together with `dual_write` OTel behavior or with `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN=false`). Double-check values and exact variable names, including the uppercase `V4`.
+
+</Details>
+
+</FaqDetails>
 
 ## Support
 

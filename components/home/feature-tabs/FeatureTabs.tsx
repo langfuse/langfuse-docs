@@ -9,10 +9,17 @@ import {
   useState,
 } from "react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { Play, X } from "lucide-react";
 import { TabContent } from "./TabContent";
 import type { AutoAdvanceConfig, FeatureTabData } from "./types";
 import { CornerBox } from "@/components/ui/corner-box";
+import { Button } from "@/components/ui/button";
+import { WalkthroughVideoIframe } from "@/components/watchOrBookDemo/WalkthroughVideoIframe";
+import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
+import { cn } from "@/lib/utils";
+import { MD_MIN_WIDTH_QUERY, useMinWidth } from "@/lib/use-min-width";
 
 /** Soft ease-out (Emil Kowalski–style: calm deceleration, no snappy linear segments). */
 const CONTENT_EASE = [0.22, 1, 0.36, 1] as const;
@@ -47,7 +54,6 @@ const tabImageVariants = (reduceMotion: boolean) =>
 
 export interface FeatureTabsProps {
   features: FeatureTabData[];
-  mobileFeature: Pick<FeatureTabData, "image">;
   defaultTab?: string;
   autoAdvance?: AutoAdvanceConfig;
 }
@@ -96,14 +102,16 @@ const DEFAULT_AUTO_ADVANCE: AutoAdvanceConfig = {
 
 export const FeatureTabs = ({
   features,
-  mobileFeature,
   defaultTab = "observability",
   autoAdvance,
 }: FeatureTabsProps) => {
   const defaultAutoAdvance = autoAdvance ?? DEFAULT_AUTO_ADVANCE;
 
   const [activeTab, setActiveTab] = useState(defaultTab);
+  const [isWatchingDemo, setIsWatchingDemo] = useState(false);
   const [state, dispatch] = useReducer(tabStateReducer, initialTabState);
+  const pathname = usePathname() ?? "/";
+  const capture = usePostHogClientCapture();
 
   const tabListScrollRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -112,10 +120,12 @@ export const FeatureTabs = ({
   );
   const containerRef = useRef<HTMLDivElement | null>(null);
   const reduceMotion = useReducedMotion();
+  const isMd = useMinWidth(MD_MIN_WIDTH_QUERY);
   const [observeRoot, setObserveRoot] = useState<HTMLDivElement | null>(null);
   const isMountedRef = useRef(true);
 
   const isAutoAdvancePausedRef = useRef(state.isAutoAdvancePaused);
+  const pausedBeforeWatchingRef = useRef(false);
 
   useEffect(() => {
     isAutoAdvancePausedRef.current = state.isAutoAdvancePaused;
@@ -201,14 +211,62 @@ export const FeatureTabs = ({
 
   const handleTabChange = useCallback(
     (tabId: string) => {
-      if (activeTab === tabId) return;
+      if (activeTab === tabId && !isWatchingDemo) return;
 
       dispatch({ type: "PAUSE_AUTO_ADVANCE" });
       clearAllTimers();
+      setIsWatchingDemo(false);
       setActiveTab(tabId);
     },
-    [activeTab, clearAllTimers],
+    [activeTab, clearAllTimers, isWatchingDemo],
   );
+
+  const closeWatchDemo = useCallback(() => {
+    setIsWatchingDemo(false);
+    if (!pausedBeforeWatchingRef.current) {
+      dispatch({ type: "RESUME_AUTO_ADVANCE" });
+    }
+  }, []);
+
+  const handleWatchDemoToggle = useCallback(() => {
+    if (isWatchingDemo) {
+      closeWatchDemo();
+      return;
+    }
+
+    pausedBeforeWatchingRef.current = isAutoAdvancePausedRef.current;
+    dispatch({ type: "PAUSE_AUTO_ADVANCE" });
+    clearAllTimers();
+    setIsWatchingDemo(true);
+    capture("home:watch_demo_clicked", {
+      source: "home_feature_tabs",
+      path: pathname,
+    });
+  }, [capture, clearAllTimers, closeWatchDemo, isWatchingDemo, pathname]);
+
+  useEffect(() => {
+    if (!isWatchingDemo) {
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      const root = containerRef.current;
+      const target = event.target;
+      if (root && target instanceof Node && !root.contains(target)) {
+        return;
+      }
+
+      event.preventDefault();
+      closeWatchDemo();
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [closeWatchDemo, isWatchingDemo]);
 
   // Keyboard navigation
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -245,6 +303,10 @@ export const FeatureTabs = ({
         return;
       case "Escape":
         event.preventDefault();
+        if (isWatchingDemo) {
+          closeWatchDemo();
+          return;
+        }
         if (state.isAutoAdvancePaused) {
           dispatch({ type: "RESUME_AUTO_ADVANCE" });
         } else {
@@ -258,6 +320,7 @@ export const FeatureTabs = ({
 
     dispatch({ type: "SET_FOCUSED_INDEX", payload: newIndex });
     tabRefs.current[newIndex]?.focus();
+    handleTabChange(features[newIndex]!.id);
   };
 
   // Scroll active tab into view (for mobile)
@@ -293,6 +356,7 @@ export const FeatureTabs = ({
     if (
       defaultAutoAdvance.enabled &&
       !state.isAutoAdvancePaused &&
+      !isWatchingDemo &&
       state.isInViewport
     ) {
       startAutoAdvance();
@@ -307,6 +371,7 @@ export const FeatureTabs = ({
     startAutoAdvance,
     state.isAutoAdvancePaused,
     state.isInViewport,
+    isWatchingDemo,
     clearAutoAdvanceTimer,
   ]);
 
@@ -336,7 +401,7 @@ export const FeatureTabs = ({
       ref={setContainerNode}
       className="overflow-hidden p-0 mt-0 bg-card border-radius-none"
     >
-      {/* Accessibility: Auto-advance status announcement */}
+      {/* Accessibility: announce pause/resume only, not every auto-advance */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {defaultAutoAdvance.enabled && (
           <span>
@@ -347,111 +412,175 @@ export const FeatureTabs = ({
         )}
       </div>
 
-      {/* Preload light images for previous/next tab only (current is in TabContent) */}
-      <CornerBox
-        aria-hidden="true"
-        className="overflow-hidden absolute pointer-events-none"
-        style={{ width: 1, height: 1, opacity: 0.01 }}
-      >
-        {features.map((feature, index) => {
-          if (!preloadNeighborIndices.has(index)) {
-            return null;
-          }
-          const isNext = index === (activeIndex + 1 + n) % n;
-          return (
-            <div
-              key={`preload-${feature.id}`}
-              className="relative"
-              style={{ width: 806, height: 410 }}
-            >
-              <Image
-                src={feature.image.light}
-                alt=""
-                fill
-                quality={100}
-                sizes="806px"
-                loading={isNext ? "eager" : "lazy"}
-              />
-            </div>
-          );
-        })}
-      </CornerBox>
+      {/* Preload neighbor tab images on md+ only — on mobile this competed with LCP. */}
+      {isMd ? (
+        <CornerBox
+          aria-hidden="true"
+          className="overflow-hidden absolute pointer-events-none"
+          style={{ width: 1, height: 1, opacity: 0.01 }}
+        >
+          {features.map((feature, index) => {
+            if (!preloadNeighborIndices.has(index)) {
+              return null;
+            }
+            const isNext = index === (activeIndex + 1 + n) % n;
+            return (
+              <div
+                key={`preload-${feature.id}`}
+                className="relative"
+                style={{ width: 806, height: 410 }}
+              >
+                <Image
+                  src={feature.image.light}
+                  alt=""
+                  fill
+                  quality={100}
+                  sizes="806px"
+                  loading={isNext ? "eager" : "lazy"}
+                />
+              </div>
+            );
+          })}
+        </CornerBox>
+      ) : null}
 
-      {/* Title bar with corner box */}
-      <CornerBox
-        role="tablist"
-        aria-label="Feature navigation. Use arrow keys to navigate, Enter or Space to select, Escape to toggle auto-advance."
-        className="px-4 py-2 hidden md:block"
-        onKeyDown={handleKeyDown}
-      >
-        <div ref={tabListScrollRef} className="flex flex-row items-center">
-          {/* Title — left-aligned */}
-          <div className="relative overflow-hidden min-w-0 flex-1">
-            <div aria-hidden className="flex flex-col">
-              {features.map((f) => (
+      {/* Clickable product-area names, then animated subtitle */}
+      <CornerBox className="px-4 py-3">
+        <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
+          <div
+            ref={tabListScrollRef}
+            role="tablist"
+            aria-label="Product area screenshots. Use arrow keys to navigate, Escape to toggle auto-advance."
+            className="flex !flex-nowrap md:!flex-wrap items-center min-w-0 flex-1 overflow-x-auto md:flex-none md:overflow-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-sm leading-snug"
+            onKeyDown={handleKeyDown}
+          >
+            {features.map((feature, index) => {
+              const isActive = activeTab === feature.id && !isWatchingDemo;
+
+              return (
                 <span
-                  key={f.id}
-                  className="whitespace-nowrap text-xl font-analog font-medium invisible h-0 block"
+                  key={feature.id}
+                  className="inline-flex items-center shrink-0"
                 >
-                  {f.title}
+                  <button
+                    ref={(el) => {
+                      tabRefs.current[index] = el;
+                    }}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-controls="tabpanel-product-area"
+                    id={`tab-${feature.id}`}
+                    tabIndex={state.focusedIndex === index ? 0 : -1}
+                    onClick={() => handleTabChange(feature.id)}
+                    className={cn(
+                      "cursor-pointer whitespace-nowrap rounded-sm py-0.5 transition-colors duration-150",
+                      "focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/50",
+                      isActive
+                        ? "font-medium text-primary"
+                        : "font-normal text-text-tertiary hover:text-primary",
+                    )}
+                  >
+                    {feature.name}
+                  </button>
+                  {index < features.length - 1 && (
+                    <span aria-hidden className="px-2 text-text-tertiary">
+                      ·
+                    </span>
+                  )}
                 </span>
-              ))}
-            </div>
-            <AnimatePresence mode="wait" initial={false}>
-              {activeFeature && (
-                <motion.h3
+              );
+            })}
+          </div>
+          <Button
+            id="watch-demo-toggle"
+            type="button"
+            variant="secondary"
+            size="small"
+            icon={
+              isWatchingDemo ? (
+                <X size={12} strokeWidth={2} />
+              ) : (
+                <Play size={12} strokeWidth={2} />
+              )
+            }
+            className="w-auto"
+            wrapperClassName="shrink-0 -mr-1 ml-auto"
+            aria-label={isWatchingDemo ? "Close demo" : "Watch demo"}
+            aria-pressed={isWatchingDemo}
+            aria-controls="tabpanel-product-area"
+            onClick={handleWatchDemoToggle}
+          >
+            {isWatchingDemo ? "Close demo" : "Watch demo"}
+          </Button>
+        </div>
+
+        <div className="relative mt-3 min-h-[1.125rem] overflow-hidden">
+          <AnimatePresence mode="wait" initial={false}>
+            {isWatchingDemo ? (
+              <motion.p
+                key="watch-demo"
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.12, ease: "easeOut" }}
+                className="text-xs leading-relaxed font-normal text-text-tertiary"
+              >
+                End-to-end walkthrough of the Langfuse platform.
+              </motion.p>
+            ) : (
+              activeFeature && (
+                <motion.p
                   key={activeFeature.id}
                   initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -4 }}
                   transition={{ duration: 0.12, ease: "easeOut" }}
-                  className="block whitespace-nowrap text-xl font-analog font-medium text-primary"
+                  className="text-xs leading-relaxed font-normal text-text-tertiary"
                 >
-                  {activeFeature.title}
-                </motion.h3>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Dot indicators — right-aligned */}
-          <div className="flex flex-row items-center gap-1.5 ml-auto shrink-0">
-            {features.map((feature, index) => {
-              const isActive = activeTab === feature.id;
-
-              return (
-                <button
-                  key={feature.id}
-                  ref={(el) => {
-                    tabRefs.current[index] = el;
-                  }}
-                  role="tab"
-                  aria-selected={isActive}
-                  aria-label={feature.title}
-                  aria-controls={`tabpanel-${feature.id}`}
-                  id={`tab-${feature.id}`}
-                  tabIndex={state.focusedIndex === index ? 0 : -1}
-                  onClick={() => handleTabChange(feature.id)}
-                  className="group p-1 focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 rounded"
-                >
-                  <span
-                    className={`block w-3 h-1.5 rounded-sm transition-colors duration-150 ease-out ${
-                      isActive
-                        ? "bg-primary"
-                        : "bg-line-structure group-hover:bg-primary"
-                    }`}
-                  />
-                </button>
-              );
-            })}
-          </div>
+                  {activeFeature.subtitle}
+                </motion.p>
+              )
+            )}
+          </AnimatePresence>
         </div>
       </CornerBox>
 
-      {/* Image box - desktop */}
-      <CornerBox className="p-4 md:-mt-px hidden md:block" withStripes>
-        <div className="relative w-full overflow-hidden aspect-[2205/1291] custom-card-shadow">
+      <CornerBox
+        className="p-4 -mt-px"
+        withStripes
+        role="tabpanel"
+        id="tabpanel-product-area"
+        aria-label={
+          isWatchingDemo ? "Langfuse platform walkthrough" : undefined
+        }
+        aria-labelledby={
+          isWatchingDemo
+            ? undefined
+            : activeFeature
+              ? `tab-${activeFeature.id}`
+              : undefined
+        }
+      >
+        <div
+          className={cn(
+            "relative w-full overflow-hidden custom-card-shadow",
+            isWatchingDemo ? "aspect-video" : "aspect-[2205/1291]",
+          )}
+        >
           <AnimatePresence mode="sync" initial={false}>
-            {activeFeature ? (
+            {isWatchingDemo ? (
+              <motion.div
+                key="watch-demo"
+                variants={tabImageVariants(Boolean(reduceMotion))}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="w-full"
+              >
+                <WalkthroughVideoIframe className="w-full" />
+              </motion.div>
+            ) : activeFeature ? (
               <motion.div
                 key={activeFeature.id}
                 variants={tabImageVariants(Boolean(reduceMotion))}
@@ -459,26 +588,10 @@ export const FeatureTabs = ({
                 animate="animate"
                 exit="exit"
               >
-                <TabContent feature={activeFeature} priority />
+                <TabContent feature={activeFeature} />
               </motion.div>
             ) : null}
           </AnimatePresence>
-        </div>
-      </CornerBox>
-
-      {/* Image box - mobile */}
-      <CornerBox className="pl-4 pt-4 block md:hidden" withStripes>
-        <div className="relative w-full overflow-hidden min-h-[410px]">
-          <Image
-            src={mobileFeature?.image.light}
-            alt={mobileFeature?.image.alt}
-            width={1360}
-            height={1640}
-            quality={100}
-            className="absolute left-0 top-0 min-w-full min-h-full object-cover object-top-left"
-            sizes="(min-width: 640px) 1360px"
-            priority
-          />
         </div>
       </CornerBox>
     </div>

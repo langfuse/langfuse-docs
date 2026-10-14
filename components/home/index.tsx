@@ -12,6 +12,13 @@ import { FAQ } from "./FAQ";
 
 export const Home = () => (
   <>
+    {/* Discover the CSS background LCP image as early as a fetchpriority img. */}
+    <link
+      rel="preload"
+      as="image"
+      href="/images/patterns/hero-bg.png"
+      fetchPriority="high"
+    />
     <main className="overflow-hidden relative w-full hero-bg xl:px-5 2xl:px-10">
       <Hero />
       <FeatureTabsSection />

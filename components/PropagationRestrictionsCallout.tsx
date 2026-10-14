@@ -38,6 +38,8 @@ export function PropagationRestrictionsCallout({
 
   const includesMetadata = attributes.includes("metadata");
   const isGeneric = !attributes || attributes.length === 0;
+  const hasStringAttributes =
+    isGeneric || attributes.some((attribute) => attribute !== "metadata");
 
   return (
     <Callout type="info" title="Note on Attribute Propagation">
@@ -60,14 +62,31 @@ export function PropagationRestrictionsCallout({
         </div>
       )}
       <ul className="mt-2 mb-4 pl-6 leading-7 list-disc">
-        <li>
-          Values must be <strong>strings ≤200 characters</strong>
-        </li>
-        {(includesMetadata || isGeneric) && (
+        {hasStringAttributes && (
           <li>
-            Metadata keys: <strong>Alphanumeric characters only</strong> (no
-            whitespace or special characters)
+            {isGeneric
+              ? "userId, sessionId, version, tags, and traceName"
+              : includesMetadata
+                ? formatAttributes(attributes.filter((a) => a !== "metadata"))
+                : "Values"}{" "}
+            must be <strong>strings ≤200 characters</strong>
           </li>
+        )}
+        {(includesMetadata || isGeneric) && (
+          <>
+            <li>
+              In Python SDK v5 and JS/TS SDK v6, metadata values can be strings,
+              numbers, booleans, lists, or objects, and each{" "}
+              <strong>value must be ≤200 characters as JSON</strong> (a string
+              can have at most 198). Top-level <code>null</code> /{" "}
+              <code>None</code> values are dropped with a warning. In Python SDK
+              v4 and JS/TS SDK v5, use string values ≤200 characters.
+            </li>
+            <li>
+              Metadata keys: use <strong>alphanumeric characters</strong> (no
+              whitespace or special characters)
+            </li>
+          </>
         )}
         <li>
           Call <strong>early in your trace</strong> to ensure all observations

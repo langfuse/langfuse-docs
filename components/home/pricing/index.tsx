@@ -126,7 +126,7 @@ export function PricingPage({
               >
                 {variant === "cloud" && <PricingCalculator />}
                 <PricingDiscounts />
-                <PricingFAQ />
+                <PricingFAQ variant={variant} />
               </div>
             </div>
           </>

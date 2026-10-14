@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { readAdvertisementConsent } from "@/lib/cookie-consent";
 
 // Ad-platform click-id URL params appended to landing pages by ad clicks.
 const CLICK_ID_PARAMS = [
@@ -15,58 +16,13 @@ const CLICK_ID_PARAMS = [
 const CLICK_ID_FORMAT = /^[A-Za-z0-9_.-]{1,512}$/;
 const NINETY_DAYS_IN_SECONDS = 90 * 24 * 60 * 60;
 
-type CkyConsent = {
-  categories?: {
-    advertisement?: boolean;
-  };
-};
-
-declare global {
-  interface Window {
-    getCkyConsent?: () => CkyConsent;
-  }
-}
-
 // Click ids are ad-click attribution data, so they fall under the CookieYes
-// "advertisement" category — the same category that gates the Google Ads /
-// LinkedIn / Reddit pixels. Unlike those, this is first-party inline code
-// that CookieYes can't script-block, so consent is checked explicitly here.
-//
-// Three states, not a boolean: `getCkyConsent()` only returns real data once
-// the CookieYes banner has finished loading, so an early read can look like a
-// denial when the visitor has in fact consented. Treating that as "denied"
-// would expire previously stored click ids (see `syncClickIdCookies`), and a
-// return visit has no click-id params in the URL to rewrite them from.
-// "unknown" therefore means "leave everything as it is".
-type ConsentState = "granted" | "denied" | "unknown";
-
-function readAdvertisementConsent(): ConsentState {
-  // The live API wins whenever it can answer: it reflects in-session changes
-  // — most importantly a revoke in the preference center — that the persisted
-  // cookie may not have been rewritten with yet. Withdrawal must never be
-  // masked by a stale grant, so a conclusive `false` here is a denial even if
-  // the cookie still says yes.
-  try {
-    const advertisement = window.getCkyConsent?.()?.categories?.advertisement;
-    if (typeof advertisement === "boolean")
-      return advertisement ? "granted" : "denied";
-  } catch {
-    // an unavailable API is inconclusive, not a denial — fall through
-  }
-
-  // CookieYes has not loaded (or is blocked), so fall back to its persisted
-  // cookie: the durable record of an earlier decision, which survives reloads
-  // and is written in notice-only regions too, where the category is granted
-  // by default. It enumerates every category, so its presence is conclusive.
-  const consentCookie = document.cookie
-    .split("; ")
-    .find((cookie) => cookie.startsWith("cookieyes-consent="));
-  if (consentCookie)
-    return consentCookie.includes("advertisement:yes") ? "granted" : "denied";
-
-  // Neither source could answer: leave any stored click ids untouched.
-  return "unknown";
-}
+// "advertisement" category — the same category the AdConsentGate uses for the
+// ad pixels. Unlike those, this is first-party inline code, and a wrong
+// "denied" reading would expire previously stored click ids (see
+// `syncClickIdCookies`) that a return visit can't rewrite from the URL — so
+// the shared three-state `readAdvertisementConsent` is used and "unknown"
+// means "leave everything as it is".
 
 function syncClickIdCookies(clickIds: Partial<Record<string, string>>) {
   const { hostname, protocol } = window.location;

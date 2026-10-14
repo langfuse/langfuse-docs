@@ -1,0 +1,305 @@
+---
+title: Optimizing agent cost
+sidebarTitle: Optimizing agent cost
+description: How to bring down the cost of running your agent in a structured, effective way, from trace structure to levers to monitoring.
+---
+
+export const references = [
+  {
+    id: "bai-tokens",
+    title:
+      "How do AI agents spend your money? Analyzing and predicting token consumption in agentic coding tasks (Bai et al.)",
+    url: "https://arxiv.org/abs/2604.22750",
+  },
+  {
+    id: "anthropic-pricing",
+    title: "Pricing (Anthropic developer docs)",
+    url: "https://platform.claude.com/docs/en/about-claude/pricing",
+  },
+  {
+    id: "anthropic-cost-intelligence",
+    title: "Optimizing for cost and intelligence (Anthropic developer docs)",
+    url: "https://platform.claude.com/docs/en/about-claude/models/optimizing-for-cost-and-intelligence",
+  },
+  {
+    id: "cuadron-overthinking",
+    title:
+      "The danger of overthinking: examining the reasoning-action dilemma in agentic tasks (Cuadron et al.)",
+    url: "https://arxiv.org/abs/2502.08235",
+  },
+  {
+    id: "lost-in-compaction",
+    title:
+      "Lost in compaction: evaluating side-constraint loss under context compaction (Wang et al.)",
+    url: "https://arxiv.org/abs/2608.11242",
+  },
+  {
+    id: "anthropic-context-editing",
+    title: "Context editing (Anthropic developer docs)",
+    url: "https://platform.claude.com/docs/en/docs/build-with-claude/context-editing",
+  },
+  {
+    id: "factory-anchored-summaries",
+    title: "Compressing context (Factory)",
+    url: "https://factory.com/news/compressing-context",
+  },
+  {
+    id: "memgpt",
+    title: "MemGPT: towards LLMs as operating systems (Packer et al., UC Berkeley)",
+    url: "https://arxiv.org/abs/2310.08560",
+  },
+  {
+    id: "anthropic-context-engineering",
+    title: "Effective context engineering for AI agents (Anthropic)",
+    url: "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
+  },
+  {
+    id: "cognition-sidekick",
+    title: "Making Fable cheaper than Opus (Cognition)",
+    url: "https://cognition.com/blog/making-fable-cheaper-than-opus",
+  },
+  {
+    id: "cognition-multi-agents",
+    title: "Don't build multi-agents (Yan, Cognition)",
+    url: "https://cognition.com/blog/dont-build-multi-agents",
+  },
+];
+
+# Optimizing agent cost
+
+Agentic features can be very powerful, but the cost of running them is higher, and different from non-AI features. You will start looking into bringing down running costs sooner rather than later. This page guides you through how to execute on this in a structured, effective way.
+
+## Are you in a position to start optimizing costs?
+
+While it can be tempting, investing heavily in optimizing for cost should probably not be the first thing you do. There are 2 prerequisites for systematically optimizing cost of your agent:
+
+- you are happy with the output quality of your agent
+- you have a clear set of criteria to judge the output quality, in the form of [offline evals](/academy/evaluate/writing-evaluators#online-or-offline)
+
+The reason for this is that you will, in a way, be reducing resources/capacity of your agent, and you need to measure whether doing this has an impact on output quality.
+
+<Callout type="info">
+Think of it as figuring out how much to water your lawn. Three times a week keeps the grass green, but once a week might be enough. The way you find out is to water less and watch whether the green (initial good state) color changes (eval). If it doesn’t, you just saved yourself a lot of water.
+</Callout>
+
+### If you’re starting from zero
+
+If the 2 prerequisites above aren’t met yet, start by optimizing for quality first, and just track the cost in parallel. After some time of observing your agent and improving the output quality over time, you will be able to formalize quality criteria into [well-defined metrics](/academy/evaluate/choosing-what-to-evaluate). This is the moment you start codifying this into [evals](/academy/evaluate/writing-evaluators).
+
+### The cost optimization process
+
+We talk a lot about the [AI engineering loop](/academy/ai-engineering-loop). The cost optimization process essentially is an application of this loop, heavily focused on trying cost improvements and running offline experiments on it.
+
+<CostOptimizationLoopDiagram />
+
+You start by tracking cost of your production agent to give you a clear view on how it behaves in the real world. Optimization happens by trying different improvements to get the cost down, simulating your new agent against representative test cases, evaluating the quality of the output, and based on these results, deciding to either go through with the change, or discard it.
+
+In this process, it’s instrumental to
+
+- have a complete set of [scenarios](/academy/datasets) that are representative of what your agent will encounter in the real world
+- have a complete set of relevant [evaluators](/academy/evaluate) that together measure every aspect of output quality you care about
+
+## Make sure your trace is suited for cost optimization
+
+Trace structure and data are extremely important for making calculated guesses on what could reduce cost without impacting output quality. Check both:
+
+- structure of the trace
+- completeness of token usage and cost reporting, with the correct level of granularity
+
+Following the principle “what gets tracked gets managed”, it’s important your trace is set up to track anything that can influence cost of your agent.
+
+### Trace structure
+
+You can structure a trace in many ways. You should review and take conscious decisions about your trace structure. A couple of things to take note of:
+
+**Are all your intermediary calls logged as a separate span?** This is especially important if your agent is making heavy use of tools. One cause of high agent cost is context window blowup, often by tool outputs.<Ref refs={references} id="bai-tokens" /> Take a look at the following 2 traces:
+
+<Tabs items={["Loop shown as one LLM call with tools", "Loop shown as sequence of LLM and tool calls"]}>
+<Tab>
+
+```
+Trace: "Why was I charged twice this month?"          $0.11
+└── Generation: support-agent                         in 33,000 · out 410
+    ├── Tool: lookup_account
+    ├── Tool: get_invoices
+    └── Tool: search_help_center
+```
+
+</Tab>
+<Tab>
+
+```
+Trace: "Why was I charged twice this month?"          $0.11
+└── Agent: support-agent
+    ├── Generation: reason                            in 2,100 · out 60
+    ├── Tool: lookup_account
+    ├── Generation: reason                            in 2,600 · out 70
+    ├── Tool: get_invoices
+    ├── Generation: reason                            in 12,500 · out 80
+    ├── Tool: search_help_center
+    └── Generation: respond                           in 15,800 · out 200
+```
+
+</Tab>
+</Tabs>
+
+With the first trace, it’s hard to say why the agent run was expensive, or how to improve it. It’s also a misrepresentation of what happened in practice: an agent gets a user input, reasons about what to do (LLM call), decides to call some tools, reasons again based on the tool results (LLM call), etc. until it decides it has sufficient information to give a response (LLM call). This is why the second structure is more accurate and helpful. You can immediately see where the context blew up and it became expensive. You can also see how many LLM calls it took to get to a result, something you can also optimize for.
+
+**Are your tool call observations capturing the full tool output?** This connects to the point above: once you see input tokens of your LLM calls increasing, you want to pinpoint the tool responsible for it. You can only do this if your trace shows the full output of tool calls.
+
+**Do retries show up as separate observations?** If not, you won’t see how much retries are costing you, and you can’t optimize for it. This is also a good metric to aim to get to zero in general, as it also impacts latency.
+
+**Are you adding relevant attributes to your trace?** This is mainly to help you dig through your data. Prioritizing what area to improve is easier if you can drill down on cost by feature, topic, … See [Monitoring cost](#monitoring-cost-in-production) for more on this.
+
+<Callout type="info">
+For general best practices on traces, take a look at the page [_What does a good trace look like?_](/docs/observability/best-practices)
+</Callout>
+
+### Reporting cost and token usage
+
+Three principles to keep in mind:
+
+1. **Always report both cost and token usage of an LLM call**
+
+   When reducing cost of an individual LLM call, there are two levers you can pull: reducing the number of tokens, and using a model that has a lower cost per token. This means you need to have visibility into these 2 numbers individually.
+
+1. **Every LLM call, including intermediate ones, should be logged with its individual cost and token numbers**
+
+   An agent often calls an LLM multiple times in a loop to produce an output for the user. If you don’t include cost and token numbers on every LLM call separately, you have no visibility on when exactly the numbers blew up.
+
+1. **Be as granular as possible when reporting on these numbers**
+
+   Not all tokens are created equal, and they differ in price. You want to [report on the specific category of token](/docs/observability/features/token-and-cost-tracking#how-it-works) so that you can play with these categories in order to get your cost down.
+
+   | Token type     | Definition                                       | Example price per million tokens (Claude Sonnet 5.5, October 2026) |
+   | -------------- | ------------------------------------------------ | ------------------------------------------------------------------ |
+   | Uncached input | Tokens the model reads for the first time        | $2.00                                                              |
+   | Cache write    | Tokens written to the provider's prompt cache    | $2.50 for a 5-minute cache, $4.00 for a 1-hour cache               |
+   | Cache read     | Tokens served from the cache                     | $0.10                                                              |
+   | Output         | Tokens the model generates                       | $10.00                                                             |
+   | Reasoning      | Hidden thinking tokens, not returned in the text | Billed as output, $10.00                                           |
+
+   _Prices are from Anthropic's pricing page<Ref refs={references} id="anthropic-pricing" /> and change often. These numbers are mainly here to give you an idea of the ratios._
+
+<Callout type="info">
+To set this up in Langfuse, see the [token and cost tracking docs](/docs/observability/features/token-and-cost-tracking).
+</Callout>
+
+## Levers to pull to get agent cost down
+
+Once you are set on the above, it’s time to start experimenting. As mentioned before, this process is just a loop of identifying an improvement to try, measuring cost improvement and output quality of an experiment run, and if cost goes down while preserving quality, shipping the improvement. Below we’ll cover some common things to look at when identifying areas of improvement.
+
+### LLM model used for the task
+
+This is the most obvious one to start with, and also easy to test. Try swapping for a cheaper model and monitor the output quality. You can spin up multiple experiments with different models in parallel and compare the outputs.
+
+<Callout type="info">
+There can be a large difference in model “personality”, especially between providers. You’ll want to do some manual checks as well to “feel the vibe” before deciding to switch.
+</Callout>
+
+**Also try reducing the effort instead of swapping the model.**<Ref refs={references} id="anthropic-cost-intelligence" /> Overthinking in agents is a thing,<Ref refs={references} id="cuadron-overthinking" /> and reasoning tokens are billed as output tokens.
+
+<CostPriceVsQualityDiagram />
+
+**Does training your own smaller, specialized model make sense?** Maybe. In some cases, general models might not be cheap enough. When deciding to train your own specialized model, make sure to factor in the investment of gathering training/testing data, and training the model.
+
+<CostSpecializedModelDiagram />
+
+### Number of LLM calls per task
+
+Instead of reducing the cost per LLM call, you can also reduce the number of LLM calls the agent makes to achieve the goal. This is often done by improving the agent’s harness: using better naming, proactively sending often used information, …
+
+This is generally a high ROI improvement when starting out. There are likely some “quick win” improvements you can do, and it’s a great way to get the _cost per agent task_ down significantly.
+
+<CostPerStepDiagram />
+
+### Caching and pruning context
+
+Next, you can look at reducing the cost of your input. This can be done by:
+
+1. caching input
+2. pruning context
+
+<CostCachingVsPruningDiagram />
+
+**Caching input** is something you should try to do by default. The LLM calls in your agent trajectory will always share some context, and caching this will reduce cost “for free” (no impact on agent output quality). Some things to be aware of:
+
+- prompt caching only works when the start of each call is identical to the call before. So keep static content first and dynamic content last
+- don’t use timestamps or request ids as a prefix, since the prefix will then invalidate the cache
+- do not change the tool set or model in the middle of a session if you want to cache
+
+**Pruning context** is removing input tokens your agent likely doesn’t need. Here are a couple of common, straightforward things to prune:
+
+- don’t load full tool definitions of all available tools by default. Only load the full definition once the agent decides to use it (this is a trade-off with reducing the number of tool calls)
+- cut your system prompt if you can, since this will automatically impact ALL calls your agent does
+- if the agent uses images, try not sending these along as base64 on every LLM call
+
+<Callout type="info">
+Be careful with pruning context: you might cut information the agent still needed. Keep a close eye on output quality while testing these improvements.
+</Callout>
+
+### Compaction
+
+Compaction is, in a way, a form of pruning and it is widely used in the AI agent context. Compaction summarizes older parts of your agent’s context, which your agent probably didn’t need every detail of anymore.
+
+Of course, there is a risk of losing too much context which may impact output quality.<Ref refs={references} id="lost-in-compaction" />
+
+Some popular approaches:
+
+- keep only the last N turns or tokens and drop the rest
+- keep the conversation but clear the content of tool results from earlier steps. Anthropic offers this as context editing<Ref refs={references} id="anthropic-context-editing" /> on the API, and it cut tokens by 84% over a 100-turn task in their evaluation
+- summarize the history so far. This is what coding agents do when they auto-compact
+- keep a structured running summary with fixed fields (intent, progress, files touched, next steps) instead of a free-form one. Factory calls these anchored summaries<Ref refs={references} id="factory-anchored-summaries" />
+- move details out of the context window into files or a memory store, and keep only references in context. This is the idea behind MemGPT<Ref refs={references} id="memgpt" />
+
+### Delegating to sub-agents
+
+Delegating to sub-agents can reduce or increase cost, depending on the situation.
+
+<CostSubAgentsDiagram />
+
+Delegating **cuts cost** when
+
+- the delegated work is verbose and the agent only needs a summary of the task to continue.<Ref refs={references} id="anthropic-context-engineering" />
+  - Typical examples are sifting through logs to find something specific, running tests, etc. You don’t want all these logs/test runs propagating through every future LLM call your main agent makes.
+- the delegated work can be completed by a cheaper model than the main agent uses.<Ref refs={references} id="cognition-sidekick" />
+
+Delegating **adds cost** when
+
+- the sub-agent needs the same context as the parent: the whole execution history needs to be re-read by the sub-agent.
+- the summary given to the sub-agent loses details, and the parent needs to re-do the work as a result
+- parallel sub-agents make conflicting decisions, and the parent needs to reconcile afterwards.<Ref refs={references} id="cognition-multi-agents" />
+
+## Keep an eye on your eval costs too
+
+While evals are extremely important in this process, running many experiments with evaluators can add up too. Be mindful of this when you add a new evaluator. [Scoping your metric set](/academy/evaluate/choosing-what-to-evaluate) is a very important aspect of AI engineering.
+
+## Monitoring cost in production [#monitoring-cost-in-production]
+
+The majority of this page is focused on the process of experimenting to get the cost of your agent down. Next to that, it’s important to have good cost monitoring hygiene, so that you can act on changes in an informed manner.
+
+Here are some good metrics to track:
+
+| Metric                                           | Why                                                                           |
+| ------------------------------------------------ | ----------------------------------------------------------------------------- |
+| Cost per task, as p50, p95, and max              | An average hides the expensive tail where loops and retries live              |
+| Cost per conversation and its growth per turn    | Shows how fast the history accumulates                                        |
+| Cache hit rate                                   | Shows how much of the re-reading you pay full price for                       |
+| Steps, tool calls, and tokens per task           | Shows what drives cost. Important to track this per task instead of LLM call. |
+| Cost by feature, user, model, and prompt version | Shows where to look first                                                     |
+| Evaluation spend next to production spend        | Keeps your eval costs in check                                                |
+
+You can also set up [alerts](/docs/observability/features/alerts) for sudden cost spikes.
+
+<Callout type="info">
+**Cost can also go up without anyone touching the agent.** Some examples:
+
+- a model update changes the tokenizer, now producing 30% more tokens for the same text
+- the cache expires more often because a tool got slower, which the agent needs to wait for
+- …
+
+</Callout>
+
+## References
+
+<FurtherReading numbered resources={references} />

@@ -51,7 +51,9 @@ Set these variables if your Lambda functions use different names.
 
 ### Lambda runners
 
-Create one Lambda runner per supported runtime. The runner source code is available on `main`:
+The [Langfuse Terraform module for AWS](https://github.com/langfuse/langfuse-terraform-aws) can create both tenant-isolated Lambda runners in a VPC without network egress. Set `enable_code_based_eval_executors = true`.
+
+If you do not use the module, create one Lambda runner per supported runtime. The runner source code is available on `main`:
 
 | Runtime    | Default function name             | AWS runtime  | Handler         | Bundle file | Runner source                                                                                                                                                               |
 | ---------- | --------------------------------- | ------------ | --------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

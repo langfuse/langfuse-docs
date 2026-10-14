@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useI18n } from "fumadocs-ui/contexts/i18n";
 import React, { useState, useEffect, useMemo, forwardRef } from "react";
 import { allAuthors, Author, AuthorHoverCardContent } from "./Authors";
 import contributorsData from "@/data/generated/contributors.json";
@@ -10,9 +9,15 @@ import { HoverCard, HoverCardTrigger } from "@/components/ui/hover-card";
 import { ArrowUpRight } from "lucide-react";
 import TocCommunity from "@/components/TocCommunity";
 import { Text } from "@/components/ui/text";
+import { getDocsFeedbackIssueUrl } from "@/lib/docs-feedback-url";
 
 // ─── Utility functions ────────────────────────────────────────────────────────
 
+const GITHUB_EDIT_BASE = "https://github.com/langfuse/langfuse-docs/edit/main/";
+
+// Fallback that guesses the source file from the URL. It cannot tell a folder
+// index page (`experiments/index.mdx`) from a flat page (`experiments.mdx`), so
+// callers should pass the page's real `sourcePath` whenever they have it.
 const getGithubEditUrl = (path: string): string | null => {
   const cleanPath = path.split("#")[0].split("?")[0];
   const [, section, ...slugParts] = cleanPath.split("/");
@@ -26,6 +31,7 @@ const getGithubEditUrl = (path: string): string | null => {
     library: "content/library",
     academy: "content/academy",
     resources: "content/resources",
+    compare: "content/compare",
   };
 
   const contentDir = sectionToDir[section];
@@ -33,16 +39,7 @@ const getGithubEditUrl = (path: string): string | null => {
 
   const slugPath = slugParts.join("/");
   const filePath = `${contentDir}/${slugPath === "" ? "index" : slugPath}.mdx`;
-  return `https://github.com/langfuse/langfuse-docs/edit/main/${filePath}`;
-};
-
-const getFeedbackUrl = (pageTitle?: string): string => {
-  const title = (pageTitle ?? "this page").trim();
-  const params = new URLSearchParams({
-    title: `Feedback for "${title}"`,
-    labels: "feedback",
-  });
-  return `https://github.com/langfuse/langfuse-docs/issues/new?${params.toString()}`;
+  return `${GITHUB_EDIT_BASE}${filePath}`;
 };
 
 const getContributors = (path: string): string[] => {
@@ -129,7 +126,6 @@ const LocalizedLastUpdate = ({
   date: Date;
   className?: string;
 }) => {
-  const { text } = useI18n();
   const [formattedDate, setFormattedDate] = useState("");
 
   useEffect(() => {
@@ -138,7 +134,7 @@ const LocalizedLastUpdate = ({
 
   return (
     <p className={className}>
-      {text.lastUpdate}
+      Last edited
       {formattedDate ? ` ${formattedDate}` : null}
     </p>
   );
@@ -168,19 +164,22 @@ const processContributor = (username: string): ProcessedContributor => {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 type DocsTocFooterProps = {
-  pageTitle?: string;
   lastModified?: string;
+  /** Repo-relative source file, e.g. `content/academy/experiments/index.mdx`. */
+  sourcePath?: string;
 };
 
 export const DocsTocFooter = ({
-  pageTitle,
   lastModified,
+  sourcePath,
 }: DocsTocFooterProps) => {
   const pathname = usePathname() ?? "";
   const currentPath = pathname.split("#")[0].split("?")[0];
   const [showAll, setShowAll] = useState(false);
-  const editUrl = getGithubEditUrl(currentPath);
-  const feedbackUrl = getFeedbackUrl(pageTitle);
+  const editUrl = sourcePath
+    ? `${GITHUB_EDIT_BASE}${sourcePath}`
+    : getGithubEditUrl(currentPath);
+  const feedbackUrl = getDocsFeedbackIssueUrl(currentPath);
   const lastModifiedDate = useMemo(
     () => (lastModified ? new Date(lastModified) : undefined),
     [lastModified],

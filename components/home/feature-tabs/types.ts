@@ -20,6 +20,8 @@ export type TabDisplayMode =
 export interface FeatureTabData {
   id: string;
   icon: LucideIcon;
+  /** Product-area name shown on the homepage screenshot switcher. */
+  name: string;
   title: string;
   subtitle: string;
   body: string;

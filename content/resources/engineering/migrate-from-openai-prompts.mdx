@@ -1,0 +1,356 @@
+---
+title: Migrate OpenAI reusable prompts to Langfuse
+description: "Step-by-step guide to move OpenAI reusable prompts (prompt objects) to Langfuse prompt management before the November 2026 shutdown: export versions, recreate them with labels, and replace prompt IDs in your Responses API calls."
+tags: [migration, guide]
+---
+
+import { Cloud, MessageSquare } from "lucide-react";
+
+# Migrate OpenAI reusable prompts to Langfuse
+
+This guide walks through moving OpenAI [reusable prompts](https://developers.openai.com/api/docs/guides/prompting/migrate-from-prompt-object) (prompt objects with `pmpt_` IDs) to [Langfuse prompt management](/docs/prompt-management): finding every prompt your code references, exporting its versions, recreating them in Langfuse, and replacing the `prompt` parameter in your Responses API calls.
+
+**TL;DR:** An OpenAI prompt object maps cleanly onto a Langfuse chat prompt. The prompt ID becomes a prompt name, each version becomes a Langfuse version, the version your code pins becomes the `production` label, and `{{variables}}` keep the same syntax. The model, reasoning settings, tools, and text format move into the prompt's `config`. In your code, `responses.create(prompt={"id": ..., "variables": ...})` becomes `get_prompt()` plus `compile()`, and the compiled messages go into `input`. Your team can still edit and ship prompts without a code deploy.
+
+<Callout type="warning">
+  OpenAI [announced](https://developers.openai.com/api/docs/deprecations#2026-06-03-reusable-prompts) on June 3, 2026 that reusable prompts are deprecated. The `/v1/prompts` API and reusable prompt objects are scheduled to shut down on **November 30, 2026**, after which requests that reference a `pmpt_` ID stop working. OpenAI offers no API to export prompt objects, so copy them out of the dashboard before that date.
+</Callout>
+
+<Cards num={2}>
+  <Card title="Get started free" href="https://cloud.langfuse.com" icon={<Cloud />} />
+  <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
+</Cards>
+
+## Why teams choose Langfuse [#why-langfuse]
+
+OpenAI's [migration guide](https://developers.openai.com/api/docs/guides/prompting/migrate-from-prompt-object) recommends moving prompt content into application code and versioning it with git. That works well when only engineers change prompts and every change can wait for a deploy. Teams that used reusable prompts usually chose them for the opposite reason: prompts were edited in a UI and rolled out without a code change. Langfuse keeps that workflow:
+
+- **Edit and ship without a deploy.** Prompts are edited in the Langfuse UI or through the SDK, and your application fetches the version that carries the `production` label. Moving the label to another version is a rollout; moving it back is a rollback.
+- **Versions with history.** Every change creates a new version with a commit message and a diff view, just like prompt object versions, plus [labels](/docs/prompt-management/features/prompt-version-control) such as `production`, `staging`, or `candidate` for different environments.
+- **Metrics per version.** When you [link prompts to traces](/docs/prompt-management/features/link-to-traces), Langfuse shows latency, token usage, cost, and evaluation scores for each prompt version, so you can see the effect of every change.
+- **Test before rollout.** Try versions in the [playground](/docs/prompt-management/features/playground) and compare them on a dataset with [experiments](/docs/evaluation/experiments/experiments-via-ui) before moving the `production` label.
+- **No added latency.** The SDKs [cache prompts](/docs/prompt-management/features/caching) in memory and refresh them in the background, so fetching a prompt does not add a network call to your request path.
+- **Git remains an option.** The [GitHub integration](/docs/prompt-management/features/github-integration) syncs prompt versions to a repository or triggers CI on every change, if you also want prompts in version control.
+- **Any model, any provider.** Langfuse prompts work with OpenAI, Anthropic, Google, and open-weight models, and the platform is open source and [self-hostable](/self-hosting).
+
+Some things work differently. The Responses API resolved prompt objects on OpenAI's side; with Langfuse, your code fetches and compiles the prompt, then passes the messages and settings to the model call. Two lines per call site change, which [Step 4](#replace-calls) covers.
+
+## Concept mapping [#concept-mapping]
+
+| OpenAI reusable prompts                                  | Langfuse prompt management                                                                                                                                                                                 | Notes                                                     |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Prompt object (`pmpt_...` ID)                            | [Chat prompt](/docs/prompt-management/data-model) identified by name                                                                                                                                       | Use a readable name such as `support-assistant`           |
+| Prompt version (`version: "3"`)                          | Prompt version                                                                                                                                                                                             | Versions are numbered from 1 in the order you create them |
+| Pinned `version` in the API call                         | A [label](/docs/prompt-management/features/prompt-version-control) such as `production`                                                                                                                    | Code fetches by label, so rollouts don't need a deploy    |
+| Developer or system message (instructions)               | `system` message in the chat prompt                                                                                                                                                                        | Keep the text as-is                                       |
+| Additional messages in the prompt                        | Further messages in the chat prompt                                                                                                                                                                        | Roles and order carry over                                |
+| `{{variable}}` placeholders                              | [`{{variable}}` variables](/docs/prompt-management/features/variables)                                                                                                                                     | Same syntax; values are passed to `compile()`             |
+| Image or file variables                                  | [Message placeholders](/docs/prompt-management/features/message-placeholders)                                                                                                                              | Insert multimodal messages at runtime                     |
+| Model, reasoning effort, temperature, and other settings | Prompt [`config`](/docs/prompt-management/features/config)                                                                                                                                                 | Your code spreads `config` into the model call            |
+| Tools and text format (structured outputs)               | `tools` and `text` in the prompt `config` ([structured outputs](/docs/prompt-management/features/config#structured-outputs), [function calling](/docs/prompt-management/features/config#function-calling)) | Stored as JSON, versioned with the prompt                 |
+| `prompt` parameter in `responses.create`                 | `get_prompt()` + `compile()`, passed as `input`                                                                                                                                                            | See [Step 4](#replace-calls)                              |
+| Prompt editing in the OpenAI dashboard                   | Prompt editor and [playground](/docs/prompt-management/features/playground) in the Langfuse UI                                                                                                             | Product and domain experts keep working in a UI           |
+
+## Supported data types [#supported-data-types]
+
+| Data                                | Move?    | Path                                                                                   |
+| ----------------------------------- | -------- | -------------------------------------------------------------------------------------- |
+| Prompt messages and instructions    | Yes      | Copy from the dashboard into the export file, then import as chat prompt messages      |
+| Variables                           | Yes      | Same `{{variable}}` syntax; no changes needed                                          |
+| Model and generation settings       | Yes      | Prompt `config`                                                                        |
+| Tools and structured output schemas | Yes      | Prompt `config` (`tools`, `text`)                                                      |
+| Version history                     | Optional | Import the versions you still need, oldest first; at minimum the version in production |
+| Prompt IDs referenced in code       | Replace  | Swap `pmpt_` IDs for Langfuse prompt names and labels                                  |
+| Evals built on OpenAI Evals         | Separate | See [Migrate from OpenAI Evals](/resources/engineering/migrate-from-openai-evals)      |
+
+## The example prompt [#example-prompt]
+
+The steps below migrate one prompt object used by a support assistant. Version 3 is pinned in production code:
+
+```python
+# before: OpenAI reusable prompt
+from openai import OpenAI
+
+client = OpenAI()
+
+response = client.responses.create(
+    prompt={
+        "id": "pmpt_68a1c2f0e4b8",
+        "version": "3",
+        "variables": {"customer_name": "Acme", "issue": "billing question"},
+    },
+)
+print(response.output_text)
+```
+
+In the OpenAI dashboard, this prompt has a developer message (`You are a helpful support assistant for {{customer_name}}. Be concise and offer a concrete next step.`), a user message (`Issue: {{issue}}`), the model `gpt-5`, and low reasoning effort.
+
+Snippets below show both the Python SDK v4 (`pip install langfuse`) and the JS/TS SDK v5 (`npm install @langfuse/client`). Both read `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` from the environment.
+
+## Step 1: Find every prompt your code uses [#inventory]
+
+Start with an inventory, since each `pmpt_` ID in your code is a call that breaks on November 30, 2026. Search your repositories and configuration for prompt IDs:
+
+```bash
+grep -rn "pmpt_" --include="*.py" --include="*.ts" --include="*.js" --include="*.json" --include="*.yaml" .
+```
+
+For each ID, note the pinned `version` (if any), where it is called, and which variables the call passes. Cross-check the list against the prompts in the OpenAI dashboard: prompts that no code references can usually be skipped, and IDs that come from environment variables or a database won't show up in a code search.
+
+## Step 2: Export prompts from the dashboard [#export]
+
+OpenAI does not offer an API to list or read prompt objects, so the export is a copy from the dashboard. To keep the import scriptable and reviewable, record each prompt in a JSON file with one entry per version you want to keep:
+
+```json
+{
+  "openai_prompt_id": "pmpt_68a1c2f0e4b8",
+  "name": "support-assistant",
+  "production_version": "3",
+  "versions": [
+    {
+      "version": "3",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are a helpful support assistant for {{customer_name}}. Be concise and offer a concrete next step."
+        },
+        { "role": "user", "content": "Issue: {{issue}}" }
+      ],
+      "config": {
+        "model": "gpt-5",
+        "reasoning": { "effort": "low" }
+      }
+    }
+  ]
+}
+```
+
+Write `config` with the Responses API parameter names (`model`, `reasoning`, `temperature`, `tools`, `text`, and so on), since your code passes it straight to `responses.create` in [Step 4](#replace-calls). For a prompt with structured outputs, copy the JSON schema into `config.text.format`; for tools, copy each tool definition into `config.tools`.
+
+Commit the export files to a repository. They double as your archive of the prompt objects after OpenAI deletes them. Whether to include older versions is up to you: the version in production is required, and older versions are only useful if you want their history in Langfuse.
+
+## Step 3: Create the prompts in Langfuse [#import]
+
+Import the export files as [chat prompts](/docs/prompt-management/get-started). Create versions oldest first so the history reads in order, and assign the `production` label to the version your code pins today.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+{/* Python SDK */}
+
+```python
+import json
+from pathlib import Path
+
+from langfuse import get_client
+
+langfuse = get_client()
+
+for path in sorted(Path("openai-prompts-export").glob("*.json")):
+    exported = json.loads(path.read_text())
+
+    for version in sorted(exported["versions"], key=lambda v: int(v["version"])):
+        is_production = version["version"] == exported["production_version"]
+        langfuse.create_prompt(
+            name=exported["name"],
+            type="chat",
+            prompt=version["messages"],  # {{variables}} work unchanged
+            config=version["config"],
+            labels=["production"] if is_production else [],
+            commit_message=(
+                f"Migrated from OpenAI {exported['openai_prompt_id']} "
+                f"version {version['version']}"
+            ),
+        )
+```
+
+</Tab>
+<Tab>
+{/* JS/TS SDK */}
+
+```ts
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+import { LangfuseClient } from "@langfuse/client";
+
+type ExportedPrompt = {
+  openai_prompt_id: string;
+  name: string;
+  production_version: string;
+  versions: Array<{
+    version: string;
+    messages: Array<{ role: string; content: string }>;
+    config: Record<string, unknown>;
+  }>;
+};
+
+const langfuse = new LangfuseClient();
+const exportDir = "openai-prompts-export";
+
+for (const file of readdirSync(exportDir).filter((f) => f.endsWith(".json"))) {
+  const exported: ExportedPrompt = JSON.parse(
+    readFileSync(join(exportDir, file), "utf8"),
+  );
+  const versions = [...exported.versions].sort(
+    (a, b) => Number(a.version) - Number(b.version),
+  );
+
+  for (const version of versions) {
+    const isProduction = version.version === exported.production_version;
+    await langfuse.prompt.create({
+      name: exported.name,
+      type: "chat",
+      prompt: version.messages, // {{variables}} work unchanged
+      config: version.config,
+      labels: isProduction ? ["production"] : [],
+      commitMessage: `Migrated from OpenAI ${exported.openai_prompt_id} version ${version.version}`,
+    });
+  }
+}
+```
+
+</Tab>
+</LangTabs>
+
+<Callout type="warning">
+  Prompt creation is not idempotent: every call creates a new prompt version. Run the import once per prompt, not as a retried batch job. If a run fails midway, check the prompt's versions in the Langfuse UI before re-running.
+</Callout>
+
+Langfuse numbers versions from 1 in the order you create them, so imported version numbers can differ from OpenAI's; the commit message keeps the mapping. Confirm in the Langfuse UI that each prompt renders its variables, carries the `production` label on the right version, and shows the expected `config`.
+
+## Step 4: Replace the prompt parameter in your code [#replace-calls]
+
+Each call that passes `prompt={"id": ...}` now fetches the Langfuse prompt by name and label, compiles it with the same variables, and passes the messages as `input` together with the settings from `config`. Using the Langfuse OpenAI integration also traces the call and [links it to the prompt version](/docs/prompt-management/features/link-to-traces).
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+{/* Python SDK */}
+
+```python
+from langfuse import get_client
+from langfuse.openai import OpenAI  # traced drop-in replacement for openai.OpenAI
+
+langfuse = get_client()
+client = OpenAI()
+
+# fetch once per request; served from the SDK cache after the first call
+prompt = langfuse.get_prompt("support-assistant", type="chat", label="production")
+
+response = client.responses.create(
+    input=prompt.compile(customer_name="Acme", issue="billing question"),
+    **prompt.config,  # model, reasoning, tools, text, ...
+    langfuse_prompt=prompt,  # links the generation to the prompt version
+)
+print(response.output_text)
+```
+
+</Tab>
+<Tab>
+{/* JS/TS SDK */}
+
+```ts
+import OpenAI from "openai";
+import { LangfuseClient } from "@langfuse/client";
+import { observeOpenAI } from "@langfuse/openai";
+
+const langfuse = new LangfuseClient();
+
+// fetch once per request; served from the SDK cache after the first call
+const prompt = await langfuse.prompt.get("support-assistant", {
+  type: "chat",
+  label: "production",
+});
+
+const response = await observeOpenAI(new OpenAI(), {
+  langfusePrompt: prompt, // links the generation to the prompt version
+}).responses.create({
+  ...(prompt.config as OpenAI.Responses.ResponseCreateParamsNonStreaming), // model, reasoning, tools, text, ...
+  input: prompt.compile({
+    customer_name: "Acme",
+    issue: "billing question",
+  }) as OpenAI.Responses.ResponseInputItem[],
+});
+console.log(response.output_text);
+```
+
+</Tab>
+</LangTabs>
+
+The JS/TS integration traces through OpenTelemetry. If your application does not set up tracing yet, register the `LangfuseSpanProcessor` as described in the [OpenAI JS/TS integration](/integrations/model-providers/openai-js). For Python, `langfuse.openai` traces out of the box (see the [OpenAI Python integration](/integrations/model-providers/openai-py)).
+
+Prompts that passed an image or file as a variable use a [message placeholder](/docs/prompt-management/features/message-placeholders) instead: add a placeholder where the variable appeared, and pass the multimodal message to `compile()` at runtime.
+
+Before switching production traffic, compare old and new calls on a few representative inputs: the compiled messages should match what the prompt object produced, and the outputs should be equivalent. If you also want a systematic comparison, run the new prompt as an [experiment](/docs/evaluation/experiments/experiments-via-ui) on a small dataset.
+
+## Step 5: Roll out safely [#rollout]
+
+A few settings make the Langfuse prompt as reliable in production as the prompt object was:
+
+- **Caching.** The SDKs cache prompts in memory with a default TTL of 60 seconds and refresh them in the background, so only the first fetch per process calls the Langfuse API. Adjust it with `cache_ttl_seconds` / `cacheTtlSeconds` (see [caching](/docs/prompt-management/features/caching)).
+- **Fallback.** Pass a `fallback` to `get_prompt` / `prompt.get`, or pre-fetch prompts at startup, so your application keeps working if the Langfuse API is unreachable on first fetch (see [guaranteed availability](/docs/prompt-management/features/guaranteed-availability)).
+- **Environments.** Use labels such as `staging` and `production` instead of pinning version numbers in code, and restrict who can change the `production` label with [protected labels](/docs/prompt-management/features/prompt-version-control#protected-prompt-labels).
+- **Rollback.** If a new version misbehaves, move the `production` label back to the previous version in the UI. The next cache refresh picks it up without a deploy.
+
+Once every call site uses Langfuse, delete the `pmpt_` references from your code and configuration, and remove any environment variables that held prompt IDs.
+
+## Validation checklist [#validation-checklist]
+
+- [ ] Every `pmpt_` ID found in code and configuration has a Langfuse prompt
+- [ ] Export files for all prompts are committed as an archive
+- [ ] The `production` label points to the version that was pinned in code
+- [ ] Variables render correctly in the Langfuse UI and in `compile()`
+- [ ] `config` contains the model, reasoning, tools, and text format from the prompt object
+- [ ] Compiled messages match the prompt object's messages for a few test inputs
+- [ ] Generations in Langfuse link to the prompt version
+- [ ] A `fallback` or startup pre-fetch is in place for critical paths
+- [ ] No request references a `pmpt_` ID before November 30, 2026
+- [ ] Team members who edited prompts in the OpenAI dashboard have Langfuse project access
+
+## FAQ [#faq]
+
+<FaqDetails>
+
+<Details id="shutdown-date">
+<Summary>When do OpenAI reusable prompts stop working?</Summary>
+
+According to the [OpenAI deprecations page](https://developers.openai.com/api/docs/deprecations#2026-06-03-reusable-prompts), the `/v1/prompts` API and reusable prompt objects are scheduled to shut down on November 30, 2026. Requests that reference a prompt object by ID stop working at that point, so every call site needs to move before then.
+
+</Details>
+
+<Details id="export-api">
+<Summary>Can I export OpenAI prompt objects through the API?</Summary>
+
+No. Prompt objects can be referenced in Responses API calls, but OpenAI does not provide an endpoint to list or read their content with an API key. Copy each prompt from the OpenAI dashboard into an export file, then import the files into Langfuse with the script in [Step 3](#import).
+
+</Details>
+
+<Details id="why-not-code">
+<Summary>Why not move prompts into application code, as OpenAI recommends?</Summary>
+
+That works if only engineers change prompts and every change can wait for a deploy. If product managers or domain experts edited prompts in the OpenAI dashboard, or you rolled out prompt changes without redeploying, Langfuse keeps that workflow and adds versions, labels, per-version metrics, and experiments. You can still sync prompts to git with the GitHub integration.
+
+</Details>
+
+<Details id="latency">
+<Summary>Does fetching prompts from Langfuse add latency?</Summary>
+
+Not on the request path. The SDKs cache prompts in memory and refresh them in the background after the TTL expires, serving the cached version in the meantime. Only the first fetch in a process calls the Langfuse API, and a fallback or startup pre-fetch covers that case.
+
+</Details>
+
+<Details id="other-providers">
+<Summary>Can I use the migrated prompts with models from other providers?</Summary>
+
+Yes. Langfuse prompts are provider-agnostic: a compiled chat prompt is a list of messages that works with any chat model. Store provider-specific settings in `config`, or keep one prompt per provider if the settings differ substantially.
+
+</Details>
+
+</FaqDetails>
+
+## Get help with the migration [#get-help]
+
+Start on [Langfuse Cloud](https://cloud.langfuse.com) or [self-host](/self-hosting). If you are also moving evals off the OpenAI platform, see [Migrate from OpenAI Evals](/resources/engineering/migrate-from-openai-evals). If you want help planning the migration before the November 30, 2026 shutdown, [talk to us](/talk-to-us).
+
+<Cards num={2}>
+  <Card title="Get started free" href="https://cloud.langfuse.com" icon={<Cloud />} />
+  <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
+</Cards>

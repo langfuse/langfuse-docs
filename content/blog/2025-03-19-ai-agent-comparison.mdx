@@ -294,22 +294,41 @@ Observability tools like [Langfuse](/) let you capture, visualize, and analyze a
 
 ## FAQ
 
-### Which AI agent framework is best?
+<FaqDetails>
+
+<Details id="which-ai-agent-framework-is-best">
+<Summary>Which AI agent framework is best?</Summary>
 
 There is no single best framework; the right choice depends on your language, ecosystem, and control requirements. LangGraph is the most common default for complex Python workflows, Pydantic AI for type-safe Python services, Mastra and the Vercel AI SDK for TypeScript, and the provider SDKs (OpenAI Agents SDK, Claude Agent SDK, Google ADK, Strands Agents) when you are committed to one model ecosystem.
 
-### Is AutoGen still maintained?
+</Details>
+
+<Details id="is-autogen-still-maintained">
+<Summary>Is AutoGen still maintained?</Summary>
 
 AutoGen is in maintenance mode as of late 2025: it receives bug fixes and security patches but no new features, and it is community managed going forward. Microsoft recommends the Microsoft Agent Framework as its successor and publishes an official migration guide. Existing AutoGen applications continue to work.
 
-### Which agent framework should TypeScript teams use?
+</Details>
+
+<Details id="which-agent-framework-should-typescript-teams-use">
+<Summary>Which agent framework should TypeScript teams use?</Summary>
 
 Mastra and the Vercel AI SDK are the two leading TypeScript options, and LangGraph.js is a solid third. Mastra suits teams that want a complete framework with workflows, RAG, and evals; the Vercel AI SDK suits teams adding agent loops to existing Next.js or Node applications. Strands Agents and the Claude Agent SDK also ship TypeScript SDKs.
 
-### Do I need an agent framework at all?
+</Details>
+
+<Details id="do-i-need-an-agent-framework-at-all">
+<Summary>Do I need an agent framework at all?</Summary>
 
 Not always. A single-model tool loop can be written in under a hundred lines with a provider SDK, and for simple use cases that is a fine start. Frameworks earn their place when you need durable state, retries, multi-agent delegation, human-in-the-loop steps, and consistent tracing, the parts that are tedious and error-prone to rebuild yourself.
 
-### How do I compare agent frameworks for my own use case?
+</Details>
+
+<Details id="how-do-i-compare-agent-frameworks-for-my-own-use-case">
+<Summary>How do I compare agent frameworks for my own use case?</Summary>
 
 Build the same small task in your top two candidates and trace both. Because most frameworks in this post support OpenTelemetry, you can send traces from both prototypes to [Langfuse](/docs/observability/overview), compare cost, latency, and failure modes side by side, and then commit to the framework whose traces you would rather debug for the next year.
+
+</Details>
+
+</FaqDetails>

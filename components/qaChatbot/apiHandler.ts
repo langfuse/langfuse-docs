@@ -46,7 +46,7 @@ export const handler = async (req: Request) => {
       userId,
     },
     async () => {
-      updateActiveObservation({ input: inputText }, { asType: "generation" });
+      updateActiveObservation({ input: inputText }, { asType: "agent" });
       setActiveTraceIO({ input: inputText });
 
       const prompt = await tracedGetPrompt("langfuse-docs-assistant-chat", {
@@ -132,10 +132,7 @@ export const handler = async (req: Request) => {
                 .find((part: any) => part?.type === "text")?.text
             : (result as any).content;
 
-          updateActiveObservation(
-            { output: latestText },
-            { asType: "generation" },
-          );
+          updateActiveObservation({ output: latestText }, { asType: "agent" });
           setActiveTraceIO({ output: latestText });
           trace.getActiveSpan()?.end();
         },

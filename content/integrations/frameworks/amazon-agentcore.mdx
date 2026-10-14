@@ -10,7 +10,7 @@ logo: /images/integrations/bedrock_icon.png
 
 > **What is Amazon Bedrock AgentCore?** [Amazon Bedrock AgentCore](https://aws.amazon.com/bedrock/agents/) is a managed service that enables you to build, deploy, and manage AI agents in production. It provides containerized agent runtimes that can execute complex workflows, use tools, and interact with external APIs while leveraging foundation models from Amazon Bedrock.
 
-> **What is Langfuse?** [Langfuse](https://langfuse.com/) is an open-source platform for LLM engineering. It provides tracing and monitoring capabilities for AI agents, helping developers debug, analyze, and optimize their products. Langfuse integrates with various tools and frameworks via native integrations, OpenTelemetry, and SDKs.
+> **What is Langfuse?** [Langfuse](https://langfuse.com/) is an open-source platform for LLM engineering. It provides tracing and monitoring capabilities for AI agents, helping developers debug, analyze, and optimize their products. Langfuse integrates with various tools and frameworks via native integrations, OpenTelemetry, and SDKs. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it.
 
 ## Get Started
 
@@ -63,7 +63,7 @@ os.environ["AWS_DEFAULT_REGION"] = "us-west-2"
 
 ### Step 3: Create Agent with Langfuse Tracing
 
-Create an AgentCore agent that integrates with Langfuse via OpenTelemetry. This example uses the Strands Agents SDK with MCP tools. Any other agent framework can be used with Langfuse, see [integration pages](/integrations) for guides on how to instrument other frameworks.
+Create an AgentCore agent that integrates with Langfuse via OpenTelemetry. This example uses [Strands](/integrations/frameworks/strands-agents) with MCP tools. Any other agent framework can be used with Langfuse, see [integration pages](/integrations) for guides on how to instrument other frameworks.
 
 ```python
 from bedrock_agentcore.runtime import BedrockAgentCoreApp
@@ -255,7 +255,7 @@ Please refer to the [README.md](https://github.com/aristsakpinis93/agentcore-lan
 ## Resources
 
 - [Amazon Bedrock AgentCore Documentation](https://aws.amazon.com/bedrock/agents/)
-- [Strands Agents SDK Documentation](https://strandsagents.com)
+- [Strands Documentation](https://strandsagents.com)
 - [Langfuse Evaluation Documentation](/docs/evaluation/overview)
 - [Langfuse Datasets & Experiments](/docs/evaluation/experiments/datasets)
 - [Complete Example Repository](https://github.com/aristsakpinis93/agentcore-langfuse-continous-eval-loop)

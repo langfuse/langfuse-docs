@@ -40,9 +40,13 @@ import {
   ToolInput,
 } from "@/components/ai-elements/tool";
 import { scoreDemoNegativeUserFeedback } from "@/components/demoLangfuseBrowserClients";
+import { DemoTraceLink } from "@/components/demoTraceLink";
+import { buildDemoTraceUrl } from "@/lib/demo-trace";
 import { FeedbackDialog } from "./FeedbackPopover";
 import { cn } from "@/lib/utils";
 import type { UIMessage } from "ai";
+
+const TRACE_ID_PATTERN = /^[0-9a-f]{32}$/i;
 
 type ChatMessage = UIMessage;
 
@@ -82,13 +86,14 @@ export const Chat = ({ className, ...props }: ChatProps) => {
     });
   }, []);
 
-  const { messages, sendMessage, status, regenerate } = useChat<ChatMessage>({
-    messages: [],
-    transport: new DefaultChatTransport({
-      api: "/api/qa-chatbot",
-      body: { chatId, userId },
-    }),
-  });
+  const { messages, sendMessage, status, regenerate, stop } =
+    useChat<ChatMessage>({
+      messages: [],
+      transport: new DefaultChatTransport({
+        api: "/api/qa-chatbot",
+        body: { chatId, userId },
+      }),
+    });
 
   // Check if user has submitted any messages
   const hasUserMessages = messages.some((message) => message.role === "user");
@@ -218,14 +223,17 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                         const lastTextPartIndex =
                           textPartIndices[textPartIndices.length - 1];
                         const isLastTextPart = i === lastTextPartIndex;
-                        // Check if message is complete: not submitted/streaming and no parts are streaming
+                        // Per-message completeness: earlier replies keep their
+                        // Open-trace link while a later turn is streaming.
                         const hasStreamingParts = message.parts.some(
                           (p) => "state" in p && p.state === "streaming",
                         );
-                        const isMessageComplete =
-                          status !== "submitted" &&
-                          status !== "streaming" &&
-                          !hasStreamingParts;
+                        const isMessageComplete = !hasStreamingParts;
+                        const isChatIdle =
+                          status !== "submitted" && status !== "streaming";
+                        const traceUrl = TRACE_ID_PATTERN.test(message.id)
+                          ? buildDemoTraceUrl({ traceId: message.id })
+                          : null;
                         // Add spacing if next part is a different type (for consistent spacing between different types)
                         const nextPart = message.parts[i + 1];
                         const hasNextPartDifferentType =
@@ -237,10 +245,22 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                           >
                             <Response>{part.text}</Response>
                             {message.role === "assistant" &&
+                              isNotFirstMessage &&
+                              isLastTextPart &&
+                              isMessageComplete &&
+                              traceUrl && (
+                                <DemoTraceLink
+                                  traceUrl={traceUrl}
+                                  source="qa_chatbot"
+                                  className="mt-3"
+                                />
+                              )}
+                            {message.role === "assistant" &&
                               isLastMessage &&
                               isNotFirstMessage &&
                               isLastTextPart &&
-                              isMessageComplete && (
+                              isMessageComplete &&
+                              isChatIdle && (
                                 <Actions className="mt-2">
                                   <Action
                                     onClick={() => regenerate()}
@@ -341,20 +361,22 @@ export const Chat = ({ className, ...props }: ChatProps) => {
           onSubmit={handleSubmit}
           className="mt-4 rounded-[2px] border-line-structure bg-surface-bg shadow-sm relative z-10 focus-within:border-line-cta transition-colors"
         >
-          <div className="flex items-end gap-2">
+          <div className="flex items-end gap-1 p-1">
             <PromptInputTextarea
               ref={textareaRef}
               onChange={(e) => setInput(e.target.value)}
               value={input}
               placeholder="Ask a question about Langfuse..."
-              className="flex-1 pr-2 min-h-[40px] max-h-[300px] leading-5 pt-[10px] pb-[10px] overflow-y-auto text-sm"
+              className="flex-1 min-h-[32px] max-h-[300px] leading-5 py-1.5 px-2 overflow-y-auto text-sm"
               style={{ height: "auto" }}
-              minHeight={40}
+              minHeight={32}
               maxHeight={300}
             />
-            <div className="pr-3 pb-[10px]">
-              <PromptInputSubmit disabled={!input || !userId} status={status} />
-            </div>
+            <PromptInputSubmit
+              disabled={status === "streaming" ? !userId : !input || !userId}
+              status={status}
+              onStop={stop}
+            />
           </div>
         </PromptInput>
         <p className="mt-6 text-xs text-muted-foreground text-center relative z-10 italic">

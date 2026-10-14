@@ -1,0 +1,293 @@
+---
+title: "JS/TS v5 → v6"
+description: Migration guide for upgrading the Langfuse JS/TS SDK from v5 to v6.
+category: SDKs
+---
+
+# JS/TS v5 → v6
+
+v6 removes APIs that v5 marked `@deprecated` and makes a few breaking changes of its own. It needs Node.js 22+ and Langfuse Cloud or self-hosted Langfuse v4.59.0 or later. Check [Are you affected?](#are-you-affected); if nothing there applies, upgrade and you're done. Your editor or `@typescript-eslint/no-deprecated` flags deprecated v5 calls; v5 didn't warn at runtime.
+
+All `@langfuse/*` packages are released together. Upgrade them to the same major version:
+
+```bash
+npm install @langfuse/client@6 @langfuse/tracing@6 @langfuse/otel@6
+```
+
+## Are you affected? [#are-you-affected]
+
+You only need to change something if one of these applies to you.
+
+**New in v6:**
+
+- **You self-host Langfuse v3, or v4 older than v4.59.0** → v6 doesn't support it. Upgrade Langfuse, or stay on JS/TS SDK v5. See [Minimum versions](#minimum-versions).
+- **You run Node.js older than 22, or use `@langchain/core` older than 1.0** → [Minimum versions](#minimum-versions)
+- **You pass `requestOptions` to a generated API method without query parameters or a body**, such as `api.datasets.get(name, { timeoutInSeconds })` → [Request placeholder before `requestOptions`](#request-placeholder)
+- **You call `api.scores.create` or `api.legacy.scoreV1.*` directly** → [`api.scores.create` takes an array of scores](#scores-api)
+- **You call `api.scoresV3.getManyV3`** → [Score reads move to `api.scores.getMany`](#scores-reads)
+- **You pass a `mask` function or read metadata span attributes in a custom processor**, run experiments with a sampler, or a proxy rejects gzip-compressed requests → [Under the hood](#under-the-hood)
+
+**Previously deprecated in v5, now removed:**
+
+- **You call top-level `LangfuseClient` methods** such as `getPrompt()`, `getDataset()`, or `fetchTrace()` → [Deprecated `LangfuseClient` aliases removed](#client-aliases-removed)
+- **You call deprecated `langfuse.api.*` methods**, for example `api.trace.get`, `api.sessions`, `api.legacy.*`, `api.ingestion`, or `api.scores.getMany` → [Deprecated Public API methods removed](#removed-public-api-methods)
+- **You call `setActiveTraceIO()`, `span.setTraceIO()`, or `createTraceAttributes()`** → [Trace input/output setters removed](#trace-io-setters-removed)
+- **You call `item.link()` on dataset items** → [Dataset item `link()` removed](#dataset-item-link-removed)
+
+If none of these apply, upgrade and you're done.
+
+## Breaking changes [#breaking-changes]
+
+These are new in v6.
+
+### Minimum versions [#minimum-versions]
+
+**Affects:** self-hosted Langfuse v3 or older than v4.59.0, Node.js older than 22, and the LangChain integration on LangChain 0.x.
+
+| Requirement | v6                                       | If not met                                                       |
+| ----------- | ---------------------------------------- | ---------------------------------------------------------------- |
+| Langfuse    | Cloud, or self-hosted v4.59.0 or later   | Unsupported. Upgrade Langfuse first, or stay on JS/TS SDK v5     |
+| Node.js     | `>=22`; packages are compiled to ES2022  | Unsupported. Bundles for older runtimes must transpile the SDK   |
+| LangChain   | `@langchain/core@^1.0.0` (was `>=0.3.8`) | Peer dependency conflict when installing `@langfuse/langchain@6` |
+
+<Callout type="info">
+  Self-hosting Langfuse v3? [Upgrade to Langfuse v4](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4) to use the new SDKs and get the latest features. Until then, stay on JS/TS SDK v5. See the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
+</Callout>
+
+```bash
+npm install @langfuse/langchain@6 @langchain/core@^1
+```
+
+### Request placeholder before `requestOptions` [#request-placeholder]
+
+**Affects:** calls that pass `requestOptions` to a generated API method that takes no query parameters and no body.
+
+**Breaks (no prior deprecation):** a TypeScript compile error. In plain JavaScript, the options are silently ignored.
+
+These methods now take an optional `request` argument before `requestOptions`, like every other generated method. Calls without `requestOptions` don't change. To pass options, add `{}` as the request:
+
+```typescript
+// v5
+await langfuse.api.datasets.get("qa-set", { timeoutInSeconds: 10 });
+await langfuse.api.health.health({ maxRetries: 0 });
+
+// v6
+await langfuse.api.datasets.get("qa-set", {}, { timeoutInSeconds: 10 });
+await langfuse.api.health.health({}, { maxRetries: 0 });
+```
+
+These methods are affected. Every other generated method keeps its signature.
+
+| Namespace                   | Methods                                                                                                    |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `annotationQueues`          | `getQueue`, `getQueueItem`, `deleteQueueItem`                                                              |
+| `blobStorageIntegrations`   | `getBlobStorageIntegrations`, `getBlobStorageIntegrationStatus`, `deleteBlobStorageIntegration`            |
+| `comments`                  | `getById`                                                                                                  |
+| `datasetItems`              | `get`, `delete`                                                                                            |
+| `datasets`                  | `get`                                                                                                      |
+| `evaluationRules`           | `get`, `delete`                                                                                            |
+| `evaluators`                | `get`, `delete`                                                                                            |
+| `health`                    | `health`                                                                                                   |
+| `llmConnections`            | `delete`                                                                                                   |
+| `media`                     | `get`                                                                                                      |
+| `models`                    | `get`, `delete`                                                                                            |
+| `organizations`             | `getOrganizationMemberships`, `getProjectMemberships`, `getOrganizationProjects`, `getOrganizationApiKeys` |
+| `projects`                  | `get`, `delete`, `getApiKeys`, `deleteApiKey`                                                              |
+| `scim`                      | `getServiceProviderConfig`, `getResourceTypes`, `getSchemas`, `getUser`, `deleteUser`                      |
+| `scoreConfigs`              | `getById`                                                                                                  |
+| `scores`                    | `delete` (replaces `legacy.scoreV1.delete`)                                                                |
+| `trace`                     | `delete`                                                                                                   |
+| `unstable.dashboardWidgets` | `get`, `delete`                                                                                            |
+| `unstable.dashboards`       | `get`, `delete`, `deletePlacement`                                                                         |
+| `unstable.skills`           | `deleteVersion`                                                                                            |
+
+### `api.scores.create` takes an array of scores [#scores-api]
+
+**Affects:** direct calls to `langfuse.api.scores.create(...)` or `langfuse.api.legacy.scoreV1.*`. `langfuse.score.*` is unchanged.
+
+**Breaks:** TypeScript compile errors, or `TypeError` / `undefined` at runtime in JavaScript.
+
+- `api.scores.create()` takes an array of `CreateScoreRequest` objects. If some scores are rejected, the response includes `accepted`/`rejected` counts and `errors`. The response no longer contains the score `id`; set `id` on the request if you need it.
+- `api.legacy.scoreV1.create(...)` is gone. Use `api.scores.create([...])`.
+- `api.legacy.scoreV1.delete(scoreId)` moves to `api.scores.delete(scoreId)`.
+- The `legacy.CreateScoreRequest`, `legacy.CreateScoreResponse`, and `legacy.CreateScoreSource` re-exports are removed; use the types without the `legacy` prefix.
+
+```typescript
+// v5
+const { id } = await langfuse.api.scores.create({ name: "accuracy", value: 0.9, traceId: "trace-id" });
+await langfuse.api.legacy.scoreV1.delete("score-id");
+
+// v6
+const response = await langfuse.api.scores.create([
+  { id: "score-id", name: "accuracy", value: 0.9, traceId: "trace-id" },
+]);
+if ("rejected" in response && response.rejected > 0) console.error(response.errors);
+await langfuse.api.scores.delete("score-id");
+```
+
+### Score reads move to `api.scores.getMany` [#scores-reads]
+
+**Affects:** calls to `langfuse.api.scoresV3.getManyV3(...)`.
+
+**Breaks:** TypeScript compile errors, or `TypeError` at runtime in JavaScript, because `api.scoresV3` no longer exists. There is no alias.
+
+`api.scores.getMany` now does what `api.scoresV3.getManyV3` did, with the same arguments and response. If you called `api.scores.getMany({ scoreIds })` in v5, its response changes too; filter by `id` instead (comma-separated IDs).
+
+```typescript
+// v5
+const scores = await langfuse.api.scoresV3.getManyV3({ traceId: "trace-id", fields: "subject" });
+
+// v6
+const scores = await langfuse.api.scores.getMany({ traceId: "trace-id", fields: "subject" });
+```
+
+## Previously deprecated, now removed [#previously-deprecated]
+
+v5 already marked each of these `@deprecated` and named the replacement. If you moved to the replacement, nothing changes.
+
+### Deprecated `LangfuseClient` aliases removed [#client-aliases-removed]
+
+**Affects:** calls to the top-level convenience methods on `LangfuseClient`.
+
+**Breaks:** a TypeScript compile error, or `TypeError: ... is not a function` in JavaScript. Use the managers or the `api` client instead. Some v5 deprecation notes pointed to `api.trace.*`, `api.sessions.get`, or `api.datasets.getRun(s)`, which v6 removes too, so use the replacements below.
+
+| Removed                                | Replacement                                                   |
+| -------------------------------------- | ------------------------------------------------------------- |
+| `langfuse.getPrompt(...)`              | `langfuse.prompt.get(...)`                                    |
+| `langfuse.createPrompt(...)`           | `langfuse.prompt.create(...)`                                 |
+| `langfuse.updatePrompt(...)`           | `langfuse.prompt.update(...)`                                 |
+| `langfuse.getDataset(...)`             | `langfuse.dataset.get(...)`                                   |
+| `langfuse.createDatasetItem(...)`      | `langfuse.dataset.createItem(...)`                            |
+| `langfuse.resolveMediaReferences(...)` | `langfuse.media.resolveReferences(...)`                       |
+| `langfuse.createDataset(...)`          | `langfuse.api.datasets.create(...)`                           |
+| `langfuse.getDatasetItem(id)`          | `langfuse.api.datasetItems.get(id)`                           |
+| `langfuse.fetchMedia(id)`              | `langfuse.api.media.get(id)`                                  |
+| `langfuse.fetchTrace(id)`              | `langfuse.api.observations.getMany({ traceId: id, ... })`     |
+| `langfuse.fetchTraces(...)`            | `langfuse.api.observations.getMany({ ... })`                  |
+| `langfuse.fetchObservation(id)`        | `langfuse.api.observations.getMany({ filter: ..., ... })`     |
+| `langfuse.fetchObservations(...)`      | `langfuse.api.observations.getMany(...)`                      |
+| `langfuse.fetchSessions(...)`          | `langfuse.api.observations.getMany({ sessionId, ... })`       |
+| `langfuse.getDatasetRun(...)`          | `langfuse.api.experiments.list(...)` and `.listItems(...)`    |
+| `langfuse.getDatasetRuns(...)`         | `langfuse.api.experiments.list({ datasetId, fromStartTime })` |
+
+```typescript
+// v5
+const prompt = await langfuse.getPrompt("support-agent");
+const trace = await langfuse.fetchTrace("trace-id");
+
+// v6
+const prompt = await langfuse.prompt.get("support-agent");
+const observations = await langfuse.api.observations.getMany({ traceId: "trace-id", fields: "core,basic,io" });
+```
+
+### Deprecated Public API methods removed [#removed-public-api-methods]
+
+**Affects:** calls to the methods below through `langfuse.api.*`.
+
+**Breaks:** a TypeScript compile error, or `TypeError` / `undefined` in JavaScript. Each method was marked `@deprecated` in v5 with a note naming its replacement. The `api.legacy` namespace is gone. For details, see the [SDK method quick reference](/faq/all/deprecated-api-migration#sdk-method-quick-reference).
+
+| Removed                                                       | Replacement                                                                        |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `api.trace.get(...)`, `api.trace.list(...)`                   | `api.observations.getMany({ traceId, ... })`                                       |
+| `api.sessions.*`                                              | `api.observations.getMany({ sessionId, ... })`                                     |
+| `api.legacy.observationsV1.*`                                 | `api.observations.getMany(...)`                                                    |
+| `api.legacy.metricsV1.metrics(...)`                           | `api.metrics.metrics(...)`                                                         |
+| `api.scores.getMany({ scoreIds })`, `api.scores.getById(...)` | `api.scores.getMany({ id })`                                                       |
+| `api.datasetRunItems.*`                                       | `api.experiments.listItems(...)` or the experiment runner                          |
+| `api.datasets.getRun(...)`, `.getRuns(...)`                   | `api.experiments.list(...)` and `.listItems(...)`                                  |
+| `api.datasets.deleteRun(...)`                                 | List experiment items, then `api.trace.deleteMultiple({ traceIds })`               |
+| `api.ingestion.batch(...)`                                    | Tracing via OpenTelemetry (the SDK default), `api.scores.create([...])` for scores |
+
+`api.scores.getMany` keeps its name but now behaves like `scoresV3.getManyV3`; see [Score reads move to `api.scores.getMany`](#scores-reads).
+
+See [Dataset runs → Experiments](/faq/all/deprecated-api-migration#dataset-runs) for details.
+
+### Trace input/output setters removed [#trace-io-setters-removed]
+
+**Affects:** calls to `setActiveTraceIO()`, `span.setTraceIO()`, or `createTraceAttributes()`, or use of the `LangfuseTraceAttributes` type.
+
+**Breaks:** a TypeScript compile error, or a missing export / `TypeError` in JavaScript. Trace input and output now come from the root observation, so set them there.
+
+```typescript
+// v5
+await startActiveObservation("request", async () => {
+  setActiveTraceIO({ input: query, output: result });
+});
+
+// v6
+await startActiveObservation("request", async (span) => {
+  span.update({ input: query, output: result });
+  // or, inside the active root observation: updateActiveObservation({ input, output })
+});
+```
+
+Use `propagateAttributes()` for other trace attributes. `setActiveTraceAsPublic()` and `span.setTraceAsPublic()` are unchanged. If you still use [trace-level LLM-as-a-judge evaluators](/faq/all/llm-as-a-judge-migration), migrate them to observation-level evaluators.
+
+### Dataset item `link()` removed [#dataset-item-link-removed]
+
+**Affects:** calls to `item.link()` or use of the `LinkDatasetItemFunction` type.
+
+**Breaks:** a TypeScript compile error, or `TypeError: item.link is not a function` in JavaScript. `dataset.items` is now a plain `DatasetItem[]`. Use the experiment runner instead.
+
+```typescript
+// v5
+for (const item of dataset.items) {
+  await startActiveObservation("qa-task", async (span) => {
+    span.update({ input: item.input, output: await myApp(item.input) });
+    await item.link(span, "baseline");
+  });
+}
+
+// v6
+const result = await dataset.runExperiment({
+  name: "baseline",
+  task: async (item) => myApp(item.input),
+  evaluators: [accuracy],
+});
+```
+
+See [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) for the full runner API.
+
+## New features [#new-features]
+
+These need no code changes.
+
+- **Experiment links.** `result.experimentUrl` links directly to the experiment comparison view. `LangfuseClient` also exposes `getProjectId()` and `getExperimentUrl(experimentId)`.
+- **Typed metadata filters.** For data sent with v6, numeric and boolean metadata keeps its type, and nested objects can be filtered by dotted path, such as `a.b = 1`. Data sent with v5 keeps its previous shape. `propagateAttributes({ metadata })` accepts any JSON-serializable value.
+- **Batch score creation.** `api.scores.create()` accepts an array of `CreateScoreRequest` objects.
+- **Experiment records.** Run evaluations are sent for local-data runs too. Dataset versions (`datasetVersion`) are recorded on items as `langfuse.experiment.item.version`.
+
+## Under the hood [#under-the-hood]
+
+These need no code changes unless you depend on the old behavior.
+
+- **Scores are sent in batches of up to 100 to `POST /api/public/scores`** instead of the legacy ingestion endpoint. `langfuse.score.create()`, `.observation()`, `.trace()`, `flush()`, `shutdown()`, and the batching settings work as before. If the server accepts only part of a batch (HTTP 207), the SDK logs `Langfuse rejected N of M scores in batch:` with the server's errors and doesn't retry the rejected scores. Each score's timestamp is the time it was queued. `LangfuseBrowserClient.score()` also sends to `POST /api/public/scores`, with public-key authentication.
+- **Score methods never throw.** Input is validated on the client. Scores with an empty name or a non-finite or non-string value are logged at error level and dropped.
+- **Metadata values are JSON-encoded on the span, strings included.** The `langfuse.observation.metadata.<key>` and `langfuse.trace.metadata.<key>` attributes hold `'"prod"'` for the string `prod` and `'5'` for the number `5`. Langfuse decodes them only for spans from JS/TS SDK v6 or later, which is what keeps value types intact. Custom span processors or exporters that read these attributes need to `JSON.parse()` them. A `mask` function on `LangfuseSpanProcessor` now also receives each observation metadata value, decoded, so `data` can be a number, boolean, or object, not only a string. Propagated metadata isn't masked. The 200-character limit on propagated metadata applies to the encoded value, so a string can have at most 198 characters.
+- **Experiments are recorded through OpenTelemetry.** The experiment runner sends experiment and item attributes on its spans instead of calling `POST /api/public/dataset-run-items`. The runner doesn't special-case sampling: if your OpenTelemetry sampler drops an item's trace, that item doesn't appear in the experiment, while run-level scores are always stored. Don't sample traces while running experiments.
+- **Span batches are gzip-compressed on Node.js and Bun.** If a proxy rejects compressed requests, pass `new LangfuseSpanProcessor({ compression: "none" })` or set `LANGFUSE_OTEL_COMPRESSION=none`. The standard `OTEL_EXPORTER_OTLP_TRACES_COMPRESSION` and `OTEL_EXPORTER_OTLP_COMPRESSION` variables are honored too. Browser and edge runtimes don't compress.
+
+## Migration checklist [#migration-checklist]
+
+Work through this list, or paste it into your coding agent. Skip items that don't apply.
+
+- Use Node.js 22+ and Langfuse Cloud or self-hosted Langfuse v4.59.0+. On self-hosted v3, stay on v5.
+- Upgrade every `@langfuse/*` package to `@6`. With LangChain: `@langchain/core@^1`.
+- Generated API methods in the [affected list](#request-placeholder): `method(...pathArgs, requestOptions)` → `method(...pathArgs, {}, requestOptions)`.
+- `api.scores.create({ ... })` → `api.scores.create([{ ... }])`; set `id` on the request if you need it, and handle partial rejections (`rejected` > 0).
+- `api.legacy.scoreV1.create(...)` → `api.scores.create([...])`; `api.legacy.scoreV1.delete(id)` → `api.scores.delete(id)`; drop the `legacy.` prefix from score types.
+- `api.scoresV3.getManyV3(...)` → `api.scores.getMany(...)`.
+- v2 score reads: `api.scores.getMany({ scoreIds })` → `api.scores.getMany({ id })`; `api.scores.getById(id)` → `api.scores.getMany({ id })`.
+- `langfuse.getPrompt` / `createPrompt` / `updatePrompt` → `langfuse.prompt.get` / `create` / `update`.
+- `langfuse.getDataset` / `createDatasetItem` → `langfuse.dataset.get` / `createItem`; `langfuse.createDataset` / `getDatasetItem` → `langfuse.api.datasets.create` / `langfuse.api.datasetItems.get`.
+- `langfuse.resolveMediaReferences` → `langfuse.media.resolveReferences`; `langfuse.fetchMedia` → `langfuse.api.media.get`.
+- `langfuse.fetchTrace(s)` / `fetchObservation(s)` / `fetchSessions`, `api.trace.get` / `api.trace.list` / `api.sessions.*` / `api.legacy.observationsV1.*` → `langfuse.api.observations.getMany(...)`.
+- `api.legacy.metricsV1.metrics(...)` → `api.metrics.metrics(...)`.
+- `langfuse.getDatasetRun(s)`, `api.datasets.getRun(s)`, `api.datasetRunItems.*` → `api.experiments.list(...)` / `api.experiments.listItems(...)`.
+- `api.datasets.deleteRun(...)` → list experiment items, then `api.trace.deleteMultiple({ traceIds })`.
+- `api.ingestion.batch(...)` → SDK tracing (OpenTelemetry) for traces, `api.scores.create([...])` for scores.
+- `setActiveTraceIO()` / `span.setTraceIO()` / `createTraceAttributes()` → `span.update({ input, output })` on the root observation.
+- `item.link(...)` → `dataset.runExperiment({ name, task, evaluators })`.
+- `mask` functions: handle non-string `data`. Custom processors reading `langfuse.*.metadata.<key>` attributes: `JSON.parse()` the values.
+- Experiments: don't sample traces while running them.
+- Proxy rejects gzip: `new LangfuseSpanProcessor({ compression: "none" })` or `LANGFUSE_OTEL_COMPRESSION=none`.

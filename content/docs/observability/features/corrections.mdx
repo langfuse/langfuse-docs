@@ -112,13 +112,15 @@ langfuse.score.create({
 curl -X POST https://cloud.langfuse.com/api/public/scores \
   -H "Content-Type: application/json" \
   -H "Authorization: Basic <base64_encoded_credentials>" \
-  -d '{
-    "traceId": "trace-123",
-    "observationId": "obs-456",
-    "name": "output",
-    "value": "The corrected output text here",
-    "dataType": "CORRECTION"
-  }'
+  -d '[
+    {
+      "traceId": "trace-123",
+      "observationId": "obs-456",
+      "name": "output",
+      "value": "The corrected output text here",
+      "dataType": "CORRECTION"
+    }
+  ]'
 ```
 
 </Tab>
@@ -130,7 +132,7 @@ curl -X POST https://cloud.langfuse.com/api/public/scores \
 
 ## Fetching Corrections
 
-Corrections are stored as scores and can be fetched programmatically to build datasets or analyze model performance. Filter the [Scores API](/docs/api-and-data-platform/features/scores-api) by `dataType=CORRECTION`. The corrected output is in the `value` field.
+Corrections are stored as scores and can be fetched programmatically to build datasets or analyze model performance. Filter the [Scores API](/docs/api-and-data-platform/features/public-api#v3) by `dataType=CORRECTION`. The corrected output is in the `value` field.
 
 <Tabs items={["Python", "TypeScript", "HTTP"]}>
 <Tab>
@@ -140,7 +142,8 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-corrections = langfuse.api.scores_v3.get_many_v3(
+# Python SDK v4: langfuse.api.scores_v3.get_many_v3(...)
+corrections = langfuse.api.scores.get_many(
     data_type="CORRECTION",
     fields="subject,details",
 )
@@ -154,7 +157,8 @@ import { LangfuseClient } from "@langfuse/client";
 
 const langfuse = new LangfuseClient();
 
-const corrections = await langfuse.api.scoresV3.getManyV3({
+// JS/TS SDK v5: langfuse.api.scoresV3.getManyV3(...)
+const corrections = await langfuse.api.scores.getMany({
   dataType: "CORRECTION",
   fields: "subject,details",
 });

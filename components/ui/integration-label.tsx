@@ -10,6 +10,7 @@ interface IntegrationLabelProps {
   label: string;
   href?: string;
   className?: string;
+  analyticsItem?: string;
   onMouseEnter?: MouseEventHandler;
   onMouseLeave?: MouseEventHandler;
 }
@@ -19,6 +20,7 @@ export function IntegrationLabel({
   label,
   href,
   className,
+  analyticsItem,
   onMouseEnter,
   onMouseLeave,
 }: IntegrationLabelProps) {
@@ -37,6 +39,7 @@ export function IntegrationLabel({
     return (
       <Link
         href={href}
+        data-use-case-item={analyticsItem}
         className={cn(chipClassName, className)}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}

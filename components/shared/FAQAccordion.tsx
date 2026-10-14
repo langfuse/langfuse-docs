@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import { Link } from "@/components/ui/link";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
+import { FaqAsk } from "@/components/faq/FaqAsk";
+import { FaqAskAiTrigger } from "@/components/faq/FaqAskAiTrigger";
 
 export type FAQItem = {
   question: string;
@@ -129,6 +131,12 @@ export interface FAQAccordionProps {
   faqs: FAQItem[];
   /** Question key to open initially. Defaults to the first question. */
   defaultOpen?: string;
+  /**
+   * How the trailing “Ask anything else” row behaves.
+   * - `faq-bot` (default): inline form posting to `/api/faq-bot`
+   * - `ask-ai`: opens the Inkeep Ask AI sidebar
+   */
+  askMode?: "faq-bot" | "ask-ai";
   className?: string;
 }
 
@@ -139,6 +147,7 @@ export interface FAQAccordionProps {
 export function FAQAccordion({
   faqs,
   defaultOpen,
+  askMode = "faq-bot",
   className,
 }: FAQAccordionProps) {
   const [openItem, setOpenItem] = useState<string>(
@@ -179,6 +188,7 @@ export function FAQAccordion({
           </AccordionPrimitive.Content>
         </AccordionPrimitive.Item>
       ))}
+      {askMode === "ask-ai" ? <FaqAskAiTrigger /> : <FaqAsk />}
     </AccordionPrimitive.Root>
   );
 }
