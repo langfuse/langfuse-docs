@@ -33,7 +33,7 @@ You only need to change something if one of these applies to you.
 **Previously deprecated in v5, now removed:**
 
 - **You call top-level `LangfuseClient` methods** such as `getPrompt()`, `getDataset()`, or `fetchTrace()` → [Deprecated `LangfuseClient` aliases removed](#client-aliases-removed)
-- **You call deprecated `langfuse.api.*` methods**, for example `api.trace.get`, `api.sessions`, `api.legacy.*`, or `api.scores.getMany` → [Deprecated Public API methods removed](#removed-public-api-methods)
+- **You call deprecated `langfuse.api.*` methods**, for example `api.trace.get`, `api.sessions`, `api.legacy.*`, `api.ingestion`, or `api.scores.getMany` → [Deprecated Public API methods removed](#removed-public-api-methods)
 - **You call `setActiveTraceIO()`, `span.setTraceIO()`, or `createTraceAttributes()`** → [Trace input/output setters removed](#trace-io-setters-removed)
 - **You call `item.link()` on dataset items** → [Dataset item `link()` removed](#dataset-item-link-removed)
 
@@ -250,20 +250,21 @@ const observations = await langfuse.api.observations.getMany({
 
 **Previously deprecated in v5, now removed.** Each of these methods was marked `@deprecated` in v5, with a note naming its replacement. In v6 they are gone: TypeScript reports a compile error, and JavaScript gets `TypeError` or `undefined`. There is no `api.legacy` namespace anymore. For full replacement guidance, see the [SDK method quick reference](/faq/all/deprecated-api-migration#sdk-method-quick-reference).
 
-| Removed                                                   | Replacement                                                          |
-| --------------------------------------------------------- | -------------------------------------------------------------------- |
-| `api.trace.get(...)`, `api.trace.list(...)`               | `api.observations.getMany({ traceId, ... })`                         |
-| `api.sessions.*`                                          | `api.observations.getMany({ sessionId, ... })`                       |
-| `api.legacy.observationsV1.*`                             | `api.observations.getMany(...)`                                      |
-| `api.legacy.metricsV1.metrics(...)`                       | `api.metrics.metrics(...)`                                           |
-| `api.scores.getMany(...)` (v2), `api.scores.getById(...)` | `api.scores.getMany(...)` (Scores API v3)                            |
-| `api.datasetRunItems.*`                                   | `api.experiments.listItems(...)` or the experiment runner            |
-| `api.datasets.getRun(...)`, `.getRuns(...)`               | `api.experiments.list(...)` and `.listItems(...)`                    |
-| `api.datasets.deleteRun(...)`                             | List experiment items, then `api.trace.deleteMultiple({ traceIds })` |
+| Removed                                                   | Replacement                                                                                    |
+| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `api.trace.get(...)`, `api.trace.list(...)`               | `api.observations.getMany({ traceId, ... })`                                                   |
+| `api.sessions.*`                                          | `api.observations.getMany({ sessionId, ... })`                                                 |
+| `api.legacy.observationsV1.*`                             | `api.observations.getMany(...)`                                                                |
+| `api.legacy.metricsV1.metrics(...)`                       | `api.metrics.metrics(...)`                                                                     |
+| `api.scores.getMany(...)` (v2), `api.scores.getById(...)` | `api.scores.getMany(...)` (Scores API v3)                                                      |
+| `api.datasetRunItems.*`                                   | `api.experiments.listItems(...)` or the experiment runner                                      |
+| `api.datasets.getRun(...)`, `.getRuns(...)`               | `api.experiments.list(...)` and `.listItems(...)`                                              |
+| `api.datasets.deleteRun(...)`                             | List experiment items, then `api.trace.deleteMultiple({ traceIds })`                           |
+| `api.ingestion.batch(...)`                                | OpenTelemetry for tracing (the SDK's tracing does this), `api.scores.create([...])` for scores |
 
 `api.scores.getMany` keeps its name but now reads Scores API v3; see [Score reads move to `api.scores.getMany`](#scores-reads).
 
-Removed types include the trace, session, v1 observation, dataset run, and dataset run item response types, the `ScoreV1` family, and `SdkLogEvent`.
+Removed types include the trace, session, v1 observation, dataset run, and dataset run item response types, the `ScoreV1` family, and the ingestion request and event types such as `IngestionEvent`, `TraceBody`, and `ObservationBody`. `ScoreBody` stays.
 
 To delete an experiment's data, page through its items and delete their traces. This also deletes their observations and scores:
 
