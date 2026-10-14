@@ -242,20 +242,20 @@ These need no code changes unless you depend on the old behavior.
 
 Work through this list, or paste it into your coding agent. Skip items that don't apply.
 
-- [ ] Use Python 3.11+ and Langfuse Cloud or self-hosted Langfuse v4.59.0+. On self-hosted v3, stay on v4.
-- [ ] `pip install --upgrade "langfuse>=5"`. With integrations: `openai>=1`, `langchain-core>=1`.
-- [ ] `api.scores.create(name=..., value=..., ...)` → `api.scores.create(request=[CreateScoreRequest(...)])`, and handle `CreateScoreBatchResults` for partial rejections.
-- [ ] `api.legacy.score_v1.create(...)` → `api.scores.create(request=[...])`; `api.legacy.score_v1.delete(score_id=...)` → `api.scores.delete(score_id=...)`.
-- [ ] `api.scores_v3.get_many_v3(...)` → `api.scores.get_many(...)` (same for `async_api`).
-- [ ] v2 score reads: `api.scores.get_many(score_ids=...)` → `api.scores.get_many(id=...)`; `api.scores.get_by_id(...)` → `api.scores.get_many(id=...)`.
-- [ ] `run_batched_evaluation()`: remove `scope` and `_additional_trace_tags`; `fetch_trace_fields` → `fields`; use a v2 filter JSON array; mapper receives `ObservationV2`; discard v4 resume tokens.
-- [ ] `api.trace.get` / `api.trace.list` / `api.sessions.*` / `api.legacy.observations_v1.*` → `api.observations.get_many(...)`.
-- [ ] `api.legacy.metrics_v1.metrics(...)` → `api.metrics.metrics(...)`.
-- [ ] `api.dataset_run_items.*`, `api.datasets.get_run(s)`, `get_dataset_run(s)()` → `api.experiments.list(...)` / `api.experiments.list_items(...)`.
-- [ ] `delete_dataset_run()` / `api.datasets.delete_run()` → list experiment items, then `api.trace.delete_multiple(trace_ids=[...])`.
-- [ ] `api.ingestion.batch(...)` → SDK tracing (OpenTelemetry) for traces, `api.scores.create(request=[...])` for scores.
-- [ ] `set_current_trace_io()` / `span.set_trace_io()` → `span.update(input=..., output=...)` on the root observation.
-- [ ] `blocked_instrumentation_scopes=[...]` → `should_export_span` combined with `is_default_export_span`.
-- [ ] `mask_otel_spans` or custom exporters touching `langfuse.*.metadata.<key>` attributes: `json.loads()` values, write `json.dumps()` values.
-- [ ] Experiments: run with `sample_rate=1.0`.
-- [ ] Proxy rejects gzip: set `otel_compression="none"` or `LANGFUSE_OTEL_COMPRESSION=none`.
+- Use Python 3.11+ and Langfuse Cloud or self-hosted Langfuse v4.59.0+. On self-hosted v3, stay on v4.
+- `pip install --upgrade "langfuse>=5"`. With integrations: `openai>=1`, `langchain-core>=1`.
+- `api.scores.create(name=..., value=..., ...)` → `api.scores.create(request=[CreateScoreRequest(...)])`, and handle `CreateScoreBatchResults` for partial rejections.
+- `api.legacy.score_v1.create(...)` → `api.scores.create(request=[...])`; `api.legacy.score_v1.delete(score_id=...)` → `api.scores.delete(score_id=...)`.
+- `api.scores_v3.get_many_v3(...)` → `api.scores.get_many(...)` (same for `async_api`).
+- v2 score reads: `api.scores.get_many(score_ids=...)` → `api.scores.get_many(id=...)`; `api.scores.get_by_id(...)` → `api.scores.get_many(id=...)`.
+- `run_batched_evaluation()`: remove `scope` and `_additional_trace_tags`; `fetch_trace_fields` → `fields`; use a v2 filter JSON array; mapper receives `ObservationV2`; discard v4 resume tokens.
+- `api.trace.get` / `api.trace.list` / `api.sessions.*` / `api.legacy.observations_v1.*` → `api.observations.get_many(...)`.
+- `api.legacy.metrics_v1.metrics(...)` → `api.metrics.metrics(...)`.
+- `api.dataset_run_items.*`, `api.datasets.get_run(s)`, `get_dataset_run(s)()` → `api.experiments.list(...)` / `api.experiments.list_items(...)`.
+- `delete_dataset_run()` / `api.datasets.delete_run()` → list experiment items, then `api.trace.delete_multiple(trace_ids=[...])`.
+- `api.ingestion.batch(...)` → SDK tracing (OpenTelemetry) for traces, `api.scores.create(request=[...])` for scores.
+- `set_current_trace_io()` / `span.set_trace_io()` → `span.update(input=..., output=...)` on the root observation.
+- `blocked_instrumentation_scopes=[...]` → `should_export_span` combined with `is_default_export_span`.
+- `mask_otel_spans` or custom exporters touching `langfuse.*.metadata.<key>` attributes: `json.loads()` values, write `json.dumps()` values.
+- Experiments: run with `sample_rate=1.0`.
+- Proxy rejects gzip: set `otel_compression="none"` or `LANGFUSE_OTEL_COMPRESSION=none`.
