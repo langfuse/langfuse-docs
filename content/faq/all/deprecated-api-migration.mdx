@@ -479,6 +479,8 @@ curl \
 | Python v4 | `client.api.ingestion.batch(...)` with trace or observation events | Python SDK `4.7.0+` tracing and instrumentation, which export through OpenTelemetry |
 | JS/TS v5  | `client.api.ingestion.batch(...)` with trace or observation events | JS/TS SDK `5.4.0+` tracing and instrumentation, which export through OpenTelemetry  |
 
+Python SDK v5 and JS/TS SDK v6 remove `api.ingestion`. Use the SDK's OpenTelemetry tracing for traces and observations, and `api.scores.create` for scores.
+
 Score writes are unaffected. Direct REST clients can continue using `POST /scores`. Current Python and JS/TS SDKs intentionally batch score writes as `score-create` events through `POST /ingestion`; Langfuse v4 continues to accept that event type after <V4CutoverDate />. No SDK release that reroutes score writes to `POST /scores` is required for compatibility.
 
 ## Deprecated endpoints [#endpoints]

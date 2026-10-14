@@ -30,7 +30,7 @@ You only need to change something if one of these applies to you.
 
 **Previously deprecated in v4, now removed:**
 
-- **You call deprecated `langfuse.api.*` methods**, for example `api.trace.get`, `api.sessions`, `api.legacy.*`, or `api.scores.get_many` → [Deprecated Public API methods removed](#removed-public-api-methods)
+- **You call deprecated `langfuse.api.*` methods**, for example `api.trace.get`, `api.sessions`, `api.legacy.*`, `api.ingestion`, or `api.scores.get_many` → [Deprecated Public API methods removed](#removed-public-api-methods)
 - **You call `set_current_trace_io()` or `span.set_trace_io()`** → [Trace input/output setters removed](#trace-io-setters-removed)
 - **You call `get_dataset_runs()`, `get_dataset_run()`, or `delete_dataset_run()`** → [Dataset run helpers removed](#dataset-run-helpers-removed)
 - **You pass `blocked_instrumentation_scopes`** → [`blocked_instrumentation_scopes` removed](#blocked-instrumentation-scopes)
@@ -176,15 +176,16 @@ v4 already marked each of these as deprecated and named the replacement. If you 
 
 **Previously deprecated in v4, now removed.** Each of these methods raised a `DeprecationWarning` in v4 that named its replacement. In v5 they raise `AttributeError`, and there is no `api.legacy` namespace anymore. For full replacement guidance, see the [SDK method quick reference](/faq/all/deprecated-api-migration#sdk-method-quick-reference).
 
-| Removed                                                           | Replacement                                                 |
-| ----------------------------------------------------------------- | ----------------------------------------------------------- |
-| `api.trace.get(...)`, `api.trace.list(...)`                       | `api.observations.get_many(trace_id=..., ...)`              |
-| `api.sessions.*`                                                  | `api.observations.get_many(session_id=..., ...)`            |
-| `api.legacy.observations_v1.*`                                    | `api.observations.get_many(...)`                            |
-| `api.legacy.metrics_v1.metrics(...)`                              | `api.metrics.metrics(...)`                                  |
-| `api.scores.get_many(...)` (v2), `api.scores.get_by_id(...)`      | `api.scores.get_many(...)` (Scores API v3)                  |
-| `api.dataset_run_items.*`                                         | `api.experiments.list_items(...)` or the experiment runner  |
-| `api.datasets.get_run(...)`, `.get_runs(...)`, `.delete_run(...)` | [Dataset run helpers removed](#dataset-run-helpers-removed) |
+| Removed                                                           | Replacement                                                                                            |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `api.trace.get(...)`, `api.trace.list(...)`                       | `api.observations.get_many(trace_id=..., ...)`                                                         |
+| `api.sessions.*`                                                  | `api.observations.get_many(session_id=..., ...)`                                                       |
+| `api.legacy.observations_v1.*`                                    | `api.observations.get_many(...)`                                                                       |
+| `api.legacy.metrics_v1.metrics(...)`                              | `api.metrics.metrics(...)`                                                                             |
+| `api.scores.get_many(...)` (v2), `api.scores.get_by_id(...)`      | `api.scores.get_many(...)` (Scores API v3)                                                             |
+| `api.dataset_run_items.*`                                         | `api.experiments.list_items(...)` or the experiment runner                                             |
+| `api.datasets.get_run(...)`, `.get_runs(...)`, `.delete_run(...)` | [Dataset run helpers removed](#dataset-run-helpers-removed)                                            |
+| `api.ingestion.batch(...)`                                        | OpenTelemetry for tracing (the SDK's tracing does this), `api.scores.create(request=[...])` for scores |
 
 `api.trace` keeps `delete` and `delete_multiple`. `api.datasets` keeps `list`, `get`, and `create`.
 
@@ -202,7 +203,7 @@ trace = langfuse.api.trace.get("trace-id")
 observations = langfuse.api.observations.get_many(trace_id="trace-id", fields="core,basic,io")
 ```
 
-Removed types include `Trace`, `TraceWithDetails`, `TraceWithFullDetails`, `Traces`, `Observation`, `ObservationsView`, `ObservationsViews`, `Session`, `SessionWithTraces`, `PaginatedSessions`, `DatasetRun`, `DatasetRunItem`, `DatasetRunWithItems`, `PaginatedDatasetRuns`, `PaginatedDatasetRunItems`, `CreateDatasetRunItemRequest`, `DeleteDatasetRunResponse`, the `ScoreV1` family, `GetScoresResponse*`, the v1 `MetricsResponse`, and the `sdk-log` ingestion event. `langfuse.model` no longer re-exports `DatasetRun`, `Observation`, or `TraceWithFullDetails`.
+Removed types include `Trace`, `TraceWithDetails`, `TraceWithFullDetails`, `Traces`, `Observation`, `ObservationsView`, `ObservationsViews`, `Session`, `SessionWithTraces`, `PaginatedSessions`, `DatasetRun`, `DatasetRunItem`, `DatasetRunWithItems`, `PaginatedDatasetRuns`, `PaginatedDatasetRunItems`, `CreateDatasetRunItemRequest`, `DeleteDatasetRunResponse`, the `ScoreV1` family, `GetScoresResponse*`, the v1 `MetricsResponse`, and the ingestion request and event types such as `IngestionEvent`, `TraceBody`, and `ObservationBody`. `langfuse.model` no longer re-exports `DatasetRun`, `Observation`, or `TraceWithFullDetails`.
 
 ### Trace input/output setters removed [#trace-io-setters-removed]
 
