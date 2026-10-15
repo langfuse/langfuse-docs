@@ -1,17 +1,16 @@
 import {
-  Tabs as FumadocsTabs,
-  Tab as FumadocsTab,
   TabsContent as FumadocsTabsContent,
   TabsList,
   TabsTrigger,
 } from "fumadocs-ui/components/tabs";
 import { cn } from "@/lib/utils";
 import type React from "react";
+import { LangTab, LangTabs } from "@/components/LangTabs";
 
 const tabContentClass = "!bg-card tabs-content-normalized";
 
-// Attach Tab as a static property so <Tabs.Tab> works as a member expression
-// in MDX v3 (which compiles it as Tabs.Tab, not components["Tabs.Tab"]).
+// MDX maps Tabs/Tab to LangTabs. Re-export the same wrapper here so persist
+// grouping cannot drift between two tab implementations.
 export function TabsContent({
   className,
   forceMount = true,
@@ -26,19 +25,5 @@ export function TabsContent({
   );
 }
 
-export function Tab({
-  className,
-  forceMount = true,
-  ...props
-}: React.ComponentProps<typeof FumadocsTab>) {
-  return (
-    <FumadocsTab
-      forceMount={forceMount}
-      className={cn(tabContentClass, className)}
-      {...props}
-    />
-  );
-}
-
-export const Tabs = Object.assign(FumadocsTabs, { Tab });
-export { TabsList, TabsTrigger };
+export const Tabs = Object.assign(LangTabs, { Tab: LangTab });
+export { LangTab as Tab, TabsList, TabsTrigger };
