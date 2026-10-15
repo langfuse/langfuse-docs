@@ -1,0 +1,114 @@
+---
+title: Monitor Grokified with Langfuse
+sidebarTitle: Grokified
+logo: /images/integrations/grokified_icon.png
+description: Learn how to integrate Grokified with Langfuse using the OpenAI drop-in replacement.
+category: Integrations
+---
+
+# Observability for Grokified with Langfuse
+
+This guide shows you how to integrate Grokified with Langfuse. Grokified's chat completions API is OpenAI-compatible, so you can use the Langfuse OpenAI drop-in replacement to trace model calls. Use Langfuse's low-level SDK or `@observe()` decorator to trace other parts of your application.
+
+> **What is Grokified?** [Grokified](https://grokified.com) is an OpenAI-compatible API for Grok models at 50% of the list price. It is a separate service from the direct Grok API described in the [direct Grok integration](/integrations/model-providers/xai-grok): it has its own API keys and its own base URL, `https://api.grokified.com/v1`. The [API docs](https://grokified.com/docs) list every model.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source AI engineering platform that helps teams trace API calls, monitor performance, and debug issues in their LLM applications. Use [Langfuse Cloud](https://langfuse.com/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](https://langfuse.com/self-hosting) it.
+
+<Steps>
+## Step 1: Install Dependencies
+
+Make sure you have installed the necessary Python packages:
+
+```python
+%pip install openai langfuse
+```
+
+## Step 2: Set Up Environment Variables
+
+```python
+import os
+
+# Get keys for your project from the project settings page
+# https://cloud.langfuse.com
+
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-...");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-...");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+
+
+# Get your Grokified API key from https://grokified.com/login (keys start with gk_live_)
+os.environ.setdefault("GROKIFIED_API_KEY", "gk_live_...");
+```
+
+## Step 3: Langfuse OpenAI drop-in Replacement
+
+In this step we use the native [OpenAI drop-in replacement](https://langfuse.com/integrations/model-providers/openai-py) by importing `from langfuse.openai import openai`.
+
+To start using Grokified with OpenAI's client libraries, pass in your Grokified API key to the `api_key` option, and set the `base_url` to `https://api.grokified.com/v1`:
+
+```python
+# instead of import openai:
+from langfuse.openai import openai
+
+client = openai.OpenAI(
+  api_key=os.environ.get("GROKIFIED_API_KEY"),
+  base_url="https://api.grokified.com/v1",
+)
+```
+
+<Callout type="info" emoji="ℹ️">
+**Note:** The OpenAI drop-in replacement is fully compatible with the [Low-Level Langfuse Python SDKs](https://langfuse.com/docs/sdk/python/low-level-sdk) and [`@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators) to trace other parts of your application alongside model calls.
+
+</Callout>
+
+## Step 4: Run An Example
+
+The following cell demonstrates how to call Grokified's chat completions API using the traced OpenAI client. All API calls will be automatically traced by Langfuse.
+
+```python
+client = openai.OpenAI(
+  api_key=os.environ.get("GROKIFIED_API_KEY"),
+  base_url="https://api.grokified.com/v1",
+)
+
+response = client.chat.completions.create(
+  model="grok-4.6",
+  messages=[
+    {"role": "system", "content": "Act like you are a helpful assistant."},
+    {"role": "user", "content": "What are the famous attractions in San Francisco?"},
+  ],
+)
+
+print(response.choices[0].message.content)
+
+# In short-lived scripts, flush queued events before the process exits
+from langfuse import get_client
+get_client().flush()
+```
+
+`grok-4.6` works on any Grokified account. `grok-build-0.1` is a coding model with a 256K context window, and `grok-4.7` needs a Basic or higher Grokified plan (a prepaid account gets a 403 `plan_capability_required` error for it). The [Grokified model list](https://grokified.com/docs/models) has the current models and prices.
+
+## Step 5: See Traces in Langfuse
+
+After running the example model call, you can see the traces in Langfuse. You will see detailed information about your Grokified API calls, including:
+
+- Request parameters (model, messages, temperature, etc.)
+- Response content
+- Token usage statistics
+- Latency metrics
+
+<Callout type="info" emoji="ℹ️">
+**Cost tracking:** Langfuse shows token usage from the response. To see cost for a model Langfuse has no built-in price for, add a [custom model definition](https://langfuse.com/docs/observability/features/token-and-cost-tracking) with the prices from the Grokified model list. Each non-streaming Grokified response also carries a `usage.grokified` block with the list price, the amount charged and the remaining balance.
+</Callout>
+</Steps>
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
+
+## Resources
+
+- Check the [Grokified documentation](https://grokified.com/docs) for further details on available models and API options.
+- Visit [Grokified](https://grokified.com) to create an API key.
+- Visit [Langfuse](https://langfuse.com) to learn more about monitoring and tracing capabilities for your LLM applications.
