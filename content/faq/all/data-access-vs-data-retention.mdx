@@ -1,0 +1,45 @@
+---
+title: What is the difference between data access and data retention?
+description: "How the data access window of your Langfuse Cloud plan differs from data retention, what happens to older data, and how to delete data on a schedule."
+tags: [platform, cloud]
+---
+
+# What is the difference between data access and data retention?
+
+Data access and data retention are two separate settings on Langfuse Cloud:
+
+- **Data access** is set by your plan. It determines how many days of historic data you can view in Langfuse.
+- **Data retention** is an opt-in feature on Pro and Enterprise. It lets you decide how long Langfuse stores your data before deleting it.
+
+## Data access depends on your plan [#data-access]
+
+Each [Langfuse Cloud plan](/pricing) includes a data access window:
+
+| Plan       | Data access |
+| ---------- | ----------- |
+| Hobby      | 30 days     |
+| Core       | 90 days     |
+| Pro        | 3 years     |
+| Enterprise | 3 years     |
+
+The data access window limits how far back you can look at your traces, observations, and scores. It does not delete anything. Data older than your window is still stored, and becomes accessible again when you upgrade to a plan with a longer window.
+
+For example, if you have used the Hobby plan for six months, you can see the last 30 days of data. After upgrading to Core, you can see the last 90 days.
+
+## Data retention is an opt-in setting [#data-retention]
+
+[Data retention](/docs/administration/data-retention) lets you define a custom retention period per project, with a minimum of 3 days. Every night, Langfuse permanently deletes traces, observations, scores, and media assets that are older than this period. Deleted data cannot be recovered, including by upgrading your plan.
+
+Data retention is available on the Pro and Enterprise plans, and on self-hosted Enterprise Edition. Without a retention policy, Langfuse does not automatically delete your event data. Use data retention if you need to delete data on a schedule, for example to meet internal data policies or regulatory requirements.
+
+## Summary [#summary]
+
+|                      | Data access                    | Data retention                              |
+| -------------------- | ------------------------------ | ------------------------------------------- |
+| What it controls     | How much history you can view  | How long data is stored before deletion     |
+| Set by               | Your plan                      | Project owners and admins, per project      |
+| Default              | Always on (30 days to 3 years) | Off, data is not deleted automatically      |
+| Effect on older data | Hidden, but still stored       | Permanently deleted                         |
+| Available on         | All Langfuse Cloud plans       | Pro, Enterprise, and self-hosted Enterprise |
+
+If you need to keep data longer than your data access window outside of Langfuse, set up a [Blob Storage Export](/docs/api-and-data-platform/features/export-to-blob-storage) to sync traces, observations, and scores to your own S3, GCS, or Azure bucket.
