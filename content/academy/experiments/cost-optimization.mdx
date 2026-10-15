@@ -76,7 +76,7 @@ While it can be tempting, investing heavily in optimizing for cost should probab
 - you are happy with the output quality of your agent
 - you have a clear set of criteria to judge the output quality, in the form of [offline evals](/academy/evaluate/writing-evaluators#online-or-offline)
 
-The reason for this is that you will, in a way, be reducing resources/capacity of your agent, and you need to measure whether doing this has an impact on output quality.
+The reason for this is that you will, in a way, be reducing resources/capacity of your agent, and you need to measure whether doing this has an impact on output quality. **This means you will start with a larger, more expensive model** so you can see what good looks like first.
 
 <Callout type="info">
 Think of it as figuring out how much to water your lawn. Three times a week keeps the grass green, but once a week might be enough. The way you find out is to water less and watch whether the green (initial good state) color changes (eval). If it doesn’t, you just saved yourself a lot of water.
@@ -85,6 +85,10 @@ Think of it as figuring out how much to water your lawn. Three times a week keep
 ### If you’re starting from zero
 
 If the 2 prerequisites above aren’t met yet, start by optimizing for quality first, and just track the cost in parallel. After some time of observing your agent and improving the output quality over time, you will be able to formalize quality criteria into [well-defined metrics](/academy/evaluate/choosing-what-to-evaluate). This is the moment you start codifying this into [evals](/academy/evaluate/writing-evaluators).
+
+<Callout type="info">
+Are your traces structured to do cost optimization well? See [Appendix: Preparing your trace for cost optimization](#preparing-your-trace-for-cost-optimization).
+</Callout>
 
 ### The cost optimization process
 
@@ -98,92 +102,6 @@ In this process, it’s instrumental to
 
 - have a complete set of [scenarios](/academy/datasets) that are representative of what your agent will encounter in the real world
 - have a complete set of relevant [evaluators](/academy/evaluate) that together measure every aspect of output quality you care about
-
-## Make sure your trace is suited for cost optimization
-
-Trace structure and data are extremely important for making calculated guesses on what could reduce cost without impacting output quality. Check both:
-
-- structure of the trace
-- completeness of token usage and cost reporting, with the correct level of granularity
-
-Following the principle “what gets tracked gets managed”, it’s important your trace is set up to track anything that can influence cost of your agent.
-
-### Trace structure
-
-You can structure a trace in many ways. You should review and take conscious decisions about your trace structure. A couple of things to take note of:
-
-**Are all your intermediary calls logged as a separate span?** This is especially important if your agent is making heavy use of tools. One cause of high agent cost is context window blowup, often by tool outputs.<Ref refs={references} id="bai-tokens" /> Take a look at the following 2 traces:
-
-<Tabs items={["Loop shown as one LLM call with tools", "Loop shown as sequence of LLM and tool calls"]}>
-<Tab>
-
-```
-Trace: "Why was I charged twice this month?"          $0.11
-└── Generation: support-agent                         in 33,000 · out 410
-    ├── Tool: lookup_account
-    ├── Tool: get_invoices
-    └── Tool: search_help_center
-```
-
-</Tab>
-<Tab>
-
-```
-Trace: "Why was I charged twice this month?"          $0.11
-└── Agent: support-agent
-    ├── Generation: reason                            in 2,100 · out 60
-    ├── Tool: lookup_account
-    ├── Generation: reason                            in 2,600 · out 70
-    ├── Tool: get_invoices
-    ├── Generation: reason                            in 12,500 · out 80
-    ├── Tool: search_help_center
-    └── Generation: respond                           in 15,800 · out 200
-```
-
-</Tab>
-</Tabs>
-
-With the first trace, it’s hard to say why the agent run was expensive, or how to improve it. It’s also a misrepresentation of what happened in practice: an agent gets a user input, reasons about what to do (LLM call), decides to call some tools, reasons again based on the tool results (LLM call), etc. until it decides it has sufficient information to give a response (LLM call). This is why the second structure is more accurate and helpful. You can immediately see where the context blew up and it became expensive. You can also see how many LLM calls it took to get to a result, something you can also optimize for.
-
-**Are your tool call observations capturing the full tool output?** This connects to the point above: once you see input tokens of your LLM calls increasing, you want to pinpoint the tool responsible for it. You can only do this if your trace shows the full output of tool calls.
-
-**Do retries show up as separate observations?** If not, you won’t see how much retries are costing you, and you can’t optimize for it. This is also a good metric to aim to get to zero in general, as it also impacts latency.
-
-**Are you adding relevant attributes to your trace?** This is mainly to help you dig through your data. Prioritizing what area to improve is easier if you can drill down on cost by feature, topic, … See [Monitoring cost](#monitoring-cost-in-production) for more on this.
-
-<Callout type="info">
-For general best practices on traces, take a look at the page [_What does a good trace look like?_](/docs/observability/best-practices)
-</Callout>
-
-### Reporting cost and token usage
-
-Three principles to keep in mind:
-
-1. **Always report both cost and token usage of an LLM call**
-
-   When reducing cost of an individual LLM call, there are two levers you can pull: reducing the number of tokens, and using a model that has a lower cost per token. This means you need to have visibility into these 2 numbers individually.
-
-1. **Every LLM call, including intermediate ones, should be logged with its individual cost and token numbers**
-
-   An agent often calls an LLM multiple times in a loop to produce an output for the user. If you don’t include cost and token numbers on every LLM call separately, you have no visibility on when exactly the numbers blew up.
-
-1. **Be as granular as possible when reporting on these numbers**
-
-   Not all tokens are created equal, and they differ in price. You want to [report on the specific category of token](/docs/observability/features/token-and-cost-tracking#how-it-works) so that you can play with these categories in order to get your cost down.
-
-   | Token type     | Definition                                       | Example price per million tokens (Claude Sonnet 5.5, October 2026) |
-   | -------------- | ------------------------------------------------ | ------------------------------------------------------------------ |
-   | Uncached input | Tokens the model reads for the first time        | $2.00                                                              |
-   | Cache write    | Tokens written to the provider's prompt cache    | $2.50 for a 5-minute cache, $4.00 for a 1-hour cache               |
-   | Cache read     | Tokens served from the cache                     | $0.10                                                              |
-   | Output         | Tokens the model generates                       | $10.00                                                             |
-   | Reasoning      | Hidden thinking tokens, not returned in the text | Billed as output, $10.00                                           |
-
-   _Prices are from Anthropic's pricing page<Ref refs={references} id="anthropic-pricing" /> and change often. These numbers are mainly here to give you an idea of the ratios._
-
-<Callout type="info">
-To set this up in Langfuse, see the [token and cost tracking docs](/docs/observability/features/token-and-cost-tracking).
-</Callout>
 
 ## Levers to pull to get agent cost down
 
@@ -298,6 +216,94 @@ You can also set up [alerts](/docs/observability/features/alerts) for sudden cos
 - the cache expires more often because a tool got slower, which the agent needs to wait for
 - …
 
+</Callout>
+
+---
+
+## Appendix: Preparing your trace for cost optimization [#preparing-your-trace-for-cost-optimization]
+
+Trace structure and data are extremely important for making calculated guesses on what could reduce cost without impacting output quality. Check both:
+
+- structure of the trace
+- completeness of token usage and cost reporting, with the correct level of granularity
+
+Following the principle “what gets tracked gets managed”, it’s important your trace is set up to track anything that can influence cost of your agent.
+
+### Trace structure
+
+You can structure a trace in many ways. You should review and take conscious decisions about your trace structure. A couple of things to take note of:
+
+**Are all your intermediary calls logged as a separate span?** This is especially important if your agent is making heavy use of tools. One cause of high agent cost is context window blowup, often by tool outputs.<Ref refs={references} id="bai-tokens" /> Take a look at the following 2 traces:
+
+<Tabs items={["Loop shown as one LLM call with tools", "Loop shown as sequence of LLM and tool calls"]}>
+<Tab>
+
+```
+Trace: "Why was I charged twice this month?"          $0.11
+└── Generation: support-agent                         in 33,000 · out 410
+    ├── Tool: lookup_account
+    ├── Tool: get_invoices
+    └── Tool: search_help_center
+```
+
+</Tab>
+<Tab>
+
+```
+Trace: "Why was I charged twice this month?"          $0.11
+└── Agent: support-agent
+    ├── Generation: reason                            in 2,100 · out 60
+    ├── Tool: lookup_account
+    ├── Generation: reason                            in 2,600 · out 70
+    ├── Tool: get_invoices
+    ├── Generation: reason                            in 12,500 · out 80
+    ├── Tool: search_help_center
+    └── Generation: respond                           in 15,800 · out 200
+```
+
+</Tab>
+</Tabs>
+
+With the first trace, it’s hard to say why the agent run was expensive, or how to improve it. It’s also a misrepresentation of what happened in practice: an agent gets a user input, reasons about what to do (LLM call), decides to call some tools, reasons again based on the tool results (LLM call), etc. until it decides it has sufficient information to give a response (LLM call). This is why the second structure is more accurate and helpful. You can immediately see where the context blew up and it became expensive. You can also see how many LLM calls it took to get to a result, something you can also optimize for.
+
+**Are your tool call observations capturing the full tool output?** This connects to the point above: once you see input tokens of your LLM calls increasing, you want to pinpoint the tool responsible for it. You can only do this if your trace shows the full output of tool calls.
+
+**Do retries show up as separate observations?** If not, you won’t see how much retries are costing you, and you can’t optimize for it. This is also a good metric to aim to get to zero in general, as it also impacts latency.
+
+**Are you adding relevant attributes to your trace?** This is mainly to help you dig through your data. Prioritizing what area to improve is easier if you can drill down on cost by feature, topic, … See [Monitoring cost](#monitoring-cost-in-production) for more on this.
+
+<Callout type="info">
+For general best practices on traces, take a look at the page [_What does a good trace look like?_](/docs/observability/best-practices)
+</Callout>
+
+### Reporting cost and token usage
+
+Three principles to keep in mind:
+
+1. **Always report both cost and token usage of an LLM call**
+
+   When reducing cost of an individual LLM call, there are two levers you can pull: reducing the number of tokens, and using a model that has a lower cost per token. This means you need to have visibility into these 2 numbers individually.
+
+1. **Every LLM call, including intermediate ones, should be logged with its individual cost and token numbers**
+
+   An agent often calls an LLM multiple times in a loop to produce an output for the user. If you don’t include cost and token numbers on every LLM call separately, you have no visibility on when exactly the numbers blew up.
+
+1. **Be as granular as possible when reporting on these numbers**
+
+   Not all tokens are created equal, and they differ in price. You want to [report on the specific category of token](/docs/observability/features/token-and-cost-tracking#how-it-works) so that you can play with these categories in order to get your cost down.
+
+   | Token type     | Definition                                       | Example price per million tokens (Claude Sonnet 5.5, October 2026) |
+   | -------------- | ------------------------------------------------ | ------------------------------------------------------------------ |
+   | Uncached input | Tokens the model reads for the first time        | $2.00                                                              |
+   | Cache write    | Tokens written to the provider's prompt cache    | $2.50 for a 5-minute cache, $4.00 for a 1-hour cache               |
+   | Cache read     | Tokens served from the cache                     | $0.10                                                              |
+   | Output         | Tokens the model generates                       | $10.00                                                             |
+   | Reasoning      | Hidden thinking tokens, not returned in the text | Billed as output, $10.00                                           |
+
+   _Prices are from Anthropic's pricing page<Ref refs={references} id="anthropic-pricing" /> and change often. These numbers are mainly here to give you an idea of the ratios._
+
+<Callout type="info">
+To set this up in Langfuse, see the [token and cost tracking docs](/docs/observability/features/token-and-cost-tracking).
 </Callout>
 
 ## References
