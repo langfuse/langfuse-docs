@@ -15,7 +15,7 @@ Get started, no credit card required. Great for hobby projects and POCs.
 
 - All platform features (with limits)
 - 50k units / month included
-- 30 days data access
+- 30 days [data access](/faq/all/data-access-vs-data-retention)
 - 2 users
 - Community support via GitHub
 
@@ -29,7 +29,7 @@ For production projects. Longer data access and unlimited users.
 
 - Everything in Hobby
 - 100k units / month included, additional: $8/100k units (lower with volume)
-- 90 days data access
+- 90 days [data access](/faq/all/data-access-vs-data-retention)
 - Unlimited users
 - In-app support
 
@@ -45,7 +45,7 @@ For scaling projects. Unlimited history, high rate limits, all features.
 
 - Everything in Core
 - 100k units / month included, additional: $8/100k units (lower with volume)
-- 3 years data access
+- 3 years [data access](/faq/all/data-access-vs-data-retention)
 - Data retention management
 - Unlimited annotation queues
 - High rate limits
@@ -106,7 +106,7 @@ Trusted by: Ramp, GoDaddy, [Khan Academy](/users/khan-academy), [Merck Group](/u
 | [Additional usage](/docs/administration/billable-units)                                         | --                  | $8/100k units       | $8/100k units       | $8/100k units                |
 | Custom usage pricing                                                                            | --                  | --                  | --                  | Yearly Commitment            |
 | [Multi-modal](/docs/observability/features/multi-modality)                                      | Free while in beta  | Free while in beta  | Free while in beta  | Free while in beta           |
-| Access to historical data                                                                       | 30 days             | 90 days             | 3 years             | 3 years                      |
+| [Access to historical data](/faq/all/data-access-vs-data-retention)                             | 30 days             | 90 days             | 3 years             | 3 years                      |
 | [Ingestion throughput](/faq/all/api-limits)                                                     | 1,000 req/min       | 4,000 req/min       | 20,000 req/min      | Custom                       |
 | **Langfuse AI**                                                                                 |                     |                     |                     |                              |
 | [Langfuse Assistant (in-app agent)](/docs/langfuse-assistant)                                   | Yes                 | Yes                 | Yes                 | Yes                          |
@@ -266,6 +266,9 @@ A billable unit is any tracing data point you send to Langfuse -- including the 
 
 **How does the graduated pricing work?**
 Graduated pricing means you pay different rates for different volume tiers. The first 100k units are included in paid plans, then you pay $8/100k for 100k--1M, $7/100k for 1M--10M, $6.50/100k for 10M--50M, and $6/100k for 50M+ units. Use the pricing calculator on [langfuse.com/pricing](https://langfuse.com/pricing#pricing-calculator) to estimate your bill.
+
+**What is the difference between data access and data retention?**
+Data access is set by your plan and determines how many days of historic data you can view (Hobby: 30 days, Core: 90 days, Pro and Enterprise: 3 years). Older data is still stored and becomes accessible again when you upgrade. [Data retention](/docs/administration/data-retention) is a separate, opt-in feature on Pro and Enterprise that permanently deletes data after a custom period. See [data access vs. data retention](/faq/all/data-access-vs-data-retention).
 
 **How can I reduce my Langfuse Cloud bill?**
 The primary way is to reduce the number of billable units you ingest. See [tips for cutting costs](/faq/all/cutting-costs). With graduated pricing, you automatically get lower rates as your volume increases.
