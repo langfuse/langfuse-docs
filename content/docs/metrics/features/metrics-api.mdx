@@ -75,9 +75,15 @@ The v2 Metrics API provides significant performance improvements through an opti
 
 The v2 Metrics API enforces a default `config.row_limit` of 100 rows per query to ensure consistent performance. You can specify a custom `config.row_limit` in your query to override this default, up to a maximum of 1,000 rows.
 
-### High Cardinality Dimensions
+### High Cardinality Dimensions [#high-cardinality-dimensions]
 
-Certain dimensions like `id`, `traceId`, `userId`, and `sessionId` cannot be used for grouping in the v2 Metrics API. Grouping by these high cardinality fields is extremely expensive and rarely useful in practice. These dimensions remain available for filtering.
+Dimensions like `id`, `traceId`, `userId`, and `sessionId` are high cardinality. You can group by them only in top-N queries, which must:
+
+- set `config.row_limit` explicitly,
+- include an `orderBy` with direction `desc` on one of the query's metrics, and
+- not set `timeDimension`.
+
+See [Top users by cost](#example-top-users-by-cost) for an example. High cardinality dimensions are always available for filtering.
 
 ### Semantic-root filtering and grouping
 
@@ -117,4 +123,34 @@ curl \
     "config": {"row_limit": 1000}
   }' \
   https://cloud.langfuse.com/api/public/v2/metrics
+```
+
+### Example: Top users by cost [#example-top-users-by-cost]
+
+The 10 users with the highest LLM cost in production. `userId` is a [high cardinality dimension](#high-cardinality-dimensions), so the query sets `config.row_limit` and orders by `sum_totalCost` descending.
+
+```bash
+curl \
+  -H "Authorization: Basic <BASIC AUTH HEADER>" \
+  -G \
+  --data-urlencode 'query={
+    "view": "observations",
+    "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
+    "dimensions": [{"field": "userId"}],
+    "filters": [{"column": "environment", "operator": "=", "value": "production", "type": "string"}],
+    "fromTimestamp": "2025-12-01T00:00:00Z",
+    "toTimestamp": "2025-12-08T00:00:00Z",
+    "orderBy": [{"field": "sum_totalCost", "direction": "desc"}],
+    "config": {"row_limit": 10}
+  }' \
+  https://cloud.langfuse.com/api/public/v2/metrics
+```
+
+```json
+{
+  "data": [
+    { "userId": "user-17", "sum_totalCost": 0.777 },
+    { "userId": "user-24", "sum_totalCost": 0.014 }
+  ]
+}
 ```
