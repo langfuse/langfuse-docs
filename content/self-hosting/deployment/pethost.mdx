@@ -1,0 +1,46 @@
+---
+title: Deploy Langfuse v4 on Pethost
+description: Use this guide to deploy Langfuse v4 on a single Pethost machine with its one-click template.
+label: "Version: v4"
+sidebarTitle: "Pethost"
+---
+
+# Pethost
+
+import SelfHostCommunityDeployment from "@/components-mdx/self-host-community-deployment.mdx";
+
+<SelfHostCommunityDeployment />
+
+You can deploy Langfuse v4 on [Pethost](https://pethost.dev/), a small cloud for personal projects, with its one-click template.
+The template runs the services of the [Docker Compose deployment](/self-hosting/deployment/docker-compose) on one machine, so the same limits apply: no high availability and no scaling.
+See the [architecture overview](/self-hosting#architecture) for more details.
+
+## Deploy
+
+Open the [Langfuse template](https://pethost.dev/templates/langfuse/), click **Deploy on Pethost**, and enter the email and password of the first user.
+
+The template creates these services on the machine:
+
+- Langfuse v4 web and worker services
+- PostgreSQL 17
+- Redis 7
+- ClickHouse, with its system logs kept for 7 days
+- MinIO, reachable only from the other services
+
+It generates `NEXTAUTH_SECRET`, `SALT`, `ENCRYPTION_KEY` and the data stores' passwords, and sets `NEXTAUTH_URL` to the project's HTTPS address.
+It uses [headless initialization](/self-hosting/administration/headless-initialization) to create an organization and a project named Default, with the email and password you entered as their owner, and sets `AUTH_DISABLE_SIGNUP=true`.
+
+The six services take about 2.7 GB of memory at rest, so pick a machine with more than 3 GB. The template bounds the Node.js heap of the web service to 1 GB and the worker's to 512 MB.
+
+MinIO has no public endpoint, so media uploads from browsers and SDK clients do not work until you configure [blob storage](/self-hosting/deployment/infrastructure/blobstorage) that they can reach.
+
+The template's files are in the [template repository](https://github.com/pethost-dev/templates/tree/main/langfuse).
+
+## Features
+
+Langfuse supports many configuration options and self-hosted features.
+For more details, see the [configuration guide](/self-hosting/configuration).
+
+import SelfHostFeatures from "@/components-mdx/self-host-features.mdx";
+
+<SelfHostFeatures />
