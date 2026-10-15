@@ -151,8 +151,8 @@ langfuse = get_client()
 now = datetime.now()
 one_day_ago = now - timedelta(hours=24)
 
-# The advanced `filter` parameter takes precedence over the individual query
-# parameters, so the time window is expressed as filter conditions as well.
+# Each condition in the advanced `filter` parameter replaces the individual
+# query parameter for the same field; the other query parameters still apply.
 traces = langfuse.api.observations.get_many(
     fields="core,basic,io,metadata,trace_context",
     filter=json.dumps([
