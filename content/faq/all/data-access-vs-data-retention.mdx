@@ -28,7 +28,7 @@ For example, if you have used the Hobby plan for six months, you can see the las
 
 ## Data retention is an opt-in setting [#data-retention]
 
-[Data retention](/docs/administration/data-retention) lets you define a custom retention period per project, with a minimum of 3 days. Every night, Langfuse permanently deletes traces, observations, scores, and media assets that are older than this period. Deleted data cannot be recovered, including by upgrading your plan.
+[Data retention](/docs/administration/data-retention) lets you define a custom retention period per project, with a minimum of 3 days. Every night, Langfuse permanently deletes traces, observations, scores, and media assets that are older than this period, except for [media associated with saved dataset items](/docs/administration/data-retention#dataset-media). Deleted data cannot be recovered, including by upgrading your plan.
 
 Data retention is available on the Pro and Enterprise plans, and on self-hosted Enterprise Edition. Without a retention policy, Langfuse does not automatically delete your event data. Use data retention if you need to delete data on a schedule, for example to meet internal data policies or regulatory requirements.
 
@@ -42,4 +42,4 @@ Data retention is available on the Pro and Enterprise plans, and on self-hosted 
 | Effect on older data | Hidden, but still stored       | Permanently deleted                         |
 | Available on         | All Langfuse Cloud plans       | Pro, Enterprise, and self-hosted Enterprise |
 
-If you need to keep data longer than your data access window outside of Langfuse, set up a [Blob Storage Export](/docs/api-and-data-platform/features/export-to-blob-storage) to sync traces, observations, and scores to your own S3, GCS, or Azure bucket.
+If you need to keep data outside of Langfuse, [Blob Storage Export](/docs/api-and-data-platform/features/export-to-blob-storage) can sync traces, observations, and scores to your own S3, GCS, or Azure bucket. On Langfuse Cloud, it is available on Pro with the Teams add-on and on Enterprise.

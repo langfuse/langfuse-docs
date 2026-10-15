@@ -50,23 +50,14 @@ const DATA_ACCESS_FAQ_HREF = "/faq/all/data-access-vs-data-retention";
 const DATA_ACCESS_DESCRIPTION =
   "How many days of historic data you can view. Older data is still stored and becomes accessible when you upgrade. This is separate from data retention, which deletes data.";
 
-// Info icon explaining that data access is not data retention
-const DataAccessInfo = () => {
-  return (
-    <HoverCard>
-      <HoverCardTrigger aria-label="About data access">
-        <InfoIcon className="inline-block ml-1 size-3" />
-      </HoverCardTrigger>
-      <HoverCardContent className="w-60 text-xs">
-        {DATA_ACCESS_DESCRIPTION} (
-        <Link href={DATA_ACCESS_FAQ_HREF} className="underline">
-          learn more
-        </Link>
-        )
-      </HoverCardContent>
-    </HoverCard>
-  );
-};
+// Info icon explaining that data access is not data retention.
+// FeatureDetails is resolved at render time, so it can be defined further below.
+const DataAccessInfo = () => (
+  <FeatureDetails
+    description={DATA_ACCESS_DESCRIPTION}
+    href={DATA_ACCESS_FAQ_HREF}
+  />
+);
 
 type DeploymentOption = "cloud" | "selfHosted";
 
