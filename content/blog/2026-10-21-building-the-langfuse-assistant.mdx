@@ -7,6 +7,7 @@ author: Ben
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
+import { AssistantMilestones } from "@/components/blog/AssistantMilestones";
 
 <BlogHeader
   title="How we built the Langfuse Assistant"
@@ -31,15 +32,7 @@ The first step was expanding the [MCP server](/blog/2025-12-09-building-langfuse
 
 Then in June we launched the first Beta version of the Assistant. A [Mastra](https://mastra.ai) agent that ran behind an HTTP endpoint, streaming responses to the browser. It handled one conversation at a time, with no parallel work or background execution. In early July we then gave it write access with human-in-the-loop approvals, and later that month added a sandbox. Background execution then got launched in August. We [announced all these capabilities together in September](/changelog/2026-09-03-langfuse-assistant).
 
-```mermaid
-timeline
-  title Assistant milestones in 2026
-  May 29 : Overhauled and expanded MCP server
-  June 19 : Langfuse Assistant public beta
-  July 1 : Write actions with approvals
-  August 6 : Background execution
-  August 13 : Sandbox-enabled runs
-```
+<AssistantMilestones />
 
 Here's the architecture that we ended up with:
 
