@@ -11,66 +11,76 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 <BlogHeader
   title="How we built the Langfuse Assistant"
   description="How we built the Langfuse Assistant on our existing MCP server, why the agent runs outside its sandbox, and how we handle background runs."
-  authors={["benbachem"]}
+  authors={["lotteverheyden", "benbachem"]}
   date="October 21, 2026"
 />
 
-Back in June we [launched](/changelog/2026-06-19-langfuse-assistant-public-beta) Halo, the [Langfuse Assistant](/docs/langfuse-assistant). You can ask it to interpret your traces, build a dataset, or help set up evals without leaving the Langfuse UI.
+Back in June we [launched](/changelog/2026-06-19-langfuse-assistant-public-beta) Halo, the [Langfuse Assistant](/docs/langfuse-assistant). You can ask it to interpret your traces, build a dashboard or dataset, or help set up evals without leaving the Langfuse UI.
 
-It's somewhat ironic: as a company focused on helping others build agents, we didn't have an agentic feature in our own UI. We already offered a [Langfuse skill](/docs/api-and-data-platform/features/agent-skill), [MCP server](/docs/api-and-data-platform/features/mcp-server), and [CLI](/docs/api-and-data-platform/features/cli) for using Langfuse from agents like Claude Code or Cursor. We wanted to bring those capabilities into Langfuse itself.
+It's somewhat ironic: as a company focused on helping others build agents, we didn't have an in-ui agent of our own. We've invested into building the infrastructure and tools for agent integration such as the [Langfuse skill](/docs/api-and-data-platform/features/agent-skill), [MCP server](/docs/api-and-data-platform/features/mcp-server), and [CLI](/docs/api-and-data-platform/features/cli) for using Langfuse from agents like Claude Code or Cursor but now we wanted to bring those capabilities into Langfuse itself.
 
 <Video src="https://static.langfuse.com/docs-videos/in-app-agent.mp4" />
 
-When we first talked about writing this post, I wasn't sure there was much to write about. The first version was a Mastra agent, an MCP server, and some code to glue them together. There was no sandbox. We already had tools for accessing project data, so the agent could use those. I think that's worth writing about: we could start with a fairly small implementation and add capabilities as we needed them.
+When we first discussed whether we should write this post, I wasn't sure there was much to write about. The first version was simply a Mastra agent, an MCP server, and some code to glue them together. Nothing a tech company would consider worth writing a blog post about. There was no sandbox yet, we didn't invent a more efficient algorithm for agent execution and we didn't rewrite anything in Rust (although there might be some other posts here coming soon). Building the in-ui agent was mostly about integrating existing pieces and making them work smoothly together as well as creating the foundations for future agentic features.
 
-From the start, we wanted to reuse as much as possible and share the tools and instructions behind Halo with people using Langfuse through Claude Code or Codex. We didn't want a second set to maintain just for the in-product agent. If we improved a tool or fixed some guidance for Halo, that should help people using their own agents too. That meant building on our existing MCP server and, later, bringing the shared Langfuse skill into the Assistant.
+From the start, we knew we wanted to reuse as much as possible and share the tools and instructions behind Halo with people using Langfuse through Claude Code or Codex. We didn't want a second set of things to maintain just for the in-product agent. If we improved a tool or fixed some guidance for Halo, that should help people using their own agents too. That meant building on our existing MCP server as well as bringing the shared Langfuse skill into the Assistant.
 
 ## How the Assistant is put together
 
 The first step was expanding the [MCP server](/blog/2025-12-09-building-langfuse-mcp-server). The [May 29 release](/changelog/2026-05-29-mcp-update) added tools for observations, metrics, scores, comments, datasets, and annotation queues, making most Langfuse project data available to agents. We needed these tools for Halo, but they were also useful to anyone connecting their own agent.
 
-The June version was a [Mastra](https://mastra.ai) agent behind an HTTP endpoint, streaming responses to the browser. It handled one conversation at a time, with no parallel work or background execution. In July we added approvals for actions that change data, embedded the Langfuse skill, and added a sandbox. Background execution became the default in August. We [announced these capabilities together in September](/changelog/2026-09-03-langfuse-assistant).
+Then in June we launched the first Beta version of the Assistant. A [Mastra](https://mastra.ai) agent that ran behind an HTTP endpoint, streaming responses to the browser. It handled one conversation at a time, with no parallel work or background execution. In early July we then gave it write access with human-in-the-loop approvals, and later that month added a sandbox. Background execution then got launched in August. We [announced all these capabilities together in September](/changelog/2026-09-03-langfuse-assistant).
 
 ```mermaid
 timeline
   title Assistant milestones in 2026
-  May 29 : Expanded MCP tools released — shared foundation for the Assistant
-  June 19 : V1 public beta
+  May 29 : Overhauled and expanded MCP server
+  June 19 : Langfuse Assistant public beta
   July 1 : Write actions with approvals
-  July 2 : Langfuse skill embedded
-  July 16 : Sandbox implementation merged
-  July 29–August 6 : Background worker, service, and client merged
-                   : Background execution enabled by default on August 6
-  August 6 : Silent MCP tool results
-  September 3 : Public announcement of background runs, sandbox analysis, and approvals
-  Exploring : SDK and model access in the sandbox
+  August 6 : Background execution
+  August 13 : Sandbox-enabled runs
 ```
 
-Unless marked as a release or announcement, these dates refer to implementation milestones in git. SDK and model access in the sandbox are still exploratory.
-
-The current setup looks like this:
+Here's the architecture that we ended up with:
 
 ```mermaid
 flowchart LR
-  B[Browser] -->|start run| W[Langfuse web]
-  W -.->|SSE: persisted events| B
-  W -->|enqueue| Q[(Redis queue)]
-  W --> P[(Postgres<br/>runs + event log)]
-  P -.->|poll event tail| W
-  Q --> K[Langfuse worker<br/>Mastra agent loop]
-  K -->|events| P
-  K --> M[Model<br/>Claude on Bedrock]
-  K -->|temporary project key| MCP[Langfuse MCP server]
-  K -->|read, write, edit, bash| S[Optional sandbox<br/>Lambda MicroVM, no egress by default]
+  B[Browser]
+
+  subgraph runs[Run management]
+    W[Langfuse web]
+    Q[(Redis queue)]
+    P[(Postgres<br/>Run state + event log)]
+    K[Langfuse worker<br/>Mastra agent loop]
+    W -->|Save run| P
+    W -->|Enqueue run ID| Q
+    Q -->|Pick up run| K
+    K -->|Save progress and results| P
+    P -.->|Poll new events| W
+  end
+
+  subgraph tools[Model and tools]
+    M[Claude on Bedrock]
+    MCP[Langfuse MCP server<br/>Project-scoped data access]
+    S[Optional Lambda MicroVM<br/>Files + scripts, no egress by default]
+  end
+
+  B -->|Start run or approve action| W
+  W -.->|Stream saved events over SSE| B
+  K <-->|Model calls| M
+  K -->|Temporary project key + approved tools| MCP
+  K -->|read, write, edit, bash| S
 ```
 
-The web server saves the run request and puts its ID on a queue. A worker picks it up, rechecks the user's access, and runs the agent using the saved conversation. As the agent works, the worker writes events to Postgres. The web server polls for new events and streams them to the browser over SSE. Closing the browser doesn't stop the run.
+For the user, this means they can ask Halo to investigate something, close the tab, and come back to its progress and results. The worker keeps going independently of the browser, while the saved event log lets the UI catch up when they return. MCP tools let Halo work with their project data; the optional sandbox lets it process larger results with scripts instead of reading everything into the model's context. Neither gives it more access than the user has, and actions that change data still need approval.
 
 ## Reusing the MCP server and skill
 
-Halo uses the same MCP server you can connect to Claude Code or Cursor. Almost all customer-data access goes through it, though the system prompt also includes some generic information about the user. We can control which tools the Assistant gets to call without having to secure arbitrary network requests. The agent has no web-fetch tool or network access of its own.
+As mentioned earlier, sharing as much as possible between the Langfuse Assistant and users interacting with Langfuse through tools such as Claude Code or Codex was a key design goal.
 
-For each run, the worker creates a temporary API key scoped to the project. By default, it can only call MCP tools annotated as read-only. We also filter tools by the signed-in user's role before exposing them to the model. If the user's role doesn't allow an action, the agent doesn't get the tool for it.
+Halo uses our public MCP server, the same one you can connect to. Almost all customer-data access goes through it, though the system prompt also includes some generic information about the user, similar to what you'd see in a system prompt from Claude or ChatGPT. By relying on MCP and tools, we can control which tools the Assistant gets to call without having to secure arbitrary network requests.
+
+For each run, the worker creates a temporary API key scoped to the project. By default, it can only call read-only MCP tools. We maintain our own mapping of tool permissions rather than trusting the MCP server's read-only annotations. We also filter tools by the signed-in user's role before exposing them to the model. If the user's role doesn't allow an action, the agent doesn't get the tool for it.
 
 Tools that change data require approval. The worker adds the approved tool to an allowlist in the MCP request headers, then removes that permission before continuing the agent loop. Choosing **Always approve** saves the approval for that conversation. We still recheck it against the user's current role on each run, so an approval can't give the agent permissions the user doesn't have.
 
@@ -132,9 +142,9 @@ flowchart TD
 
 We did reinvent part of what is often called programmatic tool calling, or code mode. Mastra released [Code Mode](https://mastra.ai/blog/introducing-code-mode) in June 2026, but didn't support it when we designed this. The difference is that with code mode, a script can make the tool calls itself. Our agent still makes the MCP calls and then writes code to process the results. If your framework doesn't support code mode, this is a fairly simple workaround.
 
-## Background runs without Temporal
+## Background runs
 
-When we added background execution, we discussed using Temporal. We wanted runs to continue when someone closed the browser, but didn't need to resume every interrupted model call or tool execution. For an interactive chat, we were comfortable showing a failure and letting the user retry. Writes make that decision less straightforward, though.
+When we added background execution, we wanted runs to continue when someone closed the browser, but didn't need to resume every interrupted model call or tool execution. For an interactive chat, we were comfortable showing a failure and letting the user retry. Writes make that decision less straightforward, though.
 
 We already use [BullMQ](https://docs.bullmq.io), so we use it to deliver run IDs to workers. Postgres stores the run state. A worker claims a queued run and sends a heartbeat every five seconds. When someone reads or watches the conversation, we check that heartbeat. If it's more than a minute old, we consider the worker lost and mark the run as failed.
 
@@ -142,7 +152,7 @@ Waiting for approval doesn't tie up a worker. The run stops, and the user's deci
 
 The awkward case is a worker dying after an approved action completes but before it saves the result. The data may already have changed, even though the conversation doesn't show it. That's why we don't automatically retry failed runs. If we catch the failure, we can save a warning telling the user to check the action before retrying. If the worker disappears entirely, we can only show a generic interruption. In either case, we may not know whether the write completed.
 
-If your runs take hours, cost a lot, or have side effects you can't check afterwards, I'd probably make a different choice and use something like Temporal.
+If your runs take hours, cost a lot, or have side effects you can't check afterwards, I'd probably make a different choice and use a durable workflow engine.
 
 ## What's next
 
