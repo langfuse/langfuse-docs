@@ -22,7 +22,7 @@ It's somewhat ironic: as a company focused on helping others build agents, we di
 
 <Video src="https://static.langfuse.com/docs-videos/in-app-agent.mp4" />
 
-When we first discussed whether we should write this post, I wasn't sure there was much to write about. The first version was simply a Mastra agent, an MCP server, and some code to glue them together. Nothing a tech company would consider worth writing a blog post about. There was no sandbox yet, we didn't invent a more efficient algorithm for agent execution and we didn't rewrite anything in Rust (although there might be some other posts here coming soon). Building the in-ui agent was mostly about integrating existing pieces and making them work smoothly together as well as creating the foundations for future agentic features.
+When we first discussed whether we should write this post, I wasn't sure there was much to write about. The first version was simply a Mastra agent, an MCP server, and some code to glue them together. We didn't invent some super-efficient algorithm for agent execution, and we didn't rewrite anything in Rust (although there might be some other posts here coming soon). Building the in-ui agent was mostly about integrating existing pieces and making them work smoothly together, as well as creating the foundations for future agentic features.
 
 From the start, we knew we wanted to reuse as much as possible and share the tools and instructions behind Halo with people using Langfuse through Claude Code or Codex. We didn't want a second set of things to maintain just for the in-product agent. If we improved a tool or fixed some guidance for Halo, that should help people using their own agents too. That meant building on our existing MCP server as well as bringing the shared Langfuse skill into the Assistant.
 
@@ -69,7 +69,7 @@ You can ask Halo to investigate something, close the tab, and come back to its p
 
 ## Reusing the MCP server and skill
 
-Halo uses our public MCP server, the same one you can connect to. Almost all customer-data access goes through it, though the system prompt also includes some generic information about the user, similar to what you'd see in a system prompt from Claude or ChatGPT. By relying on MCP and tools, we can control which tools the Assistant gets to call without having to secure arbitrary network requests.
+Halo uses our public MCP server, the same one you can connect to. The only tools it gets besides MCP are for interacting with the Langfuse UI, such as proposing a redirect to another page, or working in the sandbox. Almost all customer-data access goes through MCP, though we also give it some context about the user and the page they're on: their name, timezone, browser languages, and the current URL. By relying on MCP and tools, we can control which tools the Assistant gets to call without having to secure arbitrary network requests.
 
 For each run, the worker creates a temporary API key scoped to the project. By default, it can only call read-only MCP tools. We maintain our own mapping of tool permissions rather than trusting the MCP server's read-only annotations. We also filter tools by the signed-in user's role before exposing them to the model. If the user's role doesn't allow an action, the agent doesn't get the tool for it.
 
@@ -82,6 +82,8 @@ If Halo needs another way to access project data, we have to add an MCP tool fir
 We do the same with instructions. Halo's system prompt explains how to handle approvals, link to Langfuse pages, and keep answers short. For guidance on using Langfuse, such as setting up evals or migrating prompts, we load the open source [Langfuse skill](/docs/api-and-data-platform/features/agent-skill) as a Mastra skill. It's the same one you can install in Claude Code or Cursor.
 
 When we see Halo struggle with a tool or give poor guidance, we want to fix the MCP tool or the shared skill. Maintaining a separate set of fixes just for Halo would defeat much of the point of sharing them.
+
+Some of those fixes are fairly small. Agents kept asking to sort metrics by `totalCost_sum` when the tool expected `sum_totalCost`, so we [made the MCP adapter accept both](https://github.com/langfuse/langfuse/pull/15623). When dashboard creation failed validation, the error told the agent which field was wrong but not what it could use instead. We [added the allowed values and guidance on looking up the schema](https://github.com/langfuse/langfuse/pull/15630), so it had enough information to correct the call. Both changes help anyone using the MCP server, not just Halo.
 
 ## The agent does not run in a sandbox
 
@@ -101,7 +103,9 @@ Without network access, scripts can't use the Langfuse SDK or CLI. That's a fair
 
 ## Processing tool results with code
 
-Say you ask the Assistant to group the errors in a few hundred failed observations. It could fetch them and put every response into the model's context, but that gets slow and expensive. Much of this work is just data processing. A script can group the errors and count them without the model having to read every observation.
+We don't control everything our tools return. Users can ingest large JSON structures into Langfuse, and those can end up in a tool response. We knew from the start that putting everything into the model's context could blow it up, but for most users it would still work. We didn't build a way around it in the first version.
+
+With a sandbox, the agent can use tools like `grep`, `head`, `jq`, or a short Python script to work through the data itself. Say you ask it to group the errors in a few hundred failed observations. It doesn't need to read every field of every observation to do that. It can inspect the files, group the errors, and read only the output it needs.
 
 When a sandbox is available, we add an optional `silent` parameter to every MCP tool so the agent can fetch data without putting the full result into the model's context:
 
@@ -118,7 +122,9 @@ tool.execute = async ({ silent, ...input }, context) => {
 
 With `silent: true`, the model gets a file path instead of the full result. The worker saves the result outside the VM. Before the next sandbox operation, we write the saved calls into the sandbox as JSON files containing the request and response. This also lets us restore them if the sandbox expires. Fetching data silently doesn't itself start a VM.
 
-In the example above, the agent could fetch observations in ten MCP calls, write a script to group the errors across those files, and read only the script's output. Failed tool calls still return their errors to the model, even with `silent: true`.
+In runs we looked through in preparation for the post, I've seen it use short Python scripts to check how many observations came back, combine results from several files, and count errors by environment or model. Sometimes it just prints part of a file to see what's in it. The agent decides what to inspect rather than having to read the whole response. Failed tool calls still return their errors to the model, even with `silent: true`.
+
+Our first implementation of `silent` also hid some tool errors from the model. Some tool failures came back as structured responses rather than exceptions, so our wrapper saved them to a file just like successful results. The model got a file path instead of the validation error it needed to correct its call. We [fixed the failure detection](https://github.com/langfuse/langfuse/pull/16082) so those errors go straight back to the model instead.
 
 ```mermaid
 flowchart TD
@@ -131,7 +137,9 @@ flowchart TD
   F -->|Script output enters model context| G[Agent answers with grouped errors]
 ```
 
-We did reinvent part of what is often called programmatic tool calling, or code mode. Mastra released [Code Mode](https://mastra.ai/blog/introducing-code-mode) in June 2026, but didn't support it when we designed this. The difference is that with code mode, a script can make the tool calls itself. Our agent still makes the MCP calls and then writes code to process the results. If your framework doesn't support code mode, this is a fairly simple workaround.
+You might have heard of code mode, or programmatic tool calling, where the model writes a script that calls tools and processes their results without sending everything back through the model. Mastra has [Code Mode](https://mastra.ai/blog/introducing-code-mode) for this. The tools still run on the host, but the script decides which ones to call and what to do with the results.
+
+Our setup is more limited. The worker sends operations and data into the sandbox and gets results back, but scripts can't ask the worker to execute tools. They can only process the data we've supplied. Code mode would require adding that reverse path so a script could fetch another page of observations or request an action while running. Keeping MCP calls in the agent loop is less flexible, but lets us keep the sandbox interface narrow and use our existing permissions and approval flow. We also don't have to preserve a running script while waiting for someone to approve a write.
 
 ## Background runs
 
