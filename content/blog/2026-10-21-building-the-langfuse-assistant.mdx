@@ -18,11 +18,11 @@ import { AssistantMilestones } from "@/components/blog/AssistantMilestones";
 
 Back in June we [launched](/changelog/2026-06-19-langfuse-assistant-public-beta) Halo, the [Langfuse Assistant](/docs/langfuse-assistant). You can ask it to interpret your traces, build a dashboard or dataset, or help set up evals without leaving the Langfuse UI.
 
-It's somewhat ironic: as a company focused on helping others build agents, we didn't have an in-ui agent of our own. We've invested into building the infrastructure and tools for agent integration such as the [Langfuse skill](/docs/api-and-data-platform/features/agent-skill), [MCP server](/docs/api-and-data-platform/features/mcp-server), and [CLI](/docs/api-and-data-platform/features/cli) for using Langfuse from agents like Claude Code or Cursor but now we wanted to bring those capabilities into Langfuse itself.
+It's somewhat ironic: as a company focused on helping others build agents, we didn't have an in-product agent of our own. We've invested in building the infrastructure and tools for agent integration, such as the [Langfuse skill](/docs/api-and-data-platform/features/agent-skill), [MCP server](/docs/api-and-data-platform/features/mcp-server), and [CLI](/docs/api-and-data-platform/features/cli), for using Langfuse from agents like Claude Code or Cursor. Now we wanted to bring those capabilities into Langfuse itself.
 
 <Video src="https://static.langfuse.com/docs-videos/in-app-agent.mp4" />
 
-When we first discussed whether we should write this post, I wasn't sure there was much to write about. The first version was simply a Mastra agent, an MCP server, and some code to glue them together. We didn't invent some super-efficient algorithm for agent execution, and we didn't rewrite anything in Rust (although there might be some other posts here coming soon). Building the in-ui agent was mostly about integrating existing pieces and making them work smoothly together, as well as creating the foundations for future agentic features.
+When we first discussed whether we should write this post, I wasn't sure there was much to write about. The first version was simply a Mastra agent, an MCP server, and some code to glue them together. We didn't invent some super-efficient algorithm for agent execution, and we didn't rewrite anything in Rust (although there might be some other posts here coming soon). Building the in-product agent was mostly about integrating existing pieces and making them work smoothly together, as well as creating the foundations for future agentic features.
 
 From the start, we knew we wanted to reuse as much as possible and share the tools and instructions behind Halo with people using Langfuse through Claude Code or Codex. We didn't want a second set of things to maintain just for the in-product agent. If we improved a tool or fixed some guidance for Halo, that should help people using their own agents too. That meant building on our existing MCP server as well as bringing the shared Langfuse skill into the Assistant.
 
@@ -30,7 +30,7 @@ From the start, we knew we wanted to reuse as much as possible and share the too
 
 The first step was expanding the [MCP server](/blog/2025-12-09-building-langfuse-mcp-server). The [May 29 release](/changelog/2026-05-29-mcp-update) added tools for observations, metrics, scores, comments, datasets, and annotation queues, making most Langfuse project data available to agents. We needed these tools for Halo, but they were also useful to anyone connecting their own agent.
 
-Then in June we launched the first Beta version of the Assistant. A [Mastra](https://mastra.ai) agent that ran behind an HTTP endpoint, streaming responses to the browser. It handled one conversation at a time, with no parallel work or background execution. In early July we then gave it write access with human-in-the-loop approvals, and later that month added a sandbox. Background execution then got launched in August. We [announced all these capabilities together in September](/changelog/2026-09-03-langfuse-assistant).
+In June, we launched the first beta version of the Assistant: a [Mastra](https://mastra.ai) agent that ran behind an HTTP endpoint, streaming responses to the browser. It handled one conversation at a time, with no parallel work or background execution. In early July, we gave it write access with human-in-the-loop approvals, and later that month added a sandbox. We added background execution in August. We [announced all these capabilities together in September](/changelog/2026-09-03-langfuse-assistant).
 
 <AssistantMilestones />
 
@@ -103,7 +103,7 @@ Without network access, scripts can't use the Langfuse SDK or CLI. That's a fair
 
 ## Processing tool results with code
 
-We don't control everything our tools return. Users can ingest large JSON structures into Langfuse, and those can end up in a tool response. We knew from the start that putting everything into the model's context could blow it up, but for most users it would still work. We didn't build a way around it in the first version.
+We don't control everything our tools return. Users can ingest large JSON structures into Langfuse, and those can end up in a tool response. We knew these responses could exceed the model's context window. For most users, though, they fit, so for the first version we didn't build a way around it.
 
 With a sandbox, the agent can use tools like `grep`, `head`, `jq`, or a short Python script to work through the data itself. Say you ask it to group the errors in a few hundred failed observations. It doesn't need to read every field of every observation to do that. It can inspect the files, group the errors, and read only the output it needs.
 
@@ -122,7 +122,7 @@ tool.execute = async ({ silent, ...input }, context) => {
 
 With `silent: true`, the model gets a file path instead of the full result. The worker saves the result outside the VM. Before the next sandbox operation, we write the saved calls into the sandbox as JSON files containing the request and response. This also lets us restore them if the sandbox expires. Fetching data silently doesn't itself start a VM.
 
-In runs we looked through in preparation for the post, I've seen it use short Python scripts to check how many observations came back, combine results from several files, and count errors by environment or model. Sometimes it just prints part of a file to see what's in it. The agent decides what to inspect rather than having to read the whole response. Failed tool calls still return their errors to the model, even with `silent: true`.
+Looking through runs for this post, I saw Halo use short Python scripts to count observations, combine results from several files, and count errors by environment or model. Sometimes it just printed part of a file to see what was there. The agent decides what to inspect rather than having to read the whole response. Failed tool calls still return their errors to the model, even with `silent: true`.
 
 Our first implementation of `silent` also hid some tool errors from the model. Some tool failures came back as structured responses rather than exceptions, so our wrapper saved them to a file just like successful results. The model got a file path instead of the validation error it needed to correct its call. We [fixed the failure detection](https://github.com/langfuse/langfuse/pull/16082) so those errors go straight back to the model instead.
 
@@ -149,7 +149,7 @@ We already use [BullMQ](https://docs.bullmq.io), so we use it to deliver run IDs
 
 Waiting for approval doesn't tie up a worker. The run stops, and the user's decision creates a child run that continues from the saved conversation. An approval wait can therefore survive a restart, even though we don't checkpoint active execution.
 
-The awkward case is a worker dying after an approved action completes but before it saves the result. The data may already have changed, even though the conversation doesn't show it. That's why we don't automatically retry failed runs. If we catch the failure, we can save a warning telling the user to check the action before retrying. If the worker disappears entirely, we can only show a generic interruption. In either case, we may not know whether the write completed.
+A worker can die after completing an approved write but before saving the result. The data has changed, but the conversation doesn't show it. That's why we don't automatically retry failed runs. If we catch the failure, we can save a warning telling the user to check the action before retrying. If the worker disappears entirely, we can only show a generic interruption. In either case, we may not know whether the write completed.
 
 If your runs take hours, cost a lot, or have side effects you can't check afterwards, I'd probably make a different choice and use a durable workflow engine.
 
