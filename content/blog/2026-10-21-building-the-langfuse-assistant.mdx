@@ -1,7 +1,7 @@
 ---
 title: "How we built the Langfuse Assistant"
 date: 2026/10/21
-description: "todo"
+description: "How we built the Langfuse Assistant on our existing MCP server, why the agent runs outside its sandbox, and how we handle background runs."
 tag: engineering
 author: Ben
 ---
@@ -10,87 +10,99 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
   title="How we built the Langfuse Assistant"
-  description="todo"
+  description="How we built the Langfuse Assistant on our existing MCP server, why the agent runs outside its sandbox, and how we handle background runs."
   authors={["benbachem"]}
   date="October 21, 2026"
 />
 
-Back in June we [launched](/changelog/2026-06-19-langfuse-assistant-public-beta) Halo, the [Langfuse Assistant](/docs/langfuse-assistant). You can ask it to do anything from interpreting your traces to building a dataset or setting up evals.
+Back in June we [launched](/changelog/2026-06-19-langfuse-assistant-public-beta) Halo, the [Langfuse Assistant](/docs/langfuse-assistant). You can ask it to interpret your traces, build a dataset, or help set up evals without leaving the Langfuse UI.
+
+It's somewhat ironic: as a company focused on helping others build agents, we didn't have an agentic feature in our own UI. We already offered a [Langfuse skill](/docs/api-and-data-platform/features/agent-skill), [MCP server](/docs/api-and-data-platform/features/mcp-server), and [CLI](/docs/api-and-data-platform/features/cli) for using Langfuse from agents like Claude Code or Cursor. We wanted to bring those capabilities into Langfuse itself.
 
 <Video src="https://static.langfuse.com/docs-videos/in-app-agent.mp4" />
 
-We have been giving agents access to Langfuse for a long time: through the [MCP server](/docs/api-and-data-platform/features/mcp-server), the [CLI](/docs/api-and-data-platform/features/cli), the [API](/docs/api-and-data-platform/features/public-api), and the [Langfuse skill](/docs/api-and-data-platform/features/agent-skill). That works well for many users who bring their own agent, but we still wanted an agent that works inside the Langfuse UI.
+When we first talked about writing this post, I wasn't sure there was much to write about. The first version was a Mastra agent, an MCP server, and some code to glue them together. There was no sandbox. We already had tools for accessing project data, so the agent could use those. I think that's worth writing about: we could start with a fairly small implementation and add capabilities as we needed them.
 
-Our main goal was getting a first version out fast, in a secure way. This post covers how we set up Halo and the trade-offs we made. If you're interested in reading how to set up an assistant-like agent inside an existing product in relatively little time, with good security, this post is for you.
-
-<p><mark>*Ben: how many engineers worked on this, and how long did V1 and the background/sandbox work take? One sentence here.*</mark></p>
-
-<p><mark>*Ben: was self-hosting a reason to skip Temporal and keep the sandbox optional? If yes, add one sentence here, e.g. "Langfuse is open source, and whatever we run, self-hosters have to run too."*</mark></p>
+From the start, we wanted to reuse as much as possible and share the tools and instructions behind Halo with people using Langfuse through Claude Code or Codex. We didn't want a second set to maintain just for the in-product agent. If we improved a tool or fixed some guidance for Halo, that should help people using their own agents too. That meant building on our existing MCP server and, later, bringing the shared Langfuse skill into the Assistant.
 
 ## How the Assistant is put together
 
-The Assistant evolved gradually into where it is now:
+The first step was expanding the [MCP server](/blog/2025-12-09-building-langfuse-mcp-server). The [May 29 release](/changelog/2026-05-29-mcp-update) added tools for observations, metrics, scores, comments, datasets, and annotation queues, making most Langfuse project data available to agents. We needed these tools for Halo, but they were also useful to anyone connecting their own agent.
+
+The June version was a [Mastra](https://mastra.ai) agent behind an HTTP endpoint, streaming responses to the browser. It handled one conversation at a time, with no parallel work or background execution. In July we added approvals for actions that change data, embedded the Langfuse skill, and added a sandbox. Background execution became the default in August. We [announced these capabilities together in September](/changelog/2026-09-03-langfuse-assistant).
 
 ```mermaid
-flowchart LR
-  A["<b>1. MCP server</b><br/>Dec 2025<br/>Tools for the Assistant"] --> B["<b>2. V1</b><br/>June 2026<br/>One live conversation"]
-  B --> C["<b>3. Background runs</b><br/>Sept 2026<br/>Queue and approvals"]
-  C --> D["<b>4. Sandbox</b><br/>Sept 2026<br/>Tool results as files"]
-  D -.-> E["<b>Next</b><br/>SDK in the sandbox"]
+timeline
+  title Assistant milestones in 2026
+  May 29 : Expanded MCP tools released — shared foundation for the Assistant
+  June 19 : V1 public beta
+  July 1 : Write actions with approvals
+  July 2 : Langfuse skill embedded
+  July 16 : Sandbox implementation merged
+  July 29–August 6 : Background worker, service, and client merged
+                   : Background execution enabled by default on August 6
+  August 6 : Silent MCP tool results
+  September 3 : Public announcement of background runs, sandbox analysis, and approvals
+  Exploring : SDK and model access in the sandbox
 ```
 
-<p><mark>*Ben: when did the skill get exposed to the agent?*</mark></p>
+Unless marked as a release or announcement, these dates refer to implementation milestones in git. SDK and model access in the sandbox are still exploratory.
 
-We improved the [MCP server](/blog/2025-12-09-building-langfuse-mcp-server) first and extended it to traces, observations, and metrics, because we knew the Assistant would use it. V1 was a [Mastra](https://mastra.ai) agent behind an HTTP endpoint that streamed one live conversation to the browser. Then we [moved runs to the background](/changelog/2026-09-03-langfuse-assistant), added approvals for actions that change data, and added the sandbox.
-
-This is how it is put together now:
+The current setup looks like this:
 
 ```mermaid
 flowchart LR
   B[Browser] -->|start run| W[Langfuse web]
-  B -.->|SSE: tail event log| W
+  W -.->|SSE: persisted events| B
   W -->|enqueue| Q[(Redis queue)]
   W --> P[(Postgres<br/>runs + event log)]
+  P -.->|poll event tail| W
   Q --> K[Langfuse worker<br/>Mastra agent loop]
   K -->|events| P
   K --> M[Model<br/>Claude on Bedrock]
   K -->|temporary project key| MCP[Langfuse MCP server]
-  K -->|read, write, edit, bash| S[Sandbox<br/>Lambda MicroVM, no network]
+  K -->|read, write, edit, bash| S[Optional sandbox<br/>Lambda MicroVM, no egress by default]
 ```
 
-<p><mark>*Ben: this diagram was generated with AI from the code. Please confirm it is correct, or edit it.*</mark></p>
+The web server saves the run request and puts its ID on a queue. A worker picks it up, rechecks the user's access, and runs the agent using the saved conversation. As the agent works, the worker writes events to Postgres. The web server polls for new events and streams them to the browser over SSE. Closing the browser doesn't stop the run.
 
-<p><mark>*TODO Ben: describe the diagram above.*</mark></p>
+## Reusing the MCP server and skill
 
-## All data access goes through the MCP server
+Halo uses the same MCP server you can connect to Claude Code or Cursor. Almost all customer-data access goes through it, though the system prompt also includes some generic information about the user. We can control which tools the Assistant gets to call without having to secure arbitrary network requests. The agent has no web-fetch tool or network access of its own.
 
-Halo uses the same MCP server you can connect to Claude Code or Cursor, so its requests go through the authentication and permission checks we had already built, and there is no second path to customer data that we have to secure. The agent also has no web fetch and no network access.
+For each run, the worker creates a temporary API key scoped to the project. By default, it can only call MCP tools annotated as read-only. We also filter tools by the signed-in user's role before exposing them to the model. If the user's role doesn't allow an action, the agent doesn't get the tool for it.
 
-For each run, the worker creates a temporary API key scoped to the project. By default that key can only call MCP tools annotated as read-only. Before a tool is exposed to the model at all, we check it against the signed-in user's role, so the agent never sees a tool the user could not use in the UI or API. Tools that change data need the user's approval. An approval lets the server add that one tool to the key for that one call, or for the rest of the conversation if the user chooses **Always approve**. It never gives the agent more permissions than the user has.
-Halo receives hacking attempts every day. A common pattern is links to executables. Because Halo does not have web search access and can only use the Langfuse MCP, this is not a problem.
+Tools that change data require approval. The worker adds the approved tool to an allowlist in the MCP request headers, then removes that permission before continuing the agent loop. Choosing **Always approve** saves the approval for that conversation. We still recheck it against the user's current role on each run, so an approval can't give the agent permissions the user doesn't have.
 
-<p><mark>*Placeholder: screenshots of hacking attempts.*</mark></p>
+When an organization opts into [AI feature telemetry](/docs/langfuse-assistant#data-privacy-and-security), we can use traces of Assistant runs to see where it struggles. We also see people trying to break it. These attempts started as soon as we announced Halo and still turn up regularly. One example is asking it to download an executable from a link. With no web-fetch tool and no sandbox network access configured, it can't make that request.
 
-The trade-off is that Halo can only do what MCP tools expose. Every new capability means a new MCP tool first. This is a good thing: every tool we add for the Assistant is also available to everyone who uses the MCP server directly.
+This does limit what Halo can do. If it needs another way to access project data, we have to add an MCP tool first. I actually like that constraint, though, because the same tool is then available to people using their own agents.
+
+We do the same with instructions. Halo's system prompt explains how to handle approvals, link to Langfuse pages, and keep answers short. For guidance on using Langfuse, such as setting up evals or migrating prompts, we load the open source [Langfuse skill](/docs/api-and-data-platform/features/agent-skill) as a Mastra skill. It's the same one you can install in Claude Code or Cursor.
+
+When we see Halo struggle with a tool or give poor guidance, we want to fix the MCP tool or the shared skill. Maintaining a separate set of fixes just for Halo would defeat much of the point of sharing them.
 
 ## The agent does not run in a sandbox
 
-The common pattern for coding agents is to run the agent inside a container with a shell and a file system. In the case of Halo, the agent loop runs in our normal worker process, and on its own it has no shell, file system, or network.
+We added the sandbox because we knew some tasks could be handled more efficiently by writing scripts to process data than by putting raw tool outputs into the model's context. But giving the agent bash and file system tools didn't mean the agent itself had to move into a sandbox. Ours runs in the same backend workers we already operate. When it needs to run a script or read a file, it calls a tool that accesses a separate sandbox.
 
-A shell and a file system need memory and disk reserved for each agent, which makes them expensive to scale. Most questions to Halo do not need either: answering a docs question or querying yesterday's traces only takes a few MCP calls. So by default, Halo reserves no memory or disk, and those runs scale with the backend workers we already operate.
+Many conversations don't need a sandbox at all. Answering a docs question or looking up yesterday's traces might only take a few MCP calls. Starting a VM for those conversations would cost us memory and disk without helping the agent answer.
 
-When a task does need a file system, the agent has `read`, `write`, `edit`, and `bash` tools that look like normal file system tools. They are backed by a sandbox for that conversation, an [AWS Lambda MicroVM](https://docs.aws.amazon.com/lambda/latest/dg/microvms-networking.html) that only exists once the agent starts using them. The MicroVM has no egress, and its code runs as an unprivileged user. It suspends after 60 seconds idle and is gone after four hours. If the agent comes back to a conversation after that, it gets a fresh VM and a note that its earlier files are gone.
+There's also self-hosting. Langfuse is open source, and I don't think setting up an external sandbox provider should be a requirement for using the Assistant. Without one, it still works with MCP tools.
 
-<Callout type="info">
-  On self-hosted deployments the sandbox is optional. Without it, the Assistant
-  works with MCP tools only.
-</Callout>
+The downside is that each sandbox operation has to cross that process boundary, adding latency. The separation isn't complete either: if a conversation already has a sandbox session, we check its state before running the agent.
 
-The cost is that the sandbox can do very little. It has no network, so there is no way to use the Langfuse SDK or CLI from inside it: we decided on this for security and speed of getting Halo live, and adding this functionality is something we'll do later. It means enforcing the same checks outside MCP, something we have not built yet.
+The tools are `read`, `write`, `edit`, and `bash`, backed by an [AWS Lambda MicroVM](https://docs.aws.amazon.com/lambda/latest/dg/microvms-networking.html) for each conversation. We create it when the agent first uses a sandbox tool. It runs as an unprivileged user, with no network egress configured by default. We configure it to suspend after 60 seconds idle and expire after four hours.
 
-## Tool results become files the agent can process with code
+If the session has expired, the next sandbox operation creates a new one. Files the agent wrote are gone, and we tell it that. We can restore saved MCP results, though, which I'll get to below.
 
-If you ask the Assistant to group the errors in a few hundred failed observations, a normal tool call loads every observation into the model's context. That is slow and expensive, and quality drops as the context fills up. Instead, when a sandbox is available, every MCP tool gets an extra optional `silent` parameter:
+Without network access, scripts can't use the Langfuse SDK or CLI. That's a fairly large limitation, but they can still process data the agent fetched through MCP. Keeping data access there meant we could add the sandbox without also having to secure arbitrary network calls from scripts.
+
+## Processing tool results with code
+
+Say you ask the Assistant to group the errors in a few hundred failed observations. It could fetch them and put every response into the model's context, but that gets slow and expensive. Much of this work is just data processing. A script can group the errors and count them without the model having to read every observation.
+
+To make that possible, we add an optional `silent` parameter to every MCP tool when a sandbox is available:
 
 ```ts
 // Simplified: when a sandbox is available, every MCP tool gets an optional `silent` flag.
@@ -99,39 +111,44 @@ tool.execute = async ({ silent, ...input }, context) => {
   persistToolCall({ toolName, toolCallId, result }); // stored with the run
 
   if (!silent || isError(result)) return result; // failures are never silenced
-  return `Output saved to /workspace/tool_calls/${toolName}_${toolCallId}.json`;
+  return `Output available at /workspace/tool_calls/${toolName}_${toolCallId}.json`;
 };
 ```
 
-When the agent sets `silent: true`, the MCP result does not go into the model's context. The worker saves it as a JSON file in the sandbox, and the model only sees the file path. The agent can then fetch the observations in ten MCP calls, write a script that groups the errors across all the files, and read only the script's output.
+With `silent: true`, the model gets a file path instead of the full result. The worker saves the result outside the VM. Before the next sandbox operation, we write the saved calls into the sandbox as JSON files containing the request and response. This also lets us restore them if the sandbox expires. Fetching data silently doesn't itself start a VM.
 
-<p><mark>*Placeholder: trace screenshot of a run that uses silent MCP calls and a script to group errors.*</mark></p>
+In the example above, the agent could fetch observations in ten MCP calls, write a script to group the errors across those files, and read only the script's output. Failed tool calls still return their errors to the model, even with `silent: true`.
 
-<Callout type="info">
-This pattern does the same as programmatic tool calling, sometimes called code mode, where the agent writes a script whose functions are MCP calls. OpenCode does this, and Mastra released [Code Mode](https://mastra.ai/blog/introducing-code-mode) in June 2026. When we designed this, Mastra did not support Code Mode yet. The `silent` flag is a good workaround that gets you most of the way with very little code.
-</Callout>
+```mermaid
+flowchart TD
+  %% Example workflow: the agent chooses the script and what it prints.
+  A[Agent fetches observations<br/>MCP calls with silent: true] --> B[Worker retains full results<br/>outside the sandbox]
+  B -->|File-path messages enter model context| C[Agent calls write<br/>with a script to group errors]
+  C --> D[Sandbox session created or reused<br/>Tool-call JSON files synchronized]
+  D --> E[Script written to workspace]
+  E --> F[Agent calls bash to run script<br/>Tool-call JSON files synchronized again]
+  F -->|Script output enters model context| G[Agent answers with grouped errors]
+```
+
+We did reinvent part of what is often called programmatic tool calling, or code mode. Mastra released [Code Mode](https://mastra.ai/blog/introducing-code-mode) in June 2026, but didn't support it when we designed this. The difference is that with code mode, a script can make the tool calls itself. Our agent still makes the MCP calls and then writes code to process the results. If your framework doesn't support code mode, this is a fairly simple workaround.
 
 ## Background runs without Temporal
 
-We discussed using a durable execution engine like Temporal and decided against it. A run is interactive and usually short. If it fails, the user can retry it. That did not justify new infrastructure for us, or for anyone self-hosting Langfuse.
+When we added background execution, we discussed using Temporal. We wanted runs to continue when someone closed the browser, but didn't need to resume every interrupted model call or tool execution. For an interactive chat, we were comfortable showing a failure and letting the user retry. Writes make that decision less straightforward, though.
 
-Instead, each run is a job on our existing [BullMQ](https://docs.bullmq.io) queue in Redis, and its state lives in Postgres. While a worker runs it, the worker sends a heartbeat every five seconds. If the heartbeat stops for a minute, the run is marked as failed and the user can retry. When the agent needs approval for a tool, the run stops, so no worker is held while the user decides. Their decision starts a new job that continues the conversation from the event log.
+We already use [BullMQ](https://docs.bullmq.io), so we use it to deliver run IDs to workers. Postgres stores the run state. A worker claims a queued run and sends a heartbeat every five seconds. When someone reads or watches the conversation, we check that heartbeat. If it's more than a minute old, we consider the worker lost and mark the run as failed.
 
-The cost is that a failed run starts over, and there is one case we cannot recover from cleanly. If a run fails after an approved action started but before its result was saved, we do not know whether the action went through. We never retry that run automatically, and the user gets this message: "The approved action may have completed. Verify before retrying." For a run that takes minutes, we accept that.
+Waiting for approval doesn't tie up a worker. The run stops, and the user's decision creates a child run that continues from the saved conversation. An approval wait can therefore survive a restart, even though we don't checkpoint active execution.
 
-If your runs take hours, cost a lot, or have side effects you cannot check afterwards, you should use something like Temporal.
+The awkward case is a worker dying after an approved action completes but before it saves the result. The data may already have changed, even though the conversation doesn't show it. That's why we don't automatically retry failed runs. If we catch the failure, we can save a warning telling the user to check the action before retrying. If the worker disappears entirely, we can only show a generic interruption. In either case, we may not know whether the write completed.
 
-## Halo uses the same Langfuse skill as your coding agent
-
-Halo's system prompt only covers what is specific to working inside the Langfuse UI: how to handle approvals, how to link to Langfuse pages, which internal environments to leave out of answers, and how to keep answers short.
-
-Everything else about working with Langfuse and following best practices, for example setting up evals or migrating prompts, comes from the open source [Langfuse skill](/docs/api-and-data-platform/features/agent-skill), the same one you can install in Claude Code or Cursor. We load it into Halo as a Mastra skill.
-
-This means we maintain one set of best-practice instructions for both external coding agents and Halo.
+If your runs take hours, cost a lot, or have side effects you can't check afterwards, I'd probably make a different choice and use something like Temporal.
 
 ## What's next
 
-- SDK access in the sandbox
+We're exploring giving sandbox scripts access to the Langfuse SDK and the project's configured LLM connections. Evaluator calibration is one possible use case: testing an evaluator against human-labeled examples, changing its prompt, and checking whether the results improve.
+
+The part we'd need to work out is how to let scripts make those requests while keeping access limited to what the user is allowed to do and has approved. This is still exploration, not functionality available in Halo today.
 
 The Assistant is live on [Langfuse Cloud](https://cloud.langfuse.com) and in public beta for [self-hosted deployments](/self-hosting/configuration/langfuse-assistant). If one of these decisions gets in your way, tell us in the [feedback discussion](https://github.com/orgs/langfuse/discussions/14196).
 
