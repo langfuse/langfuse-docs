@@ -77,7 +77,7 @@ The v2 Metrics API enforces a default `config.row_limit` of 100 rows per query t
 
 ### High Cardinality Dimensions [#high-cardinality-dimensions]
 
-Dimensions like `id`, `traceId`, `userId`, and `sessionId` are high cardinality. You can group by them only in top-N queries, which must:
+Dimensions like `id`, `traceId`, `userId`, and `sessionId` are high cardinality. Grouping by these high cardinality fields is extremely expensive and rarely useful in practice. You can group by them only in top-N queries, which must:
 
 - set `config.row_limit` explicitly,
 - include an `orderBy` with direction `desc` on one of the query's metrics, and
