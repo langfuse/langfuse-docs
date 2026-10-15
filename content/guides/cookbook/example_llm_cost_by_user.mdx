@@ -1,0 +1,391 @@
+---
+source: Jupyter Notebook
+title: Calculate LLM cost per user with the Observations API
+sidebarTitle: Cost by user
+description: Group recorded generation and embedding costs by user while keeping unknown costs and pagination coverage visible.
+category: Examples
+---
+
+# Calculate LLM cost per user with the Observations API
+
+This notebook attributes observed LLM spend to individual users with the [Langfuse Observations API v2](https://langfuse.com/docs/api-and-data-platform/features/observations-api#v2). It paginates through a bounded time window, aggregates cost only over rows that carry model cost, and reports what the numbers do *not* cover. Every executable cell below runs offline on synthetic data — no SDK install, credentials, or network access is required to run it end-to-end.
+
+The accounting rules it follows:
+
+- This example scopes to `GENERATION` and `EMBEDDING` observations and excludes all other types (`SPAN`, `AGENT`, `EVENT`, …). Parent `SPAN`/`AGENT` rows are **not universally rollups** — whether they carry duplicated cost depends on your instrumentation, so check what your project emits on cost-bearing types before widening this filter. This scoping also does not detect double instrumentation (the same call ingested twice) and does not guarantee that all billable usage was captured.
+- Rows whose `totalCost` is missing are counted as **unknown**, never as zero. A user with only unknown rows still appears in the output, with a known-cost sum of zero that is labeled as the *known exported sum*, not as actual zero spend.
+- Rows without a `userId` are keyed internally as `None`, so they can never collide with a real user who happens to be named `"(unallocated)"` or anything else.
+- Costs are summed as decimals via `Decimal(str(value))` to avoid float accumulation error. This cannot recover precision already lost when the SDK delivered the cost as a float, and the result is not exact invoice math.
+- The summary reports pagination coverage: `None` means no pages were fetched (not proven complete), `False` means the window was only partially fetched.
+
+## Step 1: Fetch observations with cursor pagination
+
+Each query is bounded by a timezone-aware `fromStartTime`/`toStartTime` window. The v2 API pages through results with an opaque cursor: every response carries `meta.cursor`, and a **non-empty cursor means more pages remain** — the result is not complete until a response comes back without one. We request only the field groups we need (`basic` for `userId`, `usage` for `totalCost`; `core` is always included).
+
+The fetcher validates its inputs (aware, ordered bounds; positive integer `max_pages`) and guards against a server that repeats a cursor, which would otherwise cause an unbounded fetch loop. Set `max_pages` to cap API usage while testing; the summary then reports pagination as incomplete if the last fetched page still carries a cursor.
+
+See the [Observations API v2 documentation](https://langfuse.com/docs/api-and-data-platform/features/observations-api#v2) for all parameters. On self-hosted deployments the v2 endpoints require Langfuse v4.
+
+
+```python
+import datetime as dt
+from typing import Iterator, Optional
+
+OBSERVATIONS_FIELDS = "core,basic,usage"  # core: id/type; basic: userId; usage: totalCost
+PAGE_LIMIT = 1000  # v2 API maximum
+
+
+def fetch_observation_pages(client, from_start_time, to_start_time, max_pages=None):
+    """Yield one Observations API v2 response per page until the cursor is empty.
+
+    Both bounds must be timezone-aware datetimes with from <= to. Set ``max_pages``
+    to a positive integer to cap API usage while testing; the summary will then
+    report pagination as incomplete if the last fetched page still has a cursor.
+    """
+    if max_pages is not None and (
+        not isinstance(max_pages, int) or isinstance(max_pages, bool) or max_pages < 1
+    ):
+        raise ValueError("max_pages must be a positive integer when supplied")
+    for name, bound in (("from_start_time", from_start_time), ("to_start_time", to_start_time)):
+        if bound.tzinfo is None or bound.tzinfo.utcoffset(bound) is None:
+            raise ValueError(f"{name} must be a timezone-aware datetime")
+    if from_start_time > to_start_time:
+        raise ValueError("from_start_time must be <= to_start_time")
+
+    cursor: Optional[str] = None
+    seen_cursors = set()
+    pages = 0
+    while True:
+        resp = client.api.observations.get_many(
+            from_start_time=from_start_time,
+            to_start_time=to_start_time,
+            fields=OBSERVATIONS_FIELDS,
+            limit=PAGE_LIMIT,
+            cursor=cursor,
+        )
+        yield resp
+        pages += 1
+        if max_pages is not None and pages >= max_pages:
+            return
+        cursor = getattr(resp.meta, "cursor", None)
+        if not cursor:
+            return
+        if cursor in seen_cursors:
+            # A repeated cursor means the server is not advancing pagination;
+            # requesting again would loop forever.
+            raise RuntimeError(f"server repeated pagination cursor {cursor!r}")
+        seen_cursors.add(cursor)
+```
+
+## Step 2: Aggregate by user
+
+The aggregator walks the fetched pages once and applies the accounting rules from the intro: cost-bearing types only, missing `totalCost` counted as unknown, and `None` as the internal key for rows without a `userId` (an unambiguous display label is applied only when printing).
+
+Costs are summed as `Decimal(str(total_cost))` per row. This keeps micro-costs exact through accumulation, but it cannot recover precision that was already lost when the SDK delivered `totalCost` as a float — treat the totals as an observability breakdown, not invoice reconciliation. Negative or non-finite values are rejected rather than silently summed.
+
+
+```python
+import math
+from collections import defaultdict
+from decimal import Decimal
+
+COST_BEARING_TYPES = {"GENERATION", "EMBEDDING"}  # types this example sums
+UNALLOCATED_LABEL = "<no userId on row>"  # display-only label; the internal key is None
+
+
+def summarize_cost_by_user(pages) -> dict:
+    """Aggregate totalCost by userId across Observations API v2 pages.
+
+    ``None`` is the internal dict key for rows without a userId, so a real user
+    literally named "(unallocated)" (or anything else) can never collide with
+    the unallocated bucket. Every user seen on a cost-bearing row appears in
+    the output, including users whose rows all have unknown cost.
+    """
+    users = defaultdict(lambda: {"known_cost": Decimal("0"), "unknown_rows": 0})
+    rows_with_known_cost = 0
+    rows_with_unknown_cost = 0
+    excluded_rows = 0
+    unallocated_rows = 0
+    pages_seen = 0
+    last_cursor = None
+
+    for page in pages:
+        pages_seen += 1
+        last_cursor = getattr(page.meta, "cursor", None)
+        for obs in page.data:
+            if getattr(obs, "type", None) not in COST_BEARING_TYPES:
+                # This example scopes to GENERATION/EMBEDDING. Parent
+                # SPAN/AGENT rows are not universally rollups; check what
+                # your instrumentation emits before changing this filter.
+                excluded_rows += 1
+                continue
+            user_id = getattr(obs, "user_id", None)
+            if user_id is None:
+                unallocated_rows += 1
+            record = users[user_id]
+            total_cost = getattr(obs, "total_cost", None)
+            if total_cost is None:
+                # Missing cost is unknown, not zero — count it per user.
+                record["unknown_rows"] += 1
+                rows_with_unknown_cost += 1
+                continue
+            value = float(total_cost)
+            if not math.isfinite(value):
+                raise ValueError(
+                    f"observation {getattr(obs, 'id', '?')}: non-finite totalCost {total_cost!r}"
+                )
+            if value < 0:
+                raise ValueError(
+                    f"observation {getattr(obs, 'id', '?')}: negative totalCost {total_cost!r}"
+                )
+            record["known_cost"] += Decimal(str(total_cost))
+            rows_with_known_cost += 1
+
+    return {
+        "users": dict(users),
+        "known_cost_total": sum((u["known_cost"] for u in users.values()), Decimal("0")),
+        "rows_with_known_cost": rows_with_known_cost,
+        "rows_with_unknown_cost": rows_with_unknown_cost,
+        "excluded_rows": excluded_rows,
+        "unallocated_rows": unallocated_rows,
+        "pages_fetched": pages_seen,
+        # None = no pages fetched (not proven complete); True only when the
+        # last fetched page had an empty cursor. A max_pages cap that stops
+        # on a non-empty cursor stays False.
+        "pagination_complete": None if pages_seen == 0 else not last_cursor,
+    }
+```
+
+## Step 3: Run on synthetic pages
+
+The cells below run the aggregator against small **synthetic pages** shaped like Observations API v2 responses, so the notebook executes end-to-end without the SDK, credentials, or API calls. Each row is marked with the accounting rule it exercises. Attributed users print as `repr(user_id)` and the unallocated bucket prints as an explicit `<no userId on row>` label, so the two can never be confused.
+
+Costs print without fixed decimal rounding, so micro-costs stay visible. Note that `user-carol` shows a known cost of `0` — that is the *known exported sum* over her rows (one explicit zero plus one unknown), not a claim that her spend was zero.
+
+
+```python
+from types import SimpleNamespace
+
+
+def mock_obs(obs_id, obs_type, user_id=None, total_cost=None):
+    """A minimal observation row using the v2 field names."""
+    return SimpleNamespace(id=obs_id, type=obs_type, user_id=user_id, total_cost=total_cost)
+
+
+def mock_page(rows, cursor=None):
+    """A minimal v2 response: a data list plus meta.cursor."""
+    return SimpleNamespace(data=rows, meta=SimpleNamespace(cursor=cursor))
+
+
+synthetic_pages = [
+    mock_page(
+        [
+            mock_obs("obs-1", "GENERATION", "user-alice", 0.00253),
+            mock_obs("obs-2", "GENERATION", "user-bob"),           # totalCost missing -> unknown
+            mock_obs("obs-3", "SPAN", "user-alice", 0.00253),      # non-cost type -> excluded
+            mock_obs("obs-4", "EMBEDDING", None, 0.00011),          # no userId -> unallocated
+            mock_obs("obs-5", "GENERATION", "user-carol", 0.0),    # explicit zero known cost
+        ],
+        cursor="cGFnZS0x",  # non-empty cursor: another page follows
+    ),
+    mock_page(
+        [
+            mock_obs("obs-6", "GENERATION", "user-alice", 0.0012),
+            mock_obs("obs-7", "AGENT", None, None),                  # non-cost type -> excluded
+            mock_obs("obs-8", "GENERATION", None),                   # unknown cost AND unallocated
+            mock_obs("obs-9", "GENERATION", "user-carol"),          # unknown-only so far
+        ],
+        cursor=None,  # empty cursor: last page
+    ),
+]
+
+summary = summarize_cost_by_user(synthetic_pages)
+
+print(f"{'user':>21}  {'known exported cost':>19}  {'unknown rows':>13}")
+for user_id, rec in sorted(summary["users"].items(), key=lambda kv: -kv[1]["known_cost"]):
+    label = UNALLOCATED_LABEL if user_id is None else repr(user_id)
+    print(f"{label:>21}  {format(rec['known_cost'], 'f'):>19}  {rec['unknown_rows']:>13}")
+print()
+print(f"known exported total:   {format(summary['known_cost_total'], 'f')}  (sum of rows with totalCost present)")
+print(f"rows with known cost:  {summary['rows_with_known_cost']}")
+print(f"rows with unknown cost: {summary['rows_with_unknown_cost']}  (missing totalCost, not zero)")
+print(f"excluded rows:         {summary['excluded_rows']}  (non-cost types: SPAN, AGENT, EVENT, ...)")
+print(f"unallocated rows:      {summary['unallocated_rows']}  (rows with no userId)")
+print(f"pages fetched:         {summary['pages_fetched']}  (pagination complete: {summary['pagination_complete']})")
+```
+
+                     user  known exported cost   unknown rows
+             'user-alice'              0.00373              0
+       <no userId on row>              0.00011              1
+               'user-bob'                    0              1
+             'user-carol'                  0.0              1
+    
+    known exported total:   0.00384  (sum of rows with totalCost present)
+    rows with known cost:  4
+    rows with unknown cost: 3  (missing totalCost, not zero)
+    excluded rows:         2  (non-cost types: SPAN, AGENT, EVENT, ...)
+    unallocated rows:      2  (rows with no userId)
+    pages fetched:         2  (pagination complete: True)
+
+
+## Step 4: Assertions on the tricky cases
+
+This cell locks in the behaviors that are easy to regress, using only synthetic data and a fake client — no network and no credentials. It covers: a real user literally named `"(unallocated)"` staying separate from the `None` bucket, unknown-only users surviving with a labeled zero, exact micro-cost decimal sums, rejection of negative/non-finite costs, the empty-iterable and capped-page pagination states, input validation, repeated-cursor rejection, and exact forwarding of fields/bounds/cursor by the fetcher.
+
+
+```python
+# --- a real user named "(unallocated)" must not collide with the None bucket ---
+s = summarize_cost_by_user(
+    [
+        mock_page(
+            [
+                mock_obs("a1", "GENERATION", "(unallocated)", 0.01),  # real user
+                mock_obs("a2", "GENERATION", None, 0.02),              # no userId
+            ]
+        )
+    ]
+)
+assert set(s["users"]) == {"(unallocated)", None}
+assert s["users"]["(unallocated)"]["known_cost"] == Decimal("0.01")
+assert s["users"][None]["known_cost"] == Decimal("0.02")
+
+# --- unknown-only user survives; explicit zero stays "known" ---
+s = summarize_cost_by_user(
+    [
+        mock_page(
+            [
+                mock_obs("b1", "GENERATION", "user-known-zero", 0.0),
+                mock_obs("b2", "GENERATION", "user-unknown-only"),
+            ]
+        )
+    ]
+)
+assert s["users"]["user-unknown-only"] == {"known_cost": Decimal("0"), "unknown_rows": 1}
+assert s["users"]["user-known-zero"] == {"known_cost": Decimal("0.0"), "unknown_rows": 0}
+assert s["rows_with_known_cost"] == 1 and s["rows_with_unknown_cost"] == 1
+
+# --- micro-costs accumulate exactly as decimals, not floats ---
+s = summarize_cost_by_user(
+    [
+        mock_page(
+            [
+                mock_obs("c1", "GENERATION", "user-micro", 0.00000253),
+                mock_obs("c2", "GENERATION", "user-micro", 0.00000001),
+            ]
+        )
+    ]
+)
+assert s["users"]["user-micro"]["known_cost"] == Decimal("0.00000254")
+
+# --- negative / non-finite costs are rejected, not summed ---
+for bad in (-0.01, float("nan"), float("inf")):
+    try:
+        summarize_cost_by_user([mock_page([mock_obs("d1", "GENERATION", "u", bad)])])
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(f"totalCost {bad!r} was not rejected")
+
+# --- empty iterable: pagination_complete is None (not fetched), not True ---
+assert summarize_cost_by_user([])["pagination_complete"] is None
+
+
+# --- fetcher: exact forwarding of fields, bounds, and cursor ---
+class FakeObservationsAPI:
+    def __init__(self, pages):
+        self.pages, self.calls = list(pages), []
+
+    def get_many(self, **kwargs):
+        self.calls.append(kwargs)
+        return self.pages.pop(0)
+
+
+class FakeClient:
+    def __init__(self, pages):
+        self.api = SimpleNamespace(observations=FakeObservationsAPI(pages))
+
+
+f = dt.datetime(2026, 9, 1, tzinfo=dt.timezone.utc)
+t = dt.datetime(2026, 9, 8, tzinfo=dt.timezone.utc)
+client = FakeClient([mock_page([], cursor="cursor-1"), mock_page([], cursor=None)])
+fetched = list(fetch_observation_pages(client, f, t))
+assert [p.meta.cursor for p in fetched] == ["cursor-1", None]
+first, second = client.api.observations.calls
+assert len(client.api.observations.calls) == 2
+assert first["fields"] == OBSERVATIONS_FIELDS == "core,basic,usage"
+assert first["from_start_time"] is f and first["to_start_time"] is t
+assert first["cursor"] is None and second["cursor"] == "cursor-1"
+
+# --- max_pages cap: stops early, and the summary reports incomplete ---
+client = FakeClient([mock_page([mock_obs("e1", "GENERATION", "u", 0.01)], cursor="cursor-1")])
+s = summarize_cost_by_user(fetch_observation_pages(client, f, t, max_pages=1))
+assert s["pages_fetched"] == 1 and s["pagination_complete"] is False
+
+# --- invalid max_pages, naive bounds, and unordered bounds are rejected ---
+for bad_kwargs in ({"max_pages": 0}, {"max_pages": 2.5}, {"max_pages": True}):
+    try:
+        list(fetch_observation_pages(FakeClient([]), f, t, **bad_kwargs))
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(f"{bad_kwargs} was not rejected")
+naive = dt.datetime(2026, 9, 1)
+for bad_bounds in ((naive, t), (t, naive), (t, f)):
+    try:
+        list(fetch_observation_pages(FakeClient([]), *bad_bounds))
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(f"bounds {bad_bounds} were not rejected")
+
+# --- a repeated cursor is rejected instead of looping forever ---
+client = FakeClient([mock_page([], cursor="same-cursor"), mock_page([], cursor="same-cursor")])
+try:
+    list(fetch_observation_pages(client, f, t))
+except RuntimeError:
+    pass
+else:
+    raise AssertionError("repeated cursor was not rejected")
+
+print("all assertions passed")
+```
+
+    all assertions passed
+
+
+## Reading the results
+
+- The **known exported total** is the sum of rows where `totalCost` was present. A per-user known cost of `0` with unknown rows means *no known-cost rows were seen for that user* — not that their spend was zero. Unknown rows reduce coverage; source duplication, missing prices, or pricing mismatches can make the exported total differ from provider billing.
+- A large **`<no userId on row>`** bucket means `userId` is not being set on generations, so those exported costs cannot be attributed to a user. Rows missing `userId` are kept in a `None` bucket that cannot collide with any real user name.
+- `pagination_complete` is `None` when no pages were fetched and `False` when the window was only partially fetched (for example, a `max_pages` cap that stopped on a non-empty cursor); page through the remaining cursor before using the numbers.
+- Costs reflect Langfuse model pricing and what your instrumentation reported, summed as decimals to avoid float accumulation error. They are not an invoice reconciliation, and comparing them against provider billing requires a separate like-for-like comparison.
+
+## Run against your project (optional)
+
+Everything above is offline by design. To run the same aggregation against a real project instead, first install the SDK (for example `pip install langfuse`, or `%pip install langfuse` in a notebook). The Python SDK reads credentials from environment variables — `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` — so keys never need to appear in code. Get your API keys from your Langfuse project settings; see [Query via SDKs](https://langfuse.com/docs/api-and-data-platform/features/query-via-sdk) for authentication details.
+
+Then uncomment the cell below. Note that constructing a client does not by itself prove authentication succeeded — only the first API call does. This real-API path is optional and was **not executed** while writing this notebook, so it remains unverified.
+
+
+```python
+# Optional: real fetch. Uncomment after installing the SDK and setting
+# LANGFUSE_PUBLIC_KEY / LANGFUSE_SECRET_KEY / LANGFUSE_BASE_URL in your
+# environment (e.g. shell profile, .env loader, CI secrets). Left commented
+# so the default executable path of this notebook stays fully offline.
+
+# from langfuse import get_client
+# langfuse = get_client()  # credentials come from the environment
+
+# from_start_time = dt.datetime(2026, 9, 1, tzinfo=dt.timezone.utc)
+# to_start_time = dt.datetime(2026, 9, 8, tzinfo=dt.timezone.utc)
+# summary = summarize_cost_by_user(
+#     fetch_observation_pages(langfuse, from_start_time, to_start_time)
+# )
+# summary
+```
+
+## Next steps
+
+- If you only need aggregate totals (no unknown-cost accounting), the [Metrics API v2](https://langfuse.com/docs/metrics/features/metrics-api#v2) can sum `totalCost` grouped by dimensions server-side.
+- For large windows, prefer the scheduled [blob storage export](https://langfuse.com/docs/api-and-data-platform/features/export-to-blob-storage) over paginating the API.
+- See the [v2 Observations API reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations) for the full parameter and filter schema.
