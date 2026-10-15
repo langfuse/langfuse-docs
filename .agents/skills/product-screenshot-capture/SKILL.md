@@ -62,8 +62,8 @@ If necessary, ingest a new example only after confirming that no suitable existi
 
 1. Use a 16:9 display or viewport: 1920×1080 or 1440×810.
 2. Enter browser fullscreen or use an app-only capture so browser and OS chrome are absent.
-3. Keep the full Langfuse product boundary visible. Do not remove the left product navigation or top product header merely to increase zoom unless the existing image intentionally focuses on a self-contained panel.
-4. Increase browser zoom until the important text is comfortably readable. Start around 110–125%, then verify that no controls or text are clipped.
+3. Keep the full Langfuse product boundary visible. Collapse the left navigation to its icon rail when this matches the old image: it preserves product context, creates more room for trace content, and avoids exposing the expanded account name or email. Do not remove the navigation or top product header merely to increase zoom unless the existing image intentionally focuses on a self-contained panel.
+4. Increase browser zoom until the important text is comfortably readable. Start around 125–150%, then verify that no controls, labels, or important content are clipped. The tested trace-detail framing used 150%.
 5. Size the trace tree and detail pane so both have enough room:
    - tree labels must be complete;
    - the selected row must be visibly highlighted;
@@ -74,6 +74,8 @@ If necessary, ingest a new example only after confirming that no suitable existi
 8. Move the pointer away from important content and dismiss all tooltips, dialogs, menus, and transient notifications.
 
 Cropping is a fallback for removing browser chrome, not a substitute for viewport preparation. If cropping is needed, retain a safety margin around every product edge and control.
+
+Prefer a direct, untransformed 1920×1080 capture. Do not crop away the bottom of the product or stretch a shorter capture back to 16:9.
 
 ## Step 4: Capture useful variants
 
