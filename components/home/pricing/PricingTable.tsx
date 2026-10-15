@@ -48,7 +48,7 @@ const GraduatedPricingText = () => {
 
 const DATA_ACCESS_FAQ_HREF = "/faq/all/data-access-vs-data-retention";
 const DATA_ACCESS_DESCRIPTION =
-  "How many days of historic data you can view. Older data is still stored and becomes accessible when you upgrade. This is separate from data retention, which deletes data.";
+  "How many days of historic data you can view. This is separate from data retention, which deletes data.";
 
 // Info icon explaining that data access is not data retention.
 // FeatureDetails is resolved at render time, so it can be defined further below.
