@@ -1,0 +1,202 @@
+---
+title: "Production-Grade React Components Part 3: Adaptive Optimization"
+date: 2025/02/19
+description: "Every optimization has tradeoffs. Learn how to make the decision at runtime based on data characteristics, preserving the best experience for both small and large datasets."
+tag: engineering, react, performance, architecture
+author: Michael
+---
+
+At Langfuse, we support diverse LLM observability use cases - from simple chatbot interactions with a handful of observations to multi-hour autonomous agents generating tens of thousands of observations. We've seen production traces with over 200,000 observations, while most remain small and straightforward to render.
+
+This creates a design challenge: components need to handle both typical cases and edge cases without degrading either experience. The typical approach optimizes for one end of the spectrum - either build for small data and break at scale, or optimize for scale and add unnecessary complexity for everyone.
+
+In [Part 1](/blog/2025-02-react-architecture-part-1), we covered layer separation. In [Part 2](/blog/2025-02-react-architecture-part-2), we explored co-location and pure functions. These architectural patterns provide the structure for maintainable components. Within that architecture, we still need to make performance decisions: which optimizations to apply, and when? This post shows how to accommodate performance optimizations by making the decision at runtime based on the data you're actually processing.
+
+## Adaptive Optimization
+
+Performance optimizations solve specific problems, but each comes with costs that disproportionately affect different dataset sizes. This post examines how adaptive patterns can balance these tradeoffs across three optimizations: virtualization, lazy data loading, and Web Worker offloading. Rather than applying optimizations universally, each optimization activates only when the data characteristics justify its cost.
+
+## Pattern 1: Conditional Virtualization
+
+### Context
+
+The trace log view displays observations in a table. Each row shows observation metadata, and users can expand rows to see full input/output data.
+
+### The Tradeoff
+
+Rendering thousands of DOM elements causes performance degradation and eventually browser crashes. Virtualization solves this by rendering only the visible viewport - typically 50-100 rows regardless of total dataset size.
+
+However, virtualization removes native browser features. Cmd+F can't find text that isn't in the DOM. Accessibility tools lose context. Print preview only shows the visible portion. For traces with dozens of observations, the browser handles all DOM elements without issue, making these tradeoffs unnecessary.
+
+### The Adaptive Solution
+
+The component checks observation count before rendering:
+
+```typescript
+// Determine virtualization based on observation count
+const isVirtualized = observations.length >= LOG_VIEW_VIRTUALIZATION_THRESHOLD;
+```
+
+Below the threshold (350 observations), all rows render to the DOM. Users get full browser search, accessibility support, and native browser features. Above the threshold, virtualization activates, trading those features for the ability to handle thousands of observations without performance issues.
+
+## Pattern 2: Lazy Loading with Adaptive Download
+
+### Context
+
+When users expand an observation row, the component displays the full input/output payloads. For traces with thousands of observations, each with large payloads, the component needs a data fetching strategy.
+
+### The Tradeoff
+
+Fetching all observation data upfront creates thousands of network requests and can freeze the browser. Lazy loading solves this - data fetches only when a user expands a specific row. Each expansion takes 50-100ms to load.
+
+This works well for browsing but complicates download operations. Users expect "Download trace" to include all data, but most observations haven't loaded yet. Fetching everything on demand for large traces takes too long and creates a poor user experience.
+
+### The Adaptive Solution
+
+All traces use lazy loading for browsing. The download strategy adapts based on trace size:
+
+```typescript
+// Determine download strategy based on observation count
+const isDownloadCacheOnly = observations.length >= LOG_VIEW_DOWNLOAD_THRESHOLD;
+```
+
+For small traces (under 350 observations), download fetches all data before exporting. Users get complete trace exports with all input/output payloads included.
+
+For large traces (over 350 observations), download uses cache-only mode. The export includes full data for expanded observations and metadata-only for unexpanded ones. Users see a clear indicator: "Downloaded trace data (cache only)".
+
+## Pattern 3: Conditional Web Worker Offloading
+
+### Context
+
+The JSON viewer needs to build a tree structure from JSON data before rendering. This involves parsing the JSON, creating tree nodes with parent-child relationships, and computing navigation offsets for efficient lookup.
+
+### The Tradeoff
+
+Building tree structures from large JSON datasets (100,000+ nodes) can take hundreds of milliseconds on the main thread, blocking all user interaction. Moving this work to a Web Worker keeps the UI responsive.
+
+However, worker creation, data serialization, and message passing add 10-20ms of overhead. For small JSON payloads that process in a few milliseconds, the worker adds latency and displays loading spinners for operations that should feel instant.
+
+### The Adaptive Solution
+
+The component estimates tree size, then chooses between synchronous and asynchronous execution. This fits naturally into the orchestration layer from [Part 1](/blog/2025-02-react-architecture-part-1) - the layer that combines data fetching and transformations while controlling re-render boundaries.
+
+First, estimate the size without deep traversal:
+
+```typescript
+export function estimateNodeCount(data: unknown): number {
+  if (data === null || data === undefined) return 1;
+  if (Array.isArray(data)) return data.length;
+  if (typeof data === "object") return Object.keys(data).length;
+  return 1;
+}
+```
+
+Then, provide both synchronous and asynchronous paths:
+
+```typescript
+export function useTreeState(data, config) {
+  // Estimate size once
+  const dataSize = useMemo(() => estimateNodeCount(data), [data]);
+
+  // Path 1: Synchronous build for small datasets
+  const syncTree = useMemo(() => {
+    if (dataSize > TREE_BUILD_THRESHOLD) return null;
+    return buildTreeFromJSON(data, config);
+  }, [data, dataSize, config]);
+
+  // Path 2: Web Worker build for large datasets
+  const asyncTreeQuery = useQuery({
+    queryKey: ["tree-build", data, config],
+    queryFn: () => buildTreeInWorker(data, config),
+    enabled: dataSize > TREE_BUILD_THRESHOLD,
+    staleTime: Infinity,
+  });
+
+  // Return whichever path was used
+  const tree = syncTree || asyncTreeQuery.data;
+  const isBuilding =
+    dataSize > TREE_BUILD_THRESHOLD && asyncTreeQuery.isLoading;
+
+  return { tree, isBuilding };
+}
+```
+
+_([View implementation](https://github.com/langfuse/langfuse/blob/main/web/src/components/ui/AdvancedJsonViewer/hooks/useTreeState.ts))_
+
+The same algorithm runs in both paths. The only difference is execution context. Small datasets process synchronously and return instantly. Large datasets process in a Web Worker, keeping the UI responsive. Components receive an identical API regardless of which path was taken.
+
+The threshold of 10,000 nodes reflects the tradeoff between worker overhead (10-20ms) and UI blocking (hundreds of milliseconds for large datasets). Below that size, the overhead outweighs the benefit. Above that size, keeping the UI responsive justifies the cost.
+
+## Configuration Centralization
+
+All thresholds and settings live in a single configuration file:
+
+```typescript
+export const TRACE_VIEW_CONFIG = {
+  logView: {
+    virtualizationThreshold: 350,
+    downloadThreshold: 350,
+    rowHeight: {
+      collapsed: 28,
+      expanded: 150,
+    },
+    maxIndentDepth: 5,
+    batchFetch: {
+      concurrency: 10,
+    },
+  },
+} as const;
+```
+
+_([View implementation](https://github.com/langfuse/langfuse/blob/main/web/src/components/trace2/config/trace-view-config.ts))_
+
+## When to Use Adaptive Patterns
+
+Adaptive optimization makes sense when:
+
+**Data size varies significantly** - If 95% of your users have datasets under 100 items but 5% have datasets over 10,000 items, you have variance worth addressing. If everyone's datasets are similar in size, optimize for that size.
+
+**Optimization has meaningful tradeoffs** - If the optimization only improves performance without removing features, apply it universally. Adaptive patterns are for cases where the optimization helps large datasets but hurts small ones.
+
+**Threshold is measurable and stable** - The decision point (number of rows, data size, nesting depth) should be something you can calculate quickly and reliably. If the threshold depends on complex heuristics or changes frequently, the pattern adds more complexity than value.
+
+**Maintenance cost is justified** - Running two code paths means testing two scenarios. If 99% of users hit the "small data" path, the benefit of handling the 1% edge case needs to outweigh the maintenance burden.
+
+## Tradeoffs in Practice
+
+For traces under the threshold, users get full browser search, expand all functionality, and complete downloads. The UI behaves like a standard web page.
+
+For traces above the threshold, virtualization activates. Users lose browser search and expand all, but rendering and scrolling remain smooth. Downloads use the cache-only approach.
+
+For traces with thousands of observations, all optimizations activate. These traces would be unusable without virtualization and lazy loading. The feature limitations are acceptable tradeoffs for making the traces viewable.
+
+The alternative approaches create problems:
+
+Optimizing only for large data means most users lose features and see loading spinners for operations that could be instant.
+
+Optimizing only for small data means traces with thousands of observations cause browser crashes or long freezes.
+
+## Conclusion
+
+This concludes our three-part series on production-grade React components at Langfuse:
+
+- [Part 1](/blog/2025-02-react-architecture-part-1) established layer separation - organizing code into data fetching, pure transformation, context orchestration, and presentation layers
+- [Part 2](/blog/2025-02-react-architecture-part-2) covered co-location and pure functions - keeping related code together and extracting testable business logic
+- Part 3 introduced adaptive optimization - making performance decisions at runtime based on actual data characteristics
+
+These patterns work together. Layer separation provides clear boundaries for where optimizations apply. Co-location keeps threshold logic near the code it affects. Pure functions make performance testing straightforward.
+
+At Langfuse, our engineering culture emphasizes high ownership and shipping with confidence. Engineers work across the full stack, from database queries to React components. The patterns in this series support that culture by making components predictable, maintainable, and capable of handling the extreme variance we see in production LLM applications.
+
+When developers use Langfuse to debug their applications, they don't know whether they'll open a trace with 10 observations or 10,000 observations. Our job is to make both cases work well. Adaptive optimization lets us preserve the best possible experience for the majority while gracefully handling the edge cases that would otherwise make the product unusable.
+
+_View the complete implementations:_
+
+- _[useTreeState.ts](https://github.com/langfuse/langfuse/blob/main/web/src/components/ui/AdvancedJsonViewer/hooks/useTreeState.ts) - Adaptive tree building_
+- _[TraceLogView.tsx](https://github.com/langfuse/langfuse/blob/main/web/src/components/trace2/components/TraceLogView/TraceLogView.tsx) - Threshold-based virtualization_
+- _[trace-view-config.ts](https://github.com/langfuse/langfuse/blob/main/web/src/components/trace2/config/trace-view-config.ts) - Centralized thresholds_
+- _[trace2/](https://github.com/langfuse/langfuse/tree/main/web/src/components/trace2) - Full application of all three parts_
+
+---
+
+**Building Langfuse?** We're growing our engineering team. If you care about performance, user experience, and pragmatic engineering, [check out our open positions](https://langfuse.com/careers).
