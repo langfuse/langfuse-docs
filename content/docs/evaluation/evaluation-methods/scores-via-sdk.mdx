@@ -16,6 +16,8 @@ Scores can be attached at different levels of granularity: to individual traces,
 
 See the [API reference](/docs/api) for full details on the POST and GET endpoints for scores and score configs.
 
+Upgrading from Python SDK v4 or JS/TS SDK v5? `api.scores.create` now takes a list of scores, and score reads moved to `api.scores.get_many` / `api.scores.getMany`. See the [Python v4 → v5](/docs/observability/sdk/upgrade-path/python-v4-to-v5#scores-api) and [JS/TS v5 → v6](/docs/observability/sdk/upgrade-path/js-v5-to-v6#scores-api) migration guides.
+
 ### Trace or Observation-level Scores
 
 You can add scores via the Langfuse SDKs or API. Scores can take one of four data types: **Numeric**, **Categorical**, **Boolean**, or **Text**. See [Score Types](/docs/evaluation/scores/overview#score-types) for details.

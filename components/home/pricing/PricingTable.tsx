@@ -46,6 +46,19 @@ const GraduatedPricingText = () => {
   );
 };
 
+const DATA_ACCESS_FAQ_HREF = "/faq/all/data-access-vs-data-retention";
+const DATA_ACCESS_DESCRIPTION =
+  "How many days of historic data you can view. This is separate from data retention, which deletes data.";
+
+// Info icon explaining that data access is not data retention.
+// FeatureDetails is resolved at render time, so it can be defined further below.
+const DataAccessInfo = () => (
+  <FeatureDetails
+    description={DATA_ACCESS_DESCRIPTION}
+    href={DATA_ACCESS_FAQ_HREF}
+  />
+);
+
 type DeploymentOption = "cloud" | "selfHosted";
 
 type Tier = {
@@ -104,7 +117,9 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       mainFeatures: [
         "All platform features (with limits)",
         "50k units / month included",
-        "30 days data access",
+        <>
+          30 days data access <DataAccessInfo />
+        </>,
         "2 users",
         "Community support via GitHub",
       ],
@@ -132,7 +147,9 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         <>
           100k units / month included, additional: <GraduatedPricingText />
         </>,
-        "90 days data access",
+        <>
+          90 days data access <DataAccessInfo />
+        </>,
         "Unlimited users",
         "In-app support",
       ],
@@ -156,7 +173,9 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         <>
           100k units / month included, additional: <GraduatedPricingText />
         </>,
-        "3 years data access",
+        <>
+          3 years data access <DataAccessInfo />
+        </>,
         "Data retention management",
         "Unlimited annotation queues",
         "High rate limits",
@@ -434,6 +453,8 @@ const sections: Section[] = [
       },
       {
         name: "Access to historical data",
+        description: DATA_ACCESS_DESCRIPTION,
+        href: DATA_ACCESS_FAQ_HREF,
         tiers: {
           cloud: {
             Hobby: "30 days",
