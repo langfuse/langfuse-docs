@@ -1,0 +1,89 @@
+---
+title: "Trace Tuning Engines with Langfuse"
+sidebarTitle: Tuning Engines
+logo: /images/integrations/tuning-engines_icon.svg
+description: "Learn how to route Tuning Engines OpenAI-compatible gateway requests through the Langfuse OpenAI SDK wrapper."
+---
+
+# Tuning Engines Integration
+
+In this guide, we'll show you how to integrate [Langfuse](/) with [Tuning Engines](https://app.tuningengines.com/docs).
+
+> **What is Tuning Engines?** [Tuning Engines](https://app.tuningengines.com/docs) is an OpenAI-compatible inference gateway for model routing, governed access, agent and tool registry workflows, usage tracking, and auditability across AI applications.
+
+> **What is Langfuse?** [Langfuse](/) is an open source LLM engineering platform that helps teams trace LLM calls, monitor performance, and debug issues in their AI applications.
+
+Since Tuning Engines exposes OpenAI-compatible inference endpoints, you can use the [Langfuse OpenAI SDK wrapper](/integrations/model-providers/openai-py) to automatically log Tuning Engines calls as generations in Langfuse.
+
+## Get started
+
+```bash
+pip install langfuse openai
+```
+
+```python
+import os
+
+# Set your Langfuse API keys
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"
+
+# Set your Tuning Engines inference key
+os.environ["TUNING_ENGINES_API_KEY"] = "sk-te-..."
+```
+
+## Simple LLM call
+
+- The `base_url` is set to the Tuning Engines OpenAI-compatible gateway endpoint.
+- Replace `"your-model-alias"` with a model alias exposed in your Tuning Engines tenant catalog.
+- Langfuse captures the request through its OpenAI SDK wrapper.
+
+```python
+from langfuse.openai import openai
+
+client = openai.OpenAI(
+    api_key=os.environ["TUNING_ENGINES_API_KEY"],
+    base_url="https://api.tuningengines.com/v1",
+)
+
+response = client.chat.completions.create(
+    model="your-model-alias",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Tell me a fun fact about space."},
+    ],
+    name="tuning-engines-chat",
+)
+
+print(response.choices[0].message.content)
+```
+
+## Use custom metadata
+
+You can continue using Langfuse features such as custom trace metadata, nested tracing, and session/user attributes while Tuning Engines handles governed routing and access control.
+
+```python
+from langfuse import observe
+from langfuse.openai import openai
+
+client = openai.OpenAI(
+    api_key=os.environ["TUNING_ENGINES_API_KEY"],
+    base_url="https://api.tuningengines.com/v1",
+)
+
+@observe()
+def answer_question(question: str):
+    return client.chat.completions.create(
+        model="your-model-alias",
+        messages=[{"role": "user", "content": question}],
+        name="answer-question",
+        metadata={"gateway": "tuning-engines"},
+    )
+
+answer_question("What should I monitor in a production LLM gateway?")
+```
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
