@@ -34,7 +34,7 @@ Then in June we launched the first Beta version of the Assistant. A [Mastra](htt
 
 <AssistantMilestones />
 
-Here's the architecture that we ended up with:
+Here's the high-level architecture that we ended up with:
 
 ```mermaid
 flowchart LR
@@ -65,11 +65,9 @@ flowchart LR
   K -->|read, write, edit, bash| S
 ```
 
-For the user, this means they can ask Halo to investigate something, close the tab, and come back to its progress and results. The worker keeps going independently of the browser, while the saved event log lets the UI catch up when they return. MCP tools let Halo work with their project data; the optional sandbox lets it process larger results with scripts instead of reading everything into the model's context. Neither gives it more access than the user has, and actions that change data still need approval.
+You can ask Halo to investigate something, close the tab, and come back to its progress and results. The worker keeps going independently of the browser, while the saved event log lets the UI catch up when you return. MCP tools let Halo work with your project data. The optional sandbox lets it process larger results with scripts instead of reading everything into the model's context. Neither gives it more access than you have, and actions that change data still need approval.
 
 ## Reusing the MCP server and skill
-
-As mentioned earlier, sharing as much as possible between the Langfuse Assistant and users interacting with Langfuse through tools such as Claude Code or Codex was a key design goal.
 
 Halo uses our public MCP server, the same one you can connect to. Almost all customer-data access goes through it, though the system prompt also includes some generic information about the user, similar to what you'd see in a system prompt from Claude or ChatGPT. By relying on MCP and tools, we can control which tools the Assistant gets to call without having to secure arbitrary network requests.
 
@@ -79,7 +77,7 @@ Tools that change data require approval. The worker adds the approved tool to an
 
 When an organization opts into [AI feature telemetry](/docs/langfuse-assistant#data-privacy-and-security), we can use traces of Assistant runs to see where it struggles. We also see people trying to break it. These attempts started as soon as we announced Halo and still turn up regularly. One example is asking it to download an executable from a link. With no web-fetch tool and no sandbox network access configured, it can't make that request.
 
-This does limit what Halo can do. If it needs another way to access project data, we have to add an MCP tool first. I actually like that constraint, though, because the same tool is then available to people using their own agents.
+If Halo needs another way to access project data, we have to add an MCP tool first. I actually like that constraint, though, because the same tool is then available to people using their own agents.
 
 We do the same with instructions. Halo's system prompt explains how to handle approvals, link to Langfuse pages, and keep answers short. For guidance on using Langfuse, such as setting up evals or migrating prompts, we load the open source [Langfuse skill](/docs/api-and-data-platform/features/agent-skill) as a Mastra skill. It's the same one you can install in Claude Code or Cursor.
 
@@ -97,15 +95,15 @@ The downside is that each sandbox operation has to cross that process boundary, 
 
 The tools are `read`, `write`, `edit`, and `bash`, backed by an [AWS Lambda MicroVM](https://docs.aws.amazon.com/lambda/latest/dg/microvms-networking.html) for each conversation. We create it when the agent first uses a sandbox tool. It runs as an unprivileged user, with no network egress configured by default. We configure it to suspend after 60 seconds idle and expire after four hours.
 
-If the session has expired, the next sandbox operation creates a new one. Files the agent wrote are gone, and we tell it that. We can restore saved MCP results, though, which I'll get to below.
+If the session has expired, the next sandbox operation creates a new one. Files the agent wrote are gone, and we tell it that. Saved MCP results survive because we store them outside the sandbox.
 
-Without network access, scripts can't use the Langfuse SDK or CLI. That's a fairly large limitation, but they can still process data the agent fetched through MCP. Keeping data access there meant we could add the sandbox without also having to secure arbitrary network calls from scripts.
+Without network access, scripts can't use the Langfuse SDK or CLI. That's a fairly large limitation, but they can still process data the agent fetched through MCP. Keeping data access in MCP meant we could add the sandbox without also having to secure arbitrary network calls from scripts.
 
 ## Processing tool results with code
 
 Say you ask the Assistant to group the errors in a few hundred failed observations. It could fetch them and put every response into the model's context, but that gets slow and expensive. Much of this work is just data processing. A script can group the errors and count them without the model having to read every observation.
 
-To make that possible, we add an optional `silent` parameter to every MCP tool when a sandbox is available:
+When a sandbox is available, we add an optional `silent` parameter to every MCP tool so the agent can fetch data without putting the full result into the model's context:
 
 ```ts
 // Simplified: when a sandbox is available, every MCP tool gets an optional `silent` flag.
@@ -151,7 +149,7 @@ If your runs take hours, cost a lot, or have side effects you can't check afterw
 
 We're exploring giving sandbox scripts access to the Langfuse SDK and the project's configured LLM connections. Evaluator calibration is one possible use case: testing an evaluator against human-labeled examples, changing its prompt, and checking whether the results improve.
 
-The part we'd need to work out is how to let scripts make those requests while keeping access limited to what the user is allowed to do and has approved. This is still exploration, not functionality available in Halo today.
+We'd need to restrict scripts to the requests the user is allowed to make and has approved. We're still exploring how to do that, so neither SDK access nor LLM connections are available to sandbox scripts today.
 
 The Assistant is live on [Langfuse Cloud](https://cloud.langfuse.com) and in public beta for [self-hosted deployments](/self-hosting/configuration/langfuse-assistant). If one of these decisions gets in your way, tell us in the [feedback discussion](https://github.com/orgs/langfuse/discussions/14196).
 
