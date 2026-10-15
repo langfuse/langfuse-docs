@@ -1,7 +1,10 @@
 /*
  * Nav stack heights — keep in sync with components/layout/Navbar*.tsx (60px)
  * and components/layout/DocsSecondaryNav.tsx (40px row).
- * --fd-nav-height is consumed by fumadocs (sidebar drawer, sticky rows, etc.).
+ *
+ * `--fd-nav-height` is our dual-bar total. SharedDocsLayout maps it into
+ * Fumadocs as `--fd-docs-row-1` via DocsLayout `containerProps` (Fumadocs
+ * otherwise sets that token inline to banner-only).
  */
 :root {
   --lf-nav-primary-height: 60px;
@@ -12,7 +15,6 @@
 
 /*
  * Docs chrome (SharedDocsLayout .docs-chrome): primary navbar + section tabs.
- * fumadocs uses --fd-nav-height for sidebar sticky-top, mobile drawer top/height, etc.
  */
 .docs-chrome {
   --fd-nav-height: calc(
@@ -24,18 +26,12 @@
  * Compact variant (SharedDocsLayout showSecondaryNav={false}): sections
  * that aren't in the DocsSecondaryNav tabs (e.g. handbook, security).
  * On mobile the hamburger/breadcrumb bar still needs 40px; on desktop
- * no secondary row is shown so collapse to primary only.
+ * no secondary row is shown so collapse to primary only. `--fd-nav-height`
+ * follows `--lf-nav-docs-secondary-height` via the calc on `.docs-chrome`.
  */
-.docs-chrome.docs-chrome-compact {
-  --lf-nav-docs-secondary-height: 40px;
-  --fd-nav-height: calc(
-    var(--lf-nav-primary-height) + var(--lf-nav-docs-secondary-height)
-  );
-}
 @media (min-width: 768px) {
   .docs-chrome.docs-chrome-compact {
     --lf-nav-docs-secondary-height: 0px;
-    --fd-nav-height: var(--lf-nav-primary-height);
   }
 }
 
@@ -123,13 +119,12 @@
   display: none;
 }
 
-/* Mobile sidebar drawer: push below sticky navbar + optional banner.
-   Slide from left instead of right; full width. */
+/* Mobile sidebar drawer: Fumadocs uses inset-y-0 / right-sheet defaults.
+   Offset with --fd-docs-row-1 (set from SharedDocsLayout containerProps)
+   and slide from the left at full width. */
 #nd-sidebar-mobile {
-  top: calc(var(--fd-nav-height) + var(--fd-banner-height, 0px)) !important;
-  height: calc(
-    100dvh - var(--fd-nav-height) - var(--fd-banner-height, 0px)
-  ) !important;
+  top: var(--fd-docs-row-1) !important;
+  height: calc(var(--fd-docs-height, 100dvh) - var(--fd-docs-row-1)) !important;
   /* Override fumadocs defaults: left-aligned, full width */
   inset-inline-end: unset !important;
   inset-inline-start: 0 !important;
@@ -137,15 +132,6 @@
   max-width: 100% !important;
   border-inline-start: none !important;
   --fd-sidebar-drawer-offset: -100%;
-}
-
-/* Sidebar/collapsed-trigger sticky top: nav stack + optional banner.
-   Overrides fumadocs' inline --fd-docs-row-1: var(--fd-banner-height, 0px)
-   which only accounts for the banner, not our external custom navbar. */
-#nd-docs-layout {
-  --fd-docs-row-1: calc(
-    var(--fd-nav-height) + var(--fd-banner-height, 0px)
-  ) !important;
 }
 
 /* Sidebar + TOC width: 240px to match NavbarDocs grid-cols-[240px_1fr_240px].
@@ -431,7 +417,6 @@
   margin: 0 0 1px 1px;
   border-radius: calc(var(--radius) - 4px);
   background-color: var(--line-structure) !important;
-  top: calc(var(--fd-nav-height) + var(--fd-banner-height, 0px));
 }
 
 /* Sidebar active link */
@@ -735,10 +720,8 @@
 #nd-toc {
   --text-links: var(--line-cta);
   padding: 0;
-  /* Full viewport minus docs header stack + optional banner; 1px ≈ outer chrome / rounding */
-  max-height: calc(
-    100dvh - var(--fd-nav-height) - var(--fd-banner-height, 0px) - 1px
-  );
+  /* Full viewport minus docs header stack; 1px ≈ outer chrome / rounding */
+  max-height: calc(var(--fd-docs-height, 100dvh) - var(--fd-docs-row-1) - 1px);
   border-bottom-width: 0;
   border-radius: 0 !important;
   z-index: 10;
