@@ -600,7 +600,7 @@ Set these on both the Langfuse Web and Worker containers if your internal blob s
 | `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IPS`         |                    | Comma-separated list of individual IPs to allow. Example: `10.0.0.5,fd00::1`.                                          |
 | `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IP_SEGMENTS` |                    | Comma-separated list of CIDR ranges to allow. Example: `10.0.0.0/8,192.168.0.0/16`.                                    |
 
-These mirror the `LANGFUSE_LLM_CONNECTION_WHITELISTED_*` exemption variables used for user-configured LLM connections. Unlike LLM connections, webhooks, external media storage, and SSO discovery, blob storage integrations do not have a `*_ALLOWED_HOSTS` positive host list, and `LANGFUSE_OUTBOUND_BLOCKED_IP_SEGMENTS` applies to blob endpoints only after validation is enabled by setting one of the variables above — see [Hardening → Outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists).
+These mirror the existing `LANGFUSE_LLM_CONNECTION_WHITELISTED_*` variables used for user-configured LLM connections — see [Hardening → Outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists).
 
 <Callout type="info">
 
