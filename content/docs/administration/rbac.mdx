@@ -362,6 +362,31 @@ API keys authenticate calls to the [public API](/docs/api-and-data-platform/feat
 
 **The secret key is shown exactly once, when the key is created.** Langfuse stores only a one-way hash of the secret, so it cannot be displayed again or recovered by support. The settings page shows only the public key and a masked preview (`sk-lf-...1234`) of each secret. If you lose a secret key, create a new key and delete the old one; there is no separate "rotate" operation, and rotation is exactly that pair of steps. Deleting a key invalidates it immediately, so switch your application to the new key before deleting the old one. Optionally set an expiry date on a key and use the **Last used** column to find keys that are safe to remove.
 
+### Project API key permissions [#api-key-permissions]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "full",
+  }}
+/>
+
+Choose a set of permissions under **Permissions** when creating a project API key to limit what the key can do. Give each integration the narrowest set of permissions that covers its job:
+
+| Permissions      | Access                                              | Typical use                                                                |
+| ---------------- | --------------------------------------------------- | -------------------------------------------------------------------------- |
+| Full access      | All read and write privileges within the project.   | SDKs that also fetch prompts or datasets, admin scripts                    |
+| Viewer           | Read-only access to the project's data.             | Reporting, exports, dashboards built on the public API                     |
+| Ingestion        | Create traces, scores, and media; cannot read data. | Application tracing via the SDKs or OpenTelemetry                          |
+| Scores ingestion | Submit scores only.                                 | [User feedback from a web app](/docs/observability/features/user-feedback) |
+
+<Callout type="info">
+Keys created before these permissions were available keep their existing access. A key's set of permissions cannot be changed after creation. Create a new key with a different set of permissions instead.
+</Callout>
+
 ## Related Resources
 
 - [SCIM & Organization API](/docs/administration/scim-and-org-api) to programmatically manage users, roles, projects, and API keys
