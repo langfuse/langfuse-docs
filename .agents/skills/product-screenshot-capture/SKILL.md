@@ -14,8 +14,8 @@ Create documentation screenshots that are current, readable at embedded size, vi
 - Exclude browser tabs, the address bar, bookmarks, desktop wallpaper, docks, and OS chrome.
 - Never crop through a product border, control, label, output sentence, table, or panel.
 - Zoom in enough that text remains readable when the image is embedded at roughly 1000–1200 px wide.
-- Prefer an observation of type `GENERATION`. Generations usually contain the most relevant input/output, token, cost, model, prompt, and tool information and produce the strongest screenshots.
-- Match the selected observation in the existing screenshot whenever refreshing an asset. Do not substitute a prettier but semantically different observation unless the user approves.
+- Select an observation of type `GENERATION` whenever one is available and its content makes sense for the page. Generations usually contain the most relevant input/output, token, cost, model, prompt, and tool information and produce the strongest screenshots.
+- Match the semantic content in the existing screenshot whenever refreshing an asset. If the old screenshot selected a trace or span but a meaningful generation contains the same content, select the generation and record that deliberate type improvement in the review notes.
 - Only create or re-record a video when the asset being replaced is already a video. A GIF counts as video-style media and should be replaced with MP4, not with a newly invented interaction for a static screenshot.
 - Do not modify project data unless the user explicitly asks. Browsing, selecting observations, and changing local display state are read-only.
 
@@ -42,8 +42,8 @@ Do not infer that an asset is stale from age alone. Historical changelog and blo
 
 Use this preference order:
 
-1. The same selected observation as the existing screenshot.
-2. A `GENERATION` observation with meaningful, non-sensitive input and output.
+1. A `GENERATION` observation with meaningful, non-sensitive content that matches the old screenshot and page copy.
+2. The same selected observation as the existing screenshot when no suitable generation is available.
 3. A generation that also shows useful model, prompt, token, cost, tool, or score context.
 4. A span or event only when the page specifically teaches that observation type.
 5. The trace root only when the page explains trace-level metadata or the complete workflow.
@@ -70,6 +70,7 @@ If necessary, ingest a new example only after confirming that no suitable existi
    - the detail pane must show the relevant tabs and payload;
    - output should wrap or fit without being cut at the right edge.
 6. Select the intended generation and wait for all content to finish loading.
+   - Verify the detail header identifies the selected observation as `Generation`. Repeated trace and observation names are not sufficient evidence because a trace/span and generation can share the same name.
 7. Place scrolling deliberately. Begin at the most informative input/output section, not at arbitrary telemetry metadata.
 8. Move the pointer away from important content and dismiss all tooltips, dialogs, menus, and transient notifications.
 
@@ -118,6 +119,7 @@ The dimensions must reduce exactly to 16:9. Also confirm:
 - no clipped product borders or content;
 - no loaders, errors, or empty panels;
 - selected tree row and detail panel agree;
+- selected observation type is `GENERATION` whenever a suitable generation exists;
 - text is readable at expected documentation width.
 
 ## Step 7: Independent visual review
