@@ -15,8 +15,16 @@ description: >-
 
 # Customer story setup (MD -> MDX)
 
-Turns a plain **Markdown draft** into **`content/customers/<slug>.mdx`** in the
-same pattern as `content/customers/canva.mdx` and `cresta.mdx`.
+Turns a plain **Markdown draft** into **`content/customers/<slug>.mdx`**.
+
+For an end-to-end publish from a draft, interview notes, or a text document
+(images, concept links, adopters row, social posts, and the PR), use
+[`publish-customer-story`](../publish-customer-story/SKILL.md). That skill's
+link map wins over the sparse list below. This file is the MDX field reference.
+
+Before writing, read the two newest **written** stories in
+`content/customers/` (not the video stories that lead with a YouTube embed).
+Match their layout.
 
 ## Before writing any file: collect missing input
 
@@ -60,7 +68,7 @@ description if useful):
 1. **Folder**: **`public/images/customers/<slug>/`**
 2. For each asset: **filename**, **purpose**, **where it appears** (section + suggested alt text)
 3. Remind: customer posts use **`<Frame fullWidth>`** around markdown images, e.g. `![Alt](mdc:/images/customers/<slug>/file.png)` per site conventions
-4. **Size each image by aspect ratio** (run `sips -g pixelWidth -g pixelHeight <file>` to get dimensions):
+4. **Size each image by aspect ratio.** From the repo root, run `python3 .agents/skills/publish-customer-story/image-size.py <file>`. It prints `width height` for PNG, JPEG, GIF, WebP, and SVG on macOS and Linux. Then:
    - **Portrait / square** (ratio <= 1:1) -> `<div className="flex justify-center"><Frame fullWidth className="w-1/2">...</Frame></div>`
    - **Landscape** (~1.5:1) -> `<div className="flex justify-center"><Frame fullWidth className="w-2/3">...</Frame></div>`
    - **Panoramic** (> 2:1) -> `<Frame fullWidth className="w-full">...</Frame>` (no centering wrapper needed)
@@ -108,8 +116,9 @@ available-internal-links** rule so links resolve.
 7. **Closing**: `<ImpactChart items={[{ area, impact }, ...]} />` (optional)
    then `<CustomerStoryCTA />`.
 
-**Reference implementations:** `content/customers/canva.mdx`,
-`content/customers/cresta.mdx`.
+**Reference implementations:** the two newest written stories in
+`content/customers/` (skip pages whose frontmatter sets
+`customerQuoteTag: "Video story"`).
 
 ---
 
