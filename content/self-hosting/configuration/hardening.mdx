@@ -23,13 +23,112 @@ For related operational guides, see [Authentication and SSO](/self-hosting/secur
   }}
 />
 
-We are extending Langfuse Self-Hosted Enterprise for government and other highly regulated environments. Current work includes:
+Langfuse Self-Hosted Enterprise supports government and other highly regulated environments with:
 
-- **FIPS-compatible deployment support** for environments that require approved cryptographic implementations.
-- **Hardened deployment images** designed to reduce the attack surface and support security-focused deployment baselines.
-- **End-to-end deployment documentation** for operating Langfuse and all required subcomponents as a complete air-gapped government deployment stack.
+- **[FIPS mode](#fips-mode):** Langfuse runs its cryptography on FIPS 140-3 validated cryptographic modules operated in approved mode, and refuses to start when it cannot.
+- **[Hardened images](#hardened-images):** the web and worker images are built on Iron Bank's hardened Red Hat Universal Base Image (UBI) 9.
 
-These capabilities are under active development. [Contact our sales team](/talk-to-us?deployment=self-hosted) to discuss your requirements and early access.
+We are also working on end-to-end documentation for operating Langfuse and all required subcomponents as a complete air-gapped deployment stack. [Contact our sales team](/talk-to-us?deployment=self-hosted) to discuss your requirements.
+
+### FIPS mode [#fips-mode]
+
+The Cryptographic Module Validation Program (CMVP) validates cryptographic modules, not products. Langfuse holds no FIPS 140-3 certificate of its own. In FIPS mode, the Langfuse containers use the validated modules listed below in approved mode, and check this at startup. Algorithms that are not approved, such as MD5, fail.
+
+FIPS mode is available from Langfuse v4.55.0. Use v4.57.0 or later: that release hashes passwords with PBKDF2-HMAC-SHA256 instead of bcrypt in FIPS mode, stops computing bcrypt for new API keys, and refuses storage options that need MD5 at startup.
+
+#### Cryptographic modules [#fips-modules]
+
+| Component                                           | Used for                                                                                                                                                       | Validated module                                   | CMVP certificate                                                                                 |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Node.js (web and worker)                            | TLS to ClickHouse, Redis, blob storage, SSO and LLM providers; hashing; [application-level encryption](/self-hosting/configuration/encryption); session tokens | Red Hat Enterprise Linux 9 - OpenSSL FIPS Provider | [#4857](https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/4857) |
+| Prisma engines (web and worker)                     | TLS to Postgres                                                                                                                                                | Red Hat Enterprise Linux 9 - OpenSSL FIPS Provider | [#4857](https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/4857) |
+| ClickHouse migration CLI (`migrate`, web container) | TLS to ClickHouse during migrations                                                                                                                            | Go Cryptographic Module v1.0.0                     | [#5247](https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/5247) |
+
+Node.js and the Prisma engines link the image's system OpenSSL library, so their cryptography runs in Red Hat's FIPS provider. The migration CLI is built with `GOFIPS140=v1.0.0`, which turns on the Go module's FIPS 140-3 mode.
+
+**Tested environments:** certificate #4857 lists Red Hat Enterprise Linux 9 on x86_64 (Intel Xeon), IBM POWER10, and IBM z16. Running the `linux/amd64` images on RHEL 9 hosts in FIPS mode matches a tested environment. Confirm other host operating systems and `linux/arm64` with your assessor.
+
+**Module build:** the FIPS provider comes from the `openssl-fips-provider-so` package in the UBI 9 repositories. Red Hat rebuilds this package for security fixes, so the build in the image can be newer than the build listed on the certificate while its revalidation is in process. Check the package version that your image scanner reports against the certificate and the CMVP [Modules In Process list](https://csrc.nist.gov/projects/cryptographic-module-validation-program/modules-in-process/modules-in-process-list).
+
+#### Requirements [#fips-requirements]
+
+- **Enterprise license:** an Enterprise license key (`LANGFUSE_EE_LICENSE_KEY`) on both containers. See [License Key](/self-hosting/license-key).
+- **Host FIPS mode:** the hosts that run the containers must boot in FIPS mode (`cat /proc/sys/crypto/fips_enabled` returns `1`). The FIPS provider follows the host kernel's FIPS mode, so a container cannot turn it on by itself.
+- **Infrastructure:** you are responsible for running Postgres, ClickHouse, Redis, blob storage, and the load balancer or ingress that terminates TLS for Langfuse with validated modules. In particular:
+  - Use `scram-sha-256` password authentication for Postgres. `md5` authentication is not available on a Postgres server in FIPS mode.
+  - Do not set `LANGFUSE_S3_DELETE_OBJECTS_CHECKSUM_ALGORITHM=MD5`. MinIO versions before `RELEASE.2025-02-03` require it and are therefore not supported.
+  - Do not use the native OCI Object Storage integration (`LANGFUSE_USE_OCI_NATIVE_OBJECT_STORAGE=true`); the OCI SDK hashes every upload part with MD5. Use OCI's S3-compatible API instead.
+
+#### Enable FIPS mode [#enable-fips-mode]
+
+Set the following on both the web and the worker container:
+
+```bash
+LANGFUSE_REQUIRE_FIPS=true
+LANGFUSE_EE_LICENSE_KEY=<your-license-key>
+```
+
+When `LANGFUSE_REQUIRE_FIPS=true` is set, startup fails closed:
+
+1. The image entrypoint sets `OPENSSL_CONF=/etc/pki/tls/openssl-fips.cnf`, which applies Red Hat's FIPS crypto policy to OpenSSL. An `OPENSSL_CONF` you set yourself takes precedence.
+2. The entrypoint exits before running database migrations if Node.js reports that the FIPS provider is not active.
+3. The web and worker processes check again before they connect to any database. They also require an Enterprise license and reject storage options that need MD5. These checks also run when your deployment overrides the image entrypoint. In that case, set `OPENSSL_CONF=/etc/pki/tls/openssl-fips.cnf` yourself.
+
+If a check fails, the container logs the reason and exits:
+
+| Log message contains                         | Cause                                          | Fix                                       |
+| -------------------------------------------- | ---------------------------------------------- | ----------------------------------------- |
+| `requires a Langfuse enterprise license`     | No Enterprise license key is configured.       | Set `LANGFUSE_EE_LICENSE_KEY`.            |
+| `Node's OpenSSL FIPS provider is not active` | The host does not run in FIPS mode.            | Run the containers on hosts in FIPS mode. |
+| `cannot be combined with`                    | A storage option that needs MD5 is configured. | Change the option named in the message.   |
+
+A running container with `LANGFUSE_REQUIRE_FIPS=true` has passed these checks. To check the module by hand, for example during an assessment, run Node.js in the container with the same OpenSSL configuration:
+
+```bash
+docker exec <langfuse-web-container> sh -c \
+  'OPENSSL_CONF=/etc/pki/tls/openssl-fips.cnf node -p "require(\"node:crypto\").getFips()"'
+# 1
+
+docker exec <langfuse-web-container> sh -c \
+  'OPENSSL_CONF=/etc/pki/tls/openssl-fips.cnf node -e "require(\"node:crypto\").createHash(\"md5\")"'
+# Error: ... unsupported
+```
+
+#### Passwords [#fips-passwords]
+
+In FIPS mode, Langfuse hashes and verifies email/password credentials only with PBKDF2-HMAC-SHA256 (600,000 iterations), and never runs bcrypt. Passwords set before you turned on FIPS mode are stored as bcrypt hashes, which FIPS mode does not verify. Those users cannot sign in until they set a new password:
+
+- Sign-in fails with: `This instance runs in FIPS mode and your password must be reset.`
+- Users set a new password with the **forgot password?** link on the sign-in page. Password reset sends a code by email, so configure [transactional emails](/self-hosting/configuration/transactional-emails) before you turn on FIPS mode, or move users to [SSO](/self-hosting/security/authentication-and-sso).
+- Users who sign in with SSO are not affected.
+
+If you turn FIPS mode off later, PBKDF2 passwords keep working: instances without FIPS mode verify both formats and write bcrypt for new passwords.
+
+#### Known limitations [#fips-limitations]
+
+- **Legacy API keys:** API keys created by early Langfuse versions, before keys were hashed with SHA-256, are checked once with bcrypt on first use and then re-hashed with SHA-256. Rotate such keys to avoid bcrypt entirely.
+
+### Hardened images [#hardened-images]
+
+From v4.55.0, the `langfuse/langfuse` (web) and `langfuse/langfuse-worker` images:
+
+- Are built on Iron Bank's hardened Red Hat UBI 9 images (`registry1.dso.mil/ironbank/redhat/ubi/ubi9` and `ubi9-micro`, version 9.8).
+- Run Node.js 24 from Red Hat's packages, which links the system OpenSSL library and its FIPS provider.
+- Ship no package manager, `curl`, or Python. The runtime contains `bash`, `sed`, and `wget`; use `wget` for [container health checks](/self-hosting/configuration/health-readiness-endpoints#container-health-checks).
+- Run as a non-root user with the numeric UID `1001`.
+- Keep the RPM database, so image scanners such as Trivy, Grype, or Syft can list every OS package.
+- Are published for `linux/amd64` and `linux/arm64`.
+
+Images that extend the Langfuse images cannot install packages with a package manager. Use a multi-stage build to copy additional files in.
+
+The Dockerfiles default to Red Hat's public UBI 9 images, so you can [build the images yourself](/self-hosting/deployment/infrastructure/containers#build-from-source) without credentials. To build on the Iron Bank images instead, log in to `registry1.dso.mil` and pass both base images:
+
+```bash
+docker build -f web/Dockerfile \
+  --build-arg BASE_IMAGE=registry1.dso.mil/ironbank/redhat/ubi/ubi9:9.8 \
+  --build-arg MICRO_BASE_IMAGE=registry1.dso.mil/ironbank/redhat/ubi/ubi9-micro:9.8 \
+  .
+```
 
 ## Restrict who can sign in [#access]
 
