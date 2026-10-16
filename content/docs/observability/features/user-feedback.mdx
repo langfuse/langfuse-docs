@@ -61,7 +61,7 @@ export const POST = observe(async (req: Request) => {
 
 ### 2. Collect feedback in frontend
 
-Use the Langfuse Browser SDK to send feedback as a score. The browser SDK only requires your public key; never expose a Langfuse secret key in frontend code. Use a dedicated key with the [Scores ingestion permissions](/docs/administration/rbac#api-key-permissions) so it can only submit scores.
+Use the Langfuse Browser SDK to send feedback as a score. Use a dedicated key with the [Scores ingestion permissions](/docs/administration/rbac#api-key-permissions) so it can only submit scores.
 
 ```typescript
 import { LangfuseBrowserClient } from "@langfuse/browser";
