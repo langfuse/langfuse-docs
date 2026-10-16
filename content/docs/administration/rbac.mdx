@@ -370,7 +370,7 @@ API keys authenticate calls to the [public API](/docs/api-and-data-platform/feat
     core: "full",
     pro: "full",
     enterprise: "full",
-    selfHosted: "not-available",
+    selfHosted: "full",
   }}
 />
 
@@ -384,6 +384,8 @@ Choose a preset under **Permissions** when creating a project API key to limit w
 | Scores ingestion | Submit scores only.                               | [User feedback from a web app](/docs/observability/features/user-feedback) |
 
 **Admin** is the default. Keys created before presets were available keep their existing access. A key's preset cannot be changed after creation; create a new key with a different preset instead. The SDKs' `auth_check()` reads the project, so it fails for **Ingestion** and **Scores ingestion** keys; skip it when using those presets. Click the permission count below the selector to see every action a preset grants.
+
+On self-hosted Langfuse (v4.55.0+), presets are off by default. Enable them by setting `API_AUTH_MIGRATION=enforce` and `API_KEY_PROJECT_ROLES_ENABLE=true` on the web container; until then, new keys get full project access as before.
 
 ## Related Resources
 

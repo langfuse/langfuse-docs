@@ -12,7 +12,7 @@ import { Book } from "lucide-react";
 
 <ChangelogHeader />
 
-When you create a project API key on Langfuse Cloud, you can now choose what it is allowed to do. Give each application a key with only the access it needs, so a leaked key exposes less.
+When you create a project API key, you can now choose what it is allowed to do. Give each application a key with only the access it needs, so a leaked key exposes less.
 
 - Instrument an application with an **Ingestion** key that can send traces and scores but cannot read project data.
 - Collect user feedback from a web app with a **Scores ingestion** key that can only submit scores.
@@ -30,6 +30,8 @@ Open **Project Settings → API Keys**, click **Create new API keys**, and pick 
 | Scores ingestion | Submit scores only, for example from a web application.      |
 
 **Admin** is the default, and existing keys keep the access they have today. Click the permission count below the selector to see every action a preset grants.
+
+On self-hosted Langfuse (v4.55.0+), enable presets by setting `API_AUTH_MIGRATION=enforce` and `API_KEY_PROJECT_ROLES_ENABLE=true` on the web container.
 
 <Cards num={1}>
   <Card
