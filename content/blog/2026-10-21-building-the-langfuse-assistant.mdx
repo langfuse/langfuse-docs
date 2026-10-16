@@ -8,6 +8,7 @@ author: Ben
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
 import { AssistantMilestones } from "@/components/blog/AssistantMilestones";
+import { AssistantAccessDiagram } from "@/components/blog/AssistantAccessDiagram";
 
 <BlogHeader
   title="How we built the Langfuse Assistant"
@@ -18,13 +19,15 @@ import { AssistantMilestones } from "@/components/blog/AssistantMilestones";
 
 Back in June we [launched](/changelog/2026-06-19-langfuse-assistant-public-beta) Halo, the [Langfuse Assistant](/docs/langfuse-assistant). You can ask it to interpret your traces, build a dashboard or dataset, or help set up evals without leaving the Langfuse UI.
 
-It's somewhat ironic: as a company focused on helping others build agents, we didn't have an in-product agent of our own. We've invested in building the infrastructure and tools for agent integration, such as the [Langfuse skill](/docs/api-and-data-platform/features/agent-skill), [MCP server](/docs/api-and-data-platform/features/mcp-server), and [CLI](/docs/api-and-data-platform/features/cli), for using Langfuse from agents like Claude Code or Cursor. Now we wanted to bring those capabilities into Langfuse itself.
+It's somewhat ironic: as a company focused on helping others build agents, we didn't have an in-product agent of our own. We've invested in building the infrastructure and tools for agent integration, such as the [Langfuse skill](/docs/api-and-data-platform/features/agent-skill), [MCP server](/docs/api-and-data-platform/features/mcp-server), and [CLI](/docs/api-and-data-platform/features/cli), for using Langfuse with agents like Claude Code or Cursor. Now we wanted to bring those capabilities into Langfuse itself.
 
 <Video src="https://static.langfuse.com/docs-videos/in-app-agent.mp4" />
 
 When we first discussed whether we should write this post, I wasn't sure there was much to write about. The first version was simply a Mastra agent, an MCP server, and some code to glue them together. We didn't invent some super-efficient algorithm for agent execution, and we didn't rewrite anything in Rust (although there might be some other posts here coming soon). Building the in-product agent was mostly about integrating existing pieces and making them work smoothly together, as well as creating the foundations for future agentic features.
 
 From the start, we knew we wanted to reuse as much as possible and share the tools and instructions behind Halo with people using Langfuse through Claude Code or Codex. We didn't want a second set of things to maintain just for the in-product agent. If we improved a tool or fixed some guidance for Halo, that should help people using their own agents too. That meant building on our existing MCP server as well as bringing the shared Langfuse skill into the Assistant.
+
+<AssistantAccessDiagram />
 
 ## How the Assistant is put together
 
@@ -65,7 +68,7 @@ flowchart LR
   K -->|read, write, edit, bash| S
 ```
 
-You can ask Halo to investigate something, close the tab, and come back to its progress and results. The worker keeps going independently of the browser, while the saved event log lets the UI catch up when you return. MCP tools let Halo work with your project data. The optional sandbox lets it process larger results with scripts instead of reading everything into the model's context. Neither gives it more access than you have, and actions that change data still need approval.
+Users can ask Halo to investigate something, close the tab, and come back to its progress and results. The worker keeps going independently of the browser, while the saved event log lets the UI catch up when you return. MCP tools let Halo work with user's project data. The optional sandbox lets Halo process larger results with scripts instead of reading everything into the model's context. Neither gives it more access than you have, and actions that change data still need approval.
 
 ## Reusing the MCP server and skill
 
@@ -75,27 +78,35 @@ For each run, the worker creates a temporary API key scoped to the project. By d
 
 Tools that change data require approval. The worker adds the approved tool to an allowlist in the MCP request headers, then removes that permission before continuing the agent loop. Choosing **Always approve** saves the approval for that conversation. We still recheck it against the user's current role on each run, so an approval can't give the agent permissions the user doesn't have.
 
-When an organization opts into [AI feature telemetry](/docs/langfuse-assistant#data-privacy-and-security), we can use traces of Assistant runs to see where it struggles. We also see people trying to break it. These attempts started as soon as we announced Halo and still turn up regularly. One example is asking it to download an executable from a link. With no web-fetch tool and no sandbox network access configured, it can't make that request.
-
 If Halo needs another way to access project data, we have to add an MCP tool first. I actually like that constraint, though, because the same tool is then available to people using their own agents.
 
 We do the same with instructions. Halo's system prompt explains how to handle approvals, link to Langfuse pages, and keep answers short. For guidance on using Langfuse, such as setting up evals or migrating prompts, we load the open source [Langfuse skill](/docs/api-and-data-platform/features/agent-skill) as a Mastra skill. It's the same one you can install in Claude Code or Cursor.
+
+---
+
+TODO: I think the text below does not belong in this section. Separate section on observability?
+
+When an organization opts into [AI feature telemetry](/docs/langfuse-assistant#data-privacy-and-security), we can use traces of Assistant runs to see where it struggles. We also see people trying to break it. These attempts started as soon as we announced Halo and still turn up regularly. One example is asking it to download an executable from a link. With no web-fetch tool and no sandbox network access configured, it can't make that request.
 
 When we see Halo struggle with a tool or give poor guidance, we want to fix the MCP tool or the shared skill. Maintaining a separate set of fixes just for Halo would defeat much of the point of sharing them.
 
 Some of those fixes are fairly small. Agents kept asking to sort metrics by `totalCost_sum` when the tool expected `sum_totalCost`, so we [made the MCP adapter accept both](https://github.com/langfuse/langfuse/pull/15623). When dashboard creation failed validation, the error told the agent which field was wrong but not what it could use instead. We [added the allowed values and guidance on looking up the schema](https://github.com/langfuse/langfuse/pull/15630), so it had enough information to correct the call. Both changes help anyone using the MCP server, not just Halo.
 
+---
+
 ## The agent does not run in a sandbox
 
-We added the sandbox because we knew some tasks could be handled more efficiently by writing scripts to process data than by putting raw tool outputs into the model's context. But giving the agent bash and file system tools didn't mean the agent itself had to move into a sandbox. Ours runs in the same backend workers we already operate. When it needs to run a script or read a file, it calls a tool that accesses a separate sandbox.
+We added the sandbox because we knew some tasks could be handled more efficiently by writing scripts for processing data than by putting raw tool outputs into the model's context. But giving the agent bash and file system tools didn't mean the agent itself had to move into a sandbox.
 
-Many conversations don't need a sandbox at all. Answering a docs question or looking up yesterday's traces might only take a few MCP calls. Starting a VM for those conversations would cost us memory and disk without helping the agent answer.
+Many conversations don't need a sandbox at all. Answering a docs question or looking up yesterday's traces might only take a few MCP calls. Starting a VM for those conversations would cost us memory and disk, but not actually provide value in these cases.
 
 There's also self-hosting. Langfuse is open source, and I don't think setting up an external sandbox provider should be a requirement for using the Assistant. Without one, it still works with MCP tools.
 
-The downside is that each sandbox operation has to cross that process boundary, adding latency. The separation isn't complete either: if a conversation already has a sandbox session, we check its state before running the agent.
+The downside is that each sandbox operation has to cross that process boundary, adding latency. For interacting with the sandbox, we give the agent tools: `read`, `write`, `edit`, and `bash`, backed by an [AWS Lambda MicroVM](https://docs.aws.amazon.com/lambda/latest/dg/microvms-networking.html). These are created when the agent first uses a sandbox tool. It runs as an unprivileged user, with no network egress configured by default. We configure it to suspend after 60 seconds idle and expire after four hours.
 
-The tools are `read`, `write`, `edit`, and `bash`, backed by an [AWS Lambda MicroVM](https://docs.aws.amazon.com/lambda/latest/dg/microvms-networking.html) for each conversation. We create it when the agent first uses a sandbox tool. It runs as an unprivileged user, with no network egress configured by default. We configure it to suspend after 60 seconds idle and expire after four hours.
+---
+
+TODO: the things below should either be removed or put under a separate section
 
 If the session has expired, the next sandbox operation creates a new one. Files the agent wrote are gone, and we tell it that. Saved MCP results survive because we store them outside the sandbox.
 
@@ -103,7 +114,7 @@ Without network access, scripts can't use the Langfuse SDK or CLI. That's a fair
 
 ## Processing tool results with code
 
-We don't control everything our tools return. Users can ingest large JSON structures into Langfuse, and those can end up in a tool response. We knew these responses could exceed the model's context window. For most users, though, they fit, so for the first version we didn't build a way around it.
+Some Langfuse projects have traces containing large JSON structures, so we had to provide a way to access this data without blowing up Halo's context window.
 
 With a sandbox, the agent can use tools like `grep`, `head`, `jq`, or a short Python script to work through the data itself. Say you ask it to group the errors in a few hundred failed observations. It doesn't need to read every field of every observation to do that. It can inspect the files, group the errors, and read only the output it needs.
 
@@ -120,7 +131,9 @@ tool.execute = async ({ silent, ...input }, context) => {
 };
 ```
 
-With `silent: true`, the model gets a file path instead of the full result. The worker saves the result outside the VM. Before the next sandbox operation, we write the saved calls into the sandbox as JSON files containing the request and response. This also lets us restore them if the sandbox expires. Fetching data silently doesn't itself start a VM.
+With `silent: true`, the model gets a file path instead of the full result. The worker saves the result outside the VM. Before the next sandbox operation, we write the saved calls into the sandbox as JSON files containing the request and response. This also lets us restore them if the sandbox expires.
+
+---
 
 Looking through runs for this post, I saw Halo use short Python scripts to count observations, combine results from several files, and count errors by environment or model. Sometimes it just printed part of a file to see what was there. The agent decides what to inspect rather than having to read the whole response. Failed tool calls still return their errors to the model, even with `silent: true`.
 
