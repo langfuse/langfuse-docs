@@ -70,7 +70,7 @@ export const DemoTabs = ({ className, ...props }: DemoTabsProps) => {
   };
 
   return (
-    <div className={cn(className)} {...props}>
+    <div className={cn("not-prose", className)} {...props}>
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList className="w-full">
           <TabsTrigger value="chatbot" className="gap-1.5">

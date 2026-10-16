@@ -1,23 +1,23 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowUpRight } from "lucide-react";
 
-import type { DemoTraceSource } from "@/lib/demo-public-trace";
+import type { DemoTraceSource } from "@/lib/demo-trace";
 import { cn } from "@/lib/utils";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 
+/** Analytics sources for the Open-trace CTA, including blog compare widgets. */
+export type DemoTraceLinkSource = DemoTraceSource | "jev_evals_blog";
+
 type DemoTraceLinkProps = {
   traceUrl?: string | null;
-  source: DemoTraceSource;
-  label?: string;
+  source: DemoTraceLinkSource;
   className?: string;
 };
 
 export const DemoTraceLink = ({
   traceUrl,
   source,
-  label = "View trace in Langfuse",
   className,
 }: DemoTraceLinkProps) => {
   const capture = usePostHogClientCapture();
@@ -35,8 +35,11 @@ export const DemoTraceLink = ({
           trace_url: traceUrl,
         });
       }}
+      // Inline styles defeat any leftover prose/CTA chip rules that paint
+      // links with the yellow surface-cta-primary background.
+      style={{ background: "transparent", border: "none", boxShadow: "none" }}
       className={cn(
-        "inline-flex items-center gap-3 whitespace-nowrap rounded-[2px] border border-line-structure bg-surface-cta-primary px-5 py-2 text-sm font-semibold text-text-primary no-underline transition-colors hover:border-line-structure hover:bg-surface-cta-primary/90 hover:text-text-primary",
+        "not-prose inline-flex items-center gap-1.5 !border-0 !bg-transparent p-0 text-sm font-medium text-text-primary !no-underline !shadow-none transition-colors hover:!bg-transparent hover:text-text-secondary",
         className,
       )}
     >
@@ -48,8 +51,7 @@ export const DemoTraceLink = ({
         aria-hidden="true"
         className="size-4 shrink-0"
       />
-      {label}
-      <ArrowUpRight className="size-[18px] shrink-0" aria-hidden="true" />
+      Open trace ↗
     </a>
   );
 };

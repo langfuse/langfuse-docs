@@ -76,8 +76,6 @@ class LangfuseAttributeSpanProcessor(SpanProcessor):
     def on_start(self, span, parent_context=None):
         span.set_attribute("langfuse.trace.name", "livekit-voice-agent")
         span.set_attribute("langfuse.trace.tags", ["voice-agent", VOICE_AGENT_MODE])
-        # Temporarily disabled: demo traces are not shared publicly right now.
-        # span.set_attribute("langfuse.trace.public", True)
 
     def on_end(self, span):
         pass
@@ -504,7 +502,7 @@ async def entrypoint(ctx: JobContext):
         )
 
         # Tell the demo UI which trace this conversation lands in so it can
-        # show a "View trace in Langfuse" link while the call is running.
+        # show a "View trace in Langfuse" link after the call ends.
         root_context = root_span.get_span_context()
         await ctx.room.local_participant.publish_data(
             json.dumps(
