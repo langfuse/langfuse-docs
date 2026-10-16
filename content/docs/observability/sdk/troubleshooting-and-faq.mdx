@@ -16,7 +16,7 @@ Seeing `AttributeError` or `is not a function` errors after upgrading? Follow th
 <Summary>Authentication issues</Summary>
 
 - Ensure `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` are set as environment variables or passed to `Langfuse()` as constructor arguments.
-- Use `langfuse.auth_check()` during setup (not in production) to confirm connectivity.
+- Use `langfuse.auth_check()` during setup (not in production) to confirm connectivity. It fails for keys with the **Ingestion** or **Scores ingestion** [preset](/docs/administration/rbac#api-key-presets), which cannot read the project; use a **Viewer** or **Admin** key to check connectivity instead.
 
 </Details>
 
