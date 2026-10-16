@@ -19,7 +19,7 @@ export type { ClassifierAnswer, ClassifierRunResult } from "./types";
 
 export type SentimentLabel = "positive" | "negative" | "neutral";
 
-export type SentimentEngine = "jev" | "llm";
+export type SentimentEngine = "jev" | "decisions" | "llm";
 
 export const ENGINE_CONFIG: Record<
   SentimentEngine,
@@ -29,6 +29,11 @@ export const ENGINE_CONFIG: Record<
     endpoint: "/api/sentiment-classifier",
     loading: "Classifying with Jev...",
     label: "TypeSafe Jev",
+  },
+  decisions: {
+    endpoint: "/api/sentiment-classifier-decisions",
+    loading: "Classifying with OpenAI Decisions...",
+    label: "OpenAI Decisions",
   },
   llm: {
     endpoint: "/api/sentiment-classifier-llm",

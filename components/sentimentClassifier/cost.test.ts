@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   JEV_PRICE_USD_PER_MTOK,
+  OPENAI_DECISIONS_PRICE_USD_PER_MTOK,
   comparisonRatio,
   computeCostDetails,
   computeCostUsd,
@@ -11,6 +12,7 @@ import {
   sumUsage,
 } from "./cost";
 import { classifiersForCount, parseClassifierIds } from "./criteria";
+import { summaryFor, type EngineMetric } from "./compareMetrics";
 
 test("Jev cost is attributed to input tokens only", () => {
   const details = computeCostDetails(382, 39, JEV_PRICE_USD_PER_MTOK);
@@ -19,6 +21,69 @@ test("Jev cost is attributed to input tokens only", () => {
   assert.equal(details.input, computeCostUsd(382, 39, JEV_PRICE_USD_PER_MTOK));
   // 382 / 1e6 * 0.042 ≈ 0.000016044
   assert.ok(Math.abs(details.input - 0.000016044) < 1e-12);
+});
+
+test("OpenAI Decisions cost is attributed to input tokens only", () => {
+  const details = computeCostDetails(
+    500,
+    12,
+    OPENAI_DECISIONS_PRICE_USD_PER_MTOK,
+  );
+  assert.equal(details.output, 0);
+  // 500 / 1e6 * 0.1 = 0.00005
+  assert.equal(details.input, 0.00005);
+  assert.equal(
+    details.input,
+    computeCostUsd(500, 12, OPENAI_DECISIONS_PRICE_USD_PER_MTOK),
+  );
+});
+
+test("summaryFor compares both decision engines against Luna", () => {
+  const engines: EngineMetric[] = [
+    {
+      id: "jev",
+      label: "TypeSafe Jev",
+      value: 0.00002,
+      loading: false,
+      error: false,
+    },
+    {
+      id: "decisions",
+      label: "OpenAI Decisions",
+      value: 0.00005,
+      loading: false,
+      error: false,
+    },
+    {
+      id: "luna",
+      label: "GPT-5.6 Luna",
+      value: 0.008,
+      loading: false,
+      error: false,
+    },
+  ];
+  assert.equal(
+    summaryFor(engines, "cheaper"),
+    "TypeSafe Jev 400× cheaper · OpenAI Decisions 160× cheaper",
+  );
+  assert.equal(
+    summaryFor(
+      [
+        { ...engines[0], value: 400 },
+        { ...engines[1], value: 410 },
+        { ...engines[2], value: 2600 },
+      ],
+      "faster",
+    ),
+    "TypeSafe Jev 6.5× faster · OpenAI Decisions 6.3× faster",
+  );
+  assert.equal(
+    summaryFor(
+      engines.map((engine) => ({ ...engine, loading: true, value: null })),
+      "faster",
+    ),
+    null,
+  );
 });
 
 test("classifiersForCount stacks sentiment, urgency, intent, action", () => {

@@ -49,20 +49,21 @@ export const SentimentResultPanel = ({
 
   if (compact) {
     const compactRow = (showWhy: boolean) => (
-      <div className="flex items-center gap-2 min-h-6">
-        <span className="w-[4.75rem] shrink-0 text-[11px] text-muted-foreground">
+      <div className="flex items-center gap-1.5 min-h-6 min-w-0 overflow-hidden">
+        <span className="w-[3.75rem] shrink-0 text-[11px] text-muted-foreground truncate">
           {answer.name}
         </span>
         <span
           className={cn(
-            "inline-flex items-center px-1.5 py-px rounded-[2px] text-xs font-semibold capitalize shrink-0",
+            "inline-flex max-w-[42%] items-center px-1.5 py-px rounded-[2px] text-xs font-semibold capitalize shrink-0 truncate",
             colors.bg,
             colors.text,
           )}
+          title={valueLabel}
         >
           {valueLabel}
         </span>
-        <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
+        <div className="flex-1 min-w-[1.5rem] h-1 rounded-full bg-muted overflow-hidden">
           <div
             className={cn(
               "h-full rounded-full transition-all duration-500",
@@ -71,7 +72,7 @@ export const SentimentResultPanel = ({
             style={{ width: `${answer.confidence * 100}%` }}
           />
         </div>
-        <span className="w-8 shrink-0 text-right text-[11px] tabular-nums text-muted-foreground">
+        <span className="w-7 shrink-0 text-right text-[11px] tabular-nums text-muted-foreground">
           {confidencePct}%
         </span>
         {showWhy && (
@@ -85,13 +86,15 @@ export const SentimentResultPanel = ({
     if (!showReasoning) return compactRow(false);
 
     return (
-      <details className="group">
-        <summary className="list-none cursor-pointer [&::-webkit-details-marker]:hidden">
+      <details className="group min-w-0">
+        <summary className="list-none cursor-pointer min-w-0 [&::-webkit-details-marker]:hidden">
           {compactRow(true)}
         </summary>
-        <div className="pl-[4.75rem] pt-1 space-y-1">
+        <div className="pt-1 space-y-1 min-w-0">
           {answer.explanation && (
-            <div className="text-xs text-foreground">{answer.explanation}</div>
+            <div className="text-xs text-foreground break-words">
+              {answer.explanation}
+            </div>
           )}
           {answer.keyPhrases && answer.keyPhrases.length > 0 && (
             <div className="flex flex-wrap gap-1">
