@@ -4,9 +4,13 @@ sidebarTitle: Evaluate with Datasets
 description: Run your first offline evaluation on a Langfuse dataset and compare prompt changes.
 ---
 
+import { SignupCTA } from "@/components/SignupCTA";
+
 # Evaluate with Datasets
 
 This guide walks you through how to set up a dataset, run an experiment on it, and evaluate the results. This is useful for evaluating changes before you deploy them to production. If you don't yet know what to evaluate, [Choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) will help you further. For how datasets and experiments fit together, see [Datasets](/academy/datasets) and [Experiments](/academy/experiments).
+
+<SignupCTA className="my-6" />
 
 <Callout type="info">
   This walkthrough is for running [experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk): you fetch a dataset from Langfuse, run your agent externally and push the results to the Langfuse platform. You can also [run prompt experiments in the UI](/docs/evaluation/experiments/experiments-via-ui), [score traces in the UI](/docs/evaluation/evaluation-methods/scores-via-ui), or [review items in an annotation queue](/docs/evaluation/evaluation-methods/annotation-queues).
@@ -118,7 +122,7 @@ Running experiments to test the performance of your system has three aspects:
 - **Evaluators**: Functions that score the output
 
 <Callout type="info">
-  This guide uses the current Langfuse SDKs: **Python SDK v4** and **JS/TS SDK v5**. Both use Langfuse's OpenTelemetry-based tracing and the current experiment runner. If you use an older SDK, see the [Python v3 → v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS v4 → v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5) migration guide.
+  This guide uses the current Langfuse SDKs: **Python SDK v5** and **JS/TS SDK v6**. Both use Langfuse's OpenTelemetry-based tracing and the current experiment runner, and the code also works with Python SDK v4 and JS/TS SDK v5. If you use an older SDK, see the [upgrade paths](/docs/observability/sdk/upgrade-path) ([Python v4 → v5](/docs/observability/sdk/upgrade-path/python-v4-to-v5), [JS/TS v5 → v6](/docs/observability/sdk/upgrade-path/js-v5-to-v6)).
 </Callout>
 
 <Steps>

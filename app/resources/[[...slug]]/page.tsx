@@ -8,6 +8,8 @@ import { MainContentWrapper } from "@/components/MainContentWrapper";
 import { PostArticleHeader } from "@/components/PostArticleHeader";
 import { resourcesCrumbs } from "@/lib/post-crumbs";
 import { ContentColumns } from "@/components/layout";
+import { SignupCTA } from "@/components/SignupCTA";
+import { hasResourceSignupCta } from "@/lib/resource-signup-cta";
 
 type PageProps = {
   params: Promise<{ slug?: string[] }>;
@@ -27,6 +29,7 @@ export default async function ResourcesPage({ params }: PageProps) {
           <PostArticleHeader items={resourcesCrumbs(slug, title)} />
           <DocBodyChrome showCopyButton={false}>
             <MDX components={getMDXComponents()} />
+            {hasResourceSignupCta(page.url) && <SignupCTA className="my-6" />}
           </DocBodyChrome>
         </MainContentWrapper>
       </div>

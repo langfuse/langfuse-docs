@@ -106,7 +106,7 @@ const cards = [
     title: "Active OSS community",
     bullets: [
       {
-        label: "22,000+ GitHub stars",
+        label: "35,000+ GitHub stars",
         href: "https://github.com/langfuse/langfuse",
       },
       { label: "5,000+ Discord members", href: "https://langfuse.com/discord" },

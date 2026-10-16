@@ -118,12 +118,20 @@ You can use your editor's Intellisense to explore the API methods and their para
 
 <Callout type="info">
 
-In Python SDK v4 and JS/TS SDK v5, the high-performance observations and
+From Python SDK v4 and JS/TS SDK v5 onward, the high-performance observations and
 metrics resources are the defaults: `api.observations` and `api.metrics`.
 Scores API v3 is available as `api.scores_v3` in Python SDK `4.8.1+` and
 `api.scoresV3` in JS/TS SDK `5.5.0+`; the `api.scores` v2 reads are deprecated
 ([migration guide](/faq/all/deprecated-api-migration#scores)). Deprecated v1
-resources moved under `api.legacy.*` (Python: `*_v1`, JS/TS: `*V1`).
+resources moved under `api.legacy.*` (Python: `*_v1`, JS/TS: `*V1`). Python
+SDK v5 and JS/TS SDK v6 have no `api.legacy` namespace: the legacy
+observations and metrics read resources and `api.legacy.score_v1` /
+`api.legacy.scoreV1` (including `create` and `delete`) are removed, as are the
+`api.scores` v2 reads. In these versions, `api.scores` holds all score
+endpoints: `api.scores.get_many` / `api.scores.getMany` reads Scores API v3,
+next to `create` and `delete`, and `api.scores_v3` / `api.scoresV3` are
+removed. Use `api.observations`, `api.metrics`, and `api.scores`
+instead.
 
 Observations API v2 and Metrics API v2 are available on Langfuse Cloud and
 self-hosted Langfuse v4. On self-hosted Langfuse v3, use the `api.legacy.*`
@@ -133,7 +141,7 @@ resources. See [Versions & Compatibility](/docs/compatibility#sdk-server).
 
 <Callout type="info">
 
-When fetching [prompts](/docs/prompts/get-started#use-prompt), please use the `get_prompt` (Python) / `getPrompt` (JS/TS) methods on the Langfuse client to benefit from client-side caching, automatic retries, and fallbacks.
+When fetching [prompts](/docs/prompts/get-started#use-prompt), please use the `get_prompt` (Python) / `prompt.get` (JS/TS) methods on the Langfuse client to benefit from client-side caching, automatic retries, and fallbacks.
 
 </Callout>
 
@@ -269,7 +277,7 @@ try {
 </Callout>
 
 - [OpenTelemetry Traces Ingestion Endpoint](https://api.reference.langfuse.com/#tag/opentelemetry/POST/api/public/otel/v1/traces) implements the OTLP/HTTP specification for trace ingestion, providing native OpenTelemetry integration for Langfuse Observability.
-- (Sunset as of {V4_CUTOVER_DATE_SHORT}) [Ingestion API](https://api.reference.langfuse.com/#tag/ingestion/POST/api/public/ingestion) allows trace ingestion using an API.
+- (Sunset as of {V4_CUTOVER_DATE_SHORT}) [Ingestion API](/faq/all/deprecated-api-migration#ingestion) allows trace ingestion using an API.
 
 ## Retrieve data via the API [#retrieve-data]
 
@@ -310,11 +318,11 @@ GET /api/public/v2/observations
 
 <DataFreshness />
 
-On self-hosted Langfuse v3, use the [v1 Observations API](https://api.reference.langfuse.com/#tag/observations/GET/api/public/observations) instead; see the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
+On self-hosted Langfuse v3, use the v1 Observations API (`GET /api/public/observations`) instead; see the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
 
 </Callout>
 
-The v2 Observations API is redesigned for high-performance retrieval, minimizing the work Langfuse performs per query. See the [v2 Observations API reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations) for the full parameter and response schema.
+The v2 Observations API is redesigned for high-performance retrieval, minimizing the work Langfuse performs per query. See the [v2 Observations API reference](https://api.reference.langfuse.com/#tag/observations/GET/api/public/v2/observations) for the full parameter and response schema.
 
 #### Upgrade from older trace and observation reads [#upgrade-from-older-reads]
 
@@ -405,7 +413,7 @@ curl -G \
   --data-urlencode 'filter=[{"type":"string","column":"name","operator":"does not contain","value":"healthcheck"}]'
 ```
 
-The complete list of columns and operators per type is in the [API reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations) under the `filter` parameter.
+The complete list of columns and operators per type is in the [API reference](https://api.reference.langfuse.com/#tag/observations/GET/api/public/v2/observations) under the `filter` parameter.
 
 #### Cursor-based pagination [#observations-pagination]
 
@@ -467,7 +475,7 @@ GET /api/public/v3/scores
 
 <Callout type="info">
 
-This section covers reading scores. Scores are created via `POST /api/public/scores` or the SDK helpers; see [scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk). See the [v3 Scores API reference](https://api.reference.langfuse.com/#tag/scoresv3/GET/api/public/v3/scores) for the full parameter and response schema.
+This section covers reading scores. Scores are created via `POST /api/public/scores` or the SDK helpers; see [scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk). See the [v3 Scores API reference](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores) for the full parameter and response schema.
 
 </Callout>
 
@@ -541,7 +549,7 @@ curl \
   "https://cloud.langfuse.com/api/public/v3/scores?traceId=trace-1,trace-2&fields=details,subject"
 ```
 
-The generated SDK clients expose the same endpoint (`api.scores_v3` in Python, `api.scoresV3` in JS/TS); see [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk). Score creation uses separate SDK helpers (e.g. `create_score` in Python); this client is for reads.
+The generated SDK clients expose the same endpoint: `api.scores.get_many` in Python SDK v5+ and `api.scores.getMany` in JS/TS SDK v6+ (`api.scores_v3.get_many_v3` / `api.scoresV3.getManyV3` in earlier versions); see [Query via SDKs](/docs/api-and-data-platform/features/query-via-sdk). Score creation uses separate SDK helpers (e.g. `create_score` in Python); this client is for reads.
 
 ### Experiments API [#experiments]
 

@@ -11,6 +11,7 @@ import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
 import {
   JEV_PRICE_USD_PER_MTOK,
+  computeCostDetails,
   computeCostUsd,
   type SentimentUsage,
 } from "./cost";
@@ -165,9 +166,13 @@ const handler = async (req: Request) => {
               output: outputTokens,
               total: usage.totalTokens,
             },
-            costDetails: {
-              total: usage.costUsd,
-            },
+            // Jev bills input tokens only (output price is $0); record that split
+            // so the Langfuse cost breakdown shows Input cost, not only Total.
+            costDetails: computeCostDetails(
+              inputTokens,
+              outputTokens,
+              JEV_PRICE_USD_PER_MTOK,
+            ),
           },
           { asType: "generation" },
         );

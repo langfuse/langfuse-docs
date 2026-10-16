@@ -81,7 +81,7 @@ export const codingAgentsGatewayIntegrationGroups: IntegrationGroup[] = [
       { label: "OpenRouter", href: "/integrations/gateways/openrouter" },
       {
         label: "Langfuse Gateway (coming soon)",
-        href: "/docs/roadmap#langfuse-gateway",
+        href: "/docs/roadmap",
       },
     ],
   },

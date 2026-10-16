@@ -1,13 +1,25 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  JEV_PRICE_USD_PER_MTOK,
   comparisonRatio,
+  computeCostDetails,
+  computeCostUsd,
   formatCostUsd,
   formatLatencyMs,
   formatRatio,
   sumUsage,
 } from "./cost";
 import { classifiersForCount, parseClassifierIds } from "./criteria";
+
+test("Jev cost is attributed to input tokens only", () => {
+  const details = computeCostDetails(382, 39, JEV_PRICE_USD_PER_MTOK);
+  assert.equal(details.output, 0);
+  assert.ok(details.input > 0);
+  assert.equal(details.input, computeCostUsd(382, 39, JEV_PRICE_USD_PER_MTOK));
+  // 382 / 1e6 * 0.042 ≈ 0.000016044
+  assert.ok(Math.abs(details.input - 0.000016044) < 1e-12);
+});
 
 test("classifiersForCount stacks sentiment, urgency, intent, action", () => {
   assert.deepEqual(

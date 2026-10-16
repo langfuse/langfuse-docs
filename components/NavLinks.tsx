@@ -6,6 +6,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { HoverCorners } from "@/components/ui/corner-box";
 import { cn } from "@/lib/utils";
 import {
+  industryLinks,
   productLinks,
   resourcesLinks,
   simpleLinks,
@@ -80,30 +81,6 @@ const resourcesFeatured: FeaturedItem = {
   href: "/blog/joining-clickhouse",
 };
 
-const useCasesFeatured: FeaturedItem = {
-  image: (
-    <div className="flex h-full items-center justify-center px-5">
-      <div className="w-full rounded border border-line-structure bg-surface-1 px-4 py-3 shadow-sm">
-        <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
-          Use case
-        </p>
-        <p className="mt-1 font-sans text-[12px] font-semibold leading-snug text-text-primary">
-          Multi-turn chat agents in production
-        </p>
-        <p className="mt-1 font-sans text-[10px] leading-relaxed text-text-tertiary">
-          Session-level tracing, evals, and cost visibility for chat support and
-          assistant experiences.
-        </p>
-      </div>
-    </div>
-  ),
-  title: "Langfuse for chat agents",
-  description:
-    "See how to monitor multi-turn chat quality, cost, and resolution in one view.",
-  cta: "Open use case",
-  href: "/chat-agents",
-};
-
 // ── Featured card component ───────────────────────────────────────────────────
 
 function NavFeaturedCard({ featured }: { featured: FeaturedItem }) {
@@ -132,48 +109,74 @@ function NavFeaturedCard({ featured }: { featured: FeaturedItem }) {
 
 // ── Mega dropdown panel ────────────────────────────────────────────────────────
 
-function NavDropdownPanel({
+function NavLinkColumn({
+  heading,
   links,
-  featured,
 }: {
+  heading?: string;
   links: NavPanelLink[];
-  featured: FeaturedItem;
 }) {
   return (
-    <div className="flex p-0 min-w-max border border-line-structure bg-surface-1 shadow-md">
-      <div className="group/dropdown flex flex-col gap-[6px] border-r border-line-structure min-w-[220px] p-3.5 overflow-hidden">
-        {links.map((link) => {
-          const Icon = link.icon;
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="flex relative gap-3 items-center p-1 no-underline transition-colors link-box group group/link hover:bg-surface-bg"
-            >
-              <HoverCorners />
-              <Icon className="size-[15px] shrink-0 text-text-tertiary transition-colors group-hover/dropdown:text-text-disabled group-hover/dropdown:group-hover/link:text-text-tertiary" />
-              <span className="font-sans text-[13px] font-[430] leading-[1.2] tracking-[-0.26px] text-text-tertiary transition-colors group-hover/dropdown:text-text-disabled group-hover/dropdown:group-hover/link:text-text-tertiary">
-                {link.name}
-              </span>
-            </Link>
-          );
-        })}
-      </div>
-      <div className="w-[260px] shrink-0 flex flex-col border-l border-line-structure -ml-px overflow-hidden">
-        <NavFeaturedCard featured={featured} />
-      </div>
+    <div className="group/dropdown flex min-w-[220px] flex-col gap-[6px] overflow-hidden p-3.5">
+      {heading ? (
+        <p className="px-1 pb-1 font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
+          {heading}
+        </p>
+      ) : null}
+      {links.map((link) => {
+        const Icon = link.icon;
+        return (
+          <Link
+            key={link.href}
+            href={link.href}
+            className="group/link link-box group relative flex items-center gap-3 p-1 no-underline transition-colors hover:bg-surface-bg"
+          >
+            <HoverCorners />
+            <Icon className="size-[15px] shrink-0 text-text-tertiary transition-colors group-hover/dropdown:text-text-disabled group-hover/dropdown:group-hover/link:text-text-tertiary" />
+            <span className="font-sans text-[13px] font-[430] leading-[1.2] tracking-[-0.26px] text-text-tertiary transition-colors group-hover/dropdown:text-text-disabled group-hover/dropdown:group-hover/link:text-text-tertiary">
+              {link.name}
+            </span>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+function NavDropdownPanel({
+  columns,
+  featured,
+}: {
+  columns: { heading?: string; links: NavPanelLink[] }[];
+  featured?: FeaturedItem;
+}) {
+  return (
+    <div className="flex min-w-max border border-line-structure bg-surface-1 p-0 shadow-md">
+      {columns.map((column, index) => (
+        <div
+          key={column.heading ?? column.links[0]?.href ?? index}
+          className={cn(index > 0 && "border-l border-line-structure")}
+        >
+          <NavLinkColumn heading={column.heading} links={column.links} />
+        </div>
+      ))}
+      {featured ? (
+        <div className="-ml-px flex w-[260px] shrink-0 flex-col overflow-hidden border-l border-line-structure">
+          <NavFeaturedCard featured={featured} />
+        </div>
+      ) : null}
     </div>
   );
 }
 
 // ── Custom fixed-positioned dropdown ─────────────────────────────────────────
 
-type MegaMenuId = "product" | "resources" | "use-cases";
+type MegaMenuId = "product" | "resources" | "solutions";
 
 function NavDropdown({
   id,
   label,
-  links,
+  columns,
   featured,
   openId,
   setOpenId,
@@ -182,8 +185,8 @@ function NavDropdown({
 }: {
   id: MegaMenuId;
   label: string;
-  links: NavPanelLink[];
-  featured: FeaturedItem;
+  columns: { heading?: string; links: NavPanelLink[] }[];
+  featured?: FeaturedItem;
   openId: MegaMenuId | null;
   setOpenId: React.Dispatch<React.SetStateAction<MegaMenuId | null>>;
   cancelScheduledClose: () => void;
@@ -296,7 +299,7 @@ function NavDropdown({
           left,
         }}
       >
-        <NavDropdownPanel links={links} featured={featured} />
+        <NavDropdownPanel columns={columns} featured={featured} />
       </div>
     </div>
   );
@@ -339,7 +342,7 @@ export function NavLinks({
         <NavDropdown
           id="product"
           label="Product"
-          links={productLinks}
+          columns={[{ links: productLinks }]}
           featured={productFeatured}
           openId={openId}
           setOpenId={setOpenId}
@@ -349,7 +352,7 @@ export function NavLinks({
         <NavDropdown
           id="resources"
           label="Resources"
-          links={resourcesLinks}
+          columns={[{ links: resourcesLinks }]}
           featured={resourcesFeatured}
           openId={openId}
           setOpenId={setOpenId}
@@ -357,10 +360,12 @@ export function NavLinks({
           scheduleClose={scheduleClose}
         />
         <NavDropdown
-          id="use-cases"
-          label="Use cases"
-          links={useCaseLinks}
-          featured={useCasesFeatured}
+          id="solutions"
+          label="Solutions"
+          columns={[
+            { heading: "Use cases", links: useCaseLinks },
+            { heading: "Industries", links: industryLinks },
+          ]}
           openId={openId}
           setOpenId={setOpenId}
           cancelScheduledClose={cancelScheduledClose}

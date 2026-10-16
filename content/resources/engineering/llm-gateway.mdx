@@ -5,6 +5,8 @@ description: "An LLM gateway is a proxy layer between your application and model
 tags: [guide]
 ---
 
+import { SignupCTA } from "@/components/SignupCTA";
+
 # What is an LLM gateway?
 
 An LLM gateway is a proxy layer that sits between your application and model providers. Your
@@ -12,6 +14,8 @@ code sends requests to one endpoint in one format, and the gateway translates th
 provider's native API, applies policies on the way through, and returns the response. Most
 gateways expose an OpenAI-compatible API, so switching providers becomes a change of model
 string rather than a code change.
+
+<SignupCTA className="my-6" />
 
 **TL;DR:** Use a gateway when you call more than one provider, need failover or cost
 controls, or want central key management for many teams. Skip it when a single provider and
