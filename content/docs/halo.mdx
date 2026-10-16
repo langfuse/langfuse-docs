@@ -1,0 +1,80 @@
+---
+title: Halo
+description: Use the same Langfuse project tools as external coding agents, directly from the Langfuse UI.
+sidebarTitle: Halo
+---
+
+# Halo
+
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "public-beta",
+  }}
+/>
+
+<Callout type="info">
+  **Self-hosted:** Halo is in public beta from version `>=v4.28.0` and
+  needs an instance-wide Langfuse AI model and a worker queue consumer. See
+  [self-hosted setup](/self-hosting/configuration/halo).
+</Callout>
+
+Halo is the Langfuse assistant for exploring your project data and taking actions in Langfuse with your approval. You can ask about traces, observations, sessions, and metrics, or ask it to create datasets, dashboards, and other resources. It brings the same Langfuse project tools available to external coding agents into the Langfuse UI.
+
+<Video src="https://static.langfuse.com/docs-videos/in-app-agent.mp4" />
+
+## What you can do [#what-you-can-do]
+
+For work inside Langfuse, use Halo for the same investigation and resource-management tasks you would delegate to an external agent:
+
+| Goal                     | Example prompt                                                                |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| Investigate your data    | "Which traces had the highest latency yesterday?"                             |
+| Analyze errors at scale  | "Fetch failed observations from the last 7 days and cluster the main errors." |
+| Build a resource         | "Create a dataset from last week's failed generations."                       |
+| Monitor performance      | "Build a dashboard of error rate and p95 latency for the last 7 days."        |
+| Navigate Langfuse        | "Open the traces table filtered to today's errors."                           |
+| Learn how Langfuse works | "How do I set up an evaluator?"                                               |
+
+## How it works [#how-it-works]
+
+Halo uses the same [Langfuse MCP server](/docs/api-and-data-platform/features/mcp-server) project tools that external agents can connect to, together with documentation search and sandboxed code execution. The in-app experience adds your current UI context, background execution, notifications, and approvals in Langfuse.
+
+It can:
+
+- Query traces, observations, sessions, and metrics.
+- Process large observation sets with code in a sandbox.
+- Create or update datasets, dashboards, widgets, prompts, and score configs.
+- Link you directly to filtered views and relevant pages in Langfuse.
+
+### Action approvals [#approvals]
+
+Halo pauses for your approval before changing data or configuration. **Always approve** lets a tool run without asking again in the current conversation. Halo is limited to your existing permissions in the current project. Approval does not grant additional access.
+
+### Background runs [#background-runs]
+
+Runs continue independently of your browser, so you can keep using Langfuse or start another conversation. Conversations are saved per user and project.
+
+## Data privacy and security [#data-privacy-and-security]
+
+Halo follows the same data handling model as other [Langfuse AI features](/security/ai-features):
+
+- On Langfuse Cloud, model requests use Langfuse-managed Amazon Bedrock in your [Langfuse data region](/security/data-regions). On self-hosted deployments, requests use the instance Langfuse AI model you configure.
+- Access is scoped to the signed-in user and current project.
+- AI feature tracing for product and service improvement can be enabled or disabled separately by organization admins and owners.
+
+## Limitations [#limitations]
+
+Halo can misunderstand a question or return incomplete results. Verify important answers and review proposed actions before approving them.
+
+## Related resources [#related-resources]
+
+- [Self-hosted Halo setup](/self-hosting/configuration/halo)
+- [AI Feature Security](/security/ai-features)
+- [Langfuse MCP Server](/docs/api-and-data-platform/features/mcp-server)
+- [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill)
+- [Halo announcement](/changelog/2026-06-19-langfuse-assistant-public-beta)
+- [Share Halo feedback](https://github.com/orgs/langfuse/discussions/14196)
