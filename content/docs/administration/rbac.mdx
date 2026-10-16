@@ -360,6 +360,19 @@ API keys authenticate calls to the [public API](/docs/api-and-data-platform/feat
 - **Project API keys** (`pk-lf-…` / `sk-lf-…`) are scoped to one project and are created in **Project Settings → API Keys**. Managing them requires the `apiKeys:CUD` scope (`Owner` or `Admin` on the project); `Member` can see the list.
 - **Organization API keys** are scoped to the whole organization and used with the [Organization Management API](/docs/administration/scim-and-org-api). Managing them requires the `organization:CRUD_apiKeys` scope (organization `Owner`).
 
+### Project API key presets [#api-key-presets]
+
+On Langfuse Cloud, choose a preset under **Permissions** when creating a project API key to limit what the key can do. Give each integration the narrowest preset that covers its job:
+
+| Preset           | Access                                            | Typical use                                                                |
+| ---------------- | ------------------------------------------------- | -------------------------------------------------------------------------- |
+| Admin            | All read and write privileges within the project. | SDKs that also fetch prompts or datasets, admin scripts                    |
+| Viewer           | Read-only access to the project's data.           | Reporting, exports, dashboards built on the public API                     |
+| Ingestion        | Create traces, scores, and media; no read access. | Application tracing via the SDKs or OpenTelemetry                          |
+| Scores ingestion | Submit scores only.                               | [User feedback from a web app](/docs/observability/features/user-feedback) |
+
+**Admin** is the default. Keys created before presets were available keep their existing access. A key's preset cannot be changed after creation; create a new key with a different preset instead. The SDKs' `auth_check()` reads the project, so it fails for **Ingestion** and **Scores ingestion** keys; skip it when using those presets. Click the permission count below the selector to see every action a preset grants.
+
 **The secret key is shown exactly once, when the key is created.** Langfuse stores only a one-way hash of the secret, so it cannot be displayed again or recovered by support. The settings page shows only the public key and a masked preview (`sk-lf-...1234`) of each secret. If you lose a secret key, create a new key and delete the old one; there is no separate "rotate" operation, and rotation is exactly that pair of steps. Deleting a key invalidates it immediately, so switch your application to the new key before deleting the old one. Optionally set an expiry date on a key and use the **Last used** column to find keys that are safe to remove.
 
 ## Related Resources
