@@ -374,18 +374,18 @@ API keys authenticate calls to the [public API](/docs/api-and-data-platform/feat
   }}
 />
 
-Choose a preset under **Permissions** when creating a project API key to limit what the key can do. Give each integration the narrowest preset that covers its job:
+Choose a set of permissions under **Permissions** when creating a project API key to limit what the key can do. Give each integration the narrowest set of permissions that covers its job:
 
-| Preset           | Access                                            | Typical use                                                                |
+| Permissions      | Access                                            | Typical use                                                                |
 | ---------------- | ------------------------------------------------- | -------------------------------------------------------------------------- |
 | Admin            | All read and write privileges within the project. | SDKs that also fetch prompts or datasets, admin scripts                    |
 | Viewer           | Read-only access to the project's data.           | Reporting, exports, dashboards built on the public API                     |
 | Ingestion        | Create traces, scores, and media; no read access. | Application tracing via the SDKs or OpenTelemetry                          |
 | Scores ingestion | Submit scores only.                               | [User feedback from a web app](/docs/observability/features/user-feedback) |
 
-**Admin** is the default. Keys created before presets were available keep their existing access. A key's preset cannot be changed after creation; create a new key with a different preset instead. The SDKs' `auth_check()` reads the project, so it fails for **Ingestion** and **Scores ingestion** keys; skip it when using those presets. Click the permission count below the selector to see every action a preset grants.
+Keys created before these permissions were available keep their existing access. A key's set of permissions cannot be changed after creation; create a new key with a different set of permissions instead.
 
-On self-hosted Langfuse (v4.55.0+), presets are off by default. Enable them by setting `API_AUTH_MIGRATION=enforce` and `API_KEY_PROJECT_ROLES_ENABLE=true` on the web container; until then, new keys get full project access as before.
+On self-hosted Langfuse (v4.55.0+), project API key permissions are off by default. Enable them by setting `API_AUTH_MIGRATION=enforce` and `API_KEY_PROJECT_ROLES_ENABLE=true` on the web container; until then, new keys get full project access as before.
 
 ## Related Resources
 
