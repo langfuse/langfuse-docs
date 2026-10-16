@@ -30,7 +30,9 @@ The template creates these services on the machine:
 It generates `NEXTAUTH_SECRET`, `SALT`, `ENCRYPTION_KEY` and the data stores' passwords, and sets `NEXTAUTH_URL` to the project's HTTPS address.
 It uses [headless initialization](/self-hosting/administration/headless-initialization) to create an organization and a project named Default, with the email and password you entered as their owner, and sets `AUTH_DISABLE_SIGNUP=true`.
 
-The six services take about 2.7 GB of memory at rest, so pick a machine with more than 3 GB. The template bounds the Node.js heap of the web service to 1 GB and the worker's to 512 MB.
+In a smoke test the six services used about 2.7 GB of memory at rest, with the Node.js heap of the web service bounded to 1 GB and the worker's to 512 MB; ingestion and queries need more.
+The [Docker Compose guide](/self-hosting/deployment/docker-compose) recommends at least 4 cores and 16 GiB of memory, which Pethost's Scale plan (8 vCPU, 30 GB of memory) covers.
+On such a machine, raise the heap bounds (`NODE_OPTIONS`) in the project's `compose.yaml`.
 
 MinIO has no public endpoint, so media uploads from browsers and SDK clients do not work until you configure [blob storage](/self-hosting/deployment/infrastructure/blobstorage) that they can reach.
 
