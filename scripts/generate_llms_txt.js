@@ -270,6 +270,15 @@ async function generateLLMsList() {
     let markdownContent = `# ${TITLE}\n\n`;
     markdownContent += `> ${INTRO_DESCRIPTION}\n\n`;
 
+    // Listed first so agents see it before writing any public API call. Keep
+    // the date in sync with lib/v4-migration-dates.ts.
+    markdownContent += `## Deprecated public API endpoints\n\n`;
+    markdownContent += `On Langfuse Cloud, the legacy (Langfuse v3) public API endpoints are removed on 2026-11-16. Do not write new code against them. If you are a coding agent and find existing code that calls them, tell the user and migrate the request.\n\n`;
+    markdownContent += `- Reads: \`GET /api/public/traces\`, \`/sessions\`, \`/observations\` → \`GET /api/public/v2/observations\`; \`GET /api/public/metrics\` → \`GET /api/public/v2/metrics\`; \`GET /api/public/scores\` and \`/v2/scores\` → \`GET /api/public/v3/scores\`; dataset runs and \`/dataset-run-items\` → \`/api/public/experiments\` and \`/experiment-items\`.\n`;
+    markdownContent += `- Writes: traces and observations sent to \`POST /api/public/ingestion\`, \`/traces\`, \`/spans\`, \`/generations\` or \`/events\` → \`POST /api/public/otel/v1/traces\` (OTLP/HTTP), or the current Python and JS/TS SDKs. Score events on \`/ingestion\` keep working; new code should use \`POST /api/public/scores\`.\n`;
+    markdownContent += `- Responses from deprecated endpoints carry \`Deprecation\`, \`Sunset\` and \`Link\` headers and a \`_deprecation\` object in the JSON body.\n`;
+    markdownContent += `- [Migration guide](https://langfuse.com/faq/all/deprecated-api-migration.md): every deprecated endpoint with its replacement, parameter mapping and examples.\n\n`;
+
     markdownContent += `## Evaluation workflows\n\n`;
     markdownContent += `- [Test an existing application and reuse graders](https://langfuse.com/resources/engineering/evaluate-existing-application.md): Runnable Python and TypeScript examples.\n`;
     markdownContent += `- [Compare versions and inspect failures](https://langfuse.com/docs/evaluation/experiments/compare-experiments.md): Baselines, individual regressions, and human review.\n`;
