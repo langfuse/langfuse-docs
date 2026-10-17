@@ -1,0 +1,85 @@
+---
+title: "Guardrails for RAG answers with GroundLens and Langfuse"
+sidebarTitle: GroundLens
+logo: /images/integrations/groundlens_icon.svg
+description: "Check each RAG answer against its sources with GroundLens and see the decision in the Langfuse trace: PASS, REVIEW or FAIL as a score, with the reasons and a link to a signed record."
+---
+
+# Guardrails for RAG answers with GroundLens and Langfuse
+
+[GroundLens](https://groundlens.dev) ([GitHub](https://github.com/groundlens-dev/groundlens)) is an open-source Python package that checks an LLM answer against the passages it was written from, without a model. It catches wrong figures, figures taken from the wrong company or year, and answers that do not give what was asked. It decides `PASS`, `REVIEW` or `FAIL` under a policy you own, and keeps a signed, hash-chained record of every decision.
+
+With the Langfuse integration, each check lands in the trace of the answer it checked:
+
+- A `groundlens.check` guardrail observation, with level `WARNING` for `REVIEW` and `ERROR` for `FAIL`, so problems stand out without a filter.
+- A categorical score `groundlens.decision` (`PASS`, `REVIEW` or `FAIL`), with the reason codes as its comment. Filter traces by it, chart it, or export it.
+- One span per verifier with its duration, and a generation for the LLM judge when your policy uses one.
+- The record id, hash and policy in the observation metadata, to find the signed record behind each decision.
+
+GroundLens does not send the full question, answer or passages to Langfuse. The trace carries the decision, the reasons and the record's id and hash. Reasons can include excerpts or values from the answer and passages.
+
+## Get Started
+
+<Steps>
+
+### Install
+
+```bash
+pip install "groundlens[langfuse]"
+```
+
+Works with Langfuse Cloud and self-hosted Langfuse, Python SDK v3 or v4.
+
+### Set your Langfuse keys
+
+Get the keys from the project settings in [Langfuse Cloud](https://langfuse.com/cloud) or your [self-hosted](https://langfuse.com/self-hosting) instance.
+
+```bash
+export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+export LANGFUSE_BASE_URL="https://cloud.langfuse.com"  # EU region; US: https://us.cloud.langfuse.com
+```
+
+### Check the answer inside its trace
+
+Add GroundLens as an observer and call `check` inside the observation that produced the answer.
+
+```python
+from langfuse import get_client
+import groundlens as gl
+
+langfuse = get_client()
+
+verifier = gl.Verifier(
+    sink=gl.sinks.jsonl("records/"),                 # where the signed records are kept
+    observers=[gl.integrations.langfuse(langfuse)],
+)
+
+question = "What was revenue in 2024?"
+passages = ["In 2024, revenue reached €41.2 million."]
+
+with langfuse.start_as_current_observation(name="answer", input=question):
+    answer = "Revenue was €42.1 million in 2024."   # your retrieval and model call
+    record = verifier.check(question=question, answer=answer, passages=passages)
+
+print(record.decision)  # FAIL
+print(record.reasons)   # ['c2: groundlens.numeric contradicted: €42.1 million not in sources; nearest 41200000 EUR in ctx-0 ...']
+```
+
+The record is stored before `check` returns. The observer only reports: it never changes a decision, and if Langfuse is unreachable the check still returns its record.
+
+### See the checks in Langfuse
+
+Open the trace of the answer. The `groundlens.check` observation shows the decision as its output and the reasons in its status message. Filter traces by the `groundlens.decision` score to list every `REVIEW` or `FAIL`.
+
+</Steps>
+
+## Using a judge
+
+The checks that ship with GroundLens are exact: figures, scope and intent, with no model involved. For sentences without figures, a policy can add the LLM judge you already use (OpenAI-compatible, Azure OpenAI or Bedrock). GroundLens runs first, a `FAIL` never reaches the judge, and the judge's call appears in the same trace as a `groundlens.judge` generation with its model and latency. See [Use a judge](https://groundlens.readthedocs.io/en/latest/guides/use-a-judge.html).
+
+## Learn more
+
+- [GroundLens documentation](https://groundlens.readthedocs.io)
+- [Observability guide: Langfuse and Grafana](https://groundlens.readthedocs.io/en/latest/guides/observability.html)
+- [Runnable example](https://github.com/groundlens-dev/groundlens/tree/main/examples/observability): a small credit assistant that sends its checks to a Langfuse project.
