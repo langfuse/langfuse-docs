@@ -225,8 +225,8 @@ def get_trace_input(trace):
 
 
 def fetch_root_observations_batch(*, limit, cursor=None, to_start_time=None):
-    # The advanced `filter` parameter takes precedence over the individual query
-    # parameters, so the time window is expressed as filter conditions as well.
+    # Each condition in the advanced `filter` parameter replaces the individual
+    # query parameter for the same field; the other query parameters still apply.
     return langfuse.api.observations.get_many(
         limit=limit,
         cursor=cursor,
