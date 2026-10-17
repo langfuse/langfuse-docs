@@ -692,6 +692,156 @@ function injectCallout(markdown, sourcePath) {
   return `# ${extractTitle(markdown, sourcePath)}\n\n${callout}\n\n${markdown}`;
 }
 
+const LEARNER_OUT_OF_SCOPE_SETUP = `For **Out-of-Scope Request**:
+
+1. In Langfuse, open **Evaluators → New Evaluator** and pick **Detect Out-of-Scope Request** from the **Template Gallery**.
+2. On the right side, select a sample observation that is the **final OpenAI generation** (observation type \`generation\`). Do not use the root agent observation here — that input is only Dad's chat messages and has no system prompt.
+3. Map the template's variables from the generation's **Input** through the UI selector:
+
+   | Template variable | Object field | JsonMapping |
+   | --- | --- | --- |
+   | \`{{system_prompt}}\` | \`Input\` | First message |
+   | \`{{last_user_message}}\` | \`Input\` | Second message |
+
+   The generation transcript starts \`[system, user, ...]\`. Map \`{{system_prompt}}\` to the first message, not the full conversation history. Map \`{{last_user_message}}\` to the second message — not the last message, which is often a tool result on the final generation of a tool-calling loop.
+
+4. In the right panel, test the evaluator on the sample observation.
+5. Click **Create evaluator**, review the filters and sampling rate, then execute.
+
+`;
+
+const LEARNER_OUT_OF_SCOPE_GOAL_BULLET = `- **Out-of-scope requests** — Dad tries to use Specs for something it isn't built for ("Can you file my taxes?"). Useful both for spotting product expansion ideas and for confirming the agent refuses gracefully.
+`;
+
+function applyLearnerMonitoringFixes(markdown) {
+  let next = markdown;
+
+  if (
+    next.includes("we chose two events that are worth catching") &&
+    !next.includes("**Out-of-scope requests**")
+  ) {
+    next = next.replace(
+      "we chose two events that are worth catching as a starting point:",
+      "we chose three events that are worth catching as a starting point:",
+    );
+    next = next.replace(
+      `- **User disagreement** — Dad pushes back ("No, that menu isn't there"). Either the agent gave the wrong steps or the app is showing its limits.\n`,
+      `- **User disagreement** — Dad pushes back ("No, that menu isn't there"). Either the agent gave the wrong steps or the app is showing its limits.\n${LEARNER_OUT_OF_SCOPE_GOAL_BULLET}`,
+    );
+  }
+
+  if (
+    !next.includes("`{{system_prompt}}`") &&
+    next.includes("For **User Disagreement**:")
+  ) {
+    next = next.replace(
+      "For **User Disagreement**:",
+      `${LEARNER_OUT_OF_SCOPE_SETUP}For **User Disagreement**:`,
+    );
+  }
+
+  next = next.replace(
+    "The monitor above use LLM-as-a-judge",
+    "The two monitors above use LLM-as-a-judge",
+  );
+
+  if (
+    next.includes("Send four turns that should each light up one monitor:") &&
+    !next.includes("**Out of scope**")
+  ) {
+    next = next.replace(
+      `Send four turns that should each light up one monitor:
+
+1. **Disagreement** — ask a normal question, then reply with "No, that menu isn't there"
+2. **All caps** — "THIS STILL ISNT WORKING"`,
+      `Send three turns that should each light up one monitor:
+
+1. **Out of scope** — "Can you file my taxes?"
+2. **Disagreement** — ask a normal question, then reply with "No, that menu isn't there"
+3. **All caps** — "THIS STILL ISNT WORKING"`,
+    );
+  }
+
+  if (
+    !next.includes("out-of-scope-example.png") &&
+    next.includes("The out-of-scope, disagreement, and all-caps traces")
+  ) {
+    next = next.replace(
+      "The out-of-scope, disagreement, and all-caps traces should bubble to the top.\n\n![User disagrees Example]",
+      "The out-of-scope, disagreement, and all-caps traces should bubble to the top.\n\n![Out-of-scope evaluator flagging a request outside the agent's role.](../images/monitoring/out-of-scope-example.png)\n\n![User disagrees Example]",
+    );
+  }
+
+  next = next.replace(
+    "Four hand-typed turns prove the wiring works.",
+    "Three hand-typed turns prove the wiring works.",
+  );
+
+  return next;
+}
+
+function applyInstructorMonitoringFixes(markdown) {
+  if (markdown.includes("map `system_prompt` to the first input message")) {
+    return markdown;
+  }
+
+  return markdown
+    .replace(
+      "- This is a UI-first chapter with two signals: **Detect User Disagreement** uses LLM-as-a-judge for semantic judgment, while **Detect User Frustration (ALL CAPS)** uses deterministic TypeScript logic.",
+      "- This is a UI-first chapter with three signals: **Detect Out-of-Scope Request** and **Detect User Disagreement** use LLM-as-a-judge for semantic judgment, while **Detect User Frustration (ALL CAPS)** uses deterministic TypeScript logic.",
+    )
+    .replace(
+      "- Before the disagreement evaluator, confirm the project has **Project Settings → LLM Connections** configured. The API keys in `.env` do not configure the judge model inside Langfuse.",
+      "- Before the first judge-based evaluator, confirm the project has **Project Settings → LLM Connections** configured. The API keys in `.env` do not configure the judge model inside Langfuse.",
+    )
+    .replace(
+      "- Both evaluators target the logical root `dad-it-support-chat-turn` agent observation because that observation carries the overall conversation input and final answer.",
+      "- The two judge templates target different observations: out-of-scope needs the **system prompt** on the final OpenAI generation, while disagreement needs the conversation history on the `dad-it-support-chat-turn` agent root. The agent input is only Dad's chat messages and has no system message.",
+    )
+    .replace(
+      "- Have learners use the right-side sample panel instead of mapping from memory: select a root observation, map `conversation_history` to all input messages and `last_user_message` to the last input message, then test the evaluator before saving.",
+      `- Have learners use the right-side sample panel instead of mapping from memory:
+  - Out-of-scope: select a final generation, map \`system_prompt\` to the first input message and \`last_user_message\` to the second input message, then test before saving.
+  - Disagreement: select a root observation, map \`conversation_history\` to all input messages and \`last_user_message\` to the last input message, then test before saving.`,
+    )
+    .replace(
+      `2. Create **Detect User Disagreement**, select a sample root observation, map both variables through the data tree, run a test, then create and execute the evaluator.
+3. Create **Detect User Frustration (ALL CAPS)** on the same root observation, run a test, then create and execute it.
+4. Send one disagreement turn and one ALL-CAPS turn, then inspect the scores on their root observations.
+5. Seed production traffic with \`npm run langfuse:seed:otel:no-scores\`, refresh the Tracing view, and watch the two evaluators score the seeded batch.`,
+      `2. Create **Detect Out-of-Scope Request**, select a sample final generation, map \`system_prompt\` and \`last_user_message\` through the data tree, run a test, then create and execute the evaluator.
+3. Create **Detect User Disagreement**, select a sample root observation, map both variables through the data tree, run a test, then create and execute the evaluator.
+4. Create **Detect User Frustration (ALL CAPS)** on the same root observation, run a test, then create and execute it.
+5. Send one out-of-scope turn, one disagreement turn, and one ALL-CAPS turn, then inspect the scores.
+6. Seed production traffic with \`npm run langfuse:seed:otel:no-scores\`, refresh the Tracing view, and watch the evaluators score the seeded batch.`,
+    )
+    .replace(
+      "- Accidentally choosing the wrong template instead of **Detect User Disagreement** from the Template Gallery.",
+      `- Mapping Out-of-Scope Request as if it used \`conversation_history\`. That template's variable is \`system_prompt\`, and it must be read from the generation input's first message.
+- Selecting the root agent observation for Out-of-Scope Request. The evaluator then substitutes Dad's question for \`{{system_prompt}}\` and still returns a plausible-looking score.
+- Mapping \`last_user_message\` to the last transcript item on a final generation. Final generations include tool messages after the user turn, so use the second message.
+- Accidentally choosing the wrong template instead of **Detect Out-of-Scope Request** or **Detect User Disagreement** from the Template Gallery.`,
+    )
+    .replace(
+      "- Selecting a child generation instead of the root agent observation. The evaluator only receives data from the observation it targets; it does not automatically read sibling or child observations.\n",
+      "",
+    )
+    .replace(
+      "- Mapping `conversation_history` to a single message, or `last_user_message` to every message. Use the live sample tree: **Input → messages** and **Input → messages → last**.",
+      "- Mapping `conversation_history` to a single message, or `last_user_message` to every message, on the disagreement evaluator. Use the live sample tree: **Input → messages** and **Input → messages → last**.",
+    );
+}
+
+function applyWorkshopContentFixes(markdown, sourcePath) {
+  if (sourcePath === "docs/learner/04-monitoring.md") {
+    return applyLearnerMonitoringFixes(markdown);
+  }
+  if (sourcePath === "docs/instructor/04-monitoring.md") {
+    return applyInstructorMonitoringFixes(markdown);
+  }
+  return markdown;
+}
+
 function yamlString(value) {
   return JSON.stringify(value);
 }
@@ -707,7 +857,10 @@ function frontmatter(fields) {
 }
 
 function buildGeneratedPage(markdown, file, routeBySourcePath) {
-  const withoutFrontmatter = stripFrontmatter(markdown).trim();
+  const withoutFrontmatter = applyWorkshopContentFixes(
+    stripFrontmatter(markdown).trim(),
+    file.sourcePath,
+  );
   const rewritten = rewriteMarkdownReferences(
     withoutFrontmatter,
     file.sourcePath,
@@ -797,4 +950,4 @@ if (
   });
 }
 
-export { rewriteMarkdownReferences };
+export { applyWorkshopContentFixes, rewriteMarkdownReferences };
