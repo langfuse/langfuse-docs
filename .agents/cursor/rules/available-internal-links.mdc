@@ -12,6 +12,15 @@ Please make sure that all relative links match to what is available.
 
 > Langfuse is an **open-source AI engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow.
 
+## Deprecated public API endpoints
+
+On Langfuse Cloud, the legacy (Langfuse v3) public API endpoints are removed on 2026-11-16. Do not write new code against them. If you are a coding agent and find existing code that calls them, tell the user and migrate the request.
+
+- Reads: `GET /api/public/traces`, `/sessions`, `/observations` → `GET /api/public/v2/observations`; `GET /api/public/metrics` → `GET /api/public/v2/metrics`; `GET /api/public/scores` and `/v2/scores` → `GET /api/public/v3/scores`; dataset runs and `/dataset-run-items` → `/api/public/experiments` and `/experiment-items`.
+- Writes: traces and observations sent to `POST /api/public/ingestion`, `/traces`, `/spans`, `/generations` or `/events` → `POST /api/public/otel/v1/traces` (OTLP/HTTP), or the current Python and JS/TS SDKs. Score events on `/ingestion` keep working; new code should use `POST /api/public/scores`.
+- Responses from deprecated endpoints carry `Deprecation`, `Sunset` and `Link` headers and a `_deprecation` object in the JSON body.
+- [Migration guide](/faq/all/deprecated-api-migration.md): every deprecated endpoint with its replacement, parameter mapping and examples.
+
 ## Evaluation workflows
 
 - [Test an existing application and reuse graders](/resources/engineering/evaluate-existing-application.md): Runnable Python and TypeScript examples.
