@@ -482,17 +482,18 @@ const sections: Section[] = [
     name: "Langfuse AI",
     features: [
       {
-        name: "Langfuse Assistant (in-app agent)",
+        name: "Halo (in-app agent)",
         description:
           "In-product AI assistant to explore your Langfuse project data and take selected actions with your approval. Available on Langfuse Cloud only.",
-        href: "/docs/langfuse-assistant",
+        href: "/docs/halo",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": false, Enterprise: false },
         },
       },
       {
-        name: "Langfuse Assistant usage limits",
+        name: "Halo usage limits",
+        href: "/docs/halo",
         tiers: {
           cloud: {
             Hobby: "Low",

@@ -1,10 +1,10 @@
 ---
 date: 2026-09-03
-title: Analyze thousands of observations with the Assistant
-description: Ask the Langfuse Assistant to build a dataset or a dashboard, or to run code over thousands of observations in a sandbox. Runs continue in the background.
+title: Analyze thousands of observations with Halo
+description: Ask Halo to build a dataset or a dashboard, or to run code over thousands of observations in a sandbox. Runs continue in the background.
 author: Lysander, Ben Bachem
 ogVideo: https://static.langfuse.com/changelog-videos/2026-09-03-assistant-sandbox.mp4
-canonical: /docs/langfuse-assistant
+canonical: /docs/halo
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
@@ -12,13 +12,13 @@ import { Book } from "lucide-react";
 
 <ChangelogHeader />
 
-Describe what you want and let the [Langfuse Assistant](/docs/langfuse-assistant) take care of it:
+Describe what you want and let [Halo](/docs/halo), the Langfuse assistant, take care of it:
 
 - "Create a dataset from the failed generations of last week."
 - "Build a dashboard of error rate and p95 latency for the last 7 days."
 - "Review this prompt against current best practices and propose a tighter version."
 
-It also works through hundreds or thousands of observations at once. The Assistant fetches them and runs code over them in a sandbox, rather than loading every payload into the model context:
+It also works through hundreds or thousands of observations at once. Halo fetches them and runs code over them in a sandbox, rather than loading every payload into the model context:
 
 - "Cluster the main error types across the failed observations of the last 7 days."
 - "Extract the tool name from every response last week and count how often each one appears."
@@ -26,12 +26,12 @@ It also works through hundreds or thousands of observations at once. The Assista
 
 Every run happens in the background, independently of your browser. Keep exploring Langfuse or start a second conversation while the first one is still working. You get a notification when a run finishes or needs your input.
 
-Anything that changes data or configuration still waits for your approval. For repeating work in one conversation, choose **Always approve** on a tool you are comfortable leaving unattended, and the Assistant uses that tool for the rest of that conversation without asking again.
+Anything that changes data or configuration still waits for your approval. For repeating work in one conversation, choose **Always approve** on a tool you are comfortable leaving unattended, and Halo uses that tool for the rest of that conversation without asking again.
 
 <Cards num={1}>
   <Card
-    title="Langfuse Assistant"
-    href="/docs/langfuse-assistant"
+    title="Halo"
+    href="/docs/halo"
     icon={<Book />}
     arrow
   />
