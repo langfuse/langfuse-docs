@@ -9,6 +9,8 @@ author: Ben
 import { BlogHeader } from "@/components/blog/BlogHeader";
 import { AssistantMilestones } from "@/components/blog/AssistantMilestones";
 import { AssistantAccessDiagram } from "@/components/blog/AssistantAccessDiagram";
+import { SilentToolCallsDiagram } from "@/components/blog/SilentToolCallsDiagram";
+import { BackgroundRunDiagram } from "@/components/blog/BackgroundRunDiagram";
 
 <BlogHeader
   title="How we built the Langfuse Assistant"
@@ -84,7 +86,7 @@ We do the same with instructions. Halo's system prompt explains how to handle ap
 
 ---
 
-TODO: I think the text below does not belong in this section. Separate section on observability?
+<p><mark>*TODO: I think the text below does not belong in this section. Separate section on observability?*</mark></p>
 
 When an organization opts into [AI feature telemetry](/docs/langfuse-assistant#data-privacy-and-security), we can use traces of Assistant runs to see where it struggles. We also see people trying to break it. These attempts started as soon as we announced Halo and still turn up regularly. One example is asking it to download an executable from a link. With no web-fetch tool and no sandbox network access configured, it can't make that request.
 
@@ -106,17 +108,19 @@ The downside is that each sandbox operation has to cross that process boundary, 
 
 ---
 
-TODO: the things below should either be removed or put under a separate section
+<p><mark>*TODO: the things below should either be removed or put under a separate section*</mark></p>
 
 If the session has expired, the next sandbox operation creates a new one. Files the agent wrote are gone, and we tell it that. Saved MCP results survive because we store them outside the sandbox.
 
 Without network access, scripts can't use the Langfuse SDK or CLI. That's a fairly large limitation, but they can still process data the agent fetched through MCP. Keeping data access in MCP meant we could add the sandbox without also having to secure arbitrary network calls from scripts.
 
+---
+
 ## Processing tool results with code
 
-Some Langfuse projects have traces containing large JSON structures, so we had to provide a way to access this data without blowing up Halo's context window.
+A lot of the work Halo does consists of reading large amounts of traces, and some Langfuse projects have large amounts of data stored in their traces, such as large JSON structures. We had to provide a way to access this data without blowing up Halo's context window.
 
-With a sandbox, the agent can use tools like `grep`, `head`, `jq`, or a short Python script to work through the data itself. Say you ask it to group the errors in a few hundred failed observations. It doesn't need to read every field of every observation to do that. It can inspect the files, group the errors, and read only the output it needs.
+Halo can scan through large amounts of data using the sandbox and tools like `grep`, `head`, `jq`, or a short Python script. Say you ask it to group the errors in a few hundred failed observations. It doesn't need to read every field of every observation to do that. It can inspect the files, group the errors, and read only the output it needs.
 
 When a sandbox is available, we add an optional `silent` parameter to every MCP tool so the agent can fetch data without putting the full result into the model's context:
 
@@ -131,38 +135,37 @@ tool.execute = async ({ silent, ...input }, context) => {
 };
 ```
 
-With `silent: true`, the model gets a file path instead of the full result. The worker saves the result outside the VM. Before the next sandbox operation, we write the saved calls into the sandbox as JSON files containing the request and response. This also lets us restore them if the sandbox expires.
+With `silent: true`, the model gets a file path instead of the full result. The worker saves the result outside the VM. Before the next sandbox operation, we write the saved calls into the sandbox as JSON files containing the request and response.
+
+<SilentToolCallsDiagram />
 
 ---
 
+<p><mark>*Lotte: I would replace this paragraph with some screenshots showing this instead. Can we do that safely?*</mark></p>
+
 Looking through runs for this post, I saw Halo use short Python scripts to count observations, combine results from several files, and count errors by environment or model. Sometimes it just printed part of a file to see what was there. The agent decides what to inspect rather than having to read the whole response. Failed tool calls still return their errors to the model, even with `silent: true`.
+
+<p><mark>*Lotte: I would remove this paragraph, it does not sound super important.*</mark></p>
 
 Our first implementation of `silent` also hid some tool errors from the model. Some tool failures came back as structured responses rather than exceptions, so our wrapper saved them to a file just like successful results. The model got a file path instead of the validation error it needed to correct its call. We [fixed the failure detection](https://github.com/langfuse/langfuse/pull/16082) so those errors go straight back to the model instead.
 
-```mermaid
-flowchart TD
-  %% Example workflow: the agent chooses the script and what it prints.
-  A[Agent fetches observations<br/>MCP calls with silent: true] --> B[Worker retains full results<br/>outside the sandbox]
-  B -->|File-path messages enter model context| C[Agent calls write<br/>with a script to group errors]
-  C --> D[Sandbox session created or reused<br/>Tool-call JSON files synchronized]
-  D --> E[Script written to workspace]
-  E --> F[Agent calls bash to run script<br/>Tool-call JSON files synchronized again]
-  F -->|Script output enters model context| G[Agent answers with grouped errors]
-```
+---
 
-You might have heard of code mode, or programmatic tool calling, where the model writes a script that calls tools and processes their results without sending everything back through the model. Mastra has [Code Mode](https://mastra.ai/blog/introducing-code-mode) for this. The tools still run on the host, but the script decides which ones to call and what to do with the results.
-
-Our setup is more limited. The worker sends operations and data into the sandbox and gets results back, but scripts can't ask the worker to execute tools. They can only process the data we've supplied. Code mode would require adding that reverse path so a script could fetch another page of observations or request an action while running. Keeping MCP calls in the agent loop is less flexible, but lets us keep the sandbox interface narrow and use our existing permissions and approval flow. We also don't have to preserve a running script while waiting for someone to approve a write.
+<Callout type="info">
+You might have heard of code mode, or programmatic tool calling, where the model writes a script that calls tools and processes their results without sending everything back through the model. Mastra has [Code Mode](https://mastra.ai/blog/introducing-code-mode) for this. The tools still run on the host, but the script decides which ones to call and what to do with the results. Our setup is more limited: scripts can't ask the worker to execute tools, which keeps the sandbox interface narrow and lets us use our existing permissions and approval flow.
+</Callout>
 
 ## Background runs
 
-When we added background execution, we wanted runs to continue when someone closed the browser, but didn't need to resume every interrupted model call or tool execution. For an interactive chat, we were comfortable showing a failure and letting the user retry. Writes make that decision less straightforward, though.
+We didn't want Halo's runs to be interrupted when someone closed the browser.
 
-We already use [BullMQ](https://docs.bullmq.io), so we use it to deliver run IDs to workers. Postgres stores the run state. A worker claims a queued run and sends a heartbeat every five seconds. When someone reads or watches the conversation, we check that heartbeat. If it's more than a minute old, we consider the worker lost and mark the run as failed.
+We were already using [BullMQ](https://docs.bullmq.io), so we added functionality to deliver run IDs to workers. Postgres stores Halo's run state. A worker claims a queued run and sends a heartbeat every five seconds. When someone reads or watches the conversation, we check that heartbeat. If it's more than a minute old, we consider the worker lost and mark the run as failed.
 
-Waiting for approval doesn't tie up a worker. The run stops, and the user's decision creates a child run that continues from the saved conversation. An approval wait can therefore survive a restart, even though we don't checkpoint active execution.
+<BackgroundRunDiagram />
 
-A worker can die after completing an approved write but before saving the result. The data has changed, but the conversation doesn't show it. That's why we don't automatically retry failed runs. If we catch the failure, we can save a warning telling the user to check the action before retrying. If the worker disappears entirely, we can only show a generic interruption. In either case, we may not know whether the write completed.
+We also had to take into account waiting times for action approvals, which could be minutes to hours. To avoid workers being idle for too long, a run always stops when an approval step is presented to the user, and when the user approves or denies a proposed step, it creates a new run that continues from the saved conversation in Postgres.
+
+**We decided not to automatically retry failed runs.** This was a trade-off between keeping it simple and user experience. Since Halo's runs are relatively short, this was an acceptable decision to make. If we automatically retried runs with our current architecture, there's the risk that a worker makes changes to the user's project, then fails before the run could be saved to Postgres. That's something we wanted to avoid.
 
 If your runs take hours, cost a lot, or have side effects you can't check afterwards, I'd probably make a different choice and use a durable workflow engine.
 
