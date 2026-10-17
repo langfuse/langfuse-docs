@@ -273,7 +273,10 @@ usage types and cost details accept arbitrary keys. For a paid tool call (a sear
 server-side code execution), either record it as its own generation-type observation with
 `cost_details` set to the metered price, or add a dedicated usage type with a price to the
 calling model's definition. Both approaches roll the tool cost into the same per-user and
-per-session aggregates as token spend.
+per-session aggregates as token spend. If `cost_details` has no `total` key, Langfuse
+[derives the total](/docs/observability/features/token-and-cost-tracking#cost-details-contract)
+as the sum of all cost keys, so `{"web_search": 0.01}` counts as $0.01. Keep the keys
+non-overlapping, or send `total` explicitly.
 
 </Details>
 
