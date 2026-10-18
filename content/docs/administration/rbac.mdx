@@ -306,12 +306,17 @@ Each scope is `resource:action`. `read` grants viewing; `CUD` (create, update, d
 | View traces, dashboards, prompts, datasets, and evaluators                                                        | `Viewer` on the project (`project:read`, `dashboards:read`, `prompts:read`, …)                         |
 | Export data from the UI or via [Blob Storage export](/docs/api-and-data-platform/features/export-to-blob-storage) | `Member` (`batchExports:create`, `batchExports:read`)                                                  |
 | Create scores, datasets, prompts, or evaluators                                                                   | `Member`                                                                                               |
+| Create, update, or delete alerts, including their metrics, filters, and thresholds                                | `Member` (`alerts:CUD`)                                                                                |
+| Attach existing alert automations in the same project to an alert                                                 | `Member` (`alerts:CUD`, `automations:read`)                                                            |
+| Create, update, or delete notification automations                                                                | `Admin` (`automations:CUD`)                                                                            |
 | Create or delete project API keys, LLM connections, or integrations                                               | `Admin` (`apiKeys:CUD`, `llmApiKeys:create`, `integrations:CRUD`)                                      |
 | Delete traces or a project                                                                                        | `Admin` for traces (`traces:delete`); `Owner` for the project (`project:delete`)                       |
 | View or manage organization LLM connections                                                                       | Organization `Admin` (`organizationLlmApiKeys:read`, `organizationLlmApiKeys:CUD`)                     |
 | Create organization API keys, delete the organization, or manage billing                                          | Organization `Owner` (`organization:CRUD_apiKeys`, `organization:delete`, `langfuseCloudBilling:CRUD`) |
 
 A user's effective role in a project is their [project-level role](#project-level-roles) if one is assigned, otherwise their organization role. Assigning the project role `None` means "do not override the organization role" for that project. Projects in which the effective role lacks `project:read` are hidden from the user entirely, which is why a `Viewer` or `None` organization member may see `Forbidden` on project endpoints until a project role is granted.
+
+A platform team with the Admin or Owner role can provision notification automations. Product teams with the Member role can then independently create alerts and attach those existing automations without Admin assistance. Members cannot create, edit, or delete the automations themselves. See [Alert permissions](/docs/observability/features/alerts#permissions) for details.
 
 ## Managing users
 
