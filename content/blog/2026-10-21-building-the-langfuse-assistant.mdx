@@ -74,9 +74,9 @@ Users can ask Halo to investigate something, close the tab, and come back to its
 
 ## Reusing the MCP server and skill
 
-Halo uses our public MCP servers, the same ones you can connect to. The only tools it gets besides our MCP servers are for functionality that your coding agent already has built in or that is specific to the Langfuse UI, such as proposing a redirect to another page or working in the sandbox. All customer-data access goes through MCP. In addition to the tools and MCP, we also give the agent some context about the user and the page they're on: the user's name, time zone, browser languages, and the current URL. By relying on MCP and tools, we can control which tools the Assistant gets to call without having to secure arbitrary network requests.
+Halo uses our public MCP servers, the same ones you can connect to. Beyond MCP, Halo gets sandbox tools similar to those in coding agents, plus UI-specific tools such as proposing navigation to another page. All customer-data access goes through MCP. We also give Halo the user's name, time zone, browser languages, and current URL through the system prompt. By relying on MCP and tools, we can control which tools the Assistant gets to call without having to secure arbitrary network requests.
 
-For each run, the worker creates a temporary API key scoped to the project. By default, it can only call read-only MCP tools. We maintain our own mapping of tool permissions in the in-app agent's code rather than trusting the MCP server's read-only annotations. We also filter tools by the signed-in user's role before exposing them to the model. If the user's role doesn't allow an action, the agent won't even see the tool for it at all and it won't be able to attempt the action.
+For each run, the worker creates a temporary API key scoped to the project. By default, it can only call read-only MCP tools. We maintain our own mapping of tool permissions in the in-app agent's code rather than trusting the MCP server's read-only annotations. We also filter tools by the signed-in user's role before exposing them to the model. If the user's role doesn't allow an action, we don't expose the corresponding tool to the agent at all.
 
 Tools that change data require approval. Choosing **Always approve** saves the approval for that conversation only. We still recheck it against the user's current role on each run, so an approval can't give the agent permissions the user doesn't have.
 
@@ -92,7 +92,7 @@ When an organization opts into [AI feature telemetry](/docs/langfuse-assistant#d
 
 Some of those fixes can be very straightforward. Agents kept asking to sort metrics by `totalCost_sum` when the tool expected `sum_totalCost`, so we [made the MCP adapter accept both](https://github.com/langfuse/langfuse/pull/15623). When dashboard creation failed validation, the error told the agent which field was wrong but not what it could use instead. We [added the allowed values and guidance on looking up the schema](https://github.com/langfuse/langfuse/pull/15630), so it had enough information to correct the call.
 
-We also see a lot of people trying to break Halo or exploit it in unexpected ways. These attempts started as soon as we announced Halo and still turn up regularly. Security was a major consideration in the design of both the agent and the sandbox. Some of the design decisions might seem restrictive at first, but given the number of malicious attempts we see, they are necessary to keep the system secure and protect user data.
+People have been trying to break or exploit Halo since we announced it, and those attempts still turn up regularly. Security shaped the design of both the agent and the sandbox from the start. These attempts reinforce why we keep strict boundaries around what the agent can access and what sandbox scripts can do. Some of those boundaries limit functionality, but they help keep the system secure and protect user data.
 
 ## The agent does not run in a sandbox
 
@@ -100,15 +100,15 @@ We added the sandbox because we knew some tasks could be handled more efficientl
 
 For interacting with the sandbox, we give the agent four tools: `read`, `write`, `edit`, and `bash`. When the agent first uses one of these tools in a conversation, we create a new sandbox instance that is limited to that conversation. The sandbox instance is isolated and ephemeral, with no network egress configured by default. Code the agent writes is executed as an unprivileged user within the sandbox. After some period of inactivity, the sandbox is suspended and eventually terminated and cleaned up.
 
-From within the sandbox, no process can make additional requests to Langfuse or the wider internet directly. Only the agent will push data that has been previously fetched through authorized MCP calls into the sandbox. Keeping data access in MCP meant we could add the sandbox without also having to secure arbitrary network calls from within it.
+From within the sandbox, no process can make additional requests to Langfuse or the wider internet directly. The agent can only push data into the sandbox after fetching it through authorized MCP calls. Keeping data access in MCP meant we could add the sandbox without also having to secure against arbitrary network calls made from within it.
 
-Many conversations don't need a sandbox at all. Answering a docs question or looking up yesterday's traces might only take a few MCP-based lookups. Starting a VM for those conversations would cost us memory and disk, but not actually provide value in these cases, so having the agent loop run outside of it is more efficient.
+Many conversations don't need a sandbox at all. Answering a docs question or looking up yesterday's traces might only take a few MCP-based lookups. Starting a VM for those conversations would consume memory and disk without adding value.
 
 There's also self-hosting. Langfuse is proudly open-source, and we have lots of users self-hosting it. For Langfuse Cloud, we use [AWS Lambda MicroVMs](https://docs.aws.amazon.com/lambda/latest/dg/microvms-networking.html) for the sandbox, but the sandbox interface the agent interacts with is built to be adaptable to different providers. Ultimately though, self-hosters can also choose to not use a sandbox at all. Without one, Halo still works.
 
 ## Processing tool results with code
 
-Some of the work Halo does consists of reading large amounts of traces, and some Langfuse projects have large amounts of data stored in their traces, such as large JSON structures. We had to provide a way to access this data without blowing up Halo's context window.
+Halo sometimes needs to inspect hundreds of observations containing large JSON structures. We needed a way to process that data without blowing up its context window.
 
 Halo can scan through large amounts of data using the sandbox and tools like `grep`, `head`, `jq`, or a short Python script. Say you ask it to group the errors in a few hundred failed observations. It doesn't need to read every field of every observation to do that. It can inspect the files, group the errors, and read only the output it needs. To allow for this, we add an optional `silent` parameter to every MCP tool when a sandbox is available. This allows the agent to fetch data without putting the full result into the model's context:
 
@@ -139,13 +139,13 @@ You might have heard of code mode, or programmatic tool calling, where the model
 
 In the initial implementation of Halo, the agent loop ran in an HTTP handler. If a user closed the browser, the network request would be interrupted and the agent would stop processing actions. To enable longer-running operations as well as headless invocation, we needed a way to decouple the agent loop from the HTTP request lifecycle.
 
-The architecture of Langfuse already included a web server and worker split, so we moved the agent loop from the HTTP handler to the worker. We use Postgres to store Halo's run state. New runs are created by the web server, persisted to Postgres and then scheduled through BullMQ. While a user is actively watching a conversation, the web server continuously monitors the Postgres-backed conversation and streams back events to the user's browser through Server-Sent Events.
+Langfuse already had separate web and worker processes, so we moved the agent loop from the HTTP handler to the worker. The web server saves new runs to Postgres and queues them through BullMQ. The worker executes each run and saves its progress and results to Postgres. While a user watches a conversation, the web server polls Postgres for new events and streams them to the browser over Server-Sent Events. This lets the worker keep going when the user closes the tab, and the browser catch up on saved events when they return.
 
 When an approval step is presented to the user, the run completes with a pending approval status. When the user approves or denies a proposed step, it creates a new run that continues from the saved conversation in Postgres.
 
 <BackgroundRunDiagram />
 
-**We decided not to automatically retry failed runs.** This was a trade-off between keeping it simple and user experience. Because today Halo's runs are relatively short, this was an acceptable decision to make. If your runs take hours, cost a lot, or have side effects you can't check afterward, I'd probably make a different choice and use a durable workflow engine. Should we see similar requirements in the future, we might revisit this decision.
+**We decided not to automatically retry failed runs.** Most of Halo's runs are currently short, so we chose to keep run management simple rather than add automatic recovery. The trade-off is that a failed run stays failed instead of being retried automatically. If your runs take hours, cost a lot, or have side effects you can't check afterward, I'd probably make a different choice and use a durable workflow engine. Should we see similar requirements in the future, we might revisit this decision.
 
 ## What's next
 
