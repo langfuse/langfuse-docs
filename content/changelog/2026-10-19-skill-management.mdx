@@ -20,11 +20,51 @@ Share a consistent set of skills across your agents, test revised instructions w
 
 ## Edit and version skills
 
-Create a skill in the UI or import existing files, folders, or ZIP archives. Preview and edit instructions and supporting files, compare versions, and publish an update with a note describing the change.
+Create and update skills in the UI, publish a local skill folder with the CLI, or manage versions through the API.
 
 Use labels such as `production` and `staging` to choose which version your agents receive. Saved versions remain immutable, so you can move a label back to an earlier version when needed.
 
+<Tabs items={["UI", "API", "CLI"]}>
+
+<Tab>
+
 ![The refund-policy skill with version history, labels, supporting files, and the Files, Metrics, and Observations tabs.](/images/changelog/2026-10-19-skill-management-editor.jpg)
+
+</Tab>
+
+<Tab>
+
+Publish a skill or a new version with a POST request. Include every file for that version; the skill's name and description come from the frontmatter in `SKILL.md`:
+
+```bash
+curl --request POST "$LANGFUSE_BASE_URL/api/public/unstable/skills" \
+  --user "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "files": [{
+      "path": "SKILL.md",
+      "content": "---\nname: refund-policy\ndescription: Handle refund requests.\n---\nCheck the refund policy before responding."
+    }]
+  }'
+```
+
+The POST assigns the `latest` label. See the [API reference](https://api.reference.langfuse.com/#tag/unstableskills) for request fields and label management.
+
+</Tab>
+
+<Tab>
+
+With the CLI beta installed, push a local skill folder containing `SKILL.md` and its supporting files:
+
+```bash
+langfuse skills push ./refund-policy --label production
+```
+
+The CLI creates a version when files change and assigns the `production` label.
+
+</Tab>
+
+</Tabs>
 
 ## Load skills in your agent
 
