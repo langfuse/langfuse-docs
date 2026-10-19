@@ -1,0 +1,115 @@
+---
+title: "Operating Langfuse as an internal service"
+description: "Coordinate SDK upgrades, monitor service health and support evaluation workflows, access reviews and cost allocation across application teams."
+author: Boris
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Operating Langfuse as an internal service"
+  description="Coordinate SDK upgrades, monitor service health and support evaluation workflows, access reviews and cost allocation across application teams."
+  authors={["borismichel"]}
+/>
+
+Part 2 of 2 in a series for platform teams managing Langfuse. Start with [Part 1: Provisioning and governing Langfuse across teams](/blog/provisioning-and-governing-langfuse-across-teams).
+
+Once several application teams rely on Langfuse, platform teams need to keep integrations working as SDKs, applications and responsibilities change. A missing trace could be caused by an application release, an expired credential or a service failure. Clear ownership and tested workflows help teams resolve these issues and handle routine work independently.
+
+You'll learn how to coordinate SDK upgrades, monitor end-to-end service health and support evaluation workflows that application teams can run themselves. The article also covers access reviews, credential rotation and how to separate model, Langfuse and infrastructure costs before allocating them to teams. It builds on the first article’s guidance on [projects, access boundaries, and accountable application owners](/blog/provisioning-and-governing-langfuse-across-teams). The examples are hypothetical illustrations of recurring operational needs.
+
+## Define service ownership
+
+Create or update a service page in your team workspace or service catalogue. Include the owners for telemetry incidents, application SDK upgrades, and prompt-release decisions, along with the support channel and required diagnostic details. Teams should be able to find these responsibilities without relying on a personal contact.
+
+The platform team owns the supported integration path, shared configuration, administration, and service escalation. Application teams own their instrumentation, domain datasets, evaluation criteria, and release decisions. Make that division clear in the service page and linked runbooks so incident triage and release decisions reach the right team.
+
+Langfuse Cloud removes the work of running the Langfuse infrastructure. Your team still owns its SDK rollout, network path, credentials, exported data, and internal support. With [self-hosting](/self-hosting), name owners for the Langfuse web and worker services and for PostgreSQL, ClickHouse, Redis or Valkey, and object storage. Using ClickHouse Cloud or BYOC transfers database operations to that provider; it does not make the Langfuse application fully managed.
+
+Keep the service page concise and link it from your incident runbooks. Give each responsibility one accountable owner and include escalation contacts for dependency teams. Update the page when the deployment or support arrangement changes.
+
+![Platform and application owners follow separate operating loops, sharing findings to improve service health and application quality.](/images/blog/operating-langfuse-as-an-internal-service/operating-loop.png)
+
+Figure 1. A recommended operating loop. Platform owners observe service health, triage integration failures, improve shared tooling, and verify recovery. Application owners review outputs, classify failures, change their application, and check results. Both feed findings into the next review.
+
+## Manage SDK upgrades across integrations
+
+Keep an inventory of production integrations: owning team, language, framework, SDK version, destination project, and a link to its acceptance test. Include scripts and evaluation jobs alongside user-facing applications. An application can continue serving requests even when its telemetry no longer includes the fields your debugging and evaluation workflows depend on.
+
+Publish a tested reference integration and a supported version policy. For each upgrade, provide the [relevant migration guide](/docs/observability/sdk/upgrade-path) and an acceptance test that exercises a real request. Check parent-child relationships, root input/output, model usage, errors, and export at shutdown. Verify that user, session, tags, metadata, release, and environment attributes reach the observations that need them. [In v4, a trace groups observations](/docs/observability/data-model); request evaluations should target the actual observation, usually the root. Check the score’s target and count too. Where practical, run these acceptance checks in CI before rolling out an SDK update.
+
+Test data handling with synthetic sensitive values. A new framework integration can export attributes through a different path from hand-written instrumentation. Verify [masking](/docs/observability/features/masking) on the actual exported data, including third-party spans, rather than assuming an existing callback covers every field. Keep [sampling](/docs/observability/features/sampling) changes visible too: changing which traces are retained changes the evidence available for debugging and analysis.
+
+Start with a representative application, then roll out in small groups with named owners. Track failures in the rollout issue, update the reference integration, and preserve a tested recovery path. For self-hosted server upgrades, check the current [compatibility and migration guidance](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4) separately: server changes can affect API consumers, evaluators, exports, and historical data as well as SDKs. A server upgrade alone does not establish that every integration is ready.
+
+## Monitor end to end service health
+
+Monitor the path from application export to queryable data alongside process health. Send a synthetic trace through a representative application path and check that it becomes queryable with the expected fields. Track export errors and the delay between an event being created and becoming available. Choose thresholds from the applications’ needs, and link every alert to an owner and a response runbook.
+
+When traces disappear, first separate an application release or expired credential from an ingestion problem. Compare affected projects, the last successful synthetic check, recent changes, and service status. Ask teams to include the time range, project, integration version, sanitised error, and a safe example identifier in support requests. A support template with these fields gives responders the context they need to start triage.
+
+For self-hosting, connect these checks to worker failures, queue backlog, database health, storage capacity, and dependency availability. Set recovery objectives with the teams relying on the service. [Back up the durable stores](/self-hosting/configuration/backups) and configuration required to rebuild it, then rehearse restoration in an isolated environment. Confirm that restored projects, credentials, prompts, and observability data can support the expected workflows. A successful backup job is evidence that a backup ran; a restore exercise establishes whether the recovery procedure works.
+
+What happens to the application when Langfuse is unavailable? Test it, especially if prompts are fetched at runtime. Check both a warm cache and a fresh application instance with no cached prompt, then verify the intended fallback. Review retention policies too: changing them changes storage needs and the history available for an investigation.
+
+## Support self service evaluation workflows
+
+An engineer investigating an incomplete trace and a product owner reviewing an answer need different help. Provide task-specific examples they can run and adapt. A general product tour rarely covers the diagnostic steps an engineer needs or the evaluation criteria a domain reviewer must apply.
+
+Take a hypothetical support assistant that gives incorrect answers about refunds. Its application owner selects approved, sanitised examples for a regression dataset. A domain reviewer defines the expected behaviour and checks the evaluation rubric. The team tests a candidate prompt against that dataset, inspects individual failures, and decides whether to release it. After release, it compares quality, latency, and model cost, with a route back to the previous version.
+
+The platform team supplies a reusable experiment example, consistent metadata, and a release-integration example in the team’s existing tooling. It helps when an evaluator cannot run or a prompt cannot be fetched. The application team owns the dataset’s relevance and the decision to accept the result. Platform support keeps the workflow usable; application owners remain accountable for quality.
+
+Use Langfuse’s prompt versions, labels, datasets, and experiments within a workflow your team understands. [Compose approval steps and any gradual traffic rollout](/resources/engineering/prompt-cicd) in your release tooling or application. Confirm the controls available in your deployment before relying on them; versioned prompts alone do not create an approval process.
+
+Turn recurring support issues into runnable examples and runbook updates. Use focused office hours for teams working through a migration or new workflow. Assess adoption by whether teams can complete an evaluation or diagnose a trace independently, alongside account and activity metrics.
+
+## Maintain access and credentials
+
+Onboarding is only the start of access review. Reconfirm project owners, review role changes when people move teams, and deal with orphaned projects. Before removing an inactive project, check retention obligations, open investigations, and any prompts or datasets still in use. Low activity alone isn’t enough to establish that a project can be removed.
+
+Keep a credential inventory mapping each key to its purpose, consuming service, secret-store reference, owner, and replacement date. Store references, never secret values. When rotating a key, deploy its replacement, verify the integration, and then revoke the old credential. Coordinate with application owners. Include verification and revocation steps in the rotation runbook to avoid interrupting a consuming service.
+
+Langfuse supports [expiration dates for project and organisation API keys](/changelog/2026-10-07-api-key-expirations). Use expiration to support temporary access and rotation, while scheduling replacement before requests begin failing. Existing keys do not acquire an expiration date automatically. Verify support in the deployed version and keep human access reviews separate from service-credential maintenance.
+
+## Separate cost records before allocation
+
+Before allocating costs, separate model spend, Langfuse service costs, and self-hosted infrastructure. All three can end up in a team’s budget, but they come from different records. Keep their sources and reconciliation steps explicit in the cost report.
+
+Model usage and cost recorded in Langfuse help explain which applications and requests consume resources. [Costs may be supplied by an integration or calculated from usage and model prices](/docs/observability/features/token-and-cost-tracking). Reconcile these estimates with provider billing before using them for accounting, especially where sampling, missing usage, or negotiated pricing creates gaps.
+
+Langfuse usage measures traces, observations, and scores. The [organisation usage breakdown](/changelog/2026-10-06-organization-usage-breakdown) shows units by project or type and exports CSV rows by time bucket, project, and type. It provides useful allocation inputs across an organisation. It does not turn those units into model-token spend or provide a cross-project quality review.
+
+For self-hosting, collect actual infrastructure costs separately: databases, application compute, storage, backups, and network charges. Add software or support contract costs according to the agreement. Langfuse units can inform an allocation rule, but don’t assume infrastructure and contract costs rise in the same proportion.
+
+![Model billing, Langfuse service usage and self-hosted infrastructure bills feed a platform-owned allocation process and internal showback report.](/images/blog/operating-langfuse-as-an-internal-service/cost-allocation.png)
+
+Figure 2. Three cost records feed a platform-owned allocation process. Model usage is reconciled with provider billing; Langfuse units inform allocation of the applicable service charge; self-hosted infrastructure comes from infrastructure bills. The output is an internal showback report, not a native invoice or spending limit.
+
+Start with showback - a report telling teams what costs you attribute to them and how you calculated the amounts. Chargeback actually moves those costs into team budgets. Get agreement from owners and finance on the rules before taking that next step.
+
+Consider a hypothetical monthly Cloud cost report. Every number here is invented. Suppose reconciled model spend is $3,000: $1,800 belongs to application A, $900 to B, and $300 remains unattributed. Separately, a $600 Langfuse bill is allocated using a chosen unit-share rule: A has 60% of units, B has 30%, and 10% lacks an owner. That assigns $360, $180, and $60 respectively. A’s combined showback is $2,160; B’s is $1,080; $360 remains unresolved. These are allocation choices, not Langfuse prices or automatic team invoices.
+
+In a separate self-hosted example, a $900 infrastructure bill might allocate $450 to A, $270 to B, and $180 to a shared platform budget under an agreed 50/30/20 rule. This is an alternative to the Cloud example - don’t add the two together. Keep shared capacity and unattributed costs visible so teams can discuss who should carry them.
+
+Include the reporting period, ownership mapping, allocation method, and exceptions in each cost report. Let teams challenge anomalies before finance uses the report. [Cloud billing alerts](/docs/administration/spend-alerts) concern the Langfuse bill; model-cost alerts concern model usage. Neither should be described as hard model-spend enforcement. If a budget requires requests to stop, implement and test that policy in the system that authorises those requests.
+
+## Prioritise the next service improvement
+
+Review service-health dashboards, integration checks, access exceptions, and cost reports each month. Use the checks below to identify gaps, then create tracked issues with owners and acceptance criteria:
+
+- Can a representative application export a complete, correctly masked trace, and can its team find it?
+
+- Which integrations need upgrades, who owns them, and what test proves completion?
+
+- What caused the last service incident, and has the recovery procedure been exercised?
+
+- Which access exceptions, expiring credentials, or ownerless projects need action?
+
+- Can application teams run their evaluation and release workflow without bespoke platform help?
+
+- Do cost reports reconcile, and who will resolve shared or unattributed usage?
+
+Choose the next improvement from the answers. If every SDK upgrade needs individual help, improve the migration path. If teams can sign in but cannot review results, improve the evaluation examples and guidance. If costs are disputed, repair attribution before introducing chargeback. There is no single operating model that settles all of this for every team.
+
+Start with the highest-impact gap, assign it to an owner, and use the next service review to verify that the change improved the workflow.
