@@ -1,7 +1,10 @@
 ---
 title: "Provisioning and governing Langfuse across teams"
 description: "Choose project boundaries, provision access and verify safe, useful telemetry as more application teams adopt Langfuse."
+date: 2026/10/22
 author: Boris
+tag: guide, architecture
+ogImage: /images/blog/2026-10-22-provisioning-and-governing-langfuse-across-teams/og.png
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
@@ -9,10 +12,11 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 <BlogHeader
   title="Provisioning and governing Langfuse across teams"
   description="Choose project boundaries, provision access and verify safe, useful telemetry as more application teams adopt Langfuse."
+  date="October 22, 2026"
   authors={["borismichel"]}
 />
 
-Part 1 of 2 in a series for platform teams managing Langfuse. Continue with [Part 2: Operating Langfuse as an internal service](/blog/operating-langfuse-as-an-internal-service).
+Related guide: [Operating Langfuse as an internal service](/blog/2026-10-22-operating-langfuse-as-an-internal-service).
 
 As more teams adopt Langfuse, platform teams need a consistent way to onboard applications, control access and keep ownership clear. Teams may need different permissions for experimentation and production, and each integration needs to meet the organisation's data-handling requirements. Managing those decisions case by case becomes difficult as adoption grows.
 
@@ -35,7 +39,7 @@ In this example, the platform team provides the Langfuse endpoint, organisation 
 
 Capture a primary owner and backup, deployment region, environments, data classification, expected usage, and allocation identifier in the onboarding request. Keep these details linked to the project, using your existing catalogue, configuration repository, or team workspace. Identify production-access approvers and exception reviewers. Add a review date for experimental projects so ownership and access remain current.
 
-Cloud and self-hosting change infrastructure responsibilities, but both need a defined service model. With Cloud, the internal platform team still manages how application teams gain access and use the service. For self-hosting, assign responsibility for operating the deployment as well. Reliability, upgrades, support, and cost allocation are covered in the companion article on [operating Langfuse as an internal service](/blog/operating-langfuse-as-an-internal-service).
+Cloud and self-hosting change infrastructure responsibilities, but both need a defined service model. With Cloud, the internal platform team still manages how application teams gain access and use the service. For self-hosting, assign responsibility for operating the deployment as well. Reliability, upgrades, support, and cost allocation are covered in the companion article on [operating Langfuse as an internal service](/blog/2026-10-22-operating-langfuse-as-an-internal-service).
 
 ## Design project and access boundaries
 
@@ -43,7 +47,7 @@ Cloud and self-hosting change infrastructure responsibilities, but both need a d
 
 For Support and Search, the example uses one central organisation with four projects: support-nonprod, support-prod, search-nonprod, and search-prod. Support developers work in their nonproduction project; selected Support staff can access production. Search follows the same pattern. Neither team gets access to the other's projects by default. Platform administrators have the access needed to run the service, subject to the organisation's security policy.
 
-![Illustrative organisation containing separate Support and Search production and nonproduction projects, with project roles defining access rather than infrastructure isolation.](/images/blog/provisioning-and-governing-langfuse-across-teams/project-access-boundaries.png)
+![Illustrative organisation containing separate Support and Search production and nonproduction projects, with project roles defining access rather than infrastructure isolation.](/images/blog/2026-10-22-provisioning-and-governing-langfuse-across-teams/project-access-boundaries.png)
 
 Figure 1. An illustrative access design for two teams. The organisation and project boxes represent Langfuse administration and data-access boundaries. They do not represent separate infrastructure. This example assumes project-level RBAC is available in the selected plan or edition.
 
@@ -69,7 +73,7 @@ A request to onboard a team's application to the shared Langfuse service should 
 
 The platform team reviews the request against the access policy and provisions projects and memberships. Automate through the documented APIs where the edition supports them. Keep the request linked to project identifiers, owners, and secret locations. Make retries check existing resources before creating new ones to avoid duplicate projects. This onboarding workflow is orchestration you build around Langfuse; it is not a built-in service catalogue.
 
-![Recommended onboarding lifecycle connecting project setup and application instrumentation to acceptance checks, ownership handoff and offboarding.](/images/blog/provisioning-and-governing-langfuse-across-teams/onboarding-lifecycle.png)
+![Recommended onboarding lifecycle connecting project setup and application instrumentation to acceptance checks, ownership handoff and offboarding.](/images/blog/2026-10-22-provisioning-and-governing-langfuse-across-teams/onboarding-lifecycle.png)
 
 Figure 2. A recommended onboarding lifecycle. Failed acceptance checks return to the responsible setup or instrumentation step. The handoff includes ownership and removal procedures, rather than ending when a project is created.
 

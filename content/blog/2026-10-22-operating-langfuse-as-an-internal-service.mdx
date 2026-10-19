@@ -1,7 +1,10 @@
 ---
 title: "Operating Langfuse as an internal service"
 description: "Coordinate SDK upgrades, monitor service health and support evaluation workflows, access reviews and cost allocation across application teams."
+date: 2026/10/22
 author: Boris
+tag: guide, architecture
+ogImage: /images/blog/2026-10-22-operating-langfuse-as-an-internal-service/og.png
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
@@ -9,14 +12,15 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 <BlogHeader
   title="Operating Langfuse as an internal service"
   description="Coordinate SDK upgrades, monitor service health and support evaluation workflows, access reviews and cost allocation across application teams."
+  date="October 22, 2026"
   authors={["borismichel"]}
 />
 
-Part 2 of 2 in a series for platform teams managing Langfuse. Start with [Part 1: Provisioning and governing Langfuse across teams](/blog/provisioning-and-governing-langfuse-across-teams).
+Related guide: [Provisioning and governing Langfuse across teams](/blog/2026-10-22-provisioning-and-governing-langfuse-across-teams).
 
 Once several application teams rely on Langfuse, platform teams need to keep integrations working as SDKs, applications and responsibilities change. A missing trace could be caused by an application release, an expired credential or a service failure. Clear ownership and tested workflows help teams resolve these issues and handle routine work independently.
 
-You'll learn how to coordinate SDK upgrades, monitor end-to-end service health and support evaluation workflows that application teams can run themselves. The article also covers access reviews, credential rotation and how to separate model, Langfuse and infrastructure costs before allocating them to teams. It builds on the first article’s guidance on [projects, access boundaries, and accountable application owners](/blog/provisioning-and-governing-langfuse-across-teams). The examples are hypothetical illustrations of recurring operational needs.
+You'll learn how to coordinate SDK upgrades, monitor end-to-end service health and support evaluation workflows that application teams can run themselves. The article also covers access reviews, credential rotation and how to separate model, Langfuse and infrastructure costs before allocating them to teams. The companion guide covers [projects, access boundaries, and accountable application owners](/blog/2026-10-22-provisioning-and-governing-langfuse-across-teams). The examples are hypothetical illustrations of recurring operational needs.
 
 ## Define service ownership
 
@@ -28,7 +32,7 @@ Langfuse Cloud removes the work of running the Langfuse infrastructure. Your tea
 
 Keep the service page concise and link it from your incident runbooks. Give each responsibility one accountable owner and include escalation contacts for dependency teams. Update the page when the deployment or support arrangement changes.
 
-![Platform and application owners follow separate operating loops, sharing findings to improve service health and application quality.](/images/blog/operating-langfuse-as-an-internal-service/operating-loop.png)
+![Platform and application owners follow separate operating loops, sharing findings to improve service health and application quality.](/images/blog/2026-10-22-operating-langfuse-as-an-internal-service/operating-loop.png)
 
 Figure 1. A recommended operating loop. Platform owners observe service health, triage integration failures, improve shared tooling, and verify recovery. Application owners review outputs, classify failures, change their application, and check results. Both feed findings into the next review.
 
@@ -82,7 +86,7 @@ Langfuse usage measures traces, observations, and scores. The [organisation usag
 
 For self-hosting, collect actual infrastructure costs separately: databases, application compute, storage, backups, and network charges. Add software or support contract costs according to the agreement. Langfuse units can inform an allocation rule, but don’t assume infrastructure and contract costs rise in the same proportion.
 
-![Model billing, Langfuse service usage and self-hosted infrastructure bills feed a platform-owned allocation process and internal showback report.](/images/blog/operating-langfuse-as-an-internal-service/cost-allocation.png)
+![Model billing, Langfuse service usage and self-hosted infrastructure bills feed a platform-owned allocation process and internal showback report.](/images/blog/2026-10-22-operating-langfuse-as-an-internal-service/cost-allocation.png)
 
 Figure 2. Three cost records feed a platform-owned allocation process. Model usage is reconciled with provider billing; Langfuse units inform allocation of the applicable service charge; self-hosted infrastructure comes from infrastructure bills. The output is an internal showback report, not a native invoice or spending limit.
 
