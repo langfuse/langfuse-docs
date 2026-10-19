@@ -19,6 +19,7 @@
 const fs = require("fs");
 const path = require("path");
 const { execFileSync } = require("child_process");
+const { isSearchUtility } = require("../lib/search-index-policy.js");
 
 const repoRoot = path.join(__dirname, "..");
 const contentDir = path.join(repoRoot, "content");
@@ -133,6 +134,7 @@ function contentPathToRoute(filePath) {
     blog: "blog",
     customers: "users",
     resources: "resources",
+    compare: "compare",
     // marketing pages are served at the root (no section prefix)
     marketing: "",
   };
@@ -184,7 +186,7 @@ for (const filePath of walkDir(contentDir)) {
 
   // Determine if this page should be excluded
   let exclude = false;
-  if (fm.noindex === "true") {
+  if (fm.noindex === "true" || isSearchUtility(route)) {
     exclude = true;
   } else if (fm.canonical) {
     // Normalise: strip https://langfuse.com prefix so we compare path-to-path
@@ -202,6 +204,8 @@ for (const filePath of walkDir(contentDir)) {
     const entry = { loc: route };
     if (lastmod) entry.lastmod = lastmod;
     if (fm.title) entry.title = fm.title;
+    if (fm.shortTitle) entry.shortTitle = fm.shortTitle;
+    else if (fm.sidebarTitle) entry.shortTitle = fm.sidebarTitle;
     if (fm.description) entry.description = fm.description;
     pagesByRoute.set(route, entry);
   }

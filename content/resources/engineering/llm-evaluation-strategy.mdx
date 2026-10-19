@@ -4,9 +4,13 @@ description: "How to build an LLM evaluation strategy: quality dimensions from f
 tags: [guide, evaluation]
 ---
 
+import { SignupCTA } from "@/components/SignupCTA";
+
 # How to build an LLM evaluation strategy
 
 Most LLM evaluation content explains methods: what a judge prompt looks like, how to compute similarity, when exact match is enough. Rolling evaluation out across a team is a different problem. Someone has to decide which dimensions of quality matter for this application, which method measures each one, what score blocks a release, and what evidence exists when leadership asks how you know the system works. This guide covers that rollout, step by step, with Langfuse as the worked example.
+
+<SignupCTA className="my-6" />
 
 **TL;DR:** An LLM evaluation strategy assigns every quality dimension you care about to the cheapest method that measures it reliably, then wires those measurements into the points where decisions happen: experiments before merging, gates in CI, sampled evaluators on production traffic, and a human review loop for the judgments automation cannot make. Build it in six steps: derive dimensions from observed failure modes, pick a method per dimension, establish an offline baseline with datasets and experiments, gate changes in CI, monitor production with sampled evaluators and alerts, and close the loop by turning production failures into new test cases.
 
@@ -110,7 +114,7 @@ Offline evaluation only covers inputs you thought to test, and production traffi
 
 - **Sampled judges on live observations.** [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) run on production observations matching your filters, with a sampling percentage to control cost. Sampling 5 to 10 percent of traffic is usually enough to see quality trends without paying to judge everything.
 - **Routing evaluators by intent.** Different conversation types deserve different rubrics: an evaluator that scores product advice makes no sense on a billing question. Classify intent in your application, write it to the trace as a tag or metadata, and create one evaluator per intent with a matching filter. Each evaluator then judges only the traffic its rubric was written for.
-- **Alerts on score thresholds.** [Monitors](/docs/metrics/features/monitors) (on Langfuse Cloud) evaluate numeric or categorical score metrics against warning and alert thresholds over a time window, and route breaches to Slack, webhooks, or a GitHub Actions trigger. A falling faithfulness average pages someone before users complain.
+- **Alerts on score thresholds.** [Alerts](/docs/observability/features/alerts) (on Langfuse Cloud and self-hosted v4+) evaluate numeric or categorical score metrics against warning and alert thresholds over a time window, and route breaches to Slack, webhooks, or a GitHub Actions trigger. A falling faithfulness average pages someone before users complain.
 
 One boundary to respect: online evaluator scores are produced asynchronously, after the response has shipped. They are for detecting regressions, routing traces to review, and building datasets, not for blocking a bad answer in flight. If a check must change behavior at request time, it belongs in your application code as a guardrail, and that guardrail's decisions then get evaluated like everything else.
 
@@ -166,26 +170,48 @@ One distinction worth drawing: a self-repair loop inside the application, where 
 
 ## FAQ
 
-### How many quality dimensions should an evaluation strategy start with? [#how-many-dimensions]
+<FaqDetails>
+
+<Details id="how-many-dimensions">
+<Summary>How many quality dimensions should an evaluation strategy start with?</Summary>
 
 Start with three to five, each derived from a failure mode you have observed in real traces. Every dimension carries ongoing cost: an evaluator to maintain, a threshold to defend, and alerts to triage. Expand the list when a new failure mode appears in production, not preemptively.
 
-### Can multiple people review and score the same trace? [#multiple-reviewers]
+</Details>
+
+<Details id="multiple-reviewers">
+<Summary>Can multiple people review and score the same trace?</Summary>
 
 Yes. Annotation queues in Langfuse support assigning multiple reviewers, and the same traces can be routed to separate queues with different score configs, for example an engineering triage queue and a compliance review queue with its own sub-score criteria. Each score records who created it, so parallel reviews stay attributable.
 
-### Can we score traces retroactively? [#retroactive-scoring]
+</Details>
 
-Yes, in two ways. Humans can annotate any historical trace, observation, or session at any time, and automated evaluators can backfill scores over historical observations by selecting them in the traces table and running an evaluation on the selection (this requires the evaluator's Fast Mode setting). This means a newly defined criterion can be measured against past traffic instead of starting from zero.
+<Details id="retroactive-scoring">
+<Summary>Can we score traces retroactively?</Summary>
 
-### When can automated thresholds replace human review? [#automated-thresholds]
+Yes, in two ways. Humans can annotate any historical trace, observation, or session at any time, and automated evaluators can backfill scores over historical observations by selecting them in the traces table and running an evaluation on the selection (this requires the evaluator's Langfuse v4 preview setting). This means a newly defined criterion can be measured against past traffic instead of starting from zero.
+
+</Details>
+
+<Details id="automated-thresholds">
+<Summary>When can automated thresholds replace human review?</Summary>
 
 After calibration, and usually partially rather than completely. Have humans and your LLM judge score the same items, measure agreement per dimension, and refine the rubric until agreement is stable. Then reduce human coverage to judge-flagged items, disagreements, and a verification sample; how much residual review you keep for high-stakes flows is a policy decision your measurements should inform.
 
-### How do we evaluate multi-turn conversations rather than single responses? [#multi-turn]
+</Details>
+
+<Details id="multi-turn">
+<Summary>How do we evaluate multi-turn conversations rather than single responses?</Summary>
 
 Scores in Langfuse can attach to sessions, not just traces and observations, and annotation queues accept sessions, so human reviewers can score a whole conversation. For automated judges, target an observation that records the full conversation context you want judged, since evaluators read the data present on their target.
 
-### What is the difference between offline and online evaluation? [#offline-vs-online]
+</Details>
+
+<Details id="offline-vs-online">
+<Summary>What is the difference between offline and online evaluation?</Summary>
 
 Offline evaluation runs your application against a fixed dataset in experiments, before changes ship, and is where baselines and CI gates live. Online evaluation scores live production traffic, sampled to control cost, and is where drift, regressions, and unexpected inputs surface. A complete strategy needs both, connected by datasets that grow from production failures.
+
+</Details>
+
+</FaqDetails>

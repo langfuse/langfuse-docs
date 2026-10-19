@@ -1,5 +1,7 @@
 "use client";
 
+import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 export interface AgentPromptCalloutProps {
@@ -19,11 +21,20 @@ export function AgentPromptCallout({
   lede,
   prompt,
 }: AgentPromptCalloutProps) {
+  const pathname = usePathname();
+  const capture = usePostHogClientCapture();
   const [copied, setCopied] = useState(false);
+  const trimmedPrompt = prompt.trim();
 
   const onCopy = () => {
     if (typeof navigator === "undefined" || !navigator.clipboard) return;
-    navigator.clipboard.writeText(prompt.trim()).then(
+    capture("copy_agent_prompt", {
+      source: "agent_prompt_callout",
+      path: pathname ?? "",
+      prompt_char_count: trimmedPrompt.length,
+    });
+
+    navigator.clipboard.writeText(trimmedPrompt).then(
       () => {
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
@@ -61,7 +72,7 @@ export function AgentPromptCallout({
       )}
 
       <div className="agent-prompt__prompt">
-        <pre className="agent-prompt__code">{prompt.trim()}</pre>
+        <pre className="agent-prompt__code">{trimmedPrompt}</pre>
         <button
           type="button"
           onClick={onCopy}

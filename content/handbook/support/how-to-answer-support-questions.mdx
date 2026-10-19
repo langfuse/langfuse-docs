@@ -227,7 +227,7 @@ This is the most sensitive billing question. Lead with empathy and _facts_, neve
 1. Open Stripe, search by email domain or org → recent invoice, subscription, billing history.
 2. Determine the source of the increase: plan change, usage increase (more traces/observations), seat increase, or one-off charge.
 3. Cross-check the org in Impersonation View → Usage tab → confirm trace/observation volume in the billing period.
-4. **Specifically check for OTEL-related overcounting.** A common case: customers had a pre-existing OTEL setup, and after wiring it to Langfuse it ingested unrelated HTTP/DB/framework spans that drove up volume. See [/faq/all/existing-otel-setup#unwanted-spans-in-langfuse](/faq/all/existing-otel-setup#unwanted-spans-in-langfuse), the fix is `should_export_span` on the SDK (the older `blocked_instrumentation_scopes` parameter is deprecated).
+4. **Check whether their OTEL configuration is exporting non-LLM spans.** A common case: customers wire a pre-existing OTEL setup into Langfuse and their export filter lets HTTP/DB/framework spans through. Those spans are ingested and billed as observations like any other. The customer controls what is exported via `should_export_span` on the SDK (the older `blocked_instrumentation_scopes` parameter is deprecated). See [/faq/all/existing-otel-setup#unwanted-spans-in-langfuse](/faq/all/existing-otel-setup#unwanted-spans-in-langfuse).
 5. Reply with the specific reason, link the invoice or usage view.
 
 **Reply template:**
@@ -299,10 +299,8 @@ Best,
 **Triage steps:**
 
 1. Confirm what was charged and when via Stripe.
-2. Determine if the charge was correct (customer's mistake / they didn't downgrade in time) or our error (billing bug / contract misalignment / EE-license-removal-doesn't-cancel confusion above).
-3. Customer error and they're on a small plan: explain politely, offer goodwill credit if appropriate.
-4. Our error or genuine misunderstanding: refund.
-5. For approval limits and when to loop in the team, follow the internal refund handling guidelines in the private handbook. Do not approve refunds beyond your limit unilaterally.
+2. Do not confirm, deny, or estimate a refund on the thread. Whether a charge is eligible for a refund or goodwill credit, the approval limits, and when to loop in the team all follow the internal refund handling guidelines in the private handbook.
+3. Acknowledge the request, gather the details finance needs, and route it per those guidelines. Do not approve refunds beyond your limit unilaterally.
 
 **Reply template:**
 
@@ -497,7 +495,7 @@ Langfuse uses S3-compatible storage for raw event uploads and media. Issues here
 **Triage steps:**
 
 1. Verify `LANGFUSE_S3_EVENT_UPLOAD_*` env vars are set and the bucket exists.
-2. Verify the IAM principal has `s3:PutObject`, `s3:GetObject`, `s3:ListBucket`. For MinIO, set `LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE=true`.
+2. Verify the IAM principal has `s3:PutObject`, `s3:GetObject`, `s3:ListBucket`. For SeaweedFS or MinIO, set `LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE=true`.
 3. For "blob storage export failed" notifications, check the bucket policy and lifecycle rule didn't recently change.
 4. For media uploads, also set `LANGFUSE_S3_MEDIA_UPLOAD_*`.
 
@@ -640,7 +638,7 @@ Related FAQs: [/faq/all/missing-traces](/faq/all/missing-traces), [/faq/all/aws-
 
 <summary>OTEL / OpenTelemetry: unwanted spans, double-counting, semantic conventions</summary>
 
-OTEL is the most common source of _over-ingestion_ surprises. The customer's existing OTEL setup blasts every HTTP request, DB query, and framework span at Langfuse, driving up cost and cluttering the UI.
+A common OTEL configuration issue: the customer's existing OTEL setup exports every HTTP request, DB query, and framework span to Langfuse alongside LLM spans. Because every exported span is ingested and billed as an observation, this increases both cost and UI clutter until the export filter is tightened.
 
 **Triage steps:**
 
@@ -937,13 +935,13 @@ Best,
 
 <summary>BAA / HIPAA</summary>
 
-HIPAA is available on a dedicated cloud region: `hipaa.cloud.langfuse.com`. Customers must [complete and sign the BAA via DocuSign](https://powerforms.docusign.net/39437499-4b13-4604-b373-2b1f2ae6f6fd?env=eu&acct=33986eaf-fde8-48d4-8d61-cf8c0f573e98&accountId=33986eaf-fde8-48d4-8d61-cf8c0f573e98) before they process PHI.
+HIPAA is available on a dedicated cloud region: `hipaa.cloud.langfuse.com`. Customers must [complete and sign the BAA via Ironclad](https://ironcladapp.com/public-launch/6aa89377853bdf7f289e7139) before they process PHI.
 
 **Triage steps:**
 
 1. Confirm the customer is using or about to use `hipaa.cloud.langfuse.com` (not the standard US/EU regions).
 2. **Account migration:** customers moving from EU/US must create a fresh account on `hipaa.cloud.langfuse.com`. Past trace data can be moved via the [data migration cookbook](/guides/cookbook/example_data_migration).
-3. For HIPAA-related legal requirements, direct the customer to [complete and sign the BAA via DocuSign](https://powerforms.docusign.net/39437499-4b13-4604-b373-2b1f2ae6f6fd?env=eu&acct=33986eaf-fde8-48d4-8d61-cf8c0f573e98&accountId=33986eaf-fde8-48d4-8d61-cf8c0f573e98). Do not tell customers that the BAA applies automatically.
+3. For HIPAA-related legal requirements, direct the customer to [complete and sign the BAA via Ironclad](https://ironcladapp.com/public-launch/6aa89377853bdf7f289e7139). Do not tell customers that the BAA applies automatically.
 4. For HIPAA-region IP allowlisting (egress from Langfuse to customer infra, e.g. for LLM-as-a-judge): static IPs are `35.82.248.193`, `34.211.191.155`, `52.43.164.18` (us-west-2). Full list at [langfuse.com/security/networking](https://langfuse.com/security/networking). **Ingress** to `hipaa.cloud.langfuse.com` sits behind AWS ALBs without static IPs, we cannot publish a stable ingress IP range.
 
 **Reply template:**
@@ -951,7 +949,7 @@ HIPAA is available on a dedicated cloud region: `hipaa.cloud.langfuse.com`. Cust
 ```text
 Hi {name},
 
-For HIPAA usage you'll need to be on hipaa.cloud.langfuse.com (separate region from us./cloud.) and on a HIPAA-eligible plan (Pro or higher). Please complete and sign the BAA before processing PHI: https://powerforms.docusign.net/39437499-4b13-4604-b373-2b1f2ae6f6fd?env=eu&acct=33986eaf-fde8-48d4-8d61-cf8c0f573e98&accountId=33986eaf-fde8-48d4-8d61-cf8c0f573e98
+For HIPAA usage you'll need to be on hipaa.cloud.langfuse.com (separate region from us./cloud.) and on a HIPAA-eligible plan (Pro or higher). Please complete and sign the BAA before processing PHI: https://ironcladapp.com/public-launch/6aa89377853bdf7f289e7139
 
 A note for completeness: HIPAA accounts are provisioned fresh on hipaa.cloud.langfuse.com. If your team is currently on us.cloud or cloud., past trace data can be moved via our data migration cookbook: https://langfuse.com/guides/cookbook/example_data_migration.
 
@@ -1123,11 +1121,11 @@ Related FAQ: [/faq/all/api-limits](/faq/all/api-limits).
 
 <details>
 
-<summary>"I can't see view X" / "the page is blank" / "Fast Mode"</summary>
+<summary>"I can't see view X" / "the page is blank" / "Langfuse v4 preview" (formerly "Fast Mode")</summary>
 
 **Triage steps:**
 
-1. **First check: is Fast Mode (Preview) toggled on?** Many views are gated on Fast Mode being enabled.
+1. **First check: is the Langfuse v4 preview toggled on?** Many views are gated on the Langfuse v4 preview being enabled.
 2. Hard refresh (Cmd-Shift-R / Ctrl-Shift-R) to bust any stale assets.
 3. Try Impersonation View, can you reproduce as them?
 4. Ask for browser, version, and console errors.
@@ -1137,15 +1135,15 @@ Related FAQ: [/faq/all/api-limits](/faq/all/api-limits).
 ```text
 Hi {name},
 
-Quick check: is "Fast Mode" toggled on? A few of the newer views (incl. Experiments, the redesigned Trace view) are gated on it.
+Quick check: is the "Langfuse v4 preview" toggled on? A few of the newer views (incl. Experiments, the redesigned Trace view) are gated on it.
 
-If Fast Mode is on and you still don't see it, a hard refresh (Cmd-Shift-R) usually fixes stale-asset cases. If neither helps, please share the browser, version, and any console errors.
+If the Langfuse v4 preview is on and you still don't see it, a hard refresh (Cmd-Shift-R) usually fixes stale-asset cases. If neither helps, please share the browser, version, and any console errors.
 
 Best,
 {you}
 ```
 
-**Escalate when:** the customer confirms Fast Mode is on, has hard-refreshed, and you can reproduce in Impersonation View → engineering.
+**Escalate when:** the customer confirms the Langfuse v4 preview is on, has hard-refreshed, and you can reproduce in Impersonation View → engineering.
 
 </details>
 

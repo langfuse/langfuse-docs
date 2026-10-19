@@ -1,13 +1,14 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { HomeSection } from "@/components/home/HomeSection";
 import { CornerBox, Heading, Link, TextHighlight } from "@/components/ui";
 import { Text } from "@/components/ui/text";
 
-const ASSISTANT_VIDEO_SRC =
+const HALO_VIDEO_SRC =
   "https://static.langfuse.com/docs-videos/in-app-agent.mp4";
 
-const ASSISTANT_HREF = "/docs/langfuse-assistant";
+const HALO_HREF = "/docs/halo";
 
 type ToolItem = {
   title: string;
@@ -44,7 +45,7 @@ const TOOL_ITEMS: ToolItem[] = [
   },
 ];
 
-const ASSISTANT_USE_CASES = [
+const HALO_USE_CASES = [
   {
     title: "Debug traces",
     detail: "Find failed generations and traces with high latency",
@@ -96,7 +97,45 @@ function ToolCard({ tool, index }: { tool: ToolItem; index: number }) {
   );
 }
 
-function AssistantFeature() {
+function HaloVideo() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          void el.play().catch(() => {
+            // Autoplay can still be rejected; the muted loop is best-effort.
+          });
+        } else {
+          el.pause();
+        }
+      },
+      { rootMargin: "100px", threshold: 0.25 },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <video
+      ref={videoRef}
+      src={HALO_VIDEO_SRC}
+      preload="none"
+      muted
+      loop
+      playsInline
+      aria-label="Halo investigating project data in the Langfuse app"
+      className="aspect-video h-auto w-full rounded-[2px] border border-line-structure object-cover shadow-sm"
+    />
+  );
+}
+
+function HaloFeature() {
   return (
     <CornerBox className="flex flex-col overflow-hidden">
       <div className="flex flex-col gap-5 p-4 sm:p-6">
@@ -111,7 +150,7 @@ function AssistantFeature() {
 
         <div className="flex max-w-[58ch] flex-col gap-3">
           <h3 className="text-left font-sans text-[17px] font-medium text-text-primary">
-            Langfuse Assistant
+            <Link href={HALO_HREF}>Halo</Link>, the Langfuse Assistant
           </h3>
           <Text className="text-left">
             Automate the AI engineering loop: investigate production data,
@@ -121,7 +160,7 @@ function AssistantFeature() {
         </div>
 
         <div className="grid border-y border-line-structure sm:grid-cols-3 sm:divide-x sm:divide-line-structure">
-          {ASSISTANT_USE_CASES.map((useCase) => (
+          {HALO_USE_CASES.map((useCase) => (
             <div
               key={useCase.title}
               className="flex flex-col gap-1 border-b border-line-structure py-3 last:border-b-0 sm:block sm:border-b-0 sm:px-4 sm:first:pl-0 sm:last:pr-0"
@@ -141,7 +180,7 @@ function AssistantFeature() {
 
         <div className="flex flex-wrap items-center gap-2">
           <Link
-            href={ASSISTANT_HREF}
+            href={HALO_HREF}
             className="inline-flex w-fit items-center gap-1 font-sans text-[12px] font-medium text-text-secondary no-underline transition-colors hover:text-text-primary"
           >
             View documentation <span aria-hidden>→</span>
@@ -150,15 +189,7 @@ function AssistantFeature() {
       </div>
 
       <div className="border-t border-line-structure bg-surface-1 p-3 sm:p-4">
-        <video
-          src={ASSISTANT_VIDEO_SRC}
-          autoPlay
-          muted
-          loop
-          playsInline
-          aria-label="The Langfuse Assistant investigating project data in the Langfuse app"
-          className="aspect-video h-auto w-full rounded-[2px] border border-line-structure object-cover shadow-sm"
-        />
+        <HaloVideo />
       </div>
     </CornerBox>
   );
@@ -180,15 +211,15 @@ export const DeveloperTools = () => {
             </span>
           </Heading>
           <Text className="max-w-[56ch] text-left">
-            Work in the app or from your IDE. The Assistant investigates
-            production and takes approved actions; SKILL.md, CLI, and MCP
-            connect coding agents to Langfuse.
+            Work in the app or from your IDE. <Link href={HALO_HREF}>Halo</Link>
+            , the Langfuse assistant, investigates production and takes approved
+            actions; SKILL.md, CLI, and MCP connect coding agents to Langfuse.
           </Text>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12">
           <div className="lg:col-span-8">
-            <AssistantFeature />
+            <HaloFeature />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 lg:col-span-4 lg:grid-cols-1 lg:grid-rows-3">
             {TOOL_ITEMS.map((tool, index) => (

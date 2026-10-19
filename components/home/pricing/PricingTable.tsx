@@ -46,6 +46,19 @@ const GraduatedPricingText = () => {
   );
 };
 
+const DATA_ACCESS_FAQ_HREF = "/faq/all/data-access-vs-data-retention";
+const DATA_ACCESS_DESCRIPTION =
+  "How many days of historic data you can view. This is separate from data retention, which deletes data.";
+
+// Info icon explaining that data access is not data retention.
+// FeatureDetails is resolved at render time, so it can be defined further below.
+const DataAccessInfo = () => (
+  <FeatureDetails
+    description={DATA_ACCESS_DESCRIPTION}
+    href={DATA_ACCESS_FAQ_HREF}
+  />
+);
+
 type DeploymentOption = "cloud" | "selfHosted";
 
 type Tier = {
@@ -104,7 +117,9 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       mainFeatures: [
         "All platform features (with limits)",
         "50k units / month included",
-        "30 days data access",
+        <>
+          30 days data access <DataAccessInfo />
+        </>,
         "2 users",
         "Community support via GitHub",
       ],
@@ -132,7 +147,9 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         <>
           100k units / month included, additional: <GraduatedPricingText />
         </>,
-        "90 days data access",
+        <>
+          90 days data access <DataAccessInfo />
+        </>,
         "Unlimited users",
         "In-app support",
       ],
@@ -156,7 +173,9 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         <>
           100k units / month included, additional: <GraduatedPricingText />
         </>,
-        "3 years data access",
+        <>
+          3 years data access <DataAccessInfo />
+        </>,
         "Data retention management",
         "Unlimited annotation queues",
         "High rate limits",
@@ -197,7 +216,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Custom rate limits",
         "Uptime SLA",
         "Support SLA",
-        "Dedicated support engineer",
+        "Named lead support engineer",
       ],
       addOn: {
         name: "Yearly Commitment",
@@ -243,10 +262,11 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "All Open Source features plus management APIs, project-level RBAC, data retention policies, and audit logs",
         "Bundled with ClickHouse Cloud, ClickHouse BYOC, or ClickHouse Private",
         "Langfuse pricing is additive to your ClickHouse commercial plan",
-        "Dedicated support engineer for deployment and hosting guidance",
+        "Named lead support engineer for deployment and hosting guidance",
         "Solutions architect support during evaluation and rollout",
         "Direct access to the product team for feedback",
         "SOC 2 Type II and ISO 27001 reports",
+        "Hardening for Government (in development)",
         "Support SLA",
         "Billing via AWS Marketplace or invoice",
       ],
@@ -355,7 +375,7 @@ const sections: Section[] = [
         name: "OpenTelemetry (Java, Go, custom)",
         description:
           "Use Langfuse as an OpenTelemetry backend. Thereby you can use any OpenTelemetry compatible SDKs (Java, Go, etc.) to send traces to Langfuse. This also increases compatibility with many frameworks and LLM providers.",
-        href: "/docs/opentelemetry/get-started",
+        href: "/integrations/native/opentelemetry",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -371,7 +391,7 @@ const sections: Section[] = [
       },
       {
         name: "Custom via API",
-        href: "/api-and-data-platform/features/public-api",
+        href: "/docs/api-and-data-platform/features/public-api",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -433,6 +453,8 @@ const sections: Section[] = [
       },
       {
         name: "Access to historical data",
+        description: DATA_ACCESS_DESCRIPTION,
+        href: DATA_ACCESS_FAQ_HREF,
         tiers: {
           cloud: {
             Hobby: "30 days",
@@ -460,13 +482,25 @@ const sections: Section[] = [
     name: "Langfuse AI",
     features: [
       {
-        name: "Langfuse Assistant (in-app agent)",
+        name: "Halo (in-app agent)",
         description:
           "In-product AI assistant to explore your Langfuse project data and take selected actions with your approval. Available on Langfuse Cloud only.",
-        href: "/docs/langfuse-assistant",
+        href: "/docs/halo",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": false, Enterprise: false },
+        },
+      },
+      {
+        name: "Halo usage limits",
+        href: "/docs/halo",
+        tiers: {
+          cloud: {
+            Hobby: "Low",
+            Core: "Medium",
+            Pro: "High",
+            Enterprise: "High",
+          },
         },
       },
     ],
@@ -536,7 +570,7 @@ const sections: Section[] = [
       {
         name: "Prompt Experiments",
         description: "Run structured experiments on new prompt versions",
-        href: "/docs/evaluation/dataset-runs/native-run",
+        href: "/docs/evaluation/experiments/experiments-via-ui",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -576,7 +610,7 @@ const sections: Section[] = [
         name: "Datasets",
         description:
           "Create and manage datasets of inputs and expected outputs. These can be created from production traces, manually in the UI, or uploaded via the SDK/UI. Datasets are the baseline for offline evaluation.",
-        href: "/docs/evaluation/dataset-runs/datasets",
+        href: "/docs/evaluation/experiments/datasets",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -604,7 +638,7 @@ const sections: Section[] = [
       },
       {
         name: "Evaluation Scores (custom)",
-        href: "/docs/evaluation/evaluation-methods/custom-scores",
+        href: "/docs/evaluation/evaluation-methods/scores-via-sdk",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -612,7 +646,7 @@ const sections: Section[] = [
       },
       {
         name: "User Feedback Tracking",
-        href: "/faq/all/user-feedback",
+        href: "/docs/observability/features/user-feedback",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -644,7 +678,7 @@ const sections: Section[] = [
       {
         name: "Human Annotation",
         description: "Manually annotate LLM traces in Langfuse",
-        href: "/docs/scores/annotation",
+        href: "/docs/evaluation/evaluation-methods/scores-via-ui",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -653,7 +687,7 @@ const sections: Section[] = [
       {
         name: "Human Annotation Queues",
         description: "Managed human annotation workflows with queues",
-        href: "/docs/evaluation/evaluation-methods/annotation#annotation-queues",
+        href: "/docs/evaluation/evaluation-methods/annotation-queues",
         tiers: {
           cloud: {
             Hobby: "1 queue",
@@ -679,16 +713,16 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Monitors and Alerts",
+        name: "Alerts",
         description:
-          "Threshold-based alerts on your LLM application metrics with notifications via Slack, webhooks, and GitHub Actions. Monitor limits per organization on Langfuse Cloud depend on the plan. Self-hosted deployments require Langfuse v4 and have no monitor limit.",
-        href: "/docs/metrics/features/monitors",
+          "Threshold-based alerts on your LLM application metrics with notifications via Slack, webhooks, and GitHub Actions. Alert limits per organization on Langfuse Cloud depend on the plan. Self-hosted deployments require Langfuse v4 and have no alert limit.",
+        href: "/docs/observability/features/alerts",
         tiers: {
           cloud: {
-            Hobby: "2 monitors",
-            Core: "20 monitors",
-            Pro: "50 monitors",
-            Enterprise: "100 monitors",
+            Hobby: "2 alerts",
+            Core: "20 alerts",
+            Pro: "50 alerts",
+            Enterprise: "100 alerts",
           },
           selfHosted: {
             "Open Source": "Langfuse v4+",
@@ -837,7 +871,7 @@ const sections: Section[] = [
     features: [
       {
         name: "Batch Export via UI",
-        href: "/docs/api-and-data-platform/features/query-via-sdk#ui",
+        href: "/docs/api-and-data-platform/features/export-from-ui",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: { "Open Source": true, Enterprise: true },
@@ -861,7 +895,7 @@ const sections: Section[] = [
       },
       {
         name: "Scheduled Batch Export to Blob Storage",
-        href: "/docs/api-and-data-platform/features/query-via-sdk#blob-storage",
+        href: "/docs/api-and-data-platform/features/export-to-blob-storage",
         tiers: {
           cloud: {
             Hobby: false,
@@ -995,7 +1029,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Dedicated Support Engineer",
+        name: "Named Lead Support Engineer",
         href: "/support#onboarding",
         description:
           "Includes deployment and hosting guidance for your dedicated Langfuse environment.",
@@ -1076,7 +1110,7 @@ const sections: Section[] = [
   },
   {
     name: "Security",
-    href: "/docs/security",
+    href: "/docs/security-and-guardrails",
     features: [
       {
         name: "Data region",
@@ -1114,6 +1148,13 @@ const sections: Section[] = [
             Enterprise: true,
           },
           selfHosted: { "Open Source": true, Enterprise: true },
+        },
+      },
+      {
+        name: "Hardening for Government (in development)",
+        href: "/self-hosting/configuration/hardening#hardening-for-government",
+        tiers: {
+          selfHosted: { "Open Source": false, Enterprise: true },
         },
       },
       {
@@ -1591,7 +1632,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
               {/* Callouts for different tiers - always render container for alignment */}
               <div className="px-0 py-6 h-[30px] flex items-center justify-center">
                 {tier.calloutLink ? (
-                  <div className="text-xs text-center text-muted-foreground whitespace-nowrap">
+                  <div className="text-xs text-center text-muted-foreground text-balance">
                     <Link
                       href={tier.calloutLink.href}
                       className="underline underline-offset-2 decoration-auto text-muted-foreground hover:text-primary"

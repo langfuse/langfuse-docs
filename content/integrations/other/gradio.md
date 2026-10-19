@@ -22,7 +22,7 @@ Thank you to [@tkmamidi](https://github.com/tkmamidi) for the original implement
 
 ### What is Langfuse?
 
-[Langfuse](https://github.com/langfuse/langfuse) is an open-source AI engineering platform that helps build reliable LLM applications via LLM Application Observability, Evaluation, Experiments, and Prompt Management. See [docs](https://langfuse.com/docs) for more details.
+[Langfuse](https://github.com/langfuse/langfuse) is an open-source AI engineering platform that helps build reliable LLM applications via LLM Application Observability, Evaluation, Experiments, and Prompt Management. See [docs](https://langfuse.com/docs) for more details. Use [Langfuse Cloud](https://langfuse.com/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](https://langfuse.com/self-hosting) it.
 
 ### Walkthrough
 
@@ -64,14 +64,14 @@ import os
 
 # Get keys for your project from the project settings page
 # https://cloud.langfuse.com
-os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "")
-os.environ.setdefault("LANGFUSE_SECRET_KEY", "")
-os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
 
 # Your openai key
 # We use OpenAI for this demo, could easily change to other models
-os.environ.setdefault("OPENAI_API_KEY", "")
+os.environ.setdefault("OPENAI_API_KEY", "");
 ```
 
 ```python

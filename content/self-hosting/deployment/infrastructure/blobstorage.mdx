@@ -1,8 +1,8 @@
 ---
 title: "S3 / Blob Storage Configuration (Self-Hosted)"
 sidebarTitle: Blob Storage (S3)
-description: "Configure S3 or S3-compatible blob storage for self-hosted Langfuse. Store raw events, multi-modal inputs, and batch exports with AWS S3, MinIO, or compatible services."
-label: "Version: v3"
+description: "Configure S3 or S3-compatible blob storage for self-hosted Langfuse. Store raw events, multi-modal inputs, and batch exports with Amazon S3, Google Cloud Storage, Azure Blob Storage, SeaweedFS, MinIO, or compatible services."
+label: "Version: v4"
 ---
 
 # S3 / Blob Storage
@@ -15,8 +15,9 @@ This is a deep dive into the configuration of S3. Follow one of the [deployment 
 
 Langfuse uses S3 or another S3-compatible blob storage (referred to as S3 going forward) to store raw events, multi-modal inputs, batch exports, and other files.
 In addition, we have dedicated implementations for [Azure Blob Storage](#azure-blob-storage), [Google Cloud Storage](#google-cloud-storage), and [OCI Object Storage](#oci-object-storage).
-You can use a managed service on AWS, or CloudFlare, or host it yourself using MinIO.
 We use it as a scalable and durable storage solution for large files with strong read-after-write guarantees.
+For production deployments, we recommend a managed service such as [Amazon S3](#amazon-s3), [Google Cloud Storage](#google-cloud-storage), [Azure Blob Storage](#azure-blob-storage), or [Cloudflare R2](#cloudflare-r2), as the provider takes care of durability, availability, and scaling.
+If you need to host blob storage yourself, for example on-premises or in air-gapped environments, use [SeaweedFS](#seaweedfs) or [MinIO](#minio).
 This guide covers how to configure S3 within Langfuse and how to connect your own S3-compatible storage.
 
 ## Official and Community Support [#support]
@@ -29,8 +30,9 @@ We distinguish between officially supported and community-supported options:
 | [Amazon S3](#amazon-s3)                           | Official      |
 | [Google Cloud Storage](#google-cloud-storage)     | Official      |
 | [Azure Blob Storage](#azure-blob-storage)         | Official      |
-| [MinIO / AIStor](#minio)                          | Official      |
 | [Cloudflare R2](#cloudflare-r2)                   | Official      |
+| [SeaweedFS](#seaweedfs)                           | Official      |
+| [MinIO / AIStor](#minio)                          | Official      |
 | [OCI Object Storage](#oci-object-storage)         | Community     |
 | [Tigris](#tigris)                                 | Community     |
 | [Other S3-compatible providers](#other-providers) | Community     |
@@ -60,7 +62,7 @@ They need to be provided for the Langfuse Web and Langfuse Worker containers.
 | `LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT`          |                    | Endpoint to use to upload events.                                                                                     |
 | `LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID`     |                    | Access key for the bucket. Must have List, Get, and Put permissions.                                                  |
 | `LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY` |                    | Secret access key for the bucket.                                                                                     |
-| `LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE`  |                    | Whether to force path style on requests. Required for MinIO.                                                          |
+| `LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE`  |                    | Whether to force path style on requests. Required for SeaweedFS and MinIO.                                            |
 
 ### Optional Configuration
 
@@ -76,10 +78,11 @@ Langfuse uses the credentials to generate short-lived, pre-signed URLs that allo
 | `LANGFUSE_S3_MEDIA_UPLOAD_BUCKET`               | Required           | Name of the bucket in which media files should be uploaded.                                                          |
 | `LANGFUSE_S3_MEDIA_UPLOAD_PREFIX`               | `""`               | Prefix to store media within a subpath of the bucket. Defaults to the bucket root. If provided, must end with a `/`. |
 | `LANGFUSE_S3_MEDIA_UPLOAD_REGION`               |                    | Region in which the bucket resides.                                                                                  |
-| `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT`             |                    | Endpoint to use to upload media files.                                                                               |
+| `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT`             |                    | Browser- and SDK-reachable endpoint used to upload and download media files.                                         |
+| `LANGFUSE_S3_MEDIA_UPLOAD_INTERNAL_ENDPOINT`    |                    | Optional endpoint that the Langfuse server can use to read media from object storage.                                |
 | `LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID`        |                    | Access key for the bucket. Must have List, Get, and Put permissions.                                                 |
 | `LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY`    |                    | Secret access key for the bucket.                                                                                    |
-| `LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE`     |                    | Whether to force path style on requests. Required for MinIO.                                                         |
+| `LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE`     |                    | Whether to force path style on requests. Required for SeaweedFS and MinIO.                                           |
 | `LANGFUSE_S3_MEDIA_MAX_CONTENT_LENGTH`          | `1_000_000_000`    | Maximum file size in bytes that is allowed for upload. Default is 1GB.                                               |
 | `LANGFUSE_S3_MEDIA_DOWNLOAD_URL_EXPIRY_SECONDS` | `3600`             | Presigned download URL expiry in seconds. Defaults to 1h.                                                            |
 
@@ -98,18 +101,30 @@ To configure batch exports in your environment, configure the following environm
 | `LANGFUSE_S3_BATCH_EXPORT_ENDPOINT`          |                    | Endpoint to use to upload batch exports.                                                                                                                                           |
 | `LANGFUSE_S3_BATCH_EXPORT_ACCESS_KEY_ID`     |                    | Access key for the bucket. Must have List, Get, and Put permissions.                                                                                                               |
 | `LANGFUSE_S3_BATCH_EXPORT_SECRET_ACCESS_KEY` |                    | Secret access key for the bucket.                                                                                                                                                  |
-| `LANGFUSE_S3_BATCH_EXPORT_FORCE_PATH_STYLE`  |                    | Whether to force path style on requests. Required for MinIO.                                                                                                                       |
+| `LANGFUSE_S3_BATCH_EXPORT_FORCE_PATH_STYLE`  |                    | Whether to force path style on requests. Required for SeaweedFS and MinIO.                                                                                                         |
 | `LANGFUSE_S3_BATCH_EXPORT_EXTERNAL_ENDPOINT` |                    | Optional external endpoint for generating presigned URLs. If not provided, the main endpoint is used. Useful, if langfuse traffic to the blobstorage should remain within the VPC. |
 | `BATCH_EXPORT_PAGE_SIZE`                     | `500`              | Optional page size for streaming exports to S3 to avoid memory issues. The page size can be adjusted if needed to optimize performance.                                            |
 | `BATCH_EXPORT_ROW_LIMIT`                     | `1_500_000`        | Maximum amount of rows that can be exported in a single batch export.                                                                                                              |
 
 #### S3 Compatibility
 
-The following settings apply to all S3 use-cases (events, media, batch exports) and help with S3-compatible stores that are not fully compatible with the AWS S3 API.
+The following settings apply to all S3 use-cases (events, media, batch exports) and help with S3-compatible stores that are not fully compatible with the Amazon S3 API.
 
 | Variable                                        | Required / Default | Description                                                                                                                                                                                                                                                                          |
 | ----------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `LANGFUSE_S3_DELETE_OBJECTS_CHECKSUM_ALGORITHM` |                    | Checksum algorithm for S3 DeleteObjects requests: `MD5`, `CRC32`, `CRC32C`, `CRC64NVME`, `SHA1`, or `SHA256`. If unset, the AWS SDK default (`CRC32`) is used. Set to `MD5` if your storage provider rejects deletions with a `MissingContentMD5` error (e.g. older MinIO versions). |
+
+## Multi-modal LLM-as-a-Judge [#multi-modal-llm-as-a-judge]
+
+Self-hosted Langfuse sends media used by [LLM-as-a-Judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge#multi-modal-evaluation) inline by default. Each attachment is limited to 20 MB by default.
+
+Set `LANGFUSE_EVALUATOR_MEDIA_TRANSPORT` on both the web and worker containers to change this behavior:
+
+- `inline`: The Langfuse worker downloads each attachment from object storage and sends its bytes with the model request. This is the default for self-hosted deployments.
+- `url`: The Langfuse worker creates a short-lived signed URL without downloading the attachment. The model provider downloads the attachment and must be able to reach `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT`.
+- `disabled`: Leave Langfuse media references as text instead of sending attachments.
+
+Use `LANGFUSE_EVALUATOR_MEDIA_INLINE_MAX_BYTES` to change the per-attachment inline size limit in bytes. See the [environment variable reference](/self-hosting/configuration#llm-as-a-judge-media) for details.
 
 ## Deployment Options
 
@@ -142,6 +157,8 @@ Ensure that both entities have the necessary permissions to access the bucket:
 }
 ```
 
+The same IAM role or user also works for the project-level [Blob Storage Export integration](/docs/api-and-data-platform/features/export-to-blob-storage#set-up-an-export). On self-hosted deployments, leave **Access Key ID** and **Secret Access Key** blank in that integration's Amazon S3 settings to use the IAM role instead of static credentials. This fallback only applies to the Amazon S3 provider on self-hosted deployments. Exports then run with the role's full permissions, including access to the platform buckets, and project members choose the target bucket; a [dedicated IAM user scoped to the export prefix](/docs/api-and-data-platform/features/export-to-blob-storage#bucket-permissions) is safer. Google Cloud Storage has its own default-credentials option; see [Blob Storage Export integration](#gcs-export-credentials).
+
 <Callout type="info">
 
 To use the [Data Retention](/docs/data-retention) feature in a self-hosted environment, you need to grant `s3:DeleteObject` to the Langfuse IAM role on all buckets.
@@ -150,7 +167,7 @@ If you use versioned buckets, delete markers and non-current versions need to be
 
 </Callout>
 
-#### Using AWS KMS Encryption
+#### Using AWS KMS Encryption [#using-aws-kms-encryption]
 
 Amazon S3 provides server-side encryption (SSE) options to encrypt your data at rest.
 Langfuse supports AWS KMS encryption for all S3 interactions through the following environment variables:
@@ -197,11 +214,106 @@ LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
 LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 ```
 
+### SeaweedFS [#seaweedfs]
+
+[SeaweedFS](https://github.com/seaweedfs/seaweedfs) is an Apache 2.0-licensed distributed storage system with an S3-compatible API.
+It is the default object storage in our [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) chart from chart version `v2.0.0` onwards.
+When you run SeaweedFS yourself, you are responsible for its durability, backups, and scaling, so prefer a managed service such as [Amazon S3](#amazon-s3) whenever one is available to you.
+
+#### Kubernetes (Helm) [#seaweedfs-helm]
+
+With `s3.deploy: true` (the default), the Helm chart deploys SeaweedFS as a single pod with a persistent volume, creates the `langfuse` bucket, generates S3 credentials, and configures Langfuse to use them.
+Size the volume and resources for your workload:
+
+```yaml
+s3:
+  deploy: true
+  allInOne:
+    data:
+      size: 100Gi
+    resources:
+      limits:
+        cpu: "2"
+        memory: "4Gi"
+      requests:
+        cpu: "2"
+        memory: "4Gi"
+```
+
+The bundled SeaweedFS runs as a single replica and is not highly available.
+For production, set `s3.deploy: false` and point `s3.endpoint`, `s3.bucket`, and the S3 credentials to a managed service or to a SeaweedFS cluster that you operate separately.
+See the [chart Readme](https://github.com/langfuse/langfuse-k8s/blob/main/README.md) for all options.
+
+For multi-modal tracing, browsers and SDK clients upload and download media through presigned URLs that point to `s3.mediaUpload.endpoint`.
+By default, this is the in-cluster SeaweedFS Service, which is not reachable from outside the cluster.
+Expose the SeaweedFS S3 gateway (port `8333`), for example through an Ingress, and set `s3.mediaUpload.endpoint` to its public URL.
+If the Langfuse pods cannot reach that public URL, set `LANGFUSE_S3_MEDIA_UPLOAD_INTERNAL_ENDPOINT` to the in-cluster Service (for example `http://langfuse-s3-all-in-one:8333`) via `langfuse.additionalEnv`.
+
+#### Example Configuration [#seaweedfs-example-configuration]
+
+Create an `s3.json` file with the credentials that Langfuse uses to authenticate against the SeaweedFS S3 gateway:
+
+```json
+{
+  "identities": [
+    {
+      "name": "langfuse",
+      "credentials": [
+        {
+          "accessKey": "seaweedfs",
+          "secretKey": "seaweedfssecret"
+        }
+      ],
+      "actions": ["Admin", "Read", "Write", "List", "Tagging"]
+    }
+  ]
+}
+```
+
+Start a local SeaweedFS container with the S3 gateway enabled:
+
+```bash
+docker run --name seaweedfs \
+  -p 8333:8333 \
+  -v "$(pwd)/s3.json:/etc/seaweedfs/s3.json:ro" \
+  chrislusf/seaweedfs server -s3 -s3.config=/etc/seaweedfs/s3.json -dir=/data
+```
+
+<Callout type="warning">
+
+Always pass an identities file via `-s3.config`.
+Without one, the SeaweedFS S3 gateway does not enforce authentication and accepts requests with any credentials.
+
+</Callout>
+
+Create a bucket named `langfuse`, for example with the AWS CLI:
+
+```bash
+AWS_ACCESS_KEY_ID=seaweedfs AWS_SECRET_ACCESS_KEY=seaweedfssecret \
+  aws --endpoint-url http://localhost:8333 --region us-east-1 s3 mb s3://langfuse
+```
+
+Now, you can start Langfuse using the following environment variables:
+
+```yaml
+LANGFUSE_S3_EVENT_UPLOAD_BUCKET=langfuse
+LANGFUSE_S3_EVENT_UPLOAD_REGION=us-east-1
+LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID=seaweedfs
+LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=seaweedfssecret
+LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=http://seaweedfs:8333
+LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE=true
+LANGFUSE_S3_EVENT_UPLOAD_PREFIX=events/
+```
+
+The SeaweedFS S3 gateway expects path-style requests, so set `FORCE_PATH_STYLE` to `true` for events, media, and batch exports.
+This example does not mount a persistent volume, so SeaweedFS discards all data when you remove the container.
+Mount a volume at `/data` (for example `-v seaweedfs-data:/data`) to keep your data.
+
 ### MinIO / AIStor [#minio]
 
 [MinIO](https://min.io/) and its commercial distribution [AIStor](https://www.min.io/product/aistor) are object storage servers that are compatible with the S3 API.
 They are a popular choice for on-premise deployments and local development.
-Langfuse uses MinIO for local development and as a default in our [Docker Compose](/self-hosting/deployment/docker-compose) and [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) deployment options.
+Langfuse uses MinIO for local development and as a default in our [Docker Compose](/self-hosting/deployment/docker-compose) deployment option.
 
 #### Example Configuration
 
@@ -239,13 +351,15 @@ If you cannot upgrade MinIO, set `LANGFUSE_S3_DELETE_OBJECTS_CHECKSUM_ALGORITHM=
 
 </Callout>
 
-#### Configuring Minio for Media Uploads [#minio-media-uploads]
+#### Configuring MinIO for Media Uploads [#minio-media-uploads]
 
 To enable multi-modal tracing and multi-modal datasets, presigned URLs allow SDK clients and browsers outside the Docker network to directly upload and download media assets. Therefore, the `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT` must resolve to the Docker host's address.
 
 **Development Environment:** When running `docker compose` locally, set `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT` to `http://localhost:9090` to ensure presigned URLs correctly loop back to the local instance.
 
 **Production Environment:** In a production environment, configure `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT` with a publicly accessible hostname or IP address that is reachable by your SDK clients and browsers.
+
+If the Langfuse web and worker containers cannot reach this public endpoint, set `LANGFUSE_S3_MEDIA_UPLOAD_INTERNAL_ENDPOINT` to a server-reachable object storage address. The default Docker Compose setup uses `http://minio:9000` internally while clients use `http://localhost:9090`.
 
 ### Cloudflare R2 [#cloudflare-r2]
 
@@ -314,6 +428,16 @@ To target a sovereign or private Google Cloud universe (for example, a Google Di
 The value applies across all authentication methods (JSON credentials, key file, and environment credentials).
 
 </Callout>
+
+#### Blob Storage Export integration [#gcs-export-credentials]
+
+The project-level [Blob Storage Export integration](/docs/api-and-data-platform/features/export-to-blob-storage#set-up-an-export) supports Google Cloud Storage natively, authenticating with a service account JSON key. On self-hosted deployments, project members can instead enable **Use Application Default Credentials (ADC)** to write as the deployment's own GCP identity. Because that identity is shared by every project, ADC exports are limited to buckets you approve:
+
+| Variable                                    | Required / Default | Description                                                                                                                     |
+| ------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_BLOB_STORAGE_GCS_ALLOWED_BUCKETS` |                    | Comma-separated bucket names that ADC exports may write to. Empty disables ADC exports. Exports with a JSON key are unaffected. |
+
+The allowlist is enforced on save, on **Validate**, and on every export run, so removing a bucket disables the integrations that export to it. ADC exports are not available on Langfuse Cloud.
 
 ### Google Cloud Storage (Compatibility Mode) [#google-cloud-storage-compatibility-mode]
 
@@ -433,6 +557,7 @@ This retention window is not a way to update data. Traces and observations are i
 Configure a lifecycle expiration rule for your storage provider:
 
 - **Amazon S3** — Create an S3 Lifecycle expiration rule that deletes objects after N days. See [Managing the lifecycle of objects](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html).
+- **SeaweedFS** — Apply an S3 lifecycle configuration with an `Expiration` rule, for example with `aws s3api put-bucket-lifecycle-configuration`. SeaweedFS supports expiration rules but not transitions. See [Amazon S3 API](https://github.com/seaweedfs/seaweedfs/wiki/Amazon-S3-API).
 - **MinIO** — Use `mc ilm rule add --expire-days` to set an expiration rule. See [mc ilm rule add](https://min.io/docs/minio/linux/reference/minio-mc/mc-ilm-rule-add.html).
 - **Cloudflare R2** — Configure object lifecycle expiration rules via the R2 dashboard or API. See [Object lifecycles](https://developers.cloudflare.com/r2/buckets/object-lifecycles/).
 - **Tigris** — Configure object lifecycle expiration rules via the Tigris Dashboard or AWS CLI. See [Object Lifecycle](https://www.tigrisdata.com/docs/objects/object-lifecycle/).
@@ -450,5 +575,35 @@ ALTER TABLE blob_storage_file_log MODIFY TTL created_at + INTERVAL <DAYS> DAY DE
 ```
 
 Where `<DAYS>` matches the configured bucket lifecycle expiration period.
+
+</Callout>
+
+## Endpoint validation (SSRF defense) [#endpoint-validation]
+
+In addition to the platform-level `LANGFUSE_S3_*` buckets configured via environment variables, project members can configure a blob storage **integration** in the Langfuse UI (Project Settings → Integrations → Blob Storage Export). Because that endpoint is user-supplied, Langfuse validates the host it points at — both when the integration is saved and again every time a connection is opened — to prevent the worker from being pointed at internal services (cloud metadata endpoints, link-local addresses, private RFC1918 / ULA ranges, NAT64/6to4 transition ranges) or being redirected there via DNS rebinding.
+
+Validation behavior:
+
+- **Save-time**: the endpoint hostname is resolved and rejected if any resolved IP falls into a private, link-local, loopback, or special-use range.
+- **Connection-time**: the S3 SDK's HTTP handler and the Azure SDK's request policy re-validate the resolved IP just before each request, so a hostname whose DNS answer changes after save is still blocked.
+- **Cloud**: validation is strict and cannot be relaxed.
+- **Self-hosted**: validation activates when at least one of the allowlist environment variables below is configured. This keeps backward compatibility with internal SeaweedFS, MinIO, and Azurite deployments on private networks. The default will become strict in a future major release.
+- The _integration_ offers four providers: **Amazon S3**, **S3 Compatible Storage**, **Azure Blob Storage**, and **Google Cloud Storage**. Google Cloud Storage has no endpoint field, so this validation does not apply to it; it is restricted by a [bucket allowlist](#gcs-export-credentials) instead. There is no native **OCI** provider. The native object storage integrations configured via environment variables are unaffected.
+
+### Self-hosted allowlist environment variables
+
+Set these on both the Langfuse Web and Worker containers if your internal blob storage endpoint resolves to a private address.
+
+| Variable                                                 | Required / Default | Description                                                                                                            |
+| -------------------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_HOST`        |                    | Comma-separated list of hostnames that bypass the IP-range check. Example: `minio.internal,storage.svc.cluster.local`. |
+| `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IPS`         |                    | Comma-separated list of individual IPs to allow. Example: `10.0.0.5,fd00::1`.                                          |
+| `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IP_SEGMENTS` |                    | Comma-separated list of CIDR ranges to allow. Example: `10.0.0.0/8,192.168.0.0/16`.                                    |
+
+These mirror the existing `LANGFUSE_LLM_CONNECTION_WHITELISTED_*` variables used for user-configured LLM connections — see [Hardening → Outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists).
+
+<Callout type="info">
+
+Azure container names must be 3–63 characters and contain only lowercase letters, digits, and hyphens. Names that don't meet this constraint are rejected at submission time.
 
 </Callout>

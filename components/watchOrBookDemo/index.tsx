@@ -1,11 +1,13 @@
 "use client";
 
-import { Suspense } from "react";
-import { MarketoContactForm } from "@/components/MarketoContactForm";
+import { MarketoContactFormCard } from "@/components/MarketoContactForm";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import { getGitHubStars } from "@/lib/github-stars";
 import { Link } from "@/components/ui/link";
-import { SDK_INSTALLS_PER_MONTH, DOCKER_PULLS } from "@/components/home/Usage";
+import {
+  DOCKER_PULLS,
+  formatSdkInstallsPerMonth,
+} from "@/components/home/Usage";
 import { Switch } from "@/components/ui/switch";
 import Image from "next/image";
 import { WatchWalkthroughs } from "@/components/watchOrBookDemo/WatchWalkthroughs";
@@ -14,6 +16,10 @@ import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { TextHighlight } from "@/components/ui/text-highlight";
+import {
+  SELF_SERVE_LINKS,
+  TALK_TO_US_BENEFITS,
+} from "@/components/watchOrBookDemo/constants";
 
 function SwitchToggle({
   checked,
@@ -25,21 +31,25 @@ function SwitchToggle({
   const switchHref = page === "talk-to-us" ? "/watch-demo" : "/talk-to-us";
 
   return (
-    <div className="flex items-center justify-center md:justify-start gap-3 -mt-2 mb-6 md:mb-0">
+    <div className="flex items-center justify-center gap-3 mt-4">
       <Link
         href="/talk-to-us"
         className="text-sm font-medium hover:text-primary transition-colors"
       >
         Talk to us
       </Link>
-      <Link href={switchHref} className="mt-1.5">
-        <Switch checked={checked} alwaysOn />
+      <Link
+        href={switchHref}
+        className="mt-1.5"
+        aria-label={page === "talk-to-us" ? "Watch the video" : "Talk to us"}
+      >
+        <Switch checked={checked} alwaysOn decorative />
       </Link>
       <Link
         href="/watch-demo"
         className="text-sm font-medium hover:text-primary transition-colors"
       >
-        Watch videos
+        Watch video
       </Link>
     </div>
   );
@@ -83,30 +93,14 @@ function TalkToUsContent() {
           suit your business and workflow:
         </Text>
         <ul className="flex flex-col gap-2 my-4">
-          <li className="flex items-start gap-3">
-            <CheckCircle2 className="h-4 w-4 text-primary mt-0.25 shrink-0" />
-            <Text size="s" className="text-left text-text-secondary">
-              Get a Demo
-            </Text>
-          </li>
-          <li className="flex items-start gap-3">
-            <CheckCircle2 className="h-4 w-4 text-primary mt-0.25 shrink-0" />
-            <Text size="s" className="text-left text-text-secondary">
-              Get Volume Pricing
-            </Text>
-          </li>
-          <li className="flex items-start gap-3">
-            <CheckCircle2 className="h-4 w-4 text-primary mt-0.25 shrink-0" />
-            <Text size="s" className="text-left text-text-secondary">
-              Pay by Invoice
-            </Text>
-          </li>
-          <li className="flex items-start gap-3">
-            <CheckCircle2 className="h-4 w-4 text-primary mt-0.25 shrink-0" />
-            <Text size="s" className="text-left text-text-secondary">
-              Ask questions about our Security & Compliance Policies
-            </Text>
-          </li>
+          {TALK_TO_US_BENEFITS.map((benefit) => (
+            <li key={benefit} className="flex items-start gap-3">
+              <CheckCircle2 className="h-4 w-4 text-primary mt-0.25 shrink-0" />
+              <Text size="s" className="text-left text-text-secondary">
+                {benefit}
+              </Text>
+            </li>
+          ))}
         </ul>
       </div>
       <Text className="text-left not-prose">
@@ -116,8 +110,7 @@ function TalkToUsContent() {
         </strong>
         ,{" "}
         <strong className="font-[580]">
-          {(SDK_INSTALLS_PER_MONTH / 1_000_000).toFixed(0)}M+ SDK installs per
-          month
+          {formatSdkInstallsPerMonth()} SDK installs per month
         </strong>
         , and{" "}
         <strong className="font-[580]">
@@ -132,7 +125,7 @@ function TalkToUsContent() {
 
       <div className="mt-2">
         <Text className="text-left not-prose">
-          We are looking forward to talk to you,
+          We are looking forward to talking to you,
         </Text>
         <div className="flex flex-col gap-6 mt-4">
           <TeamMemberCard
@@ -154,28 +147,15 @@ function TalkToUsContent() {
 }
 
 function DiscoverYourselfContent() {
-  const links = [
-    { href: "/docs", label: "Documentation" },
-    { href: "/self-hosting", label: "Self-hosting docs" },
-    { href: "/demo", label: "Interactive Example Project" },
-    { href: "/pricing", label: "Pricing" },
-    { href: "/enterprise", label: "Enterprise FAQ" },
-    { href: "/security", label: "Security Center" },
-    { href: "/ask-ai", label: "Questions? Ask AI" },
-    { href: "/support", label: "Contact Support" },
-    {
-      href: "/cloud",
-      label: "Create a free account (no credit card required)",
-    },
-  ];
-
   return (
-    <>
-      <Heading as="h2">Self-serve resources</Heading>
+    <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-start">
       <div>
-        <Text className="text-left">Everything you need to get started:</Text>
-        <ul className="flex flex-col gap-2 mt-2">
-          {links.map((link) => (
+        <Heading as="h2">Self-serve resources</Heading>
+        <Text className="text-left mt-2">
+          Everything you need to get started:
+        </Text>
+        <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2 mt-3">
+          {SELF_SERVE_LINKS.map((link) => (
             <li key={link.href} className="flex items-start gap-3">
               <ArrowRight className="h-3 w-3 text-text-tertiary mt-0.75 shrink-0" />
               <Link href={link.href} variant="text">
@@ -184,9 +164,7 @@ function DiscoverYourselfContent() {
             </li>
           ))}
         </ul>
-      </div>
-      <div className="mt-2">
-        <p>
+        <p className="mt-4">
           Questions?{" "}
           <Link href="/ask-ai" variant="text">
             Ask AI
@@ -197,39 +175,35 @@ function DiscoverYourselfContent() {
           </Link>
           .
         </p>
-        <div className="flex flex-col gap-6 mt-4">
-          <TeamMemberCard
-            imageSrc="/images/people/jannikmaierhoefer.jpg"
-            name="Jannik Maierhöfer"
-            title="Growth Engineer"
-            alt="Jannik Maierhöfer"
-          />
-          <TeamMemberCard
-            imageSrc="/images/people/marcklingen.jpg"
-            name="Marc Klingen"
-            title="Co-founder & CEO"
-            alt="Marc Klingen"
-          />
-        </div>
       </div>
-    </>
+      <div className="flex flex-col gap-6">
+        <TeamMemberCard
+          imageSrc="/images/people/jannikmaierhoefer.jpg"
+          name="Jannik Maierhöfer"
+          title="Growth Engineer"
+          alt="Jannik Maierhöfer"
+        />
+        <TeamMemberCard
+          imageSrc="/images/people/marcklingen.jpg"
+          name="Marc Klingen"
+          title="Co-founder & CEO"
+          alt="Marc Klingen"
+        />
+      </div>
+    </div>
   );
 }
 
 function ContactFormSection() {
-  return (
-    <div className="relative w-full max-w-md mx-auto p-4 bg-stripe-pattern corner-box-corners border border-line-structure">
-      <MarketoContactForm />
-    </div>
-  );
+  return <MarketoContactFormCard />;
 }
 
 export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
   const isDiscoverOpen = page === "watch-demo";
 
   return (
-    <HomeSection>
-      <div className="not-prose flex flex-col gap-2 mb-6 items-center text-center text-balance">
+    <HomeSection className="md:max-w-5xl xl:max-w-6xl px-4 sm:px-6 md:px-8">
+      <div className="not-prose flex flex-col gap-2 mb-8 items-center text-center text-balance">
         <Heading as="h1" size="large" className="m-0">
           <TextHighlight>
             {isDiscoverOpen ? "See Langfuse in action" : "Get a demo"}
@@ -237,39 +211,29 @@ export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
         </Heading>
         <Text className="m-0">
           {isDiscoverOpen
-            ? "Watch short videos to see how Langfuse helps you build better LLM applications"
-            : "Learn more about Langfuse — talk to us or watch videos"}
+            ? "Watch a walkthrough to see how Langfuse helps you build better LLM applications"
+            : "Learn more about Langfuse — talk to us or watch the walkthrough"}
         </Text>
+        <SwitchToggle checked={isDiscoverOpen} page={page} />
       </div>
 
-      <div className="w-full max-w-6xl px-4 not-prose">
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Left Column: Content based on switch */}
-          <div
-            className={`flex flex-col gap-8 ${
-              isDiscoverOpen ? "flex-1 md:flex-[0.4]" : "flex-1"
-            }`}
-          >
-            <SwitchToggle checked={isDiscoverOpen} page={page} />
-            {!isDiscoverOpen ? (
+      {isDiscoverOpen ? (
+        <div className="flex flex-col gap-10 w-full not-prose">
+          <WatchWalkthroughs compact />
+          <DiscoverYourselfContent />
+        </div>
+      ) : (
+        <div className="w-full not-prose">
+          <div className="flex flex-col md:flex-row gap-8">
+            <div className="flex flex-col gap-8 flex-1">
               <TalkToUsContent />
-            ) : (
-              <DiscoverYourselfContent />
-            )}
-          </div>
-
-          {/* Right Column: Calendar or Walkthroughs */}
-          <div className={isDiscoverOpen ? "flex-1 md:flex-[0.6]" : "flex-1"}>
-            {!isDiscoverOpen ? (
+            </div>
+            <div className="flex-1">
               <ContactFormSection />
-            ) : (
-              <Suspense>
-                <WatchWalkthroughs />
-              </Suspense>
-            )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </HomeSection>
   );
 }

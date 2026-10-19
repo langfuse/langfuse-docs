@@ -1,0 +1,160 @@
+---
+title: Choosing what to evaluate
+sidebarTitle: Choosing what to evaluate
+description: "How to turn observed failures and product goals into a small set of metrics: where evaluation criteria come from, which candidates deserve tracking, and how many metrics you need."
+---
+
+export const references = [
+  {
+    id: "evals-faq",
+    title: "LLM evals FAQ (Hamel Husain & Shreya Shankar)",
+    url: "https://hamel.dev/blog/posts/evals-faq/",
+  },
+  {
+    id: "openai-receipt-inspection",
+    title:
+      "Eval-driven system design: from prototype to production (OpenAI Cookbook)",
+    url: "https://developers.openai.com/cookbook/examples/partners/eval_driven_system_design/receipt_inspection",
+  },
+  {
+    id: "hamel-field-guide",
+    title: "A field guide to rapidly improving AI products (Hamel Husain)",
+    url: "https://hamel.dev/blog/posts/field-guide/",
+  },
+  {
+    id: "goodhart-variants",
+    title: "Categorizing variants of Goodhart's law (Manheim & Garrabrant)",
+    url: "https://arxiv.org/abs/1803.04585",
+  },
+];
+
+# Choosing what to evaluate
+
+"I have traces, how do I set up evals?" is a very common question, and an important one to get right. This page will guide you through choosing the right metrics to evaluate.
+
+## Three kinds of metrics [#the-three-roles]
+
+In the end, you'll end up with a set of metrics that each fall in one of the following categories:
+
+| Role                    | Question it answers                                     | Typical source                           |
+| ----------------------- | ------------------------------------------------------- | ---------------------------------------- |
+| **Goal metrics**        | Is quality improving on the things we are building for? | Error analysis, product goals            |
+| **Guardrails**          | Did we regress on something that must never break?      | Requirements, compliance, past incidents |
+| **Operational metrics** | What does it cost, and how many requests per hour?      | Tracing, for free                        |
+
+A good setup uses a mix of the three together. Goal metrics are the ones you actively push up, guardrails catch the failures you can't afford even once, and operational metrics give you more insight into the system.
+
+**The fewer metrics you can keep without feeling like you're missing visibility, the better:**
+
+- every metric is an extra evaluator/dataset to run and maintain
+- when everything is important, nothing is<Ref refs={references} id="hamel-field-guide" />
+
+<Callout>
+**Your metric set is a living artifact**
+
+Your north star changes over time. Even if you have your evals set up, it's important to keep a recurring process of looking at a sample of your traces manually. You'll discover failures your evals didn't cover yet, or notice that some metrics became less important over time.
+
+</Callout>
+
+## Where candidate metrics come from [#where-criteria-come-from]
+
+The first step towards getting a good metric set is sourcing candidate metrics. These come from two places:
+
+### 1. Observed failures [#observed-failures]
+
+Most of your metrics will come from you going through your traces, discovering how your agent behaves and how you'd like it to behave instead. There's a structured process for translating what you see into metrics to evaluate, called [Error analysis](/academy/monitoring/error-analysis). This should, in most cases, be your default way of deciding on metrics: **write evaluators for errors you discover; don't focus on imaginary ones**.<Ref refs={references} id="evals-faq" />
+
+### 2. Goals and hard constraints [#goals-and-hard-constraints]
+
+There are requirements you know you need to monitor before seeing your agent in action. Compliance rules, safety requirements, and format contracts get an evaluator from day one, even if you have never seen them break. These are often guardrail metrics.
+
+<Callout type="info">
+**Metric catalogs are good for exploration, but tailor them to your product**
+
+Evaluator libraries with ready-made metrics like hallucination, toxicity, or helpfulness measure abstract qualities that may not match how your application fails.<Ref refs={references} id="evals-faq" />
+
+</Callout>
+
+## Which candidates deserve a metric? [#which-candidates-deserve-a-metric]
+
+Not all criteria candidates should be tracked.
+
+### One-time fix or generalization problem? [#fix-first]
+
+Sometimes, an agent fails at something because you didn't specify how you wanted the agent to behave on that aspect. If a simple prompt change resolves a failure mode, just make the change and forget about it. Only keep a metric when a simple prompt change doesn't solve your problem, and you need to continuously track a failure mode over time<Ref refs={references} id="evals-faq" />.
+
+<Tabs items={["Likely one time fixes", "Generalization problems"]}>
+<Tab>
+
+- The output isn't valid JSON
+- The reply uses the wrong date format
+- The response uses markdown on a plain-text channel
+- The bot doesn't disclose it's an AI assistant
+
+</Tab>
+<Tab>
+
+- whether the answer is supported by the retrieved context
+- whether the right context was fetched to answer the question
+- whether the response actually answered the user's request
+- whether the agent picked the right tool and passed the right arguments
+
+</Tab>
+</Tabs>
+
+### Tie every metric to a decision [#tie-every-metric-to-a-decision]
+
+For each metric candidate, determine what the action changes when the metric moves: block the deploy, roll back the prompt, open an investigation. If no action changes, the metric would be noise, and should not be tracked.
+
+<Tabs items={["Conversation length is not specific enough", "Merchant-name extraction fail did not have an impact"]}>
+<Tab>
+
+Conversation length rises both when users are engaged and when they are stuck, so the number moves for unrelated reasons and you can't act on it alone.
+
+</Tab>
+<Tab>
+
+In OpenAI's receipt-processing walkthrough, merchant-name extraction was wrong 85% of the time, but those errors turned out to be uncorrelated with the audit decision the system existed to make, so the team stopped tracking it.<Ref refs={references} id="openai-receipt-inspection" />
+
+</Tab>
+</Tabs>
+
+### Mind the budget [#mind-the-budget]
+
+This one is more helpful to prune once you have set up your evaluators. Some evaluators cost more than others to run:
+
+- Code evaluators are close to free
+- An LLM-as-a-judge evaluator costs money to run, and is also harder to maintain (see [writing good evaluators](/academy/evaluate/writing-evaluators))
+
+If a metric is not that important and is expensive to track, it might be a good decision to scratch it.
+
+## Starting from zero [#starting-from-zero]
+
+Before you have your metric set, you'll need to determine your agent's failure modes. This will help you derive metrics.
+
+To start, bootstrap with two generic [scores](/docs/evaluation/scores/overview): a free-text note describing what happened and what seems wrong, and an overall pass/fail. Read 30 to 50 traces with only those, cluster the notes into named failure categories, and then create one boolean score per category. This process is called [error analysis](/academy/monitoring/error-analysis).
+
+<ManualGuideCallout
+  href="/guides/cookbook/error-analysis-llm-applications"
+  topic="Error analysis"
+  lede="The full walkthrough: sample traces, set up the two bootstrap scores in an annotation queue, cluster failure categories, and turn them into score configs."
+/>
+
+## Keeping the set alive [#keeping-the-set-alive]
+
+A metric set describes your application as it is today. Three habits keep it current:
+
+- **Re-run error analysis after significant changes.** Prompt rewrites, model swaps, and new features might change the failure distribution; [when to run it](/academy/monitoring/error-analysis#when-to-run-it) is covered on the error analysis page.
+- **Retire metrics that stopped catching things.** With the exception of guardrail checks, a score that sits at 100% for months carries no information and you can most likely drop it.
+- **Watch the metrics you optimize.** Goodhart's law applies here:<Ref refs={references} id="goodhart-variants" /> when you tune prompts against certain metrics, you can overfit at some point. It's important to [re-validate against new human labels](/guides/llm-as-a-judge-calibration-skill) from time to time.
+
+## Where to start
+
+1. Run [error analysis](/academy/monitoring/error-analysis) if you haven't.
+2. Write down the product goals and hard constraints, and turn each goal into a signal you can observe in traces.
+3. Apply the filters: fix what a prompt change fixes, keep only candidates tied to a decision, and let the judge budget push back.
+4. When you are happy with the set of metrics you assembled, implement the evaluators for it. The deep dive on [writing good evaluators](/academy/evaluate/writing-evaluators) covers how.
+
+## References
+
+<FurtherReading numbered resources={references} />

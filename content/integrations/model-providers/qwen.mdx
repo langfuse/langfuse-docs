@@ -14,7 +14,7 @@ This notebook shows how to trace **Qwen** API calls with **Langfuse** using the 
 
 > **What is Qwen?** [Qwen](https://qwen.ai) is a family of large language models developed by Alibaba Cloud, offering models like Qwen-Plus, Qwen-Max, and Qwen-Turbo through an OpenAI-compatible API.
 
-> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source AI engineering platform that helps teams trace, debug, and evaluate their LLM applications.
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source AI engineering platform that helps teams trace, debug, and evaluate their LLM applications. Use [Langfuse Cloud](https://langfuse.com/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](https://langfuse.com/self-hosting) it.
 
 <Steps>
 ## Step 1: Install Dependencies
@@ -31,12 +31,12 @@ Get your Langfuse keys from the project settings in [Langfuse Cloud](https://lan
 import os
 
 # Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...")
-os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...")
-os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com") # 🇪🇺 EU region
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
 # os.environ.setdefault("LANGFUSE_BASE_URL", "https://us.cloud.langfuse.com") # 🇺🇸 US region
 
-os.environ.setdefault("DASHSCOPE_API_KEY", "sk-...")  # Get your API key from https://qwen.ai/apiplatform
+os.environ.setdefault("DASHSCOPE_API_KEY", "sk-...");  # Get your API key from https://qwen.ai/apiplatform
 ```
 
 ## Step 3: Use Langfuse OpenAI Drop-in Replacement

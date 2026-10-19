@@ -149,7 +149,7 @@ services:
 
   # https://github.com/langfuse/langfuse/blob/main/docker-compose.yml
   langfuse-worker:
-    image: langfuse/langfuse-worker:3
+    image: docker.langfuse.com/langfuse/langfuse-worker:4
     restart: always
     depends_on: &langfuse-depends-on
       postgres:
@@ -208,7 +208,7 @@ services:
       REDIS_TLS_KEY: ${REDIS_TLS_KEY:-/certs/redis.key}
 
   langfuse-web:
-    image: langfuse/langfuse:3
+    image: docker.langfuse.com/langfuse/langfuse:4
     restart: always
     depends_on: *langfuse-depends-on
     ports:
@@ -227,7 +227,7 @@ services:
       LANGFUSE_INIT_USER_PASSWORD: ${LANGFUSE_INIT_USER_PASSWORD:-}
 
   clickhouse:
-    image: clickhouse/clickhouse-server
+    image: clickhouse/clickhouse-server:25.12
     restart: always
     user: "101:101"
     environment:

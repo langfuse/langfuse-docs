@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 import { Button } from "./ui/button";
 import { Link } from "./ui/link";
@@ -40,9 +40,17 @@ const pathsWithoutFooterWidgets = [
   "/brand",
   "/careers",
   "/press",
+  "/partners",
   "/watch-demo",
   "/enterprise",
+  "/chat-agents",
+  "/coding-agents",
+  "/workflow-automation",
+  "/financial-services",
+  "/events",
   "/changelog",
+  "/resources",
+  "/compare",
   "/cn",
   "/community",
   "/cookie-policy",
@@ -65,7 +73,13 @@ const pathsWithCopyAsMarkdownButton = [
   "/security",
   "/library",
   "/enterprise",
+  "/chat-agents",
+  "/coding-agents",
+  "/workflow-automation",
+  "/financial-services",
   "/resources",
+  "/compare",
+  "/academy",
 ];
 const isCustomerStory = (pathname: string) => pathname.startsWith("/users/");
 
@@ -327,15 +341,24 @@ export const CopyMarkdownButton = () => {
   );
 };
 
-export const MainContentWrapper = (props) => {
+export const MainContentWrapper = ({
+  children,
+  showCopyButton,
+}: {
+  children?: ReactNode;
+  /** Override the path-based copy button. Post pages render it in the header. */
+  showCopyButton?: boolean;
+}) => {
   const pathname = usePathname();
   const cookbook = COOKBOOK_ROUTE_MAPPING.find(
     (cookbook) => cookbook.path === pathname,
   );
 
-  const shouldShowCopyButton = pathsWithCopyAsMarkdownButton.some((prefix) =>
-    (pathname ?? "").startsWith(prefix),
-  );
+  const shouldShowCopyButton =
+    showCopyButton ??
+    pathsWithCopyAsMarkdownButton.some((prefix) =>
+      (pathname ?? "").startsWith(prefix),
+    );
 
   return (
     <>
@@ -349,7 +372,7 @@ export const MainContentWrapper = (props) => {
         <NotebookBanner src={cookbook.ipynbPath} className="mt-4 mb-4" />
       ) : null}
 
-      {props.children}
+      {children}
       {!pathsWithoutFooterWidgets.some(
         (path) => pathname === path || (pathname ?? "").startsWith(path + "/"),
       ) ? (
@@ -385,6 +408,7 @@ export const DocsSupport = () => {
 
 export const DocsFeedback = ({ showLabel = true }: { showLabel?: boolean }) => {
   const pathname = usePathname();
+  const capture = usePostHogClientCapture();
   const [selected, setSelected] = useState<
     "positive" | "negative" | "submitted" | null
   >(null);
@@ -401,6 +425,11 @@ export const DocsFeedback = ({ showLabel = true }: { showLabel?: boolean }) => {
     setDialogOpen(true);
     setFeedbackComment("");
     setSubmitting(true);
+
+    capture("docs_feedback", {
+      rating: newSelection,
+      page: pathname ?? "",
+    });
 
     fetch("/api/feedback", {
       method: "POST",
@@ -421,6 +450,11 @@ export const DocsFeedback = ({ showLabel = true }: { showLabel?: boolean }) => {
 
   const handleFeedbackCommentSubmit = () => {
     setCommentSubmitting(true);
+
+    capture("docs_feedback_comment", {
+      rating: selected,
+      page: pathname ?? "",
+    });
 
     fetch("/api/feedback", {
       method: "POST",

@@ -10,7 +10,6 @@ import {
   useFolderDepth,
 } from "fumadocs-ui/components/sidebar/base";
 import { useTreePath } from "fumadocs-ui/contexts/tree";
-import { isActive } from "fumadocs-ui/utils/urls";
 import type * as PageTree from "fumadocs-core/page-tree";
 
 import { cn } from "@/lib/utils";
@@ -18,8 +17,20 @@ import { cn } from "@/lib/utils";
 export const SIDEBAR_NAV_ROW_CLASS =
   "relative flex w-full max-w-[calc(100%-16px)] mx-auto flex-row items-center gap-2 rounded-lg p-2 text-start text-text-tertiary wrap-anywhere [&_svg]:size-4 [&_svg]:shrink-0 transition-colors hover:text-text-primary/80 hover:transition-none";
 
+/** Same trailing-slash rule as the former fumadocs-ui/utils/urls isActive(). */
+function isActive(href: string, pathname: string) {
+  const normalize = (p: string) =>
+    p.length > 1 && p.endsWith("/") ? p.slice(0, -1) : p;
+  return normalize(href) === normalize(pathname);
+}
+
 export function sidebarNavPaddingInlineStart(depth: number) {
   return `calc(${2 * depth} * var(--spacing) + 6px)`;
+}
+
+function getFolderAnchorId(itemId?: string) {
+  if (!itemId) return undefined;
+  return `sidebar-folder-${itemId.replace(/[^a-zA-Z0-9_-]+/g, "-")}`;
 }
 
 /**
@@ -58,6 +69,7 @@ export function SidebarFolderItem({
   const pathname = usePathname();
   /** Parent depth: folder row aligns with `SidebarItem` at the same tree level. */
   const depth = useFolderDepth();
+  const folderAnchorId = item.index ? undefined : getFolderAnchorId(item.$id);
 
   const rowStyle = { paddingInlineStart: sidebarNavPaddingInlineStart(depth) };
 
@@ -80,6 +92,7 @@ export function SidebarFolderItem({
         </SidebarFolderLink>
       ) : (
         <SidebarFolderTrigger
+          data-sidebar-folder-anchor={folderAnchorId}
           className={SIDEBAR_NAV_ROW_CLASS}
           style={rowStyle}
         >

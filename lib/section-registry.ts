@@ -14,6 +14,7 @@ import {
   academySource,
   workshopSource,
   resourcesSource,
+  compareSource,
   marketingSource,
 } from "@/lib/source";
 
@@ -101,7 +102,7 @@ export const docSections: Record<string, SectionMeta> = {
   users: {
     source: usersSource,
     collection: "customers",
-    title: "User stories",
+    title: "Customers",
     layout: "post",
     hasOwnRoute: true,
   },
@@ -130,7 +131,14 @@ export const docSections: Record<string, SectionMeta> = {
     source: resourcesSource,
     collection: "resources",
     title: "Resources",
-    layout: "docs",
+    layout: "post",
+    hasOwnRoute: true,
+  },
+  compare: {
+    source: compareSource,
+    collection: "compare",
+    title: "Compare",
+    layout: "post",
     hasOwnRoute: true,
   },
 };
@@ -145,6 +153,20 @@ export const MARKETING_SLUGS = marketingSource
   .getPages()
   .map((p) => p.url.replace(/^\//, ""))
   .filter(Boolean) as string[];
+
+/** Use case landing pages share compact spacing and omit the copy toolbar. */
+export const USE_CASE_SECTIONS = new Set<string>([
+  "chat-agents",
+  "coding-agents",
+  "workflow-automation",
+  "financial-services",
+]);
+
+/**
+ * Sections that hide both HomeLayout sidebars and use wide gutters instead.
+ * Keep slug membership here — do not hardcode section names in layouts.
+ */
+export const NO_SIDEBAR_SECTIONS = new Set<string>(["financial-services"]);
 
 /** Build a unified config that includes both doc sections and marketing entries. */
 const marketingEntries: Record<string, SectionMeta> = Object.fromEntries(
@@ -172,6 +194,7 @@ export const DEDICATED_MARKETING_SLUGS = new Set<string>([
   "pricing",
   "pricing-self-host",
   "japan",
+  "events",
 ]);
 
 export const DEDICATED_APP_SECTIONS = new Set<string>([

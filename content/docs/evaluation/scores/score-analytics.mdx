@@ -192,7 +192,7 @@ Score Analytics provides industry-standard statistical metrics with interpretati
 4. Examine heatmap: Strong diagonal pattern confirms alignment
 5. **Result**: Both judges agree strongly, your evaluation is reliable
 
-### Human vs AI Annotation Agreement
+### Human vs AI Annotation Agreement [#human-vs-ai-annotation-agreement]
 
 **Scenario**: You have human annotations and AI evaluations for quality. Should you trust the AI?
 
@@ -203,6 +203,8 @@ Score Analytics provides industry-standard statistical metrics with interpretati
 3. Check confusion matrix: Strong diagonal indicates good agreement
 4. Review Cohen's Kappa: 0.85 shows "Almost Perfect" agreement
 5. **Result**: AI evaluations align well with human judgment
+
+If agreement is low, [calibrate the judge prompt](/guides/llm-as-a-judge-calibration-skill) against labeled examples, then compare the scores again. Reviewers can add the human scores through [Annotation Queues](/docs/evaluation/evaluation-methods/annotation-queues).
 
 ### Identify Negative Correlations
 
@@ -274,6 +276,7 @@ Score Analytics provides industry-standard statistical metrics with interpretati
 
 ## Related Resources
 
+- [Calibrate your LLM-as-a-judge](/guides/llm-as-a-judge-calibration-skill) against labeled examples before relying on its scores.
 - Build [custom dashboards](/docs/metrics/features/custom-dashboards) to visualize score trends alongside other metrics.
 - To programmatically query aggregated score data for external monitoring, use the [Metrics API](/docs/metrics/features/metrics-api).
 
