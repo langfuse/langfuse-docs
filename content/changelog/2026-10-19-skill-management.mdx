@@ -69,7 +69,7 @@ await runAgent(skill.files);
 
 ## Trace skill usage
 
-Record which skills were available to the agent and which files it loaded. An observation's **Attributes** tab shows **Available skills** and **Loaded resources**, including skill names, resolved versions, and loaded file paths.
+Record which skills were available to the agent and which files it loaded, including resolved versions and resource paths.
 
 These examples assume [Langfuse tracing is configured](/docs/observability/sdk/overview). `runAgent` is your existing instrumented agent runner, exported from `./agent`.
 
@@ -128,6 +128,16 @@ Use the actual version your agent loaded. The raw attribute takes a JSON string 
 
 </Tabs>
 
-Successful instrumented skill tools record the files actually loaded. Installing or fetching files alone does not record agent use. Use custom dashboards to count how often skills were available and how often agents loaded their resources, with breakdowns by skill and file.
+Successful instrumented skill tools record the files actually loaded. Installing or fetching files alone does not record agent use.
+
+Select a generation in the trace tree and open **Preview → Skills** to see the skills available to that model call, with links to their resolved versions:
+
+![A generation showing four available skills and their version links in the trace's Preview view.](/images/changelog/2026-10-19-skill-management-generation.jpg)
+
+For a successful `loadSkill` tool call, the same section shows the loaded skill and version. Expand its file list to inspect the resource it loaded, such as `SKILL.md`:
+
+![A loadSkill tool call showing refund-policy v1 and the loaded SKILL.md file in the trace's Preview view.](/images/changelog/2026-10-19-skill-management-tool-load.jpg)
+
+Use custom dashboards to count how often skills were available and how often agents loaded their resources, with breakdowns by skill and file.
 
 To get started, open **[Skills](https://cloud.langfuse.com/project/~/skills)** in your project.
