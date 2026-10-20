@@ -5,22 +5,46 @@ description: "How Langfuse handles incidents: the on-call rotation, the incident
 
 # Langfuse Incident Response Plan
 
+Langfuse escalations and incidents are handled in the **ClickHouse incident.io account**.
+
+### Escalating to on-call
+
+**Any Langfuse or ClickHouse team member** can escalate to the Langfuse on-call engineer at any time — don't wait for certainty. When in doubt, page.
+
+1. Use `/incident escalate` (short: `/inc esc`) in Slack and select **Langfuse** as the escalation path to page the current on-call engineer.
+2. In the notification message, describe what you are seeing: affected service(s), region, customer impact, and useful links to errors, dashboards, traces, or support tickets.
+3. Set the priority and click **Escalate**.
+
+For example, to report that the scores view is down, select **Langfuse** as the escalation path and use a notification message like "Scores UI view is no longer responding across multiple projects":
+
+<Frame className="max-w-sm">
+  ![Escalate dialog in Slack with Langfuse selected as the escalation path and an example notification message](/images/handbook/product-engineering/incident-escalate.png)
+</Frame>
+
+Escalate instead of declaring an incident yourself. The on-call engineer evaluates the issue and decides whether it needs a formal incident (see below).
+
+You can also tag `@langfuse-oncall` in Slack. ClickHouse teammates can find the team in `#langfuse`; if the issue is related to ClickHouse instances, also involve `#ch-sre-team`. Salesforce support escalations should use the same Langfuse on-call flow. See [On-call at Langfuse](/handbook/product-engineering/how-we-work/on-call) for how the rotation is staffed and reviewed.
+
+**When to escalate:** platform outages, ClickHouse instance issues affecting Langfuse, security issues, elevated errors, a broken core product flow, or a customer seeing another customer's data.
+
 ### Declaring an incident
 
-**Any Langfuse or ClickHouse team member** can declare an incident at any time — don't wait for certainty. When in doubt, page.
+The **on-call engineer** decides whether an escalation becomes an incident. Declare an incident when the response needs coordination between multiple people or teams, for example:
 
-Langfuse incidents are handled in the **ClickHouse incident.io account**.
+- the issue is severe and needs to be documented with a post-mortem,
+- other teams at ClickHouse need to be involved, or
+- stakeholders outside engineering need to be kept informed.
 
-1. Use `/inc` in Slack or declare the incident from incident.io.
+Issues the on-call engineer can resolve on their own don't need an incident. Status page updates don't require an incident either; they can be published independently.
+
+To declare an incident:
+
+1. Use `/incident` (short: `/inc`) in Slack or declare the incident from incident.io.
 2. Make it clear in the title and description that this is a **Langfuse** incident.
 3. Include the affected service(s), region, customer impact, and useful links to errors, dashboards, traces, or support tickets.
 4. Select the highest plausible severity — this is not published externally.
 
-For urgent issues, use `/inc escalate` to page Langfuse directly. You can also tag `@langfuse-oncall` in Slack. ClickHouse teammates can find the team in `#langfuse`; if the issue is related to ClickHouse instances, also involve `#ch-sre-team`.
-
-incident.io will automatically create a Slack channel and route the escalation to the Langfuse on-call team. Salesforce support escalations should use the same Langfuse on-call flow. See [On-call at Langfuse](/handbook/product-engineering/how-we-work/on-call) for how the rotation is staffed and reviewed.
-
-**When to page:** platform outages, ClickHouse instance issues affecting Langfuse, security issues, elevated errors, a broken core product flow, or a customer seeing another customer's data.
+incident.io will automatically create a Slack channel for the incident.
 
 ### Response
 
