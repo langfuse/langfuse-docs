@@ -1,7 +1,7 @@
 ---
-title: "How we built the Langfuse Assistant"
+title: "How we built Langfuse Halo"
 date: 2026/10/21
-description: "How we built the Langfuse Assistant on our existing MCP server, why the agent runs outside its sandbox, and how we handle background runs."
+description: "How we built Langfuse Halo on our existing MCP server, why the agent runs outside its sandbox, and how we handle background runs."
 tag: engineering
 author: Ben
 ---
@@ -13,8 +13,8 @@ import { SilentToolCallsDiagram } from "@/components/blog/SilentToolCallsDiagram
 import { BackgroundRunDiagram } from "@/components/blog/BackgroundRunDiagram";
 
 <BlogHeader
-  title="How we built the Langfuse Assistant"
-  description="How we built the Langfuse Assistant on our existing MCP server, why the agent runs outside its sandbox, and how we handle background runs."
+  title="How we built Langfuse Halo"
+  description="How we built Langfuse Halo on our existing MCP server, why the agent runs outside its sandbox, and how we handle background runs."
   authors={["lotteverheyden", "benbachem"]}
   date="October 21, 2026"
 />
@@ -27,15 +27,15 @@ It's somewhat ironic: as a company focused on helping others build agents, we di
 
 When we first discussed whether we should write this post, I wasn't sure there was much to write about. The first version was simply a Mastra agent, an MCP server, and some code to glue them together. We didn't invent some super-efficient algorithm for agent execution, and we didn't rewrite anything in Rust (although there might be some other posts here coming soon). Building the in-product agent was mostly about integrating existing pieces and making them work smoothly together while laying the foundations for future agentic features.
 
-From the start, we knew we wanted to reuse as much as possible and share the tools and instructions behind Halo with people using Langfuse through Claude Code or Codex. We didn't want a second set of things to maintain just for the in-product agent. If we improved a tool or fixed some guidance for Halo, that should help people using their own agents too. That meant building on our existing MCP server as well as bringing the shared Langfuse skill into the Assistant.
+From the start, we knew we wanted to reuse as much as possible and share the tools and instructions behind Halo with people using Langfuse through Claude Code or Codex. We didn't want a second set of things to maintain just for the in-product agent. If we improved a tool or fixed some guidance for Halo, that should help people using their own agents too. That meant building on our existing MCP server as well as bringing the shared Langfuse skill into Halo.
 
 <AssistantAccessDiagram />
 
-## How the Assistant is put together
+## How Halo is put together
 
 The first step of building Halo was expanding the [MCP server](/blog/2025-12-09-building-langfuse-mcp-server). The [May 29 release](/changelog/2026-05-29-mcp-update) added tools for observations, metrics, scores, comments, datasets, and annotation queues, making most Langfuse project data available to agents. We needed these tools for Halo, but they were also useful to anyone connecting their own agent.
 
-In June, we launched the first beta version of the Assistant: a [Mastra](https://mastra.ai) agent that ran behind an HTTP endpoint, streaming responses to the browser. It handled one conversation at a time, with no parallel work or background execution. In early July, we gave it write access with human-in-the-loop approvals, and later that month added a sandbox. We added background execution in August. We [announced all these capabilities together in September](/changelog/2026-09-03-langfuse-assistant).
+In June, we launched the first beta version of Halo: a [Mastra](https://mastra.ai) agent that ran behind an HTTP endpoint, streaming responses to the browser. It handled one conversation at a time, with no parallel work or background execution. In early July, we gave it write access with human-in-the-loop approvals, and later that month added a sandbox. We added background execution in August. We [announced all these capabilities together in September](/changelog/2026-09-03-langfuse-assistant).
 
 <AssistantMilestones />
 
@@ -74,7 +74,7 @@ Users can ask Halo to investigate something, close the tab, and come back to its
 
 ## Reusing the MCP server and skill
 
-Halo uses our public MCP servers, the same ones you can connect to. Beyond MCP, Halo gets sandbox tools similar to those in coding agents, plus UI-specific tools such as proposing navigation to another page. All customer-data access goes through MCP. We also give Halo the user's name, time zone, browser languages, and current URL through the system prompt. By relying on MCP and tools, we can control which tools the Assistant gets to call without having to secure arbitrary network requests.
+Halo uses our public MCP servers, the same ones you can connect to. Beyond MCP, Halo gets sandbox tools similar to those in coding agents, plus UI-specific tools such as proposing navigation to another page. All customer-data access goes through MCP. We also give Halo the user's name, time zone, browser languages, and current URL through the system prompt. By relying on MCP and tools, we can control which tools Halo gets to call without having to secure arbitrary network requests.
 
 For each run, the worker creates a temporary API key scoped to the project. By default, it can only call read-only MCP tools. We maintain our own mapping of tool permissions in the in-app agent's code rather than trusting the MCP server's read-only annotations. We also filter tools by the signed-in user's role before exposing them to the model. If the user's role doesn't allow an action, we don't expose the corresponding tool to the agent at all.
 
@@ -84,11 +84,11 @@ If Halo needs another way to access project data, we have to add an MCP tool fir
 
 We do the same with instructions. Halo's system prompt explains how to handle approvals, link to Langfuse pages, and keep answers short. For guidance on using Langfuse, such as setting up evals or migrating prompts, we load the open-source [Langfuse skill](/docs/api-and-data-platform/features/agent-skill) as a Mastra skill and rely on the [Docs MCP](/docs/docs-mcp). You can also use both of these with external agents like Claude Code or Cursor.
 
-## Using Langfuse for the Langfuse Assistant
+## Using Langfuse for Halo
 
-Of course, we're using Langfuse itself to observe and analyze the behavior of the Assistant.
+Of course, we're using Langfuse itself to observe and analyze the behavior of Halo.
 
-When an organization opts into [AI feature telemetry](/docs/langfuse-assistant#data-privacy-and-security), we can use traces of Assistant runs to see where it struggles. When we see Halo struggle with a tool or give poor guidance, we fix the MCP tool or shared skill, or improve our documentation. This way, improvements driven by Halo's interactions benefit all users.
+When an organization opts into [AI feature telemetry](/docs/langfuse-assistant#data-privacy-and-security), we can use traces of Halo runs to see where it struggles. When we see Halo struggle with a tool or give poor guidance, we fix the MCP tool or shared skill, or improve our documentation. This way, improvements driven by Halo's interactions benefit all users.
 
 Some of those fixes can be very straightforward. Agents kept asking to sort metrics by `totalCost_sum` when the tool expected `sum_totalCost`, so we [made the MCP adapter accept both](https://github.com/langfuse/langfuse/pull/15623). When dashboard creation failed validation, the error told the agent which field was wrong but not what it could use instead. We [added the allowed values and guidance on looking up the schema](https://github.com/langfuse/langfuse/pull/15630), so it had enough information to correct the call.
 
@@ -151,6 +151,6 @@ When an approval step is presented to the user, the run completes with a pending
 
 We're exploring giving sandbox scripts access to the Langfuse SDK and the project's configured LLM connections. The SDK would unlock new capabilities for Halo such as evaluator calibration: testing an evaluator against human-labeled examples, changing its prompt, and checking whether the results improve. We'd need to restrict scripts to the requests the user is allowed to make and has approved. Given security concerns, this is non-trivial and we're still exploring how to do that.
 
-The Assistant is live on [Langfuse Cloud](https://cloud.langfuse.com) and in public beta for [self-hosted deployments](/self-hosting/configuration/langfuse-assistant). If one of these decisions gets in your way, tell us in the [feedback discussion](https://github.com/orgs/langfuse/discussions/14196).
+Halo is live on [Langfuse Cloud](https://cloud.langfuse.com) and in public beta for [self-hosted deployments](/self-hosting/configuration/langfuse-assistant). If one of these decisions gets in your way, tell us in the [feedback discussion](https://github.com/orgs/langfuse/discussions/14196).
 
-If you like working on this kind of problem, [we are hiring](/careers).
+If you like working on this kind of problem, [we are hiring](/careers) to help build and improve Halo.
