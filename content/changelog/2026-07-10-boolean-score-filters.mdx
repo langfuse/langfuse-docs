@@ -1,0 +1,41 @@
+---
+date: 2026-07-10
+title: Filter by boolean scores
+description: Filter Langfuse tables by true or false score values.
+author: Tobias Wochinger
+ogImage: /images/changelog/2026-07-10-boolean-score-filters.png
+canonical: /docs/observability/features/filter-search-bar
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+You can now filter Langfuse tables by **boolean scores** in the sidebar or Filter Search Bar.
+
+Boolean score filters are available across traces, observations, sessions, datasets, experiments, evaluations, and scores. In the search bar, use the same score syntax as other score types:
+
+```
+scores.is_hallucination:true
+scores.is_hallucination:false
+```
+
+Autocomplete detects boolean scores and suggests `true` or `false`.
+
+## Learn more
+
+<Cards num={2}>
+  <Card
+    title="Filter Search Bar"
+    href="/docs/observability/features/filter-search-bar"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Scores"
+    href="/docs/evaluation/scores/overview"
+    icon={<Book />}
+    arrow
+  />
+</Cards>

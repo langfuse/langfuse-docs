@@ -1,0 +1,221 @@
+---
+title: Custom Dashboards
+sidebarTitle: Custom Dashboards
+description: Create powerful, customizable dashboards to visualize, monitor, and share insights from your LLM application data with flexible metrics, rich filtering, and dynamic layouts.
+---
+
+# Custom Dashboards
+
+Transform your LLM application data into actionable insights with Langfuse custom dashboards.
+Create personalized views that track the metrics that matter most to your team - from latency and cost optimization to quality monitoring and user behavior analysis.
+
+Custom dashboards provide a flexible, self-service analytics solution built on a powerful query engine that supports multi-level aggregations across your [tracing data](/docs/tracing-data-model).
+Whether you're monitoring production performance, analyzing user feedback trends, or correlating costs with quality metrics, dashboards give you the visualization tools to make data-driven decisions.
+
+<Callout type="info">
+On [Langfuse v4](/docs/v4), some dashboard behaviors are slightly updated. See [Dashboard changes in Langfuse v4](/faq/all/dashboard-changes-in-v4) for the full reference.
+</Callout>
+
+<iframe
+  width="100%"
+  src="https://www.youtube-nocookie.com/embed/z6g9xmciaBE"
+  title="Custom Dashboard Demo"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  className="aspect-video rounded border mt-3"
+  allowFullScreen
+></iframe>
+
+## Key Capabilities
+
+- **Flexible Query Engine**: Built on the [Langfuse data model](/docs/observability/data-model) with support for complex aggregations across traces, observations, users, sessions, and scores
+- **Rich Visualization Options**: Multiple chart types including line charts, bar charts, and time series with customizable layouts
+- **Advanced Filtering**: Filter by metadata, timestamps, user properties, model parameters, and more
+- **Multi-Level Aggregations**: Aggregate data at trace, user, or session levels to answer complex analytical questions
+- **Real-Time Updates**: Dashboards reflect live data from your LLM applications
+- **Team Collaboration**: Share dashboards across your project for unified monitoring and insights
+- **Langfuse Curated Dashboards**: A set of pre-built dashboards focused on Latency, Cost, and Langfuse usage to quickly get started
+
+## Quick Start
+
+Get started with custom dashboards in two simple steps or use Langfuse's curated dashboards right away.
+
+<Steps>
+
+### Create Your First Widget
+
+Widgets are individual visualization components that display specific metrics from your LLM application data.
+
+1. Navigate to the **Dashboards** section in your Langfuse project
+2. Select the **Widgets** tab
+3. Click **New Widget**
+4. Configure your widget:
+   - **Data Source**: Choose from traces, observations, or scores (numeric, categorical, or boolean)
+   - **Metrics**: Select what to measure (count, latency, cost, scores, etc.)
+   - **Dimensions**: Group by user, model, time, trace name, etc.
+   - **Filters**: Narrow down to specific data subsets
+   - **Chart Type**: Pick the best visualization for your data
+5. Click **Save** to store your widget
+
+<Video
+  src="https://static.langfuse.com/docs-videos/create-widget.mov.mp4"
+  gifStyle
+  aspectRatio={16 / 9}
+/>
+
+### Build Your Dashboard
+
+Combine multiple widgets into comprehensive dashboards that tell the story of your LLM application performance.
+
+1. Navigate to the **Dashboards** tab
+2. Click **New Dashboard**
+3. Give your dashboard a descriptive name (e.g., "Production Monitoring", "Cost Analysis", "Quality Metrics")
+4. Add widgets by selecting from your existing widgets or creating new ones
+5. Arrange widgets using the drag-and-drop interface
+6. Resize widgets to emphasize important metrics
+
+<Video
+  src="https://static.langfuse.com/docs-videos/create-dashboard.mov.mp4"
+  gifStyle
+  aspectRatio={16 / 9}
+/>
+
+</Steps>
+
+### Leverage Curated Dashboards
+
+Jump-start your analytics with Langfuse-curated dashboards that focus on common LLM application monitoring needs:
+
+- **Latency Dashboard**: Monitor response times across models and user segments
+- **Cost Dashboard**: Track token usage and associated costs over time
+- **Usage Dashboard**: Understand your Langfuse platform utilization
+
+These pre-built dashboards can be used as-is, or edited freely. Langfuse-managed dashboards and widgets keep all of their edit controls (drag, resize, delete, add, and edit). The first change you make opens a dialog that duplicates the dashboard into your project and applies your change to the copy, so you customize a managed dashboard without touching the original.
+
+## Home dashboard
+
+Your project **Home** page is a dashboard. Out of the box it renders from a Langfuse-curated default: the classic overview (traces, model cost, latency percentiles, scores, and model usage), now built from regular widgets. Each project chooses which dashboard shows on Home:
+
+1. On **Home**, open the **dashboard selector** in the header and pick any dashboard to preview it there. The choice is reflected in the URL, so you can share the exact view.
+2. Click **Set as default** to make it the project's Home. This changes the page for everyone in the project, so you confirm before it applies.
+
+Because Home is a normal dashboard, every tile is a regular widget. You can drop the classic Home widgets (traces over time, model usage, latency percentiles, score analytics) onto any custom dashboard, or build your own Home from scratch.
+
+## Managing and sharing widgets
+
+Every widget has a **⋯ menu**, both on a dashboard tile and on its row in the widget library. From it you can:
+
+- **Copy to clipboard** copies the widget so you can paste it onto another dashboard.
+- **Paste to the right** inserts the widget from your clipboard next to the current tile. This item shows on dashboard tiles when the dashboard is editable, and is disabled unless the clipboard holds a Langfuse widget.
+- **Duplicate** creates a copy of the widget in the current project.
+- **Download as JSON** exports the widget as a portable file.
+- **Download data as CSV** exports the widget's current query result. This item shows on dashboard tiles and becomes available once the widget has loaded its data.
+
+The widget library row menu offers the same **Copy to clipboard**, **Duplicate**, and **Download as JSON** actions, plus **Delete**.
+
+### Copy and paste widgets
+
+Copy a widget, then paste it onto any dashboard with **⌘/Ctrl+V**. The widget is added to the dashboard and scrolled into view. Paste works only when the clipboard holds a Langfuse widget: other clipboard contents are left untouched, and pasting requires edit access to the target dashboard. Because the copied widget carries its full configuration, you can paste it across dashboards, projects, and instances. Filters that do not apply in the target view are dropped, and Langfuse tells you when that happens.
+
+### Import and export as JSON
+
+Widgets and dashboards use a **versioned JSON format**. A widget exports as `{"$langfuseWidget": true, "version": 1, ...}`, and a dashboard as the matching `{"$langfuseDashboard": true, "version": 1, ...}` envelope with each referenced widget's configuration inlined, so it carries no database IDs. This makes widgets and dashboards portable across projects and instances.
+
+- **Export** a widget from its **⋯ menu** with **Download as JSON**.
+- **Import** by dragging a Langfuse widget or dashboard JSON file onto a dashboard. Langfuse validates the file and recreates the widgets in your project. A dashboard file also restores its widget layout. Files that are not Langfuse widget or dashboard exports are rejected.
+
+### Environment filter precedence
+
+A widget can carry its own environment filter. When it does, that filter overrides the dashboard's environment selector for that widget, and only for the environment. Widgets without their own environment filter follow the dashboard's environment selector as usual, along with the rest of the dashboard filter bar. This keeps a widget that is scoped to a specific environment showing data even when the dashboard selector is set to a different one.
+
+## Advanced Features
+
+### Advanced Filtering and Grouping
+
+Create precise data views using Langfuse's powerful filtering capabilities:
+
+- **Metadata Filters**: Filter by custom metadata attached to traces and observations
+- **Time-Based Filters**: Analyze specific time periods or compare time ranges
+- **User Properties**: Segment by user characteristics and behavior patterns
+- **Model Parameters**: Filter by specific model configurations or versions
+- **Tags and Labels**: Use [trace tags](/docs/observability/features/tags) for categorical filtering
+- **Score Thresholds**: Filter by quality score ranges or feedback ratings
+
+### Chart Types and Visualization
+
+Choose the right visualization for your data:
+
+- **Line Charts**: Perfect for tracking trends over time (latency, cost, usage)
+- **Bar Charts**: Compare values across categories (models, users, features)
+- **Time Series**: Monitor real-time metrics with temporal granularity
+- **Pie Charts**: Display proportions of categorical data (e.g., feedback ratings)
+
+### Dynamic Layout and Responsiveness
+
+- **Drag-and-Drop Interface**: Easily rearrange widgets to create logical groupings
+- **Responsive Design**: Dashboards adapt to different screen sizes and devices
+- **Widget Resizing**: Emphasize important metrics with larger visualizations
+- **Grid System**: Maintain clean, organized layouts automatically
+
+### Data Export and Integration
+
+<Video
+  src="https://static.langfuse.com/docs-videos/download%20chart%20data%20as%20csv.mp4"
+  gifStyle
+  aspectRatio={16 / 9}
+/>
+
+Export your dashboard data for further analysis or integration with external tools. See the [Export Data](/docs/api-and-data-platform/overview) guide for comprehensive export options including:
+
+- CSV export of dashboard data
+- Integration with external analytics tools
+- Programmatic access via the [Metrics API](/docs/metrics/features/metrics-api)
+
+### Manage Dashboards via API, CLI, and MCP [#manage-dashboards-via-api]
+
+Beyond the dashboard editor in the UI, you can create and manage dashboards, their tile placements, and reusable widgets programmatically:
+
+- **Public API**: Endpoints under `/api/public/unstable` cover dashboards, placements, and widgets. See the [dashboards](https://api.reference.langfuse.com/#tag/unstabledashboards) and [dashboard widgets](https://api.reference.langfuse.com/#tag/unstabledashboardwidgets) API references.
+- **Langfuse CLI**: The [CLI](/docs/api-and-data-platform/features/cli) picks up these endpoints automatically, so you can keep dashboard definitions in version control and apply them across projects and environments.
+- **MCP server**: The [Langfuse MCP server](/docs/api-and-data-platform/features/mcp-server) exposes the same operations as tools, letting AI agents build and edit dashboards with human-in-the-loop approval for changes. The same tools power [Halo](/docs/halo), the Langfuse assistant, in the UI.
+
+<Callout type="info">
+  These endpoints and MCP tools are **unstable** and may change while the
+  dashboard and widget contract is being finalized.
+</Callout>
+
+## Use Cases and Examples
+
+### Production Monitoring Dashboard
+
+Monitor the health and performance of your LLM application in real-time:
+
+- **Error Rate Tracking**: Monitor failed requests and error patterns
+- **Latency Analysis**: Track P95 and P99 response times across different endpoints
+- **Throughput Monitoring**: Visualize request volume and capacity utilization
+- **Model Performance**: Compare accuracy and quality metrics across model versions
+- **Tool Usage & Latency**: Track how often each external tool (e.g. API calls, database queries) is invoked and its latency
+
+### Cost Optimization Dashboard
+
+Understand and optimize your LLM usage costs:
+
+- **Token Usage Trends**: Track input/output token consumption over time
+- **Cost per User**: Identify high-usage users and optimize pricing strategies
+- **Model Cost Comparison**: Compare costs across different LLM providers and models
+- **Feature Cost Analysis**: Understand which application features drive the highest costs
+
+### Quality and User Experience Dashboard
+
+Monitor the quality and user satisfaction of your LLM application:
+
+- **User Feedback Trends**: Track thumbs up/down ratings and detailed feedback
+- **Score Distribution**: Visualize the distribution of quality scores over time
+- **User Behavior Analysis**: Understand how users interact with different features
+- **A/B Test Results**: Compare quality metrics between different model versions or prompts
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-dashboard"]} />

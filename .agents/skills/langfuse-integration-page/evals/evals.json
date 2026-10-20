@@ -1,0 +1,26 @@
+{
+  "skill_name": "langfuse-integration-page",
+  "evals": [
+    {
+      "id": 0,
+      "name": "name-plus-url-livekit",
+      "prompt": "Can you add a Langfuse integration page for LiveKit Agents? Their docs are at https://docs.livekit.io/agents/ and they have an OpenInference instrumentor on PyPI called `openinference-instrumentation-livekit`. Use the framework category. The slug should be `livekit` (we don't already have one). Include a minimal 'echo agent' as the runnable example.",
+      "expected_output": "A new cookbook/integration_livekit.ipynb following the OpenInference pattern, an appended entry in cookbook/_routes.json with docsPath `integrations/frameworks/livekit` and isGuide false, and a best-effort logo download to public/images/integrations/livekit_icon.*. The notebook should have NOTEBOOK_METADATA on the first line of the first cell, STEPS_START/STEPS_END wrapping the numbered steps, both Langfuse regions in the env var cell, the get_client() auth check cell, and the LearnMore component at the very end.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "pasted-code-together-ai",
+      "prompt": "I have a working Together AI example using the OpenAI-compatible drop-in. Can you turn this into an integration page?\n\n```python\nimport os\nos.environ[\"TOGETHER_API_KEY\"] = \"...\"\nfrom langfuse.openai import openai\n\nclient = openai.OpenAI(\n  api_key=os.environ.get(\"TOGETHER_API_KEY\"),\n  base_url=\"https://api.together.xyz/v1\"\n)\n\nresp = client.chat.completions.create(\n  model=\"meta-llama/Llama-3.3-70B-Instruct-Turbo\",\n  messages=[{\"role\": \"user\", \"content\": \"Hello from Together AI\"}],\n  name=\"together-ai-test\"\n)\nprint(resp.choices[0].message.content)\n```\n\nIt's a model provider. Slug `together-ai` — ignore the existing `togetherai` notebook, we're rewriting this one with the new template.",
+      "expected_output": "A cookbook/integration_together_ai.ipynb using the OpenAI-compatible drop-in pattern (no get_client() auth check — just the langfuse.openai import and client init). Env var cell should include TOGETHER_API_KEY and TOGETHER_API_BASE. A routes entry with docsPath `integrations/model-providers/together-ai` and isGuide false. The runnable example should match the pasted code closely but with the Langfuse wrapper.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "raw-notes-weaviate",
+      "prompt": "Rough notes for a Weaviate integration page — please clean these up into the standard integration notebook. I haven't picked a category yet and the pattern needs thinking about — Weaviate has OTel support but not a native Langfuse hook. Put it under `other`.\n\n- Weaviate is an open-source vector database https://weaviate.io\n- v1.26+ supports OTel export directly\n- Users set OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS (base64 Langfuse key pair)\n- Example: create a collection, add 3 objects, do a nearText query. Use python client v4.\n- Trace will show the search span under a trace\n- Link to example trace: TODO\n- Screenshot: TODO\n\nShould come out as integration_weaviate.ipynb under content/integrations/other/weaviate.",
+      "expected_output": "A cookbook/integration_weaviate.ipynb using the raw-OTel-exporter pattern with the base64 auth header encoding. A _routes.json entry with docsPath `integrations/other/weaviate` and isGuide false. TODO placeholders preserved for the trace screenshot and example trace URL. The notes should be rewritten into proper prose following the house style.",
+      "files": []
+    }
+  ]
+}

@@ -3,12 +3,12 @@
 Install the Langfuse OpenAI wrapper, the official OpenAI SDK, and the Langfuse OpenTelemetry integration required for tracing.
 
 ```sh
-npm install @langfuse/openai @langfuse/otel
+npm install @langfuse/openai openai @langfuse/otel
 ```
 
 **Add credentials**
 
-Add your Langfuse credentials to your environment variables so the SDK knows which project to write to. 
+Add your Langfuse credentials to your environment variables so the SDK knows which project to write to.
 
 import EnvJS from "@/components-mdx/env-js.mdx";
 import SetupOtelJS from "@/components-mdx/setup-otel-js.mdx"
@@ -19,9 +19,10 @@ import SetupOtelJS from "@/components-mdx/setup-otel-js.mdx"
 
 <SetupOtelJS />
 
-Wrap your normal OpenAI client. From now on, each OpenAI request  is automatically collected and forwarded to Langfuse.
+Wrap your normal OpenAI client. From now on, each OpenAI request is automatically collected and forwarded to Langfuse.
 
 **Wrap OpenAI client**
+
 ```ts
 import OpenAI from "openai";
 import { observeOpenAI } from "@langfuse/openai";

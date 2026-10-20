@@ -1,4 +1,4 @@
-import { GITHUB_STARS } from '../src/github-stars';
+import { GITHUB_STARS } from "../src/github-stars";
 
 /**
  * Get GitHub stars count from the constant

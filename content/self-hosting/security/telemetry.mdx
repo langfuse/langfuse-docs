@@ -1,0 +1,96 @@
+---
+title: Telemetry (self-hosted)
+sidebarTitle: Telemetry
+description: Learn what telemetry Langfuse sends from self-hosted deployments, why it is collected, when it can be disabled, and which hostnames Langfuse contacts.
+label: "Version: v4"
+---
+
+# Telemetry
+
+Langfuse self-hosted sends a small amount of deployment telemetry to Langfuse.
+
+For Langfuse Enterprise (self-hosted), this telemetry is used for license compliance and to understand license usage at a high level.
+For Langfuse OSS, the same telemetry helps us understand adoption and prioritize improvements and roadmap items.
+
+<Callout type="info">
+  Langfuse does not send raw traces, prompts, observations, scores, or dataset
+  contents from your self-hosted deployment. Only high-level aggregated usage
+  metrics are shared.
+</Callout>
+
+## Application telemetry [#application-telemetry]
+
+### Where telemetry is sent
+
+The Langfuse Web container sends telemetry to Langfuse's telemetry pipeline via PostHog Cloud at `eu.posthog.com`.
+
+Implementation reference: [Telemetry job](https://github.com/langfuse/langfuse/blob/main/web/src/features/telemetry/index.ts)
+
+### What is sent
+
+Langfuse calculates these values locally and sends a single telemetry event.
+All metrics are aggregated across all projects of the instance before they are sent.
+Langfuse does not send raw ClickHouse rows or per-project breakdowns.
+
+| Field                             | Meaning                                                                                                                            | Source                     |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `langfuseVersion`                 | The running Langfuse version                                                                                                       | Application metadata       |
+| `eeLicenseKey`                    | The configured `LANGFUSE_EE_LICENSE_KEY`, if present                                                                               | Environment variable       |
+| `userDomains`                     | Up to 30 email domains from the local `users` table with user counts. Raw email addresses are not sent as they are considered PII. | Postgres                   |
+| `totalProjects`                   | Current number of non-deleted projects                                                                                             | Postgres                   |
+| `traces`                          | Total traces created in the reporting window                                                                                       | Local ClickHouse aggregate |
+| `scores`                          | Total scores created in the reporting window                                                                                       | Local ClickHouse aggregate |
+| `observations`                    | Total observations created in the reporting window                                                                                 | Local ClickHouse aggregate |
+| `datasets`                        | Total datasets created in the reporting window                                                                                     | Postgres                   |
+| `datasetItems`                    | Total dataset items created in the reporting window                                                                                | Postgres                   |
+| `datasetRuns`                     | Total dataset runs created in the reporting window                                                                                 | Postgres                   |
+| `datasetRunItems`                 | Total dataset run items created in the reporting window                                                                            | Local ClickHouse aggregate |
+| `assistantRuns`                   | Total Halo runs started in the reporting window                                                                                    | Postgres                   |
+| `startTimeframe` / `endTimeframe` | The reporting window used for the counts above                                                                                     | Application metadata       |
+
+## Can I disable telemetry? [#can-i-disable-telemetry]
+
+### Langfuse OSS
+
+Yes. Set `TELEMETRY_ENABLED=false` on all Langfuse application containers.
+
+### Langfuse Enterprise (self-hosted)
+
+Enterprise self-hosted telemetry is used for license compliance and cannot be disabled.
+If you have procurement, network, or privacy questions, please [contact us](/support).
+
+## Hostnames contacted by Langfuse [#hostnames]
+
+Langfuse does not require internet access. Use this list to configure an egress firewall or proxy, or to review which external services your deployment reaches. Langfuse keeps running when any of these hosts is unreachable; only the related feature is skipped.
+
+The list does not include infrastructure you configure yourself: Postgres, ClickHouse, Redis, blob storage, and any LLM connections, SSO providers, SMTP servers, webhooks, Slack, or export integrations you set up.
+
+### Langfuse containers [#hostnames-containers]
+
+| Hostname         | Container | Purpose                                                                                                                                                                                                                                                                              | How to turn it off                                                                                |
+| ---------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| `eu.posthog.com` | Web       | [Application telemetry](#application-telemetry), at most every 12 hours.                                                                                                                                                                                                             | Set `TELEMETRY_ENABLED=false` (Langfuse OSS only, see [above](#can-i-disable-telemetry)).         |
+| `langfuse.com`   | Web       | Update check. When a signed-in user loads the Langfuse UI, the Web container requests `https://langfuse.com/api/latest-releases` with the running Langfuse version to show a notice when a newer release is available. The endpoint serves a cached copy of the GitHub releases API. | Not configurable. The check fails gracefully if the host is unreachable.                          |
+| `langfuse.com`   | Worker    | Documentation search for [Halo](/self-hosting/configuration/halo). On each Halo run, the Worker connects to the Langfuse docs MCP server at `https://langfuse.com/api/mcp`. Only applies when `LANGFUSE_IN_APP_AGENT_ENABLED=true`.                                                  | Keep Halo disabled (default). If the host is unreachable, Halo runs without documentation search. |
+
+### Browser [#hostnames-browser]
+
+The Langfuse UI makes a few requests to external hosts. These requests are made by your users' browsers, not by the Langfuse containers:
+
+| Hostname              | Purpose                                                                                                                                                                                                                                                                                                                                                                           |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `img.shields.io`      | GitHub stars badge in the sidebar. It is no longer loaded once the user dismisses the card.                                                                                                                                                                                                                                                                                       |
+| `langfuse.com`        | Newsletter step after sign-up, from `>=v4.61.0`. The browser checks that `https://langfuse.com/api/latest-releases` is reachable; only when the user clicks Subscribe does it send their email address, the lists the step offers them, and a fixed `source` tag to `https://langfuse.com/api/productUpdateSignup`. Skip the step with `LANGFUSE_DISABLE_SIGNUP_ONBOARDING=true`. |
+| `static.langfuse.com` | Onboarding videos on empty pages, for example on the traces, sessions, scores, and datasets pages before any data is available.                                                                                                                                                                                                                                                   |
+
+If you configure [transactional emails](/self-hosting/configuration/transactional-emails), the Langfuse logo in these emails is loaded from `static.langfuse.com` by the recipient's email client.
+
+### Container image downloads [#container-image-downloads]
+
+Our deployment templates — the [`docker-compose.yml`](https://github.com/langfuse/langfuse/blob/main/docker-compose.yml) file and the [`langfuse-k8s`](https://github.com/langfuse/langfuse-k8s) Helm chart — reference the Langfuse application images as `docker.langfuse.com/langfuse/langfuse` and `docker.langfuse.com/langfuse/langfuse-worker`.
+
+`docker.langfuse.com` is a registry endpoint used to measure open source adoption via [Reo.dev](https://reo.dev). Only the pull is observed — no data from your running Langfuse instance is involved, and the endpoint is contacted only when you fetch an image.
+
+`docker.langfuse.com` serves the images from Docker Hub. Pulling through it requires access to `docker.langfuse.com` and to the Docker Hub hosts used for authentication and image layers, such as `auth.docker.io`, `registry-1.docker.io`, and `production.cloudfront.docker.com`. See Docker's [allowlist](https://docs.docker.com/desktop/setup/allow-list/) for the current list.
+
+You can also pull the images directly from Docker Hub. Replace `docker.langfuse.com/langfuse/...` with `langfuse/...` (or the fully qualified `docker.io/langfuse/...`) wherever the image is referenced. Then only the Docker Hub hosts are required.

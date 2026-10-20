@@ -18,4 +18,3 @@ function IconMCP(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export default IconMCP;
-

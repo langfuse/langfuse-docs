@@ -1,10 +1,9 @@
 "use client";
 
-import { getPagesUnderRoute } from "nextra/context";
 import Link from "next/link";
-import { type Page } from "nextra";
 import { motion, useInView } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
+import { useWrappedData } from "./WrappedDataContext";
 import { WrappedSection } from "./components/WrappedSection";
 import { WrappedGrid, WrappedGridItem } from "./components/WrappedGrid";
 import { SectionHeading } from "./components/SectionHeading";
@@ -49,14 +48,18 @@ function LaunchItem({ title, route }: LaunchItemProps) {
   return (
     <Link
       href={route}
-      className="group relative flex items-center py-1.5 -mx-6 lg:-mx-8 px-6 lg:px-8 hover:bg-muted/50 transition-colors text-sm"
+      className="group relative flex items-center py-1.5 -mx-5 lg:-mx-6 px-5 lg:px-6 hover:bg-surface-1 transition-colors text-[13px] text-text-secondary hover:text-text-primary"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <span className="mr-2 flex-shrink-0 relative w-4 flex items-center justify-start">
         <motion.span
           initial={{ opacity: 0, scale: 0.5, x: -4 }}
-          animate={shouldShowStar ? { opacity: 1, scale: 1, x: 0 } : { opacity: 0, scale: 0.5, x: -4 }}
+          animate={
+            shouldShowStar
+              ? { opacity: 1, scale: 1, x: 0 }
+              : { opacity: 0, scale: 0.5, x: -4 }
+          }
           transition={{
             duration: 0.2,
             ease: [0.22, 1, 0.36, 1],
@@ -141,35 +144,35 @@ function MonthBox({ month, year, launches, animationProps }: MonthBoxProps) {
   const launchWeekUrl = getLaunchWeekUrl(month);
 
   const content = (
-    <div className="h-full flex flex-col p-6 lg:p-8">
-        <div className="flex items-center gap-2 flex-wrap mb-4">
-          <h3 className="text-2xl font-bold font-mono">{monthName}</h3>
-          <span className="text-sm text-muted-foreground">
-            {launches.length} {launches.length === 1 ? "launch" : "launches"}
-          </span>
-          {launchWeekUrl && (
-            <Link
-              href={launchWeekUrl}
-              className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-            >
-              Launch Week
-            </Link>
-          )}
-        </div>
-        <div className="flex-1 flex flex-col">
-          {launches.map((launch, index) => (
-            <LaunchItem key={index} {...launch} />
-          ))}
-        </div>
+    <div className="h-full flex flex-col p-5 lg:p-6">
+      <div className="flex items-center gap-2 flex-wrap mb-4">
+        <h3 className="text-[22px] font-medium font-analog text-text-primary">
+          {monthName}
+        </h3>
+        <span className="text-[13px] text-text-tertiary">
+          {launches.length} {launches.length === 1 ? "launch" : "launches"}
+        </span>
+        {launchWeekUrl && (
+          <Link
+            href={launchWeekUrl}
+            className="inline-flex items-center px-2 py-1 text-[11px] font-medium rounded-[2px] border border-line-structure bg-surface-1 text-text-secondary hover:text-text-primary hover:border-line-cta transition-colors"
+          >
+            Launch Week
+          </Link>
+        )}
       </div>
+      <div className="flex-1 flex flex-col">
+        {launches.map((launch, index) => (
+          <LaunchItem key={index} {...launch} />
+        ))}
+      </div>
+    </div>
   );
 
   return (
     <WrappedGridItem colSpan={1} hideStars>
       {animationProps ? (
-        <motion.div {...animationProps}>
-          {content}
-        </motion.div>
+        <motion.div {...animationProps}>{content}</motion.div>
       ) : (
         content
       )}
@@ -178,24 +181,22 @@ function MonthBox({ month, year, launches, animationProps }: MonthBoxProps) {
 }
 
 export function Launches() {
-  const allPages = (
-    getPagesUnderRoute("/changelog") as Array<Page & { frontMatter: any }>
-  )
-    .filter(
+  const allPages = useWrappedData()
+    .changelogPages.filter(
       (page) =>
         page.frontMatter?.date &&
-        new Date(page.frontMatter.date).getFullYear() === 2025
+        new Date(page.frontMatter.date as string).getFullYear() === 2025,
     )
     .sort(
       (a, b) =>
-        new Date(a.frontMatter.date).getTime() -
-        new Date(b.frontMatter.date).getTime()
+        new Date(a.frontMatter?.date as string).getTime() -
+        new Date(b.frontMatter?.date as string).getTime(),
     );
 
   // Group by month
   const launchesByMonth = allPages.reduce(
     (acc, page) => {
-      const date = new Date(page.frontMatter.date);
+      const date = new Date(page.frontMatter?.date as string);
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const key = `${date.getFullYear()}-${month}`;
 
@@ -204,7 +205,10 @@ export function Launches() {
       }
 
       acc[key].push({
-        title: page.frontMatter.title || page.name || "Untitled",
+        title:
+          (page.frontMatter?.title as string | undefined) ||
+          page.name ||
+          "Untitled",
         route: page.route,
       });
 
@@ -216,7 +220,7 @@ export function Launches() {
         title: string;
         route: string;
       }>
-    >
+    >,
   );
 
   // Get all months and sort them (Jan to Dec)
@@ -231,18 +235,19 @@ export function Launches() {
   return (
     <WrappedSection>
       <SectionHeading
-        title="A Year of Launches..."
-        subtitle="We have shipped a ton of new features this year."
+        id="launches"
+        title="A year of launches"
+        subtitle="We shipped a ton of new features this year."
       >
-        <p className="hidden lg:block text-sm text-muted-foreground">
-          hold hover to ⭐ your favorite launches of the year
+        <p className="hidden lg:block text-[13px] text-text-tertiary">
+          Hold hover to ⭐ your favorite launches of the year
         </p>
       </SectionHeading>
       <div ref={containerRef}>
-        <WrappedGrid className="!grid-cols-1 sm:!grid-cols-1 lg:!grid-cols-3 !border-t-0 -mt-[1px]">
+        <WrappedGrid className="!grid-cols-1 sm:!grid-cols-1 lg:!grid-cols-3 !border-t-0 -mt-px">
           {months.map((monthKey, index) => {
             const [year, month] = monthKey.split("-");
-            
+
             const animationProps = {
               initial: { opacity: 0, y: 20, scale: 0.95 },
               animate: isInView
@@ -270,4 +275,3 @@ export function Launches() {
     </WrappedSection>
   );
 }
-

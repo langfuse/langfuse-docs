@@ -1,0 +1,58 @@
+---
+title: OpenTelemetry tracing for LobeChat
+description: "Send LobeChat's existing OpenTelemetry traces to Langfuse. Configure OTLP export and understand the coverage limits of the legacy integration replacement."
+sidebarTitle: LobeChat
+logo: /images/integrations/lobechat_icon.png
+---
+
+# OpenTelemetry tracing for LobeChat
+
+[LobeChat / LobeHub](https://github.com/lobehub/lobehub) is an open-source AI chat platform. Self-hosted versions with [OpenTelemetry support](https://lobehub.com/docs/self-hosting/advanced/observability/grafana) can send their existing traces to Langfuse without adding a Langfuse SDK.
+
+<Callout type="warning">
+  **Legacy setup deprecated:** The built-in `ENABLE_LANGFUSE` integration uses the legacy Langfuse JavaScript SDK v3. For new Langfuse v4 setups, use OpenTelemetry as described below. This replaces the legacy setup instructions on this page; it does not provide all of the legacy integration's features.
+</Callout>
+
+## What is captured?
+
+Coverage depends on your deployed LobeHub version and execution path. The current [server agent runtime](https://github.com/lobehub/lobehub/blob/ebe586289d55936b738e4dc822dbdd745196b4f3/apps/server/src/modules/AgentRuntime/adapters/ServerLLMTransport.ts) emits agent, chat, and tool spans with model names, token usage, timing, and conversation IDs. Langfuse maps supported GenAI attributes to its observations.
+
+The existing OpenTelemetry integration has these limits:
+
+- **No chat content:** Chat spans omit prompts and responses, so content-based debugging and evaluations need additional upstream instrumentation.
+- **No feedback parity:** Feedback scores and message-edit events are handled by the separate legacy Langfuse integration.
+- **Not every chat path is covered:** The older `/webapi/chat` path relies on the legacy integration for detailed LLM tracing. Enabling OpenTelemetry does not add missing LLM spans to that path.
+- **Operational spans are included:** The general exporter also sends infrastructure spans. Use an OpenTelemetry collector to filter them if needed, preserving the parent spans required for the hierarchy.
+
+Check your deployed version and required workflow before replacing an existing setup.
+
+## Configure OpenTelemetry export
+
+1. Create a [Langfuse project and API keys](https://cloud.langfuse.com). Self-hosted Langfuse is also supported.
+2. Base64-encode `public-key:secret-key` for Basic Auth. For example:
+
+   ```sh
+   printf '%s' 'pk-lf-...:sk-lf-...' | base64 | tr -d '\n'
+   ```
+
+3. Set these environment variables on the LobeHub server, replacing `<base64-public-key:secret-key>` with that output:
+
+   ```bash
+   ENABLE_TELEMETRY=1
+   OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://cloud.langfuse.com/api/public/otel/v1/traces
+   OTEL_EXPORTER_OTLP_TRACES_HEADERS="Authorization=Basic <base64-public-key:secret-key>,x-langfuse-ingestion-version=4"
+   ```
+
+   Use the host for your [Langfuse region or self-hosted instance](/integrations/native/opentelemetry#opentelemetry-endpoint). The `x-langfuse-ingestion-version=4` header enables real-time ingestion into the v4 data model.
+
+4. Restart LobeHub. In local development, also set `ENABLE_TELEMETRY_IN_DEV=1`; production does not need this variable.
+
+Use the **traces-specific** endpoint and headers above. LobeHub also creates a metrics exporter: keep its destination configured separately, such as your existing OpenTelemetry collector. Langfuse's OTLP endpoint accepts traces, not metrics.
+
+This route is controlled by the server's `ENABLE_TELEMETRY` setting. The legacy `ENABLE_LANGFUSE` flag and per-user Analytics toggle do not control this exporter. Remove `ENABLE_LANGFUSE` when switching away from the legacy integration.
+
+## Verify your setup
+
+Run a server-side agent conversation and inspect the resulting [observations](/docs/observability/overview) in Langfuse. Verify the span hierarchy, model, token usage, and conversation ID for your deployed version. Prompts, responses, and feedback scores are not expected from the existing chat spans.
+
+If observations are missing, check that your version instruments the chosen workflow, telemetry is enabled, and the endpoint and credentials match your Langfuse project. If data is delayed, check the v4 ingestion header. See the [OpenTelemetry reference](/integrations/native/opentelemetry) for supported attributes and collector configuration.

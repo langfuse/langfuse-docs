@@ -1,0 +1,404 @@
+---
+title: Access Control (RBAC)
+description: Langfuse offers extensive RBAC capabilities to manage project sharing and permissions across different organizations and projects.
+sidebarTitle: Access Control (RBAC)
+---
+
+# Role-Based Access Controls in Langfuse
+
+The role-based access control (RBAC) in Langfuse is based on users, organizations, projects, and roles:
+
+- `Users` are [authenticated](/docs/administration/authentication-and-sso) individuals who access Langfuse
+- `Organizations` are the top-level entities that contain projects.
+- `Projects` group all Langfuse data to allow for fine-grained role-based access control (RBAC).
+- `Roles` define the permissions of users within an organization and project:
+  - By default, users get assigned a role on the organizational level.
+  - For more fine-grained control, users can be assigned project-roles. This is useful when you want to differentiate permissions for different projects within the same organization.
+
+`API Keys` are used to authenticate with the Langfuse API. They are associated with a project and can be used to access the project's data programmatically. API keys are not tied to a user.
+
+```mermaid
+graph LR
+  A["User (via UI)"] -->|role| B[Organization]
+  B -->|1:n| C[Projects]
+  A -.->|optional: project-role| C
+  D[API Keys] -->|n:1| C
+```
+
+## Access Organizations and Projects
+
+You can easily switch between organizations and projects using the dropdowns in the top navigation bar.
+
+<Video
+  src="https://static.langfuse.com/docs-videos/project_menu.mp4"
+  gifStyle
+  aspectRatio={768 / 452}
+  className="max-w-sm"
+/>
+
+## Roles and Scopes
+
+- `Owner`: has all permissions
+- `Admin`: can edit the project settings and grant access to other users
+- `Member`: can view all metrics & create scores, but cannot configure the project
+- `Viewer`: view-only access to the project and organization, most of the configuration is hidden
+- `None`: no default access to the organization, to be used when user should have access to a single project only
+
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
+export function RolePermissionTable({ roleScopes }) {
+  return (
+    <div className="grid grid-cols-5 gap-1">
+      {Object.entries(roleScopes).map(([role, scopes]) => (
+        <div key={role} className="flex flex-col">
+          <div className="border-b pb-2 mb-2 border-gray-600">{role}</div>
+          {scopes
+            .sort((a, b) => a.localeCompare(b))
+            .map((scope) => (
+              <div key={scope} className="text-xs mt-1 break-words">
+                {scope}
+              </div>
+            ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+<Accordion type="single" collapsible>
+  <AccordionItem value="organization-scopes">
+    <AccordionTrigger>Organization-level scopes</AccordionTrigger>
+    <AccordionContent className="overflow-x-auto">
+      <RolePermissionTable
+        roleScopes={{
+          OWNER: [
+            "projects:create",
+            "projects:transfer_org",
+            "organization:CRUD_apiKeys",
+            "organization:update",
+            "organization:delete",
+            "organizationLlmApiKeys:read",
+            "organizationLlmApiKeys:CUD",
+            "organizationMembers:CUD",
+            "organizationMembers:read",
+            "orgAuditLogs:read",
+            "langfuseCloudBilling:CRUD",
+          ],
+          ADMIN: [
+            "projects:create",
+            "projects:transfer_org",
+            "organization:update",
+            "organizationLlmApiKeys:read",
+            "organizationLlmApiKeys:CUD",
+            "organizationMembers:CUD",
+            "organizationMembers:read",
+            "orgAuditLogs:read",
+          ],
+          MEMBER: ["organizationMembers:read"],
+          VIEWER: [],
+          NONE: [],
+        }}
+      />
+    </AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="project-scopes">
+    <AccordionTrigger>Project-level scopes</AccordionTrigger>
+    <AccordionContent className="overflow-x-auto">
+      <RolePermissionTable
+        roleScopes={{
+          OWNER: [
+            "project:read",
+            "project:update",
+            "project:delete",
+            "projectMembers:read",
+            "projectMembers:CUD",
+            "apiKeys:read",
+            "apiKeys:CUD",
+            "integrations:CRUD",
+            "objects:publish",
+            "objects:bookmark",
+            "objects:tag",
+            "traces:delete",
+            "scores:CUD",
+            "scoreConfigs:CUD",
+            "scoreConfigs:read",
+            "datasets:read",
+            "datasets:CUD",
+            "prompts:CUD",
+            "prompts:read",
+            "promptProtectedLabels:CUD",
+            "models:CUD",
+            "evaluator:CUD",
+            "evaluator:read",
+            "evaluationRule:CUD",
+            "evaluationRule:read",
+            "evalJobExecution:read",
+            "evalDefaultModel:CUD",
+            "evalDefaultModel:read",
+            "llmApiKeys:read",
+            "llmApiKeys:create",
+            "llmApiKeys:update",
+            "llmApiKeys:delete",
+            "llmSchemas:CUD",
+            "llmSchemas:read",
+            "llmTools:CUD",
+            "llmTools:read",
+            "playground:execute",
+            "batchExports:create",
+            "batchExports:read",
+            "comments:CUD",
+            "comments:read",
+            "annotationQueues:read",
+            "annotationQueues:CUD",
+            "annotationQueueAssignments:read",
+            "annotationQueueAssignments:CUD",
+            "promptExperiments:CUD",
+            "promptExperiments:read",
+            "projectAuditLogs:read",
+            "dashboards:read",
+            "dashboards:CUD",
+            "TableViewPresets:CUD",
+            "TableViewPresets:read",
+            "automations:CUD",
+            "automations:read",
+            "alerts:read",
+            "alerts:CUD",
+          ],
+          ADMIN: [
+            "project:read",
+            "project:update",
+            "projectMembers:read",
+            "projectMembers:CUD",
+            "apiKeys:read",
+            "apiKeys:CUD",
+            "integrations:CRUD",
+            "objects:publish",
+            "objects:bookmark",
+            "objects:tag",
+            "traces:delete",
+            "scores:CUD",
+            "scoreConfigs:CUD",
+            "scoreConfigs:read",
+            "datasets:read",
+            "datasets:CUD",
+            "prompts:CUD",
+            "prompts:read",
+            "promptProtectedLabels:CUD",
+            "models:CUD",
+            "evaluator:CUD",
+            "evaluator:read",
+            "evaluationRule:CUD",
+            "evaluationRule:read",
+            "evalJobExecution:read",
+            "evalDefaultModel:CUD",
+            "evalDefaultModel:read",
+            "llmApiKeys:read",
+            "llmApiKeys:create",
+            "llmApiKeys:update",
+            "llmApiKeys:delete",
+            "llmSchemas:CUD",
+            "llmSchemas:read",
+            "llmTools:CUD",
+            "llmTools:read",
+            "playground:execute",
+            "batchExports:create",
+            "batchExports:read",
+            "comments:CUD",
+            "comments:read",
+            "annotationQueues:read",
+            "annotationQueues:CUD",
+            "annotationQueueAssignments:read",
+            "annotationQueueAssignments:CUD",
+            "promptExperiments:CUD",
+            "promptExperiments:read",
+            "projectAuditLogs:read",
+            "dashboards:read",
+            "dashboards:CUD",
+            "TableViewPresets:CUD",
+            "TableViewPresets:read",
+            "automations:CUD",
+            "automations:read",
+            "alerts:read",
+            "alerts:CUD",
+          ],
+          MEMBER: [
+            "project:read",
+            "projectMembers:read",
+            "apiKeys:read",
+            "objects:publish",
+            "objects:bookmark",
+            "objects:tag",
+            "scores:CUD",
+            "scoreConfigs:CUD",
+            "scoreConfigs:read",
+            "datasets:read",
+            "datasets:CUD",
+            "prompts:CUD",
+            "prompts:read",
+            "evaluator:CUD",
+            "evaluator:read",
+            "evaluationRule:read",
+            "evaluationRule:CUD",
+            "evalJobExecution:read",
+            "evalDefaultModel:read",
+            "evalDefaultModel:CUD",
+            "llmApiKeys:read",
+            "llmSchemas:read",
+            "llmSchemas:CUD",
+            "llmTools:CUD",
+            "llmTools:read",
+            "playground:execute",
+            "batchExports:create",
+            "batchExports:read",
+            "comments:CUD",
+            "comments:read",
+            "annotationQueues:read",
+            "annotationQueues:CUD",
+            "annotationQueueAssignments:read",
+            "promptExperiments:CUD",
+            "promptExperiments:read",
+            "dashboards:read",
+            "dashboards:CUD",
+            "TableViewPresets:CUD",
+            "TableViewPresets:read",
+            "automations:read",
+            "alerts:read",
+            "alerts:CUD",
+          ],
+          VIEWER: [
+            "project:read",
+            "prompts:read",
+            "evaluator:read",
+            "scoreConfigs:read",
+            "evaluationRule:read",
+            "evalJobExecution:read",
+            "evalDefaultModel:read",
+            "datasets:read",
+            "llmApiKeys:read",
+            "llmSchemas:read",
+            "llmTools:read",
+            "comments:read",
+            "annotationQueues:read",
+            "promptExperiments:read",
+            "dashboards:read",
+            "TableViewPresets:read",
+            "automations:read",
+            "alerts:read",
+          ],
+          NONE: [],
+        }}
+      />
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>
+
+### How to read the scopes [#reading-scopes]
+
+Each scope is `resource:action`. `read` grants viewing; `CUD` (create, update, delete) grants changes. The project-level `Admin` role has every project scope of `Owner` except `project:delete`. A few practical consequences of the tables above:
+
+| You want a user to be able to…                                                                                    | Minimum role                                                                                           |
+| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| View traces, dashboards, prompts, datasets, and evaluators                                                        | `Viewer` on the project (`project:read`, `dashboards:read`, `prompts:read`, …)                         |
+| Export data from the UI or via [Blob Storage export](/docs/api-and-data-platform/features/export-to-blob-storage) | `Member` (`batchExports:create`, `batchExports:read`)                                                  |
+| Create scores, datasets, prompts, or evaluators                                                                   | `Member`                                                                                               |
+| Create, update, or delete alerts, including their metrics, filters, and thresholds                                | `Member` (`alerts:CUD`)                                                                                |
+| Attach existing alert automations in the same project to an alert                                                 | `Member` (`alerts:CUD`, `automations:read`)                                                            |
+| Create, update, or delete notification automations                                                                | `Admin` (`automations:CUD`)                                                                            |
+| Create or delete project API keys, LLM connections, or integrations                                               | `Admin` (`apiKeys:CUD`, `llmApiKeys:create`, `integrations:CRUD`)                                      |
+| Delete traces or a project                                                                                        | `Admin` for traces (`traces:delete`); `Owner` for the project (`project:delete`)                       |
+| View or manage organization LLM connections                                                                       | Organization `Admin` (`organizationLlmApiKeys:read`, `organizationLlmApiKeys:CUD`)                     |
+| Create organization API keys, delete the organization, or manage billing                                          | Organization `Owner` (`organization:CRUD_apiKeys`, `organization:delete`, `langfuseCloudBilling:CRUD`) |
+
+A user's effective role in a project is their [project-level role](#project-level-roles) if one is assigned, otherwise their organization role. Assigning the project role `None` means "do not override the organization role" for that project. Projects in which the effective role lacks `project:read` are hidden from the user entirely, which is why a `Viewer` or `None` organization member may see `Forbidden` on project endpoints until a project role is granted.
+
+A platform team with the Admin or Owner role can provision notification automations. Product teams with the Member role can then independently create alerts and attach those existing automations without Admin assistance. Members cannot create, edit, or delete the automations themselves. See [Alert permissions](/docs/observability/features/alerts#permissions) for details.
+
+## Managing users
+
+### Add a new user to an organization
+
+In the organization settings, you can add users via their email address and assign them a role. They will receive an email notification and will be able to access the organization once they log in. Users who do not have a Langfuse account yet, will be listed as pending invites until they sign up.
+
+### Changing user roles
+
+Any user with the `organizationMembers:CUD` permission can change the role of a user in the organization settings. This will affect the user's permissions across all projects in the organization. Users can only assign roles that are lower or equal to their own role.
+
+## Managing Projects
+
+### Add a new project
+
+Any user with the `projects:create` permission can create a new project within a Langfuse organization.
+
+### Transfer a project to another organization
+
+Only users with the `projects:transfer_org` permission can transfer a project to another organization. This will remove the project from the current organization and add it to the new one. Access to the project will depend on the roles configured in the new organization.
+
+During this process, no data will be lost, all project settings, data, and configurations will be transferred to the new organization. The project remains fully operational as API keys, settings (except for access management), and data will remain unchanged and associated with the project. All features (e.g. tracing, prompt management) will continue to work without any interruption.
+
+## Project-level roles [#project-level-roles]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "team-add-on",
+    enterprise: "full",
+    selfHosted: "ee",
+  }}
+/>
+
+Users by default inherit the role of the organization they are part of. For more fine-grained control, you can assign a user a role on the project level. This is useful when you want to differentiate permissions for different projects within the same organization.
+
+If a project-level role is assigned, it will override the organization-level role for that project.
+
+If you want to give a user access to only certain projects within an organization, you can set their role to `None` on the organization level and then assign them a role on the project level.
+
+## API keys [#api-keys]
+
+API keys authenticate calls to the [public API](/docs/api-and-data-platform/features/public-api) and the SDKs. They are not tied to a user:
+
+- **Project API keys** (`pk-lf-…` / `sk-lf-…`) are scoped to one project and are created in **Project Settings → API Keys**. Managing them requires the `apiKeys:CUD` scope (`Owner` or `Admin` on the project); `Member` can see the list.
+- **Organization API keys** are scoped to the whole organization and used with the [Organization Management API](/docs/administration/scim-and-org-api). Managing them requires the `organization:CRUD_apiKeys` scope (organization `Owner`).
+
+**The secret key is shown exactly once, when the key is created.** Langfuse stores only a one-way hash of the secret, so it cannot be displayed again or recovered by support. The settings page shows only the public key and a masked preview (`sk-lf-...1234`) of each secret. If you lose a secret key, create a new key and delete the old one; there is no separate "rotate" operation, and rotation is exactly that pair of steps. Deleting a key invalidates it immediately, so switch your application to the new key before deleting the old one. Optionally set an expiry date on a key and use the **Last used** column to find keys that are safe to remove.
+
+### Project API key permissions [#api-key-permissions]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "full",
+  }}
+/>
+
+Choose a set of permissions under **Permissions** when creating a project API key to limit what the key can do. Give each integration the narrowest set of permissions that covers its job:
+
+| Permissions      | Access                                              | Typical use                                                                |
+| ---------------- | --------------------------------------------------- | -------------------------------------------------------------------------- |
+| Full access      | All read and write privileges within the project.   | SDKs that also fetch prompts or datasets, admin scripts                    |
+| Viewer           | Read-only access to the project's data.             | Reporting, exports, dashboards built on the public API                     |
+| Ingestion        | Create traces, scores, and media; cannot read data. | Application tracing via the SDKs or OpenTelemetry                          |
+| Scores ingestion | Submit scores only.                                 | [User feedback from a web app](/docs/observability/features/user-feedback) |
+
+<Callout type="info">
+Keys created before these permissions were available keep their existing access. A key's set of permissions cannot be changed after creation. Create a new key with a different set of permissions instead.
+</Callout>
+
+## Related Resources
+
+- [SCIM & Organization API](/docs/administration/scim-and-org-api) to programmatically manage users, roles, projects, and API keys
+- [How to structure projects and environments](/faq/all/managing-different-environments) for production, staging, and development
+
+## GitHub Discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-rbac"]} />

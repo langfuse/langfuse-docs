@@ -1,5 +1,5 @@
 ```bash
-npm install @langfuse/core @langfuse/langchain
+npm install @langfuse/langchain @langfuse/otel langchain @langchain/core @langchain/openai zod
 ```
 
 import EnvJS from "@/components-mdx/env-js.mdx";
@@ -17,7 +17,7 @@ Finally, initialize the Langfuse `CallbackHandler` and add it to your chain. The
 
 ```typescript
 import { CallbackHandler } from "@langfuse/langchain";
- 
+
 // Initialize the Langfuse CallbackHandler
 const langfuseHandler = new CallbackHandler();
 ```
@@ -25,7 +25,7 @@ const langfuseHandler = new CallbackHandler();
 The line `{ callbacks: [langfuseHandler] }` is what attaches the `CallbackHandler` to the agent.
 
 ```typescript /{ callbacks: [langfuseHandler] }/
-import { createAgent, tool } from "@langchain/core/agents";
+import { createAgent, tool } from "langchain";
 import * as z from "zod";
 
 const getWeather = tool(
@@ -46,7 +46,7 @@ const agent = createAgent({
 
 console.log(
     await agent.invoke(
-        { messages: [{ role: "user", content: "What's the weather in San Francisco?" }] }, 
+        { messages: [{ role: "user", content: "What's the weather in San Francisco?" }] },
         { callbacks: [langfuseHandler] }
     )
 );

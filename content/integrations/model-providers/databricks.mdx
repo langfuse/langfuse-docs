@@ -1,0 +1,211 @@
+---
+title: Databricks and Langfuse Overview
+description: An overview of how Databricks can be used together with Langfuse to develop, test, and evaluate AI applications.
+sidebarTitle: Databricks
+logo: /images/integrations/databricks_icon.svg
+---
+
+# Databricks and Langfuse
+
+> **What is Databricks?** > [Databricks](https://www.databricks.com/) is a unified analytics platform founded by the creators of Apache Spark. It provides an interactive workspace for collaborative data engineering, machine learning, and data analytics. With Databricks, teams can build, train, and deploy models at scale, efficiently harnessing big data and advanced analytics tools.
+
+> **What is Langfuse?** > [Langfuse](https://langfuse.com/) is a comprehensive platform designed to help developers monitor, trace, and evaluate their language models in production. It offers powerful insights through detailed logging and event tracing, ensuring robust performance monitoring and easier debugging of AI applications. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it.
+
+## Tracing and Observability
+
+Databricks serving endpoints expose an OpenAI-compatible API, so you can trace them with Langfuse in three ways: via the OpenAI SDK, via LangChain, or via LlamaIndex.
+
+For all three approaches, configure your Langfuse and Databricks credentials as environment variables:
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"  # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+
+os.environ["DATABRICKS_TOKEN"] = "dapi-..."  # Databricks personal access token
+os.environ["DATABRICKS_HOST"] = "https://dbc-XXXXX-XXXX.cloud.databricks.com"  # Databricks workspace URL
+```
+
+<Tabs items={["OpenAI SDK", "LangChain", "LlamaIndex"]}>
+<Tab>
+
+Databricks endpoints act as a drop-in replacement for the OpenAI API. The `langfuse.openai` client automatically traces your requests to Langfuse. For more examples, see the [OpenAI integration docs](/integrations/model-providers/openai-py).
+
+```bash
+pip install langfuse openai
+```
+
+```python
+import os
+from langfuse.openai import OpenAI
+
+# Create an OpenAI-like client pointing to Databricks
+client = OpenAI(
+    api_key=os.environ.get("DATABRICKS_TOKEN"),
+    base_url=f"{os.environ.get('DATABRICKS_HOST')}/serving-endpoints",
+)
+
+response = client.chat.completions.create(
+    messages=[
+        {"role": "system", "content": "You are an AI assistant."},
+        {"role": "user", "content": "What is Databricks?"},
+    ],
+    model="mistral-7b",  # Adjust based on your Databricks serving endpoint name
+    max_tokens=256,
+)
+print(response.choices[0].message.content)
+```
+
+![Databricks example trace in Langfuse](/images/docs/databricks/databricks-example-trace-openai-sdk.png)
+
+_[Link to public trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/029b2344-e2a2-4c52-8d04-bd71f70c1120?timestamp=2025-03-06T14%3A45%3A04.141Z)_
+
+</Tab>
+<Tab>
+
+The [`ChatDatabricks`](https://python.langchain.com/docs/integrations/chat/databricks/) class wraps your Databricks Model Serving endpoint; the Langfuse `CallbackHandler` collects the trace data. For more examples, see the [LangChain integration docs](/integrations/frameworks/langchain).
+
+```bash
+pip install langfuse databricks-langchain
+```
+
+```python
+from databricks_langchain import ChatDatabricks
+from langfuse.langchain import CallbackHandler
+
+# Initialize Langfuse CallbackHandler for LangChain (tracing)
+langfuse_handler = CallbackHandler()
+
+chat_model = ChatDatabricks(
+    endpoint="mistral-7b",  # Your Databricks Model Serving endpoint name
+    temperature=0.1,
+    max_tokens=256,
+)
+
+messages = [
+    ("system", "You are a chatbot that can answer questions about Databricks."),
+    ("user", "What is Databricks Model Serving?"),
+]
+
+chat_model.invoke(messages, config={"callbacks": [langfuse_handler]})
+```
+
+![Databricks example trace in Langfuse](/images/docs/databricks/databricks-example-trace-langchain.png)
+
+_[Link to public trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/a55411bb-4bb4-435c-b922-e446683888ff?timestamp=2025-03-06T14%3A57%3A59.273Z)_
+
+</Tab>
+<Tab>
+
+If you use [LlamaIndex](https://github.com/run-llama/llama_index), you can replace the default LLM with a Databricks endpoint and trace calls via the OpenInference LlamaIndex instrumentation. For more examples, see the [LlamaIndex integration docs](/integrations/frameworks/llamaindex).
+
+```bash
+pip install langfuse llama-index llama-index-llms-databricks openinference-instrumentation-llama-index
+```
+
+```python
+import os
+from langfuse import get_client
+from llama_index.core.llms import ChatMessage
+from llama_index.llms.databricks import Databricks
+from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
+
+langfuse = get_client()
+
+# Initialize LlamaIndex instrumentation
+LlamaIndexInstrumentor().instrument()
+
+# Create a Databricks LLM instance
+llm = Databricks(
+    model="mistral-7b",  # Your Databricks serving endpoint name
+    api_key=os.environ.get("DATABRICKS_TOKEN"),
+    api_base=f"{os.environ.get('DATABRICKS_HOST')}/serving-endpoints/",
+)
+
+messages = [
+    ChatMessage(role="system", content="You are a helpful assistant."),
+    ChatMessage(role="user", content="What is Databricks?"),
+]
+
+response = llm.chat(messages)
+print(response)
+```
+
+![Databricks example LlamaIndex trace in Langfuse](/images/docs/databricks/databricks-example-llamaindex-trace.png)
+
+_[Link to public trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/589a858e-9678-4624-bcb6-2e0266ecb1b3?timestamp=2025-03-06T15%3A10%3A02.467Z&observation=dd7b6235-6c92-4c9b-a966-872bc281c060)_
+
+</Tab>
+</Tabs>
+
+import { BookOpen } from "lucide-react";
+
+## Playground & Evaluations
+
+This guide walks you through integrating Databricks language model endpoints with Langfuse. By doing so, you can quickly **experiment** with prompts and debug interactions using the Langfuse Playground, as well as **benchmark** your models systematically with Evaluations.
+
+With Langfuse, you can:
+
+- **Experiment in the Playground:** The interactive Playground lets you test your language models in real-time. You can send custom prompts, review detailed responses, and add prompts to your [Prompt Library](/docs/prompts/get-started).
+- **Benchmark with Evaluations:** [LLM-as-a-Judge evaluations](/docs/scores/model-based-evals) provide a way to benchmark your application's performance. You can run pre-defined test templates, analyze metrics like latency and accuracy, and refine your models based on measurable outcomes.
+
+<Steps>
+
+### Set Up a Serving Endpoint in Databricks
+
+Begin by setting up a serving endpoint in Databricks. This lets you query custom fine-tuned models or models served via a gateway such as OpenAI or Anthropic. For advanced configuration options, refer to the [Databricks docs](https://docs.databricks.com/aws/en/machine-learning/model-serving/manage-serving-endpoints).
+
+<Frame className="my-10" fullWidth>
+  ![Set up a Serving Endpoint in
+  Databricks](/images/docs/databricks/add-databricks-serving-endpoint.png)
+</Frame>
+
+### Add the Model in your Project Settings
+
+Next, add your Databricks model endpoint to your Langfuse project settings.
+
+Make sure you've entered the correct endpoint URL and authentication details. The `model name` is the name of the serving endpoint you created in Databricks.
+
+<Frame className="sm:w-1/2">
+  ![Add the Model in Your Project
+  Settings](/images/docs/databricks/databricks-add-to-langfuse.png)
+</Frame>
+
+### Use the Model in the Playground
+
+The Langfuse Playground offers an interactive interface where you can:
+
+- Send prompts and view quick results.
+- Add prompts to your [Prompt Library](/docs/prompts/get-started).
+
+<Frame className="my-10" fullWidth>
+  ![Use the Model in the
+  Playground](/images/docs/databricks/databricks-playground.png)
+</Frame>
+
+Select **Databricks** as your LLM provider and choose the endpoint you configured earlier.
+
+### Use the Model for Evaluations
+
+LLM-as-a-judge is a technique to evaluate the quality of LLM applications by using an LLM as a judge. The LLM is given a trace or a dataset entry and asked to score and reason about the output. The scores and reasoning are stored as [scores](/docs/scores/data-model) in Langfuse.
+
+<Frame className="my-10" fullWidth>
+  ![Use the Model for
+  Evaluations](/images/docs/databricks/databricks-evaluations.png)
+</Frame>
+
+</Steps>
+
+If you want to learn more about LLM Evals, check out our blog post:
+
+<Cards>
+  <Card
+    title="LLM Evaluation 101: Best Practices and Challenges"
+    href="/blog/2025-11-12-evals"
+    icon={<BookOpen />}
+  />
+</Cards>

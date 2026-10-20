@@ -11,8 +11,8 @@ export function WrappedGrid({ children, className }: WrappedGridProps) {
   return (
     <div
       className={cn(
-        "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 border-t border-l border-border auto-rows-auto",
-        className
+        "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 border-t border-l border-line-structure auto-rows-auto",
+        className,
       )}
     >
       {children}
@@ -47,9 +47,9 @@ export function WrappedGridItem({
   return (
     <div
       className={cn(
-        "relative group border-r border-b border-border",
+        "relative group border-r border-b border-line-structure bg-surface-bg",
         spanClasses[colSpan],
-        className
+        className,
       )}
       style={rowSpanStyle}
     >
@@ -58,4 +58,3 @@ export function WrappedGridItem({
     </div>
   );
 }
-

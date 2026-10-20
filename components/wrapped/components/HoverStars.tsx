@@ -38,7 +38,7 @@ export function HoverStars({ className }: HoverStarsProps) {
       bl: { x: 8, y: -8 }, // bottom-left: move right and up (towards center)
       br: { x: -8, y: -8 }, // bottom-right: move left and up (towards center)
     };
-    
+
     return {
       hidden: {
         opacity: 0,
@@ -62,10 +62,7 @@ export function HoverStars({ className }: HoverStarsProps) {
   return (
     <div
       ref={containerRef}
-      className={cn(
-        "pointer-events-none absolute inset-0",
-        className
-      )}
+      className={cn("pointer-events-none absolute inset-0", className)}
     >
       {/* Top-left star */}
       <motion.span
@@ -109,4 +106,3 @@ export function HoverStars({ className }: HoverStarsProps) {
     </div>
   );
 }
-

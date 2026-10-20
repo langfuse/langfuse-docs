@@ -1,25 +1,30 @@
-import { Background } from "../Background";
 import { Hero } from "./Hero";
 import { Intro } from "./Intro";
-import { Metrics } from "./Metrics";
 import { OSS } from "./OSS";
 import { Launches } from "./Launches";
 import { Customers } from "./Customers";
 import { Outro } from "./Outro";
+import { Metrics } from "./MetricsLazy";
+import { WrappedSection } from "./components/WrappedSection";
+import { SectionHeading } from "./components/SectionHeading";
 
 export function Wrapped() {
   return (
-    <>
-      <main className="relative overflow-hidden w-full">
-        <Hero />
-        <Intro />
+    <main className="relative w-full">
+      <Hero />
+      <Intro />
+      <WrappedSection>
+        <SectionHeading
+          id="metrics"
+          title="You all have been busy"
+          subtitle="Key metrics from our platform in 2025."
+        />
         <Metrics />
-        <OSS />
-        <Launches />
-        <Customers />
-        <Outro />
-      </main>
-      <Background />
-    </>
+      </WrappedSection>
+      <OSS />
+      <Launches />
+      <Customers />
+      <Outro />
+    </main>
   );
 }

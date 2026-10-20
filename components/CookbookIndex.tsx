@@ -1,27 +1,27 @@
-import { getPagesUnderRoute } from "nextra/context";
-import { type Page } from "nextra";
-import { Cards } from "nextra/components";
-import { FileCode } from "lucide-react";
+import { guidesSource } from "@/lib/source";
+import { FileCode, ArrowRight } from "lucide-react";
+import { Cards, Card } from "@/components/docs";
+
+type CookbookPage = ReturnType<typeof guidesSource.getPages>[number];
 
 export const CookbookIndex = ({ categories }: { categories?: string[] }) => (
   <>
     {Object.entries(
-      (
-        getPagesUnderRoute("/guides/cookbook") as Array<
-          Page & { frontMatter: any }
-        >
-      )
-        .filter((page) => page.route !== "/cookbook")
-        .filter((page) => page.route !== "/guides/cookbook")
-        .reduce((acc, page) => {
-          const category = page.frontMatter?.category || "Other";
-          if (!acc[category]) acc[category] = [];
-          acc[category].push(page);
-          return acc;
-        }, {} as Record<string, Array<Page & { frontMatter: any }>>)
+      guidesSource
+        .getPages()
+        .filter((page) => page.url.startsWith("/guides/cookbook/"))
+        .reduce(
+          (acc, page) => {
+            const category =
+              (page.data.category as string | undefined) ?? "Other";
+            if (!acc[category]) acc[category] = [];
+            acc[category].push(page);
+            return acc;
+          },
+          {} as Record<string, CookbookPage[]>,
+        ),
     )
       .sort(([categoryA], [categoryB]) => {
-        // if categories are provided, use the order of the provided categories
         if (categories) {
           const indexA = categories.indexOf(categoryA);
           const indexB = categories.indexOf(categoryB);
@@ -29,8 +29,6 @@ export const CookbookIndex = ({ categories }: { categories?: string[] }) => (
           if (indexB === -1) return -1;
           return indexA - indexB;
         }
-
-        // if categories are not provided, use the default order, Other last
         if (categoryA === "Other") return 1;
         if (categoryB === "Other") return -1;
         return categoryA.localeCompare(categoryB);
@@ -38,27 +36,33 @@ export const CookbookIndex = ({ categories }: { categories?: string[] }) => (
       .filter(([category]) => !categories || categories.includes(category))
       .map(([category, pages]) => (
         <div key={category}>
-          <h3 className="_font-semibold _tracking-tight _text-slate-900 dark:_text-slate-100 _mt-8 _text-2xl">
+          <h3 className="font-semibold tracking-tight mt-10 text-xl mb-4">
             {category}
           </h3>
           <Cards num={2}>
-            {pages.map((page) => (
-              <Cards.Card
-                href={page.route}
-                key={page.route}
-                title={
-                  page.frontMatter?.title ||
-                  page.name
-                    .split("_")
-                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                    .join(" ")
-                }
-                icon={<FileCode />}
-                arrow
-              >
-                {""}
-              </Cards.Card>
-            ))}
+            {pages.map((page) => {
+              const title =
+                page.data.title ??
+                page.slugs[page.slugs.length - 1]
+                  .split("_")
+                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(" ");
+              return (
+                <Card
+                  href={page.url}
+                  key={page.url}
+                  className="no-underline group"
+                  icon={<FileCode className="h-3 w-3" />}
+                >
+                  <div className="flex flex-1 items-center gap-3 w-full justify-between">
+                    <span className="flex-1 text-text-secondary group-hover:text-text-primary transition-colors duration-220">
+                      {title}
+                    </span>
+                    <ArrowRight className="h-3 w-3 shrink-0 text-text-tertiary opacity-0 transition-opacity group-hover:opacity-100" />
+                  </div>
+                </Card>
+              );
+            })}
           </Cards>
         </div>
       ))}

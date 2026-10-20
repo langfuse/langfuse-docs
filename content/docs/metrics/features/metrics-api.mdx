@@ -1,0 +1,156 @@
+---
+title: Metrics API
+sidebarTitle: Metrics API
+description: Retrieve custom metrics from Langfuse for flexible analytics and reporting.
+---
+
+import DataFreshness from "@/components-mdx/compat/data-freshness.mdx";
+
+# Metrics API
+
+```
+GET /api/public/v2/metrics
+```
+
+The **Metrics API** enables you to retrieve customized analytics from your Langfuse data.
+This endpoint allows you to specify dimensions, metrics, filters, and time granularity to build powerful custom reports and dashboards for your LLM applications.
+
+## What you can do
+
+Use the Metrics API to:
+
+- Aggregate cost, token usage, volume, latency, and score data.
+- Group results by supported dimensions, such as model or trace attributes.
+- Filter data and analyze trends over time.
+- Power custom reports, dashboards, billing, and monitoring workflows.
+
+For supported views, fields, query parameters, response schemas, and interactive examples, see the [v2 Metrics API Reference](https://api.reference.langfuse.com/#tag/metricsv2/GET/api/public/v2/metrics). For practical Python examples, see the [Metrics API v2 cookbook](/guides/cookbook/example_metrics_api_v2).
+
+<Callout type="info">
+
+The deprecated `GET /api/public/metrics` and `GET /api/public/metrics/daily` endpoints are documented, with migration steps, in [Migration of deprecated APIs](/faq/all/deprecated-api-migration).
+
+</Callout>
+
+## Metrics API v2 [#v2]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "v4",
+  }}
+/>
+
+<Callout type="info">
+
+<DataFreshness />
+
+On self-hosted Langfuse v3, use the [Metrics API v1](/faq/all/deprecated-api-migration#metrics-v1) instead; see the [self-hosted compatibility matrix](/self-hosting/upgrade/versioning#sdk-server).
+
+</Callout>
+
+```
+GET /api/public/v2/metrics
+```
+
+The v2 Metrics API provides significant performance improvements through an optimized data architecture built on the wide observations table, which minimizes database work per query.
+
+### Key Changes from v1
+
+**The `traces` view is no longer available in v2.** Instead, use the `observations` view which is both faster and more powerful compared to v1.
+
+### Available Views in v2
+
+| View                 | Description                                                                                   |
+| -------------------- | --------------------------------------------------------------------------------------------- |
+| `observations`       | Query observation-level data with optional trace-level aggregations                           |
+| `scores-numeric`     | Query numeric scores                                                                          |
+| `scores-categorical` | Query categorical (string) scores                                                             |
+| `scores-boolean`     | Query boolean scores; group or filter by `booleanValue`, or average `value` for the true rate |
+
+### Row Limit
+
+The v2 Metrics API enforces a default `config.row_limit` of 100 rows per query to ensure consistent performance. You can specify a custom `config.row_limit` in your query to override this default, up to a maximum of 1,000 rows.
+
+### High Cardinality Dimensions [#high-cardinality-dimensions]
+
+Dimensions like `id`, `traceId`, `userId`, and `sessionId` are high cardinality. Grouping by these high cardinality fields is extremely expensive and rarely useful in practice. You can group by them only in top-N queries, which must:
+
+- set `config.row_limit` explicitly,
+- include an `orderBy` with direction `desc` on one of the query's metrics, and
+- not set `timeDimension`.
+
+See [Top users by cost](#example-top-users-by-cost) for an example. High cardinality dimensions are always available for filtering.
+
+### Semantic-root filtering and grouping
+
+The v2-only `isRootObservation` boolean dimension identifies application entry points. `true` includes both outer roots with no parent and app roots whose OpenTelemetry instrumentation or infrastructure parent was filtered from export by the SDK. Use it to count, filter, or group application entry points without missing the latter case. See [Logical root observations](/docs/api-and-data-platform/features/public-api#logical-root-observations) for the distinction between physical and logical roots and trace-counting edge cases.
+
+For example, add this condition to a query's `filters` array to count semantic roots:
+
+```json
+[
+  {
+    "column": "isRootObservation",
+    "operator": "=",
+    "value": true,
+    "type": "boolean"
+  }
+]
+```
+
+### Ordering by metrics
+
+When ordering by an aggregated metric, use the returned metric field name in the format `{aggregation}_{measure}`, for example `sum_totalCost` for `{ "measure": "totalCost", "aggregation": "sum" }`. When ordering by the time dimension, use the returned field name `time_dimension`.
+
+### Example: Most expensive models used in observations
+
+```bash
+curl \
+  -H "Authorization: Basic <BASIC AUTH HEADER>" \
+  -G \
+  --data-urlencode 'query={
+    "view": "observations",
+    "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
+    "dimensions": [{"field": "providedModelName"}],
+    "filters": [],
+    "fromTimestamp": "2025-12-01T00:00:00Z",
+    "toTimestamp": "2025-12-16T00:00:00Z",
+    "orderBy": [{"field": "sum_totalCost", "direction": "desc"}],
+    "config": {"row_limit": 1000}
+  }' \
+  https://cloud.langfuse.com/api/public/v2/metrics
+```
+
+### Example: Top users by cost [#example-top-users-by-cost]
+
+The 10 users with the highest LLM cost in production. `userId` is a [high cardinality dimension](#high-cardinality-dimensions), so the query sets `config.row_limit` and orders by `sum_totalCost` descending.
+
+```bash
+curl \
+  -H "Authorization: Basic <BASIC AUTH HEADER>" \
+  -G \
+  --data-urlencode 'query={
+    "view": "observations",
+    "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
+    "dimensions": [{"field": "userId"}],
+    "filters": [{"column": "environment", "operator": "=", "value": "production", "type": "string"}],
+    "fromTimestamp": "2025-12-01T00:00:00Z",
+    "toTimestamp": "2025-12-08T00:00:00Z",
+    "orderBy": [{"field": "sum_totalCost", "direction": "desc"}],
+    "config": {"row_limit": 10}
+  }' \
+  https://cloud.langfuse.com/api/public/v2/metrics
+```
+
+```json
+{
+  "data": [
+    { "userId": "user-17", "sum_totalCost": 0.777 },
+    { "userId": "user-24", "sum_totalCost": 0.014 }
+  ]
+}
+```

@@ -1,40 +1,31 @@
 "use client";
 
-import { getPagesUnderRoute } from "nextra/context";
 import Link from "next/link";
 import Image from "next/image";
-import { type Page } from "nextra";
+import type { StaticImageData } from "next/image";
 import { useMemo, useRef } from "react";
+import { useWrappedData, type PageData } from "./WrappedDataContext";
 import { useInView } from "framer-motion";
 import { motion } from "framer-motion";
 import { WrappedSection } from "./components/WrappedSection";
-import { WrappedGrid, WrappedGridItem } from "./components/WrappedGrid";
 import { SectionHeading } from "./components/SectionHeading";
 import { HoverStars } from "./components/HoverStars";
-import intuitLight from "../home/img/intuit_light.svg";
-import intuitDark from "../home/img/intuit_dark.svg";
-import samsaraLight from "../home/img/samsara_light.png";
-import samsaraDark from "../home/img/samsara_dark.png";
-import khanacademyLight from "../home/img/khanacademy_light.png";
-import khanacademyDark from "../home/img/khanacademy_dark.png";
-import twilioLight from "../home/img/twilio_light.svg";
-import twilioDark from "../home/img/twilio_dark.svg";
-import sumupLight from "../home/img/sumup_light.svg";
-import sumupDark from "../home/img/sumup_dark.svg";
-import telusLight from "../home/img/telus_light.png";
-import telusDark from "../home/img/telus_dark.png";
-import magicPatternsLight from "../home/img/magicpatterns_light.png";
-import magicPatternsDark from "../home/img/magicpatterns_dark.png";
-import merckLight from "../home/img/merck-dark.png";
-import merckDark from "../home/img/merck-light.png";
-import juiceboxLight from "../home/img/juicebox_light.svg";
-import juiceboxDark from "../home/img/juicebox_dark.svg";
-import pigmentLight from "../home/img/pigment_light.svg";
-import pigmentDark from "../home/img/pigment_dark.svg";
-import sevenelevenLight from "../home/img/seveneleven_light.png";
-import sevenelevenDark from "../home/img/seveneleven_dark.png";
-import circlebackLight from "../home/img/circleback_light.png";
-import circlebackDark from "../home/img/circleback_dark.png";
+import { wordmarkDisplaySize } from "@/components/shared/wordmark";
+import { cn } from "@/lib/utils";
+import canvaLogo from "../home/img/canva.svg";
+import circlebackLogo from "../home/img/circleback.svg";
+import freeeLogo from "../home/img/freee.svg";
+import huggingfaceLogo from "../home/img/huggingface.svg";
+import intuitLogo from "../home/img/intuit.svg";
+import khanacademyLogo from "../home/img/khan.svg";
+import magicPatternsLogo from "../home/img/magic.svg";
+import merckLogo from "../home/img/merck.svg";
+import pigmentLogo from "../home/img/pigment.svg";
+import rampLogo from "../home/img/ramp.svg";
+import samsaraLogo from "../home/img/samsara.svg";
+import sumupLogo from "../home/img/sumup.svg";
+import tradeRepublicLogo from "../home/img/trade-republic.svg";
+import twilioLogo from "../home/img/twilio.svg";
 
 interface CustomerStory {
   route: string;
@@ -51,277 +42,209 @@ interface CustomerStory {
   };
 }
 
-// Companies with customer stories
 const companiesWithStories = [
-  { name: "SumUp", path: "/customers/sumup", light: sumupLight, dark: sumupDark },
-  { name: "Khan Academy", path: "/customers/khan-academy", light: khanacademyLight, dark: khanacademyDark },
-  { name: "Magic Patterns", path: "/customers/magic-patterns-ai-design-tools", light: magicPatternsLight, dark: magicPatternsDark },
-  { name: "Merck", path: "/customers/merckgroup", light: merckLight, dark: merckDark },
+  { name: "Ramp", path: "/users/ramp", logo: rampLogo },
+  {
+    name: "Trade Republic",
+    path: "/users/trade-republic",
+    logo: tradeRepublicLogo,
+  },
+  { name: "Canva", path: "/users/canva", logo: canvaLogo },
+  { name: "SumUp", path: "/users/sumup", logo: sumupLogo },
+  {
+    name: "Khan Academy",
+    path: "/users/khan-academy",
+    logo: khanacademyLogo,
+  },
+  {
+    name: "Magic Patterns",
+    path: "/users/magic-patterns-ai-design-tools",
+    logo: magicPatternsLogo,
+  },
+  {
+    name: "Merck",
+    path: "/users/merckgroup",
+    logo: merckLogo,
+  },
+  { name: "Hugging Face", path: "/users/hugging-face", logo: huggingfaceLogo },
 ];
 
-// Companies without customer stories (logos only)
-// Note: Most logos use counterintuitive naming (_light for dark mode, _dark for light mode)
-// But Intuit uses intuitive naming (_light for light mode, _dark for dark mode)
 const companiesWithoutStories = [
-  { name: "Samsara", light: samsaraLight, dark: samsaraDark, isIntuitive: false },
-  { name: "Twilio", light: twilioLight, dark: twilioDark, isIntuitive: false },
-  { name: "Telus", light: telusLight, dark: telusDark, isIntuitive: false },
-  { name: "Pigment", light: pigmentLight, dark: pigmentDark, isIntuitive: false },
-  { name: "Juicebox", light: juiceboxLight, dark: juiceboxDark, isIntuitive: false },
-  { name: "Intuit", light: intuitLight, dark: intuitDark, isIntuitive: true },
-  { name: "Seven Eleven Japan", light: sevenelevenLight, dark: sevenelevenDark, isIntuitive: false },
-  { name: "Circleback", light: circlebackLight, dark: circlebackDark, isIntuitive: false },
+  { name: "Samsara", logo: samsaraLogo },
+  { name: "Twilio", logo: twilioLogo },
+  { name: "Pigment", logo: pigmentLogo },
+  {
+    name: "Intuit",
+    logo: intuitLogo,
+  },
+  {
+    name: "Circleback",
+    logo: circlebackLogo,
+  },
+  { name: "freee", logo: freeeLogo },
 ];
 
-function CustomerStoryCard({ story }: { story: CustomerStory }) {
+function CustomerStoryCard({
+  story,
+  logo,
+}: {
+  story: CustomerStory;
+  logo?: StaticImageData;
+}) {
+  const quote = story.frontMatter.customerQuote?.replace(/^"|"$/g, "");
+  const displayLogo = logo ?? story.frontMatter.customerLogo;
+  const wordmarkSize = logo ? wordmarkDisplaySize(logo, 32) : null;
+
   return (
     <Link
       href={story.route}
-      className="group relative w-full block [perspective:1000px]"
+      className="group relative flex flex-col gap-3 p-5 lg:p-6 h-full min-h-[220px] overflow-hidden no-underline"
     >
-      {/* Hidden content to determine height */}
-      <div className="invisible p-6 lg:p-8 flex flex-col">
-        {story.frontMatter.customerLogo && <div className="h-6 mb-4" />}
-        {story.frontMatter.customerQuote && (
-          <div className="text-base sm:text-lg leading-relaxed mb-4">
-            "{story.frontMatter.customerQuote}"
-          </div>
-        )}
-        {(story.frontMatter.quoteAuthor ||
-          story.frontMatter.quoteRole ||
-          story.frontMatter.quoteCompany) && (
-          <div className="flex items-center gap-3">
-            {story.frontMatter.quoteAuthorImage && (
-              <div className="w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0" />
-            )}
-            <div className="flex-1">
-              {story.frontMatter.quoteAuthor && (
-                <div className="font-semibold text-sm sm:text-base" />
-              )}
-              <div className="text-xs sm:text-sm mt-1" />
-            </div>
-          </div>
-        )}
-      </div>
-      
-      <div className="absolute inset-0 transition-transform duration-700 [transform-style:preserve-3d] [transform:rotateY(180deg)] lg:[transform:rotateY(0deg)] lg:group-hover:[transform:rotateY(180deg)]">
-        {/* Front side - Logo only */}
-        <div className="absolute inset-0 flex items-center justify-center p-6 lg:p-8 [backface-visibility:hidden]">
-          {story.frontMatter.customerLogo && (
-            <div className="flex items-center justify-center">
-              {story.frontMatter.customerLogoDark ? (
-                <>
-                  <Image
-                    src={story.frontMatter.customerLogo}
-                    alt={`${story.frontMatter.title} logo`}
-                    width={200}
-                    height={80}
-                    className="h-8 w-auto object-contain dark:hidden"
-                    quality={100}
-                  />
-                  <Image
-                    src={story.frontMatter.customerLogoDark}
-                    alt={`${story.frontMatter.title} logo`}
-                    width={200}
-                    height={80}
-                    className="h-8 w-auto object-contain hidden dark:block"
-                    quality={100}
-                  />
-                </>
-              ) : (
-                <Image
-                  src={story.frontMatter.customerLogo}
-                  alt={`${story.frontMatter.title} logo`}
-                  width={200}
-                  height={80}
-                  className="h-8 w-auto object-contain dark:invert dark:brightness-0 dark:contrast-200"
-                  quality={100}
-                />
-              )}
-            </div>
+      {displayLogo && (
+        <div className="flex items-center h-8 shrink-0">
+          {logo && wordmarkSize ? (
+            <Image
+              src={logo}
+              alt={`${story.frontMatter.title} logo`}
+              width={logo.width}
+              height={logo.height}
+              unoptimized
+              className="h-auto w-auto object-contain"
+              style={{
+                width: wordmarkSize.width,
+                height: wordmarkSize.height,
+              }}
+              quality={100}
+            />
+          ) : (
+            <Image
+              src={story.frontMatter.customerLogo!}
+              alt={`${story.frontMatter.title} logo`}
+              width={200}
+              height={60}
+              className="object-contain w-auto max-h-7"
+              quality={100}
+            />
           )}
         </div>
+      )}
 
-        {/* Back side - Full story card */}
-        <div className="absolute inset-0 p-6 lg:p-8 flex flex-col items-center lg:items-start [backface-visibility:hidden] [transform:rotateY(180deg)]">
-          {/* Customer Logo */}
-          {story.frontMatter.customerLogo && (
-            <div className="flex items-center mb-4 flex-shrink-0">
-              {story.frontMatter.customerLogoDark ? (
-                <>
-                  <Image
-                    src={story.frontMatter.customerLogo}
-                    alt={`${story.frontMatter.title} logo`}
-                    width={200}
-                    height={60}
-                    className="h-6 w-auto object-contain dark:hidden"
-                    quality={100}
-                  />
-                  <Image
-                    src={story.frontMatter.customerLogoDark}
-                    alt={`${story.frontMatter.title} logo`}
-                    width={200}
-                    height={60}
-                    className="h-6 w-auto object-contain hidden dark:block"
-                    quality={100}
-                  />
-                </>
-              ) : (
-                <Image
-                  src={story.frontMatter.customerLogo}
-                  alt={`${story.frontMatter.title} logo`}
-                  width={200}
-                  height={60}
-                  className="h-6 w-auto object-contain dark:invert dark:brightness-0 dark:contrast-200"
-                  quality={100}
-                />
-              )}
+      {quote && (
+        <blockquote
+          className="flex-1 min-h-0 text-[14px] leading-[150%] text-text-secondary line-clamp-4"
+          title={quote}
+        >
+          “{quote}”
+        </blockquote>
+      )}
+
+      {(story.frontMatter.quoteAuthor ||
+        story.frontMatter.quoteRole ||
+        story.frontMatter.quoteCompany) && (
+        <div className="flex gap-2.5 items-center mt-auto min-w-0">
+          {story.frontMatter.quoteAuthorImage && (
+            <div className="overflow-hidden shrink-0 w-8 h-8 rounded-full">
+              <Image
+                src={story.frontMatter.quoteAuthorImage}
+                alt=""
+                width={32}
+                height={32}
+                className="object-cover w-full h-full"
+                quality={100}
+              />
             </div>
           )}
-
-          {/* Quote */}
-          {story.frontMatter.customerQuote && (
-            <blockquote className="text-base sm:text-lg leading-relaxed mb-4 text-center lg:text-left">
-              "{story.frontMatter.customerQuote}"
-            </blockquote>
-          )}
-
-          {/* Author Information - Centered on mobile, left aligned on desktop */}
-          {(story.frontMatter.quoteAuthor ||
-            story.frontMatter.quoteRole ||
-            story.frontMatter.quoteCompany) && (
-            <div className="flex items-center gap-3 flex-shrink-0 justify-center lg:justify-start">
-              {story.frontMatter.quoteAuthorImage && (
-                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden flex-shrink-0">
-                  <Image
-                    src={story.frontMatter.quoteAuthorImage}
-                    alt={`${story.frontMatter.quoteAuthor} profile picture`}
-                    width={64}
-                    height={64}
-                    className="w-full h-full object-cover"
-                    quality={100}
-                  />
-                </div>
-              )}
-              <div className="flex-1 min-w-0">
-                {story.frontMatter.quoteAuthor && (
-                  <div className="font-semibold text-sm sm:text-base break-words">
-                    {story.frontMatter.quoteAuthor}
-                  </div>
-                )}
-                {(story.frontMatter.quoteRole ||
-                  story.frontMatter.quoteCompany) && (
-                  <div className="text-xs sm:text-sm text-muted-foreground mt-1 break-words">
-                    {story.frontMatter.quoteRole}
-                    {story.frontMatter.quoteRole &&
-                      story.frontMatter.quoteCompany && (
-                        <span> at </span>
-                      )}
-                    {story.frontMatter.quoteCompany}
-                  </div>
-                )}
+          <div className="flex-1 min-w-0">
+            {story.frontMatter.quoteAuthor && (
+              <div className="text-[13px] font-medium truncate text-text-primary">
+                {story.frontMatter.quoteAuthor}
               </div>
-            </div>
-          )}
+            )}
+            {(story.frontMatter.quoteRole ||
+              story.frontMatter.quoteCompany) && (
+              <div className="text-[12px] truncate text-text-tertiary">
+                {story.frontMatter.quoteRole}
+                {story.frontMatter.quoteRole &&
+                  story.frontMatter.quoteCompany && <span> at </span>}
+                {story.frontMatter.quoteCompany}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </Link>
   );
 }
 
-function CompanyLogo({
-  name,
-  light,
-  dark,
-  isIntuitive = false,
-}: {
-  name: string;
-  light: any;
-  dark: any;
-  isIntuitive?: boolean;
-}) {
-  // Most logos use counterintuitive naming (_light for dark mode, _dark for light mode)
-  // But some like Intuit use intuitive naming (_light for light mode, _dark for dark mode)
-  const lightModeImage = isIntuitive ? light : dark;
-  const darkModeImage = isIntuitive ? dark : light;
+function CompanyLogo({ name, logo }: { name: string; logo: StaticImageData }) {
+  const { width, height } = wordmarkDisplaySize(logo, 32);
 
   return (
-    <div className="p-3 lg:p-4 flex items-center justify-center min-h-[100px]">
+    <div className="p-4 lg:p-5 flex items-center justify-center min-h-[100px]">
       <Image
-        src={lightModeImage}
+        src={logo}
         alt={`${name} logo`}
-        width={200}
-        height={80}
-        className="h-8 w-auto object-contain dark:hidden"
-        quality={100}
-      />
-      <Image
-        src={darkModeImage}
-        alt={`${name} logo`}
-        width={200}
-        height={80}
-        className="h-8 w-auto object-contain hidden dark:block"
+        width={logo.width}
+        height={logo.height}
+        unoptimized
+        className="h-auto w-auto object-contain"
+        style={{ width, height }}
         quality={100}
       />
     </div>
   );
 }
 
+type CompanyWithStory = (typeof companiesWithStories)[number];
+
 type CustomerItem =
-  | { type: "story"; story: CustomerStory & { company: any } }
-  | { type: "logo"; company: typeof companiesWithoutStories[0] }
+  | { type: "story"; story: CustomerStory & { company: CompanyWithStory } }
+  | { type: "logo"; company: (typeof companiesWithoutStories)[0] }
   | { type: "text"; text: string };
 
 export function Customers() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { once: true, margin: "-100px" });
 
-  const allStories = (getPagesUnderRoute("/customers") as Array<
-    Page & { frontMatter: any }
-  >).filter(
-    (page) => page.frontMatter?.showInCustomerIndex !== false
-  );
+  const allStories = useWrappedData().usersPages.filter(
+    (page: PageData) => page.frontMatter?.showInCustomerIndex !== false,
+  ) as Array<CustomerStory>;
 
-  // Match stories with companies
   const customerStories = companiesWithStories
     .map((company) => {
       const story = allStories.find(
-        (s) => s.route === company.path || s.route === `${company.path}/`
+        (s) => s.route === company.path || s.route === `${company.path}/`,
       );
       return story ? { ...story, company } : null;
     })
     .filter((s): s is NonNullable<typeof s> => s !== null);
 
-  // Hardcoded order of all items
   const orderedItems = useMemo(() => {
-    // Create maps for easy lookup
     const storyMap = new Map(
-      customerStories.map((story) => [story.company.name, story])
+      customerStories.map((story) => [story.company.name, story]),
     );
     const logoMap = new Map(
-      companiesWithoutStories.map((company) => [company.name, company])
+      companiesWithoutStories.map((company) => [company.name, company]),
     );
 
-    // Define the exact order
     const order: Array<{ type: "story" | "logo" | "text"; name: string }> = [
-      // First column
       { type: "logo", name: "Intuit" },
+      { type: "story", name: "Ramp" },
+      { type: "story", name: "Trade Republic" },
+      { type: "story", name: "Canva" },
       { type: "story", name: "SumUp" },
-      // Continue with rest in desired order...
       { type: "logo", name: "Samsara" },
       { type: "logo", name: "Twilio" },
-      { type: "logo", name: "Telus" },
-      { type: "logo", name: "Juicebox" },
-      { type: "logo", name: "Seven Eleven Japan" },
+      { type: "story", name: "Hugging Face" },
+      { type: "logo", name: "Pigment" },
+      { type: "logo", name: "freee" },
       { type: "story", name: "Khan Academy" },
       { type: "logo", name: "Circleback" },
       { type: "text", name: "And thousands more..." },
       { type: "story", name: "Merck" },
-      { type: "logo", name: "Pigment" },
       { type: "story", name: "Magic Patterns" },
     ];
 
-    // Build the result array
     const result: CustomerItem[] = [];
     for (const { type, name } of order) {
       if (type === "story") {
@@ -345,55 +268,53 @@ export function Customers() {
   return (
     <WrappedSection>
       <SectionHeading
-        title="Powering the Greatest..."
+        id="customers"
+        title="Powering the greatest"
         subtitle="We couldn't be prouder to work with these companies."
       />
 
       <div ref={containerRef}>
-        <div className="columns-1 sm:columns-2 lg:columns-3 gap-0 -mt-[1px]">
+        <div className="columns-1 sm:columns-2 lg:columns-3 gap-0 -mt-px">
           {orderedItems.map((item, index) => {
-            // Calculate delay based on position (top-left to bottom-right)
-            // For 3 columns: row = Math.floor(index / 3), col = index % 3
-            // Delay increases with row and column
             const columns = 3;
             const row = Math.floor(index / columns);
             const col = index % columns;
-            const delay = (row + col) * 0.1; // Stagger delay
-            
+            const delay = (row + col) * 0.08;
+
             const animationProps = {
-              initial: { opacity: 0, y: 20, scale: 0.95 },
-              animate: isInView
-                ? { opacity: 1, y: 0, scale: 1 }
-                : { opacity: 0, y: 20, scale: 0.95 },
+              initial: { opacity: 0, y: 16 },
+              animate: isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 },
               transition: {
-                duration: 0.5,
-                delay: delay,
+                duration: 0.4,
+                delay,
                 ease: [0.22, 1, 0.36, 1],
               },
             };
 
-            // Use negative margins to overlap borders on all sides except first item
-            // For columns layout, we overlap top and left borders
-            const marginClass = index === 0 
-              ? "" 
-              : "-mt-[1px] -ml-[1px]";
+            const cellClass = cn(
+              "relative border border-line-structure bg-surface-bg break-inside-avoid",
+              index === 0 ? "" : "-mt-px -ml-px",
+            );
 
             if (item.type === "story") {
               return (
                 <motion.div
                   key={`story-${item.story.route || index}`}
-                  className={`relative group border border-border bg-background break-inside-avoid ${marginClass}`}
+                  className={cn(cellClass, "group")}
                   {...animationProps}
                 >
                   <HoverStars />
-                  <CustomerStoryCard story={item.story} />
+                  <CustomerStoryCard
+                    story={item.story}
+                    logo={item.story.company.logo}
+                  />
                 </motion.div>
               );
             } else if (item.type === "logo") {
               return (
                 <motion.div
                   key={`logo-${item.company.name || index}`}
-                  className={`relative group border border-border bg-background break-inside-avoid ${marginClass}`}
+                  className={cn(cellClass, "group")}
                   {...animationProps}
                 >
                   <HoverStars />
@@ -404,11 +325,11 @@ export function Customers() {
               return (
                 <motion.div
                   key={`text-${index}`}
-                  className={`border border-border bg-background break-inside-avoid ${marginClass}`}
+                  className={cellClass}
                   {...animationProps}
                 >
-                  <div className="p-3 lg:p-4 flex items-center justify-center min-h-[100px]">
-                    <p className="text-sm text-muted-foreground text-center">
+                  <div className="p-4 lg:p-5 flex items-center justify-center min-h-[100px]">
+                    <p className="text-[13px] text-center text-text-tertiary">
                       {item.text}
                     </p>
                   </div>
@@ -421,4 +342,3 @@ export function Customers() {
     </WrappedSection>
   );
 }
-
