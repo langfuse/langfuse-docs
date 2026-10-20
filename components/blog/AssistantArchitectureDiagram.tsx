@@ -19,7 +19,6 @@ const FLOW_DURATION_MS = {
   "sandbox-request": 2783,
   "sandbox-response": 1978,
   "sandbox-suspend": 1978,
-  complete: 1978,
 } satisfies Record<(typeof steps)[number]["flow"], number>;
 
 function Box({
@@ -128,8 +127,7 @@ export function AssistantArchitectureDiagram() {
   const currentStep = overview ? undefined : steps[step];
   const executing = currentStep?.executing === true;
   const flow = currentStep?.flow;
-  const modelAndToolsActive =
-    (executing && flow !== "complete") || flow === "sandbox-suspend";
+  const modelAndToolsActive = executing || flow === "sandbox-suspend";
   const runManagementActive = !overview && !modelAndToolsActive;
   const stepDuration = currentStep
     ? Math.max(
@@ -378,11 +376,6 @@ export function AssistantArchitectureDiagram() {
                   <div className="mt-1 font-normal text-text-secondary">
                     No egress by default
                   </div>
-                  {flow === "sandbox-suspend" && (
-                    <div className="mt-1 font-normal text-text-secondary">
-                      Suspended after inactivity
-                    </div>
-                  )}
                 </div>
               </Box>
             </div>
