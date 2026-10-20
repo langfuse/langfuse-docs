@@ -7,19 +7,19 @@ import { cn } from "@/lib/utils";
 import { assistantArchitectureSteps as steps } from "@/lib/assistant-architecture-steps";
 
 const FLOW_DURATION_MS = {
-  start: 1365,
-  save: 1092,
-  enqueue: 1092,
-  pickup: 1365,
-  "model-request": 2275,
-  "model-response": 3185,
-  "mcp-request": 2275,
-  "mcp-response": 2275,
-  "sandbox-start": 2275,
-  "sandbox-request": 3640,
-  "sandbox-response": 2275,
-  "sandbox-suspend": 2275,
-  complete: 2275,
+  start: 1187,
+  save: 950,
+  enqueue: 950,
+  pickup: 1187,
+  "model-request": 1978,
+  "model-response": 2435,
+  "mcp-request": 1978,
+  "mcp-response": 1978,
+  "sandbox-start": 1978,
+  "sandbox-request": 2783,
+  "sandbox-response": 1978,
+  "sandbox-suspend": 1978,
+  complete: 1978,
 } satisfies Record<(typeof steps)[number]["flow"], number>;
 
 function Box({
@@ -134,11 +134,11 @@ export function AssistantArchitectureDiagram() {
   const stepDuration = currentStep
     ? Math.max(
         FLOW_DURATION_MS[currentStep.flow],
-        3000,
-        1000 +
+        2174,
+        522 +
           `${currentStep.title} ${currentStep.description}`.trim().split(/\s+/)
             .length *
-            300,
+            209,
       )
     : 0;
   const activeNodes = new Set<string>(currentStep?.nodes);
