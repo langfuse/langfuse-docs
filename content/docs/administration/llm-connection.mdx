@@ -16,8 +16,12 @@ They do not affect the token prices of your ingested traces as cost is inferred 
 
 <Tab>
 
-1. Navigate to your `Project Settings` > `LLM Connections` and **click on** `Add new LLM API key`.
-2. Enter the name of the LLM connection and the API key for the model you want to use.
+Choose where the connection should be available:
+
+- **Organization connection**: Navigate to **Organization Settings > LLM Connections** to create a connection that every project in the organization inherits. Organization owners and admins can manage these connections.
+- **Project connection**: Navigate to **Project Settings > LLM Connections** to create a connection for one project.
+
+Click **Add new LLM API key**, then enter the connection name and the credentials for the model you want to use.
 
 <Video
   src="https://static.langfuse.com/docs-videos/2026-03-06-add-llm-connection-v3.mp4"
@@ -29,16 +33,45 @@ They do not affect the token prices of your ingested traces as cost is inferred 
 
 <Tab>
 
-You can use the [API](/docs/api-and-data-platform/features/public-api) to manage LLM connections:
+You can use the [API](/docs/api-and-data-platform/features/public-api) to manage project connections with a project-scoped API key:
 
 ```bash
 GET /api/public/llm-connections
 PUT /api/public/llm-connections
+DELETE /api/public/llm-connections/{id}
+```
+
+### Organization connections via API [#organization-connections-api]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "not-available",
+    enterprise: "full",
+    selfHosted: "ee",
+  }}
+/>
+
+Use an [organization-scoped API key](/docs/administration/scim-and-org-api) to manage organization connections:
+
+```bash
+GET /api/public/organizations/llm-connections
+PUT /api/public/organizations/llm-connections
+DELETE /api/public/organizations/llm-connections/{id}
 ```
 
 </Tab>
 
 </Tabs>
+
+## Organization and project connections [#organization-and-project-connections]
+
+Organization connections let you configure shared LLM credentials once for every project in an organization. Projects inherit each organization connection automatically.
+
+A project connection with the same connection name overrides the organization connection for that project. The two connections must use the same provider adapter. For example, a project can override an organization connection named `openai-production` with different OpenAI credentials, a base URL, or custom models, but it cannot use the Anthropic adapter under that name.
+
+Deleting the project override makes the project inherit the organization connection again. In **Project Settings > LLM Connections**, inherited and overridden connections are labeled so you can see which credentials the project uses.
 
 ## Supported providers
 
@@ -230,7 +263,7 @@ Langfuse validates the base URL of every LLM connection against a server-side re
 A URL is rejected with `Blocked IP address detected` (or `Blocked hostname detected`) when its hostname resolves to a private, loopback, link-local, or otherwise reserved range — for example `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `127.0.0.0/8`, `169.254.0.0/16`, and their IPv6 equivalents — or when the hostname itself is blocked, such as `localhost`, `*.internal`, or `host.docker.internal`. Public IP addresses and public hostnames are not blocked. A hostname that does not resolve is rejected as well.
 
 - **Langfuse Cloud**: the deny-list is always enforced and cannot be relaxed, and base URLs must use `https://`. Point the connection at a publicly resolvable endpoint, for example a gateway with a public hostname.
-- **Self-hosted**: allow specific internal endpoints with `LANGFUSE_LLM_CONNECTION_WHITELISTED_HOST`, `LANGFUSE_LLM_CONNECTION_WHITELISTED_IPS`, or `LANGFUSE_LLM_CONNECTION_WHITELISTED_IP_SEGMENTS` (each a comma-separated list). A hostname listed in `_HOST` skips the IP check entirely; `_IPS` and `_IP_SEGMENTS` are matched against every IP address the hostname resolves to. There is no setting that disables the check for all targets: every internal endpoint has to be listed explicitly, because anything on these lists is exempt from SSRF protection. Webhooks and blob storage integrations use their own variables; see [Outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists).
+- **Self-hosted**: allow specific internal endpoints with `LANGFUSE_LLM_CONNECTION_WHITELISTED_HOST`, `LANGFUSE_LLM_CONNECTION_WHITELISTED_IPS`, or `LANGFUSE_LLM_CONNECTION_WHITELISTED_IP_SEGMENTS`, or restrict outbound LLM requests to a non-empty positive host list with `LANGFUSE_LLM_CONNECTION_ALLOWED_HOSTS` (each a comma-separated list). A hostname listed in `_WHITELISTED_HOST` skips the IP check entirely; `_IPS` and `_IP_SEGMENTS` are matched against every IP address the hostname resolves to; `_ALLOWED_HOSTS` permits only the listed hostnames (which also bypass the private-IP check) and rejects all other hosts, including provider default hosts and Langfuse AI ([Halo](/self-hosting/configuration/halo), the Langfuse assistant, uses its own provider client and is not covered). There is no setting that disables the check for all targets: every internal endpoint has to be listed explicitly, because anything on these lists is exempt from SSRF protection. Webhooks, blob storage integrations, and external media storage use their own variables; see [Outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists).
 
 ### Connecting via a gateway
 

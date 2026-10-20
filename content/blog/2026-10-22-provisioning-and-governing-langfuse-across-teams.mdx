@@ -1,0 +1,116 @@
+---
+title: "Provisioning and governing Langfuse across teams"
+description: "Choose project boundaries, provision access, and verify safe, useful telemetry as more application teams adopt Langfuse."
+date: 2026/10/22
+author: Boris, Doneyli
+tag: guide, architecture
+ogImage: /images/blog/2026-10-22-provisioning-and-governing-langfuse-across-teams/og.png
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Provisioning and governing Langfuse across teams"
+  description="Choose project boundaries, provision access, and verify safe, useful telemetry as more application teams adopt Langfuse."
+  date="October 22, 2026"
+  authors={["borismichel", "doneylidejesus"]}
+/>
+
+Related guide: [Operating Langfuse as an internal service](/blog/2026-10-22-operating-langfuse-as-an-internal-service).
+
+As more teams adopt Langfuse, platform teams need a consistent way to onboard applications, control access, and keep ownership clear. Teams may need different permissions for experimentation and production, and each integration needs to meet the organization's data-handling requirements. Managing those decisions case by case becomes difficult as adoption grows.
+
+You'll learn how to choose organization and project boundaries, provision users and credentials, and verify that integrations produce safe, useful telemetry. The recommendations also cover the steps from a team's first trace to evaluation workflows, and the ownership and offboarding practices that keep access current as teams change.
+
+The guidance applies to platform teams managing Langfuse across multiple application teams. The examples follow two teams: Support, which is building a customer support assistant, and Search, which is building an internal knowledge search application.
+
+## Define the platform service
+
+Create a team-facing service page that explains what teams can request, what the platform provides, and what application owners maintain. This can be a service catalog entry or a page in your existing workspace. Link it from the onboarding workflow so teams can find the requirements and responsibilities when they need them.
+
+In this example, the platform team provides the Langfuse endpoint, organization and project structure, membership provisioning, credential delivery, and a reference integration. The service page links to data-handling requirements and the support channel. Application teams own their instrumentation, the usefulness of their traces, their evaluation criteria, and their release decisions. Make those responsibilities explicit in the onboarding workflow.
+
+| Responsibility           | Platform team                                  | Application team                        |
+| ------------------------ | ---------------------------------------------- | --------------------------------------- |
+| Access and project setup | Maintains provisioning and access policy       | Names an owner and requests access      |
+| Telemetry                | Supplies conventions and reference integration | Instruments and tests the application   |
+| Data handling            | Defines controls with security                 | Classifies data and verifies masking    |
+| Quality and releases     | Supplies shared tooling                        | Owns datasets, evaluations, and changes |
+
+Capture a primary owner and backup, deployment region, environments, data classification, expected usage, and allocation identifier in the onboarding request. Keep these details linked to the project, using your existing catalog, configuration repository, or team workspace. Identify production-access approvers and exception reviewers. Add a review date for experimental projects so ownership and access remain current.
+
+Cloud and self-hosting change infrastructure responsibilities, but both need a defined service model. With Cloud, the internal platform team still manages how application teams gain access and use the service. For self-hosting, assign responsibility for operating the deployment as well. Reliability, upgrades, support, and cost allocation are covered in the companion article on [operating Langfuse as an internal service](/blog/2026-10-22-operating-langfuse-as-an-internal-service).
+
+## Design project and access boundaries
+
+[Langfuse organizations contain projects](/docs/administration/rbac). Projects hold the data and have project-scoped API keys. Define which roles need to view or change each application's data in an access policy, then choose the smallest structure that meets those requirements. Base each boundary on access and administration needs rather than the company's reporting hierarchy alone.
+
+For Support and Search, the example uses one central organization with four projects: support-nonprod, support-prod, search-nonprod, and search-prod. Support developers work in their nonproduction project; selected Support staff can access production. Search follows the same pattern. Neither team gets access to the other's projects by default. Platform administrators have the access needed to run the service, subject to the organization's security policy.
+
+![Illustrative organization containing separate Support and Search production and nonproduction projects, with project roles defining access rather than infrastructure isolation.](/images/blog/2026-10-22-provisioning-and-governing-langfuse-across-teams/project-access-boundaries.png)
+
+Figure 1. An illustrative access design for two teams. The organization and project boxes represent Langfuse administration and data-access boundaries. They do not represent separate infrastructure. This example assumes project-level RBAC is available in the selected plan or edition.
+
+Project-level roles can override an organization role. For selective access, the documented pattern uses organization role None and explicit project roles. Verify the effective permissions rather than assuming that a project assignment only adds access. Project-level RBAC requires Cloud Pro with the Teams add-on, Cloud Enterprise, or self-hosted Enterprise Edition. Check the [current access-control documentation](/docs/administration/rbac) before applying the example to another plan.
+
+[Environment metadata](/docs/observability/features/environments) serves a different purpose: filtering and comparing telemetry within a project. A single project with development, staging, and production environments can be useful when the same people may access all that data and want to reuse prompts and datasets. In this example, the audiences differ, so production gets a separate project. A production filter is not the control that prevents a developer from reading production data.
+
+Other access or infrastructure requirements may call for a different design. Separate organizations can suit independently administered teams. Regional deployments may need separate endpoints and organizations. Distinct cloud accounts, networks, or tenant infrastructure require a deployment-level design; another project inside the same deployment won't provide that isolation. Capture the reason for each boundary alongside the project configuration or service page, so future changes can be checked against the original requirement.
+
+## Integrate identity and authorization
+
+SSO authenticates users; authorization determines their access. Test both: a successful identity-provider login does not establish whether the Support product owner can review the intended traces or whether a Search developer is prevented from accessing restricted data.
+
+Langfuse uses [OIDC for SSO](/docs/administration/authentication-and-sso); availability and configuration depend on the deployment and plan. Its [organization APIs](/docs/administration/scim-and-org-api) administer projects, memberships, and project keys, while SCIM supports user provisioning. SCIM and the [organization APIs](/docs/administration/scim-and-org-api) require Cloud Enterprise or self-hosted Enterprise Edition. These are useful building blocks for an internal access workflow; the request form, approval policy, reconciliation jobs, and exception handling remain work for the platform team.
+
+Check the exact identity-provider integration before designing automatic group-to-project synchronization. User provisioning alone does not establish your required group mapping. Define where groups map to project roles and which system is authoritative when someone changes teams. Test removal as carefully as the first assignment, and use the documented endpoints rather than writing directly to Langfuse's database.
+
+Track user memberships separately from application credentials. Project API keys aren't tied to individual user accounts, so removing an engineer's membership does not revoke keys they could access. Keep organization-management credentials in the provisioning system and deliver application credentials through the team's approved secret store. Provisioning and application workloads need credentials appropriate to their respective tasks.
+
+## Build and verify the onboarding workflow
+
+A request to onboard a team's application to the shared Langfuse service should identify the application owner, region, data classification, environments, intended user roles, and production-access approvers. Include expected telemetry volume and an allocation identifier, even if cost reporting comes later. Validate these fields before provisioning so missing ownership or access decisions do not block the integration later.
+
+The platform team reviews the request against the access policy and provisions projects and memberships. Automate through the documented APIs where the edition supports them. Keep the request linked to project identifiers, owners, and secret locations. On each retry, check for existing resources before creating new ones to avoid duplicate projects. This onboarding workflow is orchestration you build around Langfuse; it is not a built-in service catalog.
+
+![Recommended onboarding lifecycle connecting project setup and application instrumentation to acceptance checks, ownership handoff, and offboarding.](/images/blog/2026-10-22-provisioning-and-governing-langfuse-across-teams/onboarding-lifecycle.png)
+
+Figure 2. A recommended onboarding lifecycle. Failed acceptance checks return to the responsible setup or instrumentation step. The handoff includes ownership and removal procedures, rather than ending when a project is created.
+
+Provide a version-controlled SDK or OpenTelemetry reference integration that the application team can adapt. It should select the right endpoint and project, set consistent environment and release values, and capture useful request context. In [Langfuse's data model](/docs/observability/data-model), observations are the individual steps grouped by a trace ID. Use [stable observation names](/docs/observability/best-practices) and meaningful input and output on the root observation. Include the routing configuration for application spans and shared components in the reference integration; a shared trace ID doesn't grant cross-project visibility.
+
+Data handling belongs in this integration step. Decide which inputs, outputs, metadata, and identifiers may leave the application. Mask or omit prohibited fields before export, and test the actual instrumentation used by the team. Masking coverage depends on the SDK version, integration, and export path. Follow the [current guidance](/docs/observability/features/masking) for that combination, including third-party instrumentation. A configured callback is not evidence that every field and export path has been checked.
+
+Test successful and failing requests with synthetic sensitive values, then inspect the exported telemetry to verify that masking or omission worked as intended. Check separate logs and exporters too. Sampling and retention need their own policies; neither replaces controls that prevent prohibited data from being collected.
+
+Finish with an acceptance test performed through the application and representative user accounts:
+
+- A useful trace reaches the intended project with the expected environment, release, and request context.
+
+- The agreed sensitive fields are absent or masked, including in errors and nested observations.
+
+- An authorized reviewer can complete the intended task; an unauthorized user cannot access the protected project.
+
+- The workload uses its intended credentials, and the team can identify their owner and replacement procedure.
+
+- The application owner can find the support channel and complete a representative evaluation or debugging task.
+
+If the access test fails, onboarding stays open. The same applies when a trace lacks enough context to investigate the request. Capture failed checks in the onboarding ticket or workflow, assign them to the platform or application owner, and rerun them after the fix. Successful ingestion alone does not meet the acceptance criteria.
+
+## From tracing to evaluation
+
+Build role-specific tasks into onboarding. A developer investigates a failed request, an evaluator reviews examples, and a product owner inspects application behavior. Use the reference integration and a small example dataset to make each workflow reproducible.
+
+For Support, an initial workflow could turn a sanitized failure example into a regression test, evaluate a candidate prompt, and review the result before release. The application team defines a correct answer and decides whether the change is acceptable. For [new v4 request evaluations](/faq/all/llm-as-a-judge-migration), target an explicit observation, usually the root for the end-to-end result, and put the required context there. A trace ID groups the steps; it doesn't identify which step you're scoring. Check the resulting score's target and count. The platform team can provide a tested evaluation example that application teams adapt to their own criteria.
+
+Separate projects introduce an explicit promotion step for prompts and other assets that teams want to move between stages. Define which artifacts are copied, who approves the change, and how the production result can be traced back to the reviewed candidate. [Protected prompt labels](/docs/prompt-management/features/prompt-version-control) can restrict label changes when your plan or edition supports them. [Approval workflows and traffic splitting](/resources/engineering/prompt-cicd) are composed with CI and application logic; they should not be promised as native end-to-end features. Keep production credentials and promotion rights aligned with the chosen access model.
+
+## Maintain ownership and offboarding
+
+Keep project ownership and access metadata current after launch. A team transfer, new product owner, or change in data classification should trigger a review against the access policy. Broad organization roles can undermine the intended project boundaries, so include effective-permission checks in that review.
+
+Include both user and application offboarding in the service runbook. When a person leaves a team, remove the relevant memberships, check their remaining access, and review credentials they could use. When an application retires, stop its exporters, revoke its credentials, and decide what data must remain under the agreed retention policy. Deleting the project is a separate decision. Confirm retirement with the application owner before deleting an inactive project.
+
+Pilot the workflow with Support and Search before expanding access to more teams. Use their different requirements to test the reference integration and access design. Measure how long each team takes to produce its first useful trace and pass the access tests, then ask each team to complete one evaluation or debugging task. These are rollout measures you choose, rather than a ready-made Langfuse onboarding dashboard.
+
+Expand the rollout once the next team can follow the onboarding workflow, receive the right access, send safe and useful telemetry, and complete an evaluation or debugging task. Keep the service page, reference integration, access policy, and runbook aligned as requirements change. That gives platform teams a repeatable process and application teams a clear route from provisioning to productive use.

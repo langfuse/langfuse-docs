@@ -1,0 +1,46 @@
+---
+date: 2026-10-14
+title: Python SDK v5 and JS/TS SDK v6
+description: New SDK majors built for Langfuse v4, with experiment links, typed metadata filters, and compressed span export. A small upgrade for most users.
+author: Hassieb
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+Python SDK v5 and JS/TS SDK v6 are built for Langfuse v4. They mostly remove APIs that were already deprecated, so the SDKs expose only the current, fastest APIs, and coding agents working with them default to those. For most users, upgrading is a version bump: tracing, scoring, prompts, and the integrations work as before.
+
+- Open experiment results straight from your code: `experimentUrl` / `experiment_url` links to the comparison view.
+- Filter on typed metadata: numbers and booleans keep their type, and nested objects become filterable dotted paths such as `a.b`.
+- Send large traces with less bandwidth: span batches are gzip-compressed and processed in real time on Langfuse v4.
+- Create scores in batches with `api.scores.create`, and read them from the same namespace with `api.scores.get_many` / `api.scores.getMany`. These replace `api.scores_v3` / `api.scoresV3`, a breaking change covered in the migration guides.
+- Work with a leaner API client: it includes only the current Public API, so deprecated endpoints such as `api.legacy.*` and `api.ingestion` are gone.
+
+## Upgrading
+
+```bash
+pip install --upgrade "langfuse>=5"
+```
+
+```bash
+npm install @langfuse/client@6 @langfuse/tracing@6 @langfuse/otel@6
+```
+
+Both majors need Langfuse Cloud or self-hosted Langfuse v4.59.0 or later, plus Python 3.11+ or Node.js 22+. If you self-host Langfuse v3, [upgrade to Langfuse v4](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4) to use them; until then, stay on Python SDK v4 and JS/TS SDK v5. Each migration guide starts with an "Are you affected?" list and ends with a migration checklist you can hand to your coding agent.
+
+<Cards num={2}>
+  <Card
+    title="Python v4 → v5"
+    href="/docs/observability/sdk/upgrade-path/python-v4-to-v5"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="JS/TS v5 → v6"
+    href="/docs/observability/sdk/upgrade-path/js-v5-to-v6"
+    icon={<Book />}
+    arrow
+  />
+</Cards>

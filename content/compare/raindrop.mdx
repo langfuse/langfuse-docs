@@ -1,0 +1,230 @@
+---
+title: Langfuse vs. Raindrop
+shortTitle: Raindrop
+seoTitle: "Raindrop Alternative: Langfuse vs. Raindrop"
+description: Langfuse is the open-source Raindrop alternative. October 2026 comparison of self-hosting, ClickHouse, unit vs event pricing, retention, and experiments.
+tags: [comparison]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+
+import { Cloud, MessageSquare } from "lucide-react";
+import CompareClickhouseDatastore from "@/components-mdx/compare-clickhouse-datastore.mdx";
+
+# Langfuse vs. Raindrop
+
+This guide outlines the key differences between **[Langfuse](/)** and **[Raindrop](https://www.raindrop.ai/)** to help engineering teams choose the right AI engineering platform. All Raindrop facts were checked against public Raindrop pages in October 2026.
+
+## TL;DR
+
+- **Open-source core, free to self-host.** Langfuse's core tracing, evaluation, prompt management, and APIs are [MIT-licensed](#open-source-and-deployment) and available on Cloud or self-hosted; additional Enterprise features require a license. Self-hosting is free on every tier, with Enterprise SSO and organization RBAC included. Raindrop's monitoring platform is a commercial hosted product: Workshop, the MIT-licensed part, is a local debugger, and self-hosting is advertised as a beta.
+- **About 65% lower on the illustrated workload, with no seat fees.** 500,000 user turns at 12 Langfuse units each is $621 on Langfuse Pro where [Raindrop Pro is $1,799](#worked-example): a $299 base plus $0.003 per event. Both figures are subscription plus telemetry usage; model inference and add-ons are separate. Langfuse Pro includes 3 years of history and unlimited users; Raindrop Pro includes unlimited retention.
+- **Data through APIs and exports, or SQL when self-hosting.** Langfuse runs on ClickHouse, [open source since 2016](#storage); read it through the Observations and Metrics APIs, scheduled exports to your bucket on Pro with the Teams add-on, Enterprise, and self-hosted, or SQL on your own ClickHouse. Raindrop data export starts on Pro, and warehouse exports are Enterprise.
+- **The improvement loop in one project.** Langfuse runs [prompt and model experiments in the UI](#improvement-loop) and complete agents through the SDK, compares results to a baseline, and keeps annotation queues, prompt labels, and CI gates in the same project. Raindrop's hosted experiments compare traffic already logged and do not run or replay the agent.
+- **Same-day switch.** [Point the SDK or OpenTelemetry exporter at Langfuse](#switching-from-raindrop) and import dataset cases via CSV, SDK, or API. Most teams see first traces in Langfuse the same day.
+
+**Choose Langfuse** if you want to own the platform: an open-source core for production traces, datasets, experiments, annotation, and prompts, on Cloud or self-hosted including air-gapped, on ClickHouse you can query and export. One meter covers unlimited users, and on the [worked example](#worked-example) it is about 65% lower than Raindrop Pro at list prices. Proven at 21 of the Fortune 50.
+
+**Choose Raindrop** if you are already running it and the differences on this page do not justify a switch. You accept a commercial hosted platform with self-hosting in beta, a $299 base plus per-event pricing, a Triage message allowance on Pro, warehouse export on Enterprise, and hosted experiments that compare logged traffic rather than running the agent.
+
+---
+
+## Open source and deployment [#open-source-and-deployment]
+
+Langfuse's core tracing, evaluation, prompt management, and APIs are MIT-licensed and available on Cloud or self-hosted; additional Enterprise features require a license. [Self-hosting](/self-hosting) runs the UI, login, and data in your environment on every tier, including [air-gapped operation](/self-hosting/security/networking), and Enterprise SSO and organization-level RBAC ship in the [free distribution](/pricing-self-host). Langfuse Cloud is covered by [SOC 2 Type II and ISO 27001 audits, is GDPR compliant](/security), and signs a BAA from the Pro plan in the [HIPAA region](/security/hipaa). Langfuse is used by [21 of the Fortune 50 and 129 of the Fortune 500](/enterprise).
+
+Raindrop's monitoring platform is a hosted, paid product. [Workshop](https://github.com/raindrop-ai/workshop), the MIT-licensed part, is a local debugger, and self-hosting is advertised as a beta. Its [security docs](https://raindrop.ai/docs/security/data-security-and-privacy) place event storage in AWS with United States subprocessors.
+
+|                            | Langfuse                                                                                                                                                                            | Raindrop                                     |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| License                    | **[MIT](https://github.com/langfuse/langfuse)** core: tracing, evaluation, prompts, APIs; Enterprise features licensed separately                                                   | MIT for Workshop; the platform is commercial |
+| GitHub stars               | [![Langfuse GitHub stars](https://img.shields.io/github/stars/langfuse/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://github.com/langfuse/langfuse) | Workshop only                                |
+| Full-stack self-hosting    | **[Every tier, including free](/pricing-self-host)**                                                                                                                                | Beta                                         |
+| Enterprise SSO (self-host) | **Included in free OSS** ([self-hosted pricing](/pricing-self-host)); Cloud via the [Teams add-on](/pricing)                                                                        | Enterprise                                   |
+| Org-level RBAC (self-host) | **Included in free OSS**                                                                                                                                                            | Owner, Admin, Member roles                   |
+| Air-gapped operation       | Supported                                                                                                                                                                           | Not described                                |
+| Data regions               | Cloud EU, US, Japan; [HIPAA region](/security/hipaa); any region via self-hosting                                                                                                   | AWS, United States                           |
+| SOC 2                      | [Type II](/security), reports on Pro                                                                                                                                                | Type II                                      |
+| Published Cloud Enterprise | **[$2,499/month](/pricing)**                                                                                                                                                        | Custom, sales-gated                          |
+
+---
+
+## Storage and data access [#storage]
+
+<CompareClickhouseDatastore />
+
+Langfuse works directly with ClickHouse's core team as [part of ClickHouse](/blog/joining-clickhouse). Every LLM call, tool execution, and agent step is written once to a wide, immutable observations table ([details](/blog/2026-03-10-simplify-langfuse-for-scale)). High-volume reads go through the [Observations](/docs/api-and-data-platform/features/public-api#v2) and [Metrics](/docs/metrics/features/metrics-api#v2) APIs, [scheduled exports](/docs/api-and-data-platform/features/export-to-blob-storage) (Pro with the Teams add-on, Enterprise, and self-hosted) land JSONL or Parquet in your own S3, GCS, or Azure bucket, and self-hosters query ClickHouse in SQL.
+
+Raindrop's store is vendor-operated. Reads go through its Query API and MCP; data export is a Pro feature on the [plans page](https://raindrop.ai/docs/platform/plans), and the pricing cards put Snowflake and BigQuery exports on Enterprise.
+
+|                       | Langfuse                                                                                                                                                                                                            | Raindrop                                                             |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Data store            | **ClickHouse**, [launched 2016 (OSS)](https://clickhouse.com/blog/open-source-10), Apache 2.0                                                                                                                       | Vendor-operated, on AWS                                              |
+| Cloud and self-hosted | Same ClickHouse engine and observations-first data model ([v4](/docs/v4))                                                                                                                                           | Self-hosting in beta                                                 |
+| Getting data out      | SQL on ClickHouse when self-hosting; Observations and Metrics APIs; [scheduled export](/docs/api-and-data-platform/features/export-to-blob-storage) to your bucket (Pro with Teams add-on, Enterprise, self-hosted) | Query API and MCP; export on Pro; Snowflake / BigQuery on Enterprise |
+| Retention             | 30 days Hobby, 90 days Core, **3 years** Pro and Enterprise                                                                                                                                                         | 14 days Hobby, unlimited on Pro                                      |
+
+---
+
+## Pricing [#pricing]
+
+Raindrop bills **events**. The pricing card defines one event as a user message and agent response, including tool calls and sub-agents, or one background agent run. Langfuse bills [units](/docs/administration/billable-units): one trace, one observation, or one score. A single Raindrop event can contain many Langfuse observations, so the cheaper bill depends on trace shape.
+
+The table and example below cover the software subscription and telemetry usage only. Model inference for judges or Triage, privacy add-ons, and export add-ons are separate on both sides.
+
+|              | Langfuse                                                                                                                                                  | Raindrop                                                                                                                                         |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Free tier    | 50,000 units/month, 2 users, 30 days                                                                                                                      | 1,000 events/month, hard stop, 14 days                                                                                                           |
+| Paid entry   | **Core $29/month** (100,000 units, unlimited users, 90 days)                                                                                              | **Pro $299/month** plus usage                                                                                                                    |
+| Usage        | $8/100k units after 100k, then $7/100k from 1M to 10M ([pricing](/pricing))                                                                               | **$0.003/event** up to 1M events, then **$0.002/event**                                                                                          |
+| Retention    | 30 days Hobby, 90 days Core, **3 years** Pro and Enterprise                                                                                               | 14 days on Hobby, **unlimited** on Pro                                                                                                           |
+| Seats        | No seat fees on Core and above                                                                                                                            | None published                                                                                                                                   |
+| In-app agent | [Halo](/docs/halo) on every Cloud plan, usage limits by plan; investigates traces and creates datasets, prompts, and dashboards                           | Triage: 500 messages/month on Pro, more purchasable; unlimited on Enterprise                                                                     |
+| PII          | SDK-side [masking](/docs/observability/features/masking) with rules you write, applied before data leaves your app; included                              | Managed detection and redaction via the [PII Guard](https://raindrop.ai/docs/security/pii-redaction) add-on, from $80/month plus per-event tiers |
+| Export       | [Scheduled blob export](/docs/api-and-data-platform/features/export-to-blob-storage) on Pro with the $300/month Teams add-on, Enterprise, and self-hosted | Pro; Snowflake / BigQuery on Enterprise                                                                                                          |
+
+Masking and PII Guard are different approaches, not the same feature at two prices: Langfuse masks in your SDK with rules you define before data is sent; Raindrop's PII Guard detects and redacts on its side after ingestion.
+
+### Worked example [#worked-example]
+
+500,000 user turns/month · 10 observations per turn · 1 score per turn. Each turn is one Raindrop event; in Langfuse it is 1 trace + 10 observations + 1 score = **12 units**.
+
+|                  | Base    | Usage     | **Total/month** |
+| ---------------- | ------- | --------- | --------------- |
+| **Langfuse Pro** | $199.00 | $422.00   | **$621.00**     |
+| **Raindrop Pro** | $299.00 | $1,500.00 | **$1,799.00**   |
+
+Public list prices. About 65% lower on Langfuse Pro in this illustrated workload: $621 versus $1,799 per month.
+
+- **Langfuse Pro:** 6,000,000 units. 100k included, 900k at $8/100k ($72), 5,000,000 at $7/100k ($350). Base $199. **3-year** data access.
+- **Raindrop Pro:** 500,000 events at $0.003. Base $299. **Unlimited** retention.
+- **Excluded on both sides:** model inference for judges or Triage, privacy add-ons (Raindrop PII Guard), and export add-ons (the Langfuse Teams add-on for scheduled bucket export).
+
+Raindrop bills the turn; Langfuse bills every observation and score inside it. A lean turn is cheaper on Langfuse Pro; a turn with dozens of model calls, tool spans, and scores can be cheaper on Raindrop Pro.
+
+See [Langfuse pricing](/pricing), [start free](https://cloud.langfuse.com), or [talk to us](/talk-to-us) about Enterprise volumes.
+
+---
+
+## The improvement loop [#improvement-loop]
+
+Langfuse runs the loop in one project. Add a production observation to a [dataset](/docs/evaluation/experiments/datasets), then run an experiment: [prompt and model experiments](/docs/evaluation/experiments/experiments-via-ui) execute prompts and models in the UI, and a complete agent runs through an [SDK experiment](/docs/evaluation/experiments/experiments-via-sdk) in your repository with your existing mocks and test environment, with results [compared to a baseline](/docs/evaluation/experiments/compare-experiments) in Langfuse. Route outputs to [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues). [Prompt labels](/docs/prompt-management/features/prompt-version-control) promote a version without a redeploy, and the version can carry [model and tool config](/docs/prompt-management/features/config) that your application reads at runtime. [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) score live observations and experiment runs; judges use a model connection you choose. In production, [Pulse](/docs/observability/features/pulse) surfaces outliers, [alerts](/docs/observability/features/alerts) fire on thresholds you define, and [Halo](/docs/halo) investigates traces and creates datasets, prompts, and dashboards on request; it is on every Cloud plan and in public beta for self-hosted.
+
+Raindrop's docs describe the product as monitoring for silent agent failures: issue detection, custom signals, a Triage agent, datasets, and A/B tests. Its hosted [experiments](https://raindrop.ai/docs/platform/experiments) compare cohorts of logged events and, in Raindrop's words, "don't run or replay your agent"; Workshop and Simulations provide separate replay and testing workflows.
+
+|                                 | Langfuse                                                                                                                                  | Raindrop                                                            |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Finding a failure in production | Judges and code evaluators on live observations, Pulse, alerts, Halo                                                                      | Issue detection (Pro), signals, Triage                              |
+| From a failure to a test        | [One-click add to a dataset](/docs/evaluation/experiments/datasets), then a prompt experiment in the UI or an SDK experiment of the agent | Add to dataset; hosted experiments compare logged cohorts           |
+| Who runs the comparison         | Prompts and models: the Langfuse UI. Full agents: your SDK run, compared in Langfuse                                                      | Hosted experiments: logged traffic. Replay: Workshop or Simulations |
+| Human review                    | [Annotation queues](/docs/evaluation/evaluation-methods/annotation-queues); unlimited on Pro                                              | Labels on dataset items                                             |
+| Prompt release                  | [Labels](/docs/prompt-management/features/prompt-version-control) with versioned config your app applies at runtime                       | Not documented                                                      |
+| CI                              | [GitHub Action](/docs/evaluation/experiments/experiments-ci-cd) on experiment results                                                     | Via the separate Simulations product                                |
+
+---
+
+## Which should you choose [#which-should-you-choose]
+
+Choose **Langfuse** if you want **an open-source platform that works across your stack**: OpenTelemetry instrumentation for any framework, free self-hosting with SSO and organization RBAC included, prompt experiments in the UI and full-agent experiments through the SDK against a curated dataset, annotation queues and prompt labels on the same traces, data in ClickHouse you can query and export, and unit pricing with no seat fees.
+
+Choose **Raindrop** if you are **already running it** and the differences above do not justify a switch.
+
+---
+
+## Why teams move away from Raindrop [#why-teams-move-away]
+
+The same reasons recur in migration conversations.
+
+- **Event pricing with a $299 floor.** Raindrop Pro starts at $299 and charges [$0.003 per event](#pricing), so the bill scales with every user turn. On the [worked example](#worked-example) that is $1,799 on Raindrop Pro versus $621 on Langfuse Pro, which meters units with no seat fees and includes 3 years of history. The gap shrinks when one event contains dozens of observations.
+- **The platform you buy is hosted; the open-source artifact is a local debugger.** Raindrop's Workshop is free and local, but the monitoring platform teams pay for is the hosted plan, with [self-hosting in beta](#open-source-and-deployment) and warehouse export on Enterprise. Langfuse self-hosts its open-source core, UI, login, and evaluators included, on [ClickHouse you can query](#storage).
+- **Hosted experiments do not run the agent.** Raindrop's hosted experiments [compare logged traffic](#improvement-loop) and do not run or replay the agent. Teams that need a candidate scored against a curated set run prompt experiments in the Langfuse UI or a full-agent experiment through the SDK, then promote a prompt label from the result with a CI gate.
+- **Triage is metered in messages.** Raindrop Pro includes a Triage allowance of 500 messages a month, with unlimited on Enterprise. Compare it separately with [Halo's plan-based usage limits](#pricing); evaluator execution and threshold alerts are different workloads and are not a substitute for either.
+
+---
+
+## Why teams choose Langfuse [#customers]
+
+A pattern repeats across production adopters: start where governance requires, often self-hosted, then grow into the platform.
+
+- **[Canva](/users/canva)** runs a multi-agent support system for a product with **250 million** monthly active users. LLM-as-a-judge evaluators score the systems across **15–20** metrics, and domain experts build evaluators without an engineering handoff. They self-hosted first, then moved to Cloud.
+- **[SumUp](/users/sumup)** rolled AI support to **35+** markets and deflected almost **50%** of conversations, cutting external BPO cost by **30%**. They started self-hosted for the proof of concept, then moved to Langfuse Cloud.
+- **[Merck](/users/merckgroup)** runs about **80** of 300+ GenAI use cases on Langfuse, with **200+** people building on it. They self-host for data sovereignty and provision projects via API.
+
+---
+
+## Switching from Raindrop [#switching-from-raindrop]
+
+Move live instrumentation and recreate the durable assets. History stays readable in Raindrop for the plan's retention window. Most teams see first traces in Langfuse the **same day**.
+
+- **Instrumentation:** initialize the [Langfuse SDK](/docs/observability/sdk/overview) or send OpenTelemetry to the [OTLP endpoint](/integrations/native/opentelemetry). Run both exporters during the overlap.
+- **Datasets, signals, and prompts:** export a Raindrop dataset as CSV and import it through the [Langfuse CSV uploader, SDK, or API](/docs/evaluation/experiments/datasets). Recreate judges and [prompts](/docs/prompt-management/get-started) in Langfuse. A Raindrop signal is a detector on logged events; the matching Langfuse object is an evaluator or a score.
+- **Trace history:** stays in Raindrop. Pro's unlimited retention means the archive can remain there while new data lands in Langfuse.
+
+[Talk to us](/talk-to-us) if you want help planning the overlap.
+
+---
+
+## Start free: Cloud or self-host [#get-started]
+
+[Langfuse Cloud](https://cloud.langfuse.com) Hobby includes 50k units/month, no credit card. Or [self-host](/self-hosting) the MIT stack. The [example project](/docs/demo) is populated before you instrument anything.
+
+<Cards num={2}>
+  <Card title="Get started free" href="https://cloud.langfuse.com" icon={<Cloud />} />
+  <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
+</Cards>
+
+---
+
+## FAQ [#faq]
+
+<FaqDetails>
+
+<Details id="is-langfuse-a-raindrop-alternative">
+<Summary>Is Langfuse a Raindrop alternative?</Summary>
+
+Yes, if you want an open-source core for tracing, datasets, experiments, human review, and prompt management on Cloud or self-hosted, with unit pricing and no seat fees. See [Which should you choose](#which-should-you-choose).
+
+</Details>
+
+<Details id="is-raindrop-open-source">
+<Summary>Is Raindrop open source?</Summary>
+
+Workshop is, under the MIT license. It is a free, local debugger. The hosted monitoring platform is a paid product, and self-hosting is advertised as a beta. Langfuse's core tracing, evaluation, prompt management, and APIs are MIT-licensed; additional Enterprise features require a license. See [Open source and deployment](#open-source-and-deployment).
+
+</Details>
+
+<Details id="how-does-raindrop-pricing-compare">
+<Summary>How does Raindrop pricing compare to Langfuse?</Summary>
+
+Raindrop Pro is $299/month plus $0.003 per event up to 1 million events, then $0.002. An event includes the tool calls inside one user turn. Langfuse Pro is $199/month plus graduated unit pricing, and a score or tool span is its own unit. At 500,000 turns with 12 Langfuse units each, the list-price totals are **$621** on Langfuse Pro and **$1,799** on Raindrop Pro, subscription plus usage, with model inference and add-ons excluded. Raindrop Pro includes unlimited retention; Langfuse Pro includes 3 years. Details in the [worked example](#worked-example).
+
+</Details>
+
+<Details id="can-raindrop-simulations-use-langfuse-traces">
+<Summary>Can Raindrop Simulations use Langfuse traces?</Summary>
+
+Raindrop's [Simulations page](https://www.raindrop.ai/simulate/) lists Langfuse as a bring-your-own-traces source, next to Helicone, so Langfuse stays the system of record for a team that uses both.
+
+</Details>
+
+<Details id="do-raindrop-experiments-run-the-agent">
+<Summary>Do Raindrop experiments run the agent?</Summary>
+
+No. Raindrop's docs state its hosted experiments compare logged traffic and do not run or replay the agent; Workshop and Simulations are separate replay and testing workflows. Langfuse prompt experiments execute prompts and models in the UI, and a complete agent runs through an SDK experiment in your repository with results compared in Langfuse. See [The improvement loop](#improvement-loop).
+
+</Details>
+
+<Details id="how-do-i-switch-from-raindrop">
+<Summary>How do I switch from Raindrop to Langfuse?</Summary>
+
+Run both in parallel, add the Langfuse SDK or repoint OpenTelemetry, and import dataset cases. Trace history stays in Raindrop. Most teams see first traces the same day. See [Switching from Raindrop](#switching-from-raindrop).
+
+</Details>
+
+</FaqDetails>
+
+<Callout type="info">
+  This comparison is out of date? Please [raise a pull request](https://github.com/langfuse/langfuse-docs/blob/main/content/compare/raindrop.mdx) with up-to-date information.
+</Callout>
+
+<SignupCTA className="my-6" />
